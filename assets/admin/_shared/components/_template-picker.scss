@@ -202,18 +202,32 @@
     }
 }
 
-// Campaign page-layout thumbs. The form picker draws a miniature form; a
-// campaign page has no single object to miniaturise, so this draws the page's
-// column structure instead. What separates these layouts is where things sit.
+// Campaign page-layout thumbs.
+//
+// Drawn as miniatures of the page rather than as grey bars. The form picker
+// shows a small form because a form is one object; a campaign page is a
+// composition, so this shows the composition: an image, figures with a number
+// and a caption, a part-filled progress bar, donor rows with an avatar and an
+// amount, and the donation form with its amount tiles and button.
+//
+// One accent, the admin's, not the campaign's: on the real page every band
+// takes that campaign's colour, and picking one here to stand for all of them
+// would be a promise the page does not keep.
+$gctp-ink:  rgba(0, 0, 0, 0.13);
+$gctp-ink2: rgba(0, 0, 0, 0.09);
+$gctp-ink3: rgba(0, 0, 0, 0.06);
+
 .giveflow-ctp {
     &__thumb {
         display: flex;
         flex-direction: column;
-        gap: 4px;
-        padding: 10px;
+        gap: 5px;
+        padding: 9px;
         aspect-ratio: 4 / 3;
-        background: $bg-soft;
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.07);
         border-radius: 6px;
+        overflow: hidden;
     }
 
     &__cols {
@@ -228,62 +242,169 @@
     &__main {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 5px;
         flex: 1;
         min-width: 0;
     }
 
-    // The donation form: the one element that is always the same shape,
-    // so it reads as the anchor the other rows arrange themselves around.
-    &__form {
-        flex: 0 0 34%;
-        border-radius: 4px;
-        background: rgba(0, 0, 0, 0.16);
+    &__side { flex: 0 0 36%; display: flex; }
+}
+
+// A heading.
+.gctp-title {
+    display: block;
+    height: 6px;
+    width: 62%;
+    border-radius: 2px;
+    background: $gctp-ink;
+}
+
+// Body copy.
+.gctp-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1 1 auto;
+    min-height: 12px;
+    justify-content: center;
+
+    i { display: block; height: 3px; border-radius: 2px; background: $gctp-ink3; }
+    i:nth-child( 2 ) { width: 92%; }
+    i:nth-child( 3 ) { width: 68%; }
+}
+
+// The campaign image.
+.gctp-media {
+    flex: 0 0 30%;
+    border-radius: 3px;
+    background:
+        linear-gradient( 135deg, rgba(0,0,0,.10), rgba(0,0,0,.05) );
+
+    &.is-tall { flex: 0 0 44%; }
+}
+
+// Progress: a track with the raised portion filled.
+.gctp-bar {
+    display: block;
+    flex: none;
+    height: 5px;
+    border-radius: 999px;
+    background: $gctp-ink3;
+    overflow: hidden;
+
+    i { display: block; width: 62%; height: 100%; border-radius: 999px; background: $accent; }
+}
+
+// Figures: a number over its caption.
+.gctp-figures,
+.gctp-soft,
+.gctp-cards {
+    display: flex;
+    gap: 5px;
+    flex: none;
+
+    > span {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
     }
+    .n { display: block; height: 6px; width: 78%; border-radius: 2px; background: $gctp-ink; }
+    .l { display: block; height: 3px; width: 54%; border-radius: 2px; background: $gctp-ink3; }
+}
 
-    // A full-width band beneath the columns, as in the gallery layout.
-    &__band {
-        flex: 0 0 20%;
-        border-radius: 4px;
-        background: rgba(0, 0, 0, 0.07);
+// The same figures, on a tinted panel.
+.gctp-soft {
+    padding: 7px;
+    border-radius: 4px;
+    background: $accent-soft;
+}
+
+// Impact cards: each figure in its own tinted card.
+.gctp-cards > span {
+    padding: 6px;
+    border-radius: 4px;
+    background: $accent-soft;
+}
+
+// A band in the campaign's colour, carrying figures and the progress bar.
+.gctp-accent {
+    flex: 0 0 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px;
+    border-radius: 4px;
+    background: $accent;
+
+    &.is-small { flex: 0 0 26%; }
+
+    .h { display: block; height: 6px; width: 58%; border-radius: 2px; background: rgba(255,255,255,.85); }
+    .figs { display: flex; gap: 6px; }
+    .figs i { flex: 1; height: 5px; border-radius: 2px; background: rgba(255,255,255,.55); }
+    .bar { display: block; height: 4px; border-radius: 999px; background: rgba(255,255,255,.3); overflow: hidden; }
+    .bar i { display: block; width: 64%; height: 100%; border-radius: 999px; background: #fff; }
+}
+
+// Donor rows: avatar, name, amount.
+.gctp-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: none;
+
+    > span { display: flex; align-items: center; gap: 4px; }
+    .av   { width: 8px; height: 8px; border-radius: 999px; background: $gctp-ink2; flex: none; }
+    .nm   { flex: 1; height: 3px; border-radius: 2px; background: $gctp-ink3; }
+    .amt  { width: 14px; height: 3px; border-radius: 2px; background: $gctp-ink; flex: none; }
+}
+
+// The donation form, the one part that is the same on every layout.
+.gctp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    padding: 7px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.035);
+    border: 1px solid rgba(0, 0, 0, 0.07);
+
+    .t     { display: block; height: 4px; width: 66%; border-radius: 2px; background: $gctp-ink; }
+    .tiles { display: flex; gap: 3px; }
+    .tiles i {
+        flex: 1;
+        height: 9px;
+        border-radius: 2px;
+        background: #fff;
+        border: 1px solid $gctp-ink2;
     }
+    .tiles i.on { background: $accent-soft; border-color: $accent; }
+    .f   { display: block; height: 7px; border-radius: 2px; background: #fff; border: 1px solid $gctp-ink2; }
+    .btn { display: block; height: 9px; border-radius: 2px; background: $accent; margin-top: auto; }
+}
 
-    &__wall {
-        flex: 0 0 18%;
-        border-radius: 4px;
-        background: rgba(0, 0, 0, 0.09);
-    }
+// Full-width footers.
+.gctp-wall {
+    display: grid;
+    grid-template-columns: repeat( 4, 1fr );
+    gap: 4px;
+    flex: 0 0 17%;
 
-    &__row {
-        display: block;
-        border-radius: 3px;
-        background: rgba(0, 0, 0, 0.09);
+    i { display: block; border-radius: 2px; background: $gctp-ink3; }
+}
 
-        &--media      { flex: 0 0 34%; }
-        &--media-wide { flex: 0 0 46%; }
-        &--figures    { flex: 0 0 14%; background: rgba(0, 0, 0, 0.14); }
-        &--figures3   { flex: 0 0 18%; background: rgba(0, 0, 0, 0.14); }
-        &--bar        { flex: 0 0 7%;  background: $accent; opacity: .55; }
-        &--text       { flex: 1 1 auto; min-height: 10px; }
-        &--list       { flex: 0 0 22%; }
-        &--title      { flex: 0 0 12%; }
-        // Where a layout puts a band in the campaign's own colour, the thumb
-        // shows colour, because that is the difference somebody is choosing.
-        &--accent      { flex: 0 0 20%; background: $accent; opacity: .85; }
-        &--accent-tall { flex: 0 0 34%; background: $accent; opacity: .85; }
-        &--soft        { flex: 0 0 20%; background: $accent-soft; }
-        &--cards       {
-            flex: 0 0 24%;
-            background: repeating-linear-gradient(
-                to right,
-                #{$accent-soft} 0 30%,
-                transparent 30% 35%
-            );
-        }
-        // The form, laid across the full width instead of down one side.
-        &--form-wide  { flex: 0 0 34%; background: rgba(0, 0, 0, 0.16); }
-    }
+.gctp-grid {
+    display: flex;
+    gap: 5px;
+    flex: 0 0 20%;
 
+    i { flex: 1; border-radius: 3px; background: $gctp-ink3; }
+}
+
+.giveflow-ctp {
     // The form picker clamps its descriptions to two lines. Here the
     // description IS the difference between one layout and the next, so a
     // sentence cut in half costs the reader the thing they came to compare.

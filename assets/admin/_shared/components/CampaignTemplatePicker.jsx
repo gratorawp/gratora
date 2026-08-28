@@ -30,24 +30,129 @@ const CATEGORY_LABELS = {
 
 const CATEGORY_ORDER = [ 'General', 'Appeals', 'Community', 'Impact', 'Bare' ];
 
-// Rows the wireframe draws, top to bottom, per template. An unknown id falls
-// back to the standard shape rather than drawing an empty card.
+// What each layout puts down the main column, top to bottom. The parts are
+// drawn as miniatures of the real thing rather than as grey bars: somebody
+// choosing between fourteen of these is comparing pages, and a bar chart of
+// rectangles tells them nothing about which page they are getting.
 const THUMBS = {
-    standard:     { rows: [ 'media', 'figures', 'bar', 'text', 'list' ],   form: true },
-    hero:         { rows: [ 'accent-tall', 'text', 'list' ],               form: true },
-    split:        { rows: [ 'title', 'accent', 'text', 'media' ],          form: true },
-    story:        { rows: [ 'media-wide', 'text', 'bar' ],                 form: true },
-    gallery:      { rows: [ 'media', 'text', 'bar' ],                      form: true, band: true },
-    deadline:     { rows: [ 'figures3', 'bar', 'media', 'text' ],          form: true },
-    urgent:       { rows: [ 'accent-tall', 'text' ],                       form: true },
-    matched:      { rows: [ 'title', 'accent', 'media', 'text' ],          form: true },
-    supporters:   { rows: [ 'bar', 'text' ],                               form: true, wall: true },
-    leaderboard:  { rows: [ 'soft', 'list', 'list' ],                      form: true },
-    thermometer:  { rows: [ 'accent', 'text' ],                            form: true, wall: true },
-    tiers:        { rows: [ 'text', 'cards', 'bar', 'media' ],             form: true },
-    transparency: { rows: [ 'media', 'soft', 'text', 'bar' ],              form: true },
-    minimal:      { rows: [ 'title', 'text' ],                             form: false, stacked: true, formRow: true },
+    standard:     { main: [ 'media', 'figures2', 'bar', 'text', 'list' ],  form: true },
+    hero:         { main: [ 'accent', 'text', 'list' ],                    form: true },
+    split:        { main: [ 'title', 'accentSmall', 'text', 'media' ],     form: true },
+    story:        { main: [ 'mediaTall', 'text', 'bar' ],                  form: true },
+    gallery:      { main: [ 'media', 'text', 'bar' ],                      form: true, footer: 'cards' },
+    deadline:     { main: [ 'figures3', 'bar', 'media', 'text' ],          form: true },
+    urgent:       { main: [ 'accent', 'text' ],                            form: true },
+    matched:      { main: [ 'title', 'accentSmall', 'media', 'text' ],     form: true },
+    supporters:   { main: [ 'bar', 'text' ],                               form: true, footer: 'wall' },
+    leaderboard:  { main: [ 'soft2', 'list', 'list' ],                     form: true },
+    thermometer:  { main: [ 'accentSmall', 'text' ],                       form: true, footer: 'wall' },
+    tiers:        { main: [ 'text', 'cards3', 'bar', 'media' ],            form: true },
+    transparency: { main: [ 'media', 'soft4', 'text', 'bar' ],             form: true },
+    minimal:      { main: [ 'title', 'text' ],                             stacked: true },
 };
+
+const line = ( i ) => <i key={ i } />;
+
+/** One part of the page, drawn small. */
+function Part( { kind } ) {
+    switch ( kind ) {
+        case 'title':
+            return <span className="gctp-title" />;
+
+        case 'text':
+            return <span className="gctp-text">{ [ 0, 1, 2 ].map( line ) }</span>;
+
+        case 'media':
+        case 'mediaTall':
+            return <span className={ `gctp-media${ kind === 'mediaTall' ? ' is-tall' : '' }` } />;
+
+        case 'bar':
+            return <span className="gctp-bar"><i /></span>;
+
+        case 'figures2':
+        case 'figures3':
+            return (
+                <span className="gctp-figures">
+                    { [ ...Array( kind === 'figures3' ? 3 : 2 ) ].map( ( _, i ) => (
+                        <span key={ i }><i className="n" /><i className="l" /></span>
+                    ) ) }
+                </span>
+            );
+
+        case 'soft2':
+        case 'soft4':
+            return (
+                <span className="gctp-soft">
+                    { [ ...Array( kind === 'soft4' ? 4 : 2 ) ].map( ( _, i ) => (
+                        <span key={ i }><i className="n" /><i className="l" /></span>
+                    ) ) }
+                </span>
+            );
+
+        // A band in the campaign's colour: figures and a progress bar reversed out.
+        case 'accent':
+        case 'accentSmall':
+            return (
+                <span className={ `gctp-accent${ kind === 'accentSmall' ? ' is-small' : '' }` }>
+                    <i className="h" />
+                    <span className="figs"><i /><i /></span>
+                    <span className="bar"><i /></span>
+                </span>
+            );
+
+        case 'list':
+            return (
+                <span className="gctp-list">
+                    { [ 0, 1, 2 ].map( ( i ) => (
+                        <span key={ i }><i className="av" /><i className="nm" /><i className="amt" /></span>
+                    ) ) }
+                </span>
+            );
+
+        case 'cards3':
+            return (
+                <span className="gctp-cards">
+                    { [ 0, 1, 2 ].map( ( i ) => (
+                        <span key={ i }><i className="n" /><i className="l" /></span>
+                    ) ) }
+                </span>
+            );
+
+        default:
+            return null;
+    }
+}
+
+/** The donation form, the one part that looks the same on every layout. */
+function FormPart() {
+    return (
+        <span className="gctp-form">
+            <i className="t" />
+            <span className="tiles"><i /><i className="on" /><i /></span>
+            <i className="f" />
+            <i className="f" />
+            <i className="btn" />
+        </span>
+    );
+}
+
+function Footer( { kind } ) {
+    if ( kind === 'wall' ) {
+        return (
+            <span className="gctp-wall">
+                { [ ...Array( 8 ) ].map( ( _, i ) => <i key={ i } /> ) }
+            </span>
+        );
+    }
+    if ( kind === 'cards' ) {
+        return (
+            <span className="gctp-grid">
+                { [ 0, 1, 2 ].map( ( i ) => <i key={ i } /> ) }
+            </span>
+        );
+    }
+    return null;
+}
 
 export default function CampaignTemplatePicker( { value, onPick, onClose } ) {
     const [ templates, setTemplates ] = useState( [] );
@@ -146,23 +251,24 @@ export default function CampaignTemplatePicker( { value, onPick, onClose } ) {
     );
 }
 
-/** The page shape as bars: main column, form column beside it, wall beneath. */
+/** The layout drawn small: main column, form beside it, any full-width footer. */
 function Wireframe( { shape } ) {
-    const { rows, form, wall, stacked, formRow, band } = shape;
+    const { main, form, footer, stacked } = shape;
 
     return (
         <span className="giveflow-ctp__thumb" aria-hidden="true">
             <span className={ `giveflow-ctp__cols${ stacked ? ' is-stacked' : '' }` }>
                 <span className="giveflow-ctp__main">
-                    { rows.map( ( row, i ) => (
-                        <span key={ i } className={ `giveflow-ctp__row giveflow-ctp__row--${ row }` } />
-                    ) ) }
+                    { main.map( ( kind, i ) => <Part key={ i } kind={ kind } /> ) }
+                    { stacked && <FormPart /> }
                 </span>
-                { form && <span className="giveflow-ctp__form" /> }
-                { formRow && <span className="giveflow-ctp__row giveflow-ctp__row--form-wide" /> }
+                { form && (
+                    <span className="giveflow-ctp__side">
+                        <FormPart />
+                    </span>
+                ) }
             </span>
-            { band && <span className="giveflow-ctp__band" /> }
-            { wall && <span className="giveflow-ctp__wall" /> }
+            { footer && <Footer kind={ footer } /> }
         </span>
     );
 }
