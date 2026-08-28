@@ -23,6 +23,14 @@ final class CampaignPageTemplate extends HookProvider
 {
     public const SLUG = 'giveflow-campaign-page';
 
+    /**
+     * The page's own measure, matching --dp-measure in page.css.
+     *
+     * The two have to agree: the stylesheet caps every band here, and a layout
+     * set narrower would crop them while a wider one would let them out.
+     */
+    public const MEASURE = '1200px';
+
     /** @since 1.0.0 */
     protected function actions(): array
     {
@@ -47,7 +55,7 @@ final class CampaignPageTemplate extends HookProvider
             'title'       => __('Campaign page', 'giveflow-fundraising-campaigns'),
             'description' => __('Site header and footer around the campaign page content, without the theme page banner.', 'giveflow-fundraising-campaigns'),
             'content'     => '<!-- wp:template-part {"slug":"header","tagName":"header"} /-->'
-                . '<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->'
+                . '<!-- wp:group {"tagName":"main","layout":{"type":"constrained","contentSize":"' . self::MEASURE . '","wideSize":"' . self::MEASURE . '"}} -->'
                 . '<main class="wp-block-group"><!-- wp:post-content /--></main>'
                 . '<!-- /wp:group -->'
                 . '<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->',

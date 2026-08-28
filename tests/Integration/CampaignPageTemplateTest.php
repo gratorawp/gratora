@@ -69,4 +69,38 @@ final class CampaignPageTemplateTest extends IntegrationTestCase
 
         $this->assertSame(['page.php'], $templates);
     }
+
+    /**
+     * The template's measure and the stylesheet's have to agree.
+     *
+     * page.css caps every band at --dp-measure. If the block layout is set
+     * narrower it crops them, and campaign pages come out at reading width
+     * inside bands built for 1200; wider and the bands stop matching the page
+     * around them. Neither fails loudly, so the two are pinned together here.
+     */
+    public function test_the_layout_measure_matches_the_stylesheet(): void
+    {
+        $css = (string) file_get_contents(GIVEFLOW_DIR . 'assets/campaign-page/page.css');
+
+        $this->assertSame(
+            1,
+            preg_match('/--dp-measure:\s*([0-9]+px)/', $css, $m),
+            'page.css no longer declares --dp-measure'
+        );
+        $this->assertSame(
+            $m[1],
+            CampaignPageTemplate::MEASURE,
+            'the campaign page template and page.css disagree about how wide the page is'
+        );
+    }
+
+    /** Only a constrained layout makes alignwide mean anything. */
+    public function test_the_main_group_is_constrained(): void
+    {
+        $template = get_block_template('giveflow//' . CampaignPageTemplate::SLUG, 'wp_template');
+
+        $this->assertNotNull($template);
+        $this->assertStringContainsString('"type":"constrained"', (string) $template->content);
+        $this->assertStringContainsString('"wideSize":"' . CampaignPageTemplate::MEASURE . '"', (string) $template->content);
+    }
 }
