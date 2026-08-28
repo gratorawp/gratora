@@ -881,3 +881,17 @@ body.giveflow-modal-open { overflow: hidden; }
         color: #757575;
     }
 }
+
+
+// A colour set on the block has to reach the parts that set their own.
+//
+// get_block_wrapper_attributes puts the author's colour on the wrapper, and
+// every piece inside carrying a colour of its own overrides it, so the control
+// looks broken. Last in this file on purpose: the rules it has to beat are the
+// ones above, at the same specificity, where source order decides.
+//
+// Only where a colour was actually set, so a block left alone keeps its own.
+.giveflow-block.has-text-color,
+.giveflow-block.has-text-color :where(*) {
+    color: inherit;
+}

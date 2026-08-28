@@ -640,6 +640,17 @@ body,
 .giveflow-p2p-layout__side .giveflow-form-band,
 .dp-layout__side .giveflow-p2p-form-band,
 .dp-layout__side .giveflow-form-band{ padding: 0; max-width: none; }
+/* Campaign layouts are built for the page measure, and the editor canvas is
+ * given the theme's. Scoped to the classes those layouts use, so no other page
+ * is touched, and to .editor-styles-wrapper, which exists only in the editor:
+ * this stylesheet is served to the front end too, where it cannot match. */
+.editor-styles-wrapper .alignwide.dp-wide,
+.editor-styles-wrapper .alignwide.dp-panel,
+.editor-styles-wrapper .alignwide.dp-layout,
+.editor-styles-wrapper .alignwide.dp-band {
+    max-width: var(--dp-measure, 1200px);
+}
+
 /* A wrapper that exists only to carry alignwide.
  *
  * Campaign blocks have no align support and no wrapper attributes to carry the
