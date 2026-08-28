@@ -105,46 +105,41 @@ final class CampaignPageTemplateTest extends IntegrationTestCase
     }
 
     /**
-     * The canvas is widened on a campaign page, and nowhere else.
+     * The editor is given the page measure on a campaign page, and nowhere else.
      *
-     * Scoped twice over: only when the page being edited belongs to a
-     * campaign, and only under .editor-styles-wrapper, so the same stylesheet
-     * reaching the front end can never match.
+     * Filtered rather than styled: core bakes the measure into the layout rules
+     * it generates, so a CSS variable override changes nothing. The filter is
+     * the value those rules are generated from.
      */
-    public function test_the_editor_canvas_is_widened_only_on_a_campaign_page(): void
+    public function test_the_editor_measure_is_widened_only_on_a_campaign_page(): void
     {
         $integration = new \GiveFlow\Campaigns\Blocks\BlockEditorIntegration();
+        $base = ['__experimentalFeatures' => ['layout' => ['contentSize' => '620px', 'wideSize' => '1000px']]];
 
         $plain = self::factory()->post->create(['post_type' => 'page']);
-        $this->assertSame('', $this->canvasCssFor($integration, $plain), 'an ordinary page had its editor widened');
+        $this->onPost($plain);
+        $this->assertSame(
+            '620px',
+            $integration->widenEditorForCampaignPage($base)['__experimentalFeatures']['layout']['contentSize'],
+            'an ordinary page had its editor measure changed'
+        );
 
         $campaign = self::factory()->post->create(['post_type' => 'page']);
         update_post_meta($campaign, '_giveflow_campaign_id', 123);
+        $this->onPost($campaign);
 
-        $css = $this->canvasCssFor($integration, $campaign);
-        $this->assertStringContainsString('.editor-styles-wrapper', $css);
-        $this->assertStringContainsString(
-            '--wp--style--global--content-size:' . CampaignPageTemplate::MEASURE,
-            $css,
-            'the canvas is not being given the page measure'
-        );
+        $out = $integration->widenEditorForCampaignPage($base)['__experimentalFeatures']['layout'];
+        $this->assertSame(CampaignPageTemplate::MEASURE, $out['contentSize']);
+        $this->assertSame(CampaignPageTemplate::MEASURE, $out['wideSize']);
     }
 
-    private function canvasCssFor(object $integration, int $postId): string
+    /** editingCampaignPage reads the post being edited, which in the editor is $_GET. */
+    private function onPost(int $postId): void
     {
         global $post;
         $post = get_post($postId);
         setup_postdata($post);
-
-        wp_dequeue_style('giveflow-campaign-blocks');
-        wp_styles()->registered['giveflow-campaign-blocks']->extra['after'] ?? null;
-        unset(wp_styles()->registered['giveflow-campaign-blocks']);
-
-        set_current_screen('post');
-        $integration->enqueueEditorCanvasStyle();
-
-        $style = wp_styles()->registered['giveflow-campaign-blocks'] ?? null;
-
-        return $style ? implode('', (array) ($style->extra['after'] ?? [])) : '';
+        $_GET['post'] = $postId;
     }
+
 }

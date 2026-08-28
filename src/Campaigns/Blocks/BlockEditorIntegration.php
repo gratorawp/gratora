@@ -40,6 +40,7 @@ final class BlockEditorIntegration
         add_action('wp_enqueue_scripts',          [$this, 'enqueueFrontendAssets']);
         add_filter('render_block',                [$this, 'enqueueOnRender'], 10, 2);
         add_action('init',                        [$this, 'registerPageMeta']);
+        add_filter('block_editor_settings_all',   [$this, 'widenEditorForCampaignPage']);
     }
 
     /**
@@ -154,42 +155,38 @@ final class BlockEditorIntegration
                 (string) (@filemtime($cssPath) ?: GIVEFLOW_VERSION)
             );
             wp_style_add_data(self::HANDLE_FRONTEND, 'rtl', 'replace');
-
-            $this->widenCanvasForCampaignPage();
         }
     }
 
     /**
-     * Give the editor canvas the same width the campaign page has.
+     * Give the editor the page's measure, on a campaign page only.
      *
-     * The post editor edits post_content, so the block template's own layout
-     * never applies here: the canvas takes its measure from the theme's global
-     * styles, which for most themes is a reading width. Campaign layouts are
-     * built for the page's measure and were being drawn into a column half
-     * that wide, which is not what the visitor gets.
+     * The post editor edits post_content, so the block template's own layout is
+     * not the editing context here: the canvas takes its measure from the
+     * theme's, which for most themes is a reading width, and campaign layouts
+     * built for the page measure were drawn into a column half that wide.
      *
-     * Written as the layout variables rather than a max-width so the constrained
-     * layout keeps doing the arithmetic, and scoped to .editor-styles-wrapper,
-     * a class that exists only in the editor: this same stylesheet is served to
-     * the front end, where the rule can never match.
+     * The setting is filtered rather than the CSS overridden because core bakes
+     * the measure into the layout rules it generates per block, instead of
+     * reading a custom property at paint time. Overriding
+     * --wp--style--global--content-size changes a variable nothing consults,
+     * which is why doing that had no effect at all.
+     *
+     * @param array<string,mixed> $settings
+     * @return array<string,mixed>
      *
      * @since 1.0.0
      */
-    private function widenCanvasForCampaignPage(): void
+    public function widenEditorForCampaignPage(array $settings): array
     {
         if (! self::editingCampaignPage()) {
-            return;
+            return $settings;
         }
 
-        $measure = CampaignPageTemplate::MEASURE;
+        $settings['__experimentalFeatures']['layout']['contentSize'] = CampaignPageTemplate::MEASURE;
+        $settings['__experimentalFeatures']['layout']['wideSize']    = CampaignPageTemplate::MEASURE;
 
-        wp_add_inline_style(
-            self::HANDLE_FRONTEND,
-            '.editor-styles-wrapper{'
-            . '--wp--style--global--content-size:' . $measure . ';'
-            . '--wp--style--global--wide-size:' . $measure . ';'
-            . '}'
-        );
+        return $settings;
     }
 
     /** @since 1.0.0 */
