@@ -47,7 +47,7 @@ final class CampaignPageTemplate extends HookProvider
             'title'       => __('Campaign page', 'giveflow-fundraising-campaigns'),
             'description' => __('Site header and footer around the campaign page content, without the theme page banner.', 'giveflow-fundraising-campaigns'),
             'content'     => '<!-- wp:template-part {"slug":"header","tagName":"header"} /-->'
-                . '<!-- wp:group {"tagName":"main","layout":{"type":"default"}} -->'
+                . '<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->'
                 . '<main class="wp-block-group"><!-- wp:post-content /--></main>'
                 . '<!-- /wp:group -->'
                 . '<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->',

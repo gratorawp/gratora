@@ -640,3 +640,39 @@ body,
 .giveflow-p2p-layout__side .giveflow-form-band,
 .dp-layout__side .giveflow-p2p-form-band,
 .dp-layout__side .giveflow-form-band{ padding: 0; max-width: none; }
+/* Panels a page layout can ask for by name.
+ *
+ * Classes rather than inline block styles on purpose: a static block is
+ * validated by re-running its save and comparing the markup, so a hand-written
+ * style attribute that does not match what core would emit invalidates the
+ * block and the editor offers to recover it. A className always matches.
+ *
+ * Colour comes from the campaign's accent, so a band is that campaign's colour
+ * rather than one chosen here for all of them. */
+.dp-panel {
+    padding: 28px;
+    border-radius: var(--dp-radius);
+}
+
+/* Filled: the campaign's accent, contents reversed out. */
+.dp-panel--accent {
+    background: var(--dp-accent);
+    color: #fff;
+}
+.dp-panel--accent .dp-money,
+.dp-panel--accent .dp-raised,
+.dp-panel--accent .dp-stat,
+.dp-panel--accent h1,
+.dp-panel--accent h2,
+.dp-panel--accent p { color: #fff; }
+.dp-panel--accent .dp-bar { background: rgba(255, 255, 255, .28); }
+.dp-panel--accent .dp-bar > * { background: #fff; }
+
+/* Tinted: the same accent at low strength, text unchanged. */
+.dp-panel--soft { background: var(--dp-accent-soft); }
+
+/* Roomier, for a band that opens a page. */
+.dp-panel--lead { padding: 44px 28px; }
+
+/* One figure per card, as a row of them. */
+.dp-panel--card { padding: 20px; background: var(--dp-accent-soft); border-radius: var(--dp-radius-sm); }

@@ -277,10 +277,20 @@ $gctp-ink3: rgba(0, 0, 0, 0.06);
 .gctp-media {
     flex: 0 0 30%;
     border-radius: 3px;
-    background:
-        linear-gradient( 135deg, rgba(0,0,0,.10), rgba(0,0,0,.05) );
+    background: linear-gradient( 135deg, rgba(0,0,0,.10), rgba(0,0,0,.05) );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
 
     &.is-tall { flex: 0 0 44%; }
+
+    svg {
+        width: 40%;
+        max-width: 22px;
+        height: auto;
+        color: rgba(0, 0, 0, 0.26);
+    }
 }
 
 // Progress: a track with the raised portion filled.

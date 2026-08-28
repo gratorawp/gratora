@@ -62,9 +62,19 @@ function Part( { kind } ) {
         case 'text':
             return <span className="gctp-text">{ [ 0, 1, 2 ].map( line ) }</span>;
 
+        // The photo glyph says the grey block is where a picture goes, rather
+        // than a panel somebody has to guess at.
         case 'media':
         case 'mediaTall':
-            return <span className={ `gctp-media${ kind === 'mediaTall' ? ' is-tall' : '' }` } />;
+            return (
+                <span className={ `gctp-media${ kind === 'mediaTall' ? ' is-tall' : '' }` }>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="16" rx="2.5" />
+                        <circle cx="8.5" cy="9.5" r="1.6" />
+                        <path d="m21 15.5-4.5-4.5L6 21.5" />
+                    </svg>
+                </span>
+            );
 
         case 'bar':
             return <span className="gctp-bar"><i /></span>;

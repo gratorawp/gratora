@@ -125,6 +125,40 @@ final class CampaignTemplatesTest extends IntegrationTestCase
         }
     }
 
+    /**
+     * No layout writes an inline style onto a block it did not author.
+     *
+     * A static block is validated by re-running its save and comparing the
+     * markup, so a hand-written style attribute that does not match what core
+     * would emit makes the block invalid: the editor replaces it with "Block
+     * contains unexpected or invalid content" and an Attempt recovery button.
+     * parse_blocks does not catch this, because the markup parses fine, it
+     * simply does not match. Colour and spacing come from classes instead.
+     *
+     * Column widths are the one exception: flex-basis IS what core writes for
+     * a column carrying a width.
+     *
+     * @dataProvider templateIds
+     */
+    public function test_a_layout_writes_no_inline_styles_of_its_own(string $id): void
+    {
+        $campaign = $this->createCampaign(['title' => 'Styles ' . $id, 'page_template' => $id]);
+        $content  = (string) get_post((int) $campaign['page_id'])->post_content;
+
+        preg_match_all('/style="([^"]*)"/', $content, $m);
+
+        $unexpected = array_values(array_filter(
+            $m[1],
+            static fn (string $style): bool => preg_match('/^flex-basis:[0-9.]+%$/', $style) !== 1
+        ));
+
+        $this->assertSame(
+            [],
+            $unexpected,
+            $id . ' writes inline styles core would not, so those blocks show as invalid: ' . implode(' | ', $unexpected)
+        );
+    }
+
     /** @return array<string,array{string}> */
     public static function templateIds(): array
     {

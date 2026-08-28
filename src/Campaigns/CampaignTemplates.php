@@ -201,23 +201,23 @@ BLOCKS;
 
     /** @since 1.0.0 */
     private const HERO = <<<'BLOCKS'
-<!-- wp:group {"align":"wide","style":{"color":{"background":"var(--dp-accent)","text":"#ffffff"},"spacing":{"padding":{"top":"56px","bottom":"56px","left":"56px","right":"56px"}}}} -->
-<div class="wp-block-group alignwide has-text-color has-background" style="background-color:var(--dp-accent);color:#ffffff;padding:56px">
-<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"style":{"color":{"text":"#ffffff"}}} -->
-<h1 class="wp-block-heading has-text-color" style="color:#ffffff">%%TITLE%%</h1>
+<!-- wp:group {"align":"wide","className":"dp-panel dp-panel--accent dp-panel--lead"} -->
+<div class="wp-block-group alignwide dp-panel dp-panel--accent dp-panel--lead">
+<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}}} -->
+<h1 class="wp-block-heading">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
 <!-- wp:columns {"className":"dp-figures"} -->
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
@@ -264,19 +264,19 @@ BLOCKS;
 <div class="wp-block-columns alignwide dp-layout">
 <!-- wp:column {"width":"50%","className":"dp-layout__main"} -->
 <div class="wp-block-column dp-layout__main" style="flex-basis:50%">
-<!-- wp:group {"style":{"color":{"background":"var(--dp-accent)","text":"#ffffff"},"spacing":{"padding":{"top":"36px","bottom":"36px","left":"36px","right":"36px"}}}} -->
-<div class="wp-block-group has-text-color has-background" style="background-color:var(--dp-accent);color:#ffffff;padding:36px">
+<!-- wp:group {"className":"dp-panel dp-panel--accent"} -->
+<div class="wp-block-group dp-panel dp-panel--accent">
 <!-- wp:columns {"className":"dp-figures"} -->
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
@@ -306,12 +306,20 @@ BLOCKS;
 </div>
 <!-- /wp:group -->
 
+<!-- wp:group {"align":"wide","className":"dp-wide"} -->
+<div class="wp-block-group alignwide dp-wide">
 <!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:group -->
 BLOCKS;
 
     /** @since 1.0.0 */
     private const STORY = <<<'BLOCKS'
+<!-- wp:group {"align":"wide","className":"dp-wide"} -->
+<div class="wp-block-group alignwide dp-wide">
 <!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%,"aspectRatio":"16-9"} /-->
+</div>
+<!-- /wp:group -->
 
 <!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
@@ -350,7 +358,11 @@ BLOCKS;
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
+<!-- wp:group {"align":"wide","className":"dp-wide"} -->
+<div class="wp-block-group alignwide dp-wide">
 <!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:group -->
 
 <!-- wp:columns {"align":"wide","className":"dp-layout"} -->
 <div class="wp-block-columns alignwide dp-layout">
@@ -377,8 +389,8 @@ BLOCKS;
 </div>
 <!-- /wp:columns -->
 
-<!-- wp:group {"align":"wide","style":{"color":{"background":"var(--dp-page)"},"spacing":{"padding":{"top":"40px","bottom":"40px","left":"40px","right":"40px"}}}} -->
-<div class="wp-block-group alignwide has-background" style="background-color:var(--dp-page);padding:40px">
+<!-- wp:group {"align":"wide","className":"dp-panel dp-panel--accent"} -->
+<div class="wp-block-group alignwide dp-panel dp-panel--accent">
 <!-- wp:giveflow/campaign-grid {"count":3,"heading":""} /-->
 </div>
 <!-- /wp:group -->
@@ -443,23 +455,23 @@ BLOCKS;
 
     /** @since 1.0.0 */
     private const URGENT = <<<'BLOCKS'
-<!-- wp:group {"align":"wide","style":{"color":{"background":"var(--dp-accent)","text":"#ffffff"},"spacing":{"padding":{"top":"52px","bottom":"52px","left":"52px","right":"52px"}}}} -->
-<div class="wp-block-group alignwide has-text-color has-background" style="background-color:var(--dp-accent);color:#ffffff;padding:52px">
-<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"style":{"color":{"text":"#ffffff"}}} -->
-<h1 class="wp-block-heading has-text-color" style="color:#ffffff">%%TITLE%%</h1>
+<!-- wp:group {"align":"wide","className":"dp-panel dp-panel--accent dp-panel--lead"} -->
+<div class="wp-block-group alignwide dp-panel dp-panel--accent dp-panel--lead">
+<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}}} -->
+<h1 class="wp-block-heading">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
 <!-- wp:columns {"className":"dp-figures"} -->
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"remaining","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"remaining","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"days_left","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"days_left","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
@@ -500,25 +512,25 @@ BLOCKS;
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
-<!-- wp:group {"align":"wide","style":{"color":{"background":"var(--dp-accent)","text":"#ffffff"},"spacing":{"padding":{"top":"44px","bottom":"44px","left":"44px","right":"44px"}}}} -->
-<div class="wp-block-group alignwide has-text-color has-background" style="background-color:var(--dp-accent);color:#ffffff;padding:44px">
+<!-- wp:group {"align":"wide","className":"dp-panel dp-panel--accent dp-panel--lead"} -->
+<div class="wp-block-group alignwide dp-panel dp-panel--accent dp-panel--lead">
 <!-- wp:columns {"className":"dp-figures"} -->
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
@@ -585,7 +597,11 @@ BLOCKS;
 </div>
 <!-- /wp:columns -->
 
+<!-- wp:group {"align":"wide","className":"dp-wide"} -->
+<div class="wp-block-group alignwide dp-wide">
 <!-- wp:giveflow/supporter-wall {"campaignId":%%CAMPAIGN_ID%%,"title":%%WALL_TITLE%%,"limit":50,"showMessage":true} /-->
+</div>
+<!-- /wp:group -->
 BLOCKS;
 
     /** @since 1.0.0 */
@@ -598,8 +614,8 @@ BLOCKS;
 <div class="wp-block-columns alignwide dp-layout">
 <!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
-<!-- wp:group {"style":{"color":{"background":"var(--dp-accent-soft)"},"spacing":{"padding":{"top":"32px","bottom":"32px","left":"32px","right":"32px"}}}} -->
-<div class="wp-block-group has-background" style="background-color:var(--dp-accent-soft);padding:32px">
+<!-- wp:group {"className":"dp-panel dp-panel--soft"} -->
+<div class="wp-block-group dp-panel dp-panel--soft">
 <!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 
 <!-- wp:columns {"className":"dp-figures"} -->
@@ -651,25 +667,25 @@ BLOCKS;
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
-<!-- wp:group {"align":"wide","style":{"color":{"background":"var(--dp-accent)","text":"#ffffff"},"spacing":{"padding":{"top":"48px","bottom":"48px","left":"48px","right":"48px"}}}} -->
-<div class="wp-block-group alignwide has-text-color has-background" style="background-color:var(--dp-accent);color:#ffffff;padding:48px">
+<!-- wp:group {"align":"wide","className":"dp-panel dp-panel--accent dp-panel--lead"} -->
+<div class="wp-block-group alignwide dp-panel dp-panel--accent dp-panel--lead">
 <!-- wp:columns {"className":"dp-figures"} -->
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"percent","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"percent","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"remaining","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"remaining","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
@@ -703,7 +719,11 @@ BLOCKS;
 </div>
 <!-- /wp:columns -->
 
+<!-- wp:group {"align":"wide","className":"dp-wide"} -->
+<div class="wp-block-group alignwide dp-wide">
 <!-- wp:giveflow/supporter-wall {"campaignId":%%CAMPAIGN_ID%%,"title":%%WALL_TITLE%%,"limit":40,"showMessage":true} /-->
+</div>
+<!-- /wp:group -->
 BLOCKS;
 
     /** @since 1.0.0 */
@@ -724,8 +744,8 @@ BLOCKS;
 <div class="wp-block-columns alignwide dp-layout">
 <!-- wp:column {"width":"33.33%"} -->
 <div class="wp-block-column" style="flex-basis:33.33%">
-<!-- wp:group {"style":{"color":{"background":"var(--dp-accent-soft)"},"spacing":{"padding":{"top":"28px","bottom":"28px","left":"28px","right":"28px"}}}} -->
-<div class="wp-block-group has-background" style="background-color:var(--dp-accent-soft);padding:28px">
+<!-- wp:group {"className":"dp-panel dp-panel--soft"} -->
+<div class="wp-block-group dp-panel dp-panel--soft">
 <!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:group -->
@@ -734,8 +754,8 @@ BLOCKS;
 
 <!-- wp:column {"width":"33.33%"} -->
 <div class="wp-block-column" style="flex-basis:33.33%">
-<!-- wp:group {"style":{"color":{"background":"var(--dp-accent-soft)"},"spacing":{"padding":{"top":"28px","bottom":"28px","left":"28px","right":"28px"}}}} -->
-<div class="wp-block-group has-background" style="background-color:var(--dp-accent-soft);padding:28px">
+<!-- wp:group {"className":"dp-panel dp-panel--soft"} -->
+<div class="wp-block-group dp-panel dp-panel--soft">
 <!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg"} /-->
 </div>
 <!-- /wp:group -->
@@ -744,8 +764,8 @@ BLOCKS;
 
 <!-- wp:column {"width":"33.33%"} -->
 <div class="wp-block-column" style="flex-basis:33.33%">
-<!-- wp:group {"style":{"color":{"background":"var(--dp-accent-soft)"},"spacing":{"padding":{"top":"28px","bottom":"28px","left":"28px","right":"28px"}}}} -->
-<div class="wp-block-group has-background" style="background-color:var(--dp-accent-soft);padding:28px">
+<!-- wp:group {"className":"dp-panel dp-panel--soft"} -->
+<div class="wp-block-group dp-panel dp-panel--soft">
 <!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"average","size":"lg"} /-->
 </div>
 <!-- /wp:group -->
@@ -755,7 +775,11 @@ BLOCKS;
 </div>
 <!-- /wp:columns -->
 
+<!-- wp:group {"align":"wide","className":"dp-wide"} -->
+<div class="wp-block-group alignwide dp-wide">
 <!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:group -->
 
 <!-- wp:columns {"align":"wide","className":"dp-layout"} -->
 <div class="wp-block-columns alignwide dp-layout">
@@ -781,10 +805,14 @@ BLOCKS;
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
+<!-- wp:group {"align":"wide","className":"dp-wide"} -->
+<div class="wp-block-group alignwide dp-wide">
 <!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:group -->
 
-<!-- wp:group {"align":"wide","style":{"color":{"background":"var(--dp-accent-soft)"},"spacing":{"padding":{"top":"36px","bottom":"36px","left":"36px","right":"36px"}}}} -->
-<div class="wp-block-group alignwide has-background" style="background-color:var(--dp-accent-soft);padding:36px">
+<!-- wp:group {"align":"wide","className":"dp-panel dp-panel--soft"} -->
+<div class="wp-block-group alignwide dp-panel dp-panel--soft">
 <!-- wp:columns {"className":"dp-figures"} -->
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
@@ -856,7 +884,11 @@ BLOCKS;
 </div>
 <!-- /wp:group -->
 
+<!-- wp:group {"align":"wide","className":"dp-wide"} -->
+<div class="wp-block-group alignwide dp-wide">
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:group -->
 BLOCKS;
     /**
      * The block layout for a template, with placeholders CampaignService fills.
