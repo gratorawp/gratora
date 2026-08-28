@@ -120,6 +120,15 @@ final class CampaignsController
             ],
         ]);
 
+        register_rest_route(self::NAMESPACE, '/admin/campaigns/(?P<id>\d+)/layout', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'layout'],
+            'permission_callback' => [$this, 'canAccess'],
+            'args'                => [
+                'template' => ['type' => 'string', 'required' => true],
+            ],
+        ]);
+
         register_rest_route(self::NAMESPACE, '/admin/campaigns/(?P<id>\d+)/metrics', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'metrics'],
@@ -379,6 +388,33 @@ final class CampaignsController
             'search' => $request['search'] !== null ? (string) $request['search'] : null,
         ]);
         return new WP_REST_Response($stats, 200);
+    }
+
+    /**
+     * The blocks a layout would produce for this campaign.
+     *
+     * Read-only: nothing is written and the campaign's page is untouched. What
+     * the caller does with the markup, in practice hand it to the block editor,
+     * is the caller's business.
+     *
+     * @since 1.0.0
+     */
+    public function layout(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        $campaign = $this->campaigns->findById((int) $request['id']);
+        if (! $campaign) {
+            return new WP_Error('giveflow_not_found', __('Campaign not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+        }
+
+        $template = (string) $request['template'];
+        if (! CampaignTemplates::exists($template)) {
+            return new WP_Error('giveflow_invalid_input', __('Unknown page layout.', 'giveflow-fundraising-campaigns'), ['status' => 400]);
+        }
+
+        return new WP_REST_Response([
+            'template' => $template,
+            'blocks'   => $this->campaignService->layoutBlocksFor($campaign, $template),
+        ], 200);
     }
 
     /** The starter layouts a new campaign page can be built from. @since 1.0.0 */

@@ -146,6 +146,49 @@ final class CampaignTemplatesTest extends IntegrationTestCase
         );
     }
 
+    /**
+     * The editor asks for a layout's blocks so it can put them in the canvas.
+     *
+     * The campaign id has to be interpolated or every block on the page renders
+     * for no campaign, which is the failure that looks like an empty page.
+     */
+    public function test_a_layout_can_be_read_without_writing_anything(): void
+    {
+        $campaign = $this->createCampaign(['title' => 'Read a layout']);
+        $before   = (string) get_post((int) $campaign['page_id'])->post_content;
+
+        $request = new WP_REST_Request('GET', '/giveflow/v1/admin/campaigns/' . (int) $campaign['id'] . '/layout');
+        $request->set_param('template', 'story');
+        $response = rest_do_request($request);
+        $data     = (array) $response->get_data();
+
+        $this->assertSame(200, $response->get_status());
+        $this->assertSame('story', $data['template']);
+        $this->assertStringContainsString('wp:giveflow/donation-form', (string) $data['blocks']);
+        $this->assertStringContainsString(
+            '"campaignId":' . (int) $campaign['id'],
+            (string) $data['blocks'],
+            'the campaign id was not interpolated, so every block would render for no campaign'
+        );
+
+        $this->assertSame(
+            $before,
+            (string) get_post((int) $campaign['page_id'])->post_content,
+            'reading a layout changed the page'
+        );
+    }
+
+    /** An unknown layout is refused rather than quietly serving the standard one. */
+    public function test_reading_an_unknown_layout_is_refused(): void
+    {
+        $campaign = $this->createCampaign(['title' => 'Bad layout']);
+
+        $request = new WP_REST_Request('GET', '/giveflow/v1/admin/campaigns/' . (int) $campaign['id'] . '/layout');
+        $request->set_param('template', 'no-such-layout');
+
+        $this->assertSame(400, rest_do_request($request)->get_status());
+    }
+
     /** @param array<string,mixed> $input @return array<string,mixed> */
     private function createCampaign(array $input): array
     {

@@ -28,6 +28,7 @@ import ServerSideRender from '@wordpress/server-side-render';
 import { __ } from '@wordpress/i18n';
 
 import { registerGiveFlowEntities } from '../_shared/entities';
+import './LayoutSwitcher';
 import { registerCampaignBindingSource } from './bindings.js';
 import { defaultCurrency, amountEntry } from '../_shared/format';
 import './blocks.scss';

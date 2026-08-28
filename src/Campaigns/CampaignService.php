@@ -588,6 +588,24 @@ final class CampaignService
      *
      * @since 1.0.0
      */
+    /**
+     * The blocks a layout produces for this campaign, without writing anything.
+     *
+     * The editor needs the markup rather than the template's name: it is going
+     * to hand these blocks to the block editor, and the campaign id has to be
+     * interpolated into them first or every block renders for no campaign.
+     *
+     * @since 1.0.0
+     */
+    public function layoutBlocksFor(Campaign $campaign, string $template): string
+    {
+        if (! CampaignTemplates::exists($template)) {
+            $template = CampaignTemplates::DEFAULT_ID;
+        }
+
+        return $this->pageStarterBlocks($campaign, $template);
+    }
+
     private function pageStarterBlocks(Campaign $campaign, string $template = CampaignTemplates::DEFAULT_ID): string
     {
         $id = (int) $campaign->id;
