@@ -14,7 +14,7 @@ final class AsyncDispatcher
     public const GROUP = 'giveflow';
 
     /**
-     * @param array<string,mixed> $args
+     * @param array<array-key,mixed> $args
      * @since 1.0.0
      */
     public function enqueue(string $hook, array $args = []): void
@@ -23,7 +23,7 @@ final class AsyncDispatcher
     }
 
     /**
-     * @param array<string,mixed> $args
+     * @param array<array-key,mixed> $args
      * @since 1.0.0
      */
     public function schedule(string $hook, int $timestamp, array $args = []): void
@@ -35,7 +35,7 @@ final class AsyncDispatcher
      * Idempotent: no-op if this hook is already scheduled, else run every
      * $intervalSeconds starting one minute from now.
      *
-     * @param array<string,mixed> $args
+     * @param array<array-key,mixed> $args
      * @since 1.0.0
      */
     public function scheduleRecurring(string $hook, int $intervalSeconds, array $args = []): void
