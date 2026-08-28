@@ -6,6 +6,7 @@ namespace GiveFlow\Rest\Admin;
 
 use GiveFlow\Campaigns\Campaign;
 use GiveFlow\Donations\DonationRepository;
+use GiveFlow\Donors\Donor;
 use GiveFlow\Exports\DonorExporter;
 use GiveFlow\Foundation\Auth\Capabilities;
 use GiveFlow\Exports\RevenueExporter;
@@ -58,7 +59,7 @@ final class ExportsController
                 // Mirrors the donor list's own filters so a segment you can see
                 // on screen is a segment you can take away with you.
                 'country'     => ['type' => 'string', 'default' => ''],
-                'donor_type'  => ['type' => 'string', 'default' => '', 'enum' => ['', 'individual', 'organization', 'company', 'household']],
+                'donor_type'  => ['type' => 'string', 'default' => '', 'enum' => ['', ...Donor::TYPES]],
                 'search'      => ['type' => 'string', 'default' => ''],
             ],
         ]);

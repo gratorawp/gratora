@@ -31,6 +31,15 @@ final class Donor extends Model
     public ?string $country = null;
     public ?string $locale = null;
     public ?string $tax_id_encrypted = null;
+    /**
+     * What a donor is. Every reader and writer of the column takes its list
+     * from here: they were four literals that had already drifted apart, and
+     * the donor list offered a filter for a type nothing could ever be.
+     *
+     * @var list<string>
+     */
+    public const TYPES = ['individual', 'organization', 'household'];
+
     public string $donor_type = 'individual';
     public ?int $household_id = null;
     public int $total_donated_cents = 0;

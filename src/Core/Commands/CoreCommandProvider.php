@@ -17,6 +17,7 @@ use GiveFlow\Donations\DonationIntent;
 use GiveFlow\Donations\DonationRepository;
 use GiveFlow\Donations\DonationService;
 use GiveFlow\Donors\ConsentService;
+use GiveFlow\Donors\Donor;
 use GiveFlow\Donors\DonorMetricsService;
 use GiveFlow\Donors\DonorRepository;
 use GiveFlow\Donors\DonorService;
@@ -2133,7 +2134,7 @@ final class CoreCommandProvider
                 'company'    => ['type' => ['string', 'null']],
                 'locale'     => ['type' => ['string', 'null']],
                 'country'    => ['type' => ['string', 'null'], 'description' => 'ISO 3166-1 alpha-2 country code.'],
-                'donor_type' => ['type' => 'string', 'enum' => ['individual', 'organization']],
+                'donor_type' => ['type' => 'string', 'enum' => Donor::TYPES],
                 'phone'      => ['type' => ['string', 'null']],
                 'address'    => [
                     'type'                 => ['object', 'null'],

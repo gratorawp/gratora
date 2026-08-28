@@ -55,7 +55,7 @@ final class DonorsController
                 'orderby'  => ['type' => 'string', 'default' => 'last_donation_at'],
                 'order'    => ['type' => 'string', 'enum' => ['asc', 'desc'], 'default' => 'desc'],
                 'country'    => ['type' => 'string'],
-                'donor_type' => ['type' => 'string', 'enum' => ['individual', 'organization', 'company', 'household']],
+                'donor_type' => ['type' => 'string', 'enum' => Donor::TYPES],
                 'search'     => ['type' => 'string'],
             ],
         ]);
@@ -66,7 +66,7 @@ final class DonorsController
             'permission_callback' => [$this, 'canAccess'],
             'args'                => [
                 'country'    => ['type' => 'string'],
-                'donor_type' => ['type' => 'string', 'enum' => ['individual', 'organization', 'company', 'household']],
+                'donor_type' => ['type' => 'string', 'enum' => Donor::TYPES],
                 'search'     => ['type' => 'string'],
             ],
         ]);
@@ -125,7 +125,7 @@ final class DonorsController
                         'country' => ['type' => 'string', 'pattern' => '^([A-Za-z]{2})?$'],
                     ],
                 ],
-                'donor_type' => ['type' => 'string', 'enum' => ['individual', 'organization', 'household']],
+                'donor_type' => ['type' => 'string', 'enum' => Donor::TYPES],
                 'public_hidden' => ['type' => 'boolean'],
             ],
         ]);
@@ -305,7 +305,7 @@ final class DonorsController
 
         if (array_key_exists('donor_type', $params)) {
             $type = (string) $params['donor_type'];
-            if (in_array($type, ['individual', 'organization', 'household'], true)) {
+            if (in_array($type, Donor::TYPES, true)) {
                 $update['donor_type'] = $type;
             }
         }
