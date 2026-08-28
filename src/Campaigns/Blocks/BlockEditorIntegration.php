@@ -40,7 +40,6 @@ final class BlockEditorIntegration
         add_action('wp_enqueue_scripts',          [$this, 'enqueueFrontendAssets']);
         add_filter('render_block',                [$this, 'enqueueOnRender'], 10, 2);
         add_action('init',                        [$this, 'registerPageMeta']);
-        add_filter('block_editor_settings_all',   [$this, 'widenEditorForCampaignPage']);
     }
 
     /**
@@ -158,36 +157,6 @@ final class BlockEditorIntegration
         }
     }
 
-    /**
-     * Give the editor the page's measure, on a campaign page only.
-     *
-     * The post editor edits post_content, so the block template's own layout is
-     * not the editing context here: the canvas takes its measure from the
-     * theme's, which for most themes is a reading width, and campaign layouts
-     * built for the page measure were drawn into a column half that wide.
-     *
-     * The setting is filtered rather than the CSS overridden because core bakes
-     * the measure into the layout rules it generates per block, instead of
-     * reading a custom property at paint time. Overriding
-     * --wp--style--global--content-size changes a variable nothing consults,
-     * which is why doing that had no effect at all.
-     *
-     * @param array<string,mixed> $settings
-     * @return array<string,mixed>
-     *
-     * @since 1.0.0
-     */
-    public function widenEditorForCampaignPage(array $settings): array
-    {
-        if (! self::editingCampaignPage()) {
-            return $settings;
-        }
-
-        $settings['__experimentalFeatures']['layout']['contentSize'] = CampaignPageTemplate::MEASURE;
-        $settings['__experimentalFeatures']['layout']['wideSize']    = CampaignPageTemplate::MEASURE;
-
-        return $settings;
-    }
 
     /** @since 1.0.0 */
     public function enqueueFrontendAssets(): void

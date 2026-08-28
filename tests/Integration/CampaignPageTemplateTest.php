@@ -105,41 +105,41 @@ final class CampaignPageTemplateTest extends IntegrationTestCase
     }
 
     /**
-     * The editor is given the page measure on a campaign page, and nowhere else.
+     * The layouts carry their own width in the editor.
      *
-     * Filtered rather than styled: core bakes the measure into the layout rules
-     * it generates, so a CSS variable override changes nothing. The filter is
-     * the value those rules are generated from.
+     * Two attempts at this went through Gutenberg, a CSS variable core does
+     * not read back and a settings filter that did not reach the canvas, and
+     * neither moved the page. The measure now sits on the classes the layouts
+     * use, so nothing depends on which measure the canvas settled on.
+     *
+     * Both halves of the scoping are asserted, because either one missing
+     * makes this leak: onto the front end, or onto every other page.
      */
-    public function test_the_editor_measure_is_widened_only_on_a_campaign_page(): void
+    public function test_the_layouts_carry_their_own_editor_width(): void
     {
-        $integration = new \GiveFlow\Campaigns\Blocks\BlockEditorIntegration();
-        $base = ['__experimentalFeatures' => ['layout' => ['contentSize' => '620px', 'wideSize' => '1000px']]];
+        $css = (string) file_get_contents(GIVEFLOW_DIR . 'assets/campaign-page/page.css');
 
-        $plain = self::factory()->post->create(['post_type' => 'page']);
-        $this->onPost($plain);
-        $this->assertSame(
-            '620px',
-            $integration->widenEditorForCampaignPage($base)['__experimentalFeatures']['layout']['contentSize'],
-            'an ordinary page had its editor measure changed'
+        $this->assertMatchesRegularExpression(
+            '/\.editor-styles-wrapper \.alignwide\.dp-\w+/',
+            $css,
+            'the editor width rule is gone, so campaign layouts sit at the theme measure again'
         );
 
-        $campaign = self::factory()->post->create(['post_type' => 'page']);
-        update_post_meta($campaign, '_giveflow_campaign_id', 123);
-        $this->onPost($campaign);
+        preg_match_all('/^\s*(\.[^,{]*alignwide[^,{]*)[,{]/m', $css, $m);
+        $this->assertNotEmpty($m[1]);
 
-        $out = $integration->widenEditorForCampaignPage($base)['__experimentalFeatures']['layout'];
-        $this->assertSame(CampaignPageTemplate::MEASURE, $out['contentSize']);
-        $this->assertSame(CampaignPageTemplate::MEASURE, $out['wideSize']);
-    }
-
-    /** editingCampaignPage reads the post being edited, which in the editor is $_GET. */
-    private function onPost(int $postId): void
-    {
-        global $post;
-        $post = get_post($postId);
-        setup_postdata($post);
-        $_GET['post'] = $postId;
+        foreach ($m[1] as $selector) {
+            $this->assertStringContainsString(
+                '.editor-styles-wrapper',
+                $selector,
+                'this rule would reach the front end: ' . trim($selector)
+            );
+            $this->assertMatchesRegularExpression(
+                '/\.dp-\w+/',
+                $selector,
+                'this rule would reach pages that are not campaigns: ' . trim($selector)
+            );
+        }
     }
 
 }
