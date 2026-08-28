@@ -241,6 +241,13 @@
         background: rgba(0, 0, 0, 0.16);
     }
 
+    // A full-width band beneath the columns, as in the gallery layout.
+    &__band {
+        flex: 0 0 20%;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.07);
+    }
+
     &__wall {
         flex: 0 0 18%;
         border-radius: 4px;
@@ -260,6 +267,19 @@
         &--text       { flex: 1 1 auto; min-height: 10px; }
         &--list       { flex: 0 0 22%; }
         &--title      { flex: 0 0 12%; }
+        // Where a layout puts a band in the campaign's own colour, the thumb
+        // shows colour, because that is the difference somebody is choosing.
+        &--accent      { flex: 0 0 20%; background: $accent; opacity: .85; }
+        &--accent-tall { flex: 0 0 34%; background: $accent; opacity: .85; }
+        &--soft        { flex: 0 0 20%; background: $accent-soft; }
+        &--cards       {
+            flex: 0 0 24%;
+            background: repeating-linear-gradient(
+                to right,
+                #{$accent-soft} 0 30%,
+                transparent 30% 35%
+            );
+        }
         // The form, laid across the full width instead of down one side.
         &--form-wide  { flex: 0 0 34%; background: rgba(0, 0, 0, 0.16); }
     }

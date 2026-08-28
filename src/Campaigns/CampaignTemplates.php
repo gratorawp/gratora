@@ -33,37 +33,100 @@ final class CampaignTemplates
             [
                 'id'          => self::DEFAULT_ID,
                 'category'    => 'General',
-                'name'        => __('Standard campaign', 'giveflow-fundraising-campaigns'),
-                'description' => __('Image, raised and goal figures, a progress bar, your description, then recent donations and top donors, with the form alongside.', 'giveflow-fundraising-campaigns'),
-                'best_for'    => __('Most campaigns. Start here if none of the others obviously fit.', 'giveflow-fundraising-campaigns'),
+                'name'        => __( 'Standard campaign', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'Image, raised and goal figures, a progress bar, your description, then recent donations and top donors, with the form alongside.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'Most campaigns. Start here if none of the others obviously fit.', 'giveflow-fundraising-campaigns' ),
             ],
             [
-                'id'          => 'deadline',
-                'category'    => 'Appeals',
-                'name'        => __('Appeal with a deadline', 'giveflow-fundraising-campaigns'),
-                'description' => __('Leads with the goal and how far off it is, puts the form above the fold, and holds the description back until after the ask.', 'giveflow-fundraising-campaigns'),
-                'best_for'    => __('A crisis or a matched appeal, where the reason to give now is the deadline.', 'giveflow-fundraising-campaigns'),
+                'id'          => 'hero',
+                'category'    => 'General',
+                'name'        => __( 'Colour hero', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'Opens on a full-width band in your campaign colour carrying the title, the figures and the progress bar, with everything else below it.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'A campaign that should look like an event rather than a page.', 'giveflow-fundraising-campaigns' ),
+            ],
+            [
+                'id'          => 'split',
+                'category'    => 'General',
+                'name'        => __( 'Split panel', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'The figures sit in a coloured panel next to the form, so the ask and the progress share the first screen.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'A short campaign where the number is the argument.', 'giveflow-fundraising-campaigns' ),
             ],
             [
                 'id'          => 'story',
                 'category'    => 'General',
-                'name'        => __('Story first', 'giveflow-fundraising-campaigns'),
-                'description' => __('A full-width image and the description before any figures at all. The ask comes after the reader knows what they are being asked about.', 'giveflow-fundraising-campaigns'),
-                'best_for'    => __('An appeal that has to explain itself before it asks, and campaigns with a strong photograph.', 'giveflow-fundraising-campaigns'),
+                'name'        => __( 'Story first', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'A full-width image and the description before any figures at all. The ask comes after the reader knows what they are being asked about.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'An appeal that has to explain itself before it asks, and campaigns with a strong photograph.', 'giveflow-fundraising-campaigns' ),
+            ],
+            [
+                'id'          => 'gallery',
+                'category'    => 'General',
+                'name'        => __( 'With other campaigns', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'The usual layout, then a band at the foot showing your other campaigns, so somebody who has just given sees what else needs them.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'An organisation running several appeals at once.', 'giveflow-fundraising-campaigns' ),
+            ],
+            [
+                'id'          => 'deadline',
+                'category'    => 'Appeals',
+                'name'        => __( 'Appeal with a deadline', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'Leads with the goal and how far off it is, puts the form above the fold, and holds the description back until after the ask.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'A crisis or a matched appeal, where the reason to give now is the deadline.', 'giveflow-fundraising-campaigns' ),
+            ],
+            [
+                'id'          => 'urgent',
+                'category'    => 'Appeals',
+                'name'        => __( 'Emergency appeal', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'A colour band carrying what is still needed and how long is left, then the form. Nothing on the page that is not the ask.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'A crisis, where anything the reader has to scroll past is a reader you lose.', 'giveflow-fundraising-campaigns' ),
+            ],
+            [
+                'id'          => 'matched',
+                'category'    => 'Appeals',
+                'name'        => __( 'Matched giving', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'Raised, goal and donor count together in a coloured band under the title, so the size of the effort reads before the description.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'A match or a challenge, where how many have joined in matters as much as the total.', 'giveflow-fundraising-campaigns' ),
             ],
             [
                 'id'          => 'supporters',
                 'category'    => 'Community',
-                'name'        => __('Supporter wall', 'giveflow-fundraising-campaigns'),
-                'description' => __('The people who have already given are the main content, with their messages shown and the wall running the full width beneath the form.', 'giveflow-fundraising-campaigns'),
-                'best_for'    => __('A community appeal where seeing familiar names is the reason somebody gives.', 'giveflow-fundraising-campaigns'),
+                'name'        => __( 'Supporter wall', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'The people who have already given are the main content, with their messages shown and the wall running the full width beneath the form.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'A community appeal where seeing familiar names is the reason somebody gives.', 'giveflow-fundraising-campaigns' ),
+            ],
+            [
+                'id'          => 'leaderboard',
+                'category'    => 'Community',
+                'name'        => __( 'Leaderboard', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'Top donors and recent donations carry the page, over a tinted panel of the donor and donation counts.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'A competitive campaign, a challenge between teams or offices.', 'giveflow-fundraising-campaigns' ),
+            ],
+            [
+                'id'          => 'thermometer',
+                'category'    => 'Community',
+                'name'        => __( 'Thermometer', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'The percentage, the amount raised and what is left, large and in colour, with the supporter wall beneath.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'A campaign with one number everybody is watching.', 'giveflow-fundraising-campaigns' ),
+            ],
+            [
+                'id'          => 'tiers',
+                'category'    => 'Impact',
+                'name'        => __( 'Impact figures', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'Three tinted cards carrying the raised total, the number of donors and the average donation, above the image and the form.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'An appeal where the shape of the giving is the story.', 'giveflow-fundraising-campaigns' ),
+            ],
+            [
+                'id'          => 'transparency',
+                'category'    => 'Impact',
+                'name'        => __( 'Open books', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'Four figures across a tinted band: raised, donors, donations and the average, with the image above them.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'An organisation that wants the numbers visible before the ask.', 'giveflow-fundraising-campaigns' ),
             ],
             [
                 'id'          => 'minimal',
                 'category'    => 'Bare',
-                'name'        => __('Just the form', 'giveflow-fundraising-campaigns'),
-                'description' => __('Title, description and the donation form. No figures, no donor lists, nothing that needs data to look right.', 'giveflow-fundraising-campaigns'),
-                'best_for'    => __('A page you will design yourself, and a campaign with no goal to show.', 'giveflow-fundraising-campaigns'),
+                'name'        => __( 'Just the form', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'Title, description and the donation form. No figures, no donor lists, nothing that needs data to look right.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'A page you will design yourself, and a campaign with no goal to show.', 'giveflow-fundraising-campaigns' ),
             ],
         ];
 
@@ -137,6 +200,191 @@ final class CampaignTemplates
 BLOCKS;
 
     /** @since 1.0.0 */
+    private const HERO = <<<'BLOCKS'
+<!-- wp:group {"align":"wide","style":{"color":{"background":"var(--dp-accent)","text":"#ffffff"},"spacing":{"padding":{"top":"56px","bottom":"56px","left":"56px","right":"56px"}}}} -->
+<div class="wp-block-group alignwide has-text-color has-background" style="background-color:var(--dp-accent);color:#ffffff;padding:56px">
+<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"style":{"color":{"text":"#ffffff"}}} -->
+<h1 class="wp-block-heading has-text-color" style="color:#ffffff">%%TITLE%%</h1>
+<!-- /wp:heading -->
+
+<!-- wp:columns {"className":"dp-figures"} -->
+<div class="wp-block-columns dp-figures">
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:columns {"align":"wide","className":"dp-layout"} -->
+<div class="wp-block-columns alignwide dp-layout">
+<!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
+<div class="wp-block-column dp-layout__main" style="flex-basis:62%">
+<!-- wp:group {"className":"dp-band dp-band--tight"} -->
+<div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<p class="dp-body">%%DESCRIPTION%%</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:giveflow/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
+<div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+BLOCKS;
+
+    /** @since 1.0.0 */
+    private const SPLIT = <<<'BLOCKS'
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
+<!-- /wp:heading -->
+
+<!-- wp:columns {"align":"wide","className":"dp-layout"} -->
+<div class="wp-block-columns alignwide dp-layout">
+<!-- wp:column {"width":"50%","className":"dp-layout__main"} -->
+<div class="wp-block-column dp-layout__main" style="flex-basis:50%">
+<!-- wp:group {"style":{"color":{"background":"var(--dp-accent)","text":"#ffffff"},"spacing":{"padding":{"top":"36px","bottom":"36px","left":"36px","right":"36px"}}}} -->
+<div class="wp-block-group has-text-color has-background" style="background-color:var(--dp-accent);color:#ffffff;padding:36px">
+<!-- wp:columns {"className":"dp-figures"} -->
+<div class="wp-block-columns dp-figures">
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"50%","className":"dp-layout__side"} -->
+<div class="wp-block-column dp-layout__side" style="flex-basis:50%">
+<!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:group {"className":"dp-band dp-band--tight"} -->
+<div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<p class="dp-body">%%DESCRIPTION%%</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+BLOCKS;
+
+    /** @since 1.0.0 */
+    private const STORY = <<<'BLOCKS'
+<!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%,"aspectRatio":"16-9"} /-->
+
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
+<!-- /wp:heading -->
+
+<!-- wp:group {"className":"dp-band"} -->
+<div class="wp-block-group dp-band">
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<p class="dp-body">%%DESCRIPTION%%</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:columns {"align":"wide","className":"dp-layout"} -->
+<div class="wp-block-columns alignwide dp-layout">
+<!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
+<div class="wp-block-column dp-layout__main" style="flex-basis:62%">
+<!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+
+<!-- wp:giveflow/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
+<div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:column -->
+</div>
+<!-- /wp:columns -->
+BLOCKS;
+
+    /** @since 1.0.0 */
+    private const GALLERY = <<<'BLOCKS'
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
+<!-- /wp:heading -->
+
+<!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+
+<!-- wp:columns {"align":"wide","className":"dp-layout"} -->
+<div class="wp-block-columns alignwide dp-layout">
+<!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
+<div class="wp-block-column dp-layout__main" style="flex-basis:62%">
+<!-- wp:group {"className":"dp-band dp-band--tight"} -->
+<div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<p class="dp-body">%%DESCRIPTION%%</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
+<div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:group {"align":"wide","style":{"color":{"background":"var(--dp-page)"},"spacing":{"padding":{"top":"40px","bottom":"40px","left":"40px","right":"40px"}}}} -->
+<div class="wp-block-group alignwide has-background" style="background-color:var(--dp-page);padding:40px">
+<!-- wp:giveflow/campaign-grid {"count":3,"heading":""} /-->
+</div>
+<!-- /wp:group -->
+BLOCKS;
+
+    /** @since 1.0.0 */
     private const DEADLINE = <<<'BLOCKS'
 <!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
@@ -194,18 +442,90 @@ BLOCKS;
 BLOCKS;
 
     /** @since 1.0.0 */
-    private const STORY = <<<'BLOCKS'
-<!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%,"aspectRatio":"16-9"} /-->
+    private const URGENT = <<<'BLOCKS'
+<!-- wp:group {"align":"wide","style":{"color":{"background":"var(--dp-accent)","text":"#ffffff"},"spacing":{"padding":{"top":"52px","bottom":"52px","left":"52px","right":"52px"}}}} -->
+<div class="wp-block-group alignwide has-text-color has-background" style="background-color:var(--dp-accent);color:#ffffff;padding:52px">
+<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"style":{"color":{"text":"#ffffff"}}} -->
+<h1 class="wp-block-heading has-text-color" style="color:#ffffff">%%TITLE%%</h1>
+<!-- /wp:heading -->
 
+<!-- wp:columns {"className":"dp-figures"} -->
+<div class="wp-block-columns dp-figures">
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"remaining","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"days_left","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:columns {"align":"wide","className":"dp-layout"} -->
+<div class="wp-block-columns alignwide dp-layout">
+<!-- wp:column {"width":"55%","className":"dp-layout__main"} -->
+<div class="wp-block-column dp-layout__main" style="flex-basis:55%">
+<!-- wp:group {"className":"dp-band dp-band--tight"} -->
+<div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<p class="dp-body">%%DESCRIPTION%%</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"45%","className":"dp-layout__side"} -->
+<div class="wp-block-column dp-layout__side" style="flex-basis:45%">
+<!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+BLOCKS;
+
+    /** @since 1.0.0 */
+    private const MATCHED = <<<'BLOCKS'
 <!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
-<!-- wp:group {"className":"dp-band"} -->
-<div class="wp-block-group dp-band">
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
-<p class="dp-body">%%DESCRIPTION%%</p>
-<!-- /wp:paragraph -->
+<!-- wp:group {"align":"wide","style":{"color":{"background":"var(--dp-accent)","text":"#ffffff"},"spacing":{"padding":{"top":"44px","bottom":"44px","left":"44px","right":"44px"}}}} -->
+<div class="wp-block-group alignwide has-text-color has-background" style="background-color:var(--dp-accent);color:#ffffff;padding:44px">
+<!-- wp:columns {"className":"dp-figures"} -->
+<div class="wp-block-columns dp-figures">
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:group -->
 
@@ -213,9 +533,15 @@ BLOCKS;
 <div class="wp-block-columns alignwide dp-layout">
 <!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
-<!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
 
-<!-- wp:giveflow/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
+<!-- wp:group {"className":"dp-band dp-band--tight"} -->
+<div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<p class="dp-body">%%DESCRIPTION%%</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
 </div>
 <!-- /wp:column -->
 
@@ -224,6 +550,7 @@ BLOCKS;
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
+
 </div>
 <!-- /wp:columns -->
 BLOCKS;
@@ -262,6 +589,260 @@ BLOCKS;
 BLOCKS;
 
     /** @since 1.0.0 */
+    private const LEADERBOARD = <<<'BLOCKS'
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
+<!-- /wp:heading -->
+
+<!-- wp:columns {"align":"wide","className":"dp-layout"} -->
+<div class="wp-block-columns alignwide dp-layout">
+<!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
+<div class="wp-block-column dp-layout__main" style="flex-basis:62%">
+<!-- wp:group {"style":{"color":{"background":"var(--dp-accent-soft)"},"spacing":{"padding":{"top":"32px","bottom":"32px","left":"32px","right":"32px"}}}} -->
+<div class="wp-block-group has-background" style="background-color:var(--dp-accent-soft);padding:32px">
+<!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+
+<!-- wp:columns {"className":"dp-figures"} -->
+<div class="wp-block-columns dp-figures">
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg"} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donations","size":"lg"} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:giveflow/top-donors {"campaignId":%%CAMPAIGN_ID%%,"title":%%TOP_TITLE%%,"limit":10,"layout":"list"} /-->
+
+<!-- wp:giveflow/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":8} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
+<div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:group {"className":"dp-band dp-band--tight"} -->
+<div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<p class="dp-body">%%DESCRIPTION%%</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+BLOCKS;
+
+    /** @since 1.0.0 */
+    private const THERMOMETER = <<<'BLOCKS'
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
+<!-- /wp:heading -->
+
+<!-- wp:group {"align":"wide","style":{"color":{"background":"var(--dp-accent)","text":"#ffffff"},"spacing":{"padding":{"top":"48px","bottom":"48px","left":"48px","right":"48px"}}}} -->
+<div class="wp-block-group alignwide has-text-color has-background" style="background-color:var(--dp-accent);color:#ffffff;padding:48px">
+<!-- wp:columns {"className":"dp-figures"} -->
+<div class="wp-block-columns dp-figures">
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"percent","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"remaining","size":"lg","style":{"color":{"text":"#ffffff"}}} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:columns {"align":"wide","className":"dp-layout"} -->
+<div class="wp-block-columns alignwide dp-layout">
+<!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
+<div class="wp-block-column dp-layout__main" style="flex-basis:62%">
+<!-- wp:group {"className":"dp-band dp-band--tight"} -->
+<div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<p class="dp-body">%%DESCRIPTION%%</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
+<div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:giveflow/supporter-wall {"campaignId":%%CAMPAIGN_ID%%,"title":%%WALL_TITLE%%,"limit":40,"showMessage":true} /-->
+BLOCKS;
+
+    /** @since 1.0.0 */
+    private const TIERS = <<<'BLOCKS'
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
+<!-- /wp:heading -->
+
+<!-- wp:group {"className":"dp-band dp-band--tight"} -->
+<div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<p class="dp-body">%%DESCRIPTION%%</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:columns {"align":"wide","className":"dp-layout"} -->
+<div class="wp-block-columns alignwide dp-layout">
+<!-- wp:column {"width":"33.33%"} -->
+<div class="wp-block-column" style="flex-basis:33.33%">
+<!-- wp:group {"style":{"color":{"background":"var(--dp-accent-soft)"},"spacing":{"padding":{"top":"28px","bottom":"28px","left":"28px","right":"28px"}}}} -->
+<div class="wp-block-group has-background" style="background-color:var(--dp-accent-soft);padding:28px">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"33.33%"} -->
+<div class="wp-block-column" style="flex-basis:33.33%">
+<!-- wp:group {"style":{"color":{"background":"var(--dp-accent-soft)"},"spacing":{"padding":{"top":"28px","bottom":"28px","left":"28px","right":"28px"}}}} -->
+<div class="wp-block-group has-background" style="background-color:var(--dp-accent-soft);padding:28px">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg"} /-->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"33.33%"} -->
+<div class="wp-block-column" style="flex-basis:33.33%">
+<!-- wp:group {"style":{"color":{"background":"var(--dp-accent-soft)"},"spacing":{"padding":{"top":"28px","bottom":"28px","left":"28px","right":"28px"}}}} -->
+<div class="wp-block-group has-background" style="background-color:var(--dp-accent-soft);padding:28px">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"average","size":"lg"} /-->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+
+<!-- wp:columns {"align":"wide","className":"dp-layout"} -->
+<div class="wp-block-columns alignwide dp-layout">
+<!-- wp:column {"width":"55%","className":"dp-layout__main"} -->
+<div class="wp-block-column dp-layout__main" style="flex-basis:55%">
+<!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"45%","className":"dp-layout__side"} -->
+<div class="wp-block-column dp-layout__side" style="flex-basis:45%">
+<!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+BLOCKS;
+
+    /** @since 1.0.0 */
+    private const TRANSPARENCY = <<<'BLOCKS'
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
+<!-- /wp:heading -->
+
+<!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+
+<!-- wp:group {"align":"wide","style":{"color":{"background":"var(--dp-accent-soft)"},"spacing":{"padding":{"top":"36px","bottom":"36px","left":"36px","right":"36px"}}}} -->
+<div class="wp-block-group alignwide has-background" style="background-color:var(--dp-accent-soft);padding:36px">
+<!-- wp:columns {"className":"dp-figures"} -->
+<div class="wp-block-columns dp-figures">
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg"} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donations","size":"lg"} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"average","size":"lg"} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:columns {"align":"wide","className":"dp-layout"} -->
+<div class="wp-block-columns alignwide dp-layout">
+<!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
+<div class="wp-block-column dp-layout__main" style="flex-basis:62%">
+<!-- wp:group {"className":"dp-band dp-band--tight"} -->
+<div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<p class="dp-body">%%DESCRIPTION%%</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
+<div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+BLOCKS;
+
+    /** @since 1.0.0 */
     private const MINIMAL = <<<'BLOCKS'
 <!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
@@ -277,7 +858,6 @@ BLOCKS;
 
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 BLOCKS;
-
     /**
      * The block layout for a template, with placeholders CampaignService fills.
      *
@@ -291,16 +871,20 @@ BLOCKS;
     public static function layout(string $id): string
     {
         switch ($id) {
-            case 'deadline':
-                return self::DEADLINE;
-            case 'story':
-                return self::STORY;
-            case 'supporters':
-                return self::SUPPORTERS;
-            case 'minimal':
-                return self::MINIMAL;
-            default:
-                return self::STANDARD;
+            case 'hero':         return self::HERO;
+            case 'split':        return self::SPLIT;
+            case 'story':        return self::STORY;
+            case 'gallery':      return self::GALLERY;
+            case 'deadline':     return self::DEADLINE;
+            case 'urgent':       return self::URGENT;
+            case 'matched':      return self::MATCHED;
+            case 'supporters':   return self::SUPPORTERS;
+            case 'leaderboard':  return self::LEADERBOARD;
+            case 'thermometer':  return self::THERMOMETER;
+            case 'tiers':        return self::TIERS;
+            case 'transparency': return self::TRANSPARENCY;
+            case 'minimal':      return self::MINIMAL;
+            default:             return self::STANDARD;
         }
     }
 

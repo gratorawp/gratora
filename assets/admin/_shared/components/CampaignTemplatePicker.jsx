@@ -23,20 +23,30 @@ const CATEGORY_LABELS = {
     General:   __( 'General', 'giveflow-fundraising-campaigns' ),
     Appeals:   __( 'Appeals', 'giveflow-fundraising-campaigns' ),
     Community: __( 'Community', 'giveflow-fundraising-campaigns' ),
+    Impact:    __( 'Impact', 'giveflow-fundraising-campaigns' ),
     Bare:      __( 'Bare', 'giveflow-fundraising-campaigns' ),
     Other:     __( 'Other', 'giveflow-fundraising-campaigns' ),
 };
 
-const CATEGORY_ORDER = [ 'General', 'Appeals', 'Community', 'Bare' ];
+const CATEGORY_ORDER = [ 'General', 'Appeals', 'Community', 'Impact', 'Bare' ];
 
 // Rows the wireframe draws, top to bottom, per template. An unknown id falls
 // back to the standard shape rather than drawing an empty card.
 const THUMBS = {
-    standard:   { rows: [ 'media', 'figures', 'bar', 'text', 'list' ], form: true },
-    deadline:   { rows: [ 'figures3', 'bar', 'media', 'text' ],        form: true },
-    story:      { rows: [ 'media-wide', 'text', 'bar' ],               form: true },
-    supporters: { rows: [ 'bar', 'text' ],                             form: true, wall: true },
-    minimal:    { rows: [ 'title', 'text' ],                           form: false, stacked: true, formRow: true },
+    standard:     { rows: [ 'media', 'figures', 'bar', 'text', 'list' ],   form: true },
+    hero:         { rows: [ 'accent-tall', 'text', 'list' ],               form: true },
+    split:        { rows: [ 'title', 'accent', 'text', 'media' ],          form: true },
+    story:        { rows: [ 'media-wide', 'text', 'bar' ],                 form: true },
+    gallery:      { rows: [ 'media', 'text', 'bar' ],                      form: true, band: true },
+    deadline:     { rows: [ 'figures3', 'bar', 'media', 'text' ],          form: true },
+    urgent:       { rows: [ 'accent-tall', 'text' ],                       form: true },
+    matched:      { rows: [ 'title', 'accent', 'media', 'text' ],          form: true },
+    supporters:   { rows: [ 'bar', 'text' ],                               form: true, wall: true },
+    leaderboard:  { rows: [ 'soft', 'list', 'list' ],                      form: true },
+    thermometer:  { rows: [ 'accent', 'text' ],                            form: true, wall: true },
+    tiers:        { rows: [ 'text', 'cards', 'bar', 'media' ],             form: true },
+    transparency: { rows: [ 'media', 'soft', 'text', 'bar' ],              form: true },
+    minimal:      { rows: [ 'title', 'text' ],                             form: false, stacked: true, formRow: true },
 };
 
 export default function CampaignTemplatePicker( { value, onPick, onClose } ) {
@@ -138,7 +148,7 @@ export default function CampaignTemplatePicker( { value, onPick, onClose } ) {
 
 /** The page shape as bars: main column, form column beside it, wall beneath. */
 function Wireframe( { shape } ) {
-    const { rows, form, wall, stacked, formRow } = shape;
+    const { rows, form, wall, stacked, formRow, band } = shape;
 
     return (
         <span className="giveflow-ctp__thumb" aria-hidden="true">
@@ -151,6 +161,7 @@ function Wireframe( { shape } ) {
                 { form && <span className="giveflow-ctp__form" /> }
                 { formRow && <span className="giveflow-ctp__row giveflow-ctp__row--form-wide" /> }
             </span>
+            { band && <span className="giveflow-ctp__band" /> }
             { wall && <span className="giveflow-ctp__wall" /> }
         </span>
     );

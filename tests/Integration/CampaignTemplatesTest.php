@@ -34,12 +34,13 @@ final class CampaignTemplatesTest extends IntegrationTestCase
     }
 
     /**
-     * The templates have to differ, or they are one template with five names.
+     * The templates have to differ, or they are one name repeated.
      *
-     * Checked on the blocks each lays down rather than on the id, since the id
-     * reaching the page proves nothing about what the page contains.
+     * Compared on the whole page rather than on which blocks appear: several
+     * layouts draw on the same blocks and differ by how they are arranged and
+     * coloured, which is the entire point of having more than a few.
      */
-    public function test_the_templates_lay_down_different_blocks(): void
+    public function test_the_templates_lay_down_different_pages(): void
     {
         $seen = [];
 
@@ -49,18 +50,90 @@ final class CampaignTemplatesTest extends IntegrationTestCase
                 'page_template' => $template['id'],
             ]);
 
+            // The campaign id differs per page, so take it out of the comparison.
             $content = (string) get_post((int) $campaign['page_id'])->post_content;
-            preg_match_all('#wp:giveflow/[a-z-]+#', $content, $m);
-            $blocks = $m[0];
-            sort($blocks);
-            $seen[$template['id']] = implode(',', $blocks);
+            $seen[$template['id']] = preg_replace('/"campaignId":\d+|campaign_id":\d+/', '', $content);
         }
 
         $this->assertSame(
             count($seen),
             count(array_unique($seen)),
-            'two templates lay down the same blocks: ' . wp_json_encode($seen)
+            'two templates produce the same page: ' . implode(', ', array_keys($seen))
         );
+    }
+
+    /**
+     * Every layout has to parse as blocks.
+     *
+     * These are written by hand as block markup, where a missed comment or a
+     * malformed attribute does not error: WordPress keeps the broken part as
+     * raw HTML, and the page renders looking almost right with one section
+     * quietly inert. Only parsing catches it.
+     *
+     * @dataProvider templateIds
+     */
+    public function test_a_layout_parses_as_blocks(string $id): void
+    {
+        $campaign = $this->createCampaign(['title' => 'Parse ' . $id, 'page_template' => $id]);
+        $blocks   = parse_blocks((string) get_post((int) $campaign['page_id'])->post_content);
+
+        $stray = [];
+        $names = [];
+
+        $walk = function (array $list) use (&$walk, &$stray, &$names): void {
+            foreach ($list as $block) {
+                $name = $block['blockName'] ?? null;
+
+                if ($name === null) {
+                    // Whitespace between blocks parses this way and is fine.
+                    if (trim((string) ($block['innerHTML'] ?? '')) !== '') {
+                        $stray[] = substr(trim((string) $block['innerHTML']), 0, 80);
+                    }
+                    continue;
+                }
+
+                $names[] = $name;
+                $walk($block['innerBlocks'] ?? []);
+            }
+        };
+        $walk($blocks);
+
+        $this->assertSame([], $stray, $id . ' left markup outside any block: ' . implode(' | ', $stray));
+        $this->assertNotEmpty($names, $id . ' parsed to no blocks at all');
+    }
+
+    /**
+     * Every giveflow block a layout names is one that exists.
+     *
+     * A typo in a block name renders as nothing at all, with no error anywhere.
+     *
+     * @dataProvider templateIds
+     */
+    public function test_a_layout_only_uses_registered_blocks(string $id): void
+    {
+        $campaign = $this->createCampaign(['title' => 'Registered ' . $id, 'page_template' => $id]);
+        $content  = (string) get_post((int) $campaign['page_id'])->post_content;
+
+        preg_match_all('#wp:(giveflow/[a-z-]+)#', $content, $m);
+
+        $registry = \WP_Block_Type_Registry::get_instance();
+        foreach (array_unique($m[1]) as $name) {
+            $this->assertNotNull(
+                $registry->get_registered($name),
+                $id . ' uses ' . $name . ', which is not a registered block'
+            );
+        }
+    }
+
+    /** @return array<string,array{string}> */
+    public static function templateIds(): array
+    {
+        $out = [];
+        foreach (CampaignTemplates::all() as $t) {
+            $out[$t['id']] = [$t['id']];
+        }
+
+        return $out;
     }
 
     /** The deadline layout is the only one that shows how long is left. */
