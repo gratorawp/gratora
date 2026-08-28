@@ -13,6 +13,8 @@
 #   bin/check-all.sh --analyse    analysis only, which takes seconds
 #   bin/check-all.sh p2p events   only add-ons whose name contains one of these
 #
+# bin/install-hooks.sh puts the same checks on pre-push, per repo.
+#
 set -uo pipefail
 
 CORE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
