@@ -36,7 +36,7 @@ const THUMBS = {
     deadline:   { rows: [ 'figures3', 'bar', 'media', 'text' ],        form: true },
     story:      { rows: [ 'media-wide', 'text', 'bar' ],               form: true },
     supporters: { rows: [ 'bar', 'text' ],                             form: true, wall: true },
-    minimal:    { rows: [ 'text' ],                                    form: false, stacked: true },
+    minimal:    { rows: [ 'title', 'text' ],                           form: false, stacked: true, formRow: true },
 };
 
 export default function CampaignTemplatePicker( { value, onPick, onClose } ) {
@@ -138,7 +138,7 @@ export default function CampaignTemplatePicker( { value, onPick, onClose } ) {
 
 /** The page shape as bars: main column, form column beside it, wall beneath. */
 function Wireframe( { shape } ) {
-    const { rows, form, wall, stacked } = shape;
+    const { rows, form, wall, stacked, formRow } = shape;
 
     return (
         <span className="giveflow-ctp__thumb" aria-hidden="true">
@@ -149,6 +149,7 @@ function Wireframe( { shape } ) {
                     ) ) }
                 </span>
                 { form && <span className="giveflow-ctp__form" /> }
+                { formRow && <span className="giveflow-ctp__row giveflow-ctp__row--form-wide" /> }
             </span>
             { wall && <span className="giveflow-ctp__wall" /> }
         </span>

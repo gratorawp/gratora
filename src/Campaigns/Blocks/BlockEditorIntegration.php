@@ -11,7 +11,8 @@ namespace GiveFlow\Campaigns\Blocks;
  */
 final class BlockEditorIntegration
 {
-    private const HANDLE_EDITOR   = 'giveflow-campaign-blocks-editor';
+    private const HANDLE_EDITOR    = 'giveflow-campaign-blocks-editor';
+    private const HANDLE_EDITOR_UI = 'giveflow-campaign-blocks-editor-ui';
     private const HANDLE_FRONTEND = 'giveflow-campaign-blocks';
     private const BUILD_DIR       = 'build/admin/campaign-blocks';
 
@@ -55,6 +56,25 @@ final class BlockEditorIntegration
         ]);
     }
 
+    /**
+     * Is the editor open on a page that belongs to a campaign?
+     *
+     * The same question the switcher asks itself in JS, asked here so its
+     * stylesheet is not sent to every other post and page in the site.
+     *
+     * @since 1.0.0
+     */
+    private static function editingCampaignPage(): bool
+    {
+        $postId = get_the_ID();
+
+        if (! $postId && isset($_GET['post'])) {
+            $postId = (int) $_GET['post']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading which post the editor is on, not acting on it.
+        }
+
+        return $postId > 0 && (int) get_post_meta((int) $postId, '_giveflow_campaign_id', true) > 0;
+    }
+
     /** @since 1.0.0 */
     public function registerCategory(array $categories): array
     {
@@ -84,6 +104,20 @@ final class BlockEditorIntegration
             true
         );
         wp_set_script_translations(self::HANDLE_EDITOR, 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
+
+        // Editor-chrome styles (the layout picker's modal). Kept out of
+        // campaign-blocks.css, which the front end also loads, and only sent to
+        // the screens that can open the picker: the blocks themselves can be
+        // used on any page, but the layout switcher shows on a campaign's own.
+        $uiCss = 'build/admin/campaign-blocks-ui.css';
+        if (self::editingCampaignPage() && file_exists(GIVEFLOW_DIR . $uiCss)) {
+            wp_enqueue_style(
+                self::HANDLE_EDITOR_UI,
+                GIVEFLOW_URL . $uiCss,
+                ['wp-components'],
+                (string) filemtime(GIVEFLOW_DIR . $uiCss)
+            );
+        }
 
         // The binding picker's field list is handed over rather than repeated in
         // JS, so the labels are translated once and the two halves cannot

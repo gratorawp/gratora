@@ -259,6 +259,18 @@
         &--bar        { flex: 0 0 7%;  background: $accent; opacity: .55; }
         &--text       { flex: 1 1 auto; min-height: 10px; }
         &--list       { flex: 0 0 22%; }
+        &--title      { flex: 0 0 12%; }
+        // The form, laid across the full width instead of down one side.
+        &--form-wide  { flex: 0 0 34%; background: rgba(0, 0, 0, 0.16); }
+    }
+
+    // The form picker clamps its descriptions to two lines. Here the
+    // description IS the difference between one layout and the next, so a
+    // sentence cut in half costs the reader the thing they came to compare.
+    .giveflow-template-picker__desc {
+        display: block;
+        -webkit-line-clamp: none;
+        overflow: visible;
     }
 
     // Sits under the description, so it needs to read as secondary to it.

@@ -15,6 +15,7 @@ module.exports = {
         'admin/tools':             path.resolve( __dirname, 'assets/admin/tools/index.jsx' ),
         'admin/onboarding':        path.resolve( __dirname, 'assets/admin/onboarding/index.jsx' ),
         'admin/campaign-blocks':   path.resolve( __dirname, 'assets/admin/campaign-blocks/index.jsx' ),
+        'admin/campaign-blocks-ui': path.resolve( __dirname, 'assets/admin/campaign-blocks/editor-ui.js' ),
         'admin/command-palette':   path.resolve( __dirname, 'assets/admin/command-palette/index.jsx' ),
         'donation-form/runtime':   path.resolve( __dirname, 'assets/donation-form/runtime.jsx' ),
         'donor-portal/index':      path.resolve( __dirname, 'assets/donor-portal/index.jsx' ),
