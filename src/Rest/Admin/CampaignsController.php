@@ -7,6 +7,7 @@ namespace GiveFlow\Rest\Admin;
 use GiveFlow\Donations\DonationQueries;use GiveFlow\Rest\Paging;
 use GiveFlow\Foundation\Auth\Capabilities;
 
+use GiveFlow\Campaigns\CampaignTemplates;
 use GiveFlow\Campaigns\Campaign;
 use GiveFlow\Campaigns\CampaignMetricsService;
 use GiveFlow\Campaigns\CampaignRepository;
@@ -68,6 +69,12 @@ final class CampaignsController
                 'permission_callback' => [$this, 'canAccess'],
                 'args'                => CampaignSchemas::create(),
             ],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/admin/campaigns/templates', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'templates'],
+            'permission_callback' => [$this, 'canAccess'],
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/campaigns/funds', [
@@ -372,6 +379,12 @@ final class CampaignsController
             'search' => $request['search'] !== null ? (string) $request['search'] : null,
         ]);
         return new WP_REST_Response($stats, 200);
+    }
+
+    /** The starter layouts a new campaign page can be built from. @since 1.0.0 */
+    public function templates(): WP_REST_Response
+    {
+        return new WP_REST_Response(CampaignTemplates::all(), 200);
     }
 
     /** @since 1.0.0 */

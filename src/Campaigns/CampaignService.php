@@ -77,14 +77,22 @@ final class CampaignService
 
         $skipTemplate = ! empty($input['skip_template']);
 
+        // An id nobody registered falls back to the standard layout. A template
+        // that has been removed, or a typo from an API caller, should leave a
+        // usable campaign page rather than an empty one.
+        $pageTemplate = (string) ($input['page_template'] ?? CampaignTemplates::DEFAULT_ID);
+        if (! CampaignTemplates::exists($pageTemplate)) {
+            $pageTemplate = CampaignTemplates::DEFAULT_ID;
+        }
+
         // Campaign row, default form, and page commit together. wp_insert_post()
         // writes through the same connection, so the page row rolls back with
         // the rest; what does not is anything a save_post listener does outside
         // the database, and the object cache entries for the discarded page.
-        DB::transaction(function () use ($campaign, $skipTemplate) {
+        DB::transaction(function () use ($campaign, $skipTemplate, $pageTemplate) {
             $campaign->save();
             $campaign->default_form_id = $this->createDefaultFormFor($campaign, $skipTemplate);
-            $campaign->page_id         = $this->createPageFor($campaign, $skipTemplate);
+            $campaign->page_id         = $this->createPageFor($campaign, $skipTemplate, $pageTemplate);
             $campaign->save();
         });
 
@@ -549,7 +557,7 @@ final class CampaignService
     }
 
     /** @since 1.0.0 */
-    private function createPageFor(Campaign $campaign, bool $formIsDraft = false): int
+    private function createPageFor(Campaign $campaign, bool $formIsDraft = false, string $template = CampaignTemplates::DEFAULT_ID): int
     {
         // Page is public only when both the campaign and default form are published.
         $postStatus = ( $campaign->status === 'published' && ! $formIsDraft ) ? 'publish' : 'draft';
@@ -557,7 +565,7 @@ final class CampaignService
         $pageId = wp_insert_post([
             'post_title'   => $campaign->title,
             'post_name'    => $campaign->slug,
-            'post_content' => $this->pageStarterBlocks($campaign),
+            'post_content' => $this->pageStarterBlocks($campaign, $template),
             'post_status'  => $postStatus,
             'post_type'    => 'page',
             'post_author'  => get_current_user_id() ?: 1,
@@ -580,7 +588,7 @@ final class CampaignService
      *
      * @since 1.0.0
      */
-    private function pageStarterBlocks(Campaign $campaign): string
+    private function pageStarterBlocks(Campaign $campaign, string $template = CampaignTemplates::DEFAULT_ID): string
     {
         $id = (int) $campaign->id;
         // Both serializers escape the double hyphen inside an attribute value,
@@ -594,65 +602,16 @@ final class CampaignService
         $t2 = __('What this campaign is raising for.', 'giveflow-fundraising-campaigns');
         $t5 = __('Recent donations', 'giveflow-fundraising-campaigns');
         $t6 = __('Top donors', 'giveflow-fundraising-campaigns');
+        $t7 = __('Our supporters', 'giveflow-fundraising-campaigns');
 
         // These two sections are titled by the block itself rather than a
         // Heading above it, which would render the words twice. json_encode so
         // a translated title carrying a quote cannot break the block comment.
         $t5j = json_encode($t5, JSON_UNESCAPED_UNICODE);
         $t6j = json_encode($t6, JSON_UNESCAPED_UNICODE);
+        $t7j = json_encode($t7, JSON_UNESCAPED_UNICODE);
 
-        $blocks = <<<'BLOCKS'
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
-<h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
-<!-- /wp:heading -->
-
-<!-- wp:columns {"align":"wide","className":"dp-layout"} -->
-<div class="wp-block-columns alignwide dp-layout">
-<!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
-<div class="wp-block-column dp-layout__main" style="flex-basis:62%">
-<!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
-
-<!-- wp:columns {"className":"dp-figures"} -->
-<div class="wp-block-columns dp-figures">
-<!-- wp:column -->
-<div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
-</div>
-<!-- /wp:column -->
-
-<!-- wp:column -->
-<div class="wp-block-column">
-<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
-</div>
-<!-- /wp:column -->
-</div>
-<!-- /wp:columns -->
-
-<!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
-
-<!-- wp:group {"className":"dp-band dp-band--tight"} -->
-<div class="wp-block-group dp-band dp-band--tight">
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
-<p class="dp-body">%%DESCRIPTION%%</p>
-<!-- /wp:paragraph -->
-</div>
-<!-- /wp:group -->
-
-<!-- wp:giveflow/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
-
-<!-- wp:giveflow/top-donors {"campaignId":%%CAMPAIGN_ID%%,"title":%%TOP_TITLE%%,"limit":5,"layout":"list"} /-->
-</div>
-<!-- /wp:column -->
-
-<!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
-<div class="wp-block-column dp-layout__side" style="flex-basis:38%">
-<!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
-</div>
-<!-- /wp:column -->
-</div>
-<!-- /wp:columns -->
-
-BLOCKS;
+        $blocks = CampaignTemplates::layout($template);
 
         $default = strtr($blocks, [
             '%%CAMPAIGN_ID%%'  => (string) $id,
@@ -660,6 +619,7 @@ BLOCKS;
             '%%DESCRIPTION%%'  => $t2,
             '%%RECENT_TITLE%%' => (string) $t5j,
             '%%TOP_TITLE%%'    => (string) $t6j,
+            '%%WALL_TITLE%%'   => (string) $t7j,
         ]);
 
         // Add-ons can seed a richer starter layout per campaign type (e.g. the

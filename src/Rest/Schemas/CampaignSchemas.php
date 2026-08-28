@@ -42,6 +42,12 @@ final class CampaignSchemas
     private static function properties(): array
     {
         return [
+            // Seeds the campaign page on create. Ignored afterwards: the page
+            // is the author's from the moment it exists, and re-seeding it
+            // would throw away whatever they had done to it.
+            'page_template' => [
+                'type' => 'string',
+            ],
             'title' => [
                 'type'      => 'string',
                 'minLength' => 1,
