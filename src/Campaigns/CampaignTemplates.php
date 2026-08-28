@@ -389,8 +389,8 @@ BLOCKS;
 </div>
 <!-- /wp:columns -->
 
-<!-- wp:group {"align":"wide","className":"dp-panel dp-panel--accent"} -->
-<div class="wp-block-group alignwide dp-panel dp-panel--accent">
+<!-- wp:group {"align":"wide","className":"dp-wide"} -->
+<div class="wp-block-group alignwide dp-wide">
 <!-- wp:giveflow/campaign-grid {"count":3,"heading":""} /-->
 </div>
 <!-- /wp:group -->

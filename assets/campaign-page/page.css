@@ -640,6 +640,18 @@ body,
 .giveflow-p2p-layout__side .giveflow-form-band,
 .dp-layout__side .giveflow-p2p-form-band,
 .dp-layout__side .giveflow-form-band{ padding: 0; max-width: none; }
+/* A wrapper that exists only to carry alignwide.
+ *
+ * Campaign blocks have no align support and no wrapper attributes to carry the
+ * class, so a block that needs the page width is put in one of these. It must
+ * add nothing of its own: no background, no padding, no measure. Blocks inside
+ * space themselves, the campaign grid included. */
+.dp-wide {
+    padding: 0;
+    background: none;
+    border: 0;
+}
+
 /* Panels a page layout can ask for by name.
  *
  * Classes rather than inline block styles on purpose: a static block is
