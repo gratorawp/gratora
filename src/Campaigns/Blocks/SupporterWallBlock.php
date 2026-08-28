@@ -7,7 +7,6 @@ namespace GiveFlow\Campaigns\Blocks;
 use GiveFlow\Campaigns\CampaignRepository;
 use GiveFlow\Donations\Donation;
 use GiveFlow\Donations\DonationQueries;
-use GiveFlow\Donations\DonationRepository;
 use GiveFlow\Donors\Donor;
 use GiveFlow\Donors\DonorAvatars;
 use GiveFlow\Foundation\Helpers\Money;
@@ -24,7 +23,6 @@ final class SupporterWallBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function __construct(
         CampaignRepository $campaigns,
-        private readonly DonationRepository $donations,
         private readonly DonorAvatars $avatars,
     ) {
         parent::__construct($campaigns);

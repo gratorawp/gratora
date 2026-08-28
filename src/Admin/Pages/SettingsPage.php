@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace GiveFlow\Admin\Pages;
 
-use GiveFlow\Foundation\Container\Container;
 use GiveFlow\Admin\ExtensionAssets;
 use GiveFlow\Foundation\Hooks\HookProvider;
 
@@ -18,11 +17,6 @@ final class SettingsPage extends HookProvider
     private const PAGE_ID   = 'giveflow-settings';
     private const HANDLE    = 'giveflow-admin-settings';
     private const BUILD_DIR = 'build/admin/settings';
-
-    /** @since 1.0.0 */
-    public function __construct(private Container $container)
-    {
-    }
 
     /** @since 1.0.0 */
     protected function filters(): array

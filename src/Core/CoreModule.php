@@ -604,14 +604,12 @@ final class CoreModule implements GiveFlowModule
             $c->get(DonorRepository::class),
             $c->get(DonorService::class),
             $c->get(DonationRepository::class),
-            $c->get(ReceiptRepository::class),
             $c->get(MagicLinkService::class),
             $c->get(IdentityHasher::class),
             $c->get(AnnualStatementBuilder::class),
             $c->get(ConsentService::class),
             $c->get(Mailer::class),
             $c->get(AsyncDispatcher::class),
-            $c->get(DonationService::class),
             $c->get(DonorMetricsService::class),
             $c->get(RecurringPlanActions::class),
             $c->get(GatewayManager::class),
@@ -753,7 +751,6 @@ final class CoreModule implements GiveFlowModule
             $c->get(GatewayManager::class),
             $c->get( AntiSpamGuard::class),
             $c->get(ConsentService::class),
-            $c->get(SettingsService::class),
         ));
 
         $c->bind(WebhookController::class, fn (Container $c) => new WebhookController(
@@ -897,9 +894,7 @@ final class CoreModule implements GiveFlowModule
             $c->get(CampaignRepository::class),
             $c->get(CampaignService::class),
             $c->get(CampaignMetricsService::class),
-            $c->get(FundRepository::class),
             $c->get(RecurringPlanRepository::class),
-            $c->get(RecurringCanceller::class),
             $c->get(CampaignCancelRecurringJob::class)
         ));
 
@@ -1105,7 +1100,6 @@ final class CoreModule implements GiveFlowModule
         ));
         $blocks->add(new SupporterWallBlock(
             $c->get(CampaignRepository::class),
-            $c->get(DonationRepository::class),
             $c->get(DonorAvatars::class),
         ));
 
@@ -1178,7 +1172,7 @@ final class CoreModule implements GiveFlowModule
             (new FormsPage())->register();
             (new FundsPage())->register();
             (new ToolsPage())->register();
-            (new SettingsPage($c))->register();
+            (new SettingsPage())->register();
             (new OnboardingPage())->register();
             (new Onboarding())->register();
             (new AdminGlobals($c->get(LicenseService::class)))->register();

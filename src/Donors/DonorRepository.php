@@ -140,7 +140,7 @@ final class DonorRepository
     }
 
     /**
-     * @param array{page?:int,per_page?:int,orderby?:string,order?:string,country?:string,matching_ids?:array<int>,has_search?:bool} $args
+     * @param array{page?:int,per_page?:int,orderby?:string,order?:string,country?:string,donor_type?:string,matching_ids?:array<int>,has_search?:bool} $args
      *
      * @since 1.0.0
      */

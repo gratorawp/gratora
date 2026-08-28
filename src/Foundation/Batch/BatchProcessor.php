@@ -18,7 +18,9 @@ final class BatchProcessor
 {
     /**
      * @param Closure(int):array<mixed> $next   up to $size items still needing work
-     * @param Closure(array<mixed>):void $apply process them (must remove them from $next)
+     * @param Closure(array<mixed>):mixed $apply process them (must remove them from
+     *        $next). Anything it returns is discarded, so a one-line arrow function
+     *        that ends in an update() may hand back its result.
      * @return bool true if the batch was full (more may remain - re-enqueue),
      *              false once the set is drained
      * @since 1.0.0

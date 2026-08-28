@@ -2,6 +2,8 @@
 defined('ABSPATH') || exit;
 /**
  * @var string  $mode         'front' | 'editor' | 'empty'
+ * @var ?string $emptyText     Shown in 'empty' mode
+ * @var ?string $notice
  * @var ?string $formHtml
  * @var ?string $previewDoc    Self-contained iframe document (editor mode)
  * @var ?string $formTitle
@@ -17,7 +19,7 @@ echo get_block_wrapper_attributes(array_filter([
 // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?> data-block="giveflow/donation-form">
     <?php if (($mode ?? 'front') === 'empty'): ?>
-        <p class="giveflow-block__empty"><?php echo esc_html($emptyText);
+        <p class="giveflow-block__empty"><?php echo esc_html($emptyText ?? '');
 ?></p>
         <?php if (($notice ?? '') !== ''): ?>
             <div class="giveflow-block-notice"><?php echo esc_html($notice);

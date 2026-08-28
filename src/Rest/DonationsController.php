@@ -26,7 +26,6 @@ use GiveFlow\Gateways\PaymentGateway;
 use GiveFlow\Gateways\SubscriptionCreator;
 use GiveFlow\Recurring\FrequencyMap;
 use GiveFlow\Rest\Schemas\DonationSchemas;
-use GiveFlow\Settings\SettingsService;
 use Throwable;
 use WP_Error;
 use WP_REST_Request;
@@ -50,7 +49,6 @@ final class DonationsController
         private GatewayManager $gateways,
         private AntiSpamGuard $spam,
         private ConsentService $consents,
-        private SettingsService $settings,
     ) {
     }
 

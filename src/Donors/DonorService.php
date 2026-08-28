@@ -44,6 +44,8 @@ final class DonorService
      *     locale?: ?string,
      *     company?: ?string,
      *     donor_type?: 'individual'|'organization'|'household',
+     *     phone?: ?string,
+     *     address?: array<string,mixed>|null,
      * } $profile
      *
      * @param bool $profileOnlyOnCreate Apply $profile to a donor this call

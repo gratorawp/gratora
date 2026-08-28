@@ -27,7 +27,6 @@ use GiveFlow\Gateways\SupportsPaymentMethodUpdate;
 use GiveFlow\Gateways\SupportsSubscriptionPause;
 use GiveFlow\Mail\Mailer;
 use GiveFlow\Receipts\Receipt;
-use GiveFlow\Receipts\ReceiptRepository;
 use GiveFlow\Recurring\RecurringPlan;
 use GiveFlow\Recurring\RecurringPlanActions;
 use GiveFlow\Recurring\RecurringPlanChange;
@@ -75,14 +74,12 @@ final class PortalController
         private DonorRepository $donors,
         private DonorService $donorService,
         private DonationRepository $donations,
-        private ReceiptRepository $receipts,
         private MagicLinkService $magicLinks,
         private IdentityHasher $hasher,
         private AnnualStatementBuilder $annualStatements,
         private ConsentService $consents,
         private Mailer $mailer,
         private AsyncDispatcher $async,
-        private \GiveFlow\Donations\DonationService $donationService,
         private \GiveFlow\Donors\DonorMetricsService $metrics,
         private RecurringPlanActions $planActions,
         private GatewayManager $gateways,

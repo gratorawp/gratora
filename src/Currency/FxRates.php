@@ -50,7 +50,7 @@ final class FxRates
     public const FETCH_MAX_AGE_DAYS = 2;
 
     /**
-     * @return array{base:string,date:string,rates:array<string,mixed>,manual?:array<string,mixed>,auto?:bool}|null
+     * @return array{base:string,date:string,fetched_at?:string,rates:array<string,mixed>,manual?:array<string,mixed>,auto?:bool}|null
      *
      * @since 1.0.0
      */

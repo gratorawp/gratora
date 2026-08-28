@@ -189,6 +189,50 @@ BLOCKS;
         $this->assertTrue($introOnPage0, 'the content-only step renders its content on page 0');
     }
 
+    /**
+     * A step left empty in the builder must not publish a blank wizard page.
+     *
+     * Static analysis reads the check that drops it as dead, because the step
+     * list and the page counter are mutated by reference through a closure
+     * captured by value, which it cannot follow. This settles it by running
+     * the pipeline instead of reasoning about it.
+     */
+    public function test_a_step_left_empty_in_the_builder_is_dropped(): void
+    {
+        $blocks = <<<BLOCKS
+<!-- wp:giveflow/steps -->
+<!-- wp:giveflow/step {"title":"Give"} -->
+<!-- wp:giveflow/donation-amount /-->
+<!-- wp:giveflow/email /-->
+<!-- /wp:giveflow/step -->
+<!-- wp:giveflow/step {"title":"MK_EMPTY_STEP"} -->
+<!-- /wp:giveflow/step -->
+<!-- wp:giveflow/step {"title":"Finish"} -->
+<!-- wp:giveflow/submit-button /-->
+<!-- /wp:giveflow/step -->
+<!-- /wp:giveflow/steps -->
+BLOCKS;
+
+        $raw = $this->configFor($blocks);
+        $cfg = json_decode($raw, true);
+        $this->assertIsArray($cfg);
+
+        $this->assertStringNotContainsString(
+            'MK_EMPTY_STEP',
+            $raw,
+            'an empty builder step published a blank wizard page'
+        );
+
+        // The pages that survive have to stay contiguous, or the wizard counts
+        // to a page that is not there.
+        $pages = array_values(array_unique(array_map(
+            static fn (array $s): int => (int) ($s['page'] ?? 0),
+            $cfg['steps'] ?? []
+        )));
+        sort($pages);
+        $this->assertSame(range(0, count($pages) - 1), $pages, 'the surviving pages are not contiguous');
+    }
+
     /** The first donor step's ordered items. */
     private function donorItems(array $cfg): array
     {

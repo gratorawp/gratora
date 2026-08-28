@@ -7,6 +7,7 @@ namespace GiveFlow\Settings;
 use GiveFlow\Analytics\ErrorLog;
 use GiveFlow\Currency\BaseCurrencyLock;
 use GiveFlow\Currency\BaseCurrencyLocked;
+use GiveFlow\Foundation\References\InvalidReferenceToken;
 use GiveFlow\Foundation\References\ReferenceGenerator;
 
 /**
@@ -431,6 +432,7 @@ final class SettingsService
      * @return array<string,mixed>
      *
      * @throws BaseCurrencyLocked when the write would re-denominate recorded money
+     * @throws InvalidReferenceToken when a numbering prefix or separator is not a token
      *
      * @since 1.0.0
      */

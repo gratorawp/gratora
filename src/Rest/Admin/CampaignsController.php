@@ -13,7 +13,6 @@ use GiveFlow\Campaigns\CampaignRepository;
 use GiveFlow\Campaigns\CampaignService;
 use GiveFlow\Forms\Form;
 use GiveFlow\Funds\Fund;
-use GiveFlow\Funds\FundRepository;
 use GiveFlow\Recurring\CampaignCancelRecurringJob;
 use GiveFlow\Recurring\RecurringCanceller;
 use GiveFlow\Recurring\RecurringPlan;
@@ -41,9 +40,7 @@ final class CampaignsController
         private CampaignRepository $campaigns,
         private CampaignService $campaignService,
         private CampaignMetricsService $metrics,
-        private FundRepository $funds,
         private RecurringPlanRepository $plans,
-        private RecurringCanceller $canceller,
         private CampaignCancelRecurringJob $cancelJob,
     ) {
     }

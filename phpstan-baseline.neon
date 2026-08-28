@@ -1,28 +1,10 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Property GiveFlow\\Admin\\Pages\\SettingsPage\:\:\$container is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: src/Admin/Pages/SettingsPage.php
-
-		-
 			message: '#^Using nullsafe property access on non\-nullable type GiveFlow\\Forms\\Form\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: src/Campaigns/Blocks/DonateButtonBlock.php
-
-		-
-			message: '#^Property GiveFlow\\Campaigns\\Blocks\\SupporterWallBlock\:\:\$donations is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: src/Campaigns/Blocks/SupporterWallBlock.php
-
-		-
-			message: '#^Variable \$emptyText might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: src/Campaigns/Blocks/views/donation-form.php
 
 		-
 			message: '#^Offset ''avatar_url'' on array\{name\: string, amount_cents\: int, donations_count\: int, is_anonymous\: bool\} on left side of \?\? does not exist\.$#'
@@ -49,18 +31,6 @@ parameters:
 			path: src/Core/CoreModule.php
 
 		-
-			message: '#^Method GiveFlow\\Currency\\FxRates\:\:fetchedAt\(\) never returns string so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: src/Currency/FxRates.php
-
-		-
-			message: '#^Offset ''fetched_at'' does not exist on array\{base\: string, date\: string, rates\: array\<string, mixed\>, manual\?\: array\<string, mixed\>, auto\?\: bool\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Currency/FxRates.php
-
-		-
 			message: '#^Comparison operation "\<\=" between int\<min, 90\>\|int\<181, 365\> and 365 is always true\.$#'
 			identifier: smallerOrEqual.alwaysTrue
 			count: 1
@@ -79,20 +49,8 @@ parameters:
 			path: src/Donors/DonorMetricsService.php
 
 		-
-			message: '#^Offset ''donor_type'' does not exist on array\{page\?\: int, per_page\?\: int, orderby\?\: string, order\?\: string, country\?\: string, matching_ids\?\: array\<int\>, has_search\?\: bool\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Donors/DonorRepository.php
-
-		-
 			message: '#^Anonymous function has an unused use \$donor\.$#'
 			identifier: closure.unusedUse
-			count: 1
-			path: src/Donors/DonorService.php
-
-		-
-			message: '#^Offset ''phone'' does not exist on array\{first_name\?\: string\|null, last_name\?\: string\|null, country\?\: string\|null, locale\?\: string\|null, company\?\: string\|null, donor_type\?\: ''household''\|''individual''\|''organization''\}\.$#'
-			identifier: offsetAccess.notFound
 			count: 1
 			path: src/Donors/DonorService.php
 
@@ -259,12 +217,6 @@ parameters:
 			path: src/Foundation/Transfer/DataImporter.php
 
 		-
-			message: '#^Parameter \#2 \$apply of static method GiveFlow\\Foundation\\Batch\\BatchProcessor\:\:step\(\) expects Closure\(array\<mixed\>\)\: void, Closure\(array\)\: GiveFlow\\Vendor\\Queryable\\QueryResult given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Funds/FundReassignmentJob.php
-
-		-
 			message: '#^Property GiveFlow\\Donations\\Donation\:\:\$kind \(string\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
@@ -273,18 +225,6 @@ parameters:
 		-
 			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
-			count: 1
-			path: src/Rest/Admin/CampaignsController.php
-
-		-
-			message: '#^Property GiveFlow\\Rest\\Admin\\CampaignsController\:\:\$canceller is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: src/Rest/Admin/CampaignsController.php
-
-		-
-			message: '#^Property GiveFlow\\Rest\\Admin\\CampaignsController\:\:\$funds is never read, only written\.$#'
-			identifier: property.onlyWritten
 			count: 1
 			path: src/Rest/Admin/CampaignsController.php
 
@@ -349,12 +289,6 @@ parameters:
 			path: src/Rest/Admin/RecurringController.php
 
 		-
-			message: '#^Dead catch \- GiveFlow\\Foundation\\References\\InvalidReferenceToken is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: src/Rest/Admin/SettingsController.php
-
-		-
 			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -370,12 +304,6 @@ parameters:
 			message: '#^Property GiveFlow\\Forms\\Form\:\:\$blocks \(string\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 2
-			path: src/Rest/DonationsController.php
-
-		-
-			message: '#^Property GiveFlow\\Rest\\DonationsController\:\:\$settings is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
 			path: src/Rest/DonationsController.php
 
 		-
@@ -399,18 +327,6 @@ parameters:
 		-
 			message: '#^Property GiveFlow\\Donors\\Consent\:\:\$purpose_version \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
-			count: 1
-			path: src/Rest/Portal/PortalController.php
-
-		-
-			message: '#^Property GiveFlow\\Rest\\Portal\\PortalController\:\:\$donationService is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: src/Rest/Portal/PortalController.php
-
-		-
-			message: '#^Property GiveFlow\\Rest\\Portal\\PortalController\:\:\$receipts is never read, only written\.$#'
-			identifier: property.onlyWritten
 			count: 1
 			path: src/Rest/Portal/PortalController.php
 
