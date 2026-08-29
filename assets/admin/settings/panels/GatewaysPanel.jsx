@@ -44,8 +44,14 @@ export default function GatewaysPanel( { s } ) {
     // find every answer in one place.
     const gatewayPanels = useExtensionPanels( 'settings-gateways' );
 
-    const offlineEnabled    = !! s.value( 'offline.enabled', true );
-    const offlineConfigured = !! s.value( 'offline.instructions', '' );
+    const offlineEnabled = !! s.value( 'offline.enabled', true );
+
+    // The same rule OfflineGateway::canCharge() applies: either field is a way
+    // to pay, and whitespace is not. Checking only instructions told a site
+    // that had written bank details it was not configured, and opened this card
+    // to nag about it, while donors were paying through it perfectly well.
+    const offlineConfigured = [ 'offline.instructions', 'offline.bank_details' ]
+        .some( ( key ) => String( s.value( key, '' ) ).trim() !== '' );
 
     const [ offlineOpen, setOfflineOpen ] = useCardOpen( offlineEnabled && ! offlineConfigured, 'payments', 'offline' );
 
@@ -53,7 +59,7 @@ export default function GatewaysPanel( { s } ) {
         ? <span className="giveflow-pill giveflow-pill--gray"><span className="giveflow-pill__dot giveflow-pill__dot--soft" />{ __( 'Disabled', 'giveflow-fundraising-campaigns' ) }</span>
         : offlineConfigured
             ? <span className="giveflow-pill giveflow-pill--green"><span className="giveflow-pill__dot" />{ __( 'Configured', 'giveflow-fundraising-campaigns' ) }</span>
-            : <span className="giveflow-pill giveflow-pill--amber"><span className="giveflow-pill__dot" />{ __( 'Enabled, no instructions', 'giveflow-fundraising-campaigns' ) }</span>;
+            : <span className="giveflow-pill giveflow-pill--amber"><span className="giveflow-pill__dot" />{ __( 'Enabled, no way to pay', 'giveflow-fundraising-campaigns' ) }</span>;
 
     return (
         <div className="giveflow-panel">
