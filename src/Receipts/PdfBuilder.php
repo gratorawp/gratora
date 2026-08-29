@@ -33,6 +33,12 @@ final class PdfBuilder
         // files on disk before we get here instead.
         $opts->setIsRemoteEnabled(false);
 
+        // Those on-disk paths still have to clear Dompdf's chroot, which
+        // defaults to its own library directory and so rejects every upload.
+        // Scoped to the uploads dir: localizeImages() already refuses to emit
+        // a path outside it, and Dompdf adds its own root back on top.
+        $opts->setChroot([(string) (wp_upload_dir()['basedir'] ?? '')]);
+
         $dompdf = new Dompdf($opts);
         $dompdf->setPaper($options['format'] ?? 'A4');
 
