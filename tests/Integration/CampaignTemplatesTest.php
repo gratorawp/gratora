@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GiveFlow\Tests\Integration;
 
+use GiveFlow\Campaigns\Blocks\BlockEditorIntegration;
 use GiveFlow\Campaigns\CampaignTemplates;
 use WP_REST_Request;
 
@@ -298,6 +299,68 @@ final class CampaignTemplatesTest extends IntegrationTestCase
             (string) get_post((int) $campaign['page_id'])->post_content,
             'reading a layout changed the page'
         );
+    }
+
+    /**
+     * Which layouts a campaign can wear depends on its type. A type that lays
+     * out its own page brings its own list, and judging an id against the
+     * general one both refuses that type's own layouts and accepts the ones
+     * that would delete the page it exists for.
+     */
+    public function test_a_layout_is_judged_against_the_campaign_s_own_list(): void
+    {
+        $campaign = $this->createCampaign(['title' => 'Own list']);
+
+        // A type that keeps one layout of its own and none of the general ones.
+        // Narrowed only when a type is actually asked about, so a caller that
+        // forgets to pass one still sees the general list and is caught here.
+        add_filter(
+            'giveflow.campaign.templates',
+            static fn (array $templates, string $type): array => $type === 'standard'
+                ? array_values(array_filter($templates, static fn (array $t): bool => $t['id'] === 'minimal'))
+                : $templates,
+            10,
+            2
+        );
+
+        $ask = function (string $template) use ($campaign): int {
+            $request = new WP_REST_Request('GET', '/giveflow/v1/admin/campaigns/' . (int) $campaign['id'] . '/layout');
+            $request->set_param('template', $template);
+
+            return rest_do_request($request)->get_status();
+        };
+
+        $this->assertSame(200, $ask('minimal'), 'the type\'s own layout was refused');
+        $this->assertSame(400, $ask('cover'), 'a layout this type does not offer was served anyway');
+    }
+
+    /**
+     * The switcher is offered on the campaign's own page and nowhere else.
+     *
+     * Other pages carry the campaign's id so the blocks on them resolve against
+     * it, and a peer-to-peer campaign has three such pages holding the layouts
+     * for its fundraiser, team and start routes. A template dropped on one of
+     * those replaces the thing that page is for.
+     */
+    public function test_templates_are_offered_on_the_campaign_page_and_nowhere_else(): void
+    {
+        $campaign = $this->createCampaign(['title' => 'Offered where']);
+
+        $other = self::factory()->post->create(['post_type' => 'page']);
+        update_post_meta($other, '_giveflow_campaign_id', (int) $campaign['id']);
+
+        $GLOBALS['post'] = null;
+
+        $_GET['post'] = (int) $campaign['page_id'];
+        $this->assertTrue(BlockEditorIntegration::pageTemplatesAvailable());
+
+        $_GET['post'] = $other;
+        $this->assertFalse(
+            BlockEditorIntegration::pageTemplatesAvailable(),
+            'a page that only references the campaign was offered its layouts'
+        );
+
+        unset($_GET['post']);
     }
 
     /** An unknown layout is refused rather than quietly serving the standard one. */

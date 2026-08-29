@@ -1,6 +1,10 @@
 /**
  * Swap a campaign page's layout from inside the editor.
  *
+ * The list offered is the campaign type's own. A type that lays out its own
+ * page has templates built for it, and one of the general ones would replace
+ * every block that type exists for.
+ *
  * The layout is only chosen once, when the campaign is created, and until now
  * that choice was permanent. Doing the swap here rather than in the admin
  * screens is what makes it safe to offer: the editor already has undo, so
@@ -102,6 +106,7 @@ function CampaignLayoutButton() {
     const offered = campaignId > 0 && window.giveflowCampaignBlocks?.pageTemplates !== false;
 
     const { resetBlocks } = useDispatch( blockEditorStore );
+    const { editPost } = useDispatch( editorStore );
     const { createNotice } = useDispatch( noticesStore );
     const slot = useHeaderSlot( offered );
 
@@ -117,6 +122,10 @@ function CampaignLayoutButton() {
             } );
 
             resetBlocks( parse( res.blocks || '' ) );
+            // Recorded on the post rather than sent to the server now, so it is
+            // saved with the blocks it belongs to and an organiser who changes
+            // their mind before saving leaves nothing behind.
+            editPost( { meta: { _giveflow_campaign_page_template: res.template } } );
             setPicking( false );
 
             createNotice(
@@ -153,6 +162,7 @@ function CampaignLayoutButton() {
             { slot ? createPortal( button, slot ) : null }
             { picking && (
                 <CampaignTemplatePicker
+                    campaignType={ window.giveflowCampaignBlocks?.campaignType || '' }
                     onPick={ apply }
                     onClose={ () => setPicking( false ) }
                 />

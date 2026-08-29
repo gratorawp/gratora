@@ -409,8 +409,11 @@ final class CampaignsController
             return new WP_Error('giveflow_not_found', __('Campaign not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
         }
 
+        // Checked against this campaign's own list. A type that lays out its
+        // own page has templates of its own, and one of the general ones would
+        // replace every block that type exists for.
         $template = (string) $request['template'];
-        if (! CampaignTemplates::exists($template)) {
+        if (! CampaignTemplates::exists($template, (string) $campaign->campaign_type)) {
             return new WP_Error('giveflow_invalid_input', __('Unknown page layout.', 'giveflow-fundraising-campaigns'), ['status' => 400]);
         }
 

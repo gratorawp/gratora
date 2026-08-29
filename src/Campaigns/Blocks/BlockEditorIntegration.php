@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GiveFlow\Campaigns\Blocks;
 
+use GiveFlow\Campaigns\Campaign;
 use GiveFlow\Campaigns\CampaignPageTemplate;
 use GiveFlow\Campaigns\CampaignRepository;
 use WP_Theme_JSON_Data;
@@ -51,11 +52,26 @@ final class BlockEditorIntegration
      *
      * @since 1.0.0
      */
+    /** The template a campaign page's blocks came from. */
+    public const META_TEMPLATE = '_giveflow_campaign_page_template';
+
     public function registerPageMeta(): void
     {
         register_post_meta('page', '_giveflow_campaign_id', [
             'type'          => 'integer',
             'single'        => true,
+            'show_in_rest'  => true,
+            'auth_callback' => static fn(): bool => current_user_can('edit_posts'),
+        ]);
+
+        // Which template the page's blocks came from. Written by the switcher
+        // and saved with the post, so applying a template and then undoing it
+        // leaves no record behind, and an add-on that dresses its pages from
+        // the choice reads a value the page actually kept.
+        register_post_meta('page', self::META_TEMPLATE, [
+            'type'          => 'string',
+            'single'        => true,
+            'default'       => '',
             'show_in_rest'  => true,
             'auth_callback' => static fn(): bool => current_user_can('edit_posts'),
         ]);
@@ -77,13 +93,21 @@ final class BlockEditorIntegration
     /** The campaign the open editor belongs to, or 0. @since 1.0.0 */
     private static function editedCampaignId(): int
     {
-        $postId = get_the_ID();
+        $postId = self::editedPostId();
 
-        if (! $postId && isset($_GET['post'])) {
+        return $postId > 0 ? (int) get_post_meta($postId, '_giveflow_campaign_id', true) : 0;
+    }
+
+    /** The post the editor is open on, or 0. @since 1.0.0 */
+    private static function editedPostId(): int
+    {
+        $postId = (int) get_the_ID();
+
+        if ($postId <= 0 && isset($_GET['post'])) {
             $postId = (int) $_GET['post']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading which post the editor is on, not acting on it.
         }
 
-        return $postId > 0 ? (int) get_post_meta((int) $postId, '_giveflow_campaign_id', true) : 0;
+        return max(0, $postId);
     }
 
     /**
@@ -97,13 +121,15 @@ final class BlockEditorIntegration
      */
     public static function pageTemplatesAvailable(): bool
     {
-        $campaignId = self::editedCampaignId();
-        if ($campaignId <= 0) {
+        $campaign = self::editedCampaign();
+        if ($campaign === null) {
             return false;
         }
 
-        $campaign = (new CampaignRepository())->findById($campaignId);
-        if ($campaign === null) {
+        // Only the campaign's own page. Other pages carry the campaign's id so
+        // their blocks can resolve against it, and a template dropped on one of
+        // those would replace whatever that page is actually for.
+        if ((int) ($campaign->page_id ?? 0) !== self::editedPostId()) {
             return false;
         }
 
@@ -113,6 +139,29 @@ final class BlockEditorIntegration
             (string) $campaign->campaign_type,
             $campaign
         );
+    }
+
+    /**
+     * The type of the campaign the editor is open on, or ''.
+     *
+     * The switcher asks for it because the list of templates depends on it: a
+     * type that lays out its own page has templates of its own, and offering
+     * the general ones would replace every block that type exists for.
+     *
+     * @since 1.0.0
+     */
+    public static function editedCampaignType(): string
+    {
+        $campaign = self::editedCampaign();
+
+        return $campaign === null ? '' : (string) $campaign->campaign_type;
+    }
+
+    private static function editedCampaign(): ?Campaign
+    {
+        $campaignId = self::editedCampaignId();
+
+        return $campaignId > 0 ? (new CampaignRepository())->findById($campaignId) : null;
     }
 
     /**
@@ -196,6 +245,7 @@ final class BlockEditorIntegration
             . wp_json_encode([
                 'bindingFields' => CampaignBindings::fields(),
                 'pageTemplates' => self::pageTemplatesAvailable(),
+                'campaignType'  => self::editedCampaignType(),
             ]) . ' );',
             'before'
         );

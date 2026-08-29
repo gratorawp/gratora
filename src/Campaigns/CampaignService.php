@@ -604,7 +604,7 @@ final class CampaignService
      */
     public function layoutBlocksFor(Campaign $campaign, string $template): string
     {
-        if (! CampaignTemplates::exists($template)) {
+        if (! CampaignTemplates::exists($template, (string) $campaign->campaign_type)) {
             $template = CampaignTemplates::DEFAULT_ID;
         }
 
