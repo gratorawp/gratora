@@ -54,8 +54,36 @@ final class CampaignStyleVars
         // is dark enough to need. Appended last so a filter cannot leave a
         // filled panel reversing white out of a pale accent.
         $css .= AccentInk::declarationsFor((string) ($tokens['giveflow-accent'] ?? ''));
+        $css .= self::coverImage($campaign);
 
         return self::$cache[$id] = $css;
+    }
+
+    /**
+     * The campaign's own photograph, as a value a stylesheet can use.
+     *
+     * A layout that wants the image as its ground reads this instead of placing
+     * the image block and positioning it. The block carries an editor wrapper
+     * that the editor itself owns and lays out, and a background has none, so
+     * the canvas and the front end cannot disagree about it.
+     *
+     * @since 1.0.0
+     */
+    private static function coverImage(?Campaign $campaign): string
+    {
+        $id = $campaign ? (int) ($campaign->image_attachment_id ?? 0) : 0;
+        if ($id <= 0) {
+            return '';
+        }
+
+        $url = wp_get_attachment_image_url($id, '2048x2048');
+        if (! is_string($url) || $url === '') {
+            return '';
+        }
+
+        // A url() token, not a bare address: the stylesheet uses it directly and
+        // the parentheses are what keep a stray one from ending the declaration.
+        return '--giveflow-cover-image:url(' . esc_url_raw($url) . ');';
     }
 
     /**

@@ -45,6 +45,9 @@ body,
        server side (Styling\AccentInk) because CSS cannot branch on how dark a
        colour is; the fallbacks keep the reversed-out look on a page that
        carries no campaign style. */
+    /* The campaign's photograph, emitted by Styling\CampaignStyleVars. */
+    --dp-cover-image:     var(--giveflow-cover-image, none);
+
     --dp-on-accent:       var(--giveflow-on-accent, #ffffff);
     --dp-on-accent-muted: var(--giveflow-on-accent-muted, rgba(255, 255, 255, .72));
     --dp-on-accent-line:  var(--giveflow-on-accent-line, rgba(255, 255, 255, .26));
@@ -731,10 +734,10 @@ body,
 .dp-panel--accent .giveflow-stat__value { color: var(--dp-on-accent); }
 .dp-panel--accent .giveflow-progress__bar { background: var(--dp-on-accent-line); }
 
-/* Photo cover: the campaign image is the ground, the title and figures sit on
-   it. The image block is absolute rather than a flow child so it fills the
-   panel whatever wraps it, which the editor and the front end do differently:
-   the editor nests the server preview two divs deeper. */
+/* Photo cover: the campaign's photograph is the ground the title and figures sit
+   on. It is a background rather than the image block positioned behind them,
+   because the block carries an editor wrapper the editor lays out itself, and a
+   background has no wrapper for the two to disagree about. */
 .dp-cover {
     position: relative;
     isolation: isolate;
@@ -744,7 +747,14 @@ body,
     justify-content: flex-end;
     min-height: clamp(340px, 42vw, 520px);
     padding: 40px 32px 32px;
-    background: var(--dp-accent);
+
+    /* The accent shows through wherever there is no photograph, which is also
+       what a campaign with no image gets. */
+    background-color: var(--dp-accent);
+    background-image: var(--dp-cover-image, none);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 
     /* A scrim, not the accent, is the ground here, so the ink is light whatever
        the campaign colour is. */
@@ -753,31 +763,6 @@ body,
     --giveflow-text-muted: rgba(255, 255, 255, .76);
     --giveflow-bg-soft:    rgba(255, 255, 255, .28);
     --giveflow-border:     rgba(255, 255, 255, .28);
-}
-.dp-cover__media {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    margin: 0;
-    /* The shared rail caps every campaign block at 1080px and centres it. That
-       is right for a block in the flow and wrong for the ground behind one, so
-       the cap is lifted here rather than everywhere. */
-    max-width: none;
-    border-radius: 0;
-}
-.dp-cover__media > *,
-.dp-cover__media figure { height: 100%; margin: 0; }
-/* Carrying .dp-cover as well to match the ratio rule's weight: the block
-   stylesheet sets height on .giveflow-block--image.is-ratio-N .giveflow-block__image,
-   and object-fit has nothing to cover if that height wins. */
-.dp-cover .dp-cover__media .giveflow-block__image,
-.dp-cover .dp-cover__media img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    aspect-ratio: auto;
-    object-fit: cover;
-    border-radius: 0;
 }
 /* The photograph is the campaign's, so nothing can be assumed about what the
    text lands on. */

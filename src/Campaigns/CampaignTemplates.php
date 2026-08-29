@@ -262,17 +262,16 @@ BLOCKS;
 BLOCKS;
 
     /**
-     * The image is the ground rather than a block in the flow, so the title and
-     * the figures sit on it. A campaign with no image still renders: the cover
-     * falls back to the accent, which is what the stylesheet paints underneath.
+     * The campaign's photograph is the ground rather than a block, so there is
+     * no image block here: the stylesheet paints it from the campaign, and the
+     * title and figures sit on top. A campaign with no image still renders,
+     * falling back to the accent underneath.
      *
      * @since 1.0.0
      */
     private const COVER = <<<'BLOCKS'
 <!-- wp:group {"align":"wide","className":"dp-panel dp-cover"} -->
 <div class="wp-block-group alignwide dp-panel dp-cover">
-<!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%,"aspectRatio":"auto","rounded":false,"className":"dp-cover__media"} /-->
-
 <!-- wp:group {"className":"dp-cover__body"} -->
 <div class="wp-block-group dp-cover__body">
 <!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}}} -->

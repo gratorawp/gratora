@@ -6,6 +6,8 @@ namespace GiveFlow\Tests\Integration;
 
 use GiveFlow\Campaigns\Campaign;
 use GiveFlow\Campaigns\Styling\CampaignStyleVars;
+use GiveFlow\Campaigns\CampaignService;
+use GiveFlow\Foundation\Plugin;
 
 /**
  * The ink has to survive the whole resolve, not just the maths: a campaign that
@@ -29,6 +31,36 @@ final class CampaignAccentInkTest extends IntegrationTestCase
         CampaignStyleVars::flush();
 
         return $c;
+    }
+
+    /**
+     * The photo cover paints the campaign's image as its ground. The editor and
+     * the front end each render this page their own way, and a background is
+     * the one form neither of them lays out, so the token has to carry the URL.
+     */
+    public function test_the_campaign_image_is_emitted_for_the_cover(): void
+    {
+        $service  = Plugin::instance()->container->get(CampaignService::class);
+        $campaign = $service->create([
+            'title' => 'Cover', 'goal_type' => 'amount', 'goal_cents' => 1000, 'currency' => 'USD',
+        ]);
+        $att = self::factory()->attachment->create_upload_object(DIR_TESTDATA . '/images/canola.jpg');
+        $service->update($campaign, ['image_attachment_id' => (int) $att]);
+        CampaignStyleVars::flush();
+
+        $css = CampaignStyleVars::forCampaign(
+            (new \GiveFlow\Campaigns\CampaignRepository())->findById((int) $campaign->id)
+        );
+
+        $this->assertMatchesRegularExpression('/--giveflow-cover-image:url\(https?:[^)]+\.jpg\);/', $css);
+    }
+
+    /** No image is not an error: the cover falls back to the accent underneath. */
+    public function test_a_campaign_with_no_image_emits_no_cover_token(): void
+    {
+        $css = CampaignStyleVars::forCampaign($this->campaignWithAccent('#14425f'));
+
+        $this->assertStringNotContainsString('--giveflow-cover-image', $css);
     }
 
     public function test_a_pale_accent_gets_dark_ink(): void
