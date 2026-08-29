@@ -50,6 +50,11 @@ final class CampaignStyleVars
             $css .= '--' . $key . ':' . $value . ';';
         }
 
+        // Derived, not authored: nothing in the catalogue knows what the accent
+        // is dark enough to need. Appended last so a filter cannot leave a
+        // filled panel reversing white out of a pale accent.
+        $css .= AccentInk::declarationsFor((string) ($tokens['giveflow-accent'] ?? ''));
+
         return self::$cache[$id] = $css;
     }
 

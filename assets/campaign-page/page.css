@@ -41,6 +41,14 @@ body,
        from washing its own pages in the default green. */
     --dp-accent-soft: var(--giveflow-accent-soft, color-mix(in srgb, var(--dp-accent) 12%, #fff));
 
+    /* Ink for anything drawn on the filled panel. Derived from the accent
+       server side (Styling\AccentInk) because CSS cannot branch on how dark a
+       colour is; the fallbacks keep the reversed-out look on a page that
+       carries no campaign style. */
+    --dp-on-accent:       var(--giveflow-on-accent, #ffffff);
+    --dp-on-accent-muted: var(--giveflow-on-accent-muted, rgba(255, 255, 255, .72));
+    --dp-on-accent-line:  var(--giveflow-on-accent-line, rgba(255, 255, 255, .26));
+
     --dp-text:        var(--giveflow-text, #141821);
     /* Core has no token between body and muted, so mix the two rather than pick
        a literal that would ignore a campaign's palette. */
@@ -677,19 +685,39 @@ body,
     border-radius: var(--dp-radius);
 }
 
-/* Filled: the campaign's accent, contents reversed out. */
+/* Filled: the campaign's accent, contents reversed out against it. */
 .dp-panel--accent {
     background: var(--dp-accent);
-    color: #fff;
+    color: var(--dp-on-accent);
+
+    /* Blocks in here read the page ink, and the page ink was chosen against the
+       page background, not against this panel. Hand them the panel's own or a
+       stat renders near-black on a dark accent. Never --giveflow-accent:
+       --dp-accent resolves through it, so the panel would repaint its own
+       background with its own ink. */
+    --giveflow-text:       var(--dp-on-accent);
+    --giveflow-text-muted: var(--dp-on-accent-muted);
+    --giveflow-bg-soft:    var(--dp-on-accent-line);
+    --giveflow-border:     var(--dp-on-accent-line);
 }
 .dp-panel--accent .dp-money,
 .dp-panel--accent .dp-raised,
 .dp-panel--accent .dp-stat,
 .dp-panel--accent h1,
 .dp-panel--accent h2,
-.dp-panel--accent p { color: #fff; }
-.dp-panel--accent .dp-bar { background: rgba(255, 255, 255, .28); }
-.dp-panel--accent .dp-bar > * { background: #fff; }
+.dp-panel--accent p { color: var(--dp-on-accent); }
+.dp-panel--accent .dp-bar { background: var(--dp-on-accent-line); }
+.dp-panel--accent .dp-bar > * { background: var(--dp-on-accent); }
+
+/* The accent-coloured parts of a block cannot stay the accent here, because the
+   accent is the ground they sit on. Carrying the block class rather than
+   matching the block stylesheet's specificity and hoping this file loads last. */
+.dp-panel--accent .giveflow-block--progress .giveflow-progress__value {
+    color: var(--dp-on-accent);
+}
+.dp-panel--accent .giveflow-block--progress .giveflow-progress__bar-fill {
+    background: var(--dp-on-accent);
+}
 
 /* Tinted: the same accent at low strength, text unchanged. */
 .dp-panel--soft { background: var(--dp-accent-soft); }
