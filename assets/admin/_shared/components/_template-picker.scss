@@ -358,6 +358,51 @@ $gctp-ink3: rgba(0, 0, 0, 0.06);
     .bar i { display: block; width: 64%; height: 100%; border-radius: 999px; background: #fff; }
 }
 
+// The photo cover: the accent band's contents, reversed out over the picture.
+.gctp-cover {
+    position: relative;
+    flex: 0 0 44%;
+    min-height: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient( 135deg, rgba(0,0,0,.16), rgba(0,0,0,.07) );
+
+    svg {
+        width: 32%;
+        max-width: 20px;
+        height: auto;
+        color: rgba(0,0,0,.30);
+    }
+
+    // The scrim the real cover carries, so the thumbnail explains why the text
+    // stays readable on a photograph.
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient( 180deg, rgba(6,10,20,.05), rgba(6,10,20,.62) );
+    }
+
+    .over {
+        position: absolute;
+        z-index: 1;
+        left: 8px;
+        right: 8px;
+        bottom: 7px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .h { display: block; height: 6px; width: 54%; border-radius: 2px; background: rgba(255,255,255,.92); }
+    .figs { display: flex; gap: 6px; }
+    .figs i { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.62); }
+    .bar { display: block; height: 4px; border-radius: 999px; background: rgba(255,255,255,.32); overflow: hidden; }
+    .bar i { display: block; width: 64%; height: 100%; border-radius: 999px; background: #fff; }
+}
+
 // Donor rows: avatar, name, amount.
 .gctp-list {
     display: flex;

@@ -37,6 +37,7 @@ const CATEGORY_ORDER = [ 'General', 'Appeals', 'Community', 'Impact', 'Bare' ];
 const THUMBS = {
     standard:     { main: [ 'media', 'figures2', 'bar', 'text', 'list' ],  form: true },
     hero:         { main: [ 'accent', 'text', 'list' ],                    form: true },
+    cover:        { main: [ 'cover', 'text', 'list' ],                     form: true },
     split:        { main: [ 'title', 'accentSmall', 'text', 'media' ],     form: true },
     story:        { main: [ 'mediaTall', 'text', 'bar' ],                  form: true },
     gallery:      { main: [ 'media', 'text', 'bar' ],                      form: true, footer: 'cards' },
@@ -73,6 +74,24 @@ function Part( { kind } ) {
                         <circle cx="8.5" cy="9.5" r="1.6" />
                         <path d="m21 15.5-4.5-4.5L6 21.5" />
                     </svg>
+                </span>
+            );
+
+        // The figures sit ON the photo here, which is the only thing that tells
+        // this apart from the colour hero at thumbnail size.
+        case 'cover':
+            return (
+                <span className="gctp-cover">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="16" rx="2.5" />
+                        <circle cx="8.5" cy="9.5" r="1.6" />
+                        <path d="m21 15.5-4.5-4.5L6 21.5" />
+                    </svg>
+                    <span className="over">
+                        <i className="h" />
+                        <span className="figs"><i /><i /></span>
+                        <span className="bar"><i /></span>
+                    </span>
                 </span>
             );
 

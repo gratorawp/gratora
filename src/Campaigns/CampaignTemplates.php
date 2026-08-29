@@ -45,6 +45,13 @@ final class CampaignTemplates
                 'best_for'    => __( 'A campaign that should look like an event rather than a page.', 'giveflow-fundraising-campaigns' ),
             ],
             [
+                'id'          => 'cover',
+                'category'    => 'General',
+                'name'        => __( 'Photo cover', 'giveflow-fundraising-campaigns' ),
+                'description' => __( 'Opens on the campaign image running the full width, with the title, the figures and the progress bar laid over it.', 'giveflow-fundraising-campaigns' ),
+                'best_for'    => __( 'A campaign with one photograph strong enough to carry the page.', 'giveflow-fundraising-campaigns' ),
+            ],
+            [
                 'id'          => 'split',
                 'category'    => 'General',
                 'name'        => __( 'Split panel', 'giveflow-fundraising-campaigns' ),
@@ -225,6 +232,73 @@ BLOCKS;
 <!-- /wp:columns -->
 
 <!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:columns {"align":"wide","className":"dp-layout"} -->
+<div class="wp-block-columns alignwide dp-layout">
+<!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
+<div class="wp-block-column dp-layout__main" style="flex-basis:62%">
+<!-- wp:group {"className":"dp-band dp-band--tight"} -->
+<div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<p class="dp-body">%%DESCRIPTION%%</p>
+<!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:giveflow/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
+<div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+BLOCKS;
+
+    /**
+     * The image is the ground rather than a block in the flow, so the title and
+     * the figures sit on it. A campaign with no image still renders: the cover
+     * falls back to the accent, which is what the stylesheet paints underneath.
+     *
+     * @since 1.0.0
+     */
+    private const COVER = <<<'BLOCKS'
+<!-- wp:group {"align":"wide","className":"dp-panel dp-cover"} -->
+<div class="wp-block-group alignwide dp-panel dp-cover">
+<!-- wp:giveflow/campaign-image {"campaignId":%%CAMPAIGN_ID%%,"aspectRatio":"auto","rounded":false,"className":"dp-cover__media"} /-->
+
+<!-- wp:group {"className":"dp-cover__body"} -->
+<div class="wp-block-group dp-cover__body">
+<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}}} -->
+<h1 class="wp-block-heading">%%TITLE%%</h1>
+<!-- /wp:heading -->
+
+<!-- wp:columns {"className":"dp-figures"} -->
+<div class="wp-block-columns dp-figures">
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:giveflow/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:giveflow/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+</div>
+<!-- /wp:group -->
 </div>
 <!-- /wp:group -->
 
@@ -904,6 +978,7 @@ BLOCKS;
     {
         switch ($id) {
             case 'hero':         return self::HERO;
+            case 'cover':        return self::COVER;
             case 'split':        return self::SPLIT;
             case 'story':        return self::STORY;
             case 'gallery':      return self::GALLERY;
