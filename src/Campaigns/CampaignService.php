@@ -621,6 +621,12 @@ final class CampaignService
         $t5 = __('Recent donations', 'giveflow-fundraising-campaigns');
         $t6 = __('Top donors', 'giveflow-fundraising-campaigns');
         $t7 = __('Our supporters', 'giveflow-fundraising-campaigns');
+        // Section headings, so a starter page reads as a page rather than a
+        // stack of blocks. Above the prose and above the form, which are the
+        // two things no block titles for itself.
+        $t8 = __('About this campaign', 'giveflow-fundraising-campaigns');
+        $t9  = __('Donate', 'giveflow-fundraising-campaigns');
+        $t10 = __('Other campaigns', 'giveflow-fundraising-campaigns');
 
         // These two sections are titled by the block itself rather than a
         // Heading above it, which would render the words twice. json_encode so
@@ -638,6 +644,9 @@ final class CampaignService
             '%%RECENT_TITLE%%' => (string) $t5j,
             '%%TOP_TITLE%%'    => (string) $t6j,
             '%%WALL_TITLE%%'   => (string) $t7j,
+            '%%ABOUT_TITLE%%'  => $t8,
+            '%%DONATE_TITLE%%' => $t9,
+            '%%MORE_TITLE%%'   => $t10,
         ]);
 
         // Add-ons can seed a richer starter layout per campaign type (e.g. the

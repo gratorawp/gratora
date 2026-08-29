@@ -185,6 +185,10 @@ final class CampaignTemplates
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
@@ -199,6 +203,10 @@ final class CampaignTemplates
 
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -241,6 +249,10 @@ BLOCKS;
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
@@ -253,6 +265,10 @@ BLOCKS;
 
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -307,6 +323,10 @@ BLOCKS;
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
@@ -319,6 +339,10 @@ BLOCKS;
 
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -364,6 +388,10 @@ BLOCKS;
 
 <!-- wp:column {"width":"50%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:50%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -373,6 +401,10 @@ BLOCKS;
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
@@ -418,6 +450,10 @@ BLOCKS;
 
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -443,6 +479,10 @@ BLOCKS;
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
@@ -455,6 +495,10 @@ BLOCKS;
 
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -464,6 +508,10 @@ BLOCKS;
 
 <!-- wp:group {"align":"wide","className":"dp-wide"} -->
 <div class="wp-block-group alignwide dp-wide">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%MORE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/campaign-grid {"count":3,"heading":""} /-->
 </div>
 <!-- /wp:group -->
@@ -507,6 +555,10 @@ BLOCKS;
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
@@ -519,6 +571,10 @@ BLOCKS;
 
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -561,6 +617,10 @@ BLOCKS;
 <div class="wp-block-column dp-layout__main" style="flex-basis:55%">
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
@@ -571,6 +631,10 @@ BLOCKS;
 
 <!-- wp:column {"width":"45%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:45%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -622,6 +686,10 @@ BLOCKS;
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
@@ -632,6 +700,10 @@ BLOCKS;
 
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -654,6 +726,10 @@ BLOCKS;
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
@@ -664,6 +740,10 @@ BLOCKS;
 
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -718,6 +798,10 @@ BLOCKS;
 
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -727,6 +811,10 @@ BLOCKS;
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
@@ -775,6 +863,10 @@ BLOCKS;
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
@@ -785,6 +877,10 @@ BLOCKS;
 
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -807,6 +903,10 @@ BLOCKS;
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
@@ -864,6 +964,10 @@ BLOCKS;
 
 <!-- wp:column {"width":"45%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:45%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -923,6 +1027,10 @@ BLOCKS;
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"giveflow/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
@@ -935,6 +1043,10 @@ BLOCKS;
 
 <!-- wp:column {"width":"38%","className":"dp-layout__side"} -->
 <div class="wp-block-column dp-layout__side" style="flex-basis:38%">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
@@ -959,6 +1071,10 @@ BLOCKS;
 
 <!-- wp:group {"align":"wide","className":"dp-wide"} -->
 <div class="wp-block-group alignwide dp-wide">
+<!-- wp:heading {"level":2,"className":"dp-h2"} -->
+<h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
+<!-- /wp:heading -->
+
 <!-- wp:giveflow/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:group -->

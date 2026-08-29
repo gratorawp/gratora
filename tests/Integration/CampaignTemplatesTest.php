@@ -160,6 +160,21 @@ final class CampaignTemplatesTest extends IntegrationTestCase
     }
 
     /** @return array<string,array{string}> */
+    /**
+     * A placeholder that survives seeding renders as %%ITS_NAME%% on the page, to
+     * donors. The templates and the substitution map live in different files, so
+     * adding one to only half of the pair is the easy mistake.
+     *
+     * @dataProvider templateIds
+     */
+    public function test_a_layout_leaves_no_placeholder_behind(string $id): void
+    {
+        $campaign = $this->createCampaign(['title' => 'Placeholder ' . $id, 'page_template' => $id]);
+        $content  = (string) get_post((int) $campaign['page_id'])->post_content;
+
+        $this->assertDoesNotMatchRegularExpression('/%%[A-Z_]+%%/', $content);
+    }
+
     public static function templateIds(): array
     {
         $out = [];
