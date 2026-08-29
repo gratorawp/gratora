@@ -75,6 +75,9 @@ final class CampaignsController
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'templates'],
             'permission_callback' => [$this, 'canAccess'],
+            'args'                => [
+                'campaign_type' => ['type' => 'string'],
+            ],
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/campaigns/funds', [
@@ -418,9 +421,12 @@ final class CampaignsController
     }
 
     /** The starter layouts a new campaign page can be built from. @since 1.0.0 */
-    public function templates(): WP_REST_Response
+    public function templates(WP_REST_Request $request): WP_REST_Response
     {
-        return new WP_REST_Response(CampaignTemplates::all(), 200);
+        return new WP_REST_Response(
+            CampaignTemplates::all((string) ($request->get_param('campaign_type') ?? '')),
+            200
+        );
     }
 
     /** @since 1.0.0 */

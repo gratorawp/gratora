@@ -10,9 +10,11 @@
     --dp-bg-soft:  var(--giveflow-bg-soft, #f8fafb);
     --dp-radius:   var(--giveflow-radius, 10px);
 
-    max-width: 900px;
+    // The same measure the campaign pages read at, so the portal is not the one
+    // screen in the product that sits 300px narrower than everything around it.
+    max-width: var(--dp-measure, 1200px);
     margin: 0 auto;
-    padding: 32px 20px;
+    padding: 32px 24px;
     color: var(--dp-text);
     font-family: var(--giveflow-typeface, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
     font-size: var(--giveflow-type-size, 15px);
@@ -60,9 +62,61 @@
         &:hover { color: var(--dp-text); border-color: var(--dp-muted); }
     }
 
+    // Nav beside the content rather than above it. A donor's sections are a
+    // place they move between and come back to, and add-ons add more of them:
+    // a row that scrolls sideways hides the ones it cannot fit, while a column
+    // grows down the page where there is room for it.
+    &__body {
+        display: grid;
+        grid-template-columns: 220px minmax(0, 1fr);
+        gap: 40px;
+        align-items: start;
+    }
+
     &__nav {
         display: flex;
+        flex-direction: column;
+        gap: 2px;
+        // Stays with the reader down a long receipts list.
+        position: sticky;
+        top: 24px;
+    }
+
+    &__tab {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        border-radius: 8px;
+        padding: 9px 12px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--dp-muted);
+        cursor: pointer;
+        text-align: left;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &:hover     { color: var(--dp-text); background: var(--dp-bg-soft); }
+        &.is-active { color: var(--dp-accent); background: var(--dp-bg-soft); font-weight: 600; }
+    }
+
+    &__main { min-width: 0; }
+}
+
+// One column, and the nav goes back to the scrolling row it was: a 220px
+// sidebar beside a phone-width column leaves neither of them usable.
+@media (max-width: 782px) {
+    .dp__body {
+        display: block;
+    }
+
+    .dp__nav {
+        position: static;
+        flex-direction: row;
         gap: 4px;
+        margin-bottom: 20px;
         border-bottom: 1px solid var(--dp-border);
         // Add-ons register their own tabs, so the row can outgrow the width.
         // It scrolls rather than wrapping labels to a second line.
@@ -72,25 +126,19 @@
 
         &::-webkit-scrollbar { display: none; }
     }
-    &__tab {
-        appearance: none;
-        background: transparent;
-        border: 0;
-        padding: 10px 16px;
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--dp-muted);
-        cursor: pointer;
+
+    .dp__tab {
+        width: auto;
+        flex-shrink: 0;
+        white-space: nowrap;
+        border-radius: 0;
         border-bottom: 2px solid transparent;
         margin-bottom: -1px;
-        white-space: nowrap;
-        flex-shrink: 0;
+        padding: 10px 16px;
 
-        &:hover     { color: var(--dp-text); }
-        &.is-active { color: var(--dp-accent); border-bottom-color: var(--dp-accent); }
+        &:hover     { background: transparent; }
+        &.is-active { background: transparent; border-bottom-color: var(--dp-accent); }
     }
-
-    &__main { padding-top: 8px; }
 }
 
 .dp-loading,

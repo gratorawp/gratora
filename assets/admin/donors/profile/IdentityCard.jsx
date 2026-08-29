@@ -195,10 +195,10 @@ export default function IdentityCard( { donor } ) {
                             { magicLinkExpires
                                 ? sprintf(
                                     /* translators: %s: date and time the link stops working */
-                                    __( 'Works once, until %s. The donor can revoke it with sign out everywhere.', 'giveflow-fundraising-campaigns' ),
+                                    __( 'Works once, until %s. The donor can revoke it by signing out of the portal.', 'giveflow-fundraising-campaigns' ),
                                     formatDateTime( magicLinkExpires )
                                 )
-                                : __( 'Works once. The donor can revoke it with sign out everywhere.', 'giveflow-fundraising-campaigns' ) }
+                                : __( 'Works once. The donor can revoke it by signing out of the portal.', 'giveflow-fundraising-campaigns' ) }
                         </div>
                     </div>
                 ) }

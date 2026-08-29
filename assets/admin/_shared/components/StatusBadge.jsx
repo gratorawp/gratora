@@ -6,8 +6,11 @@ import { __ } from '@wordpress/i18n';
  * override (e.g. "Published" instead of "Active").
  */
 const STATUS = {
-    // Campaign / form lifecycle
-    draft:              { variant: 'gray',  label: __( 'Draft', 'giveflow-fundraising-campaigns' ) },
+    // Campaign / form lifecycle. Three states, three colours: draft and
+    // archived were both gray, so the only thing telling a campaign that has
+    // never opened from one that is finished with was the word inside the pill.
+    // Amber reads as unfinished here as it does on a pending donation.
+    draft:              { variant: 'amber', label: __( 'Draft', 'giveflow-fundraising-campaigns' ) },
     published:          { variant: 'green', label: __( 'Active', 'giveflow-fundraising-campaigns' ) },
     archived:           { variant: 'gray',  label: __( 'Archived', 'giveflow-fundraising-campaigns' ) },
     // Donation lifecycle

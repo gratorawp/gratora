@@ -23,11 +23,16 @@ final class CampaignTemplates
     public const DEFAULT_ID = 'standard';
 
     /**
+     * The campaign type decides which templates are on offer. A peer-to-peer
+     * campaign has a start page, teams and a fundraiser grid, and a layout
+     * built for a single donation form has nowhere to put any of it, so the
+     * type reaches the filter rather than every add-on re-deriving it.
+     *
      * @return list<array{id:string,name:string,category:string,description:string,best_for:string}>
      *
      * @since 1.0.0
      */
-    public static function all(): array
+    public static function all(string $campaignType = ''): array
     {
         $templates = [
             [
@@ -137,13 +142,13 @@ final class CampaignTemplates
             ],
         ];
 
-        return (array) apply_filters('giveflow.campaign.templates', $templates);
+        return (array) apply_filters('giveflow.campaign.templates', $templates, $campaignType);
     }
 
     /** @since 1.0.0 */
-    public static function find(string $id): ?array
+    public static function find(string $id, string $campaignType = ''): ?array
     {
-        foreach (self::all() as $template) {
+        foreach (self::all($campaignType) as $template) {
             if ($template['id'] === $id) {
                 return $template;
             }
@@ -1111,8 +1116,8 @@ BLOCKS;
     }
 
     /** Whether an id names a template that exists. @since 1.0.0 */
-    public static function exists(string $id): bool
+    public static function exists(string $id, string $campaignType = ''): bool
     {
-        return self::find($id) !== null;
+        return self::find($id, $campaignType) !== null;
     }
 }

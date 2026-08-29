@@ -1614,19 +1614,6 @@ $card-radius:   $radius-lg;
     }
 }
 
-// Kept for back-compat: still used in the campaigns list/table elsewhere.
-.giveflow-status-badge {
-    font-size: 12px;
-    font-weight: 500;
-    padding: 3px 10px;
-    border-radius: 999px;
-    background: $accent-soft;
-    color: $accent-dark;
-
-    &--draft    { background: $bg-soft; color: $text-muted; }
-    &--archived { background: $amber-soft; color: $amber; }
-}
-
 .giveflow-banner {
     display: flex;
     align-items: center;

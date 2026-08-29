@@ -390,6 +390,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
             { pickingLayout && (
                 <CampaignTemplatePicker
                     value={ pageTemplate.id }
+                    campaignType={ campaignType }
                     onPick={ ( t ) => { setPageTemplate( t ); setPickingLayout( false ); } }
                     onClose={ () => setPickingLayout( false ) }
                 />

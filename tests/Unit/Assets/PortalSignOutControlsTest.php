@@ -12,6 +12,10 @@ use PHPUnit\Framework\TestCase;
  * control in front of it is a capability the donor does not have, which the
  * integration tests cannot see because they call the route directly.
  *
+ * Signing out is one control now. Two buttons a few pixels apart asked the
+ * donor to choose a session scope, and the narrower one left other devices
+ * signed in, which is the answer nobody wants from a button labelled Sign out.
+ *
  * @since 1.0.0
  */
 final class PortalSignOutControlsTest extends TestCase
@@ -24,19 +28,21 @@ final class PortalSignOutControlsTest extends TestCase
         return (string) file_get_contents($path);
     }
 
-    public function test_the_donor_can_reach_both_ways_out(): void
+    public function test_signing_out_ends_every_session(): void
     {
-        $src = $this->source();
-
-        $this->assertMatchesRegularExpression(
-            "/api\(\s*'logout'/",
-            $src,
-            'ending this session is a control'
-        );
         $this->assertMatchesRegularExpression(
             "/api\(\s*'logout-everywhere'/",
-            $src,
-            'and so is ending every session and every unopened link'
+            $this->source(),
+            'the one way out reaches every session and every unopened link'
+        );
+    }
+
+    public function test_there_is_no_second_way_out_that_leaves_devices_signed_in(): void
+    {
+        $this->assertDoesNotMatchRegularExpression(
+            "/api\(\s*'logout'\s*[,)]/",
+            $this->source(),
+            'the single-session route is gone; a control calling it would be reinstating the narrower answer'
         );
     }
 }

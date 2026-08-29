@@ -437,7 +437,8 @@ function App() {
                 </div>
             ) }
 
-            <div class="dp__nav" role="tablist">
+            <div class="dp__body">
+            <div class="dp__nav" role="tablist" aria-orientation="vertical">
                 { [ ...TABS, ...visibleExtTabs ].map( ( t ) => {
                     const showDot = t.id === 'consents' && consentsPending > 0;
                     return (
@@ -467,6 +468,7 @@ function App() {
                     tab === t.id ? <ExtensionPanel key={ t.id } tab={ t } context={ extContext } /> : null
                 ) ) }
             </main>
+            </div>
 
             { openDonation && (
                 <DonationDetail
@@ -489,42 +491,23 @@ const TABS = [
 ];
 
 /**
- * Two ways out, one of them irreversible: signing out everywhere also cancels
- * every sign-in link nobody has opened, including one support just read down
- * the phone. It sits a few pixels from ordinary sign-out, so it asks first, the
- * way cancelling a donation and deleting an account do.
+ * One way out, and it takes everything: every signed-in device, and every
+ * sign-in link nobody has opened. Two buttons a few pixels apart asked the
+ * donor to choose a session scope they had no information to choose between.
+ *
+ * The scope is said out loud rather than confirmed in a dialog. It is what the
+ * donor profile promises staff when it hands out a link that lasts a month, so
+ * the wording has to reach the person who would use it.
  */
 function SignOutControls() {
-    const [ confirming, setConfirming ] = useState( false );
-
-    if ( confirming ) {
-        return (
-            <div class="dp__signout-group">
-                <span class="dp-hint" role="status">
-                    { __( 'This ends every signed-in device and cancels any sign-in link that was never opened, including one the team sent you.', 'giveflow-fundraising-campaigns' ) }
-                </span>
-                <button
-                    type="button"
-                    class="dp__signout"
-                    onClick={ () => {
-                        api( 'logout-everywhere', { method: 'POST' } ).finally( () => window.location.reload() );
-                    } }
-                >{ __( 'Yes, sign out everywhere', 'giveflow-fundraising-campaigns' ) }</button>
-                <button type="button" class="dp__signout" onClick={ () => setConfirming( false ) }>
-                    { __( 'Keep me signed in', 'giveflow-fundraising-campaigns' ) }
-                </button>
-            </div>
-        );
-    }
-
     return (
         <div class="dp__signout-group">
             <button type="button" class="dp__signout" onClick={ () => {
-                api( 'logout', { method: 'POST' } ).finally( () => window.location.reload() );
+                api( 'logout-everywhere', { method: 'POST' } ).finally( () => window.location.reload() );
             } }>{ __( 'Sign out', 'giveflow-fundraising-campaigns' ) }</button>
-            <button type="button" class="dp__signout" onClick={ () => setConfirming( true ) }>
-                { __( 'Sign out everywhere', 'giveflow-fundraising-campaigns' ) }
-            </button>
+            <span class="dp-hint">
+                { __( 'Ends every device, and cancels any sign-in link you have not opened yet.', 'giveflow-fundraising-campaigns' ) }
+            </span>
         </div>
     );
 }

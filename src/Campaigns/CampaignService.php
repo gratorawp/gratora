@@ -80,8 +80,13 @@ final class CampaignService
         // An id nobody registered falls back to the standard layout. A template
         // that has been removed, or a typo from an API caller, should leave a
         // usable campaign page rather than an empty one.
+        //
+        // Validated against this campaign's own type, because the list depends
+        // on it: a type whose add-on replaces the templates wholesale has ids
+        // core has never heard of, and checking without the type rejects every
+        // one of them.
         $pageTemplate = (string) ($input['page_template'] ?? CampaignTemplates::DEFAULT_ID);
-        if (! CampaignTemplates::exists($pageTemplate)) {
+        if (! CampaignTemplates::exists($pageTemplate, (string) $campaign->campaign_type)) {
             $pageTemplate = CampaignTemplates::DEFAULT_ID;
         }
 
@@ -651,7 +656,10 @@ final class CampaignService
 
         // Add-ons can seed a richer starter layout per campaign type (e.g. the
         // peer-to-peer add-on lays out its thermometer, leaderboard and grids).
-        return (string) apply_filters('giveflow.campaign.starter_blocks', $default, $campaign);
+        // The chosen template goes with it: an add-on that replaces the layout
+        // wholesale still has to honour which one the organiser picked, and
+        // the campaign row does not record it.
+        return (string) apply_filters('giveflow.campaign.starter_blocks', $default, $campaign, $template);
     }
 
     /** @since 1.0.0 */

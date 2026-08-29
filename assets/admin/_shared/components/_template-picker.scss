@@ -459,6 +459,14 @@ $gctp-ink3: rgba(0, 0, 0, 0.06);
     i { flex: 1; border-radius: 3px; background: $gctp-ink3; }
 }
 
+// Rows across the whole thumb, for a layout whose lists sit under the columns
+// rather than inside one. Sized like the other footers so the main column
+// above it keeps the same proportions from card to card.
+.gctp-list.is-wide {
+    flex: 0 0 20%;
+    justify-content: space-between;
+}
+
 .giveflow-ctp {
     // The form picker clamps its descriptions to two lines. Here the
     // description IS the difference between one layout and the next, so a

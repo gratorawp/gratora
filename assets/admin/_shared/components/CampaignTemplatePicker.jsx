@@ -10,11 +10,17 @@
  * Each thumb is a wireframe rather than a rendered preview. What separates
  * these templates is where things sit on the page, and a real preview at this
  * size is a grey rectangle whichever layout it is.
+ *
+ * A template can carry its own shape in a `thumb` key. Add-ons register
+ * layouts core has never heard of, and without that they all fall back to the
+ * standard wireframe, so a picker offering two of them draws the same page
+ * twice.
  */
 
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { Modal, Spinner } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
 
 // Grouping keys are stable; only the display text is translated.
@@ -51,6 +57,15 @@ const THUMBS = {
     transparency: { main: [ 'media', 'soft4', 'text', 'bar' ],             form: true },
     minimal:      { main: [ 'title', 'text' ],                             stacked: true },
 };
+
+/**
+ * The wireframe a template is drawn as. A template can carry its own shape,
+ * which is the only way an add-on's layout gets a picture of itself: core keys
+ * these by id and has never heard of one.
+ */
+export function thumbFor( template ) {
+    return template.thumb || THUMBS[ template.id ] || THUMBS.standard;
+}
 
 const line = ( i ) => <i key={ i } />;
 
@@ -180,10 +195,21 @@ function Footer( { kind } ) {
             </span>
         );
     }
+    // Ranked rows across the whole width, for a layout that puts its lists
+    // under the columns instead of inside one.
+    if ( kind === 'rows' ) {
+        return (
+            <span className="gctp-list is-wide">
+                { [ 0, 1, 2 ].map( ( i ) => (
+                    <span key={ i }><i className="av" /><i className="nm" /><i className="amt" /></span>
+                ) ) }
+            </span>
+        );
+    }
     return null;
 }
 
-export default function CampaignTemplatePicker( { value, onPick, onClose } ) {
+export default function CampaignTemplatePicker( { value, campaignType, onPick, onClose } ) {
     const [ templates, setTemplates ] = useState( [] );
     const [ loading, setLoading ]     = useState( true );
     const [ category, setCategory ]   = useState( 'All' );
@@ -192,7 +218,12 @@ export default function CampaignTemplatePicker( { value, onPick, onClose } ) {
     const load = () => {
         setLoading( true );
         setFailed( false );
-        apiFetch( { path: '/giveflow/v1/admin/campaigns/templates' } )
+        // The type is asked for, because what a campaign can lay out depends on
+        // it: a peer-to-peer campaign has teams and a fundraiser grid to place,
+        // and a single-form layout has nowhere to put either.
+        apiFetch( { path: addQueryArgs( '/giveflow/v1/admin/campaigns/templates', {
+            campaign_type: campaignType || undefined,
+        } ) } )
             .then( ( list ) => setTemplates( Array.isArray( list ) ? list : [] ) )
             .catch( () => {
                 setTemplates( [] );
@@ -201,7 +232,8 @@ export default function CampaignTemplatePicker( { value, onPick, onClose } ) {
             .finally( () => setLoading( false ) );
     };
 
-    useEffect( load, [] );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect( load, [ campaignType ] );
 
     const categories = useMemo( () => {
         const seen = new Set();
@@ -263,7 +295,7 @@ export default function CampaignTemplatePicker( { value, onPick, onClose } ) {
                                 aria-pressed={ value === t.id }
                                 onClick={ () => onPick( t ) }
                             >
-                                <Wireframe shape={ THUMBS[ t.id ] || THUMBS.standard } />
+                                <Wireframe shape={ thumbFor( t ) } />
                                 <span className="giveflow-template-picker__meta">
                                     <strong>{ t.name }</strong>
                                     <span className="giveflow-template-picker__desc">{ t.description }</span>

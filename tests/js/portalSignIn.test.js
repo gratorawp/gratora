@@ -165,44 +165,62 @@ describe( 'signing up', () => {
     } );
 } );
 
-describe( 'signing out everywhere', () => {
-    test( 'one click does not destroy every link on the account', async () => {
-        routes.me = () => jsonResponse( 200, me() );
+describe( 'signing out', () => {
+	test( 'one click ends every session, with the CSRF header on it', async () => {
+		routes.me = () => jsonResponse( 200, me() );
+		// Never resolves: the client reloads the page in finally(), which jsdom
+		// cannot do, and the call itself is what this asserts.
+		routes[ 'logout-everywhere' ] = () => new Promise( () => {} );
 
-        await boot();
-        await clickButton( 'Sign out everywhere' );
+		await boot();
+		await clickButton( 'Sign out' );
 
-        expect( global.fetch.mock.calls.map( ( c ) => String( c[ 0 ] ) ) )
-            .not.toContain( '/wp-json/giveflow/v1/portal/logout-everywhere' );
-        expect( text() ).toContain( 'cancels any sign-in link that was never opened' );
-    } );
+		const posted = global.fetch.mock.calls
+			.find( ( c ) => String( c[ 0 ] ).endsWith( '/logout-everywhere' ) );
+		expect( posted ).toBeTruthy();
+		expect( posted[ 1 ].method ).toBe( 'POST' );
+		expect( posted[ 1 ].headers[ 'X-GiveFlow-Csrf' ] ).toBe( 'csrf-token' );
+	} );
 
-    test( 'confirming it does', async () => {
-        routes.me = () => jsonResponse( 200, me() );
-        // Never resolves: the client reloads the page in finally(), which jsdom
-        // cannot do, and the call itself is what this asserts.
-        routes[ 'logout-everywhere' ] = () => new Promise( () => {} );
+	test( 'there is no second control offering a narrower sign out', async () => {
+		routes.me = () => jsonResponse( 200, me() );
 
-        await boot();
-        await clickButton( 'Sign out everywhere' );
-        await clickButton( 'Yes, sign out everywhere' );
+		await boot();
 
-        const posted = global.fetch.mock.calls
-            .find( ( c ) => String( c[ 0 ] ).endsWith( '/logout-everywhere' ) );
-        expect( posted ).toBeTruthy();
-        expect( posted[ 1 ].method ).toBe( 'POST' );
-        expect( posted[ 1 ].headers[ 'X-GiveFlow-Csrf' ] ).toBe( 'csrf-token' );
-    } );
+		expect( text() ).not.toContain( 'Sign out everywhere' );
+		expect( text() ).not.toContain( 'Keep me signed in' );
+	} );
 
-    test( 'and backing out of it leaves the ordinary way out', async () => {
-        routes.me = () => jsonResponse( 200, me() );
+	test( 'the scope is stated, since the button no longer names it', async () => {
+		routes.me = () => jsonResponse( 200, me() );
 
-        await boot();
-        await clickButton( 'Sign out everywhere' );
-        await clickButton( 'Keep me signed in' );
+		await boot();
 
-        expect( text() ).toContain( 'Sign out everywhere' );
-        expect( global.fetch.mock.calls.map( ( c ) => String( c[ 0 ] ) ) )
-            .not.toContain( '/wp-json/giveflow/v1/portal/logout-everywhere' );
-    } );
+		// The donor profile promises staff this is how a month-long link is
+		// revoked, so the donor has to be told that is what the button does.
+		expect( text() ).toContain( 'cancels any sign-in link you have not opened yet' );
+	} );
+} );
+
+describe( 'the portal layout', () => {
+	test( 'the sections sit beside the content, not above it', async () => {
+		routes.me = () => jsonResponse( 200, me() );
+
+		await boot();
+
+		const body = document.querySelector( '.dp__body' );
+		expect( body ).toBeTruthy();
+		// Both in the same row container is what makes it two columns; a nav
+		// left outside it would render above the content again.
+		expect( body.querySelector( '.dp__nav' ) ).toBeTruthy();
+		expect( body.querySelector( '.dp__main' ) ).toBeTruthy();
+	} );
+
+	test( 'a vertical tablist says so, for anyone arrowing through it', async () => {
+		routes.me = () => jsonResponse( 200, me() );
+
+		await boot();
+
+		expect( document.querySelector( '.dp__nav' ).getAttribute( 'aria-orientation' ) ).toBe( 'vertical' );
+	} );
 } );

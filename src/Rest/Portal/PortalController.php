@@ -132,17 +132,11 @@ final class PortalController
             ],
         ]);
 
-        register_rest_route(self::NAMESPACE, '/portal/logout', [
-            'methods'             => WP_REST_Server::CREATABLE,
-            'callback'            => [$this, 'logout'],
-            // The portal JS sends X-GiveFlow-Csrf on every call, so a cross-site
-            // forged POST cannot sign the donor out.
-            'permission_callback' => [$this, 'sessionWithCsrf'],
-        ]);
-
         register_rest_route(self::NAMESPACE, '/portal/logout-everywhere', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'logoutEverywhere'],
+            // The portal JS sends X-GiveFlow-Csrf on every call, so a cross-site
+            // forged POST cannot sign the donor out.
             'permission_callback' => [$this, 'sessionWithCsrf'],
         ]);
 
@@ -644,13 +638,6 @@ final class PortalController
         }
 
         return false;
-    }
-
-    /** @since 1.0.0 */
-    public function logout(): WP_REST_Response
-    {
-        $this->session->destroy();
-        return new WP_REST_Response(['ok' => true], 200);
     }
 
     /** @since 1.0.0 */
