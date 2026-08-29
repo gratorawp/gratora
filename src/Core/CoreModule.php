@@ -1122,6 +1122,15 @@ final class CoreModule implements GiveFlowModule
             $blocks->register();
         });
 
+        // WordPress's own Tools, Export and Erase Personal Data. They answered
+        // nothing for donors until this, which is the screen a site owner is
+        // told to use when a request arrives.
+        (new \GiveFlow\Donors\Privacy\WordPressPrivacy(
+            $c->get(DonorRepository::class),
+            $c->get(DonorService::class),
+            $c->get(IdentityHasher::class),
+        ))->register();
+
         (new CampaignBlockEditorIntegration())->register();
 
         // Publishes every registered command as a WordPress ability, which is
