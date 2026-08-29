@@ -6,6 +6,7 @@ namespace GiveFlow\Tests\Integration;
 
 use GiveFlow\Campaigns\Campaign;
 use GiveFlow\Campaigns\CampaignPageTemplate;
+use WP_Theme_JSON_Resolver;
 
 /**
  * Campaign pages resolve to the plugin's minimal block template (chrome +
@@ -32,6 +33,51 @@ final class CampaignPageTemplateTest extends IntegrationTestCase
             'post_title'  => 'Template page',
             'meta_input'  => ['_giveflow_campaign_id' => (int) $c->id],
         ]);
+    }
+
+    /**
+     * The front end wraps campaign content in the template's constrained group;
+     * the post editor does not, and falls back to the theme's root layout. The
+     * two measures have to come out the same or the editor lies about the page.
+     */
+    public function test_the_editor_measures_a_campaign_page_by_the_template(): void
+    {
+        $pageId   = $this->makeCampaignPage();
+        $baseline = (string) (wp_get_global_settings()['layout']['contentSize'] ?? '');
+        $this->assertNotSame(
+            CampaignPageTemplate::MEASURE,
+            $baseline,
+            'the theme already uses our measure, so this proves nothing'
+        );
+
+        set_current_screen('post.php');
+        $_GET['post'] = $pageId;
+        WP_Theme_JSON_Resolver::clean_cached_data();
+        wp_cache_flush();
+
+        $this->assertSame(
+            CampaignPageTemplate::MEASURE,
+            (string) (wp_get_global_settings()['layout']['contentSize'] ?? '')
+        );
+
+        $_GET['post'] = wp_insert_post([
+            'post_type'   => 'page',
+            'post_status' => 'publish',
+            'post_title'  => 'An ordinary page',
+        ]);
+        WP_Theme_JSON_Resolver::clean_cached_data();
+        wp_cache_flush();
+
+        $this->assertSame(
+            $baseline,
+            (string) (wp_get_global_settings()['layout']['contentSize'] ?? ''),
+            'every other page keeps the theme measure'
+        );
+
+        unset($_GET['post']);
+        set_current_screen('front');
+        WP_Theme_JSON_Resolver::clean_cached_data();
+        wp_cache_flush();
     }
 
     public function test_campaign_page_gets_the_minimal_template_first(): void

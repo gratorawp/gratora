@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GiveFlow\Campaigns\Blocks;
 
 use GiveFlow\Campaigns\CampaignPageTemplate;
+use WP_Theme_JSON_Data;
 
 /**
  * Registers the campaign block category, editor assets and front-end enqueues.
@@ -40,6 +41,7 @@ final class BlockEditorIntegration
         add_action('wp_enqueue_scripts',          [$this, 'enqueueFrontendAssets']);
         add_filter('render_block',                [$this, 'enqueueOnRender'], 10, 2);
         add_action('init',                        [$this, 'registerPageMeta']);
+        add_filter('wp_theme_json_data_theme',    [$this, 'matchEditorMeasureToTemplate']);
     }
 
     /**
@@ -75,6 +77,34 @@ final class BlockEditorIntegration
         }
 
         return $postId > 0 && (int) get_post_meta((int) $postId, '_giveflow_campaign_id', true) > 0;
+    }
+
+    /**
+     * The post editor lays campaign content out in the theme's root layout, not
+     * in the campaign template, so its canvas measures by the theme while the
+     * front end measures by us (Twenty Twenty-Five: 645px against 1200px).
+     * Handing the editor our measure is what makes the two agree.
+     *
+     * Scoped to the request editing a campaign page, so every other post, the
+     * site editor and the front end keep the theme's own measure.
+     *
+     * @since 1.0.0
+     */
+    public function matchEditorMeasureToTemplate(WP_Theme_JSON_Data $data): WP_Theme_JSON_Data
+    {
+        if (! is_admin() || ! self::editingCampaignPage()) {
+            return $data;
+        }
+
+        return $data->update_with([
+            'version'  => 2,
+            'settings' => [
+                'layout' => [
+                    'contentSize' => CampaignPageTemplate::MEASURE,
+                    'wideSize'    => CampaignPageTemplate::MEASURE,
+                ],
+            ],
+        ]);
     }
 
     /** @since 1.0.0 */
