@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace GiveFlow\Campaigns\Blocks;
 
 use GiveFlow\Campaigns\CampaignPageTemplate;
+use GiveFlow\Campaigns\CampaignRepository;
 use WP_Theme_JSON_Data;
 
 /**
@@ -70,13 +71,48 @@ final class BlockEditorIntegration
      */
     private static function editingCampaignPage(): bool
     {
+        return self::editedCampaignId() > 0;
+    }
+
+    /** The campaign the open editor belongs to, or 0. @since 1.0.0 */
+    private static function editedCampaignId(): int
+    {
         $postId = get_the_ID();
 
         if (! $postId && isset($_GET['post'])) {
             $postId = (int) $_GET['post']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading which post the editor is on, not acting on it.
         }
 
-        return $postId > 0 && (int) get_post_meta((int) $postId, '_giveflow_campaign_id', true) > 0;
+        return $postId > 0 ? (int) get_post_meta((int) $postId, '_giveflow_campaign_id', true) : 0;
+    }
+
+    /**
+     * Whether this campaign's page can be reshaped by a layout template.
+     *
+     * A campaign type that lays its own page out owns every block on it, so
+     * offering to replace them all is offering to delete the thing the type
+     * exists for. Peer to peer seeds its own layout this way.
+     *
+     * @since 1.0.0
+     */
+    public static function pageTemplatesAvailable(): bool
+    {
+        $campaignId = self::editedCampaignId();
+        if ($campaignId <= 0) {
+            return false;
+        }
+
+        $campaign = (new CampaignRepository())->findById($campaignId);
+        if ($campaign === null) {
+            return false;
+        }
+
+        return (bool) apply_filters(
+            'giveflow.campaign.supports_page_templates',
+            true,
+            (string) $campaign->campaign_type,
+            $campaign
+        );
     }
 
     /**
@@ -142,7 +178,7 @@ final class BlockEditorIntegration
         // the screens that can open the picker: the blocks themselves can be
         // used on any page, but the layout switcher shows on a campaign's own.
         $uiCss = 'build/admin/campaign-blocks-ui.css';
-        if (self::editingCampaignPage() && file_exists(GIVEFLOW_DIR . $uiCss)) {
+        if (self::pageTemplatesAvailable() && file_exists(GIVEFLOW_DIR . $uiCss)) {
             wp_enqueue_style(
                 self::HANDLE_EDITOR_UI,
                 GIVEFLOW_URL . $uiCss,
@@ -157,7 +193,10 @@ final class BlockEditorIntegration
         wp_add_inline_script(
             self::HANDLE_EDITOR,
             'window.giveflowCampaignBlocks = Object.assign( window.giveflowCampaignBlocks || {}, '
-            . wp_json_encode(['bindingFields' => CampaignBindings::fields()]) . ' );',
+            . wp_json_encode([
+                'bindingFields' => CampaignBindings::fields(),
+                'pageTemplates' => self::pageTemplatesAvailable(),
+            ]) . ' );',
             'before'
         );
     }

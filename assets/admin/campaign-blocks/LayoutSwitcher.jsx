@@ -14,7 +14,8 @@
  * visible answer: is the header there. If it is not, no button, no error.
  *
  * Only mounts on a page tied to a campaign, which is the _giveflow_campaign_id
- * meta a campaign's page carries. Every other page opens the same editor.
+ * meta a campaign's page carries, and only when that campaign's type is one
+ * templates can reshape. Every other page opens the same editor.
  */
 
 import { useState, useEffect, createPortal } from '@wordpress/element';
@@ -95,11 +96,16 @@ function CampaignLayoutButton() {
         []
     );
 
+    // A campaign type that lays its own page out owns every block on it, so
+    // swapping in a template would delete the thing that type exists for. The
+    // server decides, because it is the side that knows the campaign's type.
+    const offered = campaignId > 0 && window.giveflowCampaignBlocks?.pageTemplates !== false;
+
     const { resetBlocks } = useDispatch( blockEditorStore );
     const { createNotice } = useDispatch( noticesStore );
-    const slot = useHeaderSlot( !! campaignId );
+    const slot = useHeaderSlot( offered );
 
-    if ( ! campaignId ) {
+    if ( ! offered ) {
         return null;
     }
 
