@@ -22,27 +22,11 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve( path.dirname( fileURLToPath( import.meta.url ) ), '..' );
 
 /**
- * The directory the plugin installs into, taken from the header rather than
- * from whatever this checkout happens to be called.
- *
- * WordPress.org derives the slug from the plugin name and requires the text
- * domain to match it, so the header is the one place that already has to be
- * right. Reading the folder name instead produced a zip that installed to
- * wp-content/plugins/giveflow while the directory installs to
- * giveflow-fundraising-campaigns: a site that took one from each channel would end
- * up running the plugin twice.
+ * The directory the plugin installs into. Named here and in deploy.yml, and the
+ * two have to agree: a zip that unpacks to a different directory than the
+ * directory installs to leaves a site running the plugin twice.
  */
-const slug = ( () => {
-    const header = readFileSync( path.join( root, 'giveflow.php' ), 'utf8' );
-    const match  = header.match( /^\s*\*\s*Text Domain:\s*(\S+)\s*$/m );
-
-    if ( ! match ) {
-        console.error( 'No Text Domain in the plugin header. Refusing to guess the install directory.' );
-        process.exit( 1 );
-    }
-
-    return match[ 1 ];
-} )();
+const slug = 'giveflow-fundraising-campaigns';
 
 function rules() {
     const file = path.join( root, '.distignore' );

@@ -18,9 +18,7 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-# Same source of truth as the packager: the header, not the checkout's name.
-SLUG=$(sed -n 's/^[[:space:]]*\*[[:space:]]*Text Domain:[[:space:]]*\([^[:space:]]*\).*/\1/p' giveflow.php | head -1)
-test -n "$SLUG" || { echo "::error::no Text Domain in the plugin header" >&2; exit 1; }
+SLUG=giveflow-fundraising-campaigns
 
 ZIP="dist/$SLUG.zip"
 OUT="dist/$SLUG"
