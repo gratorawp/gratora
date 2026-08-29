@@ -228,7 +228,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
                 </Field>
             ) }
 
-            <Field label={ __( 'Page layout', 'giveflow-fundraising-campaigns' ) }>
+            <Field label={ __( 'Campaign template', 'giveflow-fundraising-campaigns' ) }>
                 <button
                     type="button"
                     className="giveflow-cc__layout"

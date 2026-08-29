@@ -121,13 +121,13 @@ function CampaignLayoutButton() {
 
             createNotice(
                 'info',
-                __( 'Layout replaced. Undo puts the old one back.', 'giveflow-fundraising-campaigns' ),
+                __( 'Campaign template applied. Undo puts the old page back.', 'giveflow-fundraising-campaigns' ),
                 { type: 'snackbar' }
             );
         } catch ( err ) {
             createNotice(
                 'error',
-                err?.message || __( 'The layout could not be applied.', 'giveflow-fundraising-campaigns' ),
+                err?.message || __( 'The campaign template could not be applied.', 'giveflow-fundraising-campaigns' ),
                 { type: 'snackbar' }
             );
         } finally {
@@ -143,7 +143,7 @@ function CampaignLayoutButton() {
         >
             { applying ? <Spinner /> : <BrandMark /> }
             <span className="giveflow-layout-btn__label">
-                { __( 'Layout', 'giveflow-fundraising-campaigns' ) }
+                { __( 'Campaign templates', 'giveflow-fundraising-campaigns' ) }
             </span>
         </Button>
     );

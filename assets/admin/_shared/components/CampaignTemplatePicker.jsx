@@ -217,14 +217,14 @@ export default function CampaignTemplatePicker( { value, onPick, onClose } ) {
 
     return (
         <Modal
-            title={ __( 'Choose a page layout', 'giveflow-fundraising-campaigns' ) }
+            title={ __( 'Campaign templates', 'giveflow-fundraising-campaigns' ) }
             onRequestClose={ onClose }
             className="giveflow-template-picker giveflow-ctp"
             size="large"
         >
             { failed ? (
                 <div className="giveflow-template-picker__state">
-                    <p>{ __( 'The page layouts could not be loaded.', 'giveflow-fundraising-campaigns' ) }</p>
+                    <p>{ __( 'The campaign templates could not be loaded.', 'giveflow-fundraising-campaigns' ) }</p>
                     <button type="button" className="btn" onClick={ load }>
                         { __( 'Try again', 'giveflow-fundraising-campaigns' ) }
                     </button>
