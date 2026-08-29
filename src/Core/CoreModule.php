@@ -1075,14 +1075,18 @@ final class CoreModule implements GiveFlowModule
             $c->get(CampaignRepository::class),
             $c->get(FormRepository::class),
         ));
-        $formShortcode = new DonationFormShortcode(
+        // Bound rather than built here: an add-on rendering a donation form in
+        // the editor needs this to build the preview document, and it holds
+        // per-request state that a second instance would not share.
+        $c->bind(DonationFormShortcode::class, fn (Container $c) => new DonationFormShortcode(
             $c->get(FormRepository::class),
             $c->get(CampaignStyleResolver::class),
             $c->get(CampaignRepository::class),
             $c->get(AntiSpamGuard::class),
             $c->get(GatewayManager::class),
             $c->get(TestMode::class),
-        );
+        ));
+        $formShortcode = $c->get(DonationFormShortcode::class);
         $blocks->add(new DonationFormBlock(
             $c->get(CampaignRepository::class),
             $c->get(FormRepository::class),
