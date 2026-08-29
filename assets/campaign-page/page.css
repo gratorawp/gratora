@@ -720,6 +720,17 @@ body,
     background: var(--dp-on-accent);
 }
 
+/* The tokens above are the whole answer on the front end, and half of it in the
+   editor: a block previewed there resolves no queried page, so it carries the
+   campaign's tokens inline on its own wrapper, and an inline --giveflow-text
+   outranks anything an ancestor declares. Setting the colour itself is what
+   survives both, because the inline style never sets `color`. */
+.dp-panel--accent .giveflow-stat__label,
+.dp-panel--accent .giveflow-progress__caption,
+.dp-panel--accent .giveflow-progress__target { color: var(--dp-on-accent-muted); }
+.dp-panel--accent .giveflow-stat__value { color: var(--dp-on-accent); }
+.dp-panel--accent .giveflow-progress__bar { background: var(--dp-on-accent-line); }
+
 /* Photo cover: the campaign image is the ground, the title and figures sit on
    it. The image block is absolute rather than a flow child so it fills the
    panel whatever wraps it, which the editor and the front end do differently:
@@ -748,11 +759,19 @@ body,
     inset: 0;
     z-index: 0;
     margin: 0;
+    /* The shared rail caps every campaign block at 1080px and centres it. That
+       is right for a block in the flow and wrong for the ground behind one, so
+       the cap is lifted here rather than everywhere. */
+    max-width: none;
     border-radius: 0;
 }
 .dp-cover__media > *,
 .dp-cover__media figure { height: 100%; margin: 0; }
-.dp-cover__media img {
+/* Carrying .dp-cover as well to match the ratio rule's weight: the block
+   stylesheet sets height on .giveflow-block--image.is-ratio-N .giveflow-block__image,
+   and object-fit has nothing to cover if that height wins. */
+.dp-cover .dp-cover__media .giveflow-block__image,
+.dp-cover .dp-cover__media img {
     display: block;
     width: 100%;
     height: 100%;
@@ -779,10 +798,16 @@ body,
     line-height: 1.08;
     letter-spacing: -.02em;
 }
-/* Same reason as the filled panel: the accent cannot colour a bar that is
-   sitting on the accent, or on a photograph of unknown colour. */
+/* Same reason as the filled panel, and the same editor caveat: the ink is set
+   rather than handed over as a token, so an inline token on a previewed block
+   cannot take it back. */
 .dp-cover .giveflow-block--progress .giveflow-progress__value { color: #fff; }
 .dp-cover .giveflow-block--progress .giveflow-progress__bar-fill { background: #fff; }
+.dp-cover .giveflow-stat__value { color: #fff; }
+.dp-cover .giveflow-stat__label,
+.dp-cover .giveflow-progress__caption,
+.dp-cover .giveflow-progress__target { color: rgba(255, 255, 255, .76); }
+.dp-cover .giveflow-progress__bar { background: rgba(255, 255, 255, .28); }
 
 /* Tinted: the same accent at low strength, text unchanged. */
 .dp-panel--soft { background: var(--dp-accent-soft); }
