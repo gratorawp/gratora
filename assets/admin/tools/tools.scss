@@ -329,3 +329,18 @@
         overflow-wrap: anywhere;
     }
 }
+
+// System report groups. The rows are the settings screen's info grid; only the
+// heading that separates one group from the next is new.
+.giveflow-sysinfo__group + .giveflow-sysinfo__group {
+    margin-top: 22px;
+}
+
+.giveflow-sysinfo__title {
+    margin: 0 0 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: $text-muted;
+}

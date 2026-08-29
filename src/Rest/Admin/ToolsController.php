@@ -49,6 +49,7 @@ final class ToolsController
         private DataImporter $importer,
         private CsvImporter $csv,
         private TestDataPurger $testData,
+        private \GiveFlow\Admin\SystemReport $report,
     ) {
     }
 
@@ -1034,6 +1035,9 @@ final class ToolsController
                 ],
                 $this->upgrades->pending()
             ),
+            // The full report, grouped, so the screen and the clipboard carry
+            // the same thing and neither has to know what is in it.
+            'report'                => $this->report->sections(),
             'test_data'             => $this->testData->preview(),
             'recalc_scopes'         => array_map(
                 static fn ($slug, $label): array => ['value' => $slug, 'label' => $label],

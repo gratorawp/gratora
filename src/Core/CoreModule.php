@@ -964,6 +964,10 @@ final class CoreModule implements GiveFlowModule
                 $c->get(DataImporter::class),
                 $c->get(CsvImporter::class),
                 new \GiveFlow\Foundation\Maintenance\TestDataPurger($c->get(DonorService::class)),
+                new \GiveFlow\Admin\SystemReport(
+                    $c->get(ModuleManager::class),
+                    $c->get(GatewayManager::class),
+                ),
             ),
             new ExportsController(
                 $c->get(DonorExporter::class),

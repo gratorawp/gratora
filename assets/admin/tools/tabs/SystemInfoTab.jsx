@@ -12,19 +12,18 @@ function formatWhen( iso ) {
 export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } ) {
     const [ copied, setCopied ] = useState( false );
 
-    const rows = info ? [
-        [ __( 'GiveFlow version', 'giveflow-fundraising-campaigns' ), info.version ],
-        [ __( 'PHP version', 'giveflow-fundraising-campaigns' ), info.php ],
-        [ __( 'WordPress', 'giveflow-fundraising-campaigns' ), info.wp ],
-        [ __( 'Site URL', 'giveflow-fundraising-campaigns' ), info.site_url ],
-        [ __( 'REST namespace', 'giveflow-fundraising-campaigns' ), info.rest_root ],
-    ] : [];
+    const sections = info?.report ?? [];
+
+    // One text block, in the order the screen shows it, so what lands in a
+    // ticket is what the person was looking at.
+    const asText = () => sections
+        .map( ( s ) => `== ${ s.title } ==\n`
+            + s.rows.map( ( r ) => `${ r.label }: ${ r.value }` ).join( '\n' ) )
+        .join( '\n\n' );
 
     const copy = async () => {
         try {
-            await navigator.clipboard.writeText(
-                rows.map( ( [ k, v ] ) => `${ k }: ${ v }` ).join( '\n' )
-            );
+            await navigator.clipboard.writeText( asText() );
             setCopied( true );
             setTimeout( () => setCopied( false ), 2000 );
         } catch ( err ) {
@@ -36,7 +35,7 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
         <div className="giveflow-panel">
             <Card
                 title={ __( 'System info', 'giveflow-fundraising-campaigns' ) }
-                sub={ __( 'Worth pasting into a support request.', 'giveflow-fundraising-campaigns' ) }
+                sub={ __( 'Everything a support request needs. No keys or credentials are included, so it is safe to paste.', 'giveflow-fundraising-campaigns' ) }
             >
                 { infoError ? (
                     <div className="giveflow-advanced-actions">
@@ -47,14 +46,19 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
                     <p className="giveflow-tools-empty">{ __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p>
                 ) : (
                     <>
-                        <div className="giveflow-advanced-info">
-                            { rows.map( ( [ label, value ] ) => (
-                                <div key={ label }>
-                                    <dt>{ label }</dt>
-                                    <dd><code>{ value }</code></dd>
+                        { sections.map( ( section ) => (
+                            <div key={ section.title } className="giveflow-sysinfo__group">
+                                <h3 className="giveflow-sysinfo__title">{ section.title }</h3>
+                                <div className="giveflow-advanced-info">
+                                    { section.rows.map( ( r, i ) => (
+                                        <div key={ `${ section.title }-${ i }` }>
+                                            <dt>{ r.label }</dt>
+                                            <dd><code>{ r.value }</code></dd>
+                                        </div>
+                                    ) ) }
                                 </div>
-                            ) ) }
-                        </div>
+                            </div>
+                        ) ) }
                         <div className="giveflow-advanced-actions" style={ { marginTop: 12 } }>
                             <Btn variant="secondary" onClick={ copy }>
                                 { copied ? __( 'Copied', 'giveflow-fundraising-campaigns' ) : __( 'Copy to clipboard', 'giveflow-fundraising-campaigns' ) }
