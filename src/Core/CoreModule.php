@@ -1120,6 +1120,14 @@ final class CoreModule implements GiveFlowModule
         });
 
         (new CampaignBlockEditorIntegration())->register();
+
+        // Publishes every registered command as a WordPress ability, which is
+        // what an MCP server reads. Add-on packs are included because the
+        // bridge reads the registry when the abilities hook fires, after the
+        // command broadcast on init:5.
+        (new \GiveFlow\Foundation\Commands\AbilitiesBridge(
+            $c->get(CommandRegistry::class)
+        ))->register();
         $campaignBindings = new CampaignBindings($c->get(CampaignRepository::class));
         $campaignBindings->register();
 
