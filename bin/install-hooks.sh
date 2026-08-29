@@ -13,11 +13,13 @@
 #
 # Re-run it any time; it overwrites its own hook and leaves any other alone.
 #
+# Repos outside this plugins directory can be added with GIVEFLOW_EXTRA_REPOS,
+# a colon-separated list of paths.
+#
 set -uo pipefail
 
 CORE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLUGINS_DIR="$(dirname "$CORE_DIR")"
-HQ="$HOME/Local Sites/getdono/app/public/wp-content/plugins/giveflow-hq"
 
 read -r -d '' HOOK <<'HOOKEOF'
 #!/usr/bin/env bash
@@ -67,7 +69,10 @@ install_into "$CORE_DIR"
 for d in "$PLUGINS_DIR"/giveflow-*/; do
     install_into "${d%/}"
 done
-[ -d "$HQ" ] && install_into "$HQ"
+IFS=':' read -ra EXTRA <<< "${GIVEFLOW_EXTRA_REPOS:-}"
+for d in ${EXTRA[@]+"${EXTRA[@]}"}; do
+    [ -n "$d" ] && [ -d "$d" ] && install_into "$d"
+done
 
 echo
 echo "Hooks live in .git/hooks, which git does not track, so this has to be run"

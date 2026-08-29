@@ -13,6 +13,9 @@
 #   bin/check-all.sh --analyse    analysis only, which takes seconds
 #   bin/check-all.sh p2p events   only add-ons whose name contains one of these
 #
+# Repos outside this plugins directory can be added with GIVEFLOW_EXTRA_REPOS,
+# a colon-separated list of paths.
+#
 # bin/install-hooks.sh puts the same checks on pre-push, per repo.
 #
 set -uo pipefail
@@ -45,9 +48,10 @@ for d in "$PLUGINS_DIR"/giveflow-*/; do
     [ -f "${d}composer.json" ] && REPOS+=("${d%/}")
 done
 
-# giveflow-hq lives in the other site, since it is not a GiveFlow add-on.
-HQ="$HOME/Local Sites/getdono/app/public/wp-content/plugins/giveflow-hq"
-[ -f "$HQ/composer.json" ] && REPOS+=("$HQ")
+IFS=':' read -ra EXTRA <<< "${GIVEFLOW_EXTRA_REPOS:-}"
+for d in ${EXTRA[@]+"${EXTRA[@]}"}; do
+    [ -n "$d" ] && [ -f "$d/composer.json" ] && REPOS+=("${d%/}")
+done
 
 printf '%-32s %s\n' "REPO" "RESULT"
 printf '%-32s %s\n' "--------------------------------" "------"
