@@ -328,6 +328,12 @@ final class CoreModule implements GiveFlowModule
 
         $c->bind(PdfBuilder::class, fn () => new PdfBuilder());
         $c->bind(LicenseService::class, fn (Container $c) => new LicenseService($c->get(ModuleManager::class)));
+        // Bound, not built at the one call site: the tools screen renders it and
+        // the assistant's support commands answer from it.
+        $c->bind(\GiveFlow\Admin\SystemReport::class, fn (Container $c) => new \GiveFlow\Admin\SystemReport(
+            $c->get(ModuleManager::class),
+            $c->get(GatewayManager::class),
+        ));
 
         $c->bind(ReferenceGenerator::class, fn (Container $c) => new ReferenceGenerator(
             $c->get(Clock::class)
@@ -964,10 +970,7 @@ final class CoreModule implements GiveFlowModule
                 $c->get(DataImporter::class),
                 $c->get(CsvImporter::class),
                 new \GiveFlow\Foundation\Maintenance\TestDataPurger($c->get(DonorService::class)),
-                new \GiveFlow\Admin\SystemReport(
-                    $c->get(ModuleManager::class),
-                    $c->get(GatewayManager::class),
-                ),
+                $c->get(\GiveFlow\Admin\SystemReport::class),
             ),
             new ExportsController(
                 $c->get(DonorExporter::class),
