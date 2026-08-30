@@ -724,6 +724,17 @@ final class DonationsController
             return null;
         }
 
+        // Noon stands in for a moment nobody wrote down, which is right for a
+        // date in the past: nothing else on the donation happened that day, so
+        // the receipt and any note still sort after it. Today is different. The
+        // receipt is issued and the first note is added within seconds of the
+        // recording, so a donation stamped at noon this morning sorts after
+        // both and the history reads as though it was created after its own
+        // receipt was issued.
+        if ($date->format('Y-m-d') === current_time('Y-m-d')) {
+            return current_time('mysql', true);
+        }
+
         return $date->setTime(12, 0)->format('Y-m-d H:i:s');
     }
 
