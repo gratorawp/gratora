@@ -166,7 +166,7 @@
             "version": "v1.0.7",
             "source": {
                 "type": "git",
-                "url": "git@github-giveflowdev:givefloworg/queryable.git",
+                "url": "git@github-giveflowdev:fundkitorg/queryable.git",
                 "reference": "3a50b44075d52fa27bbbaf4bfc2204570c9d5da9"
             },
             "require": {

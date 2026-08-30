@@ -90,7 +90,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github-giveflowdev:givefloworg/queryable.git"
+            "url": "git@github-giveflowdev:fundkitorg/queryable.git"
         }
     ]
 }

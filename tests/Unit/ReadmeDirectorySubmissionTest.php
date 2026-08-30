@@ -44,7 +44,7 @@ final class ReadmeDirectorySubmissionTest extends TestCase
     ];
 
     /** Where readme.txt sends a reviewer for the sources behind build/. */
-    private const REPOSITORY = 'https://github.com/givefloworg/giveflow';
+    private const REPOSITORY = 'https://github.com/fundkitorg/giveflow';
 
     private function root(): string
     {

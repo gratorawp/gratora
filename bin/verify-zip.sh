@@ -106,7 +106,7 @@ done
 # Guideline 4: build/ is compiled, and the repository readme.txt names is where a
 # reviewer is sent for the sources. That link is load-bearing rather than prose,
 # so losing it is a build failure and not a copy edit.
-grep -q 'github.com/givefloworg/giveflow' "$OUT/readme.txt" \
+grep -q 'github.com/fundkitorg/giveflow' "$OUT/readme.txt" \
     || fail "readme.txt does not name the repository, so nothing says where build/ came from"
 
 # The other side of the same bargain: the repository answers for these, so
