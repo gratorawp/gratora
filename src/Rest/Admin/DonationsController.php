@@ -786,6 +786,8 @@ final class DonationsController
             }
         }
 
+        $attribution = $this->attributionLabels($result['items']);
+
         $shaped = [];
         foreach ($result['items'] as $d) {
             /** @var Donation $d */
@@ -795,6 +797,7 @@ final class DonationsController
                 $d->campaign_id ? ($campaignsById[$d->campaign_id] ?? null) : null,
                 $d->form_id     ? ($formsById[$d->form_id]         ?? null) : null,
                 $d->fund_id     ? ($fundsById[$d->fund_id]         ?? null) : null,
+                $attribution[(int) $d->id] ?? null,
             );
         }
 
@@ -992,7 +995,14 @@ final class DonationsController
         }
 
         return new WP_REST_Response([
-            'donation' => $this->shapeDonation($donation, $donor, $campaign, $form, $fund) + [
+            'donation' => $this->shapeDonation(
+                $donation,
+                $donor,
+                $campaign,
+                $form,
+                $fund,
+                $this->attributionLabels([$donation])[(int) $donation->id] ?? null
+            ) + [
                 // Fields the list endpoint doesn't include.
                 'fee_cents'            => $donation->fee_cents,
                 'net_cents'            => $donation->net_cents,
@@ -1680,7 +1690,8 @@ final class DonationsController
     }
 
     /** @since 1.0.0 */
-    private function shapeDonation(Donation $d, ?Donor $donor, ?Campaign $campaign = null, ?Form $form = null, ?Fund $fund = null): array
+    /** @param array<string, mixed>|null $attribution */
+    private function shapeDonation(Donation $d, ?Donor $donor, ?Campaign $campaign = null, ?Form $form = null, ?Fund $fund = null, ?array $attribution = null): array
     {
         return [
             'id'           => $d->id,
@@ -1725,7 +1736,42 @@ final class DonationsController
                 'name' => (string) $fund->name,
                 'code' => (string) $fund->code,
             ] : null,
+            // Whoever inside the campaign this was credited to, when something
+            // owns that idea. Null on every donation that is the campaign's own.
+            'attributed_to' => $attribution,
         ];
+    }
+
+    /**
+     * Who a set of donations was credited to inside their campaign, keyed by
+     * donation id.
+     *
+     * Batched on purpose: the list asks for a page of donations at once, and a
+     * lookup per row is exactly the N+1 the campaign and donor loads above go
+     * out of their way to avoid. Core stores the columns and knows no names, so
+     * whatever owns them answers.
+     *
+     * @param list<Donation> $donations
+     * @return array<int, array<string, mixed>>
+     *
+     * @since 1.0.0
+     */
+    private function attributionLabels(array $donations): array
+    {
+        $credited = array_values(array_filter(
+            $donations,
+            static fn (Donation $d): bool => $d->fundraiser_id !== null || $d->fundraiser_team_id !== null
+        ));
+        if ($credited === []) {
+            return [];
+        }
+
+        $labels = (array) apply_filters('giveflow.donation.attribution_labels', [], $credited);
+
+        return array_filter(
+            $labels,
+            static fn ($l): bool => is_array($l) && (string) ($l['label'] ?? '') !== ''
+        );
     }
 
     /**

@@ -337,11 +337,28 @@ export default function List() {
             label:    __( 'Campaign', 'giveflow-fundraising-campaigns' ),
             elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
             filterBy: { operators: [ 'is' ] },
-            render: ( { item } ) => (
-                item.campaign?.title
-                    ? <a className="giveflow-row__link" href={ campaignDetailHref( item.campaign.id ) } { ...rowLinkProps }>{ item.campaign.title }</a>
-                    : <span className="giveflow-row__sub">-</span>
-            ),
+            render: ( { item } ) => {
+                if ( ! item.campaign?.title ) {
+                    return <span className="giveflow-row__sub">-</span>;
+                }
+
+                return (
+                    <div className="giveflow-row">
+                        <div className="giveflow-row__body">
+                            <a className="giveflow-row__link" href={ campaignDetailHref( item.campaign.id ) } { ...rowLinkProps }>
+                                { item.campaign.title }
+                            </a>
+                            { /* Who inside the campaign it came through, when
+                                 something owns that idea. The campaign alone
+                                 does not say whether a donation arrived
+                                 through somebody raising for it. */ }
+                            { item.attributed_to?.label && (
+                                <div className="giveflow-row__sub">{ item.attributed_to.label }</div>
+                            ) }
+                        </div>
+                    </div>
+                );
+            },
         },
         {
             id:       'is_test',
