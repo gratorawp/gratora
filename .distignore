@@ -26,6 +26,10 @@
 composer.lock
 /package-lock.json
 
+# The stub directory phpstan.neon.dist points at. It defines constants for the
+# analyser and is never loaded at runtime.
+/phpstan
+
 /tests-e2e
 /test-results
 /playwright.config.ts
@@ -44,6 +48,7 @@ composer.lock
 /languages/README.md
 /.wordpress-org
 /CLAUDE.md
+/docs
 /qa
 /graphify-out
 
@@ -72,6 +77,7 @@ tests
 .php-cs-fixer.cache
 *.cache
 *.dist
+*.neon
 
 # A vendored package carries its own repository furniture, and the rebrand
 # showed why naming the package is the wrong shape: these were listed under a

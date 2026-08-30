@@ -281,6 +281,9 @@ final class DistPackagingTest extends TestCase
             'assets/deactivation',
             'build',
             'src',
+            'phpstan',
+            'phpstan-baseline.neon',
+            'docs',
         ];
 
         foreach ($samples as $rel) {
