@@ -434,29 +434,27 @@ final class DashboardMetricsService
         $noteCount  = (int) ($noteRows['notes'] ?? 0);
         $donorCount = (int) ($noteRows['donors'] ?? 0);
 
-        // Resolved only for the link target: one donor means their profile,
-        // several mean the donor list.
-        $noteDonors = [];
-        if ($noteCount > 0 && $donorCount === 1) {
+        // Resolved only for the link target: one note has a donation to open.
+        $onlyNote = '';
+        if ($noteCount === 1) {
             $one = DonationQueries::donationRows(
                 DB::table('giveflow_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
                 $includeTest
             )
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->where('paid_at', $since7d, '>=')
-                ->selectRaw('MIN(donor_id) AS donor_id')
+                ->selectRaw('MIN(reference) AS reference')
                 ->get();
-            $id = (int) ($one['donor_id'] ?? 0);
-            if ($id > 0) $noteDonors[$id] = true;
+            $onlyNote = (string) ($one['reference'] ?? '');
         }
         if ($noteCount > 0) {
-            // The note is the donor's, so open their profile when it points at one
-            // person: their timeline shows the note in context. Several donors
-            // have no single profile, so fall back to the donor list rather than
-            // the donations ledger, which is where you read amounts, not messages.
-            $href = count($noteDonors) === 1
-                ? admin_url('admin.php?page=giveflow-donors#donor/' . array_key_first($noteDonors))
-                : admin_url('admin.php?page=giveflow-donors');
+            // The note is written on a donation and is only ever shown on that
+            // donation's own screen, so that is where Read goes. It used to open
+            // the donor's profile, which does not carry the note at all: the
+            // reader arrived at a page with no sign of the thing they came for.
+            $href = $onlyNote !== ''
+                ? admin_url('admin.php?page=giveflow-donations&view=detail&reference=' . rawurlencode($onlyNote))
+                : admin_url('admin.php?page=giveflow-donations');
             $items[] = [
                 'key'   => 'donor-notes',
                 'tone'  => 'info',
