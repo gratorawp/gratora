@@ -172,7 +172,12 @@ final class CoreReportCommandsTest extends IntegrationTestCase
         }
     }
 
-    public function test_a_single_donor_note_links_to_that_donors_profile(): void
+    /**
+     * The note is written on a donation and is shown on that donation's screen
+     * and nowhere else. This used to open the donor's profile, which does not
+     * carry it: Read led to a page with no sign of the thing it named.
+     */
+    public function test_a_single_note_opens_the_donation_that_carries_it(): void
     {
         $ctx = $this->adminCtx();
         $this->seedNotedDonation(1, 'Please keep this anonymous.');
@@ -181,11 +186,14 @@ final class CoreReportCommandsTest extends IntegrationTestCase
         $note  = $this->itemByKey($items, 'donor-notes');
 
         $this->assertNotNull($note, 'expected a donor-notes attention item');
-        $this->assertStringContainsString('page=giveflow-donors', $note['action_href']);
-        $this->assertStringEndsWith('#donor/1', $note['action_href']);
+        $this->assertStringContainsString('page=giveflow-donations', $note['action_href']);
+        $this->assertStringContainsString('view=detail', $note['action_href']);
+        $this->assertStringContainsString('reference=GIVEFLOW-NOTE-1', $note['action_href']);
+        $this->assertStringNotContainsString('giveflow-donors', $note['action_href']);
     }
 
-    public function test_notes_from_several_donors_fall_back_to_the_donor_list(): void
+    /** Several notes have no single donation to open, so the ledger it is. */
+    public function test_several_notes_fall_back_to_the_donations_list(): void
     {
         $ctx = $this->adminCtx();
         $this->seedNotedDonation(1, 'First note.');
@@ -195,8 +203,8 @@ final class CoreReportCommandsTest extends IntegrationTestCase
         $note  = $this->itemByKey($items, 'donor-notes');
 
         $this->assertNotNull($note);
-        $this->assertStringEndsWith('page=giveflow-donors', $note['action_href']);
-        $this->assertStringNotContainsString('#donor/', $note['action_href']);
+        $this->assertStringEndsWith('page=giveflow-donations', $note['action_href']);
+        $this->assertStringNotContainsString('view=detail', $note['action_href']);
     }
 
     private function itemByKey(array $items, string $key): ?array
