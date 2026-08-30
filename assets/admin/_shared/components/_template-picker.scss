@@ -217,6 +217,12 @@ $gctp-ink:  rgba(0, 0, 0, 0.13);
 $gctp-ink2: rgba(0, 0, 0, 0.09);
 $gctp-ink3: rgba(0, 0, 0, 0.06);
 
+// A photograph reads as a photograph. Drawn as a grey box these cards were
+// eight pictures of nothing, and half the templates differ only in where the
+// picture goes.
+$gctp-photo: linear-gradient( 152deg, #7c8593 0%, #3f4753 54%, #232932 100% );
+$gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100% );
+
 .giveflow-ctp {
     &__thumb {
         display: flex;
@@ -277,7 +283,7 @@ $gctp-ink3: rgba(0, 0, 0, 0.06);
 .gctp-media {
     flex: 0 0 30%;
     border-radius: 3px;
-    background: linear-gradient( 135deg, rgba(0,0,0,.10), rgba(0,0,0,.05) );
+    background: $gctp-photo;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -289,7 +295,7 @@ $gctp-ink3: rgba(0, 0, 0, 0.06);
         width: 40%;
         max-width: 22px;
         height: auto;
-        color: rgba(0, 0, 0, 0.26);
+        color: rgba(255, 255, 255, 0.6);
     }
 }
 
@@ -368,13 +374,13 @@ $gctp-ink3: rgba(0, 0, 0, 0.06);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient( 135deg, rgba(0,0,0,.16), rgba(0,0,0,.07) );
+    background: $gctp-photo-deep;
 
     svg {
         width: 32%;
         max-width: 20px;
         height: auto;
-        color: rgba(0,0,0,.30);
+        color: rgba(255, 255, 255, .55);
     }
 
     // The scrim the real cover carries, so the thumbnail explains why the text
@@ -489,5 +495,73 @@ $gctp-ink3: rgba(0, 0, 0, 0.06);
     &__state {
         padding: 40px;
         text-align: center;
+    }
+}
+
+
+// The split hero: the picture on one side, the readout on the other.
+.gctp-split {
+    display: flex;
+    gap: 4px;
+    flex: 0 0 40%;
+    min-height: 0;
+
+    .gctp-media { flex: 1.15 1 0; margin: 0; }
+    .gctp-accent { flex: .85 1 0; justify-content: center; }
+}
+
+// The row of links to the rest of the page.
+.gctp-nav {
+    display: flex;
+    gap: 4px;
+    flex: none;
+    padding-bottom: 3px;
+    border-bottom: 1px solid $gctp-ink3;
+
+    i {
+        display: block;
+        height: 5px;
+        width: 18px;
+        border-radius: 999px;
+        background: $gctp-ink2;
+    }
+}
+
+// The centred cover puts its headline in the middle rather than at the foot,
+// which is the whole of what separates that template from the poster.
+.gctp-cover.is-centred {
+    .over {
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    .over .h { width: 62%; }
+    .over .figs { justify-content: center; }
+}
+
+// A template whose whole page is dark says so here, because that is the thing
+// about it somebody is choosing.
+.giveflow-ctp__thumb.is-dark {
+    background: #12161d;
+    border-color: rgba(255, 255, 255, .12);
+
+    .gctp-title,
+    .gctp-text i,
+    .gctp-bar,
+    .gctp-list .nm,
+    .gctp-list .amt,
+    .gctp-list .av,
+    .gctp-wall i,
+    .gctp-grid i { background: rgba(255, 255, 255, .22); }
+
+    .gctp-form {
+        background: rgba(255, 255, 255, .06);
+        border-color: rgba(255, 255, 255, .14);
+    }
+    .gctp-form .t { background: rgba(255, 255, 255, .32); }
+    .gctp-form .tiles i,
+    .gctp-form .f {
+        background: rgba(255, 255, 255, .08);
+        border-color: rgba(255, 255, 255, .16);
     }
 }

@@ -95,8 +95,9 @@ function Part( { kind } ) {
         // The figures sit ON the photo here, which is the only thing that tells
         // this apart from the colour hero at thumbnail size.
         case 'cover':
+        case 'coverCentre':
             return (
-                <span className="gctp-cover">
+                <span className={ `gctp-cover${ kind === 'coverCentre' ? ' is-centred' : '' }` }>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="3" y="4" width="18" height="16" rx="2.5" />
                         <circle cx="8.5" cy="9.5" r="1.6" />
@@ -107,6 +108,34 @@ function Part( { kind } ) {
                         <span className="figs"><i /><i /></span>
                         <span className="bar"><i /></span>
                     </span>
+                </span>
+            );
+
+        // The photograph on one side and the readout on the other, which is a
+        // shape none of the stacked heroes can stand for.
+        case 'split':
+            return (
+                <span className="gctp-split">
+                    <span className="gctp-media">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="4" width="18" height="16" rx="2.5" />
+                            <circle cx="8.5" cy="9.5" r="1.6" />
+                            <path d="m21 15.5-4.5-4.5L6 21.5" />
+                        </svg>
+                    </span>
+                    <span className="gctp-accent">
+                        <i className="h" />
+                        <span className="figs"><i /><i /></span>
+                        <span className="bar"><i /></span>
+                    </span>
+                </span>
+            );
+
+        // The row of links to the rest of the page.
+        case 'nav':
+            return (
+                <span className="gctp-nav">
+                    { [ 0, 1, 2 ].map( ( i ) => <i key={ i } /> ) }
                 </span>
             );
 
@@ -314,10 +343,10 @@ export default function CampaignTemplatePicker( { value, campaignType, onPick, o
 
 /** The layout drawn small: main column, form beside it, any full-width footer. */
 function Wireframe( { shape } ) {
-    const { main, form, footer, stacked } = shape;
+    const { main, form, footer, stacked, tone } = shape;
 
     return (
-        <span className="giveflow-ctp__thumb" aria-hidden="true">
+        <span className={ `giveflow-ctp__thumb${ tone === 'dark' ? ' is-dark' : '' }` } aria-hidden="true">
             <span className={ `giveflow-ctp__cols${ stacked ? ' is-stacked' : '' }` }>
                 <span className="giveflow-ctp__main">
                     { main.map( ( kind, i ) => <Part key={ i } kind={ kind } /> ) }
