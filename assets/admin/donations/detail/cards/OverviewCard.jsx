@@ -50,6 +50,18 @@ export default function OverviewCard( { donation } ) {
                         </KvRow>
                     ) }
 
+                    { /* Who inside the campaign it came through. Absent on a
+                         donation the campaign received itself, and on every
+                         site with nothing that owns the idea. */ }
+                    { donation.attributed_to?.label && (
+                        <KvRow label={ donation.attributed_to.kind === 'team'
+                            ? __( 'Team', 'giveflow-fundraising-campaigns' )
+                            : __( 'Fundraiser', 'giveflow-fundraising-campaigns' ) }
+                        >
+                            { donation.attributed_to.label }
+                        </KvRow>
+                    ) }
+
                     { donation.fund && (
                         <KvRow label={ __( 'Fund', 'giveflow-fundraising-campaigns' ) }>
                             { donation.fund.name }
