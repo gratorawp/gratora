@@ -120,6 +120,18 @@ final class DonationsController
             'permission_callback' => [$this, 'canAccess'],
         ]);
 
+        // Who a recorded donation can be credited to inside its campaign. Core
+        // stores the attribution columns but owns no such thing itself, so the
+        // list is empty until an add-on fills it.
+        register_rest_route(self::NAMESPACE, '/admin/donations/attribution-options', [
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => [$this, 'attributionOptions'],
+            'permission_callback' => [$this, 'canAccess'],
+            'args'                => [
+                'campaign_id' => ['type' => 'integer', 'required' => true, 'minimum' => 1],
+            ],
+        ]);
+
         // Before the (?P<reference>...) route, which would otherwise swallow it.
         register_rest_route(self::NAMESPACE, '/admin/donations/gateway-options', [
             'methods'             => WP_REST_Server::READABLE,
@@ -302,6 +314,32 @@ final class DonationsController
      *
      * @since 1.0.0
      */
+    /**
+     * Who a donation recorded against this campaign can be credited to.
+     *
+     * A cheque handed to somebody raising money is theirs, and until this
+     * existed the only way to attribute one was to donate through their page.
+     * Each option carries the intent fields that crediting it means, so core
+     * never has to know what a fundraiser or a team is: it stores the columns
+     * and hands back whatever the add-on that owns them asked for.
+     *
+     * @since 1.0.0
+     */
+    public function attributionOptions(WP_REST_Request $request): WP_REST_Response
+    {
+        return new WP_REST_Response($this->attributionFor((int) $request['campaign_id']), 200);
+    }
+
+    /** @return list<array{id:string,label:string,extra:array<string,mixed>}> */
+    private function attributionFor(int $campaignId): array
+    {
+        $options = (array) apply_filters('giveflow.donation.attribution_options', [], $campaignId);
+
+        return array_values(array_filter($options, static fn ($o): bool => is_array($o)
+            && ($o['id'] ?? '') !== ''
+            && is_array($o['extra'] ?? null)));
+    }
+
     public function campaignOptions(): WP_REST_Response
     {
         $rows = Campaign::query()
@@ -340,6 +378,12 @@ final class DonationsController
             'note_to_org'    => ['type' => 'string'],
             'send_receipt'   => ['type' => 'boolean', 'default' => false],
             // The admin's answer to a 409: yes, I know, record it anyway.
+            'attributed_to'  => [
+                'type'        => 'string',
+                'required'    => false,
+                'default'     => '',
+                'description' => 'Credit the donation to somebody inside the campaign. Use an id from /admin/donations/attribution-options for this campaign; empty credits the campaign itself.',
+            ],
             'confirm_duplicate' => ['type' => 'boolean', 'default' => false],
         ];
     }
@@ -426,6 +470,28 @@ final class DonationsController
             }
         }
 
+        // Only what was offered. Checking against the same list the picker was
+        // built from is what stops a fundraiser on another campaign being
+        // credited here, without core having to know what a fundraiser is.
+        $extra        = [];
+        $attributedTo = (string) ($request['attributed_to'] ?? '');
+        if ($attributedTo !== '') {
+            $campaignId = $request['campaign_id'] !== null ? (int) $request['campaign_id'] : 0;
+            foreach ($this->attributionFor($campaignId) as $option) {
+                if ((string) $option['id'] === $attributedTo) {
+                    $extra = (array) $option['extra'];
+                    break;
+                }
+            }
+            if ($extra === []) {
+                return new WP_Error(
+                    'giveflow_invalid_attribution',
+                    __('That is not somebody this campaign can credit a donation to.', 'giveflow-fundraising-campaigns'),
+                    ['status' => 422]
+                );
+            }
+        }
+
         $intent = new DonationIntent(
             email: (string) $request['email'],
             amount_cents: (int) $request['amount_cents'],
@@ -452,6 +518,7 @@ final class DonationsController
             // email is not them coming back, so the money is recorded against
             // the erased shell and the erasure holds.
             reactivate_redacted_donor: false,
+            extra: $extra,
         );
 
         $donation = null;

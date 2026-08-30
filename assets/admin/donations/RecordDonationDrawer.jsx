@@ -1,5 +1,6 @@
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 import { __, sprintf } from '@wordpress/i18n';
 
 import Dialog from '@giveflow/ui/components/Dialog';
@@ -43,6 +44,10 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
     const [ funds, setFunds ]                   = useState( [] );
     const [ campaigns, setCampaigns ]           = useState( [] );
     const [ campaignsFailed, setCampaignsFailed ] = useState( false );
+    // Who inside the campaign this can be credited to. Empty unless an add-on
+    // has somebody, which is most sites, and the field is not rendered then.
+    const [ attributedTo, setAttributedTo ]     = useState( '' );
+    const [ attributions, setAttributions ]     = useState( [] );
     const [ saving, setSaving ]       = useState( false );
     const [ error, setError ]         = useState( '' );
     // Set when the server found a donation this would duplicate. Holds its
@@ -89,6 +94,33 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
         return () => { aborted = true; };
     }, [] );
 
+    // Asked again whenever the campaign changes: who can be credited belongs to
+    // that campaign, and a name carried over from the last one would be wrong.
+    useEffect( () => {
+        if ( campaignId === '' ) {
+            setAttributions( [] );
+            setAttributedTo( '' );
+            return undefined;
+        }
+
+        let aborted = false;
+        apiFetch( { path: addQueryArgs( '/giveflow/v1/admin/donations/attribution-options', { campaign_id: Number( campaignId ) } ) } )
+            .then( ( res ) => {
+                if ( aborted ) return;
+                setAttributions( ( Array.isArray( res ) ? res : [] ).map( ( o ) => ( {
+                    value: String( o.id ),
+                    label: o.group ? `${ o.group }: ${ o.label }` : o.label,
+                } ) ) );
+            } )
+            // Silent: an empty list means the donation is credited to the
+            // campaign alone, which is what happened before this field existed.
+            .catch( () => {
+                if ( ! aborted ) setAttributions( [] );
+            } );
+
+        return () => { aborted = true; };
+    }, [ campaignId ] );
+
     const cents = amount === '' ? 0 : Math.round( Number( amount ) * 100 );
     const ready = email.trim() !== '' && cents > 0 && receivedAt !== '';
 
@@ -116,6 +148,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     payment_method: method,
                     received_at: receivedAt,
                     campaign_id: campaignId === '' ? null : Number( campaignId ),
+                    attributed_to: attributedTo,
                     fund_id: fundId === '' ? null : Number( fundId ),
                     note_to_org: note.trim(),
                     send_receipt: sendReceipt,
@@ -227,13 +260,27 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 >
                     <SearchableSelect
                         value={ campaignId }
-                        onChange={ setCampaign }
+                        onChange={ ( next ) => { setCampaign( next ); setAttributedTo( '' ); } }
                         options={ campaigns }
                         placeholder={ campaignsFailed
                             ? __( 'Unavailable', 'giveflow-fundraising-campaigns' )
                             : __( 'No campaign', 'giveflow-fundraising-campaigns' ) }
                     />
                 </Field>
+
+                { attributions.length > 0 && (
+                    <Field
+                        label={ __( 'Credit to', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Optional. A check handed to somebody raising for this campaign counts towards their total as well as the campaign\'s.', 'giveflow-fundraising-campaigns' ) }
+                    >
+                        <SearchableSelect
+                            value={ attributedTo }
+                            onChange={ setAttributedTo }
+                            options={ attributions }
+                            placeholder={ __( 'The campaign itself', 'giveflow-fundraising-campaigns' ) }
+                        />
+                    </Field>
+                ) }
 
                 { funds.length > 0 && (
                     <Field
