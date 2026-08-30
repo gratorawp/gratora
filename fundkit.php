@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: FundKit Fundraising Campaigns
- * Plugin URI: https://giveflow.io
+ * Plugin URI: https://fundkit.net
  * Description: A fundraising platform for WordPress
  * Version: 1.0.0
  * Requires at least: 7.0

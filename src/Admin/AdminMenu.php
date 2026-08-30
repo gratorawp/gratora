@@ -70,9 +70,16 @@ final class AdminMenu extends HookProvider
     /** @since 1.0.0 */
     private static function menuIcon(): string
     {
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round">'
-            . '<path d="M3 6.8 C5.4 4.5 7.6 4.5 10 6.8 S14.6 9.1 17 6.8" />'
-            . '<path d="M3 13.8 C5.4 11.5 7.6 11.5 10 13.8 S14.6 16.1 17 13.8" />'
+        // Shapes rather than type, because WordPress inlines this as a base64
+        // data URI where there is no font to fall back on. Filled rather than
+        // stroked, because svg-painter.js sets fill on the root element to
+        // match the admin colour scheme: an open stroked path picks that up and
+        // fills into a blob. Sized to fill the 20px box so the letter carries
+        // the same optical weight as the core icons above and below it.
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ffffff" stroke="none">'
+            . '<rect x="4.7" y="2.7" width="3.4" height="19.5" rx="1.7" />'
+            . '<rect x="4.7" y="2.7" width="14.6" height="3.4" rx="1.7" />'
+            . '<rect x="4.7" y="10.3" width="11.6" height="3.4" rx="1.7" />'
             . '</svg>';
         return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }

@@ -1,5 +1,7 @@
 /**
- * Brand chip: gradient square with the white double-wave mark. Inline-styled
+ * Brand chip: gradient square carrying the same F as the admin menu, so the
+ * small square contexts all wear one glyph and the directory tile carries the
+ * wordmark. Inline-styled
  * so any bundle can render it without a stylesheet. `size` in pixels; radius
  * and glyph scale with it.
  */
@@ -31,13 +33,12 @@ export default function FundKitMark( { size = 28 } ) {
                 width={ glyph }
                 height={ glyph }
                 viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
+                fill="currentColor"
+                stroke="none"
             >
-                <path d="M3 9.5c3-3 6-3 9 0s6 3 9 0" />
-                <path d="M3 15.5c3-3 6-3 9 0s6 3 9 0" />
+                <rect x="4.7" y="2.7" width="3.4" height="19.5" rx="1.7" />
+                <rect x="4.7" y="2.7" width="14.6" height="3.4" rx="1.7" />
+                <rect x="4.7" y="10.3" width="11.6" height="3.4" rx="1.7" />
             </svg>
         </span>
     );

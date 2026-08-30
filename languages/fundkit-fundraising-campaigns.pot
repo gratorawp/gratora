@@ -465,7 +465,7 @@ msgstr ""
 #. Plugin URI of the plugin
 #. Author URI of the plugin
 #: fundkit.php
-msgid "https://giveflow.io"
+msgid "https://fundkit.net"
 msgstr ""
 
 #. Description of the plugin
