@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Admin\Pages;
+namespace FundKit\Admin\Pages;
 
-use GiveFlow\Foundation\Hooks\HookProvider;
+use FundKit\Foundation\Hooks\HookProvider;
 
 /**
  * Registers and renders the Tools admin page.
@@ -13,14 +13,14 @@ use GiveFlow\Foundation\Hooks\HookProvider;
  */
 final class ToolsPage extends HookProvider
 {
-    private const PAGE_ID   = 'giveflow-tools';
-    private const HANDLE    = 'giveflow-admin-tools';
+    private const PAGE_ID   = 'fundkit-tools';
+    private const HANDLE    = 'fundkit-admin-tools';
     private const BUILD_DIR = 'build/admin/tools';
 
     /** @since 1.0.0 */
     protected function filters(): array
     {
-        return ['giveflow.admin.pages' => 'registerPage'];
+        return ['fundkit.admin.pages' => 'registerPage'];
     }
 
     /** @since 1.0.0 */
@@ -28,8 +28,8 @@ final class ToolsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Tools', 'giveflow-fundraising-campaigns'),
-            'capability' => 'manage_giveflow',
+            'title'      => __('Tools', 'fundkit-fundraising-campaigns'),
+            'capability' => 'manage_fundkit',
             // After Settings: this is where someone goes once they already know
             // what they are looking for.
             'position'   => 95,
@@ -45,7 +45,7 @@ final class ToolsPage extends HookProvider
         ?>
         <div class="wrap">
             <hr class="wp-header-end" />
-            <div id="giveflow-admin-tools"></div>
+            <div id="fundkit-admin-tools"></div>
         </div>
         <?php
     }
@@ -53,7 +53,7 @@ final class ToolsPage extends HookProvider
     /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
-        $assetPath = GIVEFLOW_DIR . self::BUILD_DIR . '/index.asset.php';
+        $assetPath = FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
         if (! file_exists($assetPath)) {
             return;
         }
@@ -62,28 +62,28 @@ final class ToolsPage extends HookProvider
 
         wp_enqueue_script(
             self::HANDLE,
-            GIVEFLOW_URL . self::BUILD_DIR . '/index.js',
+            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? GIVEFLOW_VERSION,
+            $asset['version']      ?? FUNDKIT_VERSION,
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         // The list is a DataViews table, and its own layout CSS is a vendor file
         // rather than anything the theme or wp-components provides.
         wp_enqueue_style(
-            'giveflow-dataviews-vendor-tools',
-            GIVEFLOW_URL . self::BUILD_DIR . '/dataviews.css',
+            'fundkit-dataviews-vendor-tools',
+            FUNDKIT_URL . self::BUILD_DIR . '/dataviews.css',
             ['wp-components'],
-            (string) (@filemtime(GIVEFLOW_DIR . self::BUILD_DIR . '/dataviews.css') ?: GIVEFLOW_VERSION)
+            (string) (@filemtime(FUNDKIT_DIR . self::BUILD_DIR . '/dataviews.css') ?: FUNDKIT_VERSION)
         );
         wp_enqueue_style(
-            'giveflow-admin-tools',
-            GIVEFLOW_URL . 'build/admin/tools.css',
+            'fundkit-admin-tools',
+            FUNDKIT_URL . 'build/admin/tools.css',
             ['wp-components'],
-            (string) (@filemtime(GIVEFLOW_DIR . 'build/admin/tools.css') ?: GIVEFLOW_VERSION)
+            (string) (@filemtime(FUNDKIT_DIR . 'build/admin/tools.css') ?: FUNDKIT_VERSION)
         );
     }
 }

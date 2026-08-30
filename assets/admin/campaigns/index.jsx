@@ -1,12 +1,12 @@
 import { createRoot } from '@wordpress/element';
 
-import { registerGiveFlowEntities } from '../_shared/entities';
+import { registerFundKitEntities } from '../_shared/entities';
 import List from './List';
 import Detail from './Detail';
 import Toaster from '../_shared/components/Toaster';
 import './campaigns.scss';
 
-registerGiveFlowEntities();
+registerFundKitEntities();
 
 function App() {
     const params = new URLSearchParams( window.location.search );
@@ -21,7 +21,7 @@ function App() {
 }
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'giveflow-admin-campaigns' );
+    const root = document.getElementById( 'fundkit-admin-campaigns' );
     if ( ! root ) return;
     createRoot( root ).render( <><App /><Toaster /></> );
 } );

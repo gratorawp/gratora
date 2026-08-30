@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Funds\Fund;
-use GiveFlow\Funds\FundResolver;
-use GiveFlow\Funds\FundRepository;
+use FundKit\Donations\Donation;
+use FundKit\Funds\Fund;
+use FundKit\Funds\FundResolver;
+use FundKit\Funds\FundRepository;
 use WP_REST_Request;
 
 /**
@@ -28,7 +28,7 @@ final class FundScheduleWindowTest extends IntegrationTestCase
 
     private function fund(string $code, string $name, ?string $startsAt, ?string $endsAt): Fund
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/funds');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/funds');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(array_filter([
             'code'      => $code,
@@ -44,7 +44,7 @@ final class FundScheduleWindowTest extends IntegrationTestCase
 
     private function createCampaign(): int
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Window campaign', 'status' => 'published']));
 
@@ -53,17 +53,17 @@ final class FundScheduleWindowTest extends IntegrationTestCase
 
     private function formWithFundPicker(): array
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'title'       => 'Pick a fund',
             'campaign_id' => $this->campaignId,
-            'blocks'      => '<!-- wp:giveflow/fund-picker /-->'
-                . '<!-- wp:giveflow/submit-button {"label":"Give"} /-->',
+            'blocks'      => '<!-- wp:fundkit/fund-picker /-->'
+                . '<!-- wp:fundkit/submit-button {"label":"Give"} /-->',
         ]));
         $created = rest_do_request($req)->get_data();
 
-        $form = \GiveFlow\Forms\Form::query()->find('id', (int) $created['id']);
+        $form = \FundKit\Forms\Form::query()->find('id', (int) $created['id']);
         $form->status = 'published';
         $form->save();
 
@@ -86,7 +86,7 @@ final class FundScheduleWindowTest extends IntegrationTestCase
         $open   = $this->fund('general-giving', 'General giving', null, null);
 
         $form = $this->formWithFundPicker();
-        $html = do_shortcode('[giveflow_donation_form slug="' . $form['slug'] . '"]');
+        $html = do_shortcode('[fundkit_donation_form slug="' . $form['slug'] . '"]');
 
         $this->assertStringContainsString('General giving', $html, 'the fund still running is still on the form');
         $this->assertStringNotContainsString('Winter appeal', $html, 'the fund that ended is not a choice');
@@ -99,7 +99,7 @@ final class FundScheduleWindowTest extends IntegrationTestCase
         $this->fund('general-giving', 'General giving', null, null);
 
         $form = $this->formWithFundPicker();
-        $html = do_shortcode('[giveflow_donation_form slug="' . $form['slug'] . '"]');
+        $html = do_shortcode('[fundkit_donation_form slug="' . $form['slug'] . '"]');
 
         $this->assertStringNotContainsString('Spring appeal', $html);
     }
@@ -119,7 +119,7 @@ final class FundScheduleWindowTest extends IntegrationTestCase
     {
         $open = $this->fund('winter-appeal', 'Winter appeal', $this->yesterday(), $this->nextMonth());
 
-        $create = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'window.donor@example.org',
@@ -140,7 +140,7 @@ final class FundScheduleWindowTest extends IntegrationTestCase
         $this->fund('winter-appeal', 'Winter appeal', null, $this->yesterday());
 
         $rows = [];
-        foreach ((array) rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/funds'))->get_data() as $row) {
+        foreach ((array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/funds'))->get_data() as $row) {
             $rows[$row['code']] = $row;
         }
 

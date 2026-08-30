@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Blocks;
+namespace FundKit\Campaigns\Blocks;
 
 /**
  * Tiny circular initial-avatar used by the donor-activity blocks. The hue is
@@ -18,12 +18,12 @@ final class BlockAvatar
     {
         $name = trim($name);
         if ($anonymous || $name === '') {
-            return '<span class="giveflow-avatar giveflow-avatar--anon" aria-hidden="true">?</span>';
+            return '<span class="fundkit-avatar fundkit-avatar--anon" aria-hidden="true">?</span>';
         }
 
 
         // Names are stored HTML-encoded, so decode before picking the
-        // initial. Letter-first, matching GiveFlowP2P\Blocks\Initials.
+        // initial. Letter-first, matching FundKitP2P\Blocks\Initials.
         $decoded = html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $initial = preg_match('/\p{L}|\p{N}/u', $decoded, $m) === 1
             ? mb_strtoupper($m[0])
@@ -36,12 +36,12 @@ final class BlockAvatar
         // Gravatar is asked for a transparent image when it has none on file,
         // so a donor without one keeps their colored letter.
         $photo = $imageUrl === '' ? '' : sprintf(
-            '<img class="giveflow-avatar__photo" src="%s" alt="" loading="lazy" decoding="async">',
+            '<img class="fundkit-avatar__photo" src="%s" alt="" loading="lazy" decoding="async">',
             esc_url($imageUrl)
         );
 
         return sprintf(
-            '<span class="giveflow-avatar" aria-hidden="true" style="background: hsl(%d 52%% 42%%);">%s%s</span>',
+            '<span class="fundkit-avatar" aria-hidden="true" style="background: hsl(%d 52%% 42%%);">%s%s</span>',
             $hue,
             esc_html($initial),
             $photo

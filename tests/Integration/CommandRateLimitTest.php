@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\Event;
-use GiveFlow\Analytics\EventRecorder;
-use GiveFlow\Foundation\Commands\Command;
-use GiveFlow\Foundation\Commands\CommandContext;
-use GiveFlow\Foundation\Commands\CommandRegistry;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Analytics\Event;
+use FundKit\Analytics\EventRecorder;
+use FundKit\Foundation\Commands\Command;
+use FundKit\Foundation\Commands\CommandContext;
+use FundKit\Foundation\Commands\CommandRegistry;
+use FundKit\Foundation\Plugin;
 
 final class CommandRateLimitTest extends IntegrationTestCase
 {

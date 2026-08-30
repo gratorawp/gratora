@@ -1,7 +1,7 @@
 /**
  * Forms-editor block registry. Two extension surfaces converge here:
- * window.giveflow.blocks.register(name, def) after the bundle loads, and the
- * 'giveflow.editor.registerBlocks' action fired before mount; both whitelist for the inserter.
+ * window.fundkit.blocks.register(name, def) after the bundle loads, and the
+ * 'fundkit.editor.registerBlocks' action fired before mount; both whitelist for the inserter.
  */
 
 import { registerBlockType, getBlockType } from '@wordpress/blocks';
@@ -13,7 +13,7 @@ import { BlockIcons } from './blocks/_shared/block-icons';
 const allowed = new Set();
 
 /**
- * Defaults merged into every GiveFlow block's `supports` at registration time.
+ * Defaults merged into every FundKit block's `supports` at registration time.
  * Keeps Gutenberg's "Advanced > Additional CSS class(es)" panel hidden:
  * donation-form authors shouldn't be hand-rolling CSS classes per block.
  */
@@ -25,7 +25,7 @@ const api = {
     /** Register a block. Idempotent. */
     register( name, definition ) {
         if ( ! name || typeof name !== 'string' ) {
-            throw new Error( 'giveflow.blocks.register: name must be a non-empty string' );
+            throw new Error( 'fundkit.blocks.register: name must be a non-empty string' );
         }
         allowed.add( name );
         const merged = {
@@ -52,15 +52,15 @@ const api = {
 
 /** Fire the registration action; called once by Editor.jsx on mount. */
 export function runBlockRegistration() {
-    doAction( 'giveflow.editor.registerBlocks', api );
+    doAction( 'fundkit.editor.registerBlocks', api );
 }
 
-// Expose on window.giveflow for the imperative path.
+// Expose on window.fundkit for the imperative path.
 if ( typeof window !== 'undefined' ) {
-    window.giveflow = window.giveflow || {};
-    window.giveflow.blocks = api;
-    window.giveflow.editorHooks = {
-        registerBlocks: 'giveflow.editor.registerBlocks',
+    window.fundkit = window.fundkit || {};
+    window.fundkit.blocks = api;
+    window.fundkit.editorHooks = {
+        registerBlocks: 'fundkit.editor.registerBlocks',
     };
 }
 

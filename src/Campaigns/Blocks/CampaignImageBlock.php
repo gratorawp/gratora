@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Blocks;
+namespace FundKit\Campaigns\Blocks;
 
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Foundation\Helpers\View;
 
 /**
  * Core's featured-image block reads the post, which is only the page a campaign
@@ -17,7 +17,7 @@ final class CampaignImageBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/campaign-image';
+        return 'fundkit/campaign-image';
     }
 
     /** @since 1.0.0 */
@@ -66,8 +66,8 @@ final class CampaignImageBlock extends CampaignBlock
             return '';
         }
 
-        return '<div class="giveflow-block-notice">'
-            . esc_html__('This campaign has no cover image yet. Add one in the campaign settings.', 'giveflow-fundraising-campaigns')
+        return '<div class="fundkit-block-notice">'
+            . esc_html__('This campaign has no cover image yet. Add one in the campaign settings.', 'fundkit-fundraising-campaigns')
             . '</div>';
     }
 }

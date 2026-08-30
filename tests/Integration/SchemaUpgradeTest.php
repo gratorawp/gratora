@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 /**
  * What an update does to a site that already has data.
@@ -18,7 +18,7 @@ namespace GiveFlow\Tests\Integration;
  */
 final class SchemaUpgradeTest extends UpgradeTestCase
 {
-    private const TABLE = 'giveflow_donations';
+    private const TABLE = 'fundkit_donations';
 
     private function seedDonation(string $reference): void
     {
@@ -54,7 +54,7 @@ final class SchemaUpgradeTest extends UpgradeTestCase
     public function test_a_missing_column_is_added_and_the_rows_survive(): void
     {
         $this->installCurrentSchema();
-        $this->seedDonation('GIVEFLOW-UP-COL');
+        $this->seedDonation('FUNDKIT-UP-COL');
 
         // An older release did not have this column.
         $this->alterScratch('ALTER TABLE `' . $this->scratch(self::TABLE) . '` DROP COLUMN `base_amount_cents`');
@@ -63,7 +63,7 @@ final class SchemaUpgradeTest extends UpgradeTestCase
         $this->runTheRealUpdate();
 
         $this->assertContains('base_amount_cents', $this->columns(self::TABLE), 'the column is added on update');
-        $this->assertDonationSurvived('GIVEFLOW-UP-COL');
+        $this->assertDonationSurvived('FUNDKIT-UP-COL');
     }
 
     public function test_a_missing_index_is_added(): void
@@ -87,12 +87,12 @@ final class SchemaUpgradeTest extends UpgradeTestCase
         $this->installCurrentSchema();
 
         $this->alterScratch('ALTER TABLE `' . $this->scratch(self::TABLE) . '` MODIFY `gateway` VARCHAR(8) NOT NULL');
-        $this->seedDonation('GIVEFLOW-UP-WIDE');
+        $this->seedDonation('FUNDKIT-UP-WIDE');
 
         $this->runTheRealUpdate();
 
         $this->assertStringContainsString('32', $this->columnType(self::TABLE, 'gateway'), 'widened to the declared size');
-        $this->assertDonationSurvived('GIVEFLOW-UP-WIDE');
+        $this->assertDonationSurvived('FUNDKIT-UP-WIDE');
     }
 
     public function test_a_dropped_table_is_rebuilt(): void

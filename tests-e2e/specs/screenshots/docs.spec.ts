@@ -14,8 +14,8 @@
  *
  * Point it at the docs folder and run it:
  *
- *   GIVEFLOW_E2E_SHOTS=1 \
- *   GIVEFLOW_E2E_SHOTS_DIR="$HOME/Local Sites/getdono/app/public/wp-content/themes/dono/docs/screenshots" \
+ *   FUNDKIT_E2E_SHOTS=1 \
+ *   FUNDKIT_E2E_SHOTS_DIR="$HOME/Local Sites/getdono/app/public/wp-content/themes/dono/docs/screenshots" \
  *   npx playwright test --project=screenshots specs/screenshots/docs.spec.ts
  *
  * Needs a seeded site: the captures show real campaigns, donations and donors.
@@ -33,7 +33,7 @@ const admin = (page: string, extra = ''): string => `/wp-admin/admin.php?page=${
 
 /** One dashboard widget, addressed by the heading a reader sees. */
 function widget(page: Page, heading: string): Locator {
-    return page.locator('.giveflow-widget-slot').filter({ has: page.getByRole('heading', { name: heading, exact: true }) });
+    return page.locator('.fundkit-widget-slot').filter({ has: page.getByRole('heading', { name: heading, exact: true }) });
 }
 
 /**
@@ -58,7 +58,7 @@ async function unpinAdminChrome(page: Page): Promise<void> {
 async function shootElement(page: Page, target: Locator, name: string): Promise<void> {
     await expect(target).toBeVisible({ timeout: 15_000 });
     await page.waitForTimeout(600);
-    await target.screenshot({ path: `${process.env.GIVEFLOW_E2E_SHOTS_DIR}/${name}.png`, animations: 'disabled', caret: 'hide' });
+    await target.screenshot({ path: `${process.env.FUNDKIT_E2E_SHOTS_DIR}/${name}.png`, animations: 'disabled', caret: 'hide' });
 }
 
 test.describe('documentation screenshots', () => {
@@ -69,7 +69,7 @@ test.describe('documentation screenshots', () => {
     });
 
     test('dashboard', async ({ page }) => {
-        await page.goto(admin('giveflow'));
+        await page.goto(admin('fundkit'));
         await page.waitForLoadState('networkidle');
         // Recharts draws its series from JS, so idle alone still catches the
         // revenue chart mid-sweep.
@@ -89,34 +89,34 @@ test.describe('documentation screenshots', () => {
     test('lists and details', async ({ page }) => {
         // Every full-screen documentation image is viewport sized, not fullPage:
         // 1600x1000 at 2x is the 3200x2000 the existing set uses.
-        await page.goto(admin('giveflow-campaigns'));
+        await page.goto(admin('fundkit-campaigns'));
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(1_500);
         await shoot(page, 'campaigns-list');
 
-        await page.goto(admin('giveflow-donations'));
+        await page.goto(admin('fundkit-donations'));
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(1_500);
         await shoot(page, 'donations-list');
 
-        await page.goto(admin('giveflow-donors'));
+        await page.goto(admin('fundkit-donors'));
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(1_500);
         await shoot(page, 'donors-list');
 
         // Open the first row of each list rather than addressing an id, so the
         // capture survives a reseed.
-        await page.goto(admin('giveflow-donations'));
+        await page.goto(admin('fundkit-donations'));
         await page.waitForLoadState('networkidle');
-        const donation = page.locator('#giveflow-admin-donations a[href^="#donation/"], #giveflow-admin-donations a[href*="view=detail"]').first();
+        const donation = page.locator('#fundkit-admin-donations a[href^="#donation/"], #fundkit-admin-donations a[href*="view=detail"]').first();
         await expect(donation).toBeVisible({ timeout: 15_000 });
         await donation.click();
         await page.waitForTimeout(2_500);
         await shoot(page, 'donation-detail');
 
-        await page.goto(admin('giveflow-donors'));
+        await page.goto(admin('fundkit-donors'));
         await page.waitForLoadState('networkidle');
-        const donor = page.locator('#giveflow-admin-donors a[href^="#donor/"]').first();
+        const donor = page.locator('#fundkit-admin-donors a[href^="#donor/"]').first();
         await expect(donor).toBeVisible({ timeout: 15_000 });
         await donor.click();
         await page.waitForTimeout(2_500);

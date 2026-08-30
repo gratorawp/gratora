@@ -7,7 +7,7 @@ import { BlockIcons } from '../_shared/block-icons';
 import Segmented from '../../../_shared/components/Segmented';
 import AmountInput from '../../../_shared/components/AmountInput';
 
-const NAME = 'giveflow/donation-amount';
+const NAME = 'fundkit/donation-amount';
 
 // Stable per-row id so React keys survive reorder/delete instead of tracking
 // array position. Persisted in attributes; the server normaliser ignores it.
@@ -86,25 +86,25 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Amounts', 'giveflow-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Amounts', 'fundkit-fundraising-campaigns' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Donation type', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Donation type', 'fundkit-fundraising-campaigns' ) }
                         value={ donationType }
                         onChange={ ( v ) => setAttributes( { donationType: v } ) }
                         options={ [
-                            { value: 'multi', label: __( 'Multi-level', 'giveflow-fundraising-campaigns' ) },
-                            { value: 'fixed', label: __( 'Open amount', 'giveflow-fundraising-campaigns' ) },
+                            { value: 'multi', label: __( 'Multi-level', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'fixed', label: __( 'Open amount', 'fundkit-fundraising-campaigns' ) },
                         ] }
                     />
                     <p style={ { margin: '6px 0 12px', fontSize: 11, color: '#6b7280' } }>
                         { donationType === 'fixed'
-                            ? __( 'Donors enter any amount. No preset tiles.', 'giveflow-fundraising-campaigns' )
-                            : __( 'Show preset amounts donors can pick from.', 'giveflow-fundraising-campaigns' ) }
+                            ? __( 'Donors enter any amount. No preset tiles.', 'fundkit-fundraising-campaigns' )
+                            : __( 'Show preset amounts donors can pick from.', 'fundkit-fundraising-campaigns' ) }
                     </p>
 
                     { donationType === 'multi' && (
                         <ToggleControl
-                            label={ __( 'Allow custom amount', 'giveflow-fundraising-campaigns' ) }
+                            label={ __( 'Allow custom amount', 'fundkit-fundraising-campaigns' ) }
                             checked={ allowCustom }
                             onChange={ ( v ) => setAttributes( { allowCustom: v } ) }
                             __nextHasNoMarginBottom
@@ -116,8 +116,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             type="number"
                             min="0"
                             step="0.01"
-                            label={ __( 'Minimum amount', 'giveflow-fundraising-campaigns' ) }
-                            help={ __( 'Leave empty for no minimum beyond the site default.', 'giveflow-fundraising-campaigns' ) }
+                            label={ __( 'Minimum amount', 'fundkit-fundraising-campaigns' ) }
+                            help={ __( 'Leave empty for no minimum beyond the site default.', 'fundkit-fundraising-campaigns' ) }
                             value={ minCents ? String( minCents / 100 ) : '' }
                             onChange={ ( v ) => setAttributes( {
                                 minCents: v === '' ? 0 : Math.max( 0, Math.round( parseFloat( v ) * 100 ) || 0 ),
@@ -129,14 +129,14 @@ function Edit( { attributes, setAttributes, clientId } ) {
 
                     { donationType === 'multi' && (
                     <>
-                    <div className="giveflow-amounts-head">
-                        <span className="giveflow-amounts-head__label">{ __( 'Options', 'giveflow-fundraising-campaigns' ) }</span>
+                    <div className="fundkit-amounts-head">
+                        <span className="fundkit-amounts-head__label">{ __( 'Options', 'fundkit-fundraising-campaigns' ) }</span>
                         <button
                             type="button"
-                            className="giveflow-amounts-add"
+                            className="fundkit-amounts-add"
                             onClick={ addPreset }
-                            aria-label={ __( 'Add amount', 'giveflow-fundraising-campaigns' ) }
-                            title={ __( 'Add amount', 'giveflow-fundraising-campaigns' ) }
+                            aria-label={ __( 'Add amount', 'fundkit-fundraising-campaigns' ) }
+                            title={ __( 'Add amount', 'fundkit-fundraising-campaigns' ) }
                         >
                             +
                         </button>
@@ -145,12 +145,12 @@ function Edit( { attributes, setAttributes, clientId } ) {
                     { presets.map( ( p, i ) => (
                         <div
                             key={ p.id || i }
-                            className={ `giveflow-preset-row${ dragIndex === i ? ' is-dragging' : '' }` }
+                            className={ `fundkit-preset-row${ dragIndex === i ? ' is-dragging' : '' }` }
                             onDragOver={ ( e ) => e.preventDefault() }
                             onDrop={ () => { reorder( dragIndex, i ); setDragIndex( null ); } }
                         >
                             <span
-                                className="giveflow-preset-row__drag"
+                                className="fundkit-preset-row__drag"
                                 draggable
                                 tabIndex={ 0 }
                                 onDragStart={ ( e ) => {
@@ -164,22 +164,22 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                     if ( e.key === 'ArrowDown' ) { e.preventDefault(); reorder( i, i + 1 ); }
                                 } }
                                 role="button"
-                                aria-label={ __( 'Drag to reorder, or use the arrow keys', 'giveflow-fundraising-campaigns' ) }
-                                title={ __( 'Drag to reorder', 'giveflow-fundraising-campaigns' ) }
+                                aria-label={ __( 'Drag to reorder, or use the arrow keys', 'fundkit-fundraising-campaigns' ) }
+                                title={ __( 'Drag to reorder', 'fundkit-fundraising-campaigns' ) }
                             >
                                 ⠿
                             </span>
                             <input
                                 type="radio"
-                                className="giveflow-preset-row__radio"
-                                name={ `giveflow-amount-highlight-${ clientId }` }
+                                className="fundkit-preset-row__radio"
+                                name={ `fundkit-amount-highlight-${ clientId }` }
                                 checked={ !! p.preselected }
                                 onChange={ () => setPreselected( i ) }
                                 onClick={ () => { if ( p.preselected ) setPreselected( i ); } }
-                                aria-label={ __( 'Preselect this amount', 'giveflow-fundraising-campaigns' ) }
-                                title={ __( 'Preselect this amount', 'giveflow-fundraising-campaigns' ) }
+                                aria-label={ __( 'Preselect this amount', 'fundkit-fundraising-campaigns' ) }
+                                title={ __( 'Preselect this amount', 'fundkit-fundraising-campaigns' ) }
                             />
-                            <span className="giveflow-preset-row__amt">
+                            <span className="fundkit-preset-row__amt">
                                 <AmountInput
                                     value={ p.cents > 0 ? p.cents / 100 : 0 }
                                     onChange={ ( n ) => updatePreset( i, { cents: Math.max( 0, Math.round( Number( n || 0 ) * 100 ) ) } ) }
@@ -190,18 +190,18 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             </span>
                             <button
                                 type="button"
-                                className="giveflow-preset-row__remove"
+                                className="fundkit-preset-row__remove"
                                 onClick={ () => removePreset( i ) }
                                 disabled={ presets.length <= 1 }
-                                aria-label={ __( 'Remove amount', 'giveflow-fundraising-campaigns' ) }
-                                title={ __( 'Remove amount', 'giveflow-fundraising-campaigns' ) }
+                                aria-label={ __( 'Remove amount', 'fundkit-fundraising-campaigns' ) }
+                                title={ __( 'Remove amount', 'fundkit-fundraising-campaigns' ) }
                             >
                                 −
                             </button>
                         </div>
                     ) ) }
                     <p style={ { margin: '6px 0 0', fontSize: 11, color: '#6b7280' } }>
-                        { __( 'Select a radio to preselect an amount.', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Select a radio to preselect an amount.', 'fundkit-fundraising-campaigns' ) }
                     </p>
                     </>
                     ) }
@@ -209,7 +209,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <div style={ { fontSize: 12, color: '#666', marginBottom: 8 } }>
-                    { __( 'Donation amount', 'giveflow-fundraising-campaigns' ) }
+                    { __( 'Donation amount', 'fundkit-fundraising-campaigns' ) }
                 </div>
                 { donationType === 'multi' && (
                 <div style={ { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 } }>
@@ -224,13 +224,13 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             style={ {
                                 padding:      '10px 12px',
                                 background:   '#f0f0f1',
-                                borderRadius: 'var(--giveflow-radius-sm, 6px)',
+                                borderRadius: 'var(--fundkit-radius-sm, 6px)',
                                 textAlign:    'center',
                                 display:      'flex',
                                 flexDirection: 'column',
                                 gap:          2,
                                 position:     'relative',
-                                outline:      selected ? '2px solid var(--giveflow-accent, #211d3f)' : 'none',
+                                outline:      selected ? '2px solid var(--fundkit-accent, #211d3f)' : 'none',
                                 outlineOffset: selected ? -2 : 0,
                             } }
                         >
@@ -241,7 +241,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                 tagName="div"
                                 value={ p.impact }
                                 onChange={ ( v ) => updatePreset( i, { impact: v } ) }
-                                placeholder={ __( 'Add a caption', 'giveflow-fundraising-campaigns' ) }
+                                placeholder={ __( 'Add a caption', 'fundkit-fundraising-campaigns' ) }
                                 allowedFormats={ [] }
                                 style={ {
                                     fontSize: 11,
@@ -261,13 +261,13 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             padding:      '10px 12px',
                             background:   '#fff',
                             border:       '1px solid #c3c4c7',
-                            borderRadius: 'var(--giveflow-radius-sm, 6px)',
+                            borderRadius: 'var(--fundkit-radius-sm, 6px)',
                             fontSize:     13,
                             color:        '#9ca3af',
                             textAlign:    'left',
                         } }
                     >
-                        { __( 'Custom amount', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Custom amount', 'fundkit-fundraising-campaigns' ) }
                     </div>
                 ) }
             </div>
@@ -278,9 +278,9 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Donation amount', 'giveflow-fundraising-campaigns' ),
-        description: __( 'Amount picker with preset buttons and an optional custom-amount input.', 'giveflow-fundraising-campaigns' ),
-        category:   'giveflow-amount',
+        title:      __( 'Donation amount', 'fundkit-fundraising-campaigns' ),
+        description: __( 'Amount picker with preset buttons and an optional custom-amount input.', 'fundkit-fundraising-campaigns' ),
+        category:   'fundkit-amount',
         icon:       BlockIcons[ 'donation-amount' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

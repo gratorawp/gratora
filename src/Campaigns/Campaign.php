@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns;
+namespace FundKit\Campaigns;
 
 defined('ABSPATH') || exit;
 
-use GiveFlow\Campaigns\Styling\CampaignStyleResolver;
-use GiveFlow\Foundation\Time\ScheduleWindow;
-use GiveFlow\Vendor\Queryable\Model;
-use GiveFlow\Vendor\Queryable\Schema\Table;
+use FundKit\Campaigns\Styling\CampaignStyleResolver;
+use FundKit\Foundation\Time\ScheduleWindow;
+use FundKit\Vendor\Queryable\Model;
+use FundKit\Vendor\Queryable\Schema\Table;
 
 /**
  * Owns one public-facing WP page (via `page_id`) and zero or more donation forms.
@@ -18,7 +18,7 @@ use GiveFlow\Vendor\Queryable\Schema\Table;
  */
 final class Campaign extends Model
 {
-    protected string $table = 'giveflow_campaigns';
+    protected string $table = 'fundkit_campaigns';
     protected string $version = '1.0.0';
 
     public int $id;

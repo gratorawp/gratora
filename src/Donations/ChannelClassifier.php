@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donations;
+namespace FundKit\Donations;
 
 /**
  * Maps `donations.source_attribution` (utm_source/utm_medium) into a canonical

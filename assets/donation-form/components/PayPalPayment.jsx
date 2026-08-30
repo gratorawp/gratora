@@ -198,19 +198,19 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
         // The form's own shell, the same one StripePayment declares, so the
         // reset and the themed typography reach this component on the path
         // where a form has no gateway block and nothing else supplies them.
-        <div className="giveflow-form giveflow-form--payment">
+        <div className="fundkit-form fundkit-form--payment">
             { payment?.amountCents ? (
-                <p className="giveflow-form__payment-amount">
+                <p className="fundkit-form__payment-amount">
                     { formatAmount( payment.amountCents, payment.currency, config ) }
                 </p>
             ) : null }
 
             { error ? (
-                <div className="giveflow-form__error" role="alert">{ error }</div>
+                <div className="fundkit-form__error" role="alert">{ error }</div>
             ) : null }
 
             { ! ready && ! error ? (
-                <p className="giveflow-form__payment-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
+                <p className="fundkit-form__payment-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
             ) : null }
 
             { /* Approving is not the end of the work: the capture or the plan
@@ -222,12 +222,12 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                the callbacks that finish it. */ }
             <div
                 ref={ mountRef }
-                className="giveflow-form__paypal-buttons"
+                className="fundkit-form__paypal-buttons"
                 hidden={ approved }
             />
 
             { approved && ! error ? (
-                <p className="giveflow-form__payment-loading" role="status">
+                <p className="fundkit-form__payment-loading" role="status">
                     { i18n.processing || i18n.paymentLoading }
                 </p>
             ) : null }
@@ -235,10 +235,10 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
             { /* An approval whose round trip failed is not progress, so the way
                out is offered again even though the approval stands. */ }
             { ! approved || error ? (
-                <div className="giveflow-form__nav giveflow-form__nav--align-left">
+                <div className="fundkit-form__nav fundkit-form__nav--align-left">
                     <button
                         type="button"
-                        className="giveflow-form__button giveflow-form__button--secondary"
+                        className="fundkit-form__button fundkit-form__button--secondary"
                         disabled={ popupOpen }
                         onClick={ () => dispatch( { type: 'CANCEL_PAYMENT' } ) }
                     >

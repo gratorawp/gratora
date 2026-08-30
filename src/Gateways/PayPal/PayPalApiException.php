@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways\PayPal;
+namespace FundKit\Gateways\PayPal;
 
 use RuntimeException;
 

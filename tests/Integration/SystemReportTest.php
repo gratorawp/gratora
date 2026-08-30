@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Admin\SystemReport;
-use GiveFlow\Foundation\Config\SystemSetting;
-use GiveFlow\Foundation\Modules\ModuleManager;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\GatewayManager;
+use FundKit\Admin\SystemReport;
+use FundKit\Foundation\Config\SystemSetting;
+use FundKit\Foundation\Modules\ModuleManager;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\GatewayManager;
 
 /**
  * The report exists to be pasted into a support ticket, so the thing it must
@@ -119,7 +119,7 @@ final class SystemReportTest extends IntegrationTestCase
         foreach ($sections['Database'] as $row) {
             $database .= $row['label'] . ': ' . $row['value'] . "\n";
         }
-        $this->assertStringContainsString($wpdb->prefix . 'giveflow_donations', $database);
+        $this->assertStringContainsString($wpdb->prefix . 'fundkit_donations', $database);
         $this->assertStringContainsString('rows', $database);
     }
 }

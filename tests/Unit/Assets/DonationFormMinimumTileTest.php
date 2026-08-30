@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Assets;
+namespace FundKit\Tests\Unit\Assets;
 
 use PHPUnit\Framework\TestCase;
 

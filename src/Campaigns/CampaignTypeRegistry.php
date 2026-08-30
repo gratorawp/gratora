@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns;
+namespace FundKit\Campaigns;
 
 use RuntimeException;
 

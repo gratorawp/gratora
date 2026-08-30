@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Gateways\PayPal\PayPalAccount;
-use GiveFlow\Gateways\PayPal\PayPalApi;
-use GiveFlow\Gateways\PayPal\PayPalGateway;
-use GiveFlow\Gateways\PayPal\PayPalPlanRecorder;
-use GiveFlow\Gateways\PayPal\PayPalPlans;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanRepository;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donations\DonationService;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Gateways\PayPal\PayPalAccount;
+use FundKit\Gateways\PayPal\PayPalApi;
+use FundKit\Gateways\PayPal\PayPalGateway;
+use FundKit\Gateways\PayPal\PayPalPlanRecorder;
+use FundKit\Gateways\PayPal\PayPalPlans;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -39,14 +39,14 @@ final class PayPalAmountChangeTest extends IntegrationTestCase
         parent::setUp();
 
         $this->calls = [];
-        update_option('giveflow_gateway_config', ['test_mode' => true]);
+        update_option('fundkit_gateway_config', ['test_mode' => true]);
 
         $account = Plugin::instance()->container->get(PayPalAccount::class);
         $account->forget();
         $account->saveKeys(true, 'AeA1QIZ_client', 'EO422dn3_secret');
         $account->saveWebhookId(true, 'WH-TEST-1');
 
-        $manager = Plugin::instance()->container->get(\GiveFlow\Gateways\GatewayManager::class);
+        $manager = Plugin::instance()->container->get(\FundKit\Gateways\GatewayManager::class);
         if (! $manager->get('paypal')) {
             $manager->register($this->gateway());
         }
@@ -140,7 +140,7 @@ final class PayPalAmountChangeTest extends IntegrationTestCase
     /** @param array<string,mixed> $resource */
     private function postWebhook(string $type, array $resource): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/webhooks/paypal');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/paypal');
         $req->set_header('content-type', 'application/json');
         foreach ([
             'paypal_transmission_id'   => 'tx-' . bin2hex(random_bytes(3)),

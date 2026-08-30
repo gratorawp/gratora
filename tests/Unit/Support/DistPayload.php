@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Support;
+namespace FundKit\Tests\Unit\Support;
 
 /**
  * Answers "does this path reach a customer?" from .distignore.

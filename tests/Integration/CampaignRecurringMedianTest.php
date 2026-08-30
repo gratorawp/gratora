@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Foundation\Plugin;
 
 /**
  * Two campaign-detail metrics that used to count the wrong set:
@@ -68,7 +68,7 @@ final class CampaignRecurringMedianTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'GIVEFLOW-RM-' . $ref;
+        $d->reference         = 'FUNDKIT-RM-' . $ref;
         $d->donor_id          = $donorId;
         $d->campaign_id       = self::CAMPAIGN;
         $d->amount_cents      = $cents;

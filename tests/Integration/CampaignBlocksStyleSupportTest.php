@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
+use FundKit\Campaigns\Campaign;
 
 /**
  * A campaign page is an ordinary page, so its blocks answer to the editor's own
@@ -18,14 +18,14 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
     public function campaignBlockNames(): array
     {
         return [
-            ['giveflow/campaign-image'],
-            ['giveflow/campaign-progress'],
-            ['giveflow/campaign-stat'],
-            ['giveflow/donate-button'],
-            ['giveflow/top-donors'],
-            ['giveflow/recent-donations'],
-            ['giveflow/supporter-wall'],
-            ['giveflow/campaign-grid'],
+            ['fundkit/campaign-image'],
+            ['fundkit/campaign-progress'],
+            ['fundkit/campaign-stat'],
+            ['fundkit/donate-button'],
+            ['fundkit/top-donors'],
+            ['fundkit/recent-donations'],
+            ['fundkit/supporter-wall'],
+            ['fundkit/campaign-grid'],
         ];
     }
 
@@ -65,7 +65,7 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
         $id = (int) $this->campaign()->id;
 
         $html = do_blocks(
-            '<!-- wp:giveflow/campaign-progress {"campaignId":' . $id
+            '<!-- wp:fundkit/campaign-progress {"campaignId":' . $id
             . ',"style":{"color":{"background":"#ff0000","text":"#0000ff"}}} /-->'
         );
 
@@ -78,7 +78,7 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
         $id = (int) $this->campaign()->id;
 
         $html = do_blocks(
-            '<!-- wp:giveflow/campaign-progress {"campaignId":' . $id
+            '<!-- wp:fundkit/campaign-progress {"campaignId":' . $id
             . ',"style":{"spacing":{"padding":{"top":"40px"}}}} /-->'
         );
 
@@ -94,11 +94,11 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
         $id = (int) $this->campaign()->id;
 
         $html = do_blocks(
-            '<!-- wp:giveflow/campaign-progress {"campaignId":' . $id
+            '<!-- wp:fundkit/campaign-progress {"campaignId":' . $id
             . ',"style":{"color":{"background":"#ff0000"}}} /-->'
         );
 
-        $this->assertStringContainsString('giveflow-block--progress', $html);
-        $this->assertStringContainsString('data-block="giveflow/campaign-progress"', $html);
+        $this->assertStringContainsString('fundkit-block--progress', $html);
+        $this->assertStringContainsString('data-block="fundkit/campaign-progress"', $html);
     }
 }

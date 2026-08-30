@@ -90,7 +90,7 @@ export function OptionsEditor( {
     const remove = ( i ) => onChange( rows.filter( ( _, idx ) => idx !== i ) );
 
     return (
-        <div className="giveflow-options-editor">
+        <div className="fundkit-options-editor">
             { rows.map( ( o, i ) => (
                 <div
                     key={ i }
@@ -101,21 +101,21 @@ export function OptionsEditor( {
                     } }
                 >
                     <TextControl
-                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
                         value={ o.label }
                         onChange={ ( v ) => updateLabel( i, v ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Value', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Value', 'fundkit-fundraising-campaigns' ) }
                         value={ o.value }
                         onChange={ ( v ) => update( i, { value: slugify( v ) || `option-${ i + 1 }` } ) }
-                        help={ __( 'Stored when this option is picked. Auto-derived from the label.', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Stored when this option is picked. Auto-derived from the label.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     { allowDefault && (
                         <ToggleControl
-                            label={ __( 'Default', 'giveflow-fundraising-campaigns' ) }
+                            label={ __( 'Default', 'fundkit-fundraising-campaigns' ) }
                             checked={ !! o.isDefault }
                             onChange={ ( v ) => update( i, { isDefault: v } ) }
                             __nextHasNoMarginBottom
@@ -128,12 +128,12 @@ export function OptionsEditor( {
                         disabled={ rows.length <= 1 }
                         style={ { marginTop: 4 } }
                     >
-                        { __( 'Remove option', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Remove option', 'fundkit-fundraising-campaigns' ) }
                     </Button>
                 </div>
             ) ) }
             <Button variant="secondary" onClick={ add }>
-                { addLabel || __( 'Add option', 'giveflow-fundraising-campaigns' ) }
+                { addLabel || __( 'Add option', 'fundkit-fundraising-campaigns' ) }
             </Button>
         </div>
     );

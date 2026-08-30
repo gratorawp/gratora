@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/components/BoxControl';
+export { default } from '@fundkit/ui/components/BoxControl';

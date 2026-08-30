@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\CampaignService;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\CampaignService;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Plugin;
 
 /**
  * Locks the create-drawer-facing behaviour added to CampaignService::create():
  * default_fund_id + image_attachment_id now persist at create time, and
  * currency defaults to the org currency (not a hardcoded EUR) when the form
  * does not send one. Verified against the persisted row, not the return value
- * (giveflow_queryable_silent_write_failure.md).
+ * (fundkit_queryable_silent_write_failure.md).
  */
 final class CampaignCreateTest extends IntegrationTestCase
 {

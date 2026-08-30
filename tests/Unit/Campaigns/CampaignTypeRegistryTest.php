@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Campaigns;
+namespace FundKit\Tests\Unit\Campaigns;
 
-use GiveFlow\Campaigns\CampaignTypeHandler;
-use GiveFlow\Campaigns\CampaignTypeRegistry;
-use GiveFlow\Campaigns\DefaultCampaignTypeHandler;
+use FundKit\Campaigns\CampaignTypeHandler;
+use FundKit\Campaigns\CampaignTypeRegistry;
+use FundKit\Campaigns\DefaultCampaignTypeHandler;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 

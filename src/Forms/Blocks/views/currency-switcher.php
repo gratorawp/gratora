@@ -6,21 +6,21 @@ defined('ABSPATH') || exit;
  * @var string       $style  'dropdown' | 'pills'
  * @var string       $align  'left' | 'right'
  */
-$wrapClasses = 'giveflow-block giveflow-block--currency-switcher giveflow-currency'
-    . ' giveflow-currency--' . esc_attr($style)
-    . ' giveflow-currency--' . esc_attr($align);
+$wrapClasses = 'fundkit-block fundkit-block--currency-switcher fundkit-currency'
+    . ' fundkit-currency--' . esc_attr($style)
+    . ' fundkit-currency--' . esc_attr($align);
 ?>
 <?php
-$ariaName = $label !== '' ? $label : __('Currency', 'giveflow-fundraising-campaigns');
+$ariaName = $label !== '' ? $label : __('Currency', 'fundkit-fundraising-campaigns');
 ?>
 <div class="<?php echo esc_attr($wrapClasses); ?>">
     <?php if ($label !== ''): ?>
-        <span class="giveflow-currency__label"><?php echo esc_html((string) $label); ?></span>
+        <span class="fundkit-currency__label"><?php echo esc_html((string) $label); ?></span>
     <?php endif; ?>
     <?php if ($style === 'pills'): ?>
-        <span class="giveflow-currency__pills" role="radiogroup" aria-label="<?php echo esc_attr((string) $ariaName); ?>">
+        <span class="fundkit-currency__pills" role="radiogroup" aria-label="<?php echo esc_attr((string) $ariaName); ?>">
             <?php foreach ($currencies as $i => $code): ?>
-                <label class="giveflow-currency__pill">
+                <label class="fundkit-currency__pill">
                     <input
                         type="radio"
                         name="currency"
@@ -32,7 +32,7 @@ $ariaName = $label !== '' ? $label : __('Currency', 'giveflow-fundraising-campai
             <?php endforeach; ?>
         </span>
     <?php else: ?>
-        <select name="currency" class="giveflow-currency__select" aria-label="<?php echo esc_attr((string) $ariaName); ?>">
+        <select name="currency" class="fundkit-currency__select" aria-label="<?php echo esc_attr((string) $ariaName); ?>">
             <?php foreach ($currencies as $code): ?>
                 <option value="<?php echo esc_attr($code); ?>"><?php echo esc_html($code); ?></option>
             <?php endforeach; ?>

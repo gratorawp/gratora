@@ -22,7 +22,7 @@ function config( overrides = {} ) {
         currency: 'USD',
         gateway:  'offline',
         layout:   'inline',
-        rest:     'https://example.test/wp-json/giveflow/v1/donations',
+        rest:     'https://example.test/wp-json/fundkit/v1/donations',
         gateways: {
             options: [ {
                 id:          'offline',
@@ -52,12 +52,12 @@ function config( overrides = {} ) {
 
 function addForm( id, cfg ) {
     const form = document.createElement( 'form' );
-    form.className = 'giveflow-donation-form';
+    form.className = 'fundkit-donation-form';
     form.id = id;
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-giveflow-form-config', '' );
+    json.setAttribute( 'data-fundkit-form-config', '' );
     json.textContent = JSON.stringify( cfg );
     form.appendChild( json );
 
@@ -78,7 +78,7 @@ async function boot() {
 const { settle } = require( './support/waitFor' );
 
 async function donate( form ) {
-    form.querySelector( '.giveflow-form__button--primary' ).click();
+    form.querySelector( '.fundkit-form__button--primary' ).click();
     await settle();
 }
 
@@ -108,31 +108,31 @@ beforeEach( () => {
 
         return Promise.resolve( {
             ok:   true,
-            json: () => Promise.resolve( awaitingTransfer( 'GIVEFLOW-2026-0000' + n ) ),
+            json: () => Promise.resolve( awaitingTransfer( 'FUNDKIT-2026-0000' + n ) ),
         } );
     } );
 } );
 
 describe( 'the instructions screen for a donation banked by hand', () => {
     test( 'it drops the stash, so nothing is left naming the awaited transfer', async () => {
-        const form = addForm( 'giveflow-form-1', config() );
+        const form = addForm( 'fundkit-form-1', config() );
         await boot();
         await donate( form );
 
         expect( form.textContent ).toContain( PENDING_MESSAGE );
-        expect( form.textContent ).toContain( 'GIVEFLOW-2026-00001' );
+        expect( form.textContent ).toContain( 'FUNDKIT-2026-00001' );
         expect( window.sessionStorage.getItem( PENDING_KEY ) ).toBeNull();
     } );
 
     test( 'a donor who reloads and submits again posts no claim on the first row', async () => {
-        const first = addForm( 'giveflow-form-1', config() );
+        const first = addForm( 'fundkit-form-1', config() );
         await boot();
         await donate( first );
 
         // The reload: same tab and same session storage, a fresh page and a
         // fresh runtime.
         document.body.innerHTML = '';
-        const second = addForm( 'giveflow-form-1', config() );
+        const second = addForm( 'fundkit-form-1', config() );
         await boot();
         await donate( second );
 
@@ -141,13 +141,13 @@ describe( 'the instructions screen for a donation banked by hand', () => {
     } );
 
     test( 'the donation the donor is looking at survives the stash going', async () => {
-        const form = addForm( 'giveflow-form-1', config() );
+        const form = addForm( 'fundkit-form-1', config() );
         await boot();
         await donate( form );
 
         // The amount is what tells the donor how much to transfer, and on a
         // gateway that navigated away and back the stash is its only source.
-        expect( form.querySelector( '.giveflow-form__summary--receipt' ) ).not.toBeNull();
+        expect( form.querySelector( '.fundkit-form__summary--receipt' ) ).not.toBeNull();
         expect( form.textContent ).toContain( '25' );
     } );
 } );

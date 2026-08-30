@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Blocks;
+namespace FundKit\Campaigns\Blocks;
 
-use GiveFlow\Campaigns\CampaignRepository;
-use GiveFlow\Forms\FormRepository;
-use GiveFlow\Forms\Shortcode\DonationFormShortcode;
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Campaigns\CampaignRepository;
+use FundKit\Forms\FormRepository;
+use FundKit\Forms\Shortcode\DonationFormShortcode;
+use FundKit\Foundation\Helpers\View;
 
 /**
  * Renders a campaign's donation form inline on the page (the in-page
@@ -29,7 +29,7 @@ final class DonationFormBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/donation-form';
+        return 'fundkit/donation-form';
     }
 
     /** @since 1.0.0 */
@@ -57,9 +57,9 @@ final class DonationFormBlock extends CampaignBlock
             return View::loadRelative(__DIR__, 'views/donation-form', [
                 'mode'      => 'empty',
                 'emptyText' => (string) ($attrs['emptyText'] ?? '')
-                    ?: __('Donations are not open for this campaign yet.', 'giveflow-fundraising-campaigns'),
+                    ?: __('Donations are not open for this campaign yet.', 'fundkit-fundraising-campaigns'),
                 'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
-                    ? __('This campaign has no published donation form yet.', 'giveflow-fundraising-campaigns')
+                    ? __('This campaign has no published donation form yet.', 'fundkit-fundraising-campaigns')
                     : '',
                 'styleVars' => $this->styleVars($campaign),
             ]);
@@ -92,14 +92,14 @@ final class DonationFormBlock extends CampaignBlock
         // A published form still renders nothing when the campaign itself is
         // not taking donations, a draft or one outside its schedule. Having a
         // form row is not the same as having something to show.
-        $formHtml = do_shortcode('[giveflow_donation_form slug="' . esc_attr($form->slug) . '"]');
+        $formHtml = do_shortcode('[fundkit_donation_form slug="' . esc_attr($form->slug) . '"]');
         if (trim($formHtml) === '') {
             return View::loadRelative(__DIR__, 'views/donation-form', [
                 'mode'      => 'empty',
                 'emptyText' => (string) ($attrs['emptyText'] ?? '')
-                    ?: __('Donations are not open for this campaign yet.', 'giveflow-fundraising-campaigns'),
+                    ?: __('Donations are not open for this campaign yet.', 'fundkit-fundraising-campaigns'),
                 'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
-                    ? __('This campaign is not accepting donations, so the form is hidden. Publish the campaign and check its schedule.', 'giveflow-fundraising-campaigns')
+                    ? __('This campaign is not accepting donations, so the form is hidden. Publish the campaign and check its schedule.', 'fundkit-fundraising-campaigns')
                     : '',
                 'styleVars' => $this->styleVars($campaign),
             ]);

@@ -35,7 +35,7 @@ import { useDispatch, useRegistry, useSelect } from '@wordpress/data';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
-import { useGiveFlowRecord } from '../_shared/useGiveFlowRecord';
+import { useFundKitRecord } from '../_shared/useFundKitRecord';
 import Btn from '../_shared/components/Btn';
 import LocalIcon from '../_shared/components/Icon';
 import Slider    from '../_shared/components/Slider';
@@ -74,8 +74,8 @@ function defaultFormSettings() {
 // Multi-page navigation is driven by the Steps block inside the form, not a
 // form-level toggle. Layout is just the embed style.
 const LAYOUT_OPTIONS = [
-    { value: 'inline', label: __( 'Inline (in-page)', 'giveflow-fundraising-campaigns' ) },
-    { value: 'modal',  label: __( 'Modal (button opens form)', 'giveflow-fundraising-campaigns' ) },
+    { value: 'inline', label: __( 'Inline (in-page)', 'fundkit-fundraising-campaigns' ) },
+    { value: 'modal',  label: __( 'Modal (button opens form)', 'fundkit-fundraising-campaigns' ) },
 ];
 
 function mergeFormSettings( stored, base = defaultFormSettings() ) {
@@ -164,7 +164,7 @@ function historyReducer( state, action ) {
 }
 
 export default function Editor( { formId } ) {
-    const c = useGiveFlowRecord( 'form', formId );
+    const c = useFundKitRecord( 'form', formId );
 
     const [ campaigns, setCampaigns ] = useState( [] );
     const [ gateways, setGateways ]   = useState( [] );
@@ -219,26 +219,26 @@ export default function Editor( { formId } ) {
     // Dropdown sources, not entities, so they are fetched once. A per-source
     // failure surfaces rather than leaving a select silently empty.
     useEffect( () => {
-        apiFetch( { path: '/giveflow/v1/admin/forms/campaigns' } )
+        apiFetch( { path: '/fundkit/v1/admin/forms/campaigns' } )
             .then( setCampaigns )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load campaigns.', 'giveflow-fundraising-campaigns' ) ) );
-        apiFetch( { path: '/giveflow/v1/admin/forms/gateways' } )
+            .catch( ( err ) => setError( err?.message || __( 'Could not load campaigns.', 'fundkit-fundraising-campaigns' ) ) );
+        apiFetch( { path: '/fundkit/v1/admin/forms/gateways' } )
             .then( setGateways )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load payment gateways.', 'giveflow-fundraising-campaigns' ) ) );
-        apiFetch( { path: '/giveflow/v1/admin/forms/funds' } )
+            .catch( ( err ) => setError( err?.message || __( 'Could not load payment gateways.', 'fundkit-fundraising-campaigns' ) ) );
+        apiFetch( { path: '/fundkit/v1/admin/forms/funds' } )
             .then( setFunds )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load funds.', 'giveflow-fundraising-campaigns' ) ) );
+            .catch( ( err ) => setError( err?.message || __( 'Could not load funds.', 'fundkit-fundraising-campaigns' ) ) );
     }, [] );
 
     // Expose form context to block edit components (Goal needs campaign progress).
     useEffect( () => {
-        window.giveflowFormEditor = {
+        window.fundkitFormEditor = {
             formId,
             formCampaignId: Number( c.value( 'campaign_id', 0 ) ) || 0,
             formGoal: mergeFormSettings( c.record.settings ).goal,
             campaigns,
         };
-        return () => { delete window.giveflowFormEditor; };
+        return () => { delete window.fundkitFormEditor; };
     }, [ formId, c.record.campaign_id, c.record.settings, campaigns ] );
 
     // Seeds the block-history reducer once, when the entity first resolves. A
@@ -290,7 +290,7 @@ export default function Editor( { formId } ) {
         setPreviewLoading( true );
         try {
             const res = await apiFetch( {
-                path:   '/giveflow/v1/admin/forms/preview',
+                path:   '/fundkit/v1/admin/forms/preview',
                 method: 'POST',
                 data:   {
                     blocks:      serialize( blocks ),
@@ -300,7 +300,7 @@ export default function Editor( { formId } ) {
             } );
             setPreviewHtml( res.html || '' );
         } catch ( err ) {
-            setError( err?.message || __( 'Preview failed.', 'giveflow-fundraising-campaigns' ) );
+            setError( err?.message || __( 'Preview failed.', 'fundkit-fundraising-campaigns' ) );
         } finally {
             setPreviewLoading( false );
         }
@@ -325,7 +325,7 @@ export default function Editor( { formId } ) {
             setLastSavedSerialized( serialized );
             return true;
         } catch ( err ) {
-            setError( err?.message || __( 'Save failed.', 'giveflow-fundraising-campaigns' ) );
+            setError( err?.message || __( 'Save failed.', 'fundkit-fundraising-campaigns' ) );
             return false;
         }
     }, [ c, blocks ] );
@@ -337,8 +337,8 @@ export default function Editor( { formId } ) {
         if ( ok ) {
             notify.success(
                 c.record.status === 'published'
-                    ? __( 'Form saved.', 'giveflow-fundraising-campaigns' )
-                    : __( 'Draft saved.', 'giveflow-fundraising-campaigns' )
+                    ? __( 'Form saved.', 'fundkit-fundraising-campaigns' )
+                    : __( 'Draft saved.', 'fundkit-fundraising-campaigns' )
             );
         }
     }, [ persist, c.record.status ] );
@@ -401,7 +401,7 @@ export default function Editor( { formId } ) {
     } ), [] );
 
     const missingRequired = useMemo( () => {
-        const required = window.giveflow?.forms?.required_blocks || [];
+        const required = window.fundkit?.forms?.required_blocks || [];
         if ( ! required.length ) return [];
         const present = new Set();
         const walk = ( list ) => {
@@ -419,14 +419,14 @@ export default function Editor( { formId } ) {
         setSavingAction( 'publish' );
         const ok = await persist( { status: 'published' } );
         setSavingAction( null );
-        if ( ok ) notify.success( __( 'Form published.', 'giveflow-fundraising-campaigns' ) );
+        if ( ok ) notify.success( __( 'Form published.', 'fundkit-fundraising-campaigns' ) );
     }, [ persist, missingRequired ] );
 
     const onUnpublish = useCallback( async () => {
         setSavingAction( 'unpublish' );
         const ok = await persist( { status: 'draft' } );
         setSavingAction( null );
-        if ( ok ) notify.success( __( 'Form moved to draft.', 'giveflow-fundraising-campaigns' ) );
+        if ( ok ) notify.success( __( 'Form moved to draft.', 'fundkit-fundraising-campaigns' ) );
     }, [ persist ] );
 
     const dirtyForUnload = c.isDirty || serialize( blocks ) !== lastSavedSerialized;
@@ -464,12 +464,12 @@ export default function Editor( { formId } ) {
     }, [ dirtyForUnload, c.isSaving, onSave, undo, redo, history.past.length, history.future.length ] );
 
     if ( c.isLoading || ( ! c.savedRecord && ! c.notFound ) ) {
-        return <div className="giveflow-form-editor__loading"><Spinner /></div>;
+        return <div className="fundkit-form-editor__loading"><Spinner /></div>;
     }
     if ( c.notFound ) {
         return (
             <Notice status="error" isDismissible={ false }>
-                { __( 'Form not found.', 'giveflow-fundraising-campaigns' ) }
+                { __( 'Form not found.', 'fundkit-fundraising-campaigns' ) }
             </Notice>
         );
     }
@@ -505,12 +505,12 @@ export default function Editor( { formId } ) {
     );
 
     const notices = ( error || missingRequired.length > 0 ) && (
-        <div className="giveflow-form-editor__notices">
+        <div className="fundkit-form-editor__notices">
             { missingRequired.length > 0 && (
                 <Notice status="warning" isDismissible={ false }>
                     { sprintf(
                         /* translators: %s: comma-separated list of missing block labels (Name, Email). */
-                        __( 'Add these blocks before publishing: %s.', 'giveflow-fundraising-campaigns' ),
+                        __( 'Add these blocks before publishing: %s.', 'fundkit-fundraising-campaigns' ),
                         missingRequired.map( ( r ) => r.label ).join( ', ' )
                     ) }
                 </Notice>
@@ -536,9 +536,9 @@ export default function Editor( { formId } ) {
 
     const themeVars = ( () => {
         const merged    = mergeFormSettings( c.record.settings );
-        const presets   = Array.isArray( window.giveflow?.styling?.presets ) ? window.giveflow.styling.presets : [];
-        const defaults  = window.giveflow?.styling?.defaults || {};
-        const defaultId = String( window.giveflow?.styling?.default_id || '' );
+        const presets   = Array.isArray( window.fundkit?.styling?.presets ) ? window.fundkit.styling.presets : [];
+        const defaults  = window.fundkit?.styling?.defaults || {};
+        const defaultId = String( window.fundkit?.styling?.default_id || '' );
 
         // Cascade mirrors CampaignStyleResolver: form preset, else campaign
         // preset, else org default. Campaign inline overrides apply only when
@@ -570,13 +570,13 @@ export default function Editor( { formId } ) {
 
         // Mirrors CampaignStyleResolver: an accent-soft that is only the
         // catalogue default is dropped, so the stylesheet's color-mix derives it
-        // from --giveflow-accent as the published form does. An explicit one stays.
+        // from --fundkit-accent as the published form does. An explicit one stays.
         const explicitSoft =
-            ( chosenPreset?.tokens && 'giveflow-accent-soft' in chosenPreset.tokens ) ||
-            ( ! formPresetId && 'giveflow-accent-soft' in campaignInlineTokens ) ||
-            ( 'giveflow-accent-soft' in formInlineTokens );
-        if ( ! explicitSoft && tokens[ 'giveflow-accent-soft' ] === defaults[ 'giveflow-accent-soft' ] ) {
-            delete tokens[ 'giveflow-accent-soft' ];
+            ( chosenPreset?.tokens && 'fundkit-accent-soft' in chosenPreset.tokens ) ||
+            ( ! formPresetId && 'fundkit-accent-soft' in campaignInlineTokens ) ||
+            ( 'fundkit-accent-soft' in formInlineTokens );
+        if ( ! explicitSoft && tokens[ 'fundkit-accent-soft' ] === defaults[ 'fundkit-accent-soft' ] ) {
+            delete tokens[ 'fundkit-accent-soft' ];
         }
 
         const sx = {};
@@ -590,14 +590,14 @@ export default function Editor( { formId } ) {
         // runtime in PHP.
         const cw = Number( merged.container?.width );
         if ( cw >= 320 && cw <= 1600 ) {
-            sx[ '--giveflow-editor-sheet-width' ] = `${ cw }px`;
+            sx[ '--fundkit-editor-sheet-width' ] = `${ cw }px`;
         }
 
         return sx;
     } )();
 
     return (
-        <div className="giveflow-form-editor" style={ themeVars }>
+        <div className="fundkit-form-editor" style={ themeVars }>
             <ShortcutProvider>
                 <SlotFillProvider>
                     <BlockEditorProvider
@@ -628,8 +628,8 @@ export default function Editor( { formId } ) {
                                         funds={ funds }
                                     />
                                 ) : (
-                                    <div className="giveflow-form-editor__canvas">
-                                        <div className="giveflow-form-editor__sheet">
+                                    <div className="fundkit-form-editor__canvas">
+                                        <div className="fundkit-form-editor__sheet">
                                             <BlockTools>
                                                 <WritingFlow>
                                                     <ObserveTyping>
@@ -647,7 +647,7 @@ export default function Editor( { formId } ) {
                             sidebar={ sidebar }
                             secondarySidebar={
                                 secondaryView === 'inserter' ? (
-                                    <div className="giveflow-form-editor__secondary giveflow-form-editor__secondary--inserter">
+                                    <div className="fundkit-form-editor__secondary fundkit-form-editor__secondary--inserter">
                                         <BlockLibrary
                                             showInserterHelpPanel={ false }
                                             rootClientId=""
@@ -655,9 +655,9 @@ export default function Editor( { formId } ) {
                                         />
                                     </div>
                                 ) : secondaryView === 'listview' ? (
-                                    <div className="giveflow-form-editor__secondary giveflow-form-editor__secondary--listview">
-                                        <div className="giveflow-form-editor__secondary-title">
-                                            { __( 'Form structure', 'giveflow-fundraising-campaigns' ) }
+                                    <div className="fundkit-form-editor__secondary fundkit-form-editor__secondary--listview">
+                                        <div className="fundkit-form-editor__secondary-title">
+                                            { __( 'Form structure', 'fundkit-fundraising-campaigns' ) }
                                         </div>
                                         <BlockListView />
                                     </div>
@@ -671,7 +671,7 @@ export default function Editor( { formId } ) {
 
             { templatePickerOpen && (
                 <FormTemplatePicker
-                    intro={ __( "We didn't pre-build this form so you can pick a shape that fits. You can change it later.", 'giveflow-fundraising-campaigns' ) }
+                    intro={ __( "We didn't pre-build this form so you can pick a shape that fits. You can change it later.", 'fundkit-fundraising-campaigns' ) }
                     onPick={ applyTemplate }
                     onClose={ () => setTemplatePickerOpen( false ) }
                 />
@@ -679,17 +679,17 @@ export default function Editor( { formId } ) {
 
             { pendingTemplate && (
                 <Modal
-                    title={ __( 'Apply template', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Apply template', 'fundkit-fundraising-campaigns' ) }
                     onRequestClose={ () => setPendingTemplate( null ) }
                     size="small"
                 >
                     <p style={ { marginTop: 0 } }>
-                        { __( 'Replace the current form with this template? Its blocks take over, and so do the settings it carries: layout, style, gateways, recurring and the thank-you message. Undo brings the blocks back, but not the settings.', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Replace the current form with this template? Its blocks take over, and so do the settings it carries: layout, style, gateways, recurring and the thank-you message. Undo brings the blocks back, but not the settings.', 'fundkit-fundraising-campaigns' ) }
                     </p>
                     <div style={ { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 } }>
-                        <Btn onClick={ () => setPendingTemplate( null ) }>{ __( 'Cancel', 'giveflow-fundraising-campaigns' ) }</Btn>
+                        <Btn onClick={ () => setPendingTemplate( null ) }>{ __( 'Cancel', 'fundkit-fundraising-campaigns' ) }</Btn>
                         <Btn variant="primary" onClick={ () => performApplyTemplate( pendingTemplate, true ) }>
-                            { __( 'Replace form', 'giveflow-fundraising-campaigns' ) }
+                            { __( 'Replace form', 'fundkit-fundraising-campaigns' ) }
                         </Btn>
                     </div>
                 </Modal>
@@ -720,8 +720,8 @@ function DeselectOnOutsideClick() {
             '.block-editor-block-toolbar, .block-editor-block-popover, ' +
             '.block-editor-block-contextual-toolbar, ' +
             '.components-popover, .components-dropdown, ' +
-            '.giveflow-form-editor__sidebar, ' +
-            '.giveflow-form-editor__secondary, ' +
+            '.fundkit-form-editor__sidebar, ' +
+            '.fundkit-form-editor__secondary, ' +
             '.interface-interface-skeleton__sidebar';
         const onDocMouseDown = ( e ) => {
             const t = e.target;
@@ -744,7 +744,7 @@ function AssistantBridge() {
     useEffect( () => {
         const store = () => registry.select( 'core/block-editor' );
         const act   = () => registry.dispatch( 'core/block-editor' );
-        window.giveflowFormBlocks = {
+        window.fundkitFormBlocks = {
             getBlocks: () =>
                 store().getBlocks().map( ( b ) => ( {
                     clientId: b.clientId,
@@ -764,22 +764,22 @@ function AssistantBridge() {
             moveBlock: ( clientId, toIndex ) =>
                 act().moveBlocksToPosition( [ clientId ], '', '', toIndex ),
         };
-        return () => { delete window.giveflowFormBlocks; };
+        return () => { delete window.fundkitFormBlocks; };
     }, [ registry ] );
     return null;
 }
 
 function CanvasEmpty() {
     return (
-        <div className="giveflow-form-editor__empty">
-            <h3>{ __( 'Start building your donation form', 'giveflow-fundraising-campaigns' ) }</h3>
-            <p>{ __( 'Add a heading, an amount block, and a submit button to take your first donation.', 'giveflow-fundraising-campaigns' ) }</p>
+        <div className="fundkit-form-editor__empty">
+            <h3>{ __( 'Start building your donation form', 'fundkit-fundraising-campaigns' ) }</h3>
+            <p>{ __( 'Add a heading, an amount block, and a submit button to take your first donation.', 'fundkit-fundraising-campaigns' ) }</p>
             <Inserter
                 position="bottom center"
                 rootClientId=""
                 renderToggle={ ( { onToggle, isOpen } ) => (
                     <button type="button" onClick={ onToggle } aria-expanded={ isOpen }>
-                        + { __( 'Add your first block', 'giveflow-fundraising-campaigns' ) }
+                        + { __( 'Add your first block', 'fundkit-fundraising-campaigns' ) }
                     </button>
                 ) }
             />
@@ -788,12 +788,12 @@ function CanvasEmpty() {
 }
 
 const VIEW_TABS = [
-    { id: 'develop',  label: __( 'Build', 'giveflow-fundraising-campaigns' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
-    { id: 'preview',  label: __( 'Preview', 'giveflow-fundraising-campaigns' ),  icon: <LocalIcon name="eye"      size={ 15 } /> },
+    { id: 'develop',  label: __( 'Build', 'fundkit-fundraising-campaigns' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
+    { id: 'preview',  label: __( 'Preview', 'fundkit-fundraising-campaigns' ),  icon: <LocalIcon name="eye"      size={ 15 } /> },
     // Settings is a third view of the same form, so it sits with the other two
     // rather than behind a cog, which reads as a tool acting on the current
     // view.
-    { id: 'settings', label: __( 'Settings', 'giveflow-fundraising-campaigns' ), icon: <LocalIcon name="settings" size={ 15 } /> },
+    { id: 'settings', label: __( 'Settings', 'fundkit-fundraising-campaigns' ), icon: <LocalIcon name="settings" size={ 15 } /> },
 ];
 
 function EditorHeader( {
@@ -812,7 +812,7 @@ function EditorHeader( {
     const publishDisabledReason = missing.length > 0
         ? sprintf(
             /* translators: %s: comma-separated list of missing block labels. */
-            __( 'Add these blocks first: %s.', 'giveflow-fundraising-campaigns' ),
+            __( 'Add these blocks first: %s.', 'fundkit-fundraising-campaigns' ),
             missing.join( ', ' )
         )
         : '';
@@ -821,34 +821,34 @@ function EditorHeader( {
     const showAuthoringTools = view === 'develop';
 
     return (
-        <div className="giveflow-editor-header">
-            <div className="giveflow-editor-header__left">
-                <a className="giveflow-editor-header__back" href={ backHref }>
+        <div className="fundkit-editor-header">
+            <div className="fundkit-editor-header__left">
+                <a className="fundkit-editor-header__back" href={ backHref }>
                     <LocalIcon name="chevron-left" size={ 20 } />
-                    <span>{ __( 'Campaign overview', 'giveflow-fundraising-campaigns' ) }</span>
+                    <span>{ __( 'Campaign overview', 'fundkit-fundraising-campaigns' ) }</span>
                 </a>
                 { showAuthoringTools && (
                     <>
-                        <span className="giveflow-editor-header__divider" aria-hidden="true" />
+                        <span className="fundkit-editor-header__divider" aria-hidden="true" />
                         <Button
                             icon={ inserterOpen ? CloseIcon : PlusIcon }
-                            label={ inserterOpen ? __( 'Close block inserter', 'giveflow-fundraising-campaigns' ) : __( 'Toggle block inserter', 'giveflow-fundraising-campaigns' ) }
+                            label={ inserterOpen ? __( 'Close block inserter', 'fundkit-fundraising-campaigns' ) : __( 'Toggle block inserter', 'fundkit-fundraising-campaigns' ) }
                             onClick={ () => onToggleSecondaryView( 'inserter' ) }
                             isPressed={ inserterOpen }
                             showTooltip
                         />
                         <Button
                             icon={ ListViewIcon }
-                            label={ __( 'Toggle block outline', 'giveflow-fundraising-campaigns' ) }
+                            label={ __( 'Toggle block outline', 'fundkit-fundraising-campaigns' ) }
                             onClick={ () => onToggleSecondaryView( 'listview' ) }
                             isPressed={ listViewOpen }
                             showTooltip
                         />
-                        <Button icon={ UndoIcon } label={ __( 'Undo', 'giveflow-fundraising-campaigns' ) } onClick={ onUndo } disabled={ ! canUndo } />
-                        <Button icon={ RedoIcon } label={ __( 'Redo', 'giveflow-fundraising-campaigns' ) } onClick={ onRedo } disabled={ ! canRedo } />
+                        <Button icon={ UndoIcon } label={ __( 'Undo', 'fundkit-fundraising-campaigns' ) } onClick={ onUndo } disabled={ ! canUndo } />
+                        <Button icon={ RedoIcon } label={ __( 'Redo', 'fundkit-fundraising-campaigns' ) } onClick={ onRedo } disabled={ ! canRedo } />
                         <Button
                             icon={ <LocalIcon name="layout-grid" size={ 20 } /> }
-                            label={ __( 'Start from a template', 'giveflow-fundraising-campaigns' ) }
+                            label={ __( 'Start from a template', 'fundkit-fundraising-campaigns' ) }
                             onClick={ onOpenTemplates }
                             showTooltip
                         />
@@ -856,25 +856,25 @@ function EditorHeader( {
                 ) }
             </div>
 
-            <div className="giveflow-editor-header__center">
+            <div className="fundkit-editor-header__center">
                 <input
-                    className="giveflow-editor-header__title"
+                    className="fundkit-editor-header__title"
                     type="text"
                     value={ title }
                     onChange={ ( e ) => onTitleChange( e.target.value ) }
-                    placeholder={ __( 'Untitled donation form', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'Untitled donation form', 'fundkit-fundraising-campaigns' ) }
                 />
             </div>
 
-            <div className="giveflow-editor-header__right">
-                <div className="giveflow-editor-header__tabs" role="tablist">
+            <div className="fundkit-editor-header__right">
+                <div className="fundkit-editor-header__tabs" role="tablist">
                     { VIEW_TABS.map( ( t ) => (
                         <button
                             key={ t.id }
                             type="button"
                             role="tab"
                             aria-selected={ view === t.id }
-                            className={ `giveflow-editor-header__tab${ view === t.id ? ' is-active' : '' }` }
+                            className={ `fundkit-editor-header__tab${ view === t.id ? ' is-active' : '' }` }
                             onClick={ () => onViewChange( t.id ) }
                         >
                             { t.icon }
@@ -888,7 +888,7 @@ function EditorHeader( {
                     disabled={ saving || ! isDirty }
                     isBusy={ saving && savingAction === 'save' }
                 >
-                    { isDirty ? __( 'Save', 'giveflow-fundraising-campaigns' ) : __( 'Saved', 'giveflow-fundraising-campaigns' ) }
+                    { isDirty ? __( 'Save', 'fundkit-fundraising-campaigns' ) : __( 'Saved', 'fundkit-fundraising-campaigns' ) }
                 </Button>
                 { isPublished ? (
                     <Button
@@ -897,7 +897,7 @@ function EditorHeader( {
                         disabled={ saving }
                         isBusy={ saving && savingAction === 'unpublish' }
                     >
-                        { __( 'Unpublish', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Unpublish', 'fundkit-fundraising-campaigns' ) }
                     </Button>
                 ) : (
                     <Button
@@ -908,12 +908,12 @@ function EditorHeader( {
                         label={ publishDisabledReason || undefined }
                         showTooltip={ !! publishDisabledReason }
                     >
-                        { __( 'Publish', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Publish', 'fundkit-fundraising-campaigns' ) }
                     </Button>
                 ) }
                 <Button
                     icon={ PanelRightIcon }
-                    label={ __( 'Toggle side panel', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Toggle side panel', 'fundkit-fundraising-campaigns' ) }
                     onClick={ onToggleSidebar }
                     isPressed={ sidebarOpen }
                     showTooltip
@@ -924,9 +924,9 @@ function EditorHeader( {
 }
 
 const DEVICES = [
-    { id: 'desktop', label: __( 'Desktop', 'giveflow-fundraising-campaigns' ), icon: DesktopIcon, width: '100%'  },
-    { id: 'tablet',  label: __( 'Tablet', 'giveflow-fundraising-campaigns' ),  icon: TabletIcon,  width: '768px' },
-    { id: 'phone',   label: __( 'Phone', 'giveflow-fundraising-campaigns' ),   icon: MobileIcon,  width: '390px' },
+    { id: 'desktop', label: __( 'Desktop', 'fundkit-fundraising-campaigns' ), icon: DesktopIcon, width: '100%'  },
+    { id: 'tablet',  label: __( 'Tablet', 'fundkit-fundraising-campaigns' ),  icon: TabletIcon,  width: '768px' },
+    { id: 'phone',   label: __( 'Phone', 'fundkit-fundraising-campaigns' ),   icon: MobileIcon,  width: '390px' },
 ];
 
 function PreviewPane( { loading, html, device, onDeviceChange } ) {
@@ -934,8 +934,8 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
     const isPhone = active.id === 'phone';
 
     return (
-        <div className="giveflow-form-editor__preview">
-            <div className="giveflow-form-editor__preview-toolbar" role="tablist">
+        <div className="fundkit-form-editor__preview">
+            <div className="fundkit-form-editor__preview-toolbar" role="tablist">
                 { DEVICES.map( ( d ) => (
                     <Button
                         key={ d.id }
@@ -944,27 +944,27 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
                         aria-selected={ device === d.id }
                         label={ d.label }
                         showTooltip
-                        className={ `giveflow-form-editor__device${ device === d.id ? ' is-active' : '' }` }
+                        className={ `fundkit-form-editor__device${ device === d.id ? ' is-active' : '' }` }
                         onClick={ () => onDeviceChange( d.id ) }
                     />
                 ) ) }
             </div>
             { loading && html === '' ? (
-                <div className="giveflow-form-editor__preview-spinner"><Spinner /></div>
+                <div className="fundkit-form-editor__preview-spinner"><Spinner /></div>
             ) : (
-                <div className="giveflow-form-editor__preview-stage">
+                <div className="fundkit-form-editor__preview-stage">
                     <div
-                        className={ `giveflow-form-editor__device-frame is-${ active.id }${ isPhone ? ' has-bezel' : '' }` }
+                        className={ `fundkit-form-editor__device-frame is-${ active.id }${ isPhone ? ' has-bezel' : '' }` }
                         style={ { width: active.width, position: 'relative' } }
                     >
                         <iframe
-                            className="giveflow-form-editor__preview-frame"
-                            title={ __( 'Form preview', 'giveflow-fundraising-campaigns' ) }
+                            className="fundkit-form-editor__preview-frame"
+                            title={ __( 'Form preview', 'fundkit-fundraising-campaigns' ) }
                             srcDoc={ html }
                         />
                         { loading && (
                             <div
-                                className="giveflow-form-editor__preview-spinner"
+                                className="fundkit-form-editor__preview-spinner"
                                 style={ { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.6)' } }
                             >
                                 <Spinner />
@@ -979,7 +979,7 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
 
 function SettingsView( { c, campaigns, gateways, funds } ) {
     return (
-        <div className="giveflow-form-editor__settings">
+        <div className="fundkit-form-editor__settings">
             <FormSettingsPanel
                 c={ c }
                 campaigns={ campaigns }
@@ -992,18 +992,18 @@ function SettingsView( { c, campaigns, gateways, funds } ) {
 
 function FormSidebar( { hasSelection } ) {
     return (
-        <div className="giveflow-form-sidebar">
-            <div className="giveflow-form-sidebar__header">
-                <h2 className="giveflow-form-sidebar__title">{ __( 'Block', 'giveflow-fundraising-campaigns' ) }</h2>
+        <div className="fundkit-form-sidebar">
+            <div className="fundkit-form-sidebar__header">
+                <h2 className="fundkit-form-sidebar__title">{ __( 'Block', 'fundkit-fundraising-campaigns' ) }</h2>
             </div>
-            <div className="giveflow-form-sidebar__body">
+            <div className="fundkit-form-sidebar__body">
                 { hasSelection ? (
                     <BlockInspector />
                 ) : (
                     <SidebarIntro
                         iconName="edit"
-                        title={ __( 'Block settings', 'giveflow-fundraising-campaigns' ) }
-                        description={ __( 'Select a block on the canvas to see its settings here. Form-wide settings live in the Settings tab.', 'giveflow-fundraising-campaigns' ) }
+                        title={ __( 'Block settings', 'fundkit-fundraising-campaigns' ) }
+                        description={ __( 'Select a block on the canvas to see its settings here. Form-wide settings live in the Settings tab.', 'fundkit-fundraising-campaigns' ) }
                     />
                 ) }
             </div>
@@ -1026,12 +1026,12 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
         setError( null );
         // The live blocks are posted so the checks reflect unsaved edits.
         apiFetch( {
-            path:   `/giveflow/v1/admin/forms/${ formId }/readiness`,
+            path:   `/fundkit/v1/admin/forms/${ formId }/readiness`,
             method: 'POST',
             data:   { blocks: serialize( blocks ) },
         } )
             .then( ( res ) => { if ( ! cancelled ) setServerChecks( res.checks || [] ); } )
-            .catch( ( err ) => { if ( ! cancelled ) setError( err?.message || __( 'Could not load readiness checks.', 'giveflow-fundraising-campaigns' ) ); } );
+            .catch( ( err ) => { if ( ! cancelled ) setError( err?.message || __( 'Could not load readiness checks.', 'fundkit-fundraising-campaigns' ) ); } );
         return () => { cancelled = true; };
     }, [ formId, blocks ] );
 
@@ -1043,16 +1043,16 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
                 status: 'fail',
                 label:  sprintf(
                     /* translators: %s: comma-separated list of missing block labels. */
-                    __( 'Missing required fields: %s', 'giveflow-fundraising-campaigns' ),
+                    __( 'Missing required fields: %s', 'fundkit-fundraising-campaigns' ),
                     missingRequired.map( ( r ) => r.label ).join( ', ' )
                 ),
-                detail: __( 'Donors need these to complete a donation.', 'giveflow-fundraising-campaigns' ),
+                detail: __( 'Donors need these to complete a donation.', 'fundkit-fundraising-campaigns' ),
             } );
         } else {
             out.push( {
                 id:     'required-blocks',
                 status: 'pass',
-                label:  __( 'Required fields present', 'giveflow-fundraising-campaigns' ),
+                label:  __( 'Required fields present', 'fundkit-fundraising-campaigns' ),
             } );
         }
         return out;
@@ -1087,49 +1087,49 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
     const serverFail = useMemo( () => ( serverChecks || [] ).filter( ( c ) => c.status === 'fail' ).length, [ serverChecks ] );
 
     const summaryText = ( () => {
-        if ( ! serverChecks && ! error ) return __( 'Running checks…', 'giveflow-fundraising-campaigns' );
+        if ( ! serverChecks && ! error ) return __( 'Running checks…', 'fundkit-fundraising-campaigns' );
         if ( blockFail > 0 ) return sprintf(
             /* translators: %d: number of failing required-field checks that block publishing. */
-            _n( '%d issue blocks publishing', '%d issues block publishing', blockFail, 'giveflow-fundraising-campaigns' ),
+            _n( '%d issue blocks publishing', '%d issues block publishing', blockFail, 'fundkit-fundraising-campaigns' ),
             blockFail
         );
         if ( serverFail > 0 ) return sprintf(
             /* translators: %d: number of readiness issues to fix before the form can take donations. */
-            _n( '%d issue to fix before donors can give', '%d issues to fix before donors can give', serverFail, 'giveflow-fundraising-campaigns' ),
+            _n( '%d issue to fix before donors can give', '%d issues to fix before donors can give', serverFail, 'fundkit-fundraising-campaigns' ),
             serverFail
         );
         if ( counts.warn > 0 ) return sprintf(
             /* translators: %d: number of warning readiness checks. */
-            _n( '%d thing to review', '%d things to review', counts.warn, 'giveflow-fundraising-campaigns' ),
+            _n( '%d thing to review', '%d things to review', counts.warn, 'fundkit-fundraising-campaigns' ),
             counts.warn
         );
-        return __( 'Form is ready to publish', 'giveflow-fundraising-campaigns' );
+        return __( 'Form is ready to publish', 'fundkit-fundraising-campaigns' );
     } )();
 
     const summaryStatus = counts.fail > 0 ? 'fail' : counts.warn > 0 ? 'warn' : 'pass';
 
     return (
-        <div className="giveflow-form-sidebar">
-            <div className="giveflow-form-sidebar__header">
-                <h2 className="giveflow-form-sidebar__title">{ __( 'Pre-launch checks', 'giveflow-fundraising-campaigns' ) }</h2>
-                <p className={ `giveflow-readiness__summary is-${ summaryStatus }` }>
+        <div className="fundkit-form-sidebar">
+            <div className="fundkit-form-sidebar__header">
+                <h2 className="fundkit-form-sidebar__title">{ __( 'Pre-launch checks', 'fundkit-fundraising-campaigns' ) }</h2>
+                <p className={ `fundkit-readiness__summary is-${ summaryStatus }` }>
                     <ReadinessStatusIcon status={ summaryStatus } />
                     <span>{ summaryText }</span>
                 </p>
             </div>
-            <div className="giveflow-form-sidebar__body">
+            <div className="fundkit-form-sidebar__body">
                 { error && (
                     <Notice status="error" isDismissible={ false }>{ error }</Notice>
                 ) }
                 { visibleChecks.length > 0 ? (
-                    <ul className="giveflow-readiness__list">
+                    <ul className="fundkit-readiness__list">
                         { visibleChecks.map( ( c ) => (
                             <ReadinessRow key={ c.id } check={ c } />
                         ) ) }
                     </ul>
                 ) : ( serverChecks && ! error && (
-                    <p className="giveflow-readiness__empty">
-                        { __( 'Everything looks good. This form is safe to publish.', 'giveflow-fundraising-campaigns' ) }
+                    <p className="fundkit-readiness__empty">
+                        { __( 'Everything looks good. This form is safe to publish.', 'fundkit-fundraising-campaigns' ) }
                     </p>
                 ) ) }
             </div>
@@ -1139,16 +1139,16 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
 
 function ReadinessRow( { check } ) {
     return (
-        <li className={ `giveflow-readiness__row is-${ check.status }` }>
+        <li className={ `fundkit-readiness__row is-${ check.status }` }>
             <ReadinessStatusIcon status={ check.status } />
-            <div className="giveflow-readiness__body">
-                <div className="giveflow-readiness__label">{ check.label }</div>
+            <div className="fundkit-readiness__body">
+                <div className="fundkit-readiness__label">{ check.label }</div>
                 { check.detail && (
-                    <div className="giveflow-readiness__detail">{ check.detail }</div>
+                    <div className="fundkit-readiness__detail">{ check.detail }</div>
                 ) }
                 { check.action_url && check.action_label && (
                     <a
-                        className="giveflow-readiness__action"
+                        className="fundkit-readiness__action"
                         href={ check.action_url }
                         target="_blank"
                         rel="noreferrer"
@@ -1162,31 +1162,31 @@ function ReadinessRow( { check } ) {
 }
 
 function ReadinessStatusIcon( { status } ) {
-    if ( status === 'pass' ) return <LocalIcon name="check" size={ 16 } className="giveflow-readiness__icon" aria-hidden="true" />;
-    if ( status === 'warn' ) return <LocalIcon name="alert" size={ 16 } className="giveflow-readiness__icon" aria-hidden="true" />;
-    return <LocalIcon name="close" size={ 16 } className="giveflow-readiness__icon" aria-hidden="true" />;
+    if ( status === 'pass' ) return <LocalIcon name="check" size={ 16 } className="fundkit-readiness__icon" aria-hidden="true" />;
+    if ( status === 'warn' ) return <LocalIcon name="alert" size={ 16 } className="fundkit-readiness__icon" aria-hidden="true" />;
+    return <LocalIcon name="close" size={ 16 } className="fundkit-readiness__icon" aria-hidden="true" />;
 }
 
 function SidebarIntro( { iconName, title, description } ) {
     return (
-        <div className="giveflow-sidebar-intro">
-            <span className="giveflow-sidebar-intro__icon" aria-hidden="true">
+        <div className="fundkit-sidebar-intro">
+            <span className="fundkit-sidebar-intro__icon" aria-hidden="true">
                 <LocalIcon name={ iconName } size={ 18 } />
             </span>
-            <div className="giveflow-sidebar-intro__text">
-                <h3 className="giveflow-sidebar-intro__title">{ title }</h3>
-                <p className="giveflow-sidebar-intro__desc">{ description }</p>
+            <div className="fundkit-sidebar-intro__text">
+                <h3 className="fundkit-sidebar-intro__title">{ title }</h3>
+                <p className="fundkit-sidebar-intro__desc">{ description }</p>
             </div>
         </div>
     );
 }
 
 const SETTINGS_TABS = [
-    { id: 'general',   label: __( 'General', 'giveflow-fundraising-campaigns' ) },
-    { id: 'goal',      label: __( 'Goal', 'giveflow-fundraising-campaigns' ) },
-    { id: 'gateways',  label: __( 'Gateways', 'giveflow-fundraising-campaigns' ) },
-    { id: 'after',     label: __( 'After donation', 'giveflow-fundraising-campaigns' ) },
-    { id: 'embed',     label: __( 'Embed', 'giveflow-fundraising-campaigns' ) },
+    { id: 'general',   label: __( 'General', 'fundkit-fundraising-campaigns' ) },
+    { id: 'goal',      label: __( 'Goal', 'fundkit-fundraising-campaigns' ) },
+    { id: 'gateways',  label: __( 'Gateways', 'fundkit-fundraising-campaigns' ) },
+    { id: 'after',     label: __( 'After donation', 'fundkit-fundraising-campaigns' ) },
+    { id: 'embed',     label: __( 'Embed', 'fundkit-fundraising-campaigns' ) },
 ];
 
 function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
@@ -1201,22 +1201,22 @@ function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
     const [ activeTab, setActiveTab ] = useState( 'general' );
 
     return (
-        <div className="giveflow-form-settings">
-            <div className="giveflow-form-settings__nav" role="tablist" aria-label={ __( 'Settings sections', 'giveflow-fundraising-campaigns' ) }>
+        <div className="fundkit-form-settings">
+            <div className="fundkit-form-settings__nav" role="tablist" aria-label={ __( 'Settings sections', 'fundkit-fundraising-campaigns' ) }>
                 { SETTINGS_TABS.map( ( t ) => (
                     <button
                         key={ t.id }
                         type="button"
                         role="tab"
                         aria-selected={ activeTab === t.id }
-                        className={ `giveflow-form-settings__nav-item ${ activeTab === t.id ? 'is-active' : '' }` }
+                        className={ `fundkit-form-settings__nav-item ${ activeTab === t.id ? 'is-active' : '' }` }
                         onClick={ () => setActiveTab( t.id ) }
                     >
                         { t.label }
                     </button>
                 ) ) }
             </div>
-            <main className="giveflow-form-settings__main">
+            <main className="fundkit-form-settings__main">
                 { activeTab === 'general'   && <GeneralSection   c={ c } campaigns={ campaigns } funds={ funds } settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'goal'      && <GoalSection      settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'gateways'  && <GatewaysSection  gateways={ gateways } settings={ settings } setSettings={ setSettings } /> }
@@ -1229,18 +1229,18 @@ function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
 
 function SettingsRow( { title, description, children } ) {
     return (
-        <section className="giveflow-form-settings__row">
-            <header className="giveflow-form-settings__row-head">
-                <h3 className="giveflow-form-settings__row-title">{ title }</h3>
-                { description && <p className="giveflow-form-settings__row-desc">{ description }</p> }
+        <section className="fundkit-form-settings__row">
+            <header className="fundkit-form-settings__row-head">
+                <h3 className="fundkit-form-settings__row-title">{ title }</h3>
+                { description && <p className="fundkit-form-settings__row-desc">{ description }</p> }
             </header>
-            <div className="giveflow-form-settings__row-body">{ children }</div>
+            <div className="fundkit-form-settings__row-body">{ children }</div>
         </section>
     );
 }
 
 function fundSelectOptions( funds ) {
-    const out = [ { value: '0', label: __( '(Use campaign or org default)', 'giveflow-fundraising-campaigns' ) } ];
+    const out = [ { value: '0', label: __( '(Use campaign or org default)', 'fundkit-fundraising-campaigns' ) } ];
     for ( const f of Array.isArray( funds ) ? funds : [] ) {
         if ( ! f.selectable ) {
             out.push( { value: `g:${ f.id }`, label: f.label, disabled: true } );
@@ -1258,27 +1258,27 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
     return (
         <>
             <SettingsRow
-                title={ __( 'Identity', 'giveflow-fundraising-campaigns' ) }
-                description={ __( 'The form name and the slug used in the URL and shortcode.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Identity', 'fundkit-fundraising-campaigns' ) }
+                description={ __( 'The form name and the slug used in the URL and shortcode.', 'fundkit-fundraising-campaigns' ) }
             >
                 <TextControl
-                    label={ __( 'Title', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Title', 'fundkit-fundraising-campaigns' ) }
                     value={ c.value( 'title' ) }
                     onChange={ c.setValue( 'title' ) }
                     __nextHasNoMarginBottom
                 />
                 <TextControl
-                    label={ __( 'Slug', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Slug', 'fundkit-fundraising-campaigns' ) }
                     value={ c.value( 'slug' ) }
                     onChange={ c.setValue( 'slug' ) }
-                    help={ __( 'Used in the shortcode and the form URL.', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Used in the shortcode and the form URL.', 'fundkit-fundraising-campaigns' ) }
                     __nextHasNoMarginBottom
                 />
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Status', 'giveflow-fundraising-campaigns' ) }
-                description={ __( 'Use the Publish button in the header to go live. Archived forms stay in the system but stop accepting donations.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Status', 'fundkit-fundraising-campaigns' ) }
+                description={ __( 'Use the Publish button in the header to go live. Archived forms stay in the system but stop accepting donations.', 'fundkit-fundraising-campaigns' ) }
             >
                 <SelectControl
                     value={ c.value( 'status', 'draft' ) }
@@ -1303,8 +1303,8 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Campaign', 'giveflow-fundraising-campaigns' ) }
-                description={ __( 'Every form lives under a campaign. Move this form to a different one here.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Campaign', 'fundkit-fundraising-campaigns' ) }
+                description={ __( 'Every form lives under a campaign. Move this form to a different one here.', 'fundkit-fundraising-campaigns' ) }
             >
                 <SelectControl
                     value={ String( c.value( 'campaign_id', 0 ) || 0 ) }
@@ -1322,7 +1322,7 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                             opts.unshift( {
                                 value: current,
                                 label: c.value( 'campaign', null )?.title
-                                    || __( 'Current campaign', 'giveflow-fundraising-campaigns' ),
+                                    || __( 'Current campaign', 'fundkit-fundraising-campaigns' ),
                             } );
                         }
                         return opts;
@@ -1336,24 +1336,24 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Default fund', 'giveflow-fundraising-campaigns' ) }
-                description={ __( 'Where donations land when this form has no fund picker, or the donor does not choose one.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Default fund', 'fundkit-fundraising-campaigns' ) }
+                description={ __( 'Where donations land when this form has no fund picker, or the donor does not choose one.', 'fundkit-fundraising-campaigns' ) }
             >
                 <SelectControl
                     value={ String( c.value( 'default_fund_id', 0 ) || 0 ) }
                     options={ fundSelectOptions( funds ) }
                     onChange={ ( v ) => c.edit( { default_fund_id: Number( v ) || null } ) }
-                    help={ __( 'Leave on the default to fall back to the campaign fund, then the organization default.', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Leave on the default to fall back to the campaign fund, then the organization default.', 'fundkit-fundraising-campaigns' ) }
                     __nextHasNoMarginBottom
                 />
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Layout & style', 'giveflow-fundraising-campaigns' ) }
-                description={ __( 'How the form is presented: its layout, style preset, width, and whether it sits in a card.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Layout & style', 'fundkit-fundraising-campaigns' ) }
+                description={ __( 'How the form is presented: its layout, style preset, width, and whether it sits in a card.', 'fundkit-fundraising-campaigns' ) }
             >
                 <SelectControl
-                    label={ __( 'Layout', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Layout', 'fundkit-fundraising-campaigns' ) }
                     value={ settings.layout }
                     options={ LAYOUT_OPTIONS }
                     onChange={ ( v ) => setSettings( { layout: v } ) }
@@ -1364,7 +1364,7 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                     onChange={ ( v ) => setSettings( { style: { ...settings.style, preset_id: v } } ) }
                 />
                 <Slider
-                    label={ __( 'Maximum width', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Maximum width', 'fundkit-fundraising-campaigns' ) }
                     value={ settings.container?.width ?? 540 }
                     onChange={ ( v ) => setSettings( { container: { ...settings.container, width: v } } ) }
                     min={ 320 }
@@ -1372,14 +1372,14 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                     unit="px"
                 />
                 <Segmented
-                    label={ __( 'Container', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Container', 'fundkit-fundraising-campaigns' ) }
                     value={ settings.container?.style ?? 'plain' }
                     onChange={ ( v ) => setSettings( { container: { ...settings.container, style: v } } ) }
                     options={ [
-                        { value: 'frame', label: __( 'Frame', 'giveflow-fundraising-campaigns' ) },
-                        { value: 'plain', label: __( 'Plain', 'giveflow-fundraising-campaigns' ) },
+                        { value: 'frame', label: __( 'Frame', 'fundkit-fundraising-campaigns' ) },
+                        { value: 'plain', label: __( 'Plain', 'fundkit-fundraising-campaigns' ) },
                     ] }
-                    help={ __( '"Frame" wraps the form in a card with a shadow; "Plain" renders it flush with the page.', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( '"Frame" wraps the form in a card with a shadow; "Plain" renders it flush with the page.', 'fundkit-fundraising-campaigns' ) }
                 />
             </SettingsRow>
         </>
@@ -1387,17 +1387,17 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
 }
 
 const GOAL_TYPE_OPTIONS = [
-    { value: 'none',      label: __( 'No goal', 'giveflow-fundraising-campaigns' ) },
-    { value: 'amount',    label: __( 'Amount', 'giveflow-fundraising-campaigns' ) },
-    { value: 'donations', label: __( 'Donations', 'giveflow-fundraising-campaigns' ) },
-    { value: 'donors',    label: __( 'Donors', 'giveflow-fundraising-campaigns' ) },
+    { value: 'none',      label: __( 'No goal', 'fundkit-fundraising-campaigns' ) },
+    { value: 'amount',    label: __( 'Amount', 'fundkit-fundraising-campaigns' ) },
+    { value: 'donations', label: __( 'Donations', 'fundkit-fundraising-campaigns' ) },
+    { value: 'donors',    label: __( 'Donors', 'fundkit-fundraising-campaigns' ) },
 ];
 
 const GOAL_TYPE_DESC = {
-    none:      __( 'No progress bar or target on this form.', 'giveflow-fundraising-campaigns' ),
-    amount:    __( 'Track progress toward a fundraising total.', 'giveflow-fundraising-campaigns' ),
-    donations: __( 'Track the number of completed donations to this form.', 'giveflow-fundraising-campaigns' ),
-    donors:    __( 'Track the number of unique donors who give through this form.', 'giveflow-fundraising-campaigns' ),
+    none:      __( 'No progress bar or target on this form.', 'fundkit-fundraising-campaigns' ),
+    amount:    __( 'Track progress toward a fundraising total.', 'fundkit-fundraising-campaigns' ),
+    donations: __( 'Track the number of completed donations to this form.', 'fundkit-fundraising-campaigns' ),
+    donors:    __( 'Track the number of unique donors who give through this form.', 'fundkit-fundraising-campaigns' ),
 };
 
 function GoalSection( { settings, setSettings } ) {
@@ -1405,11 +1405,11 @@ function GoalSection( { settings, setSettings } ) {
 
     return (
         <SettingsRow
-            title={ __( 'Form goal', 'giveflow-fundraising-campaigns' ) }
-            description={ __( 'An optional goal tracked for this form alone. The Goal block can show this or the parent campaign goal.', 'giveflow-fundraising-campaigns' ) }
+            title={ __( 'Form goal', 'fundkit-fundraising-campaigns' ) }
+            description={ __( 'An optional goal tracked for this form alone. The Goal block can show this or the parent campaign goal.', 'fundkit-fundraising-campaigns' ) }
         >
             <SelectControl
-                label={ __( 'Goal type', 'giveflow-fundraising-campaigns' ) }
+                label={ __( 'Goal type', 'fundkit-fundraising-campaigns' ) }
                 value={ goal.type }
                 options={ GOAL_TYPE_OPTIONS }
                 onChange={ ( type ) => setSettings( { goal: { type, amount_cents: 0, count: 0 } } ) }
@@ -1418,9 +1418,9 @@ function GoalSection( { settings, setSettings } ) {
             />
             { goal.type === 'amount' && (
                 <BaseControl
-                    id="giveflow-form-goal-amount"
-                    label={ __( 'Target amount', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'In the currency this form uses.', 'giveflow-fundraising-campaigns' ) }
+                    id="fundkit-form-goal-amount"
+                    label={ __( 'Target amount', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'In the currency this form uses.', 'fundkit-fundraising-campaigns' ) }
                     __nextHasNoMarginBottom
                 >
                     <AmountInput
@@ -1434,13 +1434,13 @@ function GoalSection( { settings, setSettings } ) {
                         currency={ defaultCurrency() }
                         min={ 0 }
                         placeholder="0"
-                        inputProps={ { id: 'giveflow-form-goal-amount' } }
+                        inputProps={ { id: 'fundkit-form-goal-amount' } }
                     />
                 </BaseControl>
             ) }
             { ( goal.type === 'donations' || goal.type === 'donors' ) && (
                 <TextControl
-                    label={ __( 'Target count', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Target count', 'fundkit-fundraising-campaigns' ) }
                     type="number"
                     min={ 0 }
                     step="1"
@@ -1462,7 +1462,7 @@ function gatewayLabel( g ) {
     if ( g.enabled !== false ) return g.label;
 
     /* translators: %s: payment gateway name. */
-    return sprintf( __( '%s (off in Settings)', 'giveflow-fundraising-campaigns' ), g.label );
+    return sprintf( __( '%s (off in Settings)', 'fundkit-fundraising-campaigns' ), g.label );
 }
 
 function GatewaysSection( { gateways, settings, setSettings } ) {
@@ -1474,7 +1474,7 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
         const store = s( 'core/block-editor' );
         const id = store
             .getClientIdsWithDescendants()
-            .find( ( cid ) => store.getBlockName( cid ) === 'giveflow/payment-gateways' );
+            .find( ( cid ) => store.getBlockName( cid ) === 'fundkit/payment-gateways' );
 
         return id ? { clientId: id, allowed: store.getBlockAttributes( id )?.allowed || [] } : null;
     }, [] );
@@ -1493,12 +1493,12 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
     };
     return (
         <SettingsRow
-            title={ __( 'Allowed gateways', 'giveflow-fundraising-campaigns' ) }
-            description={ __( 'Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings.', 'giveflow-fundraising-campaigns' ) }
+            title={ __( 'Allowed gateways', 'fundkit-fundraising-campaigns' ) }
+            description={ __( 'Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings.', 'fundkit-fundraising-campaigns' ) }
         >
-            <div className="giveflow-sidebar-list">
+            <div className="fundkit-sidebar-list">
                 { gateways.map( ( g ) => (
-                    <label key={ g.id } className="giveflow-sidebar-check">
+                    <label key={ g.id } className="fundkit-sidebar-check">
                         <input
                             type="checkbox"
                             checked={ gatewayIsOn( allowed, g.id ) }
@@ -1508,13 +1508,13 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
                     </label>
                 ) ) }
             </div>
-            <label className="giveflow-sidebar-check" style={ { marginTop: 14 } }>
+            <label className="fundkit-sidebar-check" style={ { marginTop: 14 } }>
                 <input
                     type="checkbox"
                     checked={ !! settings.test_mode }
                     onChange={ () => setSettings( { test_mode: ! settings.test_mode } ) }
                 />
-                <span>{ __( 'Test mode (no real payment, excluded from reporting)', 'giveflow-fundraising-campaigns' ) }</span>
+                <span>{ __( 'Test mode (no real payment, excluded from reporting)', 'fundkit-fundraising-campaigns' ) }</span>
             </label>
         </SettingsRow>
     );
@@ -1524,8 +1524,8 @@ function AfterSection( { settings, setSettings } ) {
     return (
         <>
             <SettingsRow
-                title={ __( 'Thank-you message', 'giveflow-fundraising-campaigns' ) }
-                description={ __( 'Shown to the donor after a successful donation, unless a redirect URL is set.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Thank-you message', 'fundkit-fundraising-campaigns' ) }
+                description={ __( 'Shown to the donor after a successful donation, unless a redirect URL is set.', 'fundkit-fundraising-campaigns' ) }
             >
                 <TextareaControl
                     value={ settings.thank_you_message }
@@ -1535,8 +1535,8 @@ function AfterSection( { settings, setSettings } ) {
                 />
             </SettingsRow>
             <SettingsRow
-                title={ __( 'Redirect URL', 'giveflow-fundraising-campaigns' ) }
-                description={ __( 'If set, donors are sent here instead of seeing the thank-you message.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Redirect URL', 'fundkit-fundraising-campaigns' ) }
+                description={ __( 'If set, donors are sent here instead of seeing the thank-you message.', 'fundkit-fundraising-campaigns' ) }
             >
                 <TextControl
                     type="url"
@@ -1545,7 +1545,7 @@ function AfterSection( { settings, setSettings } ) {
                     placeholder="https://"
                     help={
                         settings.redirect_url && ! /^https?:\/\//i.test( settings.redirect_url.trim() )
-                            ? __( 'Use a full URL starting with http:// or https://', 'giveflow-fundraising-campaigns' )
+                            ? __( 'Use a full URL starting with http:// or https://', 'fundkit-fundraising-campaigns' )
                             : undefined
                     }
                     __nextHasNoMarginBottom
@@ -1556,11 +1556,11 @@ function AfterSection( { settings, setSettings } ) {
 }
 
 function EmbedSection( { slug } ) {
-    const shortcode = `[giveflow_donation_form slug="${ slug }"]`;
+    const shortcode = `[fundkit_donation_form slug="${ slug }"]`;
     return (
         <SettingsRow
-            title={ __( 'Embed', 'giveflow-fundraising-campaigns' ) }
-            description={ __( 'Paste this shortcode into any post or page to render the form.', 'giveflow-fundraising-campaigns' ) }
+            title={ __( 'Embed', 'fundkit-fundraising-campaigns' ) }
+            description={ __( 'Paste this shortcode into any post or page to render the form.', 'fundkit-fundraising-campaigns' ) }
         >
             <ShortcodeField value={ shortcode } />
         </SettingsRow>
@@ -1568,23 +1568,23 @@ function EmbedSection( { slug } ) {
 }
 
 function StylePresetField( { value, onChange } ) {
-    const presets   = Array.isArray( window.giveflow?.styling?.presets ) ? window.giveflow.styling.presets : [];
-    const defaultId = String( window.giveflow?.styling?.default_id || '' );
+    const presets   = Array.isArray( window.fundkit?.styling?.presets ) ? window.fundkit.styling.presets : [];
+    const defaultId = String( window.fundkit?.styling?.default_id || '' );
     const defaultName = presets.find( ( p ) => p.id === defaultId )?.name || defaultId;
     return (
         <SelectControl
-            label={ __( 'Style preset', 'giveflow-fundraising-campaigns' ) }
+            label={ __( 'Style preset', 'fundkit-fundraising-campaigns' ) }
             value={ value }
             options={ [
                 {
                     value: '',
-                    label: __( 'Inherit (campaign or org default)', 'giveflow-fundraising-campaigns' ) +
+                    label: __( 'Inherit (campaign or org default)', 'fundkit-fundraising-campaigns' ) +
                         ( defaultName ? ` (${ defaultName })` : '' ),
                 },
                 ...presets.map( ( p ) => ( { value: p.id, label: p.name } ) ),
             ] }
             onChange={ onChange }
-            help={ __( 'Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign\'s choice.', 'giveflow-fundraising-campaigns' ) }
+            help={ __( 'Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign\'s choice.', 'fundkit-fundraising-campaigns' ) }
             __nextHasNoMarginBottom
             __next40pxDefaultSize
         />
@@ -1609,15 +1609,15 @@ function ShortcodeField( { value } ) {
     };
 
     return (
-        <div className="giveflow-shortcode">
-            <code className="giveflow-shortcode__code">{ value }</code>
+        <div className="fundkit-shortcode">
+            <code className="fundkit-shortcode__code">{ value }</code>
             <Button
                 variant="secondary"
                 size="small"
                 onClick={ onCopy }
-                className="giveflow-shortcode__copy"
+                className="fundkit-shortcode__copy"
             >
-                { copied ? __( 'Copied', 'giveflow-fundraising-campaigns' ) : __( 'Copy', 'giveflow-fundraising-campaigns' ) }
+                { copied ? __( 'Copied', 'fundkit-fundraising-campaigns' ) : __( 'Copy', 'fundkit-fundraising-campaigns' ) }
             </Button>
         </div>
     );

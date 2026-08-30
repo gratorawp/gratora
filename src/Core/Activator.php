@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Core;
+namespace FundKit\Core;
 
-use GiveFlow\Foundation\References\ReferenceGenerator;
-use GiveFlow\Foundation\Uninstall\DataEraser;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Funds\Fund;
-use GiveFlow\Funds\FundRepository;
+use FundKit\Foundation\References\ReferenceGenerator;
+use FundKit\Foundation\Uninstall\DataEraser;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Funds\Fund;
+use FundKit\Funds\FundRepository;
 
 /**
  * Idempotent activation: each step checks state and only acts on what's missing.
@@ -17,9 +17,9 @@ use GiveFlow\Funds\FundRepository;
  */
 final class Activator
 {
-    public const OPT_ACTIVATED_AT = 'giveflow_activated_at';
-    public const OPT_ORG_PROFILE  = 'giveflow_org_profile';
-    public const CAP_MANAGE       = 'manage_giveflow';
+    public const OPT_ACTIVATED_AT = 'fundkit_activated_at';
+    public const OPT_ORG_PROFILE  = 'fundkit_org_profile';
+    public const CAP_MANAGE       = 'manage_fundkit';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -36,12 +36,12 @@ final class Activator
         $this->seedOrgProfile();
         $this->seedReferenceSettings();
         $this->markActivated();
-        // Switching GiveFlow back on withdraws a standing instruction to wipe. It
+        // Switching FundKit back on withdraws a standing instruction to wipe. It
         // was given while removing the plugin, and it must not lie in wait to
         // destroy the records of a site that changed its mind.
         delete_option(DataEraser::OPT_IN);
 
-        do_action('giveflow.activator.ran');
+        do_action('fundkit.activator.ran');
     }
 
     /** @since 1.0.0 */
@@ -61,8 +61,8 @@ final class Activator
 
         $fund = Fund::make();
         $fund->code           = 'general';
-        $fund->name           = __('General', 'giveflow-fundraising-campaigns');
-        $fund->description    = __('Default fund for unrestricted donations.', 'giveflow-fundraising-campaigns');
+        $fund->name           = __('General', 'fundkit-fundraising-campaigns');
+        $fund->description    = __('Default fund for unrestricted donations.', 'fundkit-fundraising-campaigns');
         $fund->is_restricted  = false;
         $fund->is_default     = true;
         $fund->is_active      = true;

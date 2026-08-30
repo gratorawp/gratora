@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
 /**
- * Single wizard step block, contained by giveflow/steps.
+ * Single wizard step block, contained by fundkit/steps.
  *
  * @since 1.0.0
  */
@@ -14,7 +14,7 @@ final class StepBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/step';
+        return 'fundkit/step';
     }
 
     /** @since 1.0.0 */
@@ -36,6 +36,6 @@ final class StepBlock implements Block
      */
     public function render(array $attrs, string $content): string
     {
-        return sprintf('<div class="giveflow-block giveflow-block--step">%s</div>', $content);
+        return sprintf('<div class="fundkit-block fundkit-block--step">%s</div>', $content);
     }
 }

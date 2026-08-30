@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Receipts;
+namespace FundKit\Receipts;
 
 /**
  * Renders a donation receipt to a PDF byte string.

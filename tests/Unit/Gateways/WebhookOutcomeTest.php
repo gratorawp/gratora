@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Gateways;
+namespace FundKit\Tests\Unit\Gateways;
 
-use GiveFlow\Gateways\WebhookOutcome;
+use FundKit\Gateways\WebhookOutcome;
 use PHPUnit\Framework\TestCase;
 
 final class WebhookOutcomeTest extends TestCase

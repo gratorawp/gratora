@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Admin\ExtensionAssets;
+use FundKit\Admin\ExtensionAssets;
 
 /**
  * The extension-panel seam.
@@ -76,21 +76,21 @@ final class ExtensionSurfacesTest extends IntegrationTestCase
     /**
      * The donations page depends on the registry handle, so the registry is
      * defined before the app reads it. Without the dependency the app can
-     * render before window.giveflow.tabs exists and show nothing.
+     * render before window.fundkit.tabs exists and show nothing.
      */
     public function test_the_donations_app_depends_on_the_registry(): void
     {
         global $wp_scripts;
 
-        $page = new \GiveFlow\Admin\Pages\DonationsPage();
-        set_current_screen('giveflow_page_giveflow-donations');
+        $page = new \FundKit\Admin\Pages\DonationsPage();
+        set_current_screen('fundkit_page_fundkit-donations');
         wp_set_current_user(1);
 
         ob_start();
         $page->render();
         ob_end_clean();
 
-        $registered = $wp_scripts->registered['giveflow-admin-donations'] ?? null;
+        $registered = $wp_scripts->registered['fundkit-admin-donations'] ?? null;
         $this->assertNotNull($registered, 'The donations bundle should be registered.');
         $this->assertContains(ExtensionAssets::HANDLE, $registered->deps);
     }
@@ -104,15 +104,15 @@ final class ExtensionSurfacesTest extends IntegrationTestCase
     {
         global $wp_scripts;
 
-        $page = new \GiveFlow\Admin\Pages\DonorsPage();
-        set_current_screen('giveflow_page_giveflow-donors');
+        $page = new \FundKit\Admin\Pages\DonorsPage();
+        set_current_screen('fundkit_page_fundkit-donors');
         wp_set_current_user(1);
 
         ob_start();
         $page->render();
         ob_end_clean();
 
-        $registered = $wp_scripts->registered['giveflow-admin-donors'] ?? null;
+        $registered = $wp_scripts->registered['fundkit-admin-donors'] ?? null;
         $this->assertNotNull($registered, 'The donors bundle should be registered.');
         $this->assertContains(ExtensionAssets::HANDLE, $registered->deps);
         $this->assertContains('donor', $this->fired);

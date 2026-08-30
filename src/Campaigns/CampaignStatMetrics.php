@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns;
+namespace FundKit\Campaigns;
 
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Time\Clock;
+use FundKit\Donations\DonationRepository;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Time\Clock;
 
 /**
  * A metric answers null when the campaign cannot support it, so a stat block
@@ -31,15 +31,15 @@ final class CampaignStatMetrics
     public static function labels(): array
     {
         return [
-            'raised'    => __('Amount raised', 'giveflow-fundraising-campaigns'),
-            'goal'      => __('Our goal', 'giveflow-fundraising-campaigns'),
-            'remaining' => __('Still needed', 'giveflow-fundraising-campaigns'),
-            'percent'   => __('Of goal reached', 'giveflow-fundraising-campaigns'),
-            'donations' => __('Donations', 'giveflow-fundraising-campaigns'),
-            'donors'    => __('Donors', 'giveflow-fundraising-campaigns'),
-            'average'   => __('Average donation', 'giveflow-fundraising-campaigns'),
-            'top'       => __('Top donation', 'giveflow-fundraising-campaigns'),
-            'days_left' => __('Days left', 'giveflow-fundraising-campaigns'),
+            'raised'    => __('Amount raised', 'fundkit-fundraising-campaigns'),
+            'goal'      => __('Our goal', 'fundkit-fundraising-campaigns'),
+            'remaining' => __('Still needed', 'fundkit-fundraising-campaigns'),
+            'percent'   => __('Of goal reached', 'fundkit-fundraising-campaigns'),
+            'donations' => __('Donations', 'fundkit-fundraising-campaigns'),
+            'donors'    => __('Donors', 'fundkit-fundraising-campaigns'),
+            'average'   => __('Average donation', 'fundkit-fundraising-campaigns'),
+            'top'       => __('Top donation', 'fundkit-fundraising-campaigns'),
+            'days_left' => __('Days left', 'fundkit-fundraising-campaigns'),
         ];
     }
 

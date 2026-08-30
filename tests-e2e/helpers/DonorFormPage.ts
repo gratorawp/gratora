@@ -13,20 +13,20 @@ export class DonorFormPage {
 
     constructor(page: Page) {
         this.page = page;
-        this.form = page.locator('form.giveflow-donation-form').first();
+        this.form = page.locator('form.fundkit-donation-form').first();
     }
 
-    async open(path = process.env.GIVEFLOW_E2E_FORM_PATH ?? '/'): Promise<void> {
+    async open(path = process.env.FUNDKIT_E2E_FORM_PATH ?? '/'): Promise<void> {
         await this.page.goto(path);
         await this.form.waitFor({ state: 'attached' });
-        // The runtime sets data-giveflow-ready on every mount() exit path; the
+        // The runtime sets data-fundkit-ready on every mount() exit path; the
         // JS-gated cloak only releases when it's set.
-        await expect(this.form).toHaveAttribute('data-giveflow-ready', 'true', { timeout: 10_000 });
+        await expect(this.form).toHaveAttribute('data-fundkit-ready', 'true', { timeout: 10_000 });
         this.renderedAt = Date.now();
     }
 
     presets(): Locator {
-        return this.form.locator('.giveflow-form__preset');
+        return this.form.locator('.fundkit-form__preset');
     }
 
     async selectPresetAt(index: number): Promise<void> {
@@ -34,12 +34,12 @@ export class DonorFormPage {
     }
 
     async fillCustomAmount(value: number): Promise<void> {
-        const input = this.form.locator('.giveflow-form__custom input').first();
+        const input = this.form.locator('.fundkit-form__custom input').first();
         await input.fill(String(value));
     }
 
     currencySwitcher(): Locator {
-        return this.form.locator('.giveflow-form__currency-switcher');
+        return this.form.locator('.fundkit-form__currency-switcher');
     }
 
     async selectCurrency(code: string): Promise<void> {
@@ -49,7 +49,7 @@ export class DonorFormPage {
             await select.selectOption(code);
             return;
         }
-        await sw.locator('.giveflow-form__currency-pill', { hasText: code }).click();
+        await sw.locator('.fundkit-form__currency-pill', { hasText: code }).click();
     }
 
     async fillName(first: string, last: string): Promise<void> {
@@ -65,7 +65,7 @@ export class DonorFormPage {
 
     /** Locator for a CountrySelect combobox (search-as-you-type picker). */
     countrySelect(root?: Locator): Locator {
-        return (root ?? this.form).locator('.giveflow-form__country-select').first();
+        return (root ?? this.form).locator('.fundkit-form__country-select').first();
     }
 
     /**
@@ -75,14 +75,14 @@ export class DonorFormPage {
      */
     async pickCountry(name: string, root?: Locator): Promise<void> {
         const cs    = this.countrySelect(root);
-        const input = cs.locator('.giveflow-form__country-select-input');
+        const input = cs.locator('.fundkit-form__country-select-input');
         await input.click();
         await input.fill(name);
-        await cs.locator('.giveflow-form__country-select-option').filter({ hasText: name }).first().click();
+        await cs.locator('.fundkit-form__country-select-option').filter({ hasText: name }).first().click();
     }
 
     addressFieldset(): Locator {
-        return this.form.locator('.giveflow-form__address').first();
+        return this.form.locator('.fundkit-form__address').first();
     }
 
     async fillAddress(input: {
@@ -110,32 +110,32 @@ export class DonorFormPage {
         // The runtime emits comment as a Field-wrapped <textarea> with no name
         // attribute. The Field wrapper is what tells it apart from a textarea a
         // field block renders inside its own fieldset.
-        await this.form.locator('.giveflow-form__field textarea').first().fill(value);
+        await this.form.locator('.fundkit-form__field textarea').first().fill(value);
     }
 
     anonymousToggle(): Locator {
-        // Anonymous block renders as a bare `.giveflow-form__check`; cover-fees
-        // shares that base class but adds `giveflow-form__cover-fees`. The
+        // Anonymous block renders as a bare `.fundkit-form__check`; cover-fees
+        // shares that base class but adds `fundkit-form__cover-fees`. The
         // :not() filter rules cover-fees out.
         return this.form
-            .locator('.giveflow-form__check:not(.giveflow-form__cover-fees) input[type="checkbox"]')
+            .locator('.fundkit-form__check:not(.fundkit-form__cover-fees) input[type="checkbox"]')
             .first();
     }
 
     consentFieldset(): Locator {
-        return this.form.locator('.giveflow-form__consent').first();
+        return this.form.locator('.fundkit-form__consent').first();
     }
 
     coverFeesToggle(): Locator {
-        return this.form.locator('.giveflow-form__cover-fees input[type="checkbox"], input[name="cover_fees"]').first();
+        return this.form.locator('.fundkit-form__cover-fees input[type="checkbox"], input[name="cover_fees"]').first();
     }
 
     gatewayOptions(): Locator {
-        return this.form.locator('.giveflow-form__gateway input[type="radio"]');
+        return this.form.locator('.fundkit-form__gateway input[type="radio"]');
     }
 
     async selectGateway(id: string): Promise<void> {
-        const radio = this.form.locator(`.giveflow-form__gateway input[type="radio"][value="${id}"]`);
+        const radio = this.form.locator(`.fundkit-form__gateway input[type="radio"][value="${id}"]`);
         if (await radio.count() > 0) {
             await radio.check();
         }
@@ -149,11 +149,11 @@ export class DonorFormPage {
         const elapsed   = Date.now() - this.renderedAt;
         const remaining = 2500 - elapsed;
         if (remaining > 0) await this.page.waitForTimeout(remaining);
-        await this.form.locator('.giveflow-form__button--primary').click();
+        await this.form.locator('.fundkit-form__button--primary').click();
     }
 
     successCard(): Locator {
-        return this.form.locator('.giveflow-form__success');
+        return this.form.locator('.fundkit-form__success');
     }
 
     async expectThankYou(): Promise<void> {
@@ -161,7 +161,7 @@ export class DonorFormPage {
     }
 
     async expectFieldError(field: string): Promise<void> {
-        await expect(this.form.locator('.giveflow-form__field-error').filter({ hasText: /\S/ }).first())
+        await expect(this.form.locator('.fundkit-form__field-error').filter({ hasText: /\S/ }).first())
             .toBeVisible({ timeout: 5_000 });
         // Field-level errors live as siblings to the offending input; a generic
         // visibility check is enough for the canonical specs.

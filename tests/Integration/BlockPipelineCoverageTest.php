@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -19,7 +19,7 @@ final class BlockPipelineCoverageTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Coverage campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -27,7 +27,7 @@ final class BlockPipelineCoverageTest extends IntegrationTestCase
 
     private function configFor(string $blocks): string
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'title'       => 'Coverage form',
@@ -39,12 +39,12 @@ final class BlockPipelineCoverageTest extends IntegrationTestCase
 
         // Test blocks are minimal and would fail the publish-readiness check
         // (Name + Email required). Bypass via a direct model save.
-        $form = \GiveFlow\Forms\Form::query()->find('id', (int) $created['id']);
+        $form = \FundKit\Forms\Form::query()->find('id', (int) $created['id']);
         $form->status = 'published';
         $form->save();
 
-        $html = do_shortcode('[giveflow_donation_form slug="' . $slug . '"]');
-        preg_match('/data-giveflow-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[fundkit_donation_form slug="' . $slug . '"]');
+        preg_match('/data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
         return (string) ($m[1] ?? '');
     }
 
@@ -52,35 +52,35 @@ final class BlockPipelineCoverageTest extends IntegrationTestCase
     {
         // One unique marker per block; each must reach the runtime config.
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/heading {"text":"MK_HEADING"} /-->
-<!-- wp:giveflow/paragraph {"text":"MK_PARAGRAPH"} /-->
-<!-- wp:giveflow/html {"content":"<span>MK_HTML</span>"} /-->
-<!-- wp:giveflow/donation-amount {"presets":[91234],"currency":"EUR"} /-->
-<!-- wp:giveflow/name /-->
-<!-- wp:giveflow/email {"label":"MK_EMAIL"} /-->
-<!-- wp:giveflow/country {"label":"MK_COUNTRY"} /-->
-<!-- wp:giveflow/phone {"label":"MK_PHONE"} /-->
-<!-- wp:giveflow/comment {"label":"MK_COMMENT"} /-->
-<!-- wp:giveflow/address {"label":"MK_ADDRESS"} /-->
-<!-- wp:giveflow/anonymous-toggle {"label":"MK_ANON"} /-->
-<!-- wp:giveflow/cover-fees {"label":"MK_COVERFEES"} /-->
-<!-- wp:giveflow/recurring-toggle {"label":"MK_RECURRING","frequencies":["one-time","monthly"]} /-->
-<!-- wp:giveflow/fund-picker {"label":"MK_FUND","allowEmpty":true} /-->
-<!-- wp:giveflow/text-input {"field":"mk_text","label":"MK_TEXT"} /-->
-<!-- wp:giveflow/number-input {"field":"mk_num","label":"MK_NUMBER"} /-->
-<!-- wp:giveflow/date {"field":"mk_date","label":"MK_DATE"} /-->
-<!-- wp:giveflow/dropdown {"field":"mk_dd","label":"MK_DROPDOWN","options":["a"]} /-->
-<!-- wp:giveflow/radio {"field":"mk_radio","label":"MK_RADIO","options":["a"]} /-->
-<!-- wp:giveflow/checkbox {"field":"mk_check","label":"MK_CHECKBOX"} /-->
-<!-- wp:giveflow/multi-select {"field":"mk_ms","label":"MK_MULTISELECT","options":["a"]} /-->
-<!-- wp:giveflow/hidden {"field":"mk_hidden","defaultValue":"MK_HIDDEN"} /-->
-<!-- wp:giveflow/submit-button {"label":"MK_SUBMIT"} /-->
+<!-- wp:fundkit/heading {"text":"MK_HEADING"} /-->
+<!-- wp:fundkit/paragraph {"text":"MK_PARAGRAPH"} /-->
+<!-- wp:fundkit/html {"content":"<span>MK_HTML</span>"} /-->
+<!-- wp:fundkit/donation-amount {"presets":[91234],"currency":"EUR"} /-->
+<!-- wp:fundkit/name /-->
+<!-- wp:fundkit/email {"label":"MK_EMAIL"} /-->
+<!-- wp:fundkit/country {"label":"MK_COUNTRY"} /-->
+<!-- wp:fundkit/phone {"label":"MK_PHONE"} /-->
+<!-- wp:fundkit/comment {"label":"MK_COMMENT"} /-->
+<!-- wp:fundkit/address {"label":"MK_ADDRESS"} /-->
+<!-- wp:fundkit/anonymous-toggle {"label":"MK_ANON"} /-->
+<!-- wp:fundkit/cover-fees {"label":"MK_COVERFEES"} /-->
+<!-- wp:fundkit/recurring-toggle {"label":"MK_RECURRING","frequencies":["one-time","monthly"]} /-->
+<!-- wp:fundkit/fund-picker {"label":"MK_FUND","allowEmpty":true} /-->
+<!-- wp:fundkit/text-input {"field":"mk_text","label":"MK_TEXT"} /-->
+<!-- wp:fundkit/number-input {"field":"mk_num","label":"MK_NUMBER"} /-->
+<!-- wp:fundkit/date {"field":"mk_date","label":"MK_DATE"} /-->
+<!-- wp:fundkit/dropdown {"field":"mk_dd","label":"MK_DROPDOWN","options":["a"]} /-->
+<!-- wp:fundkit/radio {"field":"mk_radio","label":"MK_RADIO","options":["a"]} /-->
+<!-- wp:fundkit/checkbox {"field":"mk_check","label":"MK_CHECKBOX"} /-->
+<!-- wp:fundkit/multi-select {"field":"mk_ms","label":"MK_MULTISELECT","options":["a"]} /-->
+<!-- wp:fundkit/hidden {"field":"mk_hidden","defaultValue":"MK_HIDDEN"} /-->
+<!-- wp:fundkit/submit-button {"label":"MK_SUBMIT"} /-->
 BLOCKS;
 
         $config = $this->configFor($blocks);
         $this->assertNotSame('', $config, 'form must emit a runtime config');
 
-        // giveflow/name is a two-part field (firstLabel/lastLabel), no single
+        // fundkit/name is a two-part field (firstLabel/lastLabel), no single
         // label; assert it survived structurally instead of via a marker.
         $this->assertStringContainsString( '"kind":"name"', $config );
 
@@ -104,22 +104,22 @@ BLOCKS;
     public function test_layout_containers_and_multi_step_survive(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/steps -->
-<!-- wp:giveflow/step {"label":"MK_STEP_ONE"} -->
-<!-- wp:giveflow/donation-amount {"presets":[500]} /-->
-<!-- /wp:giveflow/step -->
-<!-- wp:giveflow/step {"label":"MK_STEP_TWO"} -->
-<!-- wp:giveflow/columns {"columns":2,"gap":20,"gapUnit":"px"} -->
-<!-- wp:giveflow/heading {"text":"MK_IN_COLUMNS"} /-->
-<!-- /wp:giveflow/columns -->
-<!-- wp:giveflow/row {"columns":2,"gap":14,"gapUnit":"px"} -->
-<!-- wp:giveflow/name /-->
-<!-- wp:giveflow/email /-->
-<!-- /wp:giveflow/row -->
-<!-- /wp:giveflow/step -->
-<!-- /wp:giveflow/steps -->
+<!-- wp:fundkit/steps -->
+<!-- wp:fundkit/step {"label":"MK_STEP_ONE"} -->
+<!-- wp:fundkit/donation-amount {"presets":[500]} /-->
+<!-- /wp:fundkit/step -->
+<!-- wp:fundkit/step {"label":"MK_STEP_TWO"} -->
+<!-- wp:fundkit/columns {"columns":2,"gap":20,"gapUnit":"px"} -->
+<!-- wp:fundkit/heading {"text":"MK_IN_COLUMNS"} /-->
+<!-- /wp:fundkit/columns -->
+<!-- wp:fundkit/row {"columns":2,"gap":14,"gapUnit":"px"} -->
+<!-- wp:fundkit/name /-->
+<!-- wp:fundkit/email /-->
+<!-- /wp:fundkit/row -->
+<!-- /wp:fundkit/step -->
+<!-- /wp:fundkit/steps -->
 
-<!-- wp:giveflow/submit-button {"label":"MK_SUBMIT2"} /-->
+<!-- wp:fundkit/submit-button {"label":"MK_SUBMIT2"} /-->
 BLOCKS;
 
         $config = $this->configFor($blocks);
@@ -131,10 +131,10 @@ BLOCKS;
             static fn ($s) => $s['page'] ?? 0,
             $cfg['steps'] ?? []
         ));
-        $this->assertGreaterThan(1, count($pages), 'giveflow/steps must yield multiple pages');
+        $this->assertGreaterThan(1, count($pages), 'fundkit/steps must yield multiple pages');
 
         // Columns container and its nested child both survived.
-        $this->assertStringContainsString('giveflow-block--columns', $config);
+        $this->assertStringContainsString('fundkit-block--columns', $config);
         $this->assertStringContainsString('MK_IN_COLUMNS', $config);
 
         // Row gap reached the config (the audit's row gap/gapUnit fix).
@@ -147,8 +147,8 @@ BLOCKS;
         // With no selectable funds and no explicit no-fund tile, the picker
         // would be an orphaned empty field, so the walker omits it entirely.
         $config = $this->configFor(
-            '<!-- wp:giveflow/donation-amount /--><!-- wp:giveflow/name /--><!-- wp:giveflow/email /-->'
-            . '<!-- wp:giveflow/fund-picker {"label":"MK_ORPHAN_FUND"} /-->'
+            '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/name /--><!-- wp:fundkit/email /-->'
+            . '<!-- wp:fundkit/fund-picker {"label":"MK_ORPHAN_FUND"} /-->'
         );
 
         $this->assertNotSame('', $config);
@@ -159,16 +159,16 @@ BLOCKS;
     public function test_content_only_wizard_step_keeps_its_content_on_its_own_page(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/steps -->
-<!-- wp:giveflow/step {"title":"Intro"} -->
-<!-- wp:giveflow/heading {"text":"MK_INTRO"} /-->
-<!-- /wp:giveflow/step -->
-<!-- wp:giveflow/step {"title":"Give"} -->
-<!-- wp:giveflow/donation-amount /-->
-<!-- wp:giveflow/email /-->
-<!-- wp:giveflow/submit-button /-->
-<!-- /wp:giveflow/step -->
-<!-- /wp:giveflow/steps -->
+<!-- wp:fundkit/steps -->
+<!-- wp:fundkit/step {"title":"Intro"} -->
+<!-- wp:fundkit/heading {"text":"MK_INTRO"} /-->
+<!-- /wp:fundkit/step -->
+<!-- wp:fundkit/step {"title":"Give"} -->
+<!-- wp:fundkit/donation-amount /-->
+<!-- wp:fundkit/email /-->
+<!-- wp:fundkit/submit-button /-->
+<!-- /wp:fundkit/step -->
+<!-- /wp:fundkit/steps -->
 BLOCKS;
 
         $cfg = json_decode($this->configFor($blocks), true);
@@ -200,17 +200,17 @@ BLOCKS;
     public function test_a_step_left_empty_in_the_builder_is_dropped(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/steps -->
-<!-- wp:giveflow/step {"title":"Give"} -->
-<!-- wp:giveflow/donation-amount /-->
-<!-- wp:giveflow/email /-->
-<!-- /wp:giveflow/step -->
-<!-- wp:giveflow/step {"title":"MK_EMPTY_STEP"} -->
-<!-- /wp:giveflow/step -->
-<!-- wp:giveflow/step {"title":"Finish"} -->
-<!-- wp:giveflow/submit-button /-->
-<!-- /wp:giveflow/step -->
-<!-- /wp:giveflow/steps -->
+<!-- wp:fundkit/steps -->
+<!-- wp:fundkit/step {"title":"Give"} -->
+<!-- wp:fundkit/donation-amount /-->
+<!-- wp:fundkit/email /-->
+<!-- /wp:fundkit/step -->
+<!-- wp:fundkit/step {"title":"MK_EMPTY_STEP"} -->
+<!-- /wp:fundkit/step -->
+<!-- wp:fundkit/step {"title":"Finish"} -->
+<!-- wp:fundkit/submit-button /-->
+<!-- /wp:fundkit/step -->
+<!-- /wp:fundkit/steps -->
 BLOCKS;
 
         $raw = $this->configFor($blocks);
@@ -247,10 +247,10 @@ BLOCKS;
     public function test_fields_and_content_interleave_in_authored_order(): void
     {
         $cfg = json_decode($this->configFor(
-            '<!-- wp:giveflow/paragraph {"text":"MK_ALPHA"} /-->'
-            . '<!-- wp:giveflow/name /-->'
-            . '<!-- wp:giveflow/paragraph {"text":"MK_BETA"} /-->'
-            . '<!-- wp:giveflow/email /-->'
+            '<!-- wp:fundkit/paragraph {"text":"MK_ALPHA"} /-->'
+            . '<!-- wp:fundkit/name /-->'
+            . '<!-- wp:fundkit/paragraph {"text":"MK_BETA"} /-->'
+            . '<!-- wp:fundkit/email /-->'
         ), true);
         $this->assertIsArray($cfg);
 
@@ -277,8 +277,8 @@ BLOCKS;
         // default, so an untouched toggle serializes with no attrs. The walker
         // must still emit a frequency picker (otherwise recurring is silently off).
         $cfg = json_decode($this->configFor(
-            '<!-- wp:giveflow/donation-amount /--><!-- wp:giveflow/recurring-toggle /-->'
-            . '<!-- wp:giveflow/name /--><!-- wp:giveflow/email /--><!-- wp:giveflow/submit-button /-->'
+            '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/recurring-toggle /-->'
+            . '<!-- wp:fundkit/name /--><!-- wp:fundkit/email /--><!-- wp:fundkit/submit-button /-->'
         ), true);
         $this->assertIsArray($cfg);
 
@@ -291,12 +291,12 @@ BLOCKS;
         // Empty attrs must encode as {} not []; [] leaves the block comment
         // unparsed and the notice silently disappears from the mounted form.
         $config = $this->configFor(
-            '<!-- wp:giveflow/donation-amount /--><!-- wp:giveflow/name /--><!-- wp:giveflow/email /-->'
-            . '<!-- wp:giveflow/privacy-notice /--><!-- wp:giveflow/submit-button /-->'
+            '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/name /--><!-- wp:fundkit/email /-->'
+            . '<!-- wp:fundkit/privacy-notice /--><!-- wp:fundkit/submit-button /-->'
         );
         $this->assertNotSame('', $config);
         $this->assertStringNotContainsString(
-            'wp:giveflow/privacy-notice',
+            'wp:fundkit/privacy-notice',
             $config,
             'a bare privacy notice must render, not leak an unparsed block comment'
         );
@@ -305,12 +305,12 @@ BLOCKS;
     public function test_a_field_row_stays_grouped_between_content(): void
     {
         $cfg = json_decode($this->configFor(
-            '<!-- wp:giveflow/row {"columns":2} -->'
-            . '<!-- wp:giveflow/name /-->'
-            . '<!-- wp:giveflow/email /-->'
-            . '<!-- /wp:giveflow/row -->'
-            . '<!-- wp:giveflow/divider /-->'
-            . '<!-- wp:giveflow/phone /-->'
+            '<!-- wp:fundkit/row {"columns":2} -->'
+            . '<!-- wp:fundkit/name /-->'
+            . '<!-- wp:fundkit/email /-->'
+            . '<!-- /wp:fundkit/row -->'
+            . '<!-- wp:fundkit/divider /-->'
+            . '<!-- wp:fundkit/phone /-->'
         ), true);
 
         $items = $this->donorItems($cfg);
@@ -330,16 +330,16 @@ BLOCKS;
     public function test_root_content_before_a_wizard_is_lifted_into_the_preamble(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/heading {"text":"MK_PREAMBLE"} /-->
-<!-- wp:giveflow/steps -->
-<!-- wp:giveflow/step {"title":"Give"} -->
-<!-- wp:giveflow/donation-amount /-->
-<!-- /wp:giveflow/step -->
-<!-- wp:giveflow/step {"title":"You"} -->
-<!-- wp:giveflow/email /-->
-<!-- wp:giveflow/submit-button /-->
-<!-- /wp:giveflow/step -->
-<!-- /wp:giveflow/steps -->
+<!-- wp:fundkit/heading {"text":"MK_PREAMBLE"} /-->
+<!-- wp:fundkit/steps -->
+<!-- wp:fundkit/step {"title":"Give"} -->
+<!-- wp:fundkit/donation-amount /-->
+<!-- /wp:fundkit/step -->
+<!-- wp:fundkit/step {"title":"You"} -->
+<!-- wp:fundkit/email /-->
+<!-- wp:fundkit/submit-button /-->
+<!-- /wp:fundkit/step -->
+<!-- /wp:fundkit/steps -->
 BLOCKS;
 
         $cfg = json_decode($this->configFor($blocks), true);

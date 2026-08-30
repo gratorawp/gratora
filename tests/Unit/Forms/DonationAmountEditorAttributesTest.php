@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Forms;
+namespace FundKit\Tests\Unit\Forms;
 
-use GiveFlow\Forms\Blocks\DonationAmountBlock;
+use FundKit\Forms\Blocks\DonationAmountBlock;
 use PHPUnit\Framework\TestCase;
 
 /**

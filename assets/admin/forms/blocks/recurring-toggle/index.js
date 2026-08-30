@@ -6,15 +6,15 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'giveflow/recurring-toggle';
+const NAME = 'fundkit/recurring-toggle';
 
 const FREQ_OPTIONS = [
-    { value: 'one-time',  label: __( 'One-time', 'giveflow-fundraising-campaigns' ) },
-    { value: 'weekly',    label: __( 'Weekly', 'giveflow-fundraising-campaigns' ) },
-    { value: 'biweekly',  label: __( 'Every 2 weeks', 'giveflow-fundraising-campaigns' ) },
-    { value: 'monthly',   label: __( 'Monthly', 'giveflow-fundraising-campaigns' ) },
-    { value: 'quarterly', label: __( 'Quarterly', 'giveflow-fundraising-campaigns' ) },
-    { value: 'yearly',    label: __( 'Yearly', 'giveflow-fundraising-campaigns' ) },
+    { value: 'one-time',  label: __( 'One-time', 'fundkit-fundraising-campaigns' ) },
+    { value: 'weekly',    label: __( 'Weekly', 'fundkit-fundraising-campaigns' ) },
+    { value: 'biweekly',  label: __( 'Every 2 weeks', 'fundkit-fundraising-campaigns' ) },
+    { value: 'monthly',   label: __( 'Monthly', 'fundkit-fundraising-campaigns' ) },
+    { value: 'quarterly', label: __( 'Quarterly', 'fundkit-fundraising-campaigns' ) },
+    { value: 'yearly',    label: __( 'Yearly', 'fundkit-fundraising-campaigns' ) },
 ];
 
 // One-time is not listed: every form accepts a single donation, so the server
@@ -33,7 +33,7 @@ function Edit( { attributes, setAttributes } ) {
         condition        = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--recurring' } );
+    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--recurring' } );
 
     const toggleFrequency = ( freq ) => {
         const current = Array.isArray( frequencies ) ? frequencies : [];
@@ -61,36 +61,36 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Recurring toggle', 'giveflow-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Recurring toggle', 'fundkit-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Style', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Style', 'fundkit-fundraising-campaigns' ) }
                         value={ style }
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         options={ [
-                            { value: 'pills', label: __( 'Pills', 'giveflow-fundraising-campaigns' ) },
-                            { value: 'tabs',  label: __( 'Tabs',  'giveflow-fundraising-campaigns' ) },
+                            { value: 'pills', label: __( 'Pills', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'tabs',  label: __( 'Tabs',  'fundkit-fundraising-campaigns' ) },
                         ] }
                     />
                     <Field
-                        label={ __( 'Recurring options', 'giveflow-fundraising-campaigns' ) }
-                        help={ __( 'Donors can always give once. Pick the recurring options to offer alongside it.', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Recurring options', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Donors can always give once. Pick the recurring options to offer alongside it.', 'fundkit-fundraising-campaigns' ) }
                     >
-                        <div className="giveflow-sidebar-list">
+                        <div className="fundkit-sidebar-list">
                             { RECURRING_OPTIONS.map( ( f ) => (
-                                <label key={ f.value } className="giveflow-sidebar-check">
+                                <label key={ f.value } className="fundkit-sidebar-check">
                                     <input
                                         type="checkbox"
                                         checked={ safeFreqs.includes( f.value ) }
@@ -103,11 +103,11 @@ function Edit( { attributes, setAttributes } ) {
                     </Field>
                     { willHide && (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'Pick at least one recurring option, or this block will not appear on the form.', 'giveflow-fundraising-campaigns' ) }
+                            { __( 'Pick at least one recurring option, or this block will not appear on the form.', 'fundkit-fundraising-campaigns' ) }
                         </Notice>
                     ) }
                     <SelectControl
-                        label={ __( 'Default selection', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Default selection', 'fundkit-fundraising-campaigns' ) }
                         value={ defaultFrequency }
                         options={ FREQ_OPTIONS.filter( ( f ) => effectiveFreqs.includes( f.value ) ) }
                         onChange={ ( v ) => setAttributes( { defaultFrequency: v } ) }
@@ -122,10 +122,10 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="div"
-                    className="giveflow-block-preview__title"
+                    className="fundkit-block-preview__title"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Make this recurring', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'Make this recurring', 'fundkit-fundraising-campaigns' ) }
                     allowedFormats={ [] }
                     style={ { fontSize: 13, fontWeight: 500, marginBottom: 6 } }
                 />
@@ -133,7 +133,7 @@ function Edit( { attributes, setAttributes } ) {
                     style={ {
                         display:       'flex',
                         gap:           style === 'tabs' ? 0 : 6,
-                        borderBottom:  style === 'tabs' ? '1px solid var(--giveflow-border, #e5e7eb)' : 'none',
+                        borderBottom:  style === 'tabs' ? '1px solid var(--fundkit-border, #e5e7eb)' : 'none',
                     } }
                 >
                     { previewKeys.map( ( key ) => {
@@ -149,8 +149,8 @@ function Edit( { attributes, setAttributes } ) {
                                         padding:      '8px 14px',
                                         fontSize:     12,
                                         fontWeight:   selected ? 600 : 400,
-                                        color:        selected ? 'var(--giveflow-accent, #211d3f)' : 'var(--giveflow-text-muted, #555)',
-                                        borderBottom: selected ? '2px solid var(--giveflow-accent, #211d3f)' : '2px solid transparent',
+                                        color:        selected ? 'var(--fundkit-accent, #211d3f)' : 'var(--fundkit-text-muted, #555)',
+                                        borderBottom: selected ? '2px solid var(--fundkit-accent, #211d3f)' : '2px solid transparent',
                                         marginBottom: -1,
                                     } }
                                 >
@@ -165,9 +165,9 @@ function Edit( { attributes, setAttributes } ) {
                                     padding:      '6px 14px',
                                     fontSize:     12,
                                     fontWeight:   500,
-                                    borderRadius: 'var(--giveflow-radius-sm, 8px)',
-                                    background:   selected ? 'var(--giveflow-accent, #211d3f)' : 'var(--giveflow-bg-soft, #f0f0f1)',
-                                    color:        selected ? 'var(--giveflow-on-accent, #fff)' : 'var(--giveflow-text-muted, #333)',
+                                    borderRadius: 'var(--fundkit-radius-sm, 8px)',
+                                    background:   selected ? 'var(--fundkit-accent, #211d3f)' : 'var(--fundkit-bg-soft, #f0f0f1)',
+                                    color:        selected ? 'var(--fundkit-on-accent, #fff)' : 'var(--fundkit-text-muted, #333)',
                                 } }
                             >
                                 { opt.label }
@@ -180,7 +180,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="p"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', margin: '6px 0 0', lineHeight: 1.4 } }
                     />
@@ -193,9 +193,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Recurring toggle', 'giveflow-fundraising-campaigns' ),
-        description: __( 'Frequency selector (one-time / monthly / yearly / etc).', 'giveflow-fundraising-campaigns' ),
-        category:   'giveflow-amount',
+        title:      __( 'Recurring toggle', 'fundkit-fundraising-campaigns' ),
+        description: __( 'Frequency selector (one-time / monthly / yearly / etc).', 'fundkit-fundraising-campaigns' ),
+        category:   'fundkit-amount',
         icon:       BlockIcons[ 'recurring-toggle' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

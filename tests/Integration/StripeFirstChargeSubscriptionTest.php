@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Foundation\Crypto\Crypto;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\Stripe\StripeAccount;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Foundation\Crypto\Crypto;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\Stripe\StripeAccount;
+use FundKit\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -31,7 +31,7 @@ final class StripeFirstChargeSubscriptionTest extends IntegrationTestCase
     {
         parent::setUp();
         $this->secret = 'whsec_test_' . bin2hex(random_bytes(8));
-        update_option('giveflow_gateway_config', [
+        update_option('fundkit_gateway_config', [
             'test_mode' => true, // org-wide kill switch so the donation is stamped is_test
             'stripe'    => ['webhook_secret_test' => $this->secret],
         ]);
@@ -45,17 +45,17 @@ final class StripeFirstChargeSubscriptionTest extends IntegrationTestCase
         $stripeAcct->saveKeys(false, 'sk_live_connected', 'pk_live_seed');
         $stripeAcct->refresh(['id' => 'acct_test_123', 'charges_enabled' => true]);
 
-        $manager = $c->get(\GiveFlow\Gateways\GatewayManager::class);
+        $manager = $c->get(\FundKit\Gateways\GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \GiveFlow\Gateways\Stripe\StripeGateway(
-                $c->get(\GiveFlow\Gateways\Stripe\StripeApi::class),
-                $c->get(\GiveFlow\Donations\DonationRepository::class),
-                $c->get(\GiveFlow\Donations\DonationService::class),
-                $c->get(\GiveFlow\Gateways\Stripe\StripeAccount::class),
-                $c->get(\GiveFlow\Donors\DonorRepository::class),
-                $c->get(\GiveFlow\Donors\DonorService::class),
-                $c->get(\GiveFlow\Foundation\Time\Clock::class),
-                $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
+            $manager->register(new \FundKit\Gateways\Stripe\StripeGateway(
+                $c->get(\FundKit\Gateways\Stripe\StripeApi::class),
+                $c->get(\FundKit\Donations\DonationRepository::class),
+                $c->get(\FundKit\Donations\DonationService::class),
+                $c->get(\FundKit\Gateways\Stripe\StripeAccount::class),
+                $c->get(\FundKit\Donors\DonorRepository::class),
+                $c->get(\FundKit\Donors\DonorService::class),
+                $c->get(\FundKit\Foundation\Time\Clock::class),
+                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
             ));
         }
 
@@ -89,7 +89,7 @@ final class StripeFirstChargeSubscriptionTest extends IntegrationTestCase
         // Capture exceptions thrown during subscription creation so test output
         // is informative when the chain breaks (production swallows them).
         $caught = null;
-        add_action('giveflow.donation.completed', function () use (&$caught): void {
+        add_action('fundkit.donation.completed', function () use (&$caught): void {
             // no-op; just to prove confirm() ran.
         });
 
@@ -141,7 +141,7 @@ final class StripeFirstChargeSubscriptionTest extends IntegrationTestCase
 
     private function createMonthlyDonation(): string
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => 'monthly@example.com',
@@ -170,7 +170,7 @@ final class StripeFirstChargeSubscriptionTest extends IntegrationTestCase
         $timestamp = (string) time();
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $this->secret);
 
-        $req = new WP_REST_Request('POST', '/giveflow/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);

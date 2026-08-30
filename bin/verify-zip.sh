@@ -18,7 +18,7 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-SLUG=giveflow-fundraising-campaigns
+SLUG=fundkit-fundraising-campaigns
 
 ZIP="dist/$SLUG.zip"
 OUT="dist/$SLUG"
@@ -32,7 +32,7 @@ unzip -q "$ZIP" -d dist
 
 # Without any one of these the plugin fatals on activation, behind a blank
 # admin screen that says nothing about why.
-for f in giveflow.php vendor/autoload.php vendor/woocommerce/action-scheduler/action-scheduler.php build; do
+for f in fundkit.php vendor/autoload.php vendor/woocommerce/action-scheduler/action-scheduler.php build; do
     test -e "$OUT/$f" || fail "$f missing from the zip; the plugin would fatal on activation"
 done
 
@@ -45,7 +45,7 @@ do
     test ! -e "$OUT/$leak" || fail "$leak is in the zip"
 done
 
-# Resolved the way giveflow.php resolves them, which is BOTH autoloaders and not
+# Resolved the way fundkit.php resolves them, which is BOTH autoloaders and not
 # just composer's. Strauss works by editing vendor/autoload.php to pull in the
 # prefixed one, and `composer install --no-dev` removes Strauss and regenerates
 # that file without the edit. Requiring only vendor/autoload.php therefore
@@ -55,10 +55,10 @@ OUT="$OUT" php -r '
     require "$out/vendor/autoload.php";
     require "$out/vendor/vendor-prefixed/autoload.php";
     $need = [
-      "GiveFlow\\Vendor\\Queryable\\Model",
-      "GiveFlow\\Vendor\\Dompdf\\Dompdf",
-      "GiveFlow\\Foundation\\Plugin",
-      "GiveFlow\\Receipts\\PdfBuilder",
+      "FundKit\\Vendor\\Queryable\\Model",
+      "FundKit\\Vendor\\Dompdf\\Dompdf",
+      "FundKit\\Foundation\\Plugin",
+      "FundKit\\Receipts\\PdfBuilder",
     ];
     foreach ($need as $c) {
       if (! class_exists($c)) { fwrite(STDERR, "::error::$c does not resolve from the packaged tree\n"); exit(1); }

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Styling;
+namespace FundKit\Campaigns\Styling;
 
-use GiveFlow\Campaigns\Campaign;
+use FundKit\Campaigns\Campaign;
 use WP_Post;
 
 /**
@@ -22,7 +22,7 @@ use WP_Post;
  */
 final class PageStyle
 {
-    private const BODY_CLASS = 'giveflow-campaign-styled';
+    private const BODY_CLASS = 'fundkit-campaign-styled';
 
     /**
      * The campaign page foundation, and the campaign's own tokens inlined onto
@@ -33,7 +33,7 @@ final class PageStyle
      * when a campaign block is on the page, and a page holding nothing but an
      * organizer's own headings and paragraphs still belongs to its campaign.
      */
-    public const HANDLE = 'giveflow-campaign-page';
+    public const HANDLE = 'fundkit-campaign-page';
 
     private ?Campaign $campaign = null;
 
@@ -58,14 +58,14 @@ final class PageStyle
         if (wp_style_is(self::HANDLE, 'registered')) {
             return;
         }
-        $path = GIVEFLOW_DIR . 'assets/campaign-page/page.css';
+        $path = FUNDKIT_DIR . 'assets/campaign-page/page.css';
         wp_register_style(
             self::HANDLE,
-            GIVEFLOW_URL . 'assets/campaign-page/page.css',
+            FUNDKIT_URL . 'assets/campaign-page/page.css',
             [],
-            // mtime, not GIVEFLOW_VERSION: the file changes without a release and a
+            // mtime, not FUNDKIT_VERSION: the file changes without a release and a
             // stale cache means invisible restyles.
-            (string) (@filemtime($path) ?: GIVEFLOW_VERSION)
+            (string) (@filemtime($path) ?: FUNDKIT_VERSION)
         );
     }
 
@@ -105,7 +105,7 @@ final class PageStyle
             return $campaign;
         }
 
-        $campaignId = (int) get_post_meta($postId, '_giveflow_campaign_id', true);
+        $campaignId = (int) get_post_meta($postId, '_fundkit_campaign_id', true);
 
         return $campaignId > 0 ? Campaign::query()->find('id', $campaignId) : null;
     }

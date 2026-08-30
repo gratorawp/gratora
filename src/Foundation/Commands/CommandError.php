@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Commands;
+namespace FundKit\Foundation\Commands;
 
 use RuntimeException;
 

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Rest\ControllerRegistry;
+use FundKit\Rest\ControllerRegistry;
 
 final class RestAggregationTest extends IntegrationTestCase
 {
@@ -13,7 +13,7 @@ final class RestAggregationTest extends IntegrationTestCase
         $fake = new class {
             public function registerRoutes(): void
             {
-                register_rest_route('giveflow-addon/v1', '/ping', [
+                register_rest_route('fundkit-addon/v1', '/ping', [
                     'methods'             => 'GET',
                     'callback'            => static fn () => ['pong' => true],
                     'permission_callback' => '__return_true',
@@ -21,16 +21,16 @@ final class RestAggregationTest extends IntegrationTestCase
             }
         };
 
-        add_action('giveflow.rest.register', static function (ControllerRegistry $r) use ($fake): void {
+        add_action('fundkit.rest.register', static function (ControllerRegistry $r) use ($fake): void {
             $r->add($fake);
         });
 
         do_action('rest_api_init');
 
         $routes = rest_get_server()->get_routes();
-        $this->assertArrayHasKey('/giveflow-addon/v1/ping', $routes, 'the add-on route resolves');
-        $this->assertArrayHasKey('/giveflow/v1/admin/commands', $routes, 'core route unchanged');
+        $this->assertArrayHasKey('/fundkit-addon/v1/ping', $routes, 'the add-on route resolves');
+        $this->assertArrayHasKey('/fundkit/v1/admin/commands', $routes, 'core route unchanged');
 
-        remove_all_actions('giveflow.rest.register');
+        remove_all_actions('fundkit.rest.register');
     }
 }

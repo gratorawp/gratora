@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Foundation;
+namespace FundKit\Tests\Unit\Foundation;
 
-use GiveFlow\Foundation\Helpers\Money;
+use FundKit\Foundation\Helpers\Money;
 use PHPUnit\Framework\TestCase;
 
 /**

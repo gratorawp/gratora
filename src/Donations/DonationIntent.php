@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donations;
+namespace FundKit\Donations;
 
 /**
  * Immutable input to DonationService::createPending(): everything captured from a form
@@ -55,7 +55,7 @@ final class DonationIntent
          * money that already arrived sets false: a real check is real money
          * even on a site that happens to be rehearsing, and the answer has to
          * be settled before the row is written, because listeners on
-         * giveflow.donation.creating decide things from it that are never revisited.
+         * fundkit.donation.creating decide things from it that are never revisited.
          */
         public readonly ?bool $is_test = null,
         /**

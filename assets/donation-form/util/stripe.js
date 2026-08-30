@@ -32,9 +32,9 @@ export function loadStripeJs() {
 export function detectStripeReturn( ownReference = null ) {
     const params = new URLSearchParams( window.location.search );
     const clientSecret = params.get( 'payment_intent_client_secret' );
-    if ( ! clientSecret || params.get( 'giveflow_return' ) !== '1' ) return null;
+    if ( ! clientSecret || params.get( 'fundkit_return' ) !== '1' ) return null;
 
-    const reference = params.get( 'giveflow_ref' ) || '';
+    const reference = params.get( 'fundkit_ref' ) || '';
 
     // The markers sit on the URL, which every form on the page can read, and
     // claiming one strips it for the others. A form owns only the return whose
@@ -75,7 +75,7 @@ export async function resolveStripeReturn( publishableKey, clientSecret ) {
 export function clearStripeReturnParams() {
     try {
         const url = new URL( window.location.href );
-        [ 'payment_intent', 'payment_intent_client_secret', 'redirect_status', 'giveflow_return', 'giveflow_ref' ]
+        [ 'payment_intent', 'payment_intent_client_secret', 'redirect_status', 'fundkit_return', 'fundkit_ref' ]
             .forEach( ( k ) => url.searchParams.delete( k ) );
         window.history.replaceState( {}, '', url.toString() );
     } catch {

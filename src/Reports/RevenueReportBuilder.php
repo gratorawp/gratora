@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Reports;
+namespace FundKit\Reports;
 
-use GiveFlow\Exports\RevenueExporter;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Helpers\View;
-use GiveFlow\Receipts\PdfBuilder;
+use FundKit\Exports\RevenueExporter;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Helpers\View;
+use FundKit\Receipts\PdfBuilder;
 
 /**
  * Builds a one-page revenue summary for a calendar year: the year's total, a
@@ -51,7 +51,7 @@ final class RevenueReportBuilder
             ];
         }
 
-        $org     = get_option('giveflow_org_profile', []);
+        $org     = get_option('fundkit_org_profile', []);
         $orgName = trim((string) (is_array($org) ? ($org['name'] ?? '') : '')) ?: (string) get_bloginfo('name');
 
         $html = View::load('Receipts.revenue-report', [
@@ -60,25 +60,25 @@ final class RevenueReportBuilder
             'total'          => Money::format($totalCents, $currency),
             'months'         => $months,
             'stats'          => [
-                ['label' => __('Donations', 'giveflow-fundraising-campaigns'),        'value' => number_format_i18n($totalCount)],
-                ['label' => __('Average donation', 'giveflow-fundraising-campaigns'), 'value' => Money::format($totalCount > 0 ? intdiv($totalCents, $totalCount) : 0, $currency)],
-                ['label' => __('Best month', 'giveflow-fundraising-campaigns'),       'value' => $best !== null && $best['amount_cents'] > 0 ? $this->monthLabel($best['month']) : '-'],
+                ['label' => __('Donations', 'fundkit-fundraising-campaigns'),        'value' => number_format_i18n($totalCount)],
+                ['label' => __('Average donation', 'fundkit-fundraising-campaigns'), 'value' => Money::format($totalCount > 0 ? intdiv($totalCents, $totalCount) : 0, $currency)],
+                ['label' => __('Best month', 'fundkit-fundraising-campaigns'),       'value' => $best !== null && $best['amount_cents'] > 0 ? $this->monthLabel($best['month']) : '-'],
             ],
             'generated_date' => (string) wp_date(get_option('date_format')),
         ]);
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: four-digit year. */
-            'title'   => sprintf(__('Revenue report %s', 'giveflow-fundraising-campaigns'), (string) $year),
+            'title'   => sprintf(__('Revenue report %s', 'fundkit-fundraising-campaigns'), (string) $year),
             'author'  => $orgName,
-            'subject' => __('Revenue and donations report', 'giveflow-fundraising-campaigns'),
+            'subject' => __('Revenue and donations report', 'fundkit-fundraising-campaigns'),
         ]);
     }
 
     /** @since 1.0.0 */
     public static function filename(int $year): string
     {
-        return sprintf('giveflow-revenue-%d.pdf', $year);
+        return sprintf('fundkit-revenue-%d.pdf', $year);
     }
 
     /**

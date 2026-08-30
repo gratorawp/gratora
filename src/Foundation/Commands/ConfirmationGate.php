@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Commands;
+namespace FundKit\Foundation\Commands;
 
 /**
  * HMAC-based confirmation digest and verification for mutating MCP commands.
@@ -28,7 +28,7 @@ final class ConfirmationGate
 
     /**
      * Fail-closed: an mcp + mutating dispatch may proceed only when an MCP
-     * token store is registered via the giveflow.commands.confirmation_verifier
+     * token store is registered via the fundkit.commands.confirmation_verifier
      * filter AND it accepts the token for this binding. No store registered
      * means every mcp-mutating call is rejected.
      *
@@ -39,7 +39,7 @@ final class ConfirmationGate
         if ($token === null || $token === '') {
             return false;
         }
-        $verifier = apply_filters('giveflow.commands.confirmation_verifier', null);
+        $verifier = apply_filters('fundkit.commands.confirmation_verifier', null);
         if (! is_object($verifier) || ! method_exists($verifier, 'verify')) {
             return false;
         }

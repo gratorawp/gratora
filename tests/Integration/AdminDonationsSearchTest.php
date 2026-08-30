@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -91,7 +91,7 @@ final class AdminDonationsSearchTest extends IntegrationTestCase
 
     private function request(array $params): \WP_REST_Response
     {
-        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/donations');
+        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donations');
         $req->set_query_params(array_merge(['page' => 1, 'per_page' => 25], $params));
         return rest_do_request($req);
     }
@@ -105,7 +105,7 @@ final class AdminDonationsSearchTest extends IntegrationTestCase
             ['luca.rossi@example.it',      'Luca',   'Rossi'],
         ];
         foreach ($fixtures as [$email, $first, $last]) {
-            $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
+            $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
             $req->set_header('content-type', 'application/json');
             $req->set_body(json_encode([
                 'email' => $email, 'amount_cents' => 5000, 'currency' => 'EUR',
@@ -114,7 +114,7 @@ final class AdminDonationsSearchTest extends IntegrationTestCase
             ]));
             $reference = rest_do_request($req)->get_data()['reference'];
 
-            $req2 = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
+            $req2 = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
             $req2->set_header('content-type', 'application/json');
             $req2->set_body('{}');
             rest_do_request($req2);

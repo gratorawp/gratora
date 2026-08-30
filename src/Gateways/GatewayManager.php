@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways;
+namespace FundKit\Gateways;
 
 use RuntimeException;
 
@@ -65,7 +65,7 @@ final class GatewayManager
      */
     public function optionsFor(array $allowed, ?string $country, string $currency, string $frequency = 'one_time'): array
     {
-        $cfg = get_option('giveflow_gateway_config', []);
+        $cfg = get_option('fundkit_gateway_config', []);
         $cfg = is_array($cfg) ? $cfg : [];
 
         $enabled = [];
@@ -127,7 +127,7 @@ final class GatewayManager
             return false;
         }
 
-        $cfg = get_option('giveflow_gateway_config', []);
+        $cfg = get_option('fundkit_gateway_config', []);
         $cfg = is_array($cfg) ? $cfg : [];
 
         return ($cfg[$id]['enabled'] ?? true) && $g->canCharge();

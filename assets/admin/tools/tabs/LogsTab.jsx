@@ -32,26 +32,26 @@ function hasContext( row ) {
 
 /**
  * A delivery has four readings, and only two of them are faults. An event type
- * GiveFlow has no handler for is ordinary traffic: gateways send everything they
+ * FundKit has no handler for is ordinary traffic: gateways send everything they
  * have, and most of it is none of our business.
  */
 function deliveryOutcome( row ) {
     if ( ! row.verified ) {
-        return { tone: 'red', label: __( 'Not verified', 'giveflow-fundraising-campaigns' ) };
+        return { tone: 'red', label: __( 'Not verified', 'fundkit-fundraising-campaigns' ) };
     }
     if ( row.error ) {
-        return { tone: 'red', label: __( 'Handling failed', 'giveflow-fundraising-campaigns' ) };
+        return { tone: 'red', label: __( 'Handling failed', 'fundkit-fundraising-campaigns' ) };
     }
     if ( row.processed ) {
-        return { tone: 'green', label: __( 'Processed', 'giveflow-fundraising-campaigns' ) };
+        return { tone: 'green', label: __( 'Processed', 'fundkit-fundraising-campaigns' ) };
     }
-    return { tone: 'gray', label: __( 'No action needed', 'giveflow-fundraising-campaigns' ) };
+    return { tone: 'gray', label: __( 'No action needed', 'fundkit-fundraising-campaigns' ) };
 }
 
 function Pill( { tone, label } ) {
     return (
-        <span className={ `giveflow-pill giveflow-pill--${ tone }` }>
-            <span className="giveflow-pill__dot" />
+        <span className={ `fundkit-pill fundkit-pill--${ tone }` }>
+            <span className="fundkit-pill__dot" />
             { label }
         </span>
     );
@@ -108,7 +108,7 @@ export default function LogsTab( { active, setNotice } ) {
     const load = useCallback( () => {
         const mine = ++generation.current;
         setLoading( true );
-        apiFetch( { path: addQueryArgs( '/giveflow/v1/admin/tools/log', apiParams ) } )
+        apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/tools/log', apiParams ) } )
             .then( ( res ) => {
                 if ( mine !== generation.current ) return;
                 setLog( res );
@@ -119,7 +119,7 @@ export default function LogsTab( { active, setNotice } ) {
                 // Deliberately not an empty result: "nothing has happened" and
                 // "we could not find out" are opposite answers, and this screen
                 // is read precisely when someone suspects the second.
-                setError( err?.message || __( 'The log could not be read.', 'giveflow-fundraising-campaigns' ) );
+                setError( err?.message || __( 'The log could not be read.', 'fundkit-fundraising-campaigns' ) );
             } )
             .finally( () => {
                 if ( mine === generation.current ) setLoading( false );
@@ -134,7 +134,7 @@ export default function LogsTab( { active, setNotice } ) {
         setClearing( true );
         try {
             const res = await apiFetch( {
-                path:   addQueryArgs( '/giveflow/v1/admin/tools/log', { source } ),
+                path:   addQueryArgs( '/fundkit/v1/admin/tools/log', { source } ),
                 method: 'DELETE',
             } );
             setView( ( v ) => ( { ...v, page: 1 } ) );
@@ -143,12 +143,12 @@ export default function LogsTab( { active, setNotice } ) {
                 type: 'success',
                 text: sprintf(
                     /* translators: %d: number of log entries deleted. */
-                    _n( '%d entry cleared.', '%d entries cleared.', Number( res?.deleted ) || 0, 'giveflow-fundraising-campaigns' ),
+                    _n( '%d entry cleared.', '%d entries cleared.', Number( res?.deleted ) || 0, 'fundkit-fundraising-campaigns' ),
                     Number( res?.deleted ) || 0
                 ),
             } );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not clear the log.', 'giveflow-fundraising-campaigns' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not clear the log.', 'fundkit-fundraising-campaigns' ) } );
         } finally {
             setClearing( false );
         }
@@ -160,16 +160,16 @@ export default function LogsTab( { active, setNotice } ) {
     // alone, and the delivery history goes with the failures otherwise.
     const askClear = () => setConfirm( {
         title: source
-            ? __( 'Clear this source', 'giveflow-fundraising-campaigns' )
-            : __( 'Clear the log', 'giveflow-fundraising-campaigns' ),
+            ? __( 'Clear this source', 'fundkit-fundraising-campaigns' )
+            : __( 'Clear the log', 'fundkit-fundraising-campaigns' ),
         message: source
             ? sprintf(
                 /* translators: %s: the log source being cleared, e.g. webhook.stripe */
-                __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'giveflow-fundraising-campaigns' ),
+                __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'fundkit-fundraising-campaigns' ),
                 source
             )
-            : __( 'Deletes every entry: the failures GiveFlow recorded and the history of what your gateways sent. The log fills again as things happen.', 'giveflow-fundraising-campaigns' ),
-        confirmLabel: __( 'Clear log', 'giveflow-fundraising-campaigns' ),
+            : __( 'Deletes every entry: the failures FundKit recorded and the history of what your gateways sent. The log fills again as things happen.', 'fundkit-fundraising-campaigns' ),
+        confirmLabel: __( 'Clear log', 'fundkit-fundraising-campaigns' ),
         destructive:  true,
         onConfirm:    doClear,
     } );
@@ -183,7 +183,7 @@ export default function LogsTab( { active, setNotice } ) {
     const fields = useMemo( () => [
         {
             id:            'occurred_at',
-            label:         __( 'When', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'When', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             enableHiding:  false,
             getValue:      ( { item } ) => item.occurred_at || '',
@@ -191,34 +191,34 @@ export default function LogsTab( { active, setNotice } ) {
         },
         {
             id:            'source',
-            label:         __( 'Source', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Source', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             elements:      sources.map( ( s ) => ( { value: s, label: s } ) ),
             filterBy:      { operators: [ 'is' ] },
             getValue:      ( { item } ) => fullType( item ),
-            render:        ( { item } ) => <code className="giveflow-log__source">{ fullType( item ) }</code>,
+            render:        ( { item } ) => <code className="fundkit-log__source">{ fullType( item ) }</code>,
         },
         {
             id:            'message',
-            label:         __( 'What it says', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'What it says', 'fundkit-fundraising-campaigns' ),
             enableSorting: false,
             getValue:      ( { item } ) => item.message || '',
             render: ( { item } ) => (
-                <div className="giveflow-log__message">
+                <div className="fundkit-log__message">
                     <div>{ item.message }</div>
                     { item.kind === 'webhook' && item.error && (
-                        <div className="giveflow-row__sub giveflow-log__message-sub">{ item.error }</div>
+                        <div className="fundkit-row__sub fundkit-log__message-sub">{ item.error }</div>
                     ) }
                 </div>
             ),
         },
         {
             id:            'outcome',
-            label:         __( 'Outcome', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Outcome', 'fundkit-fundraising-campaigns' ),
             enableSorting: false,
             // The one narrowing worth offering: everything else on this screen
             // is ordinary traffic an org reads by scanning, not by filtering.
-            elements:      [ { value: 'failed', label: __( 'Problems only', 'giveflow-fundraising-campaigns' ) } ],
+            elements:      [ { value: 'failed', label: __( 'Problems only', 'fundkit-fundraising-campaigns' ) } ],
             filterBy:      { operators: [ 'is' ] },
             render: ( { item } ) => {
                 if ( item.kind === 'webhook' ) {
@@ -234,7 +234,7 @@ export default function LogsTab( { active, setNotice } ) {
     const actions = useMemo( () => [
         {
             id:         'detail',
-            label:      __( 'View detail', 'giveflow-fundraising-campaigns' ),
+            label:      __( 'View detail', 'fundkit-fundraising-campaigns' ),
             isEligible: hasContext,
             callback:   ( [ item ] ) => setDetail( item ),
         },
@@ -251,10 +251,10 @@ export default function LogsTab( { active, setNotice } ) {
     const emptyAndUnfiltered = ! loading && ! error && total === 0 && ! filtered;
 
     return (
-        <div className="giveflow-panel">
-            <div className="giveflow-tools-logbar">
+        <div className="fundkit-panel">
+            <div className="fundkit-tools-logbar">
                 <Btn variant="secondary" onClick={ load } disabled={ loading }>
-                    { __( 'Refresh', 'giveflow-fundraising-campaigns' ) }
+                    { __( 'Refresh', 'fundkit-fundraising-campaigns' ) }
                 </Btn>
                 <Btn
                     variant="secondary"
@@ -262,21 +262,21 @@ export default function LogsTab( { active, setNotice } ) {
                     disabled={ clearing || total === 0 }
                     isBusy={ clearing }
                 >
-                    { __( 'Clear log', 'giveflow-fundraising-campaigns' ) }
+                    { __( 'Clear log', 'fundkit-fundraising-campaigns' ) }
                 </Btn>
             </div>
 
             { error ? (
-                <p className="giveflow-tools-empty">
-                    { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'giveflow-fundraising-campaigns' ) }
+                <p className="fundkit-tools-empty">
+                    { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'fundkit-fundraising-campaigns' ) }
                     { ' ' }
                     <code>{ error }</code>
                 </p>
             ) : emptyAndUnfiltered ? (
-                <p className="giveflow-tools-empty">{ __( 'Nothing recorded yet.', 'giveflow-fundraising-campaigns' ) }</p>
+                <p className="fundkit-tools-empty">{ __( 'Nothing recorded yet.', 'fundkit-fundraising-campaigns' ) }</p>
             ) : (
                 // Carries the shared table styling every other list screen uses.
-                <div className="giveflow-dataviews">
+                <div className="fundkit-dataviews">
                     <DataViews
                         data={ items }
                         fields={ fields }
@@ -294,21 +294,21 @@ export default function LogsTab( { active, setNotice } ) {
 
             { detail && (
                 <Dialog
-                    title={ __( 'Entry detail', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Entry detail', 'fundkit-fundraising-campaigns' ) }
                     size="wide"
                     onClose={ () => setDetail( null ) }
                     foot={ (
                         <Btn variant="secondary" onClick={ () => setDetail( null ) }>
-                            { __( 'Close', 'giveflow-fundraising-campaigns' ) }
+                            { __( 'Close', 'fundkit-fundraising-campaigns' ) }
                         </Btn>
                     ) }
                 >
-                    <div className="giveflow-log__detail-head">
-                        <code className="giveflow-log__source">{ fullType( detail ) }</code>
-                        <span className="giveflow-row__sub">{ formatDate( detail.occurred_at ) }</span>
+                    <div className="fundkit-log__detail-head">
+                        <code className="fundkit-log__source">{ fullType( detail ) }</code>
+                        <span className="fundkit-row__sub">{ formatDate( detail.occurred_at ) }</span>
                     </div>
-                    <div className="giveflow-log__message">{ detail.message }</div>
-                    <pre className="giveflow-log__context">{ JSON.stringify( detail.context, null, 2 ) }</pre>
+                    <div className="fundkit-log__message">{ detail.message }</div>
+                    <pre className="fundkit-log__context">{ JSON.stringify( detail.context, null, 2 ) }</pre>
                 </Dialog>
             ) }
 

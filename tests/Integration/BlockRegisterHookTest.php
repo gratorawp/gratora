@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Forms\Blocks\Block;
-use GiveFlow\Forms\Blocks\BlockRegistry;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Forms\Blocks\Block;
+use FundKit\Forms\Blocks\BlockRegistry;
+use FundKit\Foundation\Plugin;
 
 /**
  * Add-on modules boot after core, so a broadcast fired inside core's own boot
@@ -35,7 +35,7 @@ final class BlockRegisterHookTest extends IntegrationTestCase
             }
         };
 
-        add_action('giveflow.blocks.register_server', static function (BlockRegistry $blocks) use ($block): void {
+        add_action('fundkit.blocks.register_server', static function (BlockRegistry $blocks) use ($block): void {
             $blocks->add($block);
         });
 

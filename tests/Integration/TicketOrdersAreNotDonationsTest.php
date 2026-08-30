@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorAggregateSyncer;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Donations\AggregateSyncer;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Receipts\Receipt;
+use FundKit\Donations\Donation;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorAggregateSyncer;
+use FundKit\Foundation\Plugin;
+use FundKit\Donations\AggregateSyncer;
+use FundKit\Donations\DonationRepository;
+use FundKit\Receipts\Receipt;
 
 /**
  * Event ticket orders ride the donations table with kind='order'. They are a
@@ -77,7 +77,7 @@ final class TicketOrdersAreNotDonationsTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
 
-        $fund = \GiveFlow\Funds\Fund::make();
+        $fund = \FundKit\Funds\Fund::make();
         $fund->code       = 'tix-' . uniqid();
         $fund->name       = 'Gala';
         $fund->is_active  = true;
@@ -85,7 +85,7 @@ final class TicketOrdersAreNotDonationsTest extends IntegrationTestCase
         $fund->updated_at = $now;
         $fund->save();
 
-        $campaign = \GiveFlow\Campaigns\Campaign::make();
+        $campaign = \FundKit\Campaigns\Campaign::make();
         $campaign->title      = 'Gala';
         $campaign->slug       = 'gala-' . uniqid();
         $campaign->status     = 'published';
@@ -106,8 +106,8 @@ final class TicketOrdersAreNotDonationsTest extends IntegrationTestCase
         $sync->syncCampaign((int) $campaign->id);
         $sync->syncFund((int) $fund->id);
 
-        $freshCampaign = \GiveFlow\Campaigns\Campaign::query()->find('id', (int) $campaign->id);
-        $freshFund     = \GiveFlow\Funds\Fund::query()->find('id', (int) $fund->id);
+        $freshCampaign = \FundKit\Campaigns\Campaign::query()->find('id', (int) $campaign->id);
+        $freshFund     = \FundKit\Funds\Fund::query()->find('id', (int) $fund->id);
 
         $this->assertSame(2000, (int) $freshCampaign->raised_cents, 'the donation, not the ticket');
         $this->assertSame(2000, (int) $freshFund->raised_cents, 'a fund is an accounting designation');
@@ -121,8 +121,8 @@ final class TicketOrdersAreNotDonationsTest extends IntegrationTestCase
     /** The headline: a €70 ticket must not become €70 of donor giving. */
     public function test_a_ticket_order_does_not_count_towards_donor_lifetime_giving(): void
     {
-        $this->row('donation', 1000, 'GIVEFLOW-GAVE-1');
-        $this->row('order', 7000, 'GIVEFLOW-TICKET-1');
+        $this->row('donation', 1000, 'FUNDKIT-GAVE-1');
+        $this->row('order', 7000, 'FUNDKIT-TICKET-1');
 
         (new DonorAggregateSyncer())->syncForDonor($this->donorId);
 
@@ -137,8 +137,8 @@ final class TicketOrdersAreNotDonationsTest extends IntegrationTestCase
      */
     public function test_the_live_path_and_the_resync_path_agree(): void
     {
-        $this->row('donation', 1000, 'GIVEFLOW-GAVE-2');
-        $this->row('order', 7000, 'GIVEFLOW-TICKET-2');
+        $this->row('donation', 1000, 'FUNDKIT-GAVE-2');
+        $this->row('order', 7000, 'FUNDKIT-TICKET-2');
 
         (new DonorAggregateSyncer())->syncForDonor($this->donorId);
         $live = [(int) $this->donor()->total_donated_cents, (int) $this->donor()->donations_count];
@@ -153,24 +153,24 @@ final class TicketOrdersAreNotDonationsTest extends IntegrationTestCase
     /** A ticket is goods received; it cannot sit on a tax-deductible statement. */
     public function test_a_ticket_order_is_excluded_from_the_year_end_statement(): void
     {
-        $this->row('donation', 1000, 'GIVEFLOW-GAVE-3');
-        $this->row('order', 7000, 'GIVEFLOW-TICKET-3');
+        $this->row('donation', 1000, 'FUNDKIT-GAVE-3');
+        $this->row('order', 7000, 'FUNDKIT-TICKET-3');
 
         $repo = Plugin::instance()->container->get(DonationRepository::class);
         $rows = $repo->paidForDonorInYear($this->donorId, (int) gmdate('Y'));
 
         $refs = array_column($rows, 'reference');
-        $this->assertContains('GIVEFLOW-GAVE-3', $refs);
-        $this->assertNotContains('GIVEFLOW-TICKET-3', $refs, 'a ticket is not tax-deductible');
+        $this->assertContains('FUNDKIT-GAVE-3', $refs);
+        $this->assertNotContains('FUNDKIT-TICKET-3', $refs, 'a ticket is not tax-deductible');
         $this->assertSame(1000, array_sum(array_column($rows, 'amount_cents')));
     }
 
     /** No donation receipt is issued for a purchase. */
     public function test_no_donation_receipt_is_issued_for_a_ticket_order(): void
     {
-        $order = $this->row('order', 7000, 'GIVEFLOW-TICKET-4');
+        $order = $this->row('order', 7000, 'FUNDKIT-TICKET-4');
 
-        do_action('giveflow.donation.completed', $order);
+        do_action('fundkit.donation.completed', $order);
         $this->runPendingAsyncJobs();
 
         $this->assertNull(
@@ -182,9 +182,9 @@ final class TicketOrdersAreNotDonationsTest extends IntegrationTestCase
     /** But a real donation still gets one. */
     public function test_a_real_donation_still_gets_its_receipt(): void
     {
-        $given = $this->row('donation', 1000, 'GIVEFLOW-GAVE-4');
+        $given = $this->row('donation', 1000, 'FUNDKIT-GAVE-4');
 
-        do_action('giveflow.donation.completed', $given);
+        do_action('fundkit.donation.completed', $given);
         $this->runPendingAsyncJobs();
 
         $this->assertNotNull(Receipt::query()->where('donation_id', (int) $given->id)->get());

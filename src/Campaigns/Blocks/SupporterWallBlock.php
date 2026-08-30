@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Blocks;
+namespace FundKit\Campaigns\Blocks;
 
-use GiveFlow\Campaigns\CampaignRepository;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationQueries;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorAvatars;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Campaigns\CampaignRepository;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationQueries;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorAvatars;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Helpers\View;
 
 /**
  * Renders a supporter wall: one card per non-anonymous donor, optionally
@@ -31,7 +31,7 @@ final class SupporterWallBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/supporter-wall';
+        return 'fundkit/supporter-wall';
     }
 
     /** @since 1.0.0 */
@@ -137,8 +137,8 @@ final class SupporterWallBlock extends CampaignBlock
         if (! $byDonor) {
             return View::loadRelative(__DIR__, 'views/supporter-wall', [
                 'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'giveflow-fundraising-campaigns'),
-            'emptySubText' => __('Add the first name to it.', 'giveflow-fundraising-campaigns'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'fundkit-fundraising-campaigns'),
+            'emptySubText' => __('Add the first name to it.', 'fundkit-fundraising-campaigns'),
             'emptyIcon'    => 'supporters',
                 'entries'      => [],
                 'showMessage'  => $showMessage,
@@ -187,8 +187,8 @@ final class SupporterWallBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/supporter-wall', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'giveflow-fundraising-campaigns'),
-            'emptySubText' => __('Add the first name to it.', 'giveflow-fundraising-campaigns'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'fundkit-fundraising-campaigns'),
+            'emptySubText' => __('Add the first name to it.', 'fundkit-fundraising-campaigns'),
             'emptyIcon'    => 'supporters',
             'entries'      => $entries,
             'showMessage'  => $showMessage,

@@ -1,7 +1,7 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Using nullsafe property access on non\-nullable type GiveFlow\\Forms\\Form\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe property access on non\-nullable type FundKit\\Forms\\Form\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: src/Campaigns/Blocks/DonateButtonBlock.php
@@ -19,7 +19,7 @@ parameters:
 			path: src/Campaigns/CampaignService.php
 
 		-
-			message: '#^Method GiveFlow\\Campaigns\\Styling\\Tokens\:\:catalogue\(\) should return array\<string, array\{group\: string, label\: string, default\: string, control\: string, min\?\: float\|int, max\?\: float\|int, step\?\: float\|int, options\?\: array\<string, string\>, \.\.\.\}\> but returns array\{giveflow\-accent\: array\{group\: ''brand'', label\: string, default\: ''\#211d3f'', control\: ''color''\}, giveflow\-accent\-soft\: array\{group\: ''brand'', label\: string, default\: ''\#efedf8'', control\: ''color'', help\: string\}, giveflow\-text\: array\{group\: ''brand'', label\: string, default\: ''\#111827'', control\: ''color''\}, giveflow\-text\-muted\: array\{group\: ''brand'', label\: string, default\: ''\#6b7280'', control\: ''color'', help\: string\}, giveflow\-bg\: array\{group\: ''surface'', label\: string, default\: ''\#ffffff'', control\: ''color''\}, giveflow\-bg\-soft\: array\{group\: ''surface'', label\: string, default\: ''\#f8fafb'', control\: ''color'', help\: string\}, giveflow\-border\: array\{group\: ''surface'', label\: string, default\: ''\#e5e7eb'', control\: ''color''\}, giveflow\-typeface\: array\{group\: ''typography'', label\: string, default\: ''system\-ui, \-apple…'', control\: ''font''\}, \.\.\.\}\.$#'
+			message: '#^Method FundKit\\Campaigns\\Styling\\Tokens\:\:catalogue\(\) should return array\<string, array\{group\: string, label\: string, default\: string, control\: string, min\?\: float\|int, max\?\: float\|int, step\?\: float\|int, options\?\: array\<string, string\>, \.\.\.\}\> but returns array\{fundkit\-accent\: array\{group\: ''brand'', label\: string, default\: ''\#211d3f'', control\: ''color''\}, fundkit\-accent\-soft\: array\{group\: ''brand'', label\: string, default\: ''\#efedf8'', control\: ''color'', help\: string\}, fundkit\-text\: array\{group\: ''brand'', label\: string, default\: ''\#111827'', control\: ''color''\}, fundkit\-text\-muted\: array\{group\: ''brand'', label\: string, default\: ''\#6b7280'', control\: ''color'', help\: string\}, fundkit\-bg\: array\{group\: ''surface'', label\: string, default\: ''\#ffffff'', control\: ''color''\}, fundkit\-bg\-soft\: array\{group\: ''surface'', label\: string, default\: ''\#f8fafb'', control\: ''color'', help\: string\}, fundkit\-border\: array\{group\: ''surface'', label\: string, default\: ''\#e5e7eb'', control\: ''color''\}, fundkit\-typeface\: array\{group\: ''typography'', label\: string, default\: ''system\-ui, \-apple…'', control\: ''font''\}, \.\.\.\}\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Campaigns/Styling/Tokens.php
@@ -37,13 +37,13 @@ parameters:
 			path: src/Donors/DonorMetricsService.php
 
 		-
-			message: '#^Method GiveFlow\\Donors\\DonorMetricsService\:\:noteForEvent\(\) never returns string so it can be removed from the return type\.$#'
+			message: '#^Method FundKit\\Donors\\DonorMetricsService\:\:noteForEvent\(\) never returns string so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
 			path: src/Donors/DonorMetricsService.php
 
 		-
-			message: '#^Parameter \#2 \$noteMap of method GiveFlow\\Donors\\DonorMetricsService\:\:noteForEvent\(\) expects array\<int, string\>, array\<int, array\<string, string\|null\>\> given\.$#'
+			message: '#^Parameter \#2 \$noteMap of method FundKit\\Donors\\DonorMetricsService\:\:noteForEvent\(\) expects array\<int, string\>, array\<int, array\<string, string\|null\>\> given\.$#'
 			identifier: argument.type
 			count: 2
 			path: src/Donors/DonorMetricsService.php
@@ -61,25 +61,25 @@ parameters:
 			path: src/Donors/DonorService.php
 
 		-
-			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$donations_count \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$donations_count \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Forms/Blocks/GoalBlock.php
 
 		-
-			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$donors_count \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$donors_count \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 2
 			path: src/Forms/Blocks/GoalBlock.php
 
 		-
-			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Forms/Blocks/GoalBlock.php
 
 		-
-			message: '#^Method GiveFlow\\Forms\\Blocks\\NumberInputBlock\:\:attributes\(\) should return array\<string, array\{type\: string, default\?\: mixed\}\> but returns array\{label\: array\{type\: ''string'', default\: ''''\}, placeholder\: array\{type\: ''string'', default\: ''''\}, helpText\: array\{type\: ''string'', default\: ''''\}, required\: array\{type\: ''boolean'', default\: false\}, min\: array\{type\: array\{''number'', ''null''\}, default\: null\}, max\: array\{type\: array\{''number'', ''null''\}, default\: null\}, step\: array\{type\: ''number'', default\: 1\}, field\: array\{type\: ''string'', default\: ''''\}\}\.$#'
+			message: '#^Method FundKit\\Forms\\Blocks\\NumberInputBlock\:\:attributes\(\) should return array\<string, array\{type\: string, default\?\: mixed\}\> but returns array\{label\: array\{type\: ''string'', default\: ''''\}, placeholder\: array\{type\: ''string'', default\: ''''\}, helpText\: array\{type\: ''string'', default\: ''''\}, required\: array\{type\: ''boolean'', default\: false\}, min\: array\{type\: array\{''number'', ''null''\}, default\: null\}, max\: array\{type\: array\{''number'', ''null''\}, default\: null\}, step\: array\{type\: ''number'', default\: 1\}, field\: array\{type\: ''string'', default\: ''''\}\}\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Forms/Blocks/NumberInputBlock.php
@@ -97,7 +97,7 @@ parameters:
 			path: src/Forms/FormService.php
 
 		-
-			message: '#^Property GiveFlow\\Forms\\Form\:\:\$blocks \(string\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Forms\\Form\:\:\$blocks \(string\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Forms/FormSubmissionValidator.php
@@ -121,7 +121,7 @@ parameters:
 			path: src/Forms/Shortcode/DonationFormShortcode.php
 
 		-
-			message: '#^Method GiveFlow\\Forms\\Shortcode\\DonationFormShortcode\:\:hasPaymentGatewaysBlock\(\) is unused\.$#'
+			message: '#^Method FundKit\\Forms\\Shortcode\\DonationFormShortcode\:\:hasPaymentGatewaysBlock\(\) is unused\.$#'
 			identifier: method.unused
 			count: 1
 			path: src/Forms/Shortcode/DonationFormShortcode.php
@@ -187,7 +187,7 @@ parameters:
 			path: src/Forms/Shortcode/DonationFormShortcode.php
 
 		-
-			message: '#^Template type T of method GiveFlow\\Foundation\\Container\\Container\:\:get\(\) is not referenced in a parameter\.$#'
+			message: '#^Template type T of method FundKit\\Foundation\\Container\\Container\:\:get\(\) is not referenced in a parameter\.$#'
 			identifier: method.templateTypeNotInParameter
 			count: 1
 			path: src/Foundation/Container/Container.php
@@ -199,13 +199,13 @@ parameters:
 			path: src/Foundation/Transfer/CsvImporter.php
 
 		-
-			message: '#^Method GiveFlow\\Foundation\\Transfer\\DataImporter\:\:drop\(\) never returns array\<string, mixed\> so it can be removed from the return type\.$#'
+			message: '#^Method FundKit\\Foundation\\Transfer\\DataImporter\:\:drop\(\) never returns array\<string, mixed\> so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
 			path: src/Foundation/Transfer/DataImporter.php
 
 		-
-			message: '#^Offset ''default_form_id''\|''household_id''\|''parent_fund_id'' on array\{donor_id\: ''giveflow_donors'', household_id\: ''giveflow_donors'', campaign_id\: ''giveflow_campaigns'', form_id\: ''giveflow_forms'', source_form_id\: ''giveflow_forms'', default_form_id\: ''giveflow_forms'', fund_id\: ''giveflow_funds'', default_fund_id\: ''giveflow_funds'', \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			message: '#^Offset ''default_form_id''\|''household_id''\|''parent_fund_id'' on array\{donor_id\: ''fundkit_donors'', household_id\: ''fundkit_donors'', campaign_id\: ''fundkit_campaigns'', form_id\: ''fundkit_forms'', source_form_id\: ''fundkit_forms'', default_form_id\: ''fundkit_forms'', fund_id\: ''fundkit_funds'', default_fund_id\: ''fundkit_funds'', \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
 			path: src/Foundation/Transfer/DataImporter.php
@@ -217,13 +217,13 @@ parameters:
 			path: src/Foundation/Transfer/DataImporter.php
 
 		-
-			message: '#^Property GiveFlow\\Donations\\Donation\:\:\$kind \(string\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Donations\\Donation\:\:\$kind \(string\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Receipts/ReceiptIssuer.php
 
 		-
-			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Admin/CampaignsController.php
@@ -235,7 +235,7 @@ parameters:
 			path: src/Rest/Admin/DonationsController.php
 
 		-
-			message: '#^Method GiveFlow\\Rest\\Admin\\DonorsController\:\:index\(\) never returns WP_Error so it can be removed from the return type\.$#'
+			message: '#^Method FundKit\\Rest\\Admin\\DonorsController\:\:index\(\) never returns WP_Error so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
 			path: src/Rest/Admin/DonorsController.php
@@ -247,43 +247,43 @@ parameters:
 			path: src/Rest/Admin/FormsController.php
 
 		-
-			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$currency \(string\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$currency \(string\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Admin/FormsController.php
 
 		-
-			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$donations_count \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$donations_count \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Admin/FormsController.php
 
 		-
-			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$donors_count \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$donors_count \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Admin/FormsController.php
 
 		-
-			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$goal_type \(string\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$goal_type \(string\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Admin/FormsController.php
 
 		-
-			message: '#^Property GiveFlow\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Admin/FormsController.php
 
 		-
-			message: '#^Method GiveFlow\\Rest\\Admin\\OnboardingController\:\:finalize\(\) never returns WP_Error so it can be removed from the return type\.$#'
+			message: '#^Method FundKit\\Rest\\Admin\\OnboardingController\:\:finalize\(\) never returns WP_Error so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
 			path: src/Rest/Admin/OnboardingController.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(GiveFlow\\Vendor\\Queryable\\Model\)\: mixed\)\|null, Closure\(GiveFlow\\Donations\\Donation\)\: array\{reference\: string, amount_cents\: int, currency\: string, frequency\: string, is_test\: bool, failure_recorded\: bool\} given\.$#'
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(FundKit\\Vendor\\Queryable\\Model\)\: mixed\)\|null, Closure\(FundKit\\Donations\\Donation\)\: array\{reference\: string, amount_cents\: int, currency\: string, frequency\: string, is_test\: bool, failure_recorded\: bool\} given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Rest/Admin/RecurringController.php
@@ -301,7 +301,7 @@ parameters:
 			path: src/Rest/DonationsController.php
 
 		-
-			message: '#^Property GiveFlow\\Forms\\Form\:\:\$blocks \(string\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Forms\\Form\:\:\$blocks \(string\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 2
 			path: src/Rest/DonationsController.php
@@ -313,19 +313,19 @@ parameters:
 			path: src/Rest/PayPalController.php
 
 		-
-			message: '#^Property GiveFlow\\Donations\\Donation\:\:\$fee_covered_cents \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Donations\\Donation\:\:\$fee_covered_cents \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 2
 			path: src/Rest/Portal/PortalController.php
 
 		-
-			message: '#^Property GiveFlow\\Donations\\Donation\:\:\$refunded_cents \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Donations\\Donation\:\:\$refunded_cents \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Portal/PortalController.php
 
 		-
-			message: '#^Property GiveFlow\\Donors\\Consent\:\:\$purpose_version \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property FundKit\\Donors\\Consent\:\:\$purpose_version \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Portal/PortalController.php

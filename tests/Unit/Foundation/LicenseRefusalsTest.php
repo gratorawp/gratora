@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Foundation;
+namespace FundKit\Tests\Unit\Foundation;
 
-use GiveFlow\Foundation\License\LicenseRefusals;
+use FundKit\Foundation\License\LicenseRefusals;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \GiveFlow\Foundation\License\LicenseRefusals
+ * @covers \FundKit\Foundation\License\LicenseRefusals
  */
 final class LicenseRefusalsTest extends TestCase
 {
@@ -25,7 +25,7 @@ final class LicenseRefusalsTest extends TestCase
 
     public function test_a_mistyped_key_is_not_reported_as_a_plan_that_excludes_the_addon(): void
     {
-        $groups = LicenseRefusals::group($this->refused(['GiveFlow Events', 'invalid']));
+        $groups = LicenseRefusals::group($this->refused(['FundKit Events', 'invalid']));
 
         $this->assertCount(1, $groups);
         $this->assertStringContainsString('not recognised', $groups[0]['headline']);
@@ -34,7 +34,7 @@ final class LicenseRefusalsTest extends TestCase
 
     public function test_a_site_out_of_seats_is_told_freeing_one_is_enough(): void
     {
-        $groups = LicenseRefusals::group($this->refused(['GiveFlow Events', 'over_limit']));
+        $groups = LicenseRefusals::group($this->refused(['FundKit Events', 'over_limit']));
 
         $this->assertStringContainsString('no sites left', $groups[0]['headline']);
         $this->assertStringNotContainsString('does not cover', $groups[0]['headline']);
@@ -43,14 +43,14 @@ final class LicenseRefusalsTest extends TestCase
 
     public function test_a_product_outside_the_plan_still_says_so(): void
     {
-        $groups = LicenseRefusals::group($this->refused(['GiveFlow Events', 'not_entitled']));
+        $groups = LicenseRefusals::group($this->refused(['FundKit Events', 'not_entitled']));
 
         $this->assertStringContainsString('does not cover', $groups[0]['headline']);
     }
 
     public function test_a_revoked_licence_is_named_as_revoked(): void
     {
-        $groups = LicenseRefusals::group($this->refused(['GiveFlow Events', 'revoked']));
+        $groups = LicenseRefusals::group($this->refused(['FundKit Events', 'revoked']));
 
         $this->assertStringContainsString('revoked', $groups[0]['headline']);
     }
@@ -58,23 +58,23 @@ final class LicenseRefusalsTest extends TestCase
     public function test_each_refusal_reason_gets_its_own_message(): void
     {
         $groups = LicenseRefusals::group($this->refused(
-            ['GiveFlow Events', 'not_entitled'],
-            ['GiveFlow Tributes', 'over_limit'],
-            ['GiveFlow Gift Aid', 'not_entitled'],
+            ['FundKit Events', 'not_entitled'],
+            ['FundKit Tributes', 'over_limit'],
+            ['FundKit Gift Aid', 'not_entitled'],
         ));
 
         $this->assertCount(2, $groups, 'two distinct reasons, two messages');
 
         $byStatus = array_column($groups, 'names', 'status');
-        $this->assertSame('GiveFlow Events, GiveFlow Gift Aid', $byStatus['not_entitled']);
-        $this->assertSame('GiveFlow Tributes', $byStatus['over_limit']);
+        $this->assertSame('FundKit Events, FundKit Gift Aid', $byStatus['not_entitled']);
+        $this->assertSame('FundKit Tributes', $byStatus['over_limit']);
     }
 
     public function test_the_reason_the_admin_can_act_on_is_listed_first(): void
     {
         $groups = LicenseRefusals::group($this->refused(
-            ['GiveFlow Events', 'revoked'],
-            ['GiveFlow Tributes', 'invalid'],
+            ['FundKit Events', 'revoked'],
+            ['FundKit Tributes', 'invalid'],
         ));
 
         $this->assertSame('invalid', $groups[0]['status']);
@@ -82,10 +82,10 @@ final class LicenseRefusalsTest extends TestCase
 
     public function test_an_unrecognised_status_still_produces_a_message(): void
     {
-        $groups = LicenseRefusals::group($this->refused(['GiveFlow Events', 'something_new']));
+        $groups = LicenseRefusals::group($this->refused(['FundKit Events', 'something_new']));
 
         $this->assertCount(1, $groups);
         $this->assertNotSame('', $groups[0]['headline']);
-        $this->assertStringContainsString('GiveFlow Events', $groups[0]['headline']);
+        $this->assertStringContainsString('FundKit Events', $groups[0]['headline']);
     }
 }

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Admin;
+namespace FundKit\Admin;
 
-use GiveFlow\Donors\Portal\PortalPage;
-use GiveFlow\Foundation\Hooks\HookProvider;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Donors\Portal\PortalPage;
+use FundKit\Foundation\Hooks\HookProvider;
+use FundKit\Vendor\Queryable\DB;
 use WP_Post;
 
 /**
@@ -35,12 +35,12 @@ final class ManagedPageStates extends HookProvider
         }
 
         if (in_array((int) $post->ID, $this->campaignPageIds(), true)) {
-            $states['giveflow_campaign'] = __('GiveFlow Campaign', 'giveflow-fundraising-campaigns');
+            $states['fundkit_campaign'] = __('FundKit Campaign', 'fundkit-fundraising-campaigns');
             return $states;
         }
 
         if ((int) get_option(PortalPage::OPTION_PAGE_ID, 0) === (int) $post->ID) {
-            $states['giveflow_portal'] = __('GiveFlow Donor Portal', 'giveflow-fundraising-campaigns');
+            $states['fundkit_portal'] = __('FundKit Donor Portal', 'fundkit-fundraising-campaigns');
         }
 
         return $states;
@@ -48,7 +48,7 @@ final class ManagedPageStates extends HookProvider
 
     /**
      * A campaign's own page, not every page carrying its id: P2P layout
-     * subpages hold _giveflow_campaign_id too, and those are not the campaign.
+     * subpages hold _fundkit_campaign_id too, and those are not the campaign.
      *
      * @since 1.0.0
      */
@@ -57,7 +57,7 @@ final class ManagedPageStates extends HookProvider
         if ($this->campaignPageIds === null) {
             $this->campaignPageIds = array_values(array_filter(array_map(
                 'intval',
-                DB::table('giveflow_campaigns')->where('page_id', 0, '>')->pluck('page_id')
+                DB::table('fundkit_campaigns')->where('page_id', 0, '>')->pluck('page_id')
             )));
         }
 

@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'giveflow/phone';
+const NAME = 'fundkit/phone';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -13,27 +13,27 @@ function Edit( { attributes, setAttributes } ) {
         required = false,
         condition = DEFAULT_CONDITION,
     } = attributes;
-    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--field' } );
+    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--field' } );
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Phone', 'giveflow-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Phone', 'fundkit-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Phone', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'Phone', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Placeholder', 'fundkit-fundraising-campaigns' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         placeholder="+1 (555) 123 4567"
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Required', 'fundkit-fundraising-campaigns' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -45,11 +45,11 @@ function Edit( { attributes, setAttributes } ) {
                 />
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="giveflow-block-preview__label">
-                    { label || __( 'Phone', 'giveflow-fundraising-campaigns' ) }
-                    { required && <em className="giveflow-block-preview__req" aria-hidden="true">*</em> }
+                <span className="fundkit-block-preview__label">
+                    { label || __( 'Phone', 'fundkit-fundraising-campaigns' ) }
+                    { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
                 </span>
-                <div className="giveflow-block-preview__field">
+                <div className="fundkit-block-preview__field">
                     { placeholder || '+1 (555) 123 4567' }
                 </div>
             </div>
@@ -60,8 +60,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Phone', 'giveflow-fundraising-campaigns' ),
-        category:   'giveflow-donor',
+        title:      __( 'Phone', 'fundkit-fundraising-campaigns' ),
+        category:   'fundkit-donor',
         icon:       BlockIcons[ 'phone' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

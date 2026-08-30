@@ -1,5 +1,5 @@
 /**
- * Registers GiveFlow commands in the WP global command palette (Cmd/Ctrl+K); enqueued
+ * Registers FundKit commands in the WP global command palette (Cmd/Ctrl+K); enqueued
  * on every admin screen so the palette can always reach them.
  */
 import { dispatch } from '@wordpress/data';
@@ -16,7 +16,7 @@ import {
 } from '@wordpress/icons';
 
 const adminUrl = ( page ) =>
-    `${ window.giveflowCommandPalette?.adminUrl ?? '/wp-admin/' }admin.php?page=${ page }`;
+    `${ window.fundkitCommandPalette?.adminUrl ?? '/wp-admin/' }admin.php?page=${ page }`;
 
 const goTo = ( page ) => ( { close } ) => {
     window.location.href = adminUrl( page );
@@ -25,53 +25,53 @@ const goTo = ( page ) => ( { close } ) => {
 
 const commands = [
     {
-        name:     'giveflow/dashboard',
-        label:    __( 'GiveFlow: Open dashboard', 'giveflow-fundraising-campaigns' ),
+        name:     'fundkit/dashboard',
+        label:    __( 'FundKit: Open dashboard', 'fundkit-fundraising-campaigns' ),
         icon:     chartBar,
-        callback: goTo( 'giveflow' ),
+        callback: goTo( 'fundkit' ),
     },
     {
-        name:     'giveflow/donations',
-        label:    __( 'GiveFlow: View donations', 'giveflow-fundraising-campaigns' ),
+        name:     'fundkit/donations',
+        label:    __( 'FundKit: View donations', 'fundkit-fundraising-campaigns' ),
         icon:     currencyDollar,
-        callback: goTo( 'giveflow-donations' ),
+        callback: goTo( 'fundkit-donations' ),
     },
     {
-        name:     'giveflow/donors',
-        label:    __( 'GiveFlow: View donors', 'giveflow-fundraising-campaigns' ),
+        name:     'fundkit/donors',
+        label:    __( 'FundKit: View donors', 'fundkit-fundraising-campaigns' ),
         icon:     people,
-        callback: goTo( 'giveflow-donors' ),
+        callback: goTo( 'fundkit-donors' ),
     },
     {
-        name:     'giveflow/campaigns',
-        label:    __( 'GiveFlow: View campaigns', 'giveflow-fundraising-campaigns' ),
+        name:     'fundkit/campaigns',
+        label:    __( 'FundKit: View campaigns', 'fundkit-fundraising-campaigns' ),
         icon:     megaphone,
-        callback: goTo( 'giveflow-campaigns' ),
+        callback: goTo( 'fundkit-campaigns' ),
     },
     {
-        name:     'giveflow/funds',
-        label:    __( 'GiveFlow: View funds', 'giveflow-fundraising-campaigns' ),
+        name:     'fundkit/funds',
+        label:    __( 'FundKit: View funds', 'fundkit-fundraising-campaigns' ),
         icon:     archive,
-        callback: goTo( 'giveflow-funds' ),
+        callback: goTo( 'fundkit-funds' ),
     },
     {
-        name:     'giveflow/settings',
-        label:    __( 'GiveFlow: Open settings', 'giveflow-fundraising-campaigns' ),
+        name:     'fundkit/settings',
+        label:    __( 'FundKit: Open settings', 'fundkit-fundraising-campaigns' ),
         icon:     cog,
-        callback: goTo( 'giveflow-settings' ),
+        callback: goTo( 'fundkit-settings' ),
     },
     {
-        name:     'giveflow/onboarding',
-        label:    __( 'GiveFlow: Open onboarding wizard', 'giveflow-fundraising-campaigns' ),
+        name:     'fundkit/onboarding',
+        label:    __( 'FundKit: Open onboarding wizard', 'fundkit-fundraising-campaigns' ),
         icon:     plus,
-        callback: goTo( 'giveflow-onboarding' ),
+        callback: goTo( 'fundkit-onboarding' ),
     },
     {
-        name:     'giveflow/new-campaign',
-        label:    __( 'GiveFlow: New campaign', 'giveflow-fundraising-campaigns' ),
+        name:     'fundkit/new-campaign',
+        label:    __( 'FundKit: New campaign', 'fundkit-fundraising-campaigns' ),
         icon:     plus,
         callback: ( { close } ) => {
-            window.location.href = adminUrl( 'giveflow-campaigns' ) + '&action=new';
+            window.location.href = adminUrl( 'fundkit-campaigns' ) + '&action=new';
             close();
         },
     },

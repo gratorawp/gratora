@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Recurring;
+namespace FundKit\Tests\Unit\Recurring;
 
-use GiveFlow\Recurring\FrequencyMap;
+use FundKit\Recurring\FrequencyMap;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 

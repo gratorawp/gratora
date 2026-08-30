@@ -1,10 +1,10 @@
 import { createRoot } from '@wordpress/element';
 
-import { registerGiveFlowEntities } from '../_shared/entities';
+import { registerFundKitEntities } from '../_shared/entities';
 import Toaster from '../_shared/components/Toaster';
 import Editor from './Editor';
 
-registerGiveFlowEntities();
+registerFundKitEntities();
 
 function App() {
     const params = new URLSearchParams( window.location.search );
@@ -13,7 +13,7 @@ function App() {
 }
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'giveflow-admin-forms' );
+    const root = document.getElementById( 'fundkit-admin-forms' );
     if ( ! root ) return;
     createRoot( root ).render( <><App /><Toaster /></> );
 } );

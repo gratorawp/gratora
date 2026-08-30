@@ -25,13 +25,13 @@ import { __ } from '@wordpress/i18n';
 
 // Grouping keys are stable; only the display text is translated.
 const CATEGORY_LABELS = {
-    All:       __( 'All', 'giveflow-fundraising-campaigns' ),
-    General:   __( 'General', 'giveflow-fundraising-campaigns' ),
-    Appeals:   __( 'Appeals', 'giveflow-fundraising-campaigns' ),
-    Community: __( 'Community', 'giveflow-fundraising-campaigns' ),
-    Impact:    __( 'Impact', 'giveflow-fundraising-campaigns' ),
-    Bare:      __( 'Bare', 'giveflow-fundraising-campaigns' ),
-    Other:     __( 'Other', 'giveflow-fundraising-campaigns' ),
+    All:       __( 'All', 'fundkit-fundraising-campaigns' ),
+    General:   __( 'General', 'fundkit-fundraising-campaigns' ),
+    Appeals:   __( 'Appeals', 'fundkit-fundraising-campaigns' ),
+    Community: __( 'Community', 'fundkit-fundraising-campaigns' ),
+    Impact:    __( 'Impact', 'fundkit-fundraising-campaigns' ),
+    Bare:      __( 'Bare', 'fundkit-fundraising-campaigns' ),
+    Other:     __( 'Other', 'fundkit-fundraising-campaigns' ),
 };
 
 const CATEGORY_ORDER = [ 'General', 'Appeals', 'Community', 'Impact', 'Bare' ];
@@ -250,7 +250,7 @@ export default function CampaignTemplatePicker( { value, campaignType, onPick, o
         // The type is asked for, because what a campaign can lay out depends on
         // it: a peer-to-peer campaign has teams and a fundraiser grid to place,
         // and a single-form layout has nowhere to put either.
-        apiFetch( { path: addQueryArgs( '/giveflow/v1/admin/campaigns/templates', {
+        apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/campaigns/templates', {
             campaign_type: campaignType || undefined,
         } ) } )
             .then( ( list ) => setTemplates( Array.isArray( list ) ? list : [] ) )
@@ -278,35 +278,35 @@ export default function CampaignTemplatePicker( { value, campaignType, onPick, o
 
     return (
         <Modal
-            title={ __( 'Campaign templates', 'giveflow-fundraising-campaigns' ) }
+            title={ __( 'Campaign templates', 'fundkit-fundraising-campaigns' ) }
             onRequestClose={ onClose }
-            className="giveflow-template-picker giveflow-ctp"
+            className="fundkit-template-picker fundkit-ctp"
             size="large"
         >
             { failed ? (
-                <div className="giveflow-template-picker__state">
-                    <p>{ __( 'The campaign templates could not be loaded.', 'giveflow-fundraising-campaigns' ) }</p>
+                <div className="fundkit-template-picker__state">
+                    <p>{ __( 'The campaign templates could not be loaded.', 'fundkit-fundraising-campaigns' ) }</p>
                     <button type="button" className="btn" onClick={ load }>
-                        { __( 'Try again', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Try again', 'fundkit-fundraising-campaigns' ) }
                     </button>
                 </div>
             ) : loading ? (
-                <div className="giveflow-template-picker__state"><Spinner /></div>
+                <div className="fundkit-template-picker__state"><Spinner /></div>
             ) : (
                 <>
-                    <p className="giveflow-template-picker__intro">
-                        { __( 'Where things sit on the campaign page. Everything here is blocks, so you can rearrange any of it afterwards.', 'giveflow-fundraising-campaigns' ) }
+                    <p className="fundkit-template-picker__intro">
+                        { __( 'Where things sit on the campaign page. Everything here is blocks, so you can rearrange any of it afterwards.', 'fundkit-fundraising-campaigns' ) }
                     </p>
 
                     { categories.length > 2 && (
-                        <div className="giveflow-template-picker__filters" role="tablist">
+                        <div className="fundkit-template-picker__filters" role="tablist">
                             { categories.map( ( c ) => (
                                 <button
                                     key={ c }
                                     type="button"
                                     role="tab"
                                     aria-selected={ category === c }
-                                    className={ `giveflow-template-picker__filter${ category === c ? ' is-active' : '' }` }
+                                    className={ `fundkit-template-picker__filter${ category === c ? ' is-active' : '' }` }
                                     onClick={ () => setCategory( c ) }
                                 >
                                     { CATEGORY_LABELS[ c ] || c }
@@ -315,21 +315,21 @@ export default function CampaignTemplatePicker( { value, campaignType, onPick, o
                         </div>
                     ) }
 
-                    <div className="giveflow-template-picker__grid">
+                    <div className="fundkit-template-picker__grid">
                         { visible.map( ( t ) => (
                             <button
                                 key={ t.id }
                                 type="button"
-                                className={ `giveflow-template-picker__card${ value === t.id ? ' is-active' : '' }` }
+                                className={ `fundkit-template-picker__card${ value === t.id ? ' is-active' : '' }` }
                                 aria-pressed={ value === t.id }
                                 onClick={ () => onPick( t ) }
                             >
                                 <Wireframe shape={ thumbFor( t ) } />
-                                <span className="giveflow-template-picker__meta">
+                                <span className="fundkit-template-picker__meta">
                                     <strong>{ t.name }</strong>
-                                    <span className="giveflow-template-picker__desc">{ t.description }</span>
+                                    <span className="fundkit-template-picker__desc">{ t.description }</span>
                                     { t.best_for && (
-                                        <span className="giveflow-ctp__best">{ t.best_for }</span>
+                                        <span className="fundkit-ctp__best">{ t.best_for }</span>
                                     ) }
                                 </span>
                             </button>
@@ -346,14 +346,14 @@ function Wireframe( { shape } ) {
     const { main, form, footer, stacked, tone } = shape;
 
     return (
-        <span className={ `giveflow-ctp__thumb${ tone === 'dark' ? ' is-dark' : '' }` } aria-hidden="true">
-            <span className={ `giveflow-ctp__cols${ stacked ? ' is-stacked' : '' }` }>
-                <span className="giveflow-ctp__main">
+        <span className={ `fundkit-ctp__thumb${ tone === 'dark' ? ' is-dark' : '' }` } aria-hidden="true">
+            <span className={ `fundkit-ctp__cols${ stacked ? ' is-stacked' : '' }` }>
+                <span className="fundkit-ctp__main">
                     { main.map( ( kind, i ) => <Part key={ i } kind={ kind } /> ) }
                     { stacked && <FormPart /> }
                 </span>
                 { form && (
-                    <span className="giveflow-ctp__side">
+                    <span className="fundkit-ctp__side">
                         <FormPart />
                     </span>
                 ) }

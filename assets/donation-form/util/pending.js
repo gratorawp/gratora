@@ -1,7 +1,7 @@
 // What a redirect gateway needs to pick a donation back up when the donor
 // returns on a fresh page load. Session-scoped, so it dies with the tab rather
 // than following the donor around.
-export const PENDING_KEY = 'giveflow:pending-donation';
+export const PENDING_KEY = 'fundkit:pending-donation';
 
 export function rememberPending( data, values, hostId = '' ) {
     try {

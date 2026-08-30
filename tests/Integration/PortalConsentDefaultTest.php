@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -22,7 +22,7 @@ final class PortalConsentDefaultTest extends IntegrationTestCase
 {
     protected function tearDown(): void
     {
-        delete_option('giveflow_consents');
+        delete_option('fundkit_consents');
         parent::tearDown();
     }
 
@@ -70,15 +70,15 @@ final class PortalConsentDefaultTest extends IntegrationTestCase
     private function portalConsents(int $donorId): array
     {
         $sid = $this->portalSession($donorId, bin2hex(random_bytes(8)));
-        $_COOKIE['giveflow_donor_session'] = $sid;
+        $_COOKIE['fundkit_donor_session'] = $sid;
 
         try {
-            $res = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/portal/consents'));
+            $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/portal/consents'));
             $this->assertSame(200, $res->get_status());
 
             return (array) $res->get_data();
         } finally {
-            unset($_COOKIE['giveflow_donor_session']);
+            unset($_COOKIE['fundkit_donor_session']);
         }
     }
 }

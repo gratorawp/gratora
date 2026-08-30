@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways\Offline;
+namespace FundKit\Gateways\Offline;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Gateways\GatewayConfirmResult;
-use GiveFlow\Gateways\GatewayIntentResult;
-use GiveFlow\Gateways\PaymentGateway;
-use GiveFlow\Gateways\RefundResult;
-use GiveFlow\Gateways\SettlesOutOfBand;
-use GiveFlow\Gateways\WebhookOutcome;
+use FundKit\Donations\Donation;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Gateways\GatewayConfirmResult;
+use FundKit\Gateways\GatewayIntentResult;
+use FundKit\Gateways\PaymentGateway;
+use FundKit\Gateways\RefundResult;
+use FundKit\Gateways\SettlesOutOfBand;
+use FundKit\Gateways\WebhookOutcome;
 use WP_REST_Request;
 
 /**
@@ -37,13 +37,13 @@ final class OfflineGateway implements PaymentGateway, SettlesOutOfBand
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Offline donations', 'giveflow-fundraising-campaigns');
+        return __('Offline donations', 'fundkit-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Pay by bank transfer, check or cash. We confirm it manually.', 'giveflow-fundraising-campaigns');
+        return __('Pay by bank transfer, check or cash. We confirm it manually.', 'fundkit-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */
@@ -82,7 +82,7 @@ final class OfflineGateway implements PaymentGateway, SettlesOutOfBand
      */
     public function canCharge(): bool
     {
-        $cfg = get_option('giveflow_gateway_config', []);
+        $cfg = get_option('fundkit_gateway_config', []);
         $cfg = is_array($cfg) ? $cfg : [];
 
         return trim((string) ($cfg['offline']['instructions'] ?? '')) !== ''

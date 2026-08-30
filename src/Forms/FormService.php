@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms;
+namespace FundKit\Forms;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\CampaignRepository;
-use GiveFlow\Foundation\Time\Clock;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\CampaignRepository;
+use FundKit\Foundation\Time\Clock;
 use InvalidArgumentException;
 
 /**
@@ -22,9 +22,9 @@ final class FormService
      * @var list<array{block:string,label:string}>
      */
     private const REQUIRED_BLOCKS = [
-        ['block' => 'giveflow/donation-amount', 'label' => 'Amount'],
-        ['block' => 'giveflow/name',            'label' => 'Name'],
-        ['block' => 'giveflow/email',           'label' => 'Email'],
+        ['block' => 'fundkit/donation-amount', 'label' => 'Amount'],
+        ['block' => 'fundkit/name',            'label' => 'Name'],
+        ['block' => 'fundkit/email',           'label' => 'Email'],
     ];
 
     /**
@@ -60,9 +60,9 @@ final class FormService
     private static function requiredLabel(string $label): string
     {
         return match ($label) {
-            'Amount' => __('Amount', 'giveflow-fundraising-campaigns'),
-            'Name'   => __('Name', 'giveflow-fundraising-campaigns'),
-            'Email'  => __('Email', 'giveflow-fundraising-campaigns'),
+            'Amount' => __('Amount', 'fundkit-fundraising-campaigns'),
+            'Name'   => __('Name', 'fundkit-fundraising-campaigns'),
+            'Email'  => __('Email', 'fundkit-fundraising-campaigns'),
             default  => $label,
         };
     }
@@ -98,7 +98,7 @@ final class FormService
 
         $title = trim((string) ($input['title'] ?? ''));
         if ($title === '') {
-            $title = __('Untitled donation form', 'giveflow-fundraising-campaigns');
+            $title = __('Untitled donation form', 'fundkit-fundraising-campaigns');
         }
 
         $campaign = $this->resolveCampaign($input['campaign_id'] ?? null);
@@ -126,7 +126,7 @@ final class FormService
         $this->syncGatewayAllowed($form);
         $form->save();
 
-        do_action('giveflow.form.created', $form);
+        do_action('fundkit.form.created', $form);
         return $form;
     }
 
@@ -188,7 +188,7 @@ final class FormService
     private function findGatewayAllowed(array $blocks): ?array
     {
         foreach ($blocks as $b) {
-            if (($b['blockName'] ?? '') === 'giveflow/payment-gateways') {
+            if (($b['blockName'] ?? '') === 'fundkit/payment-gateways') {
                 $a = $b['attrs']['allowed'] ?? [];
                 return is_array($a)
                     ? array_values(array_filter(array_map('strval', $a), static fn ($s) => $s !== ''))
@@ -228,10 +228,10 @@ final class FormService
             if ($raw !== '') {
                 $next = sanitize_title($raw);
                 if ($next === '') {
-                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'giveflow-fundraising-campaigns'));
+                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'fundkit-fundraising-campaigns'));
                 }
                 if ($next !== $form->slug && $this->forms->slugExists($next, $form->id)) {
-                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'giveflow-fundraising-campaigns'));
+                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'fundkit-fundraising-campaigns'));
                 }
                 $form->slug = $next;
             }
@@ -282,7 +282,7 @@ final class FormService
         $this->syncGatewayAllowed($form);
         $form->save();
 
-        do_action('giveflow.form.updated', $form);
+        do_action('fundkit.form.updated', $form);
         return $form;
     }
 
@@ -302,13 +302,13 @@ final class FormService
 
         if ($defaultFormId === (int) $form->id) {
             throw new InvalidArgumentException(
-                esc_html__('This form is the campaign default. Pick a different default form before deleting it.', 'giveflow-fundraising-campaigns')
+                esc_html__('This form is the campaign default. Pick a different default form before deleting it.', 'fundkit-fundraising-campaigns')
             );
         }
 
         Form::query()->where('id', $form->id)->delete();
 
-        do_action('giveflow.form.deleted', $form);
+        do_action('fundkit.form.deleted', $form);
     }
 
     /**
@@ -321,7 +321,7 @@ final class FormService
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
         /* translators: %s: original form title */
-        $title = sprintf(__('%s (copy)', 'giveflow-fundraising-campaigns'), $source->title);
+        $title = sprintf(__('%s (copy)', 'fundkit-fundraising-campaigns'), $source->title);
 
         $copy = Form::make();
         $copy->title        = $title;
@@ -339,7 +339,7 @@ final class FormService
 
         $copy->save();
 
-        do_action('giveflow.form.duplicated', $copy, $source);
+        do_action('fundkit.form.duplicated', $copy, $source);
         return $copy;
     }
 
@@ -368,7 +368,7 @@ final class FormService
         throw new InvalidArgumentException(
             esc_html(sprintf(
                 /* translators: %s: comma-separated list of missing block labels (Amount, Name, Email). */
-                __('A published donation form needs these blocks: %s.', 'giveflow-fundraising-campaigns'),
+                __('A published donation form needs these blocks: %s.', 'fundkit-fundraising-campaigns'),
                 implode(', ', $labels)
             ))
         );
@@ -383,11 +383,11 @@ final class FormService
     {
         $id = (int) ($idOrNull ?? 0);
         if ($id <= 0) {
-            throw new InvalidArgumentException(esc_html__('A campaign is required.', 'giveflow-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('A campaign is required.', 'fundkit-fundraising-campaigns'));
         }
         $campaign = $this->campaigns->findById($id);
         if (! $campaign) {
-            throw new InvalidArgumentException(esc_html__('Campaign not found.', 'giveflow-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('Campaign not found.', 'fundkit-fundraising-campaigns'));
         }
         return $campaign;
     }
@@ -463,7 +463,7 @@ final class FormService
 
         throw new InvalidArgumentException(esc_html(sprintf(
             /* translators: %s: campaign title. */
-            __('This is the default donation form for %s, so it cannot be moved. Make another form the default first.', 'giveflow-fundraising-campaigns'),
+            __('This is the default donation form for %s, so it cannot be moved. Make another form the default first.', 'fundkit-fundraising-campaigns'),
             $campaign->title
         )));
     }

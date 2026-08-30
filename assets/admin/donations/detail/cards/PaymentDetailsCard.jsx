@@ -14,7 +14,7 @@ function MonoCopy( { value, label } ) {
                 type="button"
                 className="dd-mono-copy__btn"
                 aria-label={ label }
-                title={ ok ? __( 'Copied', 'giveflow-fundraising-campaigns' ) : label }
+                title={ ok ? __( 'Copied', 'fundkit-fundraising-campaigns' ) : label }
                 onClick={ async () => {
                     try {
                         await navigator.clipboard.writeText( value );
@@ -37,29 +37,29 @@ export default function PaymentDetailsCard( { donation } ) {
             <div className="dd-card__body">
                 <div className="dd-kv" style={ { gridTemplateColumns: '160px 1fr' } }>
                     <div className="dd-kv__row">
-                        <div className="dd-kv__lbl">{ __( 'Intent ID', 'giveflow-fundraising-campaigns' ) }</div>
-                        <div className="dd-kv__val"><MonoCopy value={ donation.gateway_intent_id } label={ __( 'Copy intent ID', 'giveflow-fundraising-campaigns' ) } /></div>
+                        <div className="dd-kv__lbl">{ __( 'Intent ID', 'fundkit-fundraising-campaigns' ) }</div>
+                        <div className="dd-kv__val"><MonoCopy value={ donation.gateway_intent_id } label={ __( 'Copy intent ID', 'fundkit-fundraising-campaigns' ) } /></div>
                     </div>
                     <div className="dd-kv__row">
-                        <div className="dd-kv__lbl">{ __( 'Transaction ID', 'giveflow-fundraising-campaigns' ) }</div>
-                        <div className="dd-kv__val"><MonoCopy value={ donation.gateway_txn_id } label={ __( 'Copy transaction ID', 'giveflow-fundraising-campaigns' ) } /></div>
+                        <div className="dd-kv__lbl">{ __( 'Transaction ID', 'fundkit-fundraising-campaigns' ) }</div>
+                        <div className="dd-kv__val"><MonoCopy value={ donation.gateway_txn_id } label={ __( 'Copy transaction ID', 'fundkit-fundraising-campaigns' ) } /></div>
                     </div>
                 </div>
 
                 { hasFees && (
                     <div style={ { marginTop: 18 } }>
-                        <div className="dd-section-lbl">{ __( 'Fees breakdown', 'giveflow-fundraising-campaigns' ) }</div>
+                        <div className="dd-section-lbl">{ __( 'Fees breakdown', 'fundkit-fundraising-campaigns' ) }</div>
                         <div className="dd-fees">
                             <div className="dd-fees__cell">
-                                <div className="dd-fees__lbl">{ __( 'Gross', 'giveflow-fundraising-campaigns' ) }</div>
+                                <div className="dd-fees__lbl">{ __( 'Gross', 'fundkit-fundraising-campaigns' ) }</div>
                                 <div className="dd-fees__val num">{ formatAmount( donation.amount_cents, donation.currency ) }</div>
                             </div>
                             <div className="dd-fees__cell dd-fees__cell--neg">
-                                <div className="dd-fees__lbl">{ __( 'Gateway fee', 'giveflow-fundraising-campaigns' ) }</div>
+                                <div className="dd-fees__lbl">{ __( 'Gateway fee', 'fundkit-fundraising-campaigns' ) }</div>
                                 <div className="dd-fees__val num">- { formatAmount( donation.fee_cents, donation.currency ) }</div>
                             </div>
                             <div className="dd-fees__cell dd-fees__cell--net">
-                                <div className="dd-fees__lbl">{ __( 'Net', 'giveflow-fundraising-campaigns' ) }</div>
+                                <div className="dd-fees__lbl">{ __( 'Net', 'fundkit-fundraising-campaigns' ) }</div>
                                 <div className="dd-fees__val num">{ formatAmount( donation.net_cents, donation.currency ) }</div>
                             </div>
                         </div>

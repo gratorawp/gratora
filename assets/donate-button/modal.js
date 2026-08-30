@@ -15,10 +15,10 @@
         // eslint-disable-next-line no-unused-expressions
         modal.offsetHeight;
         modal.classList.add( OPEN_CLASS );
-        document.body.classList.add( 'giveflow-modal-open' );
+        document.body.classList.add( 'fundkit-modal-open' );
 
         // Prefer the first control in the form over the close button.
-        const body = modal.querySelector( '.giveflow-donate-modal__body' );
+        const body = modal.querySelector( '.fundkit-donate-modal__body' );
         const focusTarget = ( body && body.querySelector( FOCUSABLE ) )
             || modal.querySelector( FOCUSABLE );
         if ( focusTarget ) focusTarget.focus();
@@ -28,7 +28,7 @@
         if ( ! modal ) return;
         modal.classList.remove( OPEN_CLASS );
         modal.hidden = true;
-        document.body.classList.remove( 'giveflow-modal-open' );
+        document.body.classList.remove( 'fundkit-modal-open' );
         if ( lastFocused && typeof lastFocused.focus === 'function' ) {
             lastFocused.focus();
             lastFocused = null;
@@ -39,22 +39,22 @@
         const slug = button.dataset.formSlug;
         if ( ! slug ) return null;
         // Prefer a sibling modal in the same block; fall back to any matching modal.
-        const block = button.closest( '.giveflow-block--donate-button' );
-        return ( block && block.querySelector( `.giveflow-donate-modal[data-form-slug="${ slug }"]` ) )
-            || document.querySelector( `.giveflow-donate-modal[data-form-slug="${ slug }"]` );
+        const block = button.closest( '.fundkit-block--donate-button' );
+        return ( block && block.querySelector( `.fundkit-donate-modal[data-form-slug="${ slug }"]` ) )
+            || document.querySelector( `.fundkit-donate-modal[data-form-slug="${ slug }"]` );
     }
 
     document.addEventListener( 'click', ( e ) => {
-        const button = e.target.closest( '.giveflow-donate-button[data-form-slug]' );
+        const button = e.target.closest( '.fundkit-donate-button[data-form-slug]' );
         if ( button && ! button.classList.contains( 'is-disabled' ) ) {
             e.preventDefault();
             open( findModal( button ) );
             return;
         }
 
-        const closer = e.target.closest( '[data-giveflow-modal-close]' );
+        const closer = e.target.closest( '[data-fundkit-modal-close]' );
         if ( closer ) {
-            close( closer.closest( '.giveflow-donate-modal' ) );
+            close( closer.closest( '.fundkit-donate-modal' ) );
         }
     } );
 
@@ -71,7 +71,7 @@
     // anywhere, and the page as it stands beats a modal that cannot say what
     // happened.
     function revealFor( host ) {
-        const modal = host && host.closest( '.giveflow-donate-modal' );
+        const modal = host && host.closest( '.fundkit-donate-modal' );
         if ( modal ) open( modal );
     }
 
@@ -81,12 +81,12 @@
     // registered here, while a script an optimizer held back to the first
     // interaction arrives to find the mark on the page and nothing to hear.
     // RETURN_CLAIMED_EVENT in assets/donation-form/runtime.jsx.
-    window.addEventListener( 'giveflow:donation:return-claimed', ( e ) => {
+    window.addEventListener( 'fundkit:donation:return-claimed', ( e ) => {
         revealFor( e.detail && e.detail.host );
     } );
 
     function revealClaimed() {
-        revealFor( document.querySelector( '.giveflow-donation-form[data-giveflow-returning]' ) );
+        revealFor( document.querySelector( '.fundkit-donation-form[data-fundkit-returning]' ) );
     }
 
     // Deferred a task so a runtime booting on this same event has mounted and
@@ -103,7 +103,7 @@
 
     document.addEventListener( 'keydown', ( e ) => {
         if ( e.key === 'Escape' ) {
-            const openModal = document.querySelector( '.giveflow-donate-modal.' + OPEN_CLASS );
+            const openModal = document.querySelector( '.fundkit-donate-modal.' + OPEN_CLASS );
             if ( openModal ) close( openModal );
             return;
         }
@@ -111,9 +111,9 @@
         // Trap Tab inside the open modal so focus can't wander to the
         // scroll-locked page hidden behind the backdrop.
         if ( e.key === 'Tab' ) {
-            const openModal = document.querySelector( '.giveflow-donate-modal.' + OPEN_CLASS );
+            const openModal = document.querySelector( '.fundkit-donate-modal.' + OPEN_CLASS );
             if ( ! openModal ) return;
-            const panel = openModal.querySelector( '.giveflow-donate-modal__panel' ) || openModal;
+            const panel = openModal.querySelector( '.fundkit-donate-modal__panel' ) || openModal;
             const nodes = Array.prototype.slice
                 .call( panel.querySelectorAll( FOCUSABLE ) )
                 .filter( ( n ) => n.offsetParent !== null );

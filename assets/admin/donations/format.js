@@ -3,7 +3,7 @@
 import { __ } from '@wordpress/i18n';
 // MySQL strings arrive in UTC with no zone marker, which a browser reads as
 // local time. parseTimestamp marks them.
-import { parseTimestamp } from '@giveflow/ui/utils/format';
+import { parseTimestamp } from '@fundkit/ui/utils/format';
 
 export { formatAmount, formatAmountCompact } from '../_shared/format';
 
@@ -22,11 +22,11 @@ export function formatDate( iso, opts = {} ) {
 }
 
 export const STATUS_LABEL = {
-    pending:        __( 'Pending', 'giveflow-fundraising-campaigns' ),
-    processing:     __( 'Processing', 'giveflow-fundraising-campaigns' ),
-    paid:           __( 'Paid', 'giveflow-fundraising-campaigns' ),
-    failed:         __( 'Failed', 'giveflow-fundraising-campaigns' ),
-    refunded:       __( 'Refunded', 'giveflow-fundraising-campaigns' ),
-    partial_refund: __( 'Partially refunded', 'giveflow-fundraising-campaigns' ),
-    disputed:       __( 'Disputed', 'giveflow-fundraising-campaigns' ),
+    pending:        __( 'Pending', 'fundkit-fundraising-campaigns' ),
+    processing:     __( 'Processing', 'fundkit-fundraising-campaigns' ),
+    paid:           __( 'Paid', 'fundkit-fundraising-campaigns' ),
+    failed:         __( 'Failed', 'fundkit-fundraising-campaigns' ),
+    refunded:       __( 'Refunded', 'fundkit-fundraising-campaigns' ),
+    partial_refund: __( 'Partially refunded', 'fundkit-fundraising-campaigns' ),
+    disputed:       __( 'Disputed', 'fundkit-fundraising-campaigns' ),
 };

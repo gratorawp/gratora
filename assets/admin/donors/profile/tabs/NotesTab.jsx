@@ -22,7 +22,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
         setError( null );
         try {
             const note = await apiFetch( {
-                path:   `/giveflow/v1/admin/donors/${ donorId }/notes`,
+                path:   `/fundkit/v1/admin/donors/${ donorId }/notes`,
                 method: 'POST',
                 data:   { body: body.trim() },
             } );
@@ -38,14 +38,14 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
 
     const remove = ( noteId ) => {
         setConfirm( {
-            title:        __( 'Delete note', 'giveflow-fundraising-campaigns' ),
-            message:      __( 'Delete this note?', 'giveflow-fundraising-campaigns' ),
-            confirmLabel: __( 'Delete', 'giveflow-fundraising-campaigns' ),
+            title:        __( 'Delete note', 'fundkit-fundraising-campaigns' ),
+            message:      __( 'Delete this note?', 'fundkit-fundraising-campaigns' ),
+            confirmLabel: __( 'Delete', 'fundkit-fundraising-campaigns' ),
             destructive:  true,
             onConfirm: async () => {
                 try {
                     await apiFetch( {
-                        path:   `/giveflow/v1/admin/donors/notes/${ noteId }`,
+                        path:   `/fundkit/v1/admin/donors/notes/${ noteId }`,
                         method: 'DELETE',
                     } );
                     setNotes( ( ns ) => ns.filter( ( n ) => n.id !== noteId ) );
@@ -67,7 +67,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                 <p className="dp-tab-note">
                     { sprintf(
                         /* translators: 1: notes shown, 2: notes in total */
-                        __( 'Showing the %1$d most recent of %2$d notes.', 'giveflow-fundraising-campaigns' ),
+                        __( 'Showing the %1$d most recent of %2$d notes.', 'fundkit-fundraising-campaigns' ),
                         notes.length,
                         total
                     ) }
@@ -80,14 +80,14 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                             <EmptyState
                                 compact
                                 icon={ <StickyNote size={ 22 } strokeWidth={ 1.75 } /> }
-                                title={ __( 'No notes yet', 'giveflow-fundraising-campaigns' ) }
-                                body={ __( 'Add a note to capture context about this donor (preferred contact, stewardship plan, etc.).', 'giveflow-fundraising-campaigns' ) }
+                                title={ __( 'No notes yet', 'fundkit-fundraising-campaigns' ) }
+                                body={ __( 'Add a note to capture context about this donor (preferred contact, stewardship plan, etc.).', 'fundkit-fundraising-campaigns' ) }
                             />
                         )
                         : (
                             <div className="dp-notes-list">
                                 { notes.map( ( n ) => {
-                                    const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'giveflow-fundraising-campaigns' ) : __( 'System', 'giveflow-fundraising-campaigns' ) );
+                                    const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'fundkit-fundraising-campaigns' ) : __( 'System', 'fundkit-fundraising-campaigns' ) );
                                     return (
                                         <div key={ n.id } className="dp-note">
                                             <span className="dp-note__avatar" aria-hidden="true">{ initials( author ) }</span>
@@ -105,7 +105,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                                                 <button
                                                     type="button"
                                                     className="dp-note__delete"
-                                                    aria-label={ __( 'Delete note', 'giveflow-fundraising-campaigns' ) }
+                                                    aria-label={ __( 'Delete note', 'fundkit-fundraising-campaigns' ) }
                                                     onClick={ () => remove( n.id ) }
                                                 >
                                                     <IconTrash width="14" height="14" />
@@ -118,10 +118,10 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                         ) }
 
                     <form className="dp-note-form" onSubmit={ submit }>
-                        <textarea className="giveflow-textarea"
+                        <textarea className="fundkit-textarea"
                             value={ body }
                             onChange={ ( e ) => setBody( e.target.value ) }
-                            placeholder={ __( 'Add a note about this donor…', 'giveflow-fundraising-campaigns' ) }
+                            placeholder={ __( 'Add a note about this donor…', 'fundkit-fundraising-campaigns' ) }
                             rows={ 3 }
                         />
                         { error && <div className="dp-note-form__error">{ error }</div> }
@@ -131,7 +131,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                                 className="btn btn--primary"
                                 disabled={ saving || ! body.trim() }
                             >
-                                { saving ? __( 'Saving…', 'giveflow-fundraising-campaigns' ) : __( 'Add note', 'giveflow-fundraising-campaigns' ) }
+                                { saving ? __( 'Saving…', 'fundkit-fundraising-campaigns' ) : __( 'Add note', 'fundkit-fundraising-campaigns' ) }
                             </button>
                         </div>
                     </form>

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use GiveFlow\Campaigns\Campaign;
+use FundKit\Campaigns\Campaign;
 
 /**
  * A campaign schedule is the org's calendar, and the gate on the money path has

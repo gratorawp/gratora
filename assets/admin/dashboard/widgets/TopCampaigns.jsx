@@ -16,7 +16,7 @@ function Sparkline( { points = [], color = '#6f5ce6' } ) {
     } ).join( ' ' );
 
     return (
-        <svg viewBox={ `0 0 ${ w } ${ h }` } width={ w } height={ h } aria-hidden="true" className="giveflow-spark">
+        <svg viewBox={ `0 0 ${ w } ${ h }` } width={ w } height={ h } aria-hidden="true" className="fundkit-spark">
             <path d={ path } fill="none" stroke={ color } strokeWidth="1.5" />
         </svg>
     );
@@ -28,8 +28,8 @@ export default function TopCampaigns( { rows = [] } ) {
             <EmptyState
                 compact
                 icon={ <TrendingUp size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donations in this range', 'giveflow-fundraising-campaigns' ) }
-                body={ __( 'Pick a wider date range or wait for new donations to come in.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'No donations in this range', 'fundkit-fundraising-campaigns' ) }
+                body={ __( 'Pick a wider date range or wait for new donations to come in.', 'fundkit-fundraising-campaigns' ) }
             />
         );
     }
@@ -37,30 +37,30 @@ export default function TopCampaigns( { rows = [] } ) {
     const max = rows[ 0 ].amount_cents;
 
     return (
-        <table className="giveflow-table giveflow-top-campaigns">
+        <table className="fundkit-table fundkit-top-campaigns">
             <tbody>
                 { rows.map( ( c ) => {
                     const pct = max > 0 ? Math.round( ( c.amount_cents / max ) * 100 ) : 0;
                     return (
                         <tr key={ c.id }>
                             <td>
-                                <div className="giveflow-table__primary">
+                                <div className="fundkit-table__primary">
                                     <a href={ detailHref( c.id ) }>{ c.title }</a>
                                 </div>
-                                <div className="giveflow-table__bar">
-                                    <div className="giveflow-table__bar-fill" style={ { width: `${ pct }%` } } />
+                                <div className="fundkit-table__bar">
+                                    <div className="fundkit-table__bar-fill" style={ { width: `${ pct }%` } } />
                                 </div>
                             </td>
-                            <td className="giveflow-top-campaigns__spark">
+                            <td className="fundkit-top-campaigns__spark">
                                 <Sparkline points={ c.sparkline } />
                             </td>
-                            <td className="giveflow-table__right">
-                                <div className="giveflow-table__primary">
+                            <td className="fundkit-table__right">
+                                <div className="fundkit-table__primary">
                                     { formatAmount( c.amount_cents, c.currency ) }
                                 </div>
-                                <div className="giveflow-table__sub">
+                                <div className="fundkit-table__sub">
                                     { sprintf(
-                                        /* translators: %d: number of donations */ _n( '%d donation', '%d donations', c.donations_count, 'giveflow-fundraising-campaigns' ),
+                                        /* translators: %d: number of donations */ _n( '%d donation', '%d donations', c.donations_count, 'fundkit-fundraising-campaigns' ),
                                         c.donations_count
                                     ) }
                                 </div>

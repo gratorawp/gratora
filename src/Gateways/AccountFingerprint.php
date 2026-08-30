@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways;
+namespace FundKit\Gateways;
 
 /**
  * Identifies the account a cached remote object was created under.

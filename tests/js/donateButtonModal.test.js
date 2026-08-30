@@ -57,26 +57,26 @@ function formConfig( overrides = {} ) {
 // runtime never boots.
 function formMarkup( id, hydrate, overrides = {} ) {
     const json = hydrate
-        ? `<script type="application/json" data-giveflow-form-config>${ JSON.stringify( formConfig( overrides ) ) }</script>`
+        ? `<script type="application/json" data-fundkit-form-config>${ JSON.stringify( formConfig( overrides ) ) }</script>`
         : '';
 
-    return `<form class="giveflow-donation-form"${ id ? ` id="${ id }"` : '' }>${ json }</form>`;
+    return `<form class="fundkit-donation-form"${ id ? ` id="${ id }"` : '' }>${ json }</form>`;
 }
 
 function page( {
-    modalFormId = 'giveflow-form-1',
+    modalFormId = 'fundkit-form-1',
     extraFormId = null,
     hydrate = false,
     modalOverrides = {},
     extraFirst = false,
 } = {} ) {
     const block = `
-        <div class="giveflow-block giveflow-block--donate-button">
-            <button type="button" class="giveflow-donate-button" data-form-slug="probe"></button>
-            <div class="giveflow-donate-modal" data-form-slug="probe" hidden>
-                <div class="giveflow-donate-modal__panel">
-                    <button type="button" class="giveflow-donate-modal__close" data-giveflow-modal-close></button>
-                    <div class="giveflow-donate-modal__body">
+        <div class="fundkit-block fundkit-block--donate-button">
+            <button type="button" class="fundkit-donate-button" data-form-slug="probe"></button>
+            <div class="fundkit-donate-modal" data-form-slug="probe" hidden>
+                <div class="fundkit-donate-modal__panel">
+                    <button type="button" class="fundkit-donate-modal__close" data-fundkit-modal-close></button>
+                    <div class="fundkit-donate-modal__body">
                         ${ formMarkup( modalFormId, hydrate, modalOverrides ) }
                     </div>
                 </div>
@@ -87,13 +87,13 @@ function page( {
 
     document.body.innerHTML = extraFirst ? extra + block : block + extra;
 
-    return document.querySelector( '.giveflow-donate-modal' );
+    return document.querySelector( '.fundkit-donate-modal' );
 }
 
 // urlReference diverges from reference when the return on the URL is not the
 // submission this tab stashed.
-function returning( formKey, reference = 'GIVEFLOW-2026-00050', urlReference = reference ) {
-    window.history.replaceState( {}, '', '/campaign/?giveflow_return=1&giveflow_ref=' + urlReference
+function returning( formKey, reference = 'FUNDKIT-2026-00050', urlReference = reference ) {
+    window.history.replaceState( {}, '', '/campaign/?fundkit_return=1&fundkit_ref=' + urlReference
         + '&payment_intent_client_secret=pi_probe_secret' );
 
     if ( formKey !== null ) {
@@ -163,12 +163,12 @@ afterEach( () => {
 
 test( 'a donor returning from their bank is shown the modal holding the outcome', async () => {
     const modal = page( { hydrate: true } );
-    returning( 'giveflow-form-1' );
+    returning( 'fundkit-form-1' );
 
     await loadModalScript();
     await bootRuntime();
 
-    expect( text( 'giveflow-form-1' ) ).toContain( THANKS );
+    expect( text( 'fundkit-form-1' ) ).toContain( THANKS );
     expect( modal.hidden ).toBe( false );
     expect( modal.classList.contains( 'is-open' ) ).toBe( true );
 } );
@@ -186,14 +186,14 @@ test( 'the button still opens the modal on a click', async () => {
     const modal = page();
 
     await loadModalScript();
-    document.querySelector( '.giveflow-donate-button' ).click();
+    document.querySelector( '.fundkit-donate-button' ).click();
 
     expect( modal.hidden ).toBe( false );
 } );
 
 test( 'a return belonging to an inline form elsewhere on the page does not open the modal', async () => {
-    const modal = page( { extraFormId: 'giveflow-form-2', hydrate: true } );
-    returning( 'giveflow-form-2' );
+    const modal = page( { extraFormId: 'fundkit-form-2', hydrate: true } );
+    returning( 'fundkit-form-2' );
 
     await loadModalScript();
     await bootRuntime();
@@ -202,8 +202,8 @@ test( 'a return belonging to an inline form elsewhere on the page does not open 
     // reached the form that claimed it. The two halves disagreeing in this
     // direction is the modal claiming a return the runtime gave to somebody
     // else.
-    expect( text( 'giveflow-form-2' ) ).toContain( THANKS );
-    expect( text( 'giveflow-form-1' ) ).not.toContain( THANKS );
+    expect( text( 'fundkit-form-2' ) ).toContain( THANKS );
+    expect( text( 'fundkit-form-1' ) ).not.toContain( THANKS );
     expect( modal.hidden ).toBe( true );
 } );
 
@@ -214,12 +214,12 @@ test( 'a browser that refused storage still gets the modal when it holds the onl
     await loadModalScript();
     await bootRuntime();
 
-    expect( text( 'giveflow-form-1' ) ).toContain( THANKS );
+    expect( text( 'fundkit-form-1' ) ).toContain( THANKS );
     expect( modal.hidden ).toBe( false );
 } );
 
 test( 'a stash naming no form opens the modal that holds the first form on the page', async () => {
-    const modal = page( { extraFormId: 'giveflow-form-2', hydrate: true } );
+    const modal = page( { extraFormId: 'fundkit-form-2', hydrate: true } );
     returning( null );
 
     await loadModalScript();
@@ -229,13 +229,13 @@ test( 'a stash naming no form opens the modal that holds the first form on the p
     // leave nothing unambiguous. The runtime does not abstain: it falls through
     // to the first in document order. Both halves are asserted because refusing
     // to reveal here is refusing to reveal an outcome already rendered.
-    expect( text( 'giveflow-form-1' ) ).toContain( THANKS );
-    expect( text( 'giveflow-form-2' ) ).not.toContain( THANKS );
+    expect( text( 'fundkit-form-1' ) ).toContain( THANKS );
+    expect( text( 'fundkit-form-2' ) ).not.toContain( THANKS );
     expect( modal.hidden ).toBe( false );
 } );
 
 test( 'the same page with the inline form first leaves the modal shut', async () => {
-    const modal = page( { extraFormId: 'giveflow-form-2', hydrate: true, extraFirst: true } );
+    const modal = page( { extraFormId: 'fundkit-form-2', hydrate: true, extraFirst: true } );
     returning( null );
 
     await loadModalScript();
@@ -244,8 +244,8 @@ test( 'the same page with the inline form first leaves the modal shut', async ()
     // Same page, same empty stash, opposite document order: the claim moves and
     // the reveal has to move with it. Nothing here reads the order itself, which
     // is the point of following the claim rather than re-deriving it.
-    expect( text( 'giveflow-form-2' ) ).toContain( THANKS );
-    expect( text( 'giveflow-form-1' ) ).not.toContain( THANKS );
+    expect( text( 'fundkit-form-2' ) ).toContain( THANKS );
+    expect( text( 'fundkit-form-1' ) ).not.toContain( THANKS );
     expect( modal.hidden ).toBe( true );
 } );
 
@@ -254,14 +254,14 @@ describe( 'the reveal agrees with the form that actually claimed the return', ()
         // formKey is wp_unique_id(), a per-request counter, and the return URL
         // carries query params, which is what makes page caches regenerate. The
         // id stashed at submit need not be the id rendered on the return.
-        const modal = page( { extraFormId: 'giveflow-form-2', hydrate: true } );
-        returning( 'giveflow-form-7' );
+        const modal = page( { extraFormId: 'fundkit-form-2', hydrate: true } );
+        returning( 'fundkit-form-7' );
 
         await loadModalScript();
         await bootRuntime();
 
-        expect( text( 'giveflow-form-1' ) ).toContain( THANKS );
-        expect( text( 'giveflow-form-2' ) ).not.toContain( THANKS );
+        expect( text( 'fundkit-form-1' ) ).toContain( THANKS );
+        expect( text( 'fundkit-form-2' ) ).not.toContain( THANKS );
         expect( modal.hidden ).toBe( false );
     } );
 
@@ -272,12 +272,12 @@ describe( 'the reveal agrees with the form that actually claimed the return', ()
         // opened here would be an empty form over the page, and the markers are
         // still on the URL for a reload to do it again.
         const modal = page( { hydrate: true } );
-        returning( 'giveflow-form-1', 'GIVEFLOW-2026-00050', 'GIVEFLOW-2026-00099' );
+        returning( 'fundkit-form-1', 'FUNDKIT-2026-00050', 'FUNDKIT-2026-00099' );
 
         await loadModalScript();
         await bootRuntime();
 
-        expect( text( 'giveflow-form-1' ) ).not.toContain( THANKS );
+        expect( text( 'fundkit-form-1' ) ).not.toContain( THANKS );
         expect( modal.hidden ).toBe( true );
     } );
 
@@ -286,10 +286,10 @@ describe( 'the reveal agrees with the form that actually claimed the return', ()
         // first interaction. By then there are no markers left to read, and the
         // claim on the form is the only thing that says a return happened.
         const modal = page( { hydrate: true } );
-        returning( 'giveflow-form-1' );
+        returning( 'fundkit-form-1' );
 
         await bootRuntime();
-        expect( window.location.search ).not.toContain( 'giveflow_return' );
+        expect( window.location.search ).not.toContain( 'fundkit_return' );
 
         await loadModalScript();
 
@@ -304,17 +304,17 @@ describe( 'the reveal agrees with the form that actually claimed the return', ()
         // modal has no key of its own to check, which is why it must not be
         // deciding this.
         const modal = page( {
-            extraFormId: 'giveflow-form-2',
+            extraFormId: 'fundkit-form-2',
             hydrate: true,
             modalOverrides: { stripe: {} },
         } );
-        returning( 'giveflow-form-1' );
+        returning( 'fundkit-form-1' );
 
         await loadModalScript();
         await bootRuntime();
 
-        expect( text( 'giveflow-form-1' ) ).not.toContain( THANKS );
-        expect( text( 'giveflow-form-2' ) ).not.toContain( THANKS );
+        expect( text( 'fundkit-form-1' ) ).not.toContain( THANKS );
+        expect( text( 'fundkit-form-2' ) ).not.toContain( THANKS );
         expect( modal.hidden ).toBe( true );
     } );
 
@@ -323,12 +323,12 @@ describe( 'the reveal agrees with the form that actually claimed the return', ()
         // with !== against a string param abstains on a value that spells the
         // same thing. One side coercing and the other not is two rules again.
         const modal = page( { hydrate: true } );
-        returning( 'giveflow-form-1', 20260050, '20260050' );
+        returning( 'fundkit-form-1', 20260050, '20260050' );
 
         await loadModalScript();
         await bootRuntime();
 
-        expect( text( 'giveflow-form-1' ) ).toContain( THANKS );
+        expect( text( 'fundkit-form-1' ) ).toContain( THANKS );
         expect( modal.hidden ).toBe( false );
     } );
 
@@ -339,7 +339,7 @@ describe( 'the reveal agrees with the form that actually claimed the return', ()
         await loadModalScript();
         await bootRuntime();
 
-        expect( document.querySelector( '.giveflow-donation-form' ).textContent ).toContain( THANKS );
+        expect( document.querySelector( '.fundkit-donation-form' ).textContent ).toContain( THANKS );
         expect( modal.hidden ).toBe( false );
     } );
 
@@ -349,7 +349,7 @@ describe( 'the reveal agrees with the form that actually claimed the return', ()
         // form that never mounted shows the donor an empty form and invites a
         // second donation.
         const modal = page();
-        returning( 'giveflow-form-1' );
+        returning( 'fundkit-form-1' );
 
         await loadModalScript();
 

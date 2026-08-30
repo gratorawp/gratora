@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\DonorMetricsService;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Donors\DonorMetricsService;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Recurring\RecurringPlan;
 
 /**
  * The donor profile's "Recurring MRR" is rendered with the org's currency

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donations;
+namespace FundKit\Donations;
 
-use GiveFlow\Vendor\Queryable\DB;
-use GiveFlow\Donors\DonorAggregateSyncer;
+use FundKit\Vendor\Queryable\DB;
+use FundKit\Donors\DonorAggregateSyncer;
 
 /**
  * Recomputes denormalised donation aggregates for a donor, campaign, or form.
@@ -16,7 +16,7 @@ final class AggregateSyncer
 {
     /**
      * Delegates to DonorAggregateSyncer, which is what the live
-     * giveflow.donation.completed hook runs, so a resync and the live path cannot
+     * fundkit.donation.completed hook runs, so a resync and the live path cannot
      * disagree.
      *
      * @since 1.0.0
@@ -31,7 +31,7 @@ final class AggregateSyncer
     {
         if ($campaignId <= 0) return;
 
-        $row = DonationQueries::donationsOnly(DB::table('giveflow_donations')
+        $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('campaign_id', $campaignId))
             ->selectRaw("
@@ -43,7 +43,7 @@ final class AggregateSyncer
             ")
             ->get();
 
-        DB::table('giveflow_campaigns')
+        DB::table('fundkit_campaigns')
             ->where('id', $campaignId)
             ->update([
                 'raised_cents'    => (int) ($row['raised']    ?? 0),
@@ -58,7 +58,7 @@ final class AggregateSyncer
     {
         if ($fundId <= 0) return;
 
-        $row = DonationQueries::donationsOnly(DB::table('giveflow_donations')
+        $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('fund_id', $fundId))
             ->selectRaw("
@@ -71,7 +71,7 @@ final class AggregateSyncer
             ")
             ->get();
 
-        DB::table('giveflow_funds')
+        DB::table('fundkit_funds')
             ->where('id', $fundId)
             ->update([
                 'raised_cents'    => (int) ($row['raised']    ?? 0),
@@ -87,7 +87,7 @@ final class AggregateSyncer
     {
         if ($formId <= 0) return;
 
-        $row = DonationQueries::donationsOnly(DB::table('giveflow_donations')
+        $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('form_id', $formId))
             ->selectRaw("
@@ -104,7 +104,7 @@ final class AggregateSyncer
         $now = gmdate('Y-m-d H:i:s');
 
         // Separate table: only donation-type forms have donation aggregates.
-        DB::table('giveflow_form_donation_stats')->upsert(
+        DB::table('fundkit_form_donation_stats')->upsert(
             [
                 'form_id'         => $formId,
                 'raised_cents'    => (int) ($row['raised']    ?? 0),
@@ -124,7 +124,7 @@ final class AggregateSyncer
     // source of truth for the netted figure, independent of the donation's
     // refunded_cents over-refund counter.
     // Fully-qualified table name on both sides: unqualified `id` would bind
-    // to wp_giveflow_refunds.id since refunds also has an id column.
+    // to wp_fundkit_refunds.id since refunds also has an id column.
     /** @since 1.0.0 */
     private function refundedSubquery(): string
     {

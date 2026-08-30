@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\References\ReferenceGenerator;
-use GiveFlow\Foundation\Time\FrozenClock;
+use FundKit\Foundation\References\ReferenceGenerator;
+use FundKit\Foundation\Time\FrozenClock;
 
 final class ReferenceGeneratorTest extends IntegrationTestCase
 {
@@ -15,7 +15,7 @@ final class ReferenceGeneratorTest extends IntegrationTestCase
         delete_option(ReferenceGenerator::OPTION_SETTINGS);
         // Wipe any counter rows lingering across tests.
         self::$wpdb->query(
-            "DELETE FROM " . self::$prefix . "options WHERE option_name LIKE 'giveflow_reference_counter_%'"
+            "DELETE FROM " . self::$prefix . "options WHERE option_name LIKE 'fundkit_reference_counter_%'"
         );
     }
 

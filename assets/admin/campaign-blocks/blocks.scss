@@ -1,12 +1,12 @@
 // Theme-sensitive surfaces read CSS custom properties so a wrapper carrying
-// `style="--giveflow-accent: ..."` recolours a block without recompiling.
+// `style="--fundkit-accent: ..."` recolours a block without recompiling.
 
 $accent-fallback:     #211d3f;
 $accent-soft-fallback: rgba(33, 29, 63, .12);
-// The resolver emits --giveflow-accent-soft only when a preset or the campaign
+// The resolver emits --fundkit-accent-soft only when a preset or the campaign
 // pairs one with the accent; deriving it otherwise keeps a purple campaign from
 // washing its own pages in green.
-$accent-soft: var(--giveflow-accent-soft, color-mix(in srgb, var(--giveflow-accent, #{$accent-fallback}) 12%, #fff));
+$accent-soft: var(--fundkit-accent-soft, color-mix(in srgb, var(--fundkit-accent, #{$accent-fallback}) 12%, #fff));
 $text-fallback:       #1e1e1e;
 $text-muted-fallback: #6b7280;
 $border-fallback:     #e5e7eb;
@@ -16,36 +16,36 @@ $radius-fallback:     12px;
 $radius-sm-fallback:  8px;
 $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
 
-.giveflow-block {
+.fundkit-block {
     margin: 0 0 24px;
-    color: var(--giveflow-text, #{$text-fallback});
+    color: var(--fundkit-text, #{$text-fallback});
 
     // Twenty Twenty-Five ships `html :where([style*="border-width"]) {
     // border-style: solid }`, which matches on the substring, and our blocks
-    // emit a --giveflow-stroke custom property. Declaring a border here keeps the
+    // emit a --fundkit-stroke custom property. Declaring a border here keeps the
     // theme from drawing a 3px currentColor one; blocks that want a border set
     // it themselves.
     border: 0;
 }
 
-.giveflow-block-notice {
+.fundkit-block-notice {
     padding: 16px 20px;
     border: 1px dashed #f0b400;
     background: #fff8e1;
     color: #6b4d00;
-    border-radius: var(--giveflow-radius-sm, #{$radius-sm-fallback});
+    border-radius: var(--fundkit-radius-sm, #{$radius-sm-fallback});
     font-size: 13px;
 }
 
-.giveflow-block-note {
+.fundkit-block-note {
     font-size: 12px;
     margin: 6px 0 12px;
-    color: var(--giveflow-text, #{$text-fallback});
+    color: var(--fundkit-text, #{$text-fallback});
     line-height: 1.45;
 
     strong { font-weight: 500; }
 
-    &--muted { color: var(--giveflow-text-muted, #{$text-muted-fallback}); font-style: italic; }
+    &--muted { color: var(--fundkit-text-muted, #{$text-muted-fallback}); font-style: italic; }
 
     &__pill {
         display: inline-block;
@@ -55,8 +55,8 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: .04em;
-        background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
-        color: var(--giveflow-text-muted, #{$text-muted-fallback});
+        background: var(--fundkit-bg-soft, #{$bg-soft-fallback});
+        color: var(--fundkit-text-muted, #{$text-muted-fallback});
         border-radius: 9px;
         vertical-align: middle;
     }
@@ -64,59 +64,59 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
 
 // Deliberately not a card: one stat per block means several sit side by side,
 // and a border each would draw a grid nobody asked for.
-.giveflow-block--stat {
-    .giveflow-stat__label {
+.fundkit-block--stat {
+    .fundkit-stat__label {
         font-size: 12px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: .06em;
-        color: var(--giveflow-text-muted, #{$text-muted-fallback});
+        color: var(--fundkit-text-muted, #{$text-muted-fallback});
     }
-    .giveflow-stat__value {
+    .fundkit-stat__value {
         margin-top: 4px;
         font-size: 30px;
         font-weight: 800;
         letter-spacing: -.02em;
-        color: var(--giveflow-text, #{$text-fallback});
+        color: var(--fundkit-text, #{$text-fallback});
         line-height: 1.1;
         font-variant-numeric: tabular-nums;
     }
 
-    &.is-sm .giveflow-stat__value { font-size: 21px; }
-    &.is-lg .giveflow-stat__value { font-size: 42px; letter-spacing: -.028em; }
+    &.is-sm .fundkit-stat__value { font-size: 21px; }
+    &.is-lg .fundkit-stat__value { font-size: 42px; letter-spacing: -.028em; }
 }
 
 // Editor only: a stat whose figure this campaign cannot answer. Dashed and
 // muted rather than red, because nothing is wrong; the number does not exist
 // yet, and on the page the block simply renders nothing.
-.giveflow-stat-empty {
+.fundkit-stat-empty {
     padding: 14px 16px;
-    border: 1px dashed var(--giveflow-border, #{$border-fallback});
-    border-radius: var(--giveflow-radius-sm, #{$radius-sm-fallback});
-    background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
+    border: 1px dashed var(--fundkit-border, #{$border-fallback});
+    border-radius: var(--fundkit-radius-sm, #{$radius-sm-fallback});
+    background: var(--fundkit-bg-soft, #{$bg-soft-fallback});
 
     &__label {
         font-size: 12px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: .06em;
-        color: var(--giveflow-text-muted, #{$text-muted-fallback});
+        color: var(--fundkit-text-muted, #{$text-muted-fallback});
     }
 
     &__note {
         margin: 6px 0 0;
         font-size: 13px;
         line-height: 1.45;
-        color: var(--giveflow-text-muted, #{$text-muted-fallback});
+        color: var(--fundkit-text-muted, #{$text-muted-fallback});
     }
 }
 
 // aspect-ratio with object-fit so a portrait upload and a landscape one crop to
 // the same shape rather than shoving the page around.
-.giveflow-block--image {
+.fundkit-block--image {
     margin: 0;
 
-    .giveflow-block__image {
+    .fundkit-block__image {
         display: block;
         width: 100%;
         height: 100%;
@@ -125,18 +125,18 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
 
     &.is-rounded {
         overflow: hidden;
-        border-radius: var(--giveflow-radius, #{$radius-fallback});
+        border-radius: var(--fundkit-radius, #{$radius-fallback});
     }
 
-    &.is-ratio-16-9 .giveflow-block__image { aspect-ratio: 16 / 9; }
-    &.is-ratio-3-2  .giveflow-block__image { aspect-ratio: 3 / 2; }
-    &.is-ratio-4-3  .giveflow-block__image { aspect-ratio: 4 / 3; }
-    &.is-ratio-1-1  .giveflow-block__image { aspect-ratio: 1 / 1; }
-    &.is-ratio-auto .giveflow-block__image { aspect-ratio: auto; height: auto; }
+    &.is-ratio-16-9 .fundkit-block__image { aspect-ratio: 16 / 9; }
+    &.is-ratio-3-2  .fundkit-block__image { aspect-ratio: 3 / 2; }
+    &.is-ratio-4-3  .fundkit-block__image { aspect-ratio: 4 / 3; }
+    &.is-ratio-1-1  .fundkit-block__image { aspect-ratio: 1 / 1; }
+    &.is-ratio-auto .fundkit-block__image { aspect-ratio: auto; height: auto; }
 }
 
-.giveflow-block--progress {
-    .giveflow-progress__labels {
+.fundkit-block--progress {
+    .fundkit-progress__labels {
         display: flex;
         align-items: flex-end;
         justify-content: space-between;
@@ -144,45 +144,45 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
         gap: 8px;
         margin-bottom: 10px;
     }
-    .giveflow-progress__value {
+    .fundkit-progress__value {
         font-size: 24px;
         font-weight: 700;
-        color: var(--giveflow-accent, #{$accent-fallback});
+        color: var(--fundkit-accent, #{$accent-fallback});
         font-variant-numeric: tabular-nums;
     }
-    .giveflow-progress__caption {
+    .fundkit-progress__caption {
         margin-left: 6px;
         font-size: 13px;
-        color: var(--giveflow-text-muted, #{$text-muted-fallback});
+        color: var(--fundkit-text-muted, #{$text-muted-fallback});
         text-transform: lowercase;
     }
-    .giveflow-progress__target {
+    .fundkit-progress__target {
         font-size: 13px;
-        color: var(--giveflow-text-muted, #{$text-muted-fallback});
+        color: var(--fundkit-text-muted, #{$text-muted-fallback});
         font-variant-numeric: tabular-nums;
     }
-    .giveflow-progress__bar {
+    .fundkit-progress__bar {
         height: 14px;
-        background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
+        background: var(--fundkit-bg-soft, #{$bg-soft-fallback});
         border-radius: 999px;
         overflow: hidden;
     }
-    .giveflow-progress__bar-fill {
+    .fundkit-progress__bar-fill {
         height: 100%;
-        background: linear-gradient(90deg, var(--giveflow-accent, #{$accent-fallback}), color-mix(in srgb, var(--giveflow-accent, #{$accent-fallback}) 65%, #fff));
+        background: linear-gradient(90deg, var(--fundkit-accent, #{$accent-fallback}), color-mix(in srgb, var(--fundkit-accent, #{$accent-fallback}) 65%, #fff));
         border-radius: 999px;
         transition: width .35s ease;
     }
 }
 
-.giveflow-block--donate-button {
+.fundkit-block--donate-button {
     &.is-align-left   { text-align: left; }
     &.is-align-center { text-align: center; }
     &.is-align-right  { text-align: right; }
 
-    .giveflow-donate-button {
+    .fundkit-donate-button {
         display: inline-block;
-        background: var(--giveflow-accent, #{$accent-fallback});
+        background: var(--fundkit-accent, #{$accent-fallback});
         color: #fff;
         font-size: 15px;
         font-weight: 500;
@@ -195,16 +195,16 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
 
         &:hover { filter: brightness(.92); }
         &.is-disabled {
-            background: var(--giveflow-text-muted, #{$text-muted-fallback});
+            background: var(--fundkit-text-muted, #{$text-muted-fallback});
             cursor: not-allowed;
             opacity: .8;
         }
     }
 }
 
-body.giveflow-modal-open { overflow: hidden; }
+body.fundkit-modal-open { overflow: hidden; }
 
-.giveflow-donate-modal {
+.fundkit-donate-modal {
     position: fixed;
     inset: 0;
     z-index: 999999;
@@ -212,7 +212,7 @@ body.giveflow-modal-open { overflow: hidden; }
     &[hidden] { display: none; }
 
     &.is-open {
-        animation: giveflow-modal-in .15s ease;
+        animation: fundkit-modal-in .15s ease;
     }
 
     &__backdrop {
@@ -226,9 +226,9 @@ body.giveflow-modal-open { overflow: hidden; }
         max-width: 540px;
         margin: 5vh auto;
         max-height: 90vh;
-        background: var(--giveflow-bg, #{$bg-fallback});
-        border-radius: var(--giveflow-radius, #{$radius-fallback});
-        box-shadow: var(--giveflow-card-shadow, #{$shadow-fallback});
+        background: var(--fundkit-bg, #{$bg-fallback});
+        border-radius: var(--fundkit-radius, #{$radius-fallback});
+        box-shadow: var(--fundkit-card-shadow, #{$shadow-fallback});
         overflow: auto;
         padding: 32px 28px 24px;
     }
@@ -246,39 +246,39 @@ body.giveflow-modal-open { overflow: hidden; }
         border: 0;
         border-radius: 50%;
         cursor: pointer;
-        color: var(--giveflow-text-muted, #{$text-muted-fallback});
+        color: var(--fundkit-text-muted, #{$text-muted-fallback});
 
         &:hover {
-            background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
-            color: var(--giveflow-text, #{$text-fallback});
+            background: var(--fundkit-bg-soft, #{$bg-soft-fallback});
+            color: var(--fundkit-text, #{$text-fallback});
         }
     }
 }
 
-@keyframes giveflow-modal-in {
+@keyframes fundkit-modal-in {
     from { opacity: 0; }
     to   { opacity: 1; }
 }
 
-.giveflow-block__title {
+.fundkit-block__title {
     margin: 0 0 16px;
     font-size: 20px;
     font-weight: 600;
     line-height: 1.25;
-    color: var(--giveflow-text, #{$text-fallback});
+    color: var(--fundkit-text, #{$text-fallback});
 }
 
-.giveflow-block__empty {
+.fundkit-block__empty {
     margin: 0;
     padding: 16px 20px;
-    border: 1px dashed var(--giveflow-border, #{$border-fallback});
-    background: var(--giveflow-bg-soft, #fafafa);
-    color: var(--giveflow-text-muted, #{$text-muted-fallback});
-    border-radius: var(--giveflow-radius-sm, #{$radius-sm-fallback});
+    border: 1px dashed var(--fundkit-border, #{$border-fallback});
+    background: var(--fundkit-bg-soft, #fafafa);
+    color: var(--fundkit-text-muted, #{$text-muted-fallback});
+    border-radius: var(--fundkit-radius-sm, #{$radius-sm-fallback});
     font-size: 13px;
 }
 
-.giveflow-empty {
+.fundkit-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -286,56 +286,56 @@ body.giveflow-modal-open { overflow: hidden; }
     gap: 8px;
     padding: 28px 24px;
     border-style: solid;
-    background: var(--giveflow-bg, #fff);
-    color: var(--giveflow-text, #{$text-fallback});
+    background: var(--fundkit-bg, #fff);
+    color: var(--fundkit-text, #{$text-fallback});
 }
 
-.giveflow-empty__icon {
-    color: var(--giveflow-text-muted, #{$text-muted-fallback});
+.fundkit-empty__icon {
+    color: var(--fundkit-text-muted, #{$text-muted-fallback});
     line-height: 0;
     margin-bottom: 4px;
 }
 
-.giveflow-empty__title {
+.fundkit-empty__title {
     margin: 0;
     font-size: 17px;
-    font-weight: var(--giveflow-heading-weight, 600);
-    color: var(--giveflow-text, #{$text-fallback});
+    font-weight: var(--fundkit-heading-weight, 600);
+    color: var(--fundkit-text, #{$text-fallback});
 }
 
-.giveflow-empty__sub {
+.fundkit-empty__sub {
     margin: 0;
     font-size: 14px;
-    color: var(--giveflow-text-muted, #{$text-muted-fallback});
+    color: var(--fundkit-text-muted, #{$text-muted-fallback});
 }
 
 // ServerSideRender suppresses its own <h3> (REST_REQUEST) so the editor's
 // inline RichText title is the one shown; style it to match the frontend.
-.giveflow-campaign-block-edit {
+.fundkit-campaign-block-edit {
     &__title {
         margin: 0 0 16px;
         font-size: 20px;
         font-weight: 600;
         line-height: 1.25;
-        color: var(--giveflow-text, #{$text-fallback});
+        color: var(--fundkit-text, #{$text-fallback});
 
         &[data-rich-text-placeholder]::before,
         &:empty::before {
-            color: var(--giveflow-text-muted, #{$text-muted-fallback});
+            color: var(--fundkit-text-muted, #{$text-muted-fallback});
             opacity: .65;
         }
     }
 }
 
-.giveflow-block--top-donors {
-    .giveflow-top-donors__list {
+.fundkit-block--top-donors {
+    .fundkit-top-donors__list {
         list-style: none;
         margin: 0;
         padding: 0;
-        counter-reset: giveflow-top-donor;
+        counter-reset: fundkit-top-donor;
     }
 
-    .giveflow-top-donors__row {
+    .fundkit-top-donors__row {
         display: flex;
         // Wrap is the narrow-container fallback only: the row is avatar, name
         // and amount, and they fit on one line at any sane width.
@@ -346,44 +346,44 @@ body.giveflow-modal-open { overflow: hidden; }
         // are avatar-led lists and a shared left edge is what makes them read
         // as one column.
         padding: 12px 0;
-        border-bottom: 1px solid var(--giveflow-border, #{$border-fallback});
+        border-bottom: 1px solid var(--fundkit-border, #{$border-fallback});
 
         &:last-child { border-bottom: 0; }
     }
 
-    .giveflow-top-donors__name {
+    .fundkit-top-donors__name {
         flex: 1 1 auto;
         min-width: 0;
         font-size: 14px;
         font-weight: 500;
-        color: var(--giveflow-text, #{$text-fallback});
+        color: var(--fundkit-text, #{$text-fallback});
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
 
         &.is-anonymous {
             font-style: italic;
-            color: var(--giveflow-text-muted, #{$text-muted-fallback});
+            color: var(--fundkit-text-muted, #{$text-muted-fallback});
             font-weight: 400;
         }
     }
 
-    .giveflow-top-donors__count {
+    .fundkit-top-donors__count {
         flex: 0 0 auto;
         font-size: 12px;
-        color: var(--giveflow-text-muted, #{$text-muted-fallback});
+        color: var(--fundkit-text-muted, #{$text-muted-fallback});
         font-variant-numeric: tabular-nums;
     }
 
-    .giveflow-top-donors__amount {
+    .fundkit-top-donors__amount {
         flex: 0 0 auto;
         font-size: 14px;
         font-weight: 600;
-        color: var(--giveflow-accent, #{$accent-fallback});
+        color: var(--fundkit-accent, #{$accent-fallback});
         font-variant-numeric: tabular-nums;
     }
 
-    .giveflow-top-donors__podium .giveflow-avatar {
+    .fundkit-top-donors__podium .fundkit-avatar {
         align-self: center;
         width: 44px;
         height: 44px;
@@ -391,7 +391,7 @@ body.giveflow-modal-open { overflow: hidden; }
         margin-bottom: 2px;
     }
 
-    .giveflow-top-donors__podium {
+    .fundkit-top-donors__podium {
         list-style: none;
         margin: 0 0 16px;
         padding: 0;
@@ -401,10 +401,10 @@ body.giveflow-modal-open { overflow: hidden; }
         gap: 8px;
     }
 
-    .giveflow-top-donors__podium-tier {
-        background: var(--giveflow-bg, #{$bg-fallback});
-        border: 1px solid var(--giveflow-border, #{$border-fallback});
-        border-radius: var(--giveflow-radius, #{$radius-fallback});
+    .fundkit-top-donors__podium-tier {
+        background: var(--fundkit-bg, #{$bg-fallback});
+        border: 1px solid var(--fundkit-border, #{$border-fallback});
+        border-radius: var(--fundkit-radius, #{$radius-fallback});
         padding: 16px 12px 18px;
         text-align: center;
         display: flex;
@@ -413,10 +413,10 @@ body.giveflow-modal-open { overflow: hidden; }
 
         &--1 {
             min-height: 160px;
-            border-color: var(--giveflow-accent, #{$accent-fallback});
+            border-color: var(--fundkit-accent, #{$accent-fallback});
             box-shadow: 0 4px 14px #{$accent-soft};
-            .giveflow-top-donors__podium-rank {
-                background: var(--giveflow-accent, #{$accent-fallback});
+            .fundkit-top-donors__podium-rank {
+                background: var(--fundkit-accent, #{$accent-fallback});
                 color: #fff;
             }
         }
@@ -424,7 +424,7 @@ body.giveflow-modal-open { overflow: hidden; }
         &--3 { min-height: 120px; }
     }
 
-    .giveflow-top-donors__podium-rank {
+    .fundkit-top-donors__podium-rank {
         align-self: center;
         display: inline-flex;
         align-items: center;
@@ -432,120 +432,120 @@ body.giveflow-modal-open { overflow: hidden; }
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
-        color: var(--giveflow-text, #{$text-fallback});
+        background: var(--fundkit-bg-soft, #{$bg-soft-fallback});
+        color: var(--fundkit-text, #{$text-fallback});
         font-size: 13px;
         font-weight: 700;
         font-variant-numeric: tabular-nums;
         margin-bottom: 4px;
     }
 
-    .giveflow-top-donors__podium-name {
+    .fundkit-top-donors__podium-name {
         font-size: 14px;
         font-weight: 600;
-        color: var(--giveflow-text, #{$text-fallback});
+        color: var(--fundkit-text, #{$text-fallback});
         word-break: break-word;
 
         &.is-anonymous {
             font-style: italic;
-            color: var(--giveflow-text-muted, #{$text-muted-fallback});
+            color: var(--fundkit-text-muted, #{$text-muted-fallback});
             font-weight: 500;
         }
     }
 
-    .giveflow-top-donors__podium-amount {
+    .fundkit-top-donors__podium-amount {
         font-size: 14px;
         font-weight: 600;
-        color: var(--giveflow-accent, #{$accent-fallback});
+        color: var(--fundkit-accent, #{$accent-fallback});
         font-variant-numeric: tabular-nums;
     }
 
-    .giveflow-top-donors__podium-count {
+    .fundkit-top-donors__podium-count {
         font-size: 11px;
-        color: var(--giveflow-text-muted, #{$text-muted-fallback});
+        color: var(--fundkit-text-muted, #{$text-muted-fallback});
         font-variant-numeric: tabular-nums;
     }
 
     @media (max-width: 480px) {
-        .giveflow-top-donors__podium {
+        .fundkit-top-donors__podium {
             grid-template-columns: 1fr;
         }
-        .giveflow-top-donors__podium-tier {
+        .fundkit-top-donors__podium-tier {
             min-height: auto !important;
         }
     }
 }
 
-.giveflow-block--recent-donations {
-    .giveflow-recent-donations__list {
+.fundkit-block--recent-donations {
+    .fundkit-recent-donations__list {
         list-style: none;
         margin: 0;
         padding: 0;
     }
 
-    .giveflow-recent-donations__item {
+    .fundkit-recent-donations__item {
         display: flex;
         align-items: flex-start;
         gap: 12px;
         padding: 12px 0;
-        border-bottom: 1px solid var(--giveflow-border, #{$border-fallback});
+        border-bottom: 1px solid var(--fundkit-border, #{$border-fallback});
 
         &:last-child { border-bottom: 0; }
     }
 
-    .giveflow-recent-donations__content {
+    .fundkit-recent-donations__content {
         flex: 1;
         min-width: 0;
     }
 
-    .giveflow-recent-donations__header {
+    .fundkit-recent-donations__header {
         display: flex;
         align-items: baseline;
         justify-content: space-between;
         gap: 12px;
     }
 
-    .giveflow-recent-donations__name {
+    .fundkit-recent-donations__name {
         font-size: 14px;
         font-weight: 500;
-        color: var(--giveflow-text, #{$text-fallback});
+        color: var(--fundkit-text, #{$text-fallback});
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
 
         &.is-anonymous {
             font-style: italic;
-            color: var(--giveflow-text-muted, #{$text-muted-fallback});
+            color: var(--fundkit-text-muted, #{$text-muted-fallback});
             font-weight: 400;
         }
     }
 
-    .giveflow-recent-donations__amount {
+    .fundkit-recent-donations__amount {
         flex: 0 0 auto;
         font-size: 14px;
         font-weight: 600;
-        color: var(--giveflow-accent, #{$accent-fallback});
+        color: var(--fundkit-accent, #{$accent-fallback});
         font-variant-numeric: tabular-nums;
     }
 
-    .giveflow-recent-donations__meta {
+    .fundkit-recent-donations__meta {
         margin-top: 4px;
         display: flex;
         flex-direction: column;
         gap: 6px;
     }
 
-    .giveflow-recent-donations__time {
+    .fundkit-recent-donations__time {
         font-size: 12px;
-        color: var(--giveflow-text-muted, #{$text-muted-fallback});
+        color: var(--fundkit-text-muted, #{$text-muted-fallback});
     }
 
-    .giveflow-recent-donations__message {
+    .fundkit-recent-donations__message {
         margin: 0;
         padding: 8px 12px;
-        border-left: 3px solid var(--giveflow-accent, #{$accent-fallback});
-        background: var(--giveflow-bg-soft, #f9fafb);
-        color: var(--giveflow-text, #{$text-fallback});
+        border-left: 3px solid var(--fundkit-accent, #{$accent-fallback});
+        background: var(--fundkit-bg-soft, #f9fafb);
+        color: var(--fundkit-text, #{$text-fallback});
         font-style: italic;
         font-size: 13px;
         line-height: 1.5;
@@ -553,8 +553,8 @@ body.giveflow-modal-open { overflow: hidden; }
     }
 }
 
-.giveflow-block--supporter-wall {
-    .giveflow-supporter-wall {
+.fundkit-block--supporter-wall {
+    .fundkit-supporter-wall {
         list-style: none;
         margin: 0;
         padding: 0;
@@ -563,10 +563,10 @@ body.giveflow-modal-open { overflow: hidden; }
         gap: 12px;
     }
 
-    .giveflow-supporter-wall__card {
-        background: var(--giveflow-bg, #{$bg-fallback});
-        border: 1px solid var(--giveflow-border, #{$border-fallback});
-        border-radius: var(--giveflow-radius, 10px);
+    .fundkit-supporter-wall__card {
+        background: var(--fundkit-bg, #{$bg-fallback});
+        border: 1px solid var(--fundkit-border, #{$border-fallback});
+        border-radius: var(--fundkit-radius, 10px);
         padding: 14px 16px;
         display: flex;
         flex-direction: column;
@@ -577,34 +577,34 @@ body.giveflow-modal-open { overflow: hidden; }
         }
     }
 
-    .giveflow-supporter-wall__top {
+    .fundkit-supporter-wall__top {
         display: flex;
         align-items: center;
         gap: 10px;
 
-        .giveflow-avatar { width: 32px; height: 32px; font-size: 13px; }
+        .fundkit-avatar { width: 32px; height: 32px; font-size: 13px; }
     }
 
-    .giveflow-supporter-wall__name {
+    .fundkit-supporter-wall__name {
         font-size: 14px;
         font-weight: 600;
-        color: var(--giveflow-text, #{$text-fallback});
+        color: var(--fundkit-text, #{$text-fallback});
         word-break: break-word;
     }
 
-    .giveflow-supporter-wall__amount {
+    .fundkit-supporter-wall__amount {
         font-size: 12px;
         font-weight: 600;
-        color: var(--giveflow-accent, #{$accent-fallback});
+        color: var(--fundkit-accent, #{$accent-fallback});
         font-variant-numeric: tabular-nums;
     }
 
-    .giveflow-supporter-wall__message {
+    .fundkit-supporter-wall__message {
         margin: 0;
         padding: 0;
         font-size: 13px;
         line-height: 1.45;
-        color: var(--giveflow-text-muted, #{$text-muted-fallback});
+        color: var(--fundkit-text-muted, #{$text-muted-fallback});
         font-style: italic;
 
         &::before { content: '\201C'; }
@@ -612,10 +612,10 @@ body.giveflow-modal-open { overflow: hidden; }
     }
 
     @media (max-width: 480px) {
-        .giveflow-supporter-wall {
+        .fundkit-supporter-wall {
             grid-template-columns: 1fr;
         }
-        .giveflow-supporter-wall__card.has-message {
+        .fundkit-supporter-wall__card.has-message {
             grid-column: span 1;
         }
     }
@@ -624,71 +624,71 @@ body.giveflow-modal-open { overflow: hidden; }
 // Left alignment, "md" size and "auto" columns are the base styles above, so
 // only the non-default cases need rules.
 
-.giveflow-block--stat.is-align-center { text-align: center; }
-.giveflow-block--stat.is-align-right  { text-align: right; }
+.fundkit-block--stat.is-align-center { text-align: center; }
+.fundkit-block--stat.is-align-right  { text-align: right; }
 
-.giveflow-block--progress.is-align-center .giveflow-progress__labels {
+.fundkit-block--progress.is-align-center .fundkit-progress__labels {
     justify-content: center;
     text-align: center;
 }
 
-.giveflow-block--donate-button {
-    .giveflow-donate-button {
+.fundkit-block--donate-button {
+    .fundkit-donate-button {
         &.is-size-sm { padding: 8px 18px;  font-size: 13px; }
         &.is-size-lg { padding: 16px 32px; font-size: 17px; }
     }
 
-    &.is-full-width .giveflow-donate-button {
+    &.is-full-width .fundkit-donate-button {
         display: block;
         width: 100%;
         text-align: center;
     }
 }
 
-.giveflow-block--supporter-wall {
-    .giveflow-supporter-wall {
+.fundkit-block--supporter-wall {
+    .fundkit-supporter-wall {
         &.is-cols-2 { grid-template-columns: repeat(2, 1fr); }
         &.is-cols-3 { grid-template-columns: repeat(3, 1fr); }
         &.is-cols-4 { grid-template-columns: repeat(4, 1fr); }
     }
 
     @media (max-width: 480px) {
-        .giveflow-supporter-wall.is-cols-2,
-        .giveflow-supporter-wall.is-cols-3,
-        .giveflow-supporter-wall.is-cols-4 {
+        .fundkit-supporter-wall.is-cols-2,
+        .fundkit-supporter-wall.is-cols-3,
+        .fundkit-supporter-wall.is-cols-4 {
             grid-template-columns: 1fr;
         }
     }
 }
 
-.giveflow-block--grid {
+.fundkit-block--grid {
     margin: 28px 0 24px;
 }
-.giveflow-grid__head {
+.fundkit-grid__head {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 18px;
 }
-.giveflow-grid__title {
+.fundkit-grid__title {
     margin: 0;
     font-size: 22px;
     font-weight: 800;
     letter-spacing: -.02em;
-    color: var(--giveflow-text, #{$text-fallback});
+    color: var(--fundkit-text, #{$text-fallback});
 }
-.giveflow-campaign-grid {
+.fundkit-campaign-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
 }
-.giveflow-campaign-card {
+.fundkit-campaign-card {
     display: flex;
     flex-direction: column;
-    background: var(--giveflow-bg, #{$bg-fallback});
-    border: 1px solid var(--giveflow-border, #{$border-fallback});
-    border-radius: var(--giveflow-radius, #{$radius-fallback});
+    background: var(--fundkit-bg, #{$bg-fallback});
+    border: 1px solid var(--fundkit-border, #{$border-fallback});
+    border-radius: var(--fundkit-radius, #{$radius-fallback});
     box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
     overflow: hidden;
     text-decoration: none;
@@ -698,7 +698,7 @@ body.giveflow-modal-open { overflow: hidden; }
     &:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 28px rgba(15, 23, 42, .12);
-        border-color: color-mix(in srgb, var(--giveflow-accent, #{$accent-fallback}) 35%, var(--giveflow-border, #{$border-fallback}));
+        border-color: color-mix(in srgb, var(--fundkit-accent, #{$accent-fallback}) 35%, var(--fundkit-border, #{$border-fallback}));
     }
     &.is-inert { pointer-events: none; cursor: default; }
 
@@ -712,7 +712,7 @@ body.giveflow-modal-open { overflow: hidden; }
         &.is-placeholder {
             background:
                 radial-gradient(130% 120% at 12% 0%, rgba(255, 255, 255, .22), transparent 50%),
-                linear-gradient(135deg, var(--giveflow-accent, #{$accent-fallback}), color-mix(in srgb, var(--giveflow-accent, #{$accent-fallback}) 55%, #08160f));
+                linear-gradient(135deg, var(--fundkit-accent, #{$accent-fallback}), color-mix(in srgb, var(--fundkit-accent, #{$accent-fallback}) 55%, #08160f));
         }
     }
 
@@ -722,13 +722,13 @@ body.giveflow-modal-open { overflow: hidden; }
         display: block;
         margin: 0 0 6px;
         font-size: 17px; font-weight: 700; letter-spacing: -.01em; line-height: 1.3;
-        color: var(--giveflow-text, #{$text-fallback});
+        color: var(--fundkit-text, #{$text-fallback});
     }
 
     &__blurb {
         margin: 0 0 16px;
         font-size: 13.5px; line-height: 1.55;
-        color: var(--giveflow-text-muted, #{$text-muted-fallback});
+        color: var(--fundkit-text-muted, #{$text-muted-fallback});
         display: -webkit-box;
         -webkit-line-clamp: 2;
         line-clamp: 2;
@@ -741,7 +741,7 @@ body.giveflow-modal-open { overflow: hidden; }
     &__bar {
         display: block;
         height: 8px;
-        background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
+        background: var(--fundkit-bg-soft, #{$bg-soft-fallback});
         border-radius: 999px;
         overflow: hidden;
         margin-bottom: 8px;
@@ -749,14 +749,14 @@ body.giveflow-modal-open { overflow: hidden; }
         > span {
             display: block;
             height: 100%;
-            background: linear-gradient(90deg, var(--giveflow-accent, #{$accent-fallback}), color-mix(in srgb, var(--giveflow-accent, #{$accent-fallback}) 70%, #fff));
+            background: linear-gradient(90deg, var(--fundkit-accent, #{$accent-fallback}), color-mix(in srgb, var(--fundkit-accent, #{$accent-fallback}) 70%, #fff));
             border-radius: 999px;
         }
     }
 
     &__meta { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 13px; }
-    &__raised { font-weight: 700; color: var(--giveflow-text, #{$text-fallback}); }
-    &__goal   { color: var(--giveflow-text-muted, #{$text-muted-fallback}); }
+    &__raised { font-weight: 700; color: var(--fundkit-text, #{$text-fallback}); }
+    &__goal   { color: var(--fundkit-text-muted, #{$text-muted-fallback}); }
 
     &__foot {
         display: flex;
@@ -765,18 +765,18 @@ body.giveflow-modal-open { overflow: hidden; }
         gap: 10px;
         margin-top: 16px;
         padding-top: 14px;
-        border-top: 1px solid var(--giveflow-border, #{$border-fallback});
+        border-top: 1px solid var(--fundkit-border, #{$border-fallback});
     }
     &__pct {
         font-size: 12.5px; font-weight: 700;
-        color: var(--giveflow-accent, #{$accent-fallback});
+        color: var(--fundkit-accent, #{$accent-fallback});
         background: #{$accent-soft};
         padding: 3px 10px; border-radius: 999px;
     }
     &__link {
         display: inline-flex; align-items: center; gap: 6px;
         font-size: 13.5px; font-weight: 700;
-        color: var(--giveflow-accent, #{$accent-fallback});
+        color: var(--fundkit-accent, #{$accent-fallback});
 
         svg { display: block; transition: transform .12s; }
     }
@@ -785,25 +785,25 @@ body.giveflow-modal-open { overflow: hidden; }
 
 // The form centres itself with its own `margin: 0 auto` and max-width, so no
 // alignment handling belongs here.
-.giveflow-block--donation-form {
+.fundkit-block--donation-form {
     margin: 0 0 24px;
 }
-.giveflow-donation-form__placeholder {
+.fundkit-donation-form__placeholder {
     display: flex;
     flex-direction: column;
     gap: 4px;
     padding: 28px;
     text-align: center;
-    border: 1px dashed var(--giveflow-border, #{$border-fallback});
-    border-radius: var(--giveflow-radius, #{$radius-fallback});
-    background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
-    color: var(--giveflow-text-muted, #{$text-muted-fallback});
+    border: 1px dashed var(--fundkit-border, #{$border-fallback});
+    border-radius: var(--fundkit-radius, #{$radius-fallback});
+    background: var(--fundkit-bg-soft, #{$bg-soft-fallback});
+    color: var(--fundkit-text-muted, #{$text-muted-fallback});
 
-    strong { color: var(--giveflow-text, #{$text-fallback}); font-size: 15px; }
+    strong { color: var(--fundkit-text, #{$text-fallback}); font-size: 15px; }
     span   { font-size: 13px; }
 }
 
-.giveflow-avatar {
+.fundkit-avatar {
     position: relative;
     overflow: hidden;
     flex: 0 0 auto;
@@ -819,8 +819,8 @@ body.giveflow-modal-open { overflow: hidden; }
     line-height: 1;
 
     &--anon {
-        background: var(--giveflow-bg-soft, #{$bg-soft-fallback});
-        color: var(--giveflow-text-muted, #{$text-muted-fallback});
+        background: var(--fundkit-bg-soft, #{$bg-soft-fallback});
+        color: var(--fundkit-text-muted, #{$text-muted-fallback});
     }
 
     // Sits over the initial, so a donor with no picture on file keeps their
@@ -838,15 +838,15 @@ body.giveflow-modal-open { overflow: hidden; }
 // One shared rail: campaign blocks align to the same 1080px container as the
 // P2P sections and the start page. Last in the file so the centering wins over
 // the per-block margin shorthands above.
-.giveflow-block--image,
-.giveflow-block--stat,
-.giveflow-block--progress,
-.giveflow-block--donate-button,
-.giveflow-block--top-donors,
-.giveflow-block--recent-donations,
-.giveflow-block--supporter-wall,
-.giveflow-block--grid,
-.giveflow-block--donation-form {
+.fundkit-block--image,
+.fundkit-block--stat,
+.fundkit-block--progress,
+.fundkit-block--donate-button,
+.fundkit-block--top-donors,
+.fundkit-block--recent-donations,
+.fundkit-block--supporter-wall,
+.fundkit-block--grid,
+.fundkit-block--donation-form {
     box-sizing: border-box;
     max-width: 1080px;
     margin-left: auto;
@@ -854,7 +854,7 @@ body.giveflow-modal-open { overflow: hidden; }
 }
 
 /* The campaign's cover photo, edited from the block that shows it. */
-.giveflow-block-image-picker {
+.fundkit-block-image-picker {
     margin: 0 0 16px;
 
     &__preview {
@@ -891,7 +891,7 @@ body.giveflow-modal-open { overflow: hidden; }
 // ones above, at the same specificity, where source order decides.
 //
 // Only where a colour was actually set, so a block left alone keeps its own.
-.giveflow-block.has-text-color,
-.giveflow-block.has-text-color :where(*) {
+.fundkit-block.has-text-color,
+.fundkit-block.has-text-color :where(*) {
     color: inherit;
 }

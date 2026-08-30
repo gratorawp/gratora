@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Analytics\Event;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorRetention;
-use GiveFlow\Donors\Erasure\ErasureHandler;
-use GiveFlow\Donors\Erasure\ErasureRequest;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Settings\SettingsService;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Analytics\Event;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorRetention;
+use FundKit\Donors\Erasure\ErasureHandler;
+use FundKit\Donors\Erasure\ErasureRequest;
+use FundKit\Foundation\Plugin;
+use FundKit\Settings\SettingsService;
+use FundKit\Vendor\Queryable\DB;
 use ReflectionClassConstant;
 use RuntimeException;
 
 /**
  * The nightly sweep runs third-party code, through the documented
- * `giveflow.donor.erasure_handlers` filter, once per donor and inside the loop. A
+ * `fundkit.donor.erasure_handlers` filter, once per donor and inside the loop. A
  * handler that throws leaves that donor unredacted, so a sweep that always
  * reads the oldest matching rows would be handed the same donor every night
  * and never reach anyone behind them: an org that asked for automatic erasure
@@ -97,7 +97,7 @@ final class DonorRetentionPoisonRowTest extends IntegrationTestCase
 
                 $prefix = DB::getPrefix();
                 DB::raw(
-                    "UPDATE {$prefix}giveflow_donors SET redacted_at = NULL WHERE id = %d",
+                    "UPDATE {$prefix}fundkit_donors SET redacted_at = NULL WHERE id = %d",
                     [$request->donorId]
                 );
 
@@ -109,7 +109,7 @@ final class DonorRetentionPoisonRowTest extends IntegrationTestCase
             $h[] = $handler;
             return $h;
         };
-        add_filter('giveflow.donor.erasure_handlers', $add);
+        add_filter('fundkit.donor.erasure_handlers', $add);
 
         return $add;
     }
@@ -119,7 +119,7 @@ final class DonorRetentionPoisonRowTest extends IntegrationTestCase
         try {
             $this->retention()->run();
         } finally {
-            remove_filter('giveflow.donor.erasure_handlers', $handler);
+            remove_filter('fundkit.donor.erasure_handlers', $handler);
         }
     }
 
@@ -139,7 +139,7 @@ final class DonorRetentionPoisonRowTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('giveflow_privacy');
+        delete_option('fundkit_privacy');
         delete_option(DonorRetention::STARTS_AT_OPTION);
         parent::tearDown();
     }
@@ -229,7 +229,7 @@ final class DonorRetentionPoisonRowTest extends IntegrationTestCase
             $this->retention()->run();
             $afterContinuation = count($this->retentionErrors());
         } finally {
-            remove_filter('giveflow.donor.erasure_handlers', $add);
+            remove_filter('fundkit.donor.erasure_handlers', $add);
         }
 
         $this->assertSame($batch, $afterFirstPass, 'every donor in the batch was attempted once');

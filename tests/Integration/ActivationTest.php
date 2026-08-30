@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Core\Activator;
-use GiveFlow\Core\CoreModule;
-use GiveFlow\Donors\Portal\PortalPage;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\Upgrade\UpgradeRoutine;
+use FundKit\Core\Activator;
+use FundKit\Core\CoreModule;
+use FundKit\Donors\Portal\PortalPage;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Upgrade\UpgradeRoutine;
 
 final class ActivationTest extends IntegrationTestCase
 {
@@ -29,7 +29,7 @@ final class ActivationTest extends IntegrationTestCase
         Plugin::onActivation();
 
         $fund = self::$wpdb->get_row(
-            "SELECT code, name, is_default, is_active FROM " . self::$prefix . "giveflow_funds WHERE code = 'general'"
+            "SELECT code, name, is_default, is_active FROM " . self::$prefix . "fundkit_funds WHERE code = 'general'"
         );
 
         $this->assertNotNull($fund);
@@ -40,11 +40,11 @@ final class ActivationTest extends IntegrationTestCase
 
     public function test_activation_stamps_the_schema_version(): void
     {
-        delete_option('giveflow_db_version');
+        delete_option('fundkit_db_version');
         Plugin::onActivation();
         $this->assertSame(
-            GIVEFLOW_DB_VERSION,
-            get_option('giveflow_db_version'),
+            FUNDKIT_DB_VERSION,
+            get_option('fundkit_db_version'),
             'activation records the schema version so the boot gate skips a redundant migration'
         );
     }
@@ -56,12 +56,12 @@ final class ActivationTest extends IntegrationTestCase
         Plugin::onActivation();
 
         $count = (int) self::$wpdb->get_var(
-            "SELECT COUNT(*) FROM " . self::$prefix . "giveflow_funds WHERE code = 'general'"
+            "SELECT COUNT(*) FROM " . self::$prefix . "fundkit_funds WHERE code = 'general'"
         );
         $this->assertSame(1, $count);
     }
 
-    public function test_administrator_role_gains_manage_giveflow_capability(): void
+    public function test_administrator_role_gains_manage_fundkit_capability(): void
     {
         Plugin::onActivation();
 
@@ -109,10 +109,10 @@ final class ActivationTest extends IntegrationTestCase
         Plugin::onActivation();
 
         $campaignCount = (int) self::$wpdb->get_var(
-            "SELECT COUNT(*) FROM " . self::$prefix . "giveflow_campaigns"
+            "SELECT COUNT(*) FROM " . self::$prefix . "fundkit_campaigns"
         );
         $formCount = (int) self::$wpdb->get_var(
-            "SELECT COUNT(*) FROM " . self::$prefix . "giveflow_forms"
+            "SELECT COUNT(*) FROM " . self::$prefix . "fundkit_forms"
         );
 
         $this->assertSame(0, $campaignCount, 'No campaigns should be seeded on activation');
@@ -131,7 +131,7 @@ final class ActivationTest extends IntegrationTestCase
         $post = get_post($id);
         $this->assertSame('publish', $post->post_status);
         $this->assertStringContainsString(PortalPage::SHORTCODE, $post->post_content);
-        $this->assertSame(GIVEFLOW_VERSION, get_option(PortalPage::OPTION_VERSION));
+        $this->assertSame(FUNDKIT_VERSION, get_option(PortalPage::OPTION_VERSION));
     }
 
     /**

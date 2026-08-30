@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationService;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
 
 /**
  * confirm() must be a single-winner transition. The sync redirect-return
@@ -28,7 +28,7 @@ final class DonationConfirmRaceTest extends IntegrationTestCase
         $b = Donation::query()->where('reference', $ref)->get();
 
         $fired = 0;
-        add_action('giveflow.donation.completed', function () use (&$fired): void {
+        add_action('fundkit.donation.completed', function () use (&$fired): void {
             $fired++;
         });
 
@@ -67,7 +67,7 @@ final class DonationConfirmRaceTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'GIVEFLOW-CN-' . substr(md5(uniqid('', true)), 0, 8);
+        $d->reference         = 'FUNDKIT-CN-' . substr(md5(uniqid('', true)), 0, 8);
         $d->donor_id          = (int) $donor->id;
         $d->amount_cents      = 5000;
         $d->net_cents         = 5000;

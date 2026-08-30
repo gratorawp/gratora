@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\EventRecorder;
-use GiveFlow\Core\Commands\CoreCommandProvider;
-use GiveFlow\Foundation\Commands\CommandContext;
-use GiveFlow\Foundation\Commands\CommandRegistry;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Analytics\EventRecorder;
+use FundKit\Core\Commands\CoreCommandProvider;
+use FundKit\Foundation\Commands\CommandContext;
+use FundKit\Foundation\Commands\CommandRegistry;
+use FundKit\Foundation\Plugin;
+use FundKit\Settings\SettingsService;
 
 /**
  * settings.get / settings.update let the assistant read and write benign org
@@ -30,7 +30,7 @@ final class CoreSettingsCommandsTest extends IntegrationTestCase
     private function adminCtx(): CommandContext
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('giveflow_manage_settings');
+        get_role('administrator')->add_cap('fundkit_manage_settings');
         wp_set_current_user($admin);
         return new CommandContext($admin, 'rest', 'req-' . uniqid());
     }
@@ -57,7 +57,7 @@ final class CoreSettingsCommandsTest extends IntegrationTestCase
         $this->assertFalse($byId['settings.update']['idempotent'], 'settings.update must not be idempotent');
 
         foreach (['settings.get', 'settings.update'] as $id) {
-            $this->assertSame('giveflow_manage_settings', $byId[$id]['capability'], "{$id} must be gated on giveflow_manage_settings");
+            $this->assertSame('fundkit_manage_settings', $byId[$id]['capability'], "{$id} must be gated on fundkit_manage_settings");
         }
     }
 
@@ -156,7 +156,7 @@ final class CoreSettingsCommandsTest extends IntegrationTestCase
         // No allowlisted group ships a secret, so inject secret-shaped keys into
         // an allowed group's option to prove the redaction walk (top-level +
         // nested). SettingsService::get merges the stored option over defaults.
-        update_option('giveflow_org_profile', [
+        update_option('fundkit_org_profile', [
             'name'    => 'Hope Foundation',
             'api_key' => 'sk_live_should_not_leak',
             'nested'  => ['webhook_secret' => 'whsec_should_not_leak', 'city' => 'Berlin'],

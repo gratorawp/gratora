@@ -4,7 +4,7 @@ export default function ProgressBar( { current, total, labels = [] } ) {
     if ( total <= 1 ) return null;
     return (
         <div
-            class="giveflow-form__progress"
+            class="fundkit-form__progress"
             role="progressbar"
             aria-valuemin="0"
             aria-valuemax={ total }
@@ -20,7 +20,7 @@ export default function ProgressBar( { current, total, labels = [] } ) {
                 return (
                     <span
                         key={ i }
-                        class={ `giveflow-form__progress-dot ${ state }`.trim() }
+                        class={ `fundkit-form__progress-dot ${ state }`.trim() }
                         aria-label={ label }
                     />
                 );

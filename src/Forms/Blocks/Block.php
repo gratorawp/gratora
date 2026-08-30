@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
 /**
- * Server-side render contract for a giveflow block.
+ * Server-side render contract for a fundkit block.
  *
  * @since 1.0.0
  */

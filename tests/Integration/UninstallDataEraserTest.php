@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Core\Activator;
-use GiveFlow\Core\CoreModule;
-use GiveFlow\Foundation\Auth\Capabilities;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\Uninstall\DataEraser;
+use FundKit\Core\Activator;
+use FundKit\Core\CoreModule;
+use FundKit\Foundation\Auth\Capabilities;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Uninstall\DataEraser;
 
 /**
  * The one feature whose bug costs a charity its donation history.
@@ -16,7 +16,7 @@ use GiveFlow\Foundation\Uninstall\DataEraser;
  * Nothing here calls erase(). It would drop the tables of the shared test
  * database and every later test in the run would fail against the wreckage, so
  * what is asserted is the plan: the opt-in that gates it, and the exact set of
- * tables and options it would take. The add-ons share the giveflow_ prefix, so a
+ * tables and options it would take. The add-ons share the fundkit_ prefix, so a
  * wipe that matched on it would destroy the tickets, gift aid and
  * peer-to-peer data of plugins that are still installed.
  */
@@ -65,7 +65,7 @@ final class UninstallDataEraserTest extends IntegrationTestCase
      */
     public function test_page_ids_are_readable_before_anything_is_dropped(): void
     {
-        $req = new \WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
+        $req = new \WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Erase probe', 'status' => 'published']));
         $created = rest_do_request($req)->get_data();
@@ -80,24 +80,24 @@ final class UninstallDataEraserTest extends IntegrationTestCase
     {
         $tables = (new DataEraser())->plan()['tables'];
 
-        $this->assertContains('giveflow_donations', $tables);
-        $this->assertContains('giveflow_donors', $tables);
-        $this->assertContains('giveflow_system_settings', $tables);
+        $this->assertContains('fundkit_donations', $tables);
+        $this->assertContains('fundkit_donors', $tables);
+        $this->assertContains('fundkit_system_settings', $tables);
 
         // Each of these exists on a site running the add-ons.
         foreach ([
-            'giveflow_ticket_orders',
-            'giveflow_ticket_events',
-            'giveflow_event_attendees',
-            'giveflow_fundraisers',
-            'giveflow_fundraiser_teams',
-            'giveflow_p2p_sponsors',
-            'giveflow_gift_aid_claims',
-            'giveflow_gift_aid_declarations',
-            'giveflow_ai_conversations',
-            'giveflow_connect_events',
-            'giveflow_donation_tributes',
-            'giveflow_give_import_map',
+            'fundkit_ticket_orders',
+            'fundkit_ticket_events',
+            'fundkit_event_attendees',
+            'fundkit_fundraisers',
+            'fundkit_fundraiser_teams',
+            'fundkit_p2p_sponsors',
+            'fundkit_gift_aid_claims',
+            'fundkit_gift_aid_declarations',
+            'fundkit_ai_conversations',
+            'fundkit_connect_events',
+            'fundkit_donation_tributes',
+            'fundkit_give_import_map',
         ] as $foreign) {
             $this->assertNotContains(
                 $foreign,
@@ -118,18 +118,18 @@ final class UninstallDataEraserTest extends IntegrationTestCase
 
     public function test_only_options_core_owns_are_planned(): void
     {
-        update_option('giveflow_gift_aid_db_version', '9.9.9', false);
-        update_option('giveflow_p2p_rules_version', '1', false);
+        update_option('fundkit_gift_aid_db_version', '9.9.9', false);
+        update_option('fundkit_p2p_rules_version', '1', false);
 
         $options = (new DataEraser())->plan()['options'];
 
-        $this->assertContains('giveflow_org_profile', $options);
-        $this->assertContains('giveflow_db_version', $options);
-        $this->assertNotContains('giveflow_gift_aid_db_version', $options);
-        $this->assertNotContains('giveflow_p2p_rules_version', $options);
+        $this->assertContains('fundkit_org_profile', $options);
+        $this->assertContains('fundkit_db_version', $options);
+        $this->assertNotContains('fundkit_gift_aid_db_version', $options);
+        $this->assertNotContains('fundkit_p2p_rules_version', $options);
 
-        delete_option('giveflow_gift_aid_db_version');
-        delete_option('giveflow_p2p_rules_version');
+        delete_option('fundkit_gift_aid_db_version');
+        delete_option('fundkit_p2p_rules_version');
     }
 
     /**
@@ -144,18 +144,18 @@ final class UninstallDataEraserTest extends IntegrationTestCase
         $options = (new DataEraser())->plan()['options'];
 
         foreach ([
-            'giveflow_campaign_cancel_recurring',
-            'giveflow_fund_reassignments',
-            'giveflow_donor_rehash_pending',
-            'giveflow_donor_rehash_after_id',
-            'giveflow_retention_starts_at',
-            'giveflow_retention_cursor',
-            'giveflow_gateway_reconcile_cursor',
-            'giveflow_upgrade_routines_failed',
-            'giveflow_consents',
-            'giveflow_email_settings',
-            'giveflow_paypal_product',
-            'giveflow_paypal_plans',
+            'fundkit_campaign_cancel_recurring',
+            'fundkit_fund_reassignments',
+            'fundkit_donor_rehash_pending',
+            'fundkit_donor_rehash_after_id',
+            'fundkit_retention_starts_at',
+            'fundkit_retention_cursor',
+            'fundkit_gateway_reconcile_cursor',
+            'fundkit_upgrade_routines_failed',
+            'fundkit_consents',
+            'fundkit_email_settings',
+            'fundkit_paypal_product',
+            'fundkit_paypal_plans',
         ] as $option) {
             $this->assertContains(
                 $option,
@@ -166,7 +166,7 @@ final class UninstallDataEraserTest extends IntegrationTestCase
     }
 
     /**
-     * These two names belong to giveflow/giveflow-licensing, which every paid
+     * These two names belong to fundkit/fundkit-licensing, which every paid
      * add-on vendors and which has no uninstall of its own. Core is the only
      * thing that erases them, so a name that drifts apart from the client's
      * leaves the licence key, a bearer credential, on the site after uninstall.
@@ -180,21 +180,21 @@ final class UninstallDataEraserTest extends IntegrationTestCase
         $options = (new DataEraser())->plan()['options'];
 
         $this->assertContains(
-            'giveflow_pro_license_key',
+            'fundkit_pro_license_key',
             $options,
             'the licence key must not outlive an opt-in wipe'
         );
-        $this->assertContains('giveflow_licensing_status', $options);
+        $this->assertContains('fundkit_licensing_status', $options);
     }
 
     /** Reference counters carry the year, so they are matched rather than listed. */
     public function test_reference_counters_are_planned_whatever_year_they_name(): void
     {
-        update_option('giveflow_reference_counter_donation_2031', 7, false);
+        update_option('fundkit_reference_counter_donation_2031', 7, false);
 
-        $this->assertContains('giveflow_reference_counter_donation_2031', (new DataEraser())->plan()['options']);
+        $this->assertContains('fundkit_reference_counter_donation_2031', (new DataEraser())->plan()['options']);
 
-        delete_option('giveflow_reference_counter_donation_2031');
+        delete_option('fundkit_reference_counter_donation_2031');
     }
 
     /** The opt-in itself goes, so a reinstall does not inherit a standing wipe. */
@@ -204,7 +204,7 @@ final class UninstallDataEraserTest extends IntegrationTestCase
     }
 
     /**
-     * An add-on's capabilities are its own to remove. giveflow_manage_fundraisers
+     * An add-on's capabilities are its own to remove. fundkit_manage_fundraisers
      * is registered by the peer-to-peer plugin, and taking it here would break
      * a site that keeps that plugin.
      */
@@ -212,10 +212,10 @@ final class UninstallDataEraserTest extends IntegrationTestCase
     {
         $caps = [...Capabilities::ALL, Capabilities::MANAGE];
 
-        foreach (['giveflow_manage_fundraisers', 'giveflow_manage_connect'] as $foreign) {
+        foreach (['fundkit_manage_fundraisers', 'fundkit_manage_connect'] as $foreign) {
             $this->assertNotContains($foreign, $caps, "{$foreign} belongs to an add-on");
         }
-        $this->assertContains('giveflow_view_donations', $caps);
+        $this->assertContains('fundkit_view_donations', $caps);
     }
 
     public function test_planning_reads_nothing_destructive(): void
@@ -223,6 +223,6 @@ final class UninstallDataEraserTest extends IntegrationTestCase
         (new DataEraser())->plan();
         (new DataEraser())->plan();
 
-        $this->assertNotEmpty(get_option('giveflow_org_profile', []), 'planning must not delete anything');
+        $this->assertNotEmpty(get_option('fundkit_org_profile', []), 'planning must not delete anything');
     }
 }

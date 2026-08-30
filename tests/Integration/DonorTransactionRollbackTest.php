@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\Consent;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorNote;
-use GiveFlow\Donors\DonorNoteRepository;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Donors\Erasure\ErasureHandler;
-use GiveFlow\Donors\Erasure\ErasureRequest;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Donors\MagicLinkService;
-use GiveFlow\Donors\MagicLinkToken;
-use GiveFlow\Donors\PendingSignup;
-use GiveFlow\Donors\PendingSignupRepository;
-use GiveFlow\Donors\SignupRedemption;
-use GiveFlow\Foundation\Identity\IdentityHasher;
-use GiveFlow\Donors\DonorAggregateSyncer;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Donations\Donation;
+use FundKit\Donors\Consent;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorNote;
+use FundKit\Donors\DonorNoteRepository;
+use FundKit\Donors\DonorService;
+use FundKit\Donors\Erasure\ErasureHandler;
+use FundKit\Donors\Erasure\ErasureRequest;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Donors\MagicLinkService;
+use FundKit\Donors\MagicLinkToken;
+use FundKit\Donors\PendingSignup;
+use FundKit\Donors\PendingSignupRepository;
+use FundKit\Donors\SignupRedemption;
+use FundKit\Foundation\Identity\IdentityHasher;
+use FundKit\Donors\DonorAggregateSyncer;
+use FundKit\Foundation\Plugin;
+use FundKit\Vendor\Queryable\DB;
 use RuntimeException;
 use Throwable;
 use WP_REST_Request;
@@ -93,12 +93,12 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         $throw = static function (): void {
             throw new RuntimeException(self::CREATE_FAILURE);
         };
-        add_action('giveflow.donor.created', $throw);
+        add_action('fundkit.donor.created', $throw);
 
         try {
             $body();
         } finally {
-            remove_action('giveflow.donor.created', $throw);
+            remove_action('fundkit.donor.created', $throw);
         }
     }
 
@@ -230,7 +230,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         $throw = static function (): void {
             throw new RuntimeException(self::DELETE_FAILURE);
         };
-        add_action('giveflow.donor.deleted', $throw);
+        add_action('fundkit.donor.deleted', $throw);
 
         try {
             $this->container()->get(DonorService::class)->delete($rows['donor']);
@@ -238,7 +238,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         } catch (Throwable $e) {
             $this->assertSame(self::DELETE_FAILURE, $e->getMessage());
         } finally {
-            remove_action('giveflow.donor.deleted', $throw);
+            remove_action('fundkit.donor.deleted', $throw);
         }
 
         $this->assertDeletionRowsPresent($rows, true);
@@ -271,7 +271,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         $throw = static function (): void {
             throw new RuntimeException(self::DELETE_FAILURE);
         };
-        add_action('giveflow.donor.deleted', $throw);
+        add_action('fundkit.donor.deleted', $throw);
 
         try {
             $this->container()->get(DonorService::class)->delete($donor);
@@ -279,7 +279,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         } catch (Throwable $e) {
             $this->assertSame(self::DELETE_FAILURE, $e->getMessage());
         } finally {
-            remove_action('giveflow.donor.deleted', $throw);
+            remove_action('fundkit.donor.deleted', $throw);
         }
 
         $this->assertNotNull(get_post($attachmentId), 'the failed deletion destroyed the picture');
@@ -297,7 +297,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
     /** PATCH the admin donor profile the way the Donors screen does. */
     private function patchDonor(int $donorId, array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('PATCH', "/giveflow/v1/admin/donors/{$donorId}");
+        $req = new WP_REST_Request('PATCH', "/fundkit/v1/admin/donors/{$donorId}");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -332,7 +332,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         ]);
 
         $this->assertSame(409, $refused->get_status(), 'the collision was not refused');
-        $this->assertSame('giveflow_email_collision', $refused->get_data()['code'] ?? null);
+        $this->assertSame('fundkit_email_collision', $refused->get_data()['code'] ?? null);
 
         $after = Donor::query()->where('id', (int) $donor->id)->get();
 
@@ -379,7 +379,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function donorRow(int $donorId): array
     {
-        return (array) DB::table('giveflow_donors')->where('id', $donorId)->get();
+        return (array) DB::table('fundkit_donors')->where('id', $donorId)->get();
     }
 
     /**
@@ -461,7 +461,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
             $handlers[] = $handler;
             return $handlers;
         };
-        add_filter('giveflow.donor.erasure_handlers', $add);
+        add_filter('fundkit.donor.erasure_handlers', $add);
 
         try {
             $this->container()->get(DonorService::class)->redact($donor);
@@ -469,7 +469,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         } catch (Throwable $e) {
             $this->assertSame(self::ERASURE_FAILURE, $e->getMessage());
         } finally {
-            remove_filter('giveflow.donor.erasure_handlers', $add);
+            remove_filter('fundkit.donor.erasure_handlers', $add);
         }
 
         $after = Donor::query()->where('id', (int) $donor->id)->get();

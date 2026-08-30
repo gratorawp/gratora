@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest\Admin;
-use GiveFlow\Foundation\Auth\Capabilities;
+namespace FundKit\Rest\Admin;
+use FundKit\Foundation\Auth\Capabilities;
 
-use GiveFlow\Currency\FxBackfill;
-use GiveFlow\Currency\FxRates;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Currency\FxRatesUpdater;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Currency\FxBackfill;
+use FundKit\Currency\FxRates;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Currency\FxRatesUpdater;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Settings\SettingsService;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -23,7 +23,7 @@ use WP_REST_Server;
  */
 final class FxController
 {
-    private const NAMESPACE = 'giveflow/v1';
+    private const NAMESPACE = 'fundkit/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -60,7 +60,7 @@ final class FxController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('giveflow_manage_settings');
+        return Capabilities::userCan('fundkit_manage_settings');
     }
 
     /** @since 1.0.0 */
@@ -92,8 +92,8 @@ final class FxController
 
         if (! $this->updater->saveSettings((bool) ($body['auto'] ?? true), $manual, $frame)) {
             return new WP_REST_Response([
-                'code'    => 'giveflow_fx_frame_moved',
-                'message' => __('The base currency changed while this screen was open, so the rates shown are no longer in the currency they were entered against. Reload the page and set them again.', 'giveflow-fundraising-campaigns'),
+                'code'    => 'fundkit_fx_frame_moved',
+                'message' => __('The base currency changed while this screen was open, so the rates shown are no longer in the currency they were entered against. Reload the page and set them again.', 'fundkit-fundraising-campaigns'),
             ], 409);
         }
 

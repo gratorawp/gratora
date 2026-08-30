@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/components/EmptyState';
+export { default } from '@fundkit/ui/components/EmptyState';

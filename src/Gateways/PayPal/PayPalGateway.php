@@ -2,27 +2,27 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways\PayPal;
+namespace FundKit\Gateways\PayPal;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Gateways\GatewayConfirmResult;
-use GiveFlow\Gateways\GatewayIntentResult;
-use GiveFlow\Gateways\PaymentGateway;
-use GiveFlow\Gateways\RefundResult;
-use GiveFlow\Gateways\PaymentMethodUpdate;
-use GiveFlow\Gateways\SubscriptionAware;
-use GiveFlow\Gateways\SupportsSubscriptionPause;
-use GiveFlow\Gateways\SupportsPaymentMethodUpdate;
-use GiveFlow\Gateways\WebhookOutcome;
-use GiveFlow\Gateways\SubscriptionChangeNeedsApproval;
-use GiveFlow\Gateways\WebhookPaymentGuard;
-use GiveFlow\Recurring\FrequencyMap;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanRepository;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donations\DonationService;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Gateways\GatewayConfirmResult;
+use FundKit\Gateways\GatewayIntentResult;
+use FundKit\Gateways\PaymentGateway;
+use FundKit\Gateways\RefundResult;
+use FundKit\Gateways\PaymentMethodUpdate;
+use FundKit\Gateways\SubscriptionAware;
+use FundKit\Gateways\SupportsSubscriptionPause;
+use FundKit\Gateways\SupportsPaymentMethodUpdate;
+use FundKit\Gateways\WebhookOutcome;
+use FundKit\Gateways\SubscriptionChangeNeedsApproval;
+use FundKit\Gateways\WebhookPaymentGuard;
+use FundKit\Recurring\FrequencyMap;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanRepository;
 use RuntimeException;
 use WP_REST_Request;
 
@@ -30,9 +30,9 @@ use WP_REST_Request;
  * PayPal gateway via Orders v2 (one-time) and Subscriptions v1 (recurring).
  *
  * The donor never leaves the site: the JS SDK renders PayPal's buttons and
- * opens its own popup. For one-time donations GiveFlow creates the Order up front
+ * opens its own popup. For one-time donations FundKit creates the Order up front
  * so `gateway_intent_id` exists before the donor approves; the browser then
- * approves it and GiveFlow captures server-side. For recurring, GiveFlow provisions a
+ * approves it and FundKit captures server-side. For recurring, FundKit provisions a
  * Product + Plan and the button creates the Subscription against that plan.
  *
  * Webhooks are the source of truth for money movement and are idempotent, so a
@@ -70,13 +70,13 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('PayPal', 'giveflow-fundraising-campaigns');
+        return __('PayPal', 'fundkit-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Pay with your PayPal balance, a bank account, or a card. No PayPal account required.', 'giveflow-fundraising-campaigns');
+        return __('Pay with your PayPal balance, a bank account, or a card. No PayPal account required.', 'fundkit-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */
@@ -104,7 +104,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     private function siteTestMode(): bool
     {
-        $cfg = get_option('giveflow_gateway_config', []);
+        $cfg = get_option('fundkit_gateway_config', []);
 
         return is_array($cfg) && ! empty($cfg['test_mode']);
     }
@@ -186,7 +186,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                     ],
                 ],
             ],
-        ], ['PayPal-Request-Id' => 'giveflow_order_' . $donation->reference]);
+        ], ['PayPal-Request-Id' => 'fundkit_order_' . $donation->reference]);
 
         $orderId = (string) ($order['id'] ?? '');
         if ($orderId === '') {
@@ -256,7 +256,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             $result = $this->api->post(
                 '/v2/checkout/orders/' . rawurlencode($orderId) . '/capture',
                 [],
-                ['PayPal-Request-Id' => 'giveflow_capture_' . $donation->reference]
+                ['PayPal-Request-Id' => 'fundkit_capture_' . $donation->reference]
             );
         } catch (RuntimeException $e) {
             if (! $this->isAlreadyCaptured($e)) {
@@ -539,7 +539,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * A refund issued from the PayPal dashboard. Recorded so GiveFlow's totals
+     * A refund issued from the PayPal dashboard. Recorded so FundKit's totals
      * match PayPal without an admin re-entering it.
      *
      * @param array<string,mixed> $refund
@@ -717,7 +717,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 'recurring.paypal',
                 sprintf(
                     /* translators: 1: PayPal subscription id, 2: the reason it was refused */
-                    __('PayPal subscription %1$s has no recurring plan here, so it cannot be cancelled from this site: %2$s', 'giveflow-fundraising-campaigns'),
+                    __('PayPal subscription %1$s has no recurring plan here, so it cannot be cancelled from this site: %2$s', 'fundkit-fundraising-campaigns'),
                     $subId,
                     $e->getMessage()
                 ),
@@ -896,7 +896,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 ]);
 
             $plan->amount_cents = $amount;
-            do_action('giveflow.recurring.plan_amount_changed', $plan);
+            do_action('fundkit.recurring.plan_amount_changed', $plan);
         }
 
         return new WebhookOutcome(
@@ -1230,7 +1230,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 [
                     // Stable per attempt so a timed-out refund that already
                     // processed returns the original instead of issuing a second.
-                    'PayPal-Request-Id' => 'giveflow_refund_' . $donation->id . '_'
+                    'PayPal-Request-Id' => 'fundkit_refund_' . $donation->id . '_'
                         . (int) $donation->refunded_cents . '_' . $amountCents,
                 ]
             );
@@ -1322,7 +1322,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new RuntimeException(esc_html__('This donation has no PayPal subscription.', 'giveflow-fundraising-campaigns'));
+            throw new RuntimeException(esc_html__('This donation has no PayPal subscription.', 'fundkit-fundraising-campaigns'));
         }
 
         // The subscription's own current plan, read back from PayPal, so this
@@ -1337,7 +1337,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         )['plan_id'] ?? '');
 
         if ($planId === '') {
-            throw new RuntimeException(esc_html__('PayPal did not say which plan this subscription is on.', 'giveflow-fundraising-campaigns'));
+            throw new RuntimeException(esc_html__('PayPal did not say which plan this subscription is on.', 'fundkit-fundraising-campaigns'));
         }
 
         $revised = $this->api->post(
@@ -1354,7 +1354,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
 
-        throw new RuntimeException(esc_html__('PayPal did not return a link for changing the payment method.', 'giveflow-fundraising-campaigns'));
+        throw new RuntimeException(esc_html__('PayPal did not return a link for changing the payment method.', 'fundkit-fundraising-campaigns'));
     }
 
     /**
@@ -1416,7 +1416,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * @return array{0:string,1:int} interval unit + count for a GiveFlow frequency.
+     * @return array{0:string,1:int} interval unit + count for a FundKit frequency.
      *
      * Delegates to FrequencyMap rather than repeating the table: a local copy
      * with a monthly default silently bills biweekly donors once a month.

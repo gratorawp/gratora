@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest;
+namespace FundKit\Rest;
 
-use GiveFlow\Foundation\Hooks\HookProvider;
-use GiveFlow\Rest\Admin\ExportsController as AdminExportsController;
-use GiveFlow\Rest\Admin\ToolsController as AdminToolsController;
-use GiveFlow\Rest\Admin\CampaignsController as AdminCampaignsController;
-use GiveFlow\Rest\Admin\CommandsController as AdminCommandsController;
-use GiveFlow\Rest\Admin\DashboardController as AdminDashboardController;
-use GiveFlow\Rest\Admin\DonationsController as AdminDonationsController;
-use GiveFlow\Rest\Admin\DonorsController as AdminDonorsController;
-use GiveFlow\Rest\Admin\FormsController as AdminFormsController;
-use GiveFlow\Rest\Admin\FundsController as AdminFundsController;
-use GiveFlow\Rest\Admin\FxController;
-use GiveFlow\Rest\Admin\NumberingController as AdminNumberingController;
-use GiveFlow\Rest\Admin\OnboardingController as AdminOnboardingController;
-use GiveFlow\Rest\Admin\RecurringController as AdminRecurringController;
-use GiveFlow\Rest\Admin\ReportsController as AdminReportsController;
-use GiveFlow\Rest\Admin\RolesController as AdminRolesController;
-use GiveFlow\Rest\Admin\SettingsController as AdminSettingsController;
-use GiveFlow\Rest\Admin\PayPalKeysController;
-use GiveFlow\Rest\Admin\ReadinessController as AdminReadinessController;
-use GiveFlow\Rest\Admin\StripeKeysController;
-use GiveFlow\Rest\Admin\UserPrefsController as AdminUserPrefsController;
-use GiveFlow\Rest\Portal\PortalController;
+use FundKit\Foundation\Hooks\HookProvider;
+use FundKit\Rest\Admin\ExportsController as AdminExportsController;
+use FundKit\Rest\Admin\ToolsController as AdminToolsController;
+use FundKit\Rest\Admin\CampaignsController as AdminCampaignsController;
+use FundKit\Rest\Admin\CommandsController as AdminCommandsController;
+use FundKit\Rest\Admin\DashboardController as AdminDashboardController;
+use FundKit\Rest\Admin\DonationsController as AdminDonationsController;
+use FundKit\Rest\Admin\DonorsController as AdminDonorsController;
+use FundKit\Rest\Admin\FormsController as AdminFormsController;
+use FundKit\Rest\Admin\FundsController as AdminFundsController;
+use FundKit\Rest\Admin\FxController;
+use FundKit\Rest\Admin\NumberingController as AdminNumberingController;
+use FundKit\Rest\Admin\OnboardingController as AdminOnboardingController;
+use FundKit\Rest\Admin\RecurringController as AdminRecurringController;
+use FundKit\Rest\Admin\ReportsController as AdminReportsController;
+use FundKit\Rest\Admin\RolesController as AdminRolesController;
+use FundKit\Rest\Admin\SettingsController as AdminSettingsController;
+use FundKit\Rest\Admin\PayPalKeysController;
+use FundKit\Rest\Admin\ReadinessController as AdminReadinessController;
+use FundKit\Rest\Admin\StripeKeysController;
+use FundKit\Rest\Admin\UserPrefsController as AdminUserPrefsController;
+use FundKit\Rest\Portal\PortalController;
 
 /**
  * Registers all REST route groups on rest_api_init.
@@ -100,7 +100,7 @@ final class RestProvider extends HookProvider
         $this->readiness->registerRoutes();
 
         $registry = new ControllerRegistry();
-        do_action('giveflow.rest.register', $registry);
+        do_action('fundkit.rest.register', $registry);
         foreach ($registry->all() as $controller) {
             $controller->registerRoutes();
         }

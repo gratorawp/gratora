@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Core\CoreModule;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\Upgrade\SchemaGuard;
-use GiveFlow\Foundation\Upgrade\UpgradeRunner;
+use FundKit\Core\CoreModule;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Upgrade\SchemaGuard;
+use FundKit\Foundation\Upgrade\UpgradeRunner;
 
 /**
  * WordPress calls an activation hook with $network_wide, and the hook pointed
@@ -29,9 +29,9 @@ final class ActivationHookSignatureTest extends IntegrationTestCase
 {
     public function test_the_hook_registered_with_wordpress_is_not_the_fresh_flag_one(): void
     {
-        $plugin = dirname(__DIR__, 2) . '/giveflow/giveflow.php';
+        $plugin = dirname(__DIR__, 2) . '/fundkit/fundkit.php';
         if (! is_file($plugin)) {
-            $plugin = dirname(__DIR__, 2) . '/giveflow.php';
+            $plugin = dirname(__DIR__, 2) . '/fundkit.php';
         }
         $source = (string) file_get_contents($plugin);
 

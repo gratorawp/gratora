@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Funds;
+namespace FundKit\Funds;
 
 defined('ABSPATH') || exit;
 
-use GiveFlow\Foundation\Time\ScheduleWindow;
-use GiveFlow\Vendor\Queryable\Model;
-use GiveFlow\Vendor\Queryable\Schema\Table;
+use FundKit\Foundation\Time\ScheduleWindow;
+use FundKit\Vendor\Queryable\Model;
+use FundKit\Vendor\Queryable\Schema\Table;
 
 /**
  * Fund / designation model.
@@ -17,7 +17,7 @@ use GiveFlow\Vendor\Queryable\Schema\Table;
  */
 final class Fund extends Model
 {
-    protected string $table = 'giveflow_funds';
+    protected string $table = 'fundkit_funds';
     protected string $version = '1.0.0';
 
     public int $id;

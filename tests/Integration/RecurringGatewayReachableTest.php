@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Recurring\GatewayUnreachable;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanActions;
-use GiveFlow\Recurring\RecurringPlanChange;
+use FundKit\Foundation\Plugin;
+use FundKit\Recurring\GatewayUnreachable;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanActions;
+use FundKit\Recurring\RecurringPlanChange;
 
 /**
  * A plan may not be changed while its processor is absent.

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit;
+namespace FundKit\Tests\Unit;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Gateways\WebhookPaymentGuard;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Donations\Donation;
+use FundKit\Gateways\WebhookPaymentGuard;
+use FundKit\Recurring\RecurringPlan;
 use PHPUnit\Framework\TestCase;
 
 /**

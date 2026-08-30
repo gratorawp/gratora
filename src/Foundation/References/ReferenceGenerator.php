@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\References;
+namespace FundKit\Foundation\References;
 
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Vendor\Queryable\DB;
 use RuntimeException;
 
 /**
@@ -13,7 +13,7 @@ use RuntimeException;
  *
  * Per-scope counter (donation / receipt / refund), atomically incremented via
  * MySQL LAST_INSERT_ID() - gap-free and race-safe. Configurable via the
- * giveflow_reference_settings option. reset_yearly (default true) starts a fresh
+ * fundkit_reference_settings option. reset_yearly (default true) starts a fresh
  * counter each Jan 1, which requires include_year to tell the two sequences
  * apart; without it, numbering is continuous across years either way.
  *
@@ -21,7 +21,7 @@ use RuntimeException;
  */
 final class ReferenceGenerator
 {
-    public const OPTION_SETTINGS = 'giveflow_reference_settings';
+    public const OPTION_SETTINGS = 'fundkit_reference_settings';
 
     public const DEFAULT_SETTINGS = [
         'prefixes' => [
@@ -164,14 +164,14 @@ final class ReferenceGenerator
     public static function assertTokens(array $input): void
     {
         $labels = [
-            'donation' => __('Donation prefix', 'giveflow-fundraising-campaigns'),
-            'receipt'  => __('Receipt prefix', 'giveflow-fundraising-campaigns'),
-            'refund'   => __('Refund prefix', 'giveflow-fundraising-campaigns'),
+            'donation' => __('Donation prefix', 'fundkit-fundraising-campaigns'),
+            'receipt'  => __('Receipt prefix', 'fundkit-fundraising-campaigns'),
+            'refund'   => __('Refund prefix', 'fundkit-fundraising-campaigns'),
         ];
 
         if (array_key_exists('separator', $input) && ! self::isToken((string) $input['separator'])) {
             throw new InvalidReferenceToken(
-                __('Separator', 'giveflow-fundraising-campaigns'),
+                __('Separator', 'fundkit-fundraising-campaigns'),
                 (string) $input['separator'],
             );
         }
@@ -249,8 +249,8 @@ final class ReferenceGenerator
         $s = $this->settings();
 
         return ! empty($s['reset_yearly']) && ! empty($s['include_year'])
-            ? "giveflow_reference_counter_{$scope}_{$year}"
-            : "giveflow_reference_counter_{$scope}";
+            ? "fundkit_reference_counter_{$scope}_{$year}"
+            : "fundkit_reference_counter_{$scope}";
     }
 
     /**
@@ -278,7 +278,7 @@ final class ReferenceGenerator
      */
     private function seedFor(string $scope, string $key): int
     {
-        $continuous = "giveflow_reference_counter_{$scope}";
+        $continuous = "fundkit_reference_counter_{$scope}";
 
         if ($key !== $continuous) {
             return (int) get_option($continuous, 0);
@@ -286,7 +286,7 @@ final class ReferenceGenerator
 
         $result = DB::raw(
             'SELECT option_name, option_value FROM ' . DB::getPrefix() . "options
-             WHERE option_name LIKE 'giveflow_reference_counter%'"
+             WHERE option_name LIKE 'fundkit_reference_counter%'"
         );
 
         $high = 0;

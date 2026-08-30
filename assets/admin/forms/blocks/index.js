@@ -39,25 +39,25 @@ import registerHiddenBlock          from './hidden';
 import registerHtmlBlock            from './html';
 import registerPrivacyNoticeBlock   from './privacy-notice';
 
-const GIVEFLOW_CATEGORIES = [
-    { slug: 'giveflow-amount',  title: __( 'Donation amount',   'giveflow-fundraising-campaigns' ) },
-    { slug: 'giveflow-donor',   title: __( 'Donor information', 'giveflow-fundraising-campaigns' ) },
-    { slug: 'giveflow-fields',  title: __( 'Custom fields',     'giveflow-fundraising-campaigns' ) },
-    { slug: 'giveflow-content', title: __( 'Content & layout',  'giveflow-fundraising-campaigns' ) },
-    { slug: 'giveflow-extras',  title: __( 'Extras',            'giveflow-fundraising-campaigns' ) },
+const FUNDKIT_CATEGORIES = [
+    { slug: 'fundkit-amount',  title: __( 'Donation amount',   'fundkit-fundraising-campaigns' ) },
+    { slug: 'fundkit-donor',   title: __( 'Donor information', 'fundkit-fundraising-campaigns' ) },
+    { slug: 'fundkit-fields',  title: __( 'Custom fields',     'fundkit-fundraising-campaigns' ) },
+    { slug: 'fundkit-content', title: __( 'Content & layout',  'fundkit-fundraising-campaigns' ) },
+    { slug: 'fundkit-extras',  title: __( 'Extras',            'fundkit-fundraising-campaigns' ) },
 ];
 
 function ensureCategories() {
     try {
         const existing = select( 'core/blocks' ).getCategories();
-        const keep = existing.filter( ( c ) => ! String( c.slug ).startsWith( 'giveflow-' ) );
-        dispatch( 'core/blocks' ).setCategories( [ ...GIVEFLOW_CATEGORIES, ...keep ] );
+        const keep = existing.filter( ( c ) => ! String( c.slug ).startsWith( 'fundkit-' ) );
+        dispatch( 'core/blocks' ).setCategories( [ ...FUNDKIT_CATEGORIES, ...keep ] );
     } catch ( err ) {
         // setCategories not available on this version; harmless.
     }
 }
 
-addAction( 'giveflow.editor.registerBlocks', 'giveflow/core-blocks', ( api ) => {
+addAction( 'fundkit.editor.registerBlocks', 'fundkit/core-blocks', ( api ) => {
     ensureCategories();
     registerHeadingBlock( api );
     registerParagraphBlock( api );

@@ -50,12 +50,12 @@ tfoot td{font-weight:700;border-top:2px solid #000;border-bottom:0;padding-top:9
         <p class="org-meta"><?php echo esc_html(implode("\n", $org_address_lines)); ?></p>
     <?php endif; ?>
     <?php if ($org_tax_id !== ''): ?>
-        <p class="ein"><?php echo esc_html(sprintf(/* translators: %s: tax id / EIN */ __('Tax ID (EIN): %s', 'giveflow-fundraising-campaigns'), $org_tax_id)); ?></p>
+        <p class="ein"><?php echo esc_html(sprintf(/* translators: %s: tax id / EIN */ __('Tax ID (EIN): %s', 'fundkit-fundraising-campaigns'), $org_tax_id)); ?></p>
     <?php endif; ?>
 </div>
 
 <div class="parties">
-    <p class="party-label"><?php esc_html_e('Issued to', 'giveflow-fundraising-campaigns'); ?></p>
+    <p class="party-label"><?php esc_html_e('Issued to', 'fundkit-fundraising-campaigns'); ?></p>
     <div class="donor-block"><?php
         $donorBlock = $donor_name;
         if (! empty($donor_address_lines)) {
@@ -65,20 +65,20 @@ tfoot td{font-weight:700;border-top:2px solid #000;border-bottom:0;padding-top:9
     ?></div>
 </div>
 
-<h1><?php echo esc_html(sprintf(/* translators: %d: statement year */ __('%d Annual Donation Statement', 'giveflow-fundraising-campaigns'), $year)); ?></h1>
+<h1><?php echo esc_html(sprintf(/* translators: %d: statement year */ __('%d Annual Donation Statement', 'fundkit-fundraising-campaigns'), $year)); ?></h1>
 
 <p class="intro"><?php echo esc_html(sprintf(
     /* translators: 1: statement year, 2: organization name */
-    __('Thank you for your %1$d contributions to %2$s.', 'giveflow-fundraising-campaigns'),
+    __('Thank you for your %1$d contributions to %2$s.', 'fundkit-fundraising-campaigns'),
     $year,
     $org_name
 )); ?></p>
 
 <table>
 <thead><tr>
-    <th><?php esc_html_e('Date', 'giveflow-fundraising-campaigns'); ?></th>
-    <th><?php esc_html_e('Reference', 'giveflow-fundraising-campaigns'); ?></th>
-    <th class="amt"><?php esc_html_e('Amount', 'giveflow-fundraising-campaigns'); ?></th>
+    <th><?php esc_html_e('Date', 'fundkit-fundraising-campaigns'); ?></th>
+    <th><?php esc_html_e('Reference', 'fundkit-fundraising-campaigns'); ?></th>
+    <th class="amt"><?php esc_html_e('Amount', 'fundkit-fundraising-campaigns'); ?></th>
 </tr></thead>
 <tbody>
 <?php foreach ($lines as $line): ?>
@@ -115,7 +115,7 @@ tfoot td{font-weight:700;border-top:2px solid #000;border-bottom:0;padding-top:9
 <?php endif; ?>
 
 <p class="footer">
-    <?php echo esc_html(sprintf(/* translators: %s: generation date */ __('Generated %s.', 'giveflow-fundraising-campaigns'), $generated_date)); ?>
-    <?php esc_html_e('Retain this statement for your tax records.', 'giveflow-fundraising-campaigns'); ?>
+    <?php echo esc_html(sprintf(/* translators: %s: generation date */ __('Generated %s.', 'fundkit-fundraising-campaigns'), $generated_date)); ?>
+    <?php esc_html_e('Retain this statement for your tax records.', 'fundkit-fundraising-campaigns'); ?>
 </p>
 </body></html>

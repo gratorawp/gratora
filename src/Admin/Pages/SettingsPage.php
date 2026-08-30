@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Admin\Pages;
+namespace FundKit\Admin\Pages;
 
-use GiveFlow\Admin\ExtensionAssets;
-use GiveFlow\Foundation\Hooks\HookProvider;
+use FundKit\Admin\ExtensionAssets;
+use FundKit\Foundation\Hooks\HookProvider;
 
 /**
  * Registers and renders the Settings admin page.
@@ -14,14 +14,14 @@ use GiveFlow\Foundation\Hooks\HookProvider;
  */
 final class SettingsPage extends HookProvider
 {
-    private const PAGE_ID   = 'giveflow-settings';
-    private const HANDLE    = 'giveflow-admin-settings';
+    private const PAGE_ID   = 'fundkit-settings';
+    private const HANDLE    = 'fundkit-admin-settings';
     private const BUILD_DIR = 'build/admin/settings';
 
     /** @since 1.0.0 */
     protected function filters(): array
     {
-        return ['giveflow.admin.pages' => 'registerPage'];
+        return ['fundkit.admin.pages' => 'registerPage'];
     }
 
     /** @since 1.0.0 */
@@ -29,8 +29,8 @@ final class SettingsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Settings', 'giveflow-fundraising-campaigns'),
-            'capability' => 'giveflow_access_settings',
+            'title'      => __('Settings', 'fundkit-fundraising-campaigns'),
+            'capability' => 'fundkit_access_settings',
             'position'   => 90,
             'render'     => [$this, 'render'],
         ];
@@ -47,7 +47,7 @@ final class SettingsPage extends HookProvider
                   // heading (the "Settings" h1 is React-rendered), notices land
                   // inside the React header row. This pins them above it. ?>
             <hr class="wp-header-end" />
-            <div id="giveflow-admin-settings"></div>
+            <div id="fundkit-admin-settings"></div>
         </div>
         <?php
     }
@@ -55,7 +55,7 @@ final class SettingsPage extends HookProvider
     /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
-        $assetPath = GIVEFLOW_DIR . self::BUILD_DIR . '/index.asset.php';
+        $assetPath = FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
         if (! file_exists($assetPath)) return;
         $asset = require $assetPath;
 
@@ -67,19 +67,19 @@ final class SettingsPage extends HookProvider
 
         wp_enqueue_script(
             self::HANDLE,
-            GIVEFLOW_URL . self::BUILD_DIR . '/index.js',
+            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
             array_merge($asset['dependencies'] ?? [], [ExtensionAssets::HANDLE]),
-            $asset['version']      ?? GIVEFLOW_VERSION,
+            $asset['version']      ?? FUNDKIT_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
             self::HANDLE,
-            GIVEFLOW_URL . 'build/admin/settings.css',
+            FUNDKIT_URL . 'build/admin/settings.css',
             ['wp-components'],
-            (string) (@filemtime(GIVEFLOW_DIR . 'build/admin/settings.css') ?: GIVEFLOW_VERSION)
+            (string) (@filemtime(FUNDKIT_DIR . 'build/admin/settings.css') ?: FUNDKIT_VERSION)
         );
     }
 }

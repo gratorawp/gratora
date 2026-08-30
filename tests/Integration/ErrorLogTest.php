@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Analytics\Event;
-use GiveFlow\Analytics\EventRetention;
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Analytics\Event;
+use FundKit\Analytics\EventRetention;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Foundation\Plugin;
 
 /**
  * Failures are recorded where the site owner can reach them.
@@ -110,7 +110,7 @@ final class ErrorLogTest extends IntegrationTestCase
 
     public function test_pruning_leaves_other_events_alone(): void
     {
-        $recorder = Plugin::instance()->container->get(\GiveFlow\Analytics\EventRecorder::class);
+        $recorder = Plugin::instance()->container->get(\FundKit\Analytics\EventRecorder::class);
         $recorder->record('donation.completed', ['payload' => ['keep' => 'me']]);
 
         for ($i = 0; $i < ErrorLog::KEEP + 150; $i++) {

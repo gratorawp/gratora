@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms;
+namespace FundKit\Forms;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationIntent;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationIntent;
 
 /**
  * Pass-through handler for the standard donation form type.
@@ -23,7 +23,7 @@ final class DefaultFormTypeHandler implements FormTypeHandler
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Donation', 'giveflow-fundraising-campaigns');
+        return __('Donation', 'fundkit-fundraising-campaigns');
     }
 
     /**

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Forms\FormService;
+use FundKit\Forms\FormService;
 use WP_REST_Request;
 
 /**
@@ -21,7 +21,7 @@ final class FormPublishReadinessTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Readiness campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -30,38 +30,38 @@ final class FormPublishReadinessTest extends IntegrationTestCase
     public function test_required_blocks_list_is_amount_name_email(): void
     {
         $names = array_map(fn (array $r): string => $r['block'], FormService::requiredBlocks());
-        $this->assertContains('giveflow/donation-amount', $names);
-        $this->assertContains('giveflow/name', $names);
-        $this->assertContains('giveflow/email', $names);
+        $this->assertContains('fundkit/donation-amount', $names);
+        $this->assertContains('fundkit/name', $names);
+        $this->assertContains('fundkit/email', $names);
     }
 
     public function test_missing_amount_block_is_reported(): void
     {
         $missing = FormService::missingRequiredBlocks(
-            '<!-- wp:giveflow/name /--><!-- wp:giveflow/email /-->'
+            '<!-- wp:fundkit/name /--><!-- wp:fundkit/email /-->'
         );
         $names = array_map(fn (array $r): string => $r['block'], $missing);
-        $this->assertSame(['giveflow/donation-amount'], $names);
+        $this->assertSame(['fundkit/donation-amount'], $names);
     }
 
     public function test_missing_name_and_email_blocks_are_reported(): void
     {
         $missing = FormService::missingRequiredBlocks(
-            '<!-- wp:giveflow/donation-amount /-->'
+            '<!-- wp:fundkit/donation-amount /-->'
         );
         $names = array_map(fn (array $r): string => $r['block'], $missing);
-        $this->assertSame(['giveflow/name', 'giveflow/email'], $names);
+        $this->assertSame(['fundkit/name', 'fundkit/email'], $names);
     }
 
     public function test_publishing_a_form_without_amount_is_rejected(): void
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'title'       => 'No amount',
             'status'      => 'published',
             'campaign_id' => $this->campaignId,
-            'blocks'      => '<!-- wp:giveflow/name /--><!-- wp:giveflow/email /-->',
+            'blocks'      => '<!-- wp:fundkit/name /--><!-- wp:fundkit/email /-->',
         ]));
 
         $res = rest_do_request($req);
@@ -71,13 +71,13 @@ final class FormPublishReadinessTest extends IntegrationTestCase
 
     public function test_publishing_a_form_with_amount_name_email_succeeds(): void
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'title'       => 'Complete form',
             'status'      => 'published',
             'campaign_id' => $this->campaignId,
-            'blocks'      => '<!-- wp:giveflow/donation-amount /--><!-- wp:giveflow/name /--><!-- wp:giveflow/email /-->',
+            'blocks'      => '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/name /--><!-- wp:fundkit/email /-->',
         ]));
 
         $res = rest_do_request($req);

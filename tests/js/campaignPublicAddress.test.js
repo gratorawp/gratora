@@ -37,10 +37,10 @@ test( 'the public URL is the page permalink, not the campaign slug', () => {
         />
     );
 
-    const link = root.querySelector( '.giveflow-url-preview a' );
+    const link = root.querySelector( '.fundkit-url-preview a' );
     expect( link.getAttribute( 'href' ) ).toBe( 'https://example.test/campaigns/support-us-2/' );
 
-    const shown = root.querySelector( '.giveflow-url-preview .url' ).textContent;
+    const shown = root.querySelector( '.fundkit-url-preview .url' ).textContent;
     expect( shown ).toContain( 'example.test/campaigns/support-us-2' );
     expect( shown ).not.toContain( 'support-us<' );
 } );
@@ -53,13 +53,13 @@ test( 'a permalink outside the campaigns prefix is shown as it is', () => {
         />
     );
 
-    expect( root.querySelector( '.giveflow-url-preview a' ).getAttribute( 'href' ) ).toBe( 'https://example.test/?page_id=41' );
-    expect( root.querySelector( '.giveflow-url-preview .url' ).textContent ).not.toContain( '/campaigns/' );
+    expect( root.querySelector( '.fundkit-url-preview a' ).getAttribute( 'href' ) ).toBe( 'https://example.test/?page_id=41' );
+    expect( root.querySelector( '.fundkit-url-preview .url' ).textContent ).not.toContain( '/campaigns/' );
 } );
 
 test( 'a campaign with no page advertises no address at all', () => {
     const root = mount( <PublicAddressCard c={ controller( 'support-us' ) } pageUrl={ null } /> );
 
-    expect( root.querySelector( '.giveflow-url-preview' ) ).toBeNull();
+    expect( root.querySelector( '.fundkit-url-preview' ) ).toBeNull();
     expect( root.textContent ).toContain( 'no page yet' );
 } );

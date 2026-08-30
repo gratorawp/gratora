@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Analytics;
+namespace FundKit\Analytics;
 
-use GiveFlow\Foundation\Identity\IdentityHasher;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Foundation\Identity\IdentityHasher;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Settings\SettingsService;
 
 /**
- * Records analytics events to the giveflow_events table.
+ * Records analytics events to the fundkit_events table.
  *
  * @since 1.0.0
  */
@@ -44,7 +44,7 @@ final class EventRecorder
     /** @since 1.0.0 */
     private function write(string $type, array $ctx): void
     {
-        $ctx = apply_filters('giveflow.event.recording', $ctx, $type);
+        $ctx = apply_filters('fundkit.event.recording', $ctx, $type);
 
         $event = Event::make();
         $event->type              = $type;
@@ -73,6 +73,6 @@ final class EventRecorder
 
         $event->save();
 
-        do_action('giveflow.event.recorded', $event);
+        do_action('fundkit.event.recorded', $event);
     }
 }

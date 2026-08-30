@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Recurring;
+namespace FundKit\Recurring;
 
 use RuntimeException;
 

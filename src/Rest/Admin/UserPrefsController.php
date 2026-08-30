@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest\Admin;
-use GiveFlow\Dashboard\AttentionDismissals;
-use GiveFlow\Foundation\Auth\Capabilities;
+namespace FundKit\Rest\Admin;
+use FundKit\Dashboard\AttentionDismissals;
+use FundKit\Foundation\Auth\Capabilities;
 
 use WP_REST_Request;
 use WP_REST_Response;
@@ -22,8 +22,8 @@ use WP_REST_Server;
  */
 final class UserPrefsController
 {
-    private const NAMESPACE = 'giveflow/v1';
-    private const META_KEY  = 'giveflow_widget_layout';
+    private const NAMESPACE = 'fundkit/v1';
+    private const META_KEY  = 'fundkit_widget_layout';
 
     /** @since 1.0.0 */
     public function registerRoutes(): void

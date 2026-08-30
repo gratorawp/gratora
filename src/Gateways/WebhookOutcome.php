@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways;
+namespace FundKit\Gateways;
 
 /**
  * Result of `PaymentGateway::handleWebhook()`. The router uses it to set the

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms;
+namespace FundKit\Forms;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationIntent;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationIntent;
 
 /**
  * Behaviour a non-default form_type plugs in.
@@ -38,7 +38,7 @@ interface FormTypeHandler
     public function onDonationCreated(Donation $donation, array $body): void;
 
     /**
-     * @return class-string<\GiveFlow\Vendor\Queryable\Model>|null sidecar PK = parent id, or null
+     * @return class-string<\FundKit\Vendor\Queryable\Model>|null sidecar PK = parent id, or null
      *
      * @since 1.0.0
      */

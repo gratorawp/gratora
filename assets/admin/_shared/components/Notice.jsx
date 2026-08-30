@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/components/Notice';
+export { default } from '@fundkit/ui/components/Notice';

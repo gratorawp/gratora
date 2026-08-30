@@ -56,21 +56,21 @@ export default function GatewaysPanel( { s } ) {
     const [ offlineOpen, setOfflineOpen ] = useCardOpen( offlineEnabled && ! offlineConfigured, 'payments', 'offline' );
 
     const offlinePill = ! offlineEnabled
-        ? <span className="giveflow-pill giveflow-pill--gray"><span className="giveflow-pill__dot giveflow-pill__dot--soft" />{ __( 'Disabled', 'giveflow-fundraising-campaigns' ) }</span>
+        ? <span className="fundkit-pill fundkit-pill--gray"><span className="fundkit-pill__dot fundkit-pill__dot--soft" />{ __( 'Disabled', 'fundkit-fundraising-campaigns' ) }</span>
         : offlineConfigured
-            ? <span className="giveflow-pill giveflow-pill--green"><span className="giveflow-pill__dot" />{ __( 'Configured', 'giveflow-fundraising-campaigns' ) }</span>
-            : <span className="giveflow-pill giveflow-pill--amber"><span className="giveflow-pill__dot" />{ __( 'Enabled, no way to pay', 'giveflow-fundraising-campaigns' ) }</span>;
+            ? <span className="fundkit-pill fundkit-pill--green"><span className="fundkit-pill__dot" />{ __( 'Configured', 'fundkit-fundraising-campaigns' ) }</span>
+            : <span className="fundkit-pill fundkit-pill--amber"><span className="fundkit-pill__dot" />{ __( 'Enabled, no way to pay', 'fundkit-fundraising-campaigns' ) }</span>;
 
     return (
-        <div className="giveflow-panel">
+        <div className="fundkit-panel">
             <Card
-                title={ __( 'Test mode', 'giveflow-fundraising-campaigns' ) }
-                sub={ __( 'Org-wide rehearsal switch, also settable per form', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Test mode', 'fundkit-fundraising-campaigns' ) }
+                sub={ __( 'Org-wide rehearsal switch, also settable per form', 'fundkit-fundraising-campaigns' ) }
                 edited={ s.isDirty }
             >
                 <ToggleRow
-                    title={ __( 'Enable test mode for all forms', 'giveflow-fundraising-campaigns' ) }
-                    sub={ __( 'No real payment is taken and these donations are excluded from reporting.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Enable test mode for all forms', 'fundkit-fundraising-campaigns' ) }
+                    sub={ __( 'No real payment is taken and these donations are excluded from reporting.', 'fundkit-fundraising-campaigns' ) }
                     checked={ !! s.value( 'test_mode', false ) }
                     onChange={ s.setValue( 'test_mode' ) }
                 />
@@ -86,8 +86,8 @@ export default function GatewaysPanel( { s } ) {
 
             <Card
                 leading={ <BrandMark letter="O" variant="offline" /> }
-                title={ __( 'Offline donations', 'giveflow-fundraising-campaigns' ) }
-                sub={ __( 'Donor sees your bank details and pays offline', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Offline donations', 'fundkit-fundraising-campaigns' ) }
+                sub={ __( 'Donor sees your bank details and pays offline', 'fundkit-fundraising-campaigns' ) }
                 meta={ offlinePill }
                 edited={ s.isDirty }
                 collapsible
@@ -95,36 +95,36 @@ export default function GatewaysPanel( { s } ) {
                 onToggle={ setOfflineOpen }
             >
                 <ToggleRow
-                    title={ __( 'Enable offline donations', 'giveflow-fundraising-campaigns' ) }
-                    sub={ __( 'For cash, check, or bank transfer donations marked paid by admin.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Enable offline donations', 'fundkit-fundraising-campaigns' ) }
+                    sub={ __( 'For cash, check, or bank transfer donations marked paid by admin.', 'fundkit-fundraising-campaigns' ) }
                     checked={ offlineEnabled }
                     onChange={ s.setValue( 'offline.enabled' ) }
                 />
 
                 <FormRow
-                    label={ __( 'Instructions', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Emailed to donors who choose bank transfer, with their donation reference.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Instructions', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Emailed to donors who choose bank transfer, with their donation reference.', 'fundkit-fundraising-campaigns' ) }
                     wide
                 >
                     <textarea
-                        className="giveflow-textarea"
+                        className="fundkit-textarea"
                         rows={ 4 }
-                        placeholder={ __( 'Please transfer the donation amount within 7 days. Use the reference number so we can match your donation to your receipt.', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'Please transfer the donation amount within 7 days. Use the reference number so we can match your donation to your receipt.', 'fundkit-fundraising-campaigns' ) }
                         { ...s.bind( 'offline.instructions' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Bank details template', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Click a placeholder to drop it in. They expand when the donor is shown their transfer details.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Bank details template', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Click a placeholder to drop it in. They expand when the donor is shown their transfer details.', 'fundkit-fundraising-campaigns' ) }
                     wide
                 >
-                    <div className="giveflow-merge-tags">
+                    <div className="fundkit-merge-tags">
                         { BANK_PLACEHOLDERS.map( ( tag ) => (
                             <button
                                 key={ tag }
                                 type="button"
-                                className="giveflow-merge-tag"
+                                className="fundkit-merge-tag"
                                 onClick={ () => insertPlaceholder( tag ) }
                             >
                                 { tag }
@@ -133,7 +133,7 @@ export default function GatewaysPanel( { s } ) {
                     </div>
                     <textarea
                         ref={ bankRef }
-                        className="giveflow-textarea giveflow-textarea--mono"
+                        className="fundkit-textarea fundkit-textarea--mono"
                         rows={ 5 }
                         placeholder={ 'Account holder: …\nIBAN: …\nBIC:  …\nReference: {reference}\nAmount:    {amount}' }
                         { ...s.bind( 'offline.bank_details' ) }

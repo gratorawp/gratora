@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways;
+namespace FundKit\Gateways;
 
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlan;
 
 /**
  * A gateway whose donor can change the card behind a recurring plan.

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Donors\MagicLinkService;
-use GiveFlow\Donors\MagicLinkToken;
-use GiveFlow\Donors\Portal\PortalSession;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donors\DonorService;
+use FundKit\Donors\MagicLinkService;
+use FundKit\Donors\MagicLinkToken;
+use FundKit\Donors\Portal\PortalSession;
+use FundKit\Foundation\Plugin;
 
 /**
  * Magic-link tokens are the donor portal's only auth path - a regression in
@@ -151,7 +151,7 @@ final class MagicLinkRedemptionTest extends IntegrationTestCase
         return Plugin::instance()->container->get(MagicLinkService::class);
     }
 
-    private function makeDonor(): \GiveFlow\Donors\Donor
+    private function makeDonor(): \FundKit\Donors\Donor
     {
         return Plugin::instance()->container
             ->get(DonorService::class)

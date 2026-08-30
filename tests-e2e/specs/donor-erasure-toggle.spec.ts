@@ -2,7 +2,7 @@ import { test, expect, type Page, type Locator } from '@playwright/test';
 import { AdminPage } from '../helpers/AdminPage';
 
 /**
- * The switch that decides whether GiveFlow erases donors nobody asked about. The
+ * The switch that decides whether FundKit erases donors nobody asked about. The
  * integration tests prove the sweep obeys it; these prove an admin can see what
  * it is about to do before it does it, which is the part that only exists on
  * screen.
@@ -13,7 +13,7 @@ import { AdminPage } from '../helpers/AdminPage';
  * hide a control that is still in force.
  */
 
-const PRIVACY = '/wp-admin/admin.php?page=giveflow-settings&tab=privacy';
+const PRIVACY = '/wp-admin/admin.php?page=fundkit-settings&tab=privacy';
 
 const TOGGLE = 'Erase inactive donors automatically';
 const YEARS = 'Erase donors inactive for (years)';
@@ -25,7 +25,7 @@ const WINDOW = 'Reunite window after redaction (days)';
  * flipped by clicking what a person clicks.
  */
 function switchFor(page: Page): Locator {
-    return page.locator(`.giveflow-switch[aria-label="${ TOGGLE }"]`);
+    return page.locator(`.fundkit-switch[aria-label="${ TOGGLE }"]`);
 }
 
 function toggleState(page: Page): Locator {
@@ -34,7 +34,7 @@ function toggleState(page: Page): Locator {
 
 /** A FormRow, so a label and its input are reached together. */
 function field(page: Page, label: string): Locator {
-    return page.locator(`.giveflow-form-row:has(.giveflow-form-row__label:has-text("${ label }"))`);
+    return page.locator(`.fundkit-form-row:has(.fundkit-form-row__label:has-text("${ label }"))`);
 }
 
 async function openPrivacy(page: Page): Promise<void> {

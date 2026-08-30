@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\Commands\CommandContext;
-use GiveFlow\Foundation\Commands\CommandRegistry;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Foundation\Commands\CommandContext;
+use FundKit\Foundation\Commands\CommandRegistry;
+use FundKit\Foundation\Plugin;
+use FundKit\Recurring\RecurringPlan;
 
 /**
  * recurring.update_amount is the donor portal's change_amount through a

@@ -2,46 +2,46 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Shortcode;
+namespace FundKit\Forms\Shortcode;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\CampaignRepository;
-use GiveFlow\Campaigns\Styling\CampaignStyleResolver;
-use GiveFlow\Donations\AntiSpamGuard;
-use GiveFlow\Forms\Blocks\ColumnsBlock;
-use GiveFlow\Donors\ConsentService;
-use GiveFlow\Forms\Blocks\ConsentBlock;
-use GiveFlow\Forms\Blocks\TermsBlock;
-use GiveFlow\Forms\Blocks\CurrencySwitcherBlock;
-use GiveFlow\Forms\Blocks\DateBlock;
-use GiveFlow\Forms\Blocks\DividerBlock;
-use GiveFlow\Forms\Blocks\DonationAmountBlock;
-use GiveFlow\Forms\Blocks\DropdownBlock;
-use GiveFlow\Forms\Blocks\FundPickerBlock;
-use GiveFlow\Forms\Blocks\HtmlBlock;
-use GiveFlow\Forms\Blocks\RecurringToggleBlock;
-use GiveFlow\Forms\Blocks\SectionBlock;
-use GiveFlow\Forms\Form;
-use GiveFlow\Forms\FormRepository;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Hooks\HookProvider;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\BrowserAware;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\Stripe\StripeApi;
-use GiveFlow\Gateways\TestMode;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\CampaignRepository;
+use FundKit\Campaigns\Styling\CampaignStyleResolver;
+use FundKit\Donations\AntiSpamGuard;
+use FundKit\Forms\Blocks\ColumnsBlock;
+use FundKit\Donors\ConsentService;
+use FundKit\Forms\Blocks\ConsentBlock;
+use FundKit\Forms\Blocks\TermsBlock;
+use FundKit\Forms\Blocks\CurrencySwitcherBlock;
+use FundKit\Forms\Blocks\DateBlock;
+use FundKit\Forms\Blocks\DividerBlock;
+use FundKit\Forms\Blocks\DonationAmountBlock;
+use FundKit\Forms\Blocks\DropdownBlock;
+use FundKit\Forms\Blocks\FundPickerBlock;
+use FundKit\Forms\Blocks\HtmlBlock;
+use FundKit\Forms\Blocks\RecurringToggleBlock;
+use FundKit\Forms\Blocks\SectionBlock;
+use FundKit\Forms\Form;
+use FundKit\Forms\FormRepository;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Hooks\HookProvider;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\BrowserAware;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\Stripe\StripeApi;
+use FundKit\Gateways\TestMode;
 use Throwable;
 
 /**
- * `[giveflow_donation_form]` shortcode. Renders a form's blocks plus a
- * data-giveflow-form-config script the Preact runtime reads.
+ * `[fundkit_donation_form]` shortcode. Renders a form's blocks plus a
+ * data-fundkit-form-config script the Preact runtime reads.
  *
  * @since 1.0.0
  */
 final class DonationFormShortcode extends HookProvider
 {
-    private const TAG    = 'giveflow_donation_form';
-    private const HANDLE = 'giveflow-donation-form-runtime';
+    private const TAG    = 'fundkit_donation_form';
+    private const HANDLE = 'fundkit-donation-form-runtime';
 
     private bool $cssLinkInlined = false;
 
@@ -95,24 +95,24 @@ final class DonationFormShortcode extends HookProvider
         FormGatewayAssets::enqueue();
         FormFieldAssets::enqueue();
 
-        $assetPath = GIVEFLOW_DIR . 'build/donation-form/runtime/index.asset.php';
+        $assetPath = FUNDKIT_DIR . 'build/donation-form/runtime/index.asset.php';
         if (file_exists($assetPath)) {
             $asset = require $assetPath;
             wp_register_script(
                 self::HANDLE,
-                GIVEFLOW_URL . 'build/donation-form/runtime/index.js',
+                FUNDKIT_URL . 'build/donation-form/runtime/index.js',
                 array_merge($asset['dependencies'] ?? [], [FormGatewayAssets::HANDLE, FormFieldAssets::HANDLE]),
-                $asset['version']      ?? GIVEFLOW_VERSION,
+                $asset['version']      ?? FUNDKIT_VERSION,
                 true
             );
             wp_enqueue_script(self::HANDLE);
         }
 
-        $cssPath = GIVEFLOW_DIR . 'build/donation-form/runtime.css';
+        $cssPath = FUNDKIT_DIR . 'build/donation-form/runtime.css';
         if (file_exists($cssPath)) {
             wp_register_style(
                 self::HANDLE,
-                GIVEFLOW_URL . 'build/donation-form/runtime.css',
+                FUNDKIT_URL . 'build/donation-form/runtime.css',
                 [],
                 $this->cssVersion()
             );
@@ -133,14 +133,14 @@ final class DonationFormShortcode extends HookProvider
         $atts = is_array($atts) ? $atts : [];
         $slug = trim((string) ($atts['slug'] ?? ''));
         if ($slug === '') {
-            return $this->renderError(__('Specify a form slug: [giveflow_donation_form slug="..."].', 'giveflow-fundraising-campaigns'));
+            return $this->renderError(__('Specify a form slug: [fundkit_donation_form slug="..."].', 'fundkit-fundraising-campaigns'));
         }
 
         $form = $this->forms->findBySlug($slug);
         if (! $form) {
             return $this->renderError(sprintf(
                 /* translators: %s: form slug */
-                __('No donation form found for slug "%s".', 'giveflow-fundraising-campaigns'),
+                __('No donation form found for slug "%s".', 'fundkit-fundraising-campaigns'),
                 $slug
             ));
         }
@@ -149,23 +149,23 @@ final class DonationFormShortcode extends HookProvider
         // nothing. The preview filter only takes effect for a user who can
         // edit, so the gate is never bypassed for a public visitor.
         $editorPreview = current_user_can('edit_posts')
-            && (bool) apply_filters('giveflow.form.editor_preview', false, $form);
+            && (bool) apply_filters('fundkit.form.editor_preview', false, $form);
         if (! $editorPreview) {
             // Nothing renders for a visitor either way. renderError adds the
             // reason for whoever can act on it, so a page that has quietly lost
             // its form does not depend on the admin thinking to check the
             // campaign screen. The equivalent block already explains itself.
             if ($form->status !== 'published') {
-                return $this->renderError(__('This form is not published, so it is hidden here.', 'giveflow-fundraising-campaigns'));
+                return $this->renderError(__('This form is not published, so it is hidden here.', 'fundkit-fundraising-campaigns'));
             }
             $campaign = $this->campaigns ? $this->campaigns->findById($form->campaign_id) : null;
             if (! $campaign) {
-                return $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'giveflow-fundraising-campaigns'));
+                return $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'fundkit-fundraising-campaigns'));
             }
             if (! $campaign->acceptsDonations()) {
                 return $this->renderError(
                     $campaign->notAcceptingReason()
-                    ?? __('This campaign is not accepting donations, so the form is hidden.', 'giveflow-fundraising-campaigns')
+                    ?? __('This campaign is not accepting donations, so the form is hidden.', 'fundkit-fundraising-campaigns')
                 );
             }
         }
@@ -187,16 +187,16 @@ final class DonationFormShortcode extends HookProvider
         ) {
             $this->cssLinkInlined = true;
             wp_dequeue_style(self::HANDLE);
-            $href = GIVEFLOW_URL . 'build/donation-form/' . $this->cssFileName() . '?ver=' . rawurlencode($this->cssVersion());
+            $href = FUNDKIT_URL . 'build/donation-form/' . $this->cssFileName() . '?ver=' . rawurlencode($this->cssVersion());
             // The enqueued route is the one dequeued two lines up, for the
             // reason above; the handle stays registered so the version and the
             // filename still come from wp_styles.
             // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- wp_dequeue_style() drops this same handle just above; href is esc_url()d and its version comes from wp_styles.
-            $html = '<link rel="stylesheet" id="giveflow-runtime-css" href="' . esc_url($href) . '">' . $html;
+            $html = '<link rel="stylesheet" id="fundkit-runtime-css" href="' . esc_url($href) . '">' . $html;
         }
 
         // The server fallback markup is not styled by the runtime CSS, so it
-        // flashes unstyled until the (footer) runtime mounts. The `giveflow-js`
+        // flashes unstyled until the (footer) runtime mounts. The `fundkit-js`
         // class is only added when JS runs, so no-JS visitors keep the visible
         // fallback, and the timeout failsafe reveals the form if the runtime
         // never loads. Once per request.
@@ -207,10 +207,10 @@ final class DonationFormShortcode extends HookProvider
         // phpcs:ignore WordPress.WP.EnqueuedResources -- see above.
         if (! $this->cloakEmitted) {
             $this->cloakEmitted = true;
-            $html = "<style>.giveflow-js .giveflow-donation-form:not([data-giveflow-ready]){visibility:hidden}</style>"
-                . "<script>document.documentElement.classList.add('giveflow-js');"
-                . "setTimeout(function(){var n=document.querySelectorAll('.giveflow-donation-form:not([data-giveflow-ready])');"
-                . "for(var i=0;i<n.length;i++)n[i].setAttribute('data-giveflow-ready','1')},4000)</script>"
+            $html = "<style>.fundkit-js .fundkit-donation-form:not([data-fundkit-ready]){visibility:hidden}</style>"
+                . "<script>document.documentElement.classList.add('fundkit-js');"
+                . "setTimeout(function(){var n=document.querySelectorAll('.fundkit-donation-form:not([data-fundkit-ready])');"
+                . "for(var i=0;i<n.length;i++)n[i].setAttribute('data-fundkit-ready','1')},4000)</script>"
                 . $html;
         }
 
@@ -220,7 +220,7 @@ final class DonationFormShortcode extends HookProvider
     /** @since 1.0.0 */
     private function renderBlocks(Form $form): string
     {
-        $formId = 'giveflow-form-' . wp_unique_id();
+        $formId = 'fundkit-form-' . wp_unique_id();
 
         // SSR fund-picker pre-selects the campaign default, matching the walker.
         $campDefaultFund = 0;
@@ -234,7 +234,7 @@ final class DonationFormShortcode extends HookProvider
         $inner = do_blocks((string) $form->blocks);
         FundPickerBlock::$renderCampaignDefaultFundId = 0;
 
-        $variant = apply_filters('giveflow.form.variant', null, $form, $this->visitorContext());
+        $variant = apply_filters('fundkit.form.variant', null, $form, $this->visitorContext());
         $gateway = $this->pickGateway($form);
         $config  = $this->buildConfig($form, $gateway, $variant);
 
@@ -246,12 +246,12 @@ final class DonationFormShortcode extends HookProvider
 
         // Only a no-JS visitor sees this: a dead form would GET their inputs
         // into the URL on submit.
-        $noscript = '<noscript><div class="giveflow-donation-form__noscript">'
-            . esc_html__('This donation form needs JavaScript enabled. Please turn it on and reload the page to donate.', 'giveflow-fundraising-campaigns')
+        $noscript = '<noscript><div class="fundkit-donation-form__noscript">'
+            . esc_html__('This donation form needs JavaScript enabled. Please turn it on and reload the page to donate.', 'fundkit-fundraising-campaigns')
             . '</div></noscript>';
 
         return sprintf(
-            '<form class="giveflow-donation-form giveflow-donation-form--blocks%s" id="%s" data-form-slug="%s" data-gateway="%s" data-layout="%s"%s%s novalidate>%s<script type="application/json" data-giveflow-form-config>%s</script></form>',
+            '<form class="fundkit-donation-form fundkit-donation-form--blocks%s" id="%s" data-form-slug="%s" data-gateway="%s" data-layout="%s"%s%s novalidate>%s<script type="application/json" data-fundkit-form-config>%s</script></form>',
             $containerClass,
             esc_attr($formId),
             esc_attr($form->slug),
@@ -289,12 +289,12 @@ final class DonationFormShortcode extends HookProvider
         }
 
         $classSuffix = $style === 'plain'
-            ? ' giveflow-donation-form--plain'
-            : ' giveflow-donation-form--framed';
+            ? ' fundkit-donation-form--plain'
+            : ' fundkit-donation-form--framed';
 
         // Inline max-width (not just the CSS var) so host-theme selectors cannot out-specify it.
         $containerDecls = $width > 0
-            ? '--giveflow-form-max-width:' . $width . 'px;max-width:' . $width . 'px'
+            ? '--fundkit-form-max-width:' . $width . 'px;max-width:' . $width . 'px'
             : '';
 
         return [$classSuffix, $containerDecls];
@@ -342,14 +342,14 @@ final class DonationFormShortcode extends HookProvider
 
         $html = $this->renderBlocks($stub);
 
-        $assetPath = GIVEFLOW_DIR . 'build/donation-form/runtime/index.asset.php';
-        $asset     = is_file($assetPath) ? include $assetPath : ['dependencies' => [], 'version' => GIVEFLOW_VERSION];
+        $assetPath = FUNDKIT_DIR . 'build/donation-form/runtime/index.asset.php';
+        $asset     = is_file($assetPath) ? include $assetPath : ['dependencies' => [], 'version' => FUNDKIT_VERSION];
 
         // Version CSS by mtime so SCSS-only rebuilds bust the iframe cache
         return [
             'html'   => $html,
-            'cssUrl' => GIVEFLOW_URL . 'build/donation-form/' . $this->cssFileName() . '?v=' . $this->cssVersion(),
-            'jsUrl'  => GIVEFLOW_URL . 'build/donation-form/runtime/index.js?v=' . ($asset['version'] ?? GIVEFLOW_VERSION),
+            'cssUrl' => FUNDKIT_URL . 'build/donation-form/' . $this->cssFileName() . '?v=' . $this->cssVersion(),
+            'jsUrl'  => FUNDKIT_URL . 'build/donation-form/runtime/index.js?v=' . ($asset['version'] ?? FUNDKIT_VERSION),
             'jsDeps' => (array) ($asset['dependencies'] ?? []),
         ];
     }
@@ -471,7 +471,7 @@ final class DonationFormShortcode extends HookProvider
             'country' => null,
             'user_id' => get_current_user_id() ?: null,
         ];
-        return (array) apply_filters('giveflow.form.visitor_context', $base);
+        return (array) apply_filters('fundkit.form.visitor_context', $base);
     }
 
     /** @since 1.0.0 */
@@ -505,7 +505,7 @@ final class DonationFormShortcode extends HookProvider
     {
         $visitor = $this->visitorContext();
         $built    = $this->buildSteps($form, $variant, $visitor);
-        $steps    = (array) apply_filters('giveflow.form.steps', $built['steps'], $form, $variant, $visitor);
+        $steps    = (array) apply_filters('fundkit.form.steps', $built['steps'], $form, $variant, $visitor);
         $pages    = $built['pages'];
         $pageNav  = $built['pageNav'];
         $preamble = $built['preamble'] ?? [];
@@ -525,23 +525,23 @@ final class DonationFormShortcode extends HookProvider
 
         $thankYouMessage = trim((string) ($form->settings['thank_you_message'] ?? ''));
         if ($thankYouMessage === '') {
-            $thankYouMessage = __('Thanks for your donation. A receipt is on the way to your inbox.', 'giveflow-fundraising-campaigns');
+            $thankYouMessage = __('Thanks for your donation. A receipt is on the way to your inbox.', 'fundkit-fundraising-campaigns');
         }
         $redirectUrl = trim((string) ($form->settings['redirect_url'] ?? ''));
 
         $currency = $this->detectCurrency($form);
 
-        $currencyCfg = get_option('giveflow_currency_locale', []);
+        $currencyCfg = get_option('fundkit_currency_locale', []);
         $fmtCfg      = is_array($currencyCfg['format'] ?? null) ? $currencyCfg['format'] : [];
         $numberFormat = [
             'decimalPlaces'  => (int) ($fmtCfg['decimal_places'] ?? 2),
             'decimalSep'     => (string) ($fmtCfg['decimal_sep']  ?? '.'),
             'thousandSep'    => (string) ($fmtCfg['thousand_sep'] ?? ','),
             'symbolPosition' => (string) ($fmtCfg['symbol_position'] ?? 'before'),
-            'symbol'         => \GiveFlow\Foundation\Helpers\Money::symbolFor($currency),
+            'symbol'         => \FundKit\Foundation\Helpers\Money::symbolFor($currency),
         ];
 
-        $privacy = get_option('giveflow_privacy', []);
+        $privacy = get_option('fundkit_privacy', []);
         $privacyUrl = is_array($privacy) ? trim((string) ($privacy['privacy_policy_url'] ?? '')) : '';
 
         $currencies = $this->detectCurrencies($form);
@@ -620,7 +620,7 @@ final class DonationFormShortcode extends HookProvider
                 'tokens' => $resolvedStyle['tokens'],
                 'accent' => (string) $resolvedStyle['accent'],
             ],
-            'rest'        => esc_url_raw(rest_url('giveflow/v1/donations')),
+            'rest'        => esc_url_raw(rest_url('fundkit/v1/donations')),
             // Anonymous donors send none, so a page-cached form never carries a
             // stale nonce the REST layer would 403. The create route is public;
             // spam and rate-limit gates protect it.
@@ -634,10 +634,10 @@ final class DonationFormShortcode extends HookProvider
             // because the form takes an address on trust and a card need not
             // match it.
             'portal'      => [
-                'url'      => ( new \GiveFlow\Donors\Portal\PortalPage() )->url(),
+                'url'      => ( new \FundKit\Donors\Portal\PortalPage() )->url(),
                 // Published whole: the donations endpoint is a full URL, not a
                 // base to append to.
-                'sendLink' => esc_url_raw(rest_url('giveflow/v1/portal/send-link')),
+                'sendLink' => esc_url_raw(rest_url('fundkit/v1/portal/send-link')),
                 'token'    => $this->spam ? $this->spam->mintPortalToken() : '',
             ],
             // HMAC token (tied to render timestamp) echoed back on submit.
@@ -653,7 +653,7 @@ final class DonationFormShortcode extends HookProvider
                 // set on the amount block raises it for this form; the org-wide
                 // floor still applies underneath, so take the larger.
                 'minAmountCents' => max(
-                    (int) apply_filters('giveflow.spam.min_amount_cents', 100),
+                    (int) apply_filters('fundkit.spam.min_amount_cents', 100),
                     self::amountBlockMinCents($form)
                 ),
             ],
@@ -662,37 +662,37 @@ final class DonationFormShortcode extends HookProvider
             'pageNav'    => $pageNav,
             'preamble'   => $preamble,
             'i18n'     => [
-                'chooseAmount'   => __('Choose an amount', 'giveflow-fundraising-campaigns'),
-                'customAmount'   => __('Custom amount', 'giveflow-fundraising-campaigns'),
-                'yourDetails'    => __('Your details', 'giveflow-fundraising-campaigns'),
-                'firstName'      => __('First name', 'giveflow-fundraising-campaigns'),
-                'lastName'       => __('Last name', 'giveflow-fundraising-campaigns'),
-                'email'          => __('Email', 'giveflow-fundraising-campaigns'),
-                'country'        => __('Country', 'giveflow-fundraising-campaigns'),
-                'reviewDonation' => __('Review your donation', 'giveflow-fundraising-campaigns'),
-                'amount'         => __('Amount', 'giveflow-fundraising-campaigns'),
-                'frequency'      => __('Donation frequency', 'giveflow-fundraising-campaigns'),
-                'fees'           => __('Processing fee', 'giveflow-fundraising-campaigns'),
-                'total'          => __('Total', 'giveflow-fundraising-campaigns'),
-                'manageGiving'   => __('Manage your giving', 'giveflow-fundraising-campaigns'),
-                'portalLinkSent' => __('Check your email', 'giveflow-fundraising-campaigns'),
-                'donor'          => __('Donor', 'giveflow-fundraising-campaigns'),
-                'paymentMethod'  => __('Payment method', 'giveflow-fundraising-campaigns'),
+                'chooseAmount'   => __('Choose an amount', 'fundkit-fundraising-campaigns'),
+                'customAmount'   => __('Custom amount', 'fundkit-fundraising-campaigns'),
+                'yourDetails'    => __('Your details', 'fundkit-fundraising-campaigns'),
+                'firstName'      => __('First name', 'fundkit-fundraising-campaigns'),
+                'lastName'       => __('Last name', 'fundkit-fundraising-campaigns'),
+                'email'          => __('Email', 'fundkit-fundraising-campaigns'),
+                'country'        => __('Country', 'fundkit-fundraising-campaigns'),
+                'reviewDonation' => __('Review your donation', 'fundkit-fundraising-campaigns'),
+                'amount'         => __('Amount', 'fundkit-fundraising-campaigns'),
+                'frequency'      => __('Donation frequency', 'fundkit-fundraising-campaigns'),
+                'fees'           => __('Processing fee', 'fundkit-fundraising-campaigns'),
+                'total'          => __('Total', 'fundkit-fundraising-campaigns'),
+                'manageGiving'   => __('Manage your giving', 'fundkit-fundraising-campaigns'),
+                'portalLinkSent' => __('Check your email', 'fundkit-fundraising-campaigns'),
+                'donor'          => __('Donor', 'fundkit-fundraising-campaigns'),
+                'paymentMethod'  => __('Payment method', 'fundkit-fundraising-campaigns'),
                 /* translators: %s: the selected currency code, e.g. INR. */
-                'noGatewayForCurrency' => __('No payment method here accepts %s. Choose another currency to continue.', 'giveflow-fundraising-campaigns'),
-                'noGatewayForFrequency' => __('No payment method here can take a recurring donation. Choose a one-time donation to continue.', 'giveflow-fundraising-campaigns'),
+                'noGatewayForCurrency' => __('No payment method here accepts %s. Choose another currency to continue.', 'fundkit-fundraising-campaigns'),
+                'noGatewayForFrequency' => __('No payment method here can take a recurring donation. Choose a one-time donation to continue.', 'fundkit-fundraising-campaigns'),
                 // Not a currency problem: no allowed gateway is switched on.
                 // Naming the currency sends donors hunting for a fix that is not
                 // theirs to make.
-                'noGatewayAvailable' => __('Online donations are unavailable right now. Please try again later.', 'giveflow-fundraising-campaigns'),
-                'testModeNotice' => __('Test mode is on. No real payment is taken and this donation is excluded from reporting.', 'giveflow-fundraising-campaigns'),
-                'back'           => __('Back', 'giveflow-fundraising-campaigns'),
-                'next'           => __('Continue', 'giveflow-fundraising-campaigns'),
-                'donateNow'      => __('Donate now', 'giveflow-fundraising-campaigns'),
-                'processing'     => __('Processing…', 'giveflow-fundraising-campaigns'),
-                'thanks'         => __('Thank you for your donation!', 'giveflow-fundraising-campaigns'),
-                'pendingTitle'   => __('Your donation is pending', 'giveflow-fundraising-campaigns'),
-                'pendingMessage' => __('Thank you. We have emailed you instructions to complete your payment.', 'giveflow-fundraising-campaigns'),
+                'noGatewayAvailable' => __('Online donations are unavailable right now. Please try again later.', 'fundkit-fundraising-campaigns'),
+                'testModeNotice' => __('Test mode is on. No real payment is taken and this donation is excluded from reporting.', 'fundkit-fundraising-campaigns'),
+                'back'           => __('Back', 'fundkit-fundraising-campaigns'),
+                'next'           => __('Continue', 'fundkit-fundraising-campaigns'),
+                'donateNow'      => __('Donate now', 'fundkit-fundraising-campaigns'),
+                'processing'     => __('Processing…', 'fundkit-fundraising-campaigns'),
+                'thanks'         => __('Thank you for your donation!', 'fundkit-fundraising-campaigns'),
+                'pendingTitle'   => __('Your donation is pending', 'fundkit-fundraising-campaigns'),
+                'pendingMessage' => __('Thank you. We have emailed you instructions to complete your payment.', 'fundkit-fundraising-campaigns'),
                 // The donor has finished and nothing is expected of them. The
                 // pending copy would tell someone who has already paid that we
                 // are still waiting on them.
@@ -702,83 +702,83 @@ final class DonationFormShortcode extends HookProvider
                 // clearing, and by a card PayPal has held for review, and those
                 // owe the donor different explanations. Naming a bank told a
                 // card donor something untrue about their own payment.
-                'processingTitle'   => __('Thank you, your donation is on its way', 'giveflow-fundraising-campaigns'),
-                'processingMessage' => __('Your payment is being processed. This can take a few working days, and we will email you once it completes.', 'giveflow-fundraising-campaigns'),
-                'donateAgain'    => __('Donate again', 'giveflow-fundraising-campaigns'),
-                'error'          => __('Sorry, something went wrong. Please try again.', 'giveflow-fundraising-campaigns'),
+                'processingTitle'   => __('Thank you, your donation is on its way', 'fundkit-fundraising-campaigns'),
+                'processingMessage' => __('Your payment is being processed. This can take a few working days, and we will email you once it completes.', 'fundkit-fundraising-campaigns'),
+                'donateAgain'    => __('Donate again', 'fundkit-fundraising-campaigns'),
+                'error'          => __('Sorry, something went wrong. Please try again.', 'fundkit-fundraising-campaigns'),
                 // A donor who cancelled at their bank, or whose bank refused
                 // the debit, comes back to the same page as a donor whose
                 // payment broke. Only this one can promise the money stayed
                 // where it was, and the generic copy sends them to check a
                 // statement with nothing on it.
-                'notCompleted'   => __('Your payment was not completed, so nothing has been charged. Please try again when you are ready.', 'giveflow-fundraising-campaigns'),
+                'notCompleted'   => __('Your payment was not completed, so nothing has been charged. Please try again when you are ready.', 'fundkit-fundraising-campaigns'),
                 // The other half of that pair: the browser could not find out
                 // what happened, which is not the same as knowing nothing
                 // happened. A donor whose bank has taken the money must not be
                 // sent back to the form to pay a second time.
-                'unresolvedTitle'  => __('We could not confirm your payment', 'giveflow-fundraising-campaigns'),
-                'returnUnresolved' => __('We could not check on your payment, and your bank may still have taken it. Please do not pay again yet. Check again in a moment, or contact us with your reference and we will look it up.', 'giveflow-fundraising-campaigns'),
-                'checkAgain'       => __('Check again', 'giveflow-fundraising-campaigns'),
-                'paymentTitle'   => __('Complete your donation', 'giveflow-fundraising-campaigns'),
-                'paymentLoading' => __('Loading secure payment…', 'giveflow-fundraising-campaigns'),
-                'payNow'         => __('Pay', 'giveflow-fundraising-campaigns'),
-                'confirming'     => __('Confirming your payment…', 'giveflow-fundraising-campaigns'),
-                'cancel'         => __('Cancel', 'giveflow-fundraising-campaigns'),
-                'comment'        => __('Add a message', 'giveflow-fundraising-campaigns'),
-                'notePublic'     => __('Show my message publicly on the supporter wall', 'giveflow-fundraising-campaigns'),
-                'anonymous'      => __('Make this donation anonymous', 'giveflow-fundraising-campaigns'),
-                'phone'          => __('Phone', 'giveflow-fundraising-campaigns'),
-                'addressLine1'   => __('Address line 1', 'giveflow-fundraising-campaigns'),
-                'addressLine2'   => __('Apartment, suite, etc.', 'giveflow-fundraising-campaigns'),
-                'addressCity'    => __('City', 'giveflow-fundraising-campaigns'),
-                'addressRegion'  => __('State / region', 'giveflow-fundraising-campaigns'),
-                'addressPostal'  => __('Postal code', 'giveflow-fundraising-campaigns'),
-                'addressCountry' => __('Country', 'giveflow-fundraising-campaigns'),
-                'noSpecificFund' => __('No specific fund', 'giveflow-fundraising-campaigns'),
-                'number'         => __('Number', 'giveflow-fundraising-campaigns'),
-                'impact'         => __('Provides', 'giveflow-fundraising-campaigns'),
-                'currency'       => __('Currency', 'giveflow-fundraising-campaigns'),
-                'coverFees'      => __('I\'d like to help cover the transaction fee', 'giveflow-fundraising-campaigns'),
-                'feesTotal'      => __('Total with fees:', 'giveflow-fundraising-campaigns'),
-                'formTitle'      => __('Donation form', 'giveflow-fundraising-campaigns'),
-                'close'          => __('Close', 'giveflow-fundraising-campaigns'),
-                'required'       => __('Required', 'giveflow-fundraising-campaigns'),
-                'freqOneTime'    => __('One-time', 'giveflow-fundraising-campaigns'),
-                'freqWeekly'     => __('Weekly', 'giveflow-fundraising-campaigns'),
-                'freqBiweekly'   => __('Every 2 weeks', 'giveflow-fundraising-campaigns'),
-                'freqMonthly'    => __('Monthly', 'giveflow-fundraising-campaigns'),
-                'freqQuarterly'  => __('Quarterly', 'giveflow-fundraising-campaigns'),
-                'freqYearly'     => __('Yearly', 'giveflow-fundraising-campaigns'),
-                'searchCountry'  => __('Search country…', 'giveflow-fundraising-campaigns'),
+                'unresolvedTitle'  => __('We could not confirm your payment', 'fundkit-fundraising-campaigns'),
+                'returnUnresolved' => __('We could not check on your payment, and your bank may still have taken it. Please do not pay again yet. Check again in a moment, or contact us with your reference and we will look it up.', 'fundkit-fundraising-campaigns'),
+                'checkAgain'       => __('Check again', 'fundkit-fundraising-campaigns'),
+                'paymentTitle'   => __('Complete your donation', 'fundkit-fundraising-campaigns'),
+                'paymentLoading' => __('Loading secure payment…', 'fundkit-fundraising-campaigns'),
+                'payNow'         => __('Pay', 'fundkit-fundraising-campaigns'),
+                'confirming'     => __('Confirming your payment…', 'fundkit-fundraising-campaigns'),
+                'cancel'         => __('Cancel', 'fundkit-fundraising-campaigns'),
+                'comment'        => __('Add a message', 'fundkit-fundraising-campaigns'),
+                'notePublic'     => __('Show my message publicly on the supporter wall', 'fundkit-fundraising-campaigns'),
+                'anonymous'      => __('Make this donation anonymous', 'fundkit-fundraising-campaigns'),
+                'phone'          => __('Phone', 'fundkit-fundraising-campaigns'),
+                'addressLine1'   => __('Address line 1', 'fundkit-fundraising-campaigns'),
+                'addressLine2'   => __('Apartment, suite, etc.', 'fundkit-fundraising-campaigns'),
+                'addressCity'    => __('City', 'fundkit-fundraising-campaigns'),
+                'addressRegion'  => __('State / region', 'fundkit-fundraising-campaigns'),
+                'addressPostal'  => __('Postal code', 'fundkit-fundraising-campaigns'),
+                'addressCountry' => __('Country', 'fundkit-fundraising-campaigns'),
+                'noSpecificFund' => __('No specific fund', 'fundkit-fundraising-campaigns'),
+                'number'         => __('Number', 'fundkit-fundraising-campaigns'),
+                'impact'         => __('Provides', 'fundkit-fundraising-campaigns'),
+                'currency'       => __('Currency', 'fundkit-fundraising-campaigns'),
+                'coverFees'      => __('I\'d like to help cover the transaction fee', 'fundkit-fundraising-campaigns'),
+                'feesTotal'      => __('Total with fees:', 'fundkit-fundraising-campaigns'),
+                'formTitle'      => __('Donation form', 'fundkit-fundraising-campaigns'),
+                'close'          => __('Close', 'fundkit-fundraising-campaigns'),
+                'required'       => __('Required', 'fundkit-fundraising-campaigns'),
+                'freqOneTime'    => __('One-time', 'fundkit-fundraising-campaigns'),
+                'freqWeekly'     => __('Weekly', 'fundkit-fundraising-campaigns'),
+                'freqBiweekly'   => __('Every 2 weeks', 'fundkit-fundraising-campaigns'),
+                'freqMonthly'    => __('Monthly', 'fundkit-fundraising-campaigns'),
+                'freqQuarterly'  => __('Quarterly', 'fundkit-fundraising-campaigns'),
+                'freqYearly'     => __('Yearly', 'fundkit-fundraising-campaigns'),
+                'searchCountry'  => __('Search country…', 'fundkit-fundraising-campaigns'),
                 'validation'     => [
-                    'required'       => __('Required.', 'giveflow-fundraising-campaigns'),
-                    'pickAmount'     => __('Pick or enter an amount.', 'giveflow-fundraising-campaigns'),
+                    'required'       => __('Required.', 'fundkit-fundraising-campaigns'),
+                    'pickAmount'     => __('Pick or enter an amount.', 'fundkit-fundraising-campaigns'),
                     /* translators: %s: minimum donation amount formatted */
-                    'minAmount'      => __('Minimum donation is %s.', 'giveflow-fundraising-campaigns'),
-                    'invalidEmail'   => __('Enter a valid email.', 'giveflow-fundraising-campaigns'),
-                    'enterName'      => __('Enter a name.', 'giveflow-fundraising-campaigns'),
-                    'invalidNumber'  => __('Enter a number.', 'giveflow-fundraising-campaigns'),
+                    'minAmount'      => __('Minimum donation is %s.', 'fundkit-fundraising-campaigns'),
+                    'invalidEmail'   => __('Enter a valid email.', 'fundkit-fundraising-campaigns'),
+                    'enterName'      => __('Enter a name.', 'fundkit-fundraising-campaigns'),
+                    'invalidNumber'  => __('Enter a number.', 'fundkit-fundraising-campaigns'),
                     /* translators: %s: minimum value */
-                    'minNumber'      => __('Must be at least %s.', 'giveflow-fundraising-campaigns'),
+                    'minNumber'      => __('Must be at least %s.', 'fundkit-fundraising-campaigns'),
                     /* translators: %s: maximum value */
-                    'maxNumber'      => __('Must be at most %s.', 'giveflow-fundraising-campaigns'),
+                    'maxNumber'      => __('Must be at most %s.', 'fundkit-fundraising-campaigns'),
                     /* translators: %s: earliest allowed date */
-                    'minDate'        => __('On or after %s.', 'giveflow-fundraising-campaigns'),
+                    'minDate'        => __('On or after %s.', 'fundkit-fundraising-campaigns'),
                     /* translators: %s: latest allowed date */
-                    'maxDate'        => __('On or before %s.', 'giveflow-fundraising-campaigns'),
+                    'maxDate'        => __('On or before %s.', 'fundkit-fundraising-campaigns'),
                     /* translators: %s: maximum length */
-                    'tooLong'        => __('Too long (max %s).', 'giveflow-fundraising-campaigns'),
-                    'invalidFormat'  => __('Invalid format.', 'giveflow-fundraising-campaigns'),
-                    'pickAtLeastOne' => __('Pick at least one.', 'giveflow-fundraising-campaigns'),
+                    'tooLong'        => __('Too long (max %s).', 'fundkit-fundraising-campaigns'),
+                    'invalidFormat'  => __('Invalid format.', 'fundkit-fundraising-campaigns'),
+                    'pickAtLeastOne' => __('Pick at least one.', 'fundkit-fundraising-campaigns'),
                     /* translators: %s: minimum number of selections */
-                    'pickAtLeast'    => __('Pick at least %s.', 'giveflow-fundraising-campaigns'),
+                    'pickAtLeast'    => __('Pick at least %s.', 'fundkit-fundraising-campaigns'),
                     /* translators: %s: maximum number of selections */
-                    'pickNoMoreThan' => __('Pick no more than %s.', 'giveflow-fundraising-campaigns'),
+                    'pickNoMoreThan' => __('Pick no more than %s.', 'fundkit-fundraising-campaigns'),
                 ],
             ],
         ];
 
-        return (array) apply_filters('giveflow.form.config', $config, $form, $variant, $visitor);
+        return (array) apply_filters('fundkit.form.config', $config, $form, $variant, $visitor);
     }
 
     /**
@@ -798,10 +798,10 @@ final class DonationFormShortcode extends HookProvider
         // One ordered stream of fields and content, so the runtime renders them
         // interleaved in authored order rather than all content then all fields.
         $items        = [];
-        // Root content before a giveflow/steps wizard: rendered once above it.
+        // Root content before a fundkit/steps wizard: rendered once above it.
         $preamble     = [];
         $rowSeq       = 0;
-        // The giveflow/step index a step sits in (0 = none).
+        // The fundkit/step index a step sits in (0 = none).
         $currentPage  = 0;
         $stepDefs     = [];
         $pageNav      = [
@@ -857,7 +857,7 @@ final class DonationFormShortcode extends HookProvider
             $attrs = (array) ($block['attrs'] ?? []);
 
             switch ($name) {
-                case 'giveflow/heading':
+                case 'fundkit/heading':
                     $level = (int) ($attrs['level'] ?? 2);
                     if ($level < 1 || $level > 6) $level = 2;
                     $items[] = $withCond([
@@ -868,7 +868,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $attrs);
                     break;
 
-                case 'giveflow/paragraph':
+                case 'fundkit/paragraph':
                     $items[] = $withCond([
                         'kind'  => 'paragraph',
                         'html'  => wp_kses_post((string) ($attrs['text'] ?? '')),
@@ -876,21 +876,21 @@ final class DonationFormShortcode extends HookProvider
                     ], $attrs);
                     break;
 
-                case 'giveflow/divider':
+                case 'fundkit/divider':
                     $items[] = $withCond(
                         ['kind' => 'divider'] + DividerBlock::settings($attrs),
                         $attrs
                     );
                     break;
 
-                case 'giveflow/html':
+                case 'fundkit/html':
                     $items[] = $withCond([
                         'kind' => 'html',
                         'html' => HtmlBlock::sanitize((string) ($attrs['content'] ?? '')),
                     ], $attrs);
                     break;
 
-                case 'giveflow/currency-switcher':
+                case 'fundkit/currency-switcher':
                     $sw = CurrencySwitcherBlock::settings($attrs);
                     $items[] = $withCond([
                         'kind'    => 'currency-switcher',
@@ -900,20 +900,20 @@ final class DonationFormShortcode extends HookProvider
                     ], $attrs);
                     break;
 
-                case 'giveflow/payment-gateways':
+                case 'fundkit/payment-gateways':
                     $items[] = $withCond(['kind' => 'payment-gateways'], $attrs);
                     break;
 
-                case 'giveflow/privacy-notice':
+                case 'fundkit/privacy-notice':
                     // Cast to object so empty attrs encode as {} not []; [] makes
                     // the block comment unparseable and the notice silently vanishes.
                     $privacyHtml = (string) do_blocks(
-                        '<!-- wp:giveflow/privacy-notice ' . wp_json_encode((object) $attrs) . ' /-->'
+                        '<!-- wp:fundkit/privacy-notice ' . wp_json_encode((object) $attrs) . ' /-->'
                     );
                     $items[] = $withCond(['kind' => 'html', 'html' => $privacyHtml], $attrs);
                     break;
 
-                case 'giveflow/hidden':
+                case 'fundkit/hidden':
                     $items[] = $tagRow([
                         'kind'         => 'hidden',
                         'field'        => (string) ($attrs['field']        ?? ''),
@@ -923,17 +923,17 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/goal':
+                case 'fundkit/goal':
                     $goalAttrs = $attrs;
                     $goalAttrs['campaignId'] = $form->campaign_id;
                     $goalAttrs['formId']     = $form->id;
                     $html = (string) do_blocks(
-                        '<!-- wp:giveflow/goal ' . wp_json_encode($goalAttrs) . ' /-->'
+                        '<!-- wp:fundkit/goal ' . wp_json_encode($goalAttrs) . ' /-->'
                     );
                     $items[] = $withCond(['kind' => 'html', 'html' => $html], $attrs);
                     break;
 
-                case 'giveflow/row':
+                case 'fundkit/row':
                     $columns = (int) ($attrs['columns'] ?? 2);
                     if ($columns < 1 || $columns > 4) $columns = 2;
                     $gap = (int) ($attrs['gap'] ?? 12);
@@ -953,7 +953,7 @@ final class DonationFormShortcode extends HookProvider
                     $walk($children, $childRow);
                     break;
 
-                case 'giveflow/columns':
+                case 'fundkit/columns':
                     $columnsInlineStyle = ColumnsBlock::columnsStyle($attrs);
                     $outerItems         = $items;
                     $items              = [];
@@ -969,13 +969,13 @@ final class DonationFormShortcode extends HookProvider
                     $items   = array_merge($outerItems, $bubbled);
                     $items[] = $withCond([
                         'kind'     => 'columns',
-                        'classes'  => ['giveflow-block', 'giveflow-block--columns'],
+                        'classes'  => ['fundkit-block', 'fundkit-block--columns'],
                         'style'    => $columnsInlineStyle,
                         'children' => $columnsChildren,
                     ], $attrs);
                     break;
 
-                case 'giveflow/steps':
+                case 'fundkit/steps':
                     $progressStyle = (string) ($attrs['progressStyle'] ?? 'dots');
                     if (! in_array($progressStyle, ['dots', 'bar', 'none'], true)) {
                         $progressStyle = 'dots';
@@ -995,7 +995,7 @@ final class DonationFormShortcode extends HookProvider
                     $walk($children, $row);
                     break;
 
-                case 'giveflow/step':
+                case 'fundkit/step':
                     $flushItems();
                     $currentPage++;
                     $stepDefs[$currentPage] = [
@@ -1020,7 +1020,7 @@ final class DonationFormShortcode extends HookProvider
                     }
                     break;
 
-                case 'giveflow/section':
+                case 'fundkit/section':
                     $sectionInlineStyle = SectionBlock::sectionStyle($attrs);
                     $outerItems       = $items;
                     $items            = [];
@@ -1034,13 +1034,13 @@ final class DonationFormShortcode extends HookProvider
                     $items   = array_merge($outerItems, $bubbled);
                     $items[] = $withCond([
                         'kind'     => 'section',
-                        'classes'  => ['giveflow-block', 'giveflow-block--section'],
+                        'classes'  => ['fundkit-block', 'fundkit-block--section'],
                         'style'    => $sectionInlineStyle,
                         'children' => $sectionChildren,
                     ], $attrs);
                     break;
 
-                case 'giveflow/name':
+                case 'fundkit/name':
                     // Required block: never conditional. Pass no attrs so a stale condition can't hide it.
                     $items[] = $tagRow([
                         'kind'             => 'name',
@@ -1053,8 +1053,8 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, []);
                     break;
 
-                case 'giveflow/email':
-                    // Required block: never conditional (see giveflow/name).
+                case 'fundkit/email':
+                    // Required block: never conditional (see fundkit/name).
                     $items[] = $tagRow([
                         'kind'        => 'email',
                         'label'       => (string) ($attrs['label'] ?? ''),
@@ -1063,7 +1063,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, []);
                     break;
 
-                case 'giveflow/country':
+                case 'fundkit/country':
                     $items[] = $tagRow([
                         'kind'        => 'country',
                         'label'       => (string) ($attrs['label'] ?? ''),
@@ -1072,7 +1072,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/phone':
+                case 'fundkit/phone':
                     $items[] = $tagRow([
                         'kind'        => 'phone',
                         'label'       => (string) ($attrs['label'] ?? ''),
@@ -1081,38 +1081,38 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/comment':
+                case 'fundkit/comment':
                     $items[] = $tagRow([
                         'kind'        => 'comment',
-                        'label'       => (string) ($attrs['label']       ?? __('Add a message', 'giveflow-fundraising-campaigns')),
-                        'placeholder' => (string) ($attrs['placeholder'] ?? __('Anything you want to share?', 'giveflow-fundraising-campaigns')),
+                        'label'       => (string) ($attrs['label']       ?? __('Add a message', 'fundkit-fundraising-campaigns')),
+                        'placeholder' => (string) ($attrs['placeholder'] ?? __('Anything you want to share?', 'fundkit-fundraising-campaigns')),
                         'required'    => (bool)   ($attrs['required']    ?? false),
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/anonymous-toggle':
-                    $privacyCfg     = get_option('giveflow_privacy', []);
+                case 'fundkit/anonymous-toggle':
+                    $privacyCfg     = get_option('fundkit_privacy', []);
                     $globalDefault  = is_array($privacyCfg) && ! empty($privacyCfg['always_anonymous_default']);
                     $items[] = $tagRow([
                         'kind'      => 'anonymous',
-                        'label'     => (string) ($attrs['label']     ?? __('Make this donation anonymous', 'giveflow-fundraising-campaigns')),
+                        'label'     => (string) ($attrs['label']     ?? __('Make this donation anonymous', 'fundkit-fundraising-campaigns')),
                         'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false) || $globalDefault,
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/cover-fees':
+                case 'fundkit/cover-fees':
                     $items[] = $tagRow([
                         'kind'      => 'cover_fees',
-                        'label'     => (string) ($attrs['label']     ?? __('Cover the processing fee so 100% of my donation reaches you', 'giveflow-fundraising-campaigns')),
+                        'label'     => (string) ($attrs['label']     ?? __('Cover the processing fee so 100% of my donation reaches you', 'fundkit-fundraising-campaigns')),
                         'percent'   => (float)  ($attrs['percent']   ?? 2.9),
                         'fixed'     => (int)    ($attrs['fixed']     ?? 30),
                         'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false),
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/fund-picker':
+                case 'fundkit/fund-picker':
                     $fpAllow      = (bool) ($attrs['allowEmpty'] ?? false);
-                    $fpRepo       = new \GiveFlow\Funds\FundRepository();
+                    $fpRepo       = new \FundKit\Funds\FundRepository();
                     $fpAllowedIds = array_values(array_filter(array_map('intval', (array) ($attrs['fundIds'] ?? []))));
                     $fpOptions    = $fpRepo->pickerOptions($fpAllowedIds !== [] ? $fpAllowedIds : null, true);
 
@@ -1167,7 +1167,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/address':
+                case 'fundkit/address':
                     $items[] = $tagRow([
                         'kind'           => 'address',
                         'label'          => (string) ($attrs['label']          ?? ''),
@@ -1191,7 +1191,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/consent':
+                case 'fundkit/consent':
                     // Resolved from the org registry, same as the server render:
                     // the block names purposes, it does not define them, so a
                     // key the org deleted drops out rather than being invented.
@@ -1220,7 +1220,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/donation-summary':
+                case 'fundkit/donation-summary':
                     // A decoration, not a field: it reads state back rather than
                     // collecting anything, and only decorations reach
                     // renderDecorationItem.
@@ -1231,7 +1231,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $attrs);
                     break;
 
-                case 'giveflow/terms':
+                case 'fundkit/terms':
                     if (TermsBlock::isConfigured($attrs)) {
                         $items[] = $tagRow([
                             'kind'     => 'terms',
@@ -1244,7 +1244,7 @@ final class DonationFormShortcode extends HookProvider
                     }
                     break;
 
-                case 'giveflow/donation-amount':
+                case 'fundkit/donation-amount':
                     // The amount UI is a fixed step, so preceding content leads
                     // it as its own step rather than nesting inside it.
                     $flushItems();
@@ -1265,7 +1265,7 @@ final class DonationFormShortcode extends HookProvider
                         }
                     }
                     $presets = DonationAmountBlock::normalizePresets($raw);
-                    $presets = (array) apply_filters('giveflow.form.amounts', $presets, $form, $variant, $visitor);
+                    $presets = (array) apply_filters('fundkit.form.amounts', $presets, $form, $variant, $visitor);
                     $steps[] = [
                         'type'        => 'amount',
                         'page'        => $currentPage,
@@ -1274,7 +1274,7 @@ final class DonationFormShortcode extends HookProvider
                     ];
                     break;
 
-                case 'giveflow/submit-button':
+                case 'fundkit/submit-button':
                     $flushItems();
                     $sbAlign = (string) ($attrs['align'] ?? 'left');
                     if (! in_array($sbAlign, ['left', 'center', 'right', 'full'], true)) {
@@ -1283,12 +1283,12 @@ final class DonationFormShortcode extends HookProvider
                     $steps[] = [
                         'type'        => 'submit',
                         'page'        => $currentPage,
-                        'label'       => (string) ($attrs['label'] ?? __('Donate now', 'giveflow-fundraising-campaigns')),
+                        'label'       => (string) ($attrs['label'] ?? __('Donate now', 'fundkit-fundraising-campaigns')),
                         'align'       => $sbAlign,
                     ];
                     break;
 
-                case 'giveflow/date':
+                case 'fundkit/date':
                     $items[] = $tagRow([
                         'kind'     => 'date',
                         'label'    => (string) ($attrs['label']    ?? ''),
@@ -1300,7 +1300,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/text-input':
+                case 'fundkit/text-input':
                     $items[] = $tagRow([
                         'kind'        => 'text',
                         'label'       => (string) ($attrs['label']       ?? ''),
@@ -1313,7 +1313,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/number-input':
+                case 'fundkit/number-input':
                     $nMin  = $attrs['min']  ?? null;
                     $nMax  = $attrs['max']  ?? null;
                     $nStep = $attrs['step'] ?? 1;
@@ -1330,7 +1330,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/recurring-toggle':
+                case 'fundkit/recurring-toggle':
                     $rFreqs = RecurringToggleBlock::normalizeFrequencies($attrs['frequencies'] ?? RecurringToggleBlock::DEFAULT_FREQUENCIES);
                     if (! in_array('one-time', $rFreqs, true) && ! empty($rFreqs)) {
                         array_unshift($rFreqs, 'one-time');
@@ -1354,7 +1354,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/dropdown':
+                case 'fundkit/dropdown':
                     $dOptions = DropdownBlock::normalizeOptions($attrs['options'] ?? null);
                     $dDefault = '';
                     foreach ($dOptions as $opt) {
@@ -1371,7 +1371,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/radio':
+                case 'fundkit/radio':
                     $rOptions = DropdownBlock::normalizeOptions($attrs['options'] ?? null);
                     $rrDefault = '';
                     foreach ($rOptions as $opt) {
@@ -1390,7 +1390,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/checkbox':
+                case 'fundkit/checkbox':
                     $items[] = $tagRow([
                         'kind'      => 'checkbox',
                         'label'     => (string) ($attrs['label']    ?? ''),
@@ -1401,7 +1401,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'giveflow/multi-select':
+                case 'fundkit/multi-select':
                     $msOptions = DropdownBlock::normalizeOptions($attrs['options'] ?? null);
                     $msDefaults = [];
                     foreach ($msOptions as $opt) {
@@ -1423,7 +1423,7 @@ final class DonationFormShortcode extends HookProvider
                     // A field block shipped outside core answers with the runtime
                     // item its component renders from; a block nobody claims stays
                     // out of the config rather than reaching the donor half-built.
-                    $extra = apply_filters('giveflow.form.block_field', null, $name, $attrs, $form);
+                    $extra = apply_filters('fundkit.form.block_field', null, $name, $attrs, $form);
                     if (is_array($extra) && isset($extra['kind'])) {
                         $items[] = $tagRow($extra, $row, $attrs);
                     }
@@ -1440,7 +1440,7 @@ final class DonationFormShortcode extends HookProvider
             if ($s['type'] === 'submit') { $hasSubmit = true; break; }
         }
         if (! $hasSubmit) {
-            $steps[] = ['type' => 'submit', 'page' => $currentPage, 'label' => __('Donate now', 'giveflow-fundraising-campaigns')];
+            $steps[] = ['type' => 'submit', 'page' => $currentPage, 'label' => __('Donate now', 'fundkit-fundraising-campaigns')];
         }
 
         // Walker pages are 1-indexed; runtime wants dense 0-indexed.
@@ -1480,7 +1480,7 @@ final class DonationFormShortcode extends HookProvider
         $scan = function (array $list) use (&$scan, &$found): void {
             foreach ($list as $b) {
                 if ($found !== null) return;
-                if (($b['blockName'] ?? '') === 'giveflow/donation-amount') {
+                if (($b['blockName'] ?? '') === 'fundkit/donation-amount') {
                     $c = strtoupper((string) ($b['attrs']['currency'] ?? ''));
                     if ($c !== '') { $found = $c; return; }
                 }
@@ -1500,7 +1500,7 @@ final class DonationFormShortcode extends HookProvider
         $blocks = parse_blocks((string) $form->blocks);
         $scan = function (array $list) use (&$scan, &$codes): void {
             foreach ($list as $b) {
-                if (($b['blockName'] ?? '') === 'giveflow/currency-switcher') {
+                if (($b['blockName'] ?? '') === 'fundkit/currency-switcher') {
                     foreach (CurrencySwitcherBlock::resolve($b['attrs']['currencies'] ?? []) as $c) {
                         if (! in_array($c, $codes, true)) $codes[] = $c;
                     }
@@ -1520,7 +1520,7 @@ final class DonationFormShortcode extends HookProvider
         $scan = function (array $list) use (&$scan, &$found): void {
             foreach ($list as $b) {
                 if ($found !== null) return;
-                if (($b['blockName'] ?? '') === 'giveflow/currency-switcher') {
+                if (($b['blockName'] ?? '') === 'fundkit/currency-switcher') {
                     $found = CurrencySwitcherBlock::settings(
                         (array) ($b['attrs'] ?? [])
                     );
@@ -1547,7 +1547,7 @@ final class DonationFormShortcode extends HookProvider
         $scan = function (array $list) use (&$scan, &$found): void {
             foreach ($list as $b) {
                 if ($found !== null) return;
-                if (($b['blockName'] ?? '') === 'giveflow/payment-gateways') {
+                if (($b['blockName'] ?? '') === 'fundkit/payment-gateways') {
                     $found = is_array($b['attrs'] ?? null) ? $b['attrs'] : [];
                     return;
                 }
@@ -1566,7 +1566,7 @@ final class DonationFormShortcode extends HookProvider
      */
     private function fxConfig(string $formCurrency, array $switcherCurrencies): array
     {
-        $fx   = new \GiveFlow\Currency\FxRates();
+        $fx   = new \FundKit\Currency\FxRates();
         $base = $fx->base() ?: strtoupper($formCurrency);
 
         $codes = array_values(array_unique(array_merge(
@@ -1588,11 +1588,11 @@ final class DonationFormShortcode extends HookProvider
     /** @since 1.0.0 */
     private function renderError(string $message): string
     {
-        if (! current_user_can('manage_options') && ! current_user_can('manage_giveflow')) {
+        if (! current_user_can('manage_options') && ! current_user_can('manage_fundkit')) {
             return '';
         }
         return sprintf(
-            '<div class="giveflow-donation-form__error" style="padding:12px 16px;border:1px solid #c00;background:#fee;color:#900;font-size:13px;">%s</div>',
+            '<div class="fundkit-donation-form__error" style="padding:12px 16px;border:1px solid #c00;background:#fee;color:#900;font-size:13px;">%s</div>',
             esc_html($message)
         );
     }
@@ -1601,8 +1601,8 @@ final class DonationFormShortcode extends HookProvider
     private function cssVersion(): string
     {
         if ($this->cssVersion === null) {
-            $path = GIVEFLOW_DIR . 'build/donation-form/runtime.css';
-            $this->cssVersion = (string) (@filemtime($path) ?: GIVEFLOW_VERSION);
+            $path = FUNDKIT_DIR . 'build/donation-form/runtime.css';
+            $this->cssVersion = (string) (@filemtime($path) ?: FUNDKIT_VERSION);
         }
         return $this->cssVersion;
     }
@@ -1645,7 +1645,7 @@ final class DonationFormShortcode extends HookProvider
 
         try {
             $clientId = Plugin::instance()->container
-                ->get(\GiveFlow\Gateways\PayPal\PayPalAccount::class)
+                ->get(\FundKit\Gateways\PayPal\PayPalAccount::class)
                 ->clientIdFor($testMode);
         } catch (Throwable) {
             return null;
@@ -1698,7 +1698,7 @@ final class DonationFormShortcode extends HookProvider
      */
     private static function amountBlockMinCents($form): int
     {
-        if (! preg_match_all('/<!--\s+wp:giveflow\/donation-amount\s+(\{.*?\})\s+\/?-->/s', (string) $form->blocks, $m)) {
+        if (! preg_match_all('/<!--\s+wp:fundkit\/donation-amount\s+(\{.*?\})\s+\/?-->/s', (string) $form->blocks, $m)) {
             return 0;
         }
 

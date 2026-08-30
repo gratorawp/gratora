@@ -35,21 +35,21 @@ function initials( name ) {
 function donorKpis( stats ) {
     return [
         {
-            label: __( 'Total donors', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Total donors', 'fundkit-fundraising-campaigns' ),
             value: stats ? stats.total_count.toLocaleString() : '-',
         },
         {
-            label: __( 'With donations', 'giveflow-fundraising-campaigns' ),
+            label: __( 'With donations', 'fundkit-fundraising-campaigns' ),
             value: stats ? stats.with_donations.toLocaleString() : '-',
         },
         {
-            label: __( 'Lifetime given', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Lifetime given', 'fundkit-fundraising-campaigns' ),
             value: stats && stats.total_donated_cents > 0
                 ? formatAmount( stats.total_donated_cents )
                 : '-',
         },
         {
-            label: __( 'Avg lifetime value', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Avg lifetime value', 'fundkit-fundraising-campaigns' ),
             value: stats && stats.avg_ltv_cents > 0
                 ? formatAmount( stats.avg_ltv_cents )
                 : '-',
@@ -87,7 +87,7 @@ export function DonorsApp( { toggleSlot } ) {
         setError( null );
 
         apiFetch( {
-            path: addQueryArgs( '/giveflow/v1/admin/donors', {
+            path: addQueryArgs( '/fundkit/v1/admin/donors', {
                 page:       view.page,
                 per_page:   view.perPage,
                 orderby:    view.sort?.field === 'total_donated'
@@ -110,12 +110,12 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( aborted ) return;
                 setData( [] );
                 setTotal( 0 );
-                setError( err?.message || __( 'Failed to load donors.', 'giveflow-fundraising-campaigns' ) );
+                setError( err?.message || __( 'Failed to load donors.', 'fundkit-fundraising-campaigns' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
         apiFetch( {
-            path: addQueryArgs( '/giveflow/v1/admin/donors/stats', {
+            path: addQueryArgs( '/fundkit/v1/admin/donors/stats', {
                 search:     view.search || undefined,
                 country:    filterValue( 'country' )    || undefined,
                 donor_type: filterValue( 'donor_type' ) || undefined,
@@ -134,28 +134,28 @@ export function DonorsApp( { toggleSlot } ) {
     const fields = useMemo( () => [
         {
             id:    'name',
-            label: __( 'Name', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Name', 'fundkit-fundraising-campaigns' ),
             render: ( { item } ) => {
-                const name = item.name || __( '(no name)', 'giveflow-fundraising-campaigns' );
+                const name = item.name || __( '(no name)', 'fundkit-fundraising-campaigns' );
                 return (
-                    <div className="giveflow-row">
-                        <span className="giveflow-row__avatar" aria-hidden="true">
+                    <div className="fundkit-row">
+                        <span className="fundkit-row__avatar" aria-hidden="true">
                             { initials( name ) }
                             { item.avatar_url && (
-                                <img className="giveflow-row__avatar-photo" src={ item.avatar_url } alt="" loading="lazy" decoding="async" />
+                                <img className="fundkit-row__avatar-photo" src={ item.avatar_url } alt="" loading="lazy" decoding="async" />
                             ) }
                         </span>
-                        <div className="giveflow-row__body">
-                            <span className="giveflow-ref-cell">
-                                <a className="giveflow-row__link giveflow-row__link--strong" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
+                        <div className="fundkit-row__body">
+                            <span className="fundkit-ref-cell">
+                                <a className="fundkit-row__link fundkit-row__link--strong" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
                                     { name }
                                 </a>
                                 { item.is_test_only && (
-                                    <span className="giveflow-pill giveflow-pill--test">{ __( 'Test', 'giveflow-fundraising-campaigns' ) }</span>
+                                    <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundkit-fundraising-campaigns' ) }</span>
                                 ) }
                             </span>
                             { item.donor_type && item.donor_type !== 'individual' && (
-                                <div className="giveflow-row__sub" style={ { textTransform: 'capitalize' } }>
+                                <div className="fundkit-row__sub" style={ { textTransform: 'capitalize' } }>
                                     { item.donor_type }
                                 </div>
                             ) }
@@ -166,75 +166,75 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'email',
-            label: __( 'Email', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Email', 'fundkit-fundraising-campaigns' ),
             render: ( { item } ) => (
                 item.email
-                    ? <span className="giveflow-mono">{ item.email }</span>
-                    : <span className="giveflow-row__sub">-</span>
+                    ? <span className="fundkit-mono">{ item.email }</span>
+                    : <span className="fundkit-row__sub">-</span>
             ),
         },
         {
             id:    'country',
-            label: __( 'Country', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Country', 'fundkit-fundraising-campaigns' ),
             elements: COUNTRIES.map( ( c ) => ( { value: c.code, label: `${ c.code } - ${ c.name }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
                 item.country
                     ? (
-                        <span className="giveflow-country">
-                            <span className="giveflow-country__code">{ item.country }</span>
+                        <span className="fundkit-country">
+                            <span className="fundkit-country__code">{ item.country }</span>
                         </span>
                     )
-                    : <span className="giveflow-row__sub">-</span>
+                    : <span className="fundkit-row__sub">-</span>
             ),
         },
         {
             id:    'donor_type',
-            label: __( 'Donor type', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Donor type', 'fundkit-fundraising-campaigns' ),
             elements: [
-                { value: 'individual',   label: __( 'Individual', 'giveflow-fundraising-campaigns' ) },
-                { value: 'organization', label: __( 'Organization', 'giveflow-fundraising-campaigns' ) },
-                { value: 'household',    label: __( 'Household', 'giveflow-fundraising-campaigns' ) },
+                { value: 'individual',   label: __( 'Individual', 'fundkit-fundraising-campaigns' ) },
+                { value: 'organization', label: __( 'Organization', 'fundkit-fundraising-campaigns' ) },
+                { value: 'household',    label: __( 'Household', 'fundkit-fundraising-campaigns' ) },
             ],
             filterBy: { operators: [ 'is' ] },
             getValue: ( { item } ) => item.donor_type || 'individual',
             render:   ( { item } ) => (
-                <span className="giveflow-row__sub" style={ { textTransform: 'capitalize' } }>
+                <span className="fundkit-row__sub" style={ { textTransform: 'capitalize' } }>
                     { item.donor_type || 'individual' }
                 </span>
             ),
         },
         {
             id:            'donations_count',
-            label:         __( '#', 'giveflow-fundraising-campaigns' ),
+            label:         __( '#', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <span className="giveflow-amount giveflow-amount--num">{ item.donations_count }</span>
+                <span className="fundkit-amount fundkit-amount--num">{ item.donations_count }</span>
             ),
         },
         {
             id:            'total_donated',
-            label:         __( 'Total', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Total', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <span className="giveflow-amount">
+                <span className="fundkit-amount">
                     { formatAmount( item.total_donated_cents ) }
                 </span>
             ),
         },
         {
             id:            'last_donation_at',
-            label:         __( 'Last donation', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Last donation', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
                 item.last_donation_at
                     ? (
-                        <span className="giveflow-time" title={ formatDate( item.last_donation_at ) }>
-                            <span className="giveflow-time__rel">{ timeAgo( item.last_donation_at ) }</span>
-                            <span className="giveflow-time__abs">{ formatDate( item.last_donation_at ) }</span>
+                        <span className="fundkit-time" title={ formatDate( item.last_donation_at ) }>
+                            <span className="fundkit-time__rel">{ timeAgo( item.last_donation_at ) }</span>
+                            <span className="fundkit-time__abs">{ formatDate( item.last_donation_at ) }</span>
                         </span>
                     )
-                    : <span className="giveflow-row__sub">-</span>
+                    : <span className="fundkit-row__sub">-</span>
             ),
         },
     ], [] );
@@ -250,7 +250,7 @@ export function DonorsApp( { toggleSlot } ) {
     const actions = useMemo( () => [
         {
             id:            'delete',
-            label:         __( 'Delete', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Delete', 'fundkit-fundraising-campaigns' ),
             icon:          () => <DeleteIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -264,29 +264,29 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( ! items.length ) return;
                 const n = items.length;
                 setConfirm( {
-                    title:        _n( 'Delete donor', 'Delete donors', n, 'giveflow-fundraising-campaigns' ),
+                    title:        _n( 'Delete donor', 'Delete donors', n, 'fundkit-fundraising-campaigns' ),
                     message: n === 1
-                        ? __( 'Delete this donor? They have no donations, so nothing is kept: the record and anything describing it go for good.', 'giveflow-fundraising-campaigns' )
+                        ? __( 'Delete this donor? They have no donations, so nothing is kept: the record and anything describing it go for good.', 'fundkit-fundraising-campaigns' )
                         : sprintf(
                             /* translators: %d: number of donors to delete */
                             _n(
                                 'Delete %d donor? They have no donations, so nothing is kept.',
                                 'Delete %d donors? They have no donations, so nothing is kept.',
                                 n,
-                                'giveflow-fundraising-campaigns'
+                                'fundkit-fundraising-campaigns'
                             ),
                             n
                         ),
-                    confirmLabel: __( 'Delete', 'giveflow-fundraising-campaigns' ),
+                    confirmLabel: __( 'Delete', 'fundkit-fundraising-campaigns' ),
                     destructive:  true,
                     onConfirm: async () => {
                         try {
                             await Promise.all( items.map( ( i ) => apiFetch( {
-                                path:   `/giveflow/v1/admin/donors/${ i.id }`,
+                                path:   `/fundkit/v1/admin/donors/${ i.id }`,
                                 method: 'DELETE',
                             } ) ) );
                         } catch ( err ) {
-                            setError( err?.message || __( 'Could not delete one or more donors.', 'giveflow-fundraising-campaigns' ) );
+                            setError( err?.message || __( 'Could not delete one or more donors.', 'fundkit-fundraising-campaigns' ) );
                         } finally {
                             load();
                         }
@@ -296,7 +296,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'redact',
-            label:         __( 'Redact (anonymize)', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Redact (anonymize)', 'fundkit-fundraising-campaigns' ),
             icon:          () => <RedactIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -305,35 +305,35 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( ! items.length ) return;
                 const n = items.length;
                 const message = n === 1
-                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row and any active recurring plan is cancelled at the gateway, but their donations stay attached and counted. This cannot be undone.', 'giveflow-fundraising-campaigns' )
+                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row and any active recurring plan is cancelled at the gateway, but their donations stay attached and counted. This cannot be undone.', 'fundkit-fundraising-campaigns' )
                     : sprintf(
                         /* translators: %d: number of donors to redact */
                         _n(
                             'Redact %d donor? Their PII is wiped from the donor rows and any active recurring plan is cancelled at the gateway, but donations stay attached and counted. This cannot be undone.',
                             'Redact %d donors? Their PII is wiped from the donor rows and any active recurring plan is cancelled at the gateway, but donations stay attached and counted. This cannot be undone.',
                             n,
-                            'giveflow-fundraising-campaigns'
+                            'fundkit-fundraising-campaigns'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        _n( 'Redact donor', 'Redact donors', n, 'giveflow-fundraising-campaigns' ),
+                    title:        _n( 'Redact donor', 'Redact donors', n, 'fundkit-fundraising-campaigns' ),
                     message,
-                    confirmLabel: __( 'Redact', 'giveflow-fundraising-campaigns' ),
+                    confirmLabel: __( 'Redact', 'fundkit-fundraising-campaigns' ),
                     destructive:  true,
                     // The callback fills the server's confirmation from each
                     // row, so nothing else stands between one click and erased
                     // PII here.
-                    requireText:  __( 'REDACT', 'giveflow-fundraising-campaigns' ),
+                    requireText:  __( 'REDACT', 'fundkit-fundraising-campaigns' ),
                     onConfirm: async () => {
                         try {
                             await Promise.all( items.map( ( i ) => apiFetch( {
-                                path:   `/giveflow/v1/admin/donors/${ i.id }/redact`,
+                                path:   `/fundkit/v1/admin/donors/${ i.id }/redact`,
                                 method: 'POST',
                                 data:   { confirmation: i.email || `DONOR_${ i.id }` },
                             } ) ) );
                         } catch ( err ) {
-                            setError( err?.message || __( 'Could not redact one or more donors.', 'giveflow-fundraising-campaigns' ) );
+                            setError( err?.message || __( 'Could not redact one or more donors.', 'fundkit-fundraising-campaigns' ) );
                         } finally {
                             load();
                         }
@@ -345,18 +345,18 @@ export function DonorsApp( { toggleSlot } ) {
 
     return (
         <div>
-            <div className="giveflow-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'GiveFlow', 'giveflow-fundraising-campaigns' ) }</a>
+            <div className="fundkit-crumbs">
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'FundKit', 'fundkit-fundraising-campaigns' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Donors', 'giveflow-fundraising-campaigns' ) }</span>
+                <span>{ __( 'Donors', 'fundkit-fundraising-campaigns' ) }</span>
             </div>
-            <div className="giveflow-page-head">
-                <div className="giveflow-page-head__title-row">
-                    <h1>{ __( 'Donors', 'giveflow-fundraising-campaigns' ) }</h1>
+            <div className="fundkit-page-head">
+                <div className="fundkit-page-head__title-row">
+                    <h1>{ __( 'Donors', 'fundkit-fundraising-campaigns' ) }</h1>
                 </div>
-                <div className="giveflow-page-head__right">
-                    <span className="giveflow-page-head__meta">
-                        { sprintf( /* translators: %s: number of donors */ _n( '%s donor', '%s donors', total, 'giveflow-fundraising-campaigns' ), total.toLocaleString() ) }
+                <div className="fundkit-page-head__right">
+                    <span className="fundkit-page-head__meta">
+                        { sprintf( /* translators: %s: number of donors */ _n( '%s donor', '%s donors', total, 'fundkit-fundraising-campaigns' ), total.toLocaleString() ) }
                     </span>
                     { toggleSlot }
                 </div>
@@ -371,11 +371,11 @@ export function DonorsApp( { toggleSlot } ) {
             { ! loading && ! error && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No donors yet', 'giveflow-fundraising-campaigns' ) }
-                    body={ __( 'Anyone who donates is added here. Publish a form to take the first one.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'No donors yet', 'fundkit-fundraising-campaigns' ) }
+                    body={ __( 'Anyone who donates is added here. Publish a form to take the first one.', 'fundkit-fundraising-campaigns' ) }
                 />
             ) : (
-                <div className={ `giveflow-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
+                <div className={ `fundkit-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
                     <DataViews
                         data={ data }
                         isLoading={ loading }
@@ -392,11 +392,11 @@ export function DonorsApp( { toggleSlot } ) {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'giveflow-fundraising-campaigns' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'giveflow-fundraising-campaigns' ) }
+                            title={ __( 'Nothing matches these filters', 'fundkit-fundraising-campaigns' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundkit-fundraising-campaigns' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'giveflow-fundraising-campaigns' ) }
+                                    { __( 'Clear filters', 'fundkit-fundraising-campaigns' ) }
                                 </Btn>
                             }
                         />
@@ -436,10 +436,10 @@ function IconInsights() {
 function ViewToggle( { active, onChange } ) {
     return (
         <div
-            className="giveflow-view-toggle"
+            className="fundkit-view-toggle"
             role="tablist"
             tabIndex={ -1 }
-            aria-label={ __( 'Donor sections', 'giveflow-fundraising-campaigns' ) }
+            aria-label={ __( 'Donor sections', 'fundkit-fundraising-campaigns' ) }
             onKeyDown={ ( e ) => tablistKeyDown( e, [ 'list', 'insights' ], active, onChange ) }
         >
             <button
@@ -447,22 +447,22 @@ function ViewToggle( { active, onChange } ) {
                 role="tab"
                 aria-selected={ active === 'list' }
                 tabIndex={ active === 'list' ? 0 : -1 }
-                className={ `giveflow-cmp-toggle${ active === 'list' ? ' is-active' : '' }` }
+                className={ `fundkit-cmp-toggle${ active === 'list' ? ' is-active' : '' }` }
                 onClick={ () => onChange( 'list' ) }
             >
                 <IconList />
-                { __( 'List', 'giveflow-fundraising-campaigns' ) }
+                { __( 'List', 'fundkit-fundraising-campaigns' ) }
             </button>
             <button
                 type="button"
                 role="tab"
                 aria-selected={ active === 'insights' }
                 tabIndex={ active === 'insights' ? 0 : -1 }
-                className={ `giveflow-cmp-toggle${ active === 'insights' ? ' is-active' : '' }` }
+                className={ `fundkit-cmp-toggle${ active === 'insights' ? ' is-active' : '' }` }
                 onClick={ () => onChange( 'insights' ) }
             >
                 <IconInsights />
-                { __( 'Insights', 'giveflow-fundraising-campaigns' ) }
+                { __( 'Insights', 'fundkit-fundraising-campaigns' ) }
             </button>
         </div>
     );
@@ -500,7 +500,7 @@ function DonorsRoot() {
 }
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'giveflow-admin-donors' );
+    const root = document.getElementById( 'fundkit-admin-donors' );
     if ( ! root ) return;
     createRoot( root ).render( <><DonorsRoot /><Toaster /></> );
 } );

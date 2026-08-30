@@ -42,31 +42,31 @@ export default function QuickActions() {
         setCreating( true );
         try {
             const c = await apiFetch( {
-                path:   '/giveflow/v1/admin/campaigns',
+                path:   '/fundkit/v1/admin/campaigns',
                 method: 'POST',
-                data:   { title: __( 'Untitled campaign', 'giveflow-fundraising-campaigns' ) },
+                data:   { title: __( 'Untitled campaign', 'fundkit-fundraising-campaigns' ) },
             } );
             window.location.href = detailHref( c.id, 'overview' );
         } catch ( err ) {
             setCreating( false );
-            notify.error( err?.message || __( 'Could not create the campaign. Please try again.', 'giveflow-fundraising-campaigns' ) );
+            notify.error( err?.message || __( 'Could not create the campaign. Please try again.', 'fundkit-fundraising-campaigns' ) );
         }
     };
 
     return (
-        <div className="giveflow-quick-actions">
-            <Button variant="primary" onClick={ onNewCampaign } isBusy={ creating } disabled={ creating } className="giveflow-quick-actions__primary">
-                { ICON.plus } { __( 'New campaign', 'giveflow-fundraising-campaigns' ) }
+        <div className="fundkit-quick-actions">
+            <Button variant="primary" onClick={ onNewCampaign } isBusy={ creating } disabled={ creating } className="fundkit-quick-actions__primary">
+                { ICON.plus } { __( 'New campaign', 'fundkit-fundraising-campaigns' ) }
             </Button>
 
-            <a className="giveflow-quick-actions__item" href={ adminUrl( { page: 'giveflow-donations' } ) }>
-                { ICON.donations } { __( 'Donations', 'giveflow-fundraising-campaigns' ) }
+            <a className="fundkit-quick-actions__item" href={ adminUrl( { page: 'fundkit-donations' } ) }>
+                { ICON.donations } { __( 'Donations', 'fundkit-fundraising-campaigns' ) }
             </a>
-            <a className="giveflow-quick-actions__item" href={ adminUrl( { page: 'giveflow-donors' } ) }>
-                { ICON.donors } { __( 'Donors', 'giveflow-fundraising-campaigns' ) }
+            <a className="fundkit-quick-actions__item" href={ adminUrl( { page: 'fundkit-donors' } ) }>
+                { ICON.donors } { __( 'Donors', 'fundkit-fundraising-campaigns' ) }
             </a>
-            <a className="giveflow-quick-actions__item" href={ adminUrl( { page: 'giveflow-settings' } ) }>
-                { ICON.settings } { __( 'Settings', 'giveflow-fundraising-campaigns' ) }
+            <a className="fundkit-quick-actions__item" href={ adminUrl( { page: 'fundkit-settings' } ) }>
+                { ICON.settings } { __( 'Settings', 'fundkit-fundraising-campaigns' ) }
             </a>
         </div>
     );

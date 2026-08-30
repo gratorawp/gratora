@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donors;
+namespace FundKit\Donors;
 
 defined('ABSPATH') || exit;
 
-use GiveFlow\Vendor\Queryable\Model;
-use GiveFlow\Vendor\Queryable\Schema\Table;
+use FundKit\Vendor\Queryable\Model;
+use FundKit\Vendor\Queryable\Schema\Table;
 
 /**
  * Append-only consent record. Revocation inserts a new row with granted=false;
@@ -22,7 +22,7 @@ use GiveFlow\Vendor\Queryable\Schema\Table;
  */
 final class Consent extends Model
 {
-    protected string $table = 'giveflow_consents';
+    protected string $table = 'fundkit_consents';
     protected string $version = '1.0.0';
 
     public int $id;

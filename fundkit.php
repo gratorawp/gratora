@@ -1,22 +1,22 @@
 <?php
 /**
- * Plugin Name: GiveFlow Fundraising Campaigns
+ * Plugin Name: FundKit Fundraising Campaigns
  * Plugin URI: https://giveflow.io
  * Description: A fundraising platform for WordPress
  * Version: 1.0.0
  * Requires at least: 7.0
  * Requires PHP: 8.1
- * Author: GiveFlow
+ * Author: FundKit
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: giveflow-fundraising-campaigns
+ * Text Domain: fundkit-fundraising-campaigns
  * Domain Path: /languages
  */
 
 /**
- * GiveFlow, a fundraising platform for WordPress.
+ * FundKit, a fundraising platform for WordPress.
  *
- * Copyright (C) 2026 GiveFlow
+ * Copyright (C) 2026 FundKit
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -35,9 +35,9 @@
 
 declare(strict_types=1);
 
-use GiveFlow\Admin\Pages\FormsPage;
-use GiveFlow\Cli\CliCommands;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Admin\Pages\FormsPage;
+use FundKit\Cli\CliCommands;
+use FundKit\Foundation\Plugin;
 
 if (! defined('ABSPATH')) {
     exit;
@@ -47,11 +47,11 @@ require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/vendor/vendor-prefixed/autoload.php';
 require_once __DIR__ . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
 
-define('GIVEFLOW_VERSION', '1.0.0');
-define('GIVEFLOW_DB_VERSION', '1.0.5');
-define('GIVEFLOW_FILE', __FILE__);
-define('GIVEFLOW_DIR', plugin_dir_path(__FILE__));
-define('GIVEFLOW_URL', plugin_dir_url(__FILE__));
+define('FUNDKIT_VERSION', '1.0.0');
+define('FUNDKIT_DB_VERSION', '1.0.6');
+define('FUNDKIT_FILE', __FILE__);
+define('FUNDKIT_DIR', plugin_dir_path(__FILE__));
+define('FUNDKIT_URL', plugin_dir_url(__FILE__));
 
 register_activation_hook(__FILE__, [ Plugin::class, 'onPluginActivated']);
 register_deactivation_hook(__FILE__, [ Plugin::class, 'onDeactivation']);
@@ -61,11 +61,11 @@ add_action('plugins_loaded', static function (): void {
 
     if (defined('WP_CLI') && WP_CLI) {
         $cli = new CliCommands();
-        WP_CLI::add_command('giveflow migrate', [$cli, 'migrate']);
-        WP_CLI::add_command('giveflow recompute-aggregates', [$cli, 'recompute_aggregates']);
-        WP_CLI::add_command('giveflow seed', [$cli, 'seed']);
-        WP_CLI::add_command('giveflow demo-seed', [$cli, 'demo_seed']);
-        WP_CLI::add_command('giveflow e2e-seed', [$cli, 'e2e_seed']);
+        WP_CLI::add_command('fundkit migrate', [$cli, 'migrate']);
+        WP_CLI::add_command('fundkit recompute-aggregates', [$cli, 'recompute_aggregates']);
+        WP_CLI::add_command('fundkit seed', [$cli, 'seed']);
+        WP_CLI::add_command('fundkit demo-seed', [$cli, 'demo_seed']);
+        WP_CLI::add_command('fundkit e2e-seed', [$cli, 'e2e_seed']);
     }
 });
 

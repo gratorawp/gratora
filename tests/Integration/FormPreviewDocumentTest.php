@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\CampaignRepository;
-use GiveFlow\Campaigns\Styling\CampaignStyleResolver;
-use GiveFlow\Forms\FormRepository;
-use GiveFlow\Forms\Shortcode\DonationFormShortcode;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\GatewayManager;
+use FundKit\Campaigns\CampaignRepository;
+use FundKit\Campaigns\Styling\CampaignStyleResolver;
+use FundKit\Forms\FormRepository;
+use FundKit\Forms\Shortcode\DonationFormShortcode;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\GatewayManager;
 
 /**
  * The editor preview is an iframe srcdoc, so it has no wp_scripts queue: every
@@ -40,8 +40,8 @@ final class FormPreviewDocumentTest extends IntegrationTestCase
 
     private function document(): string
     {
-        $blocks = '<!-- wp:giveflow/donation-amount /--><!-- wp:giveflow/name /-->'
-            . '<!-- wp:giveflow/email /--><!-- wp:giveflow/submit-button /-->';
+        $blocks = '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/name /-->'
+            . '<!-- wp:fundkit/email /--><!-- wp:fundkit/submit-button /-->';
 
         $shortcode = $this->shortcode();
 

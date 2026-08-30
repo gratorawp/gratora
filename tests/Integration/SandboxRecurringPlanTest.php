@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\CampaignService;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\Sandbox\SandboxGateway;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanRepository;
+use FundKit\Campaigns\CampaignService;
+use FundKit\Donations\Donation;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\Sandbox\SandboxGateway;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -29,7 +29,7 @@ final class SandboxRecurringPlanTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('giveflow_gateway_config', [
+        update_option('fundkit_gateway_config', [
             'test_mode' => true,
             'sandbox'   => ['enabled' => true],
         ]);
@@ -105,14 +105,14 @@ final class SandboxRecurringPlanTest extends IntegrationTestCase
      */
     private function donate(array $overrides = []): array
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(array_merge([
             'campaign_id'  => $this->seedCampaign(),
             'gateway'      => 'sandbox',
             'amount_cents' => 1500,
             'currency'     => 'EUR',
-            'email'        => 'sandbox-rec-' . uniqid() . '@giveflow.test',
+            'email'        => 'sandbox-rec-' . uniqid() . '@fundkit.test',
             'profile'      => ['first_name' => 'Sandy', 'last_name' => 'Recurring'],
         ], $overrides)));
 

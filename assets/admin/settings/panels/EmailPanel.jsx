@@ -25,7 +25,7 @@ export default function EmailPanel( { s } ) {
         try {
             const data = testTo.trim() ? { to: testTo.trim() } : {};
             const res  = await apiFetch( {
-                path:   '/giveflow/v1/admin/email/test-send',
+                path:   '/fundkit/v1/admin/email/test-send',
                 method: 'POST',
                 data,
             } );
@@ -37,16 +37,16 @@ export default function EmailPanel( { s } ) {
                 type: unauthenticated ? 'warning' : 'success',
                 text: sprintf(
                     /* translators: %s: recipient address */
-                    __( 'Test email sent to %s. Check the inbox and the spam folder.', 'giveflow-fundraising-campaigns' ),
-                    res?.to || __( 'the recipient', 'giveflow-fundraising-campaigns' )
+                    __( 'Test email sent to %s. Check the inbox and the spam folder.', 'fundkit-fundraising-campaigns' ),
+                    res?.to || __( 'the recipient', 'fundkit-fundraising-campaigns' )
                 ) + ( unauthenticated
-                    ? ' ' + __( 'It went out over PHP mail, which does not authenticate your domain. Gmail and Outlook reject unauthenticated mail outright, so this can be accepted here and still never arrive.', 'giveflow-fundraising-campaigns' )
+                    ? ' ' + __( 'It went out over PHP mail, which does not authenticate your domain. Gmail and Outlook reject unauthenticated mail outright, so this can be accepted here and still never arrive.', 'fundkit-fundraising-campaigns' )
                     : '' ),
             } );
         } catch ( err ) {
             setTestNotice( {
                 type: 'error',
-                text: err?.message || __( 'Send failed.', 'giveflow-fundraising-campaigns' ),
+                text: err?.message || __( 'Send failed.', 'fundkit-fundraising-campaigns' ),
             } );
         } finally {
             setTesting( false );
@@ -54,53 +54,53 @@ export default function EmailPanel( { s } ) {
     };
 
     return (
-        <div className="giveflow-panel">
+        <div className="fundkit-panel">
             <Card
-                title={ __( 'Sender identity', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Sender identity', 'fundkit-fundraising-campaigns' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'From name', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Shown as the sender in the donor inbox.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'From name', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Shown as the sender in the donor inbox.', 'fundkit-fundraising-campaigns' ) }
                 >
-                    <input type="text" className="giveflow-input" { ...s.bind( 'from_name' ) } />
+                    <input type="text" className="fundkit-input" { ...s.bind( 'from_name' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'From email', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Use an address on a domain you control.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'From email', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Use an address on a domain you control.', 'fundkit-fundraising-campaigns' ) }
                 >
-                    <input type="email" className="giveflow-input" { ...s.bind( 'from_email' ) } />
+                    <input type="email" className="fundkit-input" { ...s.bind( 'from_email' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'Reply-to', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Where donor replies arrive. Defaults to From email.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Reply-to', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Where donor replies arrive. Defaults to From email.', 'fundkit-fundraising-campaigns' ) }
                 >
-                    <input type="email" className="giveflow-input" { ...s.bind( 'reply_to' ) } />
+                    <input type="email" className="fundkit-input" { ...s.bind( 'reply_to' ) } />
                 </FormRow>
                 <ToggleRow
-                    title={ __( 'BCC me on every donation receipt', 'giveflow-fundraising-campaigns' ) }
-                    sub={ __( 'Sends a copy to the admin email.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'BCC me on every donation receipt', 'fundkit-fundraising-campaigns' ) }
+                    sub={ __( 'Sends a copy to the admin email.', 'fundkit-fundraising-campaigns' ) }
                     checked={ !! s.value( 'bcc_admin', false ) }
                     onChange={ s.setValue( 'bcc_admin' ) }
                 />
             </Card>
 
             <Card
-                title={ __( 'Send a test email', 'giveflow-fundraising-campaigns' ) }
-                sub={ __( 'Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Send a test email', 'fundkit-fundraising-campaigns' ) }
+                sub={ __( 'Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank.', 'fundkit-fundraising-campaigns' ) }
             >
-                <FormRow label={ __( 'Recipient', 'giveflow-fundraising-campaigns' ) }>
+                <FormRow label={ __( 'Recipient', 'fundkit-fundraising-campaigns' ) }>
                     <input
                         type="email"
-                        className="giveflow-input"
+                        className="fundkit-input"
                         value={ testTo }
                         onChange={ ( e ) => setTestTo( e.target.value ) }
-                        placeholder={ __( 'Leave blank to send to your WP user email', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'Leave blank to send to your WP user email', 'fundkit-fundraising-campaigns' ) }
                     />
                 </FormRow>
                 <div style={ { display: 'flex', justifyContent: 'flex-end' } }>
                     <Btn variant="secondary" onClick={ sendTest } disabled={ testing } isBusy={ testing }>
-                        { testing ? __( 'Sending…', 'giveflow-fundraising-campaigns' ) : __( 'Send test email', 'giveflow-fundraising-campaigns' ) }
+                        { testing ? __( 'Sending…', 'fundkit-fundraising-campaigns' ) : __( 'Send test email', 'fundkit-fundraising-campaigns' ) }
                     </Btn>
                 </div>
                 { testNotice && (
@@ -114,45 +114,45 @@ export default function EmailPanel( { s } ) {
                      the first symptom is a donor who never got a receipt for
                      money they gave. Named as a category with a link to the
                      directory, not a recommendation of one vendor. */ }
-                <p className="giveflow-muted" style={ { marginTop: 12 } }>
-                    { __( 'If test emails arrive but donors report nothing, the cause is almost always authentication rather than GiveFlow. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends.', 'giveflow-fundraising-campaigns' ) }
+                <p className="fundkit-muted" style={ { marginTop: 12 } }>
+                    { __( 'If test emails arrive but donors report nothing, the cause is almost always authentication rather than FundKit. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends.', 'fundkit-fundraising-campaigns' ) }
                     { ' ' }
                     <a href="https://wordpress.org/plugins/tags/smtp/" target="_blank" rel="noreferrer noopener">
-                        { __( 'SMTP plugins on WordPress.org', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'SMTP plugins on WordPress.org', 'fundkit-fundraising-campaigns' ) }
                     </a>
                 </p>
             </Card>
 
             <Card
-                title={ __( 'Donor emails', 'giveflow-fundraising-campaigns' ) }
-                sub={ __( 'Sent to donors automatically by GiveFlow', 'giveflow-fundraising-campaigns' ) }
-                meta={ __( 'Click a row to edit', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Donor emails', 'fundkit-fundraising-campaigns' ) }
+                sub={ __( 'Sent to donors automatically by FundKit', 'fundkit-fundraising-campaigns' ) }
+                meta={ __( 'Click a row to edit', 'fundkit-fundraising-campaigns' ) }
             >
-                <div className="giveflow-email-list">
+                <div className="fundkit-email-list">
                     { templates.map( ( t ) => {
                         const enabled = !! s.value( `templates.${ t.id }.enabled`, true );
                         return (
                             <button
                                 key={ t.id }
                                 type="button"
-                                className="giveflow-email-row"
+                                className="fundkit-email-row"
                                 onClick={ () => setEditing( t ) }
                             >
                                 <span
-                                    className={ `giveflow-email-row__dot${ enabled ? ' is-on' : '' }` }
+                                    className={ `fundkit-email-row__dot${ enabled ? ' is-on' : '' }` }
                                     aria-hidden="true"
                                 />
-                                <span className="giveflow-email-row__body">
-                                    <span className="giveflow-email-row__title">
+                                <span className="fundkit-email-row__body">
+                                    <span className="fundkit-email-row__title">
                                         { t.label }
                                         <span className="screen-reader-text">
-                                            { enabled ? __( '(enabled)', 'giveflow-fundraising-campaigns' ) : __( '(disabled)', 'giveflow-fundraising-campaigns' ) }
+                                            { enabled ? __( '(enabled)', 'fundkit-fundraising-campaigns' ) : __( '(disabled)', 'fundkit-fundraising-campaigns' ) }
                                         </span>
                                     </span>
-                                    <span className="giveflow-email-row__desc">{ t.desc }</span>
+                                    <span className="fundkit-email-row__desc">{ t.desc }</span>
                                 </span>
-                                <span className="giveflow-email-row__recipient">{ t.recipient }</span>
-                                <span className="giveflow-email-row__edit">{ __( 'Edit', 'giveflow-fundraising-campaigns' ) }</span>
+                                <span className="fundkit-email-row__recipient">{ t.recipient }</span>
+                                <span className="fundkit-email-row__edit">{ __( 'Edit', 'fundkit-fundraising-campaigns' ) }</span>
                             </button>
                         );
                     } ) }
@@ -188,7 +188,7 @@ const SAMPLE_VALUES = {
 function expandTags( text ) {
     return ( text || '' ).split( /(\{[a-z_]+\})/ ).map( ( part, i ) =>
         /^\{[a-z_]+\}$/.test( part ) && SAMPLE_VALUES[ part ] === undefined
-            ? <span key={ i } className="giveflow-email-preview__tag">{ part }</span>
+            ? <span key={ i } className="fundkit-email-preview__tag">{ part }</span>
             : ( SAMPLE_VALUES[ part ] ?? part )
     );
 }
@@ -245,15 +245,15 @@ function TemplateDialog( { t, s, onClose } ) {
             onClose={ onClose }
             foot={ (
                 <>
-                    <Btn onClick={ onClose }>{ __( 'Cancel', 'giveflow-fundraising-campaigns' ) }</Btn>
-                    <Btn variant="primary" onClick={ done }>{ __( 'Done', 'giveflow-fundraising-campaigns' ) }</Btn>
+                    <Btn onClick={ onClose }>{ __( 'Cancel', 'fundkit-fundraising-campaigns' ) }</Btn>
+                    <Btn variant="primary" onClick={ done }>{ __( 'Done', 'fundkit-fundraising-campaigns' ) }</Btn>
                 </>
             ) }
         >
-            { t.desc && <p className="giveflow-dialog__help">{ t.desc }</p> }
+            { t.desc && <p className="fundkit-dialog__help">{ t.desc }</p> }
 
             <div
-                className="giveflow-email-editor-tabs"
+                className="fundkit-email-editor-tabs"
                 role="tablist"
                 tabIndex={ -1 }
                 onKeyDown={ ( e ) => tablistKeyDown( e, [ 'edit', 'preview' ], view, setView ) }
@@ -263,66 +263,66 @@ function TemplateDialog( { t, s, onClose } ) {
                     role="tab"
                     aria-selected={ view === 'edit' }
                     tabIndex={ view === 'edit' ? 0 : -1 }
-                    className={ `giveflow-email-editor-tab${ view === 'edit' ? ' is-active' : '' }` }
+                    className={ `fundkit-email-editor-tab${ view === 'edit' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'edit' ) }
                 >
-                    { __( 'Edit', 'giveflow-fundraising-campaigns' ) }
+                    { __( 'Edit', 'fundkit-fundraising-campaigns' ) }
                 </button>
                 <button
                     type="button"
                     role="tab"
                     aria-selected={ view === 'preview' }
                     tabIndex={ view === 'preview' ? 0 : -1 }
-                    className={ `giveflow-email-editor-tab${ view === 'preview' ? ' is-active' : '' }` }
+                    className={ `fundkit-email-editor-tab${ view === 'preview' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'preview' ) }
                 >
-                    { __( 'Preview', 'giveflow-fundraising-campaigns' ) }
+                    { __( 'Preview', 'fundkit-fundraising-campaigns' ) }
                 </button>
             </div>
 
             { view === 'preview' ? (
-                <div className="giveflow-email-preview">
-                    <div className="giveflow-email-preview__head">
+                <div className="fundkit-email-preview">
+                    <div className="fundkit-email-preview__head">
                         <div>
-                            <strong>{ __( 'Subject:', 'giveflow-fundraising-campaigns' ) }</strong>{ ' ' }
+                            <strong>{ __( 'Subject:', 'fundkit-fundraising-campaigns' ) }</strong>{ ' ' }
                             { draft.subject.trim()
                                 ? expandTags( draft.subject )
-                                : <em>{ __( '(no subject)', 'giveflow-fundraising-campaigns' ) }</em> }
+                                : <em>{ __( '(no subject)', 'fundkit-fundraising-campaigns' ) }</em> }
                         </div>
-                        <div><strong>{ __( 'To:', 'giveflow-fundraising-campaigns' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
+                        <div><strong>{ __( 'To:', 'fundkit-fundraising-campaigns' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
                     </div>
-                    <pre className="giveflow-email-preview__body">{ expandTags( draft.body ) }</pre>
+                    <pre className="fundkit-email-preview__body">{ expandTags( draft.body ) }</pre>
                 </div>
             ) : (
                 <>
                     <ToggleRow
-                        title={ __( 'Send this email', 'giveflow-fundraising-campaigns' ) }
-                        sub={ __( 'Disable to skip this notification entirely.', 'giveflow-fundraising-campaigns' ) }
+                        title={ __( 'Send this email', 'fundkit-fundraising-campaigns' ) }
+                        sub={ __( 'Disable to skip this notification entirely.', 'fundkit-fundraising-campaigns' ) }
                         checked={ draft.enabled }
                         onChange={ ( v ) => set( { enabled: v } ) }
                     />
 
-                    <FormRow label={ __( 'Subject', 'giveflow-fundraising-campaigns' ) } wide>
+                    <FormRow label={ __( 'Subject', 'fundkit-fundraising-campaigns' ) } wide>
                         <input
                             type="text"
-                            className="giveflow-input"
+                            className="fundkit-input"
                             value={ draft.subject }
                             onChange={ ( e ) => set( { subject: e.target.value } ) }
                         />
                     </FormRow>
 
                     <FormRow
-                        label={ __( 'Body', 'giveflow-fundraising-campaigns' ) }
-                        help={ __( 'Plain text. Merge tags expand at send time.', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Body', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Plain text. Merge tags expand at send time.', 'fundkit-fundraising-campaigns' ) }
                         wide
                     >
                         { !! t.tags.length && (
-                            <div className="giveflow-merge-tags">
+                            <div className="fundkit-merge-tags">
                                 { t.tags.map( ( tag ) => (
                                     <button
                                         key={ tag }
                                         type="button"
-                                        className="giveflow-merge-tag"
+                                        className="fundkit-merge-tag"
                                         onClick={ () => insertTag( tag ) }
                                     >
                                         { tag }
@@ -332,7 +332,7 @@ function TemplateDialog( { t, s, onClose } ) {
                         ) }
                         <textarea
                             ref={ bodyRef }
-                            className="giveflow-textarea"
+                            className="fundkit-textarea"
                             rows={ 10 }
                             value={ draft.body }
                             onChange={ ( e ) => set( { body: e.target.value } ) }

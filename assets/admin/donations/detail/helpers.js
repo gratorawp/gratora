@@ -1,7 +1,7 @@
 // Money in minor units; REST dates are MySQL strings in UTC with no zone
 // marker, which a browser reads as local time. parseTimestamp marks them.
 import { __, sprintf } from '@wordpress/i18n';
-import { parseTimestamp } from '@giveflow/ui/utils/format';
+import { parseTimestamp } from '@fundkit/ui/utils/format';
 
 export { formatAmount, formatAmountCompact, currencyDecimals, amountEntry } from '../../_shared/format';
 
@@ -34,11 +34,11 @@ export function timeAgo( iso ) {
     const d = parseTimestamp( iso );
     if ( Number.isNaN( d.getTime() ) ) return iso;
     const diff = Math.max( 0, ( Date.now() - d.getTime() ) / 1000 );
-    if ( diff < 60 )      return __( 'just now', 'giveflow-fundraising-campaigns' );
-    if ( diff < 3600 )    return sprintf( /* translators: %d: number of minutes */ __( '%dm ago', 'giveflow-fundraising-campaigns' ),  Math.floor( diff / 60 ) );
-    if ( diff < 86400 )   return sprintf( /* translators: %d: number of hours */ __( '%dh ago', 'giveflow-fundraising-campaigns' ),  Math.floor( diff / 3600 ) );
-    if ( diff < 604800 )  return sprintf( /* translators: %d: number of days */ __( '%dd ago', 'giveflow-fundraising-campaigns' ),  Math.floor( diff / 86400 ) );
-    if ( diff < 2628000 ) return sprintf( /* translators: %d: number of weeks */ __( '%dw ago', 'giveflow-fundraising-campaigns' ),  Math.floor( diff / 604800 ) );
+    if ( diff < 60 )      return __( 'just now', 'fundkit-fundraising-campaigns' );
+    if ( diff < 3600 )    return sprintf( /* translators: %d: number of minutes */ __( '%dm ago', 'fundkit-fundraising-campaigns' ),  Math.floor( diff / 60 ) );
+    if ( diff < 86400 )   return sprintf( /* translators: %d: number of hours */ __( '%dh ago', 'fundkit-fundraising-campaigns' ),  Math.floor( diff / 3600 ) );
+    if ( diff < 604800 )  return sprintf( /* translators: %d: number of days */ __( '%dd ago', 'fundkit-fundraising-campaigns' ),  Math.floor( diff / 86400 ) );
+    if ( diff < 2628000 ) return sprintf( /* translators: %d: number of weeks */ __( '%dw ago', 'fundkit-fundraising-campaigns' ),  Math.floor( diff / 604800 ) );
     return formatDateShort( iso );
 }
 
@@ -50,28 +50,28 @@ export function initials( name ) {
 
 export function donationStatusPill( status ) {
     switch ( status ) {
-        case 'paid':           return { cls: 'is-ok',     label: __( 'Paid',     'giveflow-fundraising-campaigns' ) };
-        case 'pending':        return { cls: 'is-warn',   label: __( 'Pending',  'giveflow-fundraising-campaigns' ) };
-        case 'failed':         return { cls: 'is-error',  label: __( 'Failed',   'giveflow-fundraising-campaigns' ) };
-        case 'refunded':       return { cls: 'is-muted',  label: __( 'Refunded', 'giveflow-fundraising-campaigns' ) };
-        case 'partial_refund': return { cls: 'is-warn',   label: __( 'Partial',  'giveflow-fundraising-campaigns' ) };
-        case 'disputed':       return { cls: 'is-error',  label: __( 'Disputed', 'giveflow-fundraising-campaigns' ) };
-        case 'abandoned':      return { cls: 'is-muted',  label: __( 'Abandoned','giveflow-fundraising-campaigns' ) };
+        case 'paid':           return { cls: 'is-ok',     label: __( 'Paid',     'fundkit-fundraising-campaigns' ) };
+        case 'pending':        return { cls: 'is-warn',   label: __( 'Pending',  'fundkit-fundraising-campaigns' ) };
+        case 'failed':         return { cls: 'is-error',  label: __( 'Failed',   'fundkit-fundraising-campaigns' ) };
+        case 'refunded':       return { cls: 'is-muted',  label: __( 'Refunded', 'fundkit-fundraising-campaigns' ) };
+        case 'partial_refund': return { cls: 'is-warn',   label: __( 'Partial',  'fundkit-fundraising-campaigns' ) };
+        case 'disputed':       return { cls: 'is-error',  label: __( 'Disputed', 'fundkit-fundraising-campaigns' ) };
+        case 'abandoned':      return { cls: 'is-muted',  label: __( 'Abandoned','fundkit-fundraising-campaigns' ) };
         default:               return { cls: 'is-muted',  label: status };
     }
 }
 
 export const CHANNEL_LABEL = {
-    direct:        __( 'Direct',         'giveflow-fundraising-campaigns' ),
-    email:         __( 'Email',          'giveflow-fundraising-campaigns' ),
-    social:        __( 'Social',         'giveflow-fundraising-campaigns' ),
-    'paid-social': __( 'Paid social',    'giveflow-fundraising-campaigns' ),
-    organic:       __( 'Organic search', 'giveflow-fundraising-campaigns' ),
-    cpc:           __( 'Paid search',    'giveflow-fundraising-campaigns' ),
-    referral:      __( 'Referral',       'giveflow-fundraising-campaigns' ),
-    qr:            __( 'QR code',        'giveflow-fundraising-campaigns' ),
-    peer:          __( 'Peer-to-peer',   'giveflow-fundraising-campaigns' ),
-    other:         __( 'Other',          'giveflow-fundraising-campaigns' ),
+    direct:        __( 'Direct',         'fundkit-fundraising-campaigns' ),
+    email:         __( 'Email',          'fundkit-fundraising-campaigns' ),
+    social:        __( 'Social',         'fundkit-fundraising-campaigns' ),
+    'paid-social': __( 'Paid social',    'fundkit-fundraising-campaigns' ),
+    organic:       __( 'Organic search', 'fundkit-fundraising-campaigns' ),
+    cpc:           __( 'Paid search',    'fundkit-fundraising-campaigns' ),
+    referral:      __( 'Referral',       'fundkit-fundraising-campaigns' ),
+    qr:            __( 'QR code',        'fundkit-fundraising-campaigns' ),
+    peer:          __( 'Peer-to-peer',   'fundkit-fundraising-campaigns' ),
+    other:         __( 'Other',          'fundkit-fundraising-campaigns' ),
 };
 
 /**

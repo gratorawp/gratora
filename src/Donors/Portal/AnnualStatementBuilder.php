@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donors\Portal;
+namespace FundKit\Donors\Portal;
 
-use GiveFlow\Receipts\OrgProfile;
+use FundKit\Receipts\OrgProfile;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationQueries;
-use GiveFlow\Donations\Refund;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Helpers\View;
-use GiveFlow\Receipts\PdfBuilder;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationQueries;
+use FundKit\Donations\Refund;
+use FundKit\Donors\Donor;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Helpers\View;
+use FundKit\Receipts\PdfBuilder;
 
 /**
  * Builds a PDF annual donation statement for a donor.
@@ -21,7 +21,7 @@ use GiveFlow\Receipts\PdfBuilder;
  */
 final class AnnualStatementBuilder
 {
-    /** Names this builder to the giveflow.statement.pdf filter. */
+    /** Names this builder to the fundkit.statement.pdf filter. */
     public const KIND = 'portal';
 
     /** @since 1.0.0 */
@@ -36,7 +36,7 @@ final class AnnualStatementBuilder
         // this one outright. Without the seam a donor can reach two different
         // annual statements for the same year from the same portal, only one
         // of which satisfies their tax authority.
-        $override = apply_filters('giveflow.statement.pdf', null, $donor, $year, self::KIND);
+        $override = apply_filters('fundkit.statement.pdf', null, $donor, $year, self::KIND);
         if (is_string($override) && $override !== '') {
             return $override;
         }
@@ -96,7 +96,7 @@ final class AnnualStatementBuilder
         $org      = OrgProfile::load();
         $orgName  = (string) $org['name'];
         $donorName = trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''));
-        if ($donorName === '') $donorName = __('Friend', 'giveflow-fundraising-campaigns');
+        if ($donorName === '') $donorName = __('Friend', 'fundkit-fundraising-campaigns');
 
         $html = View::loadRelative(__DIR__, 'views/annual-statement', [
             'year'       => $year,
@@ -107,9 +107,9 @@ final class AnnualStatementBuilder
         ]);
 
         return $this->pdf->fromHtml($html, [
-            'title'   => sprintf(/* translators: %d: year */ __('Annual statement %d', 'giveflow-fundraising-campaigns'), $year),
+            'title'   => sprintf(/* translators: %d: year */ __('Annual statement %d', 'fundkit-fundraising-campaigns'), $year),
             'author'  => $orgName,
-            'subject' => __('Annual donation statement', 'giveflow-fundraising-campaigns'),
+            'subject' => __('Annual donation statement', 'fundkit-fundraising-campaigns'),
         ]);
     }
 }

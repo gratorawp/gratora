@@ -5,7 +5,7 @@ import Btn from './Btn';
 
 /**
  * Shared confirm dialog for list-table bulk/row actions; replaces window.confirm
- * with the GiveFlow-styled modal. Driven by a `confirm` state object, null when closed:
+ * with the FundKit-styled modal. Driven by a `confirm` state object, null when closed:
  * { title, message, confirmLabel, destructive, onConfirm } (onConfirm runs after close).
  *
  * `requireText` holds the confirm button until the word is typed back, for the
@@ -30,7 +30,7 @@ export default function ConfirmDialog( { confirm, onClose } ) {
             foot={
                 <>
                     <Btn variant="secondary" onClick={ onClose }>
-                        { __( 'Cancel', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Cancel', 'fundkit-fundraising-campaigns' ) }
                     </Btn>
                     <Btn
                         variant={ confirm.destructive ? 'danger' : 'primary' }
@@ -41,17 +41,17 @@ export default function ConfirmDialog( { confirm, onClose } ) {
                             if ( action ) await action();
                         } }
                     >
-                        { confirm.confirmLabel || __( 'Confirm', 'giveflow-fundraising-campaigns' ) }
+                        { confirm.confirmLabel || __( 'Confirm', 'fundkit-fundraising-campaigns' ) }
                     </Btn>
                 </>
             }
         >
             <p style={ { margin: 0 } }>{ confirm.message }</p>
             { required !== '' && (
-                <label className="giveflow-fld" style={ { marginTop: 16, display: 'block' } }>
-                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'giveflow-fundraising-campaigns' ), required ) }
+                <label className="fundkit-fld" style={ { marginTop: 16, display: 'block' } }>
+                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'fundkit-fundraising-campaigns' ), required ) }
                     <input
-                        className="giveflow-input"
+                        className="fundkit-input"
                         type="text"
                         value={ typed }
                         onChange={ ( e ) => setTyped( e.target.value ) }

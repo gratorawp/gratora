@@ -1,5 +1,5 @@
 /* Campaign page foundation: the --dp-* token layer, the page measure and bands,
-   the type ramp and the shared primitives. The giveflow-p2p-* selectors are aliases
+   the type ramp and the shared primitives. The fundkit-p2p-* selectors are aliases
    of the same vocabulary, so one definition serves both plugins.
 
    Nothing below may hardcode a colour, radius, font or shadow. Read a token,
@@ -7,7 +7,7 @@
    exactly as designed and a styled one carries its identity throughout. */
 
 /* Declared on body, not :root: the campaign's values land on body via the
-   giveflow-campaign-styled class (see Styling\PageStyle) and a property set on body
+   fundkit-campaign-styled class (see Styling\PageStyle) and a property set on body
    is invisible to :root above it. Body also covers anything an organiser drops
    beside our blocks, which sits in no wrapper of ours.
 
@@ -18,15 +18,15 @@
 
 body,
 .editor-styles-wrapper,
-.giveflow-p2p-layout,
-.giveflow-p2p-thermo,
-.giveflow-p2p-grid-section,
-.giveflow-p2p-fundraiser,
-.giveflow-p2p-team,
-.giveflow-p2p-leaderboard,
-.giveflow-p2p-donors,
-.giveflow-p2p-sponsors,
-.giveflow-p2p-welcome,
+.fundkit-p2p-layout,
+.fundkit-p2p-thermo,
+.fundkit-p2p-grid-section,
+.fundkit-p2p-fundraiser,
+.fundkit-p2p-team,
+.fundkit-p2p-leaderboard,
+.fundkit-p2p-donors,
+.fundkit-p2p-sponsors,
+.fundkit-p2p-welcome,
 .dp-layout{
     /* How wide the page reads. Every rule that needs it reads this, so the
        measure moves in one place and the editor canvas follows the front end. */
@@ -34,54 +34,54 @@ body,
 
     /* Block wrappers carry the campaign's resolved style as core's own custom
        properties (see Styling\CampaignStyleVars). */
-    --dp-accent:      var(--giveflow-accent, #211d3f);
+    --dp-accent:      var(--fundkit-accent, #211d3f);
     --dp-accent-dark: color-mix(in srgb, var(--dp-accent) 78%, #000);
-    /* The resolver emits --giveflow-accent-soft only when a preset or the campaign
+    /* The resolver emits --fundkit-accent-soft only when a preset or the campaign
        pairs one with the accent; deriving it otherwise keeps a purple campaign
        from washing its own pages in the default green. */
-    --dp-accent-soft: var(--giveflow-accent-soft, color-mix(in srgb, var(--dp-accent) 12%, #fff));
+    --dp-accent-soft: var(--fundkit-accent-soft, color-mix(in srgb, var(--dp-accent) 12%, #fff));
 
     /* Ink for anything drawn on the filled panel. Derived from the accent
        server side (Styling\AccentInk) because CSS cannot branch on how dark a
        colour is; the fallbacks keep the reversed-out look on a page that
        carries no campaign style. */
     /* The campaign's photograph, emitted by Styling\CampaignStyleVars. */
-    --dp-cover-image:     var(--giveflow-cover-image, none);
+    --dp-cover-image:     var(--fundkit-cover-image, none);
 
-    --dp-on-accent:       var(--giveflow-on-accent, #ffffff);
-    --dp-on-accent-muted: var(--giveflow-on-accent-muted, rgba(255, 255, 255, .72));
-    --dp-on-accent-line:  var(--giveflow-on-accent-line, rgba(255, 255, 255, .26));
+    --dp-on-accent:       var(--fundkit-on-accent, #ffffff);
+    --dp-on-accent-muted: var(--fundkit-on-accent-muted, rgba(255, 255, 255, .72));
+    --dp-on-accent-line:  var(--fundkit-on-accent-line, rgba(255, 255, 255, .26));
 
-    --dp-text:        var(--giveflow-text, #141821);
+    --dp-text:        var(--fundkit-text, #141821);
     /* Core has no token between body and muted, so mix the two rather than pick
        a literal that would ignore a campaign's palette. */
     --dp-text-2:      color-mix(in srgb, var(--dp-text) 70%, var(--dp-muted) 30%);
-    --dp-muted:       var(--giveflow-text-muted, #7a8398);
+    --dp-muted:       var(--fundkit-text-muted, #7a8398);
 
-    /* Boundary weight, inherited from core. Not @giveflow/ui's hairline-divider
+    /* Boundary weight, inherited from core. Not @fundkit/ui's hairline-divider
        value: at about 3% contrast a card boundary reads as unfinished. */
-    --dp-border:      var(--giveflow-border, #e8ebf0);
+    --dp-border:      var(--fundkit-border, #e8ebf0);
     /* The lighter within-list rule, derived so it tracks a custom border. */
     --dp-rule:        color-mix(in srgb, var(--dp-border) 55%, var(--dp-card));
-    --dp-card:        var(--giveflow-bg, #ffffff);
-    --dp-page:        var(--giveflow-bg-soft, #fafbfc);
+    --dp-card:        var(--fundkit-bg, #ffffff);
+    --dp-page:        var(--fundkit-bg-soft, #fafbfc);
 
-    --dp-radius:      var(--giveflow-radius, 14px);
-    --dp-radius-sm:   var(--giveflow-radius-sm, 10px);
-    --dp-font:        var(--giveflow-typeface, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-    --dp-shadow:      var(--giveflow-card-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 2px 6px rgba(15, 23, 42, .06));
+    --dp-radius:      var(--fundkit-radius, 14px);
+    --dp-radius-sm:   var(--fundkit-radius-sm, 10px);
+    --dp-font:        var(--fundkit-typeface, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+    --dp-shadow:      var(--fundkit-card-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 2px 6px rgba(15, 23, 42, .06));
 
-    /* Match core's .giveflow-donate-button so every call to action on a campaign
+    /* Match core's .fundkit-donate-button so every call to action on a campaign
        page reads as the same button, following the campaign's button group
        where it sets one. */
-    --dp-btn-bg:             var(--giveflow-button-bg, var(--dp-accent));
-    --dp-btn-fg:             var(--giveflow-button-fg, #fff);
-    --dp-btn-hover-bg:       var(--giveflow-button-hover-bg, var(--dp-accent-dark));
+    --dp-btn-bg:             var(--fundkit-button-bg, var(--dp-accent));
+    --dp-btn-fg:             var(--fundkit-button-fg, #fff);
+    --dp-btn-hover-bg:       var(--fundkit-button-hover-bg, var(--dp-accent-dark));
     --dp-btn-radius:         var(--dp-radius-sm);
     --dp-btn-padding-block:  12px;
     --dp-btn-padding-inline: 24px;
     --dp-btn-font-size:      15px;
-    --dp-btn-font-weight:    var(--giveflow-button-weight, 500);
+    --dp-btn-font-weight:    var(--fundkit-button-weight, 500);
 }
 
 /* Core's columns block owns two-column layout: the flex basis comes from the
@@ -89,7 +89,7 @@ body,
    page measure and the sticky rail are ours, and overriding display here would
    break the block in the editor. */
 
-.giveflow-p2p-layout,
+.fundkit-p2p-layout,
 .dp-layout{
     box-sizing: border-box;
     max-width: var(--dp-measure, 1200px);
@@ -101,20 +101,20 @@ body,
     padding-inline: 24px;
 }
 
-.giveflow-p2p-layout .dp-band,
-.giveflow-p2p-layout .dp-rail,
+.fundkit-p2p-layout .dp-band,
+.fundkit-p2p-layout .dp-rail,
 .dp-layout .dp-band,
 .dp-layout .dp-rail{ padding-inline: 0; }
 
 /* Let a column shrink below its content's intrinsic width, so a long
    unbreakable child cannot force horizontal overflow on narrow screens. */
 
-.giveflow-p2p-layout > .wp-block-column,
+.fundkit-p2p-layout > .wp-block-column,
 .dp-layout > .wp-block-column{
     min-width: 0;
 }
 
-.giveflow-p2p-layout__side,
+.fundkit-p2p-layout__side,
 .dp-layout__side{
     position: sticky;
     top: 32px;
@@ -139,12 +139,12 @@ body,
 /* Core stacks columns at 781px; drop the sticky with it. */
 @media (max-width: 781px) {
     .dp-layout__side,
-    .giveflow-p2p-layout__side {
+    .fundkit-p2p-layout__side {
         position: static;
     }
 }
 
-#giveflow-form {
+#fundkit-form {
     scroll-margin-top: 24px;
 }
 
@@ -159,8 +159,8 @@ body,
     color: var(--dp-text);
     background: var(--dp-card);
     font-family: var(--dp-font);
-    font-size: calc(var(--giveflow-type-size, 15px) + 1px);
-    font-weight: var(--giveflow-body-weight, 400);
+    font-size: calc(var(--fundkit-type-size, 15px) + 1px);
+    font-weight: var(--fundkit-body-weight, 400);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
 
@@ -180,7 +180,7 @@ body,
 .dp-page *::before,
 .dp-page *::after { box-sizing: border-box; }
 
-/* Matches .giveflow-p2p-layout, so a single-column page and a page with a rail
+/* Matches .fundkit-p2p-layout, so a single-column page and a page with a rail
    present at the same width. Inside a layout column the column constrains this
    anyway. */
 
@@ -192,11 +192,11 @@ body,
 
 .dp-top { padding-top: 64px; }
 
-.dp-display { margin: 0; font-size: 44px; line-height: 1.08; font-weight: var(--giveflow-heading-weight, 650); letter-spacing: -.022em; text-wrap: balance; }
+.dp-display { margin: 0; font-size: 44px; line-height: 1.08; font-weight: var(--fundkit-heading-weight, 650); letter-spacing: -.022em; text-wrap: balance; }
 
-.dp-h2 { margin: 0 0 18px; font-size: 26px; line-height: 1.25; font-weight: var(--giveflow-heading-weight, 650); letter-spacing: -.015em; }
+.dp-h2 { margin: 0 0 18px; font-size: 26px; line-height: 1.25; font-weight: var(--fundkit-heading-weight, 650); letter-spacing: -.015em; }
 
-.dp-h3 { margin: 0 0 8px; font-size: 17px; line-height: 1.35; font-weight: var(--giveflow-heading-weight, 650); }
+.dp-h3 { margin: 0 0 8px; font-size: 17px; line-height: 1.35; font-weight: var(--fundkit-heading-weight, 650); }
 
 .dp-lede { margin: 14px 0 0; font-size: 18px; line-height: 1.55; color: var(--dp-text-2); }
 
@@ -367,7 +367,7 @@ body,
 .dp-profile__amount {
     margin: 0;
     font-size: clamp(22px, 2.4vw, 26px);
-    font-weight: var(--giveflow-heading-weight, 650);
+    font-weight: var(--fundkit-heading-weight, 650);
     letter-spacing: -.015em;
     font-variant-numeric: tabular-nums;
     line-height: 1.15;
@@ -414,7 +414,7 @@ body,
 .dp-profile__stat b {
     display: block;
     font-size: 15px;
-    font-weight: var(--giveflow-heading-weight, 650);
+    font-weight: var(--fundkit-heading-weight, 650);
     font-variant-numeric: tabular-nums;
     line-height: 1.2;
     color: var(--dp-text);
@@ -439,7 +439,7 @@ body,
 
 .dp-money { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: 28px; font-variant-numeric: tabular-nums; }
 
-.dp-raised { font-size: 36px; font-weight: var(--giveflow-heading-weight, 650); letter-spacing: -.022em; color: var(--dp-accent); }
+.dp-raised { font-size: 36px; font-weight: var(--fundkit-heading-weight, 650); letter-spacing: -.022em; color: var(--dp-accent); }
 
 .dp-goal { font-size: 15px; color: var(--dp-muted); }
 
@@ -453,7 +453,7 @@ body,
 
 .dp-stat + .dp-stat { border-left: 1px solid var(--dp-border); padding-left: 18px; }
 
-.dp-stat b { display: block; font-size: 22px; font-weight: var(--giveflow-heading-weight, 650); letter-spacing: -.018em; font-variant-numeric: tabular-nums; }
+.dp-stat b { display: block; font-size: 22px; font-weight: var(--fundkit-heading-weight, 650); letter-spacing: -.018em; font-variant-numeric: tabular-nums; }
 
 .dp-stat span { display: block; margin-top: 3px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--dp-muted); }
 
@@ -463,7 +463,7 @@ body,
     display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px;
     border: 0; border-radius: var(--dp-btn-radius);
     background: var(--dp-btn-bg); color: var(--dp-btn-fg);
-    font: inherit; font-size: 15px; font-weight: var(--giveflow-button-weight, 650); cursor: pointer; text-decoration: none;
+    font: inherit; font-size: 15px; font-weight: var(--fundkit-button-weight, 650); cursor: pointer; text-decoration: none;
 }
 
 .dp-btn:hover { background: var(--dp-btn-hover-bg); color: var(--dp-btn-fg); }
@@ -638,8 +638,8 @@ body,
    (Frame or Plain), honoured by the shortcode this block renders; forcing it
    flat here would override the organiser's choice. */
 
-.giveflow-p2p-form-band,
-.giveflow-form-band{
+.fundkit-p2p-form-band,
+.fundkit-form-band{
     max-width: var(--dp-measure, 1200px);
     margin: 0 auto;
     padding: 0 24px 72px;
@@ -647,10 +647,10 @@ body,
 
 /* In a rail the form is already a column of its own, so it needs no inset. */
 
-.giveflow-p2p-layout__side .giveflow-p2p-form-band,
-.giveflow-p2p-layout__side .giveflow-form-band,
-.dp-layout__side .giveflow-p2p-form-band,
-.dp-layout__side .giveflow-form-band{ padding: 0; max-width: none; }
+.fundkit-p2p-layout__side .fundkit-p2p-form-band,
+.fundkit-p2p-layout__side .fundkit-form-band,
+.dp-layout__side .fundkit-p2p-form-band,
+.dp-layout__side .fundkit-form-band{ padding: 0; max-width: none; }
 /* Campaign layouts are built for the page measure, and the editor canvas is
  * given the theme's. Scoped to the classes those layouts use, so no other page
  * is touched, and to .editor-styles-wrapper, which exists only in the editor:
@@ -696,13 +696,13 @@ body,
 
     /* Blocks in here read the page ink, and the page ink was chosen against the
        page background, not against this panel. Hand them the panel's own or a
-       stat renders near-black on a dark accent. Never --giveflow-accent:
+       stat renders near-black on a dark accent. Never --fundkit-accent:
        --dp-accent resolves through it, so the panel would repaint its own
        background with its own ink. */
-    --giveflow-text:       var(--dp-on-accent);
-    --giveflow-text-muted: var(--dp-on-accent-muted);
-    --giveflow-bg-soft:    var(--dp-on-accent-line);
-    --giveflow-border:     var(--dp-on-accent-line);
+    --fundkit-text:       var(--dp-on-accent);
+    --fundkit-text-muted: var(--dp-on-accent-muted);
+    --fundkit-bg-soft:    var(--dp-on-accent-line);
+    --fundkit-border:     var(--dp-on-accent-line);
 }
 .dp-panel--accent .dp-money,
 .dp-panel--accent .dp-raised,
@@ -716,23 +716,23 @@ body,
 /* The accent-coloured parts of a block cannot stay the accent here, because the
    accent is the ground they sit on. Carrying the block class rather than
    matching the block stylesheet's specificity and hoping this file loads last. */
-.dp-panel--accent .giveflow-block--progress .giveflow-progress__value {
+.dp-panel--accent .fundkit-block--progress .fundkit-progress__value {
     color: var(--dp-on-accent);
 }
-.dp-panel--accent .giveflow-block--progress .giveflow-progress__bar-fill {
+.dp-panel--accent .fundkit-block--progress .fundkit-progress__bar-fill {
     background: var(--dp-on-accent);
 }
 
 /* The tokens above are the whole answer on the front end, and half of it in the
    editor: a block previewed there resolves no queried page, so it carries the
-   campaign's tokens inline on its own wrapper, and an inline --giveflow-text
+   campaign's tokens inline on its own wrapper, and an inline --fundkit-text
    outranks anything an ancestor declares. Setting the colour itself is what
    survives both, because the inline style never sets `color`. */
-.dp-panel--accent .giveflow-stat__label,
-.dp-panel--accent .giveflow-progress__caption,
-.dp-panel--accent .giveflow-progress__target { color: var(--dp-on-accent-muted); }
-.dp-panel--accent .giveflow-stat__value { color: var(--dp-on-accent); }
-.dp-panel--accent .giveflow-progress__bar { background: var(--dp-on-accent-line); }
+.dp-panel--accent .fundkit-stat__label,
+.dp-panel--accent .fundkit-progress__caption,
+.dp-panel--accent .fundkit-progress__target { color: var(--dp-on-accent-muted); }
+.dp-panel--accent .fundkit-stat__value { color: var(--dp-on-accent); }
+.dp-panel--accent .fundkit-progress__bar { background: var(--dp-on-accent-line); }
 
 /* Photo cover: the campaign's photograph is the ground the title and figures sit
    on. It is a background rather than the image block positioned behind them,
@@ -759,10 +759,10 @@ body,
     /* A scrim, not the accent, is the ground here, so the ink is light whatever
        the campaign colour is. */
     color: #fff;
-    --giveflow-text:       #fff;
-    --giveflow-text-muted: rgba(255, 255, 255, .76);
-    --giveflow-bg-soft:    rgba(255, 255, 255, .28);
-    --giveflow-border:     rgba(255, 255, 255, .28);
+    --fundkit-text:       #fff;
+    --fundkit-text-muted: rgba(255, 255, 255, .76);
+    --fundkit-bg-soft:    rgba(255, 255, 255, .28);
+    --fundkit-border:     rgba(255, 255, 255, .28);
 }
 /* The photograph is the campaign's, so nothing can be assumed about what the
    text lands on. */
@@ -786,13 +786,13 @@ body,
 /* Same reason as the filled panel, and the same editor caveat: the ink is set
    rather than handed over as a token, so an inline token on a previewed block
    cannot take it back. */
-.dp-cover .giveflow-block--progress .giveflow-progress__value { color: #fff; }
-.dp-cover .giveflow-block--progress .giveflow-progress__bar-fill { background: #fff; }
-.dp-cover .giveflow-stat__value { color: #fff; }
-.dp-cover .giveflow-stat__label,
-.dp-cover .giveflow-progress__caption,
-.dp-cover .giveflow-progress__target { color: rgba(255, 255, 255, .76); }
-.dp-cover .giveflow-progress__bar { background: rgba(255, 255, 255, .28); }
+.dp-cover .fundkit-block--progress .fundkit-progress__value { color: #fff; }
+.dp-cover .fundkit-block--progress .fundkit-progress__bar-fill { background: #fff; }
+.dp-cover .fundkit-stat__value { color: #fff; }
+.dp-cover .fundkit-stat__label,
+.dp-cover .fundkit-progress__caption,
+.dp-cover .fundkit-progress__target { color: rgba(255, 255, 255, .76); }
+.dp-cover .fundkit-progress__bar { background: rgba(255, 255, 255, .28); }
 
 /* Tinted: the same accent at low strength, text unchanged. */
 .dp-panel--soft { background: var(--dp-accent-soft); }

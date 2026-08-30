@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest\Admin;
-use GiveFlow\Foundation\Auth\Capabilities;
+namespace FundKit\Rest\Admin;
+use FundKit\Foundation\Auth\Capabilities;
 
-use GiveFlow\Currency\BaseCurrencyLock;
-use GiveFlow\Currency\BaseCurrencyLocked;
-use GiveFlow\Foundation\References\InvalidReferenceToken;
-use GiveFlow\Donors\DonorRetention;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Currency\BaseCurrencyLock;
+use FundKit\Currency\BaseCurrencyLocked;
+use FundKit\Foundation\References\InvalidReferenceToken;
+use FundKit\Donors\DonorRetention;
+use FundKit\Settings\SettingsService;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
-use GiveFlow\Settings\SecretRedactor;
+use FundKit\Settings\SecretRedactor;
 
 /**
  * Admin settings read/write by group key.
@@ -23,7 +23,7 @@ use GiveFlow\Settings\SecretRedactor;
  */
 final class SettingsController
 {
-    private const NAMESPACE = 'giveflow/v1';
+    private const NAMESPACE = 'fundkit/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -75,7 +75,7 @@ final class SettingsController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('giveflow_manage_settings');
+        return Capabilities::userCan('fundkit_manage_settings');
     }
 
     /** @since 1.0.0 */
@@ -83,7 +83,7 @@ final class SettingsController
     {
         $group = (string) $request['group'];
         if (! $this->settings->knows($group)) {
-            return new WP_Error('giveflow_unknown_group', __('Unknown settings group.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_unknown_group', __('Unknown settings group.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
         // Never hand a stored secret back out. The gateways group holds the
         // Stripe webhook signing secret, which is the only authentication on
@@ -105,13 +105,13 @@ final class SettingsController
     {
         $group = (string) $request['group'];
         if (! $this->settings->knows($group)) {
-            return new WP_Error('giveflow_unknown_group', __('Unknown settings group.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_unknown_group', __('Unknown settings group.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
-        // Assigning GiveFlow capabilities to roles grants privileges, so it needs
-        // full admin - not the delegatable giveflow_manage_settings, which a scoped
+        // Assigning FundKit capabilities to roles grants privileges, so it needs
+        // full admin - not the delegatable fundkit_manage_settings, which a scoped
         // role could otherwise use to grant itself refund/redact/export caps.
         if ($group === 'roles' && ! current_user_can('manage_options')) {
-            return new WP_Error('giveflow_forbidden', __('Managing roles requires full administrator access.', 'giveflow-fundraising-campaigns'), ['status' => 403]);
+            return new WP_Error('fundkit_forbidden', __('Managing roles requires full administrator access.', 'fundkit-fundraising-campaigns'), ['status' => 403]);
         }
         $body = (array) $request->get_json_params();
         // Whitelist to known top-level keys for this group so arbitrary keys
@@ -132,9 +132,9 @@ final class SettingsController
         try {
             $saved = $this->settings->update($group, $body);
         } catch (BaseCurrencyLocked $e) {
-            return new WP_Error('giveflow_base_currency_locked', $e->getMessage(), ['status' => 409]);
+            return new WP_Error('fundkit_base_currency_locked', $e->getMessage(), ['status' => 409]);
         } catch (InvalidReferenceToken $e) {
-            return new WP_Error('giveflow_invalid_reference_token', $e->getMessage(), ['status' => 400]);
+            return new WP_Error('fundkit_invalid_reference_token', $e->getMessage(), ['status' => 400]);
         }
 
         return new WP_REST_Response(SecretRedactor::redact($saved), 200);

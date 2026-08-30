@@ -5,7 +5,7 @@ import Dashboard from './Dashboard';
 import './dashboard.scss';
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'giveflow-admin-dashboard' );
+    const root = document.getElementById( 'fundkit-admin-dashboard' );
     if ( ! root ) return;
     // Toaster renders notify.* output (e.g. the New-campaign error); without it
     // those notifications fire into a store with no renderer and vanish.

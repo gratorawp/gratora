@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Assets;
+namespace FundKit\Tests\Unit\Assets;
 
-use GiveFlow\Settings\SettingsService;
+use FundKit\Settings\SettingsService;
 use PHPUnit\Framework\TestCase;
 
 /**

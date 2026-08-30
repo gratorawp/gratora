@@ -12,15 +12,15 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
     const canResend       = canResendReceipt( donation, donor );
 
     const name = donation.is_anonymous
-        ? __( 'Anonymous donor', 'giveflow-fundraising-campaigns' )
-        : (donor?.name || donation.donor?.name || __( 'Donor', 'giveflow-fundraising-campaigns' ));
+        ? __( 'Anonymous donor', 'fundkit-fundraising-campaigns' )
+        : (donor?.name || donation.donor?.name || __( 'Donor', 'fundkit-fundraising-campaigns' ));
 
     return (
         <header className="dd-head">
             <div className="dd-crumbs">
-                <button type="button" onClick={ onBack }>{ __( 'GiveFlow', 'giveflow-fundraising-campaigns' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'FundKit', 'fundkit-fundraising-campaigns' ) }</button>
                 <span className="sep">›</span>
-                <button type="button" onClick={ onBack }>{ __( 'Donations', 'giveflow-fundraising-campaigns' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'Donations', 'fundkit-fundraising-campaigns' ) }</button>
                 <span className="sep">›</span>
                 <span className="mono">{ donation.reference }</span>
             </div>
@@ -33,7 +33,7 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
                         { donation.campaign && (
                             <>
                                 <span className="dot-sep">·</span>
-                                <span>{ __( 'Donated to', 'giveflow-fundraising-campaigns' ) } <a href={ campaignHref( donation.campaign.id ) }>{ donation.campaign.title }</a></span>
+                                <span>{ __( 'Donated to', 'fundkit-fundraising-campaigns' ) } <a href={ campaignHref( donation.campaign.id ) }>{ donation.campaign.title }</a></span>
                             </>
                         ) }
                         <span className="dot-sep">·</span>
@@ -53,8 +53,8 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
                     </div>
                     { isPartialRefund && (
                         <div className="dd-page-head__amount-sub">
-                            { __( 'Refunded', 'giveflow-fundraising-campaigns' ) } <strong>{ formatAmount( donation.refunded_cents, donation.currency ) }</strong>
-                            <span> · { __( 'net', 'giveflow-fundraising-campaigns' ) } </span>
+                            { __( 'Refunded', 'fundkit-fundraising-campaigns' ) } <strong>{ formatAmount( donation.refunded_cents, donation.currency ) }</strong>
+                            <span> · { __( 'net', 'fundkit-fundraising-campaigns' ) } </span>
                             <strong className="num">{ formatAmount( donation.amount_cents - donation.refunded_cents, donation.currency ) }</strong>
                         </div>
                     ) }
@@ -64,15 +64,15 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
                         { canResend && (
                             <button type="button" className="btn" onClick={ onResendReceipt }>
                                 <IconMail className="ic" />
-                                { __( 'Resend receipt', 'giveflow-fundraising-campaigns' ) }
+                                { __( 'Resend receipt', 'fundkit-fundraising-campaigns' ) }
                             </button>
                         ) }
                         { isRefundable && (
                             <button type="button" className="btn btn--danger" onClick={ onRefund }>
                                 <IconRefund className="ic" />
                                 { isPartialRefund
-                                    ? __( 'Refund remaining', 'giveflow-fundraising-campaigns' )
-                                    : __( 'Refund', 'giveflow-fundraising-campaigns' ) }
+                                    ? __( 'Refund remaining', 'fundkit-fundraising-campaigns' )
+                                    : __( 'Refund', 'fundkit-fundraising-campaigns' ) }
                             </button>
                         ) }
                     </div>

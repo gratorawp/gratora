@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donations;
+namespace FundKit\Donations;
 
-use GiveFlow\Foundation\Crypto\Crypto;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Foundation\Crypto\Crypto;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Vendor\Queryable\DB;
 
 /**
  * Encrypt/decrypt seam for donation-scoped admin notes.
@@ -57,7 +57,7 @@ final class DonationNoteRepository
     {
         $note = DonationNote::query()->find('id', $noteId);
         if (! $note) return false;
-        DB::table('giveflow_donation_notes')->where('id', $noteId)->delete();
+        DB::table('fundkit_donation_notes')->where('id', $noteId)->delete();
         return true;
     }
 

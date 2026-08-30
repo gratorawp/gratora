@@ -1,6 +1,6 @@
-@import '@giveflow/ui/scss/tokens';
+@import '@fundkit/ui/scss/tokens';
 @import '../_shared/admin-base';
-@import '@giveflow/ui/scss/components/empty-state';
+@import '@fundkit/ui/scss/components/empty-state';
 
 // Donor-profile-specific accent palette not in the shared tokens.
 $violet:        #7c5cff;
@@ -11,18 +11,18 @@ $rose-soft:     #fce7f3;
 // Insights tab bar-chart radius (used by the analytics widgets).
 $bar-radius:    6px;
 
-.giveflow-view-toggle {
+.fundkit-view-toggle {
     display: inline-flex;
     align-items: center;
     gap: 8px;
 }
 
-.giveflow-donor-insights {
+.fundkit-donor-insights {
     display: flex;
     flex-direction: column;
     gap: 16px;
 
-    .giveflow-overview__grid {
+    .fundkit-overview__grid {
         display: grid;
         grid-template-columns: 1.4fr 1fr;
         gap: 16px;
@@ -34,7 +34,7 @@ $bar-radius:    6px;
     }
 }
 
-.giveflow-segments {
+.fundkit-segments {
     &__bar {
         display: flex;
         height: 14px;
@@ -60,14 +60,14 @@ $bar-radius:    6px;
             text-align: left;
         }
         th { font-weight: 600; color: $text-muted; }
-        td.giveflow-num, th.giveflow-num {
+        td.fundkit-num, th.fundkit-num {
             text-align: right;
             font-variant-numeric: tabular-nums;
         }
     }
 }
 
-.giveflow-seg-chip {
+.fundkit-seg-chip {
     display: inline-block;
     width: 10px;
     height: 10px;
@@ -76,12 +76,12 @@ $bar-radius:    6px;
     vertical-align: middle;
 }
 
-.giveflow-seg-hint {
+.fundkit-seg-hint {
     color: $text-soft;
     font-size: 12px;
 }
 
-.giveflow-ltv-hist {
+.fundkit-ltv-hist {
     display: grid;
     // One row whatever the bucket count: auto-fit wraps the last bucket onto
     // its own line, which reads as a broken chart rather than a distribution.
@@ -126,14 +126,14 @@ $bar-radius:    6px;
     }
 }
 
-.giveflow-loading, .giveflow-empty, .giveflow-error {
+.fundkit-loading, .fundkit-empty, .fundkit-error {
     padding: 24px;
     color: $text-muted;
     text-align: center;
 }
-.giveflow-error { color: #dc2626; }
+.fundkit-error { color: #dc2626; }
 
-.giveflow-cohort {
+.fundkit-cohort {
     overflow-x: auto;
 
     &__table {
@@ -151,7 +151,7 @@ $bar-radius:    6px;
             color: $text-muted;
             text-align: left;
         }
-        th.giveflow-num, td.giveflow-num { text-align: right; font-variant-numeric: tabular-nums; }
+        th.fundkit-num, td.fundkit-num { text-align: right; font-variant-numeric: tabular-nums; }
     }
 
     &__cell {
@@ -163,11 +163,11 @@ $bar-radius:    6px;
     }
 }
 
-.giveflow-at-risk {
+.fundkit-at-risk {
     // Seven columns crowd a narrow admin. Why is last, so it is the first to
     // sit off-edge; Donor and Email never move.
     &__scroll { overflow-x: auto; }
-    .giveflow-table { min-width: 780px; }
+    .fundkit-table { min-width: 780px; }
 
     &__head {
         display: flex;
@@ -183,7 +183,7 @@ $bar-radius:    6px;
 
 // One rule for both donor tables. They were separate and near-identical, and
 // had already drifted: only one of them coloured its donor links.
-.giveflow-table {
+.fundkit-table {
     width: 100%;
     font-size: 13px;
     border-collapse: collapse;
@@ -197,11 +197,11 @@ $bar-radius:    6px;
     th:last-child,  td:last-child  { padding-right: 0; }
     // A right-aligned column ends hard against a left-aligned neighbour: the
     // date and the reason pill met with nothing between them.
-    .giveflow-why { padding-left: 24px; }
+    .fundkit-why { padding-left: 24px; }
     th { font-weight: 600; color: $text-muted; }
     // A right-aligned amount sitting against a left-aligned date read as one
     // value, so the trailing pair is right-aligned together.
-    .giveflow-num, .giveflow-date { text-align: right; font-variant-numeric: tabular-nums; }
+    .fundkit-num, .fundkit-date { text-align: right; font-variant-numeric: tabular-nums; }
     a { color: $accent; text-decoration: none; }
     a:hover { text-decoration: underline; }
     code {
@@ -213,7 +213,7 @@ $bar-radius:    6px;
     }
 }
 
-.giveflow-pagination {
+.fundkit-pagination {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -527,7 +527,7 @@ $bar-radius:    6px;
 .dp-sidebar > .dp-card { position: sticky; top: 16px; }
 .dp-main    { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
 
-// Card chrome (re-themed; .dp-card not .giveflow-widget)
+// Card chrome (re-themed; .dp-card not .fundkit-widget)
 .dp-card {
     background: #fff;
     border: 1px solid $border-soft;
@@ -584,13 +584,13 @@ $bar-radius:    6px;
 // with no photo keeps their letters and a Gravatar that resolves to nothing
 // leaves them showing through. Same arrangement the campaign blocks use.
 .dp-avatar,
-.giveflow-row__avatar {
+.fundkit-row__avatar {
     position: relative;
     overflow: hidden;
 }
 
 .dp-avatar__photo,
-.giveflow-row__avatar-photo {
+.fundkit-row__avatar-photo {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -947,7 +947,7 @@ $bar-radius:    6px;
     cursor: pointer;
     font-size: 12.5px;
     font-weight: 600;
-    color: var(--giveflow-color-accent, $accent);
+    color: var(--fundkit-color-accent, $accent);
 
     &:hover { text-decoration: underline; }
 }
@@ -987,10 +987,10 @@ $bar-radius:    6px;
         display: flex; flex-direction: column; gap: 4px;
         font-size: 13px; color: $text-muted;
     }
-    // Input chrome comes from the shared .giveflow-input / .giveflow-select /
-    // .giveflow-textarea classes on the elements; only the invalid-state border is
+    // Input chrome comes from the shared .fundkit-input / .fundkit-select /
+    // .fundkit-textarea classes on the elements; only the invalid-state border is
     // kept here, since those classes have no built-in error state.
-    .giveflow-input[aria-invalid="true"] { border-color: $red; }
+    .fundkit-input[aria-invalid="true"] { border-color: $red; }
 
     &__country-wrap { position: relative; }
     &__country-list {
@@ -1094,7 +1094,7 @@ $bar-radius:    6px;
     border-top: 1px solid $border-soft;
     padding-top: 14px;
 
-    // textarea chrome comes from the shared .giveflow-textarea class on the element.
+    // textarea chrome comes from the shared .fundkit-textarea class on the element.
     &__error  { color: $red; font-size: 12.5px; margin-top: 6px; }
     &__actions{ display: flex; justify-content: flex-end; margin-top: 10px; }
 }
@@ -1177,12 +1177,12 @@ $bar-radius:    6px;
 .dp-error { color: $red; }
 
 // Legacy scope (kept while we still mount older variants)
-.giveflow-donor-profile {
+.fundkit-donor-profile {
     display: flex;
     flex-direction: column;
     gap: 16px;
 
-    .giveflow-overview__grid { margin: 0; }
+    .fundkit-overview__grid { margin: 0; }
 
     &__head {
         margin: 8px 0 0;
@@ -1220,7 +1220,7 @@ $bar-radius:    6px;
     }
 }
 
-.giveflow-donor-edit {
+.fundkit-donor-edit {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
@@ -1272,7 +1272,7 @@ $bar-radius:    6px;
     }
 }
 
-.giveflow-back {
+.fundkit-back {
     appearance: none;
     background: none;
     border: 0;
@@ -1284,13 +1284,13 @@ $bar-radius:    6px;
     &:hover { text-decoration: underline; }
 }
 
-.giveflow-seg-label {
+.fundkit-seg-label {
     font-size: 13px;
     color: $text-muted;
     font-weight: 400;
 }
 
-.giveflow-sparkline {
+.fundkit-sparkline {
     display: flex;
     align-items: flex-end;
     gap: 2px;
@@ -1309,7 +1309,7 @@ $bar-radius:    6px;
     }
 }
 
-.giveflow-chip {
+.fundkit-chip {
     display: inline-block;
     padding: 2px 8px;
     border-radius: 999px;
@@ -1336,7 +1336,7 @@ $bar-radius:    6px;
         span { color: $text-muted; font-size: 13px; }
     }
 
-    // select. rather than a bare class: .giveflow-input sets width:100% and is
+    // select. rather than a bare class: .fundkit-input sets width:100% and is
     // ordered after this, so it fills the row and stops at wp-core-ui's
     // select max-width of 25rem. One element outranks it.
     select#{&}__year {
@@ -1354,6 +1354,6 @@ $bar-radius:    6px;
 // Said above a list that holds fewer rows than the tab badge counts.
 .dp-tab-note {
     margin: 0 0 12px;
-    color: var(--giveflow-text-muted, #6b7280);
+    color: var(--fundkit-text-muted, #6b7280);
     font-size: 13px;
 }

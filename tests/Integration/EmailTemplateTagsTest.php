@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Settings\SettingsService;
+use FundKit\Settings\SettingsService;
 
 /**
  * The admin editor offers merge tags to an author as safe to drop into a
@@ -59,7 +59,7 @@ final class EmailTemplateTagsTest extends IntegrationTestCase
     /** An add-on may add tags for its own templates without patching core. */
     public function test_an_addon_can_declare_tags_through_the_filter(): void
     {
-        add_filter('giveflow.email.template_tags', static function (array $tags): array {
+        add_filter('fundkit.email.template_tags', static function (array $tags): array {
             $tags['addon_thing'] = ['donor_name', 'widget_count'];
             return $tags;
         });

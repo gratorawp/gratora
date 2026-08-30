@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\References\ReferenceGenerator;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\References\ReferenceGenerator;
 
 /**
  * Changing the numbering settings moves which option holds the counter, and the
@@ -35,7 +35,7 @@ final class ReferenceCounterSeedingTest extends IntegrationTestCase
     private function alreadyIssued(int $count): void
     {
         $year = (int) gmdate('Y');
-        update_option("giveflow_reference_counter_donation_{$year}", (string) $count, false);
+        update_option("fundkit_reference_counter_donation_{$year}", (string) $count, false);
     }
 
     public function test_turning_yearly_reset_off_does_not_restart_the_numbering(): void

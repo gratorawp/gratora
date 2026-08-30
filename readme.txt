@@ -1,4 +1,4 @@
-=== GiveFlow Fundraising Campaigns ===
+=== FundKit Fundraising Campaigns ===
 Contributors: donodp
 Tags: donations, donation form, fundraising, recurring donations, nonprofit
 Requires at least: 7.0
@@ -12,7 +12,7 @@ Donation forms, campaigns, recurring giving, donor management, receipts and repo
 
 == Description ==
 
-**GiveFlow is a fundraising platform for WordPress.**
+**FundKit is a fundraising platform for WordPress.**
 
 Build a campaign, add a donation form, and start taking one-time and recurring donations today.
 
@@ -35,7 +35,7 @@ Create beautiful, fully customizable donation forms in the WordPress editor.
 
 = Campaigns =
 
-* GiveFlow builds the campaign page for you, form included
+* FundKit builds the campaign page for you, form included
 * Progress bars, stats, recent donations, top donors and a supporter wall
 * Goals by amount raised, donations or donors, with an optional end date
 * Brand presets you reuse across campaigns and forms
@@ -117,9 +117,9 @@ https://github.com/givefloworg/giveflow
 
 == Installation ==
 
-1. Install GiveFlow from Plugins > Add New, or upload the plugin folder to `/wp-content/plugins/` and activate it.
-2. Open **GiveFlow** in the admin menu and follow the short onboarding.
-3. Under **GiveFlow > Settings**, add your payment provider keys, or enable offline donations.
+1. Install FundKit from Plugins > Add New, or upload the plugin folder to `/wp-content/plugins/` and activate it.
+2. Open **FundKit** in the admin menu and follow the short onboarding.
+3. Under **FundKit > Settings**, add your payment provider keys, or enable offline donations.
 4. Create a campaign, then add a donation form to any page.
 
 == Frequently Asked Questions ==
@@ -132,13 +132,13 @@ All of it. A campaign page is an ordinary WordPress page, so you can move, resty
 
 No. Campaign pages and donation forms are built from blocks in the WordPress editor.
 
-= Is GiveFlow GDPR-friendly? =
+= Is FundKit GDPR-friendly? =
 
-Email, phone, address and tax ID are encrypted at rest, consent is recorded per donation, and you can erase or anonymize a donor on request. GiveFlow gives you the tools; compliance depends on how you use them.
+Email, phone, address and tax ID are encrypted at rest, consent is recorded per donation, and you can erase or anonymize a donor on request. FundKit gives you the tools; compliance depends on how you use them.
 
 = Can I bring donations in from somewhere else? =
 
-Yes. Import a CSV of donors, or donors and donations together, mapping your columns to GiveFlow fields.
+Yes. Import a CSV of donors, or donors and donations together, mapping your columns to FundKit fields.
 
 == Screenshots ==
 

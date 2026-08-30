@@ -2,7 +2,7 @@ import { __, sprintf, _n } from '@wordpress/i18n';
 
 export default function DonorCohort( { cohort } ) {
     if ( ! cohort ) {
-        return <p className="giveflow-panel__empty">{ __( 'No donor activity yet.', 'giveflow-fundraising-campaigns' ) }</p>;
+        return <p className="fundkit-panel__empty">{ __( 'No donor activity yet.', 'fundkit-fundraising-campaigns' ) }</p>;
     }
 
     const {
@@ -11,49 +11,49 @@ export default function DonorCohort( { cohort } ) {
     } = cohort;
 
     return (
-        <div className="giveflow-cohort">
-            <div className="giveflow-cohort__stat">
-                <div className="giveflow-cohort__label">{ __( 'New donors', 'giveflow-fundraising-campaigns' ) }</div>
-                <div className="giveflow-cohort__value">{ first_time }</div>
-                <div className="giveflow-cohort__sub">
+        <div className="fundkit-cohort">
+            <div className="fundkit-cohort__stat">
+                <div className="fundkit-cohort__label">{ __( 'New donors', 'fundkit-fundraising-campaigns' ) }</div>
+                <div className="fundkit-cohort__value">{ first_time }</div>
+                <div className="fundkit-cohort__sub">
                     { returning > 0
                         ? sprintf(
                             /* translators: 1: number of returning donors, 2: conversion percent */
-                            __( '%1$d came back (%2$s%%)', 'giveflow-fundraising-campaigns' ),
+                            __( '%1$d came back (%2$s%%)', 'fundkit-fundraising-campaigns' ),
                             returning,
                             conversion_pct === null ? '-' : conversion_pct
                         )
-                        : __( 'No repeat donations yet.', 'giveflow-fundraising-campaigns' ) }
+                        : __( 'No repeat donations yet.', 'fundkit-fundraising-campaigns' ) }
                 </div>
             </div>
 
-            <div className="giveflow-cohort__divider" aria-hidden="true" />
+            <div className="fundkit-cohort__divider" aria-hidden="true" />
 
-            <div className="giveflow-cohort__stat">
-                <div className="giveflow-cohort__label">{ __( 'Recurring donors', 'giveflow-fundraising-campaigns' ) }</div>
-                <div className="giveflow-cohort__value">{ recurring_active }</div>
-                <div className="giveflow-cohort__sub">
+            <div className="fundkit-cohort__stat">
+                <div className="fundkit-cohort__label">{ __( 'Recurring donors', 'fundkit-fundraising-campaigns' ) }</div>
+                <div className="fundkit-cohort__value">{ recurring_active }</div>
+                <div className="fundkit-cohort__sub">
                     { recurring_new_in_range > 0
                         ? sprintf(
                             /* translators: %d: new recurring plans in this range */
-                            _n( '+%d new in range', '+%d new in range', recurring_new_in_range, 'giveflow-fundraising-campaigns' ),
+                            _n( '+%d new in range', '+%d new in range', recurring_new_in_range, 'fundkit-fundraising-campaigns' ),
                             recurring_new_in_range
                         )
-                        : __( 'No new plans in range.', 'giveflow-fundraising-campaigns' ) }
+                        : __( 'No new plans in range.', 'fundkit-fundraising-campaigns' ) }
                 </div>
             </div>
 
-            <div className="giveflow-cohort__share">
-                <div className="giveflow-cohort__share-label">
+            <div className="fundkit-cohort__share">
+                <div className="fundkit-cohort__share-label">
                     { sprintf(
                         /* translators: %d: percent of revenue from recurring donors */
-                        __( '%d%% of revenue is recurring', 'giveflow-fundraising-campaigns' ),
+                        __( '%d%% of revenue is recurring', 'fundkit-fundraising-campaigns' ),
                         recurring_share_pct
                     ) }
                 </div>
-                <div className="giveflow-cohort__share-bar">
+                <div className="fundkit-cohort__share-bar">
                     <div
-                        className="giveflow-cohort__share-fill"
+                        className="fundkit-cohort__share-fill"
                         style={ { width: `${ Math.min( 100, recurring_share_pct ) }%` } }
                     />
                 </div>

@@ -11,7 +11,7 @@ export default function RolesPanel( { s } ) {
 
     const load = () => {
         setLoadError( false );
-        apiFetch( { path: '/giveflow/v1/admin/roles' } )
+        apiFetch( { path: '/fundkit/v1/admin/roles' } )
             .then( setData )
             .catch( () => setLoadError( true ) );
     };
@@ -25,20 +25,20 @@ export default function RolesPanel( { s } ) {
 
     if ( loadError ) {
         return (
-            <div className="giveflow-panel">
+            <div className="fundkit-panel">
                 <Card>
                     <p style={ { color: '#b42318', margin: '0 0 12px' } }>
-                        { __( 'Could not load roles.', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Could not load roles.', 'fundkit-fundraising-campaigns' ) }
                     </p>
-                    <Btn variant="secondary" onClick={ load }>{ __( 'Retry', 'giveflow-fundraising-campaigns' ) }</Btn>
+                    <Btn variant="secondary" onClick={ load }>{ __( 'Retry', 'fundkit-fundraising-campaigns' ) }</Btn>
                 </Card>
             </div>
         );
     }
-    if ( ! data ) return <p>{ __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p>;
+    if ( ! data ) return <p>{ __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</p>;
 
     // Both come from the server: an add-on registers capabilities through the
-    // giveflow.capabilities filter, so a list kept here could never include them.
+    // fundkit.capabilities filter, so a list kept here could never include them.
     const roles    = data.roles || [];
     const capGroups = data.capabilities || [];
     const allCaps  = capGroups.flatMap( ( g ) => g.caps.map( ( c ) => c.cap ) );
@@ -62,22 +62,22 @@ export default function RolesPanel( { s } ) {
     const setAll = ( slug, on ) => setRoleCaps( slug, on ? allCaps : [] );
 
     return (
-        <div className="giveflow-panel">
+        <div className="fundkit-panel">
             <Card edited={ s.isDirty }>
-                <div className="giveflow-roles-table" style={ { '--giveflow-role-count': roles.length } }>
-                    <div className="giveflow-roles-table__head">
-                        <div className="giveflow-roles-table__role-cell">{ __( 'Capability', 'giveflow-fundraising-campaigns' ) }</div>
+                <div className="fundkit-roles-table" style={ { '--fundkit-role-count': roles.length } }>
+                    <div className="fundkit-roles-table__head">
+                        <div className="fundkit-roles-table__role-cell">{ __( 'Capability', 'fundkit-fundraising-campaigns' ) }</div>
                         { roles.map( ( r ) => (
-                            <div key={ r.slug } className="giveflow-roles-table__role">
+                            <div key={ r.slug } className="fundkit-roles-table__role">
                                 <strong>{ r.name }</strong>
-                                <div className="giveflow-roles-table__role-actions">
+                                <div className="fundkit-roles-table__role-actions">
                                     <Btn
                                         variant="ghost"
                                         size="sm"
                                         onClick={ () => setAll( r.slug, true ) }
                                         disabled={ r.slug === 'administrator' }
                                     >
-                                        { __( 'All', 'giveflow-fundraising-campaigns' ) }
+                                        { __( 'All', 'fundkit-fundraising-campaigns' ) }
                                     </Btn>
                                     <Btn
                                         variant="ghost"
@@ -85,7 +85,7 @@ export default function RolesPanel( { s } ) {
                                         onClick={ () => setAll( r.slug, false ) }
                                         disabled={ r.slug === 'administrator' }
                                     >
-                                        { __( 'None', 'giveflow-fundraising-campaigns' ) }
+                                        { __( 'None', 'fundkit-fundraising-campaigns' ) }
                                     </Btn>
                                 </div>
                             </div>
@@ -93,16 +93,16 @@ export default function RolesPanel( { s } ) {
                     </div>
 
                     { capGroups.map( ( group ) => (
-                        <div key={ group.label } className="giveflow-roles-table__group">
-                            <div className="giveflow-roles-table__group-label">{ group.label }</div>
+                        <div key={ group.label } className="fundkit-roles-table__group">
+                            <div className="fundkit-roles-table__group-label">{ group.label }</div>
                             { group.caps.map( ( { cap, label } ) => (
-                                <div key={ cap } className="giveflow-roles-table__row">
-                                    <div className="giveflow-roles-table__cap">{ label }</div>
+                                <div key={ cap } className="fundkit-roles-table__row">
+                                    <div className="fundkit-roles-table__cap">{ label }</div>
                                     { roles.map( ( r ) => {
                                         const has  = ( mapping[ r.slug ] || [] ).includes( cap );
                                         const lock = r.slug === 'administrator';
                                         return (
-                                            <div key={ r.slug } className="giveflow-roles-table__cell">
+                                            <div key={ r.slug } className="fundkit-roles-table__cell">
                                                 <input
                                                     type="checkbox"
                                                     checked={ has || lock }

@@ -10,11 +10,11 @@ import MaintenanceTab from './tabs/MaintenanceTab';
 import SystemInfoTab from './tabs/SystemInfoTab';
 
 const TABS = [
-    { key: 'maintenance', label: __( 'Maintenance', 'giveflow-fundraising-campaigns' ) },
-    { key: 'logs',        label: __( 'Logs', 'giveflow-fundraising-campaigns' ) },
-    { key: 'system',      label: __( 'System info', 'giveflow-fundraising-campaigns' ) },
-    { key: 'export',      label: __( 'Export', 'giveflow-fundraising-campaigns' ) },
-    { key: 'import',      label: __( 'Import', 'giveflow-fundraising-campaigns' ) },
+    { key: 'maintenance', label: __( 'Maintenance', 'fundkit-fundraising-campaigns' ) },
+    { key: 'logs',        label: __( 'Logs', 'fundkit-fundraising-campaigns' ) },
+    { key: 'system',      label: __( 'System info', 'fundkit-fundraising-campaigns' ) },
+    { key: 'export',      label: __( 'Export', 'fundkit-fundraising-campaigns' ) },
+    { key: 'import',      label: __( 'Import', 'fundkit-fundraising-campaigns' ) },
 ];
 
 const fromHash = () => {
@@ -30,7 +30,7 @@ export default function Tools() {
 
     const loadInfo = useCallback( () => {
         setInfoError( false );
-        apiFetch( { path: '/giveflow/v1/admin/tools/info' } )
+        apiFetch( { path: '/fundkit/v1/admin/tools/info' } )
             .then( setInfo )
             .catch( () => setInfoError( true ) );
     }, [] );
@@ -51,23 +51,23 @@ export default function Tools() {
     const shared = { info, infoError, loadInfo, notice, setNotice };
 
     return (
-        <div className="giveflow-settings-page">
-            <div className="giveflow-crumbs">
-                <a href="admin.php?page=giveflow">{ __( 'GiveFlow', 'giveflow-fundraising-campaigns' ) }</a>
+        <div className="fundkit-settings-page">
+            <div className="fundkit-crumbs">
+                <a href="admin.php?page=fundkit">{ __( 'FundKit', 'fundkit-fundraising-campaigns' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Tools', 'giveflow-fundraising-campaigns' ) }</span>
+                <span>{ __( 'Tools', 'fundkit-fundraising-campaigns' ) }</span>
                 <span className="sep">›</span>
                 <span>{ TABS.find( ( t ) => t.key === tab )?.label || '' }</span>
             </div>
 
-            <div className="giveflow-page-head">
-                <div className="giveflow-page-head__title-row">
-                    <h1>{ __( 'Tools', 'giveflow-fundraising-campaigns' ) }</h1>
+            <div className="fundkit-page-head">
+                <div className="fundkit-page-head__title-row">
+                    <h1>{ __( 'Tools', 'fundkit-fundraising-campaigns' ) }</h1>
                 </div>
             </div>
 
-            <div className="giveflow-tabs" role="tablist" aria-label={ __( 'Tools sections', 'giveflow-fundraising-campaigns' ) }>
-                <div className="giveflow-tabs__scroll">
+            <div className="fundkit-tabs" role="tablist" aria-label={ __( 'Tools sections', 'fundkit-fundraising-campaigns' ) }>
+                <div className="fundkit-tabs__scroll">
                     { TABS.map( ( t ) => (
                         <a
                             key={ t.key }
@@ -87,12 +87,12 @@ export default function Tools() {
             <Toaster />
 
             { notice && (
-                <div className={ `giveflow-advanced-notice giveflow-advanced-notice--${ notice.type }` }>
+                <div className={ `fundkit-advanced-notice fundkit-advanced-notice--${ notice.type }` }>
                     { notice.text }
                 </div>
             ) }
 
-            <div className="giveflow-settings-page__body">
+            <div className="fundkit-settings-page__body">
                 <div hidden={ tab !== 'maintenance' }><MaintenanceTab { ...shared } active={ tab === 'maintenance' } /></div>
                 <div hidden={ tab !== 'logs' }><LogsTab { ...shared } active={ tab === 'logs' } /></div>
                 <div hidden={ tab !== 'system' }><SystemInfoTab { ...shared } /></div>

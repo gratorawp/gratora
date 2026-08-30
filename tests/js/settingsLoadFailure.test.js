@@ -1,7 +1,7 @@
 /**
  * Every settings field reads its group through a fallback, so a group that
  * never loaded draws a complete, ordinary looking form: Anonymize IPs on,
- * reference prefix GIVEFLOW, an empty legal name. On a screen about retention and
+ * reference prefix FUNDKIT, an empty legal name. On a screen about retention and
  * money the operator has to be told that is not what the site holds.
  */
 
@@ -24,7 +24,7 @@ let settingsFail = true;
 
 function seedApi() {
     apiFetch.mockImplementation( ( { path } ) => {
-        if ( path.startsWith( '/giveflow/v1/admin/settings/' ) ) {
+        if ( path.startsWith( '/fundkit/v1/admin/settings/' ) ) {
             return settingsFail
                 ? Promise.reject( new Error( 'Internal server error' ) )
                 : Promise.resolve( {} );
@@ -43,7 +43,7 @@ async function mountOn( tab ) {
 
 /** The visible tab panel: the others are rendered but hidden. */
 const shownPanels = ( root ) =>
-    [ ...root.querySelectorAll( '.giveflow-settings-page__body > div' ) ].filter( ( d ) => ! d.hidden );
+    [ ...root.querySelectorAll( '.fundkit-settings-page__body > div' ) ].filter( ( d ) => ! d.hidden );
 
 beforeEach( () => {
     apiFetch.mockReset();
@@ -65,7 +65,7 @@ test( 'a numbering group that failed to load does not advertise a prefix', async
     const shown = shownPanels( root ).map( ( d ) => d.textContent ).join( ' ' );
 
     expect( shown ).toContain( 'Could not load these settings.' );
-    expect( shown ).not.toContain( 'GIVEFLOW-' );
+    expect( shown ).not.toContain( 'FUNDKIT-' );
 } );
 
 test( 'Retry asks for the group again', async () => {
@@ -75,10 +75,10 @@ test( 'Retry asks for the group again', async () => {
     expect( retry ).toBeTruthy();
 
     settingsFail = false;
-    const before = apiFetch.mock.calls.filter( ( [ a ] ) => a.path === '/giveflow/v1/admin/settings/org-profile' ).length;
+    const before = apiFetch.mock.calls.filter( ( [ a ] ) => a.path === '/fundkit/v1/admin/settings/org-profile' ).length;
     retry.click();
     await settle();
-    const after = apiFetch.mock.calls.filter( ( [ a ] ) => a.path === '/giveflow/v1/admin/settings/org-profile' ).length;
+    const after = apiFetch.mock.calls.filter( ( [ a ] ) => a.path === '/fundkit/v1/admin/settings/org-profile' ).length;
 
     expect( after ).toBeGreaterThan( before );
     expect( shownPanels( root ).map( ( d ) => d.textContent ).join( ' ' ) ).not.toContain( 'Could not load these settings.' );

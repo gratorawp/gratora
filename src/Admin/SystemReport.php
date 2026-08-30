@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Admin;
+namespace FundKit\Admin;
 
-use GiveFlow\Foundation\Config\SystemSetting;
-use GiveFlow\Foundation\Modules\ModuleManager;
-use GiveFlow\Gateways\GatewayManager;
+use FundKit\Foundation\Config\SystemSetting;
+use FundKit\Foundation\Modules\ModuleManager;
+use FundKit\Gateways\GatewayManager;
 
 /**
  * What a support request needs to know about a site, in one place.
@@ -21,14 +21,14 @@ final class SystemReport
 {
     /** Tables worth counting: the ones a support answer usually turns on. */
     private const COUNTED = [
-        'giveflow_donations',
-        'giveflow_donors',
-        'giveflow_campaigns',
-        'giveflow_forms',
-        'giveflow_recurring_plans',
-        'giveflow_funds',
-        'giveflow_refunds',
-        'giveflow_receipts',
+        'fundkit_donations',
+        'fundkit_donors',
+        'fundkit_campaigns',
+        'fundkit_forms',
+        'fundkit_recurring_plans',
+        'fundkit_funds',
+        'fundkit_refunds',
+        'fundkit_receipts',
     ];
 
     private const EXTENSIONS = [
@@ -50,18 +50,18 @@ final class SystemReport
     public function sections(): array
     {
         return [
-            ['title' => __('GiveFlow', 'giveflow-fundraising-campaigns'),      'rows' => $this->giveflow()],
-            ['title' => __('Add-ons', 'giveflow-fundraising-campaigns'),       'rows' => $this->addOns()],
-            ['title' => __('Payments', 'giveflow-fundraising-campaigns'),      'rows' => $this->payments()],
-            ['title' => __('WordPress', 'giveflow-fundraising-campaigns'),     'rows' => $this->wordpress()],
-            ['title' => __('Server', 'giveflow-fundraising-campaigns'),        'rows' => $this->server()],
-            ['title' => __('Database', 'giveflow-fundraising-campaigns'),      'rows' => $this->database()],
-            ['title' => __('Active plugins', 'giveflow-fundraising-campaigns'), 'rows' => $this->plugins()],
+            ['title' => __('FundKit', 'fundkit-fundraising-campaigns'),      'rows' => $this->fundkit()],
+            ['title' => __('Add-ons', 'fundkit-fundraising-campaigns'),       'rows' => $this->addOns()],
+            ['title' => __('Payments', 'fundkit-fundraising-campaigns'),      'rows' => $this->payments()],
+            ['title' => __('WordPress', 'fundkit-fundraising-campaigns'),     'rows' => $this->wordpress()],
+            ['title' => __('Server', 'fundkit-fundraising-campaigns'),        'rows' => $this->server()],
+            ['title' => __('Database', 'fundkit-fundraising-campaigns'),      'rows' => $this->database()],
+            ['title' => __('Active plugins', 'fundkit-fundraising-campaigns'), 'rows' => $this->plugins()],
         ];
     }
 
     /** @return list<array{label:string, value:string}> */
-    private function giveflow(): array
+    private function fundkit(): array
     {
         // Presence, never the value. The key decrypts every donor record on the
         // site, and this screen is written to be pasted into a ticket.
@@ -69,14 +69,14 @@ final class SystemReport
         $keyLost = SystemSetting::read('encryption_key_lost_at');
 
         $rows = [
-            self::row(__('Version', 'giveflow-fundraising-campaigns'), defined('GIVEFLOW_VERSION') ? GIVEFLOW_VERSION : 'unknown'),
-            self::row(__('Encryption key', 'giveflow-fundraising-campaigns'), self::yesNo($keyHeld)),
+            self::row(__('Version', 'fundkit-fundraising-campaigns'), defined('FUNDKIT_VERSION') ? FUNDKIT_VERSION : 'unknown'),
+            self::row(__('Encryption key', 'fundkit-fundraising-campaigns'), self::yesNo($keyHeld)),
         ];
 
         // Loud on purpose: without the key the encrypted columns cannot be read
         // back, so a support answer starts here rather than anywhere else.
         if (is_string($keyLost) && $keyLost !== '') {
-            $rows[] = self::row(__('Encryption key lost at', 'giveflow-fundraising-campaigns'), $keyLost);
+            $rows[] = self::row(__('Encryption key lost at', 'fundkit-fundraising-campaigns'), $keyLost);
         }
 
         return $rows;
@@ -103,14 +103,14 @@ final class SystemReport
                 (string) $id,
                 sprintf(
                     /* translators: 1: installed core version, 2: the version constraint the add-on asked for */
-                    __('not loaded: core %1$s does not satisfy %2$s', 'giveflow-fundraising-campaigns'),
+                    __('not loaded: core %1$s does not satisfy %2$s', 'fundkit-fundraising-campaigns'),
                     (string) ($pair[0] ?? '?'),
                     (string) ($pair[1] ?? '?')
                 )
             );
         }
 
-        return $rows ?: [self::row(__('Installed', 'giveflow-fundraising-campaigns'), __('None', 'giveflow-fundraising-campaigns'))];
+        return $rows ?: [self::row(__('Installed', 'fundkit-fundraising-campaigns'), __('None', 'fundkit-fundraising-campaigns'))];
     }
 
     /** @return list<array{label:string, value:string}> */
@@ -124,12 +124,12 @@ final class SystemReport
             $rows[] = self::row(
                 (string) $gateway->label(),
                 $gateway->canCharge()
-                    ? __('ready', 'giveflow-fundraising-campaigns')
-                    : __('not configured', 'giveflow-fundraising-campaigns')
+                    ? __('ready', 'fundkit-fundraising-campaigns')
+                    : __('not configured', 'fundkit-fundraising-campaigns')
             );
         }
 
-        return $rows ?: [self::row(__('Gateways', 'giveflow-fundraising-campaigns'), __('None registered', 'giveflow-fundraising-campaigns'))];
+        return $rows ?: [self::row(__('Gateways', 'fundkit-fundraising-campaigns'), __('None registered', 'fundkit-fundraising-campaigns'))];
     }
 
     /** @return list<array{label:string, value:string}> */
@@ -139,26 +139,26 @@ final class SystemReport
         $parent = $theme->parent();
 
         return [
-            self::row(__('Version', 'giveflow-fundraising-campaigns'), get_bloginfo('version')),
-            self::row(__('Site URL', 'giveflow-fundraising-campaigns'), site_url()),
-            self::row(__('Home URL', 'giveflow-fundraising-campaigns'), home_url()),
-            self::row(__('REST root', 'giveflow-fundraising-campaigns'), esc_url_raw(rest_url('giveflow/v1/'))),
-            self::row(__('Multisite', 'giveflow-fundraising-campaigns'), self::yesNo(is_multisite())),
-            self::row(__('Locale', 'giveflow-fundraising-campaigns'), get_locale()),
-            self::row(__('Timezone', 'giveflow-fundraising-campaigns'), wp_timezone_string()),
-            self::row(__('Permalinks', 'giveflow-fundraising-campaigns'), (string) get_option('permalink_structure') ?: __('plain', 'giveflow-fundraising-campaigns')),
-            self::row(__('Theme', 'giveflow-fundraising-campaigns'), sprintf(
+            self::row(__('Version', 'fundkit-fundraising-campaigns'), get_bloginfo('version')),
+            self::row(__('Site URL', 'fundkit-fundraising-campaigns'), site_url()),
+            self::row(__('Home URL', 'fundkit-fundraising-campaigns'), home_url()),
+            self::row(__('REST root', 'fundkit-fundraising-campaigns'), esc_url_raw(rest_url('fundkit/v1/'))),
+            self::row(__('Multisite', 'fundkit-fundraising-campaigns'), self::yesNo(is_multisite())),
+            self::row(__('Locale', 'fundkit-fundraising-campaigns'), get_locale()),
+            self::row(__('Timezone', 'fundkit-fundraising-campaigns'), wp_timezone_string()),
+            self::row(__('Permalinks', 'fundkit-fundraising-campaigns'), (string) get_option('permalink_structure') ?: __('plain', 'fundkit-fundraising-campaigns')),
+            self::row(__('Theme', 'fundkit-fundraising-campaigns'), sprintf(
                 '%s %s%s',
                 (string) $theme->get('Name'),
                 (string) $theme->get('Version'),
                 $parent ? ' (child of ' . (string) $parent->get('Name') . ')' : ''
             )),
-            self::row(__('Block theme', 'giveflow-fundraising-campaigns'), self::yesNo(wp_is_block_theme())),
-            self::row(__('Memory limit', 'giveflow-fundraising-campaigns'), self::constantValue('WP_MEMORY_LIMIT')),
-            self::row(__('Debug mode', 'giveflow-fundraising-campaigns'), self::yesNo(defined('WP_DEBUG') && WP_DEBUG)),
+            self::row(__('Block theme', 'fundkit-fundraising-campaigns'), self::yesNo(wp_is_block_theme())),
+            self::row(__('Memory limit', 'fundkit-fundraising-campaigns'), self::constantValue('WP_MEMORY_LIMIT')),
+            self::row(__('Debug mode', 'fundkit-fundraising-campaigns'), self::yesNo(defined('WP_DEBUG') && WP_DEBUG)),
             // Action Scheduler rides WP-cron, so a site with this on has a
             // backlog that never drains and a screen that has to say so.
-            self::row(__('WP-Cron disabled', 'giveflow-fundraising-campaigns'), self::yesNo(defined('DISABLE_WP_CRON') && DISABLE_WP_CRON)),
+            self::row(__('WP-Cron disabled', 'fundkit-fundraising-campaigns'), self::yesNo(defined('DISABLE_WP_CRON') && DISABLE_WP_CRON)),
         ];
     }
 
@@ -175,18 +175,18 @@ final class SystemReport
             : '';
 
         return [
-            self::row(__('PHP version', 'giveflow-fundraising-campaigns'), PHP_VERSION),
-            self::row(__('PHP interface', 'giveflow-fundraising-campaigns'), PHP_SAPI),
-            self::row(__('Web server', 'giveflow-fundraising-campaigns'), $software !== '' ? $software : __('unknown', 'giveflow-fundraising-campaigns')),
-            self::row(__('HTTPS', 'giveflow-fundraising-campaigns'), self::yesNo(is_ssl())),
-            self::row(__('Memory limit', 'giveflow-fundraising-campaigns'), (string) ini_get('memory_limit')),
-            self::row(__('Max execution time', 'giveflow-fundraising-campaigns'), (string) ini_get('max_execution_time')),
-            self::row(__('Upload max filesize', 'giveflow-fundraising-campaigns'), (string) ini_get('upload_max_filesize')),
-            self::row(__('Post max size', 'giveflow-fundraising-campaigns'), (string) ini_get('post_max_size')),
-            self::row(__('Max input vars', 'giveflow-fundraising-campaigns'), (string) ini_get('max_input_vars')),
+            self::row(__('PHP version', 'fundkit-fundraising-campaigns'), PHP_VERSION),
+            self::row(__('PHP interface', 'fundkit-fundraising-campaigns'), PHP_SAPI),
+            self::row(__('Web server', 'fundkit-fundraising-campaigns'), $software !== '' ? $software : __('unknown', 'fundkit-fundraising-campaigns')),
+            self::row(__('HTTPS', 'fundkit-fundraising-campaigns'), self::yesNo(is_ssl())),
+            self::row(__('Memory limit', 'fundkit-fundraising-campaigns'), (string) ini_get('memory_limit')),
+            self::row(__('Max execution time', 'fundkit-fundraising-campaigns'), (string) ini_get('max_execution_time')),
+            self::row(__('Upload max filesize', 'fundkit-fundraising-campaigns'), (string) ini_get('upload_max_filesize')),
+            self::row(__('Post max size', 'fundkit-fundraising-campaigns'), (string) ini_get('post_max_size')),
+            self::row(__('Max input vars', 'fundkit-fundraising-campaigns'), (string) ini_get('max_input_vars')),
             self::row(
-                __('Missing PHP extensions', 'giveflow-fundraising-campaigns'),
-                $missing === [] ? __('None', 'giveflow-fundraising-campaigns') : implode(', ', $missing)
+                __('Missing PHP extensions', 'fundkit-fundraising-campaigns'),
+                $missing === [] ? __('None', 'fundkit-fundraising-campaigns') : implode(', ', $missing)
             ),
         ];
     }
@@ -203,10 +203,10 @@ final class SystemReport
         $version = (string) $wpdb->get_var('SELECT VERSION()');
 
         $rows = [
-            self::row(__('Server', 'giveflow-fundraising-campaigns'), $version !== '' ? $version : __('unknown', 'giveflow-fundraising-campaigns')),
-            self::row(__('Charset', 'giveflow-fundraising-campaigns'), (string) $wpdb->charset),
-            self::row(__('Collation', 'giveflow-fundraising-campaigns'), (string) $wpdb->collate),
-            self::row(__('Table prefix', 'giveflow-fundraising-campaigns'), (string) $wpdb->prefix),
+            self::row(__('Server', 'fundkit-fundraising-campaigns'), $version !== '' ? $version : __('unknown', 'fundkit-fundraising-campaigns')),
+            self::row(__('Charset', 'fundkit-fundraising-campaigns'), (string) $wpdb->charset),
+            self::row(__('Collation', 'fundkit-fundraising-campaigns'), (string) $wpdb->collate),
+            self::row(__('Table prefix', 'fundkit-fundraising-campaigns'), (string) $wpdb->prefix),
         ];
 
         foreach (self::COUNTED as $base) {
@@ -218,10 +218,10 @@ final class SystemReport
                 $exists
                     ? sprintf(
                         /* translators: %s: a row count */
-                        __('%s rows', 'giveflow-fundraising-campaigns'),
+                        __('%s rows', 'fundkit-fundraising-campaigns'),
                         number_format_i18n((int) $wpdb->get_var("SELECT COUNT(*) FROM `{$table}`")) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is built from $wpdb->prefix and a constant in this file, never from input.
                     )
-                    : __('MISSING', 'giveflow-fundraising-campaigns')
+                    : __('MISSING', 'fundkit-fundraising-campaigns')
             );
         }
         // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -247,7 +247,7 @@ final class SystemReport
             $data = $all[$file] ?? null;
             if ($data === null) {
                 // Active but not on disk, which is itself worth reporting.
-                $rows[] = self::row((string) $file, __('active, but the file is missing', 'giveflow-fundraising-campaigns'));
+                $rows[] = self::row((string) $file, __('active, but the file is missing', 'fundkit-fundraising-campaigns'));
                 continue;
             }
             $rows[] = self::row((string) $data['Name'], (string) $data['Version']);
@@ -258,13 +258,13 @@ final class SystemReport
                 (string) $data['Name'],
                 sprintf(
                     /* translators: %s: plugin version */
-                    __('%s (must-use)', 'giveflow-fundraising-campaigns'),
+                    __('%s (must-use)', 'fundkit-fundraising-campaigns'),
                     (string) $data['Version']
                 )
             );
         }
 
-        return $rows ?: [self::row(__('Active', 'giveflow-fundraising-campaigns'), __('None', 'giveflow-fundraising-campaigns'))];
+        return $rows ?: [self::row(__('Active', 'fundkit-fundraising-campaigns'), __('None', 'fundkit-fundraising-campaigns'))];
     }
 
     /** @return array{label:string, value:string} */
@@ -276,12 +276,12 @@ final class SystemReport
     private static function yesNo(bool $value): string
     {
         return $value
-            ? __('Yes', 'giveflow-fundraising-campaigns')
-            : __('No', 'giveflow-fundraising-campaigns');
+            ? __('Yes', 'fundkit-fundraising-campaigns')
+            : __('No', 'fundkit-fundraising-campaigns');
     }
 
     private static function constantValue(string $name): string
     {
-        return defined($name) ? (string) constant($name) : __('not set', 'giveflow-fundraising-campaigns');
+        return defined($name) ? (string) constant($name) : __('not set', 'fundkit-fundraising-campaigns');
     }
 }

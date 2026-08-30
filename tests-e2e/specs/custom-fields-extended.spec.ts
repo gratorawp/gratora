@@ -3,32 +3,32 @@
  * spec only smoke-tested at one block each (date + dropdown). This drives
  * every remaining custom-field block end-to-end:
  *
- *   - giveflow/text-input       (free-text)
- *   - giveflow/number-input     (numeric with min/max)
- *   - giveflow/radio            (single-select via radios)
- *   - giveflow/checkbox         (single boolean)
- *   - giveflow/multi-select     (multi-value via checkbox group)
- *   - giveflow/hidden           (no DOM, value lives in state)
+ *   - fundkit/text-input       (free-text)
+ *   - fundkit/number-input     (numeric with min/max)
+ *   - fundkit/radio            (single-select via radios)
+ *   - fundkit/checkbox         (single boolean)
+ *   - fundkit/multi-select     (multi-value via checkbox group)
+ *   - fundkit/hidden           (no DOM, value lives in state)
  *
  * Each test exercises the interactive control and then submits the full
  * form. A reaching-thank-you submit proves the field's value survived state,
  * validation, and the runtime payload builder (buildPayload's custom
  * serializer in state/store.js).
  *
- * Seeded via `wp giveflow e2e-seed` -> GIVEFLOW_E2E_CUSTOM_FIELDS_FORM_PATH.
+ * Seeded via `wp fundkit e2e-seed` -> FUNDKIT_E2E_CUSTOM_FIELDS_FORM_PATH.
  */
 
 import { test, expect } from '../fixtures/donor-form';
 
-const FORM_PATH = process.env.GIVEFLOW_E2E_CUSTOM_FIELDS_FORM_PATH ?? '';
+const FORM_PATH = process.env.FUNDKIT_E2E_CUSTOM_FIELDS_FORM_PATH ?? '';
 
 test.describe('custom-field blocks (extended)', () => {
-    test.skip(! FORM_PATH, 'set GIVEFLOW_E2E_CUSTOM_FIELDS_FORM_PATH via `wp giveflow e2e-seed`');
+    test.skip(! FORM_PATH, 'set FUNDKIT_E2E_CUSTOM_FIELDS_FORM_PATH via `wp fundkit e2e-seed`');
     test.use({ formPath: FORM_PATH });
 
     test('text-input renders, accepts input, and submits', async ({ donor }) => {
         const field = donor.form
-            .locator('.giveflow-form__field')
+            .locator('.fundkit-form__field')
             .filter({ hasText: 'CUSTOM_TEXT_LABEL' });
         await expect(field).toBeVisible();
         await field.locator('input[type="text"]').fill('hello world');
@@ -43,7 +43,7 @@ test.describe('custom-field blocks (extended)', () => {
 
     test('number-input renders as type=number and respects min/max attrs', async ({ donor }) => {
         const field = donor.form
-            .locator('.giveflow-form__field')
+            .locator('.fundkit-form__field')
             .filter({ hasText: 'CUSTOM_NUMBER_LABEL' });
         const input = field.locator('input[type="number"]');
         await expect(input).toBeVisible();
@@ -61,7 +61,7 @@ test.describe('custom-field blocks (extended)', () => {
     });
 
     test('radio renders one option per choice and submits the picked one', async ({ donor }) => {
-        const fieldset = donor.form.locator('fieldset.giveflow-form__radio');
+        const fieldset = donor.form.locator('fieldset.fundkit-form__radio');
         await expect(fieldset).toBeVisible();
         await expect(fieldset.locator('legend')).toHaveText('CUSTOM_RADIO_LABEL');
 
@@ -83,7 +83,7 @@ test.describe('custom-field blocks (extended)', () => {
     test('checkbox renders, toggles, and submits', async ({ donor }) => {
         // The form has the cover-fees check + the consent check (none here)
         // plus this single custom checkbox. Locate by label text to be sure.
-        const wrapper = donor.form.locator('label.giveflow-form__check--single')
+        const wrapper = donor.form.locator('label.fundkit-form__check--single')
             .filter({ hasText: 'CUSTOM_CHECKBOX_LABEL' });
         await expect(wrapper).toBeVisible();
 
@@ -101,7 +101,7 @@ test.describe('custom-field blocks (extended)', () => {
     });
 
     test('multi-select toggles options independently and submits multiple values', async ({ donor }) => {
-        const fieldset = donor.form.locator('fieldset.giveflow-form__multi-select');
+        const fieldset = donor.form.locator('fieldset.fundkit-form__multi-select');
         await expect(fieldset).toBeVisible();
         await expect(fieldset.locator('legend')).toHaveText('CUSTOM_MULTISELECT_LABEL');
 

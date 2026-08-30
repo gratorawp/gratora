@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: '20'
 
-      # @giveflow/ui is a public git dependency, but npm locks it as
+      # @fundkit/ui is a public git dependency, but npm locks it as
       # ssh://git@github.com, which a runner has no key for: the install
       # then dies on "Permission denied (publickey)" before anything runs.
       # Rewrite it to https, which needs no credentials.

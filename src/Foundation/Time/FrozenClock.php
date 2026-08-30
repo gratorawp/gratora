@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Time;
+namespace FundKit\Foundation\Time;
 
 use DateTimeImmutable;
 

@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donations;
+namespace FundKit\Donations;
 
-use GiveFlow\Campaigns\CampaignRepository;
-use GiveFlow\Donors\DonorRepository;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Donors\Portal\PortalPage;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Hooks\HookProvider;
-use GiveFlow\Mail\Mailer;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanChange;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Campaigns\CampaignRepository;
+use FundKit\Donors\DonorRepository;
+use FundKit\Donors\DonorService;
+use FundKit\Donors\Portal\PortalPage;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Hooks\HookProvider;
+use FundKit\Mail\Mailer;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanChange;
+use FundKit\Settings\SettingsService;
 
 /**
  * Wires the non-receipt donation email templates (offline instructions, refund
@@ -38,16 +38,16 @@ final class DonationEmails extends HookProvider
     protected function actions(): array
     {
         return [
-            'giveflow.donation.intent_created' => 'onIntentCreated',
-            'giveflow.donation.pending'        => ['onPending', 10, 3],
-            'giveflow.donation.refunded'       => ['onRefunded', 10, 2],
-            'giveflow.recurring.renewed'       => ['onRecurringRenewed', 10, 2],
-            'giveflow.recurring.cancelled'     => ['onRecurringCancelled', 10, 2],
-            'giveflow.recurring.renewal_failed' => ['onRecurringFailed', 10, 2],
-            'giveflow.donation.completed'      => 'onDonationCompleted',
+            'fundkit.donation.intent_created' => 'onIntentCreated',
+            'fundkit.donation.pending'        => ['onPending', 10, 3],
+            'fundkit.donation.refunded'       => ['onRefunded', 10, 2],
+            'fundkit.recurring.renewed'       => ['onRecurringRenewed', 10, 2],
+            'fundkit.recurring.cancelled'     => ['onRecurringCancelled', 10, 2],
+            'fundkit.recurring.renewal_failed' => ['onRecurringFailed', 10, 2],
+            'fundkit.donation.completed'      => 'onDonationCompleted',
             // Fires for every plan change, donor-made or admin-made; the
             // handler decides whether to send.
-            'giveflow.recurring.plan_changed'  => ['onPlanChanged', 10, 2],
+            'fundkit.recurring.plan_changed'  => ['onPlanChanged', 10, 2],
         ];
     }
 
@@ -115,7 +115,7 @@ final class DonationEmails extends HookProvider
 
         // No receipt number here: the receipt row is issued asynchronously and
         // does not exist yet. The receipt email carries it, and a notice that
-        // needs it can be sent from giveflow.async.receipt_issued instead.
+        // needs it can be sent from fundkit.async.receipt_issued instead.
         $this->mailer->sendTemplate('recurring_renewal', $email, [
             'donor_first_name'  => $this->donorFirstName($donation),
             'donor_name'        => $this->donorName($donation),
@@ -267,7 +267,7 @@ final class DonationEmails extends HookProvider
      * The donor's first donation they made themselves: a one-off welcome,
      * separate from the transactional receipt.
      *
-     * Not giveflow.donor.first_donation_completed, which is the aggregate's 0 -> 1
+     * Not fundkit.donor.first_donation_completed, which is the aggregate's 0 -> 1
      * crossing. Nobody typed their address into this site when an admin entered
      * a check, so no welcome goes out for one - but that check still crosses
      * 0 -> 1, and when the donor later gives online the count moves 1 -> 2, the
@@ -354,7 +354,7 @@ final class DonationEmails extends HookProvider
             ? $donationTemplate
             : ($neutral[$donationTemplate] ?? $donationTemplate);
 
-        return (string) apply_filters('giveflow.email.donation_template', $template, $donationTemplate, $donation);
+        return (string) apply_filters('fundkit.email.donation_template', $template, $donationTemplate, $donation);
     }
 
     /** @since 1.0.0 */

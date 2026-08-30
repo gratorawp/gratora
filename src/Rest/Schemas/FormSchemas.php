@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest\Schemas;
+namespace FundKit\Rest\Schemas;
 
 /**
  * JSON-Schema arg specs for the admin forms endpoints. Settings is
@@ -74,7 +74,7 @@ final class FormSchemas
                 'additionalProperties' => true,
                 'properties'           => [
                     // Recurring frequencies and anonymity are per-block
-                    // (giveflow/recurring-toggle, giveflow/anonymous-toggle); settings
+                    // (fundkit/recurring-toggle, fundkit/anonymous-toggle); settings
                     // carries only top-level form options.
                     'gateways' => [
                         'type'       => 'object',

@@ -12,7 +12,7 @@ import LayoutControls from '../_shared/widgets/LayoutControls';
 import SectionBar from '../_shared/widgets/SectionBar';
 import RevenueChart from '../_shared/widgets/RevenueChart';
 import ChannelBreakdown from '../_shared/widgets/ChannelBreakdown';
-import { useGiveFlowLayout } from '../_shared/widgets/useGiveFlowLayout';
+import { useFundKitLayout } from '../_shared/widgets/useFundKitLayout';
 import { defaultCurrency } from '../_shared/format';
 
 import KpiRow from './widgets/KpiRow';
@@ -68,7 +68,7 @@ export default function Dashboard() {
     const [ fetchError, setFetchError ]     = useState( false );
     const [ reloadKey, setReloadKey ]       = useState( 0 );
 
-    const layout = useGiveFlowLayout( SCOPE, WIDGET_KEYS );
+    const layout = useFundKitLayout( SCOPE, WIDGET_KEYS );
 
     // Only fetch sections for visible widgets; include= changes on hide/unhide.
     const includeKey = useMemo( () => layout.visibleOrder.join( ',' ), [ layout.visibleOrder ] );
@@ -78,7 +78,7 @@ export default function Dashboard() {
         setLoading( true );
         setFetchError( false );
         apiFetch( {
-            path: addQueryArgs( '/giveflow/v1/admin/dashboard', { range, compare: compareMode, include: includeKey, include_test: includeTest } ),
+            path: addQueryArgs( '/fundkit/v1/admin/dashboard', { range, compare: compareMode, include: includeKey, include_test: includeTest } ),
         } )
             .then( ( m ) => { if ( ! aborted ) setMetrics( ( prev ) => ( { ...( prev || {} ), ...m } ) ); } )
             .catch( () => { if ( ! aborted ) setFetchError( true ); } )
@@ -97,21 +97,21 @@ export default function Dashboard() {
 
     const registry = {
         today: {
-            title:  __( 'Activity (last 24h)', 'giveflow-fundraising-campaigns' ),
+            title:  __( 'Activity (last 24h)', 'fundkit-fundraising-campaigns' ),
             render: () => <TodayStrip today={ m.today } />,
         },
         kpis: {
-            title:  __( 'Key metrics', 'giveflow-fundraising-campaigns' ),
+            title:  __( 'Key metrics', 'fundkit-fundraising-campaigns' ),
             span:   'full',
             bare:   true,
             render: () => <KpiRow kpi={ m.kpi } compareOn={ compareOn } range={ range } includesTest={ !! m.test?.includes_test } loading={ metrics === null && loading } />,
         },
         attention: {
-            title:  __( 'Needs attention', 'giveflow-fundraising-campaigns' ),
+            title:  __( 'Needs attention', 'fundkit-fundraising-campaigns' ),
             render: () => <NeedsAttention items={ m.attention } />,
         },
         revenue: {
-            title:  __( 'Revenue', 'giveflow-fundraising-campaigns' ),
+            title:  __( 'Revenue', 'fundkit-fundraising-campaigns' ),
             span:   'full',
             render: () => (
                 <RevenueChart
@@ -123,38 +123,38 @@ export default function Dashboard() {
             ),
         },
         'active-campaigns': {
-            title:  __( 'Active campaigns', 'giveflow-fundraising-campaigns' ),
+            title:  __( 'Active campaigns', 'fundkit-fundraising-campaigns' ),
             render: () => <ActiveCampaigns rows={ m.active_campaigns } />,
         },
         recurring: {
-            title:  __( 'Recurring revenue', 'giveflow-fundraising-campaigns' ),
+            title:  __( 'Recurring revenue', 'fundkit-fundraising-campaigns' ),
             render: () => <RecurringForecast recurring={ m.recurring } />,
         },
         'top-campaigns': {
-            title:  __( 'Top campaigns', 'giveflow-fundraising-campaigns' ),
+            title:  __( 'Top campaigns', 'fundkit-fundraising-campaigns' ),
             render: () => <TopCampaigns rows={ m.top_campaigns } />,
         },
         channel: {
-            title:  __( 'Channels', 'giveflow-fundraising-campaigns' ),
+            title:  __( 'Channels', 'fundkit-fundraising-campaigns' ),
             render: () => <ChannelBreakdown rows={ m.by_channel } currency={ currency } />,
         },
         'recent-activity': {
-            title:  __( 'Recent donations', 'giveflow-fundraising-campaigns' ),
+            title:  __( 'Recent donations', 'fundkit-fundraising-campaigns' ),
             render: () => <RecentActivity rows={ m.recent_activity } />,
         },
         'quick-actions': {
-            title:  __( 'Quick actions', 'giveflow-fundraising-campaigns' ),
+            title:  __( 'Quick actions', 'fundkit-fundraising-campaigns' ),
             render: () => <QuickActions />,
         },
     };
 
     return (
-        <div className="giveflow-dashboard" data-loading={ loading ? 'true' : undefined }>
-            <div className="giveflow-page-head">
-                <div className="giveflow-page-head__title-row">
-                    <h1>{ __( 'Dashboard', 'giveflow-fundraising-campaigns' ) }</h1>
+        <div className="fundkit-dashboard" data-loading={ loading ? 'true' : undefined }>
+            <div className="fundkit-page-head">
+                <div className="fundkit-page-head__title-row">
+                    <h1>{ __( 'Dashboard', 'fundkit-fundraising-campaigns' ) }</h1>
                 </div>
-                <div className="giveflow-page-head__right">
+                <div className="fundkit-page-head__right">
                     <SectionBar
                         range={ range } onRangeChange={ setRange }
                         compareMode={ compareMode } onCompareModeChange={ setCompareMode }
@@ -182,23 +182,23 @@ export default function Dashboard() {
                             '%d test record is not counted here.',
                             '%d test records are not counted here.',
                             hiddenTotal,
-                            'giveflow-fundraising-campaigns'
+                            'fundkit-fundraising-campaigns'
                         ),
                         hiddenTotal
                     ) }
                     { ' ' }
                     <Button variant="link" onClick={ () => setIncludeTest( true ) }>
-                        { __( 'Show them', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Show them', 'fundkit-fundraising-campaigns' ) }
                     </Button>
                 </Notice>
             ) }
 
             { metrics?.test?.includes_test && (
                 <Notice status="warning" isDismissible={ false }>
-                    { __( 'These figures include test records. They contain money that was never actually taken, so they cannot be quoted as income.', 'giveflow-fundraising-campaigns' ) }
+                    { __( 'These figures include test records. They contain money that was never actually taken, so they cannot be quoted as income.', 'fundkit-fundraising-campaigns' ) }
                     { ' ' }
                     <Button variant="link" onClick={ () => setIncludeTest( false ) }>
-                        { __( 'Hide them', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Hide them', 'fundkit-fundraising-campaigns' ) }
                     </Button>
                 </Notice>
             ) }
@@ -208,18 +208,18 @@ export default function Dashboard() {
                  the range now selected. */ }
             { metrics !== null && fetchError && (
                 <Notice status="error" onRemove={ () => setFetchError( false ) }>
-                    { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'giveflow-fundraising-campaigns' ) }
+                    { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'fundkit-fundraising-campaigns' ) }
                 </Notice>
             ) }
 
             { metrics === null && fetchError ? (
                 <EmptyState
                     icon={ <AlertTriangle size={ 24 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'Could not load your dashboard', 'giveflow-fundraising-campaigns' ) }
-                    body={ __( 'Something went wrong fetching your metrics. Check your connection and try again.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Could not load your dashboard', 'fundkit-fundraising-campaigns' ) }
+                    body={ __( 'Something went wrong fetching your metrics. Check your connection and try again.', 'fundkit-fundraising-campaigns' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setReloadKey( ( k ) => k + 1 ) }>
-                            { __( 'Retry', 'giveflow-fundraising-campaigns' ) }
+                            { __( 'Retry', 'fundkit-fundraising-campaigns' ) }
                         </Btn>
                     }
                 />

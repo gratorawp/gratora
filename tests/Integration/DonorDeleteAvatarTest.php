@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
 
 /**
  * A donor's picture is a WordPress attachment on a public uploads URL, and the
  * donor row holds the only pointer to it. Deleting the donor without deleting
  * the file leaves the photograph served to anyone with the URL, with nothing
  * left in the site that says whose it was: not the uninstall wipe, which reads
- * the ids out of giveflow_donors, and not the admin, who is looking at a media item
+ * the ids out of fundkit_donors, and not the admin, who is looking at a media item
  * with no owner. Erasure already takes the file, and deletion is the more
  * complete of the two, so it cannot take less.
  */

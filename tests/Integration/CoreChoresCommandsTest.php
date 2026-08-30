@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\EventRecorder;
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Core\Commands\CoreCommandProvider;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Commands\CommandContext;
-use GiveFlow\Foundation\Commands\CommandRegistry;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Receipts\Receipt;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Analytics\EventRecorder;
+use FundKit\Campaigns\Campaign;
+use FundKit\Core\Commands\CoreCommandProvider;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Commands\CommandContext;
+use FundKit\Foundation\Commands\CommandRegistry;
+use FundKit\Foundation\Plugin;
+use FundKit\Receipts\Receipt;
+use FundKit\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -36,7 +36,7 @@ final class CoreChoresCommandsTest extends IntegrationTestCase
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
         $role  = get_role('administrator');
-        foreach (['giveflow_view_donations', 'giveflow_edit_donors'] as $cap) {
+        foreach (['fundkit_view_donations', 'fundkit_edit_donors'] as $cap) {
             $role->add_cap($cap);
         }
         wp_set_current_user($admin);
@@ -53,17 +53,17 @@ final class CoreChoresCommandsTest extends IntegrationTestCase
         $this->assertArrayHasKey('donation.missing_receipts', $byId);
         $this->assertFalse($byId['donation.missing_receipts']['mutating'], 'missing_receipts is a read');
         $this->assertTrue($byId['donation.missing_receipts']['idempotent']);
-        $this->assertSame('giveflow_view_donations', $byId['donation.missing_receipts']['capability']);
+        $this->assertSame('fundkit_view_donations', $byId['donation.missing_receipts']['capability']);
 
         $this->assertArrayHasKey('recurring.cancel_for_campaign', $byId);
         $this->assertTrue($byId['recurring.cancel_for_campaign']['mutating'], 'cancel_for_campaign is a write');
         $this->assertFalse($byId['recurring.cancel_for_campaign']['idempotent']);
-        $this->assertSame('giveflow_view_donations', $byId['recurring.cancel_for_campaign']['capability']);
+        $this->assertSame('fundkit_view_donations', $byId['recurring.cancel_for_campaign']['capability']);
 
         $this->assertArrayHasKey('donor.send_email', $byId);
         $this->assertTrue($byId['donor.send_email']['mutating'], 'send_email is a write');
         $this->assertFalse($byId['donor.send_email']['idempotent']);
-        $this->assertSame('giveflow_edit_donors', $byId['donor.send_email']['capability']);
+        $this->assertSame('fundkit_edit_donors', $byId['donor.send_email']['capability']);
     }
 
     public function test_missing_receipts_lists_paid_donations_without_a_valid_receipt(): void
@@ -268,7 +268,7 @@ final class CoreChoresCommandsTest extends IntegrationTestCase
 
     private function driveDonationToPaid(string $email): string
     {
-        $createReq = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body(json_encode([
             'email'        => $email,
@@ -279,7 +279,7 @@ final class CoreChoresCommandsTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($createReq)->get_data()['reference'];
 
-        $confirmReq = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
+        $confirmReq = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
         $confirmReq->set_header('content-type', 'application/json');
         $confirmReq->set_body('{}');
         rest_do_request($confirmReq);

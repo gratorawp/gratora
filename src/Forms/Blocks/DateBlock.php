@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Foundation\Helpers\View;
 
 /**
  * Date input field block.
@@ -16,7 +16,7 @@ final class DateBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/date';
+        return 'fundkit/date';
     }
 
     /** @since 1.0.0 */

@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Dashboard;
+namespace FundKit\Dashboard;
 
 use DateTimeImmutable;
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Donations\ChannelClassifier;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationQueries;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donations\Refund;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanRepository;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Campaigns\Campaign;
+use FundKit\Donations\ChannelClassifier;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationQueries;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donations\Refund;
+use FundKit\Donors\Donor;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanRepository;
+use FundKit\Vendor\Queryable\DB;
 
 /**
  * Aggregates metrics across all campaigns for the platform dashboard.
@@ -203,7 +203,7 @@ final class DashboardMetricsService
 
             $out[] = [
                 'id'             => (int) $d->id,
-                'donor_name'     => $name !== '' ? $name : __('Anonymous', 'giveflow-fundraising-campaigns'),
+                'donor_name'     => $name !== '' ? $name : __('Anonymous', 'fundkit-fundraising-campaigns'),
                 'amount_cents'   => (int) $d->amount_cents,
                 'currency'       => (string) $d->currency,
                 'paid_at'        => $d->paid_at,
@@ -331,11 +331,11 @@ final class DashboardMetricsService
                 'tone'  => 'error',
                 'title' => sprintf(
                     /* translators: %d: failed donations count */
-                    _n('%d donation failed in the last 24 hours.', '%d donations failed in the last 24 hours.', $failed, 'giveflow-fundraising-campaigns'),
+                    _n('%d donation failed in the last 24 hours.', '%d donations failed in the last 24 hours.', $failed, 'fundkit-fundraising-campaigns'),
                     $failed
                 ),
-                'action_label' => __('Review', 'giveflow-fundraising-campaigns'),
-                'action_href'  => admin_url('admin.php?page=giveflow-donations&status=failed'),
+                'action_label' => __('Review', 'fundkit-fundraising-campaigns'),
+                'action_href'  => admin_url('admin.php?page=fundkit-donations&status=failed'),
                 'count'        => $failed,
             ];
         }
@@ -357,13 +357,13 @@ final class DashboardMetricsService
                 'tone'  => 'error',
                 'title' => sprintf(
                     /* translators: %d: failed test donations count */
-                    _n('%d test donation failed in the last 24 hours.', '%d test donations failed in the last 24 hours.', $failedTest, 'giveflow-fundraising-campaigns'),
+                    _n('%d test donation failed in the last 24 hours.', '%d test donations failed in the last 24 hours.', $failedTest, 'fundkit-fundraising-campaigns'),
                     $failedTest
                 ),
-                'action_label' => __('Review', 'giveflow-fundraising-campaigns'),
+                'action_label' => __('Review', 'fundkit-fundraising-campaigns'),
                 // The live link hides test rows, so it would land on an empty
                 // screen.
-                'action_href'  => admin_url('admin.php?page=giveflow-donations&status=failed&include_test=1'),
+                'action_href'  => admin_url('admin.php?page=fundkit-donations&status=failed&include_test=1'),
                 'count'        => $failedTest,
             ];
         }
@@ -386,12 +386,12 @@ final class DashboardMetricsService
                 'tone'  => 'warn',
                 'title' => sprintf(
                     /* translators: 1: campaign title, 2: days remaining */
-                    _n('"%1$s" ends in %2$d day.', '"%1$s" ends in %2$d days.', $daysLeft, 'giveflow-fundraising-campaigns'),
+                    _n('"%1$s" ends in %2$d day.', '"%1$s" ends in %2$d days.', $daysLeft, 'fundkit-fundraising-campaigns'),
                     $c->title,
                     $daysLeft
                 ),
-                'action_label' => __('Open', 'giveflow-fundraising-campaigns'),
-                'action_href'  => admin_url('admin.php?page=giveflow-campaigns&view=detail&id=' . $c->id . '&tab=overview'),
+                'action_label' => __('Open', 'fundkit-fundraising-campaigns'),
+                'action_href'  => admin_url('admin.php?page=fundkit-campaigns&view=detail&id=' . $c->id . '&tab=overview'),
             ];
         }
 
@@ -410,11 +410,11 @@ final class DashboardMetricsService
                 'tone'  => 'warn',
                 'title' => sprintf(
                     /* translators: %s: campaign title */
-                    __('"%s" has no default form. The donate button on its page does nothing.', 'giveflow-fundraising-campaigns'),
+                    __('"%s" has no default form. The donate button on its page does nothing.', 'fundkit-fundraising-campaigns'),
                     $c->title
                 ),
-                'action_label' => __('Set form', 'giveflow-fundraising-campaigns'),
-                'action_href'  => admin_url('admin.php?page=giveflow-campaigns&view=detail&id=' . $c->id . '&tab=settings'),
+                'action_label' => __('Set form', 'fundkit-fundraising-campaigns'),
+                'action_href'  => admin_url('admin.php?page=fundkit-campaigns&view=detail&id=' . $c->id . '&tab=settings'),
             ];
         }
 
@@ -423,7 +423,7 @@ final class DashboardMetricsService
         // donors, so one donor leaving three notes is one donor.
         // whereRaw emits no AND connector, so it has to open the chain.
         $noteRows = DonationQueries::donationRows(
-            DB::table('giveflow_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
+            DB::table('fundkit_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
             $includeTest
         )
             ->whereIn('status', ['paid', 'partial_refund'])
@@ -438,7 +438,7 @@ final class DashboardMetricsService
         $onlyNote = '';
         if ($noteCount === 1) {
             $one = DonationQueries::donationRows(
-                DB::table('giveflow_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
+                DB::table('fundkit_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
                 $includeTest
             )
                 ->whereIn('status', ['paid', 'partial_refund'])
@@ -453,8 +453,8 @@ final class DashboardMetricsService
             // the donor's profile, which does not carry the note at all: the
             // reader arrived at a page with no sign of the thing they came for.
             $href = $onlyNote !== ''
-                ? admin_url('admin.php?page=giveflow-donations&view=detail&reference=' . rawurlencode($onlyNote))
-                : admin_url('admin.php?page=giveflow-donations');
+                ? admin_url('admin.php?page=fundkit-donations&view=detail&reference=' . rawurlencode($onlyNote))
+                : admin_url('admin.php?page=fundkit-donations');
             $items[] = [
                 'key'   => 'donor-notes',
                 'tone'  => 'info',
@@ -464,11 +464,11 @@ final class DashboardMetricsService
                         '%d donor left a note in the last 7 days.',
                         '%d donors left notes in the last 7 days.',
                         $donorCount,
-                        'giveflow-fundraising-campaigns'
+                        'fundkit-fundraising-campaigns'
                     ),
                     $donorCount
                 ),
-                'action_label' => __('Read', 'giveflow-fundraising-campaigns'),
+                'action_label' => __('Read', 'fundkit-fundraising-campaigns'),
                 'action_href'  => $href,
                 'count'        => $noteCount,
             ];
@@ -480,9 +480,9 @@ final class DashboardMetricsService
             $items[] = [
                 'key'          => 'no-campaigns',
                 'tone'         => 'info',
-                'title'        => __('No published campaigns yet. Start one to begin collecting donations.', 'giveflow-fundraising-campaigns'),
-                'action_label' => __('Create campaign', 'giveflow-fundraising-campaigns'),
-                'action_href'  => admin_url('admin.php?page=giveflow-campaigns'),
+                'title'        => __('No published campaigns yet. Start one to begin collecting donations.', 'fundkit-fundraising-campaigns'),
+                'action_label' => __('Create campaign', 'fundkit-fundraising-campaigns'),
+                'action_href'  => admin_url('admin.php?page=fundkit-campaigns'),
             ];
         }
 
@@ -623,7 +623,7 @@ final class DashboardMetricsService
      */
     public function recurring(bool $includeTest = false): array
     {
-        // Single SQL roll-up over giveflow_recurring_plans: monthly-normalized
+        // Single SQL roll-up over fundkit_recurring_plans: monthly-normalized
         // amounts, bounded memory, currency-correct via the base column.
         $stats = $this->recurringPlans->recurringStats($this->clock->now()->format('Y-m-d'), $includeTest);
         $currency = strtoupper(Money::defaultCurrency());
@@ -680,7 +680,7 @@ final class DashboardMetricsService
         $campaignIds = array_map(static fn ($c) => (int) $c->id, $rows);
         $lastByCampaign = [];
         $lastRows = DonationQueries::donationRows(
-            DB::table('giveflow_donations')
+            DB::table('fundkit_donations')
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->whereIn('campaign_id', $campaignIds),
             $includeTest
@@ -699,7 +699,7 @@ final class DashboardMetricsService
         $testTotals = [];
         if ($includeTest) {
             $totalRows = DonationQueries::donationRows(
-                DB::table('giveflow_donations')
+                DB::table('fundkit_donations')
                     ->whereIn('status', ['paid', 'partial_refund'])
                     ->whereIn('campaign_id', $campaignIds),
                 true
@@ -811,7 +811,7 @@ final class DashboardMetricsService
         // consumers, which all apply the kind filter too, so a live ticket
         // order could start an all-time chart before the first donation.
         $row = DonationQueries::donationRows(
-            DB::table('giveflow_donations')->whereIn('status', ['paid', 'partial_refund']),
+            DB::table('fundkit_donations')->whereIn('status', ['paid', 'partial_refund']),
             $includeTest
         )
             ->selectRaw('MIN(paid_at) AS first_paid')

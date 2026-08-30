@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\Uninstall\DataEraser;
+use FundKit\Foundation\Uninstall\DataEraser;
 
 /**
- * The answer to "delete all GiveFlow data on deactivation" belongs to the
+ * The answer to "delete all FundKit data on deactivation" belongs to the
  * deactivation it was given for.
  *
  * As a plain flag it outlived one. Tick the box, then close the tab or let the

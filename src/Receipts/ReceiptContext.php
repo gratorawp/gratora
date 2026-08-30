@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Receipts;
+namespace FundKit\Receipts;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\Donor;
+use FundKit\Campaigns\Campaign;
+use FundKit\Donations\Donation;
+use FundKit\Donors\Donor;
 
 /**
  * Data bundle passed to a ReceiptRenderer.
  *
- * Modules extend context via `giveflow.receipt.context`. Keys in `extras` must
+ * Modules extend context via `fundkit.receipt.context`. Keys in `extras` must
  * be namespaced by the module to avoid collisions.
  *
  * @since 1.0.0

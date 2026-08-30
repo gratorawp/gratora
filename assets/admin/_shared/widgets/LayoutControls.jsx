@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/widgets/LayoutControls';
+export { default } from '@fundkit/ui/widgets/LayoutControls';

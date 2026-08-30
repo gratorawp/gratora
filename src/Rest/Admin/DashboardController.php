@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest\Admin;
-use GiveFlow\Foundation\Auth\Capabilities;
+namespace FundKit\Rest\Admin;
+use FundKit\Foundation\Auth\Capabilities;
 
-use GiveFlow\Dashboard\DashboardMetricsService;
+use FundKit\Dashboard\DashboardMetricsService;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -17,7 +17,7 @@ use WP_REST_Server;
  */
 final class DashboardController
 {
-    private const NAMESPACE = 'giveflow/v1';
+    private const NAMESPACE = 'fundkit/v1';
 
     /** @since 1.0.0 */
     public function __construct(private DashboardMetricsService $metrics)
@@ -49,7 +49,7 @@ final class DashboardController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('giveflow_view_reports');
+        return Capabilities::userCan('fundkit_view_reports');
     }
 
     /** @since 1.0.0 */

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
 /**
- * giveflow/columns: multi-column container for content blocks.
+ * fundkit/columns: multi-column container for content blocks.
  *
  * @since 1.0.0
  */
@@ -14,7 +14,7 @@ final class ColumnsBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/columns';
+        return 'fundkit/columns';
     }
 
     /** @since 1.0.0 */
@@ -31,7 +31,7 @@ final class ColumnsBlock implements Block
     public function render(array $attrs, string $content): string
     {
         return sprintf(
-            '<div class="giveflow-block giveflow-block--columns" style="%s">%s</div>',
+            '<div class="fundkit-block fundkit-block--columns" style="%s">%s</div>',
             esc_attr(self::columnsStyle($attrs)),
             $content
         );

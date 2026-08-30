@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways;
+namespace FundKit\Gateways;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Donations\Donation;
+use FundKit\Recurring\RecurringPlan;
 
 /**
  * The check every webhook must pass before it is allowed to mark a donation paid.
@@ -31,7 +31,7 @@ final class WebhookPaymentGuard
      *                                     the event claims. Null means unknown,
      *                                     which is refused.
      * @param int|null    $observedCents   what the processor says was paid, in
-     *                                     GiveFlow's storage units. Null is refused:
+     *                                     FundKit's storage units. Null is refused:
      *                                     an unknown amount cannot be checked.
      * @param string|null $observedCurrency ISO code, or null to skip.
      *

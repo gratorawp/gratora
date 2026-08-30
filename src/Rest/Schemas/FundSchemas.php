@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest\Schemas;
+namespace FundKit\Rest\Schemas;
 
 /**
  * JSON-Schema arg specs for the admin funds endpoints. update() reuses

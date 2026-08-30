@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest\Admin;
+namespace FundKit\Rest\Admin;
 
-use GiveFlow\Foundation\Auth\Capabilities;
-use GiveFlow\Foundation\References\ReferenceGenerator;
+use FundKit\Foundation\Auth\Capabilities;
+use FundKit\Foundation\References\ReferenceGenerator;
 use Throwable;
 use WP_Error;
 use WP_REST_Request;
@@ -21,7 +21,7 @@ use WP_REST_Server;
  */
 final class NumberingController
 {
-    private const NAMESPACE = 'giveflow/v1';
+    private const NAMESPACE = 'fundkit/v1';
     private const SCOPES = ['donation', 'receipt', 'refund'];
 
     /** @since 1.0.0 */
@@ -60,7 +60,7 @@ final class NumberingController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('giveflow_manage_settings');
+        return Capabilities::userCan('fundkit_manage_settings');
     }
 
     /**
@@ -90,7 +90,7 @@ final class NumberingController
         try {
             $this->references->nextNumber($scope, $next);
         } catch (Throwable $e) {
-            return new WP_Error('giveflow_numbering_invalid', $e->getMessage(), ['status' => 400]);
+            return new WP_Error('fundkit_numbering_invalid', $e->getMessage(), ['status' => 400]);
         }
 
         return new WP_REST_Response([

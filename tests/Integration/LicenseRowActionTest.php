@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\Portal\PortalPage;
-use GiveFlow\Forms\FormReadinessService;
-use GiveFlow\Forms\FormRepository;
-use GiveFlow\Foundation\Container\Container;
-use GiveFlow\Foundation\Crypto\Crypto;
-use GiveFlow\Foundation\License\LicenseService;
-use GiveFlow\Foundation\Modules\GiveFlowModule;
-use GiveFlow\Foundation\Modules\ModuleManager;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\PayPal\PayPalAccount;
-use GiveFlow\Gateways\Stripe\ApplePayDomain;
-use GiveFlow\Gateways\Stripe\StripeAccount;
-use GiveFlow\Gateways\Stripe\StripeApi;
-use GiveFlow\Gateways\TestMode;
-use GiveFlow\Settings\ReadinessService;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Donors\Portal\PortalPage;
+use FundKit\Forms\FormReadinessService;
+use FundKit\Forms\FormRepository;
+use FundKit\Foundation\Container\Container;
+use FundKit\Foundation\Crypto\Crypto;
+use FundKit\Foundation\License\LicenseService;
+use FundKit\Foundation\Modules\FundKitModule;
+use FundKit\Foundation\Modules\ModuleManager;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\PayPal\PayPalAccount;
+use FundKit\Gateways\Stripe\ApplePayDomain;
+use FundKit\Gateways\Stripe\StripeAccount;
+use FundKit\Gateways\Stripe\StripeApi;
+use FundKit\Gateways\TestMode;
+use FundKit\Settings\ReadinessService;
+use FundKit\Settings\SettingsService;
 
 /**
  * The licences row on Setup sent the operator to a settings tab that does not
@@ -38,7 +38,7 @@ final class LicenseRowActionTest extends IntegrationTestCase
         $api      = new StripeApi($stripe);
 
         $modules = new ModuleManager(new Container());
-        $modules->register($this->proModule('giveflow-p2p', 'Peer to peer'));
+        $modules->register($this->proModule('fundkit-p2p', 'Peer to peer'));
         $modules->bootAll();
 
         return new ReadinessService(
@@ -77,17 +77,17 @@ final class LicenseRowActionTest extends IntegrationTestCase
 
     public function test_the_row_links_where_the_licensing_client_says(): void
     {
-        add_filter('giveflow.license.manage_url', static fn (): string => admin_url('admin.php?page=giveflow-licenses'));
+        add_filter('fundkit.license.manage_url', static fn (): string => admin_url('admin.php?page=fundkit-licenses'));
 
         $row = $this->licenseRow();
 
-        $this->assertSame(admin_url('admin.php?page=giveflow-licenses'), $row['action_url']);
+        $this->assertSame(admin_url('admin.php?page=fundkit-licenses'), $row['action_url']);
         $this->assertSame('Add a key', $row['action_label']);
     }
 
-    private function proModule(string $id, string $name): GiveFlowModule
+    private function proModule(string $id, string $name): FundKitModule
     {
-        return new class($id, $name) implements GiveFlowModule {
+        return new class($id, $name) implements FundKitModule {
             public function __construct(private string $id, private string $name)
             {
             }
@@ -119,7 +119,7 @@ final class LicenseRowActionTest extends IntegrationTestCase
 
             public function tier(): string
             {
-                return GiveFlowModule::TIER_PRO;
+                return FundKitModule::TIER_PRO;
             }
 
             public function boot(Container $c): void

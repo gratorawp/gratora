@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Donors\Portal\PortalPage;
-use GiveFlow\Forms\Form;
-use GiveFlow\Forms\FormReadinessService;
-use GiveFlow\Foundation\Crypto\Crypto;
-use GiveFlow\Foundation\License\LicenseService;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\PayPal\PayPalAccount;
-use GiveFlow\Gateways\Stripe\ApplePayDomain;
-use GiveFlow\Gateways\Stripe\StripeAccount;
-use GiveFlow\Gateways\Stripe\StripeApi;
-use GiveFlow\Gateways\TestMode;
-use GiveFlow\Forms\FormRepository;
-use GiveFlow\Settings\ReadinessService;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Campaigns\Campaign;
+use FundKit\Donors\Portal\PortalPage;
+use FundKit\Forms\Form;
+use FundKit\Forms\FormReadinessService;
+use FundKit\Foundation\Crypto\Crypto;
+use FundKit\Foundation\License\LicenseService;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\PayPal\PayPalAccount;
+use FundKit\Gateways\Stripe\ApplePayDomain;
+use FundKit\Gateways\Stripe\StripeAccount;
+use FundKit\Gateways\Stripe\StripeApi;
+use FundKit\Gateways\TestMode;
+use FundKit\Forms\FormRepository;
+use FundKit\Settings\ReadinessService;
+use FundKit\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -30,7 +30,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        delete_option('giveflow_gateway_config');
+        delete_option('fundkit_gateway_config');
         delete_option(PortalPage::OPTION_PAGE_ID);
     }
 
@@ -69,7 +69,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
     private function enableOffline(string $instructions = 'Transfer within 7 days.'): void
     {
-        update_option('giveflow_gateway_config', [
+        update_option('fundkit_gateway_config', [
             'offline' => ['enabled' => true, 'instructions' => $instructions],
         ]);
     }
@@ -100,7 +100,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
     public function test_test_mode_is_reported_as_a_warning_not_a_pass(): void
     {
-        update_option('giveflow_gateway_config', ['test_mode' => true]);
+        update_option('fundkit_gateway_config', ['test_mode' => true]);
 
         $check = $this->checks()['mode'];
         $this->assertSame(ReadinessService::WARN, $check['status']);
@@ -132,7 +132,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
     /** And the stronger sentence is still earned once a live key is stored. */
     public function test_live_mode_says_keys_are_on_file_once_they_are(): void
     {
-        update_option('giveflow_gateway_config', ['stripe' => ['enabled' => true]]);
+        update_option('fundkit_gateway_config', ['stripe' => ['enabled' => true]]);
         (new StripeAccount(new Crypto()))->saveKeys(false, 'sk_live_x', 'pk_live_x');
 
         $this->assertStringContainsString('live keys on file', (string) $this->checks()['mode']['label']);
@@ -179,8 +179,8 @@ final class ReadinessServiceTest extends IntegrationTestCase
     {
         (new StripeAccount(new Crypto()))->saveKeys(true, 'sk_test_x', 'pk_test_x');
         $this->enableOffline();
-        update_option('giveflow_gateway_config', array_merge(
-            (array) get_option('giveflow_gateway_config', []),
+        update_option('fundkit_gateway_config', array_merge(
+            (array) get_option('fundkit_gateway_config', []),
             ['stripe' => ['enabled' => false]]
         ));
 
@@ -203,7 +203,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
     public function test_a_switched_on_gateway_still_raises_its_gaps(): void
     {
         (new StripeAccount(new Crypto()))->saveKeys(true, 'sk_test_x', 'pk_test_x');
-        update_option('giveflow_gateway_config', ['stripe' => ['enabled' => true]]);
+        update_option('fundkit_gateway_config', ['stripe' => ['enabled' => true]]);
 
         $checks = $this->checks();
 
@@ -245,14 +245,14 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
     public function test_an_org_with_no_address_is_flagged_on_receipts(): void
     {
-        update_option('giveflow_org_profile', ['name' => 'Test Org', 'address_lines' => [], 'tax_id' => '']);
+        update_option('fundkit_org_profile', ['name' => 'Test Org', 'address_lines' => [], 'tax_id' => '']);
 
         $this->assertSame(ReadinessService::WARN, $this->checks()['org-identity']['status']);
     }
 
     public function test_a_complete_org_passes(): void
     {
-        update_option('giveflow_org_profile', [
+        update_option('fundkit_org_profile', [
             'name'          => 'Test Org',
             'legal_name'    => 'Test Org e.V.',
             'address_lines' => ['1 Example Street', 'Berlin'],
@@ -284,7 +284,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
     public function test_the_endpoint_reports_the_blocker_count(): void
     {
-        $data = (array) rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/readiness'))->get_data();
+        $data = (array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/readiness'))->get_data();
 
         $this->assertArrayHasKey('checks', $data);
         $this->assertGreaterThan(0, $data['blockers']);
@@ -293,17 +293,17 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
     private function publishedCampaign(bool $publishForm): void
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Readiness campaign', 'status' => 'published']));
         $campaignId = (int) rest_do_request($req)->get_data()['id'];
 
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'title'       => 'Readiness form',
             'campaign_id' => $campaignId,
-            'blocks'      => '<!-- wp:giveflow/donation-amount /-->',
+            'blocks'      => '<!-- wp:fundkit/donation-amount /-->',
         ]));
         $formId = (int) rest_do_request($req)->get_data()['id'];
 

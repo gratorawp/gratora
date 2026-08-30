@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Foundation;
+namespace FundKit\Tests\Unit\Foundation;
 
-use GiveFlow\Foundation\Modules\VersionConstraint;
+use FundKit\Foundation\Modules\VersionConstraint;
 use PHPUnit\Framework\TestCase;
 
 final class VersionConstraintTest extends TestCase

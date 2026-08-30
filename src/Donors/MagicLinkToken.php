@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donors;
+namespace FundKit\Donors;
 
 defined('ABSPATH') || exit;
 
-use GiveFlow\Vendor\Queryable\Model;
-use GiveFlow\Vendor\Queryable\Schema\Table;
+use FundKit\Vendor\Queryable\Model;
+use FundKit\Vendor\Queryable\Schema\Table;
 
 /**
  * One-time token for donor self-service.
@@ -21,7 +21,7 @@ use GiveFlow\Vendor\Queryable\Schema\Table;
  */
 final class MagicLinkToken extends Model
 {
-    protected string $table = 'giveflow_magic_link_tokens';
+    protected string $table = 'fundkit_magic_link_tokens';
     protected string $version = '1.0.0';
 
     public int $id;

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Gateways;
+namespace FundKit\Tests\Unit\Gateways;
 
 use DateTimeImmutable;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Foundation\Time\FrozenClock;
-use GiveFlow\Gateways\Offline\OfflineGateway;
+use FundKit\Donations\Donation;
+use FundKit\Foundation\Time\FrozenClock;
+use FundKit\Gateways\Offline\OfflineGateway;
 use PHPUnit\Framework\TestCase;
 use WP_REST_Request;
 

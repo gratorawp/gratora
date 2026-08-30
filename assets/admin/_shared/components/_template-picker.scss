@@ -3,7 +3,7 @@
 // campaigns.scss and forms/editor.scss, since those pages load separate CSS
 // bundles and the components live in _shared/components/.
 
-.giveflow-template-picker {
+.fundkit-template-picker {
     .components-modal__content { padding-top: 12px; }
 
     &__intro {
@@ -89,7 +89,7 @@
     }
 }
 
-.giveflow-template-thumb {
+.fundkit-template-thumb {
     --thumb-accent: #{$accent};
     position: relative;
     aspect-ratio: 4 / 3;
@@ -223,7 +223,7 @@ $gctp-ink3: rgba(0, 0, 0, 0.06);
 $gctp-photo: linear-gradient( 152deg, #7c8593 0%, #3f4753 54%, #232932 100% );
 $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100% );
 
-.giveflow-ctp {
+.fundkit-ctp {
     &__thumb {
         display: flex;
         flex-direction: column;
@@ -473,11 +473,11 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     justify-content: space-between;
 }
 
-.giveflow-ctp {
+.fundkit-ctp {
     // The form picker clamps its descriptions to two lines. Here the
     // description IS the difference between one layout and the next, so a
     // sentence cut in half costs the reader the thing they came to compare.
-    .giveflow-template-picker__desc {
+    .fundkit-template-picker__desc {
         display: block;
         -webkit-line-clamp: none;
         overflow: visible;
@@ -541,7 +541,7 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
 
 // A template whose whole page is dark says so here, because that is the thing
 // about it somebody is choosing.
-.giveflow-ctp__thumb.is-dark {
+.fundkit-ctp__thumb.is-dark {
     background: #12161d;
     border-color: rgba(255, 255, 255, .12);
 

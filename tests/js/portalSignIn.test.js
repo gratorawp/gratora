@@ -43,7 +43,7 @@ function me( overrides = {} ) {
 
 // The runtime mounts itself on import, so each test needs its own module copy.
 async function boot() {
-    document.body.innerHTML = '<div id="giveflow-donor-portal"></div>';
+    document.body.innerHTML = '<div id="fundkit-donor-portal"></div>';
 
     jest.isolateModules( () => {
         require( '../../assets/donor-portal/index.jsx' );
@@ -54,7 +54,7 @@ async function boot() {
 }
 
 function text() {
-    return document.getElementById( 'giveflow-donor-portal' ).textContent;
+    return document.getElementById( 'fundkit-donor-portal' ).textContent;
 }
 
 // Awaited, because the form's submit handler closes over the state of the
@@ -89,13 +89,13 @@ function clickButton( label ) {
 beforeEach( () => {
     routes = {};
     window.history.replaceState( {}, '', '/portal/' );
-    window.giveflowPortal = { rest: '/wp-json/giveflow/v1/portal/', nonce: '', token: 'portal-token' };
-    window.giveflow = {
+    window.fundkitPortal = { rest: '/wp-json/fundkit/v1/portal/', nonce: '', token: 'portal-token' };
+    window.fundkit = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
     global.fetch = jest.fn( ( url ) => {
-        const path = String( url ).replace( '/wp-json/giveflow/v1/portal/', '' );
+        const path = String( url ).replace( '/wp-json/fundkit/v1/portal/', '' );
         const route = routes[ path ];
         if ( typeof route === 'function' ) return route();
 
@@ -179,7 +179,7 @@ describe( 'signing out', () => {
 			.find( ( c ) => String( c[ 0 ] ).endsWith( '/logout-everywhere' ) );
 		expect( posted ).toBeTruthy();
 		expect( posted[ 1 ].method ).toBe( 'POST' );
-		expect( posted[ 1 ].headers[ 'X-GiveFlow-Csrf' ] ).toBe( 'csrf-token' );
+		expect( posted[ 1 ].headers[ 'X-FundKit-Csrf' ] ).toBe( 'csrf-token' );
 	} );
 
 	test( 'there is no second control offering a narrower sign out', async () => {

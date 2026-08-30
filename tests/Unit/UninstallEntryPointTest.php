@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit;
+namespace FundKit\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 
@@ -43,7 +43,7 @@ final class UninstallEntryPointTest extends TestCase
     public function test_including_uninstall_leaves_the_eraser_able_to_run(): void
     {
         $result = $this->runProbe(<<<'PHP'
-        $eraser = new GiveFlow\Foundation\Uninstall\DataEraser();
+        $eraser = new FundKit\Foundation\Uninstall\DataEraser();
         echo 'TABLES=' . count($eraser->coreTables());
         PHP);
 
@@ -55,7 +55,7 @@ final class UninstallEntryPointTest extends TestCase
     public function test_the_models_load_after_the_file_has_bootstrapped(): void
     {
         $result = $this->runProbe(<<<'PHP'
-        echo class_exists('GiveFlow\Campaigns\Campaign') ? 'CAMPAIGN=yes' : 'CAMPAIGN=no';
+        echo class_exists('FundKit\Campaigns\Campaign') ? 'CAMPAIGN=yes' : 'CAMPAIGN=no';
         PHP);
 
         $this->assertSame('CAMPAIGN=yes', $result);
@@ -120,12 +120,12 @@ final class UninstallEntryPointTest extends TestCase
         $script = "<?php\n"
             . "chdir(sys_get_temp_dir());\n"
             . "define('ABSPATH', '/dev/null/');\n"
-            . "define('WP_UNINSTALL_PLUGIN', 'giveflow/giveflow.php');\n"
+            . "define('WP_UNINSTALL_PLUGIN', 'fundkit/fundkit.php');\n"
             . "\$GLOBALS['erased'] = false;\n"
             . "\$GLOBALS['switched'] = [];\n"
             . "\$GLOBALS['restored'] = 0;\n"
             . "function get_option(\$name, \$default = false) {\n"
-            . "    return \$name === 'giveflow_delete_data' ? {$optIn} : \$default;\n"
+            . "    return \$name === 'fundkit_delete_data' ? {$optIn} : \$default;\n"
             . "}\n"
             . "function delete_option(\$name) { return true; }\n"
             . "function is_multisite() { \$GLOBALS['erased'] = true; return " . var_export($multisite, true) . "; }\n"
@@ -143,7 +143,7 @@ final class UninstallEntryPointTest extends TestCase
             . 'require ' . var_export($root . '/uninstall.php', true) . ";\n"
             . $body . "\n";
 
-        $this->probe = sys_get_temp_dir() . '/giveflow-uninstall-probe-' . bin2hex(random_bytes(6)) . '.php';
+        $this->probe = sys_get_temp_dir() . '/fundkit-uninstall-probe-' . bin2hex(random_bytes(6)) . '.php';
         file_put_contents($this->probe, $script);
 
         exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($this->probe) . ' 2>&1', $lines);

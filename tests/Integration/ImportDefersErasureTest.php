@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\DonorRetention;
+use FundKit\Donors\DonorRetention;
 use WP_REST_Request;
 
 /**
@@ -37,7 +37,7 @@ final class ImportDefersErasureTest extends IntegrationTestCase
     /** @param array<string,string> $mapping */
     private function importCsv(bool $dryRun, ?array $mapping = null): array
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/tools/csv-import');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/csv-import');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'csv'     => $this->csv(),

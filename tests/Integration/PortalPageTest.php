@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\Portal\PortalPage;
+use FundKit\Donors\Portal\PortalPage;
 
 /**
  * The donor portal page is the front door for every magic-link email - if
@@ -12,7 +12,7 @@ use GiveFlow\Donors\Portal\PortalPage;
  * reach their receipts, recurring management or my-fundraising.
  *
  * Locks: idempotent ensure(), adoption of existing slugged page, resolve()
- * filters trashed/draft/non-page rows, url() respects the giveflow.portal.url
+ * filters trashed/draft/non-page rows, url() respects the fundkit.portal.url
  * override but otherwise returns get_permalink() of the resolved id.
  */
 final class PortalPageTest extends IntegrationTestCase
@@ -31,7 +31,7 @@ final class PortalPageTest extends IntegrationTestCase
     {
         delete_option(PortalPage::OPTION_PAGE_ID);
         delete_option(PortalPage::OPTION_VERSION);
-        remove_all_filters('giveflow.portal.url');
+        remove_all_filters('fundkit.portal.url');
         parent::tearDown();
     }
 
@@ -76,7 +76,7 @@ final class PortalPageTest extends IntegrationTestCase
             'post_title'   => 'Members area',
             'post_name'    => PortalPage::SLUG,
             'post_status'  => 'publish',
-            'post_content' => '[giveflow_donor_portal]',
+            'post_content' => '[fundkit_donor_portal]',
         ], true);
         $this->assertIsInt($existing);
         $this->assertGreaterThan(0, $existing);
@@ -124,7 +124,7 @@ final class PortalPageTest extends IntegrationTestCase
 
     public function test_filter_override_wins(): void
     {
-        add_filter('giveflow.portal.url', static fn () => 'https://custom.example/portal/');
+        add_filter('fundkit.portal.url', static fn () => 'https://custom.example/portal/');
 
         (new PortalPage())->ensure();
 
@@ -138,7 +138,7 @@ final class PortalPageTest extends IntegrationTestCase
         (new PortalPage())->maybeHeal();
         $idAfterFirstHeal = (int) get_option(PortalPage::OPTION_PAGE_ID);
         $this->assertGreaterThan(0, $idAfterFirstHeal, 'first heal ensures the page');
-        $this->assertSame(GIVEFLOW_VERSION, get_option(PortalPage::OPTION_VERSION));
+        $this->assertSame(FUNDKIT_VERSION, get_option(PortalPage::OPTION_VERSION));
 
         // Second heal with same version: no-op, same id.
         (new PortalPage())->maybeHeal();

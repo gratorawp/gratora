@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Async;
+namespace FundKit\Async;
 
 /**
  * Wrapper over Action Scheduler.
@@ -11,7 +11,7 @@ namespace GiveFlow\Async;
  */
 final class AsyncDispatcher
 {
-    public const GROUP = 'giveflow';
+    public const GROUP = 'fundkit';
 
     /**
      * @param array<array-key,mixed> $args

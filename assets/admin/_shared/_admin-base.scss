@@ -1,14 +1,14 @@
-// Forwarded to @giveflow/ui - the single source of truth for the shared admin chrome.
-@import '@giveflow/ui/scss/admin-base';
+// Forwarded to @fundkit/ui - the single source of truth for the shared admin chrome.
+@import '@fundkit/ui/scss/admin-base';
 
 // A switch and its label in a page head, beside the count it changes.
-.giveflow-inline-toggle {
+.fundkit-inline-toggle {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
     font-size: 13px;
-    color: var(--giveflow-color-text-muted, #6b7280);
+    color: var(--fundkit-color-text-muted, #6b7280);
     white-space: nowrap;
 }
 
@@ -16,10 +16,10 @@
 // list, the donors list and the donor profile all mark a rehearsal the same
 // way, and a screen that renders the class without the rule shows a bare word.
 //
-// Doubled class on purpose: a later .giveflow-pill rule (the pill-group button)
+// Doubled class on purpose: a later .fundkit-pill rule (the pill-group button)
 // sets a transparent background, and the extra class outranks it wherever the
 // two land in source order.
-.giveflow-pill.giveflow-pill--test {
+.fundkit-pill.fundkit-pill--test {
     background: $amber-soft;
     color: $amber;
     font-weight: 600;
@@ -27,13 +27,13 @@
 
 // Reference plus its test badge. Inline-flex so the badge sits on the
 // reference's baseline rather than wrapping under it in a narrow column.
-.giveflow-ref-cell {
+.fundkit-ref-cell {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     min-width: 0;
 
-    .giveflow-mono-link {
+    .fundkit-mono-link {
         min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -41,10 +41,10 @@
 }
 
 // Links inside admin copy. WordPress paints every unstyled anchor its own blue,
-// which reads as WordPress chrome sitting in a GiveFlow sentence. accent-dark
+// which reads as WordPress chrome sitting in a FundKit sentence. accent-dark
 // rather than accent: this is body-weight text, and the lighter green does not
 // carry enough contrast against a white card.
-.giveflow-muted a {
+.fundkit-muted a {
     color: $accent-dark;
 
     &:hover,

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\AntiSpamGuard;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donations\AntiSpamGuard;
+use FundKit\Foundation\Plugin;
 
 /**
  * The limiter counts every attempt, and counts it once.
@@ -83,7 +83,7 @@ final class RateLimitAtomicityTest extends IntegrationTestCase
 
         $refused = $this->guard()->consumeEmailQuota($email);
         $this->assertNotNull($refused);
-        $this->assertSame('giveflow_rate_limited', $refused->get_error_code());
+        $this->assertSame('fundkit_rate_limited', $refused->get_error_code());
     }
 
     /** One mailbox running out must not spend another's allowance. */
@@ -131,7 +131,7 @@ final class RateLimitAtomicityTest extends IntegrationTestCase
 
         $stored = (int) $wpdb->get_var(
             "SELECT option_value FROM {$wpdb->options}
-             WHERE option_name LIKE '_transient_giveflow_donate_email_%'
+             WHERE option_name LIKE '_transient_fundkit_donate_email_%'
              ORDER BY option_id DESC LIMIT 1"
         );
 
@@ -151,14 +151,14 @@ final class RateLimitAtomicityTest extends IntegrationTestCase
         $this->guard()->consumeEmailQuota($email);
         $first = (int) $wpdb->get_var(
             "SELECT option_value FROM {$wpdb->options}
-             WHERE option_name LIKE '_transient_timeout_giveflow_donate_email_%'
+             WHERE option_name LIKE '_transient_timeout_fundkit_donate_email_%'
              ORDER BY option_id DESC LIMIT 1"
         );
 
         $this->guard()->consumeEmailQuota($email);
         $second = (int) $wpdb->get_var(
             "SELECT option_value FROM {$wpdb->options}
-             WHERE option_name LIKE '_transient_timeout_giveflow_donate_email_%'
+             WHERE option_name LIKE '_transient_timeout_fundkit_donate_email_%'
              ORDER BY option_id DESC LIMIT 1"
         );
 

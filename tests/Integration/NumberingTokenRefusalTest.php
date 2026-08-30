@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\References\InvalidReferenceToken;
-use GiveFlow\Foundation\References\ReferenceGenerator;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\References\InvalidReferenceToken;
+use FundKit\Foundation\References\ReferenceGenerator;
+use FundKit\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -27,7 +27,7 @@ final class NumberingTokenRefusalTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $req = new WP_REST_Request('PUT', '/giveflow/v1/admin/settings/numbering');
+        $req = new WP_REST_Request('PUT', '/fundkit/v1/admin/settings/numbering');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -39,7 +39,7 @@ final class NumberingTokenRefusalTest extends IntegrationTestCase
         $res = $this->put(['separator' => '.']);
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('giveflow_invalid_reference_token', $res->get_data()['code']);
+        $this->assertSame('fundkit_invalid_reference_token', $res->get_data()['code']);
         $this->assertStringContainsString('Separator', (string) $res->get_data()['message']);
         $this->assertSame('-', $this->settings()->get('numbering')['separator'], 'nothing was stored');
     }

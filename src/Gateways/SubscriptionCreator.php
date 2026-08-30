@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways;
+namespace FundKit\Gateways;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Donations\Donation;
+use FundKit\Recurring\RecurringPlan;
 use RuntimeException;
 
 /**

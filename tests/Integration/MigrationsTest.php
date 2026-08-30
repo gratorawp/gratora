@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 final class MigrationsTest extends IntegrationTestCase
 {
     public function test_all_10_core_tables_exist(): void
     {
         $expected = [
-            'giveflow_donors', 'giveflow_consents', 'giveflow_magic_link_tokens',
-            'giveflow_campaigns', 'giveflow_funds',
-            'giveflow_donations', 'giveflow_recurring_plans', 'giveflow_receipts',
-            'giveflow_forms', 'giveflow_events',
+            'fundkit_donors', 'fundkit_consents', 'fundkit_magic_link_tokens',
+            'fundkit_campaigns', 'fundkit_funds',
+            'fundkit_donations', 'fundkit_recurring_plans', 'fundkit_receipts',
+            'fundkit_forms', 'fundkit_events',
         ];
 
         foreach ($expected as $t) {
@@ -27,7 +27,7 @@ final class MigrationsTest extends IntegrationTestCase
 
     public function test_donations_has_webhook_dedup_unique_indexes(): void
     {
-        $tbl = self::$prefix . 'giveflow_donations';
+        $tbl = self::$prefix . 'fundkit_donations';
         $indexes = self::$wpdb->get_results("SHOW INDEX FROM {$tbl}");
 
         $named = [];
@@ -44,7 +44,7 @@ final class MigrationsTest extends IntegrationTestCase
 
     public function test_events_table_has_funnel_indexes(): void
     {
-        $tbl = self::$prefix . 'giveflow_events';
+        $tbl = self::$prefix . 'fundkit_events';
         $indexes = self::$wpdb->get_results("SHOW INDEX FROM {$tbl}");
 
         $names = array_unique(array_map(fn ($r) => $r->Key_name, $indexes));

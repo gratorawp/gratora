@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Settings;
+namespace FundKit\Settings;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Currency\BaseCurrencyLock;
-use GiveFlow\Currency\BaseCurrencyLocked;
-use GiveFlow\Foundation\References\InvalidReferenceToken;
-use GiveFlow\Foundation\References\ReferenceGenerator;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Currency\BaseCurrencyLock;
+use FundKit\Currency\BaseCurrencyLocked;
+use FundKit\Foundation\References\InvalidReferenceToken;
+use FundKit\Foundation\References\ReferenceGenerator;
 
 /**
  * Reads and writes plugin settings, grouped by area (org-profile, gateways, email).
@@ -20,7 +20,7 @@ final class SettingsService
 {
     public const GROUPS = [
         'org-profile' => [
-            'option'   => 'giveflow_org_profile',
+            'option'   => 'fundkit_org_profile',
             'defaults' => [
                 'name'          => '',
                 'legal_name'    => '',
@@ -42,7 +42,7 @@ final class SettingsService
             ],
         ],
         'currency-locale' => [
-            'option'   => 'giveflow_currency_locale',
+            'option'   => 'fundkit_currency_locale',
             'defaults' => [
                 'default_currency'     => 'USD',
                 'supported_currencies' => ['USD'],
@@ -55,7 +55,7 @@ final class SettingsService
             ],
         ],
         'org-brand' => [
-            'option'   => 'giveflow_org_brand',
+            'option'   => 'fundkit_org_brand',
             'defaults' => [
                 // User-created presets; built-ins are merged on read by StylePresets::all().
                 'presets'    => [],
@@ -63,7 +63,7 @@ final class SettingsService
             ],
         ],
         'gateways' => [
-            'option'   => 'giveflow_gateway_config',
+            'option'   => 'fundkit_gateway_config',
             'defaults' => [
                 // Org-wide test mode; per-form settings.test_mode also triggers it.
                 'test_mode' => false,
@@ -94,7 +94,7 @@ final class SettingsService
             ],
         ],
         'privacy' => [
-            'option'   => 'giveflow_privacy',
+            'option'   => 'fundkit_privacy',
             'defaults' => [
                 'privacy_policy_url'             => '',
                 'retention_days_after_redaction' => 90,
@@ -105,7 +105,7 @@ final class SettingsService
                 // The window used once erasure is switched on: anonymize
                 // inactive donors after N years. Donation rows are kept.
                 'donor_retention_years'          => 7,
-                // Prune giveflow_events older than N days; 0 disables.
+                // Prune fundkit_events older than N days; 0 disables.
                 'event_retention_days'           => 730,
                 'anonymize_ips'                  => true,
                 // Off by default: a Gravatar request carries a hash of the
@@ -118,7 +118,7 @@ final class SettingsService
             ],
         ],
         'roles' => [
-            'option'   => 'giveflow_roles',
+            'option'   => 'fundkit_roles',
             // Administrator only. The Roles screen shows this mapping as
             // granted, and CoreModule seeds it into real capabilities on the
             // first admin load, so a role listed here holds what the screen
@@ -128,15 +128,15 @@ final class SettingsService
             'defaults' => [
                 'mapping' => [
                     'administrator' => [
-                        'giveflow_view_donors', 'giveflow_edit_donors', 'giveflow_export_donors', 'giveflow_redact_donors',
-                        'giveflow_view_donations', 'giveflow_edit_donations', 'giveflow_refund_donations', 'giveflow_resend_receipt',
-                        'giveflow_view_reports', 'giveflow_manage_campaigns', 'giveflow_manage_forms', 'giveflow_manage_settings',
+                        'fundkit_view_donors', 'fundkit_edit_donors', 'fundkit_export_donors', 'fundkit_redact_donors',
+                        'fundkit_view_donations', 'fundkit_edit_donations', 'fundkit_refund_donations', 'fundkit_resend_receipt',
+                        'fundkit_view_reports', 'fundkit_manage_campaigns', 'fundkit_manage_forms', 'fundkit_manage_settings',
                     ],
                 ],
             ],
         ],
         'consents' => [
-            'option'   => 'giveflow_consents',
+            'option'   => 'fundkit_consents',
             // Empty on purpose. A consent purpose names something the
             // organization actually does, and we do not know what that is.
             // Shipping a "Newsletter" purpose puts a permanent "No response"
@@ -147,7 +147,7 @@ final class SettingsService
             ],
         ],
         'receipts' => [
-            'option'   => 'giveflow_receipt_settings',
+            'option'   => 'fundkit_receipt_settings',
             'defaults' => [
                 'header_title'       => 'Donation receipt',
                 'intro'              => '',
@@ -165,7 +165,7 @@ final class SettingsService
             'defaults' => ReferenceGenerator::DEFAULT_SETTINGS,
         ],
         'email' => [
-            'option'   => 'giveflow_email_settings',
+            'option'   => 'fundkit_email_settings',
             'defaults' => [
                 'from_name'  => '',
                 'from_email' => '',
@@ -184,7 +184,7 @@ final class SettingsService
     private ?array $groupsCache = null;
 
     /**
-     * The group map, including any groups registered via `giveflow.settings.groups`.
+     * The group map, including any groups registered via `fundkit.settings.groups`.
      *
      * @return array<string,mixed>
      *
@@ -193,7 +193,7 @@ final class SettingsService
     public function groups(): array
     {
         if ($this->groupsCache === null) {
-            $filtered = apply_filters('giveflow.settings.groups', self::GROUPS);
+            $filtered = apply_filters('fundkit.settings.groups', self::GROUPS);
             $this->groupsCache = is_array($filtered) ? $filtered : self::GROUPS;
         }
         return $this->groupsCache;
@@ -233,28 +233,28 @@ final class SettingsService
         return [
             'donation_receipt' => [
                 'enabled' => true,
-                'subject' => __('Thank you for your donation to {organisation_name}', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_first_name},\n\nThank you for your donation of {amount} to {organisation_name}.\n\nReference: {reference}\nReceipt number: {receipt_number}\n\nYour receipt is attached as a PDF. Keep it for your records.\n\nWith gratitude,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Thank you for your donation to {organisation_name}', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_first_name},\n\nThank you for your donation of {amount} to {organisation_name}.\n\nReference: {reference}\nReceipt number: {receipt_number}\n\nYour receipt is attached as a PDF. Keep it for your records.\n\nWith gratitude,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             'donation_first' => [
                 'enabled' => true,
-                'subject' => __('Thank you for your first donation to {organisation_name}', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_first_name},\n\nThank you for making your first donation to {organisation_name}. Your support means a great deal, and we are grateful to have you with us.\n\nWe will keep you posted on the difference it makes.\n\nWith gratitude,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Thank you for your first donation to {organisation_name}', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_first_name},\n\nThank you for making your first donation to {organisation_name}. Your support means a great deal, and we are grateful to have you with us.\n\nWe will keep you posted on the difference it makes.\n\nWith gratitude,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             'offline_instructions' => [
                 'enabled' => true,
-                'subject' => __('Payment instructions for your donation to {organisation_name}', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_name},\n\nThank you for choosing to support {campaign_title} with a donation of {amount}.\n\n{instructions}\n\nPlease transfer the amount using the reference {reference}. We will email your receipt as soon as the payment arrives.\n\n{bank_details}\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Payment instructions for your donation to {organisation_name}', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_name},\n\nThank you for choosing to support {campaign_title} with a donation of {amount}.\n\n{instructions}\n\nPlease transfer the amount using the reference {reference}. We will email your receipt as soon as the payment arrives.\n\n{bank_details}\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             'donation_pending' => [
                 'enabled' => true,
-                'subject' => __('Your donation is processing', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_first_name},\n\nWe have received your donation of {amount}.\n\nReference: {reference}\n\nYour payment is being processed. Bank settlement can take a few business days; we will email your receipt the moment it clears.\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Your donation is processing', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_first_name},\n\nWe have received your donation of {amount}.\n\nReference: {reference}\n\nYour payment is being processed. Bank settlement can take a few business days; we will email your receipt the moment it clears.\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             'donation_refunded' => [
                 'enabled' => true,
-                'subject' => __('Your donation has been refunded', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_name},\n\nWe have refunded your donation of {amount} to {campaign_title}. Funds should return to your card within 5 to 10 business days.\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Your donation has been refunded', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_name},\n\nWe have refunded your donation of {amount} to {campaign_title}. Funds should return to your card within 5 to 10 business days.\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             // The neutral set. An add-on can move something through the
             // donation rails that is not a donation (a ticket order, say), and
@@ -262,61 +262,61 @@ final class SettingsService
             // contribution. Same facts, no claim about what the money was.
             'payment_instructions' => [
                 'enabled' => true,
-                'subject' => __('Payment instructions for {organisation_name}', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_name},\n\nThank you. Your payment of {amount} is not complete yet.\n\n{instructions}\n\nPlease transfer the amount using the reference {reference}. We will confirm as soon as the payment arrives.\n\n{bank_details}\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Payment instructions for {organisation_name}', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_name},\n\nThank you. Your payment of {amount} is not complete yet.\n\n{instructions}\n\nPlease transfer the amount using the reference {reference}. We will confirm as soon as the payment arrives.\n\n{bank_details}\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             'payment_pending' => [
                 'enabled' => true,
-                'subject' => __('Your payment is processing', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_first_name},\n\nWe have received your payment of {amount}.\n\nReference: {reference}\n\nYour payment is being processed. Bank settlement can take a few business days; we will confirm as soon as it clears.\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Your payment is processing', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_first_name},\n\nWe have received your payment of {amount}.\n\nReference: {reference}\n\nYour payment is being processed. Bank settlement can take a few business days; we will confirm as soon as it clears.\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             'payment_refunded' => [
                 'enabled' => true,
-                'subject' => __('Your payment has been refunded', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_name},\n\nWe have refunded your payment of {amount}. Funds should return to your card within 5 to 10 business days.\n\nReference: {reference}\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Your payment has been refunded', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_name},\n\nWe have refunded your payment of {amount}. Funds should return to your card within 5 to 10 business days.\n\nReference: {reference}\n\nIf this was a mistake or you have any questions, just reply to this email.\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             'recurring_renewal' => [
                 'enabled' => true,
-                'subject' => __('Your recurring donation renewed', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} was renewed today.\n\nReference: {reference}\n\nThank you for your continued support.\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Your recurring donation renewed', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} was renewed today.\n\nReference: {reference}\n\nThank you for your continued support.\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             'subscription_payment_failed' => [
                 'enabled' => true,
-                'subject' => __("Your donation couldn't be taken this month", 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_first_name},\n\nWe tried to collect your recurring donation of {amount} to {campaign_title} today and your bank declined it. This usually means a card has expired or been replaced.\n\nNothing has been charged and your donation is still set up. You can put that right here:\n{portal_url}\n\nIf you would rather stop the donation, that is completely fine, and you can do that from the same page.\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __("Your donation couldn't be taken this month", 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_first_name},\n\nWe tried to collect your recurring donation of {amount} to {campaign_title} today and your bank declined it. This usually means a card has expired or been replaced.\n\nNothing has been charged and your donation is still set up. You can put that right here:\n{portal_url}\n\nIf you would rather stop the donation, that is completely fine, and you can do that from the same page.\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             'subscription_cancelled' => [
                 'enabled' => true,
-                'subject' => __('Your recurring donation has been cancelled', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} has been cancelled. No further charges will be made.\n\nThank you for the donations you made along the way.\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Your recurring donation has been cancelled', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_name},\n\nYour recurring donation of {amount} to {campaign_title} has been cancelled. No further charges will be made.\n\nThank you for the donations you made along the way.\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             // Sent only when someone at the organization changes a plan on the
             // donor's behalf. A donor changing their own donation is looking at
             // the screen that did it and gets nothing.
             'recurring_amount_changed' => [
                 'enabled' => true,
-                'subject' => __('Your recurring donation amount has changed', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation to {campaign_title} has been changed from {old_amount} to {amount}, starting with your next payment.\n\nIf that is not what you expected, you can change it back or stop the donation here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Your recurring donation amount has changed', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation to {campaign_title} has been changed from {old_amount} to {amount}, starting with your next payment.\n\nIf that is not what you expected, you can change it back or stop the donation here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             'recurring_paused' => [
                 'enabled' => true,
-                'subject' => __('Your recurring donation is paused', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation of {amount} to {campaign_title} has been paused. Nothing will be charged until it restarts on {resumes_at}.\n\nYou can restart it sooner, or stop it altogether, here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Your recurring donation is paused', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation of {amount} to {campaign_title} has been paused. Nothing will be charged until it restarts on {resumes_at}.\n\nYou can restart it sooner, or stop it altogether, here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             'recurring_resumed' => [
                 'enabled' => true,
-                'subject' => __('Your recurring donation has restarted', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation of {amount} to {campaign_title} has restarted. Your next payment is due on {next_payment_at}.\n\nYou can manage it any time here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Your recurring donation has restarted', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation of {amount} to {campaign_title} has restarted. Your next payment is due on {next_payment_at}.\n\nYou can manage it any time here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             'recurring_skipped' => [
                 'enabled' => true,
-                'subject' => __('Your next donation has been skipped', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_first_name},\n\nYour next recurring donation of {amount} to {campaign_title} has been skipped. Nothing will be charged this time, and the donation continues on {next_payment_at}.\n\nYou can manage it any time here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Your next donation has been skipped', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_first_name},\n\nYour next recurring donation of {amount} to {campaign_title} has been skipped. Nothing will be charged this time, and the donation continues on {next_payment_at}.\n\nYou can manage it any time here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
             'magic_link' => [
                 'enabled' => true,
-                'subject' => __('Your sign-in link for {organisation_name}', 'giveflow-fundraising-campaigns'),
-                'body'    => __("Hi {donor_name},\n\nOpen your donor portal:\n{portal_url}\n\nThis link works for {link_expiry} and can only be used once. If you didn't request it, you can ignore this email.\n\nThanks,\n{organisation_name}", 'giveflow-fundraising-campaigns'),
+                'subject' => __('Your sign-in link for {organisation_name}', 'fundkit-fundraising-campaigns'),
+                'body'    => __("Hi {donor_name},\n\nOpen your donor portal:\n{portal_url}\n\nThis link works for {link_expiry} and can only be used once. If you didn't request it, you can ignore this email.\n\nThanks,\n{organisation_name}", 'fundkit-fundraising-campaigns'),
             ],
         ];
     }
@@ -339,7 +339,7 @@ final class SettingsService
         $donor    = ['donor_first_name', 'donor_name', 'organisation_name'];
         $donation = array_merge($donor, ['amount', 'campaign_title']);
 
-        return (array) apply_filters('giveflow.email.template_tags', [
+        return (array) apply_filters('fundkit.email.template_tags', [
             'donation_receipt'            => array_merge($donation, ['receipt_number', 'reference', 'download_url']),
             'donation_first'              => $donor,
             'donation_pending'            => array_merge($donation, ['reference']),
@@ -375,7 +375,7 @@ final class SettingsService
      */
     public static function templateMeta(): array
     {
-        return array_values((array) apply_filters('giveflow.email.template_meta', []));
+        return array_values((array) apply_filters('fundkit.email.template_meta', []));
     }
 
     /**
@@ -392,7 +392,7 @@ final class SettingsService
 
         // Translatable template defaults (see the const note). Merge core
         // defaults UNDER any templates a filter already contributed, so an
-        // add-on registering its own templates (giveflow.settings.groups) cannot
+        // add-on registering its own templates (fundkit.settings.groups) cannot
         // displace the core set - otherwise activating an add-on silently
         // drops core transactional emails (receipts, magic link). The stored
         // option overlays both in get(), so a customized template still wins.
@@ -466,7 +466,7 @@ final class SettingsService
         // The values as they were are handed along too: a listener that has to
         // act on a setting being switched on, rather than on every save of the
         // group it lives in, has no other way to tell the two apart.
-        do_action('giveflow.settings.updated', $group, $next, $current);
+        do_action('fundkit.settings.updated', $group, $next, $current);
         return $next;
     }
 
@@ -481,7 +481,7 @@ final class SettingsService
      * Top level only, deliberately. roles.mapping is role => capabilities and
      * numbering.prefixes is scope => prefix; both have keys core cannot know,
      * so recursing would throw away exactly the data the screen is editing.
-     * Add-ons registering a group through giveflow.settings.groups are covered by
+     * Add-ons registering a group through fundkit.settings.groups are covered by
      * the same rule, since a group has to declare its defaults to work at all.
      *
      * @param array<string,mixed> $cfg
@@ -533,7 +533,7 @@ final class SettingsService
                 $group,
                 implode(', ', $rejected)
             ));
-            do_action('giveflow.settings.rejected', $group, $rejected);
+            do_action('fundkit.settings.rejected', $group, $rejected);
         }
 
         return $kept;

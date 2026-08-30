@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Gateways;
+namespace FundKit\Tests\Unit\Gateways;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Gateways\GatewayConfirmResult;
-use GiveFlow\Gateways\GatewayIntentResult;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\PaymentGateway;
-use GiveFlow\Gateways\RefundResult;
-use GiveFlow\Gateways\WebhookOutcome;
+use FundKit\Donations\Donation;
+use FundKit\Gateways\GatewayConfirmResult;
+use FundKit\Gateways\GatewayIntentResult;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\PaymentGateway;
+use FundKit\Gateways\RefundResult;
+use FundKit\Gateways\WebhookOutcome;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use WP_REST_Request;
@@ -187,7 +187,7 @@ final class GatewayManagerTest extends TestCase
 
     public function test_options_for_empty_allowed_returns_all_enabled_in_registration_order(): void
     {
-        $GLOBALS['_giveflow_test_options'] = [];
+        $GLOBALS['_fundkit_test_options'] = [];
         $gm = new GatewayManager();
         $gm->register(new FakeGateway('offline', ['one_time', 'recurring'], ['card'], ['*'], ['*']));
         $gm->register(new FakeGateway('stripe',  ['one_time', 'recurring'], ['card'], ['*'], ['*']));
@@ -197,7 +197,7 @@ final class GatewayManagerTest extends TestCase
 
     public function test_options_for_excludes_explicitly_disabled_gateway(): void
     {
-        $GLOBALS['_giveflow_test_options'] = ['giveflow_gateway_config' => ['stripe' => ['enabled' => false]]];
+        $GLOBALS['_fundkit_test_options'] = ['fundkit_gateway_config' => ['stripe' => ['enabled' => false]]];
         $gm = new GatewayManager();
         $gm->register(new FakeGateway('offline', ['one_time'], ['card'], ['*'], ['*']));
         $gm->register(new FakeGateway('stripe',  ['one_time'], ['card'], ['*'], ['*']));
@@ -207,7 +207,7 @@ final class GatewayManagerTest extends TestCase
 
     public function test_options_for_intersects_and_orders_by_allowed_list(): void
     {
-        $GLOBALS['_giveflow_test_options'] = [];
+        $GLOBALS['_fundkit_test_options'] = [];
         $gm = new GatewayManager();
         $gm->register(new FakeGateway('offline', ['one_time'], ['card'], ['*'], ['*']));
         $gm->register(new FakeGateway('stripe',  ['one_time'], ['card'], ['*'], ['*']));
@@ -219,7 +219,7 @@ final class GatewayManagerTest extends TestCase
 
     public function test_options_for_drops_context_unavailable_gateway(): void
     {
-        $GLOBALS['_giveflow_test_options'] = [];
+        $GLOBALS['_fundkit_test_options'] = [];
         $gm = new GatewayManager();
         $gm->register(new FakeGateway('offline',  ['one_time'], ['card'], ['*'],  ['*']));
         $gm->register(new FakeGateway('usd_only', ['one_time'], ['card'], ['*'],  ['USD']));
@@ -229,7 +229,7 @@ final class GatewayManagerTest extends TestCase
 
     public function test_options_meta_for_is_not_context_filtered_and_carries_metadata(): void
     {
-        $GLOBALS['_giveflow_test_options'] = [];
+        $GLOBALS['_fundkit_test_options'] = [];
         $gm = new GatewayManager();
         $gm->register(new FakeGateway('offline',  ['one_time', 'recurring'], ['card'], ['*'],  ['*']));
         $gm->register(new FakeGateway('usd_only', ['one_time'],              ['card'], ['DE'], ['USD']));
@@ -244,7 +244,7 @@ final class GatewayManagerTest extends TestCase
 
     public function test_options_meta_for_respects_org_disable_and_allowed_order(): void
     {
-        $GLOBALS['_giveflow_test_options'] = ['giveflow_gateway_config' => ['usd_only' => ['enabled' => false]]];
+        $GLOBALS['_fundkit_test_options'] = ['fundkit_gateway_config' => ['usd_only' => ['enabled' => false]]];
         $gm = new GatewayManager();
         $gm->register(new FakeGateway('offline',  ['one_time'], ['card'], ['*'], ['*']));
         $gm->register(new FakeGateway('usd_only', ['one_time'], ['card'], ['*'], ['USD']));

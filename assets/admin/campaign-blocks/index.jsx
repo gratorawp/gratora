@@ -1,5 +1,5 @@
 // Every block here is server-rendered, so the editor previews through
-// ServerSideRender. campaignId=0 falls back to the page's _giveflow_campaign_id
+// ServerSideRender. campaignId=0 falls back to the page's _fundkit_campaign_id
 // post meta.
 
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -27,32 +27,32 @@ import Notice from '../_shared/components/Notice';
 import ServerSideRender from '@wordpress/server-side-render';
 import { __ } from '@wordpress/i18n';
 
-import { registerGiveFlowEntities } from '../_shared/entities';
+import { registerFundKitEntities } from '../_shared/entities';
 import './LayoutSwitcher';
 import { registerCampaignBindingSource } from './bindings.js';
 import { defaultCurrency, amountEntry } from '../_shared/format';
 import './blocks.scss';
 
-registerGiveFlowEntities();
+registerFundKitEntities();
 
 // The client half of the binding source PHP registers. Without it a bound core
 // block shows the source's label instead of the campaign's own value.
-registerCampaignBindingSource( ( window.giveflowCampaignBlocks || {} ).bindingFields || {} );
+registerCampaignBindingSource( ( window.fundkitCampaignBlocks || {} ).bindingFields || {} );
 
 function useBoundCampaign( campaignId ) {
     const postMetaId = useSelect( ( select ) => {
         const editor = select( 'core/editor' );
         if ( ! editor || ! editor.getEditedPostAttribute ) return 0;
         const meta = editor.getEditedPostAttribute( 'meta' ) || {};
-        return Number( meta._giveflow_campaign_id || 0 );
+        return Number( meta._fundkit_campaign_id || 0 );
     }, [] );
 
     const resolvedId = campaignId || postMetaId || 0;
-    const { record, hasResolved } = useEntityRecord( 'giveflow/v1', 'campaign', resolvedId, {
+    const { record, hasResolved } = useEntityRecord( 'fundkit/v1', 'campaign', resolvedId, {
         enabled: resolvedId > 0,
     } );
 
-    // A page keeps _giveflow_campaign_id after the campaign it names is deleted.
+    // A page keeps _fundkit_campaign_id after the campaign it names is deleted.
     // Treating the meta alone as context hid the picker on a page that could no
     // longer resolve a campaign at all, so the canvas said to pick one in a
     // sidebar that was not offering the control.
@@ -67,23 +67,23 @@ function useBoundCampaign( campaignId ) {
 }
 
 function CampaignPicker( { value, onChange, noneLabel } ) {
-    const { records } = useEntityRecords( 'giveflow/v1', 'campaign', { per_page: 100 } );
+    const { records } = useEntityRecords( 'fundkit/v1', 'campaign', { per_page: 100 } );
     // useEntityRecords yields `records: null` until the fetch resolves, and a
     // destructuring default only replaces `undefined`, so this guard is what
     // keeps the inspector from throwing on selection.
     const campaigns = Array.isArray( records ) ? records : [];
     // The blocks are registered for every block-editor user, but the campaign
-    // list is gated on a GiveFlow capability. Without this an Editor gets a picker
+    // list is gated on a FundKit capability. Without this an Editor gets a picker
     // whose only option is "Select a campaign" and no idea why.
     const empty = Array.isArray( records ) && records.length === 0;
 
     return (
         <>
             <SelectControl
-                label={ __( 'Campaign', 'giveflow-fundraising-campaigns' ) }
+                label={ __( 'Campaign', 'fundkit-fundraising-campaigns' ) }
                 value={ String( value || 0 ) }
                 options={ [
-                    { value: '0', label: noneLabel || __( 'Select a campaign', 'giveflow-fundraising-campaigns' ) },
+                    { value: '0', label: noneLabel || __( 'Select a campaign', 'fundkit-fundraising-campaigns' ) },
                     ...campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title } ) ),
                 ] }
                 onChange={ ( v ) => onChange( Number( v ) ) }
@@ -91,7 +91,7 @@ function CampaignPicker( { value, onChange, noneLabel } ) {
             />
             { empty && (
                 <Notice status="warning" isDismissible={ false }>
-                    { __( 'No campaigns are available to you. You may not have permission to view them, or none have been created yet.', 'giveflow-fundraising-campaigns' ) }
+                    { __( 'No campaigns are available to you. You may not have permission to view them, or none have been created yet.', 'fundkit-fundraising-campaigns' ) }
                 </Notice>
             ) }
         </>
@@ -133,7 +133,7 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
     // untouched, so the canvas keeps showing the answer from before the edit.
     // Carrying the campaign's own timestamp in the query makes every campaign
     // change refresh every block bound to it, not just the one that made it.
-    const { record: boundCampaign } = useEntityRecord( 'giveflow/v1', 'campaign', resolvedId, {
+    const { record: boundCampaign } = useEntityRecord( 'fundkit/v1', 'campaign', resolvedId, {
         enabled: resolvedId > 0,
     } );
     const revision = boundCampaign?.updated_at;
@@ -143,8 +143,8 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
             <div { ...blockProps }>
                 <Placeholder
                     icon={ icon }
-                    label={ __( 'GiveFlow campaign block', 'giveflow-fundraising-campaigns' ) }
-                    instructions={ __( 'Choose which campaign this block should display.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'FundKit campaign block', 'fundkit-fundraising-campaigns' ) }
+                    instructions={ __( 'Choose which campaign this block should display.', 'fundkit-fundraising-campaigns' ) }
                 >
                     <CampaignPicker
                         value={ attributes.campaignId }
@@ -169,7 +169,7 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
                     attributes={ editableTitle
                         ? { ...attributes, campaignId: resolvedId, title: '' }
                         : { ...attributes, campaignId: resolvedId } }
-                    urlQueryArgs={ revision ? { giveflow_rev: revision } : undefined }
+                    urlQueryArgs={ revision ? { fundkit_rev: revision } : undefined }
                 />
             </Disabled>
         </div>
@@ -183,7 +183,7 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
 // timestamp catches an edit to any of them, and the picker already holds this
 // query so watching it costs no extra request.
 function useCampaignsRevision() {
-    const { records } = useEntityRecords( 'giveflow/v1', 'campaign', { per_page: 100 } );
+    const { records } = useEntityRecords( 'fundkit/v1', 'campaign', { per_page: 100 } );
     if ( ! Array.isArray( records ) ) return undefined;
 
     const latest = records.reduce(
@@ -212,22 +212,22 @@ function CampaignImagePicker( { campaign, campaignId } ) {
     const apply = ( attachmentId ) => {
         setBusy( true );
         setError( null );
-        saveEntityRecord( 'giveflow/v1', 'campaign', {
+        saveEntityRecord( 'fundkit/v1', 'campaign', {
             id: campaignId,
             // null clears it; the schema refuses 0.
             image_attachment_id: attachmentId,
         } )
-            .catch( () => setError( __( 'That image could not be saved to the campaign.', 'giveflow-fundraising-campaigns' ) ) )
+            .catch( () => setError( __( 'That image could not be saved to the campaign.', 'fundkit-fundraising-campaigns' ) ) )
             .finally( () => setBusy( false ) );
     };
 
     const current = Number( campaign.image_attachment_id || 0 );
 
     return (
-        <div className="giveflow-block-image-picker">
+        <div className="fundkit-block-image-picker">
             { !! campaign.image_url && (
                 <img
-                    className="giveflow-block-image-picker__preview"
+                    className="fundkit-block-image-picker__preview"
                     src={ campaign.image_url }
                     alt=""
                 />
@@ -239,15 +239,15 @@ function CampaignImagePicker( { campaign, campaignId } ) {
                     value={ current }
                     onSelect={ ( media ) => apply( Number( media.id ) ) }
                     render={ ( { open } ) => (
-                        <div className="giveflow-block-image-picker__actions">
+                        <div className="fundkit-block-image-picker__actions">
                             <Button variant="secondary" onClick={ open } disabled={ busy }>
                                 { current
-                                    ? __( 'Replace image', 'giveflow-fundraising-campaigns' )
-                                    : __( 'Choose image', 'giveflow-fundraising-campaigns' ) }
+                                    ? __( 'Replace image', 'fundkit-fundraising-campaigns' )
+                                    : __( 'Choose image', 'fundkit-fundraising-campaigns' ) }
                             </Button>
                             { !! current && (
                                 <Button variant="tertiary" isDestructive onClick={ () => apply( null ) } disabled={ busy }>
-                                    { __( 'Remove', 'giveflow-fundraising-campaigns' ) }
+                                    { __( 'Remove', 'fundkit-fundraising-campaigns' ) }
                                 </Button>
                             ) }
                         </div>
@@ -255,8 +255,8 @@ function CampaignImagePicker( { campaign, campaignId } ) {
                 />
             </MediaUploadCheck>
 
-            <p className="giveflow-block-image-picker__note">
-                { __( 'Saved to the campaign as soon as you choose, and used everywhere the campaign appears.', 'giveflow-fundraising-campaigns' ) }
+            <p className="fundkit-block-image-picker__note">
+                { __( 'Saved to the campaign as soon as you choose, and used everywhere the campaign appears.', 'fundkit-fundraising-campaigns' ) }
             </p>
 
             { error && <Notice status="error">{ error }</Notice> }
@@ -264,11 +264,11 @@ function CampaignImagePicker( { campaign, campaignId } ) {
     );
 }
 
-registerBlockType( 'giveflow/campaign-image', {
+registerBlockType( 'fundkit/campaign-image', {
     apiVersion: 3,
-    title:       __( 'Campaign image', 'giveflow-fundraising-campaigns' ),
-    description: __( "The campaign's cover photo. Follows the campaign, not the page it sits on.", 'giveflow-fundraising-campaigns' ),
-    category:    'giveflow',
+    title:       __( 'Campaign image', 'fundkit-fundraising-campaigns' ),
+    description: __( "The campaign's cover photo. Follows the campaign, not the page it sits on.", 'fundkit-fundraising-campaigns' ),
+    category:    'fundkit',
     icon:        'format-image',
     attributes: {
         campaignId:  { type: 'integer', default: 0 },
@@ -282,7 +282,7 @@ registerBlockType( 'giveflow/campaign-image', {
         const issues = [];
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Image', 'giveflow-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Image', 'fundkit-fundraising-campaigns' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -291,27 +291,27 @@ registerBlockType( 'giveflow/campaign-image', {
                     />
                     <CampaignImagePicker campaign={ campaign } campaignId={ resolvedId } />
                     <SelectControl
-                        label={ __( 'Aspect ratio', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Aspect ratio', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.aspectRatio }
                         options={ [
-                            { value: '16-9', label: __( 'Wide (16:9)',     'giveflow-fundraising-campaigns' ) },
-                            { value: '3-2',  label: __( 'Photo (3:2)',     'giveflow-fundraising-campaigns' ) },
-                            { value: '4-3',  label: __( 'Classic (4:3)',   'giveflow-fundraising-campaigns' ) },
-                            { value: '1-1',  label: __( 'Square (1:1)',    'giveflow-fundraising-campaigns' ) },
-                            { value: 'auto', label: __( "The image's own", 'giveflow-fundraising-campaigns' ) },
+                            { value: '16-9', label: __( 'Wide (16:9)',     'fundkit-fundraising-campaigns' ) },
+                            { value: '3-2',  label: __( 'Photo (3:2)',     'fundkit-fundraising-campaigns' ) },
+                            { value: '4-3',  label: __( 'Classic (4:3)',   'fundkit-fundraising-campaigns' ) },
+                            { value: '1-1',  label: __( 'Square (1:1)',    'fundkit-fundraising-campaigns' ) },
+                            { value: 'auto', label: __( "The image's own", 'fundkit-fundraising-campaigns' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { aspectRatio: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Rounded corners', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Rounded corners', 'fundkit-fundraising-campaigns' ) }
                         checked={ attributes.rounded }
                         onChange={ ( v ) => setAttributes( { rounded: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Load with priority', 'giveflow-fundraising-campaigns' ) }
-                        help={ __( 'Leave on when this is the first image a visitor sees. Turn it off further down the page so it loads only when needed.', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Load with priority', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Leave on when this is the first image a visitor sees. Turn it off further down the page so it loads only when needed.', 'fundkit-fundraising-campaigns' ) }
                         checked={ attributes.priority }
                         onChange={ ( v ) => setAttributes( { priority: v } ) }
                         __nextHasNoMarginBottom
@@ -319,7 +319,7 @@ registerBlockType( 'giveflow/campaign-image', {
                 </PanelBody>
             </InspectorControls>
             <CampaignCanvas
-                block="giveflow/campaign-image"
+                block="fundkit/campaign-image"
                 attributes={ attributes }
                 setAttributes={ setAttributes }
                 onCampaignPage={ onCampaignPage }
@@ -334,15 +334,15 @@ registerBlockType( 'giveflow/campaign-image', {
 // Mirrors CampaignStatMetrics::labels() in PHP, which is what actually renders;
 // a key here that is not there falls back to raised.
 const STAT_METRICS = [
-    { value: 'raised',    label: __( 'Amount raised',    'giveflow-fundraising-campaigns' ) },
-    { value: 'goal',      label: __( 'Our goal',         'giveflow-fundraising-campaigns' ) },
-    { value: 'remaining', label: __( 'Still needed',     'giveflow-fundraising-campaigns' ) },
-    { value: 'percent',   label: __( 'Of goal reached',  'giveflow-fundraising-campaigns' ) },
-    { value: 'donations', label: __( 'Donations',        'giveflow-fundraising-campaigns' ) },
-    { value: 'donors',    label: __( 'Donors',           'giveflow-fundraising-campaigns' ) },
-    { value: 'average',   label: __( 'Average donation', 'giveflow-fundraising-campaigns' ) },
-    { value: 'top',       label: __( 'Top donation',     'giveflow-fundraising-campaigns' ) },
-    { value: 'days_left', label: __( 'Days left',        'giveflow-fundraising-campaigns' ) },
+    { value: 'raised',    label: __( 'Amount raised',    'fundkit-fundraising-campaigns' ) },
+    { value: 'goal',      label: __( 'Our goal',         'fundkit-fundraising-campaigns' ) },
+    { value: 'remaining', label: __( 'Still needed',     'fundkit-fundraising-campaigns' ) },
+    { value: 'percent',   label: __( 'Of goal reached',  'fundkit-fundraising-campaigns' ) },
+    { value: 'donations', label: __( 'Donations',        'fundkit-fundraising-campaigns' ) },
+    { value: 'donors',    label: __( 'Donors',           'fundkit-fundraising-campaigns' ) },
+    { value: 'average',   label: __( 'Average donation', 'fundkit-fundraising-campaigns' ) },
+    { value: 'top',       label: __( 'Top donation',     'fundkit-fundraising-campaigns' ) },
+    { value: 'days_left', label: __( 'Days left',        'fundkit-fundraising-campaigns' ) },
 ];
 
 // Metrics this campaign cannot answer, so the editor says so instead of leaving
@@ -352,13 +352,13 @@ function statIssue( campaign, metric ) {
     const goalType = campaign.goal_type || 'amount';
     const noGoal = ! Number( goalType === 'amount' ? campaign.goal_cents : campaign.goal_count );
     if ( noGoal && [ 'goal', 'remaining', 'percent' ].includes( metric ) ) {
-        return __( 'This campaign has no goal, so this stat will not render.', 'giveflow-fundraising-campaigns' );
+        return __( 'This campaign has no goal, so this stat will not render.', 'fundkit-fundraising-campaigns' );
     }
     if ( metric === 'days_left' && ! campaign.ends_at ) {
-        return __( 'This campaign has no end date, so this stat will not render.', 'giveflow-fundraising-campaigns' );
+        return __( 'This campaign has no end date, so this stat will not render.', 'fundkit-fundraising-campaigns' );
     }
     if ( [ 'average', 'top' ].includes( metric ) && ! Number( campaign.donations_count ) ) {
-        return __( 'No donations yet, so this stat will not render until the first one arrives.', 'giveflow-fundraising-campaigns' );
+        return __( 'No donations yet, so this stat will not render until the first one arrives.', 'fundkit-fundraising-campaigns' );
     }
     return null;
 }
@@ -371,21 +371,21 @@ function statIssue( campaign, metric ) {
  * the number simply does not exist yet.
  */
 function StatNotRendering( { label, issue } ) {
-    const blockProps = useBlockProps( { className: 'giveflow-stat-empty' } );
+    const blockProps = useBlockProps( { className: 'fundkit-stat-empty' } );
 
     return (
         <div { ...blockProps }>
-            <div className="giveflow-stat-empty__label">{ label }</div>
-            <p className="giveflow-stat-empty__note">{ issue }</p>
+            <div className="fundkit-stat-empty__label">{ label }</div>
+            <p className="fundkit-stat-empty__note">{ issue }</p>
         </div>
     );
 }
 
-registerBlockType( 'giveflow/campaign-stat', {
+registerBlockType( 'fundkit/campaign-stat', {
     apiVersion: 3,
-    title:       __( 'Campaign stat', 'giveflow-fundraising-campaigns' ),
-    description: __( 'A single campaign figure. Add one per number you want to show.', 'giveflow-fundraising-campaigns' ),
-    category:    'giveflow',
+    title:       __( 'Campaign stat', 'fundkit-fundraising-campaigns' ),
+    description: __( 'A single campaign figure. Add one per number you want to show.', 'fundkit-fundraising-campaigns' ),
+    category:    'fundkit',
     icon:        'chart-bar',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -401,7 +401,7 @@ registerBlockType( 'giveflow/campaign-stat', {
         const fallbackLabel = ( STAT_METRICS.find( ( m ) => m.value === attributes.metric ) || {} ).label || '';
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Stat', 'giveflow-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Stat', 'fundkit-fundraising-campaigns' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -409,37 +409,37 @@ registerBlockType( 'giveflow/campaign-stat', {
                         issues={ issues }
                     />
                     <SelectControl
-                        label={ __( 'Figure', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Figure', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.metric }
                         options={ STAT_METRICS }
                         onChange={ ( v ) => setAttributes( { metric: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
                         placeholder={ fallbackLabel }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Size', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Size', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.size }
                         options={ [
-                            { value: 'sm', label: __( 'Small',  'giveflow-fundraising-campaigns' ) },
-                            { value: 'md', label: __( 'Medium', 'giveflow-fundraising-campaigns' ) },
-                            { value: 'lg', label: __( 'Large',  'giveflow-fundraising-campaigns' ) },
+                            { value: 'sm', label: __( 'Small',  'fundkit-fundraising-campaigns' ) },
+                            { value: 'md', label: __( 'Medium', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'lg', label: __( 'Large',  'fundkit-fundraising-campaigns' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { size: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Alignment', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Alignment', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.align }
                         options={ [
-                            { value: 'left',   label: __( 'Left',   'giveflow-fundraising-campaigns' ) },
-                            { value: 'center', label: __( 'Center', 'giveflow-fundraising-campaigns' ) },
-                            { value: 'right',  label: __( 'Right',  'giveflow-fundraising-campaigns' ) },
+                            { value: 'left',   label: __( 'Left',   'fundkit-fundraising-campaigns' ) },
+                            { value: 'center', label: __( 'Center', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'right',  label: __( 'Right',  'fundkit-fundraising-campaigns' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         __nextHasNoMarginBottom
@@ -454,7 +454,7 @@ registerBlockType( 'giveflow/campaign-stat', {
                 <StatNotRendering label={ fallbackLabel } issue={ issue } />
             ) : (
                 <CampaignCanvas
-                    block="giveflow/campaign-stat"
+                    block="fundkit/campaign-stat"
                     attributes={ attributes }
                     setAttributes={ setAttributes }
                     onCampaignPage={ onCampaignPage }
@@ -467,11 +467,11 @@ registerBlockType( 'giveflow/campaign-stat', {
     save: () => null,
 } );
 
-registerBlockType( 'giveflow/campaign-progress', {
+registerBlockType( 'fundkit/campaign-progress', {
     apiVersion: 3,
-    title:      __( 'Campaign progress', 'giveflow-fundraising-campaigns' ),
-    description: __( 'Progress bar toward the campaign goal.', 'giveflow-fundraising-campaigns' ),
-    category:   'giveflow',
+    title:      __( 'Campaign progress', 'fundkit-fundraising-campaigns' ),
+    description: __( 'Progress bar toward the campaign goal.', 'fundkit-fundraising-campaigns' ),
+    category:   'fundkit',
     icon:       'chart-line',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -485,12 +485,12 @@ registerBlockType( 'giveflow/campaign-progress', {
             const goalType = campaign.goal_type || 'amount';
             const target = goalType === 'amount' ? ( campaign.goal_cents ?? 0 ) : ( campaign.goal_count ?? 0 );
             if ( ! target ) {
-                issues.push( __( 'No goal set on this campaign. Until you set one, the bar will sit at 0%.', 'giveflow-fundraising-campaigns' ) );
+                issues.push( __( 'No goal set on this campaign. Until you set one, the bar will sit at 0%.', 'fundkit-fundraising-campaigns' ) );
             }
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Progress', 'giveflow-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Progress', 'fundkit-fundraising-campaigns' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -498,17 +498,17 @@ registerBlockType( 'giveflow/campaign-progress', {
                         issues={ issues }
                     />
                     <ToggleControl
-                        label={ __( 'Show labels', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Show labels', 'fundkit-fundraising-campaigns' ) }
                         checked={ attributes.showLabels }
                         onChange={ ( v ) => setAttributes( { showLabels: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Alignment', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Alignment', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.align }
                         options={ [
-                            { value: 'left',   label: __( 'Left',   'giveflow-fundraising-campaigns' ) },
-                            { value: 'center', label: __( 'Center', 'giveflow-fundraising-campaigns' ) },
+                            { value: 'left',   label: __( 'Left',   'fundkit-fundraising-campaigns' ) },
+                            { value: 'center', label: __( 'Center', 'fundkit-fundraising-campaigns' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         __nextHasNoMarginBottom
@@ -516,7 +516,7 @@ registerBlockType( 'giveflow/campaign-progress', {
                 </PanelBody>
             </InspectorControls>
             <CampaignCanvas
-                block="giveflow/campaign-progress"
+                block="fundkit/campaign-progress"
                 attributes={ attributes }
                 setAttributes={ setAttributes }
                 onCampaignPage={ onCampaignPage }
@@ -528,11 +528,11 @@ registerBlockType( 'giveflow/campaign-progress', {
     save: () => null,
 } );
 
-registerBlockType( 'giveflow/donate-button', {
+registerBlockType( 'fundkit/donate-button', {
     apiVersion: 3,
-    title:      __( 'Donate button', 'giveflow-fundraising-campaigns' ),
-    description: __( 'Button that opens the campaign\'s default donation form.', 'giveflow-fundraising-campaigns' ),
-    category:   'giveflow',
+    title:      __( 'Donate button', 'fundkit-fundraising-campaigns' ),
+    description: __( 'Button that opens the campaign\'s default donation form.', 'fundkit-fundraising-campaigns' ),
+    category:   'fundkit',
     icon:       'heart',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -545,14 +545,14 @@ registerBlockType( 'giveflow/donate-button', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && ! campaign.default_form_id ) {
-            issues.push( __( 'This campaign has no default form. The button will appear but clicking it won\'t open anything until a form is set.', 'giveflow-fundraising-campaigns' ) );
+            issues.push( __( 'This campaign has no default form. The button will appear but clicking it won\'t open anything until a form is set.', 'fundkit-fundraising-campaigns' ) );
         }
         if ( campaign?.status === 'archived' ) {
-            issues.push( __( 'This campaign is archived. The button will render but submissions will be rejected.', 'giveflow-fundraising-campaigns' ) );
+            issues.push( __( 'This campaign is archived. The button will render but submissions will be rejected.', 'fundkit-fundraising-campaigns' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Donate button', 'giveflow-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Donate button', 'fundkit-fundraising-campaigns' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -560,36 +560,36 @@ registerBlockType( 'giveflow/donate-button', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Donate now', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'Donate now', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Alignment', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Alignment', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.align }
                         options={ [
-                            { value: 'left',   label: __( 'Left',   'giveflow-fundraising-campaigns' ) },
-                            { value: 'center', label: __( 'Center', 'giveflow-fundraising-campaigns' ) },
-                            { value: 'right',  label: __( 'Right',  'giveflow-fundraising-campaigns' ) },
+                            { value: 'left',   label: __( 'Left',   'fundkit-fundraising-campaigns' ) },
+                            { value: 'center', label: __( 'Center', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'right',  label: __( 'Right',  'fundkit-fundraising-campaigns' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Button size', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Button size', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.size }
                         options={ [
-                            { value: 'sm', label: __( 'Small',  'giveflow-fundraising-campaigns' ) },
-                            { value: 'md', label: __( 'Medium', 'giveflow-fundraising-campaigns' ) },
-                            { value: 'lg', label: __( 'Large',  'giveflow-fundraising-campaigns' ) },
+                            { value: 'sm', label: __( 'Small',  'fundkit-fundraising-campaigns' ) },
+                            { value: 'md', label: __( 'Medium', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'lg', label: __( 'Large',  'fundkit-fundraising-campaigns' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { size: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Full width', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Full width', 'fundkit-fundraising-campaigns' ) }
                         checked={ attributes.fullWidth }
                         onChange={ ( v ) => setAttributes( { fullWidth: v } ) }
                         __nextHasNoMarginBottom
@@ -597,7 +597,7 @@ registerBlockType( 'giveflow/donate-button', {
                 </PanelBody>
             </InspectorControls>
             <CampaignCanvas
-                block="giveflow/donate-button"
+                block="fundkit/donate-button"
                 attributes={ attributes }
                 setAttributes={ setAttributes }
                 onCampaignPage={ onCampaignPage }
@@ -609,11 +609,11 @@ registerBlockType( 'giveflow/donate-button', {
     save: () => null,
 } );
 
-registerBlockType( 'giveflow/top-donors', {
+registerBlockType( 'fundkit/top-donors', {
     apiVersion: 3,
-    title:      __( 'Top donors', 'giveflow-fundraising-campaigns' ),
-    description: __( 'Leaderboard of the donors who gave the most to this campaign.', 'giveflow-fundraising-campaigns' ),
-    category:   'giveflow',
+    title:      __( 'Top donors', 'fundkit-fundraising-campaigns' ),
+    description: __( 'Leaderboard of the donors who gave the most to this campaign.', 'fundkit-fundraising-campaigns' ),
+    category:   'fundkit',
     icon:       'awards',
     attributes: {
         campaignId:     { type: 'integer', default: 0 },
@@ -629,11 +629,11 @@ registerBlockType( 'giveflow/top-donors', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
-            issues.push( __( 'No donations yet, so the leaderboard will be empty on the page.', 'giveflow-fundraising-campaigns' ) );
+            issues.push( __( 'No donations yet, so the leaderboard will be empty on the page.', 'fundkit-fundraising-campaigns' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Top donors', 'giveflow-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Top donors', 'fundkit-fundraising-campaigns' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -641,32 +641,32 @@ registerBlockType( 'giveflow/top-donors', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Title', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Title', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Top supporters', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'Top supporters', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Empty state text', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'No donors to rank yet.', 'giveflow-fundraising-campaigns' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'No donors to rank yet.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Layout', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Layout', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.layout }
                         options={ [
-                            { value: 'list',   label: __( 'List',   'giveflow-fundraising-campaigns' ) },
-                            { value: 'podium', label: __( 'Podium', 'giveflow-fundraising-campaigns' ) },
+                            { value: 'list',   label: __( 'List',   'fundkit-fundraising-campaigns' ) },
+                            { value: 'podium', label: __( 'Podium', 'fundkit-fundraising-campaigns' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { layout: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'Number of donors', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Number of donors', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.limit }
                         onChange={ ( v ) => setAttributes( { limit: Number( v ) || 10 } ) }
                         min={ 3 }
@@ -674,42 +674,42 @@ registerBlockType( 'giveflow/top-donors', {
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donation amount', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Show donation amount', 'fundkit-fundraising-campaigns' ) }
                         checked={ attributes.showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donation count per donor', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Show donation count per donor', 'fundkit-fundraising-campaigns' ) }
                         checked={ attributes.showDonorCount }
                         onChange={ ( v ) => setAttributes( { showDonorCount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Hide anonymous donors', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Hide anonymous donors', 'fundkit-fundraising-campaigns' ) }
                         checked={ attributes.hideAnonymous }
                         onChange={ ( v ) => setAttributes( { hideAnonymous: v } ) }
-                        help={ __( 'When off, anonymous donors appear as "Anonymous".', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'When off, anonymous donors appear as "Anonymous".', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
             </InspectorControls>
             <CampaignCanvas
-                block="giveflow/top-donors"
+                block="fundkit/top-donors"
                 editableTitle
                 attributes={ attributes }
                 setAttributes={ setAttributes }
                 onCampaignPage={ onCampaignPage }
                 resolvedId={ resolvedId }
                 icon="awards"
-                className="giveflow-campaign-block-edit"
+                className="fundkit-campaign-block-edit"
             >
                 <RichText
                     tagName="h3"
-                    className="giveflow-campaign-block-edit__title"
+                    className="fundkit-campaign-block-edit__title"
                     value={ attributes.title }
                     onChange={ ( v ) => setAttributes( { title: v } ) }
-                    placeholder={ __( 'Top supporters', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'Top supporters', 'fundkit-fundraising-campaigns' ) }
                     allowedFormats={ [] }
                 />
             </CampaignCanvas>
@@ -718,11 +718,11 @@ registerBlockType( 'giveflow/top-donors', {
     save: () => null,
 } );
 
-registerBlockType( 'giveflow/recent-donations', {
+registerBlockType( 'fundkit/recent-donations', {
     apiVersion: 3,
-    title:      __( 'Recent donations', 'giveflow-fundraising-campaigns' ),
-    description: __( 'Live feed of the most recent paid donations for this campaign.', 'giveflow-fundraising-campaigns' ),
-    category:   'giveflow',
+    title:      __( 'Recent donations', 'fundkit-fundraising-campaigns' ),
+    description: __( 'Live feed of the most recent paid donations for this campaign.', 'fundkit-fundraising-campaigns' ),
+    category:   'fundkit',
     icon:       'list-view',
     attributes: {
         campaignId:    { type: 'integer', default: 0 },
@@ -738,11 +738,11 @@ registerBlockType( 'giveflow/recent-donations', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
-            issues.push( __( 'No donations yet, so the feed will be empty on the page.', 'giveflow-fundraising-campaigns' ) );
+            issues.push( __( 'No donations yet, so the feed will be empty on the page.', 'fundkit-fundraising-campaigns' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Recent donations', 'giveflow-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Recent donations', 'fundkit-fundraising-campaigns' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -750,22 +750,22 @@ registerBlockType( 'giveflow/recent-donations', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Title', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Title', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Recent donations', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'Recent donations', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Empty state text', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'No donations to show yet.', 'giveflow-fundraising-campaigns' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'No donations to show yet.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'Number of donations', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Number of donations', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.limit }
                         onChange={ ( v ) => setAttributes( { limit: Number( v ) || 10 } ) }
                         min={ 1 }
@@ -773,25 +773,25 @@ registerBlockType( 'giveflow/recent-donations', {
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show amount', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Show amount', 'fundkit-fundraising-campaigns' ) }
                         checked={ attributes.showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show time ago', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Show time ago', 'fundkit-fundraising-campaigns' ) }
                         checked={ attributes.showTime }
                         onChange={ ( v ) => setAttributes( { showTime: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donor message', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Show donor message', 'fundkit-fundraising-campaigns' ) }
                         checked={ attributes.showMessage }
                         onChange={ ( v ) => setAttributes( { showMessage: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Include anonymous donations', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Include anonymous donations', 'fundkit-fundraising-campaigns' ) }
                         checked={ attributes.showAnonymous }
                         onChange={ ( v ) => setAttributes( { showAnonymous: v } ) }
                         __nextHasNoMarginBottom
@@ -799,21 +799,21 @@ registerBlockType( 'giveflow/recent-donations', {
                 </PanelBody>
             </InspectorControls>
             <CampaignCanvas
-                block="giveflow/recent-donations"
+                block="fundkit/recent-donations"
                 editableTitle
                 attributes={ attributes }
                 setAttributes={ setAttributes }
                 onCampaignPage={ onCampaignPage }
                 resolvedId={ resolvedId }
                 icon="list-view"
-                className="giveflow-campaign-block-edit"
+                className="fundkit-campaign-block-edit"
             >
                 <RichText
                     tagName="h3"
-                    className="giveflow-campaign-block-edit__title"
+                    className="fundkit-campaign-block-edit__title"
                     value={ attributes.title }
                     onChange={ ( v ) => setAttributes( { title: v } ) }
-                    placeholder={ __( 'Recent donations', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'Recent donations', 'fundkit-fundraising-campaigns' ) }
                     allowedFormats={ [] }
                 />
             </CampaignCanvas>
@@ -822,11 +822,11 @@ registerBlockType( 'giveflow/recent-donations', {
     save: () => null,
 } );
 
-registerBlockType( 'giveflow/supporter-wall', {
+registerBlockType( 'fundkit/supporter-wall', {
     apiVersion: 3,
-    title:      __( 'Supporter wall', 'giveflow-fundraising-campaigns' ),
-    description: __( 'A wall of campaign supporters with optional messages.', 'giveflow-fundraising-campaigns' ),
-    category:   'giveflow',
+    title:      __( 'Supporter wall', 'fundkit-fundraising-campaigns' ),
+    description: __( 'A wall of campaign supporters with optional messages.', 'fundkit-fundraising-campaigns' ),
+    category:   'fundkit',
     icon:       'groups',
     attributes: {
         campaignId:     { type: 'integer', default: 0 },
@@ -843,14 +843,14 @@ registerBlockType( 'giveflow/supporter-wall', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
-            issues.push( __( 'No donations yet, so the wall will be empty on the page.', 'giveflow-fundraising-campaigns' ) );
+            issues.push( __( 'No donations yet, so the wall will be empty on the page.', 'fundkit-fundraising-campaigns' ) );
         }
         // Displayed in major units, stored as cents.
         const minAmountMajor = ( Number( attributes.minAmountCents ) || 0 ) / 100;
         const { step: minAmountStep } = amountEntry( defaultCurrency() );
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Supporter wall', 'giveflow-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Supporter wall', 'fundkit-fundraising-campaigns' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -858,32 +858,32 @@ registerBlockType( 'giveflow/supporter-wall', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Title', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Title', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Thank you to our supporters', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'Thank you to our supporters', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Empty state text', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'The supporter wall is empty.', 'giveflow-fundraising-campaigns' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'The supporter wall is empty.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Sort by', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Sort by', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.sort }
                         options={ [
-                            { value: 'recent',       label: __( 'Most recent',  'giveflow-fundraising-campaigns' ) },
-                            { value: 'alphabetical', label: __( 'Alphabetical', 'giveflow-fundraising-campaigns' ) },
+                            { value: 'recent',       label: __( 'Most recent',  'fundkit-fundraising-campaigns' ) },
+                            { value: 'alphabetical', label: __( 'Alphabetical', 'fundkit-fundraising-campaigns' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { sort: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'Number of supporters', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Number of supporters', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.limit }
                         onChange={ ( v ) => setAttributes( { limit: Number( v ) || 50 } ) }
                         min={ 5 }
@@ -892,7 +892,7 @@ registerBlockType( 'giveflow/supporter-wall', {
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Minimum donation amount', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Minimum donation amount', 'fundkit-fundraising-campaigns' ) }
                         type="number"
                         min={ 0 }
                         step={ minAmountStep }
@@ -904,29 +904,29 @@ registerBlockType( 'giveflow/supporter-wall', {
                                 : 0;
                             setAttributes( { minAmountCents: cents } );
                         } }
-                        help={ __( 'Only show donors who gave at least this amount. 0 = no minimum.', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Only show donors who gave at least this amount. 0 = no minimum.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donor message', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Show donor message', 'fundkit-fundraising-campaigns' ) }
                         checked={ attributes.showMessage }
                         onChange={ ( v ) => setAttributes( { showMessage: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donation amount', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Show donation amount', 'fundkit-fundraising-campaigns' ) }
                         checked={ attributes.showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Columns', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Columns', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.columns }
                         options={ [
-                            { value: 'auto', label: __( 'Auto', 'giveflow-fundraising-campaigns' ) },
-                            { value: '2',    label: __( '2', 'giveflow-fundraising-campaigns' ) },
-                            { value: '3',    label: __( '3', 'giveflow-fundraising-campaigns' ) },
-                            { value: '4',    label: __( '4', 'giveflow-fundraising-campaigns' ) },
+                            { value: 'auto', label: __( 'Auto', 'fundkit-fundraising-campaigns' ) },
+                            { value: '2',    label: __( '2', 'fundkit-fundraising-campaigns' ) },
+                            { value: '3',    label: __( '3', 'fundkit-fundraising-campaigns' ) },
+                            { value: '4',    label: __( '4', 'fundkit-fundraising-campaigns' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { columns: v } ) }
                         __nextHasNoMarginBottom
@@ -934,21 +934,21 @@ registerBlockType( 'giveflow/supporter-wall', {
                 </PanelBody>
             </InspectorControls>
             <CampaignCanvas
-                block="giveflow/supporter-wall"
+                block="fundkit/supporter-wall"
                 editableTitle
                 attributes={ attributes }
                 setAttributes={ setAttributes }
                 onCampaignPage={ onCampaignPage }
                 resolvedId={ resolvedId }
                 icon="groups"
-                className="giveflow-campaign-block-edit"
+                className="fundkit-campaign-block-edit"
             >
                 <RichText
                     tagName="h3"
-                    className="giveflow-campaign-block-edit__title"
+                    className="fundkit-campaign-block-edit__title"
                     value={ attributes.title }
                     onChange={ ( v ) => setAttributes( { title: v } ) }
-                    placeholder={ __( 'Thank you to our supporters', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'Thank you to our supporters', 'fundkit-fundraising-campaigns' ) }
                     allowedFormats={ [] }
                 />
             </CampaignCanvas>
@@ -957,11 +957,11 @@ registerBlockType( 'giveflow/supporter-wall', {
     save: () => null,
 } );
 
-registerBlockType( 'giveflow/campaign-grid', {
+registerBlockType( 'fundkit/campaign-grid', {
     apiVersion: 3,
-    title:       __( 'Campaigns grid', 'giveflow-fundraising-campaigns' ),
-    description: __( 'A responsive grid of other published campaigns as cards.', 'giveflow-fundraising-campaigns' ),
-    category:   'giveflow',
+    title:       __( 'Campaigns grid', 'fundkit-fundraising-campaigns' ),
+    description: __( 'A responsive grid of other published campaigns as cards.', 'fundkit-fundraising-campaigns' ),
+    category:   'fundkit',
     icon:       'grid-view',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -975,24 +975,24 @@ registerBlockType( 'giveflow/campaign-grid', {
         const revision = useCampaignsRevision();
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Campaigns grid', 'giveflow-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Campaigns grid', 'fundkit-fundraising-campaigns' ) }>
                     <TextControl
-                        label={ __( 'Heading', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Heading', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.heading }
                         onChange={ ( v ) => setAttributes( { heading: v } ) }
-                        help={ __( 'Leave empty when a Heading block above this one already names the section, as the seeded layout does.', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Leave empty when a Heading block above this one already names the section, as the seeded layout does.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Empty state text', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'This is the only campaign running right now.', 'giveflow-fundraising-campaigns' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'This is the only campaign running right now.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'How many', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'How many', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.count }
                         min={ 1 }
                         max={ 12 }
@@ -1000,12 +1000,12 @@ registerBlockType( 'giveflow/campaign-grid', {
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Order by', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Order by', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.orderBy }
                         options={ [
-                            { value: 'recent',      label: __( 'Most recent', 'giveflow-fundraising-campaigns' ) },
-                            { value: 'most-funded', label: __( 'Most funded', 'giveflow-fundraising-campaigns' ) },
-                            { value: 'ending-soon', label: __( 'Ending soon', 'giveflow-fundraising-campaigns' ) },
+                            { value: 'recent',      label: __( 'Most recent', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'most-funded', label: __( 'Most funded', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'ending-soon', label: __( 'Ending soon', 'fundkit-fundraising-campaigns' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { orderBy: v } ) }
                         __nextHasNoMarginBottom
@@ -1015,10 +1015,10 @@ registerBlockType( 'giveflow/campaign-grid', {
                             <CampaignPicker
                                 value={ attributes.campaignId }
                                 onChange={ ( v ) => setAttributes( { campaignId: v } ) }
-                                noneLabel={ __( 'Exclude none', 'giveflow-fundraising-campaigns' ) }
+                                noneLabel={ __( 'Exclude none', 'fundkit-fundraising-campaigns' ) }
                             />
-                            <p className="giveflow-block-note giveflow-block-note--muted">
-                                { __( 'The selected campaign (or this page\'s campaign) is excluded from the grid.', 'giveflow-fundraising-campaigns' ) }
+                            <p className="fundkit-block-note fundkit-block-note--muted">
+                                { __( 'The selected campaign (or this page\'s campaign) is excluded from the grid.', 'fundkit-fundraising-campaigns' ) }
                             </p>
                         </>
                     ) }
@@ -1030,9 +1030,9 @@ registerBlockType( 'giveflow/campaign-grid', {
             <div { ...useBlockProps() }>
                 <Disabled>
                     <ServerSideRender
-                        block="giveflow/campaign-grid"
+                        block="fundkit/campaign-grid"
                         attributes={ { ...attributes, campaignId: attributes.campaignId || resolvedId } }
-                        urlQueryArgs={ revision ? { giveflow_rev: revision } : undefined }
+                        urlQueryArgs={ revision ? { fundkit_rev: revision } : undefined }
                     />
                 </Disabled>
             </div>
@@ -1041,11 +1041,11 @@ registerBlockType( 'giveflow/campaign-grid', {
     save: () => null,
 } );
 
-registerBlockType( 'giveflow/donation-form', {
+registerBlockType( 'fundkit/donation-form', {
     apiVersion: 3,
-    title:       __( 'Donation form', 'giveflow-fundraising-campaigns' ),
-    description: __( 'Renders the campaign donation form inline on the page.', 'giveflow-fundraising-campaigns' ),
-    category:   'giveflow',
+    title:       __( 'Donation form', 'fundkit-fundraising-campaigns' ),
+    description: __( 'Renders the campaign donation form inline on the page.', 'fundkit-fundraising-campaigns' ),
+    category:   'fundkit',
     icon:       'money-alt',
     attributes: {
         campaignId: { type: 'integer', default: 0 },
@@ -1059,28 +1059,28 @@ registerBlockType( 'giveflow/donation-form', {
         // where one can be created.
         const formEditUrl = new URL(
             formId
-                ? `admin.php?page=giveflow-forms&form=${ formId }`
-                : `admin.php?page=giveflow-campaigns&view=detail&id=${ resolvedId }&tab=forms`,
+                ? `admin.php?page=fundkit-forms&form=${ formId }`
+                : `admin.php?page=fundkit-campaigns&view=detail&id=${ resolvedId }&tab=forms`,
             window.location.href
         ).href;
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Donation form', 'giveflow-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Donation form', 'fundkit-fundraising-campaigns' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
                         onCampaignPage={ onCampaignPage }
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Empty state text', 'fundkit-fundraising-campaigns' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'Donations are not open for this campaign yet.', 'giveflow-fundraising-campaigns' ) }
-                        help={ __( 'Shown when the campaign is not taking donations, so the heading above this block never captions an empty space.', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'Donations are not open for this campaign yet.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Shown when the campaign is not taking donations, so the heading above this block never captions an empty space.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     { campaign && (
-                        <p className="giveflow-block-note">
+                        <p className="fundkit-block-note">
                             <Button
                                 variant="secondary"
                                 href={ formEditUrl }
@@ -1088,15 +1088,15 @@ registerBlockType( 'giveflow/donation-form', {
                                 __next40pxDefaultSize
                             >
                                 { formId
-                                    ? __( 'Edit donation form', 'giveflow-fundraising-campaigns' )
-                                    : __( 'Manage donation forms', 'giveflow-fundraising-campaigns' ) }
+                                    ? __( 'Edit donation form', 'fundkit-fundraising-campaigns' )
+                                    : __( 'Manage donation forms', 'fundkit-fundraising-campaigns' ) }
                             </Button>
                         </p>
                     ) }
                 </PanelBody>
             </InspectorControls>
             <CampaignCanvas
-                block="giveflow/donation-form"
+                block="fundkit/donation-form"
                 attributes={ attributes }
                 setAttributes={ setAttributes }
                 onCampaignPage={ onCampaignPage }

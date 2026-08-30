@@ -1,6 +1,6 @@
 /**
- * Re-exports @giveflow/ui's generic formatters so call sites importing '_shared/format'
- * stay stable; the GiveFlow-specific admin routing helpers stay local.
+ * Re-exports @fundkit/ui's generic formatters so call sites importing '_shared/format'
+ * stay stable; the FundKit-specific admin routing helpers stay local.
  */
 import { __ } from '@wordpress/i18n';
 import {
@@ -9,7 +9,7 @@ import {
     formatDate,
     parseTimestamp,
     timeAgo as relativeTimeAgo,
-} from '@giveflow/ui/utils/format';
+} from '@fundkit/ui/utils/format';
 
 export { currencyDecimals, groupDigits, formatDate };
 
@@ -55,18 +55,18 @@ export { default as StatusBadge } from './components/StatusBadge';
 // list + the detail header). The shared StatusBadge owns its own render map;
 // this is just the campaign-scoped label set for filter dropdowns.
 export const STATUS_LABEL = {
-    draft:     __( 'Draft', 'giveflow-fundraising-campaigns' ),
-    published: __( 'Active', 'giveflow-fundraising-campaigns' ),
-    archived:  __( 'Archived', 'giveflow-fundraising-campaigns' ),
+    draft:     __( 'Draft', 'fundkit-fundraising-campaigns' ),
+    published: __( 'Active', 'fundkit-fundraising-campaigns' ),
+    archived:  __( 'Archived', 'fundkit-fundraising-campaigns' ),
 };
 
 export function listHref() {
-    return `${ window.location.pathname }?page=giveflow-campaigns`;
+    return `${ window.location.pathname }?page=fundkit-campaigns`;
 }
 
 export function detailHref( id, tab = 'overview' ) {
     const p = new URLSearchParams();
-    p.set( 'page', 'giveflow-campaigns' );
+    p.set( 'page', 'fundkit-campaigns' );
     p.set( 'view', 'detail' );
     p.set( 'id', String( id ) );
     p.set( 'tab', tab );
@@ -75,7 +75,7 @@ export function detailHref( id, tab = 'overview' ) {
 
 export function formEditorHref( formId ) {
     const p = new URLSearchParams();
-    p.set( 'page', 'giveflow-forms' );
+    p.set( 'page', 'fundkit-forms' );
     p.set( 'form', String( formId ) );
     return `${ window.location.pathname }?${ p.toString() }`;
 }

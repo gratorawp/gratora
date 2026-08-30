@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Campaigns\Styling;
+namespace FundKit\Tests\Unit\Campaigns\Styling;
 
-use GiveFlow\Campaigns\Styling\AccentInk;
+use FundKit\Campaigns\Styling\AccentInk;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -38,7 +38,7 @@ final class AccentInkTest extends TestCase
         $css = AccentInk::declarationsFor($accent);
 
         $this->assertStringContainsString(
-            $expectsLight ? '--giveflow-on-accent:#ffffff' : '--giveflow-on-accent:#10162a',
+            $expectsLight ? '--fundkit-on-accent:#ffffff' : '--fundkit-on-accent:#10162a',
             $css,
             $accent . ' got the wrong ink'
         );
@@ -48,9 +48,9 @@ final class AccentInkTest extends TestCase
     {
         $css = AccentInk::declarationsFor('#211d3f');
 
-        $this->assertStringContainsString('--giveflow-on-accent:', $css);
-        $this->assertStringContainsString('--giveflow-on-accent-muted:', $css);
-        $this->assertStringContainsString('--giveflow-on-accent-line:', $css);
+        $this->assertStringContainsString('--fundkit-on-accent:', $css);
+        $this->assertStringContainsString('--fundkit-on-accent-muted:', $css);
+        $this->assertStringContainsString('--fundkit-on-accent-line:', $css);
     }
 
     /**

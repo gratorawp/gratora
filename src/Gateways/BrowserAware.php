@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways;
+namespace FundKit\Gateways;
 
 /**
  * Optional capability: a gateway that needs the donor's browser to finish the

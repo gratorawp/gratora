@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Exports;
+namespace FundKit\Exports;
 
 use DateTimeImmutable;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Foundation\Helpers\Csv;
-use GiveFlow\Foundation\Helpers\Money;
+use FundKit\Donations\DonationRepository;
+use FundKit\Foundation\Helpers\Csv;
+use FundKit\Foundation\Helpers\Money;
 
 /**
  * Month-by-month revenue and donation counts as CSV.
@@ -83,12 +83,12 @@ final class RevenueExporter
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fwrite($out, "\xEF\xBB\xBF");
         Csv::writeRow($out, [
-            __('Month', 'giveflow-fundraising-campaigns'),
-            __('Donations', 'giveflow-fundraising-campaigns'),
+            __('Month', 'fundkit-fundraising-campaigns'),
+            __('Donations', 'fundkit-fundraising-campaigns'),
             /* translators: %s: currency code, e.g. EUR. */
-            sprintf(__('Revenue (%s)', 'giveflow-fundraising-campaigns'), $currency),
+            sprintf(__('Revenue (%s)', 'fundkit-fundraising-campaigns'), $currency),
             /* translators: %s: currency code, e.g. EUR. */
-            sprintf(__('Average donation (%s)', 'giveflow-fundraising-campaigns'), $currency),
+            sprintf(__('Average donation (%s)', 'fundkit-fundraising-campaigns'), $currency),
         ]);
 
         foreach ($this->series($fromMonth, $toMonth) as $row) {

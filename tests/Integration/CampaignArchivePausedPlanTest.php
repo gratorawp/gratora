@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Recurring\CampaignCancelRecurringJob;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringResumer;
+use FundKit\Campaigns\Campaign;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Recurring\CampaignCancelRecurringJob;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringResumer;
 use WP_REST_Request;
 
 /**
@@ -67,7 +67,7 @@ final class CampaignArchivePausedPlanTest extends IntegrationTestCase
 
     private function archiveAndCancel(int $campaignId): int
     {
-        $req = new WP_REST_Request('PUT', "/giveflow/v1/admin/campaigns/{$campaignId}");
+        $req = new WP_REST_Request('PUT', "/fundkit/v1/admin/campaigns/{$campaignId}");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['status' => 'archived', 'cancel_recurring' => true]));
         return rest_do_request($req)->get_status();

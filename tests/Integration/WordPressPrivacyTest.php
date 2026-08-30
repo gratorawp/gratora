@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorRepository;
-use GiveFlow\Donors\Privacy\WordPressPrivacy;
-use GiveFlow\Foundation\Identity\IdentityHasher;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorRepository;
+use FundKit\Donors\Privacy\WordPressPrivacy;
+use FundKit\Foundation\Identity\IdentityHasher;
+use FundKit\Foundation\Plugin;
 
 /**
  * Tools, Export Personal Data and Erase Personal Data are the screens a site
@@ -23,7 +23,7 @@ final class WordPressPrivacyTest extends IntegrationTestCase
 
         return new WordPressPrivacy(
             $c->get(DonorRepository::class),
-            $c->get(\GiveFlow\Donors\DonorService::class),
+            $c->get(\FundKit\Donors\DonorService::class),
             $c->get(IdentityHasher::class),
         );
     }
@@ -36,7 +36,7 @@ final class WordPressPrivacyTest extends IntegrationTestCase
 
         $donor = Donor::make();
         $donor->email_hash      = $hash;
-        $donor->email_encrypted = $c->get(\GiveFlow\Foundation\Crypto\Crypto::class)->encrypt($email);
+        $donor->email_encrypted = $c->get(\FundKit\Foundation\Crypto\Crypto::class)->encrypt($email);
         $donor->first_name      = 'Ada';
         $donor->last_name       = 'Lovelace';
         $donor->created_at      = $now;
@@ -50,8 +50,8 @@ final class WordPressPrivacyTest extends IntegrationTestCase
     {
         $this->privacy()->register();
 
-        $this->assertArrayHasKey('giveflow', apply_filters('wp_privacy_personal_data_exporters', []));
-        $this->assertArrayHasKey('giveflow', apply_filters('wp_privacy_personal_data_erasers', []));
+        $this->assertArrayHasKey('fundkit', apply_filters('wp_privacy_personal_data_exporters', []));
+        $this->assertArrayHasKey('fundkit', apply_filters('wp_privacy_personal_data_erasers', []));
     }
 
     public function test_an_export_returns_the_donor_the_email_belongs_to(): void

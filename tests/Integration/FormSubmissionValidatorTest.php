@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Forms\Form;
-use GiveFlow\Forms\FormSubmissionValidator;
+use FundKit\Campaigns\Campaign;
+use FundKit\Forms\Form;
+use FundKit\Forms\FormSubmissionValidator;
 
 /**
  * Server-side submit-time validation: required donor/custom fields, formats,
@@ -30,8 +30,8 @@ final class FormSubmissionValidatorTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        \GiveFlow\Foundation\Plugin::instance()->container
-            ->get(\GiveFlow\Settings\SettingsService::class)
+        \FundKit\Foundation\Plugin::instance()->container
+            ->get(\FundKit\Settings\SettingsService::class)
             ->update('consents', [
                 'purposes' => [
                     [
@@ -48,7 +48,7 @@ final class FormSubmissionValidatorTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('giveflow_consents');
+        delete_option('fundkit_consents');
         parent::tearDown();
     }
 
@@ -58,12 +58,12 @@ final class FormSubmissionValidatorTest extends IntegrationTestCase
     }
 
     private const BLOCKS = <<<BLOCKS
-<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500}]} /-->
-<!-- wp:giveflow/email {"required":true} /-->
-<!-- wp:giveflow/name {"requireFirst":true,"requireLast":false} /-->
-<!-- wp:giveflow/text-input {"label":"Nickname","required":true} /-->
-<!-- wp:giveflow/consent {"purposeKeys":["gdpr"]} /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:fundkit/email {"required":true} /-->
+<!-- wp:fundkit/name {"requireFirst":true,"requireLast":false} /-->
+<!-- wp:fundkit/text-input {"label":"Nickname","required":true} /-->
+<!-- wp:fundkit/consent {"purposeKeys":["gdpr"]} /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
 
     private function validPayload(): array
@@ -113,10 +113,10 @@ BLOCKS;
     public function test_offered_frequency_passes_when_the_form_has_a_recurring_toggle(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500}]} /-->
-<!-- wp:giveflow/email {"required":true} /-->
-<!-- wp:giveflow/recurring-toggle {"frequencies":["one-time","monthly"]} /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:fundkit/email {"required":true} /-->
+<!-- wp:fundkit/recurring-toggle {"frequencies":["one-time","monthly"]} /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
         $base = ['amount_cents' => 2500, 'custom' => [], 'consents' => []];
 
@@ -127,9 +127,9 @@ BLOCKS;
     public function test_overlong_comment_is_rejected_server_side(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500}]} /-->
-<!-- wp:giveflow/comment {"maxLength":50} /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:fundkit/comment {"maxLength":50} /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
         $base = ['amount_cents' => 2500, 'frequency' => 'one_time', 'custom' => [], 'consents' => []];
 
@@ -146,8 +146,8 @@ BLOCKS;
     public function test_presets_only_form_enforces_its_presets(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500},{"cents":5000}],"allowCustom":false} /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500},{"cents":5000}],"allowCustom":false} /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
         $base = ['frequency' => 'one_time', 'custom' => [], 'consents' => []];
 
@@ -164,9 +164,9 @@ BLOCKS;
     public function test_presets_only_accepts_a_preset_with_the_fee_folded_in(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500},{"cents":5000}],"allowCustom":false} /-->
-<!-- wp:giveflow/cover-fees /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500},{"cents":5000}],"allowCustom":false} /-->
+<!-- wp:fundkit/cover-fees /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
         $base = ['frequency' => 'one_time', 'custom' => [], 'consents' => []];
 
@@ -192,9 +192,9 @@ BLOCKS;
         // donor cannot convert anything, so another currency in the payload is
         // a crafted one and the allow-list still applies.
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/donation-amount {"presets":[{"cents":5000}],"allowCustom":false} /-->
-<!-- wp:giveflow/currency-switcher /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/donation-amount {"presets":[{"cents":5000}],"allowCustom":false} /-->
+<!-- wp:fundkit/currency-switcher /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
         $base = ['frequency' => 'one_time', 'custom' => [], 'consents' => []];
 
@@ -231,8 +231,8 @@ BLOCKS;
         $c->save();
 
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/donation-amount {"allowCustom":false} /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/donation-amount {"allowCustom":false} /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
         $form = $this->form($blocks);
         $form->campaign_id = (int) $c->id;
@@ -253,9 +253,9 @@ BLOCKS;
         // NameBlock defaults requireFirst/requireLast to true; the editor omits
         // the attrs at their default, so an absent attr still means required.
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500}]} /-->
-<!-- wp:giveflow/name /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:fundkit/name /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
         $base = ['amount_cents' => 2500, 'frequency' => 'one_time', 'custom' => [], 'consents' => []];
 
@@ -272,8 +272,8 @@ BLOCKS;
     public function test_custom_amount_form_still_accepts_any_amount(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500}],"allowCustom":true} /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500}],"allowCustom":true} /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
         $base = ['frequency' => 'one_time', 'custom' => [], 'consents' => []];
 
@@ -286,9 +286,9 @@ BLOCKS;
     public function test_fund_picker_rejects_a_fund_outside_its_allowlist(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500}]} /-->
-<!-- wp:giveflow/fund-picker {"fundIds":[7,8]} /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:fundkit/fund-picker {"fundIds":[7,8]} /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
         $base = ['amount_cents' => 2500, 'frequency' => 'one_time', 'custom' => [], 'consents' => []];
 
@@ -312,10 +312,10 @@ BLOCKS;
         // default-configured toggle serialises with no attrs. The validator
         // must still offer one-time + monthly, matching what the form renders.
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500}]} /-->
-<!-- wp:giveflow/email {"required":true} /-->
-<!-- wp:giveflow/recurring-toggle /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:fundkit/email {"required":true} /-->
+<!-- wp:fundkit/recurring-toggle /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
         $base = ['amount_cents' => 2500, 'custom' => [], 'consents' => []];
 
@@ -332,9 +332,9 @@ BLOCKS;
     public function test_required_field_hidden_by_its_condition_is_not_enforced(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500}]} /-->
-<!-- wp:giveflow/text-input {"label":"Company","field":"company","required":true,"condition":{"field":"custom.donor_type","op":"=","value":"business"}} /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:fundkit/text-input {"label":"Company","field":"company","required":true,"condition":{"field":"custom.donor_type","op":"=","value":"business"}} /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
         $form = $this->form($blocks);
         $base = ['amount_cents' => 2500, 'frequency' => 'one_time'];
@@ -357,10 +357,10 @@ BLOCKS;
         // compare, so it read every such field as hidden and enforced none of
         // them - the exact rule a crafted POST is checked against.
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/donation-amount {"presets":[{"cents":2500}]} /-->
-<!-- wp:giveflow/cover-fees {"percent":2.9,"fixed":30} /-->
-<!-- wp:giveflow/text-input {"label":"Employer","field":"employer","required":true,"condition":{"field":"cover_fees","op":"=","value":"true"}} /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500}]} /-->
+<!-- wp:fundkit/cover-fees {"percent":2.9,"fixed":30} /-->
+<!-- wp:fundkit/text-input {"label":"Employer","field":"employer","required":true,"condition":{"field":"cover_fees","op":"=","value":"true"}} /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
         $form = $this->form($blocks);
         $base = ['amount_cents' => 2500, 'frequency' => 'one_time'];
@@ -382,9 +382,9 @@ BLOCKS;
     public function test_number_and_pattern_constraints_are_enforced(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:giveflow/number-input {"label":"Age","min":18,"max":120} /-->
-<!-- wp:giveflow/text-input {"label":"Code","pattern":"[A-Z]{3}"} /-->
-<!-- wp:giveflow/submit-button /-->
+<!-- wp:fundkit/number-input {"label":"Age","min":18,"max":120} /-->
+<!-- wp:fundkit/text-input {"label":"Code","pattern":"[A-Z]{3}"} /-->
+<!-- wp:fundkit/submit-button /-->
 BLOCKS;
         $form = $this->form($blocks);
 

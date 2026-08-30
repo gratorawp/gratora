@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Currency;
+namespace FundKit\Currency;
 
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Settings\SettingsService;
 
 /**
  * The currencies an organization accepts.

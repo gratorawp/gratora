@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Foundation\Plugin;
+use FundKit\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -49,7 +49,7 @@ final class RefundCancelsPlanTest extends IntegrationTestCase
 
     private function donation(?RecurringPlan $plan): Donation
     {
-        $create = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'refunder@example.test',
@@ -66,7 +66,7 @@ final class RefundCancelsPlanTest extends IntegrationTestCase
         $this->assertArrayHasKey('reference', $created, (string) wp_json_encode($created));
         $reference = (string) $created['reference'];
 
-        $confirm = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);
@@ -85,7 +85,7 @@ final class RefundCancelsPlanTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function refund(string $reference, array $body = []): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', "/giveflow/v1/admin/donations/{$reference}/refund");
+        $req = new WP_REST_Request('POST', "/fundkit/v1/admin/donations/{$reference}/refund");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -102,7 +102,7 @@ final class RefundCancelsPlanTest extends IntegrationTestCase
         $plan     = $this->plan();
         $donation = $this->donation($plan);
 
-        $res  = rest_do_request(new WP_REST_Request('GET', "/giveflow/v1/admin/donations/{$donation->reference}"));
+        $res  = rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/admin/donations/{$donation->reference}"));
         $body = (array) $res->get_data();
 
         // Without this the dialog cannot warn, and the warning is the whole
@@ -117,7 +117,7 @@ final class RefundCancelsPlanTest extends IntegrationTestCase
         $donation = $this->donation(null);
 
         $body = (array) rest_do_request(
-            new WP_REST_Request('GET', "/giveflow/v1/admin/donations/{$donation->reference}")
+            new WP_REST_Request('GET', "/fundkit/v1/admin/donations/{$donation->reference}")
         )->get_data();
 
         // A warning that fires where it does not apply is ignored where it does.

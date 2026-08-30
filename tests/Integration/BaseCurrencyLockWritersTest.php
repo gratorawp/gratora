@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Analytics\Event;
-use GiveFlow\Analytics\EventRecorder;
-use GiveFlow\Core\Commands\CoreCommandProvider;
-use GiveFlow\Currency\BaseCurrencyLocked;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Commands\CommandContext;
-use GiveFlow\Foundation\Commands\CommandRegistry;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Analytics\Event;
+use FundKit\Analytics\EventRecorder;
+use FundKit\Core\Commands\CoreCommandProvider;
+use FundKit\Currency\BaseCurrencyLocked;
+use FundKit\Donations\Donation;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Commands\CommandContext;
+use FundKit\Foundation\Commands\CommandRegistry;
+use FundKit\Foundation\Plugin;
+use FundKit\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
  * The base currency lock has to hold at the write, not at one door.
  *
- * The settings REST route is not the only writer of giveflow_currency_locale: the
+ * The settings REST route is not the only writer of fundkit_currency_locale: the
  * settings.update command reaches the same option, and the CLI and any add-on
  * can call SettingsService directly. A guard that lives in one controller lets
  * the others reread every stored base_amount_cents as a different currency
@@ -31,7 +31,7 @@ final class BaseCurrencyLockWritersTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        update_option('giveflow_currency_locale', ['default_currency' => 'EUR', 'supported_currencies' => ['EUR']], false);
+        update_option('fundkit_currency_locale', ['default_currency' => 'EUR', 'supported_currencies' => ['EUR']], false);
     }
 
     private function registry(): CommandRegistry
@@ -45,7 +45,7 @@ final class BaseCurrencyLockWritersTest extends IntegrationTestCase
     private function adminCtx(): CommandContext
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('giveflow_manage_settings');
+        get_role('administrator')->add_cap('fundkit_manage_settings');
         wp_set_current_user($admin);
         return new CommandContext($admin, 'rest', 'req-' . uniqid());
     }
@@ -75,7 +75,7 @@ final class BaseCurrencyLockWritersTest extends IntegrationTestCase
 
     private function stored(): string
     {
-        $opt = get_option('giveflow_currency_locale');
+        $opt = get_option('fundkit_currency_locale');
 
         return (string) ($opt['default_currency'] ?? '');
     }
@@ -195,7 +195,7 @@ final class BaseCurrencyLockWritersTest extends IntegrationTestCase
         // request, the stored one from whatever wrote the option last. WordPress
         // wants an exception message escaped at the throw for exactly that
         // reason, and Plugin Check fails the submission over it.
-        update_option('giveflow_currency_locale', ['default_currency' => '<b>eur</b>'], false);
+        update_option('fundkit_currency_locale', ['default_currency' => '<b>eur</b>'], false);
         $this->liveDonation();
 
         try {
@@ -214,14 +214,14 @@ final class BaseCurrencyLockWritersTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
         $this->liveDonation();
 
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/settings/currency-locale');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/settings/currency-locale');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['default_currency' => 'JPY']));
 
         $res = rest_do_request($req);
 
         $this->assertSame(409, $res->get_status());
-        $this->assertSame('giveflow_base_currency_locked', $res->as_error()->get_error_code());
+        $this->assertSame('fundkit_base_currency_locked', $res->as_error()->get_error_code());
         $this->assertSame('EUR', $this->stored());
     }
 }

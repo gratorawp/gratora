@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns;
+namespace FundKit\Campaigns;
 
-use GiveFlow\Foundation\Hooks\HookProvider;
+use FundKit\Foundation\Hooks\HookProvider;
 use WP_Post;
 
 /**
@@ -77,6 +77,6 @@ final class CampaignPermalinks extends HookProvider
     {
         return $postId > 0
             && get_post_type($postId) === 'page'
-            && (int) get_post_meta($postId, '_giveflow_campaign_id', true) > 0;
+            && (int) get_post_meta($postId, '_fundkit_campaign_id', true) > 0;
     }
 }

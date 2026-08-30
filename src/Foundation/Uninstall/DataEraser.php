@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Uninstall;
+namespace FundKit\Foundation\Uninstall;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Core\CoreModule;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Foundation\Auth\Capabilities;
+use FundKit\Campaigns\Campaign;
+use FundKit\Core\CoreModule;
+use FundKit\Donors\Donor;
+use FundKit\Foundation\Auth\Capabilities;
 use ReflectionClass;
 
 /**
  * Removes everything core owns, when the site owner has asked for it.
  *
- * Tables come from CoreModule::migrations() rather than a `giveflow_%` glob. The
+ * Tables come from CoreModule::migrations() rather than a `fundkit_%` glob. The
  * add-ons share that prefix, so a glob run from core would drop the tickets,
  * gift aid and peer-to-peer tables of add-ons that are still installed.
  *
@@ -21,11 +21,11 @@ use ReflectionClass;
  */
 final class DataEraser
 {
-    public const OPT_IN = 'giveflow_delete_data';
+    public const OPT_IN = 'fundkit_delete_data';
 
     /**
      * Options core writes. Listed rather than matched on a prefix for the same
-     * reason as the tables: giveflow_gift_aid_db_version and its siblings belong to
+     * reason as the tables: fundkit_gift_aid_db_version and its siblings belong to
      * other plugins.
      *
      * The queued-work maps and cursors belong here as much as the settings do.
@@ -33,47 +33,47 @@ final class DataEraser
      * one left behind is an instruction aimed at whatever now holds the id.
      */
     private const OPTIONS = [
-        'giveflow_activated_at',
-        'giveflow_campaign_cancel_recurring',
-        'giveflow_consents',
-        'giveflow_currency_locale',
-        'giveflow_db_version',
-        'giveflow_delete_data',
-        'giveflow_donor_rehash_after_id',
-        'giveflow_donor_rehash_pending',
-        'giveflow_email_settings',
-        'giveflow_fund_reassignments',
-        'giveflow_fx_rates',
-        'giveflow_gateway_config',
-        'giveflow_gateway_reconcile_cursor',
-        'giveflow_licensing_status',
-        'giveflow_onboarding_campaign_id',
-        'giveflow_onboarding_status',
-        'giveflow_org_brand',
-        'giveflow_org_profile',
-        'giveflow_paypal_plans',
-        'giveflow_paypal_product',
-        'giveflow_portal_page_id',
-        'giveflow_portal_page_version',
-        'giveflow_privacy',
+        'fundkit_activated_at',
+        'fundkit_campaign_cancel_recurring',
+        'fundkit_consents',
+        'fundkit_currency_locale',
+        'fundkit_db_version',
+        'fundkit_delete_data',
+        'fundkit_donor_rehash_after_id',
+        'fundkit_donor_rehash_pending',
+        'fundkit_email_settings',
+        'fundkit_fund_reassignments',
+        'fundkit_fx_rates',
+        'fundkit_gateway_config',
+        'fundkit_gateway_reconcile_cursor',
+        'fundkit_licensing_status',
+        'fundkit_onboarding_campaign_id',
+        'fundkit_onboarding_status',
+        'fundkit_org_brand',
+        'fundkit_org_profile',
+        'fundkit_paypal_plans',
+        'fundkit_paypal_product',
+        'fundkit_portal_page_id',
+        'fundkit_portal_page_version',
+        'fundkit_privacy',
         // The key itself, not just the status cache beside it. It is a bearer
         // credential for the charity's paid entitlement, and it outlived every
-        // GiveFlow file on the site: through a handover, a database export, a
+        // FundKit file on the site: through a handover, a database export, a
         // backup handed to a contractor. Written by the licensing client
         // vendored into each paid add-on, which has no uninstall of its own.
-        'giveflow_pro_license_key',
-        'giveflow_receipt_settings',
-        'giveflow_reference_settings',
-        'giveflow_retention_cursor',
-        'giveflow_retention_starts_at',
-        'giveflow_roles',
-        'giveflow_upgrade_routines_done',
-        'giveflow_upgrade_routines_failed',
+        'fundkit_pro_license_key',
+        'fundkit_receipt_settings',
+        'fundkit_reference_settings',
+        'fundkit_retention_cursor',
+        'fundkit_retention_starts_at',
+        'fundkit_roles',
+        'fundkit_upgrade_routines_done',
+        'fundkit_upgrade_routines_failed',
     ];
 
     /** Reference counters carry the year, so they are the one keyspace to match. */
     private const OPTION_PREFIXES = [
-        'giveflow_reference_counter_',
+        'fundkit_reference_counter_',
     ];
 
     /**
@@ -152,7 +152,7 @@ final class DataEraser
     {
         // Before the tables go, so an add-on can still read what it needs to
         // clean up rows of its own that point at core.
-        do_action('giveflow.uninstall');
+        do_action('fundkit.uninstall');
 
         $plan = $this->plan();
 
@@ -164,7 +164,7 @@ final class DataEraser
         $this->deletePages($this->pageIds());
 
         // Also while the tables are there: the only pointer to a donor's
-        // picture is a column of giveflow_donors, and the file outlives the row.
+        // picture is a column of fundkit_donors, and the file outlives the row.
         $this->deleteAttachments($this->avatarAttachmentIds());
 
         $this->dropTables($plan['tables']);
@@ -248,7 +248,7 @@ final class DataEraser
 
     /**
      * Pages core created and still names in a row of its own: the portal, and
-     * each campaign's own page. Not every page carrying _giveflow_campaign_id,
+     * each campaign's own page. Not every page carrying _fundkit_campaign_id,
      * because the peer-to-peer add-on puts that meta on its fundraiser and team
      * subpages too, and those are its to remove.
      *
@@ -257,7 +257,7 @@ final class DataEraser
      */
     public function pageIds(): array
     {
-        $ids = [(int) get_option('giveflow_portal_page_id', 0)];
+        $ids = [(int) get_option('fundkit_portal_page_id', 0)];
 
         foreach (Campaign::query()->getAll() as $campaign) {
             $ids[] = (int) ($campaign->page_id ?? 0);
@@ -314,8 +314,8 @@ final class DataEraser
     }
 
     /**
-     * Core's own capabilities by name, not everything matching giveflow_. An add-on
-     * that is still installed keeps its caps: giveflow_manage_fundraisers belongs
+     * Core's own capabilities by name, not everything matching fundkit_. An add-on
+     * that is still installed keeps its caps: fundkit_manage_fundraisers belongs
      * to the peer-to-peer plugin and taking it would break a live site.
      *
      * Every registered role, because the roles screen grants these to editor

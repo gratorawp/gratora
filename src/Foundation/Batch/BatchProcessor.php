@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Batch;
+namespace FundKit\Foundation\Batch;
 
 use Closure;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Vendor\Queryable\DB;
 
 /**
  * One bounded, resumable tick of a batched data operation. The caller must operate

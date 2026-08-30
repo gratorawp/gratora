@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -16,7 +16,7 @@ final class GatewaySecretTest extends IntegrationTestCase
 {
     private function put(string $group, array $body): void
     {
-        $req = new WP_REST_Request('PUT', "/giveflow/v1/admin/settings/{$group}");
+        $req = new WP_REST_Request('PUT', "/fundkit/v1/admin/settings/{$group}");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
         rest_do_request($req);
@@ -24,19 +24,19 @@ final class GatewaySecretTest extends IntegrationTestCase
 
     private function show(string $group): array
     {
-        return (array) rest_do_request(new WP_REST_Request('GET', "/giveflow/v1/admin/settings/{$group}"))->get_data();
+        return (array) rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/admin/settings/{$group}"))->get_data();
     }
 
     private function storedSecret(): string
     {
-        $stored = (array) get_option('giveflow_gateway_config');
+        $stored = (array) get_option('fundkit_gateway_config');
         return (string) ($stored['stripe']['webhook_secret_test'] ?? '');
     }
 
     /**
      * This used to assert the opposite, so the field could reveal the secret.
      * That traded the confidentiality of the ONLY authentication on
-     * /giveflow/v1/webhooks/stripe for a UI convenience: reading it was enough to
+     * /fundkit/v1/webhooks/stripe for a UI convenience: reading it was enough to
      * forge a paid donation with no donations capability at all.
      */
     public function test_a_settings_manager_never_reads_back_the_real_secret(): void
@@ -72,7 +72,7 @@ final class GatewaySecretTest extends IntegrationTestCase
         $this->put('gateways', ['stripe' => ['webhook_secret_test' => 'whsec_realsecret']]);
 
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
-        $res = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/settings/gateways'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/settings/gateways'));
 
         $this->assertContains($res->get_status(), [401, 403], 'a subscriber cannot read gateway settings');
         $this->assertStringNotContainsString(

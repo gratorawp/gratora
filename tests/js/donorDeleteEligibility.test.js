@@ -46,7 +46,7 @@ beforeEach( () => {
         if ( parse === false ) {
             return Promise.resolve( { json: async () => rows, headers: { get: () => '2' } } );
         }
-        if ( path.startsWith( '/giveflow/v1/admin/donors/stats' ) ) {
+        if ( path.startsWith( '/fundkit/v1/admin/donors/stats' ) ) {
             return Promise.resolve( null );
         }
         return Promise.resolve( {} );

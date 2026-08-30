@@ -1,16 +1,16 @@
-// Forwarded to @giveflow/ui - the single source of truth for the shared admin chrome.
-@import '@giveflow/ui/scss/dataviews';
+// Forwarded to @fundkit/ui - the single source of truth for the shared admin chrome.
+@import '@fundkit/ui/scss/dataviews';
 
 // A filtered list with no matches gets a slate of its own, rendered under the
 // table so the filter controls stay on screen and there is a way back. The
 // table's built-in row says only "No results", which explains nothing and
 // offers nothing, so it stands down when ours is there.
-.giveflow-dataviews.is-no-results {
+.fundkit-dataviews.is-no-results {
     .dataviews-no-results {
         display: none;
     }
 
-    .giveflow-empty-state {
-        border-top: 1px solid var(--giveflow-admin-border, #e5e7eb);
+    .fundkit-empty-state {
+        border-top: 1px solid var(--fundkit-admin-border, #e5e7eb);
     }
 }

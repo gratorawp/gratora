@@ -22,7 +22,7 @@ export default function ActionsCard( {
     return (
         <div className="dd-rail-card">
             <div className="dd-rail-card__head">
-                <span className="dd-rail-card__title">{ __( 'Actions', 'giveflow-fundraising-campaigns' ) }</span>
+                <span className="dd-rail-card__title">{ __( 'Actions', 'fundkit-fundraising-campaigns' ) }</span>
             </div>
             <div className="dd-rail-card__body">
                 <div className="dd-rail-actions">
@@ -33,7 +33,7 @@ export default function ActionsCard( {
                             onClick={ onMarkPaid }
                         >
                             <IconCheck className="ic" />
-                            { __( 'Mark as paid', 'giveflow-fundraising-campaigns' ) }
+                            { __( 'Mark as paid', 'fundkit-fundraising-campaigns' ) }
                         </button>
                     ) }
                     { canMarkFailed && (
@@ -43,7 +43,7 @@ export default function ActionsCard( {
                             onClick={ onMarkFailed }
                         >
                             <IconAlert className="ic" />
-                            { __( 'Mark as failed', 'giveflow-fundraising-campaigns' ) }
+                            { __( 'Mark as failed', 'fundkit-fundraising-campaigns' ) }
                         </button>
                     ) }
                     <button
@@ -53,7 +53,7 @@ export default function ActionsCard( {
                         onClick={ onRefund }
                     >
                         <IconRefund className="ic" />
-                        { __( 'Refund donation', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Refund donation', 'fundkit-fundraising-campaigns' ) }
                     </button>
                     <button
                         type="button"
@@ -63,24 +63,24 @@ export default function ActionsCard( {
                     >
                         <IconMail className="ic" />
                         { isRedacted
-                            ? __( 'Donor erased, cannot email', 'giveflow-fundraising-campaigns' )
-                            : __( 'Resend receipt', 'giveflow-fundraising-campaigns' ) }
+                            ? __( 'Donor erased, cannot email', 'fundkit-fundraising-campaigns' )
+                            : __( 'Resend receipt', 'fundkit-fundraising-campaigns' ) }
                     </button>
                     { primaryReceipt
                         ? (
                             <button
                                 type="button"
                                 className="btn btn--block"
-                                onClick={ () => downloadFile( `/giveflow/v1/admin/receipts/${ primaryReceipt.id }/pdf`, `${ primaryReceipt.receipt_number }.pdf` ).catch( ( e ) => notify.error( e?.message || __( 'Could not download the receipt.', 'giveflow-fundraising-campaigns' ) ) ) }
+                                onClick={ () => downloadFile( `/fundkit/v1/admin/receipts/${ primaryReceipt.id }/pdf`, `${ primaryReceipt.receipt_number }.pdf` ).catch( ( e ) => notify.error( e?.message || __( 'Could not download the receipt.', 'fundkit-fundraising-campaigns' ) ) ) }
                             >
                                 <IconDownload className="ic" />
-                                { __( 'Download receipt PDF', 'giveflow-fundraising-campaigns' ) }
+                                { __( 'Download receipt PDF', 'fundkit-fundraising-campaigns' ) }
                             </button>
                         )
                         : (
                             <button type="button" className="btn btn--block" disabled>
                                 <IconDownload className="ic" />
-                                { __( 'No receipt yet', 'giveflow-fundraising-campaigns' ) }
+                                { __( 'No receipt yet', 'fundkit-fundraising-campaigns' ) }
                             </button>
                         ) }
                     <button
@@ -89,13 +89,13 @@ export default function ActionsCard( {
                         onClick={ onAddNote }
                     >
                         <IconNote className="ic" />
-                        { __( 'Add note', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Add note', 'fundkit-fundraising-campaigns' ) }
                     </button>
                 </div>
                 { canRefund && (
                     <div className="dd-rail-actions__hint">
                         { /* translators: %s: max refund amount */ }
-                        { __( 'Refunds capped at', 'giveflow-fundraising-campaigns' ) }{ ' ' }
+                        { __( 'Refunds capped at', 'fundkit-fundraising-campaigns' ) }{ ' ' }
                         <strong>{ formatAmount( donation.refundable_cents, donation.currency ) }</strong>.
                     </div>
                 ) }

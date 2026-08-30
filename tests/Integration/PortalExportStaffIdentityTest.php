@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\DonorMetricsService;
-use GiveFlow\Donors\DonorNoteRepository;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donors\DonorMetricsService;
+use FundKit\Donors\DonorNoteRepository;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -21,7 +21,7 @@ final class PortalExportStaffIdentityTest extends IntegrationTestCase
 {
     protected function tearDown(): void
     {
-        unset($_COOKIE['giveflow_donor_session']);
+        unset($_COOKIE['fundkit_donor_session']);
         parent::tearDown();
     }
 
@@ -54,10 +54,10 @@ final class PortalExportStaffIdentityTest extends IntegrationTestCase
      */
     private function download(int $donorId): array
     {
-        $_COOKIE['giveflow_donor_session'] = $this->portalSession($donorId, 'tok');
+        $_COOKIE['fundkit_donor_session'] = $this->portalSession($donorId, 'tok');
 
-        $req = new WP_REST_Request('POST', '/giveflow/v1/portal/data-export');
-        $req->set_header('X-GiveFlow-Csrf', 'tok');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/data-export');
+        $req->set_header('X-FundKit-Csrf', 'tok');
         $res = rest_do_request($req);
 
         ob_start();

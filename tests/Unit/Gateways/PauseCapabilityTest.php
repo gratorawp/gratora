@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Gateways;
+namespace FundKit\Tests\Unit\Gateways;
 
-use GiveFlow\Gateways\SupportsSubscriptionPause;
+use FundKit\Gateways\SupportsSubscriptionPause;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -29,8 +29,8 @@ final class PauseCapabilityTest extends TestCase
     public static function coreSubscriptionGateways(): array
     {
         return [
-            [\GiveFlow\Gateways\Stripe\StripeGateway::class],
-            [\GiveFlow\Gateways\PayPal\PayPalGateway::class],
+            [\FundKit\Gateways\Stripe\StripeGateway::class],
+            [\FundKit\Gateways\PayPal\PayPalGateway::class],
         ];
     }
 

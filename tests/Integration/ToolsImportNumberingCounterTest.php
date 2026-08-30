@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationIntent;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\References\ReferenceGenerator;
-use GiveFlow\Foundation\Transfer\DataExporter;
-use GiveFlow\Receipts\Receipt;
-use GiveFlow\Settings\SettingsService;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationIntent;
+use FundKit\Donations\DonationService;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\References\ReferenceGenerator;
+use FundKit\Foundation\Transfer\DataExporter;
+use FundKit\Receipts\Receipt;
+use FundKit\Settings\SettingsService;
+use FundKit\Vendor\Queryable\DB;
 use WP_REST_Request;
 
 /**
@@ -58,17 +58,17 @@ final class ToolsImportNumberingCounterTest extends IntegrationTestCase
     {
         $prefix = DB::getPrefix();
         foreach ([
-            'giveflow_receipts',
-            'giveflow_refunds',
-            'giveflow_consents',
-            'giveflow_donation_notes',
-            'giveflow_donor_notes',
-            'giveflow_donations',
-            'giveflow_donors',
-            'giveflow_form_donation_stats',
-            'giveflow_forms',
-            'giveflow_campaigns',
-            'giveflow_funds',
+            'fundkit_receipts',
+            'fundkit_refunds',
+            'fundkit_consents',
+            'fundkit_donation_notes',
+            'fundkit_donor_notes',
+            'fundkit_donations',
+            'fundkit_donors',
+            'fundkit_form_donation_stats',
+            'fundkit_forms',
+            'fundkit_campaigns',
+            'fundkit_funds',
         ] as $table) {
             DB::raw("DELETE FROM {$prefix}{$table}");
         }
@@ -78,7 +78,7 @@ final class ToolsImportNumberingCounterTest extends IntegrationTestCase
     private function forgetCounters(): void
     {
         $prefix = DB::getPrefix();
-        DB::raw("DELETE FROM {$prefix}options WHERE option_name LIKE 'giveflow_reference_counter%'");
+        DB::raw("DELETE FROM {$prefix}options WHERE option_name LIKE 'fundkit_reference_counter%'");
         wp_cache_delete('alloptions', 'options');
     }
 
@@ -127,7 +127,7 @@ final class ToolsImportNumberingCounterTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function post(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/tools/import');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/import');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 

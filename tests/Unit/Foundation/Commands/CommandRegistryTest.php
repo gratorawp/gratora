@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Foundation\Commands;
+namespace FundKit\Tests\Unit\Foundation\Commands;
 
-use GiveFlow\Foundation\Commands\Command;
-use GiveFlow\Foundation\Commands\CommandRegistry;
+use FundKit\Foundation\Commands\Command;
+use FundKit\Foundation\Commands\CommandRegistry;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 

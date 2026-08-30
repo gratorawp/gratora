@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Cli;
+namespace FundKit\Cli;
 
 use Closure;
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\CampaignService;
-use GiveFlow\Donations\AggregateSyncer;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationIntent;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Forms\Form;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Funds\Fund;
-use GiveFlow\Funds\FundService;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanRepository;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\CampaignService;
+use FundKit\Donations\AggregateSyncer;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationIntent;
+use FundKit\Donations\DonationService;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Forms\Form;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Funds\Fund;
+use FundKit\Funds\FundService;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanRepository;
+use FundKit\Vendor\Queryable\DB;
 
 /**
  * Builds a year of plausible fundraising history so admin screenshots show an
@@ -140,7 +140,7 @@ final class DemoSeeder
         $noMail    = static fn () => true;
         $noReceipt = static fn () => false;
         add_filter('pre_wp_mail', $noMail, 99);
-        add_filter('giveflow.receipt.should_issue', $noReceipt, 99);
+        add_filter('fundkit.receipt.should_issue', $noReceipt, 99);
 
         try {
             $this->seedFunds();
@@ -157,7 +157,7 @@ final class DemoSeeder
             $this->recompute();
         } finally {
             remove_filter('pre_wp_mail', $noMail, 99);
-            remove_filter('giveflow.receipt.should_issue', $noReceipt, 99);
+            remove_filter('fundkit.receipt.should_issue', $noReceipt, 99);
         }
 
         return $this->counts;
@@ -213,21 +213,21 @@ final class DemoSeeder
         foreach (array_chunk($donationIds, self::CHUNK) as $chunk) {
             // Add-ons hang their own rows off a donation. Core cannot know
             // them, and orphaning them would be worse than leaving them.
-            do_action('giveflow.test_data.purge_donations', $chunk);
+            do_action('fundkit.test_data.purge_donations', $chunk);
 
-            DB::table('giveflow_receipts')->whereIn('donation_id', $chunk)->delete();
-            DB::table('giveflow_refunds')->whereIn('donation_id', $chunk)->delete();
-            DB::table('giveflow_donation_notes')->whereIn('donation_id', $chunk)->delete();
-            DB::table('giveflow_events')->whereIn('donation_id', $chunk)->delete();
+            DB::table('fundkit_receipts')->whereIn('donation_id', $chunk)->delete();
+            DB::table('fundkit_refunds')->whereIn('donation_id', $chunk)->delete();
+            DB::table('fundkit_donation_notes')->whereIn('donation_id', $chunk)->delete();
+            DB::table('fundkit_events')->whereIn('donation_id', $chunk)->delete();
 
             $removed['donations'] += (int) Donation::query()->whereIn('id', $chunk)->delete()->affectedRows;
         }
         $this->say("demo donations removed: {$removed['donations']}");
 
         foreach (array_chunk($planIds, self::CHUNK) as $chunk) {
-            do_action('giveflow.test_data.purge_plans', $chunk);
+            do_action('fundkit.test_data.purge_plans', $chunk);
 
-            DB::table('giveflow_events')->whereIn('recurring_plan_id', $chunk)->delete();
+            DB::table('fundkit_events')->whereIn('recurring_plan_id', $chunk)->delete();
             $removed['recurring_plans'] += (int) RecurringPlan::query()->whereIn('id', $chunk)->delete()->affectedRows;
         }
         $this->say("demo recurring plans removed: {$removed['recurring_plans']}");
@@ -992,7 +992,7 @@ final class DemoSeeder
                 break;
         }
 
-        DB::table('giveflow_recurring_plans')->where('id', $plan->id)->update($patch);
+        DB::table('fundkit_recurring_plans')->where('id', $plan->id)->update($patch);
     }
 
     // ----------------------------------------------------------- after-care
@@ -1008,8 +1008,8 @@ final class DemoSeeder
     {
         $prefix = DB::getPrefix();
         $result = DB::raw(
-            "UPDATE {$prefix}giveflow_events e
-             JOIN {$prefix}giveflow_donations d ON d.id = e.donation_id
+            "UPDATE {$prefix}fundkit_events e
+             JOIN {$prefix}fundkit_donations d ON d.id = e.donation_id
              SET e.occurred_at = COALESCE(d.paid_at, d.created_at)
              WHERE d.gateway_intent_id LIKE %s",
             [self::KEY_PREFIX . '%']

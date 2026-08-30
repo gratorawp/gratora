@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\GatewayConfirmResult;
-use GiveFlow\Gateways\GatewayIntentResult;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\PaymentGateway;
-use GiveFlow\Gateways\RefundResult;
-use GiveFlow\Gateways\SubscriptionAware;
-use GiveFlow\Gateways\WebhookOutcome;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringResumer;
+use FundKit\Donations\Donation;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\GatewayConfirmResult;
+use FundKit\Gateways\GatewayIntentResult;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\PaymentGateway;
+use FundKit\Gateways\RefundResult;
+use FundKit\Gateways\SubscriptionAware;
+use FundKit\Gateways\WebhookOutcome;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringResumer;
 use RuntimeException;
 use WP_REST_Request;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns;
+namespace FundKit\Campaigns;
 
 /**
  * Built-in handler for the 'standard' campaign type.
@@ -20,7 +20,7 @@ final class DefaultCampaignTypeHandler implements CampaignTypeHandler
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Standard', 'giveflow-fundraising-campaigns');
+        return __('Standard', 'fundkit-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */

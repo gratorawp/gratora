@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Donations;
+namespace FundKit\Tests\Unit\Donations;
 
-use GiveFlow\Donations\DonationIntent;
+use FundKit\Donations\DonationIntent;
 use Error;
 use PHPUnit\Framework\TestCase;
 

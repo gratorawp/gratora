@@ -4,14 +4,14 @@
  * and glyph scale with it.
  */
 
-export default function GiveFlowMark( { size = 28 } ) {
+export default function FundKitMark( { size = 28 } ) {
     const px     = Number( size );
     const radius = Math.max( 4, Math.round( px * 0.22 ) );
     const glyph  = Math.round( px * 0.62 );
 
     return (
         <span
-            className="giveflow-mark"
+            className="fundkit-mark"
             aria-hidden="true"
             style={ {
                 display:         'inline-flex',

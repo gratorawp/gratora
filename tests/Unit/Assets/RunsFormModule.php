@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Assets;
+namespace FundKit\Tests\Unit\Assets;
 
 /**
  * Executes a donation-form module in node so its behaviour can be asserted,
@@ -11,7 +11,7 @@ namespace GiveFlow\Tests\Unit\Assets;
  * The modules are ESM inside a CommonJS package and lean on the bundler to
  * resolve extensionless relative imports, so the plain .js files are copied to
  * .mjs under the plugin root with those specifiers completed. Copying rather
- * than importing in place is also what lets node find @giveflow/ui.
+ * than importing in place is also what lets node find @fundkit/ui.
  *
  * The snippet gets `mod` (the entry module) and `emit( value )`, which hands
  * JSON back to PHP.

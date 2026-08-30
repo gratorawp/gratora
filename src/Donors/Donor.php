@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donors;
+namespace FundKit\Donors;
 
 defined('ABSPATH') || exit;
 
-use GiveFlow\Vendor\Queryable\Model;
-use GiveFlow\Vendor\Queryable\Schema\Table;
+use FundKit\Vendor\Queryable\Model;
+use FundKit\Vendor\Queryable\Schema\Table;
 
 /**
  * Donor record. PII columns are AES-256-GCM encrypted; email_hash is the
@@ -17,7 +17,7 @@ use GiveFlow\Vendor\Queryable\Schema\Table;
  */
 final class Donor extends Model
 {
-    protected string $table = 'giveflow_donors';
+    protected string $table = 'fundkit_donors';
     protected string $version = '1.0.0';
 
     public int $id;

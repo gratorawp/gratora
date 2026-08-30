@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Helpers\View;
 
 /**
  * Donation amount block with preset tiers and optional custom input.
@@ -17,7 +17,7 @@ final class DonationAmountBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/donation-amount';
+        return 'fundkit/donation-amount';
     }
 
     /** @since 1.0.0 */

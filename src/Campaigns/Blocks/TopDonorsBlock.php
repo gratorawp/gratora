@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Blocks;
+namespace FundKit\Campaigns\Blocks;
 
-use GiveFlow\Campaigns\CampaignRepository;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorAvatars;
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Campaigns\CampaignRepository;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorAvatars;
+use FundKit\Foundation\Helpers\View;
 
 /**
  * Renders a ranked list or podium of top donors for a campaign.
@@ -29,7 +29,7 @@ final class TopDonorsBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/top-donors';
+        return 'fundkit/top-donors';
     }
 
     /** @since 1.0.0 */
@@ -83,7 +83,7 @@ final class TopDonorsBlock extends CampaignBlock
             if ($hideAnonymous && $isAnonymousAggregate) continue;
 
             $entries[] = [
-                'name'            => $name !== '' ? $name : __('Anonymous', 'giveflow-fundraising-campaigns'),
+                'name'            => $name !== '' ? $name : __('Anonymous', 'fundkit-fundraising-campaigns'),
                 'amount_cents'    => (int) $row['amount_cents'],
                 'donations_count' => (int) $row['donations_count'],
                 'is_anonymous'    => $isAnonymousAggregate,
@@ -95,7 +95,7 @@ final class TopDonorsBlock extends CampaignBlock
             $anon = $this->donations->anonymousPaidTotal(null, null, (int) $campaign->id);
             if ($anon['donations_count'] > 0) {
                 $entries[] = [
-                    'name'            => __('Anonymous', 'giveflow-fundraising-campaigns'),
+                    'name'            => __('Anonymous', 'fundkit-fundraising-campaigns'),
                     'amount_cents'    => $anon['amount_cents'],
                     'donations_count' => $anon['donations_count'],
                     'is_anonymous'    => true,
@@ -108,8 +108,8 @@ final class TopDonorsBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/top-donors', [
             'title'          => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donors to rank yet.', 'giveflow-fundraising-campaigns'),
-            'emptySubText' => __('The first donation starts the list.', 'giveflow-fundraising-campaigns'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donors to rank yet.', 'fundkit-fundraising-campaigns'),
+            'emptySubText' => __('The first donation starts the list.', 'fundkit-fundraising-campaigns'),
             'emptyIcon'    => 'donor',
             'entries'        => $entries,
             'currency'       => $campaign->currency,

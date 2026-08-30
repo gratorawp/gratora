@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Recurring\GatewayUnreachable;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Recurring\GatewayUnreachable;
+use FundKit\Recurring\RecurringPlan;
 
 /**
  * Erasing a donor must not leave their money moving.

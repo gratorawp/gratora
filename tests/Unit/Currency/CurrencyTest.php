@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Currency;
+namespace FundKit\Tests\Unit\Currency;
 
-use GiveFlow\Currency\Currency;
+use FundKit\Currency\Currency;
 use PHPUnit\Framework\TestCase;
 
 /**

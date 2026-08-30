@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Modules;
+namespace FundKit\Foundation\Modules;
 
 /**
  * Minimal semver constraint matcher (no Composer dependency).

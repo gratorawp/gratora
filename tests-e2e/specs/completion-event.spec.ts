@@ -13,16 +13,16 @@ import { test, expect } from '../fixtures/donor-form';
  * selection rather than on the assertion.
  */
 const COLLECT = `
-    window.__giveflowCompleted = [];
-    window.addEventListener( 'giveflow:donation:completed', ( e ) => {
-        window.__giveflowCompleted.push( e.detail );
+    window.__fundkitCompleted = [];
+    window.addEventListener( 'fundkit:donation:completed', ( e ) => {
+        window.__fundkitCompleted.push( e.detail );
     } );
 `;
 
 type Detail = { reference: string; statusToken: string; status: string };
 
 async function collected( page ): Promise<Detail[]> {
-    return page.evaluate( () => window.__giveflowCompleted ?? [] );
+    return page.evaluate( () => window.__fundkitCompleted ?? [] );
 }
 
 test.describe( 'donation completion event', () => {

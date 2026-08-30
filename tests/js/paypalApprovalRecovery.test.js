@@ -37,7 +37,7 @@ jest.mock( '../../assets/donation-form/util/paypal', () => ( {
 
 function config() {
     return {
-        rest:   'https://example.test/wp-json/giveflow/v1/donations',
+        rest:   'https://example.test/wp-json/fundkit/v1/donations',
         nonce:  'n0nce',
         paypal: { clientId: 'CLIENT-1', currency: 'USD' },
         i18n:   {
@@ -50,7 +50,7 @@ function config() {
 
 function oneTimePayment() {
     return {
-        reference:   'GIVEFLOW-1',
+        reference:   'FUNDKIT-1',
         statusToken: 'tok',
         amountCents: 5000,
         currency:    'USD',
@@ -60,7 +60,7 @@ function oneTimePayment() {
 
 function subscriptionPayment() {
     return {
-        reference:   'GIVEFLOW-2',
+        reference:   'FUNDKIT-2',
         statusToken: 'tok',
         amountCents: 2500,
         currency:    'USD',
@@ -95,7 +95,7 @@ async function mount( payment ) {
     // the point at which the component is actually driveable.
     await waitFor( () => sdkButtons !== null, 'the PayPal buttons to be built' );
     await waitFor(
-        () => !! document.querySelector( '.giveflow-form__paypal-buttons' ),
+        () => !! document.querySelector( '.fundkit-form__paypal-buttons' ),
         'the button mount to render'
     );
 
@@ -107,7 +107,7 @@ function screen() {
 
     return {
         text:         root.textContent,
-        buttonsShown: ! root.querySelector( '.giveflow-form__paypal-buttons' ).hidden,
+        buttonsShown: ! root.querySelector( '.fundkit-form__paypal-buttons' ).hidden,
         buttons:      [ ...root.querySelectorAll( 'button' ) ]
             .map( ( b ) => `${ b.textContent.trim() }/disabled=${ b.disabled }` ),
     };

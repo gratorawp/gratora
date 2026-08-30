@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Admin;
+namespace FundKit\Admin;
 
-use GiveFlow\Foundation\Auth\Capabilities;
-use GiveFlow\Foundation\Hooks\HookProvider;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Foundation\Auth\Capabilities;
+use FundKit\Foundation\Hooks\HookProvider;
+use FundKit\Vendor\Queryable\DB;
 use WP_Admin_Bar;
 
 /**
@@ -16,7 +16,7 @@ use WP_Admin_Bar;
  * with rows, the totals move, and nothing says the card was never charged. The
  * expensive version of finding out is a launched campaign that took nothing.
  *
- * Two states, because GiveFlow has two switches. The org-wide flag is loud. A
+ * Two states, because FundKit has two switches. The org-wide flag is loud. A
  * single form left behind after a launch is quieter and worse, so it is called
  * out separately rather than folded into the same message.
  *
@@ -50,28 +50,28 @@ final class TestModeBadge extends HookProvider
             return;
         }
 
-        // Both name GiveFlow: other plugins put their own test badge in this bar,
+        // Both name FundKit: other plugins put their own test badge in this bar,
         // and a bare "test mode" leaves the operator guessing whose till is open.
         $title = $orgWide
-            ? __('GiveFlow Test Mode Active', 'giveflow-fundraising-campaigns')
+            ? __('FundKit Test Mode Active', 'fundkit-fundraising-campaigns')
             : sprintf(
                 /* translators: %d: how many published forms are in test mode. */
-                _n('%d GiveFlow Form in Test Mode', '%d GiveFlow Forms in Test Mode', $forms, 'giveflow-fundraising-campaigns'),
+                _n('%d FundKit Form in Test Mode', '%d FundKit Forms in Test Mode', $forms, 'fundkit-fundraising-campaigns'),
                 $forms
             );
 
         $bar->add_node([
-            'id' => 'giveflow-test-mode',
+            'id' => 'fundkit-test-mode',
             // top-secondary puts it on the right, beside the account menu,
             // where the eye already goes. The default group buries it among
             // the site and comment links.
             'parent' => 'top-secondary',
-            'title'  => '<span class="giveflow-test-mode-badge">' . $this->icon() . esc_html($title) . '</span>',
-            'href'   => esc_url(admin_url('admin.php?page=giveflow-settings&tab=gateways')),
+            'title'  => '<span class="fundkit-test-mode-badge">' . $this->icon() . esc_html($title) . '</span>',
+            'href'   => esc_url(admin_url('admin.php?page=fundkit-settings&tab=gateways')),
             'meta'  => [
                 'title' => $orgWide
-                    ? __('No card is charged and these donations stay out of your reporting. Turn this off before you go live.', 'giveflow-fundraising-campaigns')
-                    : __('These forms take no real money. Every other form on the site does.', 'giveflow-fundraising-campaigns'),
+                    ? __('No card is charged and these donations stay out of your reporting. Turn this off before you go live.', 'fundkit-fundraising-campaigns')
+                    : __('These forms take no real money. Every other form on the site does.', 'fundkit-fundraising-campaigns'),
             ],
         ]);
     }
@@ -83,7 +83,7 @@ final class TestModeBadge extends HookProvider
      */
     private function icon(): string
     {
-        return '<svg class="giveflow-test-mode-badge__icon" viewBox="0 0 24 24" fill="none"'
+        return '<svg class="fundkit-test-mode-badge__icon" viewBox="0 0 24 24" fill="none"'
             . ' stroke="currentColor" stroke-width="2" stroke-linecap="round"'
             . ' stroke-linejoin="round" aria-hidden="true" focusable="false">'
             . '<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0'
@@ -98,7 +98,7 @@ final class TestModeBadge extends HookProvider
     /* Sized and coloured to sit alongside the other fundraising
        plugins' test badges rather than compete with them: a chip inset
        from the bar, not a full-height block. */
-    #wpadminbar #wp-admin-bar-giveflow-test-mode .giveflow-test-mode-badge {
+    #wpadminbar #wp-admin-bar-fundkit-test-mode .fundkit-test-mode-badge {
         display: inline-flex;
         align-items: center;
         gap: 4px;
@@ -112,13 +112,13 @@ final class TestModeBadge extends HookProvider
         line-height: 25px;
         white-space: nowrap;
     }
-    #wpadminbar #wp-admin-bar-giveflow-test-mode .giveflow-test-mode-badge__icon {
+    #wpadminbar #wp-admin-bar-fundkit-test-mode .fundkit-test-mode-badge__icon {
         width: 13px;
         height: 13px;
         flex: none;
     }
-    #wpadminbar #wp-admin-bar-giveflow-test-mode:hover .giveflow-test-mode-badge { background: #d68a37; }
-    #wpadminbar #wp-admin-bar-giveflow-test-mode > .ab-item { padding: 0; }
+    #wpadminbar #wp-admin-bar-fundkit-test-mode:hover .fundkit-test-mode-badge { background: #d68a37; }
+    #wpadminbar #wp-admin-bar-fundkit-test-mode > .ab-item { padding: 0; }
 CSS;
 
     /** @since 1.0.0 */
@@ -133,15 +133,15 @@ CSS;
 
         // A src-less handle, because the badge has no stylesheet of its own and
         // a printed style tag is not enqueueable.
-        wp_register_style('giveflow-test-mode-badge', false, [], GIVEFLOW_VERSION);
-        wp_enqueue_style('giveflow-test-mode-badge');
-        wp_add_inline_style('giveflow-test-mode-badge', self::BADGE_CSS);
+        wp_register_style('fundkit-test-mode-badge', false, [], FUNDKIT_VERSION);
+        wp_enqueue_style('fundkit-test-mode-badge');
+        wp_add_inline_style('fundkit-test-mode-badge', self::BADGE_CSS);
     }
 
     /** @since 1.0.0 */
     private function orgWide(): bool
     {
-        $cfg = get_option('giveflow_gateway_config', []);
+        $cfg = get_option('fundkit_gateway_config', []);
 
         return is_array($cfg) && ! empty($cfg['test_mode']);
     }
@@ -170,7 +170,7 @@ CSS;
         // test_mode is written as a JSON boolean today; matching '1' as well
         // means a future writer storing an int or a string does not silently
         // stop counting.
-        return (int) DB::table('giveflow_forms')
+        return (int) DB::table('fundkit_forms')
             ->whereRaw(
                 "JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(settings), settings, NULL), "
                 . "'\$.test_mode')) IN ('true', '1')"
@@ -186,6 +186,6 @@ CSS;
      */
     private function visibleToCurrentUser(): bool
     {
-        return is_user_logged_in() && Capabilities::userCan('giveflow_view_donations');
+        return is_user_logged_in() && Capabilities::userCan('fundkit_view_donations');
     }
 }

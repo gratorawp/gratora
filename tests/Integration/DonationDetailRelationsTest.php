@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\CampaignService;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Funds\FundService;
+use FundKit\Campaigns\CampaignService;
+use FundKit\Donations\Donation;
+use FundKit\Foundation\Plugin;
+use FundKit\Funds\FundService;
 use WP_REST_Request;
 
 /**
@@ -53,7 +53,7 @@ final class DonationDetailRelationsTest extends IntegrationTestCase
     public function test_the_detail_payload_carries_its_campaign_and_fund(): void
     {
         $ref = $this->donationWithRelations();
-        $res = rest_do_request(new WP_REST_Request('GET', "/giveflow/v1/admin/donations/{$ref}"));
+        $res = rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/admin/donations/{$ref}"));
         $this->assertSame(200, $res->get_status());
 
         $d = ((array) $res->get_data())['donation'];
@@ -66,7 +66,7 @@ final class DonationDetailRelationsTest extends IntegrationTestCase
     public function test_the_list_payload_carries_the_fund(): void
     {
         $this->donationWithRelations();
-        $res = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/donations'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/donations'));
 
         $rows = (array) $res->get_data();
         $named = array_values(array_filter($rows, static fn ($r): bool => ! empty($r['fund'])));

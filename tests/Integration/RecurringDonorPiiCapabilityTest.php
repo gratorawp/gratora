@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\Donor;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Donors\Donor;
+use FundKit\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -28,7 +28,7 @@ final class RecurringDonorPiiCapabilityTest extends IntegrationTestCase
 
     private function seedPlanForDonor(): int
     {
-        $create = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'noor.haddad@example.org',
@@ -62,9 +62,9 @@ final class RecurringDonorPiiCapabilityTest extends IntegrationTestCase
     public function test_the_list_withholds_the_donor_email_without_view_donors(): void
     {
         $this->seedPlanForDonor();
-        $this->actAs(['giveflow_view_donations']);
+        $this->actAs(['fundkit_view_donations']);
 
-        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/recurring');
+        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/recurring');
         $req->set_query_params(['page' => 1, 'per_page' => 25]);
         $res = rest_do_request($req);
 
@@ -78,9 +78,9 @@ final class RecurringDonorPiiCapabilityTest extends IntegrationTestCase
     public function test_view_donors_still_reads_the_email(): void
     {
         $this->seedPlanForDonor();
-        $this->actAs(['giveflow_view_donations', 'giveflow_view_donors']);
+        $this->actAs(['fundkit_view_donations', 'fundkit_view_donors']);
 
-        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/recurring');
+        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/recurring');
         $req->set_query_params(['page' => 1, 'per_page' => 25]);
         $rows = (array) rest_do_request($req)->get_data();
 

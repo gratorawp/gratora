@@ -8,7 +8,7 @@ import { notify } from '../_shared/notify';
 import { tablistKeyDown } from '../_shared/tablistKeys';
 import { useExtensionTabs, ExtensionTabPanel } from '../_shared/extensionTabs';
 
-import { useGiveFlowSettings } from '../_shared/useGiveFlowSettings';
+import { useFundKitSettings } from '../_shared/useFundKitSettings';
 import { useFxRates } from '../_shared/useFxRates';
 import SetupPanel from './panels/SetupPanel';
 import OrganizationPanel from './panels/OrganizationPanel';
@@ -30,41 +30,41 @@ import {
 // Ordered by how often an operator opens it, money first. Add-on tabs land
 // after these.
 const TABS = [
-    { key: 'setup',        label: __( 'Setup', 'giveflow-fundraising-campaigns' ),                Icon: IconSetup },
-    { key: 'gateways',     label: __( 'Payment gateways', 'giveflow-fundraising-campaigns' ),     Icon: IconGateways },
-    { key: 'organization', label: __( 'Organization', 'giveflow-fundraising-campaigns' ),         Icon: IconOrganization },
-    { key: 'brand',        label: __( 'Brand', 'giveflow-fundraising-campaigns' ),                Icon: IconBrand },
-    { key: 'email',        label: __( 'Emails', 'giveflow-fundraising-campaigns' ),               Icon: IconEmail },
-    { key: 'receipts',     label: __( 'Receipts', 'giveflow-fundraising-campaigns' ),             Icon: IconReceipt },
-    { key: 'currency',     label: __( 'Currency', 'giveflow-fundraising-campaigns' ),             Icon: IconCurrency },
-    { key: 'numbering',    label: __( 'Numbering', 'giveflow-fundraising-campaigns' ),            Icon: IconNumbering },
-    { key: 'privacy',      label: __( 'Privacy', 'giveflow-fundraising-campaigns' ),              Icon: IconPrivacy },
-    { key: 'roles',        label: __( 'Roles', 'giveflow-fundraising-campaigns' ),                Icon: IconRoles, adminOnly: true },
+    { key: 'setup',        label: __( 'Setup', 'fundkit-fundraising-campaigns' ),                Icon: IconSetup },
+    { key: 'gateways',     label: __( 'Payment gateways', 'fundkit-fundraising-campaigns' ),     Icon: IconGateways },
+    { key: 'organization', label: __( 'Organization', 'fundkit-fundraising-campaigns' ),         Icon: IconOrganization },
+    { key: 'brand',        label: __( 'Brand', 'fundkit-fundraising-campaigns' ),                Icon: IconBrand },
+    { key: 'email',        label: __( 'Emails', 'fundkit-fundraising-campaigns' ),               Icon: IconEmail },
+    { key: 'receipts',     label: __( 'Receipts', 'fundkit-fundraising-campaigns' ),             Icon: IconReceipt },
+    { key: 'currency',     label: __( 'Currency', 'fundkit-fundraising-campaigns' ),             Icon: IconCurrency },
+    { key: 'numbering',    label: __( 'Numbering', 'fundkit-fundraising-campaigns' ),            Icon: IconNumbering },
+    { key: 'privacy',      label: __( 'Privacy', 'fundkit-fundraising-campaigns' ),              Icon: IconPrivacy },
+    { key: 'roles',        label: __( 'Roles', 'fundkit-fundraising-campaigns' ),                Icon: IconRoles, adminOnly: true },
 ];
 
 // Always last, whatever add-ons register in between.
 //
-// Roles assigns GiveFlow capabilities, so the REST route requires full admin. A
+// Roles assigns FundKit capabilities, so the REST route requires full admin. A
 // settings manager was still offered the tab and only learned their save was
 // refused after editing the grid.
 const visibleTabs = () =>
-    TABS.filter( ( t ) => ! t.adminOnly || !! window.giveflow?.can?.manage_options );
+    TABS.filter( ( t ) => ! t.adminOnly || !! window.fundkit?.can?.manage_options );
 
 const TAIL_TABS = [];
 
 // Save-job slug -> human label, for failure messages (job slugs are not tab keys).
 const SECTION_LABELS = {
-    'org-profile':     __( 'Organization', 'giveflow-fundraising-campaigns' ),
-    'org-brand':       __( 'Brand', 'giveflow-fundraising-campaigns' ),
-    'currency-locale': __( 'Currency & locale', 'giveflow-fundraising-campaigns' ),
-    'exchange-rates':  __( 'Exchange rates', 'giveflow-fundraising-campaigns' ),
-    'gateways':        __( 'Payment gateways', 'giveflow-fundraising-campaigns' ),
-    'email':           __( 'Emails', 'giveflow-fundraising-campaigns' ),
-    'receipts':        __( 'Receipts', 'giveflow-fundraising-campaigns' ),
-    'numbering':       __( 'Numbering', 'giveflow-fundraising-campaigns' ),
-    'consents':        __( 'Consents', 'giveflow-fundraising-campaigns' ),
-    'privacy':         __( 'Data & privacy', 'giveflow-fundraising-campaigns' ),
-    'roles':           __( 'Roles & permissions', 'giveflow-fundraising-campaigns' ),
+    'org-profile':     __( 'Organization', 'fundkit-fundraising-campaigns' ),
+    'org-brand':       __( 'Brand', 'fundkit-fundraising-campaigns' ),
+    'currency-locale': __( 'Currency & locale', 'fundkit-fundraising-campaigns' ),
+    'exchange-rates':  __( 'Exchange rates', 'fundkit-fundraising-campaigns' ),
+    'gateways':        __( 'Payment gateways', 'fundkit-fundraising-campaigns' ),
+    'email':           __( 'Emails', 'fundkit-fundraising-campaigns' ),
+    'receipts':        __( 'Receipts', 'fundkit-fundraising-campaigns' ),
+    'numbering':       __( 'Numbering', 'fundkit-fundraising-campaigns' ),
+    'consents':        __( 'Consents', 'fundkit-fundraising-campaigns' ),
+    'privacy':         __( 'Data & privacy', 'fundkit-fundraising-campaigns' ),
+    'roles':           __( 'Roles & permissions', 'fundkit-fundraising-campaigns' ),
 };
 
 function initialTab() {
@@ -78,7 +78,7 @@ function initialTab() {
 /**
  * A panel reads its group through fallbacks, so a group that failed to load
  * draws a complete, ordinary looking form of literal defaults: Anonymize IPs
- * on, prefix GIVEFLOW, an empty legal name. None of it is this site's settings, and
+ * on, prefix FUNDKIT, an empty legal name. None of it is this site's settings, and
  * nothing on the screen said so.
  *
  * @since 1.0.0
@@ -89,11 +89,11 @@ export function SettingsGroup( { of, children } ) {
 
     if ( failed ) {
         return (
-            <div className="giveflow-panel">
+            <div className="fundkit-panel">
                 <Card>
                     <p style={ { color: '#b42318', margin: '0 0 12px' } }>{ failed.loadError }</p>
                     <Btn variant="secondary" onClick={ () => groups.forEach( ( g ) => g.reload?.() ) }>
-                        { __( 'Retry', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Retry', 'fundkit-fundraising-campaigns' ) }
                     </Btn>
                 </Card>
             </div>
@@ -101,7 +101,7 @@ export function SettingsGroup( { of, children } ) {
     }
 
     if ( groups.some( ( g ) => g.isLoading ) ) {
-        return <p>{ __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p>;
+        return <p>{ __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</p>;
     }
 
     return children;
@@ -121,17 +121,17 @@ export default function Settings() {
         ...TAIL_TABS,
     ];
 
-    const org      = useGiveFlowSettings( 'org-profile' );
-    const brand    = useGiveFlowSettings( 'org-brand' );
-    const currency = useGiveFlowSettings( 'currency-locale' );
+    const org      = useFundKitSettings( 'org-profile' );
+    const brand    = useFundKitSettings( 'org-brand' );
+    const currency = useFundKitSettings( 'currency-locale' );
     const fx       = useFxRates();
-    const gateways = useGiveFlowSettings( 'gateways' );
-    const email    = useGiveFlowSettings( 'email' );
-    const receipts = useGiveFlowSettings( 'receipts' );
-    const numbering = useGiveFlowSettings( 'numbering' );
-    const consents = useGiveFlowSettings( 'consents' );
-    const privacy  = useGiveFlowSettings( 'privacy' );
-    const roles    = useGiveFlowSettings( 'roles' );
+    const gateways = useFundKitSettings( 'gateways' );
+    const email    = useFundKitSettings( 'email' );
+    const receipts = useFundKitSettings( 'receipts' );
+    const numbering = useFundKitSettings( 'numbering' );
+    const consents = useFundKitSettings( 'consents' );
+    const privacy  = useFundKitSettings( 'privacy' );
+    const roles    = useFundKitSettings( 'roles' );
 
     // Re-run when extTabs changes so this closure never holds a stale list: an
     // add-on tab registers after mount, and a hash-only navigation to it never
@@ -236,7 +236,7 @@ export default function Settings() {
             .filter( Boolean );
 
         if ( failed.length === 0 ) {
-            notify.success( __( 'All changes saved.', 'giveflow-fundraising-campaigns' ) );
+            notify.success( __( 'All changes saved.', 'fundkit-fundraising-campaigns' ) );
             return;
         }
 
@@ -247,10 +247,10 @@ export default function Settings() {
         const base = failed.length < jobs.length
             ? sprintf(
                 /* translators: %s: comma-separated section names that failed */
-                __( 'Could not save: %s.', 'giveflow-fundraising-campaigns' ),
+                __( 'Could not save: %s.', 'fundkit-fundraising-campaigns' ),
                 labels.join( ', ' ),
             )
-            : __( 'Save failed.', 'giveflow-fundraising-campaigns' );
+            : __( 'Save failed.', 'fundkit-fundraising-campaigns' );
         notify.error( reason ? `${ base } ${ reason }` : base );
     };
 
@@ -271,34 +271,34 @@ export default function Settings() {
     const anySaving = org.isSaving || brand.isSaving || currency.isSaving || fx.isSaving || gateways.isSaving || email.isSaving || receipts.isSaving || numbering.isSaving || consents.isSaving || privacy.isSaving || roles.isSaving;
 
     return (
-        <div className="giveflow-settings-page">
-            <div className="giveflow-crumbs">
-                <a href="admin.php?page=giveflow">{ __( 'GiveFlow', 'giveflow-fundraising-campaigns' ) }</a>
+        <div className="fundkit-settings-page">
+            <div className="fundkit-crumbs">
+                <a href="admin.php?page=fundkit">{ __( 'FundKit', 'fundkit-fundraising-campaigns' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Settings', 'giveflow-fundraising-campaigns' ) }</span>
+                <span>{ __( 'Settings', 'fundkit-fundraising-campaigns' ) }</span>
                 <span className="sep">›</span>
                 <span>{ allTabs.find( ( t ) => t.key === tab )?.label || '' }</span>
             </div>
 
-            <div className="giveflow-page-head">
-                <div className="giveflow-page-head__title-row">
-                    <h1>{ __( 'Settings', 'giveflow-fundraising-campaigns' ) }</h1>
+            <div className="fundkit-page-head">
+                <div className="fundkit-page-head__title-row">
+                    <h1>{ __( 'Settings', 'fundkit-fundraising-campaigns' ) }</h1>
                 </div>
-                <div className="giveflow-page-head__right">
-                    <span className="giveflow-page-head__meta">
-                        { __( 'Changes save when you click Save changes', 'giveflow-fundraising-campaigns' ) }
+                <div className="fundkit-page-head__right">
+                    <span className="fundkit-page-head__meta">
+                        { __( 'Changes save when you click Save changes', 'fundkit-fundraising-campaigns' ) }
                     </span>
                 </div>
             </div>
 
             <div
-                className="giveflow-tabs"
+                className="fundkit-tabs"
                 role="tablist"
                 tabIndex={ -1 }
-                aria-label={ __( 'Settings sections', 'giveflow-fundraising-campaigns' ) }
+                aria-label={ __( 'Settings sections', 'fundkit-fundraising-campaigns' ) }
                 onKeyDown={ ( e ) => tablistKeyDown( e, allTabs.map( ( t ) => t.key ), tab, jumpTo ) }
             >
-                <div className="giveflow-tabs__scroll">
+                <div className="fundkit-tabs__scroll">
                     { allTabs.map( ( t ) => {
                         const active   = tab === t.key;
                         const isDirty  = !! dirtyByTab[ t.key ];
@@ -313,9 +313,9 @@ export default function Settings() {
                                 className={ active ? 'is-active' : '' }
                                 onClick={ ( e ) => { e.preventDefault(); jumpTo( t.key ); } }
                             >
-                                <Icon className="giveflow-tab__icon" />
+                                <Icon className="fundkit-tab__icon" />
                                 { t.label }
-                                { isDirty && <span className="giveflow-tab__dot" title={ __( 'Unsaved changes', 'giveflow-fundraising-campaigns' ) } /> }
+                                { isDirty && <span className="fundkit-tab__dot" title={ __( 'Unsaved changes', 'fundkit-fundraising-campaigns' ) } /> }
                             </a>
                         );
                     } ) }
@@ -324,7 +324,7 @@ export default function Settings() {
 
             <Toaster />
 
-            <div className="giveflow-settings-page__body">
+            <div className="fundkit-settings-page__body">
                 <div hidden={ tab !== 'setup' }>
                     <SetupPanel onJumpTo={ jumpTo } active={ tab === 'setup' } />
                 </div>
@@ -368,32 +368,32 @@ export default function Settings() {
             </div>
 
             { dirtySections > 0 && (
-                <div className="giveflow-save-bar" role="status" aria-live="polite">
-                    <span className="giveflow-save-bar__dot" aria-hidden="true" />
-                    <span className="giveflow-save-bar__count">
+                <div className="fundkit-save-bar" role="status" aria-live="polite">
+                    <span className="fundkit-save-bar__dot" aria-hidden="true" />
+                    <span className="fundkit-save-bar__count">
                         { dirtySections === 1
-                            ? __( 'Unsaved changes in 1 section', 'giveflow-fundraising-campaigns' )
+                            ? __( 'Unsaved changes in 1 section', 'fundkit-fundraising-campaigns' )
                             : sprintf(
                                 /* translators: %d: number of sections with unsaved changes */
-                                _n( 'Unsaved changes across %d section', 'Unsaved changes across %d sections', dirtySections, 'giveflow-fundraising-campaigns' ),
+                                _n( 'Unsaved changes across %d section', 'Unsaved changes across %d sections', dirtySections, 'fundkit-fundraising-campaigns' ),
                                 dirtySections,
                             ) }
                     </span>
                     <button
                         type="button"
-                        className="giveflow-save-bar__btn giveflow-save-bar__btn--ghost"
+                        className="fundkit-save-bar__btn fundkit-save-bar__btn--ghost"
                         onClick={ discardAll }
                         disabled={ anySaving }
                     >
-                        { __( 'Discard', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Discard', 'fundkit-fundraising-campaigns' ) }
                     </button>
                     <button
                         type="button"
-                        className="giveflow-save-bar__btn giveflow-save-bar__btn--primary"
+                        className="fundkit-save-bar__btn fundkit-save-bar__btn--primary"
                         onClick={ saveAll }
                         disabled={ anySaving }
                     >
-                        { __( 'Save changes', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Save changes', 'fundkit-fundraising-campaigns' ) }
                     </button>
                 </div>
             ) }

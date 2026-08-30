@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Donations\Refund;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\RefundResult;
-use GiveFlow\Receipts\Receipt;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationService;
+use FundKit\Donations\Refund;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\RefundResult;
+use FundKit\Receipts\Receipt;
 
 /**
  * A refund the gateway has accepted is not a refund the gateway has paid.
@@ -151,7 +151,7 @@ final class RefundSettlementTest extends IntegrationTestCase
     public function test_an_awaited_refund_does_not_void_the_receipt(): void
     {
         $donation = $this->paidDonation('receipt@example.test');
-        do_action('giveflow.async.issue_receipt', ['donation_id' => (int) $donation->id]);
+        do_action('fundkit.async.issue_receipt', ['donation_id' => (int) $donation->id]);
 
         $receipt = Receipt::query()->where('donation_id', (int) $donation->id)->get();
         $this->assertNotNull($receipt, 'precondition: a receipt was issued');

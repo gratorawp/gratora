@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/components/DateField';
+export { default } from '@fundkit/ui/components/DateField';

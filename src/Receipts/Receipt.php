@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Receipts;
+namespace FundKit\Receipts;
 
 defined('ABSPATH') || exit;
 
-use GiveFlow\Vendor\Queryable\Model;
-use GiveFlow\Vendor\Queryable\Schema\Table;
+use FundKit\Vendor\Queryable\Model;
+use FundKit\Vendor\Queryable\Schema\Table;
 
 /**
  * Receipt audit record: proof a receipt was issued and emailed.
@@ -19,7 +19,7 @@ use GiveFlow\Vendor\Queryable\Schema\Table;
  */
 final class Receipt extends Model
 {
-    protected string $table = 'giveflow_receipts';
+    protected string $table = 'fundkit_receipts';
     protected string $version = '1.0.0';
 
     public int $id;

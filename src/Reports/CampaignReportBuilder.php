@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Reports;
+namespace FundKit\Reports;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\CampaignMetricsService;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Helpers\View;
-use GiveFlow\Receipts\PdfBuilder;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\CampaignMetricsService;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Helpers\View;
+use FundKit\Receipts\PdfBuilder;
 
 /**
  * Builds a single-page campaign performance PDF: raised vs goal, a progress bar,
@@ -35,7 +35,7 @@ final class CampaignReportBuilder
         $raisedCents = (int) $summary['amount_raised_cents'];
         [$hasGoal, $goalDisplay, $percent, $barWidth] = $this->goal($campaign, $summary, $currency);
 
-        $org     = get_option('giveflow_org_profile', []);
+        $org     = get_option('fundkit_org_profile', []);
         $orgName = trim((string) (is_array($org) ? ($org['name'] ?? '') : '')) ?: (string) get_bloginfo('name');
 
         $html = View::load('Receipts.campaign-report', [
@@ -48,18 +48,18 @@ final class CampaignReportBuilder
             'percent'        => $percent,
             'bar_width'      => $barWidth,
             'stats'          => [
-                ['label' => __('Donations', 'giveflow-fundraising-campaigns'),        'value' => number_format_i18n((int) $summary['donations_count'])],
-                ['label' => __('Unique donors', 'giveflow-fundraising-campaigns'),    'value' => number_format_i18n((int) $summary['donors_count'])],
-                ['label' => __('Average donation', 'giveflow-fundraising-campaigns'), 'value' => Money::format((int) $summary['avg_donation_cents'], $currency)],
+                ['label' => __('Donations', 'fundkit-fundraising-campaigns'),        'value' => number_format_i18n((int) $summary['donations_count'])],
+                ['label' => __('Unique donors', 'fundkit-fundraising-campaigns'),    'value' => number_format_i18n((int) $summary['donors_count'])],
+                ['label' => __('Average donation', 'fundkit-fundraising-campaigns'), 'value' => Money::format((int) $summary['avg_donation_cents'], $currency)],
             ],
             'generated_date' => (string) wp_date(get_option('date_format')),
         ]);
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: campaign title. */
-            'title'   => sprintf(__('Campaign report: %s', 'giveflow-fundraising-campaigns'), (string) $campaign->title),
+            'title'   => sprintf(__('Campaign report: %s', 'fundkit-fundraising-campaigns'), (string) $campaign->title),
             'author'  => $orgName,
-            'subject' => __('Campaign performance report', 'giveflow-fundraising-campaigns'),
+            'subject' => __('Campaign performance report', 'fundkit-fundraising-campaigns'),
         ]);
     }
 
@@ -70,7 +70,7 @@ final class CampaignReportBuilder
      */
     public static function filename(int $campaignId, string $range): string
     {
-        return sprintf('giveflow-campaign-%d-%s.pdf', $campaignId, $range);
+        return sprintf('fundkit-campaign-%d-%s.pdf', $campaignId, $range);
     }
 
     /**
@@ -99,11 +99,11 @@ final class CampaignReportBuilder
         if ($type === 'donors') {
             $current = (int) $summary['donors_count'];
             /* translators: %s: donor goal count */
-            $display = sprintf(__('%s donors', 'giveflow-fundraising-campaigns'), number_format_i18n($goalCount));
+            $display = sprintf(__('%s donors', 'fundkit-fundraising-campaigns'), number_format_i18n($goalCount));
         } else {
             $current = (int) $summary['donations_count'];
             /* translators: %s: donation goal count */
-            $display = sprintf(__('%s donations', 'giveflow-fundraising-campaigns'), number_format_i18n($goalCount));
+            $display = sprintf(__('%s donations', 'fundkit-fundraising-campaigns'), number_format_i18n($goalCount));
         }
 
         $percent = (int) round(($current / $goalCount) * 100);
@@ -120,11 +120,11 @@ final class CampaignReportBuilder
     private function rangeLabel(string $range): string
     {
         return match ($range) {
-            'today'    => __('Today', 'giveflow-fundraising-campaigns'),
-            'last-7'   => __('Last 7 days', 'giveflow-fundraising-campaigns'),
-            'last-30'  => __('Last 30 days', 'giveflow-fundraising-campaigns'),
-            'last-90'  => __('Last 90 days', 'giveflow-fundraising-campaigns'),
-            'all-time' => __('All time', 'giveflow-fundraising-campaigns'),
+            'today'    => __('Today', 'fundkit-fundraising-campaigns'),
+            'last-7'   => __('Last 7 days', 'fundkit-fundraising-campaigns'),
+            'last-30'  => __('Last 30 days', 'fundkit-fundraising-campaigns'),
+            'last-90'  => __('Last 90 days', 'fundkit-fundraising-campaigns'),
+            'all-time' => __('All time', 'fundkit-fundraising-campaigns'),
             default    => $range,
         };
     }

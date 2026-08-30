@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Recurring;
+namespace FundKit\Recurring;
 
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\SubscriptionAware;
+use FundKit\Donations\DonationService;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\SubscriptionAware;
 
 /**
  * The one canonical way to cancel a recurring plan: tell the gateway, then run

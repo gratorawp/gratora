@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Admin\Pages;
+namespace FundKit\Admin\Pages;
 
-use GiveFlow\Foundation\Hooks\HookProvider;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Donors\ConsentService;
-use GiveFlow\Gateways\GatewayManager;
+use FundKit\Foundation\Hooks\HookProvider;
+use FundKit\Foundation\Plugin;
+use FundKit\Donors\ConsentService;
+use FundKit\Gateways\GatewayManager;
 
 /**
  * Registers and renders the Forms admin page, including full-screen editor mode.
@@ -16,14 +16,14 @@ use GiveFlow\Gateways\GatewayManager;
  */
 final class FormsPage extends HookProvider
 {
-    private const PAGE_ID   = 'giveflow-forms';
-    private const HANDLE    = 'giveflow-admin-forms';
+    private const PAGE_ID   = 'fundkit-forms';
+    private const HANDLE    = 'fundkit-admin-forms';
     private const BUILD_DIR = 'build/admin/forms';
 
     /** @since 1.0.0 */
     protected function filters(): array
     {
-        return ['giveflow.admin.pages' => 'registerPage'];
+        return ['fundkit.admin.pages' => 'registerPage'];
     }
 
     /** @since 1.0.0 */
@@ -57,16 +57,16 @@ final class FormsPage extends HookProvider
         . 'html.wp-toolbar{padding-top:0!important}'
         . 'html,body{height:100%;margin:0;padding:0;background:#fff}'
         . '#wpwrap,#wpcontent,#wpbody,#wpbody-content{margin-left:0!important;padding:0!important;float:none!important;width:100%!important;background:#fff}'
-        . '.wrap,.giveflow-forms-wrap{margin:0!important;padding:0!important}'
-        . '#giveflow-admin-forms{height:100vh;overflow:hidden;background:#fff}';
+        . '.wrap,.fundkit-forms-wrap{margin:0!important;padding:0!important}'
+        . '#fundkit-admin-forms{height:100vh;overflow:hidden;background:#fff}';
 
     /** @since 1.0.0 */
     public function registerPage(array $pages): array
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Forms', 'giveflow-fundraising-campaigns'),
-            'capability' => 'giveflow_access_forms',
+            'title'      => __('Forms', 'fundkit-fundraising-campaigns'),
+            'capability' => 'fundkit_access_forms',
             'position'   => 15,
             'hidden'     => true,
             'render'     => [$this, 'render'],
@@ -80,8 +80,8 @@ final class FormsPage extends HookProvider
         $this->bootBlockEditorContext();
         $this->enqueueAssets();
         ?>
-        <div class="wrap giveflow-forms-wrap">
-            <div id="giveflow-admin-forms"></div>
+        <div class="wrap fundkit-forms-wrap">
+            <div id="fundkit-admin-forms"></div>
         </div>
         <?php
     }
@@ -131,16 +131,16 @@ final class FormsPage extends HookProvider
         do_action('enqueue_block_editor_assets');
         add_action('admin_print_footer_scripts', ['_WP_Editors', 'print_default_editor_scripts'], 45);
 
-        $asset = require GIVEFLOW_DIR . self::BUILD_DIR . '/index.asset.php';
+        $asset = require FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
         wp_enqueue_script(
             self::HANDLE,
-            GIVEFLOW_URL . self::BUILD_DIR . '/index.js',
+            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? GIVEFLOW_VERSION,
+            $asset['version']      ?? FUNDKIT_VERSION,
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
 
         // Registered gateways so the payment-gateways block can list them,
         // each carrying whether the org is currently offering it: a gateway
@@ -167,30 +167,30 @@ final class FormsPage extends HookProvider
             Plugin::instance()->container->get(ConsentService::class)->purposes()
         );
 
-        wp_localize_script(self::HANDLE, 'giveflowFormsEditor', [
+        wp_localize_script(self::HANDLE, 'fundkitFormsEditor', [
             'gateways' => $gateways,
             'consents' => $consents,
-            'consentsSettingsUrl' => admin_url('admin.php?page=giveflow-settings&tab=consents'),
+            'consentsSettingsUrl' => admin_url('admin.php?page=fundkit-settings&tab=consents'),
         ]);
 
-        do_action('giveflow.editor.assets', self::HANDLE);
+        do_action('fundkit.editor.assets', self::HANDLE);
 
         wp_enqueue_style(
-            'giveflow-dataviews-vendor-forms',
-            GIVEFLOW_URL . self::BUILD_DIR . '/dataviews.css',
+            'fundkit-dataviews-vendor-forms',
+            FUNDKIT_URL . self::BUILD_DIR . '/dataviews.css',
             ['wp-components'],
-            (string) (@filemtime(GIVEFLOW_DIR . self::BUILD_DIR . '/dataviews.css') ?: GIVEFLOW_VERSION)
+            (string) (@filemtime(FUNDKIT_DIR . self::BUILD_DIR . '/dataviews.css') ?: FUNDKIT_VERSION)
         );
 
         wp_enqueue_style(
-            'giveflow-admin-forms',
-            GIVEFLOW_URL . 'build/admin/forms.css',
+            'fundkit-admin-forms',
+            FUNDKIT_URL . 'build/admin/forms.css',
             ['wp-edit-post', 'wp-block-editor', 'wp-components'],
-            (string) (@filemtime(GIVEFLOW_DIR . 'build/admin/forms.css') ?: GIVEFLOW_VERSION)
+            (string) (@filemtime(FUNDKIT_DIR . 'build/admin/forms.css') ?: FUNDKIT_VERSION)
         );
 
         if (self::isFormEditView()) {
-            wp_add_inline_style('giveflow-admin-forms', self::FULLSCREEN_CSS);
+            wp_add_inline_style('fundkit-admin-forms', self::FULLSCREEN_CSS);
         }
     }
 }

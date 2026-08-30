@@ -8,7 +8,7 @@ const MONTHS = [
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
 
-const PAD = 22; // .giveflow-schedule__lane horizontal padding
+const PAD = 22; // .fundkit-schedule__lane horizontal padding
 
 // Jan-Dec lane with draggable start/today/end markers synced to date inputs below.
 export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdited, endEdited } ) {
@@ -91,13 +91,13 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
     const setEnd   = ( next ) => onChange?.( { ends_at:   next || null } );
 
     return (
-        <div className="giveflow-schedule">
-            <div className="giveflow-schedule__lane" ref={ laneRef }>
-                <div className="giveflow-schedule__track" />
+        <div className="fundkit-schedule">
+            <div className="fundkit-schedule__lane" ref={ laneRef }>
+                <div className="fundkit-schedule__track" />
 
                 { hasWindow && (
                     <div
-                        className="giveflow-schedule__window"
+                        className="fundkit-schedule__window"
                         style={ {
                             left:  `calc(${ PAD }px + (100% - ${ PAD * 2 }px) * ${ winLeft  / 100 })`,
                             right: `calc(${ PAD }px + (100% - ${ PAD * 2 }px) * ${ ( 100 - winRight ) / 100 })`,
@@ -107,7 +107,7 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
 
                 { todayPct !== null && (
                     <div
-                        className="giveflow-schedule__today"
+                        className="fundkit-schedule__today"
                         style={ { left: markerLeft( todayPct ) } }
                     />
                 ) }
@@ -115,18 +115,18 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
                 { startPct !== null && (
                     <>
                         <div
-                            className="giveflow-schedule__marker"
+                            className="fundkit-schedule__marker"
                             style={ { left: markerLeft( startPct ), cursor: 'ew-resize' } }
                             onPointerDown={ beginDrag( 'start' ) }
                             role="slider"
-                            aria-label={ __( 'Drag to change start date', 'giveflow-fundraising-campaigns' ) }
+                            aria-label={ __( 'Drag to change start date', 'fundkit-fundraising-campaigns' ) }
                             aria-valuenow={ Math.round( startPct ) }
                             aria-valuemin={ 0 }
                             aria-valuemax={ 100 }
                         />
-                        <div className="giveflow-schedule__label" style={ { left: markerLeft( startPct ) } }>
+                        <div className="fundkit-schedule__label" style={ { left: markerLeft( startPct ) } }>
                             { shortDate( start ) }
-                            <small>{ __( 'Start', 'giveflow-fundraising-campaigns' ) }</small>
+                            <small>{ __( 'Start', 'fundkit-fundraising-campaigns' ) }</small>
                         </div>
                     </>
                 ) }
@@ -134,48 +134,48 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
                 { endPct !== null && (
                     <>
                         <div
-                            className="giveflow-schedule__marker"
+                            className="fundkit-schedule__marker"
                             style={ { left: markerLeft( endPct ), cursor: 'ew-resize' } }
                             onPointerDown={ beginDrag( 'end' ) }
                             role="slider"
-                            aria-label={ __( 'Drag to change end date', 'giveflow-fundraising-campaigns' ) }
+                            aria-label={ __( 'Drag to change end date', 'fundkit-fundraising-campaigns' ) }
                             aria-valuenow={ Math.round( endPct ) }
                             aria-valuemin={ 0 }
                             aria-valuemax={ 100 }
                         />
-                        <div className="giveflow-schedule__label" style={ { left: markerLeft( endPct ) } }>
+                        <div className="fundkit-schedule__label" style={ { left: markerLeft( endPct ) } }>
                             { shortDate( end ) }
-                            <small>{ __( 'End', 'giveflow-fundraising-campaigns' ) }</small>
+                            <small>{ __( 'End', 'fundkit-fundraising-campaigns' ) }</small>
                         </div>
                     </>
                 ) }
             </div>
 
-            <div className="giveflow-schedule__axis">
+            <div className="fundkit-schedule__axis">
                 { MONTHS.map( ( m ) => <span key={ m }>{ m }</span> ) }
             </div>
 
-            <div className="giveflow-schedule__dates">
+            <div className="fundkit-schedule__dates">
                 <label>
-                    <span>{ __( 'Starts at', 'giveflow-fundraising-campaigns' ) }</span>
+                    <span>{ __( 'Starts at', 'fundkit-fundraising-campaigns' ) }</span>
                     <DateField
                         withTime
                         value={ startsAt || '' }
                         onChange={ setStart }
                         edited={ startEdited }
-                        placeholder={ __( 'No start scheduled', 'giveflow-fundraising-campaigns' ) }
-                        ariaLabel={ __( 'Pick a start date and time', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'No start scheduled', 'fundkit-fundraising-campaigns' ) }
+                        ariaLabel={ __( 'Pick a start date and time', 'fundkit-fundraising-campaigns' ) }
                     />
                 </label>
                 <label>
-                    <span>{ __( 'Ends at', 'giveflow-fundraising-campaigns' ) }</span>
+                    <span>{ __( 'Ends at', 'fundkit-fundraising-campaigns' ) }</span>
                     <DateField
                         withTime
                         value={ endsAt || '' }
                         onChange={ setEnd }
                         edited={ endEdited }
-                        placeholder={ __( 'No end scheduled', 'giveflow-fundraising-campaigns' ) }
-                        ariaLabel={ __( 'Pick an end date and time', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'No end scheduled', 'fundkit-fundraising-campaigns' ) }
+                        ariaLabel={ __( 'Pick an end date and time', 'fundkit-fundraising-campaigns' ) }
                     />
                 </label>
             </div>

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\DonorMetricsService;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Donors\DonorMetricsService;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Recurring\RecurringPlan;
 
 /**
  * The banner an admin sees on a donor whose renewal was declined.

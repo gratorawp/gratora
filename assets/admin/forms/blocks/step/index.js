@@ -1,5 +1,5 @@
 /**
- * giveflow/step: one page inside a giveflow/steps wizard. Hidden from the inserter;
+ * fundkit/step: one page inside a fundkit/steps wizard. Hidden from the inserter;
  * authors add steps via the parent's toolbar.
  */
 
@@ -9,11 +9,11 @@ import { useSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'giveflow/step';
+const NAME = 'fundkit/step';
 
 function Edit( { attributes, setAttributes, clientId } ) {
     const { title = '', showTitle = true } = attributes;
-    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--step' } );
+    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--step' } );
 
     const { index, total, childCount } = useSelect( ( select ) => {
         const { getBlockRootClientId, getBlockOrder } = select( 'core/block-editor' );
@@ -29,28 +29,28 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Step', 'giveflow-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Step', 'fundkit-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
                         value={ title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        help={ __( 'Shown as the page title and on the progress indicator.', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Shown as the page title and on the progress indicator.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show label', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Show label', 'fundkit-fundraising-campaigns' ) }
                         checked={ showTitle }
                         onChange={ ( v ) => setAttributes( { showTitle: v } ) }
-                        help={ __( 'Off hides the label on the donor form. The progress indicator still uses it for screen-reader names.', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Off hides the label on the donor form. The progress indicator still uses it for screen-reader names.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
             </InspectorControls>
             <div { ...blockProps }>
-                <div className="giveflow-block-preview__step-meta">
+                <div className="fundkit-block-preview__step-meta">
                     { sprintf(
                         /* translators: %1$d: current step number. %2$d: total number of steps. */
-                        __( 'Step %1$d of %2$d', 'giveflow-fundraising-campaigns' ),
+                        __( 'Step %1$d of %2$d', 'fundkit-fundraising-campaigns' ),
                         index + 1,
                         total
                     ) }
@@ -58,16 +58,16 @@ function Edit( { attributes, setAttributes, clientId } ) {
                 { showTitle && (
                     <RichText
                         tagName="h3"
-                        className="giveflow-block-preview__step-title"
+                        className="fundkit-block-preview__step-title"
                         value={ title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Untitled step', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'Untitled step', 'fundkit-fundraising-campaigns' ) }
                         allowedFormats={ [] }
                     />
                 ) }
                 { childCount === 0 && (
                     <Notice status="warning" isDismissible={ false }>
-                        { __( 'This step is empty. Add fields or content, or remove the step, so donors do not land on a blank page.', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'This step is empty. Add fields or content, or remove the step, so donors do not land on a blank page.', 'fundkit-fundraising-campaigns' ) }
                     </Notice>
                 ) }
                 <InnerBlocks
@@ -81,11 +81,11 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Step', 'giveflow-fundraising-campaigns' ),
-        description: __( 'One page inside a Steps wizard.', 'giveflow-fundraising-campaigns' ),
-        category:    'giveflow-content',
+        title:       __( 'Step', 'fundkit-fundraising-campaigns' ),
+        description: __( 'One page inside a Steps wizard.', 'fundkit-fundraising-campaigns' ),
+        category:    'fundkit-content',
         icon:        BlockIcons[ 'step' ],
-        parent:      [ 'giveflow/steps' ],
+        parent:      [ 'fundkit/steps' ],
         supports:    { html: false, anchor: false, inserter: false },
         attributes: {
             title:     { type: 'string',  default: '' },

@@ -1,4 +1,4 @@
-# GiveFlow
+# FundKit
 
 [![PHPUnit](https://github.com/givefloworg/giveflow/actions/workflows/phpunit.yml/badge.svg)](https://github.com/givefloworg/giveflow/actions/workflows/phpunit.yml)
 [![e2e](https://github.com/givefloworg/giveflow/actions/workflows/e2e.yml/badge.svg)](https://github.com/givefloworg/giveflow/actions/workflows/e2e.yml)
@@ -8,7 +8,7 @@
 
 ### A fundraising platform for WordPress
 
-GiveFlow gives an organization the whole fundraising stack in one plugin: a
+FundKit gives an organization the whole fundraising stack in one plugin: a
 block-based donation form builder, one-time and recurring giving, campaigns and
 funds, encrypted donor records with a self-service portal, receipts, and
 advanced reporting.
@@ -26,7 +26,7 @@ advanced reporting.
 
 ```bash
 git clone https://github.com/givefloworg/giveflow.git
-cd giveflow
+cd fundkit
 composer install
 npm install
 npm run build
@@ -50,18 +50,18 @@ npm run build
 PHP tests need a WordPress test library and a throwaway database, set up once per
 machine. See [TESTING.md](TESTING.md).
 
-## Extending GiveFlow
+## Extending FundKit
 
-GiveFlow is built to be extended by other plugins, and uses its own seams to do it:
+FundKit is built to be extended by other plugins, and uses its own seams to do it:
 
-- **Modules.** A plugin registers on `giveflow.modules.register` with an id,
+- **Modules.** A plugin registers on `fundkit.modules.register` with an id,
   version, dependencies and migrations, and is booted in dependency order.
-- **Settings tabs.** `giveflow.settings.groups` adds a server-side settings group;
-  `window.giveflow.tabs.register( 'settings', ... )` mounts the panel that edits it.
+- **Settings tabs.** `fundkit.settings.groups` adds a server-side settings group;
+  `window.fundkit.tabs.register( 'settings', ... )` mounts the panel that edits it.
 - **Form fields and gateways.** New donation-form blocks and new payment
   gateways register through the same registries the built-in ones use.
-- **Commands.** `giveflow.commands.register` adds a capability-gated, schema-checked
-  action, which also becomes available to anything driving GiveFlow programmatically.
+- **Commands.** `fundkit.commands.register` adds a capability-gated, schema-checked
+  action, which also becomes available to anything driving FundKit programmatically.
 
 Persistence goes through [Queryable](https://github.com/givefloworg/queryable), a
 small first-party query builder and schema tool. Models declare their own schema

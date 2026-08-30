@@ -1,11 +1,11 @@
 {
-    "name": "giveflow/giveflow",
+    "name": "fundkit/fundkit",
     "description": "Donation platform for WordPress",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "GiveFlow"
+            "name": "FundKit"
         }
     ],
     "require": {
@@ -27,12 +27,12 @@
     },
     "autoload": {
         "psr-4": {
-            "GiveFlow\\": "src/"
+            "FundKit\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "GiveFlow\\Tests\\": "tests/"
+            "FundKit\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -63,9 +63,9 @@
     "extra": {
         "strauss": {
             "target_directory": "vendor/vendor-prefixed",
-            "namespace_prefix": "GiveFlow\\Vendor\\",
-            "classmap_prefix": "GiveFlow_Vendor_",
-            "constant_prefix": "GIVEFLOW_VENDOR_",
+            "namespace_prefix": "FundKit\\Vendor\\",
+            "classmap_prefix": "FundKit_Vendor_",
+            "constant_prefix": "FUNDKIT_VENDOR_",
             "packages": [
                 "dompdf/dompdf",
                 "dompdf/php-font-lib",

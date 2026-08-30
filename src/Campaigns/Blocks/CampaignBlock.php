@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Blocks;
+namespace FundKit\Campaigns\Blocks;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\CampaignRepository;
-use GiveFlow\Campaigns\Styling\CampaignStyleVars;
-use GiveFlow\Campaigns\Styling\PageStyle;
-use GiveFlow\Forms\Blocks\Block;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\CampaignRepository;
+use FundKit\Campaigns\Styling\CampaignStyleVars;
+use FundKit\Campaigns\Styling\PageStyle;
+use FundKit\Forms\Blocks\Block;
 
 /**
  * Base for campaign-scoped page blocks. Resolves the campaign via an explicit
- * campaignId attribute or, when 0, falls back to the page's `_giveflow_campaign_id`
+ * campaignId attribute or, when 0, falls back to the page's `_fundkit_campaign_id`
  * post meta.
  *
  * @since 1.0.0
@@ -97,7 +97,7 @@ abstract class CampaignBlock implements Block
         if ($id === 0) {
             global $post;
             if ($post instanceof \WP_Post) {
-                $id = (int) get_post_meta($post->ID, '_giveflow_campaign_id', true);
+                $id = (int) get_post_meta($post->ID, '_fundkit_campaign_id', true);
             }
         }
         return $id > 0 ? $this->campaigns->findRenderable($id) : null;
@@ -123,19 +123,19 @@ abstract class CampaignBlock implements Block
         if ($id === 0) {
             global $post;
             if ($post instanceof \WP_Post) {
-                $id = (int) get_post_meta($post->ID, '_giveflow_campaign_id', true);
+                $id = (int) get_post_meta($post->ID, '_fundkit_campaign_id', true);
             }
         }
 
         $bound = $id > 0 ? $this->campaigns->findById($id) : null;
         $message = $bound === null
-            ? __('This block is not bound to a campaign. Pick one in the block sidebar.', 'giveflow-fundraising-campaigns')
+            ? __('This block is not bound to a campaign. Pick one in the block sidebar.', 'fundkit-fundraising-campaigns')
             : sprintf(
                 /* translators: %s: the campaign's status, e.g. "draft". */
-                __('This campaign is %s, so this block is hidden from visitors. Publish the campaign to show it.', 'giveflow-fundraising-campaigns'),
+                __('This campaign is %s, so this block is hidden from visitors. Publish the campaign to show it.', 'fundkit-fundraising-campaigns'),
                 (string) $bound->status
             );
 
-        return '<div class="giveflow-block-notice">' . esc_html($message) . '</div>';
+        return '<div class="fundkit-block-notice">' . esc_html($message) . '</div>';
     }
 }

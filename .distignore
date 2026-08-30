@@ -50,7 +50,7 @@ composer.lock
 /bin
 
 /vendor/dompdf
-/vendor/giveflow
+/vendor/fundkit
 /vendor/masterminds
 /vendor/sabberworm
 /vendor/phpunit

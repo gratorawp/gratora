@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Styling;
+namespace FundKit\Campaigns\Styling;
 
-use GiveFlow\Campaigns\Campaign;
+use FundKit\Campaigns\Campaign;
 
 /**
  * A campaign's style is a map of 26 tokens, not one color. This emits the
@@ -35,7 +35,7 @@ final class CampaignStyleVars
 
         $tokens = (new CampaignStyleResolver())->resolveForCampaign($campaign);
 
-        // resolveForCampaign applies giveflow.campaign_style.tokens after merging,
+        // resolveForCampaign applies fundkit.campaign_style.tokens after merging,
         // so whatever a filter returned has not been through the allowlist.
         // These values land verbatim in CSS, where a stray ; or } escapes the
         // declaration, so sanitize once more rather than trusting the filter.
@@ -53,7 +53,7 @@ final class CampaignStyleVars
         // Derived, not authored: nothing in the catalogue knows what the accent
         // is dark enough to need. Appended last so a filter cannot leave a
         // filled panel reversing white out of a pale accent.
-        $css .= AccentInk::declarationsFor((string) ($tokens['giveflow-accent'] ?? ''));
+        $css .= AccentInk::declarationsFor((string) ($tokens['fundkit-accent'] ?? ''));
         $css .= self::coverImage($campaign);
 
         return self::$cache[$id] = $css;
@@ -83,7 +83,7 @@ final class CampaignStyleVars
 
         // A url() token, not a bare address: the stylesheet uses it directly and
         // the parentheses are what keep a stray one from ending the declaration.
-        return '--giveflow-cover-image:url(' . esc_url_raw($url) . ');';
+        return '--fundkit-cover-image:url(' . esc_url_raw($url) . ');';
     }
 
     /**

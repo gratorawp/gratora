@@ -7,7 +7,7 @@ export default function DonorCard( { donor, donationName, isAnonymous, onOpenDon
         return (
             <div className="dd-card">
                 <div className="dd-card__body">
-                    <p className="dd-empty">{ __( 'Anonymous donor: name and contact information were not collected.', 'giveflow-fundraising-campaigns' ) }</p>
+                    <p className="dd-empty">{ __( 'Anonymous donor: name and contact information were not collected.', 'fundkit-fundraising-campaigns' ) }</p>
                 </div>
             </div>
         );
@@ -24,7 +24,7 @@ export default function DonorCard( { donor, donationName, isAnonymous, onOpenDon
                         <div className="dd-donor-row__name">{ donor.name }</div>
                         { donationName && donationName !== donor.name && (
                             <div className="dd-donor-row__lifetime">
-                                { sprintf( /* translators: %s: donor-provided name */ __( 'Given as "%s" on this donation', 'giveflow-fundraising-campaigns' ), donationName ) }
+                                { sprintf( /* translators: %s: donor-provided name */ __( 'Given as "%s" on this donation', 'fundkit-fundraising-campaigns' ), donationName ) }
                             </div>
                         ) }
                         { donor.email && (
@@ -40,12 +40,12 @@ export default function DonorCard( { donor, donationName, isAnonymous, onOpenDon
                             { lifetime.count > 0
                                 ? sprintf(
                                     /* translators: 1: donation count, 2: lifetime amount, 3: first donation date */
-                                    __( '%1$s donations · %2$s lifetime · first donation %3$s', 'giveflow-fundraising-campaigns' ),
+                                    __( '%1$s donations · %2$s lifetime · first donation %3$s', 'fundkit-fundraising-campaigns' ),
                                     lifetime.count.toLocaleString(),
                                     formatAmount( lifetime.total_cents ),
                                     formatDate( donor.first_donation_at )
                                 )
-                                : __( 'First donation from this donor', 'giveflow-fundraising-campaigns' ) }
+                                : __( 'First donation from this donor', 'fundkit-fundraising-campaigns' ) }
                         </div>
                     </div>
                     <button
@@ -53,7 +53,7 @@ export default function DonorCard( { donor, donationName, isAnonymous, onOpenDon
                         className="dd-donor-row__link"
                         onClick={ () => onOpenDonor?.( donor.id ) }
                     >
-                        { __( 'Open donor →', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Open donor →', 'fundkit-fundraising-campaigns' ) }
                     </button>
                 </div>
             </div>

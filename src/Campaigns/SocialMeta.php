@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns;
+namespace FundKit\Campaigns;
 
-use GiveFlow\Foundation\Hooks\HookProvider;
+use FundKit\Foundation\Hooks\HookProvider;
 
 /**
  * Prints Open Graph + Twitter card meta on a campaign's main page so shared
  * links unfurl with the campaign title, summary, and image. Add-ons reshape
- * the tag set per route via the giveflow.social_meta filter (P2P swaps in the
+ * the tag set per route via the fundkit.social_meta filter (P2P swaps in the
  * fundraiser's or team's own meta). A detected SEO plugin owns social meta,
- * so we stand down unless giveflow.social_meta.enabled opts back in.
+ * so we stand down unless fundkit.social_meta.enabled opts back in.
  *
  * @since 1.0.0
  */
@@ -42,7 +42,7 @@ final class SocialMeta extends HookProvider
         }
 
         $pageId = get_queried_object_id();
-        $tags   = apply_filters('giveflow.social_meta', $this->tagsFor($campaign, $pageId), [
+        $tags   = apply_filters('fundkit.social_meta', $this->tagsFor($campaign, $pageId), [
             'campaign' => $campaign,
             'page_id'  => $pageId,
         ]);
@@ -118,10 +118,10 @@ final class SocialMeta extends HookProvider
 
     /**
      * The campaign whose MAIN page is being viewed. Layout subpages (P2P
-     * fundraiser/team/start layouts) carry _giveflow_campaign_id too, so the page
+     * fundraiser/team/start layouts) carry _fundkit_campaign_id too, so the page
      * id must also equal the campaign's own page_id. Virtual add-on routes
      * (fundraiser/team) resolve to the campaign page and pass this gate; the
-     * giveflow.social_meta filter then reshapes the tags for them.
+     * fundkit.social_meta filter then reshapes the tags for them.
      *
      * @since 1.0.0
      */
@@ -134,7 +134,7 @@ final class SocialMeta extends HookProvider
         if ($pageId <= 0) {
             return null;
         }
-        $campaignId = (int) get_post_meta($pageId, '_giveflow_campaign_id', true);
+        $campaignId = (int) get_post_meta($pageId, '_fundkit_campaign_id', true);
         if ($campaignId <= 0) {
             return null;
         }
@@ -152,7 +152,7 @@ final class SocialMeta extends HookProvider
             || class_exists('RankMath')
             || defined('AIOSEO_VERSION')
             || defined('SEOPRESS_VERSION');
-        return (bool) apply_filters('giveflow.social_meta.enabled', ! $seoActive);
+        return (bool) apply_filters('fundkit.social_meta.enabled', ! $seoActive);
     }
 
     /**

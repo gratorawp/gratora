@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Helpers;
+namespace FundKit\Foundation\Helpers;
 
 /**
  * CSV helpers with formula-injection protection.

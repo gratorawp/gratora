@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Foundation\Helpers\View;
 
 /**
  * The numbers come from the donor's own choices, so only the Preact runtime can
@@ -17,7 +17,7 @@ final class DonationSummaryBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/donation-summary';
+        return 'fundkit/donation-summary';
     }
 
     /** @since 1.0.0 */

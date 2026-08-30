@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Foundation\Helpers\View;
 
 /** @since 1.0.0 */
 final class SubmitButtonBlock implements Block
@@ -12,7 +12,7 @@ final class SubmitButtonBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/submit-button';
+        return 'fundkit/submit-button';
     }
 
     /** @since 1.0.0 */
@@ -33,7 +33,7 @@ final class SubmitButtonBlock implements Block
         }
 
         return View::loadRelative(__DIR__, 'views/submit-button', [
-            'label' => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'giveflow-fundraising-campaigns'),
+            'label' => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'fundkit-fundraising-campaigns'),
             'align' => $align,
         ]);
     }

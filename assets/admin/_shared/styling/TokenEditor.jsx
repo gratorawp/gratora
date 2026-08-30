@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/styling/TokenEditor';
+export { default } from '@fundkit/ui/styling/TokenEditor';

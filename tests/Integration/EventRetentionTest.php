@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\Event;
-use GiveFlow\Analytics\EventRetention;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Analytics\Event;
+use FundKit\Analytics\EventRetention;
+use FundKit\Foundation\Plugin;
 
 /**
- * EventRetention prunes giveflow_events older than the retention window. The prune
+ * EventRetention prunes fundkit_events older than the retention window. The prune
  * now runs in bounded batches (re-enqueuing while a full batch returns) instead
  * of one unbounded DELETE, but the cutoff semantics must stay the same.
  */
@@ -17,7 +17,7 @@ final class EventRetentionTest extends IntegrationTestCase
 {
     public function test_run_prunes_events_past_the_window_and_keeps_recent(): void
     {
-        update_option('giveflow_privacy', ['event_retention_days' => 730]);
+        update_option('fundkit_privacy', ['event_retention_days' => 730]);
 
         $this->seedEvent('old',    gmdate('Y-m-d H:i:s', time() - 800 * 86400));
         $this->seedEvent('recent', gmdate('Y-m-d H:i:s', time() - 10 * 86400));
@@ -30,7 +30,7 @@ final class EventRetentionTest extends IntegrationTestCase
 
     public function test_zero_retention_disables_pruning(): void
     {
-        update_option('giveflow_privacy', ['event_retention_days' => 0]);
+        update_option('fundkit_privacy', ['event_retention_days' => 0]);
 
         $this->seedEvent('ancient', gmdate('Y-m-d H:i:s', time() - 5000 * 86400));
 
@@ -42,7 +42,7 @@ final class EventRetentionTest extends IntegrationTestCase
     private function retention(): EventRetention
     {
         return new EventRetention(
-            Plugin::instance()->container->get(\GiveFlow\Async\AsyncDispatcher::class)
+            Plugin::instance()->container->get(\FundKit\Async\AsyncDispatcher::class)
         );
     }
 

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\Crypto\Crypto;
+use FundKit\Foundation\Crypto\Crypto;
 
 /**
- * Crypto reads its key from giveflow_system_settings, so it needs the real DB.
+ * Crypto reads its key from fundkit_system_settings, so it needs the real DB.
  * Relocated from the pure-unit suite for that reason.
  */
 final class CryptoTest extends IntegrationTestCase

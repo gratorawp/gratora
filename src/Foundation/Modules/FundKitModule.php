@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Modules;
+namespace FundKit\Foundation\Modules;
 
-use GiveFlow\Foundation\Container\Container;
+use FundKit\Foundation\Container\Container;
 
 /**
  * Implemented by every gateway, integration, add-on, and core.
@@ -12,7 +12,7 @@ use GiveFlow\Foundation\Container\Container;
  *
  * @since 1.0.0
  */
-interface GiveFlowModule
+interface FundKitModule
 {
     /** Distribution tier returned by tier(). */
     public const TIER_CORE = 'core';
@@ -20,7 +20,7 @@ interface GiveFlowModule
     public const TIER_PRO  = 'pro';
 
     /**
-     * Globally-unique identifier, e.g. 'core', 'giveflow-p2p'.
+     * Globally-unique identifier, e.g. 'core', 'fundkit-p2p'.
      *
      * @since 1.0.0
      */
@@ -65,7 +65,7 @@ interface GiveFlowModule
     public function boot(Container $container): void;
 
     /**
-     * @return array<class-string<\GiveFlow\Vendor\Queryable\Model>>
+     * @return array<class-string<\FundKit\Vendor\Queryable\Model>>
      * @since 1.0.0
      */
     public function migrations(): array;

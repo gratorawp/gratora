@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\Stripe\StripeAccount;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\Stripe\StripeAccount;
+use FundKit\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
  * When a donor cancels a recurring plan through the donor portal, the same
- * `giveflow.recurring.cancelled` event the Stripe webhook fires must also fire -
+ * `fundkit.recurring.cancelled` event the Stripe webhook fires must also fire -
  * otherwise the `subscription_cancelled` email stays silent on donor-initiated
  * cancels.
  */
@@ -22,7 +22,7 @@ final class PortalRecurringCancelTest extends IntegrationTestCase
         parent::setUp();
 
         // Stripe gateway must exist so the portal's gateway lookup doesn't no-op.
-        update_option('giveflow_gateway_config', ['test_mode' => true]);
+        update_option('fundkit_gateway_config', ['test_mode' => true]);
         $stripeAcct = Plugin::instance()->container->get(StripeAccount::class);
         $stripeAcct->saveKeys(true, 'sk_test_portal', 'pk_test_seed');
         $stripeAcct->saveKeys(false, 'sk_live_portal', 'pk_live_seed');
@@ -41,17 +41,17 @@ final class PortalRecurringCancelTest extends IntegrationTestCase
         }, 10, 3);
 
         $c       = Plugin::instance()->container;
-        $manager = $c->get(\GiveFlow\Gateways\GatewayManager::class);
+        $manager = $c->get(\FundKit\Gateways\GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \GiveFlow\Gateways\Stripe\StripeGateway(
-                $c->get(\GiveFlow\Gateways\Stripe\StripeApi::class),
-                $c->get(\GiveFlow\Donations\DonationRepository::class),
-                $c->get(\GiveFlow\Donations\DonationService::class),
-                $c->get(\GiveFlow\Gateways\Stripe\StripeAccount::class),
-                $c->get(\GiveFlow\Donors\DonorRepository::class),
-                $c->get(\GiveFlow\Donors\DonorService::class),
-                $c->get(\GiveFlow\Foundation\Time\Clock::class),
-                $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
+            $manager->register(new \FundKit\Gateways\Stripe\StripeGateway(
+                $c->get(\FundKit\Gateways\Stripe\StripeApi::class),
+                $c->get(\FundKit\Donations\DonationRepository::class),
+                $c->get(\FundKit\Donations\DonationService::class),
+                $c->get(\FundKit\Gateways\Stripe\StripeAccount::class),
+                $c->get(\FundKit\Donors\DonorRepository::class),
+                $c->get(\FundKit\Donors\DonorService::class),
+                $c->get(\FundKit\Foundation\Time\Clock::class),
+                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
             ));
         }
     }
@@ -59,7 +59,7 @@ final class PortalRecurringCancelTest extends IntegrationTestCase
     public function test_donor_initiated_cancel_fires_canonical_event_and_sends_email(): void
     {
         $donor = Plugin::instance()->container
-            ->get(\GiveFlow\Donors\DonorService::class)
+            ->get(\FundKit\Donors\DonorService::class)
             ->findOrCreate('cancel-tester@example.com', ['first_name' => 'Cancel', 'last_name' => 'Tester']);
 
         $plan = $this->seedPlan((int) $donor->id);
@@ -68,20 +68,20 @@ final class PortalRecurringCancelTest extends IntegrationTestCase
         $mails        = $this->captureMails();
         $eventFired   = false;
         $reasonFromEvent = null;
-        add_action('giveflow.recurring.cancelled', function ($plan, $reason) use (&$eventFired, &$reasonFromEvent): void {
+        add_action('fundkit.recurring.cancelled', function ($plan, $reason) use (&$eventFired, &$reasonFromEvent): void {
             $eventFired = true;
             $reasonFromEvent = $reason;
         }, 10, 2);
 
         try {
-            $req = new WP_REST_Request('POST', "/giveflow/v1/portal/recurring/{$plan->id}/action");
+            $req = new WP_REST_Request('POST', "/fundkit/v1/portal/recurring/{$plan->id}/action");
             $req->set_header('content-type', 'application/json');
-            $req->set_header('X-GiveFlow-Csrf', $csrf);
+            $req->set_header('X-FundKit-Csrf', $csrf);
             $req->set_body((string) wp_json_encode(['action' => 'cancel', 'reason' => 'too expensive']));
             $res = rest_do_request($req);
             $this->assertSame(200, $res->get_status(), 'cancel succeeds: ' . wp_json_encode($res->get_data()));
 
-            $this->assertTrue($eventFired, 'giveflow.recurring.cancelled fires from the donor portal');
+            $this->assertTrue($eventFired, 'fundkit.recurring.cancelled fires from the donor portal');
             $this->assertSame('too expensive', $reasonFromEvent);
 
             $cancellationMail = $this->findMailBySubject($mails, 'cancelled');
@@ -91,7 +91,7 @@ final class PortalRecurringCancelTest extends IntegrationTestCase
             $this->assertSame('cancelled', $fresh->status);
             $this->assertSame('too expensive', $fresh->cancellation_reason);
         } finally {
-            unset($_COOKIE['giveflow_donor_session']);
+            unset($_COOKIE['fundkit_donor_session']);
         }
     }
 
@@ -122,7 +122,7 @@ final class PortalRecurringCancelTest extends IntegrationTestCase
         $sid  = bin2hex(random_bytes(32));
         $csrf = bin2hex(random_bytes(16));
         $sid = $this->portalSession($donorId, $csrf);
-        $_COOKIE['giveflow_donor_session'] = $sid;
+        $_COOKIE['fundkit_donor_session'] = $sid;
         return $csrf;
     }
 

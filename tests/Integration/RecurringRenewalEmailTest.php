@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Campaigns\Campaign;
+use FundKit\Donations\Donation;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Settings\SettingsService;
 
 /**
  * The renewal notice goes out while the receipt row is still queued, so it can
@@ -55,7 +55,7 @@ final class RecurringRenewalEmailTest extends IntegrationTestCase
         $plan->save();
 
         $donation = Donation::make();
-        $donation->reference        = 'GIVEFLOW-RENEW-' . strtoupper(bin2hex(random_bytes(3)));
+        $donation->reference        = 'FUNDKIT-RENEW-' . strtoupper(bin2hex(random_bytes(3)));
         $donation->donor_id         = (int) $donor->id;
         $donation->campaign_id      = (int) $campaign->id;
         $donation->amount_cents     = 2500;
@@ -69,7 +69,7 @@ final class RecurringRenewalEmailTest extends IntegrationTestCase
         $donation->updated_at       = $now;
         $donation->save();
 
-        do_action('giveflow.recurring.renewed', $donation, $plan);
+        do_action('fundkit.recurring.renewed', $donation, $plan);
 
         $this->assertCount(1, $sent);
         $body = (string) $sent[0]['body'];

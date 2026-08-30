@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Foundation\Commands;
+namespace FundKit\Tests\Unit\Foundation\Commands;
 
-use GiveFlow\Foundation\Commands\Command;
-use GiveFlow\Foundation\Commands\CommandContext;
-use GiveFlow\Foundation\Commands\CommandError;
-use GiveFlow\Foundation\Commands\CommandResult;
+use FundKit\Foundation\Commands\Command;
+use FundKit\Foundation\Commands\CommandContext;
+use FundKit\Foundation\Commands\CommandError;
+use FundKit\Foundation\Commands\CommandResult;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 

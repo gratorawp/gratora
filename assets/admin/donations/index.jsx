@@ -1,4 +1,4 @@
-// GiveFlow admin: Donations. Two views: list + detail, routed via URLSearchParams.
+// FundKit admin: Donations. Two views: list + detail, routed via URLSearchParams.
 
 import { createRoot } from '@wordpress/element';
 
@@ -19,7 +19,7 @@ function App() {
 }
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'giveflow-admin-donations' );
+    const root = document.getElementById( 'fundkit-admin-donations' );
     if ( ! root ) return;
     createRoot( root ).render( <><App /><Toaster /></> );
 } );

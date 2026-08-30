@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Foundation\Config\SystemSetting;
-use GiveFlow\Foundation\Identity\IdentityHasher;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Foundation\Config\SystemSetting;
+use FundKit\Foundation\Identity\IdentityHasher;
 
 /**
  * IdentityHasher takes an AsyncDispatcher and reads its pepper/salt from
- * giveflow_system_settings, so it needs the real DB. Relocated from the pure-unit
+ * fundkit_system_settings, so it needs the real DB. Relocated from the pure-unit
  * suite for that reason.
  */
 final class IdentityHasherTest extends IntegrationTestCase

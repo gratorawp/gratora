@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms;
+namespace FundKit\Forms;
 
 /**
  * Server mirror of assets/donation-form/state/conditions.js so validation and

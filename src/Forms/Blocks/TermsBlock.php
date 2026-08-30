@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Foundation\Helpers\View;
 
 /**
- * Acceptance is recorded in giveflow_consents under the `terms` purpose along with
+ * Acceptance is recorded in fundkit_consents under the `terms` purpose along with
  * the text revision, so what a donor agreed to survives later edits to the
  * wording. The block ships no default wording: terms are the org's to write.
  *
@@ -20,7 +20,7 @@ final class TermsBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/terms';
+        return 'fundkit/terms';
     }
 
     /** @since 1.0.0 */

@@ -15,27 +15,27 @@ defined('ABSPATH') || exit;
 $isAmount = $goalType === 'amount';
 $fmt = static function (int $v) use ($isAmount, $currency): string {
     return $isAmount
-        ? \GiveFlow\Foundation\Helpers\Money::compact($v, $currency)
+        ? \FundKit\Foundation\Helpers\Money::compact($v, $currency)
         : (string) number_format_i18n($v);
 };
 $unitLabel = match ($goalType) {
-    'donations' => _n('donation', 'donations', $target, 'giveflow-fundraising-campaigns'),
-    'donors'    => _n('donor', 'donors', $target, 'giveflow-fundraising-campaigns'),
+    'donations' => _n('donation', 'donations', $target, 'fundkit-fundraising-campaigns'),
+    'donors'    => _n('donor', 'donors', $target, 'fundkit-fundraising-campaigns'),
     default     => '',
 };
 ?>
-<div class="giveflow-block giveflow-block--goal giveflow-goal">
+<div class="fundkit-block fundkit-block--goal fundkit-goal">
     <?php if ($showAmount): ?>
-        <div class="giveflow-goal__amount">
+        <div class="fundkit-goal__amount">
             <strong><?php echo esc_html($fmt($current)); ?></strong>
             <span><?php
             if ($isAmount) {
                 /* translators: %s formatted goal amount with currency */
-                printf(esc_html__('raised of %s goal', 'giveflow-fundraising-campaigns'), esc_html($fmt($target)));
+                printf(esc_html__('raised of %s goal', 'fundkit-fundraising-campaigns'), esc_html($fmt($target)));
             } else {
                 printf(
                     /* translators: 1: target number, 2: unit label e.g. donations */
-                    esc_html__('of %1$s %2$s goal', 'giveflow-fundraising-campaigns'),
+                    esc_html__('of %1$s %2$s goal', 'fundkit-fundraising-campaigns'),
                     esc_html($fmt($target)),
                     esc_html($unitLabel)
                 );
@@ -44,27 +44,27 @@ $unitLabel = match ($goalType) {
         </div>
     <?php endif; ?>
 
-    <div class="giveflow-goal__bar" role="progressbar"
+    <div class="fundkit-goal__bar" role="progressbar"
          aria-valuemin="0" aria-valuemax="100" aria-valuenow="<?php echo esc_attr((string) $percent); ?>">
-        <div class="giveflow-goal__fill" style="width:<?php echo esc_attr((string) $percent); ?>%"></div>
+        <div class="fundkit-goal__fill" style="width:<?php echo esc_attr((string) $percent); ?>%"></div>
     </div>
 
-    <div class="giveflow-goal__meta">
+    <div class="fundkit-goal__meta">
         <?php if ($showDonors && $donorsCount > 0): ?>
-            <span class="giveflow-goal__donors">
+            <span class="fundkit-goal__donors">
                 <?php
                 /* translators: %d number of donors */
-                printf(esc_html(_n('%d donor', '%d donors', $donorsCount, 'giveflow-fundraising-campaigns')), (int) $donorsCount);
+                printf(esc_html(_n('%d donor', '%d donors', $donorsCount, 'fundkit-fundraising-campaigns')), (int) $donorsCount);
                 ?>
             </span>
         <?php endif; ?>
 
         <?php if ($showDeadline && $endsAt): ?>
-            <span class="giveflow-goal__deadline">
+            <span class="fundkit-goal__deadline">
                 <?php
                 $days = max(0, (int) floor((strtotime((string) $endsAt) - time()) / 86400));
                 /* translators: %d days remaining */
-                printf(esc_html(_n('%d day left', '%d days left', $days, 'giveflow-fundraising-campaigns')), (int) $days);
+                printf(esc_html(_n('%d day left', '%d days left', $days, 'fundkit-fundraising-campaigns')), (int) $days);
                 ?>
             </span>
         <?php endif; ?>

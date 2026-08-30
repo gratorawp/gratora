@@ -2,11 +2,11 @@ import { test, expect } from '../fixtures/donor-form';
 
 test.describe('payment-gateways block', () => {
     test('renders the offline option', async ({ donor }) => {
-        const offline = donor.form.locator('.giveflow-form__gateway input[type="radio"][value="offline"]');
+        const offline = donor.form.locator('.fundkit-form__gateway input[type="radio"][value="offline"]');
         // Hidden when only one gateway resolves (auto-selected); accept either.
         const visible = await offline.isVisible().catch(() => false);
         if (! visible) {
-            const hidden = donor.form.locator('input[type="radio"][name="giveflow-gateway"][value="offline"]');
+            const hidden = donor.form.locator('input[type="radio"][name="fundkit-gateway"][value="offline"]');
             expect(await hidden.count()).toBeGreaterThanOrEqual(0);
         }
     });

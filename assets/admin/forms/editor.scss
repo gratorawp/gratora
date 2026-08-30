@@ -1,39 +1,39 @@
 // Fullscreen chrome-hiding lives server-side in
 // FormsPage::maybePrintFullscreenStyles, inlined in <head>.
 
-@import '@giveflow/ui/scss/tokens';
+@import '@fundkit/ui/scss/tokens';
 @import '../_shared/admin-base';
 
-@import '@giveflow/ui/scss/components/buttons';
-@import '@giveflow/ui/scss/components/form';
-@import '@giveflow/ui/scss/components/switch';
-@import '@giveflow/ui/scss/components/collapsible';
-@import '@giveflow/ui/scss/components/segmented';
-@import '@giveflow/ui/scss/components/slider';
-@import '@giveflow/ui/scss/components/number-with-unit';
-@import '@giveflow/ui/scss/components/color-input';
-@import '@giveflow/ui/scss/components/field';
-@import '@giveflow/ui/scss/components/box-control';
-@import '@giveflow/ui/scss/components/amount-input';
-@import '@giveflow/ui/scss/components/notice';
-@import '@giveflow/ui/scss/components/toast';
+@import '@fundkit/ui/scss/components/buttons';
+@import '@fundkit/ui/scss/components/form';
+@import '@fundkit/ui/scss/components/switch';
+@import '@fundkit/ui/scss/components/collapsible';
+@import '@fundkit/ui/scss/components/segmented';
+@import '@fundkit/ui/scss/components/slider';
+@import '@fundkit/ui/scss/components/number-with-unit';
+@import '@fundkit/ui/scss/components/color-input';
+@import '@fundkit/ui/scss/components/field';
+@import '@fundkit/ui/scss/components/box-control';
+@import '@fundkit/ui/scss/components/amount-input';
+@import '@fundkit/ui/scss/components/notice';
+@import '@fundkit/ui/scss/components/toast';
 @import '../_shared/components/template-picker';
 
 $header-height: 56px;
 $sidebar-width: 300px;
 
-.giveflow-form-editor {
+.fundkit-form-editor {
     margin: 0;
     height: 100%;
     min-height: 100vh;
     background: #fff;
     color: $text;
 
-    // Mirrors runtime.scss: with no explicitly paired --giveflow-accent-soft the
-    // preview derives one from --giveflow-accent, as the published form does,
+    // Mirrors runtime.scss: with no explicitly paired --fundkit-accent-soft the
+    // preview derives one from --fundkit-accent, as the published form does,
     // rather than showing a static tint.
-    --giveflow-accent-soft: #{$accent-soft};
-    --giveflow-accent-soft: color-mix(in srgb, var(--giveflow-accent) 12%, #fff);
+    --fundkit-accent-soft: #{$accent-soft};
+    --fundkit-accent-soft: color-mix(in srgb, var(--fundkit-accent) 12%, #fff);
 
     &__loading {
         padding: 40px;
@@ -55,7 +55,7 @@ $sidebar-width: 300px;
     }
 
     &__sheet {
-        max-width: var( --giveflow-editor-sheet-width, 540px );
+        max-width: var( --fundkit-editor-sheet-width, 540px );
         margin: 0 auto;
         background: #fff;
         border-radius: 14px;
@@ -171,7 +171,7 @@ $sidebar-width: 300px;
         background: #fff;
         border-bottom: 1px solid $border-soft;
 
-        .components-button.giveflow-form-editor__device {
+        .components-button.fundkit-form-editor__device {
             width: 32px;
             height: 32px;
             min-width: 32px;
@@ -259,13 +259,13 @@ $sidebar-width: 300px;
 
 // WP admin chrome is hidden in FormsPage::maybePrintFullscreenStyles, so the
 // skeleton reserves no space for it.
-.giveflow-form-editor .interface-interface-skeleton {
+.fundkit-form-editor .interface-interface-skeleton {
     position: fixed;
     inset: 0;
     height: auto;
 }
 
-// Root-level scope, not .giveflow-form-editor, so it also catches popovers that
+// Root-level scope, not .fundkit-form-editor, so it also catches popovers that
 // portal out of the editor. Safe because this stylesheet is only enqueued on
 // the form editor page.
 :root {
@@ -281,7 +281,7 @@ $sidebar-width: 300px;
     --wp-components-color-accent-darker-20: #{$accent-dark};
 }
 
-.giveflow-form-editor {
+.fundkit-form-editor {
     .block-editor-block-list__block.is-selected,
     .block-editor-block-list__block.is-hovered,
     .block-editor-block-list__block.has-child-selected {
@@ -298,7 +298,7 @@ $sidebar-width: 300px;
     }
 }
 
-// The between-blocks inserter portals outside .giveflow-form-editor, so these
+// The between-blocks inserter portals outside .fundkit-form-editor, so these
 // selectors are unscoped.
 .block-editor-block-list__insertion-point-indicator {
     background: #{$accent} !important;
@@ -340,22 +340,22 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-form-editor .interface-interface-skeleton__sidebar {
+.fundkit-form-editor .interface-interface-skeleton__sidebar {
     width: $sidebar-width;
     border-left: 1px solid $border-soft;
 }
 
-.giveflow-form-editor .interface-interface-skeleton__secondary-sidebar {
+.fundkit-form-editor .interface-interface-skeleton__secondary-sidebar {
     // The skeleton animates an inline width while a panel opens, then drops it,
     // and core's base width:auto collapses around the absolutely-positioned
     // content wrapper. This is what holds the rail open. Keep in step with
-    // .giveflow-form-editor__secondary below.
+    // .fundkit-form-editor__secondary below.
     width: 350px;
     border-right: 1px solid $border-soft;
     background: #fff;
 }
 
-.giveflow-form-editor__secondary {
+.fundkit-form-editor__secondary {
     // The skeleton's animation wrapper is width:fit-content, so without an
     // explicit width the panel shrink-wraps to its widest label. 350px matches
     // the inserter's intrinsic width, so the rail does not jump when toggling.
@@ -435,7 +435,7 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-editor-header {
+.fundkit-editor-header {
     height: $header-height;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
@@ -671,7 +671,7 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-form-sidebar {
+.fundkit-form-sidebar {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -751,7 +751,7 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-readiness {
+.fundkit-readiness {
     &__summary {
         display: flex;
         align-items: center;
@@ -788,9 +788,9 @@ $sidebar-width: 300px;
 
         &:last-child { border-bottom: 0; }
 
-        &.is-pass  .giveflow-readiness__icon { color: #15803d; }
-        &.is-warn  .giveflow-readiness__icon { color: #b45309; }
-        &.is-fail  .giveflow-readiness__icon { color: #b91c1c; }
+        &.is-pass  .fundkit-readiness__icon { color: #15803d; }
+        &.is-warn  .fundkit-readiness__icon { color: #b45309; }
+        &.is-fail  .fundkit-readiness__icon { color: #b91c1c; }
     }
 
     &__icon {
@@ -829,7 +829,7 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-amounts-head {
+.fundkit-amounts-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -844,8 +844,8 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-amounts-add,
-.giveflow-preset-row__remove {
+.fundkit-amounts-add,
+.fundkit-preset-row__remove {
     flex: 0 0 auto;
     width: 24px;
     height: 24px;
@@ -861,14 +861,14 @@ $sidebar-width: 300px;
     justify-content: center;
 }
 
-.giveflow-amounts-add {
+.fundkit-amounts-add {
     color: $text;
 
     &:hover:not( :disabled ) { background: $bg-soft; }
     &:disabled { opacity: .4; cursor: default; }
 }
 
-.giveflow-preset-row {
+.fundkit-preset-row {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -898,7 +898,7 @@ $sidebar-width: 300px;
         flex: 1;
         min-width: 0;
 
-        .giveflow-amount { width: 100%; }
+        .fundkit-amount { width: 100%; }
     }
 
     &__remove:hover:not( :disabled ) {
@@ -914,7 +914,7 @@ $sidebar-width: 300px;
 
 }
 
-.giveflow-checkbox-row {
+.fundkit-checkbox-row {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -928,7 +928,7 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-shadow-grid {
+.fundkit-shadow-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 6px;
@@ -976,7 +976,7 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-sidebar-intro {
+.fundkit-sidebar-intro {
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -1015,7 +1015,7 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-form-settings {
+.fundkit-form-settings {
     display: grid;
     grid-template-columns: 240px 1fr;
     gap: 0;
@@ -1112,7 +1112,7 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-sidebar-heading {
+.fundkit-sidebar-heading {
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
@@ -1121,7 +1121,7 @@ $sidebar-width: 300px;
     margin-top: 8px;
 }
 
-.giveflow-sidebar-toggle {
+.fundkit-sidebar-toggle {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1129,7 +1129,7 @@ $sidebar-width: 300px;
     cursor: pointer;
 }
 
-.giveflow-sidebar-list {
+.fundkit-sidebar-list {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -1151,7 +1151,7 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-sidebar-check {
+.fundkit-sidebar-check {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1159,7 +1159,7 @@ $sidebar-width: 300px;
     cursor: pointer;
 }
 
-.giveflow-color-field {
+.fundkit-color-field {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -1211,7 +1211,7 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-sidebar-shortcode {
+.fundkit-sidebar-shortcode {
     margin-top: 8px;
     padding: 10px 12px;
     background: #f8fafb;
@@ -1229,7 +1229,7 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-shortcode {
+.fundkit-shortcode {
     display: flex;
     align-items: stretch;
     gap: 6px;
@@ -1257,7 +1257,7 @@ $sidebar-width: 300px;
     }
 }
 
-.giveflow-block-preview {
+.fundkit-block-preview {
     border-radius: 8px;
     padding: 14px 16px;
     background: #fff;
@@ -1531,7 +1531,7 @@ $sidebar-width: 300px;
 
     &__goal-fill {
         height: 100%;
-        background: var(--giveflow-accent, $accent);
+        background: var(--fundkit-accent, $accent);
         border-radius: inherit;
         transition: width .25s ease;
         min-width: 2px;
@@ -1546,17 +1546,17 @@ $sidebar-width: 300px;
 
         & > span:first-child {
             font-weight: 600;
-            color: var(--giveflow-accent, $accent);
+            color: var(--fundkit-accent, $accent);
         }
     }
 }
 
-// WordPress ToggleControl, wearing the GiveFlow switch. Scoped to this editor on
+// WordPress ToggleControl, wearing the FundKit switch. Scoped to this editor on
 // purpose: loading it on enqueue_block_editor_assets would re-skin the toggles
 // of core blocks and every other plugin in every block editor.
 //
 // !important because @wordpress/components ships more specific rules.
-.giveflow-form-editor {
+.fundkit-form-editor {
     .components-form-toggle__track {
         width: 34px !important;
         height: 20px !important;

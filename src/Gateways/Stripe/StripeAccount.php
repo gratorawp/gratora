@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways\Stripe;
+namespace FundKit\Gateways\Stripe;
 
-use GiveFlow\Foundation\Config\SystemSetting;
-use GiveFlow\Foundation\Crypto\Crypto;
+use FundKit\Foundation\Config\SystemSetting;
+use FundKit\Foundation\Crypto\Crypto;
 
 /**
  * The organization's own Stripe API keys, stored per mode.
  *
- * GiveFlow is not a Stripe platform: the org pastes the keys from their own Stripe
+ * FundKit is not a Stripe platform: the org pastes the keys from their own Stripe
  * dashboard and every call is made directly as that account. Secret keys are
  * encrypted at rest and never leave the server; publishable keys are public by
  * design and are handed to the browser to mount the Payment Element.

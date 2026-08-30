@@ -1,1 +1,1 @@
-export * from '@giveflow/ui/widgets/icons';
+export * from '@fundkit/ui/widgets/icons';

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Campaigns\Campaign;
+use FundKit\Donations\Donation;
+use FundKit\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -61,7 +61,7 @@ final class DashboardTestScopeTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function dashboard(?bool $includeTest = null): array
     {
-        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/dashboard');
+        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/dashboard');
         if ($includeTest !== null) {
             $req->set_param('include_test', $includeTest);
         }
@@ -97,7 +97,7 @@ final class DashboardTestScopeTest extends IntegrationTestCase
     {
         $this->donation(true);
 
-        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/dashboard');
+        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/dashboard');
         $req->set_param('include', 'kpis');
         $payload = (array) rest_do_request($req)->get_data();
 

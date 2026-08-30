@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donors;
+namespace FundKit\Donors;
 
 /**
  * Why one donor is on the at-risk list.
@@ -114,15 +114,15 @@ final class AtRiskReason
     public static function labels(): array
     {
         return [
-            self::PLAN_FAILING        => __('Recurring payments failing', 'giveflow-fundraising-campaigns'),
-            self::PLAN_PAUSED         => __('Recurring donation paused', 'giveflow-fundraising-campaigns'),
-            self::PLAN_CANCELLED      => __('Recurring plan cancelled', 'giveflow-fundraising-campaigns'),
-            self::PLAN_ACTIVE         => __('Recurring plan still active', 'giveflow-fundraising-campaigns'),
-            self::FIRST_DONATION_ONLY => __('First donation, never repeated', 'giveflow-fundraising-campaigns'),
-            self::NO_GAP_YET          => __('Not enough giving history to compare', 'giveflow-fundraising-campaigns'),
-            self::WELL_PAST_GAP       => __('Well past their average gap', 'giveflow-fundraising-campaigns'),
-            self::PAST_GAP            => __('Past their average gap', 'giveflow-fundraising-campaigns'),
-            self::WITHIN_GAP          => __('Within their average gap', 'giveflow-fundraising-campaigns'),
+            self::PLAN_FAILING        => __('Recurring payments failing', 'fundkit-fundraising-campaigns'),
+            self::PLAN_PAUSED         => __('Recurring donation paused', 'fundkit-fundraising-campaigns'),
+            self::PLAN_CANCELLED      => __('Recurring plan cancelled', 'fundkit-fundraising-campaigns'),
+            self::PLAN_ACTIVE         => __('Recurring plan still active', 'fundkit-fundraising-campaigns'),
+            self::FIRST_DONATION_ONLY => __('First donation, never repeated', 'fundkit-fundraising-campaigns'),
+            self::NO_GAP_YET          => __('Not enough giving history to compare', 'fundkit-fundraising-campaigns'),
+            self::WELL_PAST_GAP       => __('Well past their average gap', 'fundkit-fundraising-campaigns'),
+            self::PAST_GAP            => __('Past their average gap', 'fundkit-fundraising-campaigns'),
+            self::WITHIN_GAP          => __('Within their average gap', 'fundkit-fundraising-campaigns'),
         ];
     }
 

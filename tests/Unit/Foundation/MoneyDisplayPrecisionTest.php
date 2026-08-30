@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Foundation;
+namespace FundKit\Tests\Unit\Foundation;
 
-use GiveFlow\Foundation\Helpers\Money;
+use FundKit\Foundation\Helpers\Money;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -24,7 +24,7 @@ final class MoneyDisplayPrecisionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $GLOBALS['_giveflow_test_options']['giveflow_currency_locale'] = [
+        $GLOBALS['_fundkit_test_options']['fundkit_currency_locale'] = [
             'default_currency' => 'USD',
             'format'           => ['decimal_places' => 0],
         ];
@@ -37,7 +37,7 @@ final class MoneyDisplayPrecisionTest extends TestCase
 
     protected function tearDown(): void
     {
-        ($GLOBALS['_giveflow_reset_options'])();
+        ($GLOBALS['_fundkit_reset_options'])();
         parent::tearDown();
     }
 

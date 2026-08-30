@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Foundation\Helpers\View;
 
 /**
- * giveflow/divider: a horizontal rule with author-set spacing and line colour.
+ * fundkit/divider: a horizontal rule with author-set spacing and line colour.
  *
  * @since 1.0.0
  */
@@ -16,7 +16,7 @@ final class DividerBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/divider';
+        return 'fundkit/divider';
     }
 
     /** @since 1.0.0 */
@@ -26,7 +26,7 @@ final class DividerBlock implements Block
             'marginTop'    => ['type' => 'number', 'default' => 16],
             'marginBottom' => ['type' => 'number', 'default' => 16],
             'thickness'    => ['type' => 'number', 'default' => 1],
-            // Empty = inherit the form border token (--giveflow-border).
+            // Empty = inherit the form border token (--fundkit-border).
             'color'        => ['type' => 'string', 'default' => ''],
         ];
     }

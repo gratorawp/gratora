@@ -12,11 +12,11 @@ export default function CoverImageCard( { id, url, onChange } ) {
 
     if ( ! url ) {
         return (
-            <div className="giveflow-cover-card" style={ { gridTemplateColumns: '1fr' } }>
+            <div className="fundkit-cover-card" style={ { gridTemplateColumns: '1fr' } }>
                 <div>
-                    <Btn variant="primary" onClick={ pick }>{ __( 'Select an image', 'giveflow-fundraising-campaigns' ) }</Btn>
+                    <Btn variant="primary" onClick={ pick }>{ __( 'Select an image', 'fundkit-fundraising-campaigns' ) }</Btn>
                     <div style={ { marginTop: 8, fontSize: 12, color: '#6b7280' } }>
-                        { __( '1600 × 900 (16:9) recommended.', 'giveflow-fundraising-campaigns' ) }
+                        { __( '1600 × 900 (16:9) recommended.', 'fundkit-fundraising-campaigns' ) }
                     </div>
                 </div>
             </div>
@@ -24,15 +24,15 @@ export default function CoverImageCard( { id, url, onChange } ) {
     }
 
     return (
-        <div className="giveflow-cover-card">
-            <div className="giveflow-cover-card__thumb" style={ { backgroundImage: `url(${ url })` } } />
-            <div className="giveflow-cover-card__meta">
+        <div className="fundkit-cover-card">
+            <div className="fundkit-cover-card__thumb" style={ { backgroundImage: `url(${ url })` } } />
+            <div className="fundkit-cover-card__meta">
                 <AttachmentMeta id={ id } url={ url } />
-                <div className="giveflow-cover-card__actions">
-                    <Btn variant="secondary" size="sm" onClick={ pick }>{ __( 'Replace', 'giveflow-fundraising-campaigns' ) }</Btn>
-                    <Btn variant="ghost" size="sm" onClick={ remove }>{ __( 'Remove', 'giveflow-fundraising-campaigns' ) }</Btn>
+                <div className="fundkit-cover-card__actions">
+                    <Btn variant="secondary" size="sm" onClick={ pick }>{ __( 'Replace', 'fundkit-fundraising-campaigns' ) }</Btn>
+                    <Btn variant="ghost" size="sm" onClick={ remove }>{ __( 'Remove', 'fundkit-fundraising-campaigns' ) }</Btn>
                 </div>
-                <span className="giveflow-cover-card__chip">{ __( 'Cropped on cards · 16:9 expected', 'giveflow-fundraising-campaigns' ) }</span>
+                <span className="fundkit-cover-card__chip">{ __( 'Cropped on cards · 16:9 expected', 'fundkit-fundraising-campaigns' ) }</span>
             </div>
         </div>
     );
@@ -73,11 +73,11 @@ function AttachmentMeta( { id, url } ) {
 
     return (
         <>
-            <strong>{ meta.filename || __( 'Cover image', 'giveflow-fundraising-campaigns' ) }</strong>
+            <strong>{ meta.filename || __( 'Cover image', 'fundkit-fundraising-campaigns' ) }</strong>
             { parts && <>{ parts }<br /></> }
             { meta.uploaded && sprintf(
                 /* translators: %s: relative time, e.g. "12d ago" */
-                __( 'Uploaded %s', 'giveflow-fundraising-campaigns' ),
+                __( 'Uploaded %s', 'fundkit-fundraising-campaigns' ),
                 timeAgo( meta.uploaded ),
             ) }
         </>
@@ -93,12 +93,12 @@ function formatBytes( bytes ) {
 
 function openMediaFrame( { onSelect, currentId } ) {
     if ( ! window.wp?.media ) {
-        notify.error( __( 'Media library not loaded.', 'giveflow-fundraising-campaigns' ) );
+        notify.error( __( 'Media library not loaded.', 'fundkit-fundraising-campaigns' ) );
         return;
     }
     const frame = window.wp.media( {
-        title:    __( 'Select campaign cover image', 'giveflow-fundraising-campaigns' ),
-        button:   { text: __( 'Use this image', 'giveflow-fundraising-campaigns' ) },
+        title:    __( 'Select campaign cover image', 'fundkit-fundraising-campaigns' ),
+        button:   { text: __( 'Use this image', 'fundkit-fundraising-campaigns' ) },
         library:  { type: 'image' },
         multiple: false,
     } );

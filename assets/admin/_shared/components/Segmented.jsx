@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/components/Segmented';
+export { default } from '@fundkit/ui/components/Segmented';

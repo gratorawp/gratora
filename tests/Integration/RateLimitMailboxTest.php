@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\Identity\IdentityHasher;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Foundation\Identity\IdentityHasher;
+use FundKit\Foundation\Plugin;
 
 /**
  * The mailbox an address reaches, used to rate-limit outbound mail.

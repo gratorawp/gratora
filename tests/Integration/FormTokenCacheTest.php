@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\AntiSpamGuard;
-use GiveFlow\Foundation\Config\SystemSetting;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donations\AntiSpamGuard;
+use FundKit\Foundation\Config\SystemSetting;
+use FundKit\Foundation\Plugin;
 
 /**
  * Full-codebase QA Batch 3: the anti-spam form token is a coarse day bucket so

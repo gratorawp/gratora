@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'giveflow/date';
+const NAME = 'fundkit/date';
 
 function slugify( s ) {
     return String( s || '' )
@@ -24,47 +24,47 @@ function Edit( { attributes, setAttributes } ) {
         condition = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--field' } );
+    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--field' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Date', 'giveflow-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Date', 'fundkit-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Field name', 'fundkit-fundraising-campaigns' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugify( v ) } ) }
-                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Required', 'fundkit-fundraising-campaigns' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Minimum date', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Minimum date', 'fundkit-fundraising-campaigns' ) }
                         value={ minDate }
                         onChange={ ( v ) => setAttributes( { minDate: v } ) }
                         placeholder="YYYY-MM-DD"
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Maximum date', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Maximum date', 'fundkit-fundraising-campaigns' ) }
                         value={ maxDate }
                         onChange={ ( v ) => setAttributes( { maxDate: v } ) }
                         placeholder="YYYY-MM-DD"
@@ -79,24 +79,24 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="giveflow-block-preview__label"
+                    className="fundkit-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Date', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'Date', 'fundkit-fundraising-campaigns' ) }
                     allowedFormats={ [] }
                 />
-                { required && <em className="giveflow-block-preview__req" aria-hidden="true">*</em> }
+                { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
                 { helpText !== '' && (
                     <RichText
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', display: 'block', marginTop: 2 } }
                     />
                 ) }
-                <div className="giveflow-block-preview__field">YYYY-MM-DD</div>
+                <div className="fundkit-block-preview__field">YYYY-MM-DD</div>
             </div>
         </>
     );
@@ -105,9 +105,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Date', 'giveflow-fundraising-campaigns' ),
-        description: __( 'Date picker for birthdays, dedication dates, event dates, etc.', 'giveflow-fundraising-campaigns' ),
-        category:   'giveflow-fields',
+        title:      __( 'Date', 'fundkit-fundraising-campaigns' ),
+        description: __( 'Date picker for birthdays, dedication dates, event dates, etc.', 'fundkit-fundraising-campaigns' ),
+        category:   'fundkit-fields',
         icon:       BlockIcons[ 'date' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

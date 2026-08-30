@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest\Admin;
+namespace FundKit\Rest\Admin;
 
-use GiveFlow\Donations\DonationQueries;use GiveFlow\Rest\Paging;
-use GiveFlow\Foundation\Auth\Capabilities;
+use FundKit\Donations\DonationQueries;use FundKit\Rest\Paging;
+use FundKit\Foundation\Auth\Capabilities;
 
-use GiveFlow\Campaigns\CampaignTemplates;
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\CampaignMetricsService;
-use GiveFlow\Campaigns\CampaignRepository;
-use GiveFlow\Campaigns\CampaignService;
-use GiveFlow\Forms\Form;
-use GiveFlow\Funds\Fund;
-use GiveFlow\Recurring\CampaignCancelRecurringJob;
-use GiveFlow\Recurring\RecurringCanceller;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanRepository;
-use GiveFlow\Rest\Schemas\CampaignSchemas;
+use FundKit\Campaigns\CampaignTemplates;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\CampaignMetricsService;
+use FundKit\Campaigns\CampaignRepository;
+use FundKit\Campaigns\CampaignService;
+use FundKit\Forms\Form;
+use FundKit\Funds\Fund;
+use FundKit\Recurring\CampaignCancelRecurringJob;
+use FundKit\Recurring\RecurringCanceller;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanRepository;
+use FundKit\Rest\Schemas\CampaignSchemas;
 use InvalidArgumentException;
 use RuntimeException;
 use WP_Error;
@@ -34,7 +34,7 @@ use WP_REST_Server;
  */
 final class CampaignsController
 {
-    private const NAMESPACE = 'giveflow/v1';
+    private const NAMESPACE = 'fundkit/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -170,7 +170,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('giveflow_not_found', __('Campaign not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
         $summary = $this->plans->liveForCampaign((int) $campaign->id);
         return new WP_REST_Response([
@@ -183,7 +183,7 @@ final class CampaignsController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('giveflow_manage_campaigns');
+        return Capabilities::userCan('fundkit_manage_campaigns');
     }
 
     /** @since 1.0.0 */
@@ -212,7 +212,7 @@ final class CampaignsController
         // These figures read stored rollups, which are live-only by
         // construction, so there is nothing to toggle to. Saying how many test
         // donations are not in them is what stops a zero reading as broken.
-        $response->header('X-GiveFlow-Test-Hidden', (string) DonationQueries::hiddenTestCount());
+        $response->header('X-FundKit-Test-Hidden', (string) DonationQueries::hiddenTestCount());
         $response->header('X-WP-TotalPages', (string) max(1, (int) ceil($result['total'] / max(1, $perPage))));
         return $response;
     }
@@ -222,7 +222,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('giveflow_not_found', __('Campaign not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
         return new WP_REST_Response($this->shapeFull($campaign, (string) ($request['range'] ?? 'all-time')), 200);
     }
@@ -234,9 +234,9 @@ final class CampaignsController
         try {
             $campaign = $this->campaignService->create($body);
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('giveflow_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
         } catch (RuntimeException $e) {
-            return new WP_Error('giveflow_campaign_create_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('fundkit_campaign_create_failed', $e->getMessage(), ['status' => 500]);
         }
         return new WP_REST_Response($this->shapeFull($campaign, 'all-time'), 201);
     }
@@ -246,14 +246,14 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('giveflow_not_found', __('Campaign not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
         $body      = (array) ($request->get_json_params() ?? []);
         $wasActive = $campaign->status !== 'archived';
         try {
             $campaign = $this->campaignService->update($campaign, $body);
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('giveflow_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
         }
 
         // Archiving is non-destructive to subscriptions by default; the admin
@@ -272,7 +272,7 @@ final class CampaignsController
                 ->where('is_test', false)
                 ->count();
 
-            $this->cancelJob->start((int) $campaign->id, __('Campaign archived', 'giveflow-fundraising-campaigns'));
+            $this->cancelJob->start((int) $campaign->id, __('Campaign archived', 'fundkit-fundraising-campaigns'));
 
             $recurringCancel = ['queued' => $queued];
         }
@@ -290,7 +290,7 @@ final class CampaignsController
     {
         $current = $this->campaigns->findById((int) $request['id']);
         if (! $current) {
-            return new WP_Error('giveflow_not_found', __('Campaign not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
 
         $others = Campaign::query()
@@ -338,12 +338,12 @@ final class CampaignsController
     {
         $source = $this->campaigns->findById((int) $request['id']);
         if (! $source) {
-            return new WP_Error('giveflow_not_found', __('Campaign not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
         try {
             $copy = $this->campaignService->duplicate($source);
         } catch (RuntimeException $e) {
-            return new WP_Error('giveflow_campaign_duplicate_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('fundkit_campaign_duplicate_failed', $e->getMessage(), ['status' => 500]);
         }
         return new WP_REST_Response($this->shapeFull($copy, 'all-time'), 201);
     }
@@ -353,12 +353,12 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('giveflow_not_found', __('Campaign not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
         try {
             $this->campaignService->delete($campaign);
         } catch (RuntimeException $e) {
-            return new WP_Error('giveflow_campaign_delete_blocked', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('fundkit_campaign_delete_blocked', $e->getMessage(), ['status' => 422]);
         }
         return new WP_REST_Response(['deleted' => true, 'id' => $campaign->id], 200);
     }
@@ -368,7 +368,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('giveflow_not_found', __('Campaign not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
         $range   = (string) ($request['range']   ?? 'all-time');
         $compare = (string) ($request['compare'] ?? 'none');
@@ -406,7 +406,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('giveflow_not_found', __('Campaign not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
 
         // Checked against this campaign's own list. A type that lays out its
@@ -414,7 +414,7 @@ final class CampaignsController
         // replace every block that type exists for.
         $template = (string) $request['template'];
         if (! CampaignTemplates::exists($template, (string) $campaign->campaign_type)) {
-            return new WP_Error('giveflow_invalid_input', __('Unknown page layout.', 'giveflow-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_invalid_input', __('Unknown page layout.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
         }
 
         return new WP_REST_Response([
@@ -476,7 +476,7 @@ final class CampaignsController
             'not_accepting'       => $c->notAcceptingReason(),
             'campaign_type'       => $c->campaign_type,
             'campaign_type_label' => $c->campaign_type === 'standard' ? '' : (string) (
-                ((array) apply_filters('giveflow.campaign.types', ['standard' => '']))[$c->campaign_type]
+                ((array) apply_filters('fundkit.campaign.types', ['standard' => '']))[$c->campaign_type]
                     ?? ucfirst(str_replace('_', ' ', $c->campaign_type))
             ),
             'currency'            => $c->currency,

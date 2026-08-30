@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Helpers;
+namespace FundKit\Foundation\Helpers;
 
 use InvalidArgumentException;
 
@@ -46,7 +46,7 @@ final class View
     private static function renderFile(string $template, array $args): string
     {
         if (! file_exists($template)) {
-            throw new InvalidArgumentException(esc_html("GiveFlow view template not found: {$template}"));
+            throw new InvalidArgumentException(esc_html("FundKit view template not found: {$template}"));
         }
 
         ob_start();
@@ -66,9 +66,9 @@ final class View
         if (str_contains($path, '.')) {
             [$domain, $rest] = explode('.', $path, 2);
             $rest = str_replace('.', '/', $rest);
-            return GIVEFLOW_DIR . "src/{$domain}/resources/views/{$rest}.php";
+            return FUNDKIT_DIR . "src/{$domain}/resources/views/{$rest}.php";
         }
 
-        return GIVEFLOW_DIR . "src/resources/views/{$path}.php";
+        return FUNDKIT_DIR . "src/resources/views/{$path}.php";
     }
 }

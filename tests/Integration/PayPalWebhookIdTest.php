@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\PayPal\PayPalAccount;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\PayPal\PayPalAccount;
 use WP_REST_Request;
 
 /**
@@ -77,7 +77,7 @@ final class PayPalWebhookIdTest extends IntegrationTestCase
     /** @param array<string,mixed> $payload */
     private function post(array $payload): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/keys');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($payload));
 
@@ -118,7 +118,7 @@ final class PayPalWebhookIdTest extends IntegrationTestCase
 
         $this->webhookTransportFails = true;
 
-        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/keys');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['mode' => 'test', 'webhook_id' => self::HOOK_UNKNOWN]));
         rest_do_request($req);
@@ -142,7 +142,7 @@ final class PayPalWebhookIdTest extends IntegrationTestCase
         ]);
         $this->assertSame('', $this->account()->webhookId(true));
 
-        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/keys');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['mode' => 'test', 'webhook_id' => self::HOOK_OK]));
         $res = rest_do_request($req);
@@ -164,7 +164,7 @@ final class PayPalWebhookIdTest extends IntegrationTestCase
         ]);
         $this->assertSame(self::HOOK_OK, $this->account()->webhookId(true));
 
-        $del = new WP_REST_Request('DELETE', '/giveflow/v1/gateways/paypal/webhook');
+        $del = new WP_REST_Request('DELETE', '/fundkit/v1/gateways/paypal/webhook');
         $del->set_param('mode', 'test');
         $res = rest_do_request($del);
 
@@ -184,7 +184,7 @@ final class PayPalWebhookIdTest extends IntegrationTestCase
 
         $this->webhookStatus = 404;
 
-        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/keys');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['mode' => 'test', 'webhook_id' => self::HOOK_UNKNOWN]));
         $res = rest_do_request($req);

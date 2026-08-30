@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\PayPal\PayPalAccount;
-use GiveFlow\Gateways\PayPal\PayPalPlans;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\PayPal\PayPalAccount;
+use FundKit\Gateways\PayPal\PayPalPlans;
 
 /**
  * A Plan or Product lives inside one merchant account and means nothing in
@@ -24,8 +24,8 @@ final class GatewayAccountRotationTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        delete_option('giveflow_paypal_plans');
-        delete_option('giveflow_paypal_product');
+        delete_option('fundkit_paypal_plans');
+        delete_option('fundkit_paypal_product');
 
         add_filter('pre_http_request', function ($pre, $args, $url) {
             if (! is_string($url)) return $pre;
@@ -45,8 +45,8 @@ final class GatewayAccountRotationTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('giveflow_paypal_plans');
-        delete_option('giveflow_paypal_product');
+        delete_option('fundkit_paypal_plans');
+        delete_option('fundkit_paypal_product');
         parent::tearDown();
     }
 
@@ -81,7 +81,7 @@ final class GatewayAccountRotationTest extends IntegrationTestCase
         $account->saveKeys(true, 'client-second', 'secret-two');
         $plans->resolvePlan(true, 2500, 'USD', 'MONTH', 1);
 
-        $stored = get_option('giveflow_paypal_product', []);
+        $stored = get_option('fundkit_paypal_product', []);
         $this->assertCount(2, $stored, 'one product per account, not one shared across both');
     }
 }

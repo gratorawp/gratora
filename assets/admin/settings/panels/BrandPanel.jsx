@@ -17,11 +17,11 @@ const CloneIcon = () => <Icon name="copy"  size={ 14 } />;
 const TrashIcon = () => <Icon name="trash" size={ 14 } />;
 
 export default function BrandPanel( { s } ) {
-    // Seed from window.giveflow.styling.presets when the option hasn't been saved yet.
+    // Seed from window.fundkit.styling.presets when the option hasn't been saved yet.
     const saved      = Array.isArray( s.value( 'presets' ) ) ? s.value( 'presets' ) : [];
-    const globalList = Array.isArray( window.giveflow?.styling?.presets ) ? window.giveflow.styling.presets : [];
+    const globalList = Array.isArray( window.fundkit?.styling?.presets ) ? window.fundkit.styling.presets : [];
     const presets    = saved.length > 0 ? saved : globalList;
-    const defaultId  = String( s.value( 'default_id', '' ) || window.giveflow?.styling?.default_id || '' );
+    const defaultId  = String( s.value( 'default_id', '' ) || window.fundkit?.styling?.default_id || '' );
 
     const [ confirm, setConfirm ] = useState( null );
     const [ activeId, setActiveId ] = useState( () => {
@@ -36,9 +36,9 @@ export default function BrandPanel( { s } ) {
     // lives in styling.builtins before any user edit was merged in. Falling
     // straight through to the catalogue default, as this used to, reset every
     // preset's colours to the same green.
-    const catalogueDefaults = window.giveflow?.styling?.defaults || {};
+    const catalogueDefaults = window.fundkit?.styling?.defaults || {};
     const builtinTokens = ( id ) => {
-        const list = Array.isArray( window.giveflow?.styling?.builtins ) ? window.giveflow.styling.builtins : [];
+        const list = Array.isArray( window.fundkit?.styling?.builtins ) ? window.fundkit.styling.builtins : [];
         return list.find( ( b ) => b.id === id )?.tokens || {};
     };
     const resetDefaults = active
@@ -68,7 +68,7 @@ export default function BrandPanel( { s } ) {
         const source = presets.find( ( p ) => p.id === id );
         if ( ! source ) return;
         const newId   = generateId( source.name, presets );
-        const newName = `${ source.name } ${ __( '(copy)', 'giveflow-fundraising-campaigns' ) }`;
+        const newName = `${ source.name } ${ __( '(copy)', 'fundkit-fundraising-campaigns' ) }`;
         const next    = [ ...presets, {
             id:      newId,
             name:    newName,
@@ -80,10 +80,10 @@ export default function BrandPanel( { s } ) {
     };
 
     const addPreset = () => {
-        const newId = generateId( __( 'Custom', 'giveflow-fundraising-campaigns' ), presets );
+        const newId = generateId( __( 'Custom', 'fundkit-fundraising-campaigns' ), presets );
         const next  = [ ...presets, {
             id:      newId,
-            name:    __( 'New preset', 'giveflow-fundraising-campaigns' ),
+            name:    __( 'New preset', 'fundkit-fundraising-campaigns' ),
             tokens:  {},
             builtin: false,
         } ];
@@ -95,8 +95,8 @@ export default function BrandPanel( { s } ) {
         const p = presets.find( ( x ) => x.id === id );
         if ( ! p || p.builtin ) return;
         setConfirm( {
-            title:       __( 'Delete preset', 'giveflow-fundraising-campaigns' ),
-            message:     __( 'Delete this brand preset? This cannot be undone.', 'giveflow-fundraising-campaigns' ),
+            title:       __( 'Delete preset', 'fundkit-fundraising-campaigns' ),
+            message:     __( 'Delete this brand preset? This cannot be undone.', 'fundkit-fundraising-campaigns' ),
             destructive: true,
             onConfirm:   () => {
                 const next = presets.filter( ( x ) => x.id !== id );
@@ -109,20 +109,20 @@ export default function BrandPanel( { s } ) {
     };
 
     return (
-        <div className="giveflow-panel">
-            <div className="giveflow-brand-layout">
-                <div className="giveflow-brand-layout__main">
+        <div className="fundkit-panel">
+            <div className="fundkit-brand-layout">
+                <div className="fundkit-brand-layout__main">
                     <Card
-                        title={ __( 'Brand presets', 'giveflow-fundraising-campaigns' ) }
-                        sub={ __( 'Named style presets. Campaigns and forms pick one as their look.', 'giveflow-fundraising-campaigns' ) }
+                        title={ __( 'Brand presets', 'fundkit-fundraising-campaigns' ) }
+                        sub={ __( 'Named style presets. Campaigns and forms pick one as their look.', 'fundkit-fundraising-campaigns' ) }
                         edited={ s.isDirty }
                     >
-                        <div className="giveflow-preset-mgr">
-                            <div className="giveflow-preset-mgr__list">
+                        <div className="fundkit-preset-mgr">
+                            <div className="fundkit-preset-mgr__list">
                                 { presets.map( ( p ) => {
-                                    const accent = p.tokens?.[ 'giveflow-accent' ]
-                                        || builtinTokens( p.id )[ 'giveflow-accent' ]
-                                        || catalogueDefaults[ 'giveflow-accent' ]
+                                    const accent = p.tokens?.[ 'fundkit-accent' ]
+                                        || builtinTokens( p.id )[ 'fundkit-accent' ]
+                                        || catalogueDefaults[ 'fundkit-accent' ]
                                         || '#211d3f';
                                     const isActive  = p.id === active?.id;
                                     const isDefault = p.id === defaultId;
@@ -130,21 +130,21 @@ export default function BrandPanel( { s } ) {
                                         <button
                                             key={ p.id }
                                             type="button"
-                                            className={ `giveflow-preset-mgr__row${ isActive ? ' is-active' : '' }` }
+                                            className={ `fundkit-preset-mgr__row${ isActive ? ' is-active' : '' }` }
                                             onClick={ () => setActiveId( p.id ) }
                                             aria-pressed={ isActive }
                                         >
                                             <span
-                                                className="giveflow-preset-mgr__swatch"
+                                                className="fundkit-preset-mgr__swatch"
                                                 style={ { background: accent } }
                                                 aria-hidden="true"
                                             />
-                                            <span className="giveflow-preset-mgr__meta">
-                                                <strong className="giveflow-preset-mgr__name">{ p.name }</strong>
+                                            <span className="fundkit-preset-mgr__meta">
+                                                <strong className="fundkit-preset-mgr__name">{ p.name }</strong>
                                                 { isDefault && (
-                                                    <span className="giveflow-preset-mgr__default">
+                                                    <span className="fundkit-preset-mgr__default">
                                                         <Icon name="check" size={ 12 } />
-                                                        { __( 'Default', 'giveflow-fundraising-campaigns' ) }
+                                                        { __( 'Default', 'fundkit-fundraising-campaigns' ) }
                                                     </span>
                                                 ) }
                                             </span>
@@ -153,15 +153,15 @@ export default function BrandPanel( { s } ) {
                                 } ) }
                                 <Button
                                     variant="secondary"
-                                    className="giveflow-preset-mgr__add"
+                                    className="fundkit-preset-mgr__add"
                                     onClick={ addPreset }
                                     icon={ PlusIcon }
                                 >
-                                    { __( 'Add preset', 'giveflow-fundraising-campaigns' ) }
+                                    { __( 'Add preset', 'fundkit-fundraising-campaigns' ) }
                                 </Button>
                             </div>
 
-                            <div className="giveflow-preset-mgr__editor">
+                            <div className="fundkit-preset-mgr__editor">
                                 { active ? (
                                     <PresetEditor
                                         preset={ active }
@@ -177,11 +177,11 @@ export default function BrandPanel( { s } ) {
                                     <EmptyState
                                         compact
                                         icon={ <Palette size={ 22 } strokeWidth={ 1.75 } /> }
-                                        title={ __( 'No presets yet', 'giveflow-fundraising-campaigns' ) }
-                                        body={ __( 'Brand presets give every campaign a consistent look. Create one to get started.', 'giveflow-fundraising-campaigns' ) }
+                                        title={ __( 'No presets yet', 'fundkit-fundraising-campaigns' ) }
+                                        body={ __( 'Brand presets give every campaign a consistent look. Create one to get started.', 'fundkit-fundraising-campaigns' ) }
                                         action={
                                             <Btn variant="secondary" onClick={ addPreset }>
-                                                { __( 'Add preset', 'giveflow-fundraising-campaigns' ) }
+                                                { __( 'Add preset', 'fundkit-fundraising-campaigns' ) }
                                             </Btn>
                                         }
                                     />
@@ -191,8 +191,8 @@ export default function BrandPanel( { s } ) {
                     </Card>
                 </div>
 
-                <aside className="giveflow-brand-layout__rail">
-                    <Card title={ __( 'Live preview', 'giveflow-fundraising-campaigns' ) }>
+                <aside className="fundkit-brand-layout__rail">
+                    <Card title={ __( 'Live preview', 'fundkit-fundraising-campaigns' ) }>
                         { active && (
                             <StylePreview
                                 // Floor the preview with the built-in baseline so a
@@ -202,7 +202,7 @@ export default function BrandPanel( { s } ) {
                                 // StylePresets::all()'s built-in merge.
                                 tokens={ { ...builtinTokens( active.id ), ...( active.tokens || {} ) } }
                                 layer="brand"
-                                styling={ window.giveflow?.styling || {} }
+                                styling={ window.fundkit?.styling || {} }
                             />
                         ) }
                     </Card>
@@ -215,23 +215,23 @@ export default function BrandPanel( { s } ) {
 
 function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, onMakeDefault, onClone, onDelete } ) {
     return (
-        <div className="giveflow-preset-editor">
-            <div className="giveflow-preset-editor__head">
+        <div className="fundkit-preset-editor">
+            <div className="fundkit-preset-editor__head">
                 <input
                     type="text"
-                    className="giveflow-input giveflow-preset-editor__name"
+                    className="fundkit-input fundkit-preset-editor__name"
                     value={ preset.name }
                     onChange={ ( e ) => onRename( e.target.value ) }
-                    placeholder={ __( 'Preset name', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'Preset name', 'fundkit-fundraising-campaigns' ) }
                 />
-                <div className="giveflow-preset-editor__actions">
+                <div className="fundkit-preset-editor__actions">
                     { ! isDefault && (
                         <Button variant="secondary" size="small" onClick={ onMakeDefault }>
-                            { __( 'Make default', 'giveflow-fundraising-campaigns' ) }
+                            { __( 'Make default', 'fundkit-fundraising-campaigns' ) }
                         </Button>
                     ) }
                     <Button variant="tertiary" size="small" icon={ CloneIcon } onClick={ onClone }>
-                        { __( 'Clone', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Clone', 'fundkit-fundraising-campaigns' ) }
                     </Button>
                     { ! preset.builtin && (
                         <Button
@@ -241,22 +241,22 @@ function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, o
                             isDestructive
                             onClick={ onDelete }
                         >
-                            { __( 'Delete', 'giveflow-fundraising-campaigns' ) }
+                            { __( 'Delete', 'fundkit-fundraising-campaigns' ) }
                         </Button>
                     ) }
                 </div>
             </div>
 
             { preset.description && (
-                <p className="giveflow-preset-editor__desc">{ preset.description }</p>
+                <p className="fundkit-preset-editor__desc">{ preset.description }</p>
             ) }
 
             <TokenEditor
                 value={ preset.tokens || {} }
                 onChange={ onTokens }
-                catalogue={ window.giveflow?.styling?.catalogue || {} }
-                groups={ window.giveflow?.styling?.groups || {} }
-                defaults={ resetDefaults || window.giveflow?.styling?.defaults || {} }
+                catalogue={ window.fundkit?.styling?.catalogue || {} }
+                groups={ window.fundkit?.styling?.groups || {} }
+                defaults={ resetDefaults || window.fundkit?.styling?.defaults || {} }
             />
         </div>
     );

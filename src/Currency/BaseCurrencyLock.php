@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Currency;
+namespace FundKit\Currency;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationQueries;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationQueries;
 
 /**
  * The base currency is the unit every stored base_amount_cents is already

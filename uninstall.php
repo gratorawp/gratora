@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use GiveFlow\Foundation\Uninstall\DataEraser;
+use FundKit\Foundation\Uninstall\DataEraser;
 
 defined('WP_UNINSTALL_PLUGIN') || exit;
 
-// Both, the way giveflow.php loads them. WordPress includes this file without the
+// Both, the way fundkit.php loads them. WordPress includes this file without the
 // plugin, and every model extends a Strauss-prefixed base class that the
 // composer autoloader alone cannot resolve: one require short, the erase
 // fatals on the first query it makes.

@@ -2,12 +2,12 @@
 
 defined('ABSPATH') || exit;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\Donor;
+use FundKit\Donations\Donation;
+use FundKit\Donors\Donor;
 
 /**
- * @var \GiveFlow\Donations\Donation $donation
- * @var \GiveFlow\Donors\Donor    $donor
+ * @var \FundKit\Donations\Donation $donation
+ * @var \FundKit\Donors\Donor    $donor
  * @var string   $donor_name      name given for this donation (resolved)
  * @var string   $donor_address   formatted multi-line address, empty when missing
  * @var array    $org             keys: name, address_lines (array), tax_id, vat_id, email
@@ -23,16 +23,16 @@ use GiveFlow\Donors\Donor;
  * @var array    $custom_field_labels
  */
 
-$orgName = (string) ($org['name'] ?? __('Your Organization', 'giveflow-fundraising-campaigns'));
+$orgName = (string) ($org['name'] ?? __('Your Organization', 'fundkit-fundraising-campaigns'));
 $orgAddressLines = (array) ($org['address_lines'] ?? []);
 $orgTaxId  = (string) ($org['tax_id'] ?? '');
 $orgVatId  = (string) ($org['vat_id'] ?? '');
 $orgEmail  = (string) ($org['email'] ?? '');
 
 $tpl = is_array($receipt_template ?? null) ? $receipt_template : [];
-$headerTitle = (string) ($tpl['header_title'] ?? __('Donation receipt', 'giveflow-fundraising-campaigns'));
+$headerTitle = (string) ($tpl['header_title'] ?? __('Donation receipt', 'fundkit-fundraising-campaigns'));
 $intro       = (string) ($tpl['intro']        ?? '');
-$signoff     = (string) ($tpl['signoff']      ?? __('Thank you for your support.', 'giveflow-fundraising-campaigns'));
+$signoff     = (string) ($tpl['signoff']      ?? __('Thank you for your support.', 'fundkit-fundraising-campaigns'));
 $footerNote  = (string) ($tpl['footer_note']  ?? '');
 $showTaxId   = array_key_exists('show_tax_id', $tpl) ? (bool) $tpl['show_tax_id'] : true;
 $showDonorAddr = array_key_exists('show_donor_address', $tpl) ? (bool) $tpl['show_donor_address'] : false;
@@ -45,17 +45,17 @@ if ($donorName === '') $donorName = '-';
 // The whole receipt renders in the donor's locale, so the frequency has to be
 // a translated label rather than the stored slug.
 $frequencyLabels = [
-    'weekly'    => __('Weekly', 'giveflow-fundraising-campaigns'),
-    'biweekly'  => __('Every 2 weeks', 'giveflow-fundraising-campaigns'),
-    'monthly'   => __('Monthly', 'giveflow-fundraising-campaigns'),
-    'quarterly' => __('Quarterly', 'giveflow-fundraising-campaigns'),
-    'yearly'    => __('Yearly', 'giveflow-fundraising-campaigns'),
+    'weekly'    => __('Weekly', 'fundkit-fundraising-campaigns'),
+    'biweekly'  => __('Every 2 weeks', 'fundkit-fundraising-campaigns'),
+    'monthly'   => __('Monthly', 'fundkit-fundraising-campaigns'),
+    'quarterly' => __('Quarterly', 'fundkit-fundraising-campaigns'),
+    'yearly'    => __('Yearly', 'fundkit-fundraising-campaigns'),
 ];
 $frequencyLabel = $donation->frequency === 'one_time'
-    ? __('One-time donation', 'giveflow-fundraising-campaigns')
+    ? __('One-time donation', 'fundkit-fundraising-campaigns')
     : sprintf(
         /* translators: %s: frequency label (Monthly, Quarterly, Yearly, …). */
-        __('Recurring donation (%s)', 'giveflow-fundraising-campaigns'),
+        __('Recurring donation (%s)', 'fundkit-fundraising-campaigns'),
         $frequencyLabels[(string) $donation->frequency] ?? ucfirst((string) $donation->frequency)
     );
 
@@ -72,7 +72,7 @@ foreach ($customDataArr as $key => $value) {
     if ($label === '') continue;
 
     if (is_bool($value)) {
-        $display = $value ? __('Yes', 'giveflow-fundraising-campaigns') : __('No', 'giveflow-fundraising-campaigns');
+        $display = $value ? __('Yes', 'fundkit-fundraising-campaigns') : __('No', 'fundkit-fundraising-campaigns');
     } elseif (is_array($value)) {
         $display = implode(', ', array_map('strval', $value));
         if ($display === '') continue;
@@ -87,7 +87,7 @@ $refundedDisplay = (string) ($refunded_display ?? '');
 $receiptNumber   = (string) ($receipt_number ?? '');
 $refundedCents   = (int) ($refunded_cents ?? 0);
 $netDisplay      = $refundedCents > 0
-    ? \GiveFlow\Foundation\Helpers\Money::format(
+    ? \FundKit\Foundation\Helpers\Money::format(
         (int) $donation->amount_cents - $refundedCents,
         (string) $donation->currency
     )
@@ -97,7 +97,7 @@ $fullyRefunded   = $refundedCents > 0 && $refundedCents >= (int) $donation->amou
 // A payment that bought something has to say so, and say what is left as a
 // donation, because only the remainder is deductible. Whatever sold the thing
 // states its value through the receipt context.
-$money      = static fn (int $c): string => \GiveFlow\Foundation\Helpers\Money::format($c, (string) $donation->currency);
+$money      = static fn (int $c): string => \FundKit\Foundation\Helpers\Money::format($c, (string) $donation->currency);
 $goodsCents = max(0, (int) ($extras['goods_received_cents'] ?? 0));
 $goodsLabel = trim((string) ($extras['goods_received_label'] ?? ''));
 $hasGoods   = $goodsCents > 0 && $goodsCents <= (int) $donation->amount_cents;
@@ -140,7 +140,7 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
 
 <?php if (! empty($donation->is_test)): ?>
 <div style="border:2pt solid #b91c1c; color:#b91c1c; font-weight:700; text-align:center; padding:8pt; margin:0 0 18pt; letter-spacing:.5pt;">
-    <?php esc_html_e('TEST DONATION - NOT A REAL PAYMENT', 'giveflow-fundraising-campaigns'); ?>
+    <?php esc_html_e('TEST DONATION - NOT A REAL PAYMENT', 'fundkit-fundraising-campaigns'); ?>
 </div>
 <?php endif; ?>
 
@@ -150,7 +150,7 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
     <?php
     printf(
         /* translators: %s: refunded amount. */
-        esc_html__('This donation has been refunded (%s).', 'giveflow-fundraising-campaigns'),
+        esc_html__('This donation has been refunded (%s).', 'fundkit-fundraising-campaigns'),
         esc_html($refundedDisplay)
     );
     ?>
@@ -158,7 +158,7 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
     <?php
     printf(
         /* translators: 1: refunded amount, 2: amount retained after the refund. */
-        esc_html__('Part of this donation has been refunded (%1$s). The amount retained is %2$s.', 'giveflow-fundraising-campaigns'),
+        esc_html__('Part of this donation has been refunded (%1$s). The amount retained is %2$s.', 'fundkit-fundraising-campaigns'),
         esc_html($refundedDisplay),
         esc_html($netDisplay)
     );
@@ -191,21 +191,21 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
 
 <dl class="ref">
     <?php if ($receiptNumber !== ''): ?>
-        <dt><?php esc_html_e('Receipt number', 'giveflow-fundraising-campaigns'); ?></dt>
+        <dt><?php esc_html_e('Receipt number', 'fundkit-fundraising-campaigns'); ?></dt>
         <dd><?php echo esc_html($receiptNumber); ?></dd>
     <?php endif; ?>
 
-    <dt><?php esc_html_e('Reference', 'giveflow-fundraising-campaigns'); ?></dt>
+    <dt><?php esc_html_e('Reference', 'fundkit-fundraising-campaigns'); ?></dt>
     <dd><?php echo esc_html($donation->reference); ?></dd>
 
-    <dt><?php esc_html_e('Date', 'giveflow-fundraising-campaigns'); ?></dt>
+    <dt><?php esc_html_e('Date', 'fundkit-fundraising-campaigns'); ?></dt>
     <dd><?php echo esc_html($paidAt); ?></dd>
 
-    <dt><?php esc_html_e('Donor', 'giveflow-fundraising-campaigns'); ?></dt>
+    <dt><?php esc_html_e('Donor', 'fundkit-fundraising-campaigns'); ?></dt>
     <dd><?php echo esc_html($donorName); ?></dd>
 
     <?php if ($showDonorAddr && $donorAddress !== ''): ?>
-        <dt><?php esc_html_e('Donor address', 'giveflow-fundraising-campaigns'); ?></dt>
+        <dt><?php esc_html_e('Donor address', 'fundkit-fundraising-campaigns'); ?></dt>
         <dd>
             <?php foreach (preg_split('/\R/', $donorAddress) as $line): ?>
                 <?php $line = trim((string) $line); if ($line === '') continue; ?>
@@ -215,12 +215,12 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
     <?php endif; ?>
 
     <?php if ($showTaxId && $orgTaxId !== ''): ?>
-        <dt><?php esc_html_e('Organization tax ID', 'giveflow-fundraising-campaigns'); ?></dt>
+        <dt><?php esc_html_e('Organization tax ID', 'fundkit-fundraising-campaigns'); ?></dt>
         <dd><?php echo esc_html($orgTaxId); ?></dd>
     <?php endif; ?>
 
     <?php if ($showTaxId && $orgVatId !== ''): ?>
-        <dt><?php esc_html_e('VAT ID', 'giveflow-fundraising-campaigns'); ?></dt>
+        <dt><?php esc_html_e('VAT ID', 'fundkit-fundraising-campaigns'); ?></dt>
         <dd><?php echo esc_html($orgVatId); ?></dd>
     <?php endif; ?>
 </dl>
@@ -228,36 +228,36 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
 <table class="lines">
     <thead>
         <tr>
-            <th><?php esc_html_e('Description', 'giveflow-fundraising-campaigns'); ?></th>
-            <th class="amt"><?php esc_html_e('Amount', 'giveflow-fundraising-campaigns'); ?></th>
+            <th><?php esc_html_e('Description', 'fundkit-fundraising-campaigns'); ?></th>
+            <th class="amt"><?php esc_html_e('Amount', 'fundkit-fundraising-campaigns'); ?></th>
         </tr>
     </thead>
     <tbody>
         <?php if ($hasGoods): ?>
         <tr>
-            <td><?php echo esc_html($goodsLabel !== '' ? $goodsLabel : __('Goods and services received', 'giveflow-fundraising-campaigns')); ?></td>
+            <td><?php echo esc_html($goodsLabel !== '' ? $goodsLabel : __('Goods and services received', 'fundkit-fundraising-campaigns')); ?></td>
             <td class="amt"><?php echo esc_html($money($goodsCents)); ?></td>
         </tr>
         <?php endif; ?>
         <tr>
-            <td><?php /* translators: %s: organization name. */ printf(esc_html__('Donation to %s', 'giveflow-fundraising-campaigns'), esc_html($orgName)); ?></td>
+            <td><?php /* translators: %s: organization name. */ printf(esc_html__('Donation to %s', 'fundkit-fundraising-campaigns'), esc_html($orgName)); ?></td>
             <td class="amt"><?php echo esc_html($hasGoods ? $money($giftCents) : $amount_display); ?></td>
         </tr>
         <?php if ($refundedDisplay !== ''): ?>
         <tr class="refund-row">
-            <td><?php esc_html_e('Refunded', 'giveflow-fundraising-campaigns'); ?></td>
+            <td><?php esc_html_e('Refunded', 'fundkit-fundraising-campaigns'); ?></td>
             <td class="amt">-<?php echo esc_html($refundedDisplay); ?></td>
         </tr>
         <?php endif; ?>
     </tbody>
     <tfoot>
         <tr>
-            <td><?php echo $hasGoods ? esc_html__('Total', 'giveflow-fundraising-campaigns') : '&nbsp;'; ?></td>
+            <td><?php echo $hasGoods ? esc_html__('Total', 'fundkit-fundraising-campaigns') : '&nbsp;'; ?></td>
             <td class="amt total"><?php echo esc_html($netDisplay); ?></td>
         </tr>
         <?php if ($hasGoods): ?>
         <tr class="deductible-row">
-            <td><?php esc_html_e('Tax-deductible amount', 'giveflow-fundraising-campaigns'); ?></td>
+            <td><?php esc_html_e('Tax-deductible amount', 'fundkit-fundraising-campaigns'); ?></td>
             <td class="amt"><?php echo esc_html($money(max(0, $giftCents - $refundedCents))); ?></td>
         </tr>
         <?php endif; ?>
@@ -266,7 +266,7 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
 
 <?php if (! empty($customRows)): ?>
 <div class="custom">
-    <h3><?php esc_html_e('Additional information', 'giveflow-fundraising-campaigns'); ?></h3>
+    <h3><?php esc_html_e('Additional information', 'fundkit-fundraising-campaigns'); ?></h3>
     <dl>
         <?php foreach ($customRows as $row): ?>
             <dt><?php echo esc_html($row['label']); ?></dt>

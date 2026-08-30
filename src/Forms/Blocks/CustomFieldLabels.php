@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
 /**
  * Resolve custom-field slug => human label for a form's blocks.
@@ -43,19 +43,19 @@ final class CustomFieldLabels
 
             $slug = '';
             switch ($name) {
-                case 'giveflow/text-input':
-                case 'giveflow/number-input':
-                case 'giveflow/date':
-                case 'giveflow/dropdown':
-                case 'giveflow/radio':
-                case 'giveflow/checkbox':
-                case 'giveflow/multi-select':
+                case 'fundkit/text-input':
+                case 'fundkit/number-input':
+                case 'fundkit/date':
+                case 'fundkit/dropdown':
+                case 'fundkit/radio':
+                case 'fundkit/checkbox':
+                case 'fundkit/multi-select':
                     $slug = DropdownBlock::deriveField(
                         (string) ($attrs['field'] ?? ''),
                         (string) ($attrs['label'] ?? '')
                     );
                     break;
-                case 'giveflow/hidden':
+                case 'fundkit/hidden':
                     $slug = (string) ($attrs['field'] ?? '');
                     break;
             }

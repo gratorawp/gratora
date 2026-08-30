@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Currency\FxBackfill;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Vendor\Queryable\Model;
-use GiveFlow\Vendor\Queryable\Schema\Table;
+use FundKit\Currency\FxBackfill;
+use FundKit\Donations\Donation;
+use FundKit\Vendor\Queryable\Model;
+use FundKit\Vendor\Queryable\Schema\Table;
 use ReflectionProperty;
 
 /**
@@ -35,7 +35,7 @@ final class DonationBaseAmountIndexTest extends IntegrationTestCase
         $table = new Table('utf8mb4', 'utf8mb4_unicode_ci', []);
         $schemas[Donation::class]($table);
 
-        return $table->compile('giveflow_donations');
+        return $table->compile('fundkit_donations');
     }
 
     public function test_the_column_leads_an_index_a_fresh_install_would_get(): void
@@ -50,7 +50,7 @@ final class DonationBaseAmountIndexTest extends IntegrationTestCase
     /** And that the migration this suite ran actually put it on the table. */
     public function test_the_migrated_table_carries_it(): void
     {
-        $table   = self::$prefix . 'giveflow_donations';
+        $table   = self::$prefix . 'fundkit_donations';
         $indexed = self::$wpdb->get_col(
             self::$wpdb->prepare(
                 'SHOW INDEX FROM `' . $table . '` WHERE Seq_in_index = 1 AND Column_name = %s',

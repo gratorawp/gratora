@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donors\Erasure;
+namespace FundKit\Donors\Erasure;
 
 /**
  * Every plugin that stores donor data subscribes a handler here, and erasure
  * runs all of them.
  *
- * Register with the `giveflow.donor.erasure_handlers` filter at boot:
+ * Register with the `fundkit.donor.erasure_handlers` filter at boot:
  *
- *     add_filter('giveflow.donor.erasure_handlers', static function (array $h): array {
+ *     add_filter('fundkit.donor.erasure_handlers', static function (array $h): array {
  *         $h[] = new MyHandler();
  *         return $h;
  *     });
@@ -26,7 +26,7 @@ final class ErasureRegistry
      */
     public function handlers(): array
     {
-        $handlers = apply_filters('giveflow.donor.erasure_handlers', []);
+        $handlers = apply_filters('fundkit.donor.erasure_handlers', []);
         if (! is_array($handlers)) return [];
 
         $out = [];

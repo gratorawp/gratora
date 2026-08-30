@@ -36,58 +36,58 @@ export default function OrganizationPanel( { s } ) {
     };
 
     return (
-        <div className="giveflow-panel">
+        <div className="fundkit-panel">
             <Card
-                title={ __( 'Identity', 'giveflow-fundraising-campaigns' ) }
-                meta={ __( 'Used by receipts and footer', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Identity', 'fundkit-fundraising-campaigns' ) }
+                meta={ __( 'Used by receipts and footer', 'fundkit-fundraising-campaigns' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'Legal name', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Legal name', 'fundkit-fundraising-campaigns' ) }
                     required
-                    help={ __( 'The entity that legally receives donations.', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'The entity that legally receives donations.', 'fundkit-fundraising-campaigns' ) }
                 >
-                    <input type="text" className="giveflow-input" { ...s.bind( 'legal_name' ) } />
+                    <input type="text" className="fundkit-input" { ...s.bind( 'legal_name' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Display name', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Donor-facing name in subject lines and headers.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Display name', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Donor-facing name in subject lines and headers.', 'fundkit-fundraising-campaigns' ) }
                 >
-                    <input type="text" className="giveflow-input" { ...s.bind( 'name' ) } />
+                    <input type="text" className="fundkit-input" { ...s.bind( 'name' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Contact email', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Printed on receipts, so donors know where to reply.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Contact email', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Printed on receipts, so donors know where to reply.', 'fundkit-fundraising-campaigns' ) }
                 >
-                    <input type="email" className="giveflow-input" { ...s.bind( 'email' ) } />
+                    <input type="email" className="fundkit-input" { ...s.bind( 'email' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Address', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Optional. Receipts print it when set; donors claiming tax relief usually need it.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Address', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Optional. Receipts print it when set; donors claiming tax relief usually need it.', 'fundkit-fundraising-campaigns' ) }
                 >
-                    <div className="giveflow-stack-12">
+                    <div className="fundkit-stack-12">
                         <input
                             type="text"
-                            className="giveflow-input"
-                            placeholder={ __( 'Street', 'giveflow-fundraising-campaigns' ) }
+                            className="fundkit-input"
+                            placeholder={ __( 'Street', 'fundkit-fundraising-campaigns' ) }
                             value={ addressLines[ 0 ] || '' }
                             onChange={ ( e ) => updateAddressLine( 0, e.target.value ) }
                         />
-                        <div className="giveflow-grid-2-eq">
+                        <div className="fundkit-grid-2-eq">
                             <input
                                 type="text"
-                                className="giveflow-input"
-                                placeholder={ __( 'Postcode', 'giveflow-fundraising-campaigns' ) }
+                                className="fundkit-input"
+                                placeholder={ __( 'Postcode', 'fundkit-fundraising-campaigns' ) }
                                 value={ addressLines[ 1 ] || '' }
                                 onChange={ ( e ) => updateAddressLine( 1, e.target.value ) }
                             />
                             <input
                                 type="text"
-                                className="giveflow-input"
-                                placeholder={ __( 'City', 'giveflow-fundraising-campaigns' ) }
+                                className="fundkit-input"
+                                placeholder={ __( 'City', 'fundkit-fundraising-campaigns' ) }
                                 value={ addressLines[ 2 ] || '' }
                                 onChange={ ( e ) => updateAddressLine( 2, e.target.value ) }
                             />
@@ -96,16 +96,16 @@ export default function OrganizationPanel( { s } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Country', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Country', 'fundkit-fundraising-campaigns' ) }
                     required
-                    help={ __( 'Drives tax-ID format and VAT visibility.', 'giveflow-fundraising-campaigns' ) }
+                    help={ __( 'Drives tax-ID format and VAT visibility.', 'fundkit-fundraising-campaigns' ) }
                 >
                     <select
-                        className="giveflow-select"
+                        className="fundkit-select"
                         value={ country }
                         onChange={ ( e ) => s.setValue( 'country' )( e.target.value ) }
                     >
-                        <option value="">{ __( 'Select a country', 'giveflow-fundraising-campaigns' ) }</option>
+                        <option value="">{ __( 'Select a country', 'fundkit-fundraising-campaigns' ) }</option>
                         { COUNTRIES.map( ( c ) => (
                             <option key={ c.code } value={ c.code }>{ c.name }</option>
                         ) ) }
@@ -113,21 +113,21 @@ export default function OrganizationPanel( { s } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Tax ID / EU VAT', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'VIES validation is not performed.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Tax ID / EU VAT', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'VIES validation is not performed.', 'fundkit-fundraising-campaigns' ) }
                 >
-                    <div className="giveflow-grid-2-eq">
+                    <div className="fundkit-grid-2-eq">
                         <input
                             type="text"
-                            className="giveflow-input giveflow-input--mono"
-                            placeholder={ __( 'Tax number', 'giveflow-fundraising-campaigns' ) }
+                            className="fundkit-input fundkit-input--mono"
+                            placeholder={ __( 'Tax number', 'fundkit-fundraising-campaigns' ) }
                             { ...s.bind( 'tax_id' ) }
                         />
                         { showVat && (
                             <input
                                 type="text"
-                                className="giveflow-input giveflow-input--mono"
-                                placeholder={ __( 'EU VAT ID', 'giveflow-fundraising-campaigns' ) }
+                                className="fundkit-input fundkit-input--mono"
+                                placeholder={ __( 'EU VAT ID', 'fundkit-fundraising-campaigns' ) }
                                 { ...s.bind( 'vat_id' ) }
                             />
                         ) }

@@ -1,12 +1,12 @@
-@import '@giveflow/ui/scss/tokens';
+@import '@fundkit/ui/scss/tokens';
 @import '../_shared/admin-base';
-@import '@giveflow/ui/scss/components/empty-state';
-@import '@giveflow/ui/scss/components/form';
-@import '@giveflow/ui/scss/components/date-field';
-@import '@giveflow/ui/scss/components/switch';
+@import '@fundkit/ui/scss/components/empty-state';
+@import '@fundkit/ui/scss/components/form';
+@import '@fundkit/ui/scss/components/date-field';
+@import '@fundkit/ui/scss/components/switch';
 // The record-a-donation surface is a modal now; this screen did not pull in the
 // dialog chrome before, so without it the modal rendered unstyled.
-@import '@giveflow/ui/scss/components/dialog';
+@import '@fundkit/ui/scss/components/dialog';
 
 @import '../_shared/kpi-strip';
 
@@ -676,7 +676,7 @@
     font-size: 13px;
 }
 
-.giveflow-amount__base {
+.fundkit-amount__base {
     display: block;
     margin-top: 2px;
     color: $text-muted;
@@ -685,7 +685,7 @@
 }
 
 // Record a donation drawer.
-.giveflow-rd {
+.fundkit-rd {
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
@@ -715,15 +715,15 @@
 		font-size: 13px;
 
 		span {
-			color: var(--giveflow-color-text-muted, #6b7280);
+			color: var(--fundkit-color-text-muted, #6b7280);
 		}
 	}
 }
 
-.giveflow-list-note {
+.fundkit-list-note {
     margin: -4px 0 12px;
     font-size: 13px;
-    color: var(--giveflow-color-text-muted, #6b7280);
+    color: var(--fundkit-color-text-muted, #6b7280);
 }
 
 // The amber that means test mode, from the shared token rather than a second
@@ -731,10 +731,10 @@
 // Tinted rather than solid: every other pill on this row is a tint, and a block
 // of colour beside them read as an error instead of a label.
 //
-// giveflow-pill--warning was never defined for pills, only for notices and toasts,
+// fundkit-pill--warning was never defined for pills, only for notices and toasts,
 // so this badge was rendering in the default grey.
 //
-// Doubled class on purpose: a later .giveflow-pill rule (the pill-group button)
+// Doubled class on purpose: a later .fundkit-pill rule (the pill-group button)
 // sets a transparent background at the same specificity and would win on
 // source order alone.
 

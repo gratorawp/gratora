@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Forms\Form;
-use GiveFlow\Forms\FormSubmissionValidator;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Forms\Form;
+use FundKit\Forms\FormSubmissionValidator;
+use FundKit\Foundation\Plugin;
 
 /**
  * A form with "allow custom amount" off is a fixed-amount form. The server has
@@ -27,8 +27,8 @@ final class PresetAmountBypassTest extends IntegrationTestCase
 
     private function form(bool $withSwitcher): Form
     {
-        $amount = '<!-- wp:giveflow/donation-amount {"allowCustom":false,"presets":[2500,5000,10000]} /-->';
-        $switch = $withSwitcher ? '<!-- wp:giveflow/currency-switcher /-->' : '';
+        $amount = '<!-- wp:fundkit/donation-amount {"allowCustom":false,"presets":[2500,5000,10000]} /-->';
+        $switch = $withSwitcher ? '<!-- wp:fundkit/currency-switcher /-->' : '';
 
         $f = Form::make();
         $f->title      = 'Fixed amounts';

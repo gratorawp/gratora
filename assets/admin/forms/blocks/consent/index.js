@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'giveflow/consent';
+const NAME = 'fundkit/consent';
 
 /**
  * The organization's consent purposes. The block picks from these rather than
@@ -13,12 +13,12 @@ const NAME = 'giveflow/consent';
  * agree, and the donor portal would have nothing to label it with.
  */
 function registryPurposes() {
-    const c = typeof window !== 'undefined' && window.giveflowFormsEditor && window.giveflowFormsEditor.consents;
+    const c = typeof window !== 'undefined' && window.fundkitFormsEditor && window.fundkitFormsEditor.consents;
     return Array.isArray( c ) ? c : [];
 }
 
 function settingsUrl() {
-    return ( typeof window !== 'undefined' && window.giveflowFormsEditor && window.giveflowFormsEditor.consentsSettingsUrl ) || '';
+    return ( typeof window !== 'undefined' && window.fundkitFormsEditor && window.fundkitFormsEditor.consentsSettingsUrl ) || '';
 }
 
 function Edit( { attributes, setAttributes } ) {
@@ -41,36 +41,36 @@ function Edit( { attributes, setAttributes } ) {
             : picked.filter( ( k ) => k !== key ),
     } );
 
-    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--consent' } );
+    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--consent' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Consent', 'giveflow-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Consent', 'fundkit-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Heading', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Heading', 'fundkit-fundraising-campaigns' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'How can we stay in touch?', 'giveflow-fundraising-campaigns' ) }
-                        help={ __( 'Click the heading on the form to edit it inline.', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'How can we stay in touch?', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Click the heading on the form to edit it inline.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Optional explanation shown below the heading.', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'Optional explanation shown below the heading.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
 
                     { registry.length === 0 ? (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'No consent purposes exist yet. A purpose names something your organization actually does, so you define it once and every form asks for it the same way.', 'giveflow-fundraising-campaigns' ) }
+                            { __( 'No consent purposes exist yet. A purpose names something your organization actually does, so you define it once and every form asks for it the same way.', 'fundkit-fundraising-campaigns' ) }
                             { settingsUrl() && (
                                 <>
                                     { ' ' }
                                     <ExternalLink href={ settingsUrl() }>
-                                        { __( 'Add one in Settings, Consents.', 'giveflow-fundraising-campaigns' ) }
+                                        { __( 'Add one in Settings, Consents.', 'fundkit-fundraising-campaigns' ) }
                                     </ExternalLink>
                                 </>
                             ) }
@@ -81,7 +81,7 @@ function Edit( { attributes, setAttributes } ) {
                                 <CheckboxControl
                                     key={ p.key }
                                     label={ p.required
-                                        ? `${ p.label } ${ __( '(required)', 'giveflow-fundraising-campaigns' ) }`
+                                        ? `${ p.label } ${ __( '(required)', 'fundkit-fundraising-campaigns' ) }`
                                         : p.label }
                                     help={ p.description || undefined }
                                     checked={ picked.includes( p.key ) }
@@ -92,7 +92,7 @@ function Edit( { attributes, setAttributes } ) {
                             { settingsUrl() && (
                                 <p style={ { marginTop: 12 } }>
                                     <ExternalLink href={ settingsUrl() }>
-                                        { __( 'Edit the wording in Settings, Consents.', 'giveflow-fundraising-campaigns' ) }
+                                        { __( 'Edit the wording in Settings, Consents.', 'fundkit-fundraising-campaigns' ) }
                                     </ExternalLink>
                                 </p>
                             ) }
@@ -107,24 +107,24 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="giveflow-block-preview__label"
+                    className="fundkit-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'How can we stay in touch?', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'How can we stay in touch?', 'fundkit-fundraising-campaigns' ) }
                     allowedFormats={ [] }
                 />
-                { helpText && <div className="giveflow-block-preview__hint">{ helpText }</div> }
+                { helpText && <div className="fundkit-block-preview__hint">{ helpText }</div> }
                 { shown.length === 0
                     ? (
-                        <div className="giveflow-block-preview__field">
+                        <div className="fundkit-block-preview__field">
                             { registry.length === 0
-                                ? __( 'No consent purposes exist yet. Add one in Settings, Consents.', 'giveflow-fundraising-campaigns' )
-                                : __( 'Pick which purposes this form asks for.', 'giveflow-fundraising-campaigns' ) }
+                                ? __( 'No consent purposes exist yet. Add one in Settings, Consents.', 'fundkit-fundraising-campaigns' )
+                                : __( 'Pick which purposes this form asks for.', 'fundkit-fundraising-campaigns' ) }
                         </div>
                     )
                     : shown.map( ( p ) => (
-                        <div key={ p.key } className="giveflow-block-preview__field">
-                            { p.required ? `${ p.label } (${ __( 'required', 'giveflow-fundraising-campaigns' ) })` : p.label }
+                        <div key={ p.key } className="fundkit-block-preview__field">
+                            { p.required ? `${ p.label } (${ __( 'required', 'fundkit-fundraising-campaigns' ) })` : p.label }
                         </div>
                     ) ) }
             </div>
@@ -135,9 +135,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Consent', 'giveflow-fundraising-campaigns' ),
-        description: __( 'Asks the donor to opt in to purposes your organization has defined in Settings.', 'giveflow-fundraising-campaigns' ),
-        category:   'giveflow-extras',
+        title:      __( 'Consent', 'fundkit-fundraising-campaigns' ),
+        description: __( 'Asks the donor to opt in to purposes your organization has defined in Settings.', 'fundkit-fundraising-campaigns' ),
+        category:   'fundkit-extras',
         icon:       BlockIcons[ 'consent' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

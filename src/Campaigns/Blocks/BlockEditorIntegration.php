@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Blocks;
+namespace FundKit\Campaigns\Blocks;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\CampaignPageTemplate;
-use GiveFlow\Campaigns\CampaignRepository;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\CampaignPageTemplate;
+use FundKit\Campaigns\CampaignRepository;
 use WP_Theme_JSON_Data;
 
 /**
@@ -16,22 +16,22 @@ use WP_Theme_JSON_Data;
  */
 final class BlockEditorIntegration
 {
-    private const HANDLE_EDITOR    = 'giveflow-campaign-blocks-editor';
-    private const HANDLE_EDITOR_UI = 'giveflow-campaign-blocks-editor-ui';
-    private const HANDLE_FRONTEND = 'giveflow-campaign-blocks';
+    private const HANDLE_EDITOR    = 'fundkit-campaign-blocks-editor';
+    private const HANDLE_EDITOR_UI = 'fundkit-campaign-blocks-editor-ui';
+    private const HANDLE_FRONTEND = 'fundkit-campaign-blocks';
     private const BUILD_DIR       = 'build/admin/campaign-blocks';
 
     // Must list every registered campaign block: gates the front-end CSS enqueue.
     private const BLOCK_NAMES = [
-        'giveflow/campaign-image',
-        'giveflow/campaign-stat',
-        'giveflow/campaign-progress',
-        'giveflow/campaign-grid',
-        'giveflow/donate-button',
-        'giveflow/donation-form',
-        'giveflow/top-donors',
-        'giveflow/recent-donations',
-        'giveflow/supporter-wall',
+        'fundkit/campaign-image',
+        'fundkit/campaign-stat',
+        'fundkit/campaign-progress',
+        'fundkit/campaign-grid',
+        'fundkit/donate-button',
+        'fundkit/donation-form',
+        'fundkit/top-donors',
+        'fundkit/recent-donations',
+        'fundkit/supporter-wall',
     ];
 
     /** @since 1.0.0 */
@@ -53,11 +53,11 @@ final class BlockEditorIntegration
      * @since 1.0.0
      */
     /** The template a campaign page's blocks came from. */
-    public const META_TEMPLATE = '_giveflow_campaign_page_template';
+    public const META_TEMPLATE = '_fundkit_campaign_page_template';
 
     public function registerPageMeta(): void
     {
-        register_post_meta('page', '_giveflow_campaign_id', [
+        register_post_meta('page', '_fundkit_campaign_id', [
             'type'          => 'integer',
             'single'        => true,
             'show_in_rest'  => true,
@@ -95,7 +95,7 @@ final class BlockEditorIntegration
     {
         $postId = self::editedPostId();
 
-        return $postId > 0 ? (int) get_post_meta($postId, '_giveflow_campaign_id', true) : 0;
+        return $postId > 0 ? (int) get_post_meta($postId, '_fundkit_campaign_id', true) : 0;
     }
 
     /** The post the editor is open on, or 0. @since 1.0.0 */
@@ -134,7 +134,7 @@ final class BlockEditorIntegration
         }
 
         return (bool) apply_filters(
-            'giveflow.campaign.supports_page_templates',
+            'fundkit.campaign.supports_page_templates',
             true,
             (string) $campaign->campaign_type,
             $campaign
@@ -196,11 +196,11 @@ final class BlockEditorIntegration
     public function registerCategory(array $categories): array
     {
         foreach ($categories as $category) {
-            if (($category['slug'] ?? '') === 'giveflow') return $categories;
+            if (($category['slug'] ?? '') === 'fundkit') return $categories;
         }
         array_unshift($categories, [
-            'slug'  => 'giveflow',
-            'title' => __('GiveFlow', 'giveflow-fundraising-campaigns'),
+            'slug'  => 'fundkit',
+            'title' => __('FundKit', 'fundkit-fundraising-campaigns'),
             'icon'  => 'heart',
         ]);
         return $categories;
@@ -209,30 +209,30 @@ final class BlockEditorIntegration
     /** @since 1.0.0 */
     public function enqueueEditorAssets(): void
     {
-        $assetPath = GIVEFLOW_DIR . self::BUILD_DIR . '/index.asset.php';
+        $assetPath = FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
         if (! file_exists($assetPath)) return;
         $asset = require $assetPath;
 
         wp_enqueue_script(
             self::HANDLE_EDITOR,
-            GIVEFLOW_URL . self::BUILD_DIR . '/index.js',
+            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? GIVEFLOW_VERSION,
+            $asset['version']      ?? FUNDKIT_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE_EDITOR, 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE_EDITOR, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
 
         // Editor-chrome styles (the layout picker's modal). Kept out of
         // campaign-blocks.css, which the front end also loads, and only sent to
         // the screens that can open the picker: the blocks themselves can be
         // used on any page, but the layout switcher shows on a campaign's own.
         $uiCss = 'build/admin/campaign-blocks-ui.css';
-        if (self::pageTemplatesAvailable() && file_exists(GIVEFLOW_DIR . $uiCss)) {
+        if (self::pageTemplatesAvailable() && file_exists(FUNDKIT_DIR . $uiCss)) {
             wp_enqueue_style(
                 self::HANDLE_EDITOR_UI,
-                GIVEFLOW_URL . $uiCss,
+                FUNDKIT_URL . $uiCss,
                 ['wp-components'],
-                (string) filemtime(GIVEFLOW_DIR . $uiCss)
+                (string) filemtime(FUNDKIT_DIR . $uiCss)
             );
         }
 
@@ -241,7 +241,7 @@ final class BlockEditorIntegration
         // disagree about which values exist.
         wp_add_inline_script(
             self::HANDLE_EDITOR,
-            'window.giveflowCampaignBlocks = Object.assign( window.giveflowCampaignBlocks || {}, '
+            'window.fundkitCampaignBlocks = Object.assign( window.fundkitCampaignBlocks || {}, '
             . wp_json_encode([
                 'bindingFields' => CampaignBindings::fields(),
                 'pageTemplates' => self::pageTemplatesAvailable(),
@@ -262,15 +262,15 @@ final class BlockEditorIntegration
         if (! is_admin()) {
             return;
         }
-        $cssPath = GIVEFLOW_DIR . 'build/admin/campaign-blocks.css';
+        $cssPath = FUNDKIT_DIR . 'build/admin/campaign-blocks.css';
         if (file_exists($cssPath)) {
             wp_enqueue_style(
                 self::HANDLE_FRONTEND,
-                GIVEFLOW_URL . 'build/admin/campaign-blocks.css',
+                FUNDKIT_URL . 'build/admin/campaign-blocks.css',
                 [],
-                // mtime, not GIVEFLOW_VERSION: the built css changes without a
+                // mtime, not FUNDKIT_VERSION: the built css changes without a
                 // plugin release and a stale cache means invisible restyles.
-                (string) (@filemtime($cssPath) ?: GIVEFLOW_VERSION)
+                (string) (@filemtime($cssPath) ?: FUNDKIT_VERSION)
             );
             wp_style_add_data(self::HANDLE_FRONTEND, 'rtl', 'replace');
         }
@@ -293,7 +293,7 @@ final class BlockEditorIntegration
         foreach (self::BLOCK_NAMES as $name) {
             if (has_block($name, $post)) {
                 $hasAnyBlock = true;
-                if ($name === 'giveflow/donate-button') {
+                if ($name === 'fundkit/donate-button') {
                     $hasDonateButton = true;
                 }
             }
@@ -310,7 +310,7 @@ final class BlockEditorIntegration
     }
 
     /**
-     * has_block() only sees the post's own content, so a GiveFlow block nested in a
+     * has_block() only sees the post's own content, so a FundKit block nested in a
      * synced pattern or template part would render unstyled. render_block fires
      * wherever the block lives, and a late enqueue still prints.
      *
@@ -323,7 +323,7 @@ final class BlockEditorIntegration
             return $content;
         }
         $this->enqueueBlockStyle();
-        if ($name === 'giveflow/donate-button') {
+        if ($name === 'fundkit/donate-button') {
             $this->enqueueDonateButtonModal();
         }
         return $content;
@@ -335,13 +335,13 @@ final class BlockEditorIntegration
         if (wp_style_is(self::HANDLE_FRONTEND, 'enqueued')) {
             return;
         }
-        $cssPath = GIVEFLOW_DIR . 'build/admin/campaign-blocks.css';
+        $cssPath = FUNDKIT_DIR . 'build/admin/campaign-blocks.css';
         if (file_exists($cssPath)) {
             wp_enqueue_style(
                 self::HANDLE_FRONTEND,
-                GIVEFLOW_URL . 'build/admin/campaign-blocks.css',
+                FUNDKIT_URL . 'build/admin/campaign-blocks.css',
                 [],
-                (string) (@filemtime($cssPath) ?: GIVEFLOW_VERSION)
+                (string) (@filemtime($cssPath) ?: FUNDKIT_VERSION)
             );
             wp_style_add_data(self::HANDLE_FRONTEND, 'rtl', 'replace');
         }
@@ -350,14 +350,14 @@ final class BlockEditorIntegration
     /** @since 1.0.0 */
     private function enqueueDonateButtonModal(): void
     {
-        if (wp_script_is('giveflow-donate-button-modal', 'enqueued')) {
+        if (wp_script_is('fundkit-donate-button-modal', 'enqueued')) {
             return;
         }
         wp_enqueue_script(
-            'giveflow-donate-button-modal',
-            GIVEFLOW_URL . 'assets/donate-button/modal.js',
+            'fundkit-donate-button-modal',
+            FUNDKIT_URL . 'assets/donate-button/modal.js',
             [],
-            GIVEFLOW_VERSION,
+            FUNDKIT_VERSION,
             true
         );
     }

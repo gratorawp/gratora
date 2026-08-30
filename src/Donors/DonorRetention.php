@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donors;
+namespace FundKit\Donors;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Foundation\Batch\BatchProcessor;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Foundation\Batch\BatchProcessor;
+use FundKit\Vendor\Queryable\DB;
 use Throwable;
 
 /**
  * Daily GDPR retention runner. Soft-redacts donors whose last activity
  * exceeds the configured window and have no active/paused recurring plan.
  *
- * This is the only thing in GiveFlow that destroys data without being asked, so it
+ * This is the only thing in FundKit that destroys data without being asked, so it
  * takes two things to reach a donor. The privacy setting `erase_inactive_donors`
  * has to be switched on: nothing is swept on a site whose admin never asked for
  * it. And the sweep does not start the day it is switched on, because an org
@@ -28,20 +28,20 @@ use Throwable;
  */
 final class DonorRetention
 {
-    public const HOOK = 'giveflow.cron.donor_retention';
+    public const HOOK = 'fundkit.cron.donor_retention';
 
     /** Stamped forward on activation, and by anything that bulk-loads donors. */
-    public const STARTS_AT_OPTION = 'giveflow_retention_starts_at';
+    public const STARTS_AT_OPTION = 'fundkit_retention_starts_at';
     public const GRACE_DAYS = 30;
 
     /**
-     * How far the current pass has walked. `giveflow.donor.erasure_handlers` runs
+     * How far the current pass has walked. `fundkit.donor.erasure_handlers` runs
      * third-party code inside the loop, so a donor whose erasure throws stays
      * unredacted and would be first in the same window every night, taking
      * everyone behind them with it. The cursor steps past that donor, the
      * failure is logged, and the pass still finishes.
      */
-    private const CURSOR_OPTION = 'giveflow_retention_cursor';
+    private const CURSOR_OPTION = 'fundkit_retention_cursor';
 
     private const DAILY = 86400;
     private const BATCH = 100;
@@ -61,7 +61,7 @@ final class DonorRetention
 
         // $previous defaults so a caller firing the action with two arguments
         // is a re-arm rather than a fatal.
-        add_action('giveflow.settings.updated', static function (string $group, array $next, array $previous = []): void {
+        add_action('fundkit.settings.updated', static function (string $group, array $next, array $previous = []): void {
             if ($group !== 'privacy') return;
             if (empty($next['erase_inactive_donors']) || ! empty($previous['erase_inactive_donors'])) return;
 
@@ -89,12 +89,12 @@ final class DonorRetention
             fn (int $n) => array_map(
                 static fn ($r) => (int) ($r->id ?? 0),
                 DB::raw(
-                    "SELECT id FROM {$prefix}giveflow_donors d
+                    "SELECT id FROM {$prefix}fundkit_donors d
                      WHERE d.redacted_at IS NULL
                        AND d.id > %d
                        AND COALESCE(d.last_donation_at, d.created_at) < %s
                        AND NOT EXISTS (
-                           SELECT 1 FROM {$prefix}giveflow_recurring_plans p
+                           SELECT 1 FROM {$prefix}fundkit_recurring_plans p
                            WHERE p.donor_id = d.id
                              AND p.status IN ('active', 'paused')
                        )
@@ -164,7 +164,7 @@ final class DonorRetention
      */
     public function retentionYears(): int
     {
-        $opt = get_option('giveflow_privacy', []);
+        $opt = get_option('fundkit_privacy', []);
 
         // Returns before the filter, not after: an add-on may widen a window
         // that is in force, but nothing outside this option gets to start
@@ -176,7 +176,7 @@ final class DonorRetention
         // An add-on with a legal floor of its own raises it here. Gift Aid
         // needs the donor's name and address for six years after the tax year,
         // and redaction takes exactly those.
-        return (int) apply_filters('giveflow.donor.retention_years', $stored);
+        return (int) apply_filters('fundkit.donor.retention_years', $stored);
     }
 
     /** @since 1.0.0 */
@@ -194,7 +194,7 @@ final class DonorRetention
     {
         $stored = (int) get_option(self::STARTS_AT_OPTION, 0);
 
-        return (int) apply_filters('giveflow.donor.retention_starts_at', $stored);
+        return (int) apply_filters('fundkit.donor.retention_starts_at', $stored);
     }
 
     /**
@@ -230,7 +230,7 @@ final class DonorRetention
     {
         $window = $years === null
             ? $this->retentionYears()
-            : (int) apply_filters('giveflow.donor.retention_years', max(0, $years));
+            : (int) apply_filters('fundkit.donor.retention_years', max(0, $years));
 
         if ($window <= 0) {
             return ['eligible_now' => 0, 'within_days' => 0, 'days' => $days, 'starts_at' => self::startsAt(), 'years' => 0];
@@ -256,11 +256,11 @@ final class DonorRetention
         $prefix = DB::getPrefix();
 
         $rows = DB::raw(
-            "SELECT COUNT(*) AS n FROM {$prefix}giveflow_donors d
+            "SELECT COUNT(*) AS n FROM {$prefix}fundkit_donors d
              WHERE d.redacted_at IS NULL
                AND COALESCE(d.last_donation_at, d.created_at) < %s
                AND NOT EXISTS (
-                   SELECT 1 FROM {$prefix}giveflow_recurring_plans p
+                   SELECT 1 FROM {$prefix}fundkit_recurring_plans p
                    WHERE p.donor_id = d.id
                      AND p.status IN ('active', 'paused')
                )",

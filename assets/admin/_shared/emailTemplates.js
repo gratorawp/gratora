@@ -19,9 +19,9 @@ import { __ } from '@wordpress/i18n';
  */
 function tagsFor( id, fallback ) {
     const fromServer = typeof window !== 'undefined'
-        && window.giveflow
-        && window.giveflow.email_template_tags
-        && window.giveflow.email_template_tags[ id ];
+        && window.fundkit
+        && window.fundkit.email_template_tags
+        && window.fundkit.email_template_tags[ id ];
 
     return Array.isArray( fromServer ) && fromServer.length
         ? fromServer.map( ( t ) => `{${ t }}` )
@@ -35,8 +35,8 @@ function tagsFor( id, fallback ) {
  */
 function addonTemplates() {
     const meta = typeof window !== 'undefined'
-        && window.giveflow
-        && window.giveflow.email_template_meta;
+        && window.fundkit
+        && window.fundkit.email_template_meta;
 
     if ( ! Array.isArray( meta ) ) return [];
 
@@ -62,72 +62,72 @@ function coreTemplates() {
     return [
         {
             id:        'donation_receipt',
-            label:     __( 'Donation receipt', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'Sent the moment a donation is successfully paid. This is the donor-facing thank you and tax receipt.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Donation receipt', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'Sent the moment a donation is successfully paid. This is the donor-facing thank you and tax receipt.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'donation_receipt', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{receipt_number}', '{reference}', '{download_url}' ] ),
         },
         {
             id:        'donation_first',
-            label:     __( 'First donation welcome', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'A one-off welcome sent when a donor gives for the first time, separate from the receipt. Warm and relational, not transactional.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'First donation welcome', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'A one-off welcome sent when a donor gives for the first time, separate from the receipt. Warm and relational, not transactional.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'donation_first', [ '{donor_first_name}', '{donor_name}', '{organisation_name}' ] ),
         },
         {
             id:        'offline_instructions',
-            label:     __( 'Offline donation instructions', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'Sent when a donor picks bank transfer. Shows IBAN, reference, and amount so they can complete the transfer.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Offline donation instructions', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'Sent when a donor picks bank transfer. Shows IBAN, reference, and amount so they can complete the transfer.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'offline_instructions', [ '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}', '{bank_details}', '{instructions}' ] ),
         },
         {
             id:        'donation_pending',
-            label:     __( 'Pending donation', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'Sent when a payment is processing (SEPA settlement, delayed cards) before the receipt is issued.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Pending donation', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'Sent when a payment is processing (SEPA settlement, delayed cards) before the receipt is issued.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'donation_pending', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}' ] ),
         },
         {
             id:        'donation_refunded',
-            label:     __( 'Donation refunded', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'Sent when an admin refunds a donation. Explains when funds will reappear on the donor card.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Donation refunded', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'Sent when an admin refunds a donation. Explains when funds will reappear on the donor card.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'donation_refunded', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}' ] ),
         },
         {
             id:        'payment_instructions',
-            label:     __( 'Offline payment instructions', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'The bank-transfer instructions for a payment that is not a donation, such as an order an add-on takes through the same rails.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Payer', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Offline payment instructions', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'The bank-transfer instructions for a payment that is not a donation, such as an order an add-on takes through the same rails.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Payer', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'payment_instructions', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}', '{bank_details}', '{instructions}' ] ),
         },
         {
             id:        'payment_pending',
-            label:     __( 'Pending payment', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'The processing notice for a payment that is not a donation, so the payer is not told their purchase was a contribution.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Payer', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Pending payment', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'The processing notice for a payment that is not a donation, so the payer is not told their purchase was a contribution.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Payer', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'payment_pending', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}' ] ),
         },
         {
             id:        'payment_refunded',
-            label:     __( 'Payment refunded', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'The refund notice for a payment that is not a donation. Same facts as the donation one, without calling the money a donation.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Payer', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Payment refunded', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'The refund notice for a payment that is not a donation. Same facts as the donation one, without calling the money a donation.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Payer', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'payment_refunded', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{reference}' ] ),
         },
         {
             id:        'recurring_renewal',
-            label:     __( 'Recurring renewal', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'Sent for each successful renewal of a recurring donation.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Recurring renewal', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'Sent for each successful renewal of a recurring donation.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'recurring_renewal', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{receipt_number}', '{reference}' ] ),
         },
         {
             id:        'subscription_payment_failed',
-            label:     __( 'Recurring payment failed', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'Sent the first time a renewal is declined, so the donor can update their card before the donation lapses. Retries do not re-send it.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Recurring payment failed', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'Sent the first time a renewal is declined, so the donor can update their card before the donation lapses. Retries do not re-send it.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             // Only what onRecurringFailed actually passes. The wider donation
             // list advertises tags this email has no value for (receipt
             // number, download url), and an unsupplied tag renders literally.
@@ -135,37 +135,37 @@ function coreTemplates() {
         },
         {
             id:        'subscription_cancelled',
-            label:     __( 'Subscription cancelled', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'Sent when a recurring donation is cancelled, either by the donor or by an admin.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Subscription cancelled', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'Sent when a recurring donation is cancelled, either by the donor or by an admin.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'subscription_cancelled', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}' ] ),
         },
         {
             id:        'recurring_amount_changed',
-            label:     __( 'Recurring amount changed', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'Sent when someone at the organization changes the amount of a recurring donation. A donor who changes their own in the portal is not emailed.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Recurring amount changed', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'Sent when someone at the organization changes the amount of a recurring donation. A donor who changes their own in the portal is not emailed.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'recurring_amount_changed', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{old_amount}', '{portal_url}' ] ),
         },
         {
             id:        'recurring_paused',
-            label:     __( 'Recurring donation paused', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'Sent when someone at the organization pauses a recurring donation, with the date it restarts. A donor who pauses their own in the portal is not emailed.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Recurring donation paused', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'Sent when someone at the organization pauses a recurring donation, with the date it restarts. A donor who pauses their own in the portal is not emailed.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'recurring_paused', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{resumes_at}', '{portal_url}' ] ),
         },
         {
             id:        'recurring_resumed',
-            label:     __( 'Recurring donation restarted', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'Sent when someone at the organization restarts a paused recurring donation, with the next payment date.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Recurring donation restarted', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'Sent when someone at the organization restarts a paused recurring donation, with the next payment date.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'recurring_resumed', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{next_payment_at}', '{portal_url}' ] ),
         },
         {
             id:        'recurring_skipped',
-            label:     __( 'Next donation skipped', 'giveflow-fundraising-campaigns' ),
-            desc:      __( 'Sent when someone at the organization skips one upcoming payment. The recurring donation itself continues.', 'giveflow-fundraising-campaigns' ),
-            recipient: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label:     __( 'Next donation skipped', 'fundkit-fundraising-campaigns' ),
+            desc:      __( 'Sent when someone at the organization skips one upcoming payment. The recurring donation itself continues.', 'fundkit-fundraising-campaigns' ),
+            recipient: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             tags:      tagsFor( 'recurring_skipped', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{next_payment_at}', '{portal_url}' ] ),
         },
     ];

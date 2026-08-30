@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Blocks;
+namespace FundKit\Campaigns\Blocks;
 
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Foundation\Helpers\View;
 
 /**
  * Renders the campaign fundraising progress bar.
@@ -16,7 +16,7 @@ final class CampaignProgressBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/campaign-progress';
+        return 'fundkit/campaign-progress';
     }
 
     /** @since 1.0.0 */

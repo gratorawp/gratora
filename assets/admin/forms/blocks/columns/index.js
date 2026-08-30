@@ -1,8 +1,8 @@
 /**
- * giveflow/columns: multi-column container for content blocks.
+ * fundkit/columns: multi-column container for content blocks.
  *
  * Renders as a CSS grid in both the editor preview and the donor-facing
- * runtime. Decoration-only (no donor input fields); use giveflow/row for the
+ * runtime. Decoration-only (no donor input fields); use fundkit/row for the
  * form-field side-by-side layout.
  */
 
@@ -14,27 +14,27 @@ import { BlockIcons } from '../_shared/block-icons';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import Slider from '../../../_shared/components/Slider';
 
-const NAME = 'giveflow/columns';
+const NAME = 'fundkit/columns';
 
 const GAP_UNITS = [ 'px', 'em', 'rem', '%' ];
 
 // Decoration-only blocks. Field/step blocks (donation-amount, submit-button,
 // donor-detail blocks, ...) intentionally excluded: the walker treats
-// giveflow/columns purely as a decoration container, so any step inside escapes
-// the wrapper and renders as a top-level step. Mirrors giveflow/section.
+// fundkit/columns purely as a decoration container, so any step inside escapes
+// the wrapper and renders as a top-level step. Mirrors fundkit/section.
 const ALLOWED = [
-    'giveflow/heading',
-    'giveflow/paragraph',
-    'giveflow/section',
-    'giveflow/goal',
-    'giveflow/html',
+    'fundkit/heading',
+    'fundkit/paragraph',
+    'fundkit/section',
+    'fundkit/goal',
+    'fundkit/html',
 ];
 
 function Edit( { attributes, setAttributes } ) {
     const { columns = 2, gap = 16, gapUnit = 'px', condition = DEFAULT_CONDITION } = attributes;
 
     const blockProps = useBlockProps( {
-        className: 'giveflow-block-preview giveflow-block-preview--columns',
+        className: 'fundkit-block-preview fundkit-block-preview--columns',
         style: {
             display:             'grid',
             gridTemplateColumns: `repeat(${ columns }, minmax(0, 1fr))`,
@@ -48,16 +48,16 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Columns', 'giveflow-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Columns', 'fundkit-fundraising-campaigns' ) } initialOpen>
                     <Slider
-                        label={ __( 'Columns', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Columns', 'fundkit-fundraising-campaigns' ) }
                         value={ columns }
                         onChange={ ( v ) => setAttributes( { columns: v } ) }
                         min={ 1 }
                         max={ 6 }
                     />
                     <Slider
-                        label={ __( 'Gap', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Gap', 'fundkit-fundraising-campaigns' ) }
                         value={ gap }
                         onChange={ ( v ) => setAttributes( { gap: v } ) }
                         min={ 0 }
@@ -85,9 +85,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Columns', 'giveflow-fundraising-campaigns' ),
-        description: __( 'Lay out content blocks side by side in a grid.', 'giveflow-fundraising-campaigns' ),
-        category:    'giveflow-content',
+        title:       __( 'Columns', 'fundkit-fundraising-campaigns' ),
+        description: __( 'Lay out content blocks side by side in a grid.', 'fundkit-fundraising-campaigns' ),
+        category:    'fundkit-content',
         icon:        BlockIcons[ 'columns' ],
         supports:    { html: false, anchor: false, inserter: true },
         attributes: {

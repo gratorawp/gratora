@@ -1,1 +1,1 @@
-export { default, resolveEffectiveTokens } from '@giveflow/ui/styling/StylePreview';
+export { default, resolveEffectiveTokens } from '@fundkit/ui/styling/StylePreview';

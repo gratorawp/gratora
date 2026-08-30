@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
+use FundKit\Donations\Donation;
 use WP_REST_Request;
 
 /**
@@ -18,11 +18,11 @@ final class PortalDonationPayloadTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        update_option('giveflow_currency_locale', [
+        update_option('fundkit_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'EUR', 'GBP', 'JPY'],
         ]);
-        update_option('giveflow_fx_rates', [
+        update_option('fundkit_fx_rates', [
             'base'       => 'USD',
             'date'       => gmdate('Y-m-d'),
             'fetched_at' => gmdate('c'),
@@ -41,10 +41,10 @@ final class PortalDonationPayloadTest extends IntegrationTestCase
         $this->assertNotSame('', $url, 'the campaign has a page, so the link is offered');
 
         parse_str((string) wp_parse_url($url, PHP_URL_QUERY), $query);
-        $this->assertSame('500000', (string) ($query['giveflow_amount'] ?? ''));
+        $this->assertSame('500000', (string) ($query['fundkit_amount'] ?? ''));
         $this->assertSame(
             'JPY',
-            (string) ($query['giveflow_currency'] ?? ''),
+            (string) ($query['fundkit_currency'] ?? ''),
             'without this the form reads 500000 as its own currency: 5,000 yen becomes 5,000 dollars'
         );
     }
@@ -92,7 +92,7 @@ final class PortalDonationPayloadTest extends IntegrationTestCase
 
     private function createCampaign(): int
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Give again', 'status' => 'published']));
 
@@ -101,7 +101,7 @@ final class PortalDonationPayloadTest extends IntegrationTestCase
 
     private function paidDonation(int $amountCents, string $currency, ?int $campaignId = null): string
     {
-        $create = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode(array_filter([
             'email'        => 'portal-payload@example.test',
@@ -115,7 +115,7 @@ final class PortalDonationPayloadTest extends IntegrationTestCase
         $this->assertArrayHasKey('reference', $created, (string) wp_json_encode($created));
         $reference = (string) $created['reference'];
 
-        $confirm = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);
@@ -130,7 +130,7 @@ final class PortalDonationPayloadTest extends IntegrationTestCase
         wp_set_current_user($admin);
 
         try {
-            $req = new WP_REST_Request('POST', "/giveflow/v1/admin/donations/{$reference}/refund");
+            $req = new WP_REST_Request('POST', "/fundkit/v1/admin/donations/{$reference}/refund");
             $req->set_header('content-type', 'application/json');
             $req->set_body((string) wp_json_encode(['amount_cents' => $amountCents]));
             $res = rest_do_request($req);
@@ -143,13 +143,13 @@ final class PortalDonationPayloadTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function showDonation(string $reference): array
     {
-        return (array) $this->asDonor($reference, "/giveflow/v1/portal/donations/{$reference}");
+        return (array) $this->asDonor($reference, "/fundkit/v1/portal/donations/{$reference}");
     }
 
     /** @return array<string,mixed> */
     private function listDonations(string $reference): array
     {
-        $rows = (array) $this->asDonor($reference, '/giveflow/v1/portal/donations');
+        $rows = (array) $this->asDonor($reference, '/fundkit/v1/portal/donations');
         foreach ($rows as $row) {
             if (($row['reference'] ?? '') === $reference) {
                 return (array) $row;
@@ -163,7 +163,7 @@ final class PortalDonationPayloadTest extends IntegrationTestCase
         $donation = Donation::query()->find('reference', $reference);
 
         $sid = $this->portalSession((int) $donation->donor_id, bin2hex(random_bytes(8)));
-        $_COOKIE['giveflow_donor_session'] = $sid;
+        $_COOKIE['fundkit_donor_session'] = $sid;
 
         try {
             $res = rest_do_request(new WP_REST_Request('GET', $route));
@@ -171,7 +171,7 @@ final class PortalDonationPayloadTest extends IntegrationTestCase
 
             return $res->get_data();
         } finally {
-            unset($_COOKIE['giveflow_donor_session']);
+            unset($_COOKIE['fundkit_donor_session']);
         }
     }
 }

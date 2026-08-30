@@ -15,15 +15,15 @@ $sizeClass  = 'is-size-' . (in_array($size, ['sm', 'md', 'lg'], true) ? $size : 
 <div <?php
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
 echo get_block_wrapper_attributes(array_filter([
-    'class' => 'giveflow-block giveflow-block--donate-button ' . $alignClass . ($fullWidth ? ' is-full-width' : ''),
+    'class' => 'fundkit-block fundkit-block--donate-button ' . $alignClass . ($fullWidth ? ' is-full-width' : ''),
     'style' => $styleVars,
 ]));
 // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
-     data-block="giveflow/donate-button">
+     data-block="fundkit/donate-button">
     <?php if ($formSlug): ?>
         <button type="button"
-                class="giveflow-donate-button <?php echo esc_attr($sizeClass);
+                class="fundkit-donate-button <?php echo esc_attr($sizeClass);
 ?>"
                 data-form-slug="<?php echo esc_attr($formSlug);
 ?>">
@@ -31,20 +31,20 @@ echo get_block_wrapper_attributes(array_filter([
 ?>
         </button>
         <?php if ($formHtml): ?>
-            <div class="giveflow-donate-modal" data-form-slug="<?php echo esc_attr($formSlug);
+            <div class="fundkit-donate-modal" data-form-slug="<?php echo esc_attr($formSlug);
 ?>" hidden>
-                <div class="giveflow-donate-modal__backdrop" data-giveflow-modal-close></div>
-                <div class="giveflow-donate-modal__panel" role="dialog" aria-modal="true" aria-label="<?php echo esc_attr($label);
+                <div class="fundkit-donate-modal__backdrop" data-fundkit-modal-close></div>
+                <div class="fundkit-donate-modal__panel" role="dialog" aria-modal="true" aria-label="<?php echo esc_attr($label);
 ?>">
-                    <button type="button" class="giveflow-donate-modal__close" aria-label="<?php esc_attr_e('Close', 'giveflow-fundraising-campaigns');
-?>" data-giveflow-modal-close>
+                    <button type="button" class="fundkit-donate-modal__close" aria-label="<?php esc_attr_e('Close', 'fundkit-fundraising-campaigns');
+?>" data-fundkit-modal-close>
                         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                             <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                         </svg>
                     </button>
                     <?php // $formHtml is trusted do_shortcode() output of the donation form; it ships its own ?>
                     <?php // <style>/<script>/JSON config that wp_kses_post would strip, so echo it raw like the_content(). ?>
-                    <div class="giveflow-donate-modal__body"><?php echo $formHtml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_shortcode('[giveflow_donation_form]') output; DonationFormShortcode::renderBlocks esc_attr()s every attribute and wp_json_encode()s the config with JSON_HEX_TAG. ?></div>
+                    <div class="fundkit-donate-modal__body"><?php echo $formHtml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_shortcode('[fundkit_donation_form]') output; DonationFormShortcode::renderBlocks esc_attr()s every attribute and wp_json_encode()s the config with JSON_HEX_TAG. ?></div>
                 </div>
             </div>
         <?php endif; ?>

@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\CampaignMetricsService;
-use GiveFlow\Dashboard\DashboardMetricsService;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donors\DonorRepository;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\Time\FrozenClock;
-use GiveFlow\Recurring\RecurringPlanRepository;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\CampaignMetricsService;
+use FundKit\Dashboard\DashboardMetricsService;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donors\DonorRepository;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Time\FrozenClock;
+use FundKit\Recurring\RecurringPlanRepository;
+use FundKit\Vendor\Queryable\DB;
 use WP_REST_Request;
 
 /**
@@ -87,7 +87,7 @@ final class AllTimeChartBoundTest extends IntegrationTestCase
     {
         $this->zeroDated($this->paid('2026-01-10 12:00:00', 100));
 
-        $req  = new WP_REST_Request('GET', '/giveflow/v1/admin/exports/options');
+        $req  = new WP_REST_Request('GET', '/fundkit/v1/admin/exports/options');
         $opts = rest_do_request($req)->get_data();
 
         $this->assertSame(
@@ -160,7 +160,7 @@ final class AllTimeChartBoundTest extends IntegrationTestCase
     {
         $prefix = DB::getPrefix();
         DB::raw(
-            "UPDATE {$prefix}giveflow_donations SET paid_at = '0000-00-00 00:00:00' WHERE id = %d",
+            "UPDATE {$prefix}fundkit_donations SET paid_at = '0000-00-00 00:00:00' WHERE id = %d",
             [(int) $d->id]
         );
     }
@@ -168,7 +168,7 @@ final class AllTimeChartBoundTest extends IntegrationTestCase
     private function paid(string $utc, int $cents, ?int $campaignId = null): Donation
     {
         $d = Donation::make();
-        $d->reference         = 'GIVEFLOW-BOUND-' . uniqid();
+        $d->reference         = 'FUNDKIT-BOUND-' . uniqid();
         if ($campaignId !== null) {
             $d->campaign_id = $campaignId;
         }

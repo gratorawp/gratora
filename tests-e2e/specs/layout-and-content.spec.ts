@@ -3,67 +3,67 @@
  * E2E (BlockPipelineCoverageTest verified they survive the config but
  * nothing exercised them in a browser):
  *
- *   - giveflow/heading
- *   - giveflow/paragraph
- *   - giveflow/html
- *   - giveflow/divider
- *   - giveflow/columns
- *   - giveflow/row
- *   - giveflow/section
- *   - giveflow/recurring-toggle
- *   - giveflow/fund-picker (interactivity gated on funds being present)
- *   - giveflow/privacy-notice
- *   - giveflow/goal
+ *   - fundkit/heading
+ *   - fundkit/paragraph
+ *   - fundkit/html
+ *   - fundkit/divider
+ *   - fundkit/columns
+ *   - fundkit/row
+ *   - fundkit/section
+ *   - fundkit/recurring-toggle
+ *   - fundkit/fund-picker (interactivity gated on funds being present)
+ *   - fundkit/privacy-notice
+ *   - fundkit/goal
  *
  * Strategy: each "renders" test asserts the block survived render with its
  * unique seeded marker. Interactive blocks (recurring-toggle, fund-picker)
  * additionally exercise the control. A final test does a full submit so the
  * runtime payload builder doesn't choke on any of the included blocks.
  *
- * Seeded via `wp giveflow e2e-seed` -> GIVEFLOW_E2E_LAYOUT_FORM_PATH.
+ * Seeded via `wp fundkit e2e-seed` -> FUNDKIT_E2E_LAYOUT_FORM_PATH.
  */
 
 import { test, expect } from '../fixtures/donor-form';
 
-const FORM_PATH = process.env.GIVEFLOW_E2E_LAYOUT_FORM_PATH ?? '';
+const FORM_PATH = process.env.FUNDKIT_E2E_LAYOUT_FORM_PATH ?? '';
 
 test.describe('layout + content blocks', () => {
-    test.skip(! FORM_PATH, 'set GIVEFLOW_E2E_LAYOUT_FORM_PATH via `wp giveflow e2e-seed`');
+    test.skip(! FORM_PATH, 'set FUNDKIT_E2E_LAYOUT_FORM_PATH via `wp fundkit e2e-seed`');
     test.use({ formPath: FORM_PATH });
 
     test('heading block renders at the seeded level with the seeded text', async ({ donor }) => {
-        const heading = donor.form.locator('h2.giveflow-form__heading', { hasText: 'LAYOUT_HEADING_TEXT' });
+        const heading = donor.form.locator('h2.fundkit-form__heading', { hasText: 'LAYOUT_HEADING_TEXT' });
         await expect(heading).toBeVisible();
     });
 
     test('paragraph block renders the seeded text', async ({ donor }) => {
-        const para = donor.form.locator('p.giveflow-form__paragraph', { hasText: 'LAYOUT_PARAGRAPH_TEXT' });
+        const para = donor.form.locator('p.fundkit-form__paragraph', { hasText: 'LAYOUT_PARAGRAPH_TEXT' });
         await expect(para).toBeVisible();
     });
 
     test('html block renders the sanitised inner HTML', async ({ donor }) => {
-        const html = donor.form.locator('.giveflow-form__html .layout-html-marker', { hasText: 'LAYOUT_HTML_TEXT' });
+        const html = donor.form.locator('.fundkit-form__html .layout-html-marker', { hasText: 'LAYOUT_HTML_TEXT' });
         await expect(html).toBeVisible();
     });
 
     test('divider renders as a styled <hr>', async ({ donor }) => {
-        await expect(donor.form.locator('hr.giveflow-form__divider').first()).toBeVisible();
+        await expect(donor.form.locator('hr.fundkit-form__divider').first()).toBeVisible();
     });
 
     test('columns container renders its children side by side', async ({ donor }) => {
-        const cols = donor.form.locator('.giveflow-block--columns').first();
+        const cols = donor.form.locator('.fundkit-block--columns').first();
         await expect(cols).toBeVisible();
         await expect(cols.locator('h4', { hasText: 'LAYOUT_COL_LEFT' })).toBeVisible();
         await expect(cols.locator('h4', { hasText: 'LAYOUT_COL_RIGHT' })).toBeVisible();
     });
 
     test('row renders nested donor fields together', async ({ donor }) => {
-        // The seeded row holds giveflow/name + giveflow/email. The runtime groups
-        // row-tagged donor fields into a `.giveflow-form__grid` wrapper (the
+        // The seeded row holds fundkit/name + fundkit/email. The runtime groups
+        // row-tagged donor fields into a `.fundkit-form__grid` wrapper (the
         // CSS-grid container that drives the row layout); the standalone
-        // `.giveflow-form__row` class is the name field's INNER first+last
+        // `.fundkit-form__row` class is the name field's INNER first+last
         // two-up wrapper, not the row block's wrapper.
-        const grid = donor.form.locator('.giveflow-form__grid').first();
+        const grid = donor.form.locator('.fundkit-form__grid').first();
         await expect(grid).toBeVisible();
         await expect(grid.locator('input[autocomplete="given-name"]')).toBeVisible();
         await expect(grid.locator('input[type="email"]')).toBeVisible();
@@ -72,18 +72,18 @@ test.describe('layout + content blocks', () => {
     test('section block emits a visible section wrapper', async ({ donor }) => {
         // The section block renders a generic group container with a section
         // class. We assert that SOMETHING with the section class survived.
-        const section = donor.form.locator('.giveflow-block--section, .giveflow-form__section').first();
+        const section = donor.form.locator('.fundkit-block--section, .fundkit-form__section').first();
         await expect(section).toBeVisible();
     });
 
     test('recurring-toggle renders frequencies and switching does not crash', async ({ donor }) => {
-        const fs = donor.form.locator('fieldset.giveflow-form__frequency');
+        const fs = donor.form.locator('fieldset.fundkit-form__frequency');
         await expect(fs).toBeVisible();
         await expect(fs.locator('legend')).toHaveText('LAYOUT_RECURRING_LABEL');
 
         // Two frequencies seeded: one-time + monthly. Options are buttons
         // (not labels) with role-pressed semantics.
-        const options = fs.locator('button.giveflow-form__frequency-option');
+        const options = fs.locator('button.fundkit-form__frequency-option');
         await expect(options).toHaveCount(2);
 
         // Pick the second frequency ("monthly").
@@ -92,7 +92,7 @@ test.describe('layout + content blocks', () => {
     });
 
     test('fund-picker renders its fieldset (interactivity depends on seeded funds)', async ({ donor }) => {
-        const fs = donor.form.locator('fieldset.giveflow-form__fund');
+        const fs = donor.form.locator('fieldset.fundkit-form__fund');
         await expect(fs).toBeVisible();
         // With Plugin::onActivation()'s seeded "general" fund present, at least
         // one selectable option should render. Skip if none for envs that
@@ -105,16 +105,16 @@ test.describe('layout + content blocks', () => {
 
     test('privacy-notice renders its seeded text', async ({ donor }) => {
         // privacy-notice goes through do_blocks() server-side then lands in a
-        // giveflow-form__html wrapper; the marker survives somewhere in the form.
+        // fundkit-form__html wrapper; the marker survives somewhere in the form.
         await expect(donor.form).toContainText('LAYOUT_PRIVACY_TEXT');
     });
 
     test('goal block renders without breaking the form', async ({ donor }) => {
         // The seeded campaign has no goal_cents, so the goal block may render
         // empty or with a "no goal" placeholder. The hard assertion is that
-        // the form is still data-giveflow-ready and submittable after the block
+        // the form is still data-fundkit-ready and submittable after the block
         // is in place.
-        await expect(donor.form).toHaveAttribute('data-giveflow-ready', 'true');
+        await expect(donor.form).toHaveAttribute('data-fundkit-ready', 'true');
     });
 
     test('a form with every layout + content block in place still submits cleanly', async ({ donor }) => {

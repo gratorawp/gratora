@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Forms\FormTemplates;
+use FundKit\Forms\FormTemplates;
 
 /**
  * A template names the settings it has an opinion about, and applying one
@@ -12,7 +12,7 @@ use GiveFlow\Forms\FormTemplates;
  * anything a template overwrites without naming is configuration the author
  * cannot get back.
  *
- * @covers \GiveFlow\Forms\FormTemplates
+ * @covers \FundKit\Forms\FormTemplates
  */
 final class FormTemplateSettingsScopeTest extends IntegrationTestCase
 {

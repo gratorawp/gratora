@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Mail;
+namespace FundKit\Mail;
 
-use GiveFlow\Settings\SettingsService;
+use FundKit\Settings\SettingsService;
 
 /**
  * Wraps wp_mail with configured From, Reply-To, and BCC, and per-template
- * subject/body from giveflow_email_settings.
+ * subject/body from fundkit_email_settings.
  *
  * @since 1.0.0
  */

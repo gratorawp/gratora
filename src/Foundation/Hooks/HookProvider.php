@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Hooks;
+namespace FundKit\Foundation\Hooks;
 
 /**
  * Base class for declarative WP hook attachment.

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\EventRecorder;
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Core\Commands\CoreCommandProvider;
-use GiveFlow\Foundation\Commands\CommandContext;
-use GiveFlow\Foundation\Commands\CommandRegistry;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Recurring\CampaignCancelRecurringJob;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanRepository;
+use FundKit\Analytics\EventRecorder;
+use FundKit\Campaigns\Campaign;
+use FundKit\Core\Commands\CoreCommandProvider;
+use FundKit\Foundation\Commands\CommandContext;
+use FundKit\Foundation\Commands\CommandRegistry;
+use FundKit\Foundation\Plugin;
+use FundKit\Recurring\CampaignCancelRecurringJob;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanRepository;
 
 /**
  * recurring.cancel_for_campaign starts the sweep that cancels every live plan,
@@ -34,7 +34,7 @@ final class RecurringCancelForCampaignCommandCountTest extends IntegrationTestCa
     private function ctx(): CommandContext
     {
         $user = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('giveflow_view_donations');
+        get_role('administrator')->add_cap('fundkit_view_donations');
         wp_set_current_user($user);
 
         return new CommandContext($user, 'rest', 'test-' . uniqid());

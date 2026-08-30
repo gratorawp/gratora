@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/components/ColorInput';
+export { default } from '@fundkit/ui/components/ColorInput';

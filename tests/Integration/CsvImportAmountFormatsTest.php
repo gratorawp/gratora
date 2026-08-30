@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Foundation\Identity\IdentityHasher;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\Transfer\CsvImporter;
+use FundKit\Donations\Donation;
+use FundKit\Donors\Donor;
+use FundKit\Foundation\Identity\IdentityHasher;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Transfer\CsvImporter;
 
 /**
  * How a written amount is read.

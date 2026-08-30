@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Upgrade;
+namespace FundKit\Foundation\Upgrade;
 
-use GiveFlow\Analytics\ErrorLog;
+use FundKit\Analytics\ErrorLog;
 /**
  * Runs the outstanding data migrations, one bounded step at a time.
  *
@@ -20,10 +20,10 @@ use GiveFlow\Analytics\ErrorLog;
  */
 final class UpgradeRunner
 {
-    public const OPTION_DONE = 'giveflow_upgrade_routines_done';
+    public const OPTION_DONE = 'fundkit_upgrade_routines_done';
 
     /** Last failure per routine id, so a stuck one is distinguishable. */
-    public const OPTION_FAILED = 'giveflow_upgrade_routines_failed';
+    public const OPTION_FAILED = 'fundkit_upgrade_routines_failed';
 
     /** @var list<UpgradeRoutine> */
     private array $routines;
@@ -35,7 +35,7 @@ final class UpgradeRunner
     public function __construct(array $routines = [])
     {
         // Add-ons register their own; core's ship in the order they are listed.
-        $filtered = (array) apply_filters('giveflow.upgrade.routines', $routines);
+        $filtered = (array) apply_filters('fundkit.upgrade.routines', $routines);
 
         $this->routines = array_values(array_filter(
             $filtered,

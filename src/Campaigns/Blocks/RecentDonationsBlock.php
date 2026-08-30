@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Blocks;
+namespace FundKit\Campaigns\Blocks;
 
-use GiveFlow\Campaigns\CampaignRepository;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorAvatars;
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Campaigns\CampaignRepository;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorAvatars;
+use FundKit\Foundation\Helpers\View;
 
 /**
  * Renders the most recent paid donations for a campaign.
@@ -29,7 +29,7 @@ final class RecentDonationsBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/recent-donations';
+        return 'fundkit/recent-donations';
     }
 
     /** @since 1.0.0 */
@@ -90,7 +90,7 @@ final class RecentDonationsBlock extends CampaignBlock
             // too. A suppressed picture beside their name and their words
             // would be no answer at all.
             if ($isAnonymous || $name === '' || $hidden) {
-                $name = __('Anonymous', 'giveflow-fundraising-campaigns');
+                $name = __('Anonymous', 'fundkit-fundraising-campaigns');
                 $isAnonymous = true;
             }
 
@@ -98,7 +98,7 @@ final class RecentDonationsBlock extends CampaignBlock
             $paidTs = strtotime((string) $paidAt) ?: $nowTs;
             $timeAgo = sprintf(
                 /* translators: %s: human-readable time difference, e.g. "5 minutes" */
-                __('%s ago', 'giveflow-fundraising-campaigns'),
+                __('%s ago', 'fundkit-fundraising-campaigns'),
                 human_time_diff($paidTs, $nowTs)
             );
 
@@ -123,8 +123,8 @@ final class RecentDonationsBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/recent-donations', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donations to show yet.', 'giveflow-fundraising-campaigns'),
-            'emptySubText' => __('Donations tend to follow the first one.', 'giveflow-fundraising-campaigns'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donations to show yet.', 'fundkit-fundraising-campaigns'),
+            'emptySubText' => __('Donations tend to follow the first one.', 'fundkit-fundraising-campaigns'),
             'emptyIcon'    => 'donation',
             'entries'      => $entries,
             'showAmount'   => (bool) ($attrs['showAmount'] ?? true),

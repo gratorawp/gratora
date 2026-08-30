@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Admin;
+namespace FundKit\Admin;
 
-use GiveFlow\Foundation\Hooks\HookProvider;
+use FundKit\Foundation\Hooks\HookProvider;
 
 /**
- * Registers the GiveFlow top-level admin menu and its dynamic subpages.
+ * Registers the FundKit top-level admin menu and its dynamic subpages.
  *
  * @since 1.0.0
  */
 final class AdminMenu extends HookProvider
 {
-    private const CAPABILITY = 'giveflow_access';
-    private const SLUG       = 'giveflow';
-    private const HANDLE     = 'giveflow-admin-dashboard';
+    private const CAPABILITY = 'fundkit_access';
+    private const SLUG       = 'fundkit';
+    private const HANDLE     = 'fundkit-admin-dashboard';
     private const BUILD_DIR  = 'build/admin/dashboard';
 
     /** @since 1.0.0 */
@@ -31,8 +31,8 @@ final class AdminMenu extends HookProvider
     public function registerMenu(): void
     {
         add_menu_page(
-            __('GiveFlow', 'giveflow-fundraising-campaigns'),
-            __('GiveFlow', 'giveflow-fundraising-campaigns'),
+            __('FundKit', 'fundkit-fundraising-campaigns'),
+            __('FundKit', 'fundkit-fundraising-campaigns'),
             self::CAPABILITY,
             self::SLUG,
             [$this, 'renderDashboard'],
@@ -41,17 +41,17 @@ final class AdminMenu extends HookProvider
         );
 
         // add_menu_page mints a first submenu carrying the parent's title, so the
-        // list opens with "GiveFlow" under "GiveFlow". Naming it here replaces it.
+        // list opens with "FundKit" under "FundKit". Naming it here replaces it.
         add_submenu_page(
             self::SLUG,
-            __('Dashboard', 'giveflow-fundraising-campaigns'),
-            __('Dashboard', 'giveflow-fundraising-campaigns'),
+            __('Dashboard', 'fundkit-fundraising-campaigns'),
+            __('Dashboard', 'fundkit-fundraising-campaigns'),
             self::CAPABILITY,
             self::SLUG,
             [$this, 'renderDashboard']
         );
 
-        $pages = apply_filters('giveflow.admin.pages', []);
+        $pages = apply_filters('fundkit.admin.pages', []);
         usort($pages, fn ($a, $b) => ($a['position'] ?? 50) <=> ($b['position'] ?? 50));
 
         foreach ($pages as $page) {
@@ -78,7 +78,7 @@ final class AdminMenu extends HookProvider
     }
 
     /**
-     * Adds GiveFlow actions (go to donations, new campaign, ...) to the WP 7.0
+     * Adds FundKit actions (go to donations, new campaign, ...) to the WP 7.0
      * global command palette (Cmd/Ctrl+K). Loads on every admin screen so the
      * commands are available from anywhere.
      *
@@ -88,20 +88,20 @@ final class AdminMenu extends HookProvider
     {
         if (! current_user_can(self::CAPABILITY)) return;
 
-        $assetPath = GIVEFLOW_DIR . 'build/admin/command-palette/index.asset.php';
+        $assetPath = FUNDKIT_DIR . 'build/admin/command-palette/index.asset.php';
         if (! file_exists($assetPath)) return;
 
         $asset = require $assetPath;
 
         wp_enqueue_script(
-            'giveflow-admin-command-palette',
-            GIVEFLOW_URL . 'build/admin/command-palette/index.js',
+            'fundkit-admin-command-palette',
+            FUNDKIT_URL . 'build/admin/command-palette/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? GIVEFLOW_VERSION,
+            $asset['version']      ?? FUNDKIT_VERSION,
             true
         );
-        wp_set_script_translations('giveflow-admin-command-palette', 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
-        wp_localize_script('giveflow-admin-command-palette', 'giveflowCommandPalette', [
+        wp_set_script_translations('fundkit-admin-command-palette', 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
+        wp_localize_script('fundkit-admin-command-palette', 'fundkitCommandPalette', [
             'adminUrl' => admin_url(),
         ]);
     }
@@ -115,7 +115,7 @@ final class AdminMenu extends HookProvider
             <?php // WP moves admin notices to just after this marker. Without it they
                   // land beside the React header instead of above it. ?>
             <hr class="wp-header-end" />
-            <div id="giveflow-admin-dashboard"></div>
+            <div id="fundkit-admin-dashboard"></div>
         </div>
         <?php
     }
@@ -123,26 +123,26 @@ final class AdminMenu extends HookProvider
     /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
-        $assetPath = GIVEFLOW_DIR . self::BUILD_DIR . '/index.asset.php';
+        $assetPath = FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
         if (! file_exists($assetPath)) return;
 
         $asset = require $assetPath;
 
         wp_enqueue_script(
             self::HANDLE,
-            GIVEFLOW_URL . self::BUILD_DIR . '/index.js',
+            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? GIVEFLOW_VERSION,
+            $asset['version']      ?? FUNDKIT_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
             self::HANDLE,
-            GIVEFLOW_URL . 'build/admin/dashboard.css',
+            FUNDKIT_URL . 'build/admin/dashboard.css',
             ['wp-components'],
-            (string) (@filemtime(GIVEFLOW_DIR . 'build/admin/dashboard.css') ?: GIVEFLOW_VERSION)
+            (string) (@filemtime(FUNDKIT_DIR . 'build/admin/dashboard.css') ?: FUNDKIT_VERSION)
         );
     }
 }

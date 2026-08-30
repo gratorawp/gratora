@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Donations\Refund;
-use GiveFlow\Receipts\Receipt;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donations\DonationService;
+use FundKit\Donations\Refund;
+use FundKit\Receipts\Receipt;
 use RuntimeException;
 use WP_REST_Request;
 
@@ -47,7 +47,7 @@ final class RefundFlowTest extends IntegrationTestCase
         }
 
         $eventTypes = array_column(
-            self::$wpdb->get_results("SELECT type FROM " . self::$prefix . "giveflow_events ORDER BY id"),
+            self::$wpdb->get_results("SELECT type FROM " . self::$prefix . "fundkit_events ORDER BY id"),
             'type'
         );
         $this->assertContains('donation.refunded', $eventTypes);
@@ -100,7 +100,7 @@ final class RefundFlowTest extends IntegrationTestCase
         $this->assertSame('refunded', $reloaded->status, '2000 + 3000 = full 5000; status flips to refunded');
 
         $refundCount = (int) self::$wpdb->get_var(self::$wpdb->prepare(
-            "SELECT COUNT(*) FROM " . self::$prefix . "giveflow_refunds WHERE donation_id = %d",
+            "SELECT COUNT(*) FROM " . self::$prefix . "fundkit_refunds WHERE donation_id = %d",
             $donation->id
         ));
         $this->assertSame(2, $refundCount);
@@ -148,7 +148,7 @@ final class RefundFlowTest extends IntegrationTestCase
     /** Drive a fresh donation through paid + async receipt issuance, then return the Donation row. */
     private function driveDonationToPaidAndIssueReceipt(): Donation
     {
-        $createReq = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body(json_encode([
             'email'        => 'sarah@example.com',
@@ -159,7 +159,7 @@ final class RefundFlowTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($createReq)->get_data()['reference'];
 
-        $confirmReq = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
+        $confirmReq = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
         $confirmReq->set_header('content-type', 'application/json');
         $confirmReq->set_body('{}');
         rest_do_request($confirmReq);
@@ -171,7 +171,7 @@ final class RefundFlowTest extends IntegrationTestCase
 
     private function createPendingDonation(): Donation
     {
-        $createReq = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body(json_encode([
             'email'        => 'pending@example.com',
@@ -186,11 +186,11 @@ final class RefundFlowTest extends IntegrationTestCase
 
     private function donationService(): DonationService
     {
-        return \GiveFlow\Foundation\Plugin::instance()->container->get(DonationService::class);
+        return \FundKit\Foundation\Plugin::instance()->container->get(DonationService::class);
     }
 
     private function donations(): DonationRepository
     {
-        return \GiveFlow\Foundation\Plugin::instance()->container->get(DonationRepository::class);
+        return \FundKit\Foundation\Plugin::instance()->container->get(DonationRepository::class);
     }
 }

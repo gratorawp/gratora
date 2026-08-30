@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
 
 /**
  * Every door onto donor_type has to offer the same words.
@@ -107,7 +107,7 @@ final class DonorTypeVocabularyTest extends IntegrationTestCase
         do_action('rest_api_init');
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $res = rest_do_request(new \WP_REST_Request('GET', '/giveflow/v1/admin/commands'));
+        $res = rest_do_request(new \WP_REST_Request('GET', '/fundkit/v1/admin/commands'));
         $this->assertSame(200, $res->get_status(), 'the command manifest has to be readable');
 
         return $this->enumsIn($res->get_data());

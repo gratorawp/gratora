@@ -6,13 +6,13 @@ import { __ } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 import Segmented from '../../../_shared/components/Segmented';
 
-const NAME = 'giveflow/submit-button';
+const NAME = 'fundkit/submit-button';
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'giveflow-fundraising-campaigns' ) },
-    { value: 'center', label: __( 'Center', 'giveflow-fundraising-campaigns' ) },
-    { value: 'right',  label: __( 'Right',  'giveflow-fundraising-campaigns' ) },
-    { value: 'full',   label: __( 'Full width', 'giveflow-fundraising-campaigns' ) },
+    { value: 'left',   label: __( 'Left',   'fundkit-fundraising-campaigns' ) },
+    { value: 'center', label: __( 'Center', 'fundkit-fundraising-campaigns' ) },
+    { value: 'right',  label: __( 'Right',  'fundkit-fundraising-campaigns' ) },
+    { value: 'full',   label: __( 'Full width', 'fundkit-fundraising-campaigns' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -36,15 +36,15 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Button', 'giveflow-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Button', 'fundkit-fundraising-campaigns' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Alignment', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Alignment', 'fundkit-fundraising-campaigns' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
                     />
                     <p style={ { fontSize: 12, color: '#6b7280', margin: '12px 0 0' } }>
-                        { __( 'Use {amount} and {frequency} in the label to insert the live values at runtime, e.g. "Donate {amount} {frequency}".', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Use {amount} and {frequency} in the label to insert the live values at runtime, e.g. "Donate {amount} {frequency}".', 'fundkit-fundraising-campaigns' ) }
                     </p>
                 </PanelBody>
             </InspectorControls>
@@ -53,14 +53,14 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Donate now', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'Donate now', 'fundkit-fundraising-campaigns' ) }
                     allowedFormats={ [] }
                     style={ {
                         display:       'inline-block',
                         padding:       '10px 20px',
-                        background:    'var(--giveflow-accent, #211d3f)',
+                        background:    'var(--fundkit-accent, #211d3f)',
                         color:         '#fff',
-                        borderRadius:  'var(--giveflow-radius-sm, 4px)',
+                        borderRadius:  'var(--fundkit-radius-sm, 4px)',
                         fontWeight:    500,
                         fontSize:      '14px',
                         width:         align === 'full' ? '100%' : 'auto',
@@ -75,9 +75,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Donate button', 'giveflow-fundraising-campaigns' ),
-        description: __( 'The button that completes the donation.', 'giveflow-fundraising-campaigns' ),
-        category:   'giveflow-extras',
+        title:      __( 'Donate button', 'fundkit-fundraising-campaigns' ),
+        description: __( 'The button that completes the donation.', 'fundkit-fundraising-campaigns' ),
+        category:   'fundkit-extras',
         icon:       BlockIcons[ 'submit-button' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

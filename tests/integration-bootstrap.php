@@ -14,7 +14,7 @@
  *                   installed correctly). Defaults to vendor/wp-phpunit/wp-phpunit.
  *
  * First-time setup:
- *   bin/install-wp-tests.sh giveflow_test root '' localhost
+ *   bin/install-wp-tests.sh fundkit_test root '' localhost
  */
 
 declare(strict_types=1);
@@ -26,7 +26,7 @@ $tests_dir = getenv('WP_TESTS_DIR') ?: (static function (): string {
     // still on disk - temp cleanup can take one without the other.
     $home       = getenv('HOME') ?: '';
     $candidates = array_filter([
-        $home !== '' ? $home . '/.giveflow-wp-tests/wordpress-tests-lib' : null,
+        $home !== '' ? $home . '/.fundkit-wp-tests/wordpress-tests-lib' : null,
         sys_get_temp_dir() . '/wordpress-tests-lib',
         '/tmp/wordpress-tests-lib',
     ]);
@@ -47,9 +47,9 @@ $phpunit_dir = getenv('WP_PHPUNIT__DIR') ?: __DIR__ . '/../vendor/wp-phpunit/wp-
 
 if (! file_exists($tests_dir . '/wp-tests-config.php')) {
     fwrite(STDERR, "\nThe WordPress test suite is not installed at {$tests_dir}.\n\n");
-    fwrite(STDERR, "Install it once, then every GiveFlow repo on this machine finds it:\n");
+    fwrite(STDERR, "Install it once, then every FundKit repo on this machine finds it:\n");
     fwrite(STDERR, "  composer test:setup <db-name> <db-user> <db-pass> [db-host] [wp-version]\n\n");
-    fwrite(STDERR, "e.g.  composer test:setup giveflow_tests root '' 127.0.0.1 latest\n");
+    fwrite(STDERR, "e.g.  composer test:setup fundkit_tests root '' 127.0.0.1 latest\n");
     fwrite(STDERR, "It needs a MySQL you can create databases on, and it WIPES <db-name>.\n");
     fwrite(STDERR, "Set WP_TESTS_DIR to point somewhere else.\n\n");
     exit(1);
@@ -70,19 +70,19 @@ if (! defined('WP_TESTS_CONFIG_FILE_PATH')) {
 require_once $phpunit_dir . '/includes/functions.php';
 
 // Load the plugin inside WP's "must-use" phase so it is active for every test,
-// then immediately create the giveflow_* tables. boot() runs on plugins_loaded
+// then immediately create the fundkit_* tables. boot() runs on plugins_loaded
 // (which fires AFTER muplugins_loaded) and eagerly constructs services such as
-// IdentityHasher that read wp_giveflow_system_settings, so the schema must exist
+// IdentityHasher that read wp_fundkit_system_settings, so the schema must exist
 // before boot - hence migrating here rather than on wp_loaded.
 tests_add_filter('muplugins_loaded', static function (): void {
-    require dirname(__DIR__) . '/giveflow.php';
-    \GiveFlow\Foundation\Plugin::migrateSchema();
+    require dirname(__DIR__) . '/fundkit.php';
+    \FundKit\Foundation\Plugin::migrateSchema();
 });
 
 // Full activation (capabilities, onboarding seed, portal page, rewrite rules)
 // once WordPress is fully loaded. Migrations re-run here harmlessly (idempotent).
 tests_add_filter('wp_loaded', static function (): void {
-    \GiveFlow\Foundation\Plugin::onActivation();
+    \FundKit\Foundation\Plugin::onActivation();
 }, 1);
 
 // Per-test isolation rides WP_UnitTestCase's transaction (see
@@ -93,7 +93,7 @@ tests_add_filter('wp_loaded', static function (): void {
 // data (ActivationTest re-runs activation itself).
 tests_add_filter('wp_loaded', static function (): void {
     global $wpdb;
-    $like   = $wpdb->esc_like($wpdb->prefix . 'giveflow_') . '%';
+    $like   = $wpdb->esc_like($wpdb->prefix . 'fundkit_') . '%';
     $tables = $wpdb->get_col($wpdb->prepare('SHOW TABLES LIKE %s', $like));
     foreach ($tables as $table) {
         $wpdb->query('TRUNCATE TABLE `' . str_replace('`', '', $table) . '`');

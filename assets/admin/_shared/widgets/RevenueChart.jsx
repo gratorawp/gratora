@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/widgets/RevenueChart';
+export { default } from '@fundkit/ui/widgets/RevenueChart';

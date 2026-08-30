@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/components/SectionBar';
+export { default } from '@fundkit/ui/components/SectionBar';

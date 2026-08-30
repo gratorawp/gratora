@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Analytics;
+namespace FundKit\Analytics;
 
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Foundation\Batch\BatchProcessor;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Foundation\Batch\BatchProcessor;
+use FundKit\Vendor\Queryable\DB;
 
 /**
- * Caps giveflow_events growth by deleting rows older than the retention window.
+ * Caps fundkit_events growth by deleting rows older than the retention window.
  *
- * Default: 730 days. Override via `giveflow.event.retention_days` filter or
- * the `giveflow_privacy.event_retention_days` option. 0 disables pruning.
+ * Default: 730 days. Override via `fundkit.event.retention_days` filter or
+ * the `fundkit_privacy.event_retention_days` option. 0 disables pruning.
  *
  * @since 1.0.0
  */
 final class EventRetention
 {
-    public const HOOK = 'giveflow.cron.event_retention';
+    public const HOOK = 'fundkit.cron.event_retention';
     private const DAILY = 86400;
     private const BATCH = 1000;
 
@@ -50,7 +50,7 @@ final class EventRetention
             fn (int $n) => array_map(
                 static fn ($r) => (int) ($r->id ?? 0),
                 DB::raw(
-                    "SELECT id FROM {$prefix}giveflow_events
+                    "SELECT id FROM {$prefix}fundkit_events
                      WHERE occurred_at < %s
                      ORDER BY id ASC
                      LIMIT %d",
@@ -59,7 +59,7 @@ final class EventRetention
             ),
             function (array $ids): void {
                 if ($ids) {
-                    DB::table('giveflow_events')->whereIn('id', $ids)->delete();
+                    DB::table('fundkit_events')->whereIn('id', $ids)->delete();
                 }
             },
             self::BATCH,
@@ -74,8 +74,8 @@ final class EventRetention
     /** @since 1.0.0 */
     private function retentionDays(): int
     {
-        $opt = get_option('giveflow_privacy', []);
+        $opt = get_option('fundkit_privacy', []);
         $stored = is_array($opt) ? (int) ($opt['event_retention_days'] ?? 730) : 730;
-        return (int) apply_filters('giveflow.event.retention_days', $stored);
+        return (int) apply_filters('fundkit.event.retention_days', $stored);
     }
 }

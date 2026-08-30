@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Upgrade;
+namespace FundKit\Foundation\Upgrade;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Foundation\Plugin;
 use ReflectionClass;
 
 /**
- * Confirms every giveflow_* table is really there before the schema version is stamped.
+ * Confirms every fundkit_* table is really there before the schema version is stamped.
  *
  * dbDelta reports nothing at all when a CREATE is refused, and plenty of
  * managed and shared hosts refuse one: restricted grants, a table-count quota,
@@ -22,7 +22,7 @@ use ReflectionClass;
  */
 final class SchemaGuard
 {
-    public const OPTION = 'giveflow_db_version';
+    public const OPTION = 'fundkit_db_version';
 
     /**
      * Unprefixed names of the tables a migration should have created and did not.
@@ -57,7 +57,7 @@ final class SchemaGuard
      * Stamp the schema version, unless a table is missing.
      *
      * Leaving the option alone is the whole recovery path: the wp_loaded gate
-     * sees a version behind GIVEFLOW_DB_VERSION and migrates again next request.
+     * sees a version behind FUNDKIT_DB_VERSION and migrates again next request.
      *
      * @return bool true when the stamp was written
      * @since 1.0.0
@@ -74,7 +74,7 @@ final class SchemaGuard
             return false;
         }
 
-        update_option(self::OPTION, GIVEFLOW_DB_VERSION, false);
+        update_option(self::OPTION, FUNDKIT_DB_VERSION, false);
 
         return true;
     }
@@ -94,12 +94,12 @@ final class SchemaGuard
     public static function renderNotice(): void
     {
         // Whoever switched the plugin on is who has to ask the host for the
-        // grant, and manage_giveflow may never have been applied.
+        // grant, and manage_fundkit may never have been applied.
         if (! current_user_can('manage_options')) {
             return;
         }
 
-        if (get_option(self::OPTION) === GIVEFLOW_DB_VERSION) {
+        if (get_option(self::OPTION) === FUNDKIT_DB_VERSION) {
             return;
         }
 
@@ -113,8 +113,8 @@ final class SchemaGuard
 
         printf(
             '<div class="notice notice-error"><p><strong>%s</strong> %s</p><p><code>%s</code></p></div>',
-            esc_html__('GiveFlow could not create its database tables.', 'giveflow-fundraising-campaigns'),
-            esc_html__('The plugin cannot run until they exist. This usually means the database user is not allowed to create tables, or the host caps how many a site may have. Ask your host to grant CREATE, then reload this page: GiveFlow retries on every request.', 'giveflow-fundraising-campaigns'),
+            esc_html__('FundKit could not create its database tables.', 'fundkit-fundraising-campaigns'),
+            esc_html__('The plugin cannot run until they exist. This usually means the database user is not allowed to create tables, or the host caps how many a site may have. Ask your host to grant CREATE, then reload this page: FundKit retries on every request.', 'fundkit-fundraising-campaigns'),
             esc_html($names)
         );
     }
@@ -136,7 +136,7 @@ final class SchemaGuard
 
             // A model this cannot read is skipped rather than thrown out of.
             // The registry is open to third-party modules through
-            // giveflow.modules.register, and the callers are a gate that has to
+            // fundkit.modules.register, and the callers are a gate that has to
             // survive a schema it cannot trust and an admin notice: neither is
             // worth white-screening a site over.
             try {

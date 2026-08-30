@@ -10,7 +10,7 @@ import { TimelineDot, eventTitle } from './ActivityTab';
 
 // Deep-link to a donation's detail view, the same target the timeline uses.
 function donationHref( reference ) {
-    return addQueryArgs( window.location.pathname, { page: 'giveflow-donations', view: 'detail', reference } );
+    return addQueryArgs( window.location.pathname, { page: 'fundkit-donations', view: 'detail', reference } );
 }
 
 // The full activity log for one donor, paginated server-side. The overview tab
@@ -40,7 +40,7 @@ export default function ActivityLogTab( { donorId } ) {
     useEffect( () => {
         let aborted = false;
         setLoading( true );
-        apiFetch( { path: addQueryArgs( `/giveflow/v1/admin/donors/${ donorId }/events`, apiParams ), parse: false } )
+        apiFetch( { path: addQueryArgs( `/fundkit/v1/admin/donors/${ donorId }/events`, apiParams ), parse: false } )
             .then( async ( res ) => {
                 if ( aborted ) return;
                 const items = await res.json();
@@ -48,7 +48,7 @@ export default function ActivityLogTab( { donorId } ) {
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
                 setError( '' );
             } )
-            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load activity. Refresh to try again.', 'giveflow-fundraising-campaigns' ) ); } } )
+            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load activity. Refresh to try again.', 'fundkit-fundraising-campaigns' ) ); } } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ donorId, apiParams ] );
@@ -56,7 +56,7 @@ export default function ActivityLogTab( { donorId } ) {
     const fields = useMemo( () => [
         {
             id:    'event',
-            label: __( 'Event', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Event', 'fundkit-fundraising-campaigns' ),
             enableSorting: false,
             render: ( { item } ) => {
                 const meta = eventMeta( item );
@@ -69,7 +69,7 @@ export default function ActivityLogTab( { donorId } ) {
                                  it, and the timeline does not. */ }
                             { eventTitle( item ) }
                             { item.payload?.by === 'admin' && (
-                                <span className="dp-actlog__note">{ __( 'by an admin', 'giveflow-fundraising-campaigns' ) }</span>
+                                <span className="dp-actlog__note">{ __( 'by an admin', 'fundkit-fundraising-campaigns' ) }</span>
                             ) }
                             { item.note && (
                                 <span className="dp-actlog__note">“{ item.note }”</span>
@@ -81,7 +81,7 @@ export default function ActivityLogTab( { donorId } ) {
         },
         {
             id:    'reference',
-            label: __( 'Reference', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Reference', 'fundkit-fundraising-campaigns' ),
             enableSorting: false,
             // A receipt event carries both a donation and a receipt, so
             // returning on the first would have meant a receipt row never
@@ -89,13 +89,13 @@ export default function ActivityLogTab( { donorId } ) {
             render: ( { item } ) => {
                 if ( ! item.reference && ! item.receipt_number ) return '-';
                 return (
-                    <div className="giveflow-row">
-                        <div className="giveflow-row__body">
+                    <div className="fundkit-row">
+                        <div className="fundkit-row__body">
                             { item.reference && (
-                                <a className="giveflow-mono-link" href={ donationHref( item.reference ) }>{ item.reference }</a>
+                                <a className="fundkit-mono-link" href={ donationHref( item.reference ) }>{ item.reference }</a>
                             ) }
                             { item.receipt_number && (
-                                <div className="giveflow-row__sub giveflow-row__sub--mono">{ item.receipt_number }</div>
+                                <div className="fundkit-row__sub fundkit-row__sub--mono">{ item.receipt_number }</div>
                             ) }
                         </div>
                     </div>
@@ -104,13 +104,13 @@ export default function ActivityLogTab( { donorId } ) {
         },
         {
             id:    'campaign',
-            label: __( 'Campaign', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Campaign', 'fundkit-fundraising-campaigns' ),
             enableSorting: false,
             render: ( { item } ) => item.campaign?.title || '-',
         },
         {
             id:    'amount',
-            label: __( 'Amount', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Amount', 'fundkit-fundraising-campaigns' ),
             enableSorting: false,
             render: ( { item } ) => item.amount_cents !== null && item.amount_cents !== undefined
                 ? (
@@ -122,16 +122,16 @@ export default function ActivityLogTab( { donorId } ) {
         },
         {
             id:    'occurred_at',
-            label: __( 'When', 'giveflow-fundraising-campaigns' ),
+            label: __( 'When', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             // Relative over absolute, the way the overview timeline reads it:
             // a bare "15h ago" with the real moment hidden in a tooltip made
             // the column impossible to scan by date.
             render: ( { item } ) => (
-                <div className="giveflow-row">
-                    <div className="giveflow-row__body">
-                        <div className="giveflow-row__name">{ timeAgo( item.occurred_at ) }</div>
-                        <div className="giveflow-row__sub">{ formatDateTime( item.occurred_at ) }</div>
+                <div className="fundkit-row">
+                    <div className="fundkit-row__body">
+                        <div className="fundkit-row__name">{ timeAgo( item.occurred_at ) }</div>
+                        <div className="fundkit-row__sub">{ formatDateTime( item.occurred_at ) }</div>
                     </div>
                 </div>
             ),
@@ -147,7 +147,7 @@ export default function ActivityLogTab( { donorId } ) {
     );
 
     return (
-        <div className="giveflow-dataviews dp-actlog-dv">
+        <div className="fundkit-dataviews dp-actlog-dv">
             { error && (
                 <Notice status="error" isDismissible={ false }>{ error }</Notice>
             ) }

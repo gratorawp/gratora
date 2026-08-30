@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Foundation;
+namespace FundKit\Tests\Unit\Foundation;
 
-use GiveFlow\Foundation\Container\Container;
-use GiveFlow\Foundation\Modules\GiveFlowModule;
-use GiveFlow\Foundation\Modules\ModuleManager;
+use FundKit\Foundation\Container\Container;
+use FundKit\Foundation\Modules\FundKitModule;
+use FundKit\Foundation\Modules\ModuleManager;
 use PHPUnit\Framework\TestCase;
 
 final class ModuleManagerCompatTest extends TestCase
 {
     protected function setUp(): void
     {
-        if (! defined('GIVEFLOW_VERSION')) {
-            define('GIVEFLOW_VERSION', '0.1.0');
+        if (! defined('FUNDKIT_VERSION')) {
+            define('FUNDKIT_VERSION', '0.1.0');
         }
     }
 
@@ -47,9 +47,9 @@ final class ModuleManagerCompatTest extends TestCase
     }
 
     /** @param array<string,mixed> $requires */
-    private function module(string $id, array $requires, \Closure $onBoot): GiveFlowModule
+    private function module(string $id, array $requires, \Closure $onBoot): FundKitModule
     {
-        return new class($id, $requires, $onBoot) implements GiveFlowModule {
+        return new class($id, $requires, $onBoot) implements FundKitModule {
             /** @param array<string,mixed> $requires */
             public function __construct(
                 private string $idValue,
@@ -85,7 +85,7 @@ final class ModuleManagerCompatTest extends TestCase
 
             public function tier(): string
             {
-                return GiveFlowModule::TIER_PRO;
+                return FundKitModule::TIER_PRO;
             }
 
             public function boot(Container $container): void

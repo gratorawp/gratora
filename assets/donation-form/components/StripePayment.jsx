@@ -117,26 +117,26 @@ export default function StripePayment( { config, payment, dispatch } ) {
         : '';
 
     return (
-        <div class="giveflow-form giveflow-form--payment">
-            <h3 class="giveflow-form__payment-title">{ i18n.paymentTitle || 'Complete your donation' }</h3>
+        <div class="fundkit-form fundkit-form--payment">
+            <h3 class="fundkit-form__payment-title">{ i18n.paymentTitle || 'Complete your donation' }</h3>
             { amountLine && (
-                <p class="giveflow-form__payment-amount">{ amountLine }</p>
+                <p class="fundkit-form__payment-amount">{ amountLine }</p>
             ) }
 
-            <div ref={ mountRef } class="giveflow-form__payment-element" />
+            <div ref={ mountRef } class="fundkit-form__payment-element" />
 
             { ! ready && ! error && (
-                <p class="giveflow-form__payment-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
+                <p class="fundkit-form__payment-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
             ) }
 
             { error && (
-                <div class="giveflow-form__error" role="alert">{ error }</div>
+                <div class="fundkit-form__error" role="alert">{ error }</div>
             ) }
 
-            <div class="giveflow-form__nav giveflow-form__nav--align-left">
+            <div class="fundkit-form__nav fundkit-form__nav--align-left">
                 <button
                     type="button"
-                    class="giveflow-form__button giveflow-form__button--primary"
+                    class="fundkit-form__button fundkit-form__button--primary"
                     disabled={ ! ready || paying }
                     onClick={ onPay }
                 >
@@ -144,7 +144,7 @@ export default function StripePayment( { config, payment, dispatch } ) {
                 </button>
                 <button
                     type="button"
-                    class="giveflow-form__button giveflow-form__button--secondary"
+                    class="fundkit-form__button fundkit-form__button--secondary"
                     disabled={ paying }
                     onClick={ () => dispatch( { type: 'CANCEL_PAYMENT' } ) }
                 >
@@ -158,10 +158,10 @@ export default function StripePayment( { config, payment, dispatch } ) {
 /** Map the form's themed CSS vars onto the Payment Element where they exist. */
 function stripeVars( el ) {
     try {
-        // --giveflow-accent is set on the .giveflow-donation-form element and inherits
+        // --fundkit-accent is set on the .fundkit-donation-form element and inherits
         // down to the mount node; documentElement wouldn't see the override.
         const cs = getComputedStyle( el || document.documentElement );
-        const accent = cs.getPropertyValue( '--giveflow-accent' ).trim();
+        const accent = cs.getPropertyValue( '--fundkit-accent' ).trim();
         return accent ? { colorPrimary: accent } : {};
     } catch {
         return {};
@@ -175,7 +175,7 @@ function stripeVars( el ) {
  */
 function buildReturnUrl( payment ) {
     const url = new URL( window.location.href );
-    url.searchParams.set( 'giveflow_return', '1' );
-    if ( payment?.reference ) url.searchParams.set( 'giveflow_ref', payment.reference );
+    url.searchParams.set( 'fundkit_return', '1' );
+    if ( payment?.reference ) url.searchParams.set( 'fundkit_ref', payment.reference );
     return url.toString();
 }

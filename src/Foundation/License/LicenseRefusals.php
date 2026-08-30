@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\License;
+namespace FundKit\Foundation\License;
 
 /**
  * Turns refused add-ons into what an admin should actually be told.
@@ -58,7 +58,7 @@ final class LicenseRefusals
      */
     private static function copy(string $status, string $names): array
     {
-        $keepRunning = __('They keep running for now, but they will not receive updates or security fixes.', 'giveflow-fundraising-campaigns');
+        $keepRunning = __('They keep running for now, but they will not receive updates or security fixes.', 'fundkit-fundraising-campaigns');
 
         switch ($status) {
             case 'invalid':
@@ -67,10 +67,10 @@ final class LicenseRefusals
                     'names'    => $names,
                     'headline' => sprintf(
                         /* translators: %s: comma-separated add-on names */
-                        __('The license key on this site was not recognised, so %s could not be checked', 'giveflow-fundraising-campaigns'),
+                        __('The license key on this site was not recognised, so %s could not be checked', 'fundkit-fundraising-campaigns'),
                         $names
                     ),
-                    'detail'   => __('Check the key against your purchase email. Until it is accepted they keep running, but they will not receive updates or security fixes.', 'giveflow-fundraising-campaigns'),
+                    'detail'   => __('Check the key against your purchase email. Until it is accepted they keep running, but they will not receive updates or security fixes.', 'fundkit-fundraising-campaigns'),
                 ];
 
             case 'over_limit':
@@ -79,12 +79,12 @@ final class LicenseRefusals
                     'names'    => $names,
                     'headline' => sprintf(
                         /* translators: %s: comma-separated add-on names */
-                        __('Your license has no sites left for %s', 'giveflow-fundraising-campaigns'),
+                        __('Your license has no sites left for %s', 'fundkit-fundraising-campaigns'),
                         $names
                     ),
                     // Deactivating elsewhere is enough: the client re-activates
                     // on its own next check, with no need to re-enter the key.
-                    'detail'   => __('Deactivate the license on a site you no longer use, or move to a larger plan, and this site picks it up on its own.', 'giveflow-fundraising-campaigns'),
+                    'detail'   => __('Deactivate the license on a site you no longer use, or move to a larger plan, and this site picks it up on its own.', 'fundkit-fundraising-campaigns'),
                 ];
 
             case 'revoked':
@@ -93,7 +93,7 @@ final class LicenseRefusals
                     'names'    => $names,
                     'headline' => sprintf(
                         /* translators: %s: comma-separated add-on names */
-                        __('The license for %s has been revoked', 'giveflow-fundraising-campaigns'),
+                        __('The license for %s has been revoked', 'fundkit-fundraising-campaigns'),
                         $names
                     ),
                     'detail'   => $keepRunning,
@@ -106,7 +106,7 @@ final class LicenseRefusals
                     'names'    => $names,
                     'headline' => sprintf(
                         /* translators: %s: comma-separated add-on names */
-                        __('Your license does not cover %s', 'giveflow-fundraising-campaigns'),
+                        __('Your license does not cover %s', 'fundkit-fundraising-campaigns'),
                         $names
                     ),
                     'detail'   => $keepRunning,

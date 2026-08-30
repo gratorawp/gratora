@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Donations\Refund;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationService;
+use FundKit\Donations\Refund;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
 use RuntimeException;
 
 /**

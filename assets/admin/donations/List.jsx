@@ -1,4 +1,4 @@
-// Donations list: paginated DataViews against /giveflow/v1/admin/donations.
+// Donations list: paginated DataViews against /fundkit/v1/admin/donations.
 
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import { DataViews } from '@wordpress/dataviews';
@@ -34,28 +34,28 @@ const STATUS_OPTIONS = Object.entries( STATUS_LABEL ).map( ( [ value, label ] ) 
  */
 function frequencyLabel( frequency ) {
     switch ( frequency ) {
-        case 'monthly':   return __( 'Monthly', 'giveflow-fundraising-campaigns' );
-        case 'yearly':    return __( 'Yearly', 'giveflow-fundraising-campaigns' );
-        case 'weekly':    return __( 'Weekly', 'giveflow-fundraising-campaigns' );
-        case 'quarterly': return __( 'Quarterly', 'giveflow-fundraising-campaigns' );
-        default:          return __( 'Recurring', 'giveflow-fundraising-campaigns' );
+        case 'monthly':   return __( 'Monthly', 'fundkit-fundraising-campaigns' );
+        case 'yearly':    return __( 'Yearly', 'fundkit-fundraising-campaigns' );
+        case 'weekly':    return __( 'Weekly', 'fundkit-fundraising-campaigns' );
+        case 'quarterly': return __( 'Quarterly', 'fundkit-fundraising-campaigns' );
+        default:          return __( 'Recurring', 'fundkit-fundraising-campaigns' );
     }
 }
 
 // 'recurring' is the useful default question ("which of these repeat?");
 // the individual cadences are there for orgs that run more than one.
 const FREQUENCY_OPTIONS = [
-    { value: 'recurring', label: __( 'Recurring (any)', 'giveflow-fundraising-campaigns' ) },
-    { value: 'one_time',  label: __( 'One time', 'giveflow-fundraising-campaigns' ) },
-    { value: 'monthly',   label: __( 'Monthly', 'giveflow-fundraising-campaigns' ) },
-    { value: 'yearly',    label: __( 'Yearly', 'giveflow-fundraising-campaigns' ) },
-    { value: 'weekly',    label: __( 'Weekly', 'giveflow-fundraising-campaigns' ) },
-    { value: 'quarterly', label: __( 'Quarterly', 'giveflow-fundraising-campaigns' ) },
+    { value: 'recurring', label: __( 'Recurring (any)', 'fundkit-fundraising-campaigns' ) },
+    { value: 'one_time',  label: __( 'One time', 'fundkit-fundraising-campaigns' ) },
+    { value: 'monthly',   label: __( 'Monthly', 'fundkit-fundraising-campaigns' ) },
+    { value: 'yearly',    label: __( 'Yearly', 'fundkit-fundraising-campaigns' ) },
+    { value: 'weekly',    label: __( 'Weekly', 'fundkit-fundraising-campaigns' ) },
+    { value: 'quarterly', label: __( 'Quarterly', 'fundkit-fundraising-campaigns' ) },
 ];
 
 function detailHref( reference ) {
     return addQueryArgs( window.location.pathname, {
-        page:      'giveflow-donations',
+        page:      'fundkit-donations',
         view:      'detail',
         reference,
     } );
@@ -74,7 +74,7 @@ function initialFilters() {
 // A view preference, not a setting: it belongs to the person looking at the
 // screen, and having it reset on every page load would make it useless for the
 // thing it is for, which is watching test donations arrive while you make them.
-const TEST_PREF = 'giveflow.donations.includeTest';
+const TEST_PREF = 'fundkit.donations.includeTest';
 
 const readTestPref = () => {
     try {
@@ -140,17 +140,17 @@ export default function List() {
     // aren't worth front-loading here; the donor portal scopes by donor_id.
     //
     // Not /admin/campaigns, for the reason RecordDonationDrawer already gives:
-    // that route needs giveflow_manage_campaigns, which this screen does not, so a
+    // that route needs fundkit_manage_campaigns, which this screen does not, so a
     // role scoped to viewing donations got a 403 and a filter with no options
     // in it and nothing saying why.
     useEffect( () => {
         let aborted = false;
-        apiFetch( { path: '/giveflow/v1/admin/donations/campaign-options' } )
+        apiFetch( { path: '/fundkit/v1/admin/donations/campaign-options' } )
             .then( ( res ) => { if ( ! aborted ) setCampaigns( Array.isArray( res ) ? res : [] ); } )
             .catch( ( err ) => {
                 if ( aborted ) return;
                 setCampaigns( [] );
-                notify.error( err?.message || __( 'The campaign filter could not be loaded.', 'giveflow-fundraising-campaigns' ) );
+                notify.error( err?.message || __( 'The campaign filter could not be loaded.', 'fundkit-fundraising-campaigns' ) );
             } );
         return () => { aborted = true; };
     }, [] );
@@ -161,7 +161,7 @@ export default function List() {
     // never offers an option that would return nothing.
     useEffect( () => {
         let aborted = false;
-        apiFetch( { path: addQueryArgs( '/giveflow/v1/admin/donations/gateway-options', {
+        apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/donations/gateway-options', {
             include_test: includeTest || undefined,
         } ) } )
             .then( ( res ) => { if ( ! aborted ) setGatewayOptions( Array.isArray( res ) ? res : [] ); } )
@@ -208,7 +208,7 @@ export default function List() {
 
         setFetchError( null );
         apiFetch( {
-            path:  addQueryArgs( '/giveflow/v1/admin/donations', apiParams ),
+            path:  addQueryArgs( '/fundkit/v1/admin/donations', apiParams ),
             parse: false,
         } )
             .then( async ( res ) => {
@@ -216,11 +216,11 @@ export default function List() {
                 const items = await res.json();
                 setData( Array.isArray( items ) ? items : [] );
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
-                setTestHidden( parseInt( res.headers.get( 'X-GiveFlow-Test-Hidden' ) || '0', 10 ) );
+                setTestHidden( parseInt( res.headers.get( 'X-FundKit-Test-Hidden' ) || '0', 10 ) );
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setFetchError( err?.message || __( 'Failed to load donations.', 'giveflow-fundraising-campaigns' ) );
+                setFetchError( err?.message || __( 'Failed to load donations.', 'fundkit-fundraising-campaigns' ) );
                 setData( [] );
                 setTotal( 0 );
                 setTestHidden( 0 );
@@ -233,7 +233,7 @@ export default function List() {
         delete statsParams.per_page;
         delete statsParams.orderby;
         delete statsParams.order;
-        apiFetch( { path: addQueryArgs( '/giveflow/v1/admin/donations/stats', statsParams ) } )
+        apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/donations/stats', statsParams ) } )
             .then( ( res ) => { if ( ! aborted ) setStats( res || null ); } )
             .catch( () => { if ( ! aborted ) setStats( null ); } );
 
@@ -245,23 +245,23 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:            'reference',
-            label:         __( 'Reference', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Reference', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             // The badge rides the reference rather than occupying a column of
             // its own: on a live-only list that column is the same value on
             // every row, and the thing worth knowing is that this particular
             // donation took no money.
             render: ( { item } ) => (
-                <span className="giveflow-ref-cell">
-                    <a className="giveflow-mono-link" href={ detailHref( item.reference ) } { ...rowLinkProps }>
+                <span className="fundkit-ref-cell">
+                    <a className="fundkit-mono-link" href={ detailHref( item.reference ) } { ...rowLinkProps }>
                         { item.reference }
                     </a>
                     { item.is_test && (
-                        <span className="giveflow-pill giveflow-pill--test">{ __( 'Test', 'giveflow-fundraising-campaigns' ) }</span>
+                        <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundkit-fundraising-campaigns' ) }</span>
                     ) }
                     { item.superseded && (
-                        <span className="giveflow-pill giveflow-pill--gray" title={ __( 'The donor started again on another gateway. Nothing they do now can collect this attempt.', 'giveflow-fundraising-campaigns' ) }>
-                            { __( 'Replaced', 'giveflow-fundraising-campaigns' ) }
+                        <span className="fundkit-pill fundkit-pill--gray" title={ __( 'The donor started again on another gateway. Nothing they do now can collect this attempt.', 'fundkit-fundraising-campaigns' ) }>
+                            { __( 'Replaced', 'fundkit-fundraising-campaigns' ) }
                         </span>
                     ) }
                 </span>
@@ -269,7 +269,7 @@ export default function List() {
         },
         {
             id:    'frequency',
-            label: __( 'Frequency', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Frequency', 'fundkit-fundraising-campaigns' ),
             // Nothing on the row said whether the money came from a standing
             // recurring or a one-off, which is the first thing asked of it.
             elements: FREQUENCY_OPTIONS,
@@ -278,22 +278,22 @@ export default function List() {
             // so it has no entry in that map and would come out grey.
             render: ( { item } ) => (
                 item.frequency && item.frequency !== 'one_time'
-                    ? <span className="giveflow-pill giveflow-pill--blue">{ frequencyLabel( item.frequency ) }</span>
-                    : <span className="giveflow-pill giveflow-pill--gray">{ __( 'One time', 'giveflow-fundraising-campaigns' ) }</span>
+                    ? <span className="fundkit-pill fundkit-pill--blue">{ frequencyLabel( item.frequency ) }</span>
+                    : <span className="fundkit-pill fundkit-pill--gray">{ __( 'One time', 'fundkit-fundraising-campaigns' ) }</span>
             ),
         },
         {
             id:    'donor',
-            label: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             render: ( { item } ) => {
                 const d = item.donor;
-                if ( ! d ) return <span className="giveflow-row__sub">-</span>;
-                const name = d.name || __( '(no name)', 'giveflow-fundraising-campaigns' );
+                if ( ! d ) return <span className="fundkit-row__sub">-</span>;
+                const name = d.name || __( '(no name)', 'fundkit-fundraising-campaigns' );
                 return (
-                    <div className="giveflow-row">
-                        <div className="giveflow-row__body">
-                            <div className="giveflow-row__name">{ name }</div>
-                            { d.email && <div className="giveflow-row__sub giveflow-row__sub--mono">{ d.email }</div> }
+                    <div className="fundkit-row">
+                        <div className="fundkit-row__body">
+                            <div className="fundkit-row__name">{ name }</div>
+                            { d.email && <div className="fundkit-row__sub fundkit-row__sub--mono">{ d.email }</div> }
                         </div>
                     </div>
                 );
@@ -301,7 +301,7 @@ export default function List() {
         },
         {
             id:            'amount',
-            label:         __( 'Amount', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Amount', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => {
                 const showBase =
@@ -309,10 +309,10 @@ export default function List() {
                     item.base_currency &&
                     item.base_currency !== item.currency;
                 return (
-                    <span className={ `giveflow-amount${ item.status === 'refunded' ? ' giveflow-amount--strike' : '' }` }>
+                    <span className={ `fundkit-amount${ item.status === 'refunded' ? ' fundkit-amount--strike' : '' }` }>
                         { formatAmount( item.amount_cents, item.currency ) }
                         { showBase && (
-                            <span className="giveflow-amount__base">
+                            <span className="fundkit-amount__base">
                                 { '≈ ' }{ formatAmount( item.base_amount_cents, item.base_currency ) }
                             </span>
                         ) }
@@ -322,7 +322,7 @@ export default function List() {
         },
         {
             id:            'status',
-            label:         __( 'Status', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Status', 'fundkit-fundraising-campaigns' ),
             elements:      STATUS_OPTIONS,
             filterBy:      { operators: [ 'is' ] },
             enableSorting: true,
@@ -330,7 +330,7 @@ export default function List() {
         },
         {
             id:       'gateway',
-            label:    __( 'Gateway', 'giveflow-fundraising-campaigns' ),
+            label:    __( 'Gateway', 'fundkit-fundraising-campaigns' ),
             elements: gatewayOptions,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => {
@@ -343,18 +343,18 @@ export default function List() {
         },
         {
             id:       'campaign',
-            label:    __( 'Campaign', 'giveflow-fundraising-campaigns' ),
+            label:    __( 'Campaign', 'fundkit-fundraising-campaigns' ),
             elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => {
                 if ( ! item.campaign?.title ) {
-                    return <span className="giveflow-row__sub">-</span>;
+                    return <span className="fundkit-row__sub">-</span>;
                 }
 
                 return (
-                    <div className="giveflow-row">
-                        <div className="giveflow-row__body">
-                            <a className="giveflow-row__link" href={ campaignDetailHref( item.campaign.id ) } { ...rowLinkProps }>
+                    <div className="fundkit-row">
+                        <div className="fundkit-row__body">
+                            <a className="fundkit-row__link" href={ campaignDetailHref( item.campaign.id ) } { ...rowLinkProps }>
                                 { item.campaign.title }
                             </a>
                             { /* Who inside the campaign it came through, when
@@ -362,7 +362,7 @@ export default function List() {
                                  does not say whether a donation arrived
                                  through somebody raising for it. */ }
                             { item.attributed_to?.label && (
-                                <div className="giveflow-row__sub">{ item.attributed_to.label }</div>
+                                <div className="fundkit-row__sub">{ item.attributed_to.label }</div>
                             ) }
                         </div>
                     </div>
@@ -371,51 +371,51 @@ export default function List() {
         },
         {
             id:       'is_test',
-            label:    __( 'Test mode', 'giveflow-fundraising-campaigns' ),
+            label:    __( 'Test mode', 'fundkit-fundraising-campaigns' ),
             elements: [
-                { value: 'yes', label: __( 'Test only', 'giveflow-fundraising-campaigns' ) },
-                { value: 'no',  label: __( 'Live only', 'giveflow-fundraising-campaigns' ) },
+                { value: 'yes', label: __( 'Test only', 'fundkit-fundraising-campaigns' ) },
+                { value: 'no',  label: __( 'Live only', 'fundkit-fundraising-campaigns' ) },
             ],
             filterBy:    { operators: [ 'is' ] },
             getValue:    ( { item } ) => ( item.is_test ? 'yes' : 'no' ),
             render:      ( { item } ) => item.is_test
-                ? <span className="giveflow-pill giveflow-pill--test">{ __( 'Test', 'giveflow-fundraising-campaigns' ) }</span>
-                : <span className="giveflow-row__sub">-</span>,
+                ? <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundkit-fundraising-campaigns' ) }</span>
+                : <span className="fundkit-row__sub">-</span>,
         },
         {
             id:    'superseded',
-            label: __( 'Replaced attempt', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Replaced attempt', 'fundkit-fundraising-campaigns' ),
             // Out of the columns and out of the default view, for the reason
             // the reference badge exists: on a list that hides them the column
             // reads the same on every row. It is here so an admin who needs one
             // of these can ask for it by name.
             elements: [
-                { value: 'yes', label: __( 'Replaced only', 'giveflow-fundraising-campaigns' ) },
-                { value: 'no',  label: __( 'Live attempts only', 'giveflow-fundraising-campaigns' ) },
+                { value: 'yes', label: __( 'Replaced only', 'fundkit-fundraising-campaigns' ) },
+                { value: 'no',  label: __( 'Live attempts only', 'fundkit-fundraising-campaigns' ) },
             ],
             filterBy: { operators: [ 'is' ] },
             getValue: ( { item } ) => ( item.superseded ? 'yes' : 'no' ),
             render:   ( { item } ) => item.superseded
-                ? <span className="giveflow-pill giveflow-pill--gray">{ __( 'Replaced', 'giveflow-fundraising-campaigns' ) }</span>
-                : <span className="giveflow-row__sub">-</span>,
+                ? <span className="fundkit-pill fundkit-pill--gray">{ __( 'Replaced', 'fundkit-fundraising-campaigns' ) }</span>
+                : <span className="fundkit-row__sub">-</span>,
         },
         {
             id:     'form',
-            label:  __( 'Form', 'giveflow-fundraising-campaigns' ),
+            label:  __( 'Form', 'fundkit-fundraising-campaigns' ),
             render: ( { item } ) => (
                 item.form?.title
-                    ? <a className="giveflow-row__link" href={ formEditorHref( item.form.id ) } { ...rowLinkProps }>{ item.form.title }</a>
-                    : <span className="giveflow-row__sub">-</span>
+                    ? <a className="fundkit-row__link" href={ formEditorHref( item.form.id ) } { ...rowLinkProps }>{ item.form.title }</a>
+                    : <span className="fundkit-row__sub">-</span>
             ),
         },
         {
             id:            'created_at',
-            label:         __( 'Created', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Created', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <span className="giveflow-time" title={ formatDate( item.created_at ) }>
-                    <span className="giveflow-time__rel">{ timeAgo( item.created_at ) }</span>
-                    <span className="giveflow-time__abs">{ formatDate( item.created_at ) }</span>
+                <span className="fundkit-time" title={ formatDate( item.created_at ) }>
+                    <span className="fundkit-time__rel">{ timeAgo( item.created_at ) }</span>
+                    <span className="fundkit-time__abs">{ formatDate( item.created_at ) }</span>
                 </span>
             ),
         },
@@ -434,7 +434,7 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:           'mark-paid',
-            label:        __( 'Mark as paid', 'giveflow-fundraising-campaigns' ),
+            label:        __( 'Mark as paid', 'fundkit-fundraising-campaigns' ),
             icon:         () => <CheckIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Pending and still-settling donations can be flipped to paid;
@@ -447,28 +447,28 @@ export default function List() {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'giveflow-fundraising-campaigns' )
+                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'fundkit-fundraising-campaigns' )
                     : sprintf(
                         /* translators: %d: number of donations */
                         _n(
                             'Mark %d donation as paid? Receipts will be sent to each donor.',
                             'Mark %d donations as paid? Receipts will be sent to each donor.',
                             n,
-                            'giveflow-fundraising-campaigns'
+                            'fundkit-fundraising-campaigns'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Mark donations as paid', 'giveflow-fundraising-campaigns' ),
+                    title:        __( 'Mark donations as paid', 'fundkit-fundraising-campaigns' ),
                     message,
-                    confirmLabel: __( 'Mark as paid', 'giveflow-fundraising-campaigns' ),
+                    confirmLabel: __( 'Mark as paid', 'fundkit-fundraising-campaigns' ),
                     onConfirm: async () => {
                         // allSettled, and the refetch outside the counts: a
                         // partial failure still paid some of them and emailed
                         // their donors a receipt, and a batch reported as a
                         // single failure leaves those rows reading Pending.
                         const results = await Promise.allSettled( targets.map( ( i ) => apiFetch( {
-                            path:   `/giveflow/v1/admin/donations/${ encodeURIComponent( i.reference ) }/mark-paid`,
+                            path:   `/fundkit/v1/admin/donations/${ encodeURIComponent( i.reference ) }/mark-paid`,
                             method: 'POST',
                         } ) ) );
 
@@ -478,14 +478,14 @@ export default function List() {
                         if ( done > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'giveflow-fundraising-campaigns' ),
+                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'fundkit-fundraising-campaigns' ),
                                 done
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'giveflow-fundraising-campaigns' ),
+                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'fundkit-fundraising-campaigns' ),
                                 failed
                             ) );
                         }
@@ -497,7 +497,7 @@ export default function List() {
         },
         {
             id:           'resend-receipt',
-            label:        __( 'Resend receipt', 'giveflow-fundraising-campaigns' ),
+            label:        __( 'Resend receipt', 'fundkit-fundraising-campaigns' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Only paid donations have a receipt to resend, and an erased donor
@@ -508,23 +508,23 @@ export default function List() {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Resend the receipt for this donation?', 'giveflow-fundraising-campaigns' )
+                    ? __( 'Resend the receipt for this donation?', 'fundkit-fundraising-campaigns' )
                     : sprintf(
                         /* translators: %d: number of donations */
-                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'giveflow-fundraising-campaigns' ),
+                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'fundkit-fundraising-campaigns' ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Resend receipts', 'giveflow-fundraising-campaigns' ),
+                    title:        __( 'Resend receipts', 'fundkit-fundraising-campaigns' ),
                     message,
-                    confirmLabel: __( 'Resend', 'giveflow-fundraising-campaigns' ),
+                    confirmLabel: __( 'Resend', 'fundkit-fundraising-campaigns' ),
                     onConfirm: async () => {
                         // Counted separately: a batch reported as a single
                         // failure reads as nothing having happened, so admins
                         // press it again and every donor whose receipt did go
                         // out receives it twice.
                         const results = await Promise.allSettled( targets.map( ( i ) => apiFetch( {
-                            path:   `/giveflow/v1/admin/donations/${ encodeURIComponent( i.reference ) }/resend-receipt`,
+                            path:   `/fundkit/v1/admin/donations/${ encodeURIComponent( i.reference ) }/resend-receipt`,
                             method: 'POST',
                         } ) ) );
 
@@ -534,14 +534,14 @@ export default function List() {
                         if ( sent > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'giveflow-fundraising-campaigns' ),
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'fundkit-fundraising-campaigns' ),
                                 sent
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'giveflow-fundraising-campaigns' ),
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'fundkit-fundraising-campaigns' ),
                                 failed
                             ) );
                         }
@@ -553,60 +553,60 @@ export default function List() {
 
     return (
         <div>
-            <div className="giveflow-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'GiveFlow', 'giveflow-fundraising-campaigns' ) }</a>
+            <div className="fundkit-crumbs">
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'FundKit', 'fundkit-fundraising-campaigns' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Donations', 'giveflow-fundraising-campaigns' ) }</span>
+                <span>{ __( 'Donations', 'fundkit-fundraising-campaigns' ) }</span>
             </div>
-            <div className="giveflow-page-head">
-                <div className="giveflow-page-head__title-row">
-                    <h1>{ __( 'Donations', 'giveflow-fundraising-campaigns' ) }</h1>
+            <div className="fundkit-page-head">
+                <div className="fundkit-page-head__title-row">
+                    <h1>{ __( 'Donations', 'fundkit-fundraising-campaigns' ) }</h1>
                 </div>
-                <div className="giveflow-page-head__right">
-                    <div className="giveflow-page-head__date-filters">
-                        <span className="giveflow-page-head__date-filters-label">{ __( 'From', 'giveflow-fundraising-campaigns' ) }</span>
+                <div className="fundkit-page-head__right">
+                    <div className="fundkit-page-head__date-filters">
+                        <span className="fundkit-page-head__date-filters-label">{ __( 'From', 'fundkit-fundraising-campaigns' ) }</span>
                         <DateField
                             value={ createdFrom }
                             onChange={ ( v ) => setCreatedFrom( v || '' ) }
-                            ariaLabel={ __( 'Filter donations from', 'giveflow-fundraising-campaigns' ) }
-                            placeholder={ __( 'Any', 'giveflow-fundraising-campaigns' ) }
+                            ariaLabel={ __( 'Filter donations from', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'Any', 'fundkit-fundraising-campaigns' ) }
                         />
-                        <span className="giveflow-page-head__date-filters-label">{ __( 'To', 'giveflow-fundraising-campaigns' ) }</span>
+                        <span className="fundkit-page-head__date-filters-label">{ __( 'To', 'fundkit-fundraising-campaigns' ) }</span>
                         <DateField
                             value={ createdTo }
                             onChange={ ( v ) => setCreatedTo( v || '' ) }
-                            ariaLabel={ __( 'Filter donations to', 'giveflow-fundraising-campaigns' ) }
-                            placeholder={ __( 'Any', 'giveflow-fundraising-campaigns' ) }
+                            ariaLabel={ __( 'Filter donations to', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'Any', 'fundkit-fundraising-campaigns' ) }
                         />
                         { ( createdFrom || createdTo ) && (
                             <button
                                 type="button"
-                                className="giveflow-page-head__date-filters-clear"
+                                className="fundkit-page-head__date-filters-clear"
                                 onClick={ () => { setCreatedFrom( '' ); setCreatedTo( '' ); } }
                             >
-                                { __( 'Clear', 'giveflow-fundraising-campaigns' ) }
+                                { __( 'Clear', 'fundkit-fundraising-campaigns' ) }
                             </button>
                         ) }
                     </div>
-                    <span className="giveflow-page-head__meta">
-                        { sprintf( /* translators: %s: number of donations */ _n( '%s donation', '%s donations', total, 'giveflow-fundraising-campaigns' ), total.toLocaleString() ) }
+                    <span className="fundkit-page-head__meta">
+                        { sprintf( /* translators: %s: number of donations */ _n( '%s donation', '%s donations', total, 'fundkit-fundraising-campaigns' ), total.toLocaleString() ) }
                     </span>
                     { /* Nothing to reveal on a site that has never taken a test
                          donation, so the control is only offered once some
                          exist, or while it is on and needs turning off. */ }
                     { ( testHidden > 0 || includeTest ) && (
-                        <label className="giveflow-inline-toggle">
+                        <label className="fundkit-inline-toggle">
                             <Switch
                                 checked={ includeTest }
                                 onChange={ toggleTest }
-                                label={ __( 'Show test donations', 'giveflow-fundraising-campaigns' ) }
+                                label={ __( 'Show test donations', 'fundkit-fundraising-campaigns' ) }
                             />
-                            <span>{ __( 'Show test donations', 'giveflow-fundraising-campaigns' ) }</span>
+                            <span>{ __( 'Show test donations', 'fundkit-fundraising-campaigns' ) }</span>
                         </label>
                     ) }
                     <Btn variant="primary" onClick={ () => setRecording( true ) }>
                         <Plus size={ 16 } strokeWidth={ 1.75 } />
-                        { __( 'Record a donation', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Record a donation', 'fundkit-fundraising-campaigns' ) }
                     </Btn>
                 </div>
             </div>
@@ -624,7 +624,7 @@ export default function List() {
                         // they get, so it names the row.
                         notify.success( sprintf(
                             /* translators: %s: the new donation's reference. */
-                            __( 'Recorded as %s.', 'giveflow-fundraising-campaigns' ),
+                            __( 'Recorded as %s.', 'fundkit-fundraising-campaigns' ),
                             created?.reference || ''
                         ) );
                     } }
@@ -644,13 +644,13 @@ export default function List() {
                             '%d test donation is hidden.',
                             '%d test donations are hidden.',
                             testHidden,
-                            'giveflow-fundraising-campaigns'
+                            'fundkit-fundraising-campaigns'
                         ),
                         testHidden
                     ) }
                     { ' ' }
                     <Btn variant="link" onClick={ () => toggleTest( true ) }>
-                        { __( 'Show them', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Show them', 'fundkit-fundraising-campaigns' ) }
                     </Btn>
                 </Notice>
             ) }
@@ -662,19 +662,19 @@ export default function List() {
                  so it may only appear over numbers that are actually counting
                  test donations. */ }
             { stats?.includes_test && (
-                <p className="giveflow-list-note">
-                    { __( 'Test donations are counted in the figures above and shown in the list below. These totals include money that was never actually taken, so they cannot be quoted as income.', 'giveflow-fundraising-campaigns' ) }
+                <p className="fundkit-list-note">
+                    { __( 'Test donations are counted in the figures above and shown in the list below. These totals include money that was never actually taken, so they cannot be quoted as income.', 'fundkit-fundraising-campaigns' ) }
                 </p>
             ) }
 
             { ! loading && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <Coins size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No donations yet', 'giveflow-fundraising-campaigns' ) }
-                    body={ __( 'Donations made through your published forms will appear here. Donors are created automatically from each completed donation.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'No donations yet', 'fundkit-fundraising-campaigns' ) }
+                    body={ __( 'Donations made through your published forms will appear here. Donors are created automatically from each completed donation.', 'fundkit-fundraising-campaigns' ) }
                 />
             ) : (
-                <div className={ `giveflow-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
+                <div className={ `fundkit-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
                     <DataViews
                         data={ data }
                         isLoading={ loading }
@@ -691,11 +691,11 @@ export default function List() {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'giveflow-fundraising-campaigns' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'giveflow-fundraising-campaigns' ) }
+                            title={ __( 'Nothing matches these filters', 'fundkit-fundraising-campaigns' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundkit-fundraising-campaigns' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'giveflow-fundraising-campaigns' ) }
+                                    { __( 'Clear filters', 'fundkit-fundraising-campaigns' ) }
                                 </Btn>
                             }
                         />
@@ -712,39 +712,39 @@ function donationKpis( stats ) {
     // Per card, not once above the strip: a single figure gets read out, quoted
     // and screenshotted on its own, and it has to carry its own disclaimer.
     const includesTest = !! stats?.includes_test;
-    const testSub = includesTest ? __( 'Includes test donations', 'giveflow-fundraising-campaigns' ) : null;
+    const testSub = includesTest ? __( 'Includes test donations', 'fundkit-fundraising-campaigns' ) : null;
 
     let raisedSub = testSub;
     if ( stats?.currency ) {
         raisedSub = includesTest
             ? sprintf(
                 /* translators: %s: currency code */
-                __( 'in %s, includes test donations', 'giveflow-fundraising-campaigns' ),
+                __( 'in %s, includes test donations', 'fundkit-fundraising-campaigns' ),
                 stats.currency
             )
-            : sprintf( /* translators: %s: currency code */ __( 'in %s', 'giveflow-fundraising-campaigns' ), stats.currency );
+            : sprintf( /* translators: %s: currency code */ __( 'in %s', 'fundkit-fundraising-campaigns' ), stats.currency );
     }
 
     return [
         {
-            label: __( 'Total donations', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Total donations', 'fundkit-fundraising-campaigns' ),
             value: stats ? stats.total_count.toLocaleString() : '-',
             sub:   testSub,
         },
         {
-            label: __( 'Paid', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Paid', 'fundkit-fundraising-campaigns' ),
             value: stats ? stats.paid_count.toLocaleString() : '-',
             sub:   testSub,
         },
         {
-            label: __( 'Raised', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Raised', 'fundkit-fundraising-campaigns' ),
             value: stats
                 ? formatAmount( stats.raised_cents, stats.currency || undefined )
                 : '-',
             sub: raisedSub,
         },
         {
-            label: __( 'Unique donors', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Unique donors', 'fundkit-fundraising-campaigns' ),
             value: stats ? stats.donors_count.toLocaleString() : '-',
             sub:   testSub,
         },

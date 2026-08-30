@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Receipts\ReceiptIssuer;
+use FundKit\Foundation\Plugin;
+use FundKit\Donations\DonationRepository;
+use FundKit\Receipts\ReceiptIssuer;
 use WP_REST_Request;
 
 /**
@@ -27,12 +27,12 @@ final class ReceiptTempFileTest extends IntegrationTestCase
     /** @return string[] receipt PDFs currently sitting in the system temp dir */
     private function strays(): array
     {
-        return glob(rtrim(get_temp_dir(), '/\\') . '/giveflow-receipt-*.pdf') ?: [];
+        return glob(rtrim(get_temp_dir(), '/\\') . '/fundkit-receipt-*.pdf') ?: [];
     }
 
-    private function paidDonation(): \GiveFlow\Donations\Donation
+    private function paidDonation(): \FundKit\Donations\Donation
     {
-        $create = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'temp-file@example.test',
@@ -44,7 +44,7 @@ final class ReceiptTempFileTest extends IntegrationTestCase
         ]));
         $reference = (string) (rest_do_request($create)->get_data()['reference'] ?? '');
 
-        $confirm = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);

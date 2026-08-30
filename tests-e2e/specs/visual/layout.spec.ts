@@ -1,5 +1,5 @@
 /**
- * Visual regression: the layout + content form (GIVEFLOW_E2E_LAYOUT_FORM_PATH).
+ * Visual regression: the layout + content form (FUNDKIT_E2E_LAYOUT_FORM_PATH).
  * Covers heading/paragraph/html/divider/columns/row/section plus the styled
  * interactive blocks (recurring-toggle, fund-picker, privacy-notice, goal).
  *
@@ -10,16 +10,16 @@
 import { test, expect } from '../../fixtures/donor-form';
 import { settle } from '../../helpers/visual';
 
-const FORM_PATH = process.env.GIVEFLOW_E2E_LAYOUT_FORM_PATH ?? '';
+const FORM_PATH = process.env.FUNDKIT_E2E_LAYOUT_FORM_PATH ?? '';
 
 test.describe('visual: layout + content blocks', () => {
-    test.skip(! FORM_PATH, 'set GIVEFLOW_E2E_LAYOUT_FORM_PATH via `wp giveflow e2e-seed`');
+    test.skip(! FORM_PATH, 'set FUNDKIT_E2E_LAYOUT_FORM_PATH via `wp fundkit e2e-seed`');
     test.use({ formPath: FORM_PATH });
 
     test('initial render', async ({ donor }) => {
         await settle(donor.page);
         await expect(donor.form).toHaveScreenshot('layout-form.png', {
-            mask: [donor.form.locator('.giveflow-form__goal')],
+            mask: [donor.form.locator('.fundkit-form__goal')],
         });
     });
 });

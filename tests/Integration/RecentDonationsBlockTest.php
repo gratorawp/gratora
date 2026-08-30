@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donations\Donation;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -25,7 +25,7 @@ final class RecentDonationsBlockTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Recent donations campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -128,10 +128,10 @@ final class RecentDonationsBlockTest extends IntegrationTestCase
             'post_status'  => 'publish',
             'post_type'    => 'page',
             'post_content' => sprintf(
-                '<!-- wp:giveflow/recent-donations {"campaignId":%d} /-->',
+                '<!-- wp:fundkit/recent-donations {"campaignId":%d} /-->',
                 $this->campaignId
             ),
-            'meta_input'   => ['_giveflow_campaign_id' => $this->campaignId],
+            'meta_input'   => ['_fundkit_campaign_id' => $this->campaignId],
         ]);
 
         global $post;

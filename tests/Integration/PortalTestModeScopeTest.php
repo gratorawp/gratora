@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -46,7 +46,7 @@ final class PortalTestModeScopeTest extends IntegrationTestCase
         $sid  = bin2hex(random_bytes(32));
         $csrf = bin2hex(random_bytes(16));
         $sid = $this->portalSession($donorId, $csrf);
-        $_COOKIE['giveflow_donor_session'] = $sid;
+        $_COOKIE['fundkit_donor_session'] = $sid;
         return $csrf;
     }
 
@@ -65,7 +65,7 @@ final class PortalTestModeScopeTest extends IntegrationTestCase
         $test    = $this->seedPlan($donorId, true);
         $this->openPortalFor($donorId);
 
-        $data = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/portal/recurring'))->get_data();
+        $data = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/portal/recurring'))->get_data();
         $ids  = array_map(static fn ($p) => (int) ($p['id'] ?? 0), is_array($data) ? $data : []);
 
         $this->assertContains((int) $live->id, $ids, 'the live plan should be listed');
@@ -82,7 +82,7 @@ final class PortalTestModeScopeTest extends IntegrationTestCase
         $donorId = $this->donorId();
         $this->seedPlan($donorId, true);
 
-        $metrics  = Plugin::instance()->container->get(\GiveFlow\Donors\DonorMetricsService::class);
+        $metrics  = Plugin::instance()->container->get(\FundKit\Donors\DonorMetricsService::class);
         $profile  = $metrics->profile($donorId);
         $lifetime = (array) $profile['lifetime'];
 
@@ -99,15 +99,15 @@ final class PortalTestModeScopeTest extends IntegrationTestCase
         $test    = $this->seedPlan($donorId, true);
         $csrf    = $this->openPortalFor($donorId);
 
-        $request = new WP_REST_Request('POST', '/giveflow/v1/portal/recurring/' . $test->id . '/action');
+        $request = new WP_REST_Request('POST', '/fundkit/v1/portal/recurring/' . $test->id . '/action');
         $request->set_header('content-type', 'application/json');
-        $request->set_header('x-giveflow-csrf', $csrf);
+        $request->set_header('x-fundkit-csrf', $csrf);
         $request->set_body((string) wp_json_encode(['action' => 'cancel']));
         $response = rest_do_request($request);
 
         $this->assertSame(404, $response->get_status());
         // Specifically the ownership/scope refusal, not a missing route.
-        $this->assertSame('giveflow_not_found', (string) ($response->as_error()?->get_error_code() ?? ''));
+        $this->assertSame('fundkit_not_found', (string) ($response->as_error()?->get_error_code() ?? ''));
         $this->assertSame(
             'active',
             RecurringPlan::query()->find('id', (int) $test->id)->status,

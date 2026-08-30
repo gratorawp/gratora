@@ -1,12 +1,12 @@
 import { __ } from '@wordpress/i18n';
 // MySQL strings arrive in UTC with no zone marker, which a browser reads as
 // local time. parseTimestamp marks them.
-import { parseTimestamp } from '@giveflow/ui/utils/format';
+import { parseTimestamp } from '@fundkit/ui/utils/format';
 
 export const STATUS_LABEL = {
-    draft:     __( 'Draft', 'giveflow-fundraising-campaigns' ),
-    published: __( 'Published', 'giveflow-fundraising-campaigns' ),
-    archived:  __( 'Archived', 'giveflow-fundraising-campaigns' ),
+    draft:     __( 'Draft', 'fundkit-fundraising-campaigns' ),
+    published: __( 'Published', 'fundkit-fundraising-campaigns' ),
+    archived:  __( 'Archived', 'fundkit-fundraising-campaigns' ),
 };
 
 export function formatDate( iso, opts = {} ) {
@@ -25,7 +25,7 @@ export function formatDate( iso, opts = {} ) {
 
 export function editorHref( id ) {
     const params = new URLSearchParams();
-    params.set( 'page', 'giveflow-forms' );
+    params.set( 'page', 'fundkit-forms' );
     params.set( 'form', String( id ) );
     return `${ window.location.pathname }?${ params.toString() }`;
 }
@@ -33,7 +33,7 @@ export function editorHref( id ) {
 /** Back-link from form editor → campaign detail (Forms tab). */
 export function campaignHref( campaignId ) {
     const p = new URLSearchParams();
-    p.set( 'page', 'giveflow-campaigns' );
+    p.set( 'page', 'fundkit-campaigns' );
     p.set( 'view', 'detail' );
     p.set( 'id', String( campaignId ) );
     p.set( 'tab', 'forms' );

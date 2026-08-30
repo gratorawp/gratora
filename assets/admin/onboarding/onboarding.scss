@@ -1,17 +1,17 @@
-// GiveFlow first-run onboarding. Full-page chrome stripped via the
-// `giveflow-onboarding-fullscreen` body class (added by OnboardingPage).
+// FundKit first-run onboarding. Full-page chrome stripped via the
+// `fundkit-onboarding-fullscreen` body class (added by OnboardingPage).
 
-@import '@giveflow/ui/scss/tokens';
+@import '@fundkit/ui/scss/tokens';
 @import '../_shared/admin-base';
-@import '@giveflow/ui/scss/components/amount-input';
-@import '@giveflow/ui/scss/components/searchable-select';
-@import '@giveflow/ui/scss/components/skeleton';
+@import '@fundkit/ui/scss/components/amount-input';
+@import '@fundkit/ui/scss/components/searchable-select';
+@import '@fundkit/ui/scss/components/skeleton';
 
 // Aliases for legacy local names still used inside this file.
 $shadow-card:   $shadow-md;
 $shadow-lifted: $shadow-lg;
 
-body.giveflow-onboarding-fullscreen {
+body.fundkit-onboarding-fullscreen {
     background: $bg-page;
     margin-top: 0 !important;
 
@@ -39,8 +39,8 @@ body.giveflow-onboarding-fullscreen {
     // WP admin's forms.css applies a global box-shadow + grey border to every
     // <input>/<select>/<textarea>. Override at body-class specificity so our
     // onboarding inputs render with our own chrome.
-    .giveflow-onboarding__input,
-    .giveflow-searchable__input {
+    .fundkit-onboarding__input,
+    .fundkit-searchable__input {
         border: 1px solid $border-mid;
         background: #fff;
         box-shadow: none;
@@ -58,10 +58,10 @@ body.giveflow-onboarding-fullscreen {
             outline: 0;
         }
     }
-    select.giveflow-onboarding__input { padding-right: 32px; }
+    select.fundkit-onboarding__input { padding-right: 32px; }
 }
 
-.giveflow-onboarding {
+.fundkit-onboarding {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
     color: $text;
     min-height: 100vh;
@@ -100,7 +100,7 @@ body.giveflow-onboarding-fullscreen {
         font-weight: 600;
         color: $text;
     }
-    // .giveflow-onboarding__brand-mark is rendered by the shared <GiveFlowMark/>
+    // .fundkit-onboarding__brand-mark is rendered by the shared <FundKitMark/>
     // component with inline styles, so no chip rules live here. We only
     // own the wordmark next to it.
     &__brand-name { font-size: 15px; }
@@ -182,7 +182,7 @@ body.giveflow-onboarding-fullscreen {
 
     // Form inputs. The selectors are scoped tightly so WP admin's global
     // `input[type="text"]` reset (margin, box-shadow, border-color) doesn't
-    // override the onboarding styling; `body.giveflow-onboarding-fullscreen`
+    // override the onboarding styling; `body.fundkit-onboarding-fullscreen`
     // wins on specificity.
     &__input {
         width: 100%;
@@ -209,7 +209,7 @@ body.giveflow-onboarding-fullscreen {
             box-shadow: 0 0 0 3px $accent-soft;
         }
     }
-    select.giveflow-onboarding__input {
+    select.fundkit-onboarding__input {
         appearance: none;
         cursor: pointer;
         background-image:
@@ -325,7 +325,7 @@ body.giveflow-onboarding-fullscreen {
     &__preset-thumb--classic {
         background: linear-gradient(180deg, #f5f4fa, $accent-soft);
 
-        .giveflow-onboarding__preset-btn {
+        .fundkit-onboarding__preset-btn {
             background: $accent;
             color: #fff;
             border-radius: 999px;
@@ -334,7 +334,7 @@ body.giveflow-onboarding-fullscreen {
     &__preset-thumb--bold {
         background: linear-gradient(180deg, #f5f5f7, #e9e9ee);
 
-        .giveflow-onboarding__preset-btn {
+        .fundkit-onboarding__preset-btn {
             background: #0F3D5C;
             color: #fff;
             border-radius: 4px;
@@ -348,7 +348,7 @@ body.giveflow-onboarding-fullscreen {
         background: #fafaf9;
         border: 1px dashed $border-mid;
 
-        .giveflow-onboarding__preset-btn {
+        .fundkit-onboarding__preset-btn {
             background: transparent;
             color: $text;
             border: 1px solid $text;
@@ -363,7 +363,7 @@ body.giveflow-onboarding-fullscreen {
             #ebedf0 6px 12px
         );
 
-        .giveflow-onboarding__preset-btn {
+        .fundkit-onboarding__preset-btn {
             background: $text-soft;
             color: #fff;
             border-radius: 8px;
@@ -421,7 +421,7 @@ body.giveflow-onboarding-fullscreen {
         border-radius: $radius-lg;
         background: linear-gradient(90deg, $bg-soft 0%, #f3f4f6 40%, $bg-soft 80%);
         background-size: 200% 100%;
-        animation: giveflow-skeleton-pulse 1.4s ease-in-out infinite;
+        animation: fundkit-skeleton-pulse 1.4s ease-in-out infinite;
     }
 
     // Shown when the preview request fails; the brand choice is still saved.
@@ -736,15 +736,15 @@ body.giveflow-onboarding-fullscreen {
 
 }
 
-// @giveflow/ui's admin base restates border-radius on :focus, to win back the shape
-// wp-admin's a:focus steals when .giveflow-btn renders as an anchor. It restates one
+// @fundkit/ui's admin base restates border-radius on :focus, to win back the shape
+// wp-admin's a:focus steals when .fundkit-btn renders as an anchor. It restates one
 // radius, so a pill flattens to 8px the moment it is clicked. Its selector ties
-// with a plain .giveflow-onboarding .giveflow-btn:focus and wins on order, so this needs
+// with a plain .fundkit-onboarding .fundkit-btn:focus and wins on order, so this needs
 // the extra element to outrank it.
-body .giveflow-onboarding .giveflow-btn:focus,
-body .giveflow-onboarding .giveflow-btn:active { border-radius: 999px; }
+body .fundkit-onboarding .fundkit-btn:focus,
+body .fundkit-onboarding .fundkit-btn:active { border-radius: 999px; }
 
-.giveflow-onboarding .giveflow-btn {
+.fundkit-onboarding .fundkit-btn {
     appearance: none;
     border: 1px solid transparent;
     border-radius: 999px;
@@ -784,7 +784,7 @@ body .giveflow-onboarding .giveflow-btn:active { border-radius: 999px; }
 }
 
 @media (max-width: 640px) {
-    .giveflow-onboarding {
+    .fundkit-onboarding {
         padding: 16px 12px 32px;
 
         &__top { margin-bottom: 20px; }
@@ -798,10 +798,10 @@ body .giveflow-onboarding .giveflow-btn:active { border-radius: 999px; }
         &__amounts { grid-template-columns: repeat(2, 1fr); }
         &__checklist-item {
             grid-template-columns: 28px 1fr;
-            .giveflow-btn { grid-column: 1 / -1; width: 100%; justify-content: center; }
+            .fundkit-btn { grid-column: 1 / -1; width: 100%; justify-content: center; }
         }
         &__nav { flex-direction: column-reverse; gap: 8px;
-            .giveflow-btn { width: 100%; }
+            .fundkit-btn { width: 100%; }
             > span { display: none; }
         }
     }

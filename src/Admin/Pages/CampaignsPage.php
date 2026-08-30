@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Admin\Pages;
+namespace FundKit\Admin\Pages;
 
-use GiveFlow\Admin\ExtensionAssets;
-use GiveFlow\Foundation\Hooks\HookProvider;
+use FundKit\Admin\ExtensionAssets;
+use FundKit\Foundation\Hooks\HookProvider;
 
 /**
  * Registers and renders the Campaigns admin page.
@@ -14,14 +14,14 @@ use GiveFlow\Foundation\Hooks\HookProvider;
  */
 final class CampaignsPage extends HookProvider
 {
-    private const PAGE_ID   = 'giveflow-campaigns';
-    private const HANDLE    = 'giveflow-admin-campaigns';
+    private const PAGE_ID   = 'fundkit-campaigns';
+    private const HANDLE    = 'fundkit-admin-campaigns';
     private const BUILD_DIR = 'build/admin/campaigns';
 
     /** @since 1.0.0 */
     protected function filters(): array
     {
-        return ['giveflow.admin.pages' => 'registerPage'];
+        return ['fundkit.admin.pages' => 'registerPage'];
     }
 
     /** @since 1.0.0 */
@@ -29,8 +29,8 @@ final class CampaignsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Campaigns', 'giveflow-fundraising-campaigns'),
-            'capability' => 'giveflow_access_campaigns',
+            'title'      => __('Campaigns', 'fundkit-fundraising-campaigns'),
+            'capability' => 'fundkit_access_campaigns',
             'position'   => 5,
             'render'     => [$this, 'render'],
         ];
@@ -46,7 +46,7 @@ final class CampaignsPage extends HookProvider
             <?php // WP moves admin notices to just after this marker. Without it they
                   // land beside the React header instead of above it. ?>
             <hr class="wp-header-end" />
-            <div id="giveflow-admin-campaigns"></div>
+            <div id="fundkit-admin-campaigns"></div>
         </div>
         <?php
     }
@@ -54,7 +54,7 @@ final class CampaignsPage extends HookProvider
     /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
-        $asset = require GIVEFLOW_DIR . self::BUILD_DIR . '/index.asset.php';
+        $asset = require FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
 
         wp_enqueue_media();
 
@@ -65,26 +65,26 @@ final class CampaignsPage extends HookProvider
 
         wp_enqueue_script(
             self::HANDLE,
-            GIVEFLOW_URL . self::BUILD_DIR . '/index.js',
+            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
             array_merge($asset['dependencies'] ?? [], [ExtensionAssets::HANDLE]),
-            $asset['version']      ?? GIVEFLOW_VERSION,
+            $asset['version']      ?? FUNDKIT_VERSION,
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
-            'giveflow-dataviews-vendor-campaigns',
-            GIVEFLOW_URL . self::BUILD_DIR . '/dataviews.css',
+            'fundkit-dataviews-vendor-campaigns',
+            FUNDKIT_URL . self::BUILD_DIR . '/dataviews.css',
             ['wp-components'],
-            (string) (@filemtime(GIVEFLOW_DIR . self::BUILD_DIR . '/dataviews.css') ?: GIVEFLOW_VERSION)
+            (string) (@filemtime(FUNDKIT_DIR . self::BUILD_DIR . '/dataviews.css') ?: FUNDKIT_VERSION)
         );
         wp_enqueue_style(
-            'giveflow-admin-campaigns',
-            GIVEFLOW_URL . 'build/admin/campaigns.css',
+            'fundkit-admin-campaigns',
+            FUNDKIT_URL . 'build/admin/campaigns.css',
             ['wp-components'],
-            (string) (@filemtime(GIVEFLOW_DIR . 'build/admin/campaigns.css') ?: GIVEFLOW_VERSION)
+            (string) (@filemtime(FUNDKIT_DIR . 'build/admin/campaigns.css') ?: FUNDKIT_VERSION)
         );
     }
 }

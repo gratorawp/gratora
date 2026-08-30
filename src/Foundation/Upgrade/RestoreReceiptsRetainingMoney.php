@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Upgrade;
+namespace FundKit\Foundation\Upgrade;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Receipts\Receipt;
+use FundKit\Donations\Donation;
+use FundKit\Receipts\Receipt;
 
 /**
  * Puts back the receipts a partial refund voided.
@@ -19,7 +19,7 @@ use GiveFlow\Receipts\Receipt;
  */
 final class RestoreReceiptsRetainingMoney implements UpgradeRoutine
 {
-    private const OPTION_CURSOR = 'giveflow_upgrade_restore_receipts_cursor';
+    private const OPTION_CURSOR = 'fundkit_upgrade_restore_receipts_cursor';
     private const BATCH         = 200;
 
     /** @since 1.0.0 */
@@ -31,7 +31,7 @@ final class RestoreReceiptsRetainingMoney implements UpgradeRoutine
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Restoring receipts that a partial refund withdrew.', 'giveflow-fundraising-campaigns');
+        return __('Restoring receipts that a partial refund withdrew.', 'fundkit-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */

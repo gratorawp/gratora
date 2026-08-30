@@ -1,18 +1,18 @@
-@import '@giveflow/ui/scss/tokens';
+@import '@fundkit/ui/scss/tokens';
 @import '../_shared/admin-base';
 @import '../_shared/kpi-strip';
-@import '@giveflow/ui/scss/components/notice';
-@import '@giveflow/ui/scss/components/toast';
-@import '@giveflow/ui/scss/components/empty-state';
-@import '@giveflow/ui/scss/components/buttons';
-@import '@giveflow/ui/scss/components/switch';
-@import '@giveflow/ui/scss/components/dialog';
-@import '@giveflow/ui/scss/components/searchable-select';
-@import '@giveflow/ui/scss/components/form';
-@import '@giveflow/ui/scss/components/date-field';
+@import '@fundkit/ui/scss/components/notice';
+@import '@fundkit/ui/scss/components/toast';
+@import '@fundkit/ui/scss/components/empty-state';
+@import '@fundkit/ui/scss/components/buttons';
+@import '@fundkit/ui/scss/components/switch';
+@import '@fundkit/ui/scss/components/dialog';
+@import '@fundkit/ui/scss/components/searchable-select';
+@import '@fundkit/ui/scss/components/form';
+@import '@fundkit/ui/scss/components/date-field';
 @import '../_shared/schedule-fields';
 
-.giveflow-crumbs {
+.fundkit-crumbs {
     font-size: 13px;
     color: $text-muted;
     margin-bottom: 6px;
@@ -23,7 +23,7 @@
     .sep { margin: 0 6px; color: #cbd0d5; }
 }
 
-.giveflow-page-head {
+.fundkit-page-head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -44,7 +44,7 @@
     &__meta      { font-size: 12.5px; color: $text-muted; }
 }
 
-.giveflow-funds-intro {
+.fundkit-funds-intro {
     margin: 0 0 16px;
     font-size: 13px;
     color: $text-muted;
@@ -54,7 +54,7 @@
 
 
 // ---- Table cell chrome ----
-.giveflow-fund-name {
+.fundkit-fund-name {
     position: relative;
 
     &--child::before {
@@ -71,7 +71,7 @@
     }
 }
 
-.giveflow-fund-code {
+.fundkit-fund-code {
     font-family: $font-mono;
     font-size: 11px;
     color: $text-muted;
@@ -82,7 +82,7 @@
     display: inline-block;
 }
 
-.giveflow-fund-badge {
+.fundkit-fund-badge {
     display: inline-flex;
     align-items: center;
     font-size: 11px;
@@ -97,14 +97,14 @@
     &--pending      { background: $blue-soft; color: $blue; }
 }
 
-.giveflow-fund-status {
+.fundkit-fund-status {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-size: 12.5px;
     color: $text;
 }
-.giveflow-fund-dot {
+.fundkit-fund-dot {
     width: 7px;
     height: 7px;
     border-radius: 50%;
@@ -115,7 +115,7 @@
 
 @import '../_shared/dataviews';
 
-.giveflow-fset {
+.fundkit-fset {
     border: 0;
     padding: 0;
     margin: 0 0 20px;
@@ -131,7 +131,7 @@
     }
 }
 
-.giveflow-fld {
+.fundkit-fld {
     margin-bottom: 14px;
 
     label {
@@ -145,13 +145,13 @@
     &__opt  { color: $text-soft; font-weight: 500; }
 }
 
-// Fund drawer fields use the shared .giveflow-input / .giveflow-textarea / .giveflow-input--mono
+// Fund drawer fields use the shared .fundkit-input / .fundkit-textarea / .fundkit-input--mono
 // classes (form partial imported above); no local input chrome.
 
-// Row layout for the @giveflow/ui ToggleRow (body left, switch right). Currently
-// duplicated in settings.scss + campaigns.scss too; belongs in @giveflow/ui
-// _switch.scss next to .giveflow-switch (follow-up consolidation).
-.giveflow-toggle-row {
+// Row layout for the @fundkit/ui ToggleRow (body left, switch right). Currently
+// duplicated in settings.scss + campaigns.scss too; belongs in @fundkit/ui
+// _switch.scss next to .fundkit-switch (follow-up consolidation).
+.fundkit-toggle-row {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -176,9 +176,9 @@
     }
 }
 
-.giveflow-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fundkit-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-.giveflow-seg2 {
+.fundkit-seg2 {
     display: flex;
     background: $bg-soft;
     border-radius: $radius-md;
@@ -207,7 +207,7 @@
     }
 }
 
-.giveflow-toggle {
+.fundkit-toggle {
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -231,7 +231,7 @@
 }
 
 // ---- Delete-dialog choice rows ----
-.giveflow-choice {
+.fundkit-choice {
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -266,7 +266,7 @@
     }
 }
 
-.giveflow-fund-raised {
+.fundkit-fund-raised {
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }

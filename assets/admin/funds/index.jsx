@@ -5,7 +5,7 @@ import Toaster from '../_shared/components/Toaster';
 import './funds.scss';
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'giveflow-admin-funds' );
+    const root = document.getElementById( 'fundkit-admin-funds' );
     if ( ! root ) return;
     createRoot( root ).render( <><List /><Toaster /></> );
 } );

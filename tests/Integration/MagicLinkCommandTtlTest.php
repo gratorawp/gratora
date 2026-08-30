@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\DonorMetricsService;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Donors\Portal\PortalSession;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Donors\DonorMetricsService;
+use FundKit\Donors\DonorService;
+use FundKit\Donors\Portal\PortalSession;
+use FundKit\Foundation\Plugin;
+use FundKit\Vendor\Queryable\DB;
 use WP_REST_Request;
 
 /**
@@ -56,7 +56,7 @@ final class MagicLinkCommandTtlTest extends IntegrationTestCase
 
     private function issue(int $donorId, int $ttl): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/commands/donor.magic_link.issue');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/commands/donor.magic_link.issue');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'input' => [
@@ -72,7 +72,7 @@ final class MagicLinkCommandTtlTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function token(int $donorId): array
     {
-        $row = DB::table('giveflow_magic_link_tokens')->where('donor_id', $donorId)->get();
+        $row = DB::table('fundkit_magic_link_tokens')->where('donor_id', $donorId)->get();
         $this->assertNotEmpty($row, 'the command must have written a token row');
 
         return (array) $row;
@@ -80,7 +80,7 @@ final class MagicLinkCommandTtlTest extends IntegrationTestCase
 
     private function actAsAdmin(): void
     {
-        get_role('administrator')->add_cap('giveflow_edit_donors');
+        get_role('administrator')->add_cap('fundkit_edit_donors');
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
     }
 

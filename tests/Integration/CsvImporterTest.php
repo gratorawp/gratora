@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Currency\FxBackfill;
-use GiveFlow\Currency\FxRates;
-use GiveFlow\Donations\AggregateSyncer;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Crypto\Crypto;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\Transfer\CsvImporter;
+use FundKit\Currency\FxBackfill;
+use FundKit\Currency\FxRates;
+use FundKit\Donations\AggregateSyncer;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Crypto\Crypto;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Transfer\CsvImporter;
 
 /**
  * Someone else's spreadsheet, which is the only thing this can assume about it.
@@ -598,7 +598,7 @@ final class CsvImporterTest extends IntegrationTestCase
 
     private function donorId(string $email): int
     {
-        $hasher = Plugin::instance()->container->get(\GiveFlow\Foundation\Identity\IdentityHasher::class);
+        $hasher = Plugin::instance()->container->get(\FundKit\Foundation\Identity\IdentityHasher::class);
         $donor  = Donor::query()->where('email_hash', $hasher->emailHash($email))->get();
 
         return is_array($donor) ? (int) $donor['id'] : (int) ($donor->id ?? 0);

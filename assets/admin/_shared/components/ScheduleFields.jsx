@@ -17,12 +17,12 @@ export default function ScheduleFields( {
     onStartsAt,
     endsAt,
     onEndsAt,
-    title       = __( 'Set a schedule', 'giveflow-fundraising-campaigns' ),
-    sub         = __( 'Add an optional start and end date', 'giveflow-fundraising-campaigns' ),
-    startLabel  = __( 'Start date', 'giveflow-fundraising-campaigns' ),
-    endLabel    = __( 'End date', 'giveflow-fundraising-campaigns' ),
-    startPlaceholder = __( 'Starts immediately', 'giveflow-fundraising-campaigns' ),
-    endPlaceholder   = __( 'No end date', 'giveflow-fundraising-campaigns' ),
+    title       = __( 'Set a schedule', 'fundkit-fundraising-campaigns' ),
+    sub         = __( 'Add an optional start and end date', 'fundkit-fundraising-campaigns' ),
+    startLabel  = __( 'Start date', 'fundkit-fundraising-campaigns' ),
+    endLabel    = __( 'End date', 'fundkit-fundraising-campaigns' ),
+    startPlaceholder = __( 'Starts immediately', 'fundkit-fundraising-campaigns' ),
+    endPlaceholder   = __( 'No end date', 'fundkit-fundraising-campaigns' ),
 } ) {
     // Turning the schedule off clears the dates: otherwise a value picked and
     // then hidden is still submitted, and the form says "always on" while
@@ -37,17 +37,17 @@ export default function ScheduleFields( {
 
     return (
         <>
-            <div className="giveflow-sched__toggle-row">
-                <div className="giveflow-sched__toggle-txt">
-                    <div className="giveflow-sched__toggle-title">{ title }</div>
-                    <div className="giveflow-sched__toggle-sub">{ sub }</div>
+            <div className="fundkit-sched__toggle-row">
+                <div className="fundkit-sched__toggle-txt">
+                    <div className="fundkit-sched__toggle-title">{ title }</div>
+                    <div className="fundkit-sched__toggle-sub">{ sub }</div>
                 </div>
                 <Switch checked={ enabled } onChange={ handleToggle } label={ title } />
             </div>
             { enabled && (
-                <div className="giveflow-sched__dates">
+                <div className="fundkit-sched__dates">
                     <div>
-                        <span className="giveflow-sched__date-lbl">{ startLabel }</span>
+                        <span className="fundkit-sched__date-lbl">{ startLabel }</span>
                         <DateField
                             value={ startsAt }
                             onChange={ onStartsAt }
@@ -56,7 +56,7 @@ export default function ScheduleFields( {
                         />
                     </div>
                     <div>
-                        <span className="giveflow-sched__date-lbl">{ endLabel }</span>
+                        <span className="fundkit-sched__date-lbl">{ endLabel }</span>
                         <DateField
                             value={ endsAt }
                             onChange={ onEndsAt }

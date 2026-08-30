@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\EventRecorder;
-use GiveFlow\Currency\FxRates;
-use GiveFlow\Donations\AggregateSyncer;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationIntent;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Forms\DefaultFormTypeHandler;
-use GiveFlow\Forms\FormTypeHandler;
-use GiveFlow\Forms\FormTypeRegistry;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\References\ReferenceGenerator;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Funds\FundResolver;
-use GiveFlow\Gateways\GatewayManager;
+use FundKit\Analytics\EventRecorder;
+use FundKit\Currency\FxRates;
+use FundKit\Donations\AggregateSyncer;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationIntent;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donations\DonationService;
+use FundKit\Donors\DonorService;
+use FundKit\Forms\DefaultFormTypeHandler;
+use FundKit\Forms\FormTypeHandler;
+use FundKit\Forms\FormTypeRegistry;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\References\ReferenceGenerator;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Funds\FundResolver;
+use FundKit\Gateways\GatewayManager;
 
 /**
  * The byte-identical Free path is also regression-covered by the existing
@@ -43,8 +43,8 @@ final class TypeDispatchTest extends IntegrationTestCase
             $c->get(FundResolver::class),
             $c->get(FxRates::class),
             $types,
-            $c->get(\GiveFlow\Foundation\Crypto\Crypto::class),
-            $c->get(\GiveFlow\Gateways\TestMode::class),
+            $c->get(\FundKit\Foundation\Crypto\Crypto::class),
+            $c->get(\FundKit\Gateways\TestMode::class),
         );
     }
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 /**
  * Verifies each campaign block opts into the WP 7.0 responsive visibility
@@ -17,13 +17,13 @@ final class CampaignBlocksVisibilitySupportTest extends IntegrationTestCase
     public function campaignBlockNames(): array
     {
         return [
-            ['giveflow/campaign-image'],
-            ['giveflow/campaign-progress'],
-            ['giveflow/campaign-stat'],
-            ['giveflow/donate-button'],
-            ['giveflow/top-donors'],
-            ['giveflow/recent-donations'],
-            ['giveflow/supporter-wall'],
+            ['fundkit/campaign-image'],
+            ['fundkit/campaign-progress'],
+            ['fundkit/campaign-stat'],
+            ['fundkit/donate-button'],
+            ['fundkit/top-donors'],
+            ['fundkit/recent-donations'],
+            ['fundkit/supporter-wall'],
         ];
     }
 

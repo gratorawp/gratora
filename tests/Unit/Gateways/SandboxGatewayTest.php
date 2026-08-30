@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Gateways;
+namespace FundKit\Tests\Unit\Gateways;
 
 use DateTimeImmutable;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Foundation\Time\FrozenClock;
-use GiveFlow\Gateways\Sandbox\SandboxGateway;
-use GiveFlow\Recurring\RecurringPlanRepository;
+use FundKit\Donations\Donation;
+use FundKit\Foundation\Time\FrozenClock;
+use FundKit\Gateways\Sandbox\SandboxGateway;
+use FundKit\Recurring\RecurringPlanRepository;
 use PHPUnit\Framework\TestCase;
 
 final class SandboxGatewayTest extends TestCase

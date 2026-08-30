@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -46,7 +46,7 @@ final class RecurringTestVisibilityTest extends IntegrationTestCase
 
     private function index(array $params = []): \WP_REST_Response
     {
-        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/recurring');
+        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/recurring');
         foreach ($params as $k => $v) {
             $req->set_param($k, $v);
         }
@@ -66,7 +66,7 @@ final class RecurringTestVisibilityTest extends IntegrationTestCase
 
         // The count is what lets the screen offer to reveal them. Without it the
         // toggle either never appears or appears on every site that has none.
-        $this->assertSame('2', $res->get_headers()['X-GiveFlow-Test-Hidden'] ?? null);
+        $this->assertSame('2', $res->get_headers()['X-FundKit-Test-Hidden'] ?? null);
     }
 
     public function test_asking_for_them_returns_them(): void
@@ -79,13 +79,13 @@ final class RecurringTestVisibilityTest extends IntegrationTestCase
 
         // Nothing is hidden once the caller has opted in, so the number would
         // only ever be noise.
-        $this->assertArrayNotHasKey('X-GiveFlow-Test-Hidden', $res->get_headers());
+        $this->assertArrayNotHasKey('X-FundKit-Test-Hidden', $res->get_headers());
     }
 
     /** @return array<string,mixed> */
     private function stats(array $params = []): array
     {
-        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/recurring/stats');
+        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/recurring/stats');
         foreach ($params as $k => $v) {
             $req->set_param($k, $v);
         }
@@ -128,6 +128,6 @@ final class RecurringTestVisibilityTest extends IntegrationTestCase
         $res = $this->index();
 
         $this->assertCount(1, (array) $res->get_data());
-        $this->assertSame('0', $res->get_headers()['X-GiveFlow-Test-Hidden'] ?? null);
+        $this->assertSame('0', $res->get_headers()['X-FundKit-Test-Hidden'] ?? null);
     }
 }

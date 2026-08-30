@@ -71,7 +71,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
         setError( null );
         try {
             const updated = await apiFetch( {
-                path:   `/giveflow/v1/admin/donors/${ donor.id }`,
+                path:   `/fundkit/v1/admin/donors/${ donor.id }`,
                 method: 'PATCH',
                 data:   form,
             } );
@@ -87,18 +87,18 @@ function EditPanel( { donor, onCancel, onSaved } ) {
         // The footer lives outside the form element, so it calls this directly.
         if ( e ) e.preventDefault();
         if ( phoneInvalid ) {
-            setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'giveflow-fundraising-campaigns' ) );
+            setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'fundkit-fundraising-campaigns' ) );
             return;
         }
         if ( emailInvalid ) {
-            setError( __( 'Email address looks malformed.', 'giveflow-fundraising-campaigns' ) );
+            setError( __( 'Email address looks malformed.', 'fundkit-fundraising-campaigns' ) );
             return;
         }
         if ( emailChanged ) {
             setConfirm( {
-                title:        __( 'Change donor email', 'giveflow-fundraising-campaigns' ),
-                message:      __( 'Change this donor\'s email? Future donations from the new address will link to this record.', 'giveflow-fundraising-campaigns' ),
-                confirmLabel: __( 'Change email', 'giveflow-fundraising-campaigns' ),
+                title:        __( 'Change donor email', 'fundkit-fundraising-campaigns' ),
+                message:      __( 'Change this donor\'s email? Future donations from the new address will link to this record.', 'fundkit-fundraising-campaigns' ),
+                confirmLabel: __( 'Change email', 'fundkit-fundraising-campaigns' ),
                 onConfirm:    doSave,
             } );
             return;
@@ -120,13 +120,13 @@ function EditPanel( { donor, onCancel, onSaved } ) {
     return (
         <>
             <Dialog
-                title={ __( 'Edit donor details', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Edit donor details', 'fundkit-fundraising-campaigns' ) }
                 onClose={ () => ( saving ? null : onCancel() ) }
                 size="wide"
                 foot={
                     <>
                         <Btn variant="secondary" onClick={ onCancel } disabled={ saving }>
-                            { __( 'Cancel', 'giveflow-fundraising-campaigns' ) }
+                            { __( 'Cancel', 'fundkit-fundraising-campaigns' ) }
                         </Btn>
                         <Btn
                             variant="primary"
@@ -134,15 +134,15 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                             isBusy={ saving }
                             disabled={ saving || phoneInvalid }
                         >
-                            { saving ? __( 'Saving…', 'giveflow-fundraising-campaigns' ) : __( 'Save', 'giveflow-fundraising-campaigns' ) }
+                            { saving ? __( 'Saving…', 'fundkit-fundraising-campaigns' ) : __( 'Save', 'fundkit-fundraising-campaigns' ) }
                         </Btn>
                     </>
                 }
             >
                 <form className="dp-edit-form" onSubmit={ submit }>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Email', 'giveflow-fundraising-campaigns' ) }
-                        <input className="giveflow-input"
+                        { __( 'Email', 'fundkit-fundraising-campaigns' ) }
+                        <input className="fundkit-input"
                             type="email"
                             value={ form.email }
                             onChange={ set( 'email' ) }
@@ -152,25 +152,25 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                         { emailChanged && (
                             <span className="dp-field__hint">
-                                { __( 'Saving rehashes the donor identity. Future donations from this address will link to this record.', 'giveflow-fundraising-campaigns' ) }
+                                { __( 'Saving rehashes the donor identity. Future donations from this address will link to this record.', 'fundkit-fundraising-campaigns' ) }
                             </span>
                         ) }
                     </label>
                     <label>
-                        { __( 'First name', 'giveflow-fundraising-campaigns' ) }
-                        <input className="giveflow-input" type="text" value={ form.first_name } onChange={ set( 'first_name' ) } maxLength={ 100 } />
+                        { __( 'First name', 'fundkit-fundraising-campaigns' ) }
+                        <input className="fundkit-input" type="text" value={ form.first_name } onChange={ set( 'first_name' ) } maxLength={ 100 } />
                     </label>
                     <label>
-                        { __( 'Last name', 'giveflow-fundraising-campaigns' ) }
-                        <input className="giveflow-input" type="text" value={ form.last_name } onChange={ set( 'last_name' ) } maxLength={ 100 } />
+                        { __( 'Last name', 'fundkit-fundraising-campaigns' ) }
+                        <input className="fundkit-input" type="text" value={ form.last_name } onChange={ set( 'last_name' ) } maxLength={ 100 } />
                     </label>
                     <label className="dp-edit-form__country">
-                        { __( 'Country', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Country', 'fundkit-fundraising-campaigns' ) }
                         <div className="dp-edit-form__country-wrap">
-                            <input className="giveflow-input"
+                            <input className="fundkit-input"
                                 type="text"
                                 value={ countryQuery }
-                                placeholder={ __( 'Search country…', 'giveflow-fundraising-campaigns' ) }
+                                placeholder={ __( 'Search country…', 'fundkit-fundraising-campaigns' ) }
                                 onFocus={ () => setCountryOpen( true ) }
                                 onBlur={ () => setTimeout( () => setCountryOpen( false ), 150 ) }
                                 onChange={ ( e ) => { setCountryQuery( e.target.value ); setCountryOpen( true ); } }
@@ -190,20 +190,20 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         </div>
                     </label>
                     <label>
-                        { __( 'Type', 'giveflow-fundraising-campaigns' ) }
-                        <select className="giveflow-select" value={ form.donor_type } onChange={ set( 'donor_type' ) }>
-                            <option value="individual">{ __( 'Individual', 'giveflow-fundraising-campaigns' ) }</option>
-                            <option value="organization">{ __( 'Organization', 'giveflow-fundraising-campaigns' ) }</option>
-                            <option value="household">{ __( 'Household', 'giveflow-fundraising-campaigns' ) }</option>
+                        { __( 'Type', 'fundkit-fundraising-campaigns' ) }
+                        <select className="fundkit-select" value={ form.donor_type } onChange={ set( 'donor_type' ) }>
+                            <option value="individual">{ __( 'Individual', 'fundkit-fundraising-campaigns' ) }</option>
+                            <option value="organization">{ __( 'Organization', 'fundkit-fundraising-campaigns' ) }</option>
+                            <option value="household">{ __( 'Household', 'fundkit-fundraising-campaigns' ) }</option>
                         </select>
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Company', 'giveflow-fundraising-campaigns' ) }
-                        <input className="giveflow-input" type="text" value={ form.company } onChange={ set( 'company' ) } maxLength={ 150 } />
+                        { __( 'Company', 'fundkit-fundraising-campaigns' ) }
+                        <input className="fundkit-input" type="text" value={ form.company } onChange={ set( 'company' ) } maxLength={ 150 } />
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Phone', 'giveflow-fundraising-campaigns' ) }
-                        <input className="giveflow-input"
+                        { __( 'Phone', 'fundkit-fundraising-campaigns' ) }
+                        <input className="fundkit-input"
                             type="tel"
                             value={ form.phone }
                             onChange={ set( 'phone' ) }
@@ -213,33 +213,33 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                         { phoneInvalid && (
                             <span className="dp-field__hint dp-field__hint--err">
-                                { __( 'Use digits, +, spaces, parentheses, or dashes.', 'giveflow-fundraising-campaigns' ) }
+                                { __( 'Use digits, +, spaces, parentheses, or dashes.', 'fundkit-fundraising-campaigns' ) }
                             </span>
                         ) }
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Address line 1', 'giveflow-fundraising-campaigns' ) }
-                        <input className="giveflow-input"
+                        { __( 'Address line 1', 'fundkit-fundraising-campaigns' ) }
+                        <input className="fundkit-input"
                             type="text"
                             value={ form.address.line1 }
                             onChange={ setAddr( 'line1' ) }
-                            placeholder={ __( 'Street and number', 'giveflow-fundraising-campaigns' ) }
+                            placeholder={ __( 'Street and number', 'fundkit-fundraising-campaigns' ) }
                             maxLength={ 200 }
                         />
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Address line 2', 'giveflow-fundraising-campaigns' ) }
-                        <input className="giveflow-input"
+                        { __( 'Address line 2', 'fundkit-fundraising-campaigns' ) }
+                        <input className="fundkit-input"
                             type="text"
                             value={ form.address.line2 }
                             onChange={ setAddr( 'line2' ) }
-                            placeholder={ __( 'Apartment, suite, etc. (optional)', 'giveflow-fundraising-campaigns' ) }
+                            placeholder={ __( 'Apartment, suite, etc. (optional)', 'fundkit-fundraising-campaigns' ) }
                             maxLength={ 200 }
                         />
                     </label>
                     <label>
-                        { __( 'City', 'giveflow-fundraising-campaigns' ) }
-                        <input className="giveflow-input"
+                        { __( 'City', 'fundkit-fundraising-campaigns' ) }
+                        <input className="fundkit-input"
                             type="text"
                             value={ form.address.city }
                             onChange={ setAddr( 'city' ) }
@@ -247,8 +247,8 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     <label>
-                        { __( 'Region', 'giveflow-fundraising-campaigns' ) }
-                        <input className="giveflow-input"
+                        { __( 'Region', 'fundkit-fundraising-campaigns' ) }
+                        <input className="fundkit-input"
                             type="text"
                             value={ form.address.region }
                             onChange={ setAddr( 'region' ) }
@@ -256,8 +256,8 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     <label>
-                        { __( 'Postal code', 'giveflow-fundraising-campaigns' ) }
-                        <input className="giveflow-input"
+                        { __( 'Postal code', 'fundkit-fundraising-campaigns' ) }
+                        <input className="fundkit-input"
                             type="text"
                             value={ form.address.postal }
                             onChange={ setAddr( 'postal' ) }
@@ -288,7 +288,7 @@ export default function DonorProfile( { id, onBack } ) {
 
     const load = () => {
         setLoading( true );
-        return apiFetch( { path: `/giveflow/v1/admin/donors/${ id }/profile` } )
+        return apiFetch( { path: `/fundkit/v1/admin/donors/${ id }/profile` } )
             .then( ( d ) => { setData( d ); setError( null ); } )
             .catch( ( e ) => setError( e?.message || 'Error' ) )
             .finally( () => setLoading( false ) );
@@ -298,14 +298,14 @@ export default function DonorProfile( { id, onBack } ) {
         let aborted = false;
         setLoading( true );
         setData( null );
-        apiFetch( { path: `/giveflow/v1/admin/donors/${ id }/profile` } )
+        apiFetch( { path: `/fundkit/v1/admin/donors/${ id }/profile` } )
             .then( ( d ) => { if ( ! aborted ) { setData( d ); setError( null ); } } )
             .catch( ( e ) => { if ( ! aborted ) setError( e?.message || 'Error' ); } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ id ] );
 
-    if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'giveflow-fundraising-campaigns' ) }</p>;
+    if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'fundkit-fundraising-campaigns' ) }</p>;
     if ( error )              return <p className="dp-error">{ error }</p>;
     if ( ! data )             return null;
 

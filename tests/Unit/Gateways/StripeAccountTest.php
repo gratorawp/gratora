@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Gateways;
+namespace FundKit\Tests\Unit\Gateways;
 
-use GiveFlow\Gateways\Stripe\StripeAccount;
+use FundKit\Gateways\Stripe\StripeAccount;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 

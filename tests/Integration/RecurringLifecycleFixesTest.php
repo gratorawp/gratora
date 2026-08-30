@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Recurring\CampaignCancelRecurringJob;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Foundation\Commands\CommandContext;
-use GiveFlow\Foundation\Commands\CommandRegistry;
-use GiveFlow\Recurring\RecurringResumer;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Recurring\CampaignCancelRecurringJob;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Foundation\Commands\CommandContext;
+use FundKit\Foundation\Commands\CommandRegistry;
+use FundKit\Recurring\RecurringResumer;
 
 /**
  * A paused plan has to be able to come back, a resumed one must not resurrect a
@@ -74,7 +74,7 @@ final class RecurringLifecycleFixesTest extends IntegrationTestCase
         // The batch is read up front and then blocks on one gateway call per
         // plan, so the donor can cancel while the sweep is partway through it.
         // This gateway does exactly that from inside the resume call.
-        Plugin::instance()->container->get(\GiveFlow\Gateways\GatewayManager::class)
+        Plugin::instance()->container->get(\FundKit\Gateways\GatewayManager::class)
             ->register(new CancellingDuringResumeGateway());
 
         $plan = $this->plan([
@@ -110,7 +110,7 @@ final class RecurringLifecycleFixesTest extends IntegrationTestCase
 
         // A run left mid-flight with its job lost: the only continuation was
         // the job re-enqueuing itself, so nothing else would ever restart it.
-        update_option('giveflow_campaign_cancel_recurring', [4242 => 0], false);
+        update_option('fundkit_campaign_cancel_recurring', [4242 => 0], false);
 
         $this->assertNotSame([], CampaignCancelRecurringJob::pending());
 
@@ -121,7 +121,7 @@ final class RecurringLifecycleFixesTest extends IntegrationTestCase
             'the sweep is queued again rather than left half done'
         );
 
-        delete_option('giveflow_campaign_cancel_recurring');
+        delete_option('fundkit_campaign_cancel_recurring');
     }
 }
 
@@ -129,7 +129,7 @@ final class RecurringLifecycleFixesTest extends IntegrationTestCase
  * A gateway whose resume takes long enough for the donor to cancel, which is
  * the window the resumer's batch read leaves open.
  */
-final class CancellingDuringResumeGateway implements \GiveFlow\Gateways\PaymentGateway, \GiveFlow\Gateways\SubscriptionAware
+final class CancellingDuringResumeGateway implements \FundKit\Gateways\PaymentGateway, \FundKit\Gateways\SubscriptionAware
 {
     public function id(): string { return 'racing'; }
     public function label(): string { return 'Racing'; }
@@ -139,10 +139,10 @@ final class CancellingDuringResumeGateway implements \GiveFlow\Gateways\PaymentG
     public function countries(): array { return ['*']; }
     public function currencies(): array { return ['USD']; }
     public function canCharge(): bool { return true; }
-    public function createIntent(\GiveFlow\Donations\Donation $donation): \GiveFlow\Gateways\GatewayIntentResult { throw new \RuntimeException('unused'); }
-    public function confirm(\GiveFlow\Donations\Donation $donation, array $payload = []): \GiveFlow\Gateways\GatewayConfirmResult { throw new \RuntimeException('unused'); }
-    public function handleWebhook(\WP_REST_Request $request): \GiveFlow\Gateways\WebhookOutcome { throw new \RuntimeException('unused'); }
-    public function refund(\GiveFlow\Donations\Donation $donation, int $amountCents, ?string $reason = null): \GiveFlow\Gateways\RefundResult { throw new \RuntimeException('unused'); }
+    public function createIntent(\FundKit\Donations\Donation $donation): \FundKit\Gateways\GatewayIntentResult { throw new \RuntimeException('unused'); }
+    public function confirm(\FundKit\Donations\Donation $donation, array $payload = []): \FundKit\Gateways\GatewayConfirmResult { throw new \RuntimeException('unused'); }
+    public function handleWebhook(\WP_REST_Request $request): \FundKit\Gateways\WebhookOutcome { throw new \RuntimeException('unused'); }
+    public function refund(\FundKit\Donations\Donation $donation, int $amountCents, ?string $reason = null): \FundKit\Gateways\RefundResult { throw new \RuntimeException('unused'); }
 
     public function cancelSubscription(RecurringPlan $plan, ?string $reason = null): void {}
     public function pauseSubscription(RecurringPlan $plan, ?string $resumesAt = null): void {}

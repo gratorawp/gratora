@@ -5,7 +5,7 @@ import apiFetch from '@wordpress/api-fetch';
 
 import { CURRENCIES } from '../_shared/currency';
 import CountrySelect from '../_shared/components/CountrySelect';
-import GiveFlowMark from '../_shared/components/GiveFlowMark';
+import FundKitMark from '../_shared/components/FundKitMark';
 import LocalIcon from '../_shared/components/Icon';
 import SearchableSelect from '../_shared/components/SearchableSelect';
 
@@ -55,33 +55,33 @@ const USER_TYPES = [
     {
         id:   'nonprofit',
         icon: 'building',
-        name: __( 'Nonprofit or charity', 'giveflow-fundraising-campaigns' ),
-        desc: __( 'Registered organization collecting tax-deductible donations.', 'giveflow-fundraising-campaigns' ),
+        name: __( 'Nonprofit or charity', 'fundkit-fundraising-campaigns' ),
+        desc: __( 'Registered organization collecting tax-deductible donations.', 'fundkit-fundraising-campaigns' ),
     },
     {
         id:   'community',
         icon: 'users',
-        name: __( 'Community or faith group', 'giveflow-fundraising-campaigns' ),
-        desc: __( 'Church, school, club, mutual-aid group.', 'giveflow-fundraising-campaigns' ),
+        name: __( 'Community or faith group', 'fundkit-fundraising-campaigns' ),
+        desc: __( 'Church, school, club, mutual-aid group.', 'fundkit-fundraising-campaigns' ),
     },
     {
         id:   'individual',
         icon: 'heart',
-        name: __( 'Individual fundraiser', 'giveflow-fundraising-campaigns' ),
-        desc: __( 'Personal cause, crowdfund, or memorial fund.', 'giveflow-fundraising-campaigns' ),
+        name: __( 'Individual fundraiser', 'fundkit-fundraising-campaigns' ),
+        desc: __( 'Personal cause, crowdfund, or memorial fund.', 'fundkit-fundraising-campaigns' ),
     },
     {
         id:   'exploring',
         icon: 'target',
-        name: __( 'Just exploring', 'giveflow-fundraising-campaigns' ),
-        desc: __( 'Trying GiveFlow out. Starts in test mode, so nothing takes real money until you switch it off.', 'giveflow-fundraising-campaigns' ),
+        name: __( 'Just exploring', 'fundkit-fundraising-campaigns' ),
+        desc: __( 'Trying FundKit out. Starts in test mode, so nothing takes real money until you switch it off.', 'fundkit-fundraising-campaigns' ),
     },
 ];
 
 export default function Onboarding() {
-    const wp = window.giveflow?.wp || {};
-    const presets   = Array.isArray( window.giveflow?.styling?.presets ) ? window.giveflow.styling.presets : [];
-    const defaultId = String( window.giveflow?.styling?.default_id || 'classic' );
+    const wp = window.fundkit?.wp || {};
+    const presets   = Array.isArray( window.fundkit?.styling?.presets ) ? window.fundkit.styling.presets : [];
+    const defaultId = String( window.fundkit?.styling?.default_id || 'classic' );
 
     const [ step, setStep ]     = useState( 0 );
     const [ busy, setBusy ]     = useState( false );
@@ -94,7 +94,7 @@ export default function Onboarding() {
     const stepMounted = useRef( false );
     useEffect( () => {
         if ( ! stepMounted.current ) { stepMounted.current = true; return; }
-        const h = frameRef.current?.querySelector( '.giveflow-onboarding__headline' );
+        const h = frameRef.current?.querySelector( '.fundkit-onboarding__headline' );
         if ( h ) { h.setAttribute( 'tabindex', '-1' ); h.focus(); }
     }, [ step ] );
 
@@ -115,7 +115,7 @@ export default function Onboarding() {
 
     // Pre-populate from saved settings so a resumed onboarding starts from prior inputs.
     useEffect( () => {
-        apiFetch( { path: '/giveflow/v1/admin/settings/org-profile' } )
+        apiFetch( { path: '/fundkit/v1/admin/settings/org-profile' } )
             .then( ( d ) => {
                 if ( ! d ) return;
                 setOrg( ( prev ) => ( {
@@ -130,7 +130,7 @@ export default function Onboarding() {
                 } ) );
             } )
             .catch( () => {} );
-        apiFetch( { path: '/giveflow/v1/admin/settings/currency-locale' } )
+        apiFetch( { path: '/fundkit/v1/admin/settings/currency-locale' } )
             .then( ( d ) => {
                 if ( ! d ) return;
                 // Hydrate the full record so a re-run preserves multi-currency,
@@ -148,8 +148,8 @@ export default function Onboarding() {
             } )
             .catch( () => {} );
         // Reload the saved brand preset id so a resumed wizard reflects the
-        // latest org-brand option, not the page-load snapshot of window.giveflow.
-        apiFetch( { path: '/giveflow/v1/admin/settings/org-brand' } )
+        // latest org-brand option, not the page-load snapshot of window.fundkit.
+        apiFetch( { path: '/fundkit/v1/admin/settings/org-brand' } )
             .then( ( d ) => {
                 if ( d?.default_id ) setBrand( { preset_id: String( d.default_id ) } );
             } )
@@ -158,7 +158,7 @@ export default function Onboarding() {
 
     const persist = async ( group, payload ) => {
         await apiFetch( {
-            path:   `/giveflow/v1/admin/settings/${ group }`,
+            path:   `/fundkit/v1/admin/settings/${ group }`,
             method: 'PUT',
             data:   payload,
         } );
@@ -170,19 +170,19 @@ export default function Onboarding() {
         try {
             if ( step === 0 ) {
                 if ( ! who.user_type ) {
-                    throw new Error( __( 'Pick who is fundraising to continue.', 'giveflow-fundraising-campaigns' ) );
+                    throw new Error( __( 'Pick who is fundraising to continue.', 'fundkit-fundraising-campaigns' ) );
                 }
                 await persist( 'org-profile', { user_type: who.user_type } );
             } else if ( step === 1 ) {
                 if ( ! org.country ) {
-                    throw new Error( __( 'Pick a country to continue.', 'giveflow-fundraising-campaigns' ) );
+                    throw new Error( __( 'Pick a country to continue.', 'fundkit-fundraising-campaigns' ) );
                 }
                 // A country that subdivides still needs its state: it is part of
                 // where the organization is, and it is one click. The postal
                 // address is not asked for here -- it is optional in Settings,
                 // and the receipt renderer omits the block when it is unset.
                 if ( STATES_BY_COUNTRY[ org.country ] && ! ( org.state || '' ).trim() ) {
-                    throw new Error( __( 'Pick a state or province to continue.', 'giveflow-fundraising-campaigns' ) );
+                    throw new Error( __( 'Pick a state or province to continue.', 'fundkit-fundraising-campaigns' ) );
                 }
                 await persist( 'org-profile', {
                     name:           org.name,
@@ -224,21 +224,21 @@ export default function Onboarding() {
             } else if ( step === 2 ) {
                 await persist( 'org-brand', { default_id: brand.preset_id } );
                 const r = await apiFetch( {
-                    path:   '/giveflow/v1/admin/onboarding/finalize',
+                    path:   '/fundkit/v1/admin/onboarding/finalize',
                     method: 'POST',
                     data:   {
                         campaign_title: org.name
-                            ? `${ org.name } - ${ __( 'General donations', 'giveflow-fundraising-campaigns' ) }`
-                            : __( 'General donations', 'giveflow-fundraising-campaigns' ),
+                            ? `${ org.name } - ${ __( 'General donations', 'fundkit-fundraising-campaigns' ) }`
+                            : __( 'General donations', 'fundkit-fundraising-campaigns' ),
                         user_type:      who.user_type,
                     },
                 } );
-                if ( ! r?.ok ) throw new Error( __( 'Could not finalize onboarding.', 'giveflow-fundraising-campaigns' ) );
+                if ( ! r?.ok ) throw new Error( __( 'Could not finalize onboarding.', 'fundkit-fundraising-campaigns' ) );
                 setFinalized( r );
             }
             setStep( ( s ) => Math.min( TOTAL - 1, s + 1 ) );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not save. Please try again.', 'giveflow-fundraising-campaigns' ) );
+            setError( err?.message || __( 'Could not save. Please try again.', 'fundkit-fundraising-campaigns' ) );
         } finally {
             setBusy( false );
         }
@@ -253,11 +253,11 @@ export default function Onboarding() {
         if ( busy ) return;
         setError( null );
         try {
-            await apiFetch( { path: '/giveflow/v1/admin/onboarding/dismiss', method: 'POST' } );
+            await apiFetch( { path: '/fundkit/v1/admin/onboarding/dismiss', method: 'POST' } );
         } catch ( e ) {
             // A failed dismiss leaves onboarding 'pending', so admin_init would
             // bounce us straight back here; surface the error instead of looping.
-            setError( __( 'Could not skip setup. Please try again.', 'giveflow-fundraising-campaigns' ) );
+            setError( __( 'Could not skip setup. Please try again.', 'fundkit-fundraising-campaigns' ) );
             return;
         }
         window.location.assign( wp.settings_url || wp.dashboard_url || '' );
@@ -266,29 +266,29 @@ export default function Onboarding() {
     const isChecklist = step === TOTAL - 1;
 
     return (
-        <div className="giveflow-onboarding">
-            <div className={ `giveflow-onboarding__top${ step === 2 ? ' is-wide' : '' }` }>
-                <span className="giveflow-onboarding__brand">
-                    <GiveFlowMark size={ 28 } />
-                    <span className="giveflow-onboarding__brand-name">GiveFlow</span>
+        <div className="fundkit-onboarding">
+            <div className={ `fundkit-onboarding__top${ step === 2 ? ' is-wide' : '' }` }>
+                <span className="fundkit-onboarding__brand">
+                    <FundKitMark size={ 28 } />
+                    <span className="fundkit-onboarding__brand-name">FundKit</span>
                 </span>
                 { ! isChecklist && (
-                    <button type="button" className="giveflow-onboarding__skip" onClick={ skip }>
-                        { __( 'Skip for now', 'giveflow-fundraising-campaigns' ) }
+                    <button type="button" className="fundkit-onboarding__skip" onClick={ skip }>
+                        { __( 'Skip for now', 'fundkit-fundraising-campaigns' ) }
                     </button>
                 ) }
             </div>
 
-            <section ref={ frameRef } className={ `giveflow-onboarding__frame${ step === 2 ? ' is-wide' : '' }` }>
-                <div className="giveflow-onboarding__meta">
-                    <span className="giveflow-onboarding__caption">
-                        { sprintf( /* translators: %1$d: current step number. %2$d: total number of steps. */ __( 'Step %1$d of %2$d', 'giveflow-fundraising-campaigns' ), step + 1, TOTAL ) }
+            <section ref={ frameRef } className={ `fundkit-onboarding__frame${ step === 2 ? ' is-wide' : '' }` }>
+                <div className="fundkit-onboarding__meta">
+                    <span className="fundkit-onboarding__caption">
+                        { sprintf( /* translators: %1$d: current step number. %2$d: total number of steps. */ __( 'Step %1$d of %2$d', 'fundkit-fundraising-campaigns' ), step + 1, TOTAL ) }
                     </span>
-                    <span className="giveflow-onboarding__dots" aria-hidden="true">
+                    <span className="fundkit-onboarding__dots" aria-hidden="true">
                         { Array.from( { length: TOTAL } ).map( ( _, i ) => (
                             <span
                                 key={ i }
-                                className={ `giveflow-onboarding__dot${ i < step ? ' is-done' : '' }${ i === step ? ' is-current' : '' }` }
+                                className={ `fundkit-onboarding__dot${ i < step ? ' is-done' : '' }${ i === step ? ' is-current' : '' }` }
                             />
                         ) ) }
                     </span>
@@ -306,26 +306,26 @@ export default function Onboarding() {
                     />
                 ) }
 
-                { error && <div className="giveflow-onboarding__error" role="alert">{ error }</div> }
+                { error && <div className="fundkit-onboarding__error" role="alert">{ error }</div> }
 
                 { ! isChecklist && (
                     <footer
-                        className={ `giveflow-onboarding__nav${ step === 0 ? ' giveflow-onboarding__nav--centered' : '' }` }
+                        className={ `fundkit-onboarding__nav${ step === 0 ? ' fundkit-onboarding__nav--centered' : '' }` }
                     >
                         { step > 0 && (
                             <button
                                 type="button"
-                                className="giveflow-btn giveflow-btn--ghost"
+                                className="fundkit-btn fundkit-btn--ghost"
                                 onClick={ back }
                                 disabled={ busy }
                             >
-                                ← { __( 'Back', 'giveflow-fundraising-campaigns' ) }
+                                ← { __( 'Back', 'fundkit-fundraising-campaigns' ) }
                             </button>
                         ) }
 
                         <button
                             type="button"
-                            className="giveflow-btn giveflow-btn--primary giveflow-btn--lg"
+                            className="fundkit-btn fundkit-btn--primary fundkit-btn--lg"
                             onClick={ next }
                             disabled={ busy }
                         >
@@ -339,10 +339,10 @@ export default function Onboarding() {
 }
 
 function ctaLabel( step, busy ) {
-    if ( busy ) return __( 'Saving…', 'giveflow-fundraising-campaigns' );
-    if ( step === 0 ) return __( 'Get started', 'giveflow-fundraising-campaigns' );
-    if ( step === 2 ) return __( 'Finish setup', 'giveflow-fundraising-campaigns' ) + ' →';
-    return __( 'Next', 'giveflow-fundraising-campaigns' ) + ' →';
+    if ( busy ) return __( 'Saving…', 'fundkit-fundraising-campaigns' );
+    if ( step === 0 ) return __( 'Get started', 'fundkit-fundraising-campaigns' );
+    if ( step === 2 ) return __( 'Finish setup', 'fundkit-fundraising-campaigns' ) + ' →';
+    return __( 'Next', 'fundkit-fundraising-campaigns' ) + ' →';
 }
 
 // Step 1: who is fundraising
@@ -350,33 +350,33 @@ function FundraiserTypeStep( { value, onChange } ) {
     const set = ( patch ) => onChange( { ...value, ...patch } );
     return (
         <div>
-            <h2 className="giveflow-onboarding__headline">
-                { __( "Who's fundraising?", 'giveflow-fundraising-campaigns' ) }
+            <h2 className="fundkit-onboarding__headline">
+                { __( "Who's fundraising?", 'fundkit-fundraising-campaigns' ) }
             </h2>
-            <p className="giveflow-onboarding__subtitle">
-                { __( 'Pick the one that fits best.', 'giveflow-fundraising-campaigns' ) }
+            <p className="fundkit-onboarding__subtitle">
+                { __( 'Pick the one that fits best.', 'fundkit-fundraising-campaigns' ) }
             </p>
 
-            <div className="giveflow-onboarding__section">
-                <div className="giveflow-onboarding__usertype">
+            <div className="fundkit-onboarding__section">
+                <div className="fundkit-onboarding__usertype">
                     { USER_TYPES.map( ( t ) => {
                         const isSel = value.user_type === t.id;
                         return (
                             <button
                                 key={ t.id }
                                 type="button"
-                                className={ `giveflow-onboarding__usertype-tile${ isSel ? ' is-selected' : '' }` }
+                                className={ `fundkit-onboarding__usertype-tile${ isSel ? ' is-selected' : '' }` }
                                 onClick={ () => set( { user_type: t.id } ) }
                                 aria-pressed={ isSel }
                             >
-                                <span className="giveflow-onboarding__usertype-check" aria-hidden="true">
+                                <span className="fundkit-onboarding__usertype-check" aria-hidden="true">
                                     <LocalIcon name="check" size={ 12 } strokeWidth={ 3 } />
                                 </span>
-                                <span className="giveflow-onboarding__usertype-glyph" aria-hidden="true">
+                                <span className="fundkit-onboarding__usertype-glyph" aria-hidden="true">
                                     <LocalIcon name={ t.icon } size={ 22 } strokeWidth={ 1.6 } />
                                 </span>
-                                <strong className="giveflow-onboarding__usertype-name">{ t.name }</strong>
-                                <span className="giveflow-onboarding__usertype-desc">{ t.desc }</span>
+                                <strong className="fundkit-onboarding__usertype-name">{ t.name }</strong>
+                                <span className="fundkit-onboarding__usertype-desc">{ t.desc }</span>
                             </button>
                         );
                     } ) }
@@ -416,56 +416,56 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
 
     return (
         <div>
-            <h2 className="giveflow-onboarding__headline">{ __( 'Where are you based?', 'giveflow-fundraising-campaigns' ) }</h2>
-            <p className="giveflow-onboarding__subtitle">
-                { __( "We use this for receipts and your default currency.", 'giveflow-fundraising-campaigns' ) }
+            <h2 className="fundkit-onboarding__headline">{ __( 'Where are you based?', 'fundkit-fundraising-campaigns' ) }</h2>
+            <p className="fundkit-onboarding__subtitle">
+                { __( "We use this for receipts and your default currency.", 'fundkit-fundraising-campaigns' ) }
             </p>
 
-            <div className="giveflow-onboarding__section">
-                <div className="giveflow-onboarding__section-label">
-                    { isIndividual ? __( 'About you', 'giveflow-fundraising-campaigns' ) : __( 'Organization', 'giveflow-fundraising-campaigns' ) }
+            <div className="fundkit-onboarding__section">
+                <div className="fundkit-onboarding__section-label">
+                    { isIndividual ? __( 'About you', 'fundkit-fundraising-campaigns' ) : __( 'Organization', 'fundkit-fundraising-campaigns' ) }
                 </div>
-                <div className="giveflow-onboarding__address">
+                <div className="fundkit-onboarding__address">
                     <div className="span-2">
-                        <label className="giveflow-onboarding__field-label">
-                            { isIndividual ? __( 'Your name', 'giveflow-fundraising-campaigns' ) : __( 'Organization name', 'giveflow-fundraising-campaigns' ) }
+                        <label className="fundkit-onboarding__field-label">
+                            { isIndividual ? __( 'Your name', 'fundkit-fundraising-campaigns' ) : __( 'Organization name', 'fundkit-fundraising-campaigns' ) }
                         </label>
                         <input
                             type="text"
-                            className="giveflow-onboarding__input"
+                            className="fundkit-onboarding__input"
                             value={ value.name }
                             onChange={ ( e ) => set( { name: e.target.value } ) }
-                            placeholder={ __( 'Shown on receipts and your campaign', 'giveflow-fundraising-campaigns' ) }
+                            placeholder={ __( 'Shown on receipts and your campaign', 'fundkit-fundraising-campaigns' ) }
                         />
                     </div>
                     <div className="span-2">
-                        <label className="giveflow-onboarding__field-label">{ __( 'Contact email', 'giveflow-fundraising-campaigns' ) }</label>
+                        <label className="fundkit-onboarding__field-label">{ __( 'Contact email', 'fundkit-fundraising-campaigns' ) }</label>
                         <input
                             type="email"
-                            className="giveflow-onboarding__input"
+                            className="fundkit-onboarding__input"
                             value={ value.email }
                             onChange={ ( e ) => set( { email: e.target.value } ) }
-                            placeholder={ __( 'Where donors reply and receipts come from', 'giveflow-fundraising-campaigns' ) }
+                            placeholder={ __( 'Where donors reply and receipts come from', 'fundkit-fundraising-campaigns' ) }
                         />
                     </div>
                 </div>
             </div>
 
-            <div className="giveflow-onboarding__section">
-                <div className="giveflow-onboarding__section-label">{ __( 'Country', 'giveflow-fundraising-campaigns' ) }</div>
-                <div className="giveflow-onboarding__country-row">
+            <div className="fundkit-onboarding__section">
+                <div className="fundkit-onboarding__section-label">{ __( 'Country', 'fundkit-fundraising-campaigns' ) }</div>
+                <div className="fundkit-onboarding__country-row">
                     <CountrySelect
                         value={ value.country }
                         onChange={ onCountryChange }
                     />
                     { states && (
                         <div>
-                            <label className="giveflow-onboarding__field-label">{ __( 'State', 'giveflow-fundraising-campaigns' ) }</label>
+                            <label className="fundkit-onboarding__field-label">{ __( 'State', 'fundkit-fundraising-campaigns' ) }</label>
                             <SearchableSelect
                                 value={ value.state }
                                 onChange={ ( v ) => set( { state: v } ) }
                                 options={ states.map( ( s ) => ( { value: s, label: s } ) ) }
-                                placeholder={ __( 'Select state', 'giveflow-fundraising-campaigns' ) }
+                                placeholder={ __( 'Select state', 'fundkit-fundraising-campaigns' ) }
                             />
                         </div>
                     ) }
@@ -473,13 +473,13 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
             </div>
 
 
-            <div className="giveflow-onboarding__section">
-                <div className="giveflow-onboarding__section-label">{ __( 'Currency', 'giveflow-fundraising-campaigns' ) }</div>
+            <div className="fundkit-onboarding__section">
+                <div className="fundkit-onboarding__section-label">{ __( 'Currency', 'fundkit-fundraising-campaigns' ) }</div>
                 <SearchableSelect
                     value={ currency.default_currency }
                     onChange={ ( code ) => onCurrencyChange( ( prev ) => ( { ...prev, default_currency: code } ) ) }
                     options={ currencyOptions }
-                    placeholder={ __( 'Pick a currency', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'Pick a currency', 'fundkit-fundraising-campaigns' ) }
                 />
             </div>
         </div>
@@ -493,25 +493,25 @@ const PRESET_CARDS = [
     {
         id:     'classic',
         thumb:  'classic',
-        name:   __( 'Classic', 'giveflow-fundraising-campaigns' ),
-        desc:   __( 'Friendly, rounded, green. The safe choice.', 'giveflow-fundraising-campaigns' ),
+        name:   __( 'Classic', 'fundkit-fundraising-campaigns' ),
+        desc:   __( 'Friendly, rounded, green. The safe choice.', 'fundkit-fundraising-campaigns' ),
     },
     {
         id:     'bold',
         thumb:  'bold',
-        name:   __( 'Bold', 'giveflow-fundraising-campaigns' ),
-        desc:   __( 'Deep navy, strong type, dramatic shadow.', 'giveflow-fundraising-campaigns' ),
+        name:   __( 'Bold', 'fundkit-fundraising-campaigns' ),
+        desc:   __( 'Deep navy, strong type, dramatic shadow.', 'fundkit-fundraising-campaigns' ),
     },
     {
         id:     'quiet',
         thumb:  'quiet',
-        name:   __( 'Quiet', 'giveflow-fundraising-campaigns' ),
-        desc:   __( 'Minimal lines, lots of white space.', 'giveflow-fundraising-campaigns' ),
+        name:   __( 'Quiet', 'fundkit-fundraising-campaigns' ),
+        desc:   __( 'Minimal lines, lots of white space.', 'fundkit-fundraising-campaigns' ),
     },
     {
         id:     'theme',
         thumb:  'theme',
-        name:   __( 'Use my theme', 'giveflow-fundraising-campaigns' ),
+        name:   __( 'Use my theme', 'fundkit-fundraising-campaigns' ),
         // desc filled at runtime from theme detection.
     },
 ];
@@ -520,10 +520,10 @@ const PRESET_CARDS = [
 function sampleBlocks( currency ) {
     const cur = ( currency || 'USD' ).toUpperCase();
     return [
-        `<!-- wp:giveflow/donation-amount {"presets":[2500,5000,10000],"allowCustom":true,"currency":"${ cur }"} /-->`,
-        '<!-- wp:giveflow/name {"requireFirst":true} /-->',
-        '<!-- wp:giveflow/email {"required":true} /-->',
-        '<!-- wp:giveflow/submit-button {"label":"Donate {amount}"} /-->',
+        `<!-- wp:fundkit/donation-amount {"presets":[2500,5000,10000],"allowCustom":true,"currency":"${ cur }"} /-->`,
+        '<!-- wp:fundkit/name {"requireFirst":true} /-->',
+        '<!-- wp:fundkit/email {"required":true} /-->',
+        '<!-- wp:fundkit/submit-button {"label":"Donate {amount}"} /-->',
     ].join( '\n\n' );
 }
 
@@ -544,7 +544,7 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
         setReady( false );
         setLoadState( 'loading' );
         apiFetch( {
-            path:   '/giveflow/v1/admin/forms/preview',
+            path:   '/fundkit/v1/admin/forms/preview',
             method: 'POST',
             data:   { blocks, settings: { container: { width: 460 } }, campaign_id: null },
         } )
@@ -561,14 +561,14 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
         // an opaque origin, so a targeted post is never delivered. The frame is
         // one we built and its HTML is ours, so there is no third party to leak
         // a preset's colours to.
-        win.postMessage( { type: 'giveflow:apply-tokens', tokens: selectedPreset?.tokens || {} }, '*' );
+        win.postMessage( { type: 'fundkit:apply-tokens', tokens: selectedPreset?.tokens || {} }, '*' );
     }, [ selectedPreset ] );
 
     useEffect( () => {
         const onMsg = ( e ) => {
             // Same reason: a srcdoc frame announces itself with origin "null".
             if ( e.source !== frameRef.current?.contentWindow ) return;
-            if ( e?.data?.type === 'giveflow:preview-ready' ) {
+            if ( e?.data?.type === 'fundkit:preview-ready' ) {
                 setReady( true );
                 pushTokens();
             }
@@ -581,68 +581,68 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
 
     return (
         <div>
-            <h2 className="giveflow-onboarding__headline">{ __( 'Pick a starting look', 'giveflow-fundraising-campaigns' ) }</h2>
-            <p className="giveflow-onboarding__subtitle">
-                { __( 'You can edit colors and typography anytime.', 'giveflow-fundraising-campaigns' ) }
+            <h2 className="fundkit-onboarding__headline">{ __( 'Pick a starting look', 'fundkit-fundraising-campaigns' ) }</h2>
+            <p className="fundkit-onboarding__subtitle">
+                { __( 'You can edit colors and typography anytime.', 'fundkit-fundraising-campaigns' ) }
             </p>
-            <div className="giveflow-onboarding__presets">
+            <div className="fundkit-onboarding__presets">
                 { PRESET_CARDS.map( ( card ) => {
                     const isTheme   = card.id === 'theme';
                     const isDisabled = isTheme && ! themePreset;
                     const isSel     = value.preset_id === card.id;
                     const desc      = isTheme
                         ? ( themePreset
-                            ? __( 'Inherits styles from your site theme.', 'giveflow-fundraising-campaigns' )
-                            : __( 'No theme palette detected.', 'giveflow-fundraising-campaigns' ) )
+                            ? __( 'Inherits styles from your site theme.', 'fundkit-fundraising-campaigns' )
+                            : __( 'No theme palette detected.', 'fundkit-fundraising-campaigns' ) )
                         : card.desc;
                     return (
                         <button
                             key={ card.id }
                             type="button"
-                            className={ `giveflow-onboarding__preset${ isSel ? ' is-selected' : '' }${ isDisabled ? ' is-disabled' : '' }` }
+                            className={ `fundkit-onboarding__preset${ isSel ? ' is-selected' : '' }${ isDisabled ? ' is-disabled' : '' }` }
                             onClick={ () => { if ( ! isDisabled ) onChange( { preset_id: card.id } ); } }
                             aria-pressed={ isSel }
                             disabled={ isDisabled }
                         >
                             { isSel && (
-                                <span className="giveflow-onboarding__preset-check" aria-hidden="true">
+                                <span className="fundkit-onboarding__preset-check" aria-hidden="true">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                                         <path d="M5 12.5l4 4 10-10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
                                 </span>
                             ) }
-                            <div className={ `giveflow-onboarding__preset-thumb giveflow-onboarding__preset-thumb--${ card.thumb }` }>
-                                <span className="giveflow-onboarding__preset-btn">{ __( 'Donate', 'giveflow-fundraising-campaigns' ) }</span>
+                            <div className={ `fundkit-onboarding__preset-thumb fundkit-onboarding__preset-thumb--${ card.thumb }` }>
+                                <span className="fundkit-onboarding__preset-btn">{ __( 'Donate', 'fundkit-fundraising-campaigns' ) }</span>
                             </div>
-                            <strong className="giveflow-onboarding__preset-name">{ card.name }</strong>
-                            <span className="giveflow-onboarding__preset-desc">{ desc }</span>
+                            <strong className="fundkit-onboarding__preset-name">{ card.name }</strong>
+                            <span className="fundkit-onboarding__preset-desc">{ desc }</span>
                         </button>
                     );
                 } ) }
             </div>
 
-            <div className="giveflow-onboarding__preview">
-                <div className="giveflow-onboarding__preview-label">{ __( 'Live preview', 'giveflow-fundraising-campaigns' ) }</div>
+            <div className="fundkit-onboarding__preview">
+                <div className="fundkit-onboarding__preview-label">{ __( 'Live preview', 'fundkit-fundraising-campaigns' ) }</div>
                 { loadState === 'error' ? (
-                    <div className="giveflow-onboarding__preview-fallback">
-                        <p>{ __( 'Preview unavailable. Your choice is still saved.', 'giveflow-fundraising-campaigns' ) }</p>
+                    <div className="fundkit-onboarding__preview-fallback">
+                        <p>{ __( 'Preview unavailable. Your choice is still saved.', 'fundkit-fundraising-campaigns' ) }</p>
                         <button
                             type="button"
-                            className="giveflow-btn giveflow-btn--ghost"
+                            className="fundkit-btn fundkit-btn--ghost"
                             onClick={ () => setReloadKey( ( k ) => k + 1 ) }
                         >
-                            { __( 'Retry', 'giveflow-fundraising-campaigns' ) }
+                            { __( 'Retry', 'fundkit-fundraising-campaigns' ) }
                         </button>
                     </div>
                 ) : (
-                    <div className="giveflow-onboarding__preview-stage">
+                    <div className="fundkit-onboarding__preview-stage">
                         { loadState === 'loading' && (
-                            <div className="giveflow-onboarding__preview-skeleton" aria-hidden="true" />
+                            <div className="fundkit-onboarding__preview-skeleton" aria-hidden="true" />
                         ) }
                         <iframe
                             ref={ frameRef }
-                            className="giveflow-onboarding__preview-frame"
-                            title={ __( 'Donation form preview', 'giveflow-fundraising-campaigns' ) }
+                            className="fundkit-onboarding__preview-frame"
+                            title={ __( 'Donation form preview', 'fundkit-fundraising-campaigns' ) }
                             srcDoc={ previewHtml }
                             style={ loadState === 'loaded' ? undefined : { visibility: 'hidden' } }
                         />
@@ -666,39 +666,39 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } )
 
     return (
         <div>
-            <h1 className="giveflow-onboarding__headline">{ __( "You're set up", 'giveflow-fundraising-campaigns' ) }</h1>
-            <p className="giveflow-onboarding__subtitle">
-                { __( 'Your organization details are saved. Here is what is left before you can take a donation.', 'giveflow-fundraising-campaigns' ) }
+            <h1 className="fundkit-onboarding__headline">{ __( "You're set up", 'fundkit-fundraising-campaigns' ) }</h1>
+            <p className="fundkit-onboarding__subtitle">
+                { __( 'Your organization details are saved. Here is what is left before you can take a donation.', 'fundkit-fundraising-campaigns' ) }
             </p>
 
-            <ul className="giveflow-onboarding__checklist">
+            <ul className="fundkit-onboarding__checklist">
                 <ChecklistItem
-                    title={ __( 'Connect a payment gateway', 'giveflow-fundraising-campaigns' ) }
-                    description={ __( 'Stripe, PayPal, or a manual bank-transfer flow. You can change this any time.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Connect a payment gateway', 'fundkit-fundraising-campaigns' ) }
+                    description={ __( 'Stripe, PayPal, or a manual bank-transfer flow. You can change this any time.', 'fundkit-fundraising-campaigns' ) }
                     href={ gatewayUrl }
-                    cta={ __( 'Connect', 'giveflow-fundraising-campaigns' ) }
+                    cta={ __( 'Connect', 'fundkit-fundraising-campaigns' ) }
                 />
                 { campaignId ? (
                     <ChecklistItem
-                        title={ __( 'Build your first form', 'giveflow-fundraising-campaigns' ) }
-                        description={ __( 'Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live.', 'giveflow-fundraising-campaigns' ) }
+                        title={ __( 'Build your first form', 'fundkit-fundraising-campaigns' ) }
+                        description={ __( 'Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live.', 'fundkit-fundraising-campaigns' ) }
                         href={ finalized?.form_edit_url || finalized?.campaign_page || dashboardUrl || '#' }
-                        cta={ __( 'Build', 'giveflow-fundraising-campaigns' ) }
+                        cta={ __( 'Build', 'fundkit-fundraising-campaigns' ) }
                     />
                 ) : (
                     <ChecklistItem
-                        title={ __( 'Create your first campaign', 'giveflow-fundraising-campaigns' ) }
-                        description={ __( 'A campaign holds your donation forms and totals. We can start one from your answers, or you can build your own later.', 'giveflow-fundraising-campaigns' ) }
+                        title={ __( 'Create your first campaign', 'fundkit-fundraising-campaigns' ) }
+                        description={ __( 'A campaign holds your donation forms and totals. We can start one from your answers, or you can build your own later.', 'fundkit-fundraising-campaigns' ) }
                         href={ newCampaignUrl }
-                        cta={ __( 'Create', 'giveflow-fundraising-campaigns' ) }
+                        cta={ __( 'Create', 'fundkit-fundraising-campaigns' ) }
                     />
                 ) }
             </ul>
 
 
-            <p className="giveflow-onboarding__checklist-foot">
-                <a className="giveflow-onboarding__checklist-skip" href={ dashboardUrl || '#' }>
-                    { __( 'Skip for now', 'giveflow-fundraising-campaigns' ) }
+            <p className="fundkit-onboarding__checklist-foot">
+                <a className="fundkit-onboarding__checklist-skip" href={ dashboardUrl || '#' }>
+                    { __( 'Skip for now', 'fundkit-fundraising-campaigns' ) }
                 </a>
             </p>
         </div>
@@ -707,24 +707,24 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } )
 
 function ChecklistItem( { title, description, href, cta, onClick, busy } ) {
     return (
-        <li className="giveflow-onboarding__checklist-item">
-            <span className="giveflow-onboarding__checklist-bullet" aria-hidden="true" />
-            <div className="giveflow-onboarding__checklist-body">
-                <strong className="giveflow-onboarding__checklist-title">{ title }</strong>
-                <span className="giveflow-onboarding__checklist-desc">{ description }</span>
+        <li className="fundkit-onboarding__checklist-item">
+            <span className="fundkit-onboarding__checklist-bullet" aria-hidden="true" />
+            <div className="fundkit-onboarding__checklist-body">
+                <strong className="fundkit-onboarding__checklist-title">{ title }</strong>
+                <span className="fundkit-onboarding__checklist-desc">{ description }</span>
             </div>
             { onClick
                 ? (
                     <button
                         type="button"
-                        className="giveflow-btn giveflow-btn--primary"
+                        className="fundkit-btn fundkit-btn--primary"
                         onClick={ onClick }
                         disabled={ busy }
                     >
                         { cta }
                     </button>
                 )
-                : <a className="giveflow-btn giveflow-btn--primary" href={ href }>{ cta }</a> }
+                : <a className="fundkit-btn fundkit-btn--primary" href={ href }>{ cta }</a> }
         </li>
     );
 }

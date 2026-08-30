@@ -17,7 +17,7 @@ function config( overrides = {} ) {
         currency: 'USD',
         gateway:  'offline',
         layout:   'inline',
-        rest:     'https://example.test/wp-json/giveflow/v1/donations',
+        rest:     'https://example.test/wp-json/fundkit/v1/donations',
         gateways: { options: [] },
         steps: [
             { id: 'amount', type: 'amount', presets: [ 2500 ] },
@@ -38,12 +38,12 @@ const gatewayBlock = { kind: 'payment-gateways' };
 
 function addForm( cfg ) {
     const form = document.createElement( 'form' );
-    form.className = 'giveflow-donation-form';
-    form.id = 'giveflow-form-7';
+    form.className = 'fundkit-donation-form';
+    form.id = 'fundkit-form-7';
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-giveflow-form-config', '' );
+    json.setAttribute( 'data-fundkit-form-config', '' );
     json.textContent = JSON.stringify( cfg );
     form.appendChild( json );
 
@@ -61,13 +61,13 @@ async function boot( cfg ) {
 
 const { settle } = require( './support/waitFor' );
 
-const button = () => document.querySelector( '.giveflow-form__button--primary' );
-const notices = () => [ ...document.querySelectorAll( '.giveflow-form__gateways-empty' ) ]
+const button = () => document.querySelector( '.fundkit-form__button--primary' );
+const notices = () => [ ...document.querySelectorAll( '.fundkit-form__gateways-empty' ) ]
     .map( ( n ) => n.textContent );
 
 beforeEach( () => {
     document.body.innerHTML = '';
-    window.giveflow = {
+    window.fundkit = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
@@ -137,13 +137,13 @@ test( 'a paged form explains itself on the page the submit is on', async () => {
     } ) );
 
     // Page one hosts the block, so the section it renders is what speaks there.
-    expect( document.querySelectorAll( '.giveflow-form__payment .giveflow-form__gateways-empty' ) ).toHaveLength( 1 );
+    expect( document.querySelectorAll( '.fundkit-form__payment .fundkit-form__gateways-empty' ) ).toHaveLength( 1 );
 
-    document.querySelector( '.giveflow-form__button--primary' ).click();
+    document.querySelector( '.fundkit-form__button--primary' ).click();
     await settle();
 
-    expect( document.querySelector( '.giveflow-form__page-title' ).textContent ).toBe( 'Details' );
+    expect( document.querySelector( '.fundkit-form__page-title' ).textContent ).toBe( 'Details' );
     expect( notices() ).toEqual( [ NONE ] );
     // And here it is the submit speaking, because the section stayed behind.
-    expect( document.querySelectorAll( '.giveflow-form__payment' ) ).toHaveLength( 0 );
+    expect( document.querySelectorAll( '.fundkit-form__payment' ) ).toHaveLength( 0 );
 } );

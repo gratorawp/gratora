@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Forms;
+namespace FundKit\Tests\Unit\Forms;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationIntent;
-use GiveFlow\Forms\DefaultFormTypeHandler;
-use GiveFlow\Forms\FormTypeHandler;
-use GiveFlow\Forms\FormTypeRegistry;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationIntent;
+use FundKit\Forms\DefaultFormTypeHandler;
+use FundKit\Forms\FormTypeHandler;
+use FundKit\Forms\FormTypeRegistry;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 

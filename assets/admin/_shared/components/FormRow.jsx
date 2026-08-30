@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/components/FormRow';
+export { default } from '@fundkit/ui/components/FormRow';

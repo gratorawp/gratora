@@ -1,5 +1,5 @@
 ( function () {
-    const cfg = window.giveflowDeactivation || {};
+    const cfg = window.fundkitDeactivation || {};
     let dialog = null;
     let deactivateUrl = null;
     let opener = null;
@@ -13,16 +13,16 @@
         deactivateUrl = href;
         opener = dialog.ownerDocument.activeElement;
         dialog.hidden = false;
-        document.body.classList.add( 'giveflow-deact-open' );
+        document.body.classList.add( 'fundkit-deact-open' );
         sync();
         // Cancel, not the checkbox: opening on a destructive control means a
         // stray space bar arms the wipe before anyone has read the dialog.
-        dialog.querySelector( '[data-giveflow-deact-cancel]' ).focus();
+        dialog.querySelector( '[data-fundkit-deact-cancel]' ).focus();
     }
 
     function close() {
         dialog.hidden = true;
-        document.body.classList.remove( 'giveflow-deact-open' );
+        document.body.classList.remove( 'fundkit-deact-open' );
         if ( opener && opener.focus ) opener.focus();
     }
 
@@ -31,11 +31,11 @@
      * thing, and the button says which of the two it is about to do.
      */
     function sync() {
-        const wipe = dialog.querySelector( '#giveflow-deact-wipe' ).checked;
-        const submit = dialog.querySelector( '[data-giveflow-deact-submit]' );
+        const wipe = dialog.querySelector( '#fundkit-deact-wipe' ).checked;
+        const submit = dialog.querySelector( '[data-fundkit-deact-submit]' );
 
         dialog.classList.toggle( 'is-danger', wipe );
-        dialog.querySelector( '#giveflow-deact-consequence' ).hidden = ! wipe;
+        dialog.querySelector( '#fundkit-deact-consequence' ).hidden = ! wipe;
         submit.textContent = wipe ? submit.dataset.labelWipe : submit.dataset.labelKeep;
     }
 
@@ -49,7 +49,7 @@
         const body = new URLSearchParams();
         body.set( 'action', cfg.action );
         body.set( '_wpnonce', cfg.nonce );
-        if ( dialog.querySelector( '#giveflow-deact-wipe' ).checked ) body.set( 'wipe', '1' );
+        if ( dialog.querySelector( '#fundkit-deact-wipe' ).checked ) body.set( 'wipe', '1' );
 
         fetch( cfg.ajaxUrl, {
             method: 'POST',
@@ -60,7 +60,7 @@
     }
 
     function init() {
-        dialog = document.getElementById( 'giveflow-deact' );
+        dialog = document.getElementById( 'fundkit-deact' );
         if ( ! dialog || ! cfg.slug ) return;
 
         const link = rowLink();
@@ -72,16 +72,16 @@
         }
 
         dialog.addEventListener( 'click', function ( e ) {
-            if ( e.target.closest( '[data-giveflow-deact-cancel]' ) ) {
+            if ( e.target.closest( '[data-fundkit-deact-cancel]' ) ) {
                 close();
                 return;
             }
-            if ( e.target.closest( '[data-giveflow-deact-submit]' ) ) {
+            if ( e.target.closest( '[data-fundkit-deact-submit]' ) ) {
                 send( leave );
             }
         } );
 
-        dialog.querySelector( '#giveflow-deact-wipe' ).addEventListener( 'change', sync );
+        dialog.querySelector( '#fundkit-deact-wipe' ).addEventListener( 'change', sync );
 
         document.addEventListener( 'keydown', function ( e ) {
             if ( e.key === 'Escape' && ! dialog.hidden ) close();

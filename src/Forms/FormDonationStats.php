@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms;
+namespace FundKit\Forms;
 
 defined('ABSPATH') || exit;
 
-use GiveFlow\Vendor\Queryable\Model;
-use GiveFlow\Vendor\Queryable\Schema\Table;
+use FundKit\Vendor\Queryable\Model;
+use FundKit\Vendor\Queryable\Schema\Table;
 
 /**
  * Per-form donation aggregates.
@@ -18,7 +18,7 @@ use GiveFlow\Vendor\Queryable\Schema\Table;
  */
 final class FormDonationStats extends Model
 {
-    protected string $table = 'giveflow_form_donation_stats';
+    protected string $table = 'fundkit_form_donation_stats';
     protected string $version = '1.0.0';
     protected string $primaryKey = 'form_id';
 

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Onboarding;
+namespace FundKit\Onboarding;
 
-use GiveFlow\Foundation\Hooks\HookProvider;
+use FundKit\Foundation\Hooks\HookProvider;
 
 /**
  * Full-screen first-run onboarding page (hidden submenu, no WP chrome).
@@ -13,15 +13,15 @@ use GiveFlow\Foundation\Hooks\HookProvider;
  */
 final class OnboardingPage extends HookProvider
 {
-    public const PAGE_ID   = 'giveflow-onboarding';
-    private const HANDLE   = 'giveflow-admin-onboarding';
+    public const PAGE_ID   = 'fundkit-onboarding';
+    private const HANDLE   = 'fundkit-admin-onboarding';
     private const BUILD_DIR = 'build/admin/onboarding';
 
     /** @since 1.0.0 */
     protected function filters(): array
     {
         return [
-            'giveflow.admin.pages' => 'registerPage',
+            'fundkit.admin.pages' => 'registerPage',
             'admin_body_class' => 'maybeAddBodyClass',
         ];
     }
@@ -31,7 +31,7 @@ final class OnboardingPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Onboarding', 'giveflow-fundraising-campaigns'),
+            'title'      => __('Onboarding', 'fundkit-fundraising-campaigns'),
             'capability' => 'manage_options',
             'position'   => 999,
             'hidden'     => true,
@@ -44,7 +44,7 @@ final class OnboardingPage extends HookProvider
     public function maybeAddBodyClass(string $classes): string
     {
         if ($this->isCurrentPage()) {
-            $classes .= ' giveflow-onboarding-fullscreen';
+            $classes .= ' fundkit-onboarding-fullscreen';
         }
         return $classes;
     }
@@ -54,7 +54,7 @@ final class OnboardingPage extends HookProvider
     {
         $this->enqueueAssets();
         ?>
-        <div id="giveflow-admin-onboarding"></div>
+        <div id="fundkit-admin-onboarding"></div>
         <?php
     }
 
@@ -68,25 +68,25 @@ final class OnboardingPage extends HookProvider
     /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
-        $assetPath = GIVEFLOW_DIR . self::BUILD_DIR . '/index.asset.php';
+        $assetPath = FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
         if (! file_exists($assetPath)) return;
         $asset = require $assetPath;
 
         wp_enqueue_script(
             self::HANDLE,
-            GIVEFLOW_URL . self::BUILD_DIR . '/index.js',
+            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? GIVEFLOW_VERSION,
+            $asset['version']      ?? FUNDKIT_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'giveflow-fundraising-campaigns', GIVEFLOW_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
             self::HANDLE,
-            GIVEFLOW_URL . 'build/admin/onboarding.css',
+            FUNDKIT_URL . 'build/admin/onboarding.css',
             ['wp-components'],
-            (string) (@filemtime(GIVEFLOW_DIR . 'build/admin/onboarding.css') ?: GIVEFLOW_VERSION)
+            (string) (@filemtime(FUNDKIT_DIR . 'build/admin/onboarding.css') ?: FUNDKIT_VERSION)
         );
     }
 }

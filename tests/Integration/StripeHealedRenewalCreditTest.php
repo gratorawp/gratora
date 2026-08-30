@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\Stripe\StripeAccount;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\Stripe\StripeAccount;
+use FundKit\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -27,7 +27,7 @@ final class StripeHealedRenewalCreditTest extends IntegrationTestCase
         parent::setUp();
 
         $this->secret = 'whsec_test_' . bin2hex(random_bytes(8));
-        update_option('giveflow_gateway_config', [
+        update_option('fundkit_gateway_config', [
             'stripe' => ['webhook_secret_test' => $this->secret, 'test_mode' => true],
         ]);
 
@@ -38,15 +38,15 @@ final class StripeHealedRenewalCreditTest extends IntegrationTestCase
 
         $manager = $c->get(GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \GiveFlow\Gateways\Stripe\StripeGateway(
-                $c->get(\GiveFlow\Gateways\Stripe\StripeApi::class),
+            $manager->register(new \FundKit\Gateways\Stripe\StripeGateway(
+                $c->get(\FundKit\Gateways\Stripe\StripeApi::class),
                 $c->get(DonationRepository::class),
-                $c->get(\GiveFlow\Donations\DonationService::class),
+                $c->get(\FundKit\Donations\DonationService::class),
                 $account,
-                $c->get(\GiveFlow\Donors\DonorRepository::class),
+                $c->get(\FundKit\Donors\DonorRepository::class),
                 $c->get(DonorService::class),
-                $c->get(\GiveFlow\Foundation\Time\Clock::class),
-                $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
+                $c->get(\FundKit\Foundation\Time\Clock::class),
+                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
             ));
         }
     }
@@ -182,7 +182,7 @@ final class StripeHealedRenewalCreditTest extends IntegrationTestCase
         $timestamp = (string) time();
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $this->secret);
 
-        $req = new WP_REST_Request('POST', '/giveflow/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);

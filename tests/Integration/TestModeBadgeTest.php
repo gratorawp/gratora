@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Admin\TestModeBadge;
-use GiveFlow\Forms\Form;
+use FundKit\Admin\TestModeBadge;
+use FundKit\Forms\Form;
 
 /**
  * Test mode is otherwise invisible: the donations list fills with rows, the
@@ -28,7 +28,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
 
     private function title(): ?string
     {
-        $node = $this->bar()->get_node('giveflow-test-mode');
+        $node = $this->bar()->get_node('fundkit-test-mode');
 
         return $node === null ? null : wp_strip_all_tags((string) $node->title);
     }
@@ -50,10 +50,10 @@ final class TestModeBadgeTest extends IntegrationTestCase
 
     private function orgWide(bool $on): void
     {
-        $cfg = get_option('giveflow_gateway_config', []);
+        $cfg = get_option('fundkit_gateway_config', []);
         $cfg = is_array($cfg) ? $cfg : [];
         $cfg['test_mode'] = $on;
-        update_option('giveflow_gateway_config', $cfg);
+        update_option('fundkit_gateway_config', $cfg);
     }
 
     public function test_nothing_shows_when_every_donation_is_real(): void
@@ -68,7 +68,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
     {
         $this->orgWide(true);
 
-        $this->assertSame('GiveFlow Test Mode Active', $this->title());
+        $this->assertSame('FundKit Test Mode Active', $this->title());
     }
 
     public function test_a_single_form_left_in_test_mode_is_called_out_on_its_own(): void
@@ -78,7 +78,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->orgWide(false);
         $this->publishedForm(true);
 
-        $this->assertSame('1 GiveFlow Form in Test Mode', $this->title());
+        $this->assertSame('1 FundKit Form in Test Mode', $this->title());
     }
 
     /**
@@ -116,7 +116,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->publishedForm(true);
         $this->publishedForm(false);
 
-        $this->assertSame('2 GiveFlow Forms in Test Mode', $this->title());
+        $this->assertSame('2 FundKit Forms in Test Mode', $this->title());
     }
 
     public function test_a_draft_form_in_test_mode_is_not_worth_warning_about(): void
@@ -135,7 +135,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->publishedForm(true);
 
         // Both are true, but "some forms" understates a site where nothing is real.
-        $this->assertSame('GiveFlow Test Mode Active', $this->title());
+        $this->assertSame('FundKit Test Mode Active', $this->title());
     }
 
     /** The badge is the shortest route to the switch, so it has to land on it. */
@@ -143,9 +143,9 @@ final class TestModeBadgeTest extends IntegrationTestCase
     {
         $this->orgWide(true);
 
-        $href = (string) $this->bar()->get_node('giveflow-test-mode')->href;
+        $href = (string) $this->bar()->get_node('fundkit-test-mode')->href;
 
-        $this->assertStringContainsString('page=giveflow-settings', $href);
+        $this->assertStringContainsString('page=fundkit-settings', $href);
         $this->assertStringContainsString('tab=gateways', $href);
     }
 
@@ -153,7 +153,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
     {
         $this->orgWide(true);
 
-        $title = (string) $this->bar()->get_node('giveflow-test-mode')->title;
+        $title = (string) $this->bar()->get_node('fundkit-test-mode')->title;
 
         $this->assertStringContainsString('<svg', $title);
         // The words already say it; the icon repeating them is just noise.
@@ -165,12 +165,12 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->orgWide(true);
 
         // Denied through user_has_cap rather than by picking a role: the
-        // role-to-capability mapping is itself a GiveFlow setting that other
+        // role-to-capability mapping is itself a FundKit setting that other
         // suites rewrite, so "an editor" is not reliably unprivileged.
         // manage_options too: userCan() treats a full admin as holding every
-        // GiveFlow capability, so dropping the specific one proves nothing.
+        // FundKit capability, so dropping the specific one proves nothing.
         $deny = static function (array $caps): array {
-            unset($caps['giveflow_view_donations'], $caps['manage_options']);
+            unset($caps['fundkit_view_donations'], $caps['manage_options']);
             return $caps;
         };
         add_filter('user_has_cap', $deny, 99);

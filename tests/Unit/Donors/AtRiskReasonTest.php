@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Donors;
+namespace FundKit\Tests\Unit\Donors;
 
-use GiveFlow\Donors\AtRiskReason;
+use FundKit\Donors\AtRiskReason;
 use PHPUnit\Framework\TestCase;
 
 /**

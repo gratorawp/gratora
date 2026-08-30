@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways;
+namespace FundKit\Gateways;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\Refund;
+use FundKit\Donations\Donation;
+use FundKit\Donations\Refund;
 use WP_REST_Request;
 
 /**
  * Payment gateway abstraction. Concrete gateways register themselves at boot
- * via the `giveflow.gateways.register` hook.
+ * via the `fundkit.gateways.register` hook.
  *
  * Lifecycle: createIntent, then either handleWebhook (typical) or confirm
  * (synchronous, Offline only); refund and the subscription methods as needed.

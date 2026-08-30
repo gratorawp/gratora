@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Recurring;
+namespace FundKit\Recurring;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Foundation\Batch\BatchProcessor;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\SubscriptionAware;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Foundation\Batch\BatchProcessor;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\SubscriptionAware;
 use Throwable;
 
 /**
@@ -39,7 +39,7 @@ use Throwable;
  */
 final class RecurringResumer
 {
-    public const HOOK = 'giveflow.cron.recurring_resume';
+    public const HOOK = 'fundkit.cron.recurring_resume';
     private const DAILY = 86400;
     private const BATCH = 100;
 
@@ -135,7 +135,7 @@ final class RecurringResumer
                     $e->getMessage()
                 ), ['plan_id' => (int) $plan->id, 'gateway' => (string) $plan->gateway]);
 
-                do_action('giveflow.recurring.resume_failed', $plan, $e);
+                do_action('fundkit.recurring.resume_failed', $plan, $e);
                 return;
             }
         }
@@ -153,7 +153,7 @@ final class RecurringResumer
         ], true);
 
         if ($written) {
-            do_action('giveflow.recurring.plan_resumed', $plan);
+            do_action('fundkit.recurring.plan_resumed', $plan);
         }
     }
 

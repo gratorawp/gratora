@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Reports;
+namespace FundKit\Reports;
 
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Helpers\View;
-use GiveFlow\Receipts\PdfBuilder;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Helpers\View;
+use FundKit\Receipts\PdfBuilder;
 
 /**
  * Builds a donor year-end tax statement PDF (US 501(c)(3) style contribution
@@ -24,7 +24,7 @@ use GiveFlow\Receipts\PdfBuilder;
  */
 final class TaxStatementBuilder
 {
-    /** Names this builder to the giveflow.statement.pdf filter. */
+    /** Names this builder to the fundkit.statement.pdf filter. */
     public const KIND = 'tax';
 
     /** @since 1.0.0 */
@@ -41,7 +41,7 @@ final class TaxStatementBuilder
         // See AnnualStatementBuilder: an add-on replacing annual documents
         // has to replace both, or the admin route and the portal route
         // hand out different statements for the same year.
-        $override = apply_filters('giveflow.statement.pdf', null, $donor, $year, self::KIND);
+        $override = apply_filters('fundkit.statement.pdf', null, $donor, $year, self::KIND);
         if (is_string($override) && $override !== '') {
             return $override;
         }
@@ -51,7 +51,7 @@ final class TaxStatementBuilder
             return '';
         }
 
-        $org        = get_option('giveflow_org_profile', []);
+        $org        = get_option('fundkit_org_profile', []);
         $org        = is_array($org) ? $org : [];
         $orgName    = trim((string) ($org['name'] ?? '')) ?: (string) get_bloginfo('name');
         $donorName  = trim(((string) ($donor->first_name ?? '')) . ' ' . ((string) ($donor->last_name ?? '')));
@@ -62,7 +62,7 @@ final class TaxStatementBuilder
             'org_name'            => $orgName,
             'org_address_lines'   => $this->orgAddressLines($org),
             'org_tax_id'          => trim((string) ($org['tax_id'] ?? '')),
-            'donor_name'          => $donorName !== '' ? $donorName : __('Donor', 'giveflow-fundraising-campaigns'),
+            'donor_name'          => $donorName !== '' ? $donorName : __('Donor', 'fundkit-fundraising-campaigns'),
             'donor_address_lines' => $donorAddr !== null ? explode("\n", $donorAddr) : [],
             'lines'               => $itemized['lines'],
             'totals'              => $itemized['totals'],
@@ -72,9 +72,9 @@ final class TaxStatementBuilder
 
         return $this->pdf->fromHtml($html, [
             /* translators: %d: statement year. */
-            'title'   => sprintf(__('%d annual donation statement', 'giveflow-fundraising-campaigns'), $year),
+            'title'   => sprintf(__('%d annual donation statement', 'fundkit-fundraising-campaigns'), $year),
             'author'  => $orgName,
-            'subject' => __('Annual donation statement', 'giveflow-fundraising-campaigns'),
+            'subject' => __('Annual donation statement', 'fundkit-fundraising-campaigns'),
             'format'  => 'Letter',
         ]);
     }
@@ -110,7 +110,7 @@ final class TaxStatementBuilder
      */
     public static function filename(int $donorId, int $year): string
     {
-        return sprintf('giveflow-tax-statement-%d-donor-%d.pdf', $year, $donorId);
+        return sprintf('fundkit-tax-statement-%d-donor-%d.pdf', $year, $donorId);
     }
 
     /**
@@ -148,7 +148,7 @@ final class TaxStatementBuilder
                 'amount'        => Money::format($net, $currency),
                 'refunded_note' => $refunded > 0
                     /* translators: %s: formatted refunded amount */
-                    ? sprintf(__('Net of %s refunded', 'giveflow-fundraising-campaigns'), Money::format($refunded, $currency))
+                    ? sprintf(__('Net of %s refunded', 'fundkit-fundraising-campaigns'), Money::format($refunded, $currency))
                     : '',
             ];
         }
@@ -159,8 +159,8 @@ final class TaxStatementBuilder
             $totals[] = [
                 'label'  => $multi
                     /* translators: %s: currency code */
-                    ? sprintf(__('Total contributions (%s)', 'giveflow-fundraising-campaigns'), $currency)
-                    : __('Total contributions', 'giveflow-fundraising-campaigns'),
+                    ? sprintf(__('Total contributions (%s)', 'fundkit-fundraising-campaigns'), $currency)
+                    : __('Total contributions', 'fundkit-fundraising-campaigns'),
                 'amount' => Money::format($cents, $currency),
             ];
         }
@@ -228,7 +228,7 @@ final class TaxStatementBuilder
      */
     private function orgDisclaimer(): string
     {
-        $stored = get_option('giveflow_receipt_settings', []);
+        $stored = get_option('fundkit_receipt_settings', []);
         if (! is_array($stored)) {
             return '';
         }

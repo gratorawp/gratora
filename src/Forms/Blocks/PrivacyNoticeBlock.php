@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Foundation\Helpers\View;
 
 /**
  * Inline privacy notice. Link omitted when no privacy policy URL is set.
@@ -16,7 +16,7 @@ final class PrivacyNoticeBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/privacy-notice';
+        return 'fundkit/privacy-notice';
     }
 
     /** @since 1.0.0 */
@@ -39,15 +39,15 @@ final class PrivacyNoticeBlock implements Block
             $align = 'left';
         }
 
-        $privacy = get_option('giveflow_privacy', []);
+        $privacy = get_option('fundkit_privacy', []);
         $url = is_array($privacy) ? trim((string) ($privacy['privacy_policy_url'] ?? '')) : '';
 
         $text     = trim((string) ($attrs['text']     ?? ''));
         $linkText = trim((string) ($attrs['linkText'] ?? ''));
 
         return View::loadRelative(__DIR__, 'views/privacy-notice', [
-            'text'     => $text     !== '' ? $text     : __('By donating you agree to our', 'giveflow-fundraising-campaigns'),
-            'linkText' => $linkText !== '' ? $linkText : __('Privacy Policy', 'giveflow-fundraising-campaigns'),
+            'text'     => $text     !== '' ? $text     : __('By donating you agree to our', 'fundkit-fundraising-campaigns'),
+            'linkText' => $linkText !== '' ? $linkText : __('Privacy Policy', 'fundkit-fundraising-campaigns'),
             'align'    => $align,
             'url'      => $url,
         ]);

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 /**
  * The admin donations list sorts by created_at and always filters is_test.
@@ -18,7 +18,7 @@ final class DonationListIndexTest extends IntegrationTestCase
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'giveflow_donations';
+        $table = $wpdb->prefix . 'fundkit_donations';
         $rows  = $wpdb->get_results("SHOW INDEX FROM `{$table}`");
 
         $byName = [];
@@ -57,7 +57,7 @@ final class DonationListIndexTest extends IntegrationTestCase
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'giveflow_donations';
+        $table = $wpdb->prefix . 'fundkit_donations';
         $plan  = $wpdb->get_row(
             "EXPLAIN SELECT * FROM `{$table}` WHERE is_test = 0 ORDER BY created_at DESC LIMIT 25"
         );

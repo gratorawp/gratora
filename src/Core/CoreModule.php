@@ -2,234 +2,234 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Core;
+namespace FundKit\Core;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Admin\AdminGlobals;
-use GiveFlow\Admin\AdminMenu;
-use GiveFlow\Admin\Pages\CampaignsPage;
-use GiveFlow\Admin\Pages\DonationsPage;
-use GiveFlow\Admin\Pages\SubscriptionsPage;
-use GiveFlow\Admin\Pages\DonorsPage;
-use GiveFlow\Admin\Pages\FormsPage;
-use GiveFlow\Admin\Pages\FundsPage;
-use GiveFlow\Admin\Pages\ToolsPage;
-use GiveFlow\Admin\DeactivationDialog;
-use GiveFlow\Admin\ManagedPageStates;
-use GiveFlow\Admin\TestModeBadge;
-use GiveFlow\Admin\Pages\SettingsPage;
-use GiveFlow\Analytics\Event;
-use GiveFlow\Analytics\EventRecorder;
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Campaigns\CampaignPermalinks;
-use GiveFlow\Campaigns\CampaignTypeRegistry;
-use GiveFlow\Campaigns\DefaultCampaignTypeHandler;
-use GiveFlow\Currency\FxBackfill;
-use GiveFlow\Currency\FxRates;
-use GiveFlow\Currency\FxRatesUpdater;
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\CampaignChrome;
-use GiveFlow\Campaigns\CampaignPageTemplate;
-use GiveFlow\Campaigns\Styling\PageStyle;
-use GiveFlow\Campaigns\CampaignMetricsService;
-use GiveFlow\Campaigns\CampaignStatMetrics;
-use GiveFlow\Campaigns\CampaignRepository;
-use GiveFlow\Campaigns\CampaignService;
-use GiveFlow\Campaigns\SocialMeta;
-use GiveFlow\Dashboard\DashboardMetricsService;
-use GiveFlow\Donations\AggregateSyncer;
-use GiveFlow\Donations\AntiSpamGuard;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationEmails;
-use GiveFlow\Donations\DonationNote;
-use GiveFlow\Donations\DonationNoteRepository;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Donations\Refund;
-use GiveFlow\Donors\Consent;
-use GiveFlow\Donors\ConsentService;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorAggregateSyncer;
-use GiveFlow\Donors\DonorEmailRehasher;
-use GiveFlow\Donors\DonorMetricsService;
-use GiveFlow\Donors\DonorNote;
-use GiveFlow\Donors\DonorNoteRepository;
-use GiveFlow\Donors\DonorPurge;
-use GiveFlow\Donors\DonorAvatarUploader;
-use GiveFlow\Donors\DonorAvatars;
-use GiveFlow\Donors\DonorRepository;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Donors\Erasure\AnalyticsEventHandler;
-use GiveFlow\Foundation\Transfer\CsvImporter;
-use GiveFlow\Foundation\Transfer\DataExporter;
-use GiveFlow\Foundation\Transfer\DataImporter;
-use GiveFlow\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
-use GiveFlow\Foundation\Upgrade\UpgradeRunner;
-use GiveFlow\Foundation\Upgrade\UpgradeJob;
-use GiveFlow\Foundation\Upgrade\UpgradeNotice;
-use GiveFlow\Donors\Erasure\CoreDonorDataHandler;
-use GiveFlow\Donors\Erasure\ErasureRegistry;
-use GiveFlow\Donors\MagicLinkService;
-use GiveFlow\Donors\MagicLinkToken;
-use GiveFlow\Donors\PendingSignup;
-use GiveFlow\Donors\PendingSignupRepository;
-use GiveFlow\Donors\SignupRedemption;
-use GiveFlow\Donors\Portal\AnnualStatementBuilder;
-use GiveFlow\Donors\Portal\PortalPage;
-use GiveFlow\Donors\Portal\PortalSession;
-use GiveFlow\Donors\Portal\PortalShortcode;
-use GiveFlow\Campaigns\Blocks\BlockEditorIntegration as CampaignBlockEditorIntegration;
-use GiveFlow\Campaigns\Blocks\CampaignBindingPreviewController;
-use GiveFlow\Campaigns\Blocks\CampaignBindings;
-use GiveFlow\Campaigns\Blocks\CampaignGridBlock;
-use GiveFlow\Campaigns\Blocks\CampaignImageBlock;
-use GiveFlow\Campaigns\Blocks\CampaignProgressBlock;
-use GiveFlow\Campaigns\Blocks\CampaignStatBlock;
-use GiveFlow\Campaigns\Blocks\DonateButtonBlock;
-use GiveFlow\Campaigns\Blocks\DonationFormBlock;
-use GiveFlow\Campaigns\Blocks\RecentDonationsBlock;
-use GiveFlow\Campaigns\Blocks\SupporterWallBlock;
-use GiveFlow\Campaigns\Blocks\TopDonorsBlock;
-use GiveFlow\Forms\Blocks\AddressBlock;
-use GiveFlow\Forms\Blocks\AnonymousToggleBlock;
-use GiveFlow\Forms\Blocks\BlockRegistry;
-use GiveFlow\Forms\Blocks\CommentBlock;
-use GiveFlow\Forms\Blocks\ConsentBlock;
-use GiveFlow\Forms\Blocks\DonationSummaryBlock;
-use GiveFlow\Forms\Blocks\TermsBlock;
-use GiveFlow\Forms\Blocks\CountryBlock;
-use GiveFlow\Forms\Blocks\CoverFeesBlock;
-use GiveFlow\Forms\Blocks\CurrencySwitcherBlock;
-use GiveFlow\Forms\Blocks\DividerBlock;
-use GiveFlow\Forms\Blocks\DonationAmountBlock;
-use GiveFlow\Forms\Blocks\PaymentGatewaysBlock;
-use GiveFlow\Forms\Blocks\EmailBlock;
-use GiveFlow\Forms\Blocks\FundPickerBlock;
-use GiveFlow\Forms\Blocks\GoalBlock;
-use GiveFlow\Forms\Blocks\HeadingBlock;
-use GiveFlow\Forms\Blocks\NameBlock;
-use GiveFlow\Forms\Blocks\ParagraphBlock;
-use GiveFlow\Forms\Blocks\PhoneBlock;
-use GiveFlow\Forms\Blocks\HiddenBlock;
-use GiveFlow\Forms\Blocks\HtmlBlock;
-use GiveFlow\Forms\Blocks\PrivacyNoticeBlock;
-use GiveFlow\Forms\Blocks\RowBlock;
-use GiveFlow\Forms\Blocks\ColumnsBlock;
-use GiveFlow\Forms\Blocks\SectionBlock;
-use GiveFlow\Forms\Blocks\StepBlock;
-use GiveFlow\Forms\Blocks\StepsBlock;
-use GiveFlow\Forms\Blocks\SubmitButtonBlock;
-use GiveFlow\Forms\Blocks\DateBlock;
-use GiveFlow\Forms\Blocks\TextInputBlock;
-use GiveFlow\Forms\Blocks\NumberInputBlock;
-use GiveFlow\Forms\Blocks\RecurringToggleBlock;
-use GiveFlow\Forms\Blocks\DropdownBlock;
-use GiveFlow\Forms\Blocks\RadioBlock;
-use GiveFlow\Forms\Blocks\CheckboxBlock;
-use GiveFlow\Forms\Blocks\MultiSelectBlock;
-use GiveFlow\Forms\DefaultFormTypeHandler;
-use GiveFlow\Forms\Form;
-use GiveFlow\Forms\FormDonationStats;
-use GiveFlow\Forms\FormReadinessService;
-use GiveFlow\Forms\FormRepository;
-use GiveFlow\Forms\FormService;
-use GiveFlow\Forms\FormTypeRegistry;
-use GiveFlow\Foundation\Config\SystemSetting;
-use GiveFlow\Campaigns\Styling\CampaignStyleResolver;
-use GiveFlow\Core\Commands\CoreCommandProvider;
-use GiveFlow\Forms\Shortcode\DonationFormShortcode;
-use GiveFlow\Foundation\Commands\CommandRegistry;
-use GiveFlow\Foundation\Container\Container;
-use GiveFlow\Foundation\Crypto\Crypto;
-use GiveFlow\Foundation\Auth\Capabilities;
-use GiveFlow\Foundation\Identity\IdentityHasher;
-use GiveFlow\Foundation\License\LicenseNotice;
-use GiveFlow\Foundation\License\LicenseService;
-use GiveFlow\Foundation\Modules\GiveFlowModule;
-use GiveFlow\Foundation\Modules\ModuleManager;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\References\ReferenceGenerator;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Foundation\Time\SystemClock;
-use GiveFlow\Funds\Fund;
-use GiveFlow\Funds\FundReassignmentJob;
-use GiveFlow\Recurring\CampaignCancelRecurringJob;
-use GiveFlow\Funds\FundRepository;
-use GiveFlow\Funds\FundResolver;
-use GiveFlow\Funds\FundService;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\GatewayReconciler;
-use GiveFlow\Gateways\Offline\OfflineGateway;
-use GiveFlow\Gateways\Sandbox\SandboxGateway;
-use GiveFlow\Gateways\Sandbox\SandboxRenewer;
-use GiveFlow\Gateways\Stripe\StripeApi;
-use GiveFlow\Gateways\PayPal\PayPalAccount;
-use GiveFlow\Gateways\PayPal\PayPalApi;
-use GiveFlow\Gateways\PayPal\PayPalGateway;
-use GiveFlow\Gateways\PayPal\PayPalPlanRecorder;
-use GiveFlow\Gateways\PayPal\PayPalPlans;
-use GiveFlow\Gateways\Stripe\ApplePayDomain;
-use GiveFlow\Gateways\Stripe\StripeAccount;
-use GiveFlow\Gateways\Stripe\StripeWebhookNotice;
-use GiveFlow\Gateways\Stripe\StripeGateway;
-use GiveFlow\Gateways\TestMode;
-use GiveFlow\Mail\Mailer;
-use GiveFlow\Onboarding\Onboarding;
-use GiveFlow\Onboarding\OnboardingPage;
-use GiveFlow\Exports\DonorExporter;
-use GiveFlow\Exports\RevenueExporter;
-use GiveFlow\Reports\RevenueReportBuilder;
-use GiveFlow\Receipts\PdfBuilder;
-use GiveFlow\Reports\CampaignReportBuilder;
-use GiveFlow\Reports\TaxStatementBuilder;
-use GiveFlow\Receipts\Receipt;
-use GiveFlow\Receipts\ReceiptIssuer;
-use GiveFlow\Receipts\ReceiptRepository;
-use GiveFlow\Receipts\Renderers\GenericReceiptRenderer;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringCanceller;
-use GiveFlow\Recurring\RecurringPlanActions;
-use GiveFlow\Recurring\RecurringPlanRepository;
-use GiveFlow\Recurring\RecurringResumer;
-use GiveFlow\Rest\Admin\ExportsController;
-use GiveFlow\Rest\Admin\ToolsController;
-use GiveFlow\Rest\Admin\NumberingController;
-use GiveFlow\Rest\Admin\CampaignsController as AdminCampaignsController;
-use GiveFlow\Rest\Admin\CommandsController;
-use GiveFlow\Rest\Admin\DashboardController;
-use GiveFlow\Rest\Admin\FundsController as AdminFundsController;
-use GiveFlow\Rest\Admin\DonationsController as AdminDonationsController;
-use GiveFlow\Rest\Admin\DonorsController as AdminDonorsController;
-use GiveFlow\Rest\Admin\FormsController as AdminFormsController;
-use GiveFlow\Rest\Admin\FxController;
-use GiveFlow\Rest\Admin\OnboardingController;
-use GiveFlow\Rest\Admin\ReadinessController;
-use GiveFlow\Rest\Admin\ReportsController;
-use GiveFlow\Rest\Admin\RecurringController;
-use GiveFlow\Rest\Admin\RolesController;
-use GiveFlow\Rest\Admin\SettingsController;
-use GiveFlow\Rest\Admin\PayPalKeysController;
-use GiveFlow\Rest\Admin\StripeKeysController;
-use GiveFlow\Rest\Admin\UserPrefsController;
-use GiveFlow\Rest\Portal\PortalController as PortalController;
-use GiveFlow\Rest\DonationsController;
-use GiveFlow\Rest\PayPalController;
-use GiveFlow\Rest\ReceiptsController;
-use GiveFlow\Rest\RestProvider;
-use GiveFlow\Rest\WebhookController;
-use GiveFlow\Settings\ReadinessService;
-use GiveFlow\Settings\SettingsService;
-use GiveFlow\Analytics\EventRetention;
-use GiveFlow\Donors\DonorRetention;
-use GiveFlow\Foundation\Maintenance\TransientGc;
-use GiveFlow\Vendor\Queryable\QueryException;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Admin\AdminGlobals;
+use FundKit\Admin\AdminMenu;
+use FundKit\Admin\Pages\CampaignsPage;
+use FundKit\Admin\Pages\DonationsPage;
+use FundKit\Admin\Pages\SubscriptionsPage;
+use FundKit\Admin\Pages\DonorsPage;
+use FundKit\Admin\Pages\FormsPage;
+use FundKit\Admin\Pages\FundsPage;
+use FundKit\Admin\Pages\ToolsPage;
+use FundKit\Admin\DeactivationDialog;
+use FundKit\Admin\ManagedPageStates;
+use FundKit\Admin\TestModeBadge;
+use FundKit\Admin\Pages\SettingsPage;
+use FundKit\Analytics\Event;
+use FundKit\Analytics\EventRecorder;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Campaigns\CampaignPermalinks;
+use FundKit\Campaigns\CampaignTypeRegistry;
+use FundKit\Campaigns\DefaultCampaignTypeHandler;
+use FundKit\Currency\FxBackfill;
+use FundKit\Currency\FxRates;
+use FundKit\Currency\FxRatesUpdater;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\CampaignChrome;
+use FundKit\Campaigns\CampaignPageTemplate;
+use FundKit\Campaigns\Styling\PageStyle;
+use FundKit\Campaigns\CampaignMetricsService;
+use FundKit\Campaigns\CampaignStatMetrics;
+use FundKit\Campaigns\CampaignRepository;
+use FundKit\Campaigns\CampaignService;
+use FundKit\Campaigns\SocialMeta;
+use FundKit\Dashboard\DashboardMetricsService;
+use FundKit\Donations\AggregateSyncer;
+use FundKit\Donations\AntiSpamGuard;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationEmails;
+use FundKit\Donations\DonationNote;
+use FundKit\Donations\DonationNoteRepository;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donations\DonationService;
+use FundKit\Donations\Refund;
+use FundKit\Donors\Consent;
+use FundKit\Donors\ConsentService;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorAggregateSyncer;
+use FundKit\Donors\DonorEmailRehasher;
+use FundKit\Donors\DonorMetricsService;
+use FundKit\Donors\DonorNote;
+use FundKit\Donors\DonorNoteRepository;
+use FundKit\Donors\DonorPurge;
+use FundKit\Donors\DonorAvatarUploader;
+use FundKit\Donors\DonorAvatars;
+use FundKit\Donors\DonorRepository;
+use FundKit\Donors\DonorService;
+use FundKit\Donors\Erasure\AnalyticsEventHandler;
+use FundKit\Foundation\Transfer\CsvImporter;
+use FundKit\Foundation\Transfer\DataExporter;
+use FundKit\Foundation\Transfer\DataImporter;
+use FundKit\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
+use FundKit\Foundation\Upgrade\UpgradeRunner;
+use FundKit\Foundation\Upgrade\UpgradeJob;
+use FundKit\Foundation\Upgrade\UpgradeNotice;
+use FundKit\Donors\Erasure\CoreDonorDataHandler;
+use FundKit\Donors\Erasure\ErasureRegistry;
+use FundKit\Donors\MagicLinkService;
+use FundKit\Donors\MagicLinkToken;
+use FundKit\Donors\PendingSignup;
+use FundKit\Donors\PendingSignupRepository;
+use FundKit\Donors\SignupRedemption;
+use FundKit\Donors\Portal\AnnualStatementBuilder;
+use FundKit\Donors\Portal\PortalPage;
+use FundKit\Donors\Portal\PortalSession;
+use FundKit\Donors\Portal\PortalShortcode;
+use FundKit\Campaigns\Blocks\BlockEditorIntegration as CampaignBlockEditorIntegration;
+use FundKit\Campaigns\Blocks\CampaignBindingPreviewController;
+use FundKit\Campaigns\Blocks\CampaignBindings;
+use FundKit\Campaigns\Blocks\CampaignGridBlock;
+use FundKit\Campaigns\Blocks\CampaignImageBlock;
+use FundKit\Campaigns\Blocks\CampaignProgressBlock;
+use FundKit\Campaigns\Blocks\CampaignStatBlock;
+use FundKit\Campaigns\Blocks\DonateButtonBlock;
+use FundKit\Campaigns\Blocks\DonationFormBlock;
+use FundKit\Campaigns\Blocks\RecentDonationsBlock;
+use FundKit\Campaigns\Blocks\SupporterWallBlock;
+use FundKit\Campaigns\Blocks\TopDonorsBlock;
+use FundKit\Forms\Blocks\AddressBlock;
+use FundKit\Forms\Blocks\AnonymousToggleBlock;
+use FundKit\Forms\Blocks\BlockRegistry;
+use FundKit\Forms\Blocks\CommentBlock;
+use FundKit\Forms\Blocks\ConsentBlock;
+use FundKit\Forms\Blocks\DonationSummaryBlock;
+use FundKit\Forms\Blocks\TermsBlock;
+use FundKit\Forms\Blocks\CountryBlock;
+use FundKit\Forms\Blocks\CoverFeesBlock;
+use FundKit\Forms\Blocks\CurrencySwitcherBlock;
+use FundKit\Forms\Blocks\DividerBlock;
+use FundKit\Forms\Blocks\DonationAmountBlock;
+use FundKit\Forms\Blocks\PaymentGatewaysBlock;
+use FundKit\Forms\Blocks\EmailBlock;
+use FundKit\Forms\Blocks\FundPickerBlock;
+use FundKit\Forms\Blocks\GoalBlock;
+use FundKit\Forms\Blocks\HeadingBlock;
+use FundKit\Forms\Blocks\NameBlock;
+use FundKit\Forms\Blocks\ParagraphBlock;
+use FundKit\Forms\Blocks\PhoneBlock;
+use FundKit\Forms\Blocks\HiddenBlock;
+use FundKit\Forms\Blocks\HtmlBlock;
+use FundKit\Forms\Blocks\PrivacyNoticeBlock;
+use FundKit\Forms\Blocks\RowBlock;
+use FundKit\Forms\Blocks\ColumnsBlock;
+use FundKit\Forms\Blocks\SectionBlock;
+use FundKit\Forms\Blocks\StepBlock;
+use FundKit\Forms\Blocks\StepsBlock;
+use FundKit\Forms\Blocks\SubmitButtonBlock;
+use FundKit\Forms\Blocks\DateBlock;
+use FundKit\Forms\Blocks\TextInputBlock;
+use FundKit\Forms\Blocks\NumberInputBlock;
+use FundKit\Forms\Blocks\RecurringToggleBlock;
+use FundKit\Forms\Blocks\DropdownBlock;
+use FundKit\Forms\Blocks\RadioBlock;
+use FundKit\Forms\Blocks\CheckboxBlock;
+use FundKit\Forms\Blocks\MultiSelectBlock;
+use FundKit\Forms\DefaultFormTypeHandler;
+use FundKit\Forms\Form;
+use FundKit\Forms\FormDonationStats;
+use FundKit\Forms\FormReadinessService;
+use FundKit\Forms\FormRepository;
+use FundKit\Forms\FormService;
+use FundKit\Forms\FormTypeRegistry;
+use FundKit\Foundation\Config\SystemSetting;
+use FundKit\Campaigns\Styling\CampaignStyleResolver;
+use FundKit\Core\Commands\CoreCommandProvider;
+use FundKit\Forms\Shortcode\DonationFormShortcode;
+use FundKit\Foundation\Commands\CommandRegistry;
+use FundKit\Foundation\Container\Container;
+use FundKit\Foundation\Crypto\Crypto;
+use FundKit\Foundation\Auth\Capabilities;
+use FundKit\Foundation\Identity\IdentityHasher;
+use FundKit\Foundation\License\LicenseNotice;
+use FundKit\Foundation\License\LicenseService;
+use FundKit\Foundation\Modules\FundKitModule;
+use FundKit\Foundation\Modules\ModuleManager;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\References\ReferenceGenerator;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Foundation\Time\SystemClock;
+use FundKit\Funds\Fund;
+use FundKit\Funds\FundReassignmentJob;
+use FundKit\Recurring\CampaignCancelRecurringJob;
+use FundKit\Funds\FundRepository;
+use FundKit\Funds\FundResolver;
+use FundKit\Funds\FundService;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\GatewayReconciler;
+use FundKit\Gateways\Offline\OfflineGateway;
+use FundKit\Gateways\Sandbox\SandboxGateway;
+use FundKit\Gateways\Sandbox\SandboxRenewer;
+use FundKit\Gateways\Stripe\StripeApi;
+use FundKit\Gateways\PayPal\PayPalAccount;
+use FundKit\Gateways\PayPal\PayPalApi;
+use FundKit\Gateways\PayPal\PayPalGateway;
+use FundKit\Gateways\PayPal\PayPalPlanRecorder;
+use FundKit\Gateways\PayPal\PayPalPlans;
+use FundKit\Gateways\Stripe\ApplePayDomain;
+use FundKit\Gateways\Stripe\StripeAccount;
+use FundKit\Gateways\Stripe\StripeWebhookNotice;
+use FundKit\Gateways\Stripe\StripeGateway;
+use FundKit\Gateways\TestMode;
+use FundKit\Mail\Mailer;
+use FundKit\Onboarding\Onboarding;
+use FundKit\Onboarding\OnboardingPage;
+use FundKit\Exports\DonorExporter;
+use FundKit\Exports\RevenueExporter;
+use FundKit\Reports\RevenueReportBuilder;
+use FundKit\Receipts\PdfBuilder;
+use FundKit\Reports\CampaignReportBuilder;
+use FundKit\Reports\TaxStatementBuilder;
+use FundKit\Receipts\Receipt;
+use FundKit\Receipts\ReceiptIssuer;
+use FundKit\Receipts\ReceiptRepository;
+use FundKit\Receipts\Renderers\GenericReceiptRenderer;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringCanceller;
+use FundKit\Recurring\RecurringPlanActions;
+use FundKit\Recurring\RecurringPlanRepository;
+use FundKit\Recurring\RecurringResumer;
+use FundKit\Rest\Admin\ExportsController;
+use FundKit\Rest\Admin\ToolsController;
+use FundKit\Rest\Admin\NumberingController;
+use FundKit\Rest\Admin\CampaignsController as AdminCampaignsController;
+use FundKit\Rest\Admin\CommandsController;
+use FundKit\Rest\Admin\DashboardController;
+use FundKit\Rest\Admin\FundsController as AdminFundsController;
+use FundKit\Rest\Admin\DonationsController as AdminDonationsController;
+use FundKit\Rest\Admin\DonorsController as AdminDonorsController;
+use FundKit\Rest\Admin\FormsController as AdminFormsController;
+use FundKit\Rest\Admin\FxController;
+use FundKit\Rest\Admin\OnboardingController;
+use FundKit\Rest\Admin\ReadinessController;
+use FundKit\Rest\Admin\ReportsController;
+use FundKit\Rest\Admin\RecurringController;
+use FundKit\Rest\Admin\RolesController;
+use FundKit\Rest\Admin\SettingsController;
+use FundKit\Rest\Admin\PayPalKeysController;
+use FundKit\Rest\Admin\StripeKeysController;
+use FundKit\Rest\Admin\UserPrefsController;
+use FundKit\Rest\Portal\PortalController as PortalController;
+use FundKit\Rest\DonationsController;
+use FundKit\Rest\PayPalController;
+use FundKit\Rest\ReceiptsController;
+use FundKit\Rest\RestProvider;
+use FundKit\Rest\WebhookController;
+use FundKit\Settings\ReadinessService;
+use FundKit\Settings\SettingsService;
+use FundKit\Analytics\EventRetention;
+use FundKit\Donors\DonorRetention;
+use FundKit\Foundation\Maintenance\TransientGc;
+use FundKit\Vendor\Queryable\QueryException;
 
 /**
  * Always-on module: migrations, service bindings, admin/REST/asset wiring.
  *
  * @since 1.0.0
  */
-final class CoreModule implements GiveFlowModule
+final class CoreModule implements FundKitModule
 {
     /** @since 1.0.0 */
     public function id(): string
@@ -240,13 +240,13 @@ final class CoreModule implements GiveFlowModule
     /** @since 1.0.0 */
     public function name(): string
     {
-        return __('GiveFlow Core', 'giveflow-fundraising-campaigns');
+        return __('FundKit Core', 'fundkit-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */
     public function version(): string
     {
-        return GIVEFLOW_VERSION;
+        return FUNDKIT_VERSION;
     }
 
     /** @since 1.0.0 */
@@ -288,15 +288,15 @@ final class CoreModule implements GiveFlowModule
     /** @since 1.0.0 */
     public function boot(Container $c): void
     {
-        // Cache-bust every GiveFlow build/ stylesheet by file mtime instead of
-        // GIVEFLOW_VERSION, so CSS changes show on a normal reload without a plugin
+        // Cache-bust every FundKit build/ stylesheet by file mtime instead of
+        // FUNDKIT_VERSION, so CSS changes show on a normal reload without a plugin
         // version bump (JS already busts via its content-hashed asset.php).
         add_filter('style_loader_src', static function ($src) {
-            if (! is_string($src) || strpos($src, GIVEFLOW_URL . 'build/') !== 0) {
+            if (! is_string($src) || strpos($src, FUNDKIT_URL . 'build/') !== 0) {
                 return $src;
             }
             $clean = strtok($src, '?');
-            $file  = GIVEFLOW_DIR . substr($clean, strlen(GIVEFLOW_URL));
+            $file  = FUNDKIT_DIR . substr($clean, strlen(FUNDKIT_URL));
             return file_exists($file) ? $clean . '?ver=' . filemtime($file) : $src;
         }, 20);
 
@@ -307,7 +307,7 @@ final class CoreModule implements GiveFlowModule
             $c->get(AsyncDispatcher::class)
         ));
 
-        // Both read giveflow_system_settings the moment they are constructed, and
+        // Both read fundkit_system_settings the moment they are constructed, and
         // boot constructs them. plugins_loaded is far ahead of the wp_loaded
         // migration, so on an install whose tables are absent (a subsite of a
         // network activation, a half-restored database) that read throws and
@@ -330,7 +330,7 @@ final class CoreModule implements GiveFlowModule
         $c->bind(LicenseService::class, fn (Container $c) => new LicenseService($c->get(ModuleManager::class)));
         // Bound, not built at the one call site: the tools screen renders it and
         // the assistant's support commands answer from it.
-        $c->bind(\GiveFlow\Admin\SystemReport::class, fn (Container $c) => new \GiveFlow\Admin\SystemReport(
+        $c->bind(\FundKit\Admin\SystemReport::class, fn (Container $c) => new \FundKit\Admin\SystemReport(
             $c->get(ModuleManager::class),
             $c->get(GatewayManager::class),
         ));
@@ -369,13 +369,13 @@ final class CoreModule implements GiveFlowModule
 
         // Purge expired magic-link tokens daily to prevent unbounded table growth.
         $async = $c->get(AsyncDispatcher::class);
-        add_action('giveflow.cron.magic_link_gc', function () use ($c): void {
+        add_action('fundkit.cron.magic_link_gc', function () use ($c): void {
             $c->get(MagicLinkService::class)->purgeExpired();
             // An address nobody proved is not kept past its window. Same job,
             // because a pending row and its link expire together.
             $c->get(PendingSignupRepository::class)->purgeExpired();
         });
-        add_action('init', fn () => $async->scheduleRecurring('giveflow.cron.magic_link_gc', 86400));
+        add_action('init', fn () => $async->scheduleRecurring('fundkit.cron.magic_link_gc', 86400));
 
         // Daily FX snapshot; last-good value on failure.
         $c->bind(FxRates::class, fn () => new FxRates());
@@ -435,7 +435,7 @@ final class CoreModule implements GiveFlowModule
         (new SocialMeta($c->get(CampaignRepository::class)))->register();
 
         // Keep campaign page visibility in sync with form status.
-        add_action('giveflow.form.updated', static function ($form) use ($c) {
+        add_action('fundkit.form.updated', static function ($form) use ($c) {
             $c->get(CampaignService::class)->onFormUpdated($form);
         }, 10, 1);
 
@@ -499,7 +499,7 @@ final class CoreModule implements GiveFlowModule
         // Core erases through the same registry add-ons use, so there is one
         // mechanism and one order rather than core's inline copy plus a hook
         // everyone else is expected to remember.
-        add_filter('giveflow.donor.erasure_handlers', static function (array $handlers) use ($c): array {
+        add_filter('fundkit.donor.erasure_handlers', static function (array $handlers) use ($c): array {
             $handlers[] = new CoreDonorDataHandler();
             $handlers[] = new AnalyticsEventHandler();
             return $handlers;
@@ -630,14 +630,14 @@ final class CoreModule implements GiveFlowModule
         $c->bind( FormTypeRegistry::class, function (): FormTypeRegistry {
             $r = new FormTypeRegistry();
             $r->register(new DefaultFormTypeHandler());
-            do_action('giveflow.form_types.register', $r);
+            do_action('fundkit.form_types.register', $r);
             return $r;
         });
 
         $c->bind( CampaignTypeRegistry::class, function (): CampaignTypeRegistry {
             $r = new CampaignTypeRegistry();
             $r->register(new DefaultCampaignTypeHandler());
-            do_action('giveflow.campaign_types.register', $r);
+            do_action('fundkit.campaign_types.register', $r);
             return $r;
         });
 
@@ -739,12 +739,12 @@ final class CoreModule implements GiveFlowModule
         $c->get(GatewayReconciler::class)->register();
 
         // Sandbox gateway only available when org-wide test mode is on.
-        $gwCfg = get_option('giveflow_gateway_config', []);
+        $gwCfg = get_option('fundkit_gateway_config', []);
         if (is_array($gwCfg) && ! empty($gwCfg['test_mode'])) {
             $gateways->register(new SandboxGateway($c->get(Clock::class), $c->get(RecurringPlanRepository::class)));
         }
 
-        do_action('giveflow.gateways.register', $gateways, $c);
+        do_action('fundkit.gateways.register', $gateways, $c);
 
         $c->bind( AntiSpamGuard::class, fn (Container $c) => new AntiSpamGuard(
             $c->get(IdentityHasher::class),
@@ -794,7 +794,7 @@ final class CoreModule implements GiveFlowModule
 
         // Add-ons can register additional renderers via the same filter.
         $genericRenderer = $c->get(GenericReceiptRenderer::class);
-        add_filter('giveflow.receipt.renderers', function (array $renderers) use ($genericRenderer): array {
+        add_filter('fundkit.receipt.renderers', function (array $renderers) use ($genericRenderer): array {
             $renderers[] = $genericRenderer;
             return $renderers;
         });
@@ -918,7 +918,7 @@ final class CoreModule implements GiveFlowModule
         // catalogue in the site locale rather than the reader's, on top of the
         // _doing_it_wrong it logs for the domain on every request.
         //
-        // Priority 4 keeps core ahead of the giveflow.commands.register broadcast
+        // Priority 4 keeps core ahead of the fundkit.commands.register broadcast
         // Plugin::boot fires at 5, which is where add-on packs land.
         add_action('init', static function () use ($c): void {
             // init can fire more than once, and the registry refuses a name it
@@ -969,8 +969,8 @@ final class CoreModule implements GiveFlowModule
                 $c->get(DataExporter::class),
                 $c->get(DataImporter::class),
                 $c->get(CsvImporter::class),
-                new \GiveFlow\Foundation\Maintenance\TestDataPurger($c->get(DonorService::class)),
-                $c->get(\GiveFlow\Admin\SystemReport::class),
+                new \FundKit\Foundation\Maintenance\TestDataPurger($c->get(DonorService::class)),
+                $c->get(\FundKit\Admin\SystemReport::class),
             ),
             new ExportsController(
                 $c->get(DonorExporter::class),
@@ -1067,7 +1067,7 @@ final class CoreModule implements GiveFlowModule
         $blocks->add(new MultiSelectBlock());
 
         add_filter(
-            'giveflow.settings.groups',
+            'fundkit.settings.groups',
             [$c->get(GatewayManager::class), 'declareSettings']
         );
 
@@ -1118,14 +1118,14 @@ final class CoreModule implements GiveFlowModule
         // handler they attach during their own boot would miss a broadcast
         // fired inside this method and their block would never register.
         add_action('init', static function () use ($blocks): void {
-            do_action('giveflow.blocks.register_server', $blocks);
+            do_action('fundkit.blocks.register_server', $blocks);
             $blocks->register();
         });
 
         // WordPress's own Tools, Export and Erase Personal Data. They answered
         // nothing for donors until this, which is the screen a site owner is
         // told to use when a request arrives.
-        (new \GiveFlow\Donors\Privacy\WordPressPrivacy(
+        (new \FundKit\Donors\Privacy\WordPressPrivacy(
             $c->get(DonorRepository::class),
             $c->get(DonorService::class),
             $c->get(IdentityHasher::class),
@@ -1137,7 +1137,7 @@ final class CoreModule implements GiveFlowModule
         // what an MCP server reads. Add-on packs are included because the
         // bridge reads the registry when the abilities hook fires, after the
         // command broadcast on init:5.
-        (new \GiveFlow\Foundation\Commands\AbilitiesBridge(
+        (new \FundKit\Foundation\Commands\AbilitiesBridge(
             $c->get(CommandRegistry::class)
         ))->register();
         $campaignBindings = new CampaignBindings($c->get(CampaignRepository::class));
@@ -1157,7 +1157,7 @@ final class CoreModule implements GiveFlowModule
         // register outside any is_admin() gate.
         $c->get(ApplePayDomain::class)->register();
 
-        add_action('giveflow.settings.updated', static function (string $group, array $next): void {
+        add_action('fundkit.settings.updated', static function (string $group, array $next): void {
             if ($group === 'roles') {
                 Capabilities::applyMapping(is_array($next['mapping'] ?? null) ? $next['mapping'] : []);
             }
@@ -1172,14 +1172,14 @@ final class CoreModule implements GiveFlowModule
         }, 10, 2);
 
         // Activation applies Capabilities::currentMapping(), which reads the
-        // raw giveflow_roles option: until something writes it, no role holds a
-        // single giveflow_* capability while the Roles screen shows the defaults as
+        // raw fundkit_roles option: until something writes it, no role holds a
+        // single fundkit_* capability while the Roles screen shows the defaults as
         // granted, and an administrator is refused refunds and receipt resends
         // by command dispatch on a screen that offers no way to grant them.
         // Writing the option once puts the two in agreement, through the
         // handler above.
         add_action('admin_init', static function () use ($c): void {
-            if (get_option('giveflow_roles') !== false) return;
+            if (get_option('fundkit_roles') !== false) return;
             $c->get(SettingsService::class)->update('roles', []);
         });
 
@@ -1211,15 +1211,15 @@ final class CoreModule implements GiveFlowModule
                 if (! current_user_can('manage_options')) return;
                 $lostAt = Crypto::keyLostAt();
                 if ($lostAt === null) return;
-                echo '<div class="notice giveflow-admin-notice" role="alert" style="'
+                echo '<div class="notice fundkit-admin-notice" role="alert" style="'
                     . 'border:1px solid #e5e7eb;border-left:3px solid #b42318;border-radius:8px;'
                     . 'background:#fff7f7;color:#b42318;padding:11px 14px;'
                     . 'font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Oxygen,Ubuntu,sans-serif;'
                     . 'font-size:13px;line-height:1.45;">'
-                    . '<strong>GiveFlow:</strong> '
+                    . '<strong>FundKit:</strong> '
                     . esc_html(sprintf(
                         /* translators: %s: timestamp the key loss was detected */
-                        __('Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore giveflow_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key.', 'giveflow-fundraising-campaigns'),
+                        __('Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore fundkit_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key.', 'fundkit-fundraising-campaigns'),
                         $lostAt
                     ))
                     . '</div>';

@@ -1,5 +1,5 @@
 /**
- * giveflow/section: a styled container for headings and copy.
+ * fundkit/section: a styled container for headings and copy.
  *
  * Storage is plain custom attributes (no WP block-supports, no Style Engine).
  * The editor + the donor-facing runtime + the server walker all read the
@@ -19,17 +19,17 @@ import Slider         from '../../../_shared/components/Slider';
 import BoxControl     from '../../../_shared/components/BoxControl';
 import Segmented      from '../../../_shared/components/Segmented';
 
-const NAME = 'giveflow/section';
-const ALLOWED = [ 'giveflow/heading', 'giveflow/paragraph', 'giveflow/section' ];
+const NAME = 'fundkit/section';
+const ALLOWED = [ 'fundkit/heading', 'fundkit/paragraph', 'fundkit/section' ];
 
 const BORDER_STYLES = [ 'none', 'solid', 'dashed', 'dotted' ];
 
 const SHADOW_PRESETS = [
-    { value: '',                                                                       label: __( 'None',       'giveflow-fundraising-campaigns' ) },
-    { value: '0 1px 2px rgba(15,23,42,.06)',                                           label: __( 'Subtle',     'giveflow-fundraising-campaigns' ) },
-    { value: '0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04)',             label: __( 'Soft',       'giveflow-fundraising-campaigns' ) },
-    { value: '0 4px 14px rgba(15,23,42,.10)',                                          label: __( 'Medium',     'giveflow-fundraising-campaigns' ) },
-    { value: '0 12px 32px rgba(15,23,42,.14)',                                         label: __( 'Pronounced', 'giveflow-fundraising-campaigns' ) },
+    { value: '',                                                                       label: __( 'None',       'fundkit-fundraising-campaigns' ) },
+    { value: '0 1px 2px rgba(15,23,42,.06)',                                           label: __( 'Subtle',     'fundkit-fundraising-campaigns' ) },
+    { value: '0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04)',             label: __( 'Soft',       'fundkit-fundraising-campaigns' ) },
+    { value: '0 4px 14px rgba(15,23,42,.10)',                                          label: __( 'Medium',     'fundkit-fundraising-campaigns' ) },
+    { value: '0 12px 32px rgba(15,23,42,.14)',                                         label: __( 'Pronounced', 'fundkit-fundraising-campaigns' ) },
 ];
 
 /**
@@ -81,53 +81,53 @@ function Edit( { attributes, setAttributes } ) {
     const [ showCustomShadow, setShowCustomShadow ] = useState( !! shadow && ! isPresetShadow );
 
     const blockProps = useBlockProps( {
-        className: 'giveflow-block-preview giveflow-block-preview--section',
+        className: 'fundkit-block-preview fundkit-block-preview--section',
         style:     sectionStyle( attributes ),
     } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Section', 'giveflow-fundraising-campaigns' ) } initialOpen>
-                    <Field label={ __( 'Background color', 'giveflow-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Section', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                    <Field label={ __( 'Background color', 'fundkit-fundraising-campaigns' ) }>
                         <ColorInput value={ background } onChange={ ( v ) => setAttributes( { background: v } ) } />
                     </Field>
 
-                    <Field label={ __( 'Text color', 'giveflow-fundraising-campaigns' ) }>
+                    <Field label={ __( 'Text color', 'fundkit-fundraising-campaigns' ) }>
                         <ColorInput value={ textColor } onChange={ ( v ) => setAttributes( { textColor: v } ) } />
                     </Field>
 
-                    <Field label={ __( 'Border color', 'giveflow-fundraising-campaigns' ) }>
+                    <Field label={ __( 'Border color', 'fundkit-fundraising-campaigns' ) }>
                         <ColorInput value={ border.color } onChange={ ( v ) => setBorder( { color: v } ) } />
                     </Field>
                     <Slider
-                        label={ __( 'Border width', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Border width', 'fundkit-fundraising-campaigns' ) }
                         value={ border.width || 0 }
                         onChange={ ( v ) => setBorder( { width: v } ) }
                         min={ 0 } max={ 20 } unit="px"
                     />
                     <Segmented
-                        label={ __( 'Border style', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Border style', 'fundkit-fundraising-campaigns' ) }
                         value={ border.style || 'solid' }
                         onChange={ ( v ) => setBorder( { style: v } ) }
                         options={ BORDER_STYLES }
                     />
                     <Slider
-                        label={ __( 'Border radius', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Border radius', 'fundkit-fundraising-campaigns' ) }
                         value={ border.radius || 0 }
                         onChange={ ( v ) => setBorder( { radius: v } ) }
                         min={ 0 } max={ 60 } unit="px"
                     />
 
-                    <Field label={ __( 'Shadow', 'giveflow-fundraising-campaigns' ) }>
-                        <div className="giveflow-shadow-grid">
+                    <Field label={ __( 'Shadow', 'fundkit-fundraising-campaigns' ) }>
+                        <div className="fundkit-shadow-grid">
                             { SHADOW_PRESETS.map( ( p ) => {
                                 const isOn = ! showCustomShadow && shadow === p.value;
                                 return (
                                     <button
                                         key={ p.label }
                                         type="button"
-                                        className={ `giveflow-shadow-grid__tile ${ isOn ? 'is-on' : '' }` }
+                                        className={ `fundkit-shadow-grid__tile ${ isOn ? 'is-on' : '' }` }
                                         title={ p.label }
                                         aria-label={ p.label }
                                         aria-pressed={ isOn }
@@ -137,12 +137,12 @@ function Edit( { attributes, setAttributes } ) {
                                         } }
                                     >
                                         { p.value === '' ? (
-                                            <span className="giveflow-shadow-grid__tile__none">
-                                                { __( 'None', 'giveflow-fundraising-campaigns' ) }
+                                            <span className="fundkit-shadow-grid__tile__none">
+                                                { __( 'None', 'fundkit-fundraising-campaigns' ) }
                                             </span>
                                         ) : (
                                             <span
-                                                className="giveflow-shadow-grid__tile__sample"
+                                                className="fundkit-shadow-grid__tile__sample"
                                                 style={ { boxShadow: p.value } }
                                             />
                                         ) }
@@ -152,20 +152,20 @@ function Edit( { attributes, setAttributes } ) {
                         </div>
                     </Field>
                     <Field>
-                        <label className="giveflow-checkbox-row">
+                        <label className="fundkit-checkbox-row">
                             <input
                                 type="checkbox"
                                 checked={ showCustomShadow }
                                 onChange={ ( e ) => setShowCustomShadow( e.target.checked ) }
                             />
-                            <span>{ __( 'Use custom shadow value', 'giveflow-fundraising-campaigns' ) }</span>
+                            <span>{ __( 'Use custom shadow value', 'fundkit-fundraising-campaigns' ) }</span>
                         </label>
                     </Field>
                     { showCustomShadow && (
-                        <Field label={ __( 'Custom shadow CSS', 'giveflow-fundraising-campaigns' ) } help={ __( 'Any valid box-shadow value.', 'giveflow-fundraising-campaigns' ) }>
+                        <Field label={ __( 'Custom shadow CSS', 'fundkit-fundraising-campaigns' ) } help={ __( 'Any valid box-shadow value.', 'fundkit-fundraising-campaigns' ) }>
                             <input
                                 type="text"
-                                className="giveflow-input"
+                                className="fundkit-input"
                                 value={ shadow }
                                 onChange={ ( e ) => setAttributes( { shadow: e.target.value } ) }
                                 placeholder="0 4px 14px rgba(0,0,0,.1)"
@@ -174,7 +174,7 @@ function Edit( { attributes, setAttributes } ) {
                     ) }
 
                     <BoxControl
-                        title={ __( 'Padding', 'giveflow-fundraising-campaigns' ) }
+                        title={ __( 'Padding', 'fundkit-fundraising-campaigns' ) }
                         value={ padding }
                         onChange={ ( next ) => setAttributes( { padding: { ...padding, ...next } } ) }
                         sides="four"
@@ -182,7 +182,7 @@ function Edit( { attributes, setAttributes } ) {
                         linkable
                     />
                     <BoxControl
-                        title={ __( 'Margin', 'giveflow-fundraising-campaigns' ) }
+                        title={ __( 'Margin', 'fundkit-fundraising-campaigns' ) }
                         value={ margin }
                         onChange={ ( next ) => setAttributes( { margin: { ...margin, ...next } } ) }
                         sides="four"
@@ -190,7 +190,7 @@ function Edit( { attributes, setAttributes } ) {
                         linkable
                     />
                     <Slider
-                        label={ __( 'Minimum height', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Minimum height', 'fundkit-fundraising-campaigns' ) }
                         value={ minHeight || 0 }
                         onChange={ ( v ) => setAttributes( { minHeight: v } ) }
                         min={ 0 } max={ 800 } unit="px"
@@ -214,9 +214,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Section', 'giveflow-fundraising-campaigns' ),
-        description: __( 'A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs.', 'giveflow-fundraising-campaigns' ),
-        category:    'giveflow-content',
+        title:       __( 'Section', 'fundkit-fundraising-campaigns' ),
+        description: __( 'A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs.', 'fundkit-fundraising-campaigns' ),
+        category:    'fundkit-content',
         icon:        BlockIcons[ 'section' ],
         supports:    { html: false, anchor: false, inserter: true },
         attributes: {

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Time;
+namespace FundKit\Foundation\Time;
 
 defined('ABSPATH') || exit;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use GiveFlow\Donations\DonationQueries;
+use FundKit\Donations\DonationQueries;
 use Exception;
 
 /**

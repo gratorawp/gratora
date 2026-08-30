@@ -11,18 +11,18 @@ import { notify } from '../../../_shared/notify';
 import { formatAmount, formatDateTime, timeAgo, donationStatusPill } from '../helpers';
 
 const STATUS_OPTIONS = [
-    { value: 'paid',           label: __( 'Paid', 'giveflow-fundraising-campaigns' ) },
-    { value: 'pending',        label: __( 'Pending', 'giveflow-fundraising-campaigns' ) },
-    { value: 'processing',     label: __( 'Processing', 'giveflow-fundraising-campaigns' ) },
-    { value: 'failed',         label: __( 'Failed', 'giveflow-fundraising-campaigns' ) },
-    { value: 'refunded',       label: __( 'Refunded', 'giveflow-fundraising-campaigns' ) },
-    { value: 'partial_refund', label: __( 'Partial refund', 'giveflow-fundraising-campaigns' ) },
-    { value: 'disputed',       label: __( 'Disputed', 'giveflow-fundraising-campaigns' ) },
+    { value: 'paid',           label: __( 'Paid', 'fundkit-fundraising-campaigns' ) },
+    { value: 'pending',        label: __( 'Pending', 'fundkit-fundraising-campaigns' ) },
+    { value: 'processing',     label: __( 'Processing', 'fundkit-fundraising-campaigns' ) },
+    { value: 'failed',         label: __( 'Failed', 'fundkit-fundraising-campaigns' ) },
+    { value: 'refunded',       label: __( 'Refunded', 'fundkit-fundraising-campaigns' ) },
+    { value: 'partial_refund', label: __( 'Partial refund', 'fundkit-fundraising-campaigns' ) },
+    { value: 'disputed',       label: __( 'Disputed', 'fundkit-fundraising-campaigns' ) },
 ];
 
 function donationHref( reference ) {
     return addQueryArgs( window.location.pathname, {
-        page:      'giveflow-donations',
+        page:      'fundkit-donations',
         view:      'detail',
         reference,
     } );
@@ -64,7 +64,7 @@ export default function DonationsTab( { donorId, redacted } ) {
     useEffect( () => {
         let aborted = false;
         setLoading( true );
-        apiFetch( { path: addQueryArgs( '/giveflow/v1/admin/donations', apiParams ), parse: false } )
+        apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/donations', apiParams ), parse: false } )
             .then( async ( res ) => {
                 if ( aborted ) return;
                 const items = await res.json();
@@ -72,7 +72,7 @@ export default function DonationsTab( { donorId, redacted } ) {
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
                 setError( '' );
             } )
-            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load donations. Refresh to try again.', 'giveflow-fundraising-campaigns' ) ); } } )
+            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load donations. Refresh to try again.', 'fundkit-fundraising-campaigns' ) ); } } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ apiParams ] );
@@ -80,9 +80,9 @@ export default function DonationsTab( { donorId, redacted } ) {
     const fields = useMemo( () => [
         {
             id:    'reference',
-            label: __( 'Reference', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Reference', 'fundkit-fundraising-campaigns' ),
             render: ( { item } ) => (
-                <span className="giveflow-ref-cell">
+                <span className="fundkit-ref-cell">
                     <a
                         href={ donationHref( item.reference ) }
                         style={ { fontFamily: 'ui-monospace, monospace', fontSize: 12.5, color: '#34306b', textDecoration: 'none' } }
@@ -90,14 +90,14 @@ export default function DonationsTab( { donorId, redacted } ) {
                         { item.reference }
                     </a>
                     { item.is_test && (
-                        <span className="giveflow-pill giveflow-pill--test">{ __( 'Test', 'giveflow-fundraising-campaigns' ) }</span>
+                        <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundkit-fundraising-campaigns' ) }</span>
                     ) }
                 </span>
             ),
         },
         {
             id:    'amount',
-            label: __( 'Amount', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Amount', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontWeight: 500 } }>
@@ -107,7 +107,7 @@ export default function DonationsTab( { donorId, redacted } ) {
         },
         {
             id:    'status',
-            label: __( 'Status', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Status', 'fundkit-fundraising-campaigns' ),
             elements: STATUS_OPTIONS,
             enableSorting: false,
             filterBy: { operators: [ 'is' ] },
@@ -118,19 +118,19 @@ export default function DonationsTab( { donorId, redacted } ) {
         },
         {
             id:    'frequency',
-            label: __( 'Frequency', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Frequency', 'fundkit-fundraising-campaigns' ),
             render: ( { item } ) => item.frequency === 'one_time'
-                ? __( 'One-time', 'giveflow-fundraising-campaigns' )
+                ? __( 'One-time', 'fundkit-fundraising-campaigns' )
                 : <span style={ { textTransform: 'capitalize' } }>{ item.frequency }</span>,
         },
         {
             id:    'campaign',
-            label: __( 'Campaign', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Campaign', 'fundkit-fundraising-campaigns' ),
             render: ( { item } ) => item.campaign?.title || '-',
         },
         {
             id:    'created_at',
-            label: __( 'When', 'giveflow-fundraising-campaigns' ),
+            label: __( 'When', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => {
                 const iso = item.paid_at || item.created_at;
@@ -156,7 +156,7 @@ export default function DonationsTab( { donorId, redacted } ) {
     const actions = useMemo( () => [
         {
             id:           'mark-paid',
-            label:        __( 'Mark as paid', 'giveflow-fundraising-campaigns' ),
+            label:        __( 'Mark as paid', 'fundkit-fundraising-campaigns' ),
             icon:         () => <CheckIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             isEligible:   ( item ) => item.status === 'pending' || item.status === 'processing',
@@ -165,28 +165,28 @@ export default function DonationsTab( { donorId, redacted } ) {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'giveflow-fundraising-campaigns' )
+                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'fundkit-fundraising-campaigns' )
                     : sprintf(
                         /* translators: %d: number of donations */
                         _n(
                             'Mark %d donation as paid? Receipts will be sent.',
                             'Mark %d donations as paid? Receipts will be sent.',
                             n,
-                            'giveflow-fundraising-campaigns'
+                            'fundkit-fundraising-campaigns'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Mark donations as paid', 'giveflow-fundraising-campaigns' ),
+                    title:        __( 'Mark donations as paid', 'fundkit-fundraising-campaigns' ),
                     message,
-                    confirmLabel: __( 'Mark as paid', 'giveflow-fundraising-campaigns' ),
+                    confirmLabel: __( 'Mark as paid', 'fundkit-fundraising-campaigns' ),
                     onConfirm: async () => {
                         // allSettled and a finally: a partial failure still
                         // confirmed some of them and emailed those donors a
                         // receipt, and skipping the refetch left those rows
                         // reading Pending on screen.
                         const results = await Promise.allSettled( targets.map( ( i ) => apiFetch( {
-                            path:   `/giveflow/v1/admin/donations/${ encodeURIComponent( i.reference ) }/mark-paid`,
+                            path:   `/fundkit/v1/admin/donations/${ encodeURIComponent( i.reference ) }/mark-paid`,
                             method: 'POST',
                         } ) ) );
 
@@ -196,14 +196,14 @@ export default function DonationsTab( { donorId, redacted } ) {
                         if ( done > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'giveflow-fundraising-campaigns' ),
+                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'fundkit-fundraising-campaigns' ),
                                 done
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'giveflow-fundraising-campaigns' ),
+                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'fundkit-fundraising-campaigns' ),
                                 failed
                             ) );
                         }
@@ -215,7 +215,7 @@ export default function DonationsTab( { donorId, redacted } ) {
         },
         {
             id:           'resend-receipt',
-            label:        __( 'Resend receipt', 'giveflow-fundraising-campaigns' ),
+            label:        __( 'Resend receipt', 'fundkit-fundraising-campaigns' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // An erased donor has no address left to send a receipt to.
@@ -229,21 +229,21 @@ export default function DonationsTab( { donorId, redacted } ) {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Resend the receipt for this donation?', 'giveflow-fundraising-campaigns' )
+                    ? __( 'Resend the receipt for this donation?', 'fundkit-fundraising-campaigns' )
                     : sprintf(
                         /* translators: %d: number of donations */
-                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'giveflow-fundraising-campaigns' ),
+                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'fundkit-fundraising-campaigns' ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Resend receipts', 'giveflow-fundraising-campaigns' ),
+                    title:        __( 'Resend receipts', 'fundkit-fundraising-campaigns' ),
                     message,
-                    confirmLabel: __( 'Resend', 'giveflow-fundraising-campaigns' ),
+                    confirmLabel: __( 'Resend', 'fundkit-fundraising-campaigns' ),
                     onConfirm: async () => {
                         // Silence read as nothing happening, so admins pressed
                         // it again and donors got the receipt twice.
                         const results = await Promise.allSettled( targets.map( ( i ) => apiFetch( {
-                            path:   `/giveflow/v1/admin/donations/${ encodeURIComponent( i.reference ) }/resend-receipt`,
+                            path:   `/fundkit/v1/admin/donations/${ encodeURIComponent( i.reference ) }/resend-receipt`,
                             method: 'POST',
                         } ) ) );
 
@@ -253,14 +253,14 @@ export default function DonationsTab( { donorId, redacted } ) {
                         if ( sent > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'giveflow-fundraising-campaigns' ),
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'fundkit-fundraising-campaigns' ),
                                 sent
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'giveflow-fundraising-campaigns' ),
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'fundkit-fundraising-campaigns' ),
                                 failed
                             ) );
                         }
@@ -271,7 +271,7 @@ export default function DonationsTab( { donorId, redacted } ) {
     ], [ refetch, redacted ] );
 
     return (
-        <div className="giveflow-dataviews dp-donations-dv">
+        <div className="fundkit-dataviews dp-donations-dv">
             { error && (
                 <Notice status="error" isDismissible={ false }>{ error }</Notice>
             ) }
@@ -285,7 +285,7 @@ export default function DonationsTab( { donorId, redacted } ) {
                 paginationInfo={ paginationInfo }
                 defaultLayouts={ { table: {} } }
                 getItemId={ ( item ) => String( item.id ) }
-                searchLabel={ __( 'Search by reference', 'giveflow-fundraising-campaigns' ) }
+                searchLabel={ __( 'Search by reference', 'fundkit-fundraising-campaigns' ) }
             />
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </div>

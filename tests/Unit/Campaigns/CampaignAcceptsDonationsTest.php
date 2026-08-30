@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Campaigns;
+namespace FundKit\Tests\Unit\Campaigns;
 
-use GiveFlow\Campaigns\Campaign;
+use FundKit\Campaigns\Campaign;
 use PHPUnit\Framework\TestCase;
 
 /**

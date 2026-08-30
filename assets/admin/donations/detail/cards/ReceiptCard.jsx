@@ -14,9 +14,9 @@ export default function ReceiptCard( { donation, receipts, onResend } ) {
                     <div className="dd-receipt-row">
                         <span className="dd-receipt-row__icon"><IconReceipt width="18" height="18" /></span>
                         <div className="dd-receipt-row__main">
-                            <span className="dd-pill is-warn">{ __( 'Receipt queued', 'giveflow-fundraising-campaigns' ) }</span>
+                            <span className="dd-pill is-warn">{ __( 'Receipt queued', 'fundkit-fundraising-campaigns' ) }</span>
                             <div className="dd-receipt-row__meta">
-                                { __( 'A receipt will be generated as soon as the renderer runs.', 'giveflow-fundraising-campaigns' ) }
+                                { __( 'A receipt will be generated as soon as the renderer runs.', 'fundkit-fundraising-campaigns' ) }
                             </div>
                         </div>
                     </div>
@@ -37,31 +37,31 @@ export default function ReceiptCard( { donation, receipts, onResend } ) {
                                 <span className={ `dd-receipt-row__num mono${ r.voided ? ' is-strike' : '' }` }>{ r.receipt_number }</span>
                             </span>
                             <div className="dd-receipt-row__meta">
-                                { __( 'Issued', 'giveflow-fundraising-campaigns' ) } <strong>{ formatDateTime( r.issued_at ) }</strong>
+                                { __( 'Issued', 'fundkit-fundraising-campaigns' ) } <strong>{ formatDateTime( r.issued_at ) }</strong>
                                 { r.sent_to_email_at && (
                                     <>
                                         { ' · ' }
-                                        { __( 'emailed', 'giveflow-fundraising-campaigns' ) } <strong>{ formatDateTime( r.sent_to_email_at ) }</strong>
+                                        { __( 'emailed', 'fundkit-fundraising-campaigns' ) } <strong>{ formatDateTime( r.sent_to_email_at ) }</strong>
                                     </>
                                 ) }
                                 { r.voided && (
-                                    <>{ ' · ' }<span style={ { color: 'var(--dd-red, #b42318)' } }>{ __( 'Voided', 'giveflow-fundraising-campaigns' ) }</span></>
+                                    <>{ ' · ' }<span style={ { color: 'var(--dd-red, #b42318)' } }>{ __( 'Voided', 'fundkit-fundraising-campaigns' ) }</span></>
                                 ) }
                             </div>
                         </div>
                         <div className="dd-receipt-row__actions">
                             { ! r.voided && (
                                 <button type="button" className="btn btn--sm" onClick={ onResend }>
-                                    { __( 'Resend', 'giveflow-fundraising-campaigns' ) }
+                                    { __( 'Resend', 'fundkit-fundraising-campaigns' ) }
                                 </button>
                             ) }
                             <button
                                 type="button"
                                 className="btn btn--sm"
-                                onClick={ () => downloadFile( `/giveflow/v1/admin/receipts/${ r.id }/pdf`, `${ r.receipt_number }.pdf` ).catch( ( e ) => notify.error( e?.message || __( 'Could not download the receipt.', 'giveflow-fundraising-campaigns' ) ) ) }
+                                onClick={ () => downloadFile( `/fundkit/v1/admin/receipts/${ r.id }/pdf`, `${ r.receipt_number }.pdf` ).catch( ( e ) => notify.error( e?.message || __( 'Could not download the receipt.', 'fundkit-fundraising-campaigns' ) ) ) }
                             >
                                 <IconDownload className="ic" />
-                                { __( 'PDF', 'giveflow-fundraising-campaigns' ) }
+                                { __( 'PDF', 'fundkit-fundraising-campaigns' ) }
                             </button>
                         </div>
                     </div>

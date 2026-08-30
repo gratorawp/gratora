@@ -41,7 +41,7 @@ export function loadPayPalSdk( { clientId, currency, vault = false } ) {
         script.async = true;
         // Distinct namespace per URL so the one-time and subscription SDKs can
         // coexist: the second load would otherwise overwrite window.paypal.
-        const ns = 'giveflowPayPal' + ( vault ? 'Sub' : 'One' );
+        const ns = 'fundkitPayPal' + ( vault ? 'Sub' : 'One' );
         script.setAttribute( 'data-namespace', ns );
         script.onload = () => {
             const sdk = window[ ns ];

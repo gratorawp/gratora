@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donors;
+namespace FundKit\Donors;
 
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Foundation\Batch\BatchProcessor;
-use GiveFlow\Foundation\Time\Clock;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Foundation\Batch\BatchProcessor;
+use FundKit\Foundation\Time\Clock;
 
 /**
  * Severs the last handle on an already-redacted donor, `retention_days_after_
@@ -41,7 +41,7 @@ use GiveFlow\Foundation\Time\Clock;
  */
 final class DonorPurge
 {
-    public const HOOK = 'giveflow.cron.donor_purge';
+    public const HOOK = 'fundkit.cron.donor_purge';
     private const DAILY = 86400;
     private const BATCH = 200;
 
@@ -67,7 +67,7 @@ final class DonorPurge
      */
     public static function severedHash(int $donorId): string
     {
-        return hash('sha256', 'giveflow-purged:' . $donorId);
+        return hash('sha256', 'fundkit-purged:' . $donorId);
     }
 
     /** @since 1.0.0 */
@@ -144,9 +144,9 @@ final class DonorPurge
     /** @since 1.0.0 */
     private function retentionDays(): int
     {
-        $opt    = get_option('giveflow_privacy', []);
+        $opt    = get_option('fundkit_privacy', []);
         $stored = is_array($opt) ? (int) ($opt['retention_days_after_redaction'] ?? 90) : 90;
 
-        return max(0, (int) apply_filters('giveflow.donor.retention_days_after_redaction', $stored));
+        return max(0, (int) apply_filters('fundkit.donor.retention_days_after_redaction', $stored));
     }
 }

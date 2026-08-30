@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donations\DonationService;
+use FundKit\Foundation\Plugin;
 use RuntimeException;
 use WP_REST_Request;
 
@@ -39,7 +39,7 @@ final class DonationProcessingTest extends IntegrationTestCase
 
     private function driveOfflineDonation(): Donation
     {
-        $request = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $request = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode([
             'email'        => 'sarah@example.com',
@@ -148,7 +148,7 @@ final class DonationProcessingTest extends IntegrationTestCase
         $donation = $this->driveOfflineDonation();
 
         $fired = 0;
-        add_action('giveflow.donation.processing', static function () use (&$fired): void { $fired++; });
+        add_action('fundkit.donation.processing', static function () use (&$fired): void { $fired++; });
 
         $this->service()->markProcessing($donation, 'bank_debit_submitted');
         $this->service()->markProcessing($this->reload((string) $donation->reference), 'bank_debit_submitted');
@@ -161,7 +161,7 @@ final class DonationProcessingTest extends IntegrationTestCase
         $donation = $this->driveOfflineDonation();
 
         $seen = null;
-        add_action('giveflow.donation.processing', static function ($d, $reason) use (&$seen): void {
+        add_action('fundkit.donation.processing', static function ($d, $reason) use (&$seen): void {
             $seen = $reason;
         }, 10, 2);
 

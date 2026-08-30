@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Auth;
+namespace FundKit\Foundation\Auth;
 
 /**
  * All plugin capability constants and role-mapping helpers.
@@ -11,44 +11,44 @@ namespace GiveFlow\Foundation\Auth;
  */
 final class Capabilities
 {
-    /** Umbrella cap: "can reach the GiveFlow admin area at all" (menu + base gate). */
-    public const MANAGE = 'manage_giveflow';
+    /** Umbrella cap: "can reach the FundKit admin area at all" (menu + base gate). */
+    public const MANAGE = 'manage_fundkit';
 
     public const ALL = [
-        'giveflow_view_donors',
-        'giveflow_edit_donors',
-        'giveflow_export_donors',
-        'giveflow_redact_donors',
-        'giveflow_view_donations',
-        'giveflow_edit_donations',
-        'giveflow_refund_donations',
-        'giveflow_resend_receipt',
-        'giveflow_view_reports',
-        'giveflow_manage_campaigns',
-        'giveflow_manage_forms',
-        'giveflow_manage_settings',
+        'fundkit_view_donors',
+        'fundkit_edit_donors',
+        'fundkit_export_donors',
+        'fundkit_redact_donors',
+        'fundkit_view_donations',
+        'fundkit_edit_donations',
+        'fundkit_refund_donations',
+        'fundkit_resend_receipt',
+        'fundkit_view_reports',
+        'fundkit_manage_campaigns',
+        'fundkit_manage_forms',
+        'fundkit_manage_settings',
     ];
 
     public const GROUPS = [
-        'Donors'    => ['giveflow_view_donors', 'giveflow_edit_donors', 'giveflow_export_donors', 'giveflow_redact_donors'],
-        'Donations' => ['giveflow_view_donations', 'giveflow_edit_donations', 'giveflow_refund_donations', 'giveflow_resend_receipt'],
-        'Reports'   => ['giveflow_view_reports'],
-        'Setup'     => ['giveflow_manage_campaigns', 'giveflow_manage_forms', 'giveflow_manage_settings'],
+        'Donors'    => ['fundkit_view_donors', 'fundkit_edit_donors', 'fundkit_export_donors', 'fundkit_redact_donors'],
+        'Donations' => ['fundkit_view_donations', 'fundkit_edit_donations', 'fundkit_refund_donations', 'fundkit_resend_receipt'],
+        'Reports'   => ['fundkit_view_reports'],
+        'Setup'     => ['fundkit_manage_campaigns', 'fundkit_manage_forms', 'fundkit_manage_settings'],
     ];
 
     public const LABELS = [
-        'giveflow_view_donors'      => 'View donors',
-        'giveflow_edit_donors'      => 'Edit donor records',
-        'giveflow_export_donors'    => 'Export donor list (CSV)',
-        'giveflow_redact_donors'    => 'Redact donors (GDPR)',
-        'giveflow_view_donations'   => 'View donations',
-        'giveflow_edit_donations'   => 'Edit donations (notes)',
-        'giveflow_refund_donations' => 'Change what is charged (refund, mark paid, record by hand, change a recurring plan)',
-        'giveflow_resend_receipt'   => 'Resend receipts',
-        'giveflow_view_reports'     => 'View dashboards & reports',
-        'giveflow_manage_campaigns' => 'Manage campaigns',
-        'giveflow_manage_forms'     => 'Manage donation forms',
-        'giveflow_manage_settings'  => 'Manage settings',
+        'fundkit_view_donors'      => 'View donors',
+        'fundkit_edit_donors'      => 'Edit donor records',
+        'fundkit_export_donors'    => 'Export donor list (CSV)',
+        'fundkit_redact_donors'    => 'Redact donors (GDPR)',
+        'fundkit_view_donations'   => 'View donations',
+        'fundkit_edit_donations'   => 'Edit donations (notes)',
+        'fundkit_refund_donations' => 'Change what is charged (refund, mark paid, record by hand, change a recurring plan)',
+        'fundkit_resend_receipt'   => 'Resend receipts',
+        'fundkit_view_reports'     => 'View dashboards & reports',
+        'fundkit_manage_campaigns' => 'Manage campaigns',
+        'fundkit_manage_forms'     => 'Manage donation forms',
+        'fundkit_manage_settings'  => 'Manage settings',
     ];
 
     /**
@@ -59,7 +59,7 @@ final class Capabilities
      */
     private static function maps(): array
     {
-        $maps = apply_filters('giveflow.capabilities', [
+        $maps = apply_filters('fundkit.capabilities', [
             'all'    => self::ALL,
             'groups' => self::GROUPS,
             'labels' => self::LABELS,
@@ -115,7 +115,7 @@ final class Capabilities
     }
 
     /**
-     * True for anyone who may reach the GiveFlow admin area at all (menu/base gate).
+     * True for anyone who may reach the FundKit admin area at all (menu/base gate).
      *
      * @since 1.0.0
      */
@@ -134,18 +134,18 @@ final class Capabilities
 
     /**
      * Virtual menu meta-caps: WP menus take one capability string, so each
-     * giveflow_access_* grants on manage_options or the area's granular cap. REST still
+     * fundkit_access_* grants on manage_options or the area's granular cap. REST still
      * enforces the granular caps, so menu visibility never widens actual access.
      *
      * @var array<string,string> menu meta-cap => the granular cap it maps to
      */
     public const MENU_AREAS = [
-        'giveflow_access_reports'   => 'giveflow_view_reports',
-        'giveflow_access_campaigns' => 'giveflow_manage_campaigns',
-        'giveflow_access_donations' => 'giveflow_view_donations',
-        'giveflow_access_donors'    => 'giveflow_view_donors',
-        'giveflow_access_forms'     => 'giveflow_manage_forms',
-        'giveflow_access_settings'  => 'giveflow_manage_settings',
+        'fundkit_access_reports'   => 'fundkit_view_reports',
+        'fundkit_access_campaigns' => 'fundkit_manage_campaigns',
+        'fundkit_access_donations' => 'fundkit_view_donations',
+        'fundkit_access_donors'    => 'fundkit_view_donors',
+        'fundkit_access_forms'     => 'fundkit_manage_forms',
+        'fundkit_access_settings'  => 'fundkit_manage_settings',
     ];
 
     /**
@@ -178,7 +178,7 @@ final class Capabilities
         // dispatches with the strict granular check, not the lenient userCan).
         // Add-ons keep sensitive caps off this list, so those stay explicit.
         if ($super) {
-            foreach ((array) apply_filters('giveflow.capabilities.admin_caps', []) as $cap) {
+            foreach ((array) apply_filters('fundkit.capabilities.admin_caps', []) as $cap) {
                 if (is_string($cap) && $cap !== '') {
                     $allcaps[$cap] = true;
                 }
@@ -186,7 +186,7 @@ final class Capabilities
         }
 
         if ($super || ! empty($allcaps[self::MANAGE]) || $anyArea) {
-            $allcaps['giveflow_access'] = true;
+            $allcaps['fundkit_access'] = true;
         }
 
         return $allcaps;
@@ -195,7 +195,7 @@ final class Capabilities
     /**
      * Apply a role-to-caps mapping to all registered WP roles. A role that
      * receives at least one granular cap also gets the MANAGE umbrella so it
-     * can see the GiveFlow menu; the administrator always keeps MANAGE. Runs on
+     * can see the FundKit menu; the administrator always keeps MANAGE. Runs on
      * activation and whenever the roles mapping is saved.
      *
      * @since 1.0.0
@@ -225,7 +225,7 @@ final class Capabilities
     /** @since 1.0.0 */
     public static function currentMapping(): array
     {
-        $stored = get_option('giveflow_roles', []);
+        $stored = get_option('fundkit_roles', []);
         $map    = is_array($stored['mapping'] ?? null) ? $stored['mapping'] : [];
         return $map;
     }

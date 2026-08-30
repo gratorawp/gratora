@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Analytics;
+namespace FundKit\Analytics;
 
 defined('ABSPATH') || exit;
 
-use GiveFlow\Vendor\Queryable\Model;
-use GiveFlow\Vendor\Queryable\Schema\Table;
+use FundKit\Vendor\Queryable\Model;
+use FundKit\Vendor\Queryable\Schema\Table;
 
 /**
  * Universal event log that every domain emits to this single table.
@@ -16,7 +16,7 @@ use GiveFlow\Vendor\Queryable\Schema\Table;
  */
 final class Event extends Model
 {
-    protected string $table = 'giveflow_events';
+    protected string $table = 'fundkit_events';
     protected string $version = '1.0.0';
 
     public int $id;

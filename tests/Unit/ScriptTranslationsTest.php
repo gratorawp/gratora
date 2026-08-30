@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit;
+namespace FundKit\Tests\Unit;
 
-use GiveFlow\Tests\Unit\Support\DistPayload;
+use FundKit\Tests\Unit\Support\DistPayload;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -25,7 +25,7 @@ use RecursiveIteratorIterator;
  */
 final class ScriptTranslationsTest extends TestCase
 {
-    private const DOMAIN = 'giveflow-fundraising-campaigns';
+    private const DOMAIN = 'fundkit-fundraising-campaigns';
 
     private function root(): string
     {
@@ -103,7 +103,7 @@ final class ScriptTranslationsTest extends TestCase
         foreach ($this->sources() as $path) {
             $php = (string) file_get_contents($path);
 
-            preg_match_all('/wp_enqueue_script\(\s*([^,]+?),\s*GIVEFLOW_URL \. ([^,]+?),/s', $php, $calls, PREG_SET_ORDER);
+            preg_match_all('/wp_enqueue_script\(\s*([^,]+?),\s*FUNDKIT_URL \. ([^,]+?),/s', $php, $calls, PREG_SET_ORDER);
 
             foreach ($calls as $call) {
                 $handle = trim($call[1]);

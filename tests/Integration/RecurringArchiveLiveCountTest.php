@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Recurring\CampaignCancelRecurringJob;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanRepository;
+use FundKit\Campaigns\Campaign;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Recurring\CampaignCancelRecurringJob;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -100,7 +100,7 @@ final class RecurringArchiveLiveCountTest extends IntegrationTestCase
         $this->seedMixedStatuses();
 
         $response = rest_do_request(
-            new WP_REST_Request('GET', "/giveflow/v1/admin/campaigns/{$this->campaignId}/recurring-summary")
+            new WP_REST_Request('GET', "/fundkit/v1/admin/campaigns/{$this->campaignId}/recurring-summary")
         );
         $data = $response->get_data();
 

@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donors;
+namespace FundKit\Donors;
 
 use DateTimeImmutable;
-use GiveFlow\Analytics\Event;
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Donations\ChannelClassifier;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationQueries;
-use GiveFlow\Donors\DonorNoteRepository;
-use GiveFlow\Donors\Portal\PortalPage;
-use GiveFlow\Donors\Portal\PortalSession;
-use GiveFlow\Foundation\Helpers\Csv;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Receipts\Receipt;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanRepository;
-use GiveFlow\Settings\SettingsService;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Analytics\Event;
+use FundKit\Campaigns\Campaign;
+use FundKit\Donations\ChannelClassifier;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationQueries;
+use FundKit\Donors\DonorNoteRepository;
+use FundKit\Donors\Portal\PortalPage;
+use FundKit\Donors\Portal\PortalSession;
+use FundKit\Foundation\Helpers\Csv;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Receipts\Receipt;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanRepository;
+use FundKit\Settings\SettingsService;
+use FundKit\Vendor\Queryable\DB;
 use Throwable;
 
 /**
@@ -49,7 +49,7 @@ final class DonorMetricsService
         private DonorNoteRepository $notes,
         private MagicLinkService $magicLinks,
         private Clock $clock,
-        private \GiveFlow\Gateways\GatewayManager $gateways,
+        private \FundKit\Gateways\GatewayManager $gateways,
         private DonorAvatars $avatars,
     ) {
     }
@@ -135,7 +135,7 @@ final class DonorMetricsService
             $reason = AtRiskReason::classify($r, $plans[(int) $r['id']] ?? null, $today);
             return [
                 'id'                  => $r['id'],
-                'name'                => $name !== '' ? $name : __('Donor', 'giveflow-fundraising-campaigns') . ' #' . $r['id'],
+                'name'                => $name !== '' ? $name : __('Donor', 'fundkit-fundraising-campaigns') . ' #' . $r['id'],
                 'email'               => $email,
                 'country'             => $r['country'],
                 'donations_count'     => $r['donations_count'],
@@ -285,7 +285,7 @@ final class DonorMetricsService
         // donationsOnly, not live: the total, count and average beside this are
         // donation-only, so a ticket order here made the largest donation exceed a
         // lifetime that does not contain it.
-        $largestDonation = (int) (DonationQueries::donationsOnly(DB::table('giveflow_donations')
+        $largestDonation = (int) (DonationQueries::donationsOnly(DB::table('fundkit_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId))
             ->selectRaw("COALESCE(MAX({$netExpr}), 0) AS m")
@@ -294,7 +294,7 @@ final class DonorMetricsService
         // Counted in SQL over the population the headline counts. Iterating the
         // donations array split a capped 25 rows, so past 25 donations the two
         // halves of the same card disagreed.
-        $splitRows = DonationQueries::donationsOnly(DB::table('giveflow_donations')
+        $splitRows = DonationQueries::donationsOnly(DB::table('fundkit_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId))
             ->selectRaw("CASE WHEN frequency = 'one_time' THEN 1 ELSE 0 END AS is_one_time, COUNT(*) AS n")
@@ -394,7 +394,7 @@ final class DonorMetricsService
         // Contextual banners.
         $banners = [];
         if ($donor->redacted_at !== null) {
-            $banners[] = ['kind' => 'redacted', 'message' => __('This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting.', 'giveflow-fundraising-campaigns')];
+            $banners[] = ['kind' => 'redacted', 'message' => __('This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting.', 'fundkit-fundraising-campaigns')];
         }
         $pastDuePlan = null;
         foreach ($recurringPlans as $p) {
@@ -408,18 +408,18 @@ final class DonorMetricsService
             $gateway  = $this->gateways->get((string) $pastDuePlan->gateway);
             $name     = ucfirst((string) $pastDuePlan->gateway);
 
-            if ($gateway instanceof \GiveFlow\Gateways\SupportsPaymentRetry) {
-                $message = __('A renewal was declined. Open the Recurring tab to collect it again.', 'giveflow-fundraising-campaigns');
+            if ($gateway instanceof \FundKit\Gateways\SupportsPaymentRetry) {
+                $message = __('A renewal was declined. Open the Recurring tab to collect it again.', 'fundkit-fundraising-campaigns');
             } elseif ($gateway === null) {
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. Stripe. */
-                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways.', 'giveflow-fundraising-campaigns'),
+                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways.', 'fundkit-fundraising-campaigns'),
                     $name
                 );
-            } elseif ($gateway instanceof \GiveFlow\Gateways\SupportsPaymentMethodUpdate) {
+            } elseif ($gateway instanceof \FundKit\Gateways\SupportsPaymentMethodUpdate) {
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. PayPal. */
-                    __('A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal.', 'giveflow-fundraising-campaigns'),
+                    __('A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal.', 'fundkit-fundraising-campaigns'),
                     $name
                 );
             } else {
@@ -431,7 +431,7 @@ final class DonorMetricsService
                 // gateways, and the route answers 422.
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. GoCardless. */
-                    __('A renewal was declined. %s retries on its own schedule, and neither you nor the donor can change the payment details from here. If it keeps failing, ask the donor to set the donation up again.', 'giveflow-fundraising-campaigns'),
+                    __('A renewal was declined. %s retries on its own schedule, and neither you nor the donor can change the payment details from here. If it keeps failing, ask the donor to set the donation up again.', 'fundkit-fundraising-campaigns'),
                     $name
                 );
             }
@@ -637,7 +637,7 @@ final class DonorMetricsService
     private function donorName(Donor $d): string
     {
         $name = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
-        return $name !== '' ? $name : __('Donor', 'giveflow-fundraising-campaigns') . ' #' . $d->id;
+        return $name !== '' ? $name : __('Donor', 'fundkit-fundraising-campaigns') . ' #' . $d->id;
     }
 
     /**
@@ -678,7 +678,7 @@ final class DonorMetricsService
             $name = trim(($r['first_name'] ?? '') . ' ' . ($r['last_name'] ?? ''));
             return [
                 'id'                  => $r['id'],
-                'name'                => $name !== '' ? $name : __('Donor', 'giveflow-fundraising-campaigns') . ' #' . $r['id'],
+                'name'                => $name !== '' ? $name : __('Donor', 'fundkit-fundraising-campaigns') . ' #' . $r['id'],
                 'email'               => $this->donorService->decryptEmail($donor),
                 'country'             => $r['country'],
                 'total_donated_cents' => $r['total_donated_cents'],
@@ -757,7 +757,7 @@ final class DonorMetricsService
             // this shaper is separate from the Subscriptions one, so the flag
             // has to be set in both or the tab silently loses the action.
             'can_retry'             => $this->gateways->get((string) $p->gateway)
-                instanceof \GiveFlow\Gateways\SupportsPaymentRetry,
+                instanceof \FundKit\Gateways\SupportsPaymentRetry,
             'campaign_id'           => $p->campaign_id !== null ? (int) $p->campaign_id : null,
             'is_test'               => (bool) $p->is_test,
         ];
@@ -845,7 +845,7 @@ final class DonorMetricsService
     {
         return DonationQueries::notSupersededDonation(
             Event::query()->where('donor_id', $donorId),
-            DB::getPrefix() . 'giveflow_events.donation_id',
+            DB::getPrefix() . 'fundkit_events.donation_id',
             $donorId
         );
     }

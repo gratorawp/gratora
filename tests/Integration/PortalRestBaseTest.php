@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\AntiSpamGuard;
-use GiveFlow\Donors\Portal\PortalShortcode;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donations\AntiSpamGuard;
+use FundKit\Donors\Portal\PortalShortcode;
+use FundKit\Foundation\Plugin;
 use ReflectionMethod;
 
 /**
@@ -47,20 +47,20 @@ final class PortalRestBaseTest extends IntegrationTestCase
     public function test_the_client_talks_to_the_host_the_page_was_served_from(): void
     {
         $this->assertSame(
-            'https://www.example.org/wp-json/giveflow/v1/portal/',
-            $this->base('https://example.org/wp-json/giveflow/v1/portal/', 'www.example.org'),
+            'https://www.example.org/wp-json/fundkit/v1/portal/',
+            $this->base('https://example.org/wp-json/fundkit/v1/portal/', 'www.example.org'),
             'a page served on www does not fetch from the apex'
         );
 
         $this->assertSame(
-            'https://example.org/wp-json/giveflow/v1/portal/',
-            $this->base('https://www.example.org/wp-json/giveflow/v1/portal/', 'example.org'),
+            'https://example.org/wp-json/fundkit/v1/portal/',
+            $this->base('https://www.example.org/wp-json/fundkit/v1/portal/', 'example.org'),
             'and an install canonical on www does not fetch www from the apex'
         );
 
         $this->assertSame(
-            'https://example.org:8443/?rest_route=/giveflow/v1/portal/',
-            $this->base('https://example.org:8443/?rest_route=/giveflow/v1/portal/', 'example.org:8443'),
+            'https://example.org:8443/?rest_route=/fundkit/v1/portal/',
+            $this->base('https://example.org:8443/?rest_route=/fundkit/v1/portal/', 'example.org:8443'),
             'the port and the plain-permalink query survive'
         );
     }
@@ -74,8 +74,8 @@ final class PortalRestBaseTest extends IntegrationTestCase
     {
         foreach (['evil.test', 'example.org.evil.test', 'blog.example.org', 'www.blog.example.org'] as $host) {
             $this->assertSame(
-                'https://example.org/wp-json/giveflow/v1/portal/',
-                $this->base('https://example.org/wp-json/giveflow/v1/portal/', $host),
+                'https://example.org/wp-json/fundkit/v1/portal/',
+                $this->base('https://example.org/wp-json/fundkit/v1/portal/', $host),
                 $host . ' is not this site'
             );
         }
@@ -84,7 +84,7 @@ final class PortalRestBaseTest extends IntegrationTestCase
     /** And the page hands the client that base rather than rest_url's. */
     public function test_the_page_hands_the_client_that_base(): void
     {
-        if (! file_exists(GIVEFLOW_DIR . 'build/donor-portal/index/index.asset.php')) {
+        if (! file_exists(FUNDKIT_DIR . 'build/donor-portal/index/index.asset.php')) {
             $this->markTestSkipped('the portal bundle is not built in this checkout');
         }
 
@@ -94,7 +94,7 @@ final class PortalRestBaseTest extends IntegrationTestCase
 
         try {
             $this->shortcode()->render();
-            $data = (string) wp_scripts()->get_data('giveflow-donor-portal', 'data');
+            $data = (string) wp_scripts()->get_data('fundkit-donor-portal', 'data');
         } finally {
             $GLOBALS['wp_scripts'] = null;
             if ($previous === null) {

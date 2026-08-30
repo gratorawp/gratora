@@ -1,5 +1,5 @@
 /**
- * `giveflow/anonymous-toggle` block - donor opts to publish anonymously.
+ * `fundkit/anonymous-toggle` block - donor opts to publish anonymously.
  * Skips itself when the test form lacks the block.
  */
 

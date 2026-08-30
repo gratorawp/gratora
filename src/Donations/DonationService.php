@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donations;
+namespace FundKit\Donations;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Analytics\EventRecorder;
-use GiveFlow\Currency\FxRates;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Forms\FormTypeRegistry;
-use GiveFlow\Foundation\Crypto\Crypto;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\References\ReferenceGenerator;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Funds\FundResolver;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Recurring\FrequencyMap;
-use GiveFlow\Gateways\RefundResult;
-use GiveFlow\Gateways\TestMode;
-use GiveFlow\Receipts\Receipt;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Analytics\EventRecorder;
+use FundKit\Currency\FxRates;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Forms\FormTypeRegistry;
+use FundKit\Foundation\Crypto\Crypto;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\References\ReferenceGenerator;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Funds\FundResolver;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Recurring\FrequencyMap;
+use FundKit\Gateways\RefundResult;
+use FundKit\Gateways\TestMode;
+use FundKit\Receipts\Receipt;
+use FundKit\Vendor\Queryable\DB;
 use RuntimeException;
 
 /**
@@ -74,7 +74,7 @@ final class DonationService
         // to declare a live donor's submission already collected.
         $alreadyCollected = $intent->already_collected;
 
-        $intent = apply_filters('giveflow.donation.intent_creating', $intent);
+        $intent = apply_filters('fundkit.donation.intent_creating', $intent);
 
         $typeHandler = $this->formTypes->handlerFor($intent);
         $intent      = $typeHandler->prepareIntent($intent, $intent->extra);
@@ -214,9 +214,9 @@ final class DonationService
             $donation->save();
 
             // Add-on rows that belong to this donation are written here, not on
-            // giveflow.donation.intent_created: that one fires after the commit, so
+            // fundkit.donation.intent_created: that one fires after the commit, so
             // a row it wrote could outlive a donation that rolled back.
-            do_action('giveflow.donation.creating', $donation, $intent, $donor);
+            do_action('fundkit.donation.creating', $donation, $intent, $donor);
 
             $this->events->record('donation.intent_created', [
                 'donor_id'     => $donor->id,
@@ -230,7 +230,7 @@ final class DonationService
             ]);
         });
 
-        do_action('giveflow.donation.intent_created', $donation, $intent);
+        do_action('fundkit.donation.intent_created', $donation, $intent);
         $typeHandler->onDonationCreated($donation, $intent->extra);
 
         return ['donation' => $donation, 'status_token' => $rawStatusToken];
@@ -311,7 +311,7 @@ final class DonationService
             ] + $metadata,
         ]);
 
-        do_action('giveflow.donation.pending', $donation, $reason, $metadata);
+        do_action('fundkit.donation.pending', $donation, $reason, $metadata);
     }
 
     /**
@@ -377,7 +377,7 @@ final class DonationService
             ] + $metadata,
         ]);
 
-        do_action('giveflow.donation.processing', $donation, $reason, $metadata);
+        do_action('fundkit.donation.processing', $donation, $reason, $metadata);
 
         return $donation;
     }
@@ -511,14 +511,14 @@ final class DonationService
             return Donation::query()->find('id', (int) $donation->id) ?? $donation;
         }
 
-        do_action('giveflow.donation.completed', $donation);
+        do_action('fundkit.donation.completed', $donation);
 
         return $donation;
     }
 
     /**
      * Create + confirm a renewal donation under an existing recurring plan; fires
-     * giveflow.donation.completed plus giveflow.recurring.renewed. Idempotent per (gateway,
+     * fundkit.donation.completed plus fundkit.recurring.renewed. Idempotent per (gateway,
      * intent): an existing donation is returned without a second renewal event.
      *
      * @param array<string,mixed> $confirmResult Same shape DonationService::confirm() consumes.
@@ -530,7 +530,7 @@ final class DonationService
      * @since 1.0.0
      */
     public function createRenewal(
-        \GiveFlow\Recurring\RecurringPlan $plan,
+        \FundKit\Recurring\RecurringPlan $plan,
         int $amountCents,
         string $currency,
         string $gateway,
@@ -616,7 +616,7 @@ final class DonationService
         $donation->updated_at     = $now;
         try {
             $donation->save();
-        } catch (\GiveFlow\Vendor\Queryable\QueryException $e) {
+        } catch (\FundKit\Vendor\Queryable\QueryException $e) {
             // Lost the race to a concurrent redelivery of the same invoice: the
             // other call already inserted the row (UNIQUE gateway_intent_id).
             // Return the winner idempotently instead of throwing a 500.
@@ -634,7 +634,7 @@ final class DonationService
         // The renewal's own creation seam, fired before confirm() so an add-on
         // row exists by the time the donation counts.
         //
-        // create() fires giveflow.donation.creating, which is where every add-on
+        // create() fires fundkit.donation.creating, which is where every add-on
         // writes the rows that belong to a donation, and createRenewal() fired
         // nothing at all. Gift Aid is the one that costs money: its stamper is
         // the only writer of claim rows, so month one of a monthly donation was
@@ -643,12 +643,12 @@ final class DonationService
         // unclaimed relief in the first year, across the whole regular-giving
         // base, which is the segment Gift Aid is worth most on.
         //
-        // A separate hook rather than giveflow.donation.creating: a renewal has no
+        // A separate hook rather than fundkit.donation.creating: a renewal has no
         // DonationIntent and no form submission behind it, so the listeners
         // that read those would be handed a lie. What carries over is the
         // plan and the donor's standing record.
         do_action(
-            'giveflow.donation.renewal_creating',
+            'fundkit.donation.renewal_creating',
             $donation,
             $plan,
             Donor::query()->where('id', (int) $plan->donor_id)->get()
@@ -673,7 +673,7 @@ final class DonationService
             ],
         ]);
 
-        do_action('giveflow.recurring.renewed', $donation, $plan);
+        do_action('fundkit.recurring.renewed', $donation, $plan);
 
         return ['donation' => $donation, 'created' => true];
     }
@@ -707,7 +707,7 @@ final class DonationService
             'recurring.' . $donation->gateway,
             sprintf(
                 /* translators: 1: donation reference, 2: the gateway's own message */
-                __('No recurring plan was created for %1$s, so nothing will renew: %2$s', 'giveflow-fundraising-campaigns'),
+                __('No recurring plan was created for %1$s, so nothing will renew: %2$s', 'fundkit-fundraising-campaigns'),
                 (string) $donation->reference,
                 $e->getMessage()
             ),
@@ -727,7 +727,7 @@ final class DonationService
             ],
         ]);
 
-        do_action('giveflow.recurring.subscription_creation_failed', $donation, $e);
+        do_action('fundkit.recurring.subscription_creation_failed', $donation, $e);
     }
 
     /** @since 1.0.0 */
@@ -756,7 +756,7 @@ final class DonationService
      *
      * @since 1.0.0
      */
-    public function recordRecurringFailure(\GiveFlow\Recurring\RecurringPlan $plan, ?string $reason = null): void
+    public function recordRecurringFailure(\FundKit\Recurring\RecurringPlan $plan, ?string $reason = null): void
     {
         $attempt = (int) $plan->failed_renewals_count;
 
@@ -775,7 +775,7 @@ final class DonationService
             ],
         ]);
 
-        do_action('giveflow.recurring.renewal_failed', $plan, [
+        do_action('fundkit.recurring.renewal_failed', $plan, [
             'gateway' => (string) $plan->gateway,
             'reason'  => $reason,
             'attempt' => $attempt,
@@ -783,7 +783,7 @@ final class DonationService
     }
 
     /** @since 1.0.0 */
-    public function recordRecurringCancellation(\GiveFlow\Recurring\RecurringPlan $plan, ?string $reason = null): void
+    public function recordRecurringCancellation(\FundKit\Recurring\RecurringPlan $plan, ?string $reason = null): void
     {
         $this->events->record('recurring.cancelled', [
             'donor_id'     => $plan->donor_id,
@@ -799,13 +799,13 @@ final class DonationService
             ],
         ]);
 
-        do_action('giveflow.recurring.cancelled', $plan, $reason);
+        do_action('fundkit.recurring.cancelled', $plan, $reason);
     }
 
     /** @since 1.0.0 */
-    private function frequencyFromPlan(\GiveFlow\Recurring\RecurringPlan $plan): string
+    private function frequencyFromPlan(\FundKit\Recurring\RecurringPlan $plan): string
     {
-        // Plan stores Stripe-shaped interval; donations carry the GiveFlow label.
+        // Plan stores Stripe-shaped interval; donations carry the FundKit label.
         return match ([$plan->interval_unit, $plan->interval_count]) {
             ['week',  1] => 'weekly',
             ['week',  2] => 'biweekly',
@@ -840,7 +840,7 @@ final class DonationService
         // carries many events, so the same reversal arrives more than once as a
         // matter of course. Only money still counted can be taken back:
         // `refunded` is settled and `disputed` is already done.
-        $applied = DB::table('giveflow_donations')
+        $applied = DB::table('fundkit_donations')
             ->where('id', $donation->id)
             ->whereIn('status', ['paid', 'partial_refund'])
             ->update([
@@ -875,7 +875,7 @@ final class DonationService
 
         $this->resyncAggregatesFor($donation);
 
-        do_action('giveflow.donation.disputed', $donation, $kind);
+        do_action('fundkit.donation.disputed', $donation, $kind);
 
         return $donation;
     }
@@ -891,7 +891,7 @@ final class DonationService
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
-        $applied = DB::table('giveflow_donations')
+        $applied = DB::table('fundkit_donations')
             ->where('id', $donation->id)
             ->where('status', 'disputed')
             ->update([
@@ -925,7 +925,7 @@ final class DonationService
 
         $this->resyncAggregatesFor($donation);
 
-        do_action('giveflow.donation.reversal_reinstated', $donation);
+        do_action('fundkit.donation.reversal_reinstated', $donation);
 
         return $donation;
     }
@@ -957,7 +957,7 @@ final class DonationService
         // Conditional transition: a webhook may have moved the row to a terminal
         // (paid/refunded) state since this object loaded. Only fail it while it
         // is still non-terminal so we never clobber real money back to failed.
-        $applied = DB::table('giveflow_donations')
+        $applied = DB::table('fundkit_donations')
             ->where('id', $donation->id)
             // Exclude 'failed' too: a redelivered payment_intent.payment_failed
             // must not re-run the transition (fresh updated_at would count as a
@@ -987,7 +987,7 @@ final class DonationService
             'payload'     => ['gateway' => $donation->gateway, 'reason' => $reason],
         ]);
 
-        do_action('giveflow.donation.failed', $donation);
+        do_action('fundkit.donation.failed', $donation);
 
         return $donation;
     }
@@ -1092,7 +1092,7 @@ final class DonationService
             // consumed the balance since the SUM was read makes this match zero
             // rows; the increment's row lock then serialises the rest of this
             // transaction so the check-then-act clamp above cannot be outrun.
-            $reserved = DB::table('giveflow_donations')
+            $reserved = DB::table('fundkit_donations')
                 ->whereRaw('id = ' . (int) $donation->id . ' AND refunded_cents + ' . (int) $amountCents . ' <= amount_cents')
                 ->increment('refunded_cents', (int) $amountCents);
             if ($reserved->affectedRows < 1) {
@@ -1100,7 +1100,7 @@ final class DonationService
                     esc_html("External refund for {$donation->reference} exceeds the refundable balance.")
                 );
             }
-            $newTotal = (int) (DB::table('giveflow_donations')
+            $newTotal = (int) (DB::table('fundkit_donations')
                 ->where('id', $donation->id)
                 ->selectRaw('refunded_cents AS total')
                 ->get()['total'] ?? 0);
@@ -1162,7 +1162,7 @@ final class DonationService
                 $this->aggregates->syncFund((int) $donation->fund_id);
             }
         });
-        } catch (\GiveFlow\Vendor\Queryable\QueryException $e) {
+        } catch (\FundKit\Vendor\Queryable\QueryException $e) {
             // Lost the UNIQUE(gateway_refund_id) race: a concurrent or
             // redelivered webhook already recorded this exact refund. Return it
             // idempotently - the winner fired the side effects (status flip,
@@ -1181,7 +1181,7 @@ final class DonationService
             throw $e;
         }
 
-        do_action('giveflow.donation.refunded', $donation, $refund);
+        do_action('fundkit.donation.refunded', $donation, $refund);
 
         return $refund;
     }
@@ -1272,7 +1272,7 @@ final class DonationService
     /**
      * Undo an external refund the gateway has reversed.
      *
-     * A dispute GiveFlow lost is recorded as a refund, which drops the money out of
+     * A dispute FundKit lost is recorded as a refund, which drops the money out of
      * every total and voids the receipt. Winning it later puts the money back
      * on the balance, so leaving the refund standing keeps the donation missing
      * from the org's own reporting for good.
@@ -1304,7 +1304,7 @@ final class DonationService
             // Guarded decrement, mirroring the reservation on the way in, so
             // two reinstatements for one dispute cannot drive the counter
             // below zero.
-            $released = DB::table('giveflow_donations')
+            $released = DB::table('fundkit_donations')
                 ->whereRaw('id = ' . (int) $donation->id . ' AND refunded_cents >= ' . $amount)
                 ->increment('refunded_cents', -$amount);
             if ($released->affectedRows < 1) {
@@ -1316,7 +1316,7 @@ final class DonationService
             $refund->status     = 'reversed';
             $refund->save();
 
-            $newTotal = (int) (DB::table('giveflow_donations')
+            $newTotal = (int) (DB::table('fundkit_donations')
                 ->where('id', $donation->id)
                 ->selectRaw('refunded_cents AS total')
                 ->get()['total'] ?? 0);
@@ -1363,7 +1363,7 @@ final class DonationService
             }
         });
 
-        do_action('giveflow.donation.refund_reversed', $donation, $refund);
+        do_action('fundkit.donation.refund_reversed', $donation, $refund);
 
         return $refund;
     }
@@ -1391,7 +1391,7 @@ final class DonationService
         // refuses here and says where to go instead. Absence of a transaction
         // id cannot stand in for this: an offline donation has none and is
         // refundable all the same.
-        $refusal = apply_filters('giveflow.donation.refund_refusal', null, $donation, $amountCents);
+        $refusal = apply_filters('fundkit.donation.refund_refusal', null, $donation, $amountCents);
         if (is_string($refusal) && $refusal !== '') {
             throw new RuntimeException(esc_html($refusal));
         }
@@ -1501,7 +1501,7 @@ final class DonationService
             // Atomic over-refund guard (see recordExternalRefund): the counter
             // bump applies only while the new total fits the principal, and its
             // row lock serialises concurrent refunds on this donation.
-            $reserved = DB::table('giveflow_donations')
+            $reserved = DB::table('fundkit_donations')
                 ->whereRaw('id = ' . (int) $donation->id . ' AND refunded_cents + ' . $recordedCents . ' <= amount_cents')
                 ->increment('refunded_cents', $recordedCents);
             if ($reserved->affectedRows < 1) {
@@ -1509,7 +1509,7 @@ final class DonationService
                     esc_html("Refund for {$donation->reference} exceeds the refundable balance.")
                 );
             }
-            $newTotal = (int) (DB::table('giveflow_donations')
+            $newTotal = (int) (DB::table('fundkit_donations')
                 ->where('id', $donation->id)
                 ->selectRaw('refunded_cents AS total')
                 ->get()['total'] ?? 0);
@@ -1552,7 +1552,7 @@ final class DonationService
                 ],
             ]);
 
-            // Donor sync runs from the post-commit giveflow.donation.refunded listener.
+            // Donor sync runs from the post-commit fundkit.donation.refunded listener.
             if ($donation->campaign_id) {
                 $this->aggregates->syncCampaign((int) $donation->campaign_id);
             }
@@ -1564,7 +1564,7 @@ final class DonationService
             }
         });
 
-        do_action('giveflow.donation.refunded', $donation, $refund);
+        do_action('fundkit.donation.refunded', $donation, $refund);
 
         return $refund;
     }

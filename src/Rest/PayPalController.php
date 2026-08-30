@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest;
+namespace FundKit\Rest;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\PayPal\PayPalAccount;
-use GiveFlow\Gateways\PayPal\PayPalApi;
-use GiveFlow\Gateways\PayPal\PayPalGateway;
-use GiveFlow\Gateways\PayPal\PayPalPlanRecorder;
-use GiveFlow\Gateways\PayPal\PayPalPlanRefused;
-use GiveFlow\Gateways\PayPal\PayPalMoney;
-use GiveFlow\Recurring\FrequencyMap;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donations\DonationService;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\PayPal\PayPalAccount;
+use FundKit\Gateways\PayPal\PayPalApi;
+use FundKit\Gateways\PayPal\PayPalGateway;
+use FundKit\Gateways\PayPal\PayPalPlanRecorder;
+use FundKit\Gateways\PayPal\PayPalPlanRefused;
+use FundKit\Gateways\PayPal\PayPalMoney;
+use FundKit\Recurring\FrequencyMap;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -28,7 +28,7 @@ use WP_REST_Server;
  *
  * These are unauthenticated by necessity (the donor is a stranger), so neither
  * route trusts the browser for anything that decides money:
- *  - capture uses the order id GiveFlow stored at createIntent, never the one the
+ *  - capture uses the order id FundKit stored at createIntent, never the one the
  *    client posts, so a caller cannot point a capture at a different order;
  *  - the subscription route re-reads the subscription from PayPal and requires
  *    its custom_id to match the donation reference before it records anything.
@@ -37,7 +37,7 @@ use WP_REST_Server;
  */
 final class PayPalController
 {
-    private const NS = 'giveflow/v1';
+    private const NS = 'fundkit/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -85,7 +85,7 @@ final class PayPalController
 
         $gateway = $this->gateways->get('paypal');
         if (! $gateway instanceof PayPalGateway) {
-            return $this->error('giveflow_paypal_unavailable', __('PayPal is not available.', 'giveflow-fundraising-campaigns'), 400);
+            return $this->error('fundkit_paypal_unavailable', __('PayPal is not available.', 'fundkit-fundraising-campaigns'), 400);
         }
 
         // confirm() reads the stored gateway_intent_id: the client cannot
@@ -127,8 +127,8 @@ final class PayPalController
             ]);
 
             return $this->error(
-                'giveflow_paypal_capture_failed',
-                __('PayPal could not complete this donation. If any money has left your account we will email your receipt, so please check before donating again.', 'giveflow-fundraising-campaigns'),
+                'fundkit_paypal_capture_failed',
+                __('PayPal could not complete this donation. If any money has left your account we will email your receipt, so please check before donating again.', 'fundkit-fundraising-campaigns'),
                 400
             );
         }
@@ -157,11 +157,11 @@ final class PayPalController
         }
 
         if (! FrequencyMap::isRecurring((string) $donation->frequency)) {
-            return $this->error('giveflow_paypal_not_recurring', __('That donation is not recurring.', 'giveflow-fundraising-campaigns'), 400);
+            return $this->error('fundkit_paypal_not_recurring', __('That donation is not recurring.', 'fundkit-fundraising-campaigns'), 400);
         }
         $subId = trim((string) $request->get_param('subscription_id'));
         if ($subId === '') {
-            return $this->error('giveflow_paypal_bad_subscription', __('Missing subscription id.', 'giveflow-fundraising-campaigns'), 400);
+            return $this->error('fundkit_paypal_bad_subscription', __('Missing subscription id.', 'fundkit-fundraising-campaigns'), 400);
         }
 
         $this->account->useTestMode((bool) $donation->is_test);
@@ -180,8 +180,8 @@ final class PayPalController
             ]);
 
             return $this->error(
-                'giveflow_paypal_subscription_lookup',
-                __('PayPal has your donation, but we could not finish setting up the repeat schedule here. There is no need to donate again: we will email you once it is confirmed.', 'giveflow-fundraising-campaigns'),
+                'fundkit_paypal_subscription_lookup',
+                __('PayPal has your donation, but we could not finish setting up the repeat schedule here. There is no need to donate again: we will email you once it is confirmed.', 'fundkit-fundraising-campaigns'),
                 400
             );
         }
@@ -212,13 +212,13 @@ final class PayPalController
      * both routes here move money.
      *
      * A wrong token answers exactly like a wrong reference: telling a stranger
-     * that GIVEFLOW-2026-00007 exists is the same leak either way.
+     * that FUNDKIT-2026-00007 exists is the same leak either way.
      */
     private function pendingDonation(WP_REST_Request $request): Donation|WP_Error
     {
         $notFound = $this->error(
-            'giveflow_paypal_no_donation',
-            __('We could not find that donation.', 'giveflow-fundraising-campaigns'),
+            'fundkit_paypal_no_donation',
+            __('We could not find that donation.', 'fundkit-fundraising-campaigns'),
             404
         );
 

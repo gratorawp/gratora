@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Foundation\Helpers\View;
 
 /**
  * Recurring frequency selector block.
@@ -22,7 +22,7 @@ final class RecurringToggleBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/recurring-toggle';
+        return 'fundkit/recurring-toggle';
     }
 
     /** @since 1.0.0 */

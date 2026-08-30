@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Recurring\GatewayUnreachable;
-use GiveFlow\Recurring\RecurringCanceller;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Recurring\GatewayUnreachable;
+use FundKit\Recurring\RecurringCanceller;
+use FundKit\Recurring\RecurringPlan;
 
 /**
  * A cancellation that never reached the processor must not report success.

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit;
+namespace FundKit\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 
@@ -36,10 +36,10 @@ final class ReleaseWorkflowTest extends TestCase
     {
         $matched = preg_match(
             '/^\s*\*\s*Text Domain:\s*(\S+)\s*$/m',
-            (string) file_get_contents($this->root() . '/giveflow.php'),
+            (string) file_get_contents($this->root() . '/fundkit.php'),
             $m
         );
-        $this->assertSame(1, $matched, 'giveflow.php has no Text Domain, so the zip has no name.');
+        $this->assertSame(1, $matched, 'fundkit.php has no Text Domain, so the zip has no name.');
 
         return $m[1] . '.zip';
     }

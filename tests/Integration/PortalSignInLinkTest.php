@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Donors\Portal\PortalPage;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Donors\DonorService;
+use FundKit\Donors\Portal\PortalPage;
+use FundKit\Foundation\Plugin;
 
 /**
  * The donor-portal sign-in link is emailed via an async job. Action Scheduler
@@ -40,7 +40,7 @@ final class PortalSignInLinkTest extends IntegrationTestCase
         // The shape /portal/send-link enqueues: one named value, which AS
         // spreads into a single positional string.
         Plugin::instance()->container->get(AsyncDispatcher::class)
-            ->enqueue('giveflow.async.send_portal_link', ['email' => $email]);
+            ->enqueue('fundkit.async.send_portal_link', ['email' => $email]);
 
         // runPendingAsyncJobs() mirrors AS: do_action_ref_array($hook, array_values($args)).
         $this->runPendingAsyncJobs();
@@ -60,7 +60,7 @@ final class PortalSignInLinkTest extends IntegrationTestCase
         $this->captureMail($sent);
 
         Plugin::instance()->container->get(AsyncDispatcher::class)
-            ->enqueue('giveflow.async.send_portal_link', [
+            ->enqueue('fundkit.async.send_portal_link', [
                 'email'      => 'newcomer-' . uniqid() . '@example.test',
                 'first_name' => 'Ada',
                 'last_name'  => 'Lovelace',
@@ -78,7 +78,7 @@ final class PortalSignInLinkTest extends IntegrationTestCase
             ->findOrCreate('known-' . ($id = uniqid()) . '@example.test');
 
         Plugin::instance()->container->get(AsyncDispatcher::class)
-            ->enqueue('giveflow.async.send_portal_link', [
+            ->enqueue('fundkit.async.send_portal_link', [
                 'email'      => 'known-' . $id . '@example.test',
                 'first_name' => 'Ada',
                 'last_name'  => 'Lovelace',
@@ -106,7 +106,7 @@ final class PortalSignInLinkTest extends IntegrationTestCase
         Plugin::instance()->container->get(DonorService::class)->findOrCreate($email);
 
         Plugin::instance()->container->get(AsyncDispatcher::class)
-            ->enqueue('giveflow.async.send_portal_link', ['email' => $email]);
+            ->enqueue('fundkit.async.send_portal_link', ['email' => $email]);
         $this->runPendingAsyncJobs();
 
         $this->assertCount(1, $sent);

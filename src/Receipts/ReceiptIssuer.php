@@ -2,32 +2,32 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Receipts;
+namespace FundKit\Receipts;
 
-use GiveFlow\Analytics\EventRecorder;
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorRepository;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Donors\MagicLinkService;
-use GiveFlow\Foundation\Crypto\Crypto;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Helpers\View;
-use GiveFlow\Foundation\References\ReferenceGenerator;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Forms\Blocks\CustomFieldLabels;
-use GiveFlow\Forms\Form;
-use GiveFlow\Mail\Mailer;
-use GiveFlow\Settings\SettingsService;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Analytics\EventRecorder;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Campaigns\Campaign;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorRepository;
+use FundKit\Donors\DonorService;
+use FundKit\Donors\MagicLinkService;
+use FundKit\Foundation\Crypto\Crypto;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Helpers\View;
+use FundKit\Foundation\References\ReferenceGenerator;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Forms\Blocks\CustomFieldLabels;
+use FundKit\Forms\Form;
+use FundKit\Mail\Mailer;
+use FundKit\Settings\SettingsService;
+use FundKit\Vendor\Queryable\DB;
 
 /**
  * Issues and emails receipts when donations are paid.
  *
- * On `giveflow.donation.completed` an async job runs each applicable renderer,
+ * On `fundkit.donation.completed` an async job runs each applicable renderer,
  * persists a Receipt row, renders the PDF in memory, and emails the donor.
  * No file storage; re-sends regenerate from the same context.
  *
@@ -35,7 +35,7 @@ use GiveFlow\Vendor\Queryable\DB;
  */
 final class ReceiptIssuer
 {
-    private const HOOK = 'giveflow.async.issue_receipt';
+    private const HOOK = 'fundkit.async.issue_receipt';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -60,7 +60,7 @@ final class ReceiptIssuer
     /** @since 1.0.0 */
     public function register(): void
     {
-        add_action('giveflow.donation.completed', [$this, 'onDonationCompleted']);
+        add_action('fundkit.donation.completed', [$this, 'onDonationCompleted']);
         add_action(self::HOOK, [$this, 'issueForDonation']);
     }
 
@@ -77,7 +77,7 @@ final class ReceiptIssuer
         // value of the meal, and an add-on that can state that value should be
         // able to turn issuance back on. The default is unchanged.
         $shouldIssue = (string) ($donation->kind ?? 'donation') === 'donation';
-        if (! apply_filters('giveflow.receipt.should_issue', $shouldIssue, $donation)) {
+        if (! apply_filters('fundkit.receipt.should_issue', $shouldIssue, $donation)) {
             return;
         }
 
@@ -136,7 +136,7 @@ final class ReceiptIssuer
             campaign:      $this->loadCampaign($donation),
         );
 
-        $ctx = apply_filters('giveflow.receipt.context', $ctx);
+        $ctx = apply_filters('fundkit.receipt.context', $ctx);
 
         foreach ($this->collectRenderers() as $renderer) {
             if (! $renderer->appliesTo($ctx)) continue;
@@ -235,7 +235,7 @@ final class ReceiptIssuer
             // Only the runner that actually inserted the row announces issuance;
             // a concurrent issue that found the existing row must not re-fire.
             if ($created) {
-                do_action('giveflow.receipt.issued', $receipt, $ctx);
+                do_action('fundkit.receipt.issued', $receipt, $ctx);
                 // Campaign and amount come from the donation being receipted.
                 // Without them the donor timeline shows a receipt against no
                 // campaign and no figure.
@@ -266,13 +266,13 @@ final class ReceiptIssuer
                     $sent = $this->sendEmail($receipt, $ctx, $pdfBytes);
                     if ($sent) {
                         $receipt->sent_to_email_at = $now;
-                        do_action('giveflow.receipt.email_sent', $receipt);
+                        do_action('fundkit.receipt.email_sent', $receipt);
                     } else {
                         Receipt::query()
                             ->where('id', $receipt->id)
                             ->update(['sent_to_email_at' => null]);
                         $receipt->sent_to_email_at = null;
-                        do_action('giveflow.receipt.email_failed', $receipt);
+                        do_action('fundkit.receipt.email_failed', $receipt);
                     }
                 }
             }
@@ -370,7 +370,7 @@ final class ReceiptIssuer
 
         // 30-day magic-link token for the re-download URL.
         $rawToken    = $this->magicLinks->issue($ctx->donor->id, 'download_receipt', $receipt->id);
-        $downloadUrl = rest_url("giveflow/v1/receipts/{$receipt->id}/download")
+        $downloadUrl = rest_url("fundkit/v1/receipts/{$receipt->id}/download")
                      . '?token=' . rawurlencode($rawToken);
 
         $fullName  = (string) $ctx->donor_name;
@@ -394,7 +394,7 @@ final class ReceiptIssuer
         $subject = strtr($subject, $tags);
         if (trim($subject) === '') {
             /* translators: %s: donation reference number */
-            $subject = sprintf(__('Your donation receipt - %s', 'giveflow-fundraising-campaigns'), $ctx->donation->reference);
+            $subject = sprintf(__('Your donation receipt - %s', 'fundkit-fundraising-campaigns'), $ctx->donation->reference);
         }
 
         // Honor the user-edited body when non-empty; otherwise fall back to
@@ -408,7 +408,7 @@ final class ReceiptIssuer
             // donations whatever the body content is.
             if (! empty($ctx->donation->is_test)) {
                 $body = '<p style="background:#fef2f2;border:1px solid #b91c1c;color:#b91c1c;font-weight:700;text-align:center;padding:10px;border-radius:6px;margin:0 0 20px;">'
-                      . esc_html__('Test donation. No real payment was made.', 'giveflow-fundraising-campaigns')
+                      . esc_html__('Test donation. No real payment was made.', 'fundkit-fundraising-campaigns')
                       . '</p>'
                       . $body;
             }
@@ -418,7 +418,7 @@ final class ReceiptIssuer
             $body .= sprintf(
                 '<p><a href="%s">%s</a></p>',
                 esc_url($downloadUrl),
-                esc_html__('Download receipt', 'giveflow-fundraising-campaigns')
+                esc_html__('Download receipt', 'fundkit-fundraising-campaigns')
             );
         } else {
             $body = View::load('Receipts.email', [
@@ -470,7 +470,7 @@ final class ReceiptIssuer
     /** @since 1.0.0 */
     private function writeTempPdf(string $bytes, string $reference): string
     {
-        $tmp = get_temp_dir() . 'giveflow-receipt-' . $reference . '-' . bin2hex(random_bytes(4)) . '.pdf';
+        $tmp = get_temp_dir() . 'fundkit-receipt-' . $reference . '-' . bin2hex(random_bytes(4)) . '.pdf';
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- get_temp_dir() scratch file that lives only for the wp_mail call that attaches it; WP_Filesystem needs credentials this path has no way to ask for.
         file_put_contents($tmp, $bytes);
         return $tmp;
@@ -518,7 +518,7 @@ final class ReceiptIssuer
             $ctx = $ctx->with('custom_field_labels', $this->loadCustomFieldLabels($donation));
         }
 
-        $ctx = apply_filters('giveflow.receipt.context', $ctx);
+        $ctx = apply_filters('fundkit.receipt.context', $ctx);
 
         try {
             return $renderer->render($ctx);
@@ -534,7 +534,7 @@ final class ReceiptIssuer
      */
     private function collectRenderers(): array
     {
-        return (array) apply_filters('giveflow.receipt.renderers', []);
+        return (array) apply_filters('fundkit.receipt.renderers', []);
     }
 
     /**

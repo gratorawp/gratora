@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
 /**
- * giveflow/hidden: invisible value captured with the donation.
+ * fundkit/hidden: invisible value captured with the donation.
  *
  * @since 1.0.0
  */
@@ -14,7 +14,7 @@ final class HiddenBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/hidden';
+        return 'fundkit/hidden';
     }
 
     /** @since 1.0.0 */

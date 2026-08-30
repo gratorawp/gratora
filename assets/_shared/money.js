@@ -1,11 +1,11 @@
 /**
- * Money rendering for the surfaces that run inside a GiveFlow page: the admin
+ * Money rendering for the surfaces that run inside a FundKit page: the admin
  * screens and the donor portal. Figure for figure the same as Money::format on
  * the PHP side, because a donor reads one donation in their portal and again on
  * the receipt in their inbox, and the two are the same money.
  */
 
-import { groupDigits } from '@giveflow/ui/utils/format';
+import { groupDigits } from '@fundkit/ui/utils/format';
 
 const DEFAULT_NUMBER_FORMAT = {
     decimalPlaces:  2,
@@ -23,14 +23,14 @@ const DEFAULT_NUMBER_FORMAT = {
  * @since 1.0.0
  */
 export function defaultCurrency() {
-    const code = typeof window !== 'undefined' ? window.giveflow?.default_currency : '';
+    const code = typeof window !== 'undefined' ? window.fundkit?.default_currency : '';
 
     return code ? String( code ).toUpperCase() : 'USD';
 }
 
 /** @since 1.0.0 */
 export function numberFormat() {
-    const fmt = typeof window !== 'undefined' ? window.giveflow?.number_format : null;
+    const fmt = typeof window !== 'undefined' ? window.fundkit?.number_format : null;
 
     return fmt ? { ...DEFAULT_NUMBER_FORMAT, ...fmt } : DEFAULT_NUMBER_FORMAT;
 }

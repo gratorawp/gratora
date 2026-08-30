@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Settings;
+namespace FundKit\Settings;
 
 /**
  * The single owner of "never hand a stored secret back out".
  *
  * The Stripe webhook signing secret is the only authentication on the webhook
  * route, so handing it back over REST would let any holder of the delegatable
- * `giveflow_manage_settings` cap forge a paid donation with no donations capability
+ * `fundkit_manage_settings` cap forge a paid donation with no donations capability
  * at all.
  *
  * Redacted values come back as {@see self::MASK}. The write path must call

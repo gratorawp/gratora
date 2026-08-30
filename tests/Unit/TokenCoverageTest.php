@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit;
+namespace FundKit\Tests\Unit;
 
-use GiveFlow\Campaigns\Styling\Tokens;
+use FundKit\Campaigns\Styling\Tokens;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -39,7 +39,7 @@ final class TokenCoverageTest extends TestCase
             }
             $css .= file_get_contents($path) . "\n";
         }
-        // The block server-renderers set --giveflow-accent inline on their wrappers.
+        // The block server-renderers set --fundkit-accent inline on their wrappers.
         foreach (glob($root . '/src/Campaigns/Blocks/views/*.php') ?: [] as $view) {
             $css .= file_get_contents($view) . "\n";
         }

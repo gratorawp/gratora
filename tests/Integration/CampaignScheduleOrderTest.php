@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -21,7 +21,7 @@ final class CampaignScheduleOrderTest extends IntegrationTestCase
         parent::setUp();
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Schedule campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -30,7 +30,7 @@ final class CampaignScheduleOrderTest extends IntegrationTestCase
     /** @param array<string,mixed> $data */
     private function update(array $data): \WP_REST_Response
     {
-        $req = new WP_REST_Request('PUT', '/giveflow/v1/admin/campaigns/' . $this->campaignId);
+        $req = new WP_REST_Request('PUT', '/fundkit/v1/admin/campaigns/' . $this->campaignId);
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($data));
 

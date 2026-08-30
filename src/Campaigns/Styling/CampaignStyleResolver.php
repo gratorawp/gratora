@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Styling;
+namespace FundKit\Campaigns\Styling;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Forms\Form;
+use FundKit\Campaigns\Campaign;
+use FundKit\Forms\Form;
 
 /**
  * Resolve the final token map for a form rendering.
@@ -48,15 +48,15 @@ final class CampaignStyleResolver
             $tokens = array_merge($tokens, $campaignInline);
         }
 
-        $tokens = (array) apply_filters('giveflow.form_style.tokens', $tokens, $form, $campaign);
+        $tokens = (array) apply_filters('fundkit.form_style.tokens', $tokens, $form, $campaign);
 
-        $explicitSoft = isset($presetTokens['giveflow-accent-soft'])
-            || ($formPresetId === '' && isset($campaignInline['giveflow-accent-soft']));
+        $explicitSoft = isset($presetTokens['fundkit-accent-soft'])
+            || ($formPresetId === '' && isset($campaignInline['fundkit-accent-soft']));
         $tokens = $this->dropUnpairedSoft($tokens, $explicitSoft);
 
         return [
             'tokens'        => $tokens,
-            'accent'        => (string) ($tokens['giveflow-accent'] ?? '#211d3f'),
+            'accent'        => (string) ($tokens['fundkit-accent'] ?? '#211d3f'),
             'preset_id'     => $presetId,
             'preset_seeded' => null,
         ];
@@ -70,7 +70,7 @@ final class CampaignStyleResolver
     public function accentFor(?Campaign $campaign): string
     {
         $tokens = $this->resolveForCampaign($campaign);
-        return (string) ($tokens['giveflow-accent'] ?? '#211d3f');
+        return (string) ($tokens['fundkit-accent'] ?? '#211d3f');
     }
 
     /**
@@ -96,10 +96,10 @@ final class CampaignStyleResolver
             $tokens = array_merge($tokens, $campaignInline);
         }
 
-        $tokens = (array) apply_filters('giveflow.campaign_style.tokens', $tokens, $campaign);
+        $tokens = (array) apply_filters('fundkit.campaign_style.tokens', $tokens, $campaign);
 
-        $explicitSoft = isset($presetTokens['giveflow-accent-soft'])
-            || isset($campaignInline['giveflow-accent-soft']);
+        $explicitSoft = isset($presetTokens['fundkit-accent-soft'])
+            || isset($campaignInline['fundkit-accent-soft']);
 
         return $this->dropUnpairedSoft($tokens, $explicitSoft);
     }
@@ -108,7 +108,7 @@ final class CampaignStyleResolver
      * Accent-soft (selected/hover tint) must track the accent. When nothing
      * deliberately pairs one with the accent and it is still the catalogue
      * default, drop it so the stylesheet derives it from the resolved
-     * --giveflow-accent via color-mix. Otherwise a campaign that picks a purple
+     * --fundkit-accent via color-mix. Otherwise a campaign that picks a purple
      * accent keeps the green default soft and washes its own page in green.
      * Presets that pair their own soft (Bold, Quiet) keep theirs.
      *
@@ -121,9 +121,9 @@ final class CampaignStyleResolver
     {
         $defaults = Tokens::defaults();
         if (! $explicitSoft
-            && ($tokens['giveflow-accent-soft'] ?? null) === ($defaults['giveflow-accent-soft'] ?? null)
+            && ($tokens['fundkit-accent-soft'] ?? null) === ($defaults['fundkit-accent-soft'] ?? null)
         ) {
-            unset($tokens['giveflow-accent-soft']);
+            unset($tokens['fundkit-accent-soft']);
         }
         return $tokens;
     }

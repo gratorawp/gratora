@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\MagicLinkToken;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donors\MagicLinkToken;
+use FundKit\Foundation\Plugin;
 
 /**
  * A column that only exists after a wipe is not shipped. Both paths an install
  * can reach the new token columns by are driven for real: the table built from
- * nothing, and a site sitting on the previous GIVEFLOW_DB_VERSION with the old
+ * nothing, and a site sitting on the previous FUNDKIT_DB_VERSION with the old
  * table already in place.
  *
  * DDL commits implicitly, so nothing here writes rows: the table is left in the
@@ -22,7 +22,7 @@ final class ReviewW6SchemaApplyTest extends IntegrationTestCase
      * WP_UnitTestCase rewrites CREATE TABLE and DROP TABLE to their TEMPORARY
      * forms for the duration of a test, so a migration driven under it would
      * build a table nothing else can see and a drop would silently do nothing.
-     * The giveflow_* tables are real, built at bootstrap, so this test drops the
+     * The fundkit_* tables are real, built at bootstrap, so this test drops the
      * rewriting and works on the real one.
      */
     protected function setUp(): void
@@ -34,7 +34,7 @@ final class ReviewW6SchemaApplyTest extends IntegrationTestCase
 
     private function table(): string
     {
-        return self::$wpdb->prefix . 'giveflow_magic_link_tokens';
+        return self::$wpdb->prefix . 'fundkit_magic_link_tokens';
     }
 
     /** @return array<string,string> column name => column type */
@@ -77,13 +77,13 @@ final class ReviewW6SchemaApplyTest extends IntegrationTestCase
         $this->assertArrayNotHasKey('first_name', $cols, 'the 1.0.1 table shape');
         $this->assertArrayNotHasKey('last_name', $cols);
 
-        update_option('giveflow_db_version', '1.0.1', false);
+        update_option('fundkit_db_version', '1.0.1', false);
         $this->fireProductWpLoaded();
 
         $cols = $this->columns();
         $this->assertArrayHasKey('first_name', $cols, 'the update added the column');
         $this->assertArrayHasKey('last_name', $cols);
-        $this->assertSame(GIVEFLOW_DB_VERSION, get_option('giveflow_db_version'));
+        $this->assertSame(FUNDKIT_DB_VERSION, get_option('fundkit_db_version'));
     }
 
     /**

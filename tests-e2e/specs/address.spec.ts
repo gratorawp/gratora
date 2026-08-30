@@ -1,5 +1,5 @@
 /**
- * `giveflow/address` block - full fieldset with inner CountrySelect.
+ * `fundkit/address` block - full fieldset with inner CountrySelect.
  * Skips itself when the test form lacks the address block.
  */
 
@@ -24,11 +24,11 @@ test.describe('address block', () => {
         test.skip(await fs.count() === 0, 'no address block on the test form');
 
         const inner = donor.countrySelect(fs);
-        const input = inner.locator('.giveflow-form__country-select-input');
+        const input = inner.locator('.fundkit-form__country-select-input');
         await input.click();
         await input.fill('Spa');
-        await expect(inner.locator('.giveflow-form__country-select-option').first()).toBeVisible();
-        await inner.locator('.giveflow-form__country-select-option').filter({ hasText: 'Spain' }).first().click();
+        await expect(inner.locator('.fundkit-form__country-select-option').first()).toBeVisible();
+        await inner.locator('.fundkit-form__country-select-option').filter({ hasText: 'Spain' }).first().click();
         await expect(input).toHaveValue('Spain');
     });
 

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
-use GiveFlow\Foundation\Helpers\View;
-use GiveFlow\Funds\FundRepository;
+use FundKit\Foundation\Helpers\View;
+use FundKit\Funds\FundRepository;
 
 /**
  * Fund picker block.
@@ -20,7 +20,7 @@ final class FundPickerBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/fund-picker';
+        return 'fundkit/fund-picker';
     }
 
     /** @since 1.0.0 */

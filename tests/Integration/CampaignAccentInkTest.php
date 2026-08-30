@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\Styling\CampaignStyleVars;
-use GiveFlow\Campaigns\CampaignService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\Styling\CampaignStyleVars;
+use FundKit\Campaigns\CampaignService;
+use FundKit\Foundation\Plugin;
 
 /**
  * The ink has to survive the whole resolve, not just the maths: a campaign that
@@ -23,7 +23,7 @@ final class CampaignAccentInkTest extends IntegrationTestCase
         $c->title      = 'Ink';
         $c->slug       = 'ink-' . uniqid();
         $c->status     = 'published';
-        $c->style      = ['tokens' => ['giveflow-accent' => $accent]];
+        $c->style      = ['tokens' => ['fundkit-accent' => $accent]];
         $c->created_at = $now;
         $c->updated_at = $now;
         $c->save();
@@ -49,10 +49,10 @@ final class CampaignAccentInkTest extends IntegrationTestCase
         CampaignStyleVars::flush();
 
         $css = CampaignStyleVars::forCampaign(
-            (new \GiveFlow\Campaigns\CampaignRepository())->findById((int) $campaign->id)
+            (new \FundKit\Campaigns\CampaignRepository())->findById((int) $campaign->id)
         );
 
-        $this->assertMatchesRegularExpression('/--giveflow-cover-image:url\(https?:[^)]+\.jpg\);/', $css);
+        $this->assertMatchesRegularExpression('/--fundkit-cover-image:url\(https?:[^)]+\.jpg\);/', $css);
     }
 
     /** No image is not an error: the cover falls back to the accent underneath. */
@@ -60,22 +60,22 @@ final class CampaignAccentInkTest extends IntegrationTestCase
     {
         $css = CampaignStyleVars::forCampaign($this->campaignWithAccent('#14425f'));
 
-        $this->assertStringNotContainsString('--giveflow-cover-image', $css);
+        $this->assertStringNotContainsString('--fundkit-cover-image', $css);
     }
 
     public function test_a_pale_accent_gets_dark_ink(): void
     {
         $css = CampaignStyleVars::forCampaign($this->campaignWithAccent('#ffe066'));
 
-        $this->assertStringContainsString('--giveflow-accent:#ffe066', $css);
-        $this->assertStringContainsString('--giveflow-on-accent:#10162a', $css);
+        $this->assertStringContainsString('--fundkit-accent:#ffe066', $css);
+        $this->assertStringContainsString('--fundkit-on-accent:#10162a', $css);
     }
 
     public function test_a_dark_accent_gets_light_ink(): void
     {
         $css = CampaignStyleVars::forCampaign($this->campaignWithAccent('#14425f'));
 
-        $this->assertStringContainsString('--giveflow-on-accent:#ffffff', $css);
+        $this->assertStringContainsString('--fundkit-on-accent:#ffffff', $css);
     }
 
     /**
@@ -86,7 +86,7 @@ final class CampaignAccentInkTest extends IntegrationTestCase
     {
         $css = CampaignStyleVars::forCampaign($this->campaignWithAccent('#ffe066'));
 
-        $this->assertStringContainsString('--giveflow-on-accent-muted:rgba(16,22,42,.62)', $css);
-        $this->assertStringContainsString('--giveflow-on-accent-line:rgba(16,22,42,.16)', $css);
+        $this->assertStringContainsString('--fundkit-on-accent-muted:rgba(16,22,42,.62)', $css);
+        $this->assertStringContainsString('--fundkit-on-accent-line:rgba(16,22,42,.16)', $css);
     }
 }

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\CampaignMetricsService;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\CampaignMetricsService;
+use FundKit\Donations\Donation;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
 
 /**
  * The all-time revenue series must reach back to the earliest paid donation,
@@ -41,7 +41,7 @@ final class CampaignRevenueSeriesTest extends IntegrationTestCase
 
         // A paid donation 90 days ago, i.e. 60 days BEFORE the campaign existed.
         $d = Donation::make();
-        $d->reference         = 'GIVEFLOW-BK-' . substr(md5(uniqid('', true)), 0, 8);
+        $d->reference         = 'FUNDKIT-BK-' . substr(md5(uniqid('', true)), 0, 8);
         $d->donor_id          = (int) $donor->id;
         $d->campaign_id       = (int) $c->id;
         $d->amount_cents      = 5000;

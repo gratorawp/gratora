@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Analytics\Event;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\References\ReferenceGenerator;
-use GiveFlow\Foundation\Transfer\DataExporter;
-use GiveFlow\Foundation\Transfer\DataImporter;
-use GiveFlow\Settings\SettingsService;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Analytics\Event;
+use FundKit\Donations\Donation;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\References\ReferenceGenerator;
+use FundKit\Foundation\Transfer\DataExporter;
+use FundKit\Foundation\Transfer\DataImporter;
+use FundKit\Settings\SettingsService;
+use FundKit\Vendor\Queryable\DB;
 use RuntimeException;
 use WP_REST_Request;
 
@@ -39,7 +39,7 @@ final class ToolsImportCounterRaceTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
         $this->wipeRecords();
         $this->settings()->update('numbering', ReferenceGenerator::DEFAULT_SETTINGS);
-        $this->counterKey = 'giveflow_reference_counter_donation_' . $this->year();
+        $this->counterKey = 'fundkit_reference_counter_donation_' . $this->year();
     }
 
     protected function tearDown(): void
@@ -71,17 +71,17 @@ final class ToolsImportCounterRaceTest extends IntegrationTestCase
     {
         $prefix = DB::getPrefix();
         foreach ([
-            'giveflow_receipts',
-            'giveflow_refunds',
-            'giveflow_consents',
-            'giveflow_donation_notes',
-            'giveflow_donor_notes',
-            'giveflow_donations',
-            'giveflow_donors',
-            'giveflow_form_donation_stats',
-            'giveflow_forms',
-            'giveflow_campaigns',
-            'giveflow_funds',
+            'fundkit_receipts',
+            'fundkit_refunds',
+            'fundkit_consents',
+            'fundkit_donation_notes',
+            'fundkit_donor_notes',
+            'fundkit_donations',
+            'fundkit_donors',
+            'fundkit_form_donation_stats',
+            'fundkit_forms',
+            'fundkit_campaigns',
+            'fundkit_funds',
         ] as $table) {
             DB::raw("DELETE FROM {$prefix}{$table}");
         }
@@ -90,7 +90,7 @@ final class ToolsImportCounterRaceTest extends IntegrationTestCase
     private function forgetCounters(): void
     {
         $prefix = DB::getPrefix();
-        DB::raw("DELETE FROM {$prefix}options WHERE option_name LIKE 'giveflow_reference_counter%'");
+        DB::raw("DELETE FROM {$prefix}options WHERE option_name LIKE 'fundkit_reference_counter%'");
         wp_cache_delete('alloptions', 'options');
     }
 
@@ -142,7 +142,7 @@ final class ToolsImportCounterRaceTest extends IntegrationTestCase
         fclose($out);
 
         $this->assertIsArray($decoded);
-        $this->assertNotEmpty($decoded['tables']['giveflow_donations'] ?? [], 'precondition: the file carries the numbered donation');
+        $this->assertNotEmpty($decoded['tables']['fundkit_donations'] ?? [], 'precondition: the file carries the numbered donation');
 
         $this->wipeRecords();
         $this->forgetCounters();
@@ -170,7 +170,7 @@ final class ToolsImportCounterRaceTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function post(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/tools/import');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/import');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -314,7 +314,7 @@ final class ToolsImportCounterRaceTest extends IntegrationTestCase
         return [
             'site_url' => 'https://' . md5($email) . '.example',
             'tables'   => [
-                'giveflow_donors' => [[
+                'fundkit_donors' => [[
                     'id'         => 1,
                     'email'      => $email,
                     'created_at' => gmdate('Y-m-d H:i:s'),

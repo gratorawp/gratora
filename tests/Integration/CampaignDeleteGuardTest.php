@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\CampaignService;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\CampaignService;
+use FundKit\Donations\Donation;
+use FundKit\Foundation\Plugin;
 use RuntimeException;
 
 /**
@@ -52,7 +52,7 @@ final class CampaignDeleteGuardTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'GIVEFLOW-CG-' . bin2hex(random_bytes(3));
+        $d->reference         = 'FUNDKIT-CG-' . bin2hex(random_bytes(3));
         $d->donor_id          = 1;
         $d->campaign_id       = $campaignId;
         $d->amount_cents      = 5000;

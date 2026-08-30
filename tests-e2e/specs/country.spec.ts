@@ -1,5 +1,5 @@
 /**
- * Standalone `giveflow/country` block - searchable picker (CountrySelect).
+ * Standalone `fundkit/country` block - searchable picker (CountrySelect).
  * Skips itself when the canonical form lacks the block.
  */
 
@@ -10,18 +10,18 @@ test.describe('country block', () => {
         const cs = donor.countrySelect();
         test.skip(await cs.count() === 0, 'no country picker on the test form');
         await expect(cs).toBeVisible();
-        await expect(cs.locator('.giveflow-form__country-select-input')).toBeVisible();
+        await expect(cs.locator('.fundkit-form__country-select-input')).toBeVisible();
     });
 
     test('typing filters the option list and clicking picks the country', async ({ donor }) => {
         const cs = donor.countrySelect();
         test.skip(await cs.count() === 0, 'no country picker on the test form');
 
-        const input = cs.locator('.giveflow-form__country-select-input');
+        const input = cs.locator('.fundkit-form__country-select-input');
         await input.click();
         await input.fill('Fran');
 
-        const options = cs.locator('.giveflow-form__country-select-option');
+        const options = cs.locator('.fundkit-form__country-select-option');
         await expect(options.first()).toBeVisible();
         // Every visible option must contain the substring (case-insensitive)
         // either in the label or in the ISO hint.
@@ -38,11 +38,11 @@ test.describe('country block', () => {
         const cs = donor.countrySelect();
         test.skip(await cs.count() === 0, 'no country picker on the test form');
 
-        const input = cs.locator('.giveflow-form__country-select-input');
+        const input = cs.locator('.fundkit-form__country-select-input');
         await input.click();
         await input.fill('Ger');
-        await expect(cs.locator('.giveflow-form__country-select-list')).toBeVisible();
+        await expect(cs.locator('.fundkit-form__country-select-list')).toBeVisible();
         await input.press('Escape');
-        await expect(cs.locator('.giveflow-form__country-select-list')).toHaveCount(0);
+        await expect(cs.locator('.fundkit-form__country-select-list')).toHaveCount(0);
     });
 });

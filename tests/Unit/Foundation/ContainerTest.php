@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Foundation;
+namespace FundKit\Tests\Unit\Foundation;
 
-use GiveFlow\Foundation\Container\Container;
+use FundKit\Foundation\Container\Container;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use stdClass;

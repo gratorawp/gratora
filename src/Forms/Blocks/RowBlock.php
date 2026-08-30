@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
 /**
  * Multi-column grid layout block.
@@ -14,7 +14,7 @@ final class RowBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/row';
+        return 'fundkit/row';
     }
 
     /** @since 1.0.0 */
@@ -41,7 +41,7 @@ final class RowBlock implements Block
         }
 
         return sprintf(
-            '<div class="giveflow-block giveflow-block--row" style="display:grid;grid-template-columns:repeat(%d,minmax(0,1fr));gap:%d%s">%s</div>',
+            '<div class="fundkit-block fundkit-block--row" style="display:grid;grid-template-columns:repeat(%d,minmax(0,1fr));gap:%d%s">%s</div>',
             $columns,
             $gap,
             $gapUnit,

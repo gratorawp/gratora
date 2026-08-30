@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms;
+namespace FundKit\Forms;
 
-use GiveFlow\Donations\DonationIntent;
+use FundKit\Donations\DonationIntent;
 use RuntimeException;
 
 /**

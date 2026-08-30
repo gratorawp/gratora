@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Forms\Form;
-use GiveFlow\Forms\FormReadinessService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\Stripe\StripeAccount;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Forms\Form;
+use FundKit\Forms\FormReadinessService;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\Stripe\StripeAccount;
+use FundKit\Settings\SettingsService;
 
 /**
  * The payment-gateways block decides where the selector goes, and whether there
@@ -66,15 +66,15 @@ final class FormGatewayBlockCheckTest extends IntegrationTestCase
 
         $manager = $c->get(GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \GiveFlow\Gateways\Stripe\StripeGateway(
-                $c->get(\GiveFlow\Gateways\Stripe\StripeApi::class),
-                $c->get(\GiveFlow\Donations\DonationRepository::class),
-                $c->get(\GiveFlow\Donations\DonationService::class),
+            $manager->register(new \FundKit\Gateways\Stripe\StripeGateway(
+                $c->get(\FundKit\Gateways\Stripe\StripeApi::class),
+                $c->get(\FundKit\Donations\DonationRepository::class),
+                $c->get(\FundKit\Donations\DonationService::class),
                 $account,
-                $c->get(\GiveFlow\Donors\DonorRepository::class),
-                $c->get(\GiveFlow\Donors\DonorService::class),
-                $c->get(\GiveFlow\Foundation\Time\Clock::class),
-                $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
+                $c->get(\FundKit\Donors\DonorRepository::class),
+                $c->get(\FundKit\Donors\DonorService::class),
+                $c->get(\FundKit\Foundation\Time\Clock::class),
+                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
             ));
         }
 
@@ -88,7 +88,7 @@ final class FormGatewayBlockCheckTest extends IntegrationTestCase
     public function test_a_form_with_two_gateways_and_no_block_is_flagged(): void
     {
         $this->enableTwoGateways();
-        $check = $this->check($this->form('<!-- wp:giveflow/donation-amount /-->'));
+        $check = $this->check($this->form('<!-- wp:fundkit/donation-amount /-->'));
 
         $this->assertSame('warn', $check['status'] ?? null);
         $this->assertArrayHasKey('action_url', $check);
@@ -98,7 +98,7 @@ final class FormGatewayBlockCheckTest extends IntegrationTestCase
     {
         $this->enableTwoGateways();
         $check = $this->check($this->form(
-            '<!-- wp:giveflow/donation-amount /--><!-- wp:giveflow/payment-gateways {"style":"cards"} /-->'
+            '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/payment-gateways {"style":"cards"} /-->'
         ));
 
         $this->assertSame('pass', $check['status'] ?? null);
@@ -109,7 +109,7 @@ final class FormGatewayBlockCheckTest extends IntegrationTestCase
     {
         $this->enableTwoGateways();
         $check = $this->check($this->form(
-            '<!-- wp:giveflow/step --><!-- wp:giveflow/payment-gateways /--><!-- /wp:giveflow/step -->'
+            '<!-- wp:fundkit/step --><!-- wp:fundkit/payment-gateways /--><!-- /wp:fundkit/step -->'
         ));
 
         $this->assertSame('pass', $check['status'] ?? null);

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -40,7 +40,7 @@ final class SocialMetaTest extends IntegrationTestCase
         );
     }
 
-    public function test_plain_page_emits_no_giveflow_social_meta(): void
+    public function test_plain_page_emits_no_fundkit_social_meta(): void
     {
         $pageId = wp_insert_post([
             'post_title'  => 'About us',
@@ -63,7 +63,7 @@ final class SocialMetaTest extends IntegrationTestCase
             'post_title'  => 'Fundraiser layout',
             'post_status' => 'publish',
             'post_type'   => 'page',
-            'meta_input'  => ['_giveflow_campaign_id' => (int) $campaign['id']],
+            'meta_input'  => ['_fundkit_campaign_id' => (int) $campaign['id']],
         ]);
 
         $head = $this->headFor('/?page_id=' . (int) $subpage);
@@ -76,11 +76,11 @@ final class SocialMetaTest extends IntegrationTestCase
     {
         $campaign = $this->createCampaign(['title' => 'Filtered away']);
 
-        add_filter('giveflow.social_meta', '__return_empty_array');
+        add_filter('fundkit.social_meta', '__return_empty_array');
         try {
             $head = $this->headFor('/?page_id=' . (int) $campaign['page_id']);
         } finally {
-            remove_filter('giveflow.social_meta', '__return_empty_array');
+            remove_filter('fundkit.social_meta', '__return_empty_array');
         }
 
         $this->assertStringNotContainsString('property="og:', $head);
@@ -89,7 +89,7 @@ final class SocialMetaTest extends IntegrationTestCase
     /** @param array<string,mixed> $input */
     private function createCampaign(array $input): array
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode($input + ['status' => 'published']));
         return rest_do_request($req)->get_data();

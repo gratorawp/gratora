@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Donors\DonorRepository;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\Stripe\StripeAccount;
-use GiveFlow\Gateways\Stripe\StripeApi;
-use GiveFlow\Gateways\Stripe\StripeGateway;
-use GiveFlow\Recurring\RecurringPlanRepository;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donations\DonationService;
+use FundKit\Donors\DonorRepository;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\Stripe\StripeAccount;
+use FundKit\Gateways\Stripe\StripeApi;
+use FundKit\Gateways\Stripe\StripeGateway;
+use FundKit\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -35,11 +35,11 @@ final class RetrySubscriptionGuardTest extends IntegrationTestCase
         parent::setUp();
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        update_option('giveflow_gateway_config', [
+        update_option('fundkit_gateway_config', [
             'test_mode' => true,
             'stripe'    => ['webhook_secret_test' => 'whsec_guard'],
         ]);
-        update_option('giveflow_currency_locale', [
+        update_option('fundkit_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
@@ -113,7 +113,7 @@ final class RetrySubscriptionGuardTest extends IntegrationTestCase
         static $n = 0;
         $n++;
 
-        $create = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'stranded@example.test',
@@ -143,7 +143,7 @@ final class RetrySubscriptionGuardTest extends IntegrationTestCase
     private function retry(string $reference): \WP_REST_Response|\WP_Error
     {
         return rest_do_request(
-            new WP_REST_Request('POST', "/giveflow/v1/admin/donations/{$reference}/retry-subscription")
+            new WP_REST_Request('POST', "/fundkit/v1/admin/donations/{$reference}/retry-subscription")
         );
     }
 

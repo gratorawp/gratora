@@ -2,40 +2,40 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest\Portal;
+namespace FundKit\Rest\Portal;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Donations\AntiSpamGuard;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationQueries;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donors\ConsentService;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorRepository;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Donors\MagicLinkService;
-use GiveFlow\Donors\PendingSignupRepository;
-use GiveFlow\Donors\SignupRedemption;
-use GiveFlow\Donors\Portal\AnnualStatementBuilder;
-use GiveFlow\Donors\Portal\PortalSession;
-use GiveFlow\Foundation\Identity\IdentityHasher;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\SubscriptionChangeNeedsApproval;
-use GiveFlow\Gateways\SupportsPaymentMethodUpdate;
-use GiveFlow\Gateways\SupportsSubscriptionPause;
-use GiveFlow\Mail\Mailer;
-use GiveFlow\Receipts\Receipt;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanActions;
-use GiveFlow\Recurring\RecurringPlanChange;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Campaigns\Campaign;
+use FundKit\Donations\AntiSpamGuard;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationQueries;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donors\ConsentService;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorRepository;
+use FundKit\Donors\DonorService;
+use FundKit\Donors\MagicLinkService;
+use FundKit\Donors\PendingSignupRepository;
+use FundKit\Donors\SignupRedemption;
+use FundKit\Donors\Portal\AnnualStatementBuilder;
+use FundKit\Donors\Portal\PortalSession;
+use FundKit\Foundation\Identity\IdentityHasher;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\SubscriptionChangeNeedsApproval;
+use FundKit\Gateways\SupportsPaymentMethodUpdate;
+use FundKit\Gateways\SupportsSubscriptionPause;
+use FundKit\Mail\Mailer;
+use FundKit\Receipts\Receipt;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanActions;
+use FundKit\Recurring\RecurringPlanChange;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Vendor\Queryable\DB;
 
 /**
  * The donor portal API: magic-link sign-in, self-registration, and the signed-in
@@ -45,9 +45,9 @@ use GiveFlow\Vendor\Queryable\DB;
  */
 final class PortalController
 {
-    private const NAMESPACE = 'giveflow/v1';
+    private const NAMESPACE = 'fundkit/v1';
 
-    public const SEND_LINK_HOOK          = 'giveflow.async.send_portal_link';
+    public const SEND_LINK_HOOK          = 'fundkit.async.send_portal_link';
     private const SEND_LINK_IP_MAX       = 10;
     private const SEND_LINK_IP_WINDOW    = 15 * MINUTE_IN_SECONDS;
     private const SEND_LINK_EMAIL_MAX    = 3;
@@ -80,13 +80,13 @@ final class PortalController
         private ConsentService $consents,
         private Mailer $mailer,
         private AsyncDispatcher $async,
-        private \GiveFlow\Donors\DonorMetricsService $metrics,
+        private \FundKit\Donors\DonorMetricsService $metrics,
         private RecurringPlanActions $planActions,
         private GatewayManager $gateways,
         private AntiSpamGuard $spam,
         private PendingSignupRepository $pending,
-        private \GiveFlow\Donors\DonorAvatarUploader $avatarUploader,
-        private \GiveFlow\Donors\DonorAvatars $avatars,
+        private \FundKit\Donors\DonorAvatarUploader $avatarUploader,
+        private \FundKit\Donors\DonorAvatars $avatars,
     ) {
     }
 
@@ -135,7 +135,7 @@ final class PortalController
         register_rest_route(self::NAMESPACE, '/portal/logout-everywhere', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'logoutEverywhere'],
-            // The portal JS sends X-GiveFlow-Csrf on every call, so a cross-site
+            // The portal JS sends X-FundKit-Csrf on every call, so a cross-site
             // forged POST cannot sign the donor out.
             'permission_callback' => [$this, 'sessionWithCsrf'],
         ]);
@@ -278,7 +278,7 @@ final class PortalController
     /** @since 1.0.0 */
     private function privacySetting(string $key, $default)
     {
-        $opt = get_option('giveflow_privacy', []);
+        $opt = get_option('fundkit_privacy', []);
         if (! is_array($opt)) return $default;
         return array_key_exists($key, $opt) ? $opt[$key] : $default;
     }
@@ -298,7 +298,7 @@ final class PortalController
     {
         $expected = $this->session->csrfToken();
         if ($expected === null || $expected === '') return false;
-        $provided = (string) $request->get_header('X-GiveFlow-Csrf');
+        $provided = (string) $request->get_header('X-FundKit-Csrf');
         if ($provided === '') return false;
         return hash_equals($expected, $provided);
     }
@@ -321,8 +321,8 @@ final class PortalController
     public function sameSiteOnly(WP_REST_Request $request): bool|WP_Error
     {
         $refused = new WP_Error(
-            'giveflow_cross_site',
-            __('Sign-in must start from this site.', 'giveflow-fundraising-campaigns'),
+            'fundkit_cross_site',
+            __('Sign-in must start from this site.', 'fundkit-fundraising-campaigns'),
             ['status' => 403]
         );
 
@@ -385,7 +385,7 @@ final class PortalController
         $token = (string) $request['token'];
         $session = $this->session->startFromToken($token);
         if (! $session) {
-            return new WP_Error('giveflow_invalid_token', __('Sign-in link is invalid or expired.', 'giveflow-fundraising-campaigns'), ['status' => 401]);
+            return new WP_Error('fundkit_invalid_token', __('Sign-in link is invalid or expired.', 'fundkit-fundraising-campaigns'), ['status' => 401]);
         }
         return new WP_REST_Response([
             'ok'        => true,
@@ -431,7 +431,7 @@ final class PortalController
     /**
      * Self-registration, so somebody who has not donated can get into the
      * portal. Nothing here becomes a donor: anyone can type anyone's address,
-     * so the claim waits in giveflow_pending_signups until the emailed link comes
+     * so the claim waits in fundkit_pending_signups until the emailed link comes
      * back, and redeeming it is what creates the donor.
      *
      * The donor table is not read here, for the same reason sendLink() does not
@@ -587,7 +587,7 @@ final class PortalController
     {
         $ip = filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: 'unknown';
 
-        return $this->spam->hit('giveflow_send_link_ip_' . hash('sha256', $ip), self::SEND_LINK_IP_WINDOW)
+        return $this->spam->hit('fundkit_send_link_ip_' . hash('sha256', $ip), self::SEND_LINK_IP_WINDOW)
             <= self::SEND_LINK_IP_MAX;
     }
 
@@ -605,7 +605,7 @@ final class PortalController
      */
     private function consumeEmailQuota(string $email): bool
     {
-        $key = 'giveflow_send_link_addr_'
+        $key = 'fundkit_send_link_addr_'
             . substr($this->hasher->emailHash($this->hasher->normalizeEmail($email)), 0, 32);
 
         return $this->spam->hit($key, self::SEND_LINK_EMAIL_WINDOW) <= self::SEND_LINK_EMAIL_MAX;
@@ -621,7 +621,7 @@ final class PortalController
      */
     private function consumeMailboxQuota(string $email): bool
     {
-        $key = 'giveflow_send_link_mailbox_'
+        $key = 'fundkit_send_link_mailbox_'
             . substr($this->hasher->emailHash($this->hasher->rateLimitMailbox($email)), 0, 32);
 
         $count = $this->spam->hit($key, self::SEND_LINK_MAILBOX_WINDOW);
@@ -645,7 +645,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         if ($donorId === null) {
-            return new WP_Error('giveflow_unauthorized', __('Session expired.', 'giveflow-fundraising-campaigns'), ['status' => 401]);
+            return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundkit-fundraising-campaigns'), ['status' => 401]);
         }
 
         return new WP_REST_Response(['ok' => true, 'ended' => $this->session->destroyAllFor($donorId)], 200);
@@ -659,17 +659,17 @@ final class PortalController
         if (! $donor || $donor->redacted_at !== null) {
             // A redacted donor's session is invalid even when a link was
             // already exchanged: the row no longer represents a real person.
-            return new WP_Error('giveflow_session_invalid', __('Session expired.', 'giveflow-fundraising-campaigns'), ['status' => 401]);
+            return new WP_Error('fundkit_session_invalid', __('Session expired.', 'fundkit-fundraising-campaigns'), ['status' => 401]);
         }
 
         $name = trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''));
-        $currencyCfg = get_option('giveflow_currency_locale', []);
+        $currencyCfg = get_option('fundkit_currency_locale', []);
         $defaultCurrency = is_array($currencyCfg) && ! empty($currencyCfg['default_currency'])
             ? (string) $currencyCfg['default_currency']
             : 'USD';
         return new WP_REST_Response([
             'id'                  => (int) $donor->id,
-            'name'                => $name !== '' ? $name : __('Friend', 'giveflow-fundraising-campaigns'),
+            'name'                => $name !== '' ? $name : __('Friend', 'fundkit-fundraising-campaigns'),
             'first_name'          => (string) ($donor->first_name ?? ''),
             'last_name'           => (string) ($donor->last_name ?? ''),
             'country'             => (string) ($donor->country ?? ''),
@@ -695,7 +695,7 @@ final class PortalController
      */
     private function unconvertedDonationCount(int $donorId): int
     {
-        $row = DonationQueries::donationsOnly(DB::table('giveflow_donations'))
+        $row = DonationQueries::donationsOnly(DB::table('fundkit_donations'))
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId)
             ->selectRaw(DonationQueries::unconvertedExpr() . ' AS n')
@@ -752,7 +752,7 @@ final class PortalController
         // kind, as well as owner: the list excludes ticket orders, so a
         // reference naming one must not open here either.
         if (! $d || $d->donor_id !== $donor->id || (string) $d->kind !== 'donation') {
-            return new WP_Error('giveflow_not_found', '', ['status' => 404]);
+            return new WP_Error('fundkit_not_found', '', ['status' => 404]);
         }
 
         $giveAgainUrl = null;
@@ -769,9 +769,9 @@ final class PortalController
                     // comparable across currencies, so a bare 500000 read as the
                     // form's own currency turns 5,000 yen into 5,000 dollars.
                     $giveAgainUrl = add_query_arg([
-                        'giveflow_amount'    => $net,
-                        'giveflow_currency'  => (string) $d->currency,
-                        'giveflow_frequency' => $d->frequency,
+                        'fundkit_amount'    => $net,
+                        'fundkit_currency'  => (string) $d->currency,
+                        'fundkit_frequency' => $d->frequency,
                     ], $perma);
                 }
             }
@@ -779,7 +779,7 @@ final class PortalController
 
         // Add-ons own records that hang off a donation, and the filter is how
         // those reach the portal without core knowing what they are.
-        $payload = (array) apply_filters('giveflow.portal.donation', [
+        $payload = (array) apply_filters('fundkit.portal.donation', [
             'id'                => (int) $d->id,
             'reference'         => (string) $d->reference,
             'amount_cents'      => (int) $d->amount_cents,
@@ -806,14 +806,14 @@ final class PortalController
 
         $d = $this->donations->findByReference((string) $request['reference']);
         if (! $d || $d->donor_id !== $donor->id) {
-            return new WP_Error('giveflow_not_found', '', ['status' => 404]);
+            return new WP_Error('fundkit_not_found', '', ['status' => 404]);
         }
         $body = (array) ($request->get_json_params() ?? []);
         $d->is_anonymous = (bool) ($body['is_anonymous'] ?? false);
         $d->updated_at   = gmdate('Y-m-d H:i:s');
         $d->save();
 
-        do_action('giveflow.donation.updated', $d);
+        do_action('fundkit.donation.updated', $d);
         return new WP_REST_Response(['ok' => true, 'is_anonymous' => $d->is_anonymous], 200);
     }
 
@@ -903,7 +903,7 @@ final class PortalController
                     break;
 
                 default:
-                    return new WP_Error('giveflow_invalid_action', '', ['status' => 422]);
+                    return new WP_Error('fundkit_invalid_action', '', ['status' => 422]);
             }
         } catch (SubscriptionChangeNeedsApproval $e) {
             // Ahead of the RuntimeException arm below, which is its parent and
@@ -914,21 +914,21 @@ final class PortalController
             // amount would tell the donor a change had happened that their card
             // would not agree with.
             return new WP_Error(
-                'giveflow_change_needs_approval',
-                __('Your payment provider needs you to approve this change before it takes effect. Nothing has changed yet.', 'giveflow-fundraising-campaigns'),
+                'fundkit_change_needs_approval',
+                __('Your payment provider needs you to approve this change before it takes effect. Nothing has changed yet.', 'fundkit-fundraising-campaigns'),
                 ['status' => 409, 'approve_url' => $e->approveUrl]
             );
         } catch (\InvalidArgumentException $e) {
-            return new WP_Error('giveflow_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
         } catch (\RuntimeException $e) {
-            return new WP_Error('giveflow_plan_terminal', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('fundkit_plan_terminal', $e->getMessage(), ['status' => 422]);
         } catch (\Throwable $e) {
             // Local state is deliberately left unchanged when the gateway or
             // anything downstream fails.
             ErrorLog::record('portal.recurring', $e->getMessage());
             return new WP_Error(
-                'giveflow_gateway_error',
-                __('We could not complete this change with the payment provider. Please try again in a moment.', 'giveflow-fundraising-campaigns'),
+                'fundkit_gateway_error',
+                __('We could not complete this change with the payment provider. Please try again in a moment.', 'fundkit-fundraising-campaigns'),
                 ['status' => 502]
             );
         }
@@ -955,8 +955,8 @@ final class PortalController
         $gateway = $this->gateways->get((string) $plan->gateway);
         if (! $gateway instanceof SupportsPaymentMethodUpdate) {
             return new WP_Error(
-                'giveflow_not_supported',
-                __('This donation\'s payment method cannot be changed here. Please contact us and we will help.', 'giveflow-fundraising-campaigns'),
+                'fundkit_not_supported',
+                __('This donation\'s payment method cannot be changed here. Please contact us and we will help.', 'fundkit-fundraising-campaigns'),
                 ['status' => 422]
             );
         }
@@ -966,8 +966,8 @@ final class PortalController
         } catch (\Throwable $e) {
             ErrorLog::record('portal.payment_method', $e->getMessage());
             return new WP_Error(
-                'giveflow_gateway_error',
-                __('We could not reach the payment provider. Please try again in a moment.', 'giveflow-fundraising-campaigns'),
+                'fundkit_gateway_error',
+                __('We could not reach the payment provider. Please try again in a moment.', 'fundkit-fundraising-campaigns'),
                 ['status' => 502]
             );
         }
@@ -994,7 +994,7 @@ final class PortalController
 
         $gateway = $this->gateways->get((string) $plan->gateway);
         if (! $gateway instanceof SupportsPaymentMethodUpdate) {
-            return new WP_Error('giveflow_not_supported', '', ['status' => 422]);
+            return new WP_Error('fundkit_not_supported', '', ['status' => 422]);
         }
 
         try {
@@ -1002,13 +1002,13 @@ final class PortalController
         } catch (\Throwable $e) {
             ErrorLog::record('portal.payment_method', $e->getMessage());
             return new WP_Error(
-                'giveflow_gateway_error',
-                __('The new card could not be saved. Please try again in a moment.', 'giveflow-fundraising-campaigns'),
+                'fundkit_gateway_error',
+                __('The new card could not be saved. Please try again in a moment.', 'fundkit-fundraising-campaigns'),
                 ['status' => 502]
             );
         }
 
-        do_action('giveflow.recurring.payment_method_updated', $plan);
+        do_action('fundkit.recurring.payment_method_updated', $plan);
 
         return new WP_REST_Response(['ok' => true], 200);
     }
@@ -1027,7 +1027,7 @@ final class PortalController
         // Ownership is not the only gate: a test plan is not listed, so it must
         // not be actionable either.
         if (! $plan || (int) $plan->donor_id !== (int) $donor->id || $plan->is_test) {
-            return new WP_Error('giveflow_not_found', '', ['status' => 404]);
+            return new WP_Error('fundkit_not_found', '', ['status' => 404]);
         }
 
         return $plan;
@@ -1092,11 +1092,11 @@ final class PortalController
             ->where('voided', 0)
             ->get();
         if (! $receipt) {
-            return new WP_Error('giveflow_receipt_not_found', __('Receipt not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_receipt_not_found', __('Receipt not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
 
         $token = $this->magicLinks->issue($donorId, 'download_receipt', $receiptId, 3600);
-        $url   = add_query_arg('token', $token, rest_url('giveflow/v1/receipts/' . $receiptId . '/download'));
+        $url   = add_query_arg('token', $token, rest_url('fundkit/v1/receipts/' . $receiptId . '/download'));
         return new WP_REST_Response(['url' => esc_url_raw($url)], 200);
     }
 
@@ -1108,16 +1108,16 @@ final class PortalController
 
         $year = (int) $request['year'];
         if ($year < 2000 || $year > 2100) {
-            return new WP_Error('giveflow_invalid_year', '', ['status' => 422]);
+            return new WP_Error('fundkit_invalid_year', '', ['status' => 422]);
         }
         $pdf = $this->annualStatements->build($donor, $year);
         if ($pdf === '') {
-            return new WP_Error('giveflow_no_donations', __('No donations found for that year.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_no_donations', __('No donations found for that year.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
 
         // Streamed directly, so the REST server does not JSON-encode the binary
         // body.
-        $filename = sprintf('giveflow-annual-%d.pdf', $year);
+        $filename = sprintf('fundkit-annual-%d.pdf', $year);
         $route    = $request->get_route();
         add_filter('rest_pre_serve_request', function (bool $served, $result, $req, $server) use ($route, $pdf, $filename) {
             if ((string) $req->get_route() !== $route) return $served;
@@ -1142,7 +1142,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor || $donor->redacted_at !== null) return new WP_Error('giveflow_unauthorized', __('Session expired.', 'giveflow-fundraising-campaigns'), ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundkit-fundraising-campaigns'), ['status' => 401]);
 
         return new WP_REST_Response([
             'email'      => (string) ($this->donorService->decryptEmail($donor) ?? ''),
@@ -1160,7 +1160,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor || $donor->redacted_at !== null) return new WP_Error('giveflow_unauthorized', __('Session expired.', 'giveflow-fundraising-campaigns'), ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundkit-fundraising-campaigns'), ['status' => 401]);
 
         $body  = (array) ($request->get_json_params() ?? []);
         $patch = [];
@@ -1191,17 +1191,17 @@ final class PortalController
             $max  = wp_convert_hr_to_bytes((string) ini_get('post_max_size'));
             if ($max > 0 && $sent > $max) {
                 return new WP_Error(
-                    'giveflow_upload_too_large',
+                    'fundkit_upload_too_large',
                     sprintf(
                         /* translators: %s: file size, e.g. "2 MB". */
-                        __('That picture is too large. The most this site takes is %s.', 'giveflow-fundraising-campaigns'),
-                        size_format(\GiveFlow\Donors\DonorAvatarUploader::maxBytes())
+                        __('That picture is too large. The most this site takes is %s.', 'fundkit-fundraising-campaigns'),
+                        size_format(\FundKit\Donors\DonorAvatarUploader::maxBytes())
                     ),
                     ['status' => 413]
                 );
             }
 
-            return new WP_Error('giveflow_upload_missing', __('No picture was sent.', 'giveflow-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_upload_missing', __('No picture was sent.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
         }
 
         $result = $this->avatarUploader->store($donor, $file);
@@ -1401,14 +1401,14 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor || $donor->redacted_at !== null) return new WP_Error('giveflow_unauthorized', __('Session expired.', 'giveflow-fundraising-campaigns'), ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundkit-fundraising-campaigns'), ['status' => 401]);
         return $donor;
     }
 
     /** @since 1.0.0 */
     private function portalUrl(): string
     {
-        return (new \GiveFlow\Donors\Portal\PortalPage())->url();
+        return (new \FundKit\Donors\Portal\PortalPage())->url();
     }
 
     /** @since 1.0.0 */
@@ -1432,8 +1432,8 @@ final class PortalController
     {
         if (! $this->privacySetting('allow_data_export', true)) {
             return new WP_Error(
-                'giveflow_export_disabled',
-                __('Data export is disabled by the organization.', 'giveflow-fundraising-campaigns'),
+                'fundkit_export_disabled',
+                __('Data export is disabled by the organization.', 'fundkit-fundraising-campaigns'),
                 ['status' => 403]
             );
         }
@@ -1505,12 +1505,12 @@ final class PortalController
         $bundle['exported_at'] = gmdate('c');
 
         $json     = wp_json_encode($bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $filename = sprintf('giveflow-my-data-%d-%s.json', $donor->id, gmdate('Y-m-d'));
+        $filename = sprintf('fundkit-my-data-%d-%s.json', $donor->id, gmdate('Y-m-d'));
 
         // Streamed as an attachment, so the donor's browser saves a file
         // instead of receiving the REST envelope.
         add_filter('rest_pre_serve_request', function (bool $served, $result, $req, $server) use ($json, $filename) {
-            if ((string) $req->get_route() !== '/giveflow/v1/portal/data-export') return $served;
+            if ((string) $req->get_route() !== '/fundkit/v1/portal/data-export') return $served;
             $server->send_header('Content-Type', 'application/json; charset=utf-8');
             $server->send_header('Content-Disposition', 'attachment; filename="' . $filename . '"');
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
@@ -1558,8 +1558,8 @@ final class PortalController
     {
         if (! $this->privacySetting('allow_account_delete', true)) {
             return new WP_Error(
-                'giveflow_delete_disabled',
-                __('Account deletion is disabled by the organization.', 'giveflow-fundraising-campaigns'),
+                'fundkit_delete_disabled',
+                __('Account deletion is disabled by the organization.', 'fundkit-fundraising-campaigns'),
                 ['status' => 403]
             );
         }
@@ -1568,8 +1568,8 @@ final class PortalController
 
         if (strtoupper((string) $request['confirm']) !== 'DELETE') {
             return new WP_Error(
-                'giveflow_invalid_confirmation',
-                __('Type DELETE to confirm.', 'giveflow-fundraising-campaigns'),
+                'fundkit_invalid_confirmation',
+                __('Type DELETE to confirm.', 'fundkit-fundraising-campaigns'),
                 ['status' => 422]
             );
         }
@@ -1585,8 +1585,8 @@ final class PortalController
             ErrorLog::record('portal.forget', $e->getMessage(), ['donor_id' => (int) $donor->id]);
 
             return new WP_Error(
-                'giveflow_erasure_blocked',
-                __('We could not stop your recurring donation with the payment provider, so your account has not been deleted yet. Please contact the organization and they will finish this for you.', 'giveflow-fundraising-campaigns'),
+                'fundkit_erasure_blocked',
+                __('We could not stop your recurring donation with the payment provider, so your account has not been deleted yet. Please contact the organization and they will finish this for you.', 'fundkit-fundraising-campaigns'),
                 ['status' => 409]
             );
         }

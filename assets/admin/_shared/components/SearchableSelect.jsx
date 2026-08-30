@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/components/SearchableSelect';
+export { default } from '@fundkit/ui/components/SearchableSelect';

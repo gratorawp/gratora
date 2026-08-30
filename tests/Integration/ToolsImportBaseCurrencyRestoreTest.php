@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\Transfer\DataExporter;
-use GiveFlow\Settings\SettingsService;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Campaigns\Campaign;
+use FundKit\Donations\Donation;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Transfer\DataExporter;
+use FundKit\Settings\SettingsService;
+use FundKit\Vendor\Queryable\DB;
 use WP_REST_Request;
 
 /**
@@ -33,17 +33,17 @@ final class ToolsImportBaseCurrencyRestoreTest extends IntegrationTestCase
     {
         $prefix = DB::getPrefix();
         foreach ([
-            'giveflow_receipts',
-            'giveflow_refunds',
-            'giveflow_consents',
-            'giveflow_donation_notes',
-            'giveflow_donor_notes',
-            'giveflow_donations',
-            'giveflow_donors',
-            'giveflow_form_donation_stats',
-            'giveflow_forms',
-            'giveflow_campaigns',
-            'giveflow_funds',
+            'fundkit_receipts',
+            'fundkit_refunds',
+            'fundkit_consents',
+            'fundkit_donation_notes',
+            'fundkit_donor_notes',
+            'fundkit_donations',
+            'fundkit_donors',
+            'fundkit_form_donation_stats',
+            'fundkit_forms',
+            'fundkit_campaigns',
+            'fundkit_funds',
         ] as $table) {
             DB::raw("DELETE FROM {$prefix}{$table}");
         }
@@ -107,7 +107,7 @@ final class ToolsImportBaseCurrencyRestoreTest extends IntegrationTestCase
     private function freshInstall(): void
     {
         $this->wipeRecords();
-        update_option('giveflow_currency_locale', [
+        update_option('fundkit_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ], false);
@@ -130,7 +130,7 @@ final class ToolsImportBaseCurrencyRestoreTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function post(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/tools/import');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/import');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -139,7 +139,7 @@ final class ToolsImportBaseCurrencyRestoreTest extends IntegrationTestCase
 
     private function base(): string
     {
-        $opt = get_option('giveflow_currency_locale');
+        $opt = get_option('fundkit_currency_locale');
 
         return (string) (is_array($opt) ? ($opt['default_currency'] ?? '') : '');
     }
@@ -157,11 +157,11 @@ final class ToolsImportBaseCurrencyRestoreTest extends IntegrationTestCase
         $export = $this->export();
         $this->assertSame(
             'GBP',
-            (string) ($export['settings']['giveflow_currency_locale']['default_currency'] ?? ''),
+            (string) ($export['settings']['fundkit_currency_locale']['default_currency'] ?? ''),
             'precondition: the file carries the org base'
         );
         $this->assertNotEmpty(
-            $export['tables']['giveflow_donations'] ?? [],
+            $export['tables']['fundkit_donations'] ?? [],
             'precondition: the file carries the money that base denominates'
         );
 
@@ -196,7 +196,7 @@ final class ToolsImportBaseCurrencyRestoreTest extends IntegrationTestCase
         $res = $this->post($export);
 
         $this->assertSame(409, $res->get_status());
-        $this->assertSame('giveflow_base_currency_locked', $res->as_error()->get_error_code());
+        $this->assertSame('fundkit_base_currency_locked', $res->as_error()->get_error_code());
         $this->assertSame('USD', $this->base(), 'the stored base is untouched');
         $this->assertFalse((bool) ($res->as_error()->get_error_data()['imported'] ?? true));
         $this->assertSame(

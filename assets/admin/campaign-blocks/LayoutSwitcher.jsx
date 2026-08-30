@@ -17,7 +17,7 @@
  * dependable to fill from outside core. A portal asks one question with a
  * visible answer: is the header there. If it is not, no button, no error.
  *
- * Only mounts on a page tied to a campaign, which is the _giveflow_campaign_id
+ * Only mounts on a page tied to a campaign, which is the _fundkit_campaign_id
  * meta a campaign's page carries, and only when that campaign's type is one
  * templates can reshape. Every other page opens the same editor.
  */
@@ -59,7 +59,7 @@ function useHeaderSlot( enabled ) {
                 return ++tries < 40;
             }
             host = document.createElement( 'div' );
-            host.className = 'giveflow-layout-slot';
+            host.className = 'fundkit-layout-slot';
             header.prepend( host );
             setNode( host );
             return false;
@@ -85,7 +85,7 @@ function useHeaderSlot( enabled ) {
 /** The brand mark: three stacked rules, so the button reads as ours. */
 function BrandMark() {
     return (
-        <span className="giveflow-layout-btn__mark" aria-hidden="true">
+        <span className="fundkit-layout-btn__mark" aria-hidden="true">
             <span /><span /><span />
         </span>
     );
@@ -96,14 +96,14 @@ function CampaignLayoutButton() {
     const [ applying, setApplying ] = useState( false );
 
     const campaignId = useSelect(
-        ( select ) => select( editorStore )?.getEditedPostAttribute( 'meta' )?._giveflow_campaign_id || 0,
+        ( select ) => select( editorStore )?.getEditedPostAttribute( 'meta' )?._fundkit_campaign_id || 0,
         []
     );
 
     // A campaign type that lays its own page out owns every block on it, so
     // swapping in a template would delete the thing that type exists for. The
     // server decides, because it is the side that knows the campaign's type.
-    const offered = campaignId > 0 && window.giveflowCampaignBlocks?.pageTemplates !== false;
+    const offered = campaignId > 0 && window.fundkitCampaignBlocks?.pageTemplates !== false;
 
     const { resetBlocks } = useDispatch( blockEditorStore );
     const { editPost } = useDispatch( editorStore );
@@ -118,25 +118,25 @@ function CampaignLayoutButton() {
         setApplying( true );
         try {
             const res = await apiFetch( {
-                path: `/giveflow/v1/admin/campaigns/${ campaignId }/layout?template=${ encodeURIComponent( template.id ) }`,
+                path: `/fundkit/v1/admin/campaigns/${ campaignId }/layout?template=${ encodeURIComponent( template.id ) }`,
             } );
 
             resetBlocks( parse( res.blocks || '' ) );
             // Recorded on the post rather than sent to the server now, so it is
             // saved with the blocks it belongs to and an organiser who changes
             // their mind before saving leaves nothing behind.
-            editPost( { meta: { _giveflow_campaign_page_template: res.template } } );
+            editPost( { meta: { _fundkit_campaign_page_template: res.template } } );
             setPicking( false );
 
             createNotice(
                 'info',
-                __( 'Campaign template applied. Undo puts the old page back.', 'giveflow-fundraising-campaigns' ),
+                __( 'Campaign template applied. Undo puts the old page back.', 'fundkit-fundraising-campaigns' ),
                 { type: 'snackbar' }
             );
         } catch ( err ) {
             createNotice(
                 'error',
-                err?.message || __( 'The campaign template could not be applied.', 'giveflow-fundraising-campaigns' ),
+                err?.message || __( 'The campaign template could not be applied.', 'fundkit-fundraising-campaigns' ),
                 { type: 'snackbar' }
             );
         } finally {
@@ -146,13 +146,13 @@ function CampaignLayoutButton() {
 
     const button = (
         <Button
-            className="giveflow-layout-btn"
+            className="fundkit-layout-btn"
             onClick={ () => setPicking( true ) }
             disabled={ applying }
         >
             { applying ? <Spinner /> : <BrandMark /> }
-            <span className="giveflow-layout-btn__label">
-                { __( 'Campaign templates', 'giveflow-fundraising-campaigns' ) }
+            <span className="fundkit-layout-btn__label">
+                { __( 'Campaign templates', 'fundkit-fundraising-campaigns' ) }
             </span>
         </Button>
     );
@@ -162,7 +162,7 @@ function CampaignLayoutButton() {
             { slot ? createPortal( button, slot ) : null }
             { picking && (
                 <CampaignTemplatePicker
-                    campaignType={ window.giveflowCampaignBlocks?.campaignType || '' }
+                    campaignType={ window.fundkitCampaignBlocks?.campaignType || '' }
                     onPick={ apply }
                     onClose={ () => setPicking( false ) }
                 />
@@ -171,4 +171,4 @@ function CampaignLayoutButton() {
     );
 }
 
-registerPlugin( 'giveflow-campaign-layout', { render: CampaignLayoutButton } );
+registerPlugin( 'fundkit-campaign-layout', { render: CampaignLayoutButton } );

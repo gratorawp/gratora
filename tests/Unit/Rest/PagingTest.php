@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Rest;
+namespace FundKit\Tests\Unit\Rest;
 
-use GiveFlow\Rest\Paging;
+use FundKit\Rest\Paging;
 use PHPUnit\Framework\TestCase;
 
 /**

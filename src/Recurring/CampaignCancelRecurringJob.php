@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Recurring;
+namespace FundKit\Recurring;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Async\AsyncDispatcher;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Async\AsyncDispatcher;
 
 /**
  * Cancels a campaign's live recurring plans in bounded, resumable batches.
@@ -24,9 +24,9 @@ use GiveFlow\Async\AsyncDispatcher;
  */
 final class CampaignCancelRecurringJob
 {
-    public const HOOK = 'giveflow.async.cancel_campaign_recurring';
+    public const HOOK = 'fundkit.async.cancel_campaign_recurring';
 
-    private const OPTION = 'giveflow_campaign_cancel_recurring';
+    private const OPTION = 'fundkit_campaign_cancel_recurring';
 
     /** Gateway round trips per tick, not rows: each one is an HTTPS call. */
     private const BATCH = 25;
@@ -88,7 +88,7 @@ final class CampaignCancelRecurringJob
         if ($plans === []) {
             $failed = self::failedFor($campaignId);
             self::clear($campaignId);
-            do_action('giveflow.campaign.recurring_cancelled', $campaignId, $failed);
+            do_action('fundkit.campaign.recurring_cancelled', $campaignId, $failed);
             return;
         }
 

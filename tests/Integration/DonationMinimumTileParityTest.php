@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Forms\Form;
-use GiveFlow\Forms\FormSubmissionValidator;
+use FundKit\Forms\Form;
+use FundKit\Forms\FormSubmissionValidator;
 
 /**
  * A form must accept the smallest amount it offers. Converted presets are
@@ -78,16 +78,16 @@ final class DonationMinimumTileParityTest extends IntegrationTestCase
      */
     public function test_the_bar_is_the_block_s_own_currency_not_the_org_default(): void
     {
-        update_option('giveflow_fx_rates', [
+        update_option('fundkit_fx_rates', [
             'base'       => 'USD',
             'date'       => gmdate('Y-m-d'),
             'fetched_at' => gmdate('c'),
             'rates'      => ['USD' => 1.0, 'EUR' => 0.9],
         ], false);
 
-        $blocks = '<!-- wp:giveflow/donation-amount {"allowCustom":true,"currency":"EUR","minCents":2500} /-->'
-            . '<!-- wp:giveflow/currency-switcher /-->'
-            . '<!-- wp:giveflow/submit-button {"label":"Donate"} /-->';
+        $blocks = '<!-- wp:fundkit/donation-amount {"allowCustom":true,"currency":"EUR","minCents":2500} /-->'
+            . '<!-- wp:fundkit/currency-switcher /-->'
+            . '<!-- wp:fundkit/submit-button {"label":"Donate"} /-->';
 
         $form = Form::make();
         $form->title      = 'Authored EUR ' . uniqid();
@@ -110,11 +110,11 @@ final class DonationMinimumTileParityTest extends IntegrationTestCase
         // The create path refuses a currency the org does not accept and the
         // switcher never offers one, so a fixture that only seeds the rate
         // describes a donation nobody could make.
-        update_option('giveflow_currency_locale', [
+        update_option('fundkit_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', $code],
         ]);
-        update_option('giveflow_fx_rates', [
+        update_option('fundkit_fx_rates', [
             'base'       => 'USD',
             'date'       => gmdate('Y-m-d'),
             'fetched_at' => gmdate('c'),
@@ -128,9 +128,9 @@ final class DonationMinimumTileParityTest extends IntegrationTestCase
      */
     private function formWithMinimum(int $minCents, bool $withSwitcher = false): Form
     {
-        $blocks = '<!-- wp:giveflow/donation-amount {"allowCustom":true,"currency":"USD","minCents":' . $minCents . '} /-->'
-            . ($withSwitcher ? '<!-- wp:giveflow/currency-switcher /-->' : '')
-            . '<!-- wp:giveflow/submit-button {"label":"Donate"} /-->';
+        $blocks = '<!-- wp:fundkit/donation-amount {"allowCustom":true,"currency":"USD","minCents":' . $minCents . '} /-->'
+            . ($withSwitcher ? '<!-- wp:fundkit/currency-switcher /-->' : '')
+            . '<!-- wp:fundkit/submit-button {"label":"Donate"} /-->';
 
         $form = Form::make();
         $form->title      = 'Tile parity ' . uniqid();

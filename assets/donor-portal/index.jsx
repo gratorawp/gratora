@@ -3,14 +3,14 @@
 import { render } from 'preact';
 import { useEffect, useState, useCallback, useRef } from 'preact/hooks';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { parseTimestamp } from '@giveflow/ui/utils/format';
+import { parseTimestamp } from '@fundkit/ui/utils/format';
 import { formatAmount } from '../_shared/money';
 import { COUNTRIES } from '../_shared/countries';
 import { loadStripeJs } from '../donation-form/util/stripe';
 import { recurringStatusLabel } from './statusLabels';
 import './portal.scss';
 
-const cfg = window.giveflowPortal || { rest: '/wp-json/giveflow/v1/portal/', nonce: '' };
+const cfg = window.fundkitPortal || { rest: '/wp-json/fundkit/v1/portal/', nonce: '' };
 
 const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function useFocusTrap( ref, active, onClose ) {
@@ -47,7 +47,7 @@ function useFocusTrap( ref, active, onClose ) {
 }
 
 // In memory only, populated from /portal/me or /portal/exchange. State-changing
-// endpoints reject a request without a matching `X-GiveFlow-Csrf` header.
+// endpoints reject a request without a matching `X-FundKit-Csrf` header.
 let csrfToken = '';
 
 function setCsrfFromResponse( payload ) {
@@ -80,7 +80,7 @@ function api( path, init = {} ) {
         ...( cfg.nonce ? { 'X-WP-Nonce': cfg.nonce } : {} ),
         ...( init.headers || {} ),
     };
-    if ( csrfToken ) headers[ 'X-GiveFlow-Csrf' ] = csrfToken;
+    if ( csrfToken ) headers[ 'X-FundKit-Csrf' ] = csrfToken;
 
     return fetch( `${ cfg.rest }${ path }`, {
         credentials: 'same-origin',
@@ -88,7 +88,7 @@ function api( path, init = {} ) {
         ...init,
     } ).then( async ( r ) => {
         if ( ! r.ok ) {
-            const err = await refusal( r, __( 'Request failed', 'giveflow-fundraising-campaigns' ) );
+            const err = await refusal( r, __( 'Request failed', 'fundkit-fundraising-campaigns' ) );
             if ( ( r.status === 401 || r.status === 403 ) && typeof onSessionExpired === 'function' ) {
                 onSessionExpired();
             }
@@ -111,10 +111,10 @@ function fetchDocument( url, fallback ) {
     } );
 }
 
-// Preserves the page's intent params (e.g. ?giveflow_fundraise=10) across the
+// Preserves the page's intent params (e.g. ?fundkit_fundraise=10) across the
 // magic-link round-trip through email, so registering lands back in the flow
 // the donor started rather than the portal overview.
-const RETURN_KEY = 'giveflow_portal_return';
+const RETURN_KEY = 'fundkit_portal_return';
 
 function stashReturn() {
     const p = new URLSearchParams( window.location.search );
@@ -141,7 +141,7 @@ function popReturn() {
 // A payment method that confirms by navigation leaves the portal entirely and
 // comes back to the bare URL with the modal gone, so the plan it belongs to and
 // the key needed to read the intent are parked where the boot path finds them.
-const CARD_RETURN_KEY = 'giveflow_portal_card_return';
+const CARD_RETURN_KEY = 'fundkit_portal_card_return';
 
 function stashCardReturn( planId, publishableKey ) {
     if ( ! planId || ! publishableKey ) return;
@@ -189,7 +189,7 @@ function completeCardReturn( { clientSecret, planId, publishableKey } ) {
         .then( ( res ) => {
             const intent = res && res.setupIntent;
             const token  = intent && intent.status === 'succeeded' ? intent.payment_method : '';
-            if ( ! token ) throw new Error( __( 'That payment method was not saved.', 'giveflow-fundraising-campaigns' ) );
+            if ( ! token ) throw new Error( __( 'That payment method was not saved.', 'fundkit-fundraising-campaigns' ) );
             return api( `recurring/${ planId }/payment-method/complete`, {
                 method: 'POST',
                 body:   JSON.stringify( { token } ),
@@ -199,16 +199,16 @@ function completeCardReturn( { clientSecret, planId, publishableKey } ) {
 
 // Extension-tab seam, on preact/hooks because the portal is a standalone preact
 // app; assets/admin/_shared/extensionTabs.jsx is the React counterpart.
-const TAB_EVENT   = 'giveflow:tabs:changed';
-const PANEL_EVENT = 'giveflow:panels:changed';
+const TAB_EVENT   = 'fundkit:tabs:changed';
+const PANEL_EVENT = 'fundkit:panels:changed';
 
 function readExtTabs( surface ) {
-    const reg = ( window.giveflow && window.giveflow.tabs ) || null;
+    const reg = ( window.fundkit && window.fundkit.tabs ) || null;
     return reg && typeof reg.get === 'function' ? reg.get( surface ) : [];
 }
 
 function readExtPanels( surface ) {
-    const reg = ( window.giveflow && window.giveflow.panels ) || null;
+    const reg = ( window.fundkit && window.fundkit.panels ) || null;
     return reg && typeof reg.get === 'function' ? reg.get( surface ) : [];
 }
 
@@ -288,7 +288,7 @@ function App() {
                 if ( err && ( err.status === 401 || err.status === 403 ) ) {
                     setMe( null );
                 } else {
-                    setLoadError( err?.message || __( 'Could not load your account.', 'giveflow-fundraising-campaigns' ) );
+                    setLoadError( err?.message || __( 'Could not load your account.', 'fundkit-fundraising-campaigns' ) );
                 }
                 return null;
             } )
@@ -301,13 +301,13 @@ function App() {
         if ( ! me ) return undefined;
         onSessionExpired = () => {
             setMe( null );
-            setError( __( 'Your session expired. Please sign in again.', 'giveflow-fundraising-campaigns' ) );
+            setError( __( 'Your session expired. Please sign in again.', 'fundkit-fundraising-campaigns' ) );
         };
         return () => { onSessionExpired = null; };
     }, [ me ] );
 
     // Lets an add-on tab claim the initial view from URL params (e.g. a
-    // "Start fundraising" link landing on ?giveflow_fundraise=<id>). Runs once,
+    // "Start fundraising" link landing on ?fundkit_fundraise=<id>). Runs once,
     // after sign-in, when the registry has populated.
     useEffect( () => {
         if ( initialExtTabApplied.current || ! me || ! extTabs.length ) return;
@@ -351,7 +351,7 @@ function App() {
                     // burns the next link the same way.
                     return loadMe().then( ( who ) => {
                         if ( ! who ) {
-                            setError( __( 'Your sign-in link worked, but this browser did not keep you signed in. Check that the web address here matches the one in your email, and that cookies are allowed for this site, then ask for a new link.', 'giveflow-fundraising-campaigns' ) );
+                            setError( __( 'Your sign-in link worked, but this browser did not keep you signed in. Check that the web address here matches the one in your email, and that cookies are allowed for this site, then ask for a new link.', 'fundkit-fundraising-campaigns' ) );
                         }
                     } );
                 } )
@@ -375,20 +375,20 @@ function App() {
         if ( ! me || ! pending ) return;
         pendingCardReturn.current = null;
         completeCardReturn( pending )
-            .then( () => setCardNotice( { ok: true, text: __( 'Your new payment method is saved. Future donations will use it.', 'giveflow-fundraising-campaigns' ) } ) )
+            .then( () => setCardNotice( { ok: true, text: __( 'Your new payment method is saved. Future donations will use it.', 'fundkit-fundraising-campaigns' ) } ) )
             .catch( ( e ) => setCardNotice( {
                 ok:   false,
-                text: e.message || __( 'That payment method was not saved, so your donation still uses the old one.', 'giveflow-fundraising-campaigns' ),
+                text: e.message || __( 'That payment method was not saved, so your donation still uses the old one.', 'fundkit-fundraising-campaigns' ),
             } ) );
     }, [ me ] );
 
-    if ( loading ) return <div class="dp-loading">{ __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</div>;
+    if ( loading ) return <div class="dp-loading">{ __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</div>;
     if ( ! me && loadError ) {
         return (
             <div class="dp-loading">
                 <p class="dp-signin__error">{ loadError }</p>
                 <button type="button" class="dp-link" onClick={ () => { setLoading( true ); loadMe(); } }>
-                    { __( 'Try again', 'giveflow-fundraising-campaigns' ) }
+                    { __( 'Try again', 'fundkit-fundraising-campaigns' ) }
                 </button>
             </div>
         );
@@ -404,7 +404,7 @@ function App() {
     return (
         <div class="dp">
             <header class="dp__head">
-                <h1>{ sprintf( /* translators: %s: donor's first name or full name */ __( 'Hi, %s.', 'giveflow-fundraising-campaigns' ), me.first_name || me.name ) }</h1>
+                <h1>{ sprintf( /* translators: %s: donor's first name or full name */ __( 'Hi, %s.', 'fundkit-fundraising-campaigns' ), me.first_name || me.name ) }</h1>
                 <SignOutControls />
             </header>
 
@@ -416,7 +416,7 @@ function App() {
                         class="dp-banner__action"
                         onClick={ () => { setCardNotice( null ); if ( ! cardNotice.ok ) setTab( 'recurring' ); } }
                     >
-                        { cardNotice.ok ? __( 'Dismiss', 'giveflow-fundraising-campaigns' ) : __( 'Try again', 'giveflow-fundraising-campaigns' ) }
+                        { cardNotice.ok ? __( 'Dismiss', 'fundkit-fundraising-campaigns' ) : __( 'Try again', 'fundkit-fundraising-campaigns' ) }
                     </button>
                 </div>
             ) }
@@ -424,15 +424,15 @@ function App() {
             { consentsPending > 0 && tab !== 'consents' && (
                 <div class="dp-banner" role="status">
                     <div class="dp-banner__text">
-                        <strong>{ __( 'Your privacy preferences need an update.', 'giveflow-fundraising-campaigns' ) }</strong>{ ' ' }
-                        { __( "We've revised the terms for some of the things you previously agreed to. Take a moment to review.", 'giveflow-fundraising-campaigns' ) }
+                        <strong>{ __( 'Your privacy preferences need an update.', 'fundkit-fundraising-campaigns' ) }</strong>{ ' ' }
+                        { __( "We've revised the terms for some of the things you previously agreed to. Take a moment to review.", 'fundkit-fundraising-campaigns' ) }
                     </div>
                     <button
                         type="button"
                         class="dp-banner__action"
                         onClick={ () => setTab( 'consents' ) }
                     >
-                        { __( 'Review now', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Review now', 'fundkit-fundraising-campaigns' ) }
                     </button>
                 </div>
             ) }
@@ -450,7 +450,7 @@ function App() {
                             onClick={ () => setTab( t.id ) }
                         >
                             { t.label }
-                            { showDot && <span class="dp__tab-dot" aria-label={ __( 'needs attention', 'giveflow-fundraising-campaigns' ) } /> }
+                            { showDot && <span class="dp__tab-dot" aria-label={ __( 'needs attention', 'fundkit-fundraising-campaigns' ) } /> }
                         </button>
                     );
                 } ) }
@@ -481,13 +481,13 @@ function App() {
 }
 
 const TABS = [
-    { id: 'overview',    label: __( 'Overview', 'giveflow-fundraising-campaigns' ) },
-    { id: 'donations',   label: __( 'Donations', 'giveflow-fundraising-campaigns' ) },
-    { id: 'recurring',   label: __( 'Recurring', 'giveflow-fundraising-campaigns' ) },
-    { id: 'receipts',    label: __( 'Receipts & tax', 'giveflow-fundraising-campaigns' ) },
-    { id: 'preferences', label: __( 'Preferences', 'giveflow-fundraising-campaigns' ) },
-    { id: 'profile',     label: __( 'Profile', 'giveflow-fundraising-campaigns' ) },
-    { id: 'consents',    label: __( 'Consents', 'giveflow-fundraising-campaigns' ) },
+    { id: 'overview',    label: __( 'Overview', 'fundkit-fundraising-campaigns' ) },
+    { id: 'donations',   label: __( 'Donations', 'fundkit-fundraising-campaigns' ) },
+    { id: 'recurring',   label: __( 'Recurring', 'fundkit-fundraising-campaigns' ) },
+    { id: 'receipts',    label: __( 'Receipts & tax', 'fundkit-fundraising-campaigns' ) },
+    { id: 'preferences', label: __( 'Preferences', 'fundkit-fundraising-campaigns' ) },
+    { id: 'profile',     label: __( 'Profile', 'fundkit-fundraising-campaigns' ) },
+    { id: 'consents',    label: __( 'Consents', 'fundkit-fundraising-campaigns' ) },
 ];
 
 /**
@@ -504,9 +504,9 @@ function SignOutControls() {
         <div class="dp__signout-group">
             <button type="button" class="dp__signout" onClick={ () => {
                 api( 'logout-everywhere', { method: 'POST' } ).finally( () => window.location.reload() );
-            } }>{ __( 'Sign out', 'giveflow-fundraising-campaigns' ) }</button>
+            } }>{ __( 'Sign out', 'fundkit-fundraising-campaigns' ) }</button>
             <span class="dp-hint">
-                { __( 'Ends every device, and cancels any sign-in link you have not opened yet.', 'giveflow-fundraising-campaigns' ) }
+                { __( 'Ends every device, and cancels any sign-in link you have not opened yet.', 'fundkit-fundraising-campaigns' ) }
             </span>
         </div>
     );
@@ -562,26 +562,26 @@ function SignInPrompt( { initialError } ) {
     if ( sent ) {
         return (
             <div class="dp-signin">
-                <h2>{ __( 'Check your email', 'giveflow-fundraising-campaigns' ) }</h2>
+                <h2>{ __( 'Check your email', 'fundkit-fundraising-campaigns' ) }</h2>
                 <p>{ sprintf(
                     /* translators: %s: action the link performs, either "finish setting up your account" or "sign in" */
-                    __( 'If that address is valid, a link to %s is on its way. Open it on any device.', 'giveflow-fundraising-campaigns' ),
-                    isRegister ? __( 'finish setting up your account', 'giveflow-fundraising-campaigns' ) : __( 'sign in', 'giveflow-fundraising-campaigns' )
+                    __( 'If that address is valid, a link to %s is on its way. Open it on any device.', 'fundkit-fundraising-campaigns' ),
+                    isRegister ? __( 'finish setting up your account', 'fundkit-fundraising-campaigns' ) : __( 'sign in', 'fundkit-fundraising-campaigns' )
                 ) }</p>
                 { /* The server quietly refuses a second request inside its send
                      window, so this copy promises nothing about timing. */ }
-                <p class="dp-hint">{ __( 'Only one link goes out every few minutes. If nothing arrives shortly, wait a moment before asking for another.', 'giveflow-fundraising-campaigns' ) }</p>
+                <p class="dp-hint">{ __( 'Only one link goes out every few minutes. If nothing arrives shortly, wait a moment before asking for another.', 'fundkit-fundraising-campaigns' ) }</p>
                 { /* Anyone can type anyone's address here, so a name typed
                      against an address that is already waiting for a link is
                      dropped rather than believed. Said to everyone, because
                      saying it only when it happened would answer whether that
                      address has a signup waiting. */ }
                 { isRegister && (
-                    <p class="dp-hint">{ __( 'Your name is taken from your first signup for an address. If you have signed up before, you may need to set it again in the portal once you are signed in.', 'giveflow-fundraising-campaigns' ) }</p>
+                    <p class="dp-hint">{ __( 'Your name is taken from your first signup for an address. If you have signed up before, you may need to set it again in the portal once you are signed in.', 'fundkit-fundraising-campaigns' ) }</p>
                 ) }
                 <p class="dp-signin__alt">
                     <button type="button" class="dp-link" onClick={ () => { setSent( false ); setError( null ); } }>
-                        { __( 'Use a different email address', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Use a different email address', 'fundkit-fundraising-campaigns' ) }
                     </button>
                 </p>
             </div>
@@ -590,11 +590,11 @@ function SignInPrompt( { initialError } ) {
 
     return (
         <div class="dp-signin">
-            <h2>{ isRegister ? __( 'Create your account', 'giveflow-fundraising-campaigns' ) : __( 'Donor portal', 'giveflow-fundraising-campaigns' ) }</h2>
+            <h2>{ isRegister ? __( 'Create your account', 'fundkit-fundraising-campaigns' ) : __( 'Donor portal', 'fundkit-fundraising-campaigns' ) }</h2>
             <p>
                 { isRegister
-                    ? __( "Set up an account to start fundraising. We'll email you a link to confirm.", 'giveflow-fundraising-campaigns' )
-                    : __( "Enter the email you donated with and we'll send a sign-in link.", 'giveflow-fundraising-campaigns' ) }
+                    ? __( "Set up an account to start fundraising. We'll email you a link to confirm.", 'fundkit-fundraising-campaigns' )
+                    : __( "Enter the email you donated with and we'll send a sign-in link.", 'fundkit-fundraising-campaigns' ) }
             </p>
             <form class={ isRegister ? 'is-stacked' : null } onSubmit={ submit }>
                 { isRegister && (
@@ -604,8 +604,8 @@ function SignInPrompt( { initialError } ) {
                             required
                             autocomplete="given-name"
                             value={ firstName }
-                            aria-label={ __( 'First name', 'giveflow-fundraising-campaigns' ) }
-                            placeholder={ __( 'First name', 'giveflow-fundraising-campaigns' ) }
+                            aria-label={ __( 'First name', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'First name', 'fundkit-fundraising-campaigns' ) }
                             onInput={ ( e ) => setFirstName( e.target.value ) }
                         />
                         { /* Not required: plenty of people go by one name, and a
@@ -614,8 +614,8 @@ function SignInPrompt( { initialError } ) {
                             type="text"
                             autocomplete="family-name"
                             value={ lastName }
-                            aria-label={ __( 'Last name', 'giveflow-fundraising-campaigns' ) }
-                            placeholder={ __( 'Last name', 'giveflow-fundraising-campaigns' ) }
+                            aria-label={ __( 'Last name', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'Last name', 'fundkit-fundraising-campaigns' ) }
                             onInput={ ( e ) => setLastName( e.target.value ) }
                         />
                     </div>
@@ -625,19 +625,19 @@ function SignInPrompt( { initialError } ) {
                     required
                     autocomplete="email"
                     value={ email }
-                    aria-label={ __( 'Email address', 'giveflow-fundraising-campaigns' ) }
-                    placeholder={ __( 'Enter your email address', 'giveflow-fundraising-campaigns' ) }
+                    aria-label={ __( 'Email address', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Enter your email address', 'fundkit-fundraising-campaigns' ) }
                     onInput={ ( e ) => setEmail( e.target.value ) }
                 />
                 <button type="submit" disabled={ sending }>
-                    { sending ? __( 'Sending…', 'giveflow-fundraising-campaigns' ) : ( isRegister ? __( 'Create account', 'giveflow-fundraising-campaigns' ) : __( 'Send sign-in link', 'giveflow-fundraising-campaigns' ) ) }
+                    { sending ? __( 'Sending…', 'fundkit-fundraising-campaigns' ) : ( isRegister ? __( 'Create account', 'fundkit-fundraising-campaigns' ) : __( 'Send sign-in link', 'fundkit-fundraising-campaigns' ) ) }
                 </button>
             </form>
             { error && <p class="dp-signin__error">{ error }</p> }
             <p class="dp-signin__alt">
-                { isRegister ? __( 'Already have an account or donated before?', 'giveflow-fundraising-campaigns' ) : __( 'New here and want to fundraise?', 'giveflow-fundraising-campaigns' ) }{ ' ' }
+                { isRegister ? __( 'Already have an account or donated before?', 'fundkit-fundraising-campaigns' ) : __( 'New here and want to fundraise?', 'fundkit-fundraising-campaigns' ) }{ ' ' }
                 <button type="button" class="dp-link" onClick={ () => { setError( null ); setMode( isRegister ? 'signin' : 'register' ); } }>
-                    { isRegister ? __( 'Sign in', 'giveflow-fundraising-campaigns' ) : __( 'Create an account', 'giveflow-fundraising-campaigns' ) }
+                    { isRegister ? __( 'Sign in', 'fundkit-fundraising-campaigns' ) : __( 'Create an account', 'fundkit-fundraising-campaigns' ) }
                 </button>
             </p>
         </div>
@@ -648,9 +648,9 @@ function Overview( { me } ) {
     return (
         <div class="dp-overview">
             <div class="dp-kpis">
-                <Kpi label={ __( 'Lifetime giving', 'giveflow-fundraising-campaigns' ) } value={ formatAmount( me.total_donated_cents, me.primary_currency || 'USD' ) } />
-                <Kpi label={ __( 'Donations', 'giveflow-fundraising-campaigns' ) } value={ String( me.donations_count ) } />
-                <Kpi label={ __( 'Donor since', 'giveflow-fundraising-campaigns' ) } value={ me.first_donation_at ? formatDate( me.first_donation_at ) : '-' } />
+                <Kpi label={ __( 'Lifetime giving', 'fundkit-fundraising-campaigns' ) } value={ formatAmount( me.total_donated_cents, me.primary_currency || 'USD' ) } />
+                <Kpi label={ __( 'Donations', 'fundkit-fundraising-campaigns' ) } value={ String( me.donations_count ) } />
+                <Kpi label={ __( 'Donor since', 'fundkit-fundraising-campaigns' ) } value={ me.first_donation_at ? formatDate( me.first_donation_at ) : '-' } />
             </div>
             { me.unconverted_count > 0 && (
                 <p class="dp-hint">
@@ -660,25 +660,25 @@ function Overview( { me } ) {
                             'Lifetime giving does not include %d donation you gave in another currency.',
                             'Lifetime giving does not include %d donations you gave in other currencies.',
                             me.unconverted_count,
-                            'giveflow-fundraising-campaigns'
+                            'fundkit-fundraising-campaigns'
                         ),
                         me.unconverted_count
                     ) }
                 </p>
             ) }
-            <p class="dp-hint">{ __( 'Manage recurring donations, download receipts, and update preferences from the tabs above.', 'giveflow-fundraising-campaigns' ) }</p>
+            <p class="dp-hint">{ __( 'Manage recurring donations, download receipts, and update preferences from the tabs above.', 'fundkit-fundraising-campaigns' ) }</p>
         </div>
     );
 }
 
 function freqLabel( f ) {
     const map = {
-        one_time:  __( 'one time', 'giveflow-fundraising-campaigns' ),
-        weekly:    __( 'weekly', 'giveflow-fundraising-campaigns' ),
-        biweekly:  __( 'biweekly', 'giveflow-fundraising-campaigns' ),
-        monthly:   __( 'monthly', 'giveflow-fundraising-campaigns' ),
-        quarterly: __( 'quarterly', 'giveflow-fundraising-campaigns' ),
-        yearly:    __( 'yearly', 'giveflow-fundraising-campaigns' ),
+        one_time:  __( 'one time', 'fundkit-fundraising-campaigns' ),
+        weekly:    __( 'weekly', 'fundkit-fundraising-campaigns' ),
+        biweekly:  __( 'biweekly', 'fundkit-fundraising-campaigns' ),
+        monthly:   __( 'monthly', 'fundkit-fundraising-campaigns' ),
+        quarterly: __( 'quarterly', 'fundkit-fundraising-campaigns' ),
+        yearly:    __( 'yearly', 'fundkit-fundraising-campaigns' ),
     };
     return map[ f ] || String( f || '' ).replace( '_', ' ' );
 }
@@ -689,8 +689,8 @@ function Donations( { onOpen } ) {
     useEffect( () => { api( 'donations' ).then( setList ).catch( ( e ) => setError( e.message ) ); }, [] );
 
     if ( error )    return <p class="dp-error">{ error }</p>;
-    if ( ! list )   return <p>{ __( 'Loading donations…', 'giveflow-fundraising-campaigns' ) }</p>;
-    if ( ! list.length ) return <p>{ __( 'No donations yet.', 'giveflow-fundraising-campaigns' ) }</p>;
+    if ( ! list )   return <p>{ __( 'Loading donations…', 'fundkit-fundraising-campaigns' ) }</p>;
+    if ( ! list.length ) return <p>{ __( 'No donations yet.', 'fundkit-fundraising-campaigns' ) }</p>;
 
     return (
         <div class="dp-list">
@@ -702,17 +702,17 @@ function Donations( { onOpen } ) {
                     tabIndex={ 0 }
                     onClick={ () => onOpen( d.reference ) }
                     onKeyDown={ ( e ) => { if ( e.key === 'Enter' || e.key === ' ' ) { e.preventDefault(); onOpen( d.reference ); } } }
-                    aria-label={ sprintf( /* translators: %s: donation reference */ __( 'View donation %s', 'giveflow-fundraising-campaigns' ), d.reference ) }
+                    aria-label={ sprintf( /* translators: %s: donation reference */ __( 'View donation %s', 'fundkit-fundraising-campaigns' ), d.reference ) }
                 >
                     <div>
                         <strong>{ formatAmount( d.amount_cents, d.currency ) }</strong>
                         { d.fee_covered_cents > 0 && (
-                            <span class="dp-list__pill">{ sprintf( /* translators: %s: formatted fee amount */ __( 'incl. %s fees', 'giveflow-fundraising-campaigns' ), formatAmount( d.fee_covered_cents, d.currency ) ) }</span>
+                            <span class="dp-list__pill">{ sprintf( /* translators: %s: formatted fee amount */ __( 'incl. %s fees', 'fundkit-fundraising-campaigns' ), formatAmount( d.fee_covered_cents, d.currency ) ) }</span>
                         ) }
                         { d.refunded_cents > 0 && (
-                            <span class="dp-list__pill">{ sprintf( /* translators: %s: formatted refunded amount */ __( '%s refunded', 'giveflow-fundraising-campaigns' ), formatAmount( d.refunded_cents, d.currency ) ) }</span>
+                            <span class="dp-list__pill">{ sprintf( /* translators: %s: formatted refunded amount */ __( '%s refunded', 'fundkit-fundraising-campaigns' ), formatAmount( d.refunded_cents, d.currency ) ) }</span>
                         ) }
-                        { d.is_anonymous && <span class="dp-list__pill">{ __( 'anonymous', 'giveflow-fundraising-campaigns' ) }</span> }
+                        { d.is_anonymous && <span class="dp-list__pill">{ __( 'anonymous', 'fundkit-fundraising-campaigns' ) }</span> }
                         <div class="dp-list__sub">{ formatDate( d.paid_at ) } · { d.reference }</div>
                     </div>
                     <span class={ `dp-pill dp-pill--${ d.frequency }` }>{ freqLabel( d.frequency ) }</span>
@@ -743,19 +743,19 @@ function DonationDetail( { reference, onClose } ) {
 
     return (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
-        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Donation details', 'giveflow-fundraising-campaigns' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
+        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Donation details', 'fundkit-fundraising-campaigns' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
             <div class="dp-modal__panel">
-                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'giveflow-fundraising-campaigns' ) }>×</button>
+                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'fundkit-fundraising-campaigns' ) }>×</button>
                 { error && <p class="dp-error">{ error }</p> }
-                { ! d ? <p>{ __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p> : (
+                { ! d ? <p>{ __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</p> : (
                     <>
                         <div class="dp-detail__head">
                             <div class="dp-detail__amount">{ formatAmount( d.amount_cents, d.currency ) }</div>
                             <div class="dp-detail__meta">{ formatDate( d.paid_at ) } · { d.reference }</div>
                             { d.refunded_cents > 0 && (
                                 <div class="dp-detail__refund">
-                                    <span>{ sprintf( /* translators: %s: formatted refunded amount */ __( '%s was refunded to you', 'giveflow-fundraising-campaigns' ), formatAmount( d.refunded_cents, d.currency ) ) }</span>
-                                    <strong>{ sprintf( /* translators: %s: formatted amount the organization kept */ __( 'Net %s', 'giveflow-fundraising-campaigns' ), formatAmount( d.amount_cents - d.refunded_cents, d.currency ) ) }</strong>
+                                    <span>{ sprintf( /* translators: %s: formatted refunded amount */ __( '%s was refunded to you', 'fundkit-fundraising-campaigns' ), formatAmount( d.refunded_cents, d.currency ) ) }</span>
+                                    <strong>{ sprintf( /* translators: %s: formatted amount the organization kept */ __( 'Net %s', 'fundkit-fundraising-campaigns' ), formatAmount( d.amount_cents - d.refunded_cents, d.currency ) ) }</strong>
                                 </div>
                             ) }
                         </div>
@@ -763,7 +763,7 @@ function DonationDetail( { reference, onClose } ) {
                         { d.give_again_url && (
                             <div class="dp-detail__section">
                                 <a class="dp-action is-primary" href={ d.give_again_url }>
-                                    { sprintf( /* translators: %s: formatted donation amount */ __( 'Give again (%s)', 'giveflow-fundraising-campaigns' ), formatAmount( d.amount_cents, d.currency ) ) }
+                                    { sprintf( /* translators: %s: formatted donation amount */ __( 'Give again (%s)', 'fundkit-fundraising-campaigns' ), formatAmount( d.amount_cents, d.currency ) ) }
                                 </a>
                             </div>
                         ) }
@@ -775,7 +775,7 @@ function DonationDetail( { reference, onClose } ) {
                                     checked={ d.is_anonymous }
                                     onChange={ ( e ) => toggleAnonymity( e.target.checked ) }
                                 />
-                                <span>{ __( 'Show as anonymous on public displays', 'giveflow-fundraising-campaigns' ) }</span>
+                                <span>{ __( 'Show as anonymous on public displays', 'fundkit-fundraising-campaigns' ) }</span>
                             </label>
                         </div>
 
@@ -806,8 +806,8 @@ function Recurring() {
     useEffect( () => { load(); }, [ load ] );
 
     if ( error )    return <p class="dp-error">{ error }</p>;
-    if ( ! list )   return <p>{ __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p>;
-    if ( ! list.length ) return <p>{ __( 'No recurring donations.', 'giveflow-fundraising-campaigns' ) }</p>;
+    if ( ! list )   return <p>{ __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</p>;
+    if ( ! list.length ) return <p>{ __( 'No recurring donations.', 'fundkit-fundraising-campaigns' ) }</p>;
 
     return (
         <>
@@ -818,20 +818,20 @@ function Recurring() {
                             <strong>{ formatAmount( p.amount_cents, p.currency ) }</strong>
                             <span class="dp-list__pill">{ intervalLabel( p.interval_count, p.interval_unit ) }</span>
                             <div class="dp-list__sub">
-                                { sprintf( /* translators: %s: date of the next scheduled payment */ __( 'Next: %s', 'giveflow-fundraising-campaigns' ), p.next_payment_at ? formatDate( p.next_payment_at ) : '-' ) }
+                                { sprintf( /* translators: %s: date of the next scheduled payment */ __( 'Next: %s', 'fundkit-fundraising-campaigns' ), p.next_payment_at ? formatDate( p.next_payment_at ) : '-' ) }
                             </div>
                         </div>
                         <div class="dp-list__actions">
                             <span class={ `dp-pill dp-pill--${ p.status }` }>{ recurringStatusLabel( p.status ) }</span>
                             { ( p.status === 'active' || p.status === 'past_due' ) && (
-                                <button class="dp-link" onClick={ () => setAction( p ) }>{ __( 'Manage', 'giveflow-fundraising-campaigns' ) }</button>
+                                <button class="dp-link" onClick={ () => setAction( p ) }>{ __( 'Manage', 'fundkit-fundraising-campaigns' ) }</button>
                             ) }
                             { p.status === 'paused' && (
                                 <button class="dp-link" onClick={ () => {
                                     api( `recurring/${ p.id }/action`, { method: 'POST', body: JSON.stringify( { action: 'resume' } ) } )
                                         .then( load )
                                         .catch( ( e ) => setError( e.message ) );
-                                } }>{ __( 'Resume', 'giveflow-fundraising-campaigns' ) }</button>
+                                } }>{ __( 'Resume', 'fundkit-fundraising-campaigns' ) }</button>
                             ) }
                         </div>
                     </li>
@@ -859,7 +859,7 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
     const call = ( body ) => api( `recurring/${ plan.id }/action`, { method: 'POST', body: JSON.stringify( body ) } )
         .then( onDone )
         .catch( ( e ) => {
-            setErr( e.message || __( 'Something went wrong.', 'giveflow-fundraising-campaigns' ) );
+            setErr( e.message || __( 'Something went wrong.', 'fundkit-fundraising-campaigns' ) );
             // PayPal answers a revision with a link the donor must open. The
             // API returned it all along and nothing showed it, so the message
             // asked them to approve the change and gave them no way to.
@@ -868,21 +868,21 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
 
     return (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
-        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Manage donation', 'giveflow-fundraising-campaigns' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
+        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Manage donation', 'fundkit-fundraising-campaigns' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
             <div class="dp-modal__panel">
-                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'giveflow-fundraising-campaigns' ) }>×</button>
+                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'fundkit-fundraising-campaigns' ) }>×</button>
                 { err && <p class="dp-error">{ err }</p> }
                 { approveUrl && (
                     <p class="dp-approve">
                         <a href={ approveUrl } target="_blank" rel="noreferrer noopener">
-                            { __( 'Approve the change', 'giveflow-fundraising-campaigns' ) }
+                            { __( 'Approve the change', 'fundkit-fundraising-campaigns' ) }
                         </a>
                     </p>
                 ) }
 
                 { stage === 'menu' && (
                     <>
-                        <h3>{ __( 'Manage donation', 'giveflow-fundraising-campaigns' ) }</h3>
+                        <h3>{ __( 'Manage donation', 'fundkit-fundraising-campaigns' ) }</h3>
                         { /* Two shipped gateways handle subscriptions and
                              refuse both of these: a Direct Debit mandate has no
                              pause, and stopping it means cancelling and asking
@@ -890,24 +890,24 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                              anyway got them a raw 422. */ }
                         { plan.can_pause && (
                             <>
-                                <button class="dp-action" onClick={ () => setStage( 'pause' ) }>{ __( 'Pause', 'giveflow-fundraising-campaigns' ) }</button>
-                                <button class="dp-action" onClick={ () => call( { action: 'skip_next' } ) }>{ __( 'Skip next charge', 'giveflow-fundraising-campaigns' ) }</button>
+                                <button class="dp-action" onClick={ () => setStage( 'pause' ) }>{ __( 'Pause', 'fundkit-fundraising-campaigns' ) }</button>
+                                <button class="dp-action" onClick={ () => call( { action: 'skip_next' } ) }>{ __( 'Skip next charge', 'fundkit-fundraising-campaigns' ) }</button>
                             </>
                         ) }
-                        <button class="dp-action" onClick={ () => setStage( 'amount' ) }>{ __( 'Change amount', 'giveflow-fundraising-campaigns' ) }</button>
+                        <button class="dp-action" onClick={ () => setStage( 'amount' ) }>{ __( 'Change amount', 'fundkit-fundraising-campaigns' ) }</button>
                         { plan.can_update_payment_method && (
-                            <button class="dp-action" onClick={ () => setStage( 'payment' ) }>{ __( 'Update payment method', 'giveflow-fundraising-campaigns' ) }</button>
+                            <button class="dp-action" onClick={ () => setStage( 'payment' ) }>{ __( 'Update payment method', 'fundkit-fundraising-campaigns' ) }</button>
                         ) }
-                        <button class="dp-action dp-action--danger" onClick={ () => setStage( 'cancel' ) }>{ __( 'Cancel donation', 'giveflow-fundraising-campaigns' ) }</button>
+                        <button class="dp-action dp-action--danger" onClick={ () => setStage( 'cancel' ) }>{ __( 'Cancel donation', 'fundkit-fundraising-campaigns' ) }</button>
                     </>
                 ) }
 
                 { stage === 'pause' && (
                     <>
-                        <h3>{ __( 'Pause for how long?', 'giveflow-fundraising-campaigns' ) }</h3>
+                        <h3>{ __( 'Pause for how long?', 'fundkit-fundraising-campaigns' ) }</h3>
                         { [ 1, 3, 6, 12 ].map( ( m ) => (
                             <button key={ m } class="dp-action" onClick={ () => call( { action: 'pause', months: m } ) }>
-                                { sprintf( /* translators: %d: number of months */ _n( '%d month', '%d months', m, 'giveflow-fundraising-campaigns' ), m ) }
+                                { sprintf( /* translators: %d: number of months */ _n( '%d month', '%d months', m, 'fundkit-fundraising-campaigns' ), m ) }
                             </button>
                         ) ) }
                     </>
@@ -975,7 +975,7 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
                     el.mount( mountRef.current );
                 } );
             } )
-            .catch( ( e ) => { if ( ! cancelled ) onError( e.message || __( 'Something went wrong.', 'giveflow-fundraising-campaigns' ) ); } );
+            .catch( ( e ) => { if ( ! cancelled ) onError( e.message || __( 'Something went wrong.', 'fundkit-fundraising-campaigns' ) ); } );
 
         return () => { cancelled = true; };
     }, [ plan.id ] );
@@ -1002,14 +1002,14 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
         clearCardReturn();
 
         if ( error ) {
-            onError( error.message || __( 'That card could not be saved.', 'giveflow-fundraising-campaigns' ) );
+            onError( error.message || __( 'That card could not be saved.', 'fundkit-fundraising-campaigns' ) );
             setSaving( false );
             return;
         }
 
         const token = setupIntent && setupIntent.payment_method;
         if ( ! token ) {
-            onError( __( 'That card could not be saved.', 'giveflow-fundraising-campaigns' ) );
+            onError( __( 'That card could not be saved.', 'fundkit-fundraising-campaigns' ) );
             setSaving( false );
             return;
         }
@@ -1019,28 +1019,28 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
             body: JSON.stringify( { token } ),
         } )
             .then( onDone )
-            .catch( ( e ) => { onError( e.message || __( 'That card could not be saved.', 'giveflow-fundraising-campaigns' ) ); setSaving( false ); } );
+            .catch( ( e ) => { onError( e.message || __( 'That card could not be saved.', 'fundkit-fundraising-campaigns' ) ); setSaving( false ); } );
     };
 
     if ( mode === 'redirect' ) {
         return (
             <>
-                <h3>{ __( 'Update payment method', 'giveflow-fundraising-campaigns' ) }</h3>
+                <h3>{ __( 'Update payment method', 'fundkit-fundraising-campaigns' ) }</h3>
                 <p>
                     { sprintf(
                         /* translators: %s: the payment provider's name, e.g. PayPal. */
-                        __( '%s handles this on their own site. You will be taken there to choose how you pay, and your donation carries on unchanged.', 'giveflow-fundraising-campaigns' ),
-                        label || __( 'Your payment provider', 'giveflow-fundraising-campaigns' )
+                        __( '%s handles this on their own site. You will be taken there to choose how you pay, and your donation carries on unchanged.', 'fundkit-fundraising-campaigns' ),
+                        label || __( 'Your payment provider', 'fundkit-fundraising-campaigns' )
                     ) }
                 </p>
                 <a class="dp-action" href={ redirect } rel="noopener">
                     { label
                         ? sprintf(
                             /* translators: %s: the payment provider's name, e.g. PayPal. */
-                            __( 'Continue to %s', 'giveflow-fundraising-campaigns' ),
+                            __( 'Continue to %s', 'fundkit-fundraising-campaigns' ),
                             label
                         )
-                        : __( 'Continue', 'giveflow-fundraising-campaigns' ) }
+                        : __( 'Continue', 'fundkit-fundraising-campaigns' ) }
                 </a>
             </>
         );
@@ -1048,12 +1048,12 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
 
     return (
         <>
-            <h3>{ __( 'Update payment method', 'giveflow-fundraising-campaigns' ) }</h3>
-            <p>{ __( 'Enter the card you would like future donations charged to.', 'giveflow-fundraising-campaigns' ) }</p>
+            <h3>{ __( 'Update payment method', 'fundkit-fundraising-campaigns' ) }</h3>
+            <p>{ __( 'Enter the card you would like future donations charged to.', 'fundkit-fundraising-campaigns' ) }</p>
             <div ref={ mountRef } />
-            { ! ready && <p class="dp-hint">{ __( 'Loading secure card form…', 'giveflow-fundraising-campaigns' ) }</p> }
+            { ! ready && <p class="dp-hint">{ __( 'Loading secure card form…', 'fundkit-fundraising-campaigns' ) }</p> }
             <button class="dp-action" disabled={ ! ready || saving } onClick={ save }>
-                { saving ? __( 'Saving…', 'giveflow-fundraising-campaigns' ) : __( 'Save card', 'giveflow-fundraising-campaigns' ) }
+                { saving ? __( 'Saving…', 'fundkit-fundraising-campaigns' ) : __( 'Save card', 'fundkit-fundraising-campaigns' ) }
             </button>
         </>
     );
@@ -1066,17 +1066,17 @@ function ChangeAmountForm( { plan, onSubmit } ) {
     const valid = Number.isFinite( cents ) && cents >= 50;
     return (
         <>
-            <h3>{ __( 'Change amount', 'giveflow-fundraising-campaigns' ) }</h3>
-            <p class="dp-hint">{ __( 'Current:', 'giveflow-fundraising-campaigns' ) } { formatAmount( plan.amount_cents, plan.currency ) }</p>
+            <h3>{ __( 'Change amount', 'fundkit-fundraising-campaigns' ) }</h3>
+            <p class="dp-hint">{ __( 'Current:', 'fundkit-fundraising-campaigns' ) } { formatAmount( plan.amount_cents, plan.currency ) }</p>
             <input
                 type="number"
                 step="0.01"
                 min="0.5"
                 value={ value }
-                aria-label={ __( 'New donation amount', 'giveflow-fundraising-campaigns' ) }
+                aria-label={ __( 'New donation amount', 'fundkit-fundraising-campaigns' ) }
                 onInput={ ( e ) => setValue( e.target.value ) }
             />
-            <button class="dp-action is-primary" disabled={ ! valid } onClick={ () => valid && onSubmit( cents ) }>{ __( 'Save new amount', 'giveflow-fundraising-campaigns' ) }</button>
+            <button class="dp-action is-primary" disabled={ ! valid } onClick={ () => valid && onSubmit( cents ) }>{ __( 'Save new amount', 'fundkit-fundraising-campaigns' ) }</button>
         </>
     );
 }
@@ -1088,35 +1088,35 @@ function CancelDeflection( { onPause, onSkip, onReduce, onCancel } ) {
     if ( confirmed ) {
         return (
             <>
-                <h3>{ __( 'Cancel donation?', 'giveflow-fundraising-campaigns' ) }</h3>
-                <p>{ __( "You'll keep all donations you've made so far. The recurring schedule will stop after today.", 'giveflow-fundraising-campaigns' ) }</p>
+                <h3>{ __( 'Cancel donation?', 'fundkit-fundraising-campaigns' ) }</h3>
+                <p>{ __( "You'll keep all donations you've made so far. The recurring schedule will stop after today.", 'fundkit-fundraising-campaigns' ) }</p>
                 <textarea
-                    placeholder={ __( 'Tell us why (optional, helps the org)', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'Tell us why (optional, helps the org)', 'fundkit-fundraising-campaigns' ) }
                     rows={ 3 }
                     value={ reason }
                     onInput={ ( e ) => setReason( e.target.value ) }
                 />
-                <button class="dp-action dp-action--danger" onClick={ () => onCancel( reason ) }>{ __( 'Cancel donation', 'giveflow-fundraising-campaigns' ) }</button>
+                <button class="dp-action dp-action--danger" onClick={ () => onCancel( reason ) }>{ __( 'Cancel donation', 'fundkit-fundraising-campaigns' ) }</button>
             </>
         );
     }
 
     return (
         <>
-            <h3>{ __( 'Before you cancel…', 'giveflow-fundraising-campaigns' ) }</h3>
-            <p class="dp-hint">{ __( 'A few alternatives that might work better:', 'giveflow-fundraising-campaigns' ) }</p>
+            <h3>{ __( 'Before you cancel…', 'fundkit-fundraising-campaigns' ) }</h3>
+            <p class="dp-hint">{ __( 'A few alternatives that might work better:', 'fundkit-fundraising-campaigns' ) }</p>
             { /* Offered only where the rail can actually do it. A donor trying
                  NOT to cancel was handed two buttons that both failed, and then
                  cancelled: the deflection sheet was doing the opposite of its
                  job. */ }
             { onPause && (
-                <button class="dp-action" onClick={ onPause }>{ __( 'Pause for 1-12 months', 'giveflow-fundraising-campaigns' ) }</button>
+                <button class="dp-action" onClick={ onPause }>{ __( 'Pause for 1-12 months', 'fundkit-fundraising-campaigns' ) }</button>
             ) }
             { onSkip && (
-                <button class="dp-action" onClick={ onSkip }>{ __( 'Skip just the next charge', 'giveflow-fundraising-campaigns' ) }</button>
+                <button class="dp-action" onClick={ onSkip }>{ __( 'Skip just the next charge', 'fundkit-fundraising-campaigns' ) }</button>
             ) }
-            <button class="dp-action" onClick={ onReduce }>{ __( 'Lower the amount', 'giveflow-fundraising-campaigns' ) }</button>
-            <button class="dp-action dp-action--danger" onClick={ () => setConfirmed( true ) }>{ __( 'Continue to cancel', 'giveflow-fundraising-campaigns' ) }</button>
+            <button class="dp-action" onClick={ onReduce }>{ __( 'Lower the amount', 'fundkit-fundraising-campaigns' ) }</button>
+            <button class="dp-action dp-action--danger" onClick={ () => setConfirmed( true ) }>{ __( 'Continue to cancel', 'fundkit-fundraising-campaigns' ) }</button>
         </>
     );
 }
@@ -1182,9 +1182,9 @@ function Receipts() {
     const downloadAnnual = async () => {
         setDlError( '' );
         try {
-            saveBlob( await api( `annual-statement/${ year }` ), `giveflow-annual-${ year }.pdf` );
+            saveBlob( await api( `annual-statement/${ year }` ), `fundkit-annual-${ year }.pdf` );
         } catch ( err ) {
-            setDlError( err.message || __( 'Could not generate statement.', 'giveflow-fundraising-campaigns' ) );
+            setDlError( err.message || __( 'Could not generate statement.', 'fundkit-fundraising-campaigns' ) );
         }
     };
 
@@ -1192,7 +1192,7 @@ function Receipts() {
     // hand the donor the bytes. A window.open one round trip after the tap is
     // outside the user gesture, and Safari refuses it without a word.
     const downloadReceipt = async ( id, receiptNumber ) => {
-        const generic = __( 'Could not open the receipt. Please try again.', 'giveflow-fundraising-campaigns' );
+        const generic = __( 'Could not open the receipt. Please try again.', 'fundkit-fundraising-campaigns' );
         setRowError( { id: 0, message: '' } );
         try {
             const res = await api( `receipts/${ id }/download-url` );
@@ -1207,23 +1207,23 @@ function Receipts() {
     return (
         <>
             <div class="dp-card">
-                <h3>{ __( 'Annual statement', 'giveflow-fundraising-campaigns' ) }</h3>
-                <p class="dp-hint">{ __( 'One consolidated PDF covering all your donations in a given year.', 'giveflow-fundraising-campaigns' ) }</p>
+                <h3>{ __( 'Annual statement', 'fundkit-fundraising-campaigns' ) }</h3>
+                <p class="dp-hint">{ __( 'One consolidated PDF covering all your donations in a given year.', 'fundkit-fundraising-campaigns' ) }</p>
                 <div class="dp-card__row">
-                    <select value={ year } aria-label={ __( 'Statement year', 'giveflow-fundraising-campaigns' ) } onChange={ ( e ) => setYear( e.target.value ) }>
+                    <select value={ year } aria-label={ __( 'Statement year', 'fundkit-fundraising-campaigns' ) } onChange={ ( e ) => setYear( e.target.value ) }>
                         { years.map( ( y ) => (
                             <option key={ y } value={ y }>{ y }</option>
                         ) ) }
                     </select>
-                    <button class="dp-action is-primary" onClick={ downloadAnnual }>{ __( 'Download statement', 'giveflow-fundraising-campaigns' ) }</button>
+                    <button class="dp-action is-primary" onClick={ downloadAnnual }>{ __( 'Download statement', 'fundkit-fundraising-campaigns' ) }</button>
                 </div>
                 { dlError && <p class="dp-error">{ dlError }</p> }
             </div>
 
-            <h3>{ __( 'Individual receipts', 'giveflow-fundraising-campaigns' ) }</h3>
+            <h3>{ __( 'Individual receipts', 'fundkit-fundraising-campaigns' ) }</h3>
             { error    && <p class="dp-error">{ error }</p> }
-            { ! list   && <p>{ __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p> }
-            { list && list.length === 0 && <p>{ __( 'No receipts yet.', 'giveflow-fundraising-campaigns' ) }</p> }
+            { ! list   && <p>{ __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</p> }
+            { list && list.length === 0 && <p>{ __( 'No receipts yet.', 'fundkit-fundraising-campaigns' ) }</p> }
             { list && list.length > 0 && (
                 <ul class="dp-list">
                     { list.map( ( r ) => (
@@ -1235,7 +1235,7 @@ function Receipts() {
                                     <p class="dp-error dp-list__error" role="alert">{ rowError.message }</p>
                                 ) }
                             </div>
-                            <button type="button" class="dp-link" onClick={ () => downloadReceipt( r.id, r.receipt_number ) }>{ __( 'Download', 'giveflow-fundraising-campaigns' ) }</button>
+                            <button type="button" class="dp-link" onClick={ () => downloadReceipt( r.id, r.receipt_number ) }>{ __( 'Download', 'fundkit-fundraising-campaigns' ) }</button>
                         </li>
                     ) ) }
                 </ul>
@@ -1254,9 +1254,9 @@ function Profile( { onSaved } ) {
     const [ uploading, setUploading ] = useState( false );
     const [ picErr,    setPicErr    ] = useState( '' );
 
-    useEffect( () => { api( 'profile' ).then( ( v ) => setForm( withDefaults( v ) ) ).catch( ( e ) => setErr( e.message || __( 'Could not load your profile.', 'giveflow-fundraising-campaigns' ) ) ); }, [] );
+    useEffect( () => { api( 'profile' ).then( ( v ) => setForm( withDefaults( v ) ) ).catch( ( e ) => setErr( e.message || __( 'Could not load your profile.', 'fundkit-fundraising-campaigns' ) ) ); }, [] );
 
-    if ( ! form ) return <p>{ err || __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p>;
+    if ( ! form ) return <p>{ err || __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</p>;
 
     const set = ( k ) => ( e ) => setForm( { ...form, [ k ]: e.target.value } );
 
@@ -1272,7 +1272,7 @@ function Profile( { onSaved } ) {
                 onSaved && onSaved();
                 setTimeout( () => setSaved( false ), 2500 );
             } )
-            .catch( ( e ) => setErr( e.message || __( 'Could not save.', 'giveflow-fundraising-campaigns' ) ) )
+            .catch( ( e ) => setErr( e.message || __( 'Could not save.', 'fundkit-fundraising-campaigns' ) ) )
             .finally( () => setSaving( false ) );
     };
 
@@ -1288,7 +1288,7 @@ function Profile( { onSaved } ) {
         if ( max > 0 && file.size > max ) {
             setPicErr( sprintf(
                 /* translators: %s: file size, e.g. "2 MB". */
-                __( 'That picture is too large. The most this site takes is %s.', 'giveflow-fundraising-campaigns' ),
+                __( 'That picture is too large. The most this site takes is %s.', 'fundkit-fundraising-campaigns' ),
                 cfg.avatarMaxLabel || `${ Math.floor( max / 1048576 ) } MB`
             ) );
             return;
@@ -1303,7 +1303,7 @@ function Profile( { onSaved } ) {
                 setForm( withDefaults( next ) );
                 onSaved && onSaved();
             } )
-            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not upload that picture.', 'giveflow-fundraising-campaigns' ) ) )
+            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not upload that picture.', 'fundkit-fundraising-campaigns' ) ) )
             .finally( () => setUploading( false ) );
     };
 
@@ -1315,7 +1315,7 @@ function Profile( { onSaved } ) {
                 setForm( withDefaults( next ) );
                 onSaved && onSaved();
             } )
-            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not remove that picture.', 'giveflow-fundraising-campaigns' ) ) )
+            .catch( ( e2 ) => setPicErr( e2.message || __( 'Could not remove that picture.', 'fundkit-fundraising-campaigns' ) ) )
             .finally( () => setUploading( false ) );
     };
 
@@ -1329,19 +1329,19 @@ function Profile( { onSaved } ) {
                     { uploading && <span class="dp-avatar-field__spinner" aria-hidden="true" /> }
                 </span>
                 <div class="dp-avatar-field__controls">
-                    <span class="dp-avatar-field__label">{ __( 'Profile picture', 'giveflow-fundraising-campaigns' ) }</span>
+                    <span class="dp-avatar-field__label">{ __( 'Profile picture', 'fundkit-fundraising-campaigns' ) }</span>
                     <small>
                         { sprintf(
                             /* translators: %s: file size, e.g. "2 MB". */
-                            __( 'Shown next to your name where the organization lists supporters. JPEG, PNG, GIF or WebP, up to %s.', 'giveflow-fundraising-campaigns' ),
-                            cfg.avatarMaxLabel || __( '2 MB', 'giveflow-fundraising-campaigns' )
+                            __( 'Shown next to your name where the organization lists supporters. JPEG, PNG, GIF or WebP, up to %s.', 'fundkit-fundraising-campaigns' ),
+                            cfg.avatarMaxLabel || __( '2 MB', 'fundkit-fundraising-campaigns' )
                         ) }
                     </small>
                     <div class="dp-avatar-field__buttons">
                         <label class={ `dp-btn dp-btn--ghost${ uploading ? ' is-disabled' : '' }` }>
                             { uploading
-                                ? __( 'Uploading…', 'giveflow-fundraising-campaigns' )
-                                : form.avatar_url ? __( 'Replace', 'giveflow-fundraising-campaigns' ) : __( 'Upload', 'giveflow-fundraising-campaigns' ) }
+                                ? __( 'Uploading…', 'fundkit-fundraising-campaigns' )
+                                : form.avatar_url ? __( 'Replace', 'fundkit-fundraising-campaigns' ) : __( 'Upload', 'fundkit-fundraising-campaigns' ) }
                             <input
                                 type="file"
                                 accept="image/jpeg,image/png,image/gif,image/webp"
@@ -1352,29 +1352,29 @@ function Profile( { onSaved } ) {
                         </label>
                         { form.avatar_url && ! uploading && (
                             <button type="button" class="dp-btn dp-btn--ghost" onClick={ removePicture }>
-                                { __( 'Remove', 'giveflow-fundraising-campaigns' ) }
+                                { __( 'Remove', 'fundkit-fundraising-campaigns' ) }
                             </button>
                         ) }
                     </div>
                     { picErr && <span class="dp-error dp-avatar-field__error" role="alert">{ picErr }</span> }
                 </div>
             </div>
-            <label>{ __( 'Email', 'giveflow-fundraising-campaigns' ) }
+            <label>{ __( 'Email', 'fundkit-fundraising-campaigns' ) }
                 <input type="email" value={ form.email } disabled readOnly />
-                <small>{ __( 'To change your email, contact the organization.', 'giveflow-fundraising-campaigns' ) }</small>
+                <small>{ __( 'To change your email, contact the organization.', 'fundkit-fundraising-campaigns' ) }</small>
             </label>
             <div class="dp-form__row">
-                <label>{ __( 'First name', 'giveflow-fundraising-campaigns' ) } <input type="text" value={ form.first_name } onInput={ set( 'first_name' ) } /></label>
-                <label>{ __( 'Last name', 'giveflow-fundraising-campaigns' ) }  <input type="text" value={ form.last_name }  onInput={ set( 'last_name' ) } /></label>
+                <label>{ __( 'First name', 'fundkit-fundraising-campaigns' ) } <input type="text" value={ form.first_name } onInput={ set( 'first_name' ) } /></label>
+                <label>{ __( 'Last name', 'fundkit-fundraising-campaigns' ) }  <input type="text" value={ form.last_name }  onInput={ set( 'last_name' ) } /></label>
             </div>
-            <label>{ __( 'Phone', 'giveflow-fundraising-campaigns' ) }   <input type="tel" autocomplete="tel" value={ form.phone } onInput={ set( 'phone' ) } /></label>
+            <label>{ __( 'Phone', 'fundkit-fundraising-campaigns' ) }   <input type="tel" autocomplete="tel" value={ form.phone } onInput={ set( 'phone' ) } /></label>
             <CountryPicker value={ form.country } onChange={ ( code ) => setForm( { ...form, country: code } ) } />
-            <label>{ __( 'Company', 'giveflow-fundraising-campaigns' ) } <input type="text" value={ form.company } onInput={ set( 'company' ) } /></label>
+            <label>{ __( 'Company', 'fundkit-fundraising-campaigns' ) } <input type="text" value={ form.company } onInput={ set( 'company' ) } /></label>
             <div class="dp-form__actions">
                 <button class="dp-action is-primary" disabled={ saving } onClick={ save }>
-                    { saving ? __( 'Saving…', 'giveflow-fundraising-campaigns' ) : __( 'Save', 'giveflow-fundraising-campaigns' ) }
+                    { saving ? __( 'Saving…', 'fundkit-fundraising-campaigns' ) : __( 'Save', 'fundkit-fundraising-campaigns' ) }
                 </button>
-                { saved && <span class="dp-form__saved">{ __( 'Saved.', 'giveflow-fundraising-campaigns' ) }</span> }
+                { saved && <span class="dp-form__saved">{ __( 'Saved.', 'fundkit-fundraising-campaigns' ) }</span> }
                 { err && <span class="dp-error">{ err }</span> }
             </div>
             <PrivacyActions />
@@ -1398,7 +1398,7 @@ function PrivacyActions() {
                 'Content-Type': 'application/json',
                 ...( cfg.nonce ? { 'X-WP-Nonce': cfg.nonce } : {} ),
             };
-            if ( csrfToken ) headers[ 'X-GiveFlow-Csrf' ] = csrfToken;
+            if ( csrfToken ) headers[ 'X-FundKit-Csrf' ] = csrfToken;
             const r = await fetch( `${ cfg.rest }data-export`, {
                 method:      'POST',
                 credentials: 'same-origin',
@@ -1406,7 +1406,7 @@ function PrivacyActions() {
             } );
             if ( ! r.ok ) {
                 const data = await r.json().catch( () => ({}) );
-                throw new Error( data.message || __( 'Export failed.', 'giveflow-fundraising-campaigns' ) );
+                throw new Error( data.message || __( 'Export failed.', 'fundkit-fundraising-campaigns' ) );
             }
             const blob = await r.blob();
             const url  = URL.createObjectURL( blob );
@@ -1418,7 +1418,7 @@ function PrivacyActions() {
             a.remove();
             URL.revokeObjectURL( url );
         } catch ( e ) {
-            setError( e.message || __( 'Export failed.', 'giveflow-fundraising-campaigns' ) );
+            setError( e.message || __( 'Export failed.', 'fundkit-fundraising-campaigns' ) );
         } finally {
             setExporting( false );
         }
@@ -1431,25 +1431,25 @@ function PrivacyActions() {
             await api( 'forget', { method: 'POST', body: JSON.stringify( { confirm: 'DELETE' } ) } );
             window.location.reload();
         } catch ( e ) {
-            setError( e.message || __( 'Deletion failed.', 'giveflow-fundraising-campaigns' ) );
+            setError( e.message || __( 'Deletion failed.', 'fundkit-fundraising-campaigns' ) );
             setDeleting( false );
         }
     };
 
     return (
         <div class="dp-privacy">
-            <h4>{ __( 'Your data', 'giveflow-fundraising-campaigns' ) }</h4>
+            <h4>{ __( 'Your data', 'fundkit-fundraising-campaigns' ) }</h4>
             { error && <p class="dp-error">{ error }</p> }
             <div class="dp-privacy__actions">
                 <button class="dp-action" disabled={ exporting } onClick={ downloadData }>
-                    { exporting ? __( 'Preparing…', 'giveflow-fundraising-campaigns' ) : __( 'Download my data', 'giveflow-fundraising-campaigns' ) }
+                    { exporting ? __( 'Preparing…', 'fundkit-fundraising-campaigns' ) : __( 'Download my data', 'fundkit-fundraising-campaigns' ) }
                 </button>
                 <button class="dp-action is-destructive" disabled={ deleting } onClick={ () => { setError( null ); setConfirmOpen( true ); } }>
-                    { deleting ? __( 'Deleting…', 'giveflow-fundraising-campaigns' ) : __( 'Delete my account', 'giveflow-fundraising-campaigns' ) }
+                    { deleting ? __( 'Deleting…', 'fundkit-fundraising-campaigns' ) : __( 'Delete my account', 'fundkit-fundraising-campaigns' ) }
                 </button>
             </div>
             <p class="dp-privacy__note">
-                { __( "Download returns a JSON copy of everything we hold on you. Deletion anonymizes your record; donation totals stay for the organization's tax records.", 'giveflow-fundraising-campaigns' ) }
+                { __( "Download returns a JSON copy of everything we hold on you. Deletion anonymizes your record; donation totals stay for the organization's tax records.", 'fundkit-fundraising-campaigns' ) }
             </p>
             { confirmOpen && (
                 <DeleteAccountModal
@@ -1476,15 +1476,15 @@ function DeleteAccountModal( { deleting, error, onConfirm, onClose } ) {
 
     return (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
-        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Delete my account', 'giveflow-fundraising-campaigns' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
+        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Delete my account', 'fundkit-fundraising-campaigns' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
             <div class="dp-modal__panel">
-                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'giveflow-fundraising-campaigns' ) }>×</button>
-                <h3>{ __( 'Delete my account', 'giveflow-fundraising-campaigns' ) }</h3>
+                <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'fundkit-fundraising-campaigns' ) }>×</button>
+                <h3>{ __( 'Delete my account', 'fundkit-fundraising-campaigns' ) }</h3>
                 { error && <p class="dp-error">{ error }</p> }
-                <p>{ __( 'Permanently anonymize your account? Past donations stay attached for tax/audit but every other detail is wiped. This cannot be undone.', 'giveflow-fundraising-campaigns' ) }</p>
+                <p>{ __( 'Permanently anonymize your account? Past donations stay attached for tax/audit but every other detail is wiped. This cannot be undone.', 'fundkit-fundraising-campaigns' ) }</p>
                 <div class="dp-form">
                     <label>
-                        { sprintf( /* translators: %s: the literal confirmation keyword to type (DELETE) */ __( 'Type %s to confirm.', 'giveflow-fundraising-campaigns' ), 'DELETE' ) }
+                        { sprintf( /* translators: %s: the literal confirmation keyword to type (DELETE) */ __( 'Type %s to confirm.', 'fundkit-fundraising-campaigns' ), 'DELETE' ) }
                         <input
                             ref={ inputRef }
                             type="text"
@@ -1497,9 +1497,9 @@ function DeleteAccountModal( { deleting, error, onConfirm, onClose } ) {
                     </label>
                 </div>
                 <button class="dp-action dp-action--danger" disabled={ deleting || ! matches } onClick={ onConfirm }>
-                    { deleting ? __( 'Deleting…', 'giveflow-fundraising-campaigns' ) : __( 'Delete my account', 'giveflow-fundraising-campaigns' ) }
+                    { deleting ? __( 'Deleting…', 'fundkit-fundraising-campaigns' ) : __( 'Delete my account', 'fundkit-fundraising-campaigns' ) }
                 </button>
-                <button class="dp-action" disabled={ deleting } onClick={ onClose }>{ __( 'Cancel', 'giveflow-fundraising-campaigns' ) }</button>
+                <button class="dp-action" disabled={ deleting } onClick={ onClose }>{ __( 'Cancel', 'fundkit-fundraising-campaigns' ) }</button>
             </div>
         </div>
     );
@@ -1541,12 +1541,12 @@ function CountryPicker( { value, onChange } ) {
 
     return (
         <label class="dp-country">
-            { __( 'Country', 'giveflow-fundraising-campaigns' ) }
+            { __( 'Country', 'fundkit-fundraising-campaigns' ) }
             <div class="dp-country__wrap">
                 <input
                     type="text"
                     value={ query }
-                    placeholder={ __( 'Search country…', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'Search country…', 'fundkit-fundraising-campaigns' ) }
                     onFocus={ () => setOpen( true ) }
                     onBlur={ () => setTimeout( () => setOpen( false ), 150 ) }
                     onInput={ ( e ) => { setQuery( e.target.value ); setOpen( true ); } }
@@ -1575,7 +1575,7 @@ function Consents() {
     const [ savedAt, setSavedAt ] = useState( null );
     const [ err, setErr ] = useState( '' );
 
-    const load = useCallback( () => api( 'consents' ).then( setList ).catch( ( e ) => setErr( e.message || __( 'Could not load your consents.', 'giveflow-fundraising-campaigns' ) ) ), [] );
+    const load = useCallback( () => api( 'consents' ).then( setList ).catch( ( e ) => setErr( e.message || __( 'Could not load your consents.', 'fundkit-fundraising-campaigns' ) ) ), [] );
     useEffect( () => { load(); }, [ load ] );
     useEffect( () => {
         if ( ! savedAt ) return undefined;
@@ -1589,12 +1589,12 @@ function Consents() {
         <ExtensionSection key={ panel.id } panel={ panel } context={ { api } } className="dp-ext-section" />
     ) );
 
-    if ( ! list ) return <p>{ err || __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p>;
+    if ( ! list ) return <p>{ err || __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</p>;
     if ( ! list.length ) return (
         <div class="dp-consents">
             <div class="dp-empty">
-                <p>{ __( 'No consent purposes are defined yet.', 'giveflow-fundraising-campaigns' ) }</p>
-                <p class="dp-hint">{ __( 'The organization has not configured any subscriptions or consents.', 'giveflow-fundraising-campaigns' ) }</p>
+                <p>{ __( 'No consent purposes are defined yet.', 'fundkit-fundraising-campaigns' ) }</p>
+                <p class="dp-hint">{ __( 'The organization has not configured any subscriptions or consents.', 'fundkit-fundraising-campaigns' ) }</p>
             </div>
             { sections }
         </div>
@@ -1607,7 +1607,7 @@ function Consents() {
         setErr( '' );
         api( 'consents', { method: 'POST', body: JSON.stringify( { items } ) } )
             .then( ( fresh ) => { setList( fresh ); setSavedAt( Date.now() ); } )
-            .catch( ( e ) => { setErr( e.message || __( 'Could not save your choice.', 'giveflow-fundraising-campaigns' ) ); load(); } )
+            .catch( ( e ) => { setErr( e.message || __( 'Could not save your choice.', 'fundkit-fundraising-campaigns' ) ); load(); } )
             .finally( () => setSaving( false ) );
     };
 
@@ -1622,7 +1622,7 @@ function Consents() {
         setErr( '' );
         api( 'consents', { method: 'POST', body: JSON.stringify( { items } ) } )
             .then( ( fresh ) => { setList( fresh ); setSavedAt( Date.now() ); } )
-            .catch( ( e ) => { setErr( e.message || __( 'Could not save your choice.', 'giveflow-fundraising-campaigns' ) ); load(); } )
+            .catch( ( e ) => { setErr( e.message || __( 'Could not save your choice.', 'fundkit-fundraising-campaigns' ) ); load(); } )
             .finally( () => setSaving( false ) );
     };
 
@@ -1633,12 +1633,12 @@ function Consents() {
             { err && <p class="dp-error">{ err }</p> }
             { staleCount > 0 && (
                 <div class="dp-consents__notice" role="status">
-                    <strong>{ sprintf( /* translators: %d: number of consent items that were updated */ _n( '%d updated.', '%d updated.', staleCount, 'giveflow-fundraising-campaigns' ), staleCount ) }</strong>{ ' ' }
-                    { __( 'The items marked below have new terms since you last reviewed them. Confirm or change each one.', 'giveflow-fundraising-campaigns' ) }
+                    <strong>{ sprintf( /* translators: %d: number of consent items that were updated */ _n( '%d updated.', '%d updated.', staleCount, 'fundkit-fundraising-campaigns' ), staleCount ) }</strong>{ ' ' }
+                    { __( 'The items marked below have new terms since you last reviewed them. Confirm or change each one.', 'fundkit-fundraising-campaigns' ) }
                 </div>
             ) }
             { staleCount === 0 && (
-                <p class="dp-hint">{ __( 'Toggle each subscription below. Every change is logged for your records.', 'giveflow-fundraising-campaigns' ) }</p>
+                <p class="dp-hint">{ __( 'Toggle each subscription below. Every change is logged for your records.', 'fundkit-fundraising-campaigns' ) }</p>
             ) }
             { list.map( ( p ) => (
                 <label
@@ -1653,11 +1653,11 @@ function Consents() {
                     />
                     <div>
                         <strong>{ p.label }</strong>
-                        { p.required && <span class="dp-consent__required">{ __( 'required', 'giveflow-fundraising-campaigns' ) }</span> }
-                        { p.stale && <span class="dp-consent__stale">{ __( 'Updated', 'giveflow-fundraising-campaigns' ) }</span> }
+                        { p.required && <span class="dp-consent__required">{ __( 'required', 'fundkit-fundraising-campaigns' ) }</span> }
+                        { p.stale && <span class="dp-consent__stale">{ __( 'Updated', 'fundkit-fundraising-campaigns' ) }</span> }
                         { p.description && <p class="dp-consent__desc">{ p.description }</p> }
                         { p.has_record && p.occurred_at && (
-                            <p class="dp-consent__meta">{ sprintf( /* translators: %s: date the consent was last confirmed */ __( 'Last confirmed %s', 'giveflow-fundraising-campaigns' ), formatDate( p.occurred_at ) ) }</p>
+                            <p class="dp-consent__meta">{ sprintf( /* translators: %s: date the consent was last confirmed */ __( 'Last confirmed %s', 'fundkit-fundraising-campaigns' ), formatDate( p.occurred_at ) ) }</p>
                         ) }
                         { p.stale && (
                             <button
@@ -1665,14 +1665,14 @@ function Consents() {
                                 class="dp-consent__confirm"
                                 onClick={ () => confirmStale( p.key ) }
                             >
-                                { __( 'Keep as is', 'giveflow-fundraising-campaigns' ) }
+                                { __( 'Keep as is', 'fundkit-fundraising-campaigns' ) }
                             </button>
                         ) }
                     </div>
                 </label>
             ) ) }
-            { saving && <p class="dp-consent__saving">{ __( 'Saving…', 'giveflow-fundraising-campaigns' ) }</p> }
-            { ! saving && savedAt && <p class="dp-consent__saving dp-form__saved" role="status">{ __( 'Saved.', 'giveflow-fundraising-campaigns' ) }</p> }
+            { saving && <p class="dp-consent__saving">{ __( 'Saving…', 'fundkit-fundraising-campaigns' ) }</p> }
+            { ! saving && savedAt && <p class="dp-consent__saving dp-form__saved" role="status">{ __( 'Saved.', 'fundkit-fundraising-campaigns' ) }</p> }
             { sections }
         </div>
     );
@@ -1684,14 +1684,14 @@ function Preferences() {
     const [ saved, setSaved ] = useState( false );
     const [ err, setErr ] = useState( '' );
 
-    useEffect( () => { api( 'preferences' ).then( setP ).catch( ( e ) => setErr( e.message || __( 'Could not load your preferences.', 'giveflow-fundraising-campaigns' ) ) ); }, [] );
+    useEffect( () => { api( 'preferences' ).then( setP ).catch( ( e ) => setErr( e.message || __( 'Could not load your preferences.', 'fundkit-fundraising-campaigns' ) ) ); }, [] );
     useEffect( () => {
         if ( ! saved ) return undefined;
         const t = setTimeout( () => setSaved( false ), 2500 );
         return () => clearTimeout( t );
     }, [ saved ] );
 
-    if ( ! p ) return <p>{ err || __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p>;
+    if ( ! p ) return <p>{ err || __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</p>;
 
     const save = () => {
         setSaving( true );
@@ -1699,21 +1699,21 @@ function Preferences() {
         setSaved( false );
         api( 'preferences', { method: 'POST', body: JSON.stringify( p ) } )
             .then( ( fresh ) => { setP( fresh ); setSaved( true ); } )
-            .catch( ( e ) => setErr( e.message || __( 'Could not save.', 'giveflow-fundraising-campaigns' ) ) )
+            .catch( ( e ) => setErr( e.message || __( 'Could not save.', 'fundkit-fundraising-campaigns' ) ) )
             .finally( () => setSaving( false ) );
     };
 
     return (
         <div class="dp-prefs">
             <div class="dp-prefs__col">
-                <h4>{ __( 'Privacy', 'giveflow-fundraising-campaigns' ) }</h4>
+                <h4>{ __( 'Privacy', 'fundkit-fundraising-campaigns' ) }</h4>
                 <label>
                     <input type="checkbox" checked={ p.always_anonymous } onChange={ ( e ) => setP( { ...p, always_anonymous: e.target.checked } ) } />
-                    { __( 'Make all future donations anonymous', 'giveflow-fundraising-campaigns' ) }
+                    { __( 'Make all future donations anonymous', 'fundkit-fundraising-campaigns' ) }
                 </label>
             </div>
-            <button class="dp-action is-primary" disabled={ saving } onClick={ save }>{ saving ? __( 'Saving…', 'giveflow-fundraising-campaigns' ) : __( 'Save preferences', 'giveflow-fundraising-campaigns' ) }</button>
-            { ! saving && saved && <span class="dp-form__saved" role="status">{ __( 'Saved.', 'giveflow-fundraising-campaigns' ) }</span> }
+            <button class="dp-action is-primary" disabled={ saving } onClick={ save }>{ saving ? __( 'Saving…', 'fundkit-fundraising-campaigns' ) : __( 'Save preferences', 'fundkit-fundraising-campaigns' ) }</button>
+            { ! saving && saved && <span class="dp-form__saved" role="status">{ __( 'Saved.', 'fundkit-fundraising-campaigns' ) }</span> }
             { err && <p class="dp-error">{ err }</p> }
         </div>
     );
@@ -1738,12 +1738,12 @@ function formatDate( iso ) {
 
 function intervalLabel( count, unit ) {
     const n = Number( count ) || 1;
-    const u = unit === 'year' ? _n( 'year', 'years', n, 'giveflow-fundraising-campaigns' )
-        : unit === 'week'     ? _n( 'week', 'weeks', n, 'giveflow-fundraising-campaigns' )
-        :                       _n( 'month', 'months', n, 'giveflow-fundraising-campaigns' );
+    const u = unit === 'year' ? _n( 'year', 'years', n, 'fundkit-fundraising-campaigns' )
+        : unit === 'week'     ? _n( 'week', 'weeks', n, 'fundkit-fundraising-campaigns' )
+        :                       _n( 'month', 'months', n, 'fundkit-fundraising-campaigns' );
     /* translators: 1: count, 2: interval unit (e.g. months) */
-    return sprintf( __( 'Every %1$d %2$s', 'giveflow-fundraising-campaigns' ), n, u );
+    return sprintf( __( 'Every %1$d %2$s', 'fundkit-fundraising-campaigns' ), n, u );
 }
 
-const mount = document.getElementById( 'giveflow-donor-portal' );
+const mount = document.getElementById( 'fundkit-donor-portal' );
 if ( mount ) render( <App />, mount );

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\EventRecorder;
-use GiveFlow\Campaigns\CampaignTemplates;
-use GiveFlow\Core\Commands\CoreCommandProvider;
-use GiveFlow\Foundation\Commands\CommandContext;
-use GiveFlow\Foundation\Commands\CommandRegistry;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Analytics\EventRecorder;
+use FundKit\Campaigns\CampaignTemplates;
+use FundKit\Core\Commands\CoreCommandProvider;
+use FundKit\Foundation\Commands\CommandContext;
+use FundKit\Foundation\Commands\CommandRegistry;
+use FundKit\Foundation\Plugin;
 
 /**
  * The assistant used to create every campaign on the default layout, because
@@ -93,15 +93,15 @@ final class CampaignTemplateCommandsTest extends IntegrationTestCase
 
         $this->assertTrue($res->ok, (string) ($res->error ?? ''));
 
-        $campaign = \GiveFlow\Campaigns\Campaign::query()->find('id', (int) $res->data['campaign_id']);
+        $campaign = \FundKit\Campaigns\Campaign::query()->find('id', (int) $res->data['campaign_id']);
         $page     = get_post((int) $campaign->page_id);
-        $form     = \GiveFlow\Forms\Form::query()->find('id', (int) $campaign->default_form_id);
+        $form     = \FundKit\Forms\Form::query()->find('id', (int) $campaign->default_form_id);
 
         $default = $this->registry()->dispatch('campaign.create', [
             'title'  => 'Default layout ' . uniqid(),
             'status' => 'draft',
         ], $this->context());
-        $other = \GiveFlow\Campaigns\Campaign::query()->find('id', (int) $default->data['campaign_id']);
+        $other = \FundKit\Campaigns\Campaign::query()->find('id', (int) $default->data['campaign_id']);
 
         $this->assertNotNull($page);
         $this->assertNotSame(
@@ -113,7 +113,7 @@ final class CampaignTemplateCommandsTest extends IntegrationTestCase
         // The layout carries the form with it, which is the half of the choice
         // a caller cannot see from the layout's name.
         $this->assertSame(
-            trim((string) \GiveFlow\Forms\FormTemplates::find(CampaignTemplates::formTemplate('minimal'))['blocks']),
+            trim((string) \FundKit\Forms\FormTemplates::find(CampaignTemplates::formTemplate('minimal'))['blocks']),
             trim((string) $form->blocks)
         );
     }
@@ -128,7 +128,7 @@ final class CampaignTemplateCommandsTest extends IntegrationTestCase
      */
     public function test_a_layout_this_install_does_not_offer_is_refused_rather_than_swapped(): void
     {
-        $before = \GiveFlow\Campaigns\Campaign::query()->count();
+        $before = \FundKit\Campaigns\Campaign::query()->count();
 
         $res = $this->registry()->dispatch('campaign.create', [
             'title'         => 'Wrong layout ' . uniqid(),
@@ -138,7 +138,7 @@ final class CampaignTemplateCommandsTest extends IntegrationTestCase
         ], $this->context());
 
         $this->assertFalse($res->ok, 'a layout from another campaign type was accepted');
-        $this->assertSame($before, \GiveFlow\Campaigns\Campaign::query()->count(), 'a campaign was created anyway');
+        $this->assertSame($before, \FundKit\Campaigns\Campaign::query()->count(), 'a campaign was created anyway');
     }
 
     /**
@@ -151,7 +151,7 @@ final class CampaignTemplateCommandsTest extends IntegrationTestCase
     public function test_the_schema_offers_every_registered_type_s_layouts(): void
     {
         $schema = $this->definition('campaign.create')['inputSchema']['properties']['page_template'];
-        $types  = array_keys((array) apply_filters('giveflow.campaign.types', ['standard' => '']));
+        $types  = array_keys((array) apply_filters('fundkit.campaign.types', ['standard' => '']));
 
         $this->assertNotEmpty($types);
 

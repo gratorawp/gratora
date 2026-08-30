@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest\Admin;
+namespace FundKit\Rest\Admin;
 
-use GiveFlow\Donations\DonationQueries;use GiveFlow\Rest\Paging;
-use GiveFlow\Foundation\Auth\Capabilities;
+use FundKit\Donations\DonationQueries;use FundKit\Rest\Paging;
+use FundKit\Foundation\Auth\Capabilities;
 
-use GiveFlow\Funds\Fund;
-use GiveFlow\Funds\FundReassignmentJob;
-use GiveFlow\Funds\FundRepository;
-use GiveFlow\Funds\FundService;
-use GiveFlow\Rest\Schemas\FundSchemas;
+use FundKit\Funds\Fund;
+use FundKit\Funds\FundReassignmentJob;
+use FundKit\Funds\FundRepository;
+use FundKit\Funds\FundService;
+use FundKit\Rest\Schemas\FundSchemas;
 use InvalidArgumentException;
 use RuntimeException;
 use WP_Error;
@@ -26,7 +26,7 @@ use WP_REST_Server;
  */
 final class FundsController
 {
-    private const NAMESPACE = 'giveflow/v1';
+    private const NAMESPACE = 'fundkit/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -92,7 +92,7 @@ final class FundsController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('giveflow_manage_campaigns');
+        return Capabilities::userCan('fundkit_manage_campaigns');
     }
 
     /** @since 1.0.0 */
@@ -128,7 +128,7 @@ final class FundsController
         // These figures read stored rollups, which are live-only by
         // construction, so there is nothing to toggle to. Saying how many test
         // donations are not in them is what stops a zero reading as broken.
-        $response->header('X-GiveFlow-Test-Hidden', (string) DonationQueries::hiddenTestCount());
+        $response->header('X-FundKit-Test-Hidden', (string) DonationQueries::hiddenTestCount());
         $response->header('X-WP-TotalPages', (string) max(1, (int) ceil($result['total'] / max(1, $perPage))));
         return $response;
     }
@@ -144,7 +144,7 @@ final class FundsController
     {
         $fund = $this->funds->findById((int) $request['id']);
         if (! $fund) {
-            return new WP_Error('giveflow_not_found', __('Fund not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Fund not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
         return new WP_REST_Response($this->shapeOne($fund), 200);
     }
@@ -156,9 +156,9 @@ final class FundsController
         try {
             $fund = $this->fundService->create($body);
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('giveflow_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
         } catch (RuntimeException $e) {
-            return new WP_Error('giveflow_fund_create_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('fundkit_fund_create_failed', $e->getMessage(), ['status' => 500]);
         }
         return new WP_REST_Response($this->shapeOne($fund), 201);
     }
@@ -168,13 +168,13 @@ final class FundsController
     {
         $fund = $this->funds->findById((int) $request['id']);
         if (! $fund) {
-            return new WP_Error('giveflow_not_found', __('Fund not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Fund not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
         $body = (array) ($request->get_json_params() ?? []);
         try {
             $fund = $this->fundService->update($fund, $body);
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('giveflow_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
         }
         return new WP_REST_Response($this->shapeOne($fund), 200);
     }
@@ -184,16 +184,16 @@ final class FundsController
     {
         $fund = $this->funds->findById((int) $request['id']);
         if (! $fund) {
-            return new WP_Error('giveflow_not_found', __('Fund not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Fund not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
         $reassignTo = $request['reassign_to'] !== null ? (int) $request['reassign_to'] : null;
 
         try {
             $result = $this->fundService->delete($fund, $reassignTo);
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('giveflow_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
         } catch (RuntimeException $e) {
-            return new WP_Error('giveflow_fund_delete_blocked', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('fundkit_fund_delete_blocked', $e->getMessage(), ['status' => 422]);
         }
 
         $status = $result['action'] === 'reassign_queued' ? 202 : 200;

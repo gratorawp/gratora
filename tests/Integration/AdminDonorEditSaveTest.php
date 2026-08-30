@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -73,7 +73,7 @@ final class AdminDonorEditSaveTest extends IntegrationTestCase
     private function save(Donor $donor, array $edits, array $addressEdits = []): \WP_REST_Response
     {
         $profile = (array) rest_do_request(
-            new WP_REST_Request('GET', '/giveflow/v1/admin/donors/' . (int) $donor->id . '/profile')
+            new WP_REST_Request('GET', '/fundkit/v1/admin/donors/' . (int) $donor->id . '/profile')
         )->get_data();
         $d = (array) ($profile['donor'] ?? []);
 
@@ -99,7 +99,7 @@ final class AdminDonorEditSaveTest extends IntegrationTestCase
         $form            = array_merge($form, $edits);
         $form['address'] = array_merge($form['address'], $addressEdits);
 
-        $req = new WP_REST_Request('PATCH', '/giveflow/v1/admin/donors/' . (int) $donor->id);
+        $req = new WP_REST_Request('PATCH', '/fundkit/v1/admin/donors/' . (int) $donor->id);
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($form));
 
@@ -108,7 +108,7 @@ final class AdminDonorEditSaveTest extends IntegrationTestCase
 
     private function seedDonor(string $email, string $first, string $last): Donor
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => $email,

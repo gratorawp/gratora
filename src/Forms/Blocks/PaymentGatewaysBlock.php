@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
-use GiveFlow\Foundation\Helpers\View;
-use GiveFlow\Gateways\GatewayManager;
+use FundKit\Foundation\Helpers\View;
+use FundKit\Gateways\GatewayManager;
 
 /**
  * Donor-facing gateway selector. The Preact runtime renders the interactive
@@ -25,7 +25,7 @@ final class PaymentGatewaysBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/payment-gateways';
+        return 'fundkit/payment-gateways';
     }
 
     /** @since 1.0.0 */

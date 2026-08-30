@@ -6,7 +6,7 @@ import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { OptionsEditor, normalizeOptions, slugify, slugifyField } from '../_shared/OptionsEditor';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'giveflow/multi-select';
+const NAME = 'fundkit/multi-select';
 
 const DEFAULT_OPTIONS = [
     { label: 'Option one', value: 'option-one', isDefault: false },
@@ -24,7 +24,7 @@ function Edit( { attributes, setAttributes } ) {
 
     const options = normalizeOptions( attributes.options, DEFAULT_OPTIONS );
 
-    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--multi-select' } );
+    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--multi-select' } );
 
     const updateOptionLabel = ( i, v ) => {
         const row     = options[ i ];
@@ -42,42 +42,42 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Multi-select', 'giveflow-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Multi-select', 'fundkit-fundraising-campaigns' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or any option to edit inline.', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Click the label or any option to edit inline.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Field name', 'fundkit-fundraising-campaigns' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugifyField( v ) } ) }
-                        help={ __( 'Key the array is stored under. Auto-derived from label if empty.', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Key the array is stored under. Auto-derived from label if empty.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Required', 'fundkit-fundraising-campaigns' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
-                        help={ __( 'At least one option must be selected.', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'At least one option must be selected.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                     <Slider
-                        label={ __( 'Minimum selections', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Minimum selections', 'fundkit-fundraising-campaigns' ) }
                         value={ minSelections }
                         onChange={ ( v ) => setAttributes( { minSelections: Math.max( 0, v ) } ) }
                         min={ 0 }
                         max={ 20 }
                     />
                     <Slider
-                        label={ __( 'Maximum selections', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Maximum selections', 'fundkit-fundraising-campaigns' ) }
                         value={ maxSelections }
                         onChange={ ( v ) => setAttributes( { maxSelections: Math.max( 0, v ) } ) }
                         min={ 0 }
                         max={ 20 }
-                        help={ __( 'Set to 0 for no upper limit.', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Set to 0 for no upper limit.', 'fundkit-fundraising-campaigns' ) }
                     />
                     <OptionsEditor
                         options={ options }
@@ -92,13 +92,13 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="giveflow-block-preview__label"
+                    className="fundkit-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Pick any that apply', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'Pick any that apply', 'fundkit-fundraising-campaigns' ) }
                     allowedFormats={ [] }
                 />
-                { required && <em className="giveflow-block-preview__req" aria-hidden="true">*</em> }
+                { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
                 <div
                     style={ {
                         marginTop: 8,
@@ -122,7 +122,7 @@ function Edit( { attributes, setAttributes } ) {
                                     height:       14,
                                     borderRadius: 3,
                                     border:       '1px solid #888',
-                                    background:   o.isDefault ? 'var(--giveflow-accent, #211d3f)' : '#fff',
+                                    background:   o.isDefault ? 'var(--fundkit-accent, #211d3f)' : '#fff',
                                     flexShrink:   0,
                                 } }
                             />
@@ -130,7 +130,7 @@ function Edit( { attributes, setAttributes } ) {
                                 tagName="span"
                                 value={ o.label }
                                 onChange={ ( v ) => updateOptionLabel( i, v ) }
-                                placeholder={ __( 'Option label', 'giveflow-fundraising-campaigns' ) }
+                                placeholder={ __( 'Option label', 'fundkit-fundraising-campaigns' ) }
                                 allowedFormats={ [] }
                                 style={ { fontSize: 13, color: '#111827' } }
                             />
@@ -145,9 +145,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Multi-select', 'giveflow-fundraising-campaigns' ),
-        description: __( 'Donor picks any number of options from a checkbox list.', 'giveflow-fundraising-campaigns' ),
-        category:    'giveflow-fields',
+        title:       __( 'Multi-select', 'fundkit-fundraising-campaigns' ),
+        description: __( 'Donor picks any number of options from a checkbox list.', 'fundkit-fundraising-campaigns' ),
+        category:    'fundkit-fields',
         icon:        BlockIcons[ 'multi-select' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

@@ -1,14 +1,14 @@
-.giveflow-donor-portal {
-    --dp-accent:   var(--giveflow-accent, #211d3f);
-    --dp-text:     var(--giveflow-text, #111827);
-    --dp-muted:    var(--giveflow-text-muted, #6b7280);
-    --dp-border:   var(--giveflow-border, #e5e7eb);
-    // Hairline between rows, lighter than a card boundary. Matches @giveflow/ui's
+.fundkit-donor-portal {
+    --dp-accent:   var(--fundkit-accent, #211d3f);
+    --dp-text:     var(--fundkit-text, #111827);
+    --dp-muted:    var(--fundkit-text-muted, #6b7280);
+    --dp-border:   var(--fundkit-border, #e5e7eb);
+    // Hairline between rows, lighter than a card boundary. Matches @fundkit/ui's
     // $border-soft.
-    --dp-rule:     var(--giveflow-border-soft, #eef0f2);
-    --dp-bg:       var(--giveflow-bg, #fff);
-    --dp-bg-soft:  var(--giveflow-bg-soft, #f8fafb);
-    --dp-radius:   var(--giveflow-radius, 10px);
+    --dp-rule:     var(--fundkit-border-soft, #eef0f2);
+    --dp-bg:       var(--fundkit-bg, #fff);
+    --dp-bg-soft:  var(--fundkit-bg-soft, #f8fafb);
+    --dp-radius:   var(--fundkit-radius, 10px);
 
     // The same measure the campaign pages read at, so the portal is not the one
     // screen in the product that sits 300px narrower than everything around it.
@@ -16,8 +16,8 @@
     margin: 0 auto;
     padding: 32px 24px;
     color: var(--dp-text);
-    font-family: var(--giveflow-typeface, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
-    font-size: var(--giveflow-type-size, 15px);
+    font-family: var(--fundkit-typeface, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+    font-size: var(--fundkit-type-size, 15px);
     line-height: 1.55;
 
     * { box-sizing: border-box; }
@@ -683,7 +683,7 @@
 }
 
 @media (max-width: 600px) {
-    .giveflow-donor-portal { padding: 16px 12px; }
+    .fundkit-donor-portal { padding: 16px 12px; }
 
     .dp__head {
         flex-direction: column;

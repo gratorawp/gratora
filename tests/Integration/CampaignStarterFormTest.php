@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\CampaignTemplates;
-use GiveFlow\Forms\Form;
-use GiveFlow\Forms\FormTemplates;
+use FundKit\Campaigns\CampaignTemplates;
+use FundKit\Forms\Form;
+use FundKit\Forms\FormTemplates;
 use WP_REST_Request;
 
 /**
@@ -20,7 +20,7 @@ final class CampaignStarterFormTest extends IntegrationTestCase
     /** @param array<string,mixed> $input @return array<string,mixed> */
     private function createCampaign(array $input): array
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) json_encode($input + ['status' => 'published']));
 
@@ -75,7 +75,7 @@ final class CampaignStarterFormTest extends IntegrationTestCase
         $stepped = [];
         foreach (CampaignTemplates::all() as $template) {
             $form = FormTemplates::find(CampaignTemplates::formTemplate($template['id']));
-            if (is_array($form) && str_contains((string) $form['blocks'], 'wp:giveflow/steps')) {
+            if (is_array($form) && str_contains((string) $form['blocks'], 'wp:fundkit/steps')) {
                 $stepped[] = $template['id'];
             }
         }
@@ -89,28 +89,28 @@ final class CampaignStarterFormTest extends IntegrationTestCase
      */
     public function test_a_form_nobody_registered_falls_back_to_a_working_one(): void
     {
-        add_filter('giveflow.campaign.starter_form_template', static fn (): string => 'no-such-form');
+        add_filter('fundkit.campaign.starter_form_template', static fn (): string => 'no-such-form');
 
         $campaign = $this->createCampaign(['title' => 'Unknown form']);
         $blocks   = $this->formBlocksFor($campaign);
 
-        remove_all_filters('giveflow.campaign.starter_form_template');
+        remove_all_filters('fundkit.campaign.starter_form_template');
 
-        $this->assertStringContainsString('wp:giveflow/donation-amount', $blocks);
-        $this->assertStringContainsString('wp:giveflow/email', $blocks);
-        $this->assertStringContainsString('wp:giveflow/submit-button', $blocks);
+        $this->assertStringContainsString('wp:fundkit/donation-amount', $blocks);
+        $this->assertStringContainsString('wp:fundkit/email', $blocks);
+        $this->assertStringContainsString('wp:fundkit/submit-button', $blocks);
     }
 
     /** An add-on gets to name a form of its own for a template of its own. */
     public function test_an_add_on_can_name_the_form_for_its_own_template(): void
     {
-        add_filter('giveflow.campaign.starter_form_template', static fn (): string => 'guided');
+        add_filter('fundkit.campaign.starter_form_template', static fn (): string => 'guided');
 
         $campaign = $this->createCampaign(['title' => 'Add-on form']);
         $blocks   = $this->formBlocksFor($campaign);
 
-        remove_all_filters('giveflow.campaign.starter_form_template');
+        remove_all_filters('fundkit.campaign.starter_form_template');
 
-        $this->assertStringContainsString('wp:giveflow/steps', $blocks);
+        $this->assertStringContainsString('wp:fundkit/steps', $blocks);
     }
 }

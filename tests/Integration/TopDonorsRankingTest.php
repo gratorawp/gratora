@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorRepository;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorRepository;
+use FundKit\Foundation\Plugin;
 
 /**
  * A lifetime-value ranking is a list of people who gave. Without a floor it

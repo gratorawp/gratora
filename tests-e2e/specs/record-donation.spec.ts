@@ -13,11 +13,11 @@ import { AdminPage } from '../helpers/AdminPage';
  * nothing happen.
  */
 
-const LIST = '/wp-admin/admin.php?page=giveflow-donations';
+const LIST = '/wp-admin/admin.php?page=fundkit-donations';
 
 /** A donor nobody else in the suite uses, so the duplicate check is about us. */
 function uniqueEmail(): string {
-    return `cheque-${ process.env.GIVEFLOW_E2E_RUN_ID ?? 'local' }-${ Date.now() }@example.org`;
+    return `cheque-${ process.env.FUNDKIT_E2E_RUN_ID ?? 'local' }-${ Date.now() }@example.org`;
 }
 
 async function openDrawer(page: Page): Promise<void> {
@@ -26,10 +26,10 @@ async function openDrawer(page: Page): Promise<void> {
 }
 
 async function fill(page: Page, email: string, amount: string): Promise<void> {
-    await page.locator('.giveflow-rd input[type="email"]').fill(email);
+    await page.locator('.fundkit-rd input[type="email"]').fill(email);
     // Field renders its label as a div, not a <label for>, so the amount input
     // is reached through its own field wrapper rather than by label.
-    await page.locator('.giveflow-field:has(.giveflow-field__label:text-is("Amount")) input').fill(amount);
+    await page.locator('.fundkit-field:has(.fundkit-field__label:text-is("Amount")) input').fill(amount);
 }
 
 test.describe('record a donation', () => {
@@ -65,11 +65,11 @@ test.describe('record a donation', () => {
         await fill(page, email, '125');
         await page.getByRole('button', { name: 'Record donation' }).click();
 
-        const warning = page.locator('.giveflow-notice--warning');
+        const warning = page.locator('.fundkit-notice--warning');
         await expect(warning).toBeVisible();
         await expect(warning).toContainText('already down for this donor');
         // It names what it matched, so the admin can go and look.
-        await expect(warning).toContainText(/GIVEFLOW/i);
+        await expect(warning).toContainText(/FUNDKIT/i);
 
         // The button becomes the answer to the question just asked.
         await expect(page.getByRole('button', { name: 'Record it anyway' })).toBeVisible();
@@ -86,20 +86,20 @@ test.describe('record a donation', () => {
         await openDrawer(page);
         await fill(page, email, '125');
         await page.getByRole('button', { name: 'Record donation' }).click();
-        await expect(page.locator('.giveflow-notice--warning')).toBeVisible();
+        await expect(page.locator('.fundkit-notice--warning')).toBeVisible();
 
-        await page.locator('.giveflow-field:has(.giveflow-field__label:text-is("Amount")) input').fill('126');
+        await page.locator('.fundkit-field:has(.fundkit-field__label:text-is("Amount")) input').fill('126');
 
-        await expect(page.locator('.giveflow-notice--warning')).toHaveCount(0);
+        await expect(page.locator('.fundkit-notice--warning')).toHaveCount(0);
         await expect(page.getByRole('button', { name: 'Record donation' })).toBeVisible();
     });
 
     test('a campaign list that cannot be read says so', async ({ page }) => {
-        // What a bookkeeper role without giveflow_manage_campaigns used to get was a
+        // What a bookkeeper role without fundkit_manage_campaigns used to get was a
         // blank picker, so every donation they recorded went uncategorised. The
         // route is faked rather than the role, because the failure to surface is
         // the fetch failing, whatever the reason.
-        await page.route('**/giveflow/v1/admin/donations/campaign-options*', (route) =>
+        await page.route('**/fundkit/v1/admin/donations/campaign-options*', (route) =>
             route.fulfill({ status: 403, contentType: 'application/json', body: '{"code":"forbidden"}' })
         );
 
@@ -108,7 +108,7 @@ test.describe('record a donation', () => {
         await expect(page.getByText('Campaigns could not be loaded')).toBeVisible();
         // SearchableSelect puts its placeholder on the input, not in the text.
         await expect(
-            page.locator('.giveflow-field:has(.giveflow-field__label:text-is("Campaign")) input')
+            page.locator('.fundkit-field:has(.fundkit-field__label:text-is("Campaign")) input')
         ).toHaveAttribute('placeholder', 'Unavailable');
     });
 });

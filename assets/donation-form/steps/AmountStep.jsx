@@ -23,7 +23,7 @@ export default function AmountStep( { step, state, dispatch, config } ) {
     const setCurrency = ( c ) => dispatch( { type: 'SET_CURRENCY', currency: c } );
 
     return (
-        <div class="giveflow-form__amount">
+        <div class="fundkit-form__amount">
             { ! config.currencySwitcherPositioned && (
                 <CurrencySwitcher
                     currencies={ currencies }
@@ -37,25 +37,25 @@ export default function AmountStep( { step, state, dispatch, config } ) {
             ) }
 
             { presets.length > 0 && (
-            <div class="giveflow-form__presets" role="radiogroup" aria-label={ config.i18n.amount || 'Donation amount' }>
+            <div class="fundkit-form__presets" role="radiogroup" aria-label={ config.i18n.amount || 'Donation amount' }>
                 { presets.map( ( p, i ) => (
                     <button
                         type="button"
                         key={ i }
                         role="radio"
                         aria-checked={ cents === p.cents }
-                        class={ `giveflow-form__preset${ cents === p.cents ? ' is-selected' : '' }${ p.impact ? ' has-impact' : '' }` }
+                        class={ `fundkit-form__preset${ cents === p.cents ? ' is-selected' : '' }${ p.impact ? ' has-impact' : '' }` }
                         onClick={ () => setCents( p.cents ) }
                     >
-                        <span class="giveflow-form__preset-amount">{ formatAmount( p.cents, state.currency ) }</span>
-                        { p.impact && <span class="giveflow-form__preset-impact">{ decodeEntities( p.impact ) }</span> }
+                        <span class="fundkit-form__preset-amount">{ formatAmount( p.cents, state.currency ) }</span>
+                        { p.impact && <span class="fundkit-form__preset-impact">{ decodeEntities( p.impact ) }</span> }
                     </button>
                 ) ) }
             </div>
             ) }
 
             { allowCustom && (
-                <div class="giveflow-form__custom">
+                <div class="fundkit-form__custom">
                     <AmountInput
                         value={ isCustom && cents > 0 ? cents / 100 : 0 }
                         onChange={ ( n ) => {
@@ -71,7 +71,7 @@ export default function AmountStep( { step, state, dispatch, config } ) {
                 </div>
             ) }
 
-            { error && <p class="giveflow-form__field-error" role="alert">{ error }</p> }
+            { error && <p class="fundkit-form__field-error" role="alert">{ error }</p> }
         </div>
     );
 }

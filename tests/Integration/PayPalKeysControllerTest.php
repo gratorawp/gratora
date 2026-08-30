@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Analytics\Event;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\PayPal\PayPalAccount;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Analytics\Event;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\PayPal\PayPalAccount;
 use WP_REST_Request;
 
 /**
@@ -74,7 +74,7 @@ final class PayPalKeysControllerTest extends IntegrationTestCase
 
     private function save(string $mode, string $clientId, string $secret, string $webhookId = ''): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/keys');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'mode' => $mode, 'client_id' => $clientId, 'client_secret' => $secret, 'webhook_id' => $webhookId,
@@ -124,7 +124,7 @@ final class PayPalKeysControllerTest extends IntegrationTestCase
         $res = $this->save('test', 'AeA1QIZ_wrong', 'EO422dn3_wrong');
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('giveflow_paypal_key_rejected', $res->get_data()['code'] ?? null);
+        $this->assertSame('fundkit_paypal_key_rejected', $res->get_data()['code'] ?? null);
         $this->assertFalse(
             $this->account()->hasKeysFor(true),
             'credentials PayPal rejected must not be left behind'
@@ -146,7 +146,7 @@ final class PayPalKeysControllerTest extends IntegrationTestCase
         $res = $this->save('test', '', '');
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('giveflow_paypal_bad_key', $res->get_data()['code'] ?? null);
+        $this->assertSame('fundkit_paypal_bad_key', $res->get_data()['code'] ?? null);
         $this->assertEmpty($this->calls, 'no PayPal call is spent on obviously empty input');
     }
 
@@ -158,7 +158,7 @@ final class PayPalKeysControllerTest extends IntegrationTestCase
         $this->assertTrue($this->account()->hasKeysFor(true));
         $this->assertTrue($this->account()->hasKeysFor(false));
 
-        $req = new WP_REST_Request('DELETE', '/giveflow/v1/gateways/paypal/keys');
+        $req = new WP_REST_Request('DELETE', '/fundkit/v1/gateways/paypal/keys');
         $req->set_param('mode', 'live');
         $res = rest_do_request($req);
 
@@ -220,7 +220,7 @@ final class PayPalKeysControllerTest extends IntegrationTestCase
             return $pre;
         }, 5, 3);
 
-        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/paypal/keys');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'mode' => 'test', 'client_id' => 'NEW_client', 'client_secret' => 'NEW_secret',
@@ -238,16 +238,16 @@ final class PayPalKeysControllerTest extends IntegrationTestCase
         $account = $c->get(PayPalAccount::class);
         $account->forget();
         $account->saveKeys(true, 'AeA1_client', 'EO42_secret');
-        update_option('giveflow_gateway_config', ['test_mode' => true]);
+        update_option('fundkit_gateway_config', ['test_mode' => true]);
 
-        $gateway = new \GiveFlow\Gateways\PayPal\PayPalGateway(
-            $c->get(\GiveFlow\Gateways\PayPal\PayPalApi::class),
+        $gateway = new \FundKit\Gateways\PayPal\PayPalGateway(
+            $c->get(\FundKit\Gateways\PayPal\PayPalApi::class),
             $account,
-            $c->get(\GiveFlow\Donations\DonationRepository::class),
-            $c->get(\GiveFlow\Donations\DonationService::class),
-            $c->get(\GiveFlow\Gateways\PayPal\PayPalPlans::class),
-            $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
-            $c->get(\GiveFlow\Foundation\Time\Clock::class),
+            $c->get(\FundKit\Donations\DonationRepository::class),
+            $c->get(\FundKit\Donations\DonationService::class),
+            $c->get(\FundKit\Gateways\PayPal\PayPalPlans::class),
+            $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
+            $c->get(\FundKit\Foundation\Time\Clock::class),
         );
 
         $this->assertSame(['one_time'], $gateway->frequencies(), 'no webhook, no recurring');
@@ -259,34 +259,34 @@ final class PayPalKeysControllerTest extends IntegrationTestCase
     public function test_paypal_does_not_offer_currencies_it_would_reject(): void
     {
         $c = Plugin::instance()->container;
-        $gateway = new \GiveFlow\Gateways\PayPal\PayPalGateway(
-            $c->get(\GiveFlow\Gateways\PayPal\PayPalApi::class),
+        $gateway = new \FundKit\Gateways\PayPal\PayPalGateway(
+            $c->get(\FundKit\Gateways\PayPal\PayPalApi::class),
             $c->get(PayPalAccount::class),
-            $c->get(\GiveFlow\Donations\DonationRepository::class),
-            $c->get(\GiveFlow\Donations\DonationService::class),
-            $c->get(\GiveFlow\Gateways\PayPal\PayPalPlans::class),
-            $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
-            $c->get(\GiveFlow\Foundation\Time\Clock::class),
+            $c->get(\FundKit\Donations\DonationRepository::class),
+            $c->get(\FundKit\Donations\DonationService::class),
+            $c->get(\FundKit\Gateways\PayPal\PayPalPlans::class),
+            $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
+            $c->get(\FundKit\Foundation\Time\Clock::class),
         );
 
         // PayPal rejects decimals on these two, and PayPalMoney sends decimals
         // for both because Currency::minorUnits answers 2 for Stripe's sake.
         foreach (['HUF', 'TWD'] as $code) {
             $this->assertNotContains($code, $gateway->currencies(), $code . ' would fail at the boundary');
-            $this->assertStringContainsString('.', \GiveFlow\Gateways\PayPal\PayPalMoney::toValue(100000, $code));
+            $this->assertStringContainsString('.', \FundKit\Gateways\PayPal\PayPalMoney::toValue(100000, $code));
         }
 
         $this->assertContains('JPY', $gateway->currencies(), 'JPY is genuinely zero-decimal and works');
-        $this->assertSame('1000', \GiveFlow\Gateways\PayPal\PayPalMoney::toValue(100000, 'JPY'));
+        $this->assertSame('1000', \FundKit\Gateways\PayPal\PayPalMoney::toValue(100000, 'JPY'));
     }
 
     /**
      * A webhook that exists is not a webhook that delivers anything this reads.
-     * Reported as checked, an org can save an id subscribed to nothing GiveFlow
+     * Reported as checked, an org can save an id subscribed to nothing FundKit
      * handles and be told it is fine, and then every recurring donation is
      * charged with no event to bank it.
      */
-    public function test_a_webhook_missing_the_events_giveflow_reads_is_saved_and_reported(): void
+    public function test_a_webhook_missing_the_events_fundkit_reads_is_saved_and_reported(): void
     {
         add_filter('pre_http_request', static function ($pre, $args, $url) {
             if (! is_string($url) || ! str_contains($url, 'paypal.com')) return $pre;

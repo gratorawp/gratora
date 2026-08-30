@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms;
+namespace FundKit\Forms;
 
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\Stripe\StripeAccount;
-use GiveFlow\Gateways\TestMode;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\Stripe\StripeAccount;
+use FundKit\Gateways\TestMode;
+use FundKit\Settings\SettingsService;
 
 /** @since 1.0.0 */
 final class FormReadinessService
@@ -61,7 +61,7 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-toggle-frequencies',
                 'status' => 'pass',
-                'label'  => __('No recurring toggle on this form', 'giveflow-fundraising-campaigns'),
+                'label'  => __('No recurring toggle on this form', 'fundkit-fundraising-campaigns'),
             ];
         }
         $freqs = Blocks\RecurringToggleBlock::normalizeFrequencies($stub['frequencies'] ?? Blocks\RecurringToggleBlock::DEFAULT_FREQUENCIES);
@@ -72,14 +72,14 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-toggle-frequencies',
                 'status' => 'pass',
-                'label'  => __('Recurring toggle offers at least two frequencies', 'giveflow-fundraising-campaigns'),
+                'label'  => __('Recurring toggle offers at least two frequencies', 'fundkit-fundraising-campaigns'),
             ];
         }
         return [
             'id'           => 'recurring-toggle-frequencies',
             'status'       => 'warn',
-            'label'        => __('Recurring toggle has fewer than two frequencies', 'giveflow-fundraising-campaigns'),
-            'detail'       => __('The block needs at least two frequencies to render; with one or none, it is silently hidden on the form. Add a frequency in the block settings.', 'giveflow-fundraising-campaigns'),
+            'label'        => __('Recurring toggle has fewer than two frequencies', 'fundkit-fundraising-campaigns'),
+            'detail'       => __('The block needs at least two frequencies to render; with one or none, it is silently hidden on the form. Add a frequency in the block settings.', 'fundkit-fundraising-campaigns'),
         ];
     }
 
@@ -101,25 +101,25 @@ final class FormReadinessService
             }
         }
 
-        if (count($offered) < 2 || $this->hasBlock(parse_blocks((string) $form->blocks), 'giveflow/payment-gateways')) {
+        if (count($offered) < 2 || $this->hasBlock(parse_blocks((string) $form->blocks), 'fundkit/payment-gateways')) {
             return [
                 'id'     => 'gateway-block',
                 'status' => 'pass',
-                'label'  => __('Donors can pick how to pay', 'giveflow-fundraising-campaigns'),
+                'label'  => __('Donors can pick how to pay', 'fundkit-fundraising-campaigns'),
             ];
         }
 
         return [
             'id'           => 'gateway-block',
             'status'       => 'warn',
-            'label'        => __('This form does not let the donor choose a payment method', 'giveflow-fundraising-campaigns'),
+            'label'        => __('This form does not let the donor choose a payment method', 'fundkit-fundraising-campaigns'),
             'detail'       => sprintf(
                 /* translators: %s: comma-separated list of enabled gateway names. */
-                __('%s are available, but the form has no payment methods block, so donors get whichever comes first. Add the block where you want the choice to appear.', 'giveflow-fundraising-campaigns'),
+                __('%s are available, but the form has no payment methods block, so donors get whichever comes first. Add the block where you want the choice to appear.', 'fundkit-fundraising-campaigns'),
                 implode(', ', $offered)
             ),
-            'action_url'   => admin_url('admin.php?page=giveflow-forms&form=' . (int) $form->id),
-            'action_label' => __('Edit the form', 'giveflow-fundraising-campaigns'),
+            'action_url'   => admin_url('admin.php?page=fundkit-forms&form=' . (int) $form->id),
+            'action_label' => __('Edit the form', 'fundkit-fundraising-campaigns'),
         ];
     }
 
@@ -140,7 +140,7 @@ final class FormReadinessService
     {
         foreach ($blocks as $b) {
             if (! is_array($b)) continue;
-            if (($b['blockName'] ?? null) === 'giveflow/recurring-toggle') {
+            if (($b['blockName'] ?? null) === 'fundkit/recurring-toggle') {
                 return is_array($b['attrs'] ?? null) ? $b['attrs'] : [];
             }
             $inner = $b['innerBlocks'] ?? null;
@@ -165,10 +165,10 @@ final class FormReadinessService
             return [
                 'id'           => 'gateway',
                 'status'       => 'fail',
-                'label'        => __('Stripe account is not ready to take donations', 'giveflow-fundraising-campaigns'),
-                'detail'       => __('Finish the remaining Stripe verification steps or donations will fail.', 'giveflow-fundraising-campaigns'),
-                'action_url'   => admin_url('admin.php?page=giveflow-settings#gateways'),
-                'action_label' => __('Open settings', 'giveflow-fundraising-campaigns'),
+                'label'        => __('Stripe account is not ready to take donations', 'fundkit-fundraising-campaigns'),
+                'detail'       => __('Finish the remaining Stripe verification steps or donations will fail.', 'fundkit-fundraising-campaigns'),
+                'action_url'   => admin_url('admin.php?page=fundkit-settings#gateways'),
+                'action_label' => __('Open settings', 'fundkit-fundraising-campaigns'),
             ];
         }
 
@@ -186,10 +186,10 @@ final class FormReadinessService
             return [
                 'id'           => 'gateway',
                 'status'       => 'fail',
-                'label'        => __('No payment gateway enabled for this form', 'giveflow-fundraising-campaigns'),
-                'detail'       => __('Donors cannot complete a donation without a gateway. Enable one, or widen the gateways this form allows.', 'giveflow-fundraising-campaigns'),
-                'action_url'   => admin_url('admin.php?page=giveflow-settings#gateways'),
-                'action_label' => __('Configure gateways', 'giveflow-fundraising-campaigns'),
+                'label'        => __('No payment gateway enabled for this form', 'fundkit-fundraising-campaigns'),
+                'detail'       => __('Donors cannot complete a donation without a gateway. Enable one, or widen the gateways this form allows.', 'fundkit-fundraising-campaigns'),
+                'action_url'   => admin_url('admin.php?page=fundkit-settings#gateways'),
+                'action_label' => __('Configure gateways', 'fundkit-fundraising-campaigns'),
             ];
         }
 
@@ -197,7 +197,7 @@ final class FormReadinessService
             'id'     => 'gateway',
             'status' => 'pass',
             /* translators: %s: comma-separated list of enabled gateway names. */
-            'label'  => sprintf(__('Payment gateways enabled: %s', 'giveflow-fundraising-campaigns'), implode(', ', $enabled)),
+            'label'  => sprintf(__('Payment gateways enabled: %s', 'fundkit-fundraising-campaigns'), implode(', ', $enabled)),
         ];
     }
 
@@ -208,7 +208,7 @@ final class FormReadinessService
             return [
                 'id'     => 'test-mode',
                 'status' => 'pass',
-                'label'  => __('Test mode is off', 'giveflow-fundraising-campaigns'),
+                'label'  => __('Test mode is off', 'fundkit-fundraising-campaigns'),
             ];
         }
 
@@ -222,16 +222,16 @@ final class FormReadinessService
         return [
             'id'           => 'test-mode',
             'status'       => 'warn',
-            'label'        => __('This form is in test mode', 'giveflow-fundraising-campaigns'),
+            'label'        => __('This form is in test mode', 'fundkit-fundraising-campaigns'),
             'detail'       => $ownSwitch
-                ? __('Donations will not be charged and are excluded from reporting. Turn test mode off in this form\'s gateway settings before going live.', 'giveflow-fundraising-campaigns')
-                : __('Donations will not be charged and are excluded from reporting. The whole site is in test mode; turn it off before going live.', 'giveflow-fundraising-campaigns'),
+                ? __('Donations will not be charged and are excluded from reporting. Turn test mode off in this form\'s gateway settings before going live.', 'fundkit-fundraising-campaigns')
+                : __('Donations will not be charged and are excluded from reporting. The whole site is in test mode; turn it off before going live.', 'fundkit-fundraising-campaigns'),
             'action_url'   => $ownSwitch
-                ? admin_url('admin.php?page=giveflow-forms&form=' . (int) $form->id)
-                : admin_url('admin.php?page=giveflow-settings#gateways'),
+                ? admin_url('admin.php?page=fundkit-forms&form=' . (int) $form->id)
+                : admin_url('admin.php?page=fundkit-settings#gateways'),
             'action_label' => $ownSwitch
-                ? __('Open this form', 'giveflow-fundraising-campaigns')
-                : __('Open settings', 'giveflow-fundraising-campaigns'),
+                ? __('Open this form', 'fundkit-fundraising-campaigns')
+                : __('Open settings', 'fundkit-fundraising-campaigns'),
         ];
     }
 
@@ -253,22 +253,22 @@ final class FormReadinessService
             return [
                 'id'           => 'receipt-sender',
                 'status'       => 'warn',
-                'label'        => __('Receipt sender uses WordPress fallback', 'giveflow-fundraising-campaigns'),
-                'detail'       => __('Set a sender on your site domain, for example donations@yoursite.org, so receipts are recognisable. Delivery itself depends on your mail transport: see Settings, Email.', 'giveflow-fundraising-campaigns'),
-                'action_url'   => admin_url('admin.php?page=giveflow-settings#email'),
-                'action_label' => __('Set sender', 'giveflow-fundraising-campaigns'),
+                'label'        => __('Receipt sender uses WordPress fallback', 'fundkit-fundraising-campaigns'),
+                'detail'       => __('Set a sender on your site domain, for example donations@yoursite.org, so receipts are recognisable. Delivery itself depends on your mail transport: see Settings, Email.', 'fundkit-fundraising-campaigns'),
+                'action_url'   => admin_url('admin.php?page=fundkit-settings#email'),
+                'action_label' => __('Set sender', 'fundkit-fundraising-campaigns'),
             ];
         }
         return [
             'id'     => 'receipt-sender',
             'status' => 'pass',
             /* translators: %s: from-email address used for donation receipts. */
-            'label'  => sprintf(__('Receipts sent from %s', 'giveflow-fundraising-campaigns'), $from),
+            'label'  => sprintf(__('Receipts sent from %s', 'fundkit-fundraising-campaigns'), $from),
             // Deliberately not a clean bill of health. This check can only see
             // the address; a receipt sent from a perfectly valid one still
             // bounces when the host has no authenticated transport, which is
             // the usual shape of "no donor ever got a receipt".
-            'detail' => __('This confirms the address only. Whether receipts arrive depends on your mail transport.', 'giveflow-fundraising-campaigns'),
+            'detail' => __('This confirms the address only. Whether receipts arrive depends on your mail transport.', 'fundkit-fundraising-campaigns'),
         ];
     }
 
@@ -283,16 +283,16 @@ final class FormReadinessService
             return [
                 'id'           => 'receipt-template',
                 'status'       => 'fail',
-                'label'        => __('Donation receipt email is disabled', 'giveflow-fundraising-campaigns'),
-                'detail'       => __('Donors will not receive a confirmation after paying.', 'giveflow-fundraising-campaigns'),
-                'action_url'   => admin_url('admin.php?page=giveflow-settings#email'),
-                'action_label' => __('Enable template', 'giveflow-fundraising-campaigns'),
+                'label'        => __('Donation receipt email is disabled', 'fundkit-fundraising-campaigns'),
+                'detail'       => __('Donors will not receive a confirmation after paying.', 'fundkit-fundraising-campaigns'),
+                'action_url'   => admin_url('admin.php?page=fundkit-settings#email'),
+                'action_label' => __('Enable template', 'fundkit-fundraising-campaigns'),
             ];
         }
         return [
             'id'     => 'receipt-template',
             'status' => 'pass',
-            'label'  => __('Donation receipt email is enabled', 'giveflow-fundraising-campaigns'),
+            'label'  => __('Donation receipt email is enabled', 'fundkit-fundraising-campaigns'),
         ];
     }
 
@@ -303,7 +303,7 @@ final class FormReadinessService
             return [
                 'id'     => 'https',
                 'status' => 'pass',
-                'label'  => __('Site is served over HTTPS', 'giveflow-fundraising-campaigns'),
+                'label'  => __('Site is served over HTTPS', 'fundkit-fundraising-campaigns'),
             ];
         }
         // Test mode moves no real money, so HTTPS only warns. Live mode fails:
@@ -312,15 +312,15 @@ final class FormReadinessService
             return [
                 'id'     => 'https',
                 'status' => 'warn',
-                'label'  => __('Site is not on HTTPS', 'giveflow-fundraising-campaigns'),
-                'detail' => __('Fine for test mode, but live Stripe charges will be rejected. Install an SSL certificate before turning test mode off.', 'giveflow-fundraising-campaigns'),
+                'label'  => __('Site is not on HTTPS', 'fundkit-fundraising-campaigns'),
+                'detail' => __('Fine for test mode, but live Stripe charges will be rejected. Install an SSL certificate before turning test mode off.', 'fundkit-fundraising-campaigns'),
             ];
         }
         return [
             'id'     => 'https',
             'status' => 'fail',
-            'label'  => __('Site is not on HTTPS', 'giveflow-fundraising-campaigns'),
-            'detail' => __('Stripe rejects live charges on non-HTTPS sites. Install an SSL certificate before publishing.', 'giveflow-fundraising-campaigns'),
+            'label'  => __('Site is not on HTTPS', 'fundkit-fundraising-campaigns'),
+            'detail' => __('Stripe rejects live charges on non-HTTPS sites. Install an SSL certificate before publishing.', 'fundkit-fundraising-campaigns'),
         ];
     }
 
@@ -331,7 +331,7 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-gateway',
                 'status' => 'pass',
-                'label'  => __('Form is one-time only', 'giveflow-fundraising-campaigns'),
+                'label'  => __('Form is one-time only', 'fundkit-fundraising-campaigns'),
             ];
         }
 
@@ -354,7 +354,7 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-gateway',
                 'status' => 'pass',
-                'label'  => __('Recurring donations are supported', 'giveflow-fundraising-campaigns'),
+                'label'  => __('Recurring donations are supported', 'fundkit-fundraising-campaigns'),
             ];
         }
 
@@ -362,10 +362,10 @@ final class FormReadinessService
             return [
                 'id'           => 'recurring-gateway',
                 'status'       => 'fail',
-                'label'        => __('No gateway supports recurring donations', 'giveflow-fundraising-campaigns'),
-                'detail'       => __('None of the installed gateways can charge recurring donations. Remove the recurring-toggle block from this form, or install a gateway that supports recurring.', 'giveflow-fundraising-campaigns'),
-                'action_url'   => admin_url('admin.php?page=giveflow-settings#gateways'),
-                'action_label' => __('Open gateways', 'giveflow-fundraising-campaigns'),
+                'label'        => __('No gateway supports recurring donations', 'fundkit-fundraising-campaigns'),
+                'detail'       => __('None of the installed gateways can charge recurring donations. Remove the recurring-toggle block from this form, or install a gateway that supports recurring.', 'fundkit-fundraising-campaigns'),
+                'action_url'   => admin_url('admin.php?page=fundkit-settings#gateways'),
+                'action_label' => __('Open gateways', 'fundkit-fundraising-campaigns'),
             ];
         }
 
@@ -374,14 +374,14 @@ final class FormReadinessService
         return [
             'id'           => 'recurring-gateway',
             'status'       => 'fail',
-            'label'        => __('None of your enabled gateways supports recurring', 'giveflow-fundraising-campaigns'),
+            'label'        => __('None of your enabled gateways supports recurring', 'fundkit-fundraising-campaigns'),
             'detail'       => sprintf(
                 /* translators: %s: comma-separated list of recurring-capable gateway names. */
-                __('Enable one of %s in Settings → Payment gateways, or remove the recurring-toggle block from this form.', 'giveflow-fundraising-campaigns'),
+                __('Enable one of %s in Settings → Payment gateways, or remove the recurring-toggle block from this form.', 'fundkit-fundraising-campaigns'),
                 implode(', ', $names)
             ),
-            'action_url'   => admin_url('admin.php?page=giveflow-settings#gateways'),
-            'action_label' => __('Open gateways', 'giveflow-fundraising-campaigns'),
+            'action_url'   => admin_url('admin.php?page=fundkit-settings#gateways'),
+            'action_label' => __('Open gateways', 'fundkit-fundraising-campaigns'),
         ];
     }
 
@@ -409,7 +409,7 @@ final class FormReadinessService
     {
         foreach ($blocks as $b) {
             if (! is_array($b)) continue;
-            if (($b['blockName'] ?? null) === 'giveflow/recurring-toggle') {
+            if (($b['blockName'] ?? null) === 'fundkit/recurring-toggle') {
                 $freqs = Blocks\RecurringToggleBlock::normalizeFrequencies($b['attrs']['frequencies'] ?? Blocks\RecurringToggleBlock::DEFAULT_FREQUENCIES);
                 if (! in_array('one-time', $freqs, true) && ! empty($freqs)) {
                     array_unshift($freqs, 'one-time');

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Analytics;
+namespace FundKit\Analytics;
 
 /**
  * Records a failure where the site owner can see it.
  *
- * Writes to giveflow_events as `error.<source>`, and to error_log as well: when the
+ * Writes to fundkit_events as `error.<source>`, and to error_log as well: when the
  * database is what broke, the row write fails too.
  *
- * giveflow_events rather than its own table, so errors inherit the retention window
+ * fundkit_events rather than its own table, so errors inherit the retention window
  * and the erasure handler that already clear it.
  *
  * @since 1.0.0
@@ -20,7 +20,7 @@ final class ErrorLog
     public const PREFIX = 'error.';
 
     /**
-     * Newest errors kept. The retention window governs giveflow_events as a whole
+     * Newest errors kept. The retention window governs fundkit_events as a whole
      * and is measured in days, which bounds nothing when a webhook retries
      * every minute for a week. Errors are read newest-first from one screen,
      * so anything past this is unreachable anyway.
@@ -45,7 +45,7 @@ final class ErrorLog
         }
 
         // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- the WP_DEBUG guard above is the developer opt-in, and this is the only error_log() call in the plugin.
-        error_log('[giveflow] ' . $message);
+        error_log('[fundkit] ' . $message);
     }
 
     /**
@@ -120,7 +120,7 @@ final class ErrorLog
     private static function recorder(): ?EventRecorder
     {
         try {
-            $container = \GiveFlow\Foundation\Plugin::instance()->container;
+            $container = \FundKit\Foundation\Plugin::instance()->container;
 
             return $container->has(EventRecorder::class)
                 ? $container->get(EventRecorder::class)

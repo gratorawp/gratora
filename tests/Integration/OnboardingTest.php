@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Campaigns\Campaign;
+use FundKit\Foundation\Plugin;
+use FundKit\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -22,7 +22,7 @@ final class OnboardingTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function finalize(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/admin/onboarding/finalize');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/onboarding/finalize');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode($body));
         return rest_do_request($req);
@@ -66,6 +66,6 @@ final class OnboardingTest extends IntegrationTestCase
     {
         $this->finalize(['user_type' => 'nonprofit']);
 
-        $this->assertSame('completed', get_option('giveflow_onboarding_status'));
+        $this->assertSame('completed', get_option('fundkit_onboarding_status'));
     }
 }

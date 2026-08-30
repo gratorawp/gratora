@@ -1,5 +1,5 @@
 /**
- * `giveflow/comment` block - note-to-org textarea.
+ * `fundkit/comment` block - note-to-org textarea.
  * Skips itself when the test form lacks the block.
  */
 

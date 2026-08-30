@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\Stripe\StripeAccount;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\Stripe\StripeAccount;
 use WP_REST_Request;
 
 /**
@@ -64,7 +64,7 @@ final class StripeKeysControllerTest extends IntegrationTestCase
 
     private function save(string $mode, string $secret, string $publishable): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/gateways/stripe/keys');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/stripe/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'mode' => $mode, 'secret_key' => $secret, 'publishable_key' => $publishable,
@@ -119,7 +119,7 @@ final class StripeKeysControllerTest extends IntegrationTestCase
         $res = $this->save('test', 'sk_test_wrong', 'pk_test_wrong');
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('giveflow_stripe_key_rejected', $res->get_data()['code'] ?? null);
+        $this->assertSame('fundkit_stripe_key_rejected', $res->get_data()['code'] ?? null);
         $this->assertFalse(
             $this->account()->hasKeysFor(true),
             'a key Stripe rejected must not be left behind'
@@ -185,7 +185,7 @@ final class StripeKeysControllerTest extends IntegrationTestCase
         $res = $this->save('test', 'pk_test_abcd', 'pk_test_abcd');
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('giveflow_stripe_bad_key', $res->get_data()['code'] ?? null);
+        $this->assertSame('fundkit_stripe_bad_key', $res->get_data()['code'] ?? null);
         $this->assertEmpty($this->calls, 'shape is checked before spending a Stripe call');
     }
 
@@ -195,7 +195,7 @@ final class StripeKeysControllerTest extends IntegrationTestCase
         $res = $this->save('test', 'sk_live_abcd', 'pk_live_abcd');
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('giveflow_stripe_bad_key', $res->get_data()['code'] ?? null);
+        $this->assertSame('fundkit_stripe_bad_key', $res->get_data()['code'] ?? null);
         $this->assertFalse($this->account()->hasKeysFor(true));
     }
 
@@ -205,7 +205,7 @@ final class StripeKeysControllerTest extends IntegrationTestCase
         $res = $this->save('test', 'sk_test_abcd', 'pk_live_abcd');
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('giveflow_stripe_bad_key', $res->get_data()['code'] ?? null);
+        $this->assertSame('fundkit_stripe_bad_key', $res->get_data()['code'] ?? null);
     }
 
     public function test_removing_one_mode_leaves_the_other(): void
@@ -216,7 +216,7 @@ final class StripeKeysControllerTest extends IntegrationTestCase
         $this->assertTrue($this->account()->hasKeysFor(true));
         $this->assertTrue($this->account()->hasKeysFor(false));
 
-        $req = new WP_REST_Request('DELETE', '/giveflow/v1/gateways/stripe/keys');
+        $req = new WP_REST_Request('DELETE', '/fundkit/v1/gateways/stripe/keys');
         $req->set_param('mode', 'live');
         $res = rest_do_request($req);
 

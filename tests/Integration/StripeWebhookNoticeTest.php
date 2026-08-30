@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Gateways\Stripe\StripeAccount;
-use GiveFlow\Gateways\Stripe\StripeApi;
-use GiveFlow\Gateways\Stripe\StripeWebhookNotice;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Recurring\RecurringPlan;
+use FundKit\Gateways\Stripe\StripeAccount;
+use FundKit\Gateways\Stripe\StripeApi;
+use FundKit\Gateways\Stripe\StripeWebhookNotice;
+use FundKit\Foundation\Plugin;
+use FundKit\Recurring\RecurringPlan;
 
 /**
  * The missing-webhook-secret warning is about deliveries that will be rejected.
@@ -29,7 +29,7 @@ final class StripeWebhookNoticeTest extends IntegrationTestCase
 
     private function enableStripe(bool $on): void
     {
-        update_option('giveflow_gateway_config', [
+        update_option('fundkit_gateway_config', [
             'test_mode' => true,
             'stripe'    => ['enabled' => $on, 'webhook_secret_test' => '', 'webhook_secret_live' => ''],
         ]);

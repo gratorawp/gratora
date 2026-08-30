@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Transfer;
+namespace FundKit\Foundation\Transfer;
 
-use GiveFlow\Foundation\Crypto\Crypto;
-use GiveFlow\Settings\SecretRedactor;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Foundation\Crypto\Crypto;
+use FundKit\Settings\SecretRedactor;
+use FundKit\Vendor\Queryable\DB;
 
 /**
  * Writes everything an organization owns to a file they can take elsewhere.
@@ -37,44 +37,44 @@ final class DataExporter
      * needs its donation. The importer walks this list as written.
      */
     private const TABLES = [
-        'giveflow_campaigns',
-        'giveflow_funds',
-        'giveflow_forms',
-        'giveflow_donors',
-        'giveflow_consents',
-        'giveflow_donor_notes',
-        'giveflow_donations',
-        'giveflow_donation_notes',
-        'giveflow_refunds',
-        'giveflow_recurring_plans',
-        'giveflow_receipts',
+        'fundkit_campaigns',
+        'fundkit_funds',
+        'fundkit_forms',
+        'fundkit_donors',
+        'fundkit_consents',
+        'fundkit_donor_notes',
+        'fundkit_donations',
+        'fundkit_donation_notes',
+        'fundkit_refunds',
+        'fundkit_recurring_plans',
+        'fundkit_receipts',
     ];
 
     /**
      * Deliberately absent, and each for its own reason.
      *
-     * giveflow_system_settings holds encryption_key_v1, email_pepper_v1,
+     * fundkit_system_settings holds encryption_key_v1, email_pepper_v1,
      * form_signing_secret_v1, ip_salt_v1 and gateway credentials. An export is
      * a file people email to support and commit to repositories; the keys to
      * every encrypted column in the database cannot travel that way.
      *
-     * giveflow_magic_link_tokens are live credentials. Anyone holding the file
+     * fundkit_magic_link_tokens are live credentials. Anyone holding the file
      * could sign in as any donor until they expired.
      *
-     * giveflow_pending_signups are addresses somebody typed that nobody has
+     * fundkit_pending_signups are addresses somebody typed that nobody has
      * proven, and they expire in a week. Carrying them to another site would
      * import strangers' claims as if the organization had collected them.
      *
-     * giveflow_form_donation_stats and giveflow_events are derived or observational.
+     * fundkit_form_donation_stats and fundkit_events are derived or observational.
      * The stats are recomputed on import; the log describes what happened on
      * one site, not what the organization owns.
      */
     private const SKIP = [
-        'giveflow_system_settings',
-        'giveflow_magic_link_tokens',
-        'giveflow_pending_signups',
-        'giveflow_form_donation_stats',
-        'giveflow_events',
+        'fundkit_system_settings',
+        'fundkit_magic_link_tokens',
+        'fundkit_pending_signups',
+        'fundkit_form_donation_stats',
+        'fundkit_events',
     ];
 
     /**
@@ -91,29 +91,29 @@ final class DataExporter
      * @var array<string, array<string,bool>>
      */
     private const ENCRYPTED = [
-        'giveflow_donors' => [
+        'fundkit_donors' => [
             'email'   => true,
             'address' => false,
             'phone'   => false,
             'tax_id'  => false,
             'notes'   => false,
         ],
-        'giveflow_donor_notes'    => ['body' => true],
-        'giveflow_donation_notes' => ['body' => true],
-        'giveflow_donations'      => ['custom_data' => false],
+        'fundkit_donor_notes'    => ['body' => true],
+        'fundkit_donation_notes' => ['body' => true],
+        'fundkit_donations'      => ['custom_data' => false],
     ];
 
     private const SETTINGS_OPTIONS = [
-        'giveflow_org_profile',
-        'giveflow_currency_locale',
-        'giveflow_org_brand',
-        'giveflow_gateway_config',
-        'giveflow_privacy',
-        'giveflow_roles',
-        'giveflow_consents',
-        'giveflow_receipt_settings',
-        'giveflow_email_settings',
-        'giveflow_reference_settings',
+        'fundkit_org_profile',
+        'fundkit_currency_locale',
+        'fundkit_org_brand',
+        'fundkit_gateway_config',
+        'fundkit_privacy',
+        'fundkit_roles',
+        'fundkit_consents',
+        'fundkit_receipt_settings',
+        'fundkit_email_settings',
+        'fundkit_reference_settings',
     ];
 
     /** @since 1.0.0 */
@@ -138,7 +138,7 @@ final class DataExporter
         fwrite($out, '"format":' . self::FORMAT_VERSION);
         fwrite($out, ',"exported_at":' . wp_json_encode(gmdate('c')));
         fwrite($out, ',"site_url":' . wp_json_encode(site_url()));
-        fwrite($out, ',"version":' . wp_json_encode(defined('GIVEFLOW_VERSION') ? GIVEFLOW_VERSION : 'unknown'));
+        fwrite($out, ',"version":' . wp_json_encode(defined('FUNDKIT_VERSION') ? FUNDKIT_VERSION : 'unknown'));
         fwrite($out, ',"settings":' . wp_json_encode($this->settings()));
         fwrite($out, ',"tables":{');
 
@@ -269,7 +269,7 @@ final class DataExporter
      */
     public static function tables(): array
     {
-        $tables = (array) apply_filters('giveflow.export.tables', self::TABLES);
+        $tables = (array) apply_filters('fundkit.export.tables', self::TABLES);
 
         // Nothing an add-on adds can reopen what SKIP closed.
         return array_values(array_diff(
@@ -281,7 +281,7 @@ final class DataExporter
     /**
      * The sealed columns of every exported table, importer included.
      *
-     * An add-on that contributes a table through giveflow.export.tables declares
+     * An add-on that contributes a table through fundkit.export.tables declares
      * its sealed columns here, or they cross as ciphertext this site's key is
      * the only one that opens.
      *
@@ -290,7 +290,7 @@ final class DataExporter
      */
     public static function encryptedColumns(): array
     {
-        $map = (array) apply_filters('giveflow.export.encrypted_columns', self::ENCRYPTED);
+        $map = (array) apply_filters('fundkit.export.encrypted_columns', self::ENCRYPTED);
 
         return array_filter($map, 'is_array');
     }

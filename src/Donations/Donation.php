@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donations;
+namespace FundKit\Donations;
 
 defined('ABSPATH') || exit;
 
-use GiveFlow\Vendor\Queryable\Model;
-use GiveFlow\Vendor\Queryable\Schema\Table;
+use FundKit\Vendor\Queryable\Model;
+use FundKit\Vendor\Queryable\Schema\Table;
 
 /**
  * Donation intent or completed donation.
@@ -20,7 +20,7 @@ use GiveFlow\Vendor\Queryable\Schema\Table;
  */
 final class Donation extends Model
 {
-    protected string $table = 'giveflow_donations';
+    protected string $table = 'fundkit_donations';
     protected string $version = '1.0.0';
 
     public int $id;

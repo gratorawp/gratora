@@ -1,5 +1,5 @@
 /**
- * `giveflow/consent` block - labelled consent purposes (e.g. marketing,
+ * `fundkit/consent` block - labelled consent purposes (e.g. marketing,
  * processing). Required-by-law purposes are pre-checked and locked.
  * Skips itself when the test form lacks the block.
  */
@@ -22,7 +22,7 @@ test.describe('consent block', () => {
 
         // The "Required" pill marks legally-required purposes. Their checkbox
         // must be `checked` AND `disabled` so the donor cannot un-opt.
-        const requiredLabels = fs.locator('label:has(.giveflow-form__consent-required-pill)');
+        const requiredLabels = fs.locator('label:has(.fundkit-form__consent-required-pill)');
         const reqCount = await requiredLabels.count();
         if (reqCount === 0) test.skip(true, 'no required-by-law purposes configured');
 
@@ -37,7 +37,7 @@ test.describe('consent block', () => {
         const fs = donor.consentFieldset();
         test.skip(await fs.count() === 0, 'no consent block on the test form');
 
-        const optional = fs.locator('label:not(:has(.giveflow-form__consent-required-pill)) input[type="checkbox"]');
+        const optional = fs.locator('label:not(:has(.fundkit-form__consent-required-pill)) input[type="checkbox"]');
         const optCount = await optional.count();
         if (optCount === 0) test.skip(true, 'no optional purposes configured');
 

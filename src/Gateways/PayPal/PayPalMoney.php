@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways\PayPal;
+namespace FundKit\Gateways\PayPal;
 
-use GiveFlow\Currency\Currency;
+use FundKit\Currency\Currency;
 
 /**
  * Amount conversion at the PayPal boundary.
  *
- * GiveFlow stores money as major units x 100 for every currency. PayPal does not
+ * FundKit stores money as major units x 100 for every currency. PayPal does not
  * take minor units like Stripe: it takes a decimal string carrying exactly the
  * currency's own number of decimal places, and rejects the value otherwise
  * (JPY "1000" is fine, JPY "1000.00" is not).

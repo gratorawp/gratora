@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Styling;
+namespace FundKit\Campaigns\Styling;
 
 /**
- * Brand style presets (built-ins + user customs), stored in giveflow_org_brand as
+ * Brand style presets (built-ins + user customs), stored in fundkit_org_brand as
  * ['presets' => [...], 'default_id' => id]. Built-ins are always present in all();
  * users may edit a built-in's tokens but cannot delete one.
  *
@@ -13,7 +13,7 @@ namespace GiveFlow\Campaigns\Styling;
  */
 final class StylePresets
 {
-    private const OPTION = 'giveflow_org_brand';
+    private const OPTION = 'fundkit_org_brand';
 
     /**
      * @return array<int, array{
@@ -31,53 +31,53 @@ final class StylePresets
         return [
             [
                 'id'          => 'classic',
-                'name'        => __('Classic', 'giveflow-fundraising-campaigns'),
-                'description' => __('Balanced, friendly, accent green. The GiveFlow default.', 'giveflow-fundraising-campaigns'),
+                'name'        => __('Classic', 'fundkit-fundraising-campaigns'),
+                'description' => __('Balanced, friendly, accent green. The FundKit default.', 'fundkit-fundraising-campaigns'),
                 'tokens'      => [
-                    // Signature GiveFlow pill donate button. Other presets fall
-                    // back to --giveflow-radius-sm; the Theme preset inherits the
+                    // Signature FundKit pill donate button. Other presets fall
+                    // back to --fundkit-radius-sm; the Theme preset inherits the
                     // site's button radius via themePreset().
-                    'giveflow-button-radius' => '999px',
+                    'fundkit-button-radius' => '999px',
                 ],
                 'builtin'     => true,
             ],
             [
                 'id'          => 'bold',
-                'name'        => __('Bold', 'giveflow-fundraising-campaigns'),
-                'description' => __('Deep navy with strong typography and a dramatic shadow.', 'giveflow-fundraising-campaigns'),
+                'name'        => __('Bold', 'fundkit-fundraising-campaigns'),
+                'description' => __('Deep navy with strong typography and a dramatic shadow.', 'fundkit-fundraising-campaigns'),
                 'tokens'      => [
-                    'giveflow-accent'         => '#0F3D5C',
-                    'giveflow-accent-soft'    => '#dde6ed',
-                    'giveflow-radius'         => '6px',
-                    'giveflow-radius-sm'      => '4px',
-                    'giveflow-button-weight'  => '700',
-                    'giveflow-button-shadow'  => '0 6px 16px rgba(0,0,0,.12)',
-                    'giveflow-heading-weight' => '700',
-                    'giveflow-card-shadow'    => '0 30px 60px rgba(0, 0, 0, .25)',
-                    'giveflow-focus-ring'     => '#0F3D5C',
+                    'fundkit-accent'         => '#0F3D5C',
+                    'fundkit-accent-soft'    => '#dde6ed',
+                    'fundkit-radius'         => '6px',
+                    'fundkit-radius-sm'      => '4px',
+                    'fundkit-button-weight'  => '700',
+                    'fundkit-button-shadow'  => '0 6px 16px rgba(0,0,0,.12)',
+                    'fundkit-heading-weight' => '700',
+                    'fundkit-card-shadow'    => '0 30px 60px rgba(0, 0, 0, .25)',
+                    'fundkit-focus-ring'     => '#0F3D5C',
                 ],
                 'builtin'     => true,
             ],
             [
                 'id'          => 'quiet',
-                'name'        => __('Quiet', 'giveflow-fundraising-campaigns'),
-                'description' => __('Minimal lines and lots of white space. Outlined button, no color, no shadows.', 'giveflow-fundraising-campaigns'),
+                'name'        => __('Quiet', 'fundkit-fundraising-campaigns'),
+                'description' => __('Minimal lines and lots of white space. Outlined button, no color, no shadows.', 'fundkit-fundraising-campaigns'),
                 'tokens'      => [
-                    'giveflow-accent'          => '#111827',
-                    'giveflow-accent-soft'     => '#f3f4f6',
-                    'giveflow-radius'          => '0px',
-                    'giveflow-radius-sm'       => '0px',
-                    'giveflow-bg-soft'         => '#f9fafb',
-                    'giveflow-heading-weight'  => '500',
-                    'giveflow-button-weight'   => '500',
-                    'giveflow-button-shadow'   => 'none',
-                    'giveflow-card-shadow'     => 'none',
-                    'giveflow-focus-ring'      => '#111827',
-                    'giveflow-gap'             => '28px',
-                    'giveflow-button-bg'       => 'transparent',
-                    'giveflow-button-fg'       => '#111827',
-                    'giveflow-button-border'   => '1px solid currentColor',
-                    'giveflow-button-hover-bg' => '#f3f4f6',
+                    'fundkit-accent'          => '#111827',
+                    'fundkit-accent-soft'     => '#f3f4f6',
+                    'fundkit-radius'          => '0px',
+                    'fundkit-radius-sm'       => '0px',
+                    'fundkit-bg-soft'         => '#f9fafb',
+                    'fundkit-heading-weight'  => '500',
+                    'fundkit-button-weight'   => '500',
+                    'fundkit-button-shadow'   => 'none',
+                    'fundkit-card-shadow'     => 'none',
+                    'fundkit-focus-ring'      => '#111827',
+                    'fundkit-gap'             => '28px',
+                    'fundkit-button-bg'       => 'transparent',
+                    'fundkit-button-fg'       => '#111827',
+                    'fundkit-button-border'   => '1px solid currentColor',
+                    'fundkit-button-hover-bg' => '#f3f4f6',
                 ],
                 'builtin'     => true,
             ],
@@ -164,26 +164,26 @@ final class StylePresets
             ?? $bySlug['accent-1']
             ?? ($colors[0]['color'] ?? null);
         if (is_string($accent) && $accent !== '') {
-            $tokens['giveflow-accent']     = $accent;
-            $tokens['giveflow-focus-ring'] = $accent;
+            $tokens['fundkit-accent']     = $accent;
+            $tokens['fundkit-focus-ring'] = $accent;
         }
-        if (isset($bySlug['background'])) $tokens['giveflow-bg']   = $bySlug['background'];
-        if (isset($bySlug['foreground'])) $tokens['giveflow-text'] = $bySlug['foreground'];
+        if (isset($bySlug['background'])) $tokens['fundkit-bg']   = $bySlug['background'];
+        if (isset($bySlug['foreground'])) $tokens['fundkit-text'] = $bySlug['foreground'];
 
         $button = wp_get_global_styles(['elements', 'button']) ?? [];
         if (is_array($button)) {
             $radius = $button['border']['radius'] ?? null;
             if (is_string($radius) && $radius !== '') {
-                $tokens['giveflow-radius-sm'] = $radius;
+                $tokens['fundkit-radius-sm'] = $radius;
             }
             $weight = $button['typography']['fontWeight'] ?? null;
             if ($weight !== null && $weight !== '') {
-                $tokens['giveflow-button-weight'] = (string) $weight;
+                $tokens['fundkit-button-weight'] = (string) $weight;
             }
             $btnBg = $button['color']['background'] ?? null;
-            if (is_string($btnBg) && $btnBg !== '' && ! isset($tokens['giveflow-accent'])) {
-                $tokens['giveflow-accent']     = $btnBg;
-                $tokens['giveflow-focus-ring'] = $btnBg;
+            if (is_string($btnBg) && $btnBg !== '' && ! isset($tokens['fundkit-accent'])) {
+                $tokens['fundkit-accent']     = $btnBg;
+                $tokens['fundkit-focus-ring'] = $btnBg;
             }
         }
 
@@ -191,8 +191,8 @@ final class StylePresets
 
         return [
             'id'          => 'theme',
-            'name'        => __('Site theme', 'giveflow-fundraising-campaigns'),
-            'description' => __('Picks up accent, background, and button styles from the active WordPress theme (theme.json).', 'giveflow-fundraising-campaigns'),
+            'name'        => __('Site theme', 'fundkit-fundraising-campaigns'),
+            'description' => __('Picks up accent, background, and button styles from the active WordPress theme (theme.json).', 'fundkit-fundraising-campaigns'),
             'tokens'      => $tokens,
             'builtin'     => true,
             'source'      => 'theme',

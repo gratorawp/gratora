@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donors;
+namespace FundKit\Donors;
 
-use GiveFlow\Foundation\Identity\IdentityHasher;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Foundation\Identity\IdentityHasher;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Settings\SettingsService;
 
 /**
  * Reads, records, and retrieves donor consent rows.
@@ -30,7 +30,7 @@ final class ConsentService
     public function purposes(): array
     {
         // Read through SettingsService so the configured defaults (newsletter,
-        // campaign updates) apply even when giveflow_consents was never saved. The
+        // campaign updates) apply even when fundkit_consents was never saved. The
         // admin panel reads the same way, so portal and admin stay in sync.
         $stored = (new SettingsService())->get('consents');
         $raw    = is_array($stored['purposes'] ?? null) ? $stored['purposes'] : [];
@@ -111,7 +111,7 @@ final class ConsentService
         $row->occurred_at        = $now;
         $row->save();
 
-        do_action('giveflow.consent.recorded', $row, [
+        do_action('fundkit.consent.recorded', $row, [
             'purpose_key' => $purposeKey,
             'version'     => $version,
         ]);

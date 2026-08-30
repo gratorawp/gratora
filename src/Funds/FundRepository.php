@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Funds;
+namespace FundKit\Funds;
 
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Vendor\Queryable\DB;
 
 /**
  * Fund query helpers.
@@ -245,7 +245,7 @@ final class FundRepository
             return;
         }
 
-        $rows = DB::table('giveflow_funds')
+        $rows = DB::table('fundkit_funds')
             ->whereIn('parent_fund_id', array_keys($parentIds))
             ->selectRaw('parent_fund_id, SUM(raised_cents) AS r, SUM(donations_count) AS dc')
             ->groupBy('parent_fund_id')

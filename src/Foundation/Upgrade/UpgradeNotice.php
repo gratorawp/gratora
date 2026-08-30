@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Upgrade;
+namespace FundKit\Foundation\Upgrade;
 
 /**
  * Says so while a data migration is outstanding.
@@ -34,7 +34,7 @@ final class UpgradeNotice
     /** @since 1.0.0 */
     public function render(): void
     {
-        if (! current_user_can('manage_giveflow')) {
+        if (! current_user_can('manage_fundkit')) {
             return;
         }
 
@@ -47,18 +47,18 @@ final class UpgradeNotice
         //
         // That screen is Tools > Maintenance, which lists every pending routine
         // with what it stopped on and how many times, and offers the retry.
-        // This suppressed itself on giveflow-settings and linked there too, to a
+        // This suppressed itself on fundkit-settings and linked there too, to a
         // tab=advanced that does not exist: Settings has no such tab, so the
         // link fell back to Setup and the notice hid itself on arrival. An
         // operator following the only warning about a half-finished data
         // migration landed on a page with nothing about it at all.
         $screen = function_exists('get_current_screen') ? get_current_screen() : null;
-        if ($screen && str_contains((string) $screen->id, 'giveflow-tools')) {
+        if ($screen && str_contains((string) $screen->id, 'fundkit-tools')) {
             return;
         }
 
         // Tools reads its tab from the fragment, not a query argument.
-        $url = admin_url('admin.php?page=giveflow-tools#maintenance');
+        $url = admin_url('admin.php?page=fundkit-tools#maintenance');
 
         // A routine that keeps failing reads exactly like one working through a
         // large table, and the difference is the whole point of saying anything.
@@ -74,10 +74,10 @@ final class UpgradeNotice
         if ($stuck) {
             printf(
                 '<div class="notice notice-error"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
-                esc_html__('GiveFlow could not finish a data update.', 'giveflow-fundraising-campaigns'),
-                esc_html__('It stopped with an error and will be retried. Until it finishes, some records are only partly updated.', 'giveflow-fundraising-campaigns'),
+                esc_html__('FundKit could not finish a data update.', 'fundkit-fundraising-campaigns'),
+                esc_html__('It stopped with an error and will be retried. Until it finishes, some records are only partly updated.', 'fundkit-fundraising-campaigns'),
                 esc_url($url),
-                esc_html__('See what failed', 'giveflow-fundraising-campaigns')
+                esc_html__('See what failed', 'fundkit-fundraising-campaigns')
             );
 
             return;
@@ -85,17 +85,17 @@ final class UpgradeNotice
 
         printf(
             '<div class="notice notice-warning"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
-            esc_html__('GiveFlow is finishing a data update.', 'giveflow-fundraising-campaigns'),
+            esc_html__('FundKit is finishing a data update.', 'fundkit-fundraising-campaigns'),
             esc_html(
                 _n(
                     'One job is still outstanding. It runs in the background; if it is still here in a few minutes, this site\'s scheduled tasks are not running.',
                     'Some jobs are still outstanding. They run in the background; if they are still here in a few minutes, this site\'s scheduled tasks are not running.',
                     count($pending),
-                    'giveflow-fundraising-campaigns'
+                    'fundkit-fundraising-campaigns'
                 )
             ),
             esc_url($url),
-            esc_html__('Finish them now', 'giveflow-fundraising-campaigns')
+            esc_html__('Finish them now', 'fundkit-fundraising-campaigns')
         );
     }
 }

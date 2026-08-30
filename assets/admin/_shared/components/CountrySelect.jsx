@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/components/CountrySelect';
+export { default } from '@fundkit/ui/components/CountrySelect';

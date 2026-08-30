@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/widgets/WidgetGrid';
+export { default } from '@fundkit/ui/widgets/WidgetGrid';

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\CampaignService;
-use GiveFlow\Forms\Form;
-use GiveFlow\Forms\FormTemplates;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Campaigns\CampaignService;
+use FundKit\Forms\Form;
+use FundKit\Forms\FormTemplates;
+use FundKit\Foundation\Plugin;
 
 /**
- * Several GiveFlow blocks register `supports.multiple = false` in their editor
+ * Several FundKit blocks register `supports.multiple = false` in their editor
  * registration (one amount picker, one submit, one consent block, etc.).
  * The Gutenberg editor silently drops the second instance, which produced a
  * confusing "missing block" symptom in earlier templates. This regression
@@ -21,25 +21,25 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
 {
     /** Block names whose JS registration sets `supports.multiple = false`. */
     private const SINGLETONS = [
-        'giveflow/fund-picker',
-        'giveflow/anonymous-toggle',
-        'giveflow/privacy-notice',
-        'giveflow/comment',
-        'giveflow/cover-fees',
-        'giveflow/submit-button',
-        'giveflow/donation-amount',
-        'giveflow/donation-summary',
-        'giveflow/payment-gateways',
-        'giveflow/consent',
-        'giveflow/currency-switcher',
-        'giveflow/steps',
-        'giveflow/phone',
-        'giveflow/address',
-        'giveflow/name',
-        'giveflow/email',
-        'giveflow/country',
-        'giveflow/recurring-toggle',
-        'giveflow/goal',
+        'fundkit/fund-picker',
+        'fundkit/anonymous-toggle',
+        'fundkit/privacy-notice',
+        'fundkit/comment',
+        'fundkit/cover-fees',
+        'fundkit/submit-button',
+        'fundkit/donation-amount',
+        'fundkit/donation-summary',
+        'fundkit/payment-gateways',
+        'fundkit/consent',
+        'fundkit/currency-switcher',
+        'fundkit/steps',
+        'fundkit/phone',
+        'fundkit/address',
+        'fundkit/name',
+        'fundkit/email',
+        'fundkit/country',
+        'fundkit/recurring-toggle',
+        'fundkit/goal',
     ];
 
     public function test_no_template_duplicates_a_single_instance_block(): void
@@ -76,10 +76,10 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
         $missing = [];
         foreach (FormTemplates::all() as $template) {
             $blocks = (string) ($template['blocks'] ?? '');
-            if (! str_contains($blocks, 'wp:giveflow/submit-button')) {
+            if (! str_contains($blocks, 'wp:fundkit/submit-button')) {
                 continue;   // Blank ships no markup at all, by design.
             }
-            if (! str_contains($blocks, 'wp:giveflow/payment-gateways')) {
+            if (! str_contains($blocks, 'wp:fundkit/payment-gateways')) {
                 $missing[] = (string) $template['id'];
             }
         }
@@ -106,9 +106,9 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
         $form = Form::query()->find('id', (int) $campaign->default_form_id);
 
         $this->assertNotNull($form, 'a campaign is created with a default form');
-        $this->assertStringContainsString('wp:giveflow/submit-button', (string) $form->blocks);
+        $this->assertStringContainsString('wp:fundkit/submit-button', (string) $form->blocks);
         $this->assertStringContainsString(
-            'wp:giveflow/payment-gateways',
+            'wp:fundkit/payment-gateways',
             (string) $form->blocks,
             'the starter form must ask how to pay, like every template does'
         );
@@ -124,10 +124,10 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
     {
         foreach (FormTemplates::all() as $id => $template) {
             $blocks = (string) ($template['blocks'] ?? '');
-            if (! str_contains($blocks, 'giveflow/submit-button')) continue;
+            if (! str_contains($blocks, 'fundkit/submit-button')) continue;
 
             $this->assertStringContainsString(
-                'giveflow/donation-summary',
+                'fundkit/donation-summary',
                 $blocks,
                 "template {$id} asks for money without showing the total"
             );

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\Event;
-use GiveFlow\Analytics\EventRecorder;
-use GiveFlow\Foundation\Commands\Command;
-use GiveFlow\Foundation\Commands\CommandContext;
-use GiveFlow\Foundation\Commands\CommandRegistry;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Analytics\Event;
+use FundKit\Analytics\EventRecorder;
+use FundKit\Foundation\Commands\Command;
+use FundKit\Foundation\Commands\CommandContext;
+use FundKit\Foundation\Commands\CommandRegistry;
+use FundKit\Foundation\Plugin;
 
 final class CommandConfirmationGateTest extends IntegrationTestCase
 {
@@ -70,7 +70,7 @@ final class CommandConfirmationGateTest extends IntegrationTestCase
 
     public function test_mcp_mutating_token_binding_enforced_by_core(): void
     {
-        add_filter('giveflow.commands.confirmation_verifier', fn () => new class {
+        add_filter('fundkit.commands.confirmation_verifier', fn () => new class {
             public function verify(string $token, string $session, string $commandId, string $inputDigest): bool
             {
                 return $token === 'good';
@@ -87,7 +87,7 @@ final class CommandConfirmationGateTest extends IntegrationTestCase
         $this->assertTrue($ok->ok);
         $this->assertSame(['ran' => true], $ok->data);
 
-        remove_all_filters('giveflow.commands.confirmation_verifier');
+        remove_all_filters('fundkit.commands.confirmation_verifier');
     }
 
     public function test_chat_mutating_without_confirmation_is_confirmation_required(): void
@@ -109,7 +109,7 @@ final class CommandConfirmationGateTest extends IntegrationTestCase
 
     public function test_chat_mutating_with_verified_confirmation_runs(): void
     {
-        add_filter('giveflow.commands.confirmation_verifier', fn () => new class {
+        add_filter('fundkit.commands.confirmation_verifier', fn () => new class {
             public function verify(string $token, string $session, string $commandId, string $inputDigest): bool
             {
                 return $token === 'approved';
@@ -123,7 +123,7 @@ final class CommandConfirmationGateTest extends IntegrationTestCase
         $this->assertTrue($ok->ok);
         $this->assertSame(['ran' => true], $ok->data);
 
-        remove_all_filters('giveflow.commands.confirmation_verifier');
+        remove_all_filters('fundkit.commands.confirmation_verifier');
     }
 
     public function test_chat_read_command_proceeds_without_confirmation(): void

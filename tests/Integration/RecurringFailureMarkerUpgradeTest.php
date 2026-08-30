@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 /**
  * What the failed-renewal marker is worth on a site that already has plans.
@@ -16,7 +16,7 @@ namespace GiveFlow\Tests\Integration;
  */
 final class RecurringFailureMarkerUpgradeTest extends UpgradeTestCase
 {
-    private const TABLE = 'giveflow_recurring_plans';
+    private const TABLE = 'fundkit_recurring_plans';
 
     private const SUB_ID = 'sub_before_the_update';
 

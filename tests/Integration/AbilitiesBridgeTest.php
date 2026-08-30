@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Foundation\Commands\AbilitiesBridge;
-use GiveFlow\Foundation\Commands\CommandRegistry;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Foundation\Commands\AbilitiesBridge;
+use FundKit\Foundation\Commands\CommandRegistry;
+use FundKit\Foundation\Plugin;
 
 /**
- * GiveFlow over MCP is the Abilities API plus a mapping: whatever adapter the
+ * FundKit over MCP is the Abilities API plus a mapping: whatever adapter the
  * site runs reads core's registry, so every command has to arrive there with
  * its capability and its confirmation gate intact.
  */

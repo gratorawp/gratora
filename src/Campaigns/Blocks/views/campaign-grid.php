@@ -13,65 +13,65 @@ defined('ABSPATH') || exit;
 <section <?php
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
 echo get_block_wrapper_attributes(array_filter([
-    'class' => 'giveflow-block giveflow-block--grid',
+    'class' => 'fundkit-block fundkit-block--grid',
     'style' => $styleVars,
 ]));
 // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
-?> data-block="giveflow/campaign-grid">
+?> data-block="fundkit/campaign-grid">
     <?php if ($heading !== ''): ?>
-        <div class="giveflow-grid__head">
-            <h2 class="giveflow-grid__title"><?php echo esc_html($heading);
+        <div class="fundkit-grid__head">
+            <h2 class="fundkit-grid__title"><?php echo esc_html($heading);
 ?></h2>
         </div>
     <?php endif; ?>
     <?php if ($cards === []): ?>
         <?php require __DIR__ . '/empty-cta.php'; ?>
         <?php if (($notice ?? '') !== ''): ?>
-            <div class="giveflow-block-notice"><?php echo esc_html($notice);
+            <div class="fundkit-block-notice"><?php echo esc_html($notice);
 ?></div>
         <?php endif; ?>
     <?php else: ?>
-    <div class="giveflow-campaign-grid">
+    <div class="fundkit-campaign-grid">
         <?php foreach ($cards as $card): ?>
-            <a class="giveflow-campaign-card<?php echo esc_attr($card['url'] === '' ? ' is-inert' : ''); ?>"
+            <a class="fundkit-campaign-card<?php echo esc_attr($card['url'] === '' ? ' is-inert' : ''); ?>"
                <?php echo $card['url'] !== '' ? 'href="' . esc_url($card['url']) . '"' : ''; ?>
-               style="--giveflow-accent: <?php echo esc_attr($card['accent']);
+               style="--fundkit-accent: <?php echo esc_attr($card['accent']);
 ?>;">
-                <span class="giveflow-campaign-card__cover<?php echo esc_attr($card['imageUrl'] ? '' : ' is-placeholder'); ?>">
+                <span class="fundkit-campaign-card__cover<?php echo esc_attr($card['imageUrl'] ? '' : ' is-placeholder'); ?>">
                     <?php if ($card['imageUrl']): ?>
                         <img src="<?php echo esc_url($card['imageUrl']);
 ?>" alt="<?php echo esc_attr($card['title']);
 ?>" loading="lazy" />
                     <?php endif; ?>
                 </span>
-                <span class="giveflow-campaign-card__body">
-                    <span class="giveflow-campaign-card__title"><?php echo esc_html($card['title']);
+                <span class="fundkit-campaign-card__body">
+                    <span class="fundkit-campaign-card__title"><?php echo esc_html($card['title']);
 ?></span>
                     <?php if ($card['blurb'] !== ''): ?>
-                        <span class="giveflow-campaign-card__blurb"><?php echo esc_html(wp_strip_all_tags($card['blurb']));
+                        <span class="fundkit-campaign-card__blurb"><?php echo esc_html(wp_strip_all_tags($card['blurb']));
 ?></span>
                     <?php endif; ?>
-                    <span class="giveflow-campaign-card__progress">
-                        <span class="giveflow-campaign-card__bar" role="progressbar" aria-valuenow="<?php echo (int) $card['percent']; ?>" aria-valuemin="0" aria-valuemax="100">
+                    <span class="fundkit-campaign-card__progress">
+                        <span class="fundkit-campaign-card__bar" role="progressbar" aria-valuenow="<?php echo (int) $card['percent']; ?>" aria-valuemin="0" aria-valuemax="100">
                             <span style="width: <?php echo (int) $card['percent']; ?>%;"></span>
                         </span>
-                        <span class="giveflow-campaign-card__meta">
-                            <span class="giveflow-campaign-card__raised"><?php echo esc_html($card['raised']);
+                        <span class="fundkit-campaign-card__meta">
+                            <span class="fundkit-campaign-card__raised"><?php echo esc_html($card['raised']);
 ?></span>
                             <?php if ($card['goalLabel'] !== ''): ?>
-                                <span class="giveflow-campaign-card__goal"><?php echo esc_html($card['goalLabel']);
+                                <span class="fundkit-campaign-card__goal"><?php echo esc_html($card['goalLabel']);
 ?></span>
                             <?php endif; ?>
                         </span>
                     </span>
-                    <span class="giveflow-campaign-card__foot">
+                    <span class="fundkit-campaign-card__foot">
                         <?php if ($card['percent'] > 0): ?>
-                            <span class="giveflow-campaign-card__pct"><?php echo (int) $card['percent']; ?>%</span>
+                            <span class="fundkit-campaign-card__pct"><?php echo (int) $card['percent']; ?>%</span>
                         <?php else: ?>
                             <span></span>
                         <?php endif; ?>
-                        <span class="giveflow-campaign-card__link">
-                            <?php esc_html_e('Donate', 'giveflow-fundraising-campaigns');
+                        <span class="fundkit-campaign-card__link">
+                            <?php esc_html_e('Donate', 'fundkit-fundraising-campaigns');
 ?>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                         </span>

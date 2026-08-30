@@ -2,29 +2,29 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Cli;
+namespace FundKit\Cli;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Campaigns\CampaignService;
-use GiveFlow\Currency\FxRates;
-use GiveFlow\Donations\AggregateSyncer;
-use GiveFlow\Donations\DonationIntent;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Forms\Form;
-use GiveFlow\Forms\FormService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Funds\Fund;
-use GiveFlow\Funds\FundService;
-use GiveFlow\Onboarding\Onboarding;
-use GiveFlow\Recurring\RecurringPlanRepository;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\CampaignService;
+use FundKit\Currency\FxRates;
+use FundKit\Donations\AggregateSyncer;
+use FundKit\Donations\DonationIntent;
+use FundKit\Donations\DonationService;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Forms\Form;
+use FundKit\Forms\FormService;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Funds\Fund;
+use FundKit\Funds\FundService;
+use FundKit\Onboarding\Onboarding;
+use FundKit\Recurring\RecurringPlanRepository;
+use FundKit\Settings\SettingsService;
 use WP_CLI;
 
 /**
- * `wp giveflow ...` commands. Registered only under WP-CLI (see giveflow.php).
+ * `wp fundkit ...` commands. Registered only under WP-CLI (see fundkit.php).
  * Operational commands (migrate, recompute-aggregates) are production-safe;
  * seed writes fake data and is gated on org-wide test mode.
  *
@@ -33,7 +33,7 @@ use WP_CLI;
 final class CliCommands
 {
     /** @since 1.0.0 */
-    private function container(): \GiveFlow\Foundation\Container\Container
+    private function container(): \FundKit\Foundation\Container\Container
     {
         return Plugin::instance()->container;
     }
@@ -211,7 +211,7 @@ final class CliCommands
      * Seed a year of plausible fundraising history so the admin screens can be
      * screenshotted against something that looks like a real organisation.
      *
-     * Unlike `wp giveflow seed`, the rows are live (is_test = 0): test-mode rows
+     * Unlike `wp fundkit seed`, the rows are live (is_test = 0): test-mode rows
      * are excluded from money reporting by design, so a dashboard seeded with
      * them renders empty. That makes this unsafe anywhere real money is
      * recorded, and it refuses when it finds any.
@@ -240,9 +240,9 @@ final class CliCommands
      *
      * ## EXAMPLES
      *
-     *     wp giveflow demo-seed
-     *     wp giveflow demo-seed --yes
-     *     wp giveflow demo-seed --purge
+     *     wp fundkit demo-seed
+     *     wp fundkit demo-seed --yes
+     *     wp fundkit demo-seed --purge
      *
      * @when after_wp_load
      * @since 1.0.0
@@ -270,7 +270,7 @@ final class CliCommands
             $assoc
         );
 
-        // Onboarding gates every GiveFlow admin screen while it is pending, and a
+        // Onboarding gates every FundKit admin screen while it is pending, and a
         // screenshot run needs the screens, not the wizard.
         update_option(Onboarding::OPTION, 'completed', false);
 
@@ -356,10 +356,10 @@ final class CliCommands
      * whatever the current spec set expects.
      *
      * Sets up:
-     *   - Campaign "GiveFlow E2E" (status=published)
-     *   - Form "GiveFlow E2E Form" (status=published) with every donor block the
+     *   - Campaign "FundKit E2E" (status=published)
+     *   - Form "FundKit E2E Form" (status=published) with every donor block the
      *     spec suite asserts against
-     *   - WP page "GiveFlow E2E" containing [giveflow_donation_form slug="..."]
+     *   - WP page "FundKit E2E" containing [fundkit_donation_form slug="..."]
      *
      * Rewrites org-wide money settings, so it refuses on an install that
      * reports itself as production.
@@ -375,11 +375,11 @@ final class CliCommands
      *
      * ## EXAMPLES
      *
-     *     wp giveflow e2e-seed
+     *     wp fundkit e2e-seed
      *     # then in your shell:
-     *     export GIVEFLOW_E2E_URL="http://localhost:10075"
-     *     export GIVEFLOW_E2E_FORM_PATH="/giveflow-e2e/"
-     *     export GIVEFLOW_E2E_MULTI_STEP_FORM_PATH="/giveflow-e2e-wizard/"
+     *     export FUNDKIT_E2E_URL="http://localhost:10075"
+     *     export FUNDKIT_E2E_FORM_PATH="/fundkit-e2e/"
+     *     export FUNDKIT_E2E_MULTI_STEP_FORM_PATH="/fundkit-e2e-wizard/"
      *
      * @when after_wp_load
      * @since 1.0.0
@@ -413,7 +413,7 @@ final class CliCommands
         $settings   = $this->container()->get(SettingsService::class);
 
         // Activation leaves onboarding pending, and while it is pending every
-        // admin screen redirects to it. A spec that drives a GiveFlow admin page
+        // admin screen redirects to it. A spec that drives a FundKit admin page
         // never arrives, and the failure reads as a missing control rather
         // than a redirect.
         update_option(Onboarding::OPTION, 'completed', false);
@@ -440,23 +440,23 @@ final class CliCommands
 
         // Org-wide test mode on. Required for AntiSpamGuard to relax the IP
         // and email rate limits (automation bursts through the prod caps).
-        $gatewayConfig = get_option('giveflow_gateway_config', []);
+        $gatewayConfig = get_option('fundkit_gateway_config', []);
         if (! is_array($gatewayConfig)) $gatewayConfig = [];
         $gatewayConfig['test_mode'] = true;
-        update_option('giveflow_gateway_config', $gatewayConfig, false);
+        update_option('fundkit_gateway_config', $gatewayConfig, false);
 
         // Drop AntiSpamGuard rate-limit transients so a run isn't penalized
         // by prior attempts from the same IP / email range.
         global $wpdb;
         $wpdb->query(
-            "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_giveflow_donate_%' OR option_name LIKE '_transient_timeout_giveflow_donate_%'"
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_fundkit_donate_%' OR option_name LIKE '_transient_timeout_fundkit_donate_%'"
         );
 
-        $campaign = Campaign::query()->where('slug', 'giveflow-e2e')->get();
+        $campaign = Campaign::query()->where('slug', 'fundkit-e2e')->get();
         if (! $campaign) {
             $campaign = $campaigns->create([
-                'title'         => 'GiveFlow E2E',
-                'slug'          => 'giveflow-e2e',
+                'title'         => 'FundKit E2E',
+                'slug'          => 'fundkit-e2e',
                 'status'        => 'published',
                 'skip_template' => true,
             ]);
@@ -473,56 +473,56 @@ final class CliCommands
         $singleUrl = $this->e2eUpsertFormAndPage(
             $forms,
             (int) $campaign->id,
-            'giveflow-e2e-form',
-            'GiveFlow E2E Form',
-            'giveflow-e2e',
-            'GiveFlow E2E',
+            'fundkit-e2e-form',
+            'FundKit E2E Form',
+            'fundkit-e2e',
+            'FundKit E2E',
             self::e2eCanonicalBlocks()
         );
         $multiUrl = $this->e2eUpsertFormAndPage(
             $forms,
             (int) $campaign->id,
-            'giveflow-e2e-wizard',
-            'GiveFlow E2E Wizard',
-            'giveflow-e2e-wizard',
-            'GiveFlow E2E Wizard',
+            'fundkit-e2e-wizard',
+            'FundKit E2E Wizard',
+            'fundkit-e2e-wizard',
+            'FundKit E2E Wizard',
             self::e2eMultiStepBlocks()
         );
         $condUrl = $this->e2eUpsertFormAndPage(
             $forms,
             (int) $campaign->id,
-            'giveflow-e2e-conditional',
-            'GiveFlow E2E Conditional',
-            'giveflow-e2e-conditional',
-            'GiveFlow E2E Conditional',
+            'fundkit-e2e-conditional',
+            'FundKit E2E Conditional',
+            'fundkit-e2e-conditional',
+            'FundKit E2E Conditional',
             self::e2eConditionalBlocks()
         );
         $customUrl = $this->e2eUpsertFormAndPage(
             $forms,
             (int) $campaign->id,
-            'giveflow-e2e-custom-fields',
-            'GiveFlow E2E Custom Fields',
-            'giveflow-e2e-custom-fields',
-            'GiveFlow E2E Custom Fields',
+            'fundkit-e2e-custom-fields',
+            'FundKit E2E Custom Fields',
+            'fundkit-e2e-custom-fields',
+            'FundKit E2E Custom Fields',
             self::e2eCustomFieldsBlocks()
         );
         $layoutUrl = $this->e2eUpsertFormAndPage(
             $forms,
             (int) $campaign->id,
-            'giveflow-e2e-layout',
-            'GiveFlow E2E Layout',
-            'giveflow-e2e-layout',
-            'GiveFlow E2E Layout',
+            'fundkit-e2e-layout',
+            'FundKit E2E Layout',
+            'fundkit-e2e-layout',
+            'FundKit E2E Layout',
             self::e2eLayoutBlocks()
         );
 
         WP_CLI::success("Canonical forms ready.");
-        WP_CLI::log('  export GIVEFLOW_E2E_URL="' . untrailingslashit(home_url()) . '"');
-        WP_CLI::log('  export GIVEFLOW_E2E_FORM_PATH="' . wp_parse_url($singleUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export GIVEFLOW_E2E_MULTI_STEP_FORM_PATH="' . wp_parse_url($multiUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export GIVEFLOW_E2E_CONDITIONAL_FORM_PATH="' . wp_parse_url($condUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export GIVEFLOW_E2E_CUSTOM_FIELDS_FORM_PATH="' . wp_parse_url($customUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export GIVEFLOW_E2E_LAYOUT_FORM_PATH="' . wp_parse_url($layoutUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export FUNDKIT_E2E_URL="' . untrailingslashit(home_url()) . '"');
+        WP_CLI::log('  export FUNDKIT_E2E_FORM_PATH="' . wp_parse_url($singleUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export FUNDKIT_E2E_MULTI_STEP_FORM_PATH="' . wp_parse_url($multiUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export FUNDKIT_E2E_CONDITIONAL_FORM_PATH="' . wp_parse_url($condUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export FUNDKIT_E2E_CUSTOM_FIELDS_FORM_PATH="' . wp_parse_url($customUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export FUNDKIT_E2E_LAYOUT_FORM_PATH="' . wp_parse_url($layoutUrl, PHP_URL_PATH) . '"');
     }
 
     /**
@@ -569,7 +569,7 @@ final class CliCommands
             WP_CLI::log("  form updated: slug={$form->slug} id={$form->id}");
         }
 
-        $content = '[giveflow_donation_form slug="' . esc_attr($form->slug) . '"]';
+        $content = '[fundkit_donation_form slug="' . esc_attr($form->slug) . '"]';
         $page    = get_page_by_path($pageSlug, OBJECT, 'page');
 
         // A campaign owns its page, and a campaign slug can collide with a form
@@ -701,28 +701,28 @@ final class CliCommands
         ]);
 
         return implode("\n", [
-            '<!-- wp:giveflow/heading {"text":"Support our work","level":2} /-->',
-            '<!-- wp:giveflow/currency-switcher {"currencies":["EUR","USD","GBP"]} /-->',
-            '<!-- wp:giveflow/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
-            '<!-- wp:giveflow/name {"requireFirst":true,"requireLast":true} /-->',
-            '<!-- wp:giveflow/email {"required":true} /-->',
-            '<!-- wp:giveflow/country /-->',
-            '<!-- wp:giveflow/address {"requireLine1":false,"requireCity":false,"requireRegion":false,"requirePostal":false,"requireCountry":false} /-->',
-            '<!-- wp:giveflow/phone /-->',
-            '<!-- wp:giveflow/comment {"label":"Add a message"} /-->',
-            '<!-- wp:giveflow/anonymous-toggle /-->',
-            '<!-- wp:giveflow/cover-fees /-->',
-            '<!-- wp:giveflow/date {"label":"Preferred call date","field":"call_date"} /-->',
-            '<!-- wp:giveflow/dropdown ' . $dropdown . ' /-->',
-            '<!-- wp:giveflow/consent ' . $consent . ' /-->',
-            '<!-- wp:giveflow/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
-            '<!-- wp:giveflow/donation-summary /-->',
-            '<!-- wp:giveflow/submit-button {"label":"Donate now"} /-->',
+            '<!-- wp:fundkit/heading {"text":"Support our work","level":2} /-->',
+            '<!-- wp:fundkit/currency-switcher {"currencies":["EUR","USD","GBP"]} /-->',
+            '<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
+            '<!-- wp:fundkit/name {"requireFirst":true,"requireLast":true} /-->',
+            '<!-- wp:fundkit/email {"required":true} /-->',
+            '<!-- wp:fundkit/country /-->',
+            '<!-- wp:fundkit/address {"requireLine1":false,"requireCity":false,"requireRegion":false,"requirePostal":false,"requireCountry":false} /-->',
+            '<!-- wp:fundkit/phone /-->',
+            '<!-- wp:fundkit/comment {"label":"Add a message"} /-->',
+            '<!-- wp:fundkit/anonymous-toggle /-->',
+            '<!-- wp:fundkit/cover-fees /-->',
+            '<!-- wp:fundkit/date {"label":"Preferred call date","field":"call_date"} /-->',
+            '<!-- wp:fundkit/dropdown ' . $dropdown . ' /-->',
+            '<!-- wp:fundkit/consent ' . $consent . ' /-->',
+            '<!-- wp:fundkit/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
+            '<!-- wp:fundkit/donation-summary /-->',
+            '<!-- wp:fundkit/submit-button {"label":"Donate now"} /-->',
         ]);
     }
 
     /**
-     * Multi-step variant: a giveflow/steps wizard with at least an amount step
+     * Multi-step variant: a fundkit/steps wizard with at least an amount step
      * and a donor step so multi-step.spec.ts can exercise the Continue flow.
      *
      * @since 1.0.0
@@ -730,22 +730,22 @@ final class CliCommands
     private static function e2eMultiStepBlocks(): string
     {
         return <<<'BLOCKS'
-<!-- wp:giveflow/steps -->
-<!-- wp:giveflow/step {"title":"Your donation"} -->
-<!-- wp:giveflow/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->
-<!-- /wp:giveflow/step -->
+<!-- wp:fundkit/steps -->
+<!-- wp:fundkit/step {"title":"Your donation"} -->
+<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->
+<!-- /wp:fundkit/step -->
 
-<!-- wp:giveflow/step {"title":"Your info"} -->
-<!-- wp:giveflow/name {"requireFirst":true,"requireLast":true} /-->
-<!-- wp:giveflow/email {"required":true} /-->
-<!-- /wp:giveflow/step -->
+<!-- wp:fundkit/step {"title":"Your info"} -->
+<!-- wp:fundkit/name {"requireFirst":true,"requireLast":true} /-->
+<!-- wp:fundkit/email {"required":true} /-->
+<!-- /wp:fundkit/step -->
 
-<!-- wp:giveflow/step {"title":"Confirm"} -->
-<!-- wp:giveflow/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
-<!-- wp:giveflow/donation-summary /-->
-<!-- wp:giveflow/submit-button {"label":"Donate now"} /-->
-<!-- /wp:giveflow/step -->
-<!-- /wp:giveflow/steps -->
+<!-- wp:fundkit/step {"title":"Confirm"} -->
+<!-- wp:fundkit/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
+<!-- wp:fundkit/donation-summary /-->
+<!-- wp:fundkit/submit-button {"label":"Donate now"} /-->
+<!-- /wp:fundkit/step -->
+<!-- /wp:fundkit/steps -->
 BLOCKS;
     }
 
@@ -760,33 +760,33 @@ BLOCKS;
     private static function e2eLayoutBlocks(): string
     {
         return <<<'BLOCKS'
-<!-- wp:giveflow/heading {"text":"LAYOUT_HEADING_TEXT","level":2} /-->
-<!-- wp:giveflow/paragraph {"text":"LAYOUT_PARAGRAPH_TEXT"} /-->
-<!-- wp:giveflow/html {"content":"<span class=\"layout-html-marker\">LAYOUT_HTML_TEXT</span>"} /-->
-<!-- wp:giveflow/divider {"marginTop":24,"marginBottom":24,"thickness":2,"color":"#cccccc"} /-->
+<!-- wp:fundkit/heading {"text":"LAYOUT_HEADING_TEXT","level":2} /-->
+<!-- wp:fundkit/paragraph {"text":"LAYOUT_PARAGRAPH_TEXT"} /-->
+<!-- wp:fundkit/html {"content":"<span class=\"layout-html-marker\">LAYOUT_HTML_TEXT</span>"} /-->
+<!-- wp:fundkit/divider {"marginTop":24,"marginBottom":24,"thickness":2,"color":"#cccccc"} /-->
 
-<!-- wp:giveflow/section {"label":"LAYOUT_SECTION_LABEL"} -->
-<!-- wp:giveflow/paragraph {"text":"Inside a section"} /-->
-<!-- /wp:giveflow/section -->
+<!-- wp:fundkit/section {"label":"LAYOUT_SECTION_LABEL"} -->
+<!-- wp:fundkit/paragraph {"text":"Inside a section"} /-->
+<!-- /wp:fundkit/section -->
 
-<!-- wp:giveflow/columns {"columns":2,"gap":20,"gapUnit":"px"} -->
-<!-- wp:giveflow/heading {"text":"LAYOUT_COL_LEFT","level":4} /-->
-<!-- wp:giveflow/heading {"text":"LAYOUT_COL_RIGHT","level":4} /-->
-<!-- /wp:giveflow/columns -->
+<!-- wp:fundkit/columns {"columns":2,"gap":20,"gapUnit":"px"} -->
+<!-- wp:fundkit/heading {"text":"LAYOUT_COL_LEFT","level":4} /-->
+<!-- wp:fundkit/heading {"text":"LAYOUT_COL_RIGHT","level":4} /-->
+<!-- /wp:fundkit/columns -->
 
-<!-- wp:giveflow/row {"columns":2,"gap":14,"gapUnit":"px"} -->
-<!-- wp:giveflow/name /-->
-<!-- wp:giveflow/email /-->
-<!-- /wp:giveflow/row -->
+<!-- wp:fundkit/row {"columns":2,"gap":14,"gapUnit":"px"} -->
+<!-- wp:fundkit/name /-->
+<!-- wp:fundkit/email /-->
+<!-- /wp:fundkit/row -->
 
-<!-- wp:giveflow/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->
-<!-- wp:giveflow/recurring-toggle {"label":"LAYOUT_RECURRING_LABEL","frequencies":["one-time","monthly"]} /-->
-<!-- wp:giveflow/fund-picker {"label":"LAYOUT_FUND_LABEL"} /-->
-<!-- wp:giveflow/goal {"showAmount":true} /-->
-<!-- wp:giveflow/privacy-notice {"text":"LAYOUT_PRIVACY_TEXT"} /-->
-<!-- wp:giveflow/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
-<!-- wp:giveflow/donation-summary /-->
-<!-- wp:giveflow/submit-button {"label":"Donate now"} /-->
+<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->
+<!-- wp:fundkit/recurring-toggle {"label":"LAYOUT_RECURRING_LABEL","frequencies":["one-time","monthly"]} /-->
+<!-- wp:fundkit/fund-picker {"label":"LAYOUT_FUND_LABEL"} /-->
+<!-- wp:fundkit/goal {"showAmount":true} /-->
+<!-- wp:fundkit/privacy-notice {"text":"LAYOUT_PRIVACY_TEXT"} /-->
+<!-- wp:fundkit/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
+<!-- wp:fundkit/donation-summary /-->
+<!-- wp:fundkit/submit-button {"label":"Donate now"} /-->
 BLOCKS;
     }
 
@@ -813,19 +813,19 @@ BLOCKS;
         ]);
 
         return implode("\n", [
-            '<!-- wp:giveflow/heading {"text":"Custom Fields Form","level":2} /-->',
-            '<!-- wp:giveflow/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
-            '<!-- wp:giveflow/name {"requireFirst":true,"requireLast":true} /-->',
-            '<!-- wp:giveflow/email {"required":true} /-->',
-            '<!-- wp:giveflow/text-input {"label":"CUSTOM_TEXT_LABEL","field":"cf_text","placeholder":"Type something"} /-->',
-            '<!-- wp:giveflow/number-input {"label":"CUSTOM_NUMBER_LABEL","field":"cf_number","min":1,"max":100} /-->',
-            '<!-- wp:giveflow/radio ' . $radio . ' /-->',
-            '<!-- wp:giveflow/checkbox {"label":"CUSTOM_CHECKBOX_LABEL","field":"cf_check"} /-->',
-            '<!-- wp:giveflow/multi-select ' . $multi . ' /-->',
-            '<!-- wp:giveflow/hidden {"field":"cf_hidden","defaultValue":"hidden-default"} /-->',
-            '<!-- wp:giveflow/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
-            '<!-- wp:giveflow/donation-summary /-->',
-            '<!-- wp:giveflow/submit-button {"label":"Donate now"} /-->',
+            '<!-- wp:fundkit/heading {"text":"Custom Fields Form","level":2} /-->',
+            '<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
+            '<!-- wp:fundkit/name {"requireFirst":true,"requireLast":true} /-->',
+            '<!-- wp:fundkit/email {"required":true} /-->',
+            '<!-- wp:fundkit/text-input {"label":"CUSTOM_TEXT_LABEL","field":"cf_text","placeholder":"Type something"} /-->',
+            '<!-- wp:fundkit/number-input {"label":"CUSTOM_NUMBER_LABEL","field":"cf_number","min":1,"max":100} /-->',
+            '<!-- wp:fundkit/radio ' . $radio . ' /-->',
+            '<!-- wp:fundkit/checkbox {"label":"CUSTOM_CHECKBOX_LABEL","field":"cf_check"} /-->',
+            '<!-- wp:fundkit/multi-select ' . $multi . ' /-->',
+            '<!-- wp:fundkit/hidden {"field":"cf_hidden","defaultValue":"hidden-default"} /-->',
+            '<!-- wp:fundkit/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
+            '<!-- wp:fundkit/donation-summary /-->',
+            '<!-- wp:fundkit/submit-button {"label":"Donate now"} /-->',
         ]);
     }
 
@@ -858,17 +858,17 @@ BLOCKS;
         ]);
 
         return implode("\n", [
-            '<!-- wp:giveflow/heading {"text":"Support our work","level":2} /-->',
-            '<!-- wp:giveflow/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
-            '<!-- wp:giveflow/name {"requireFirst":true,"requireLast":true} /-->',
-            '<!-- wp:giveflow/email {"required":true} /-->',
-            '<!-- wp:giveflow/dropdown ' . $dropdown . ' /-->',
-            '<!-- wp:giveflow/heading ' . $headingShownForSocial . ' /-->',
-            '<!-- wp:giveflow/text-input ' . $hiddenRequiredTextInput . ' /-->',
-            '<!-- wp:giveflow/comment ' . $commentVisibleWhenAnyValue . ' /-->',
-            '<!-- wp:giveflow/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
-            '<!-- wp:giveflow/donation-summary /-->',
-            '<!-- wp:giveflow/submit-button {"label":"Donate now"} /-->',
+            '<!-- wp:fundkit/heading {"text":"Support our work","level":2} /-->',
+            '<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
+            '<!-- wp:fundkit/name {"requireFirst":true,"requireLast":true} /-->',
+            '<!-- wp:fundkit/email {"required":true} /-->',
+            '<!-- wp:fundkit/dropdown ' . $dropdown . ' /-->',
+            '<!-- wp:fundkit/heading ' . $headingShownForSocial . ' /-->',
+            '<!-- wp:fundkit/text-input ' . $hiddenRequiredTextInput . ' /-->',
+            '<!-- wp:fundkit/comment ' . $commentVisibleWhenAnyValue . ' /-->',
+            '<!-- wp:fundkit/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
+            '<!-- wp:fundkit/donation-summary /-->',
+            '<!-- wp:fundkit/submit-button {"label":"Donate now"} /-->',
         ]);
     }
 

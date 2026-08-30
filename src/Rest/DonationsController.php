@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest;
+namespace FundKit\Rest;
 
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Currency\Currency;
-use GiveFlow\Currency\SupportedCurrencies;
-use GiveFlow\Donations\AntiSpamGuard;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\ChannelClassifier;
-use GiveFlow\Donations\DonationIntent;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Donors\ConsentService;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Forms\Form;
-use GiveFlow\Forms\Blocks\TermsBlock;
-use GiveFlow\Forms\FormSubmissionValidator;
-use GiveFlow\Gateways\BrowserAware;
-use GiveFlow\Gateways\GatewayIntentResult;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\PaymentGateway;
-use GiveFlow\Gateways\SubscriptionCreator;
-use GiveFlow\Recurring\FrequencyMap;
-use GiveFlow\Rest\Schemas\DonationSchemas;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Campaigns\Campaign;
+use FundKit\Currency\Currency;
+use FundKit\Currency\SupportedCurrencies;
+use FundKit\Donations\AntiSpamGuard;
+use FundKit\Donations\Donation;
+use FundKit\Donations\ChannelClassifier;
+use FundKit\Donations\DonationIntent;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donations\DonationService;
+use FundKit\Donors\ConsentService;
+use FundKit\Donors\Donor;
+use FundKit\Forms\Form;
+use FundKit\Forms\Blocks\TermsBlock;
+use FundKit\Forms\FormSubmissionValidator;
+use FundKit\Gateways\BrowserAware;
+use FundKit\Gateways\GatewayIntentResult;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\PaymentGateway;
+use FundKit\Gateways\SubscriptionCreator;
+use FundKit\Recurring\FrequencyMap;
+use FundKit\Rest\Schemas\DonationSchemas;
 use Throwable;
 use WP_Error;
 use WP_REST_Request;
@@ -40,7 +40,7 @@ use WP_REST_Server;
  */
 final class DonationsController
 {
-    private const NAMESPACE = 'giveflow/v1';
+    private const NAMESPACE = 'fundkit/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -98,40 +98,40 @@ final class DonationsController
         $gatewayId  = (string) ($body['gateway'] ?? '');
 
         if ($email === '' || ! is_email($email)) {
-            return new WP_Error('giveflow_invalid_email', __('A valid email is required.', 'giveflow-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_invalid_email', __('A valid email is required.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
         }
         if ($amount <= 0) {
-            return new WP_Error('giveflow_invalid_amount', __('Amount must be a positive integer (in cents).', 'giveflow-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_invalid_amount', __('Amount must be a positive integer (in cents).', 'fundkit-fundraising-campaigns'), ['status' => 400]);
         }
         if ($err = $this->spam->checkMinAmount($amount)) return $err;
         if (strlen($currency) !== 3) {
-            return new WP_Error('giveflow_invalid_currency', __('Currency must be a 3-letter ISO code.', 'giveflow-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_invalid_currency', __('Currency must be a 3-letter ISO code.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
         }
         // The switcher only offers accepted currencies, but a crafted payload
         // could submit any code, and a donation in an unsupported currency has
         // no base conversion and so would be an unreportable row.
         if (! $this->isSupportedCurrency($currency)) {
-            return new WP_Error('giveflow_unsupported_currency', __('This currency is not accepted.', 'giveflow-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_unsupported_currency', __('This currency is not accepted.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
         }
         // Zero-decimal currencies (JPY, KRW, ...) have no sub-unit. Storage is
         // always major x 100, so the amount must land on a whole major unit or
         // the gateway conversion rounds and mischarges.
         if (Currency::minorUnits($currency) === 0 && $amount % 100 !== 0) {
-            return new WP_Error('giveflow_invalid_amount', __('This currency does not support fractional amounts.', 'giveflow-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_invalid_amount', __('This currency does not support fractional amounts.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
         }
         if ($gatewayId === '' || ! $this->gateways->get($gatewayId)) {
             /* translators: %s: gateway identifier */
-            return new WP_Error('giveflow_invalid_gateway', sprintf(__('Unknown gateway: %s', 'giveflow-fundraising-campaigns'), $gatewayId), ['status' => 400]);
+            return new WP_Error('fundkit_invalid_gateway', sprintf(__('Unknown gateway: %s', 'fundkit-fundraising-campaigns'), $gatewayId), ['status' => 400]);
         }
         // A crafted payload could name a gateway that does not take this
         // currency. Refusing here says so, rather than failing at the gateway
         // with whatever wording it chooses.
         if (! $this->gateways->acceptsCurrency($gatewayId, $currency)) {
             return new WP_Error(
-                'giveflow_gateway_currency',
+                'fundkit_gateway_currency',
                 sprintf(
                     /* translators: 1: gateway identifier, 2: currency code */
-                    __('%1$s cannot take payments in %2$s.', 'giveflow-fundraising-campaigns'),
+                    __('%1$s cannot take payments in %2$s.', 'fundkit-fundraising-campaigns'),
                     $gatewayId,
                     $currency
                 ),
@@ -180,8 +180,8 @@ final class DonationsController
             // otherwise bypass the status gates and the block-level validator.
             if (! $form) {
                 return new WP_Error(
-                    'giveflow_form_not_available',
-                    __('This form is not accepting donations.', 'giveflow-fundraising-campaigns'),
+                    'fundkit_form_not_available',
+                    __('This form is not accepting donations.', 'fundkit-fundraising-campaigns'),
                     ['status' => 403]
                 );
             }
@@ -189,8 +189,8 @@ final class DonationsController
                 // Mirror the public render gate: only published forms take donations.
                 if ($form->status !== 'published') {
                     return new WP_Error(
-                        'giveflow_form_not_available',
-                        __('This form is not accepting donations.', 'giveflow-fundraising-campaigns'),
+                        'fundkit_form_not_available',
+                        __('This form is not accepting donations.', 'fundkit-fundraising-campaigns'),
                         ['status' => 403]
                     );
                 }
@@ -202,8 +202,8 @@ final class DonationsController
                     $campaign = Campaign::query()->find('id', (int) $form->campaign_id);
                     if (! $campaign || ! $campaign->acceptsDonations()) {
                         return new WP_Error(
-                            'giveflow_campaign_not_available',
-                            __('This campaign is not accepting donations.', 'giveflow-fundraising-campaigns'),
+                            'fundkit_campaign_not_available',
+                            __('This campaign is not accepting donations.', 'fundkit-fundraising-campaigns'),
                             ['status' => 403]
                         );
                     }
@@ -219,14 +219,14 @@ final class DonationsController
                 // or a crafted POST routes money to any active fund the form
                 // never listed. Cleared, the resolver falls back to the
                 // form/campaign/org default chain.
-                if (! FormSubmissionValidator::hasBlock((string) ($form->blocks ?? ''), 'giveflow/fund-picker')) {
+                if (! FormSubmissionValidator::hasBlock((string) ($form->blocks ?? ''), 'fundkit/fund-picker')) {
                     unset($body['fund_id']);
                 }
 
                 // Same rule for the donor's message. note_public puts text on
                 // the campaign's supporter wall, so a form with no comment
                 // block accepting one is an unmoderated publish route.
-                if (! FormSubmissionValidator::hasBlock((string) ($form->blocks ?? ''), 'giveflow/comment')) {
+                if (! FormSubmissionValidator::hasBlock((string) ($form->blocks ?? ''), 'fundkit/comment')) {
                     unset($body['note_to_org'], $body['note_public']);
                 }
             }
@@ -255,8 +255,8 @@ final class DonationsController
         );
         if (! in_array($gatewayId, $allowedGateways, true)) {
             return new WP_Error(
-                'giveflow_gateway_not_allowed',
-                __('That payment method is not available for this form.', 'giveflow-fundraising-campaigns'),
+                'fundkit_gateway_not_allowed',
+                __('That payment method is not available for this form.', 'fundkit-fundraising-campaigns'),
                 ['status' => 400]
             );
         }
@@ -284,7 +284,7 @@ final class DonationsController
             unset($sourceAttribution['utm_medium']);
         }
         if ($custom !== [] && strlen((string) wp_json_encode($custom)) > 16384) {
-            return new WP_Error('giveflow_custom_too_large', __('Submitted form data is too large.', 'giveflow-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_custom_too_large', __('Submitted form data is too large.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
         }
 
         $intent = new DonationIntent(
@@ -320,8 +320,8 @@ final class DonationsController
                 'gateway' => $gatewayId,
             ]);
             return new WP_Error(
-                'giveflow_create_failed',
-                __('We could not process your donation just now. Please try again.', 'giveflow-fundraising-campaigns'),
+                'fundkit_create_failed',
+                __('We could not process your donation just now. Please try again.', 'fundkit-fundraising-campaigns'),
                 ['status' => 500]
             );
         }
@@ -385,7 +385,7 @@ final class DonationsController
                 'gateway'     => $gatewayId,
             ]);
             $this->donations->markFailed($donation, 'Gateway createIntent threw: ' . $e->getMessage());
-            return new WP_Error('giveflow_gateway_intent_failed', __('We could not start your payment. Please try again in a moment.', 'giveflow-fundraising-campaigns'), ['status' => 502]);
+            return new WP_Error('fundkit_gateway_intent_failed', __('We could not start your payment. Please try again in a moment.', 'fundkit-fundraising-campaigns'), ['status' => 502]);
         }
 
         try {
@@ -396,7 +396,7 @@ final class DonationsController
             );
         } catch (Throwable $e) {
             $this->donations->markFailed($donation, 'setGatewayIntent failed: ' . $e->getMessage());
-            return new WP_Error('giveflow_intent_persist_failed', __('Something went wrong saving your donation. Please try again.', 'giveflow-fundraising-campaigns'), ['status' => 500]);
+            return new WP_Error('fundkit_intent_persist_failed', __('Something went wrong saving your donation. Please try again.', 'fundkit-fundraising-campaigns'), ['status' => 500]);
         }
 
         if ($gatewayResult->requires_action) {
@@ -564,7 +564,7 @@ final class DonationsController
     {
         $reference  = (string) $request['reference'];
         $rawToken   = trim((string) ($request['status_token'] ?? ''));
-        $notFound   = new WP_Error('giveflow_not_found', __('Donation not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+        $notFound   = new WP_Error('fundkit_not_found', __('Donation not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
 
         if ($rawToken === '') return $notFound;
 
@@ -595,7 +595,7 @@ final class DonationsController
     {
         $donation = $this->repository->findByReference((string) $request['reference']);
         if (! $donation) {
-            return new WP_Error('giveflow_not_found', __('Donation not found.', 'giveflow-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
         }
 
         if ($donation->status === 'paid') {
@@ -610,10 +610,10 @@ final class DonationsController
         }
         if (! in_array($donation->status, ['pending', 'processing', 'failed'], true)) {
             return new WP_Error(
-                'giveflow_invalid_transition',
+                'fundkit_invalid_transition',
                 sprintf(
                     /* translators: %s: current donation status. */
-                    __('Cannot confirm a %s donation.', 'giveflow-fundraising-campaigns'),
+                    __('Cannot confirm a %s donation.', 'fundkit-fundraising-campaigns'),
                     $donation->status
                 ),
                 ['status' => 422]
@@ -623,7 +623,7 @@ final class DonationsController
         $gateway = $this->gateways->get($donation->gateway);
         if (! $gateway) {
             /* translators: %s: gateway identifier. */
-            return new WP_Error('giveflow_unknown_gateway', sprintf(__('Gateway "%s" is no longer registered.', 'giveflow-fundraising-campaigns'), $donation->gateway), ['status' => 500]);
+            return new WP_Error('fundkit_unknown_gateway', sprintf(__('Gateway "%s" is no longer registered.', 'fundkit-fundraising-campaigns'), $donation->gateway), ['status' => 500]);
         }
 
         $payload = (array) ($request->get_json_params() ?? []);
@@ -632,7 +632,7 @@ final class DonationsController
         try {
             $result = $gateway->confirm($donation, $payload);
         } catch ( Throwable $e) {
-            return new WP_Error('giveflow_gateway_confirm_failed', __('We could not confirm your payment. Please try again in a moment.', 'giveflow-fundraising-campaigns'), ['status' => 502]);
+            return new WP_Error('fundkit_gateway_confirm_failed', __('We could not confirm your payment. Please try again in a moment.', 'fundkit-fundraising-campaigns'), ['status' => 502]);
         }
 
         // A held capture is not a failure: the gateway has the money and will
@@ -662,19 +662,19 @@ final class DonationsController
 
         // Money that reached the gateway and went back is not a decline. Failing
         // the donation here would write 'failed' over a donor who was charged,
-        // fire giveflow.donation.failed with it, and send the payment-failed notice.
+        // fire fundkit.donation.failed with it, and send the payment-failed notice.
         // The row is left where it stands for the refund path to reconcile.
         if (! $result->success && $result->reversed) {
             return new WP_Error(
-                'giveflow_confirm_reversed',
-                __('This payment has been returned to the donor, so it cannot be confirmed as paid.', 'giveflow-fundraising-campaigns'),
+                'fundkit_confirm_reversed',
+                __('This payment has been returned to the donor, so it cannot be confirmed as paid.', 'fundkit-fundraising-campaigns'),
                 ['status' => 409]
             );
         }
 
         if (! $result->success) {
-            $this->donations->markFailed($donation, $result->error ?? __('Gateway returned failure.', 'giveflow-fundraising-campaigns'));
-            return new WP_Error('giveflow_confirm_failed', $result->error ?? __('Confirmation failed.', 'giveflow-fundraising-campaigns'), ['status' => 402]);
+            $this->donations->markFailed($donation, $result->error ?? __('Gateway returned failure.', 'fundkit-fundraising-campaigns'));
+            return new WP_Error('fundkit_confirm_failed', $result->error ?? __('Confirmation failed.', 'fundkit-fundraising-campaigns'), ['status' => 402]);
         }
 
         $donation = $this->donations->confirm($donation, $result->toArray());

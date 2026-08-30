@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -51,81 +51,81 @@ final class AdminCapabilityGateTest extends IntegrationTestCase
 
     public function test_view_donations_reaches_donations_not_donors(): void
     {
-        $this->actAs(['giveflow_view_donations']);
-        $this->assertAllowed($this->status('GET', '/giveflow/v1/admin/donations'), 'donations viewer sees donations');
-        $this->assertForbidden($this->status('GET', '/giveflow/v1/admin/donors'), 'donations viewer blocked from donors');
+        $this->actAs(['fundkit_view_donations']);
+        $this->assertAllowed($this->status('GET', '/fundkit/v1/admin/donations'), 'donations viewer sees donations');
+        $this->assertForbidden($this->status('GET', '/fundkit/v1/admin/donors'), 'donations viewer blocked from donors');
     }
 
     public function test_view_donors_reaches_donors_not_donations(): void
     {
-        $this->actAs(['giveflow_view_donors']);
-        $this->assertAllowed($this->status('GET', '/giveflow/v1/admin/donors'), 'donor viewer sees donors');
-        $this->assertForbidden($this->status('GET', '/giveflow/v1/admin/donations'), 'donor viewer blocked from donations');
+        $this->actAs(['fundkit_view_donors']);
+        $this->assertAllowed($this->status('GET', '/fundkit/v1/admin/donors'), 'donor viewer sees donors');
+        $this->assertForbidden($this->status('GET', '/fundkit/v1/admin/donations'), 'donor viewer blocked from donations');
     }
 
     public function test_manage_options_bypasses_all_gates(): void
     {
         // The IntegrationTestCase default user is administrator (manage_options).
-        $this->assertAllowed($this->status('GET', '/giveflow/v1/admin/donors'), 'admin sees donors');
-        $this->assertAllowed($this->status('GET', '/giveflow/v1/admin/donations'), 'admin sees donations');
-        $this->assertAllowed($this->status('GET', '/giveflow/v1/admin/campaigns'), 'admin sees campaigns');
-        $this->assertAllowed($this->status('GET', '/giveflow/v1/admin/dashboard'), 'admin sees dashboard');
-        $this->assertAllowed($this->status('GET', '/giveflow/v1/admin/settings/general'), 'admin sees settings');
+        $this->assertAllowed($this->status('GET', '/fundkit/v1/admin/donors'), 'admin sees donors');
+        $this->assertAllowed($this->status('GET', '/fundkit/v1/admin/donations'), 'admin sees donations');
+        $this->assertAllowed($this->status('GET', '/fundkit/v1/admin/campaigns'), 'admin sees campaigns');
+        $this->assertAllowed($this->status('GET', '/fundkit/v1/admin/dashboard'), 'admin sees dashboard');
+        $this->assertAllowed($this->status('GET', '/fundkit/v1/admin/settings/general'), 'admin sees settings');
 
         // A fresh install grants nobody the granular caps, so a strict
         // current_user_can() locked the site owner out of their own exports.
-        $this->assertAllowed($this->status('GET', '/giveflow/v1/admin/exports/donors.csv'), 'admin exports donors');
-        $this->assertAllowed($this->status('GET', '/giveflow/v1/admin/exports/revenue.csv'), 'admin exports revenue');
-        $this->assertAllowed($this->status('GET', '/giveflow/v1/admin/exports/options'), 'admin reads export options');
+        $this->assertAllowed($this->status('GET', '/fundkit/v1/admin/exports/donors.csv'), 'admin exports donors');
+        $this->assertAllowed($this->status('GET', '/fundkit/v1/admin/exports/revenue.csv'), 'admin exports revenue');
+        $this->assertAllowed($this->status('GET', '/fundkit/v1/admin/exports/options'), 'admin reads export options');
     }
 
     public function test_settings_requires_settings_cap(): void
     {
-        $this->actAs(['giveflow_view_donations']);
-        $this->assertForbidden($this->status('GET', '/giveflow/v1/admin/settings/general'), 'donations viewer blocked from settings');
+        $this->actAs(['fundkit_view_donations']);
+        $this->assertForbidden($this->status('GET', '/fundkit/v1/admin/settings/general'), 'donations viewer blocked from settings');
 
-        $this->actAs(['giveflow_manage_settings']);
-        $this->assertAllowed($this->status('GET', '/giveflow/v1/admin/settings/general'), 'settings manager reaches settings');
+        $this->actAs(['fundkit_manage_settings']);
+        $this->assertAllowed($this->status('GET', '/fundkit/v1/admin/settings/general'), 'settings manager reaches settings');
     }
 
     public function test_redact_requires_redact_cap_not_just_view(): void
     {
-        // view_donors alone cannot redact; the per-route gate needs giveflow_redact_donors.
-        $this->actAs(['giveflow_view_donors']);
+        // view_donors alone cannot redact; the per-route gate needs fundkit_redact_donors.
+        $this->actAs(['fundkit_view_donors']);
         $this->assertForbidden(
-            $this->status('POST', '/giveflow/v1/admin/donors/999999/redact', ['confirmation' => 'x']),
+            $this->status('POST', '/fundkit/v1/admin/donors/999999/redact', ['confirmation' => 'x']),
             'donor viewer cannot redact'
         );
 
         // With the cap the gate lets it through (404/422 for the missing donor, but not forbidden).
-        $this->actAs(['giveflow_view_donors', 'giveflow_redact_donors']);
+        $this->actAs(['fundkit_view_donors', 'fundkit_redact_donors']);
         $this->assertAllowed(
-            $this->status('POST', '/giveflow/v1/admin/donors/999999/redact', ['confirmation' => 'x']),
+            $this->status('POST', '/fundkit/v1/admin/donors/999999/redact', ['confirmation' => 'x']),
             'redact cap passes the gate'
         );
     }
 
     public function test_managing_roles_requires_full_admin_not_just_settings_cap(): void
     {
-        $this->actAs(['giveflow_manage_settings']);
+        $this->actAs(['fundkit_manage_settings']);
 
         // A settings-scoped role edits ordinary settings...
         $this->assertAllowed(
-            $this->status('PUT', '/giveflow/v1/admin/settings/general', ['organization_name' => 'X']),
+            $this->status('PUT', '/fundkit/v1/admin/settings/general', ['organization_name' => 'X']),
             'settings manager edits general settings'
         );
         // ...but must not rewrite the role->capability mapping (privilege escalation),
         $this->assertForbidden(
-            $this->status('PUT', '/giveflow/v1/admin/settings/roles', ['mapping' => ['subscriber' => ['giveflow_refund_donations']]]),
+            $this->status('PUT', '/fundkit/v1/admin/settings/roles', ['mapping' => ['subscriber' => ['fundkit_refund_donations']]]),
             'settings manager cannot grant capabilities via the roles mapping'
         );
         // ...nor restore/export a settings bundle (applies the mapping + leaks secrets).
         $this->assertForbidden(
-            $this->status('POST', '/giveflow/v1/admin/tools/import', ['settings' => []]),
+            $this->status('POST', '/fundkit/v1/admin/tools/import', ['settings' => []]),
             'settings manager cannot import a settings bundle'
         );
         $this->assertForbidden(
-            $this->status('GET', '/giveflow/v1/admin/tools/export'),
+            $this->status('GET', '/fundkit/v1/admin/tools/export'),
             'settings manager cannot export secrets'
         );
     }
@@ -135,47 +135,47 @@ final class AdminCapabilityGateTest extends IntegrationTestCase
         // Reading a donor on screen is one record at a time; the CSV is the
         // whole list with decrypted emails, phones and addresses in a file that
         // leaves the site.
-        $this->actAs(['giveflow_view_donors']);
+        $this->actAs(['fundkit_view_donors']);
         $this->assertForbidden(
-            $this->status('GET', '/giveflow/v1/admin/exports/donors.csv'),
+            $this->status('GET', '/fundkit/v1/admin/exports/donors.csv'),
             'viewing donors does not carry bulk export'
         );
 
-        $this->actAs(['giveflow_export_donors']);
+        $this->actAs(['fundkit_export_donors']);
         $this->assertAllowed(
-            $this->status('GET', '/giveflow/v1/admin/exports/donors.csv'),
+            $this->status('GET', '/fundkit/v1/admin/exports/donors.csv'),
             'the export capability does'
         );
 
         // Revenue figures are aggregates, so they sit behind reports and must
         // not be reachable with the donor export cap alone.
         $this->assertForbidden(
-            $this->status('GET', '/giveflow/v1/admin/exports/revenue.csv'),
+            $this->status('GET', '/fundkit/v1/admin/exports/revenue.csv'),
             'donor export does not carry revenue reporting'
         );
 
         // The donations CSV is a second route to the same donor list. Gating
         // the donors export while this one shipped names and emails under the
-        // weaker cap made giveflow_export_donors decorative.
-        $this->actAs(['giveflow_view_donations']);
-        $csv = $this->body('GET', '/giveflow/v1/admin/donations/export.csv');
+        // weaker cap made fundkit_export_donors decorative.
+        $this->actAs(['fundkit_view_donations']);
+        $csv = $this->body('GET', '/fundkit/v1/admin/donations/export.csv');
         $this->assertStringNotContainsString('@', $csv, 'a donations viewer gets no donor emails');
         $this->assertStringNotContainsString('Donor email', $csv, 'and no column promising them');
 
-        $this->actAs(['giveflow_view_donations', 'giveflow_export_donors']);
+        $this->actAs(['fundkit_view_donations', 'fundkit_export_donors']);
         $this->assertStringContainsString(
             'Donor email',
-            $this->body('GET', '/giveflow/v1/admin/donations/export.csv'),
+            $this->body('GET', '/fundkit/v1/admin/donations/export.csv'),
             'holding the export capability restores the columns'
         );
 
-        $this->actAs(['giveflow_view_reports']);
+        $this->actAs(['fundkit_view_reports']);
         $this->assertAllowed(
-            $this->status('GET', '/giveflow/v1/admin/exports/revenue.csv'),
+            $this->status('GET', '/fundkit/v1/admin/exports/revenue.csv'),
             'reports viewer reads revenue'
         );
         $this->assertForbidden(
-            $this->status('GET', '/giveflow/v1/admin/exports/donors.csv'),
+            $this->status('GET', '/fundkit/v1/admin/exports/donors.csv'),
             'reports viewer is not handed the donor list'
         );
     }
@@ -184,11 +184,11 @@ final class AdminCapabilityGateTest extends IntegrationTestCase
     {
         // The IntegrationTestCase default user is an administrator (manage_options).
         $this->assertAllowed(
-            $this->status('PUT', '/giveflow/v1/admin/settings/roles', ['mapping' => []]),
+            $this->status('PUT', '/fundkit/v1/admin/settings/roles', ['mapping' => []]),
             'an admin can manage the roles mapping'
         );
         $this->assertAllowed(
-            $this->status('GET', '/giveflow/v1/admin/tools/export'),
+            $this->status('GET', '/fundkit/v1/admin/tools/export'),
             'an admin can export'
         );
     }

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Forms\FormTemplates;
+use FundKit\Forms\FormTemplates;
 
 /**
  * Shipped template copy is donor-facing verbatim, sitting next to amounts the

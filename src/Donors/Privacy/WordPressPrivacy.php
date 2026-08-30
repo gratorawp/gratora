@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donors\Privacy;
+namespace FundKit\Donors\Privacy;
 
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorRepository;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Identity\IdentityHasher;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorRepository;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Identity\IdentityHasher;
 
 /**
- * GiveFlow answering WordPress's own privacy tools.
+ * FundKit answering WordPress's own privacy tools.
  *
  * Tools, Export Personal Data and Erase Personal Data are what a site owner is
  * told to use when a request arrives, and what a data protection officer looks
@@ -29,7 +29,7 @@ use GiveFlow\Foundation\Identity\IdentityHasher;
 final class WordPressPrivacy
 {
     /** WordPress pages these; a donor is one subject, so one page is enough. */
-    public const GROUP = 'giveflow-donor';
+    public const GROUP = 'fundkit-donor';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -54,8 +54,8 @@ final class WordPressPrivacy
      */
     public function registerExporter(array $exporters): array
     {
-        $exporters['giveflow'] = [
-            'exporter_friendly_name' => __('GiveFlow donations', 'giveflow-fundraising-campaigns'),
+        $exporters['fundkit'] = [
+            'exporter_friendly_name' => __('FundKit donations', 'fundkit-fundraising-campaigns'),
             'callback'               => [$this, 'export'],
         ];
 
@@ -70,8 +70,8 @@ final class WordPressPrivacy
      */
     public function registerEraser(array $erasers): array
     {
-        $erasers['giveflow'] = [
-            'eraser_friendly_name' => __('GiveFlow donations', 'giveflow-fundraising-campaigns'),
+        $erasers['fundkit'] = [
+            'eraser_friendly_name' => __('FundKit donations', 'fundkit-fundraising-campaigns'),
             'callback'             => [$this, 'erase'],
         ];
 
@@ -93,8 +93,8 @@ final class WordPressPrivacy
         return [
             'data' => [[
                 'group_id'    => self::GROUP,
-                'group_label' => __('Donor record', 'giveflow-fundraising-campaigns'),
-                'item_id'     => 'giveflow-donor-' . (int) $donor->id,
+                'group_label' => __('Donor record', 'fundkit-fundraising-campaigns'),
+                'item_id'     => 'fundkit-donor-' . (int) $donor->id,
                 'data'        => $this->donorFields($donor),
             ]],
             'done' => true,
@@ -122,7 +122,7 @@ final class WordPressPrivacy
             return [
                 'items_removed'  => false,
                 'items_retained' => false,
-                'messages'       => [__('This donor was already erased.', 'giveflow-fundraising-campaigns')],
+                'messages'       => [__('This donor was already erased.', 'fundkit-fundraising-campaigns')],
                 'done'           => true,
             ];
         }
@@ -136,7 +136,7 @@ final class WordPressPrivacy
             // charity's books have to still add up after an erasure.
             'items_retained' => true,
             'messages'       => [
-                __('The donor record was erased. Their donations were kept as anonymous records, because the amounts are part of the accounts.', 'giveflow-fundraising-campaigns'),
+                __('The donor record was erased. Their donations were kept as anonymous records, because the amounts are part of the accounts.', 'fundkit-fundraising-campaigns'),
             ],
             'done'           => true,
         ];
@@ -162,10 +162,10 @@ final class WordPressPrivacy
     private function donorFields(Donor $donor): array
     {
         $fields = [
-            [__('First name', 'giveflow-fundraising-campaigns'), (string) ($donor->first_name ?? '')],
-            [__('Last name', 'giveflow-fundraising-campaigns'), (string) ($donor->last_name ?? '')],
-            [__('Company', 'giveflow-fundraising-campaigns'), (string) ($donor->company ?? '')],
-            [__('First seen', 'giveflow-fundraising-campaigns'), (string) ($donor->created_at ?? '')],
+            [__('First name', 'fundkit-fundraising-campaigns'), (string) ($donor->first_name ?? '')],
+            [__('Last name', 'fundkit-fundraising-campaigns'), (string) ($donor->last_name ?? '')],
+            [__('Company', 'fundkit-fundraising-campaigns'), (string) ($donor->company ?? '')],
+            [__('First seen', 'fundkit-fundraising-campaigns'), (string) ($donor->created_at ?? '')],
         ];
 
         $out = [];

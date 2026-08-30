@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Campaigns\Styling;
+namespace FundKit\Campaigns\Styling;
 
 /**
  * Ink for anything drawn on the campaign's accent.
@@ -44,9 +44,9 @@ final class AccentInk
 
         [$ink, $muted, $line] = self::luminance($rgb) > self::FLIP ? self::ON_LIGHT : self::ON_DARK;
 
-        return '--giveflow-on-accent:' . $ink . ';'
-            . '--giveflow-on-accent-muted:' . $muted . ';'
-            . '--giveflow-on-accent-line:' . $line . ';';
+        return '--fundkit-on-accent:' . $ink . ';'
+            . '--fundkit-on-accent-muted:' . $muted . ';'
+            . '--fundkit-on-accent-line:' . $line . ';';
     }
 
     /**

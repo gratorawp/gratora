@@ -13,7 +13,7 @@
 #
 # Re-run it any time; it overwrites its own hook and leaves any other alone.
 #
-# Repos outside this plugins directory can be added with GIVEFLOW_EXTRA_REPOS,
+# Repos outside this plugins directory can be added with FUNDKIT_EXTRA_REPOS,
 # a colon-separated list of paths.
 #
 set -uo pipefail
@@ -24,7 +24,7 @@ PLUGINS_DIR="$(dirname "$CORE_DIR")"
 read -r -d '' HOOK <<'HOOKEOF'
 #!/usr/bin/env bash
 #
-# Installed by giveflow/bin/install-hooks.sh. Runs this repo's analysis and
+# Installed by fundkit/bin/install-hooks.sh. Runs this repo's analysis and
 # suites before anything leaves the machine.
 #
 # To push past it once:  git push --no-verify
@@ -66,10 +66,10 @@ install_into() {
 }
 
 install_into "$CORE_DIR"
-for d in "$PLUGINS_DIR"/giveflow-*/; do
+for d in "$PLUGINS_DIR"/fundkit-*/; do
     install_into "${d%/}"
 done
-IFS=':' read -ra EXTRA <<< "${GIVEFLOW_EXTRA_REPOS:-}"
+IFS=':' read -ra EXTRA <<< "${FUNDKIT_EXTRA_REPOS:-}"
 for d in ${EXTRA[@]+"${EXTRA[@]}"}; do
     [ -n "$d" ] && [ -d "$d" ] && install_into "$d"
 done

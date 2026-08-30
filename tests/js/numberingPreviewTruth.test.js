@@ -43,7 +43,7 @@ function mount( record ) {
 }
 
 const previews = ( root ) =>
-    [ ...root.querySelectorAll( '.giveflow-ref-preview__value' ) ].map( ( n ) => n.textContent );
+    [ ...root.querySelectorAll( '.fundkit-ref-preview__value' ) ].map( ( n ) => n.textContent );
 
 beforeEach( () => {
     apiFetch.mockReset();

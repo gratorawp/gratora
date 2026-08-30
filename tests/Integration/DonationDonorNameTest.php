@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -20,7 +20,7 @@ final class DonationDonorNameTest extends IntegrationTestCase
 {
     private function postDonation(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode($body));
         return rest_do_request($req);
@@ -28,7 +28,7 @@ final class DonationDonorNameTest extends IntegrationTestCase
 
     private function confirm(string $reference): void
     {
-        $req = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
+        $req = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
         $req->set_header('content-type', 'application/json');
         $req->set_body('{}');
         rest_do_request($req);
@@ -133,7 +133,7 @@ final class DonationDonorNameTest extends IntegrationTestCase
             'profile'      => ['first_name' => 'Grace', 'last_name' => 'Hopper'],
         ])->get_data()['reference'];
 
-        $res = rest_do_request(new WP_REST_Request('GET', "/giveflow/v1/admin/donations/{$reference}"));
+        $res = rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/admin/donations/{$reference}"));
         $this->assertSame(200, $res->get_status());
         $this->assertSame('Grace Hopper', $res->get_data()['donation']['donor_name_given']);
     }
@@ -171,7 +171,7 @@ final class DonationDonorNameTest extends IntegrationTestCase
         ])->get_data()['reference'];
 
         $donorId  = (int) $this->donation($reference)->donor_id;
-        $request  = new WP_REST_Request('GET', "/giveflow/v1/admin/donors/{$donorId}/export");
+        $request  = new WP_REST_Request('GET', "/fundkit/v1/admin/donors/{$donorId}/export");
         $response = rest_do_request($request);
         $this->assertSame(200, $response->get_status());
 

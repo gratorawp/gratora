@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways\PayPal;
+namespace FundKit\Gateways\PayPal;
 
-use GiveFlow\Foundation\Config\SystemSetting;
-use GiveFlow\Foundation\Crypto\Crypto;
+use FundKit\Foundation\Config\SystemSetting;
+use FundKit\Foundation\Crypto\Crypto;
 
 /**
  * The organization's own PayPal REST app credentials, stored per mode.
@@ -289,7 +289,7 @@ final class PayPalAccount
     /** @since 1.0.0 */
     private function tokenKey(bool $test): string
     {
-        return 'giveflow_paypal_token_' . ($test ? 'test' : 'live');
+        return 'fundkit_paypal_token_' . ($test ? 'test' : 'live');
     }
 
     /** @since 1.0.0 */

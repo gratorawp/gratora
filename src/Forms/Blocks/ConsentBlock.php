@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Forms\Blocks;
+namespace FundKit\Forms\Blocks;
 
-use GiveFlow\Donors\ConsentService;
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Donors\ConsentService;
+use FundKit\Foundation\Helpers\View;
 
 /**
  * Consent / opt-in purposes block.
@@ -22,7 +22,7 @@ final class ConsentBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'giveflow/consent';
+        return 'fundkit/consent';
     }
 
     /** @since 1.0.0 */
@@ -51,8 +51,8 @@ final class ConsentBlock implements Block
                 return '';
             }
 
-            return '<div class="giveflow-block-notice">'
-                . esc_html__('Pick which consent purposes this form asks for, or add one in Settings, Consents.', 'giveflow-fundraising-campaigns')
+            return '<div class="fundkit-block-notice">'
+                . esc_html__('Pick which consent purposes this form asks for, or add one in Settings, Consents.', 'fundkit-fundraising-campaigns')
                 . '</div>';
         }
 

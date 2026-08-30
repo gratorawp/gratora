@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donations\DonationService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Gateways\PayPal\PayPalAccount;
-use GiveFlow\Gateways\PayPal\PayPalApi;
-use GiveFlow\Gateways\PayPal\PayPalGateway;
-use GiveFlow\Gateways\PayPal\PayPalPlanRecorder;
-use GiveFlow\Gateways\PayPal\PayPalPlans;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanRepository;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donations\DonationService;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Gateways\PayPal\PayPalAccount;
+use FundKit\Gateways\PayPal\PayPalApi;
+use FundKit\Gateways\PayPal\PayPalGateway;
+use FundKit\Gateways\PayPal\PayPalPlanRecorder;
+use FundKit\Gateways\PayPal\PayPalPlans;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanRepository;
 use RuntimeException;
 
 /**
@@ -60,7 +60,7 @@ final class PayPalAlreadyInThatStateTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('giveflow_gateway_config', ['test_mode' => true]);
+        update_option('fundkit_gateway_config', ['test_mode' => true]);
 
         $c       = Plugin::instance()->container;
         $account = $c->get(PayPalAccount::class);

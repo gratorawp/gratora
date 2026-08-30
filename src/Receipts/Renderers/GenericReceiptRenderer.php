@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Receipts\Renderers;
+namespace FundKit\Receipts\Renderers;
 
-use GiveFlow\Campaigns\Styling\StylePresets;
-use GiveFlow\Donations\Refund;
-use GiveFlow\Foundation\Helpers\Money;
-use GiveFlow\Foundation\Helpers\View;
-use GiveFlow\Receipts\PdfBuilder;
-use GiveFlow\Receipts\ReceiptContext;
-use GiveFlow\Receipts\ReceiptRenderer;
+use FundKit\Campaigns\Styling\StylePresets;
+use FundKit\Donations\Refund;
+use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Helpers\View;
+use FundKit\Receipts\PdfBuilder;
+use FundKit\Receipts\ReceiptContext;
+use FundKit\Receipts\ReceiptRenderer;
 
 /**
  * Generic receipt renderer applied to every paid donation.
@@ -36,7 +36,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Generic Receipt', 'giveflow-fundraising-campaigns');
+        return __('Generic Receipt', 'fundkit-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */
@@ -110,9 +110,9 @@ final class GenericReceiptRenderer implements ReceiptRenderer
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: human-readable donation reference. */
-            'title'  => sprintf(__('Donation receipt %s', 'giveflow-fundraising-campaigns'), $ctx->donation->reference),
-            'author' => $ctx->org['name'] ?? 'GiveFlow',
-            'subject' => __('Donation receipt', 'giveflow-fundraising-campaigns'),
+            'title'  => sprintf(__('Donation receipt %s', 'fundkit-fundraising-campaigns'), $ctx->donation->reference),
+            'author' => $ctx->org['name'] ?? 'FundKit',
+            'subject' => __('Donation receipt', 'fundkit-fundraising-campaigns'),
         ]);
     }
 
@@ -126,16 +126,16 @@ final class GenericReceiptRenderer implements ReceiptRenderer
      */
     private function loadTemplate(): array
     {
-        $stored = get_option('giveflow_receipt_settings', []);
+        $stored = get_option('fundkit_receipt_settings', []);
         if (! is_array($stored)) $stored = [];
 
         $defaults = [
-            'header_title'       => __('Donation receipt', 'giveflow-fundraising-campaigns'),
+            'header_title'       => __('Donation receipt', 'fundkit-fundraising-campaigns'),
             'intro'              => '',
-            'signoff'            => __('Thank you for your support.', 'giveflow-fundraising-campaigns'),
+            'signoff'            => __('Thank you for your support.', 'fundkit-fundraising-campaigns'),
             'footer_note'        => __(
                 "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organization's status. Keep this receipt for your records.",
-                'giveflow-fundraising-campaigns'
+                'fundkit-fundraising-campaigns'
             ),
             'show_tax_id'        => true,
             'show_donor_address' => false,
@@ -147,7 +147,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
 
         // Accent color from the org's default brand preset.
         $brandTokens = StylePresets::tokensFor(StylePresets::defaultId());
-        $accent      = (string) ($brandTokens['giveflow-accent'] ?? '#211d3f');
+        $accent      = (string) ($brandTokens['fundkit-accent'] ?? '#211d3f');
 
         return [
             'header_title'       => trim((string) ($stored['header_title'] ?? '')) !== '' ? (string) $stored['header_title'] : $defaults['header_title'],
@@ -171,7 +171,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     {
         $donation = $ctx->donation;
         $donorName = trim((string) ($ctx->donor_name ?? ''));
-        if ($donorName === '') $donorName = __('Friend', 'giveflow-fundraising-campaigns');
+        if ($donorName === '') $donorName = __('Friend', 'fundkit-fundraising-campaigns');
 
         $replacements = [
             '{donor_name}'        => $donorName,

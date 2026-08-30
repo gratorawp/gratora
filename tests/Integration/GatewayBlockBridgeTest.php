@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\CampaignService;
-use GiveFlow\Forms\FormService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Campaigns\CampaignService;
+use FundKit\Forms\FormService;
+use FundKit\Foundation\Plugin;
 
 /**
  * The payment-gateways block is the single writer of
@@ -30,7 +30,7 @@ final class GatewayBlockBridgeTest extends IntegrationTestCase
         $form = $this->forms()->create([
             'title'       => 'Gw bridge',
             'campaign_id' => $this->campaignId(),
-            'blocks'      => '<!-- wp:giveflow/payment-gateways {"allowed":["offline","stripe"]} /-->',
+            'blocks'      => '<!-- wp:fundkit/payment-gateways {"allowed":["offline","stripe"]} /-->',
         ]);
 
         $this->assertSame(['offline', 'stripe'], $form->settings['gateways']['allowed']);
@@ -41,13 +41,13 @@ final class GatewayBlockBridgeTest extends IntegrationTestCase
         $form = $this->forms()->create([
             'title'       => 'Nested gw',
             'campaign_id' => $this->campaignId(),
-            'blocks'      => '<!-- wp:giveflow/row --><!-- wp:giveflow/payment-gateways {"allowed":["offline"]} /--><!-- /wp:giveflow/row -->',
+            'blocks'      => '<!-- wp:fundkit/row --><!-- wp:fundkit/payment-gateways {"allowed":["offline"]} /--><!-- /wp:fundkit/row -->',
         ]);
         $this->assertSame(['offline'], $form->settings['gateways']['allowed']);
 
         // No block: the bridge does not touch the list, so the Settings tab
         // (or a prior value) keeps governing rather than being clobbered.
-        $form = $this->forms()->update($form, ['blocks' => '<!-- wp:giveflow/name /-->']);
+        $form = $this->forms()->update($form, ['blocks' => '<!-- wp:fundkit/name /-->']);
         $this->assertSame(['offline'], $form->settings['gateways']['allowed']);
     }
 }

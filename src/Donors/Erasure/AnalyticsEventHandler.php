@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Donors\Erasure;
+namespace FundKit\Donors\Erasure;
 
-use GiveFlow\Analytics\Event;
+use FundKit\Analytics\Event;
 
 /**
  * The analytics event log. Rows survive so campaign and form totals do not move
@@ -30,7 +30,7 @@ final class AnalyticsEventHandler implements ErasureHandler
     /** @since 1.0.0 */
     public function key(): string
     {
-        return 'giveflow.analytics_events';
+        return 'fundkit.analytics_events';
     }
 
     /** @since 1.0.0 */

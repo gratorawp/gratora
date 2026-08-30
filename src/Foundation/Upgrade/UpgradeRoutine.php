@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Upgrade;
+namespace FundKit\Foundation\Upgrade;
 
 /**
  * A one-shot data migration.

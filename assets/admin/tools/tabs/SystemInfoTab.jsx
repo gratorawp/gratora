@@ -27,29 +27,29 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
             setCopied( true );
             setTimeout( () => setCopied( false ), 2000 );
         } catch ( err ) {
-            setNotice( { type: 'error', text: __( 'Could not copy. Select the values instead.', 'giveflow-fundraising-campaigns' ) } );
+            setNotice( { type: 'error', text: __( 'Could not copy. Select the values instead.', 'fundkit-fundraising-campaigns' ) } );
         }
     };
 
     return (
-        <div className="giveflow-panel">
+        <div className="fundkit-panel">
             <Card
-                title={ __( 'System info', 'giveflow-fundraising-campaigns' ) }
-                sub={ __( 'Everything a support request needs. No keys or credentials are included, so it is safe to paste.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'System info', 'fundkit-fundraising-campaigns' ) }
+                sub={ __( 'Everything a support request needs. No keys or credentials are included, so it is safe to paste.', 'fundkit-fundraising-campaigns' ) }
             >
                 { infoError ? (
-                    <div className="giveflow-advanced-actions">
-                        <p style={ { color: '#b42318', margin: 0 } }>{ __( 'Could not load system info.', 'giveflow-fundraising-campaigns' ) }</p>
-                        <Btn variant="secondary" onClick={ loadInfo }>{ __( 'Retry', 'giveflow-fundraising-campaigns' ) }</Btn>
+                    <div className="fundkit-advanced-actions">
+                        <p style={ { color: '#b42318', margin: 0 } }>{ __( 'Could not load system info.', 'fundkit-fundraising-campaigns' ) }</p>
+                        <Btn variant="secondary" onClick={ loadInfo }>{ __( 'Retry', 'fundkit-fundraising-campaigns' ) }</Btn>
                     </div>
                 ) : ! info ? (
-                    <p className="giveflow-tools-empty">{ __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p>
+                    <p className="fundkit-tools-empty">{ __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</p>
                 ) : (
                     <>
                         { sections.map( ( section ) => (
-                            <div key={ section.title } className="giveflow-sysinfo__group">
-                                <h3 className="giveflow-sysinfo__title">{ section.title }</h3>
-                                <div className="giveflow-advanced-info">
+                            <div key={ section.title } className="fundkit-sysinfo__group">
+                                <h3 className="fundkit-sysinfo__title">{ section.title }</h3>
+                                <div className="fundkit-advanced-info">
                                     { section.rows.map( ( r, i ) => (
                                         <div key={ `${ section.title }-${ i }` }>
                                             <dt>{ r.label }</dt>
@@ -59,9 +59,9 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
                                 </div>
                             </div>
                         ) ) }
-                        <div className="giveflow-advanced-actions" style={ { marginTop: 12 } }>
+                        <div className="fundkit-advanced-actions" style={ { marginTop: 12 } }>
                             <Btn variant="secondary" onClick={ copy }>
-                                { copied ? __( 'Copied', 'giveflow-fundraising-campaigns' ) : __( 'Copy to clipboard', 'giveflow-fundraising-campaigns' ) }
+                                { copied ? __( 'Copied', 'fundkit-fundraising-campaigns' ) : __( 'Copy to clipboard', 'fundkit-fundraising-campaigns' ) }
                             </Btn>
                         </div>
                     </>
@@ -69,20 +69,20 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
             </Card>
 
             <Card
-                title={ __( 'Scheduled tasks', 'giveflow-fundraising-campaigns' ) }
-                sub={ __( 'GiveFlow jobs queued with Action Scheduler, and when each is due.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Scheduled tasks', 'fundkit-fundraising-campaigns' ) }
+                sub={ __( 'FundKit jobs queued with Action Scheduler, and when each is due.', 'fundkit-fundraising-campaigns' ) }
             >
                 { info?.cron?.length ? (
-                    <ul className="giveflow-advanced-cron">
+                    <ul className="fundkit-advanced-cron">
                         { info.cron.map( ( c, i ) => (
                             <li key={ i }>
                                 <code>{ c.hook }</code>
-                                <span className="giveflow-tools-log__when"> { formatWhen( c.next ) }</span>
+                                <span className="fundkit-tools-log__when"> { formatWhen( c.next ) }</span>
                             </li>
                         ) ) }
                     </ul>
                 ) : (
-                    <p className="giveflow-tools-empty">{ __( 'Nothing queued right now.', 'giveflow-fundraising-campaigns' ) }</p>
+                    <p className="fundkit-tools-empty">{ __( 'Nothing queued right now.', 'fundkit-fundraising-campaigns' ) }</p>
                 ) }
             </Card>
         </div>

@@ -37,11 +37,11 @@ export function dueIn( iso ) {
     const days = Math.round( ( then - Date.now() ) / 86400000 );
     if ( days < 0 ) {
         /* translators: %d: days a renewal is overdue by. */
-        return sprintf( _n( '%d day overdue', '%d days overdue', Math.abs( days ), 'giveflow-fundraising-campaigns' ), Math.abs( days ) );
+        return sprintf( _n( '%d day overdue', '%d days overdue', Math.abs( days ), 'fundkit-fundraising-campaigns' ), Math.abs( days ) );
     }
-    if ( days === 0 ) return __( 'today', 'giveflow-fundraising-campaigns' );
+    if ( days === 0 ) return __( 'today', 'fundkit-fundraising-campaigns' );
     /* translators: %d: days until the next charge. */
-    return sprintf( _n( 'in %d day', 'in %d days', days, 'giveflow-fundraising-campaigns' ), days );
+    return sprintf( _n( 'in %d day', 'in %d days', days, 'fundkit-fundraising-campaigns' ), days );
 }
 
 export function retryActionFor( plan ) {
@@ -49,7 +49,7 @@ export function retryActionFor( plan ) {
     if ( ! plan.can_retry ) return null;
     if ( ! ( plan.failed_renewals_count > 0 || plan.status === 'past_due' ) ) return null;
 
-    return { id: 'retry', label: __( 'Retry payment', 'giveflow-fundraising-campaigns' ) };
+    return { id: 'retry', label: __( 'Retry payment', 'fundkit-fundraising-campaigns' ) };
 }
 
 export function actionsFor( plan ) {
@@ -57,24 +57,24 @@ export function actionsFor( plan ) {
 
     const actions = [];
     if ( plan.status === 'paused' ) {
-        actions.push( { id: 'resume', label: __( 'Resume', 'giveflow-fundraising-campaigns' ) } );
+        actions.push( { id: 'resume', label: __( 'Resume', 'fundkit-fundraising-campaigns' ) } );
     } else {
-        actions.push( { id: 'pause', label: __( 'Pause', 'giveflow-fundraising-campaigns' ) } );
-        actions.push( { id: 'skip_next', label: __( 'Skip next', 'giveflow-fundraising-campaigns' ) } );
+        actions.push( { id: 'pause', label: __( 'Pause', 'fundkit-fundraising-campaigns' ) } );
+        actions.push( { id: 'skip_next', label: __( 'Skip next', 'fundkit-fundraising-campaigns' ) } );
     }
-    actions.push( { id: 'change_amount', label: __( 'Change amount', 'giveflow-fundraising-campaigns' ) } );
-    actions.push( { id: 'cancel', label: __( 'Cancel', 'giveflow-fundraising-campaigns' ), destructive: true } );
+    actions.push( { id: 'change_amount', label: __( 'Change amount', 'fundkit-fundraising-campaigns' ) } );
+    actions.push( { id: 'cancel', label: __( 'Cancel', 'fundkit-fundraising-campaigns' ), destructive: true } );
 
     return actions;
 }
 
 const TITLES = {
-    retry:         __( 'Retry the payment', 'giveflow-fundraising-campaigns' ),
-    pause:         __( 'Pause this donation', 'giveflow-fundraising-campaigns' ),
-    resume:        __( 'Resume this donation', 'giveflow-fundraising-campaigns' ),
-    skip_next:     __( 'Skip the next payment', 'giveflow-fundraising-campaigns' ),
-    change_amount: __( 'Change the amount', 'giveflow-fundraising-campaigns' ),
-    cancel:        __( 'Cancel this donation', 'giveflow-fundraising-campaigns' ),
+    retry:         __( 'Retry the payment', 'fundkit-fundraising-campaigns' ),
+    pause:         __( 'Pause this donation', 'fundkit-fundraising-campaigns' ),
+    resume:        __( 'Resume this donation', 'fundkit-fundraising-campaigns' ),
+    skip_next:     __( 'Skip the next payment', 'fundkit-fundraising-campaigns' ),
+    change_amount: __( 'Change the amount', 'fundkit-fundraising-campaigns' ),
+    cancel:        __( 'Cancel this donation', 'fundkit-fundraising-campaigns' ),
 };
 
 export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
@@ -94,7 +94,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
         if ( action === 'change_amount' ) {
             const cents = Math.round( parseFloat( String( amount ).replace( ',', '.' ) ) * 100 );
             if ( ! Number.isFinite( cents ) || cents <= 0 ) {
-                setError( __( 'Enter an amount.', 'giveflow-fundraising-campaigns' ) );
+                setError( __( 'Enter an amount.', 'fundkit-fundraising-campaigns' ) );
                 return;
             }
             body.amount_cents = cents;
@@ -103,10 +103,10 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
         setBusy( true );
         setError( null );
         setApproveUrl( null );
-        apiFetch( { path: `/giveflow/v1/admin/recurring/${ plan.id }/action`, method: 'POST', data: body } )
+        apiFetch( { path: `/fundkit/v1/admin/recurring/${ plan.id }/action`, method: 'POST', data: body } )
             .then( () => { onClose(); if ( onDone ) onDone(); } )
             .catch( ( e ) => {
-                setError( e?.message || __( 'That change could not be made.', 'giveflow-fundraising-campaigns' ) );
+                setError( e?.message || __( 'That change could not be made.', 'fundkit-fundraising-campaigns' ) );
                 // PayPal answers a revision with a link the donor has to open.
                 // The API has always returned it and nothing rendered it, so
                 // the message said "approve this change" and gave no way to.
@@ -117,12 +117,12 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
 
     return (
         <Dialog
-            title={ TITLES[ action ] || __( 'Change this donation', 'giveflow-fundraising-campaigns' ) }
+            title={ TITLES[ action ] || __( 'Change this donation', 'fundkit-fundraising-campaigns' ) }
             onClose={ () => ( busy ? null : onClose() ) }
             foot={
                 <>
                     <Btn variant="secondary" onClick={ onClose } disabled={ busy }>
-                        { __( 'Close', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Close', 'fundkit-fundraising-campaigns' ) }
                     </Btn>
                     <Btn
                         variant="primary"
@@ -132,8 +132,8 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                         disabled={ busy }
                     >
                         { busy
-                            ? __( 'Working…', 'giveflow-fundraising-campaigns' )
-                            : ( action === 'retry' ? __( 'Retry now', 'giveflow-fundraising-campaigns' ) : __( 'Apply change', 'giveflow-fundraising-campaigns' ) ) }
+                            ? __( 'Working…', 'fundkit-fundraising-campaigns' )
+                            : ( action === 'retry' ? __( 'Retry now', 'fundkit-fundraising-campaigns' ) : __( 'Apply change', 'fundkit-fundraising-campaigns' ) ) }
                     </Btn>
                 </>
             }
@@ -144,14 +144,14 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                         <span style={ { display: 'block', marginBottom: 4 } }>
                             { sprintf(
                                 /* translators: %s: currency code, e.g. USD */
-                                __( 'New amount (%s)', 'giveflow-fundraising-campaigns' ),
+                                __( 'New amount (%s)', 'fundkit-fundraising-campaigns' ),
                                 plan.currency
                             ) }
                         </span>
                         <input
                             type="text"
                             inputMode="decimal"
-                            className="giveflow-input"
+                            className="fundkit-input"
                             value={ amount }
                             onChange={ ( e ) => setAmount( e.target.value ) }
                         />
@@ -162,9 +162,9 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             { action === 'pause' && (
                 <p>
                     <label>
-                        <span style={ { display: 'block', marginBottom: 4 } }>{ __( 'Pause for', 'giveflow-fundraising-campaigns' ) }</span>
+                        <span style={ { display: 'block', marginBottom: 4 } }>{ __( 'Pause for', 'fundkit-fundraising-campaigns' ) }</span>
                         <select
-                            className="giveflow-select"
+                            className="fundkit-select"
                             value={ String( months ) }
                             onChange={ ( e ) => setMonths( Number( e.target.value ) ) }
                         >
@@ -172,7 +172,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                                 <option key={ m } value={ m }>
                                     { sprintf(
                                         /* translators: %d: number of months */
-                                        _n( '%d month', '%d months', m, 'giveflow-fundraising-campaigns' ),
+                                        _n( '%d month', '%d months', m, 'fundkit-fundraising-campaigns' ),
                                         m
                                     ) }
                                 </option>
@@ -185,10 +185,10 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             { action === 'cancel' && (
                 <p>
                     <label>
-                        <span style={ { display: 'block', marginBottom: 4 } }>{ __( 'Reason (optional)', 'giveflow-fundraising-campaigns' ) }</span>
+                        <span style={ { display: 'block', marginBottom: 4 } }>{ __( 'Reason (optional)', 'fundkit-fundraising-campaigns' ) }</span>
                         <input
                             type="text"
-                            className="giveflow-input"
+                            className="fundkit-input"
                             value={ reason }
                             onChange={ ( e ) => setReason( e.target.value ) }
                         />
@@ -198,16 +198,16 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
 
             { action === 'retry' && (
                 <p>
-                    { __( 'The gateway will try to collect the outstanding renewal again now. If it succeeds the donation appears within a few moments, once the gateway confirms it.', 'giveflow-fundraising-campaigns' ) }
+                    { __( 'The gateway will try to collect the outstanding renewal again now. If it succeeds the donation appears within a few moments, once the gateway confirms it.', 'fundkit-fundraising-campaigns' ) }
                 </p>
             ) }
 
             { action === 'skip_next' && (
-                <p>{ __( 'The next payment is skipped and the donation carries on one cycle later. Nothing is charged in between.', 'giveflow-fundraising-campaigns' ) }</p>
+                <p>{ __( 'The next payment is skipped and the donation carries on one cycle later. Nothing is charged in between.', 'fundkit-fundraising-campaigns' ) }</p>
             ) }
 
             { action === 'resume' && (
-                <p>{ __( 'Charging restarts on the plan’s normal schedule.', 'giveflow-fundraising-campaigns' ) }</p>
+                <p>{ __( 'Charging restarts on the plan’s normal schedule.', 'fundkit-fundraising-campaigns' ) }</p>
             ) }
 
             { /* Cancellation always emails through the canceller, so offering
@@ -217,9 +217,9 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                     <Switch
                         checked={ notify }
                         onChange={ setNotify }
-                        label={ __( 'Notify donor', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Notify donor', 'fundkit-fundraising-campaigns' ) }
                     />
-                    <span>{ __( 'Email the donor about this change', 'giveflow-fundraising-campaigns' ) }</span>
+                    <span>{ __( 'Email the donor about this change', 'fundkit-fundraising-campaigns' ) }</span>
                 </div>
             ) }
 
@@ -227,11 +227,11 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             { approveUrl && (
                 <p style={ { marginTop: 8 } }>
                     <a href={ approveUrl } target="_blank" rel="noreferrer noopener">
-                        { __( 'Open the approval page', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Open the approval page', 'fundkit-fundraising-campaigns' ) }
                     </a>
                     { ' ' }
-                    <span className="giveflow-muted">
-                        { __( 'The donor has to approve it while signed in to their own account.', 'giveflow-fundraising-campaigns' ) }
+                    <span className="fundkit-muted">
+                        { __( 'The donor has to approve it while signed in to their own account.', 'fundkit-fundraising-campaigns' ) }
                     </span>
                 </p>
             ) }

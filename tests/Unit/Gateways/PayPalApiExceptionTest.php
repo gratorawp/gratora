@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit\Gateways;
+namespace FundKit\Tests\Unit\Gateways;
 
-use GiveFlow\Gateways\PayPal\PayPalApiException;
+use FundKit\Gateways\PayPal\PayPalApiException;
 use PHPUnit\Framework\TestCase;
 
 /**

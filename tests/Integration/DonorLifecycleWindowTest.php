@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorRepository;
+use FundKit\Donations\Donation;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorRepository;
 
 /**
  * Guards that the at-risk KPI count and the at-risk list/export describe the
@@ -65,7 +65,7 @@ final class DonorLifecycleWindowTest extends IntegrationTestCase
 
     private function repo(): DonorRepository
     {
-        return \GiveFlow\Foundation\Plugin::instance()->container->get(DonorRepository::class);
+        return \FundKit\Foundation\Plugin::instance()->container->get(DonorRepository::class);
     }
 
     private function seedDonor(string $email, int $lastDonatedDaysAgo): int
@@ -92,7 +92,7 @@ final class DonorLifecycleWindowTest extends IntegrationTestCase
         // counters; lifecycleKpi()/list counts now filter on that, so seed the
         // paid row the denormalized fields imply.
         $don = Donation::make();
-        $don->reference         = 'GIVEFLOW-LW-' . substr(md5($email), 0, 8);
+        $don->reference         = 'FUNDKIT-LW-' . substr(md5($email), 0, 8);
         $don->donor_id          = $donorId;
         $don->amount_cents      = 5000;
         $don->net_cents         = 5000;

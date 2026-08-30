@@ -7,13 +7,13 @@ import Segmented from '../../../_shared/components/Segmented';
 import { BlockIcons } from '../_shared/block-icons';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 
-const NAME = 'giveflow/goal';
+const NAME = 'fundkit/goal';
 
 const EMPTY_GOAL = { type: 'none', amount_cents: 0, count: 0 };
 
 function readContext() {
-    return typeof window !== 'undefined' && window.giveflowFormEditor
-        ? window.giveflowFormEditor
+    return typeof window !== 'undefined' && window.fundkitFormEditor
+        ? window.fundkitFormEditor
         : { formCampaignId: 0, formGoal: EMPTY_GOAL, campaigns: [] };
 }
 
@@ -91,49 +91,49 @@ function Edit( { attributes, setAttributes } ) {
 
     const hasGoal = goalType !== 'none' && target > 0;
 
-    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--goal' } );
+    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--goal' } );
 
     const fmtValue = ( v ) =>
         isAmount ? formatAmount( v, currency, { compact: true } ) : String( v.toLocaleString() );
 
     const missingHint = isFormSource
-        ? __( 'No goal set for this form. Set one in Settings, Goal.', 'giveflow-fundraising-campaigns' )
+        ? __( 'No goal set for this form. Set one in Settings, Goal.', 'fundkit-fundraising-campaigns' )
         : ( campaign
-            ? __( 'The parent campaign has no goal set.', 'giveflow-fundraising-campaigns' )
-            : __( 'Link this form to a campaign to show its goal.', 'giveflow-fundraising-campaigns' ) );
+            ? __( 'The parent campaign has no goal set.', 'fundkit-fundraising-campaigns' )
+            : __( 'Link this form to a campaign to show its goal.', 'fundkit-fundraising-campaigns' ) );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Goal', 'giveflow-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Goal', 'fundkit-fundraising-campaigns' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Show', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Show', 'fundkit-fundraising-campaigns' ) }
                         value={ source }
                         onChange={ ( v ) => setAttributes( { source: v } ) }
                         options={ [
-                            { value: 'campaign', label: __( 'Campaign goal', 'giveflow-fundraising-campaigns' ) },
-                            { value: 'form',     label: __( 'Form goal', 'giveflow-fundraising-campaigns' ) },
+                            { value: 'campaign', label: __( 'Campaign goal', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'form',     label: __( 'Form goal', 'fundkit-fundraising-campaigns' ) },
                         ] }
                         help={ isFormSource
-                            ? __( 'Tracks this form’s own donations against the form goal set in Settings, Goal.', 'giveflow-fundraising-campaigns' )
-                            : __( 'Tracks the parent campaign total against the campaign goal.', 'giveflow-fundraising-campaigns' ) }
+                            ? __( 'Tracks this form’s own donations against the form goal set in Settings, Goal.', 'fundkit-fundraising-campaigns' )
+                            : __( 'Tracks the parent campaign total against the campaign goal.', 'fundkit-fundraising-campaigns' ) }
                     />
 
                     <ToggleControl
-                        label={ __( 'Show amount raised vs goal', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Show amount raised vs goal', 'fundkit-fundraising-campaigns' ) }
                         checked={ showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donor count', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Show donor count', 'fundkit-fundraising-campaigns' ) }
                         checked={ showDonors }
                         onChange={ ( v ) => setAttributes( { showDonors: v } ) }
                         __nextHasNoMarginBottom
                     />
                     { ! isFormSource && (
                         <ToggleControl
-                            label={ __( 'Show deadline', 'giveflow-fundraising-campaigns' ) }
+                            label={ __( 'Show deadline', 'fundkit-fundraising-campaigns' ) }
                             checked={ showDeadline }
                             onChange={ ( v ) => setAttributes( { showDeadline: v } ) }
                             __nextHasNoMarginBottom
@@ -147,43 +147,43 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 { ! hasGoal ? (
-                    <div className="giveflow-block-preview__hint">{ missingHint }</div>
+                    <div className="fundkit-block-preview__hint">{ missingHint }</div>
                 ) : (
                     <>
                         { showAmount && (
-                            <div className="giveflow-block-preview__goal-top">
+                            <div className="fundkit-block-preview__goal-top">
                                 <strong>{ fmtValue( current ) }</strong>
-                                <span>{ __( 'of', 'giveflow-fundraising-campaigns' ) } { fmtValue( target ) }</span>
+                                <span>{ __( 'of', 'fundkit-fundraising-campaigns' ) } { fmtValue( target ) }</span>
                             </div>
                         ) }
-                        <div className="giveflow-block-preview__goal-bar">
+                        <div className="fundkit-block-preview__goal-bar">
                             <div
-                                className="giveflow-block-preview__goal-fill"
+                                className="fundkit-block-preview__goal-fill"
                                 style={ { width: `${ percent }%` } }
                             />
                         </div>
-                        <div className="giveflow-block-preview__goal-meta">
+                        <div className="fundkit-block-preview__goal-meta">
                             <span>{ percent }%</span>
                             { showDonors && ! isFormSource && (
                                 <span>
                                     { donors === 1
-                                        ? __( '1 donor', 'giveflow-fundraising-campaigns' )
-                                        : `${ donors.toLocaleString() } ${ __( 'donors', 'giveflow-fundraising-campaigns' ) }` }
+                                        ? __( '1 donor', 'fundkit-fundraising-campaigns' )
+                                        : `${ donors.toLocaleString() } ${ __( 'donors', 'fundkit-fundraising-campaigns' ) }` }
                                 </span>
                             ) }
                             { showDeadline && ! isFormSource && days !== null && (
                                 <span>
                                     { days === 0
-                                        ? __( 'Last day', 'giveflow-fundraising-campaigns' )
+                                        ? __( 'Last day', 'fundkit-fundraising-campaigns' )
                                         : days === 1
-                                            ? __( '1 day left', 'giveflow-fundraising-campaigns' )
-                                            : `${ days } ${ __( 'days left', 'giveflow-fundraising-campaigns' ) }` }
+                                            ? __( '1 day left', 'fundkit-fundraising-campaigns' )
+                                            : `${ days } ${ __( 'days left', 'fundkit-fundraising-campaigns' ) }` }
                                 </span>
                             ) }
                         </div>
                         { isFormSource && (
-                            <p className="giveflow-block-preview__note">
-                                { __( 'Live progress appears on the published form.', 'giveflow-fundraising-campaigns' ) }
+                            <p className="fundkit-block-preview__note">
+                                { __( 'Live progress appears on the published form.', 'fundkit-fundraising-campaigns' ) }
                             </p>
                         ) }
                     </>
@@ -196,9 +196,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Goal', 'giveflow-fundraising-campaigns' ),
-        description: __( 'Progress bar for this form’s goal or its parent campaign’s goal.', 'giveflow-fundraising-campaigns' ),
-        category:   'giveflow-extras',
+        title:      __( 'Goal', 'fundkit-fundraising-campaigns' ),
+        description: __( 'Progress bar for this form’s goal or its parent campaign’s goal.', 'fundkit-fundraising-campaigns' ),
+        category:   'fundkit-extras',
         icon:       BlockIcons[ 'goal' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

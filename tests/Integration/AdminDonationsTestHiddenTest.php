@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
+use FundKit\Donations\Donation;
 use WP_REST_Request;
 
 /**
@@ -34,7 +34,7 @@ final class AdminDonationsTestHiddenTest extends IntegrationTestCase
 
     private function request(array $params = []): \WP_REST_Response
     {
-        $req = new WP_REST_Request('GET', '/giveflow/v1/admin/donations');
+        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donations');
         $req->set_query_params(array_merge(['page' => 1, 'per_page' => 25], $params));
 
         return rest_do_request($req);
@@ -48,7 +48,7 @@ final class AdminDonationsTestHiddenTest extends IntegrationTestCase
 
         $res = $this->request();
 
-        $this->assertSame('2', $res->get_headers()['X-GiveFlow-Test-Hidden'] ?? null);
+        $this->assertSame('2', $res->get_headers()['X-FundKit-Test-Hidden'] ?? null);
     }
 
     public function test_it_says_nothing_when_there_are_no_test_rows(): void
@@ -57,7 +57,7 @@ final class AdminDonationsTestHiddenTest extends IntegrationTestCase
 
         $res = $this->request();
 
-        $this->assertSame('0', $res->get_headers()['X-GiveFlow-Test-Hidden'] ?? null);
+        $this->assertSame('0', $res->get_headers()['X-FundKit-Test-Hidden'] ?? null);
     }
 
     public function test_asking_for_test_rows_needs_no_notice(): void
@@ -66,7 +66,7 @@ final class AdminDonationsTestHiddenTest extends IntegrationTestCase
 
         $res = $this->request(['is_test' => 1]);
 
-        $this->assertArrayNotHasKey('X-GiveFlow-Test-Hidden', $res->get_headers());
+        $this->assertArrayNotHasKey('X-FundKit-Test-Hidden', $res->get_headers());
     }
 
     public function test_the_count_follows_the_filters_in_use(): void
@@ -78,7 +78,7 @@ final class AdminDonationsTestHiddenTest extends IntegrationTestCase
 
         $res = $this->request(['status' => 'pending']);
 
-        $this->assertSame('1', $res->get_headers()['X-GiveFlow-Test-Hidden'] ?? null);
+        $this->assertSame('1', $res->get_headers()['X-FundKit-Test-Hidden'] ?? null);
     }
 
     public function test_an_offline_test_donation_is_reachable_once_asked_for(): void

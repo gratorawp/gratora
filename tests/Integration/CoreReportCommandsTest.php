@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\EventRecorder;
-use GiveFlow\Campaigns\CampaignService;
-use GiveFlow\Core\Commands\CoreCommandProvider;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Commands\CommandContext;
-use GiveFlow\Foundation\Commands\CommandRegistry;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Analytics\EventRecorder;
+use FundKit\Campaigns\CampaignService;
+use FundKit\Core\Commands\CoreCommandProvider;
+use FundKit\Donations\Donation;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Commands\CommandContext;
+use FundKit\Foundation\Commands\CommandRegistry;
+use FundKit\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -40,7 +40,7 @@ final class CoreReportCommandsTest extends IntegrationTestCase
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
         $role  = get_role('administrator');
-        foreach (['giveflow_view_reports', 'giveflow_view_donors'] as $cap) {
+        foreach (['fundkit_view_reports', 'fundkit_view_donors'] as $cap) {
             $role->add_cap($cap);
         }
         wp_set_current_user($admin);
@@ -84,7 +84,7 @@ final class CoreReportCommandsTest extends IntegrationTestCase
 
         $res = $this->registry()->dispatch('diagnostics.recent', [], $ctx);
 
-        $this->assertFalse($res->ok, 'error diagnostics are gated behind giveflow_view_reports');
+        $this->assertFalse($res->ok, 'error diagnostics are gated behind fundkit_view_reports');
     }
 
     public function test_manifest_lists_the_report_commands_as_non_mutating(): void
@@ -186,10 +186,10 @@ final class CoreReportCommandsTest extends IntegrationTestCase
         $note  = $this->itemByKey($items, 'donor-notes');
 
         $this->assertNotNull($note, 'expected a donor-notes attention item');
-        $this->assertStringContainsString('page=giveflow-donations', $note['action_href']);
+        $this->assertStringContainsString('page=fundkit-donations', $note['action_href']);
         $this->assertStringContainsString('view=detail', $note['action_href']);
-        $this->assertStringContainsString('reference=GIVEFLOW-NOTE-1', $note['action_href']);
-        $this->assertStringNotContainsString('giveflow-donors', $note['action_href']);
+        $this->assertStringContainsString('reference=FUNDKIT-NOTE-1', $note['action_href']);
+        $this->assertStringNotContainsString('fundkit-donors', $note['action_href']);
     }
 
     /** Several notes have no single donation to open, so the ledger it is. */
@@ -203,7 +203,7 @@ final class CoreReportCommandsTest extends IntegrationTestCase
         $note  = $this->itemByKey($items, 'donor-notes');
 
         $this->assertNotNull($note);
-        $this->assertStringEndsWith('page=giveflow-donations', $note['action_href']);
+        $this->assertStringEndsWith('page=fundkit-donations', $note['action_href']);
         $this->assertStringNotContainsString('view=detail', $note['action_href']);
     }
 
@@ -219,7 +219,7 @@ final class CoreReportCommandsTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $don = Donation::make();
-        $don->reference         = 'GIVEFLOW-NOTE-' . $donorId;
+        $don->reference         = 'FUNDKIT-NOTE-' . $donorId;
         $don->donor_id          = $donorId;
         $don->amount_cents      = 5000;
         $don->net_cents         = 5000;
@@ -284,7 +284,7 @@ final class CoreReportCommandsTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $don = Donation::make();
-        $don->reference         = 'GIVEFLOW-RPT-' . substr(md5((string) $campaignId), 0, 8);
+        $don->reference         = 'FUNDKIT-RPT-' . substr(md5((string) $campaignId), 0, 8);
         $don->donor_id          = 1;
         $don->campaign_id       = $campaignId;
         $don->amount_cents      = 8000;
@@ -304,7 +304,7 @@ final class CoreReportCommandsTest extends IntegrationTestCase
 
     private function driveDonationToPaid(): string
     {
-        $createReq = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body(json_encode([
             'email'        => 'report-cmd@example.com',
@@ -315,7 +315,7 @@ final class CoreReportCommandsTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($createReq)->get_data()['reference'];
 
-        $confirmReq = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
+        $confirmReq = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
         $confirmReq->set_header('content-type', 'application/json');
         $confirmReq->set_body('{}');
         rest_do_request($confirmReq);

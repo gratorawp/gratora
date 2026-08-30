@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Forms\Form;
-use GiveFlow\Forms\FormSubmissionValidator;
-use GiveFlow\Forms\Shortcode\DonationFormShortcode;
+use FundKit\Forms\Form;
+use FundKit\Forms\FormSubmissionValidator;
+use FundKit\Forms\Shortcode\DonationFormShortcode;
 use ReflectionMethod;
 
 /**
@@ -23,8 +23,8 @@ final class DonationMinimumOrphanedTest extends IntegrationTestCase
         $form->title      = 'Orphaned minimum ' . uniqid();
         $form->slug       = 'orphan-min-' . uniqid();
         $form->status     = 'published';
-        $form->blocks     = '<!-- wp:giveflow/donation-amount ' . $attrs . ' /-->'
-            . '<!-- wp:giveflow/submit-button {"label":"Give"} /-->';
+        $form->blocks     = '<!-- wp:fundkit/donation-amount ' . $attrs . ' /-->'
+            . '<!-- wp:fundkit/submit-button {"label":"Give"} /-->';
         $form->created_at = gmdate('Y-m-d H:i:s');
         $form->updated_at = $form->created_at;
         $form->save();

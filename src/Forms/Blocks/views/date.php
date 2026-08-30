@@ -8,13 +8,13 @@ defined('ABSPATH') || exit;
  * @var string $maxDate
  * @var string $field
  */
-$labelText = $label !== '' ? $label : __('Date', 'giveflow-fundraising-campaigns');
+$labelText = $label !== '' ? $label : __('Date', 'fundkit-fundraising-campaigns');
 $fieldName = $field !== '' ? $field : 'date';
 ?>
-<label class="giveflow-block giveflow-block--date giveflow-donor__field">
-    <span class="giveflow-donor__label"><?php echo esc_html($labelText); ?></span>
+<label class="fundkit-block fundkit-block--date fundkit-donor__field">
+    <span class="fundkit-donor__label"><?php echo esc_html($labelText); ?></span>
     <?php if ($helpText !== ''): ?>
-        <span class="giveflow-donor__help"><?php echo esc_html($helpText); ?></span>
+        <span class="fundkit-donor__help"><?php echo esc_html($helpText); ?></span>
     <?php endif; ?>
     <input
         type="date"

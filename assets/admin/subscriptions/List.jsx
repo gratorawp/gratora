@@ -1,4 +1,4 @@
-// Subscriptions list: paginated DataViews against /giveflow/v1/admin/recurring.
+// Subscriptions list: paginated DataViews against /fundkit/v1/admin/recurring.
 
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import { DataViews } from '@wordpress/dataviews';
@@ -22,33 +22,33 @@ import { rowLinkProps } from '../_shared/rowLink';
 import { formatAmount, formatDate } from '../donations/format';
 
 const STATUS_OPTIONS = [
-    { value: 'active',    label: __( 'Active', 'giveflow-fundraising-campaigns' ) },
-    { value: 'past_due',  label: __( 'Past due', 'giveflow-fundraising-campaigns' ) },
-    { value: 'paused',    label: __( 'Paused', 'giveflow-fundraising-campaigns' ) },
-    { value: 'cancelled', label: __( 'Cancelled', 'giveflow-fundraising-campaigns' ) },
-    { value: 'expired',   label: __( 'Expired', 'giveflow-fundraising-campaigns' ) },
+    { value: 'active',    label: __( 'Active', 'fundkit-fundraising-campaigns' ) },
+    { value: 'past_due',  label: __( 'Past due', 'fundkit-fundraising-campaigns' ) },
+    { value: 'paused',    label: __( 'Paused', 'fundkit-fundraising-campaigns' ) },
+    { value: 'cancelled', label: __( 'Cancelled', 'fundkit-fundraising-campaigns' ) },
+    { value: 'expired',   label: __( 'Expired', 'fundkit-fundraising-campaigns' ) },
 ];
 
 const INTERVAL_OPTIONS = [
-    { value: 'month', label: __( 'Monthly', 'giveflow-fundraising-campaigns' ) },
-    { value: 'year',  label: __( 'Yearly', 'giveflow-fundraising-campaigns' ) },
-    { value: 'week',  label: __( 'Weekly', 'giveflow-fundraising-campaigns' ) },
+    { value: 'month', label: __( 'Monthly', 'fundkit-fundraising-campaigns' ) },
+    { value: 'year',  label: __( 'Yearly', 'fundkit-fundraising-campaigns' ) },
+    { value: 'week',  label: __( 'Weekly', 'fundkit-fundraising-campaigns' ) },
 ];
 
 // A donation carries the cadence the donor chose on the form, not the plan's
 // interval pair, so it reads from its own labels.
 const FREQUENCY_LABEL = {
-    weekly:    __( 'Weekly', 'giveflow-fundraising-campaigns' ),
-    biweekly:  __( 'Every 2 weeks', 'giveflow-fundraising-campaigns' ),
-    monthly:   __( 'Monthly', 'giveflow-fundraising-campaigns' ),
-    quarterly: __( 'Quarterly', 'giveflow-fundraising-campaigns' ),
-    yearly:    __( 'Yearly', 'giveflow-fundraising-campaigns' ),
+    weekly:    __( 'Weekly', 'fundkit-fundraising-campaigns' ),
+    biweekly:  __( 'Every 2 weeks', 'fundkit-fundraising-campaigns' ),
+    monthly:   __( 'Monthly', 'fundkit-fundraising-campaigns' ),
+    quarterly: __( 'Quarterly', 'fundkit-fundraising-campaigns' ),
+    yearly:    __( 'Yearly', 'fundkit-fundraising-campaigns' ),
 };
 
 // A view preference, not a setting: it belongs to the person looking at the
 // screen, and having it reset on every page load would make it useless for the
 // thing it is for, which is watching test plans appear while you make them.
-const TEST_PREF = 'giveflow.subscriptions.includeTest';
+const TEST_PREF = 'fundkit.subscriptions.includeTest';
 
 const readTestPref = () => {
     try {
@@ -76,13 +76,13 @@ function intervalLabel( unit, count ) {
     switch ( unit ) {
         case 'week':
             /* translators: %d: number of weeks between charges. */
-            return sprintf( _n( '%d week', '%d weeks', n, 'giveflow-fundraising-campaigns' ), n );
+            return sprintf( _n( '%d week', '%d weeks', n, 'fundkit-fundraising-campaigns' ), n );
         case 'year':
             /* translators: %d: number of years between charges. */
-            return sprintf( _n( '%d year', '%d years', n, 'giveflow-fundraising-campaigns' ), n );
+            return sprintf( _n( '%d year', '%d years', n, 'fundkit-fundraising-campaigns' ), n );
         case 'month':
             /* translators: %d: number of months */
-            return sprintf( _n( '%d month', '%d months', n, 'giveflow-fundraising-campaigns' ), n );
+            return sprintf( _n( '%d month', '%d months', n, 'fundkit-fundraising-campaigns' ), n );
         default:
             return n > 1 ? `${ n } ${ unit }` : String( unit );
     }
@@ -91,14 +91,14 @@ function intervalLabel( unit, count ) {
 // The donor profile owns a plan's full history; this list links there rather
 // than building a second detail view of the same thing.
 function donorHref( donorId ) {
-    return addQueryArgs( window.location.pathname, { page: 'giveflow-donors' } ) + `#donor/${ donorId }`;
+    return addQueryArgs( window.location.pathname, { page: 'fundkit-donors' } ) + `#donor/${ donorId }`;
 }
 
 // The donation screen is where the retry lives, so each unlinked donation links
 // straight to its own record rather than to a list the org has to search.
 function donationHref( reference ) {
     return addQueryArgs( window.location.pathname, {
-        page: 'giveflow-donations',
+        page: 'fundkit-donations',
         view: 'detail',
         reference,
     } );
@@ -119,7 +119,7 @@ function attentionSub( failing, unlinked ) {
             '%d plan the gateway could not collect from',
             '%d plans the gateway could not collect from',
             failing,
-            'giveflow-fundraising-campaigns'
+            'fundkit-fundraising-campaigns'
         ),
         failing
     );
@@ -130,7 +130,7 @@ function attentionSub( failing, unlinked ) {
             '%d paid recurring donation has no plan and is listed above',
             '%d paid recurring donations have no plan and are listed above',
             unlinked.total,
-            'giveflow-fundraising-campaigns'
+            'fundkit-fundraising-campaigns'
         ),
         unlinked.total
     );
@@ -139,13 +139,13 @@ function attentionSub( failing, unlinked ) {
     // resolving the unknown half in the org's favour.
     let second = null;
     if ( unlinked.error ) {
-        second = __( 'Donations charged with no plan could not be checked', 'giveflow-fundraising-campaigns' );
+        second = __( 'Donations charged with no plan could not be checked', 'fundkit-fundraising-campaigns' );
     } else if ( unlinked.total > 0 ) {
         second = noPlan;
     }
 
     if ( second === null ) {
-        return failing > 0 ? declined : __( 'Nothing to chase', 'giveflow-fundraising-campaigns' );
+        return failing > 0 ? declined : __( 'Nothing to chase', 'fundkit-fundraising-campaigns' );
     }
 
     return failing === 0 ? second : (
@@ -161,7 +161,7 @@ function attentionSub( failing, unlinked ) {
 function withTestNote( sub, includeTest ) {
     if ( ! includeTest ) return sub;
 
-    const note = __( 'Includes test subscriptions', 'giveflow-fundraising-campaigns' );
+    const note = __( 'Includes test subscriptions', 'fundkit-fundraising-campaigns' );
     if ( ! sub ) return note;
 
     return (
@@ -178,7 +178,7 @@ function subscriptionKpis( stats, unlinked, includeTest ) {
     return [
         {
             id:    'mrr',
-            label: __( 'Monthly recurring revenue', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Monthly recurring revenue', 'fundkit-fundraising-campaigns' ),
             value: formatAmount( stats.mrr_cents ),
             sub:   withTestNote(
                 stats.unconverted > 0
@@ -188,34 +188,34 @@ function subscriptionKpis( stats, unlinked, includeTest ) {
                             '%d plan could not be converted and is not counted',
                             '%d plans could not be converted and are not counted',
                             stats.unconverted,
-                            'giveflow-fundraising-campaigns'
+                            'fundkit-fundraising-campaigns'
                         ),
                         stats.unconverted
                     )
-                    : __( 'Active plans, normalised', 'giveflow-fundraising-campaigns' ),
+                    : __( 'Active plans, normalised', 'fundkit-fundraising-campaigns' ),
                 includeTest
             ),
         },
         {
             id:    'active',
-            label: __( 'Active plans', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Active plans', 'fundkit-fundraising-campaigns' ),
             value: String( stats.active_count ),
             sub:   withTestNote( null, includeTest ),
         },
         {
             id:    'failing',
-            label: __( 'Needs attention', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Needs attention', 'fundkit-fundraising-campaigns' ),
             value: String( failing ),
             sub:   withTestNote( attentionSub( failing, unlinked ), includeTest ),
         },
         {
             id:    'churn',
-            label: __( 'Churn this month', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Churn this month', 'fundkit-fundraising-campaigns' ),
             value: `${ stats.churn_pct }%`,
             sub:   withTestNote(
                 sprintf(
                     /* translators: %d: number of plans cancelled this month. */
-                    _n( '%d cancelled', '%d cancelled', stats.churned_this_month, 'giveflow-fundraising-campaigns' ),
+                    _n( '%d cancelled', '%d cancelled', stats.churned_this_month, 'fundkit-fundraising-campaigns' ),
                     stats.churned_this_month
                 ),
                 includeTest
@@ -235,12 +235,12 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                 <div>
                     { __(
                         'Recurring donations charged with no plan behind them could not be checked, so nothing on this screen rules them out.',
-                        'giveflow-fundraising-campaigns'
+                        'fundkit-fundraising-campaigns'
                     ) }
                 </div>
-                <div className="giveflow-row__sub">{ error }</div>
+                <div className="fundkit-row__sub">{ error }</div>
                 <Btn variant="ghost" size="sm" onClick={ onReload }>
-                    { __( 'Check again', 'giveflow-fundraising-campaigns' ) }
+                    { __( 'Check again', 'fundkit-fundraising-campaigns' ) }
                 </Btn>
             </Notice>
         );
@@ -263,20 +263,20 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                         '%d recurring donation was charged, but no plan was created for it. Nothing will collect the next payment.',
                         '%d recurring donations were charged, but no plans were created for them. Nothing will collect their next payments.',
                         total,
-                        'giveflow-fundraising-campaigns'
+                        'fundkit-fundraising-campaigns'
                     ),
                     total
                 ) }
             </div>
             { windowDays > 0 && (
-                <div className="giveflow-row__sub">
+                <div className="fundkit-row__sub">
                     { sprintf(
                         /* translators: %d: number of days the check looks back over. */
                         _n(
                             'Covers donations paid in the last %d day.',
                             'Covers donations paid in the last %d days.',
                             windowDays,
-                            'giveflow-fundraising-campaigns'
+                            'fundkit-fundraising-campaigns'
                         ),
                         windowDays
                     ) }
@@ -290,10 +290,10 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                     { ' ' }
                     { FREQUENCY_LABEL[ it.frequency ] || it.frequency }
                     { ' ' }
-                    <span className="giveflow-row__sub">
+                    <span className="fundkit-row__sub">
                         { it.failure_recorded
-                            ? __( 'failure recorded', 'giveflow-fundraising-campaigns' )
-                            : __( 'no failure recorded', 'giveflow-fundraising-campaigns' ) }
+                            ? __( 'failure recorded', 'fundkit-fundraising-campaigns' )
+                            : __( 'no failure recorded', 'fundkit-fundraising-campaigns' ) }
                     </span>
                 </div>
             ) ) }
@@ -301,7 +301,7 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                 <Btn variant="ghost" size="sm" onClick={ onShowAll }>
                     { sprintf(
                         /* translators: %d: number of donations not yet listed. */
-                        _n( 'Show %d more', 'Show %d more', hidden, 'giveflow-fundraising-campaigns' ),
+                        _n( 'Show %d more', 'Show %d more', hidden, 'fundkit-fundraising-campaigns' ),
                         hidden
                     ) }
                 </Btn>
@@ -314,20 +314,20 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                             '%d more is not listed here.',
                             '%d more are not listed here.',
                             beyond,
-                            'giveflow-fundraising-campaigns'
+                            'fundkit-fundraising-campaigns'
                         ),
                         beyond
                     ) }
                 </div>
             ) }
             { canRetry && anyRecorded && (
-                <div>{ __( 'Open a donation with a recorded failure to create its plan.', 'giveflow-fundraising-campaigns' ) }</div>
+                <div>{ __( 'Open a donation with a recorded failure to create its plan.', 'fundkit-fundraising-campaigns' ) }</div>
             ) }
             { ! canRetry && (
                 <div>
                     { __(
                         'Creating a plan needs permission to issue refunds, so pass these references to someone who has it.',
-                        'giveflow-fundraising-campaigns'
+                        'fundkit-fundraising-campaigns'
                     ) }
                 </div>
             ) }
@@ -335,7 +335,7 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                 <div>
                     { __(
                         'Where no failure was recorded, check the payment provider for a subscription before asking the donor to set one up again.',
-                        'giveflow-fundraising-campaigns'
+                        'fundkit-fundraising-campaigns'
                     ) }
                 </div>
             ) }
@@ -349,35 +349,35 @@ function emptyStateCopy( unlinked, testHidden ) {
     // debug an integration that worked.
     if ( testHidden > 0 ) {
         return {
-            title: __( 'No live subscriptions', 'giveflow-fundraising-campaigns' ),
+            title: __( 'No live subscriptions', 'fundkit-fundraising-campaigns' ),
             // The count and the way to reveal them are in the notice above, so
             // this says what the empty table means rather than repeating them.
-            body:  __( 'Nothing here is charging real money yet.', 'giveflow-fundraising-campaigns' ),
+            body:  __( 'Nothing here is charging real money yet.', 'fundkit-fundraising-campaigns' ),
         };
     }
 
     if ( unlinked.error ) {
         return {
-            title: __( 'No subscriptions to show', 'giveflow-fundraising-campaigns' ),
+            title: __( 'No subscriptions to show', 'fundkit-fundraising-campaigns' ),
             body:  __(
                 'Whether a recurring donation was charged with no plan behind it is unknown, so this is not the whole picture.',
-                'giveflow-fundraising-campaigns'
+                'fundkit-fundraising-campaigns'
             ),
         };
     }
 
     if ( unlinked.total > 0 ) {
         return {
-            title: __( 'No subscriptions were created', 'giveflow-fundraising-campaigns' ),
+            title: __( 'No subscriptions were created', 'fundkit-fundraising-campaigns' ),
             body:  unlinked.canRetry
-                ? __( 'The recurring donations above were charged, but no plan was ever created for them. Open one with a recorded failure to create its plan.', 'giveflow-fundraising-campaigns' )
-                : __( 'The recurring donations above were charged, but no plan was ever created for them. Creating a plan needs permission to issue refunds.', 'giveflow-fundraising-campaigns' ),
+                ? __( 'The recurring donations above were charged, but no plan was ever created for them. Open one with a recorded failure to create its plan.', 'fundkit-fundraising-campaigns' )
+                : __( 'The recurring donations above were charged, but no plan was ever created for them. Creating a plan needs permission to issue refunds.', 'fundkit-fundraising-campaigns' ),
         };
     }
 
     return {
-        title: __( 'No subscriptions yet', 'giveflow-fundraising-campaigns' ),
-        body:  __( 'Recurring plans appear here once a donor sets one up on a form that offers it.', 'giveflow-fundraising-campaigns' ),
+        title: __( 'No subscriptions yet', 'fundkit-fundraising-campaigns' ),
+        body:  __( 'Recurring plans appear here once a donor sets one up on a form that offers it.', 'fundkit-fundraising-campaigns' ),
     };
 }
 
@@ -413,12 +413,12 @@ export default function List() {
 
     useEffect( () => {
         let aborted = false;
-        apiFetch( { path: '/giveflow/v1/admin/recurring/gateway-options' } )
+        apiFetch( { path: '/fundkit/v1/admin/recurring/gateway-options' } )
             .then( ( r ) => { if ( ! aborted ) setGateways( Array.isArray( r ) ? r : [] ); } )
             .catch( () => { if ( ! aborted ) setGateways( [] ); } );
         // Same route the donations list uses: /admin/campaigns needs a
         // capability this screen does not, and would 403 into an empty filter.
-        apiFetch( { path: '/giveflow/v1/admin/donations/campaign-options' } )
+        apiFetch( { path: '/fundkit/v1/admin/donations/campaign-options' } )
             .then( ( r ) => { if ( ! aborted ) setCampaigns( Array.isArray( r ) ? r : [] ); } )
             .catch( () => { if ( ! aborted ) setCampaigns( [] ); } );
         return () => { aborted = true; };
@@ -460,16 +460,16 @@ export default function List() {
 
     const load = () => {
         setLoading( true );
-        return apiFetch( { path: addQueryArgs( '/giveflow/v1/admin/recurring', apiParams ), parse: false } )
+        return apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/recurring', apiParams ), parse: false } )
             .then( async ( res ) => {
                 const items = await res.json();
                 setData( Array.isArray( items ) ? items : [] );
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
-                setTestHidden( parseInt( res.headers.get( 'X-GiveFlow-Test-Hidden' ) || '0', 10 ) );
+                setTestHidden( parseInt( res.headers.get( 'X-FundKit-Test-Hidden' ) || '0', 10 ) );
                 setError( null );
             } )
             .catch( ( err ) => {
-                setError( err?.message || __( 'Failed to load subscriptions.', 'giveflow-fundraising-campaigns' ) );
+                setError( err?.message || __( 'Failed to load subscriptions.', 'fundkit-fundraising-campaigns' ) );
                 setData( [] );
                 setTotal( 0 );
                 setTestHidden( 0 );
@@ -480,18 +480,18 @@ export default function List() {
     useEffect( () => {
         let aborted = false;
         setLoading( true );
-        apiFetch( { path: addQueryArgs( '/giveflow/v1/admin/recurring', apiParams ), parse: false } )
+        apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/recurring', apiParams ), parse: false } )
             .then( async ( res ) => {
                 if ( aborted ) return;
                 const items = await res.json();
                 setData( Array.isArray( items ) ? items : [] );
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
-                setTestHidden( parseInt( res.headers.get( 'X-GiveFlow-Test-Hidden' ) || '0', 10 ) );
+                setTestHidden( parseInt( res.headers.get( 'X-FundKit-Test-Hidden' ) || '0', 10 ) );
                 setError( null );
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load subscriptions.', 'giveflow-fundraising-campaigns' ) );
+                setError( err?.message || __( 'Failed to load subscriptions.', 'fundkit-fundraising-campaigns' ) );
                 setData( [] );
                 setTotal( 0 );
                 setTestHidden( 0 );
@@ -505,10 +505,10 @@ export default function List() {
     // book, and figures that disagreed with the rows under them would read as a
     // broken integration to an org whose plans are all still in test mode.
     const fetchStats = ( test ) => apiFetch( {
-        path: addQueryArgs( '/giveflow/v1/admin/recurring/stats', { include_test: test || undefined } ),
+        path: addQueryArgs( '/fundkit/v1/admin/recurring/stats', { include_test: test || undefined } ),
     } );
 
-    const statsError = () => notify.error( __( 'The recurring totals could not be loaded.', 'giveflow-fundraising-campaigns' ) );
+    const statsError = () => notify.error( __( 'The recurring totals could not be loaded.', 'fundkit-fundraising-campaigns' ) );
 
     const loadStats = () => fetchStats( includeTest ).then( setStats ).catch( statsError );
 
@@ -516,7 +516,7 @@ export default function List() {
     // them; they are fetched on their own and read out above the table. A
     // failure here is kept on screen: a count nobody could take is not a zero.
     const loadUnlinked = () => apiFetch( {
-        path: addQueryArgs( '/giveflow/v1/admin/recurring/unlinked', { limit: 50 } ),
+        path: addQueryArgs( '/fundkit/v1/admin/recurring/unlinked', { limit: 50 } ),
     } )
         .then( ( r ) => setUnlinked( {
             total:      Number( r?.total ) || 0,
@@ -530,7 +530,7 @@ export default function List() {
             items:      [],
             windowDays: 0,
             canRetry:   false,
-            error:      err?.message || __( 'The check could not be run.', 'giveflow-fundraising-campaigns' ),
+            error:      err?.message || __( 'The check could not be run.', 'fundkit-fundraising-campaigns' ),
         } ) );
 
     // Two flips of the toggle land in whatever order the network decides, and
@@ -548,31 +548,31 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:    'donor',
-            label: __( 'Donor', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Donor', 'fundkit-fundraising-campaigns' ),
             render: ( { item } ) => {
                 const d = item.donor;
-                if ( ! d ) return <span className="giveflow-row__sub">-</span>;
+                if ( ! d ) return <span className="fundkit-row__sub">-</span>;
                 return (
-                    <div className="giveflow-row">
-                        <div className="giveflow-row__body">
-                            <span className="giveflow-ref-cell">
-                                <a className="giveflow-row__link giveflow-row__link--strong" href={ donorHref( d.id ) } { ...rowLinkProps }>
-                                    { d.name || __( '(no name)', 'giveflow-fundraising-campaigns' ) }
+                    <div className="fundkit-row">
+                        <div className="fundkit-row__body">
+                            <span className="fundkit-ref-cell">
+                                <a className="fundkit-row__link fundkit-row__link--strong" href={ donorHref( d.id ) } { ...rowLinkProps }>
+                                    { d.name || __( '(no name)', 'fundkit-fundraising-campaigns' ) }
                                 </a>
                                 { item.simulated && (
                                     <span
-                                        className="giveflow-pill giveflow-pill--test"
+                                        className="fundkit-pill fundkit-pill--test"
                                         title={ sprintf(
                                             /* translators: %d: minutes between simulated renewals. */
-                                            __( 'Test plan. It renews every %d minutes so a full cycle can be watched, and no money moves.', 'giveflow-fundraising-campaigns' ),
+                                            __( 'Test plan. It renews every %d minutes so a full cycle can be watched, and no money moves.', 'fundkit-fundraising-campaigns' ),
                                             item.simulated_cycle_minutes || 0
                                         ) }
                                     >
-                                        { __( 'Simulated', 'giveflow-fundraising-campaigns' ) }
+                                        { __( 'Simulated', 'fundkit-fundraising-campaigns' ) }
                                     </span>
                                 ) }
                             </span>
-                            { d.email && <div className="giveflow-row__sub giveflow-row__sub--mono">{ d.email }</div> }
+                            { d.email && <div className="fundkit-row__sub fundkit-row__sub--mono">{ d.email }</div> }
                         </div>
                     </div>
                 );
@@ -580,20 +580,20 @@ export default function List() {
         },
         {
             id:            'amount',
-            label:         __( 'Amount', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Amount', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
                 // Muted once the plan has ended: it describes a charge that will
                 // not happen again, and Lifetime beside it says what was taken.
-                <span className={ isTerminal( item.status ) ? 'giveflow-row__sub' : undefined }>
+                <span className={ isTerminal( item.status ) ? 'fundkit-row__sub' : undefined }>
                     { formatAmount( item.amount_cents, item.currency ) }
-                    <span className="giveflow-row__sub"> / { intervalLabel( item.interval_unit, item.interval_count ) }</span>
+                    <span className="fundkit-row__sub"> / { intervalLabel( item.interval_unit, item.interval_count ) }</span>
                 </span>
             ),
         },
         {
             id:       'status',
-            label:    __( 'Status', 'giveflow-fundraising-campaigns' ),
+            label:    __( 'Status', 'fundkit-fundraising-campaigns' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             enableSorting: true,
@@ -601,10 +601,10 @@ export default function List() {
                 <>
                     <StatusBadge status={ item.status } />
                     { item.failed_renewals_count > 0 && (
-                        <span className="giveflow-row__sub" style={ { marginLeft: 6 } }>
+                        <span className="fundkit-row__sub" style={ { marginLeft: 6 } }>
                             { sprintf(
                                 /* translators: %d: consecutive failed renewals. */
-                                _n( '%d failure', '%d failures', item.failed_renewals_count, 'giveflow-fundraising-campaigns' ),
+                                _n( '%d failure', '%d failures', item.failed_renewals_count, 'fundkit-fundraising-campaigns' ),
                                 item.failed_renewals_count
                             ) }
                         </span>
@@ -614,59 +614,59 @@ export default function List() {
         },
         {
             id:            'next_payment_at',
-            label:         __( 'Next charge', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Next charge', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
                 isTerminal( item.status )
                     ? (
-                        <span className="giveflow-row__sub">
+                        <span className="fundkit-row__sub">
                             { item.cancelled_at
                                 ? sprintf(
                                     /* translators: %s: date the plan ended. */
-                                    __( 'Ended %s', 'giveflow-fundraising-campaigns' ),
+                                    __( 'Ended %s', 'fundkit-fundraising-campaigns' ),
                                     formatDate( item.cancelled_at )
                                 )
-                                : __( 'Ended', 'giveflow-fundraising-campaigns' ) }
+                                : __( 'Ended', 'fundkit-fundraising-campaigns' ) }
                         </span>
                     )
                     : item.status === 'paused' && item.resume_at
                         ? (
-                            <div className="giveflow-row">
-                                <div className="giveflow-row__name">{ formatDate( item.resume_at ) }</div>
-                                <div className="giveflow-row__sub">{ __( 'when it resumes', 'giveflow-fundraising-campaigns' ) }</div>
+                            <div className="fundkit-row">
+                                <div className="fundkit-row__name">{ formatDate( item.resume_at ) }</div>
+                                <div className="fundkit-row__sub">{ __( 'when it resumes', 'fundkit-fundraising-campaigns' ) }</div>
                             </div>
                         )
                     : (
-                        <div className="giveflow-row">
-                            <div className="giveflow-row__name">{ formatDate( item.next_payment_at ) }</div>
-                            { item.next_payment_at && <div className="giveflow-row__sub">{ dueIn( item.next_payment_at ) }</div> }
+                        <div className="fundkit-row">
+                            <div className="fundkit-row__name">{ formatDate( item.next_payment_at ) }</div>
+                            { item.next_payment_at && <div className="fundkit-row__sub">{ dueIn( item.next_payment_at ) }</div> }
                         </div>
                     )
             ),
         },
         {
             id:            'started_at',
-            label:         __( 'Giving since', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Giving since', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
                 item.started_at
                     ? <span>{ formatDate( item.started_at ) }</span>
-                    : <span className="giveflow-row__sub">-</span>
+                    : <span className="fundkit-row__sub">-</span>
             ),
         },
         {            id:       'campaign',
-            label:    __( 'Campaign', 'giveflow-fundraising-campaigns' ),
+            label:    __( 'Campaign', 'fundkit-fundraising-campaigns' ),
             elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
                 item.campaign
                     ? <span>{ item.campaign.title }</span>
-                    : <span className="giveflow-row__sub">-</span>
+                    : <span className="fundkit-row__sub">-</span>
             ),
         },
         {
             id:       'gateway',
-            label:    __( 'Gateway', 'giveflow-fundraising-campaigns' ),
+            label:    __( 'Gateway', 'fundkit-fundraising-campaigns' ),
             elements: gateways,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
@@ -675,39 +675,39 @@ export default function List() {
         },
         {
             id:       'failing',
-            label:    __( 'Renewal health', 'giveflow-fundraising-campaigns' ),
+            label:    __( 'Renewal health', 'fundkit-fundraising-campaigns' ),
             elements: [
-                { value: 'yes', label: __( 'Has failed renewals', 'giveflow-fundraising-campaigns' ) },
+                { value: 'yes', label: __( 'Has failed renewals', 'fundkit-fundraising-campaigns' ) },
             ],
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
                 item.failed_renewals_count > 0
-                    ? <span className="giveflow-pill is-warn">{ sprintf(
+                    ? <span className="fundkit-pill is-warn">{ sprintf(
                         /* translators: %d: consecutive failed renewals. */
-                        _n( '%d failure', '%d failures', item.failed_renewals_count, 'giveflow-fundraising-campaigns' ),
+                        _n( '%d failure', '%d failures', item.failed_renewals_count, 'fundkit-fundraising-campaigns' ),
                         item.failed_renewals_count
                     ) }</span>
-                    : <span className="giveflow-row__sub">{ __( 'OK', 'giveflow-fundraising-campaigns' ) }</span>
+                    : <span className="fundkit-row__sub">{ __( 'OK', 'fundkit-fundraising-campaigns' ) }</span>
             ),
         },
         {
             id:       'interval',
-            label:    __( 'Interval', 'giveflow-fundraising-campaigns' ),
+            label:    __( 'Interval', 'fundkit-fundraising-campaigns' ),
             elements: INTERVAL_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => <span>{ intervalLabel( item.interval_unit, item.interval_count ) }</span>,
         },
         {
             id:            'lifetime',
-            label:         __( 'Lifetime', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Lifetime', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <div className="giveflow-row">
-                    <div className="giveflow-row__name">{ formatAmount( item.total_paid_cents, item.currency ) }</div>
-                    <div className="giveflow-row__sub">
+                <div className="fundkit-row">
+                    <div className="fundkit-row__name">{ formatAmount( item.total_paid_cents, item.currency ) }</div>
+                    <div className="fundkit-row__sub">
                         { sprintf(
                             /* translators: %d: number of payments taken so far. */
-                            _n( '%d payment', '%d payments', item.payments_count, 'giveflow-fundraising-campaigns' ),
+                            _n( '%d payment', '%d payments', item.payments_count, 'fundkit-fundraising-campaigns' ),
                             item.payments_count
                         ) }
                     </div>
@@ -719,13 +719,13 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:          'copy_subscription_id',
-            label:       __( 'Copy subscription id', 'giveflow-fundraising-campaigns' ),
+            label:       __( 'Copy subscription id', 'fundkit-fundraising-campaigns' ),
             isPrimary:   false,
             isEligible:  ( item ) => !! item.gateway_subscription_id,
             callback:    async ( [ item ] ) => {
                 try {
                     await window.navigator?.clipboard?.writeText( item.gateway_subscription_id );
-                    notify.success( __( 'Subscription id copied.', 'giveflow-fundraising-campaigns' ) );
+                    notify.success( __( 'Subscription id copied.', 'fundkit-fundraising-campaigns' ) );
                 } catch ( e ) {
                     // No clipboard permission, so show it instead of failing
                     // silently: it is a lookup key and reading it is the point.
@@ -735,7 +735,7 @@ export default function List() {
         },
         {
             id:    'retry',
-            label: __( 'Retry payment', 'giveflow-fundraising-campaigns' ),
+            label: __( 'Retry payment', 'fundkit-fundraising-campaigns' ),
             // DataViews draws a primary action as an icon button, so one with
             // no icon renders as nothing at all -- and being primary, it is
             // left out of the row menu too, taking the action out of reach.
@@ -746,31 +746,31 @@ export default function List() {
         },
         {
             id:       'pause',
-            label:    __( 'Pause', 'giveflow-fundraising-campaigns' ),
+            label:    __( 'Pause', 'fundkit-fundraising-campaigns' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'pause' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'pause' } ),
         },
         {
             id:       'resume',
-            label:    __( 'Resume', 'giveflow-fundraising-campaigns' ),
+            label:    __( 'Resume', 'fundkit-fundraising-campaigns' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'resume' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'resume' } ),
         },
         {
             id:       'skip_next',
-            label:    __( 'Skip next', 'giveflow-fundraising-campaigns' ),
+            label:    __( 'Skip next', 'fundkit-fundraising-campaigns' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'skip_next' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'skip_next' } ),
         },
         {
             id:       'change_amount',
-            label:    __( 'Change amount', 'giveflow-fundraising-campaigns' ),
+            label:    __( 'Change amount', 'fundkit-fundraising-campaigns' ),
             isEligible: ( item ) => ! isTerminal( item.status ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'change_amount' } ),
         },
         {
             id:            'cancel',
-            label:         __( 'Cancel', 'giveflow-fundraising-campaigns' ),
+            label:         __( 'Cancel', 'fundkit-fundraising-campaigns' ),
             isDestructive: true,
             isEligible: ( item ) => ! isTerminal( item.status ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'cancel' } ),
@@ -783,35 +783,35 @@ export default function List() {
     );
 
     return (
-        <div className="giveflow-admin">
-            <div className="giveflow-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'GiveFlow', 'giveflow-fundraising-campaigns' ) }</a>
+        <div className="fundkit-admin">
+            <div className="fundkit-crumbs">
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'FundKit', 'fundkit-fundraising-campaigns' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Subscriptions', 'giveflow-fundraising-campaigns' ) }</span>
+                <span>{ __( 'Subscriptions', 'fundkit-fundraising-campaigns' ) }</span>
             </div>
-            <div className="giveflow-page-head">
-                <div className="giveflow-page-head__title-row">
-                    <h1>{ __( 'Subscriptions', 'giveflow-fundraising-campaigns' ) }</h1>
+            <div className="fundkit-page-head">
+                <div className="fundkit-page-head__title-row">
+                    <h1>{ __( 'Subscriptions', 'fundkit-fundraising-campaigns' ) }</h1>
                 </div>
-                <div className="giveflow-page-head__right">
+                <div className="fundkit-page-head__right">
                     { /* Offered once there is something to reveal, or while it
                          is on and needs turning off. An org sets recurring up
                          entirely in test mode, and a screen that hides every
                          plan it made reads as a broken integration. */ }
                     { ( testHidden > 0 || includeTest ) && (
-                        <label className="giveflow-inline-toggle">
+                        <label className="fundkit-inline-toggle">
                             <Switch
                                 checked={ includeTest }
                                 onChange={ () => toggleTest( ! includeTest ) }
-                                label={ __( 'Show test subscriptions', 'giveflow-fundraising-campaigns' ) }
+                                label={ __( 'Show test subscriptions', 'fundkit-fundraising-campaigns' ) }
                             />
-                            <span>{ __( 'Show test subscriptions', 'giveflow-fundraising-campaigns' ) }</span>
+                            <span>{ __( 'Show test subscriptions', 'fundkit-fundraising-campaigns' ) }</span>
                         </label>
                     ) }
-                    <span className="giveflow-page-head__meta">
+                    <span className="fundkit-page-head__meta">
                         { sprintf(
                             /* translators: %s: number of recurring plans. */
-                            _n( '%s plan', '%s plans', total, 'giveflow-fundraising-campaigns' ),
+                            _n( '%s plan', '%s plans', total, 'fundkit-fundraising-campaigns' ),
                             total.toLocaleString()
                         ) }
                     </span>
@@ -826,13 +826,13 @@ export default function List() {
                             '%d test subscription is hidden.',
                             '%d test subscriptions are hidden.',
                             testHidden,
-                            'giveflow-fundraising-campaigns'
+                            'fundkit-fundraising-campaigns'
                         ),
                         testHidden
                     ) }
                     { ' ' }
                     <Btn variant="link" onClick={ () => toggleTest( true ) }>
-                        { __( 'Show them', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'Show them', 'fundkit-fundraising-campaigns' ) }
                     </Btn>
                 </Notice>
             ) }
@@ -854,7 +854,7 @@ export default function List() {
             ) : (
                 // The card chrome the other list screens sit in lives on this
                 // wrapper, so without it the table renders bare on the page.
-                <div className={ `giveflow-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
+                <div className={ `fundkit-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
                     <DataViews
                         data={ data }
                         fields={ fields }
@@ -871,11 +871,11 @@ export default function List() {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'giveflow-fundraising-campaigns' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'giveflow-fundraising-campaigns' ) }
+                            title={ __( 'Nothing matches these filters', 'fundkit-fundraising-campaigns' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundkit-fundraising-campaigns' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'giveflow-fundraising-campaigns' ) }
+                                    { __( 'Clear filters', 'fundkit-fundraising-campaigns' ) }
                                 </Btn>
                             }
                         />

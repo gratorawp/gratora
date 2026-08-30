@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways\Sandbox;
+namespace FundKit\Gateways\Sandbox;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Foundation\Time\Clock;
-use GiveFlow\Gateways\GatewayConfirmResult;
-use GiveFlow\Gateways\GatewayIntentResult;
-use GiveFlow\Gateways\PaymentGateway;
-use GiveFlow\Gateways\RefundResult;
-use GiveFlow\Gateways\SubscriptionAware;
-use GiveFlow\Gateways\SubscriptionCreator;
-use GiveFlow\Gateways\WebhookOutcome;
-use GiveFlow\Recurring\FrequencyMap;
-use GiveFlow\Recurring\RecurringPlan;
-use GiveFlow\Recurring\RecurringPlanRepository;
+use FundKit\Donations\Donation;
+use FundKit\Foundation\Time\Clock;
+use FundKit\Gateways\GatewayConfirmResult;
+use FundKit\Gateways\GatewayIntentResult;
+use FundKit\Gateways\PaymentGateway;
+use FundKit\Gateways\RefundResult;
+use FundKit\Gateways\SubscriptionAware;
+use FundKit\Gateways\SubscriptionCreator;
+use FundKit\Gateways\WebhookOutcome;
+use FundKit\Recurring\FrequencyMap;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanRepository;
 use DateTimeImmutable;
 use WP_REST_Request;
 
@@ -63,13 +63,13 @@ final class SandboxGateway implements PaymentGateway, SubscriptionAware, Subscri
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Test donation', 'giveflow-fundraising-campaigns');
+        return __('Test donation', 'fundkit-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Simulated payment for testing. No real money moves and the form is in test mode.', 'giveflow-fundraising-campaigns');
+        return __('Simulated payment for testing. No real money moves and the form is in test mode.', 'fundkit-fundraising-campaigns');
     }
 
     /** @since 1.0.0 */

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\Event;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\DonorMetricsService;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Analytics\Event;
+use FundKit\Donations\Donation;
+use FundKit\Donors\DonorMetricsService;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
 
 /**
  * A DSAR / right-of-access export must be complete. profile() caps lists for
@@ -26,7 +26,7 @@ final class DsarExportCompletenessTest extends IntegrationTestCase
         $now = gmdate('Y-m-d H:i:s');
         for ($i = 0; $i < 30; $i++) {
             $d = Donation::make();
-            $d->reference    = sprintf('GIVEFLOW-TEST-%05d', $i);
+            $d->reference    = sprintf('FUNDKIT-TEST-%05d', $i);
             $d->donor_id     = $donor->id;
             $d->amount_cents = 1000 + $i;
             $d->net_cents    = 1000 + $i;
@@ -64,7 +64,7 @@ final class DsarExportCompletenessTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference    = 'GIVEFLOW-NOTE-TL';
+        $d->reference    = 'FUNDKIT-NOTE-TL';
         $d->donor_id     = $donor->id;
         $d->amount_cents = 2500;
         $d->net_cents    = 2500;

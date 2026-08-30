@@ -20,7 +20,7 @@ jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 // so the suites that drive real React keep it.
 jest.mock( 'react', () => require( 'preact/compat' ) );
 jest.mock( 'react-dom', () => require( 'preact/compat' ) );
-// @giveflow/ui ships built, so its own JSX arrives already compiled against these.
+// @fundkit/ui ships built, so its own JSX arrives already compiled against these.
 jest.mock( 'react/jsx-runtime', () => require( 'preact/compat/jsx-runtime' ) );
 jest.mock( 'react/jsx-dev-runtime', () => require( 'preact/compat/jsx-dev-runtime' ) );
 
@@ -87,11 +87,11 @@ function seedApi( onAction ) {
                 headers: { get: () => '0' },
             } );
         }
-        if ( path.startsWith( '/giveflow/v1/admin/donations/campaign-options' )
-            || path.startsWith( '/giveflow/v1/admin/donations/gateway-options' ) ) {
+        if ( path.startsWith( '/fundkit/v1/admin/donations/campaign-options' )
+            || path.startsWith( '/fundkit/v1/admin/donations/gateway-options' ) ) {
             return Promise.resolve( [] );
         }
-        if ( path.startsWith( '/giveflow/v1/admin/donations/stats' ) ) {
+        if ( path.startsWith( '/fundkit/v1/admin/donations/stats' ) ) {
             return Promise.resolve( null );
         }
         return onAction( path );

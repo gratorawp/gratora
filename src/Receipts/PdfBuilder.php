@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Receipts;
+namespace FundKit\Receipts;
 
-use GiveFlow\Vendor\Dompdf\Dompdf;
-use GiveFlow\Vendor\Dompdf\Options;
+use FundKit\Vendor\Dompdf\Dompdf;
+use FundKit\Vendor\Dompdf\Options;
 
 /**
  * Turns an HTML string into PDF bytes.
  *
- * Temp dir is forced to wp-content/uploads/giveflow/tmp because /tmp is
+ * Temp dir is forced to wp-content/uploads/fundkit/tmp because /tmp is
  * ephemeral on many deployment environments.
  *
  * @since 1.0.0
@@ -46,7 +46,7 @@ final class PdfBuilder
             'Title'   => $options['title']   ?? '',
             'Author'  => $options['author']  ?? '',
             'Subject' => $options['subject'] ?? '',
-            'Creator' => 'GiveFlow',
+            'Creator' => 'FundKit',
         ] as $key => $value) {
             if ($value !== '') {
                 $dompdf->add_info($key, (string) $value);
@@ -127,7 +127,7 @@ final class PdfBuilder
     private function ensureTmpDir(): string
     {
         $uploads = wp_upload_dir();
-        $dir = trailingslashit($uploads['basedir']) . 'giveflow/tmp';
+        $dir = trailingslashit($uploads['basedir']) . 'fundkit/tmp';
 
         if (! is_dir($dir)) {
             wp_mkdir_p($dir);

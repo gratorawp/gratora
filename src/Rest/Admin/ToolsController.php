@@ -2,54 +2,54 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Rest\Admin;
+namespace FundKit\Rest\Admin;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Analytics\ErrorLog;
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Analytics\Event;
-use GiveFlow\Currency\BaseCurrencyLocked;
-use GiveFlow\Currency\FxBackfill;
-use GiveFlow\Settings\SecretRedactor;
-use GiveFlow\Settings\SettingsService;
-use GiveFlow\Foundation\Maintenance\TestDataPurger;
-use GiveFlow\Foundation\Transfer\CsvImporter;
-use GiveFlow\Foundation\Transfer\DataExporter;
-use GiveFlow\Foundation\Transfer\DataImporter;
-use GiveFlow\Foundation\Upgrade\UpgradeRunner;
-use GiveFlow\Donations\AggregateSyncer;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorRetention;
-use GiveFlow\Forms\Form;
-use GiveFlow\Foundation\Auth\Capabilities;
-use GiveFlow\Funds\Fund;
+use FundKit\Campaigns\Campaign;
+use FundKit\Analytics\ErrorLog;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Analytics\Event;
+use FundKit\Currency\BaseCurrencyLocked;
+use FundKit\Currency\FxBackfill;
+use FundKit\Settings\SecretRedactor;
+use FundKit\Settings\SettingsService;
+use FundKit\Foundation\Maintenance\TestDataPurger;
+use FundKit\Foundation\Transfer\CsvImporter;
+use FundKit\Foundation\Transfer\DataExporter;
+use FundKit\Foundation\Transfer\DataImporter;
+use FundKit\Foundation\Upgrade\UpgradeRunner;
+use FundKit\Donations\AggregateSyncer;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorRetention;
+use FundKit\Forms\Form;
+use FundKit\Foundation\Auth\Capabilities;
+use FundKit\Funds\Fund;
 use WP_REST_Response;
 use WP_REST_Server;
-use GiveFlow\Vendor\Queryable\DB;
-use GiveFlow\Vendor\Queryable\ModelQueryBuilder;
+use FundKit\Vendor\Queryable\DB;
+use FundKit\Vendor\Queryable\ModelQueryBuilder;
 
 /**
  * Admin endpoints for system info, settings export, settings import, and
  * recomputing denormalized aggregates (admin UI wrapper over the
- * `wp giveflow recompute-aggregates` CLI).
+ * `wp fundkit recompute-aggregates` CLI).
  *
  * @since 1.0.0
  */
 final class ToolsController
 {
-    private const NAMESPACE = 'giveflow/v1';
+    private const NAMESPACE = 'fundkit/v1';
 
     /** @since 1.0.0 */
     public function __construct(
         private AggregateSyncer $aggregates,
-        private \GiveFlow\Mail\Mailer $mailer,
+        private \FundKit\Mail\Mailer $mailer,
         private FxBackfill $fxBackfill,
         private UpgradeRunner $upgrades,
         private DataExporter $exporter,
         private DataImporter $importer,
         private CsvImporter $csv,
         private TestDataPurger $testData,
-        private \GiveFlow\Admin\SystemReport $report,
+        private \FundKit\Admin\SystemReport $report,
     ) {
     }
 
@@ -64,7 +64,7 @@ final class ToolsController
 
         // Export leaks gateway secrets and import restores the role-capability
         // mapping + secrets, so both need full admin, not the delegatable
-        // giveflow_manage_settings (which a scoped role could otherwise use to
+        // fundkit_manage_settings (which a scoped role could otherwise use to
         // read the webhook secret or grant itself capabilities via import).
         register_rest_route(self::NAMESPACE, '/admin/tools/export', [
             'methods'             => WP_REST_Server::READABLE,
@@ -176,7 +176,7 @@ final class ToolsController
 
     /**
      * A delivery that was refused at the signature, and one that verified and
-     * then threw, are both failures. A verified delivery GiveFlow has no handler
+     * then threw, are both failures. A verified delivery FundKit has no handler
      * for is not, and it is the common case, so it must not be swept in here.
      *
      * Compared as text rather than as JSON: MariaDB has no JSON type and
@@ -191,7 +191,7 @@ final class ToolsController
         . " OR JSON_TYPE(JSON_EXTRACT(IF(JSON_VALID(payload), payload, NULL), '\$.error')) NOT IN ('NULL'))";
 
     /**
-     * Paged log, newest first unless asked otherwise: what GiveFlow could not
+     * Paged log, newest first unless asked otherwise: what FundKit could not
      * finish and what the gateways sent, optionally narrowed to one source or
      * to the failures.
      *
@@ -266,7 +266,7 @@ final class ToolsController
     }
 
     /**
-     * giveflow_events carries every domain's history, most of it holding donor
+     * fundkit_events carries every domain's history, most of it holding donor
      * detail this screen has no business serving. Anything outside the two
      * families it reads is dropped, so a hand-written source can neither widen
      * the list nor widen a delete.
@@ -348,7 +348,7 @@ final class ToolsController
             'id'          => (int) $e->id,
             'kind'        => 'error',
             'source'      => substr((string) $e->type, strlen(ErrorLog::PREFIX)),
-            'message'     => $message !== '' ? $message : __('No detail recorded.', 'giveflow-fundraising-campaigns'),
+            'message'     => $message !== '' ? $message : __('No detail recorded.', 'fundkit-fundraising-campaigns'),
             'context'     => $payload,
             'occurred_at' => (string) $e->occurred_at,
         ];
@@ -372,7 +372,7 @@ final class ToolsController
             'id'          => (int) $e->id,
             'kind'        => 'webhook',
             'source'      => substr((string) $e->type, strlen(self::WEBHOOK_PREFIX)),
-            'message'     => $event !== '' ? $event : __('Unnamed event.', 'giveflow-fundraising-campaigns'),
+            'message'     => $event !== '' ? $event : __('Unnamed event.', 'fundkit-fundraising-campaigns'),
             'verified'    => (bool) ($payload['verified'] ?? false),
             'processed'   => (bool) ($payload['processed'] ?? false),
             'error'       => $error !== '' ? $error : null,
@@ -383,7 +383,7 @@ final class ToolsController
 
     /**
      * Types present in the log, so the filter offers what is actually there
-     * rather than every source GiveFlow can emit and every gateway it supports.
+     * rather than every source FundKit can emit and every gateway it supports.
      * Empty also tells the screen that nothing has been recorded at all, which
      * is not the same answer as nothing matching the current filters.
      *
@@ -418,9 +418,9 @@ final class ToolsController
      */
     private static function retentionDays(): int
     {
-        $privacy = get_option('giveflow_privacy', []);
+        $privacy = get_option('fundkit_privacy', []);
         $stored  = is_array($privacy) ? (int) ($privacy['event_retention_days'] ?? 730) : 730;
-        $days    = (int) apply_filters('giveflow.event.retention_days', $stored);
+        $days    = (int) apply_filters('fundkit.event.retention_days', $stored);
 
         return $days > 0 ? $days : 0;
     }
@@ -440,16 +440,16 @@ final class ToolsController
             $to = (string) ($user->user_email ?? '');
         }
         if (! is_email($to)) {
-            return new \WP_Error('giveflow_invalid_email', __('Provide a valid recipient email.', 'giveflow-fundraising-campaigns'), ['status' => 422]);
+            return new \WP_Error('fundkit_invalid_email', __('Provide a valid recipient email.', 'fundkit-fundraising-campaigns'), ['status' => 422]);
         }
 
-        $subject = __('GiveFlow test email', 'giveflow-fundraising-campaigns');
-        $body    = '<p>' . esc_html__('This is a test email from GiveFlow.', 'giveflow-fundraising-campaigns') . '</p>'
-                 . '<p>' . esc_html__('If it landed in your inbox, your sender + transport settings are working.', 'giveflow-fundraising-campaigns') . '</p>'
+        $subject = __('FundKit test email', 'fundkit-fundraising-campaigns');
+        $body    = '<p>' . esc_html__('This is a test email from FundKit.', 'fundkit-fundraising-campaigns') . '</p>'
+                 . '<p>' . esc_html__('If it landed in your inbox, your sender + transport settings are working.', 'fundkit-fundraising-campaigns') . '</p>'
                  . '<p style="color:#6b7280;font-size:12px">'
                  . esc_html(sprintf(
                      /* translators: %s: site URL */
-                     __('Sent at %1$s from %2$s', 'giveflow-fundraising-campaigns'),
+                     __('Sent at %1$s from %2$s', 'fundkit-fundraising-campaigns'),
                      gmdate('c'),
                      site_url()
                  ))
@@ -488,14 +488,14 @@ final class ToolsController
 
         if (! $ok) {
             return new \WP_Error(
-                'giveflow_test_send_failed',
+                'fundkit_test_send_failed',
                 $reason !== ''
                     ? sprintf(
                         /* translators: %s: the mail server's own error message. */
-                        __('The mail server refused it: %s', 'giveflow-fundraising-campaigns'),
+                        __('The mail server refused it: %s', 'fundkit-fundraising-campaigns'),
                         $reason
                     )
-                    : __('wp_mail() returned false and reported no reason. The site most likely has no mail transport configured: install an SMTP plugin or check your host\'s mail logs.', 'giveflow-fundraising-campaigns'),
+                    : __('wp_mail() returned false and reported no reason. The site most likely has no mail transport configured: install an SMTP plugin or check your host\'s mail logs.', 'fundkit-fundraising-campaigns'),
                 ['status' => 500]
             );
         }
@@ -553,25 +553,25 @@ final class ToolsController
         $rebuildAll = $scope === 'all' || $converted > 0;
 
         if ($rebuildAll || $scope === 'donors') {
-            foreach (self::eachId('giveflow_donors') as $id) {
+            foreach (self::eachId('fundkit_donors') as $id) {
                 $this->aggregates->syncDonor($id);
                 $counts['donors']++;
             }
         }
         if ($rebuildAll || $scope === 'funds') {
-            foreach (self::eachId('giveflow_funds') as $id) {
+            foreach (self::eachId('fundkit_funds') as $id) {
                 $this->aggregates->syncFund($id);
                 $counts['funds']++;
             }
         }
         if ($rebuildAll || $scope === 'campaigns') {
-            foreach (self::eachId('giveflow_campaigns') as $id) {
+            foreach (self::eachId('fundkit_campaigns') as $id) {
                 $this->aggregates->syncCampaign($id);
                 $counts['campaigns']++;
             }
         }
         if ($rebuildAll || $scope === 'forms') {
-            foreach (self::eachId('giveflow_forms') as $id) {
+            foreach (self::eachId('fundkit_forms') as $id) {
                 $this->aggregates->syncForm($id);
                 $counts['forms']++;
             }
@@ -580,7 +580,7 @@ final class ToolsController
         // Add-ons recompute theirs from the same source rows. Fired after the
         // core passes so anything derived from a campaign total is rebuilt from
         // a campaign total that is already correct.
-        $counts = (array) apply_filters('giveflow.recalculate.counts', $counts, $rebuildAll ? 'all' : $scope);
+        $counts = (array) apply_filters('fundkit.recalculate.counts', $counts, $rebuildAll ? 'all' : $scope);
 
         return new WP_REST_Response([
             'ok'     => true,
@@ -628,16 +628,16 @@ final class ToolsController
     }
 
     private const SETTINGS_OPTIONS = [
-        'giveflow_org_profile',
-        'giveflow_currency_locale',
-        'giveflow_org_brand',
-        'giveflow_gateway_config',
-        'giveflow_privacy',
-        'giveflow_roles',
-        'giveflow_consents',
-        'giveflow_receipt_settings',
-        'giveflow_email_settings',
-        'giveflow_reference_settings',
+        'fundkit_org_profile',
+        'fundkit_currency_locale',
+        'fundkit_org_brand',
+        'fundkit_gateway_config',
+        'fundkit_privacy',
+        'fundkit_roles',
+        'fundkit_consents',
+        'fundkit_receipt_settings',
+        'fundkit_email_settings',
+        'fundkit_reference_settings',
     ];
 
     /**
@@ -656,7 +656,7 @@ final class ToolsController
 
         nocache_headers();
         header('Content-Type: application/json; charset=utf-8');
-        header('Content-Disposition: attachment; filename="giveflow-export-' . gmdate('Y-m-d') . '.json"');
+        header('Content-Disposition: attachment; filename="fundkit-export-' . gmdate('Y-m-d') . '.json"');
         fpassthru($out);
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fclose($out);
@@ -669,7 +669,7 @@ final class ToolsController
         $data = [
             'exported_at' => gmdate('c'),
             'site_url'    => site_url(),
-            'version'     => defined('GIVEFLOW_VERSION') ? GIVEFLOW_VERSION : 'unknown',
+            'version'     => defined('FUNDKIT_VERSION') ? FUNDKIT_VERSION : 'unknown',
             'settings'    => [],
         ];
         foreach (self::SETTINGS_OPTIONS as $opt) {
@@ -679,7 +679,7 @@ final class ToolsController
             }
 
             // An export is a file people attach to support tickets and commit
-            // to repositories. giveflow_gateway_config holds the Stripe webhook
+            // to repositories. fundkit_gateway_config holds the Stripe webhook
             // signing secret, which is the only authentication on the webhook
             // route, so it leaves masked or not at all.
             $data['settings'][$opt] = is_array($value)
@@ -695,7 +695,7 @@ final class ToolsController
     {
         $csv = (string) ($request->get_json_params()['csv'] ?? '');
         if (trim($csv) === '') {
-            return new \WP_Error('giveflow_invalid_csv', __('That file is empty.', 'giveflow-fundraising-campaigns'), ['status' => 422]);
+            return new \WP_Error('fundkit_invalid_csv', __('That file is empty.', 'fundkit-fundraising-campaigns'), ['status' => 422]);
         }
 
         return new WP_REST_Response($this->csv->inspect($csv) + ['fields' => CsvImporter::FIELDS], 200);
@@ -710,7 +710,7 @@ final class ToolsController
         $dryRun  = (bool) ($body['dry_run'] ?? true);
 
         if (trim($csv) === '') {
-            return new \WP_Error('giveflow_invalid_csv', __('That file is empty.', 'giveflow-fundraising-campaigns'), ['status' => 422]);
+            return new \WP_Error('fundkit_invalid_csv', __('That file is empty.', 'fundkit-fundraising-campaigns'), ['status' => 422]);
         }
 
         $result = $this->csv->import($csv, $mapping, $dryRun);
@@ -746,7 +746,7 @@ final class ToolsController
                 return new WP_REST_Response(['imported' => true, 'records' => $records, 'settings_applied' => 0], 200);
             }
 
-            return new \WP_Error('giveflow_invalid_import', __('No settings payload found.', 'giveflow-fundraising-campaigns'), ['status' => 422]);
+            return new \WP_Error('fundkit_invalid_import', __('No settings payload found.', 'fundkit-fundraising-campaigns'), ['status' => 422]);
         }
 
         // Settings first, so every guard on the write reads the site as it
@@ -778,7 +778,7 @@ final class ToolsController
             // over the group defaults, so the option reads as the defaults, and
             // for the currency group that means the base silently becomes USD.
             if (! is_array($incoming)) {
-                $refused[$opt] = __('That entry is not a settings group.', 'giveflow-fundraising-campaigns');
+                $refused[$opt] = __('That entry is not a settings group.', 'fundkit-fundraising-campaigns');
                 continue;
             }
 
@@ -796,13 +796,13 @@ final class ToolsController
             // it against and nothing that would read it back. Writing the option
             // anyway would restore a setting nobody honours, past every guard.
             if ($group === null) {
-                $refused[$opt] = __('This site has no settings group by that name.', 'giveflow-fundraising-campaigns');
+                $refused[$opt] = __('This site has no settings group by that name.', 'fundkit-fundraising-campaigns');
                 continue;
             }
 
             // Through the settings writer, so a restore inherits what every
             // other writer does: the base-currency lock, the per-group type
-            // whitelist, and the giveflow.settings.updated broadcast that the FX
+            // whitelist, and the fundkit.settings.updated broadcast that the FX
             // snapshot, the campaign currency sync and the role capabilities
             // hang off.
             try {
@@ -823,10 +823,10 @@ final class ToolsController
         // denominates it in whatever the site already had.
         if ($refused !== []) {
             return new \WP_Error(
-                $locked ? 'giveflow_base_currency_locked' : 'giveflow_invalid_import',
+                $locked ? 'fundkit_base_currency_locked' : 'fundkit_invalid_import',
                 sprintf(
                     /* translators: %s: one or more refusal messages, already sentences. */
-                    __('Part of that file was not restored. %s', 'giveflow-fundraising-campaigns'),
+                    __('Part of that file was not restored. %s', 'fundkit-fundraising-campaigns'),
                     implode(' ', $refused)
                 ),
                 [
@@ -865,7 +865,7 @@ final class ToolsController
      * The settings group that owns an option, or null when nothing declares it.
      *
      * Read off the group map rather than a second list here, so a group an
-     * add-on registers through `giveflow.settings.groups` is written the same way as
+     * add-on registers through `fundkit.settings.groups` is written the same way as
      * a core one.
      *
      * @since 1.0.0
@@ -889,7 +889,7 @@ final class ToolsController
      */
     private static function erasureIsOn(): bool
     {
-        $privacy = get_option('giveflow_privacy', []);
+        $privacy = get_option('fundkit_privacy', []);
 
         return is_array($privacy) && ! empty($privacy['erase_inactive_donors']);
     }
@@ -901,8 +901,8 @@ final class ToolsController
         // that cannot be restored, and there is no undo behind it.
         if (strtoupper(trim((string) $request->get_param('confirmation'))) !== 'DELETE') {
             return new \WP_Error(
-                'giveflow_confirmation_required',
-                __('Type DELETE to confirm.', 'giveflow-fundraising-campaigns'),
+                'fundkit_confirmation_required',
+                __('Type DELETE to confirm.', 'fundkit-fundraising-campaigns'),
                 ['status' => 400]
             );
         }
@@ -913,7 +913,7 @@ final class ToolsController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('giveflow_manage_settings');
+        return Capabilities::userCan('fundkit_manage_settings');
     }
 
     /** @since 1.0.0 */
@@ -937,15 +937,15 @@ final class ToolsController
     public static function scopes(): array
     {
         $core = [
-            'all'       => __('Everything', 'giveflow-fundraising-campaigns'),
-            'currency'  => __('Currency conversions', 'giveflow-fundraising-campaigns'),
-            'donors'    => __('Donors', 'giveflow-fundraising-campaigns'),
-            'funds'     => __('Funds', 'giveflow-fundraising-campaigns'),
-            'campaigns' => __('Campaigns', 'giveflow-fundraising-campaigns'),
-            'forms'     => __('Forms', 'giveflow-fundraising-campaigns'),
+            'all'       => __('Everything', 'fundkit-fundraising-campaigns'),
+            'currency'  => __('Currency conversions', 'fundkit-fundraising-campaigns'),
+            'donors'    => __('Donors', 'fundkit-fundraising-campaigns'),
+            'funds'     => __('Funds', 'fundkit-fundraising-campaigns'),
+            'campaigns' => __('Campaigns', 'fundkit-fundraising-campaigns'),
+            'forms'     => __('Forms', 'fundkit-fundraising-campaigns'),
         ];
 
-        $added = (array) apply_filters('giveflow.recalculate.scopes', []);
+        $added = (array) apply_filters('fundkit.recalculate.scopes', []);
         foreach ($added as $slug => $label) {
             $slug = strtolower(trim((string) $slug));
             // A slug core already owns is not overridable: an add-on renaming
@@ -987,8 +987,8 @@ final class ToolsController
     /** @since 1.0.0 */
     public function info(): WP_REST_Response
     {
-        // Action Scheduler, not WP-Cron: every GiveFlow job is queued through
-        // AsyncDispatcher into the 'giveflow' group, and nothing in the plugin
+        // Action Scheduler, not WP-Cron: every FundKit job is queued through
+        // AsyncDispatcher into the 'fundkit' group, and nothing in the plugin
         // calls wp_schedule_event, so _get_cron_array() would report nothing
         // queued on a site with a backlog.
         $cronEvents = [];
@@ -1014,10 +1014,10 @@ final class ToolsController
         }
 
         return new WP_REST_Response([
-            'version'   => defined('GIVEFLOW_VERSION') ? GIVEFLOW_VERSION : 'unknown',
+            'version'   => defined('FUNDKIT_VERSION') ? FUNDKIT_VERSION : 'unknown',
             'php'       => PHP_VERSION,
             'wp'        => get_bloginfo('version'),
-            'rest_root' => esc_url_raw(rest_url('giveflow/v1/')),
+            'rest_root' => esc_url_raw(rest_url('fundkit/v1/')),
             'site_url'  => site_url(),
             'cron'      => $cronEvents,
             // Real payments sitting outside every total because no rate exists

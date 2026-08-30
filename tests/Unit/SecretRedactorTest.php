@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Unit;
+namespace FundKit\Tests\Unit;
 
-use GiveFlow\Settings\SecretRedactor;
+use FundKit\Settings\SecretRedactor;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -50,7 +50,7 @@ final class SecretRedactorTest extends TestCase
     /** @dataProvider benignKeys */
     public function test_a_word_that_merely_contains_a_secret_word_is_not_masked(string $key): void
     {
-        $value = ['giveflow-accent' => '#0F3D5C'];
+        $value = ['fundkit-accent' => '#0F3D5C'];
         $out   = SecretRedactor::redact([$key => $value]);
         $this->assertSame($value, $out[$key], "$key must not be masked");
     }
@@ -59,15 +59,15 @@ final class SecretRedactorTest extends TestCase
     {
         $brand = [
             'presets' => [
-                ['id' => 'bold', 'tokens' => ['giveflow-accent' => '#0F3D5C']],
-                ['id' => 'quiet', 'tokens' => ['giveflow-accent' => '#111827']],
+                ['id' => 'bold', 'tokens' => ['fundkit-accent' => '#0F3D5C']],
+                ['id' => 'quiet', 'tokens' => ['fundkit-accent' => '#111827']],
             ],
             'default_id' => 'bold',
         ];
 
         $out = SecretRedactor::redact($brand);
 
-        $this->assertSame('#0F3D5C', $out['presets'][0]['tokens']['giveflow-accent']);
-        $this->assertSame('#111827', $out['presets'][1]['tokens']['giveflow-accent']);
+        $this->assertSame('#0F3D5C', $out['presets'][0]['tokens']['fundkit-accent']);
+        $this->assertSame('#111827', $out['presets'][1]['tokens']['fundkit-accent']);
     }
 }

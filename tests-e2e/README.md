@@ -1,4 +1,4 @@
-# GiveFlow e2e tests (Playwright)
+# FundKit e2e tests (Playwright)
 
 Browser-driven end-to-end tests. Specs live in `tests-e2e/specs/`, helpers in
 `tests-e2e/helpers/`, fixtures in `tests-e2e/fixtures/`. Config:
@@ -7,9 +7,9 @@ Browser-driven end-to-end tests. Specs live in `tests-e2e/specs/`, helpers in
 Three Playwright projects:
 
 - **core** (`specs/*.spec.ts`) - the donor form. Always runs.
-- **visual** (`specs/visual/`) - screenshot goldens. Opt-in (`GIVEFLOW_E2E_VISUAL=1`).
+- **visual** (`specs/visual/`) - screenshot goldens. Opt-in (`FUNDKIT_E2E_VISUAL=1`).
 - **screenshots** (`specs/screenshots/`) - wp-admin capture, asserts nothing.
-  Opt-in (`GIVEFLOW_E2E_SHOTS=1`).
+  Opt-in (`FUNDKIT_E2E_SHOTS=1`).
 
 ### Add-on suites live in their add-ons
 
@@ -17,10 +17,10 @@ A feature's specs belong to the plugin that ships the feature, so a checkout of
 core is self-contained and an add-on can be tested without it:
 
 - **Peer-to-peer** (start page, fundraiser/team/campaign pages, sandbox
-  donation, hide-chrome, wp-admin, donor portal) - `giveflow-p2p/tests-e2e/`, with
-  its own `playwright.config.ts` and `wp giveflow-p2p e2e-seed`.
+  donation, hide-chrome, wp-admin, donor portal) - `fundkit-p2p/tests-e2e/`, with
+  its own `playwright.config.ts` and `wp fundkit-p2p e2e-seed`.
 - **Tributes** (the tribute field, functional + visual) -
-  `giveflow-tributes/tests-e2e/`.
+  `fundkit-tributes/tests-e2e/`.
 
 Both still run against the form this plugin's seeder builds, so keep the
 kitchen-sink block set below in step with them.
@@ -34,18 +34,18 @@ kitchen-sink block set below in step with them.
 
 2. Seed the canonical forms:
    ```sh
-   wp giveflow e2e-seed
+   wp fundkit e2e-seed
    ```
    Idempotent - re-run anytime to converge to whatever the current spec set
    expects. It:
-   - Creates / updates the campaign `giveflow-e2e` (published).
-   - Creates / updates the single-page form `giveflow-e2e-form` (published) with
+   - Creates / updates the campaign `fundkit-e2e` (published).
+   - Creates / updates the single-page form `fundkit-e2e-form` (published) with
      every block the specs assert against (amount, name, email, country,
      address, phone, comment, anonymous, cover-fees, consent, custom
      date/dropdown, currency-switcher, payment-gateways, submit).
-   - Creates / updates the multi-step form `giveflow-e2e-wizard` (published) for
+   - Creates / updates the multi-step form `fundkit-e2e-wizard` (published) for
      the multi-step regression spec.
-   - Creates / updates `/giveflow-e2e-form/` and `/giveflow-e2e-wizard/` pages with their
+   - Creates / updates `/fundkit-e2e-form/` and `/fundkit-e2e-wizard/` pages with their
      respective shortcodes.
    - Enables EUR / USD / GBP in org settings so the currency-switcher specs
      have something to switch between.
@@ -56,12 +56,12 @@ kitchen-sink block set below in step with them.
 
 3. Export them (or drop them into `tests-e2e/.env`):
    ```sh
-   export GIVEFLOW_E2E_URL='http://localhost:10075'
-   export GIVEFLOW_E2E_FORM_PATH='/giveflow-e2e-form/'
-   export GIVEFLOW_E2E_MULTI_STEP_FORM_PATH='/giveflow-e2e-wizard/'
-   export GIVEFLOW_E2E_CONDITIONAL_FORM_PATH='/giveflow-e2e-conditional/'
-   export GIVEFLOW_E2E_CUSTOM_FIELDS_FORM_PATH='/giveflow-e2e-custom-fields/'
-   export GIVEFLOW_E2E_LAYOUT_FORM_PATH='/giveflow-e2e-layout/'
+   export FUNDKIT_E2E_URL='http://localhost:10075'
+   export FUNDKIT_E2E_FORM_PATH='/fundkit-e2e-form/'
+   export FUNDKIT_E2E_MULTI_STEP_FORM_PATH='/fundkit-e2e-wizard/'
+   export FUNDKIT_E2E_CONDITIONAL_FORM_PATH='/fundkit-e2e-conditional/'
+   export FUNDKIT_E2E_CUSTOM_FIELDS_FORM_PATH='/fundkit-e2e-custom-fields/'
+   export FUNDKIT_E2E_LAYOUT_FORM_PATH='/fundkit-e2e-layout/'
    ```
 
 If you'd rather build the canonical form by hand instead of running the CLI,
@@ -71,8 +71,8 @@ Two specs need env the seeder cannot mint for you, and skip themselves by name
 without it:
 
 - `specs/portal-magic-link.spec.ts` wants a fresh single-use portal link in
-  `GIVEFLOW_E2E_PORTAL_REOPEN_URL`; a donor's admin profile shows one.
-- the `screenshots` project wants `GIVEFLOW_E2E_ADMIN_USER` / `GIVEFLOW_E2E_ADMIN_PASS`
+  `FUNDKIT_E2E_PORTAL_REOPEN_URL`; a donor's admin profile shows one.
+- the `screenshots` project wants `FUNDKIT_E2E_ADMIN_USER` / `FUNDKIT_E2E_ADMIN_PASS`
   (the defaults match wp-env, so a hermetic run needs nothing).
 
 ## Run
@@ -86,9 +86,9 @@ npm run test:e2e -- specs/amount.spec.ts   # one spec
 
 Reports / traces / screenshots on failure land in `test-results/` (gitignored).
 
-If you hit `giveflow_rate_limited` (429), re-run `wp giveflow e2e-seed` to clear the
+If you hit `fundkit_rate_limited` (429), re-run `wp fundkit e2e-seed` to clear the
 AntiSpamGuard IP transients and start fresh. Better: put the fixture site in
-org test mode (Settings, or `giveflow_gateway_config['test_mode']`), which the
+org test mode (Settings, or `fundkit_gateway_config['test_mode']`), which the
 guard short-circuits. Repeated local runs trip the IP quota otherwise, at ten
 attempts per fifteen minutes, and the suite is well past that.
 
@@ -121,9 +121,9 @@ npm run test:visual            # compare against committed goldens
 npm run test:visual:update     # re-bless after an intentional styling change
 ```
 
-Needs the same env as the functional suite (`GIVEFLOW_E2E_URL` +
-`GIVEFLOW_E2E_FORM_PATH`, plus the wizard/layout paths for those specs). The
-project is opt-in (the scripts set `GIVEFLOW_E2E_VISUAL=1`) so a plain
+Needs the same env as the functional suite (`FUNDKIT_E2E_URL` +
+`FUNDKIT_E2E_FORM_PATH`, plus the wizard/layout paths for those specs). The
+project is opt-in (the scripts set `FUNDKIT_E2E_VISUAL=1`) so a plain
 `npm run test:e2e` never fails on missing snapshots.
 
 Goldens are committed under `specs/visual/__screenshots__/<platform>/`, keyed
@@ -143,15 +143,15 @@ check the site state before re-blessing.
 ## Demo data for screenshots
 
 The admin screens are only worth photographing against a site that has a year
-of history behind it. `wp giveflow demo-seed` builds one:
+of history behind it. `wp fundkit demo-seed` builds one:
 
 ```sh
-wp giveflow demo-seed          # prompts first
-wp giveflow demo-seed --yes    # unattended
+wp fundkit demo-seed          # prompts first
+wp fundkit demo-seed --yes    # unattended
 ```
 
 Not a test fixture, and nothing in the suites depends on it. It is also
-distinct from `wp giveflow seed`, which writes **test-mode** donations: those are
+distinct from `wp fundkit seed`, which writes **test-mode** donations: those are
 excluded from money reporting by design, so a dashboard seeded with them shows
 zeros. Demo rows are written **live** (`is_test = 0`), which is what makes the
 KPIs, charts and reports render at all, and what makes this unsafe next to real
@@ -183,12 +183,12 @@ whose `gateway_subscription_id` does, and the `demo-` campaigns and funds.
 Two side effects are suppressed for the duration: outbound mail, and receipt
 issuance (which would otherwise queue an Action Scheduler job and an email per
 donation). Rollups are recomputed at the end, the same way
-`wp giveflow recompute-aggregates` does, because the rows are backdated behind the
+`wp fundkit recompute-aggregates` does, because the rows are backdated behind the
 listeners that normally keep those columns current.
 
 ## Admin screenshots
 
-`specs/screenshots/admin.spec.ts` walks every GiveFlow wp-admin screen and writes a
+`specs/screenshots/admin.spec.ts` walks every FundKit wp-admin screen and writes a
 PNG per screen, for docs, design review and the wp.org listing. It asserts
 nothing: the goldens in `specs/visual/` are the regression suite, this one is a
 camera. Donor-facing surfaces are out of scope.
@@ -197,10 +197,10 @@ camera. Donor-facing surfaces are out of scope.
 npm run test:shots
 ```
 
-Its own opt-in project (`GIVEFLOW_E2E_SHOTS=1`), fixed at 1440x900 and 2x device
+Its own opt-in project (`FUNDKIT_E2E_SHOTS=1`), fixed at 1440x900 and 2x device
 scale so a set is comparable run to run and survives being scaled down.
 Captures land in `tests-e2e/screenshots/` (gitignored), or
-`GIVEFLOW_E2E_SHOTS_DIR`. Nothing is copied into `.wordpress-org/` automatically:
+`FUNDKIT_E2E_SHOTS_DIR`. Nothing is copied into `.wordpress-org/` automatically:
 pick the winners by hand, and keep `readme.txt`'s captions in step.
 
 Covered: dashboard; campaigns list and campaign detail (overview / forms /
@@ -210,8 +210,8 @@ its tabs; subscriptions; funds; every Settings tab; every Tools tab. There is
 no top-level Forms screen: a campaign's Forms tab is the list, and the builder
 opens from there.
 
-Needs `GIVEFLOW_E2E_URL` plus admin credentials (`GIVEFLOW_E2E_ADMIN_USER` /
-`GIVEFLOW_E2E_ADMIN_PASS`), nothing else. Screens whose record does not exist yet
+Needs `FUNDKIT_E2E_URL` plus admin credentials (`FUNDKIT_E2E_ADMIN_USER` /
+`FUNDKIT_E2E_ADMIN_PASS`), nothing else. Screens whose record does not exist yet
 skip themselves by name, so a half-seeded site still yields everything it can.
 
 Waiting is `helpers/capture.ts`: network idle, then DOM quiescence. Recharts
@@ -224,17 +224,17 @@ The committed `.wp-env.json` loads core only, so a standalone checkout boots:
 
 ```sh
 npx wp-env start
-npx wp-env run cli wp giveflow e2e-seed
+npx wp-env run cli wp fundkit e2e-seed
 ```
 
 An add-on suite needs its plugin mounted too. Add an override (gitignored) and
 run that suite from the add-on's own directory:
 
 ```sh
-echo '{ "plugins": [ ".", "../giveflow-p2p" ] }' > .wp-env.override.json
+echo '{ "plugins": [ ".", "../fundkit-p2p" ] }' > .wp-env.override.json
 npx wp-env start
-npx wp-env run cli wp giveflow e2e-seed
-npx wp-env run cli wp giveflow-p2p e2e-seed
+npx wp-env run cli wp fundkit e2e-seed
+npx wp-env run cli wp fundkit-p2p e2e-seed
 ```
 
 > macOS note: a Docker Desktop named-volume bug can leave the mounted plugin
@@ -242,16 +242,16 @@ npx wp-env run cli wp giveflow-p2p e2e-seed
 > affect the Linux CI runners.
 
 `.github/workflows/e2e.yml` runs this suite hermetically on every push/PR. Its
-optional `giveflow-p2p` checkout and seed steps (repo variable `GIVEFLOW_P2P_REPO` +
-secret `GIVEFLOW_P2P_TOKEN`) now only provision site state; the p2p specs run from
+optional `fundkit-p2p` checkout and seed steps (repo variable `FUNDKIT_P2P_REPO` +
+secret `FUNDKIT_P2P_TOKEN`) now only provision site state; the p2p specs run from
 the add-on's own repository.
 
 ## Conventions
 
 - TypeScript only (no JS in `tests-e2e/`).
 - Specs use the `donor` fixture from `fixtures/donor-form.ts`. The fixture
-  opens the form page, waits for `data-giveflow-ready` (the runtime cloak), and
-  assert-fails the spec on any `[giveflow] render error contained by boundary`
+  opens the form page, waits for `data-fundkit-ready` (the runtime cloak), and
+  assert-fails the spec on any `[fundkit] render error contained by boundary`
   console message - that's how the donor form signals a renderer crash that
   ErrorBoundary swallowed.
 - `submit()` on `DonorFormPage` waits the `MIN_RENDER_SECONDS` (2s) remainder
@@ -263,9 +263,9 @@ the add-on's own repository.
 - Each spec generates a unique donor email per run with `Date.now()` to avoid
   cross-test donor collisions.
 
-## Manual canonical form (if you skip `wp giveflow e2e-seed`)
+## Manual canonical form (if you skip `wp fundkit e2e-seed`)
 
-The canonical specs assume the form behind `GIVEFLOW_E2E_FORM_PATH` includes
+The canonical specs assume the form behind `FUNDKIT_E2E_FORM_PATH` includes
 these blocks (the required minimum + every block any spec targets). Specs
 whose target block is missing skip themselves with a clear reason.
 
@@ -290,6 +290,6 @@ comment, phone, consent, cover-fees, custom-fields):
 - custom date field
 - custom dropdown
 
-The `giveflow-tributes` suite runs against this same form, so keep a tribute block
+The `fundkit-tributes` suite runs against this same form, so keep a tribute block
 on it (with at least "In honor of" enabled) when that add-on is installed; its
 specs skip themselves when the block is absent.

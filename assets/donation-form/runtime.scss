@@ -1,13 +1,13 @@
-// Scoped to `.giveflow-form` to avoid fighting theme CSS; CSS variables are the
+// Scoped to `.fundkit-form` to avoid fighting theme CSS; CSS variables are the
 // override surface for themes and campaigns.
 
-.giveflow-donation-form .giveflow-modal-host {
+.fundkit-donation-form .fundkit-modal-host {
     display: inline-block;
 }
-.giveflow-donation-form .giveflow-modal-trigger {
+.fundkit-donation-form .fundkit-modal-trigger {
     cursor: pointer;
 }
-.giveflow-donation-form .giveflow-modal {
+.fundkit-donation-form .fundkit-modal {
     position: fixed;
     inset: 0;
     z-index: 99999;
@@ -22,18 +22,18 @@
     }
     &__panel {
         position: relative;
-        background: var(--giveflow-bg, #fff);
+        background: var(--fundkit-bg, #fff);
         // The modal is always a card, so it stays legible even when the
         // container style is "plain" and the in-page form inherits the theme's
         // text colour.
-        color: var(--giveflow-text, #111827);
-        border-radius: var(--giveflow-radius, 12px);
+        color: var(--fundkit-text, #111827);
+        border-radius: var(--fundkit-radius, 12px);
         max-width: 560px;
         width: calc(100% - 32px);
         max-height: calc(100vh - 64px);
         overflow: auto;
         padding: 28px 24px 24px;
-        box-shadow: var(--giveflow-card-shadow, 0 30px 60px rgba(0, 0, 0, 0.25));
+        box-shadow: var(--fundkit-card-shadow, 0 30px 60px rgba(0, 0, 0, 0.25));
     }
     &__close {
         position: absolute;
@@ -44,84 +44,84 @@
         font-size: 24px;
         line-height: 1;
         cursor: pointer;
-        color: var(--giveflow-text-muted, #6b7280);
+        color: var(--fundkit-text-muted, #6b7280);
 
-        &:hover { color: var(--giveflow-text, #111827); }
+        &:hover { color: var(--fundkit-text, #111827); }
     }
 }
 
 // Token defaults sit on the outermost wrapper so the inline
-// `style="--giveflow-accent: …"` applyThemeTokens() writes wins on the same element
+// `style="--fundkit-accent: …"` applyThemeTokens() writes wins on the same element
 // and cascades down. On a descendant they would shadow the inherited inline
 // values, since a direct declaration beats an inherited custom property
 // whatever the specificity.
-.giveflow-donation-form {
+.fundkit-donation-form {
     // Reset host-theme defaults that some block themes apply to <form>.
     border: 0;
     padding: 0;
     margin: 0 auto;
 
     // The admin-set max width, overridable at any level by theme CSS.
-    max-width: var(--giveflow-form-max-width, 720px);
+    max-width: var(--fundkit-form-max-width, 720px);
     width: 100%;
     box-sizing: border-box;
 
-    --giveflow-accent:         #211d3f;
+    --fundkit-accent:         #211d3f;
     // Literal first, accent-derived mix second: the last valid declaration wins
     // and an unsupported color-mix is ignored. A brand preset can still set
-    // --giveflow-accent-soft explicitly and override both.
-    --giveflow-accent-soft:    #efedf8;
-    --giveflow-accent-soft:    color-mix(in srgb, var(--giveflow-accent) 12%, #fff);
-    --giveflow-text:           #111827;
-    --giveflow-text-muted:     #6b7280;
-    --giveflow-border:         #e5e7eb;
-    --giveflow-bg:             #ffffff;
-    --giveflow-bg-soft:        #f8fafb;
-    --giveflow-error-bg:       #fde8e8;
-    --giveflow-error-fg:       #9b1c1c;
-    --giveflow-warning-bg:     #fef3c7;
-    --giveflow-warning-fg:     #92400e;
-    --giveflow-on-accent:      #ffffff;
-    --giveflow-required:       #d63384;
-    --giveflow-typeface:    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --giveflow-type-size:      15px;
-    --giveflow-heading-weight: 600;
-    --giveflow-body-weight:    400;
-    --giveflow-radius:         10px;
-    --giveflow-radius-sm:      8px;
-    // --giveflow-button-radius and --giveflow-switcher-radius are deliberately not
-    // defaulted: unset they fall back to --giveflow-radius-sm, and setting either
+    // --fundkit-accent-soft explicitly and override both.
+    --fundkit-accent-soft:    #efedf8;
+    --fundkit-accent-soft:    color-mix(in srgb, var(--fundkit-accent) 12%, #fff);
+    --fundkit-text:           #111827;
+    --fundkit-text-muted:     #6b7280;
+    --fundkit-border:         #e5e7eb;
+    --fundkit-bg:             #ffffff;
+    --fundkit-bg-soft:        #f8fafb;
+    --fundkit-error-bg:       #fde8e8;
+    --fundkit-error-fg:       #9b1c1c;
+    --fundkit-warning-bg:     #fef3c7;
+    --fundkit-warning-fg:     #92400e;
+    --fundkit-on-accent:      #ffffff;
+    --fundkit-required:       #d63384;
+    --fundkit-typeface:    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --fundkit-type-size:      15px;
+    --fundkit-heading-weight: 600;
+    --fundkit-body-weight:    400;
+    --fundkit-radius:         10px;
+    --fundkit-radius-sm:      8px;
+    // --fundkit-button-radius and --fundkit-switcher-radius are deliberately not
+    // defaulted: unset they fall back to --fundkit-radius-sm, and setting either
     // overrides just the donate button or just the currency switcher.
-    --giveflow-pill-radius:    999px;
-    --giveflow-preset-hover:   rgba(0, 0, 0, .04);
-    --giveflow-stroke:   1px;
-    --giveflow-gap:            20px;
-    --giveflow-field-gap:      6px;
-    --giveflow-button-size:  48px;
-    --giveflow-button-weight:  600;
-    --giveflow-button-shadow:  0 1px 2px rgba(0, 0, 0, .08);
-    --giveflow-focus-ring:     #211d3f;
-    --giveflow-card-shadow:    0 12px 32px rgba(15, 23, 42, .06);
+    --fundkit-pill-radius:    999px;
+    --fundkit-preset-hover:   rgba(0, 0, 0, .04);
+    --fundkit-stroke:   1px;
+    --fundkit-gap:            20px;
+    --fundkit-field-gap:      6px;
+    --fundkit-button-size:  48px;
+    --fundkit-button-weight:  600;
+    --fundkit-button-shadow:  0 1px 2px rgba(0, 0, 0, .08);
+    --fundkit-focus-ring:     #211d3f;
+    --fundkit-card-shadow:    0 12px 32px rgba(15, 23, 42, .06);
 
     // Opt-in via the admin "Container" setting. Each piece is a CSS variable
-    // so themes can override, e.g. `.giveflow-donation-form { --giveflow-form-padding: 20px 24px; }`.
+    // so themes can override, e.g. `.fundkit-donation-form { --fundkit-form-padding: 20px 24px; }`.
     &--framed {
-        background: var(--giveflow-form-bg, #fff);
-        // --giveflow-form-radius is a theme override hook that nothing here sets,
+        background: var(--fundkit-form-bg, #fff);
+        // --fundkit-form-radius is a theme override hook that nothing here sets,
         // so the fallback has to be the campaign's own radius: a literal would
         // put a rounded card around a campaign set to square corners.
-        border-radius: var(--giveflow-form-radius, var(--giveflow-radius, 14px));
-        box-shadow: var(--giveflow-form-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px rgba(15, 23, 42, .06));
-        padding: var(--giveflow-form-padding, 36px 40px 44px);
+        border-radius: var(--fundkit-form-radius, var(--fundkit-radius, 14px));
+        box-shadow: var(--fundkit-form-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px rgba(15, 23, 42, .06));
+        padding: var(--fundkit-form-padding, 36px 40px 44px);
     }
 }
 
 // Boundary against host-theme element styles spilling in, kept at specificity 0
-// via :where() so every giveflow component class still wins. It leaves <a>,
+// via :where() so every fundkit component class still wins. It leaves <a>,
 // list-style and colour alone, so admin-authored rich text keeps its link and
 // list affordances. A theme rule more specific than a single class can still
 // win: this is light DOM.
-:where(.giveflow-form) {
+:where(.fundkit-form) {
     :where(button, input, select, textarea) {
         margin: 0;
         font: inherit;
@@ -140,21 +140,21 @@
 // "Plain" container: background and text colour follow the host page rather
 // than the branded card tokens, so the embed reads correctly on a light or a
 // dark section. The doubled wrapper class keeps this above the base
-// `.giveflow-donation-form .giveflow-form` rule whatever the source order.
-.giveflow-donation-form.giveflow-donation-form--plain .giveflow-form {
-    background: var(--giveflow-form-bg, transparent);
+// `.fundkit-donation-form .fundkit-form` rule whatever the source order.
+.fundkit-donation-form.fundkit-donation-form--plain .fundkit-form {
+    background: var(--fundkit-form-bg, transparent);
     color: inherit;
 }
 
-.giveflow-donation-form .giveflow-form {
+.fundkit-donation-form .fundkit-form {
     display: flex;
     flex-direction: column;
-    gap: var(--giveflow-gap);
-    background: var(--giveflow-bg);
-    color: var(--giveflow-text);
-    font-family: var(--giveflow-typeface);
-    font-size: var(--giveflow-type-size);
-    font-weight: var(--giveflow-body-weight);
+    gap: var(--fundkit-gap);
+    background: var(--fundkit-bg);
+    color: var(--fundkit-text);
+    font-family: var(--fundkit-typeface);
+    font-size: var(--fundkit-type-size);
+    font-weight: var(--fundkit-body-weight);
     line-height: 1.5;
     // Cuts the inheritance chain for the typography a host theme pushes in via
     // body or .entry-content that font, color and line-height do not cover.
@@ -168,16 +168,16 @@
     // Steps are the form's only direct children, so the gap above separates
     // groups and nothing separates the fields inside one. Slightly tighter than
     // the form's own gap, so a group still reads as a group.
-    .giveflow-form__step {
+    .fundkit-form__step {
         display: flex;
         flex-direction: column;
-        gap: var(--giveflow-gap);
+        gap: var(--fundkit-gap);
     }
 
     &--inline {
         gap: 24px;
 
-        .giveflow-form__nav {
+        .fundkit-form__nav {
             display: flex;
             padding-top: 8px;
         }
@@ -192,8 +192,8 @@
     &__step-title {
         margin: 0 0 16px;
         font-size: 18px;
-        font-weight: var(--giveflow-heading-weight, 600);
-        color: var(--giveflow-text);
+        font-weight: var(--fundkit-heading-weight, 600);
+        color: var(--fundkit-text);
     }
 
     &__nav {
@@ -210,13 +210,13 @@
         &--align-right  { justify-content: flex-end; }
         &--align-full {
             justify-content: stretch;
-            .giveflow-form__button { width: 100%; }
+            .fundkit-form__button { width: 100%; }
         }
     }
 
     &__step-count {
         font-size: 12px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         font-variant-numeric: tabular-nums;
     }
 
@@ -225,42 +225,42 @@
     &__divider {
         margin: 0;
         border: 0;
-        border-top: 1px solid var(--giveflow-border);
+        border-top: 1px solid var(--fundkit-border);
         width: 100%;
     }
 
     &__button {
         appearance: none;
-        border: var(--giveflow-button-border, 0);
-        min-height: var(--giveflow-button-size, 48px);
+        border: var(--fundkit-button-border, 0);
+        min-height: var(--fundkit-button-size, 48px);
         padding: 0 22px;
         font-size: 14px;
-        font-weight: var(--giveflow-button-weight, 600);
-        // Falls back to the shared --giveflow-radius-sm so the button matches the
-        // amount tiles; --giveflow-button-radius overrides the button alone.
-        border-radius: var(--giveflow-button-radius, var(--giveflow-radius-sm, 8px));
+        font-weight: var(--fundkit-button-weight, 600);
+        // Falls back to the shared --fundkit-radius-sm so the button matches the
+        // amount tiles; --fundkit-button-radius overrides the button alone.
+        border-radius: var(--fundkit-button-radius, var(--fundkit-radius-sm, 8px));
         cursor: pointer;
         transition: filter .15s, background .15s, box-shadow .15s;
         font-family: inherit;
-        box-shadow: var(--giveflow-button-shadow, 0 1px 2px rgba(0, 0, 0, .08));
+        box-shadow: var(--fundkit-button-shadow, 0 1px 2px rgba(0, 0, 0, .08));
 
         &:disabled { opacity: .5; cursor: not-allowed; }
 
         &--primary {
-            background: var(--giveflow-button-bg, var(--giveflow-accent));
-            color: var(--giveflow-button-fg, var(--giveflow-on-accent, #fff));
+            background: var(--fundkit-button-bg, var(--fundkit-accent));
+            color: var(--fundkit-button-fg, var(--fundkit-on-accent, #fff));
 
             &:hover:not(:disabled) {
                 filter: brightness(.92);
-                background: var(--giveflow-button-hover-bg, var(--giveflow-button-bg, var(--giveflow-accent)));
+                background: var(--fundkit-button-hover-bg, var(--fundkit-button-bg, var(--fundkit-accent)));
             }
         }
 
         &--secondary {
-            background: var(--giveflow-bg-soft);
-            color: var(--giveflow-text);
+            background: var(--fundkit-bg-soft);
+            color: var(--fundkit-text);
 
-            &:hover:not(:disabled) { background: var(--giveflow-border); }
+            &:hover:not(:disabled) { background: var(--fundkit-border); }
         }
     }
 
@@ -276,10 +276,10 @@
         position: relative;
         appearance: none;
         border: 0;
-        background: var(--giveflow-bg-soft, #f8fafb);
-        color: var(--giveflow-text);
+        background: var(--fundkit-bg-soft, #f8fafb);
+        color: var(--fundkit-text);
         padding: 12px 12px;
-        border-radius: var(--giveflow-radius-sm);
+        border-radius: var(--fundkit-radius-sm);
         cursor: pointer;
         transition: background .15s, outline-color .15s;
         font-family: inherit;
@@ -291,17 +291,17 @@
         outline: 2px solid transparent;
         outline-offset: -2px;
 
-        &:hover { background: var(--giveflow-preset-hover, rgba(0, 0, 0, .04)); }
+        &:hover { background: var(--fundkit-preset-hover, rgba(0, 0, 0, .04)); }
 
         &:focus-visible {
-            outline-color: var(--giveflow-focus-ring, var(--giveflow-accent));
+            outline-color: var(--fundkit-focus-ring, var(--fundkit-accent));
             outline-offset: 2px;
         }
 
         &.is-selected {
-            outline-color: var(--giveflow-accent);
-            background: var(--giveflow-accent-soft);
-            color: var(--giveflow-accent);
+            outline-color: var(--fundkit-accent);
+            background: var(--fundkit-accent-soft);
+            color: var(--fundkit-accent);
         }
     }
     &__preset-amount {
@@ -312,7 +312,7 @@
     &__preset-impact {
         font-size: 11px;
         font-weight: 500;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         line-height: 1.3;
     }
 
@@ -326,7 +326,7 @@
             padding: 0 0 6px;
             font-size: 13px;
             font-weight: 500;
-            color: var(--giveflow-text);
+            color: var(--fundkit-text);
         }
     }
     &__frequency-options {
@@ -343,40 +343,40 @@
         font-weight: 500;
         font-family: inherit;
         cursor: pointer;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         transition: background .15s, color .15s, border-color .15s;
     }
 
     &__frequency--pills {
-        .giveflow-form__frequency-options {
+        .fundkit-form__frequency-options {
             padding: 4px;
-            background: var(--giveflow-bg-soft, #f8fafb);
-            border-radius: var(--giveflow-radius-sm, 8px);
+            background: var(--fundkit-bg-soft, #f8fafb);
+            border-radius: var(--fundkit-radius-sm, 8px);
         }
-        .giveflow-form__frequency-option {
-            border-radius: var(--giveflow-radius-sm, 8px);
+        .fundkit-form__frequency-option {
+            border-radius: var(--fundkit-radius-sm, 8px);
 
-            &:hover { color: var(--giveflow-text); }
+            &:hover { color: var(--fundkit-text); }
             &.is-selected {
-                background: var(--giveflow-accent);
-                color: var(--giveflow-on-accent, #fff);
+                background: var(--fundkit-accent);
+                color: var(--fundkit-on-accent, #fff);
             }
         }
     }
 
     &__frequency--tabs {
-        border-bottom: 1px solid var(--giveflow-border);
+        border-bottom: 1px solid var(--fundkit-border);
 
-        .giveflow-form__frequency-options { gap: 0; }
-        .giveflow-form__frequency-option {
+        .fundkit-form__frequency-options { gap: 0; }
+        .fundkit-form__frequency-option {
             margin-bottom: -1px;
             border-bottom: 2px solid transparent;
             border-radius: 0;
 
-            &:hover { color: var(--giveflow-text); }
+            &:hover { color: var(--fundkit-text); }
             &.is-selected {
-                color: var(--giveflow-accent);
-                border-bottom-color: var(--giveflow-accent);
+                color: var(--fundkit-accent);
+                border-bottom-color: var(--fundkit-accent);
                 font-weight: 600;
             }
         }
@@ -384,7 +384,7 @@
     &__frequency-help {
         margin: 6px 0 0;
         font-size: 12px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         line-height: 1.4;
     }
 
@@ -394,26 +394,26 @@
     &__custom-label {
         display: block;
         font-size: 13px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         margin-bottom: 6px;
     }
     &__custom-input-wrap {
         display: flex;
         align-items: center;
         gap: 8px;
-        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
-        border-radius: var(--giveflow-radius-sm);
+        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
+        border-radius: var(--fundkit-radius-sm);
         padding: 0 12px;
-        background: var(--giveflow-bg);
+        background: var(--fundkit-bg);
 
         &:focus-within {
-            border-color: var(--giveflow-focus-ring, var(--giveflow-accent));
-            box-shadow: 0 0 0 3px var(--giveflow-accent-soft);
+            border-color: var(--fundkit-focus-ring, var(--fundkit-accent));
+            box-shadow: 0 0 0 3px var(--fundkit-accent-soft);
         }
     }
     &__currency {
         font-size: 13px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         font-weight: 500;
     }
     &__custom-input {
@@ -424,7 +424,7 @@
         padding: 10px 0;
         font-size: 16px;
         background: transparent;
-        color: var(--giveflow-text);
+        color: var(--fundkit-text);
         font-variant-numeric: tabular-nums;
         font-family: inherit;
     }
@@ -433,7 +433,7 @@
 // Honeypot field: a bot that crawls the DOM and fills every input populates it,
 // and the server then rejects the submission silently. Hidden with `position:
 // absolute` rather than `display: none` because some bots skip hidden fields.
-.giveflow-donation-form .giveflow-form__hp {
+.fundkit-donation-form .fundkit-form__hp {
     position: absolute;
     left: -10000px;
     top: auto;
@@ -443,17 +443,17 @@
     opacity: 0;
     pointer-events: none;
 }
-.giveflow-donation-form .giveflow-privacy {
+.fundkit-donation-form .fundkit-privacy {
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
-    color: var(--giveflow-text-muted);
+    color: var(--fundkit-text-muted);
 
     &--center { text-align: center; }
     &--right  { text-align: right;  }
 
     &__link {
-        color: var(--giveflow-accent);
+        color: var(--fundkit-accent);
         text-decoration: underline;
 
         &:hover, &:focus-visible {
@@ -462,18 +462,18 @@
     }
 }
 
-.giveflow-donation-form .giveflow-amount {
+.fundkit-donation-form .fundkit-amount {
     display: flex;
     align-items: center;
     gap: 8px;
-    border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
-    border-radius: var(--giveflow-radius-sm);
+    border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
+    border-radius: var(--fundkit-radius-sm);
     padding: 0 12px;
-    background: var(--giveflow-bg);
+    background: var(--fundkit-bg);
 
     &:focus-within {
-        border-color: var(--giveflow-focus-ring, var(--giveflow-accent));
-        box-shadow: 0 0 0 3px var(--giveflow-accent-soft);
+        border-color: var(--fundkit-focus-ring, var(--fundkit-accent));
+        box-shadow: 0 0 0 3px var(--fundkit-accent-soft);
     }
 
     &__prefix {
@@ -483,7 +483,7 @@
 
     &__code {
         font-size: 13px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         font-weight: 500;
     }
 
@@ -495,14 +495,14 @@
         padding: 10px 0;
         font-size: 16px;
         background: transparent;
-        color: var(--giveflow-text);
+        color: var(--fundkit-text);
         font-variant-numeric: tabular-nums;
         font-family: inherit;
         min-width: 0;
     }
 }
 
-.giveflow-donation-form .giveflow-form {
+.fundkit-donation-form .fundkit-form {
 
     &__donor {
         display: flex;
@@ -524,53 +524,53 @@
     &__field {
         display: flex;
         flex-direction: column;
-        gap: var(--giveflow-field-gap, 4px);
+        gap: var(--fundkit-field-gap, 4px);
     }
 
     &__label {
         font-size: 13px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         font-weight: 500;
     }
 
     &__required {
-        color: var(--giveflow-required, #d63384);
+        color: var(--fundkit-required, #d63384);
         margin-left: 2px;
     }
 
     &__field input {
         appearance: none;
-        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
-        border-radius: var(--giveflow-radius-sm);
+        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
+        border-radius: var(--fundkit-radius-sm);
         padding: 10px 12px;
-        font-size: var(--giveflow-type-size, 15px);
-        background: var(--giveflow-bg);
-        color: var(--giveflow-text);
+        font-size: var(--fundkit-type-size, 15px);
+        background: var(--fundkit-bg);
+        color: var(--fundkit-text);
         font-family: inherit;
         line-height: 1.4;
 
         &:focus {
             outline: 0;
-            border-color: var(--giveflow-focus-ring, var(--giveflow-accent));
-            box-shadow: 0 0 0 3px var(--giveflow-accent-soft);
+            border-color: var(--fundkit-focus-ring, var(--fundkit-accent));
+            box-shadow: 0 0 0 3px var(--fundkit-accent-soft);
         }
 
         &[aria-invalid="true"] {
-            border-color: var(--giveflow-error-fg);
+            border-color: var(--fundkit-error-fg);
         }
     }
 
     &__field-error {
         margin: 4px 0 0;
         font-size: 12px;
-        color: var(--giveflow-error-fg);
+        color: var(--fundkit-error-fg);
     }
 
     &__summary {
         margin: 0;
         padding: 16px;
-        background: var(--giveflow-bg-soft);
-        border-radius: var(--giveflow-radius);
+        background: var(--fundkit-bg-soft);
+        border-radius: var(--fundkit-radius);
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -581,20 +581,20 @@
         justify-content: space-between;
         gap: 12px;
 
-        dt { color: var(--giveflow-text-muted); font-size: 13px; margin: 0; }
+        dt { color: var(--fundkit-text-muted); font-size: 13px; margin: 0; }
         dd { margin: 0; font-weight: 500; }
     }
     &__summary-row--total {
         margin-top: 4px;
         padding-top: 12px;
-        border-top: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
+        border-top: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
 
-        dt { color: var(--giveflow-text); font-size: 15px; font-weight: 600; }
+        dt { color: var(--fundkit-text); font-size: 15px; font-weight: 600; }
     }
     &__summary-amount {
         font-size: 22px;
         font-weight: 700;
-        color: var(--giveflow-accent);
+        color: var(--fundkit-accent);
         font-variant-numeric: tabular-nums;
     }
 
@@ -606,10 +606,10 @@
 
     &__test-banner {
         padding: 10px 14px;
-        border-radius: var(--giveflow-radius-sm);
-        border: var(--giveflow-stroke, 1px) solid var(--giveflow-warning-fg, #92400e);
-        background: var(--giveflow-warning-bg, #fef3c7);
-        color: var(--giveflow-warning-fg, #92400e);
+        border-radius: var(--fundkit-radius-sm);
+        border: var(--fundkit-stroke, 1px) solid var(--fundkit-warning-fg, #92400e);
+        background: var(--fundkit-warning-bg, #fef3c7);
+        color: var(--fundkit-warning-fg, #92400e);
         font-size: 13px;
         font-weight: 600;
     }
@@ -618,10 +618,10 @@
     // banner: a condition to act on, not an error the donor caused.
     &__gateways-empty {
         padding: 10px 14px;
-        border-radius: var(--giveflow-radius-sm);
-        border: var(--giveflow-stroke, 1px) solid var(--giveflow-warning-fg, #92400e);
-        background: var(--giveflow-warning-bg, #fef3c7);
-        color: var(--giveflow-warning-fg, #92400e);
+        border-radius: var(--fundkit-radius-sm);
+        border: var(--fundkit-stroke, 1px) solid var(--fundkit-warning-fg, #92400e);
+        background: var(--fundkit-warning-bg, #fef3c7);
+        color: var(--fundkit-warning-fg, #92400e);
         font-size: 13px;
         font-weight: 600;
     }
@@ -634,7 +634,7 @@
     &__gateways-legend {
         padding: 0;
         margin: 0 0 8px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         font-size: 13px;
     }
     &__gateways-list {
@@ -647,20 +647,20 @@
         align-items: flex-start;
         gap: 10px;
         padding: 12px 14px;
-        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
+        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
         // A control, not a tile: it sits in the same column as the amount
         // buttons and the inputs, which all take the small radius.
-        border-radius: var(--giveflow-radius-sm);
+        border-radius: var(--fundkit-radius-sm);
         cursor: pointer;
 
         input[type="radio"] {
             margin: 2px 0 0;
-            accent-color: var(--giveflow-accent);
+            accent-color: var(--fundkit-accent);
             flex-shrink: 0;
         }
         &.is-selected {
-            border-color: var(--giveflow-accent);
-            box-shadow: inset 0 0 0 1px var(--giveflow-accent);
+            border-color: var(--fundkit-accent);
+            box-shadow: inset 0 0 0 1px var(--fundkit-accent);
         }
     }
     &__gateway-body {
@@ -670,17 +670,17 @@
     }
     &__gateway-label { font-weight: 600; }
     &__gateway-desc {
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         font-size: 13px;
     }
 
     // Descendants written out rather than nested with &, which expands to the
-    // whole parent compound and would put .giveflow-donation-form in the selector
+    // whole parent compound and would put .fundkit-donation-form in the selector
     // twice, matching nothing.
     &__gateways--list {
-        .giveflow-form__gateways-list { gap: 4px; }
+        .fundkit-form__gateways-list { gap: 4px; }
 
-        .giveflow-form__gateway {
+        .fundkit-form__gateway {
             padding: 6px 0;
             border: 0;
             border-radius: 0;
@@ -697,7 +697,7 @@
         // row it nests: three inputs on a line, about 77px each in a sidebar.
         // A row holding one therefore stops being a row. Spanning only the name
         // would strand its neighbour at half width beside empty space.
-        &:has(> .giveflow-form__row--two-up) > * {
+        &:has(> .fundkit-form__row--two-up) > * {
             grid-column: 1 / -1;
         }
 
@@ -711,7 +711,7 @@
         align-items: center;
         gap: 10px;
         font-size: 14px;
-        color: var(--giveflow-text);
+        color: var(--fundkit-text);
         cursor: pointer;
         margin-top: 4px;
 
@@ -721,14 +721,14 @@
         // whatever its state. This restores the native control and pins the
         // size, doubled on the form class to outrank a theme's element rules.
         input[type="checkbox"],
-        .giveflow-donation-form.giveflow-donation-form & input[type="checkbox"] {
+        .fundkit-donation-form.fundkit-donation-form & input[type="checkbox"] {
             appearance: auto;
             -webkit-appearance: checkbox;
             width: 16px;
             height: 16px;
             min-width: 16px;
             min-height: 16px;
-            accent-color: var(--giveflow-accent);
+            accent-color: var(--fundkit-accent);
             margin: 0;
         }
 
@@ -745,17 +745,17 @@
 
     &__check-label {
         font-size: 14px;
-        color: var(--giveflow-text);
+        color: var(--fundkit-text);
     }
 
     &__check-help {
         font-size: 12px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
     }
 
     &__field-help {
         font-size: 12px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         margin-bottom: 4px;
     }
 
@@ -767,7 +767,7 @@
         legend {
             font-size: 14px;
             font-weight: 500;
-            color: var(--giveflow-text);
+            color: var(--fundkit-text);
             margin-bottom: 6px;
         }
     }
@@ -783,9 +783,9 @@
     // :focus-visible, no element default. Without this the donor lands on a
     // group that looks like every valid one on the form.
     &__radio-options[aria-invalid="true"] {
-        outline: 2px solid var(--giveflow-error-fg);
+        outline: 2px solid var(--fundkit-error-fg);
         outline-offset: 4px;
-        border-radius: var(--giveflow-radius-sm, 8px);
+        border-radius: var(--fundkit-radius-sm, 8px);
     }
 
     &__radio--horizontal &__radio-options {
@@ -799,13 +799,13 @@
         align-items: center;
         gap: 8px;
         font-size: 14px;
-        color: var(--giveflow-text);
+        color: var(--fundkit-text);
         cursor: pointer;
 
         input[type="radio"] {
             width: 16px;
             height: 16px;
-            accent-color: var(--giveflow-accent);
+            accent-color: var(--fundkit-accent);
             margin: 0;
         }
     }
@@ -822,7 +822,7 @@
         legend {
             font-size: 14px;
             font-weight: 500;
-            color: var(--giveflow-text);
+            color: var(--fundkit-text);
             margin-bottom: 6px;
         }
     }
@@ -838,13 +838,13 @@
         align-items: center;
         gap: 8px;
         font-size: 14px;
-        color: var(--giveflow-text);
+        color: var(--fundkit-text);
         cursor: pointer;
 
         input[type="checkbox"] {
             width: 16px;
             height: 16px;
-            accent-color: var(--giveflow-accent);
+            accent-color: var(--fundkit-accent);
             margin: 0;
         }
     }
@@ -856,7 +856,7 @@
     &__cover-fees-math {
         font-style: normal;
         margin-left: 6px;
-        color: var(--giveflow-accent);
+        color: var(--fundkit-accent);
         font-weight: 500;
         font-variant-numeric: tabular-nums;
     }
@@ -873,7 +873,7 @@
             padding: 0;
             font-weight: 500;
             font-size: 13px;
-            color: var(--giveflow-text-muted);
+            color: var(--fundkit-text-muted);
         }
     }
     &__fund-options {
@@ -888,7 +888,7 @@
         font-weight: 700;
         letter-spacing: .04em;
         text-transform: uppercase;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
     }
     &__fund-option {
         position: relative;
@@ -900,21 +900,21 @@
         flex-direction: column;
         gap: 2px;
         padding: 12px;
-        border: calc(var(--giveflow-stroke, 1px) * 2) solid var(--giveflow-border);
-        border-radius: var(--giveflow-radius-sm);
-        background: var(--giveflow-bg);
+        border: calc(var(--fundkit-stroke, 1px) * 2) solid var(--fundkit-border);
+        border-radius: var(--fundkit-radius-sm);
+        background: var(--fundkit-bg);
         cursor: pointer;
         transition: border-color .15s, background .15s;
 
-        &:hover { border-color: var(--giveflow-text-muted); }
+        &:hover { border-color: var(--fundkit-text-muted); }
         // The radio is visually hidden, so surface keyboard focus on the label.
         &:focus-within {
-            border-color: var(--giveflow-focus-ring, var(--giveflow-accent));
-            box-shadow: 0 0 0 3px var(--giveflow-accent-soft);
+            border-color: var(--fundkit-focus-ring, var(--fundkit-accent));
+            box-shadow: 0 0 0 3px var(--fundkit-accent-soft);
         }
         &.is-selected {
-            border-color: var(--giveflow-accent);
-            background: var(--giveflow-accent-soft);
+            border-color: var(--fundkit-accent);
+            background: var(--fundkit-accent-soft);
         }
 
         input[type="radio"] {
@@ -926,11 +926,11 @@
     &__fund-option-label {
         font-size: 13px;
         font-weight: 600;
-        color: var(--giveflow-text);
+        color: var(--fundkit-text);
     }
     &__fund-option-desc {
         font-size: 11px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         line-height: 1.3;
     }
 
@@ -944,9 +944,9 @@
 
         legend {
             padding: 0;
-            font-weight: var(--giveflow-heading-weight, 600);
+            font-weight: var(--fundkit-heading-weight, 600);
             font-size: 14px;
-            color: var(--giveflow-text);
+            color: var(--fundkit-text);
         }
     }
 
@@ -957,9 +957,9 @@
         // Controls that cannot move anything once paying starts are hidden
         // rather than greyed out, which reads as something having gone wrong.
         // The gateway owns this screen and shows the charge itself.
-        .giveflow-form__donor,
-        .giveflow-form__amount,
-        .giveflow-form__confirm {
+        .fundkit-form__donor,
+        .fundkit-form__amount,
+        .fundkit-form__confirm {
             display: none;
         }
 
@@ -967,15 +967,15 @@
         // buttons is a donor deciding which one takes their money. Scoped back
         // in below the mount, because the gateway draws its Pay and Cancel in a
         // nav of the same name.
-        .giveflow-form__nav {
+        .fundkit-form__nav {
             display: none;
         }
 
-        .giveflow-form__payment-mount .giveflow-form__nav {
+        .fundkit-form__payment-mount .fundkit-form__nav {
             display: flex;
         }
 
-        .giveflow-form__payment-mount {
+        .fundkit-form__payment-mount {
             pointer-events: auto;
         }
     }
@@ -1028,7 +1028,7 @@
         gap: 10px;
         align-items: flex-start;
         font-size: 14px;
-        color: var(--giveflow-text);
+        color: var(--fundkit-text);
         cursor: pointer;
 
         input { margin-top: 3px; flex: 0 0 auto; }
@@ -1039,11 +1039,11 @@
         max-height: 180px;
         overflow-y: auto;
         padding: 12px 14px;
-        border: 1px solid var(--giveflow-border);
-        border-radius: var(--giveflow-radius, 8px);
+        border: 1px solid var(--fundkit-border);
+        border-radius: var(--fundkit-radius, 8px);
         font-size: 13px;
         line-height: 1.5;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         white-space: pre-wrap;
     }
     &__terms-link {
@@ -1061,15 +1061,15 @@
 
         legend {
             padding: 0;
-            font-weight: var(--giveflow-heading-weight, 600);
+            font-weight: var(--fundkit-heading-weight, 600);
             font-size: 14px;
-            color: var(--giveflow-text);
+            color: var(--fundkit-text);
         }
     }
     &__consent-help {
         margin: 0;
         font-size: 13px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         line-height: 1.4;
     }
     &__consent-purposes {
@@ -1082,14 +1082,14 @@
         gap: 10px;
         align-items: flex-start;
         padding: 10px 12px;
-        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
-        border-radius: var(--giveflow-radius-sm);
-        background: var(--giveflow-bg);
+        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
+        border-radius: var(--fundkit-radius-sm);
+        background: var(--fundkit-bg);
         cursor: pointer;
 
         input[type="checkbox"] {
             margin-top: 2px;
-            accent-color: var(--giveflow-accent);
+            accent-color: var(--fundkit-accent);
             flex-shrink: 0;
         }
         input[type="checkbox"]:disabled {
@@ -1107,7 +1107,7 @@
     &__consent-label {
         font-size: 13px;
         font-weight: 500;
-        color: var(--giveflow-text);
+        color: var(--fundkit-text);
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -1115,7 +1115,7 @@
     }
     &__consent-desc {
         font-size: 12px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         line-height: 1.4;
     }
     &__consent-required-pill {
@@ -1125,8 +1125,8 @@
         letter-spacing: .04em;
         padding: 1px 6px;
         border-radius: 999px;
-        background: var(--giveflow-warning-bg, #fef3c7);
-        color: var(--giveflow-warning-fg, #92400e);
+        background: var(--fundkit-warning-bg, #fef3c7);
+        color: var(--fundkit-warning-fg, #92400e);
     }
 
     &__currency-switcher {
@@ -1135,15 +1135,15 @@
         gap: 10px;
         width: 100%;
         font-size: 13px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         margin-bottom: 12px;
 
         select {
             padding: 6px 10px;
-            border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
-            border-radius: var(--giveflow-switcher-radius, var(--giveflow-radius-sm, 8px));
+            border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
+            border-radius: var(--fundkit-switcher-radius, var(--fundkit-radius-sm, 8px));
             font: inherit;
-            background: var(--giveflow-bg);
+            background: var(--fundkit-bg);
             cursor: pointer;
         }
 
@@ -1157,34 +1157,34 @@
         gap: 6px;
         flex-wrap: wrap;
         padding: 4px;
-        background: var(--giveflow-bg-soft, #f8fafb);
-        border-radius: var(--giveflow-switcher-radius, var(--giveflow-radius-sm, 8px));
+        background: var(--fundkit-bg-soft, #f8fafb);
+        border-radius: var(--fundkit-switcher-radius, var(--fundkit-radius-sm, 8px));
     }
     &__currency-pill {
         appearance: none;
         border: 0;
         background: transparent;
         padding: 6px 14px;
-        border-radius: var(--giveflow-switcher-radius, var(--giveflow-radius-sm, 8px));
+        border-radius: var(--fundkit-switcher-radius, var(--fundkit-radius-sm, 8px));
         font: inherit;
         font-size: 13px;
         font-weight: 500;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         cursor: pointer;
         transition: background .15s, color .15s;
 
-        &:hover { color: var(--giveflow-text); }
+        &:hover { color: var(--fundkit-text); }
         &.is-selected {
-            background: var(--giveflow-accent);
-            color: var(--giveflow-on-accent, #fff);
+            background: var(--fundkit-accent);
+            color: var(--fundkit-on-accent, #fff);
         }
     }
 
     textarea {
         width: 100%;
         padding: 10px 12px;
-        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
-        border-radius: var(--giveflow-radius-sm);
+        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
+        border-radius: var(--fundkit-radius-sm);
         font: inherit;
         line-height: 1.5;
         resize: vertical;
@@ -1192,8 +1192,8 @@
 
         &:focus {
             outline: none;
-            border-color: var(--giveflow-focus-ring, var(--giveflow-accent));
-            box-shadow: 0 0 0 3px var(--giveflow-accent-soft);
+            border-color: var(--fundkit-focus-ring, var(--fundkit-accent));
+            box-shadow: 0 0 0 3px var(--fundkit-accent-soft);
         }
     }
 
@@ -1205,49 +1205,49 @@
     }
     &__html { display: contents; }
 
-    .giveflow-goal {
+    .fundkit-goal {
         display: flex;
         flex-direction: column;
         gap: 6px;
     }
-    .giveflow-goal__amount {
+    .fundkit-goal__amount {
         display: flex;
         justify-content: space-between;
         font-size: 13px;
-        color: var(--giveflow-text);
+        color: var(--fundkit-text);
 
         strong { font-weight: 600; }
-        span   { color: var(--giveflow-text-muted); }
+        span   { color: var(--fundkit-text-muted); }
     }
-    .giveflow-goal__bar {
+    .fundkit-goal__bar {
         height: 8px;
-        background: var(--giveflow-border);
-        border-radius: var(--giveflow-radius-sm, 4px);
+        background: var(--fundkit-border);
+        border-radius: var(--fundkit-radius-sm, 4px);
         overflow: hidden;
     }
-    .giveflow-goal__fill {
+    .fundkit-goal__fill {
         height: 100%;
-        background: var(--giveflow-accent);
+        background: var(--fundkit-accent);
         transition: width .3s ease;
     }
-    .giveflow-goal__meta {
+    .fundkit-goal__meta {
         display: flex;
         justify-content: space-between;
         font-size: 12px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
     }
-    .giveflow-goal--missing {
+    .fundkit-goal--missing {
         font-size: 12px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         padding: 8px 10px;
-        background: var(--giveflow-bg-soft);
-        border-radius: var(--giveflow-radius-sm);
+        background: var(--fundkit-bg-soft);
+        border-radius: var(--fundkit-radius-sm);
     }
     &__heading {
         margin: 0;
-        font-weight: var(--giveflow-heading-weight, 600);
+        font-weight: var(--fundkit-heading-weight, 600);
         line-height: 1.25;
-        color: var(--giveflow-text);
+        color: var(--fundkit-text);
 
         &--left   { text-align: left; }
         &--center { text-align: center; }
@@ -1256,14 +1256,14 @@
     &__paragraph {
         margin: 0;
         line-height: 1.5;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         font-size: 14px;
 
         &--left   { text-align: left; }
         &--center { text-align: center; }
         &--right  { text-align: right; }
 
-        a { color: var(--giveflow-accent); }
+        a { color: var(--fundkit-accent); }
     }
 
     &__progress {
@@ -1276,8 +1276,8 @@
     &__page-title {
         margin: 0 0 8px;
         font-size: 18px;
-        font-weight: var(--giveflow-heading-weight, 600);
-        color: var(--giveflow-text);
+        font-weight: var(--fundkit-heading-weight, 600);
+        color: var(--fundkit-text);
         line-height: 1.3;
     }
 
@@ -1302,43 +1302,43 @@
         justify-content: center;
         border-radius: 999px;
         cursor: pointer;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         font-size: 18px;
         line-height: 1;
         transition: background .12s, color .12s;
 
         &:hover {
-            background: var(--giveflow-bg-soft);
-            color: var(--giveflow-text);
+            background: var(--fundkit-bg-soft);
+            color: var(--fundkit-text);
         }
         &[aria-hidden="true"] { pointer-events: none; }
     }
     &__bar-title {
         margin: 0;
         font-size: 15px;
-        font-weight: var(--giveflow-heading-weight, 600);
+        font-weight: var(--fundkit-heading-weight, 600);
         text-align: center;
-        color: var(--giveflow-text);
+        color: var(--fundkit-text);
         line-height: 1.3;
     }
     &__bar-spacer { width: 32px; }
 
     &__bar-track {
         height: 4px;
-        background: var(--giveflow-border, #e5e7eb);
+        background: var(--fundkit-border, #e5e7eb);
         border-radius: 0;
         overflow: hidden;
         margin: 0 0 20px;
     }
     &__bar-fill {
         height: 100%;
-        background: var(--giveflow-accent);
+        background: var(--fundkit-accent);
         transition: width .25s ease;
     }
     &__body {
         display: flex;
         flex-direction: column;
-        gap: var(--giveflow-gap, 20px);
+        gap: var(--fundkit-gap, 20px);
     }
     &__nav--end,
     &__nav--align-end,
@@ -1346,38 +1346,38 @@
     &__nav--align-start,
     &__nav--align-left     { justify-content: flex-start; }
     &__nav--align-center   { justify-content: center; }
-    &__nav--align-stretch  { > .giveflow-form__button { flex: 1; } }
+    &__nav--align-stretch  { > .fundkit-form__button { flex: 1; } }
     &__progress-dot {
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background: var(--giveflow-border, #e5e7eb);
+        background: var(--fundkit-border, #e5e7eb);
         transition: background .15s ease, transform .15s ease;
 
-        &.is-done    { background: var(--giveflow-accent, #211d3f); }
+        &.is-done    { background: var(--fundkit-accent, #211d3f); }
         &.is-current {
-            background: var(--giveflow-accent, #211d3f);
+            background: var(--fundkit-accent, #211d3f);
             transform: scale(1.25);
         }
     }
     &__page-title {
         margin: 0 0 12px;
         font-size: 16px;
-        font-weight: var(--giveflow-heading-weight, 600);
-        color: var(--giveflow-text);
+        font-weight: var(--fundkit-heading-weight, 600);
+        color: var(--fundkit-text);
     }
 
     // Author styling belongs to WP's block-supports: the wrapper renders the
     // inline style the Style Engine produced, so only structure lives here.
-    .giveflow-block--section {
-        > .giveflow-form__decorations { margin-bottom: 0; }
+    .fundkit-block--section {
+        > .fundkit-form__decorations { margin-bottom: 0; }
     }
 
     &__error {
         padding: 10px 14px;
-        background: var(--giveflow-error-bg);
-        color: var(--giveflow-error-fg);
-        border-radius: var(--giveflow-radius-sm);
+        background: var(--fundkit-error-bg);
+        color: var(--fundkit-error-fg);
+        border-radius: var(--fundkit-radius-sm);
         font-size: 13px;
     }
 
@@ -1388,7 +1388,7 @@
         h3 {
             margin: 12px 0 6px;
             font-size: 20px;
-            font-weight: var(--giveflow-heading-weight, 600);
+            font-weight: var(--fundkit-heading-weight, 600);
         }
     }
     &__success-icon {
@@ -1396,8 +1396,8 @@
         height: 56px;
         margin: 0 auto;
         border-radius: 50%;
-        background: var(--giveflow-accent);
-        color: var(--giveflow-on-accent, #fff);
+        background: var(--fundkit-accent);
+        color: var(--fundkit-on-accent, #fff);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1407,20 +1407,20 @@
     &__reference {
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-size: 13px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         margin: 0 0 18px;
     }
 
     &__payment-title {
         margin: 0 0 4px;
         font-size: 18px;
-        font-weight: var(--giveflow-heading-weight, 600);
+        font-weight: var(--fundkit-heading-weight, 600);
     }
     &__payment-amount {
         margin: 0 0 16px;
         font-size: 22px;
         font-weight: 700;
-        color: var(--giveflow-accent);
+        color: var(--fundkit-accent);
     }
     &__payment-element {
         min-height: 44px;
@@ -1434,14 +1434,14 @@
     }
     &__payment-loading {
         font-size: 13px;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         margin: 0 0 12px;
     }
 
     &__confirming {
         text-align: center;
         padding: 32px 0;
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         font-size: 14px;
     }
     &__spinner {
@@ -1449,37 +1449,37 @@
         width: 28px;
         height: 28px;
         margin-bottom: 12px;
-        border: 3px solid var(--giveflow-border);
-        border-top-color: var(--giveflow-accent);
+        border: 3px solid var(--fundkit-border);
+        border-top-color: var(--fundkit-accent);
         border-radius: 50%;
-        animation: giveflow-form-spin 0.7s linear infinite;
+        animation: fundkit-form-spin 0.7s linear infinite;
     }
 }
 
-@keyframes giveflow-form-spin {
+@keyframes fundkit-form-spin {
     to { transform: rotate(360deg); }
 }
 
-.giveflow-form__country-select {
+.fundkit-form__country-select {
     position: relative;
 
     &-input {
         width: 100%;
         padding: 9px 32px 9px 12px;
-        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
-        border-radius: var(--giveflow-radius-sm, 8px);
-        background: var(--giveflow-bg, #fff);
-        color: var(--giveflow-text);
+        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
+        border-radius: var(--fundkit-radius-sm, 8px);
+        background: var(--fundkit-bg, #fff);
+        color: var(--fundkit-text);
         font: inherit;
         line-height: 1.4;
         cursor: pointer;
 
         &:focus {
-            outline: 2px solid var(--giveflow-accent);
+            outline: 2px solid var(--fundkit-accent);
             outline-offset: -1px;
         }
 
-        &[aria-invalid="true"] { border-color: var(--giveflow-error-fg); }
+        &[aria-invalid="true"] { border-color: var(--fundkit-error-fg); }
     }
 
     &-chevron {
@@ -1487,7 +1487,7 @@
         right: 10px;
         top: 50%;
         transform: translateY(-50%);
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         pointer-events: none;
         transition: transform .15s ease;
     }
@@ -1505,9 +1505,9 @@
         margin: 0;
         padding: 4px;
         list-style: none;
-        background: var(--giveflow-bg, #fff);
-        border: var(--giveflow-stroke, 1px) solid var(--giveflow-border);
-        border-radius: var(--giveflow-radius-sm, 8px);
+        background: var(--fundkit-bg, #fff);
+        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
+        border-radius: var(--fundkit-radius-sm, 8px);
         box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
     }
 
@@ -1519,18 +1519,18 @@
         padding: 7px 10px;
         border-radius: 6px;
         cursor: pointer;
-        color: var(--giveflow-text);
+        color: var(--fundkit-text);
         font-size: 14px;
         line-height: 1.3;
 
         &.is-active,
-        &:hover { background: var(--giveflow-accent-soft, #efedf8); }
+        &:hover { background: var(--fundkit-accent-soft, #efedf8); }
 
         &.is-current { font-weight: 600; }
     }
 
     &-hint {
-        color: var(--giveflow-text-muted);
+        color: var(--fundkit-text-muted);
         font-size: 12px;
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }

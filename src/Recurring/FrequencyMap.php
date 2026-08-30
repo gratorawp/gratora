@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Recurring;
+namespace FundKit\Recurring;
 
 use RuntimeException;
 
 /**
- * Bridge between GiveFlow donation frequencies and Stripe billing intervals.
+ * Bridge between FundKit donation frequencies and Stripe billing intervals.
  *
- * GiveFlow frequencies are user-facing labels chosen on the form: one_time, weekly,
+ * FundKit frequencies are user-facing labels chosen on the form: one_time, weekly,
  * biweekly, monthly, quarterly, yearly. Stripe Prices take an `interval`
  * (day|week|month|year) plus `interval_count`; this mapper produces the pair.
  *

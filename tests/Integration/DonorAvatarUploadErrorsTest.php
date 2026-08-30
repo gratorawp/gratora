@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorAvatarUploader;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorAvatarUploader;
 
 /**
  * An upload that fails has to say why. PHP rejects an oversized file before any
@@ -49,7 +49,7 @@ final class DonorAvatarUploadErrorsTest extends IntegrationTestCase
     {
         $err = $this->upload(['error' => UPLOAD_ERR_INI_SIZE, 'size' => 9999999, 'tmp_name' => '', 'name' => 'big.jpg']);
 
-        $this->assertSame('giveflow_upload_too_large', $err->get_error_code());
+        $this->assertSame('fundkit_upload_too_large', $err->get_error_code());
         $this->assertSame(413, $err->get_error_data()['status']);
         $this->assertStringContainsString(size_format(DonorAvatarUploader::maxBytes()), $err->get_error_message());
     }
@@ -58,7 +58,7 @@ final class DonorAvatarUploadErrorsTest extends IntegrationTestCase
     {
         $err = $this->upload(['error' => UPLOAD_ERR_OK, 'size' => PHP_INT_MAX, 'tmp_name' => '', 'name' => 'big.jpg']);
 
-        $this->assertSame('giveflow_upload_too_large', $err->get_error_code());
+        $this->assertSame('fundkit_upload_too_large', $err->get_error_code());
         $this->assertStringContainsString(size_format(DonorAvatarUploader::maxBytes()), $err->get_error_message());
     }
 
@@ -66,7 +66,7 @@ final class DonorAvatarUploadErrorsTest extends IntegrationTestCase
     {
         $err = $this->upload(['error' => UPLOAD_ERR_PARTIAL, 'size' => 100, 'tmp_name' => '', 'name' => 'x.jpg']);
 
-        $this->assertSame('giveflow_upload_failed', $err->get_error_code());
+        $this->assertSame('fundkit_upload_failed', $err->get_error_code());
         $this->assertStringContainsString('cut short', $err->get_error_message());
     }
 
@@ -74,7 +74,7 @@ final class DonorAvatarUploadErrorsTest extends IntegrationTestCase
     {
         $err = $this->upload(['error' => UPLOAD_ERR_NO_FILE, 'size' => 0, 'tmp_name' => '', 'name' => '']);
 
-        $this->assertSame('giveflow_upload_missing', $err->get_error_code());
+        $this->assertSame('fundkit_upload_missing', $err->get_error_code());
     }
 
     /** A file claiming to be an image but is not never reaches the library. */
@@ -85,7 +85,7 @@ final class DonorAvatarUploadErrorsTest extends IntegrationTestCase
 
         $err = $this->upload(['error' => UPLOAD_ERR_OK, 'size' => 41, 'tmp_name' => $path, 'name' => 'not-an-image.png']);
 
-        $this->assertSame('giveflow_upload_not_image', $err->get_error_code());
+        $this->assertSame('fundkit_upload_not_image', $err->get_error_code());
         $this->assertSame(415, $err->get_error_data()['status']);
 
         @unlink($path);

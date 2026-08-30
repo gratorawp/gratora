@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -10,13 +10,13 @@ use WP_REST_Request;
  * B7: GET /admin/commands (manifest) and POST /admin/commands/{id} (generic
  * invocation). The route gate is manage_options; the fine-grained per-command
  * capability is enforced inside dispatch(), so a manage_options user without
- * giveflow_refund_donations is still denied donation.refund.
+ * fundkit_refund_donations is still denied donation.refund.
  */
 final class CommandsRestTest extends IntegrationTestCase
 {
     public function test_get_manifest_as_admin_returns_id_list(): void
     {
-        $res = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/commands'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/commands'));
         $this->assertSame(200, $res->get_status());
 
         $ids = array_column($res->get_data(), 'id');
@@ -29,18 +29,18 @@ final class CommandsRestTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
 
-        $res = rest_do_request(new WP_REST_Request('GET', '/giveflow/v1/admin/commands'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/commands'));
         $this->assertSame(403, $res->get_status());
     }
 
     public function test_post_read_command_as_admin_returns_200(): void
     {
         // The programmatic path enforces the fine-grained cap (section 9);
-        // administrator carries manage_giveflow only until the roles UI grants it.
+        // administrator carries manage_fundkit only until the roles UI grants it.
         $reference = $this->driveDonationToPaid();
-        $this->actAsAdminWithCap('giveflow_view_donations');
+        $this->actAsAdminWithCap('fundkit_view_donations');
 
-        $res = $this->post('/giveflow/v1/admin/commands/donation.get', [
+        $res = $this->post('/fundkit/v1/admin/commands/donation.get', [
             'input' => ['donation_reference' => $reference],
         ]);
 
@@ -52,11 +52,11 @@ final class CommandsRestTest extends IntegrationTestCase
     public function test_refund_denied_for_manage_options_user_without_fine_grained_cap(): void
     {
         // Administrator has manage_options (route gate passes) but not the
-        // giveflow_refund_donations cap (granted only via the roles mapping UI).
+        // fundkit_refund_donations cap (granted only via the roles mapping UI).
         $reference = $this->driveDonationToPaid();
-        $this->actAsAdminWithoutCap('giveflow_refund_donations');
+        $this->actAsAdminWithoutCap('fundkit_refund_donations');
 
-        $res = $this->post('/giveflow/v1/admin/commands/donation.refund', [
+        $res = $this->post('/fundkit/v1/admin/commands/donation.refund', [
             'input' => ['donation_reference' => $reference, 'amount_cents' => 5000],
         ]);
 
@@ -64,7 +64,7 @@ final class CommandsRestTest extends IntegrationTestCase
         $this->assertSame('command.denied', $res->get_data()['code']);
 
         $denied = self::$wpdb->get_results(
-            "SELECT type FROM " . self::$prefix . "giveflow_events WHERE type = 'command.denied'"
+            "SELECT type FROM " . self::$prefix . "fundkit_events WHERE type = 'command.denied'"
         );
         $this->assertNotEmpty($denied, 'A command.denied event row must be written');
     }
@@ -72,9 +72,9 @@ final class CommandsRestTest extends IntegrationTestCase
     public function test_dry_run_on_mutating_command_returns_confirm_digest(): void
     {
         $reference = $this->driveDonationToPaid();
-        $this->actAsAdminWithCap('giveflow_refund_donations');
+        $this->actAsAdminWithCap('fundkit_refund_donations');
 
-        $res = $this->post('/giveflow/v1/admin/commands/donation.refund', [
+        $res = $this->post('/fundkit/v1/admin/commands/donation.refund', [
             'dry_run' => true,
             'input'   => ['donation_reference' => $reference, 'amount_cents' => 5000],
         ]);
@@ -85,20 +85,20 @@ final class CommandsRestTest extends IntegrationTestCase
         $this->assertArrayHasKey('canonical_input', $res->get_data());
 
         // Dry-run writes nothing: no Refund row, no command.invoked event.
-        $refunds = self::$wpdb->get_var("SELECT COUNT(*) FROM " . self::$prefix . "giveflow_refunds");
+        $refunds = self::$wpdb->get_var("SELECT COUNT(*) FROM " . self::$prefix . "fundkit_refunds");
         $this->assertSame('0', (string) $refunds);
     }
 
     public function test_unknown_command_returns_404(): void
     {
-        $res = $this->post('/giveflow/v1/admin/commands/nope.missing', ['input' => []]);
+        $res = $this->post('/fundkit/v1/admin/commands/nope.missing', ['input' => []]);
         $this->assertSame(404, $res->get_status());
         $this->assertSame('command.not_found', $res->get_data()['code']);
     }
 
     private function driveDonationToPaid(): string
     {
-        $createReq = new WP_REST_Request('POST', '/giveflow/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/fundkit/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body(json_encode([
             'email'        => 'rest-cmd@example.com',
@@ -109,7 +109,7 @@ final class CommandsRestTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($createReq)->get_data()['reference'];
 
-        $confirmReq = new WP_REST_Request('POST', "/giveflow/v1/donations/{$reference}/confirm");
+        $confirmReq = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
         $confirmReq->set_header('content-type', 'application/json');
         $confirmReq->set_body('{}');
         rest_do_request($confirmReq);

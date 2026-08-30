@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorAvatars;
-use GiveFlow\Foundation\Crypto\Crypto;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Settings\SettingsService;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorAvatars;
+use FundKit\Foundation\Crypto\Crypto;
+use FundKit\Foundation\Plugin;
+use FundKit\Settings\SettingsService;
 
 /**
  * Gravatar sends a hash of the donor's address to a third party from the
@@ -46,7 +46,7 @@ final class DonorAvatarsTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('giveflow_privacy');
+        delete_option('fundkit_privacy');
         parent::tearDown();
     }
 

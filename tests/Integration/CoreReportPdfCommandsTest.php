@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Analytics\EventRecorder;
-use GiveFlow\Campaigns\CampaignService;
-use GiveFlow\Core\Commands\CoreCommandProvider;
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\Refund;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Commands\CommandContext;
-use GiveFlow\Foundation\Commands\CommandRegistry;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Reports\CampaignReportBuilder;
-use GiveFlow\Reports\TaxStatementBuilder;
+use FundKit\Analytics\EventRecorder;
+use FundKit\Campaigns\CampaignService;
+use FundKit\Core\Commands\CoreCommandProvider;
+use FundKit\Donations\Donation;
+use FundKit\Donations\Refund;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Commands\CommandContext;
+use FundKit\Foundation\Commands\CommandRegistry;
+use FundKit\Foundation\Plugin;
+use FundKit\Reports\CampaignReportBuilder;
+use FundKit\Reports\TaxStatementBuilder;
 use WP_REST_Request;
 
 /**
  * Report-document commands + their secure streaming REST routes: a campaign
- * one-pager (aggregate only, giveflow_view_reports) and a donor year-end tax
- * statement (PII, giveflow_view_donors). The commands only mint a nonce-signed
+ * one-pager (aggregate only, fundkit_view_reports) and a donor year-end tax
+ * statement (PII, fundkit_view_donors). The commands only mint a nonce-signed
  * download link; the routes regenerate and stream the PDF on demand.
  */
 final class CoreReportPdfCommandsTest extends IntegrationTestCase
@@ -31,7 +31,7 @@ final class CoreReportPdfCommandsTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        update_option('giveflow_org_profile', [
+        update_option('fundkit_org_profile', [
             'name'          => 'Hope Foundation',
             'tax_id'        => '12-3456789',
             'address_lines' => ['500 Charity Way', 'Springfield, IL 62704', 'United States'],
@@ -49,8 +49,8 @@ final class CoreReportPdfCommandsTest extends IntegrationTestCase
             $this->assertFalse($byId[$id]['mutating'], "{$id} must be non-mutating");
             $this->assertTrue($byId[$id]['idempotent'], "{$id} must be idempotent");
         }
-        $this->assertSame('giveflow_view_reports', $byId['report.campaign_pdf']['capability']);
-        $this->assertSame('giveflow_view_donors', $byId['donor.tax_statement_pdf']['capability']);
+        $this->assertSame('fundkit_view_reports', $byId['report.campaign_pdf']['capability']);
+        $this->assertSame('fundkit_view_donors', $byId['donor.tax_statement_pdf']['capability']);
     }
 
     public function test_campaign_pdf_command_returns_nonce_signed_link(): void
@@ -135,7 +135,7 @@ final class CoreReportPdfCommandsTest extends IntegrationTestCase
         $this->actAsAdminWithCaps();
         $campaignId = $this->seedCampaignWithDonation();
 
-        $request  = new WP_REST_Request('GET', "/giveflow/v1/reports/campaign/{$campaignId}/pdf");
+        $request  = new WP_REST_Request('GET', "/fundkit/v1/reports/campaign/{$campaignId}/pdf");
         $response = rest_do_request($request);
         $this->assertSame(200, $response->get_status());
 
@@ -148,7 +148,7 @@ final class CoreReportPdfCommandsTest extends IntegrationTestCase
         $donorId = $this->seedDonorWithDonations();
 
         $year     = self::STATEMENT_YEAR;
-        $request  = new WP_REST_Request('GET', "/giveflow/v1/reports/donor/{$donorId}/tax-statement/{$year}");
+        $request  = new WP_REST_Request('GET', "/fundkit/v1/reports/donor/{$donorId}/tax-statement/{$year}");
         $response = rest_do_request($request);
         $this->assertSame(200, $response->get_status());
 
@@ -160,21 +160,21 @@ final class CoreReportPdfCommandsTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
         $campaignId = $this->seedCampaignWithDonation();
 
-        $status = rest_do_request(new WP_REST_Request('GET', "/giveflow/v1/reports/campaign/{$campaignId}/pdf"))->get_status();
+        $status = rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/reports/campaign/{$campaignId}/pdf"))->get_status();
         $this->assertContains($status, [401, 403]);
     }
 
     public function test_tax_statement_route_denied_without_donors_cap(): void
     {
-        // A subscriber holds neither manage_options nor giveflow_view_donors. Admins
-        // hold giveflow_view_donors implicitly (Capabilities::grantMetaCaps grants the
+        // A subscriber holds neither manage_options nor fundkit_view_donors. Admins
+        // hold fundkit_view_donors implicitly (Capabilities::grantMetaCaps grants the
         // everyday area caps to manage_options users), so the denial case is a
         // genuine non-cap user. The donor-PII route must reject them.
         $donorId = $this->seedDonorWithDonations();
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
 
         $year   = self::STATEMENT_YEAR;
-        $status = rest_do_request(new WP_REST_Request('GET', "/giveflow/v1/reports/donor/{$donorId}/tax-statement/{$year}"))->get_status();
+        $status = rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/reports/donor/{$donorId}/tax-statement/{$year}"))->get_status();
         $this->assertContains($status, [401, 403]);
     }
 
@@ -198,7 +198,7 @@ final class CoreReportPdfCommandsTest extends IntegrationTestCase
     private function actAsAdminWithCaps(): int
     {
         $role = get_role('administrator');
-        foreach (['giveflow_view_reports', 'giveflow_view_donors'] as $cap) {
+        foreach (['fundkit_view_reports', 'fundkit_view_donors'] as $cap) {
             $role->add_cap($cap);
         }
         $userId = self::factory()->user->create(['role' => 'administrator']);
@@ -213,7 +213,7 @@ final class CoreReportPdfCommandsTest extends IntegrationTestCase
             'goal_type'  => 'amount',
             'goal_cents' => 1_000_000,
         ]);
-        $this->seedPaidDonation((int) $campaign->id, 200_000, gmdate('Y-m-d H:i:s'), 'GIVEFLOW-CMP-' . uniqid());
+        $this->seedPaidDonation((int) $campaign->id, 200_000, gmdate('Y-m-d H:i:s'), 'FUNDKIT-CMP-' . uniqid());
         return (int) $campaign->id;
     }
 

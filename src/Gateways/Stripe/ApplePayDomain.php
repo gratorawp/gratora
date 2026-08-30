@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Gateways\Stripe;
+namespace FundKit\Gateways\Stripe;
 
-use GiveFlow\Foundation\Config\SystemSetting;
-use GiveFlow\Foundation\Hooks\HookProvider;
+use FundKit\Foundation\Config\SystemSetting;
+use FundKit\Foundation\Hooks\HookProvider;
 use RuntimeException;
 
 /**
@@ -20,7 +20,7 @@ use RuntimeException;
  *   2. the domain is registered with Stripe, which fetches that file to verify.
  *
  * The file contents come from the Stripe dashboard and are pasted in by the
- * admin: they are not secret, but they do change, so GiveFlow stores whatever the
+ * admin: they are not secret, but they do change, so FundKit stores whatever the
  * admin provides rather than shipping a copy that would silently go stale.
  *
  * @since 1.0.0
@@ -166,7 +166,7 @@ final class ApplePayDomain extends HookProvider
         $first = $list['data'][0] ?? null;
 
         if (! is_array($first)) {
-            return ['status' => 'unknown', 'message' => __('This domain is not registered with Stripe yet.', 'giveflow-fundraising-campaigns')];
+            return ['status' => 'unknown', 'message' => __('This domain is not registered with Stripe yet.', 'fundkit-fundraising-campaigns')];
         }
 
         // Asking Stripe to validate again is what turns a freshly-served file

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Identity;
+namespace FundKit\Foundation\Identity;
 
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorEmailRehasher;
-use GiveFlow\Foundation\Config\SystemSetting;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorEmailRehasher;
+use FundKit\Foundation\Config\SystemSetting;
 
 /**
  * Hash helpers for indexed lookup of sensitive identifiers. Losing the email

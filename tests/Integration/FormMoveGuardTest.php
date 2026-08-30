@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Campaigns\Campaign;
-use GiveFlow\Forms\Form;
-use GiveFlow\Forms\FormService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Campaigns\Campaign;
+use FundKit\Forms\Form;
+use FundKit\Forms\FormService;
+use FundKit\Foundation\Plugin;
 use InvalidArgumentException;
 
 /** A campaign's default form cannot walk off to another campaign. */

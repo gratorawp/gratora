@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Receipts\PdfBuilder;
+use FundKit\Receipts\PdfBuilder;
 
 /**
  * Every PDF the plugin produces goes through PdfBuilder, which rewrites this
@@ -54,10 +54,10 @@ final class PdfImageChrootTest extends IntegrationTestCase
     public function test_an_image_in_uploads_reaches_the_pdf(): void
     {
         $uploads = wp_upload_dir();
-        $this->writePng($uploads['basedir'], 'giveflow-logo-probe.png');
+        $this->writePng($uploads['basedir'], 'fundkit-logo-probe.png');
 
         $pdf = (new PdfBuilder())->fromHtml(
-            '<html><body><img src="' . $uploads['baseurl'] . '/giveflow-logo-probe.png"></body></html>'
+            '<html><body><img src="' . $uploads['baseurl'] . '/fundkit-logo-probe.png"></body></html>'
         );
 
         // A PNG with an alpha channel emits its soft mask as a second image
@@ -73,7 +73,7 @@ final class PdfImageChrootTest extends IntegrationTestCase
     {
         // Reachable as a path but not through this site's uploads URL, so
         // localizeImages leaves it alone and the chroot has to hold the line.
-        $outside = $this->writePng(sys_get_temp_dir() . '/giveflow-chroot-probe', 'elsewhere.png');
+        $outside = $this->writePng(sys_get_temp_dir() . '/fundkit-chroot-probe', 'elsewhere.png');
         $this->assertFileExists($outside, 'the refusal below is the chroot, not a missing file');
 
         $pdf = (new PdfBuilder())->fromHtml(

@@ -1,1 +1,1 @@
-export { default } from '@giveflow/ui/components/AmountInput';
+export { default } from '@fundkit/ui/components/AmountInput';

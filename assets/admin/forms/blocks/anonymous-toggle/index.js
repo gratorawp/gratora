@@ -4,26 +4,26 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'giveflow/anonymous-toggle';
+const NAME = 'fundkit/anonymous-toggle';
 
 function Edit( { attributes, setAttributes } ) {
     const {
-        label     = __( 'Make this donation anonymous', 'giveflow-fundraising-campaigns' ),
+        label     = __( 'Make this donation anonymous', 'fundkit-fundraising-campaigns' ),
         defaultOn = false,
         condition = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'giveflow-block-preview giveflow-block-preview--check' } );
+    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--check' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Anonymous toggle', 'giveflow-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Anonymous toggle', 'fundkit-fundraising-campaigns' ) } initialOpen>
                     <ToggleControl
-                        label={ __( 'Default on', 'giveflow-fundraising-campaigns' ) }
+                        label={ __( 'Default on', 'fundkit-fundraising-campaigns' ) }
                         checked={ defaultOn }
                         onChange={ ( v ) => setAttributes( { defaultOn: v } ) }
-                        help={ __( 'Click the label to edit it inline.', 'giveflow-fundraising-campaigns' ) }
+                        help={ __( 'Click the label to edit it inline.', 'fundkit-fundraising-campaigns' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -39,7 +39,7 @@ function Edit( { attributes, setAttributes } ) {
                         height:       16,
                         borderRadius: 3,
                         border:       '1px solid #888',
-                        background:   defaultOn ? 'var(--giveflow-accent, #211d3f)' : '#fff',
+                        background:   defaultOn ? 'var(--fundkit-accent, #211d3f)' : '#fff',
                         flexShrink:   0,
                     } }
                 />
@@ -47,7 +47,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Make this donation anonymous', 'giveflow-fundraising-campaigns' ) }
+                    placeholder={ __( 'Make this donation anonymous', 'fundkit-fundraising-campaigns' ) }
                     allowedFormats={ [] }
                     style={ { fontSize: 13, flex: 1 } }
                 />
@@ -59,9 +59,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Anonymous toggle', 'giveflow-fundraising-campaigns' ),
-        description: __( 'Lets the donor hide their identity on public displays.', 'giveflow-fundraising-campaigns' ),
-        category:   'giveflow-extras',
+        title:      __( 'Anonymous toggle', 'fundkit-fundraising-campaigns' ),
+        description: __( 'Lets the donor hide their identity on public displays.', 'fundkit-fundraising-campaigns' ),
+        category:   'fundkit-extras',
         icon:       BlockIcons[ 'anonymous-toggle' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

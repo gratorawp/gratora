@@ -10,9 +10,9 @@ import { ToggleRow } from '../../_shared/components/Switch';
 import { notify } from '../../_shared/notify';
 
 const SCOPES = [
-    { key: 'donation', label: __( 'Donation', 'giveflow-fundraising-campaigns' ) },
-    { key: 'receipt',  label: __( 'Receipt', 'giveflow-fundraising-campaigns' ) },
-    { key: 'refund',   label: __( 'Refund', 'giveflow-fundraising-campaigns' ) },
+    { key: 'donation', label: __( 'Donation', 'fundkit-fundraising-campaigns' ) },
+    { key: 'receipt',  label: __( 'Receipt', 'fundkit-fundraising-campaigns' ) },
+    { key: 'refund',   label: __( 'Refund', 'fundkit-fundraising-campaigns' ) },
 ];
 
 /**
@@ -59,7 +59,7 @@ export const isRefToken = ( raw ) => /^[A-Za-z0-9_-]+$/.test( String( raw ) );
 export const asRefToken = ( raw, fallback ) =>
     String( raw ?? '' ).replace( /[^A-Za-z0-9_-]/g, '' ) || fallback;
 
-const tokenHelp = __( 'Letters, numbers, hyphens and underscores only.', 'giveflow-fundraising-campaigns' );
+const tokenHelp = __( 'Letters, numbers, hyphens and underscores only.', 'fundkit-fundraising-campaigns' );
 
 /** @since 1.0.0 */
 function TokenInput( { value, bind, maxLength, placeholder, style } ) {
@@ -68,7 +68,7 @@ function TokenInput( { value, bind, maxLength, placeholder, style } ) {
         <>
             <input
                 type="text"
-                className={ `giveflow-input${ invalid ? ' is-invalid' : '' }` }
+                className={ `fundkit-input${ invalid ? ' is-invalid' : '' }` }
                 aria-invalid={ invalid || undefined }
                 maxLength={ maxLength }
                 placeholder={ placeholder }
@@ -76,7 +76,7 @@ function TokenInput( { value, bind, maxLength, placeholder, style } ) {
                 { ...bind }
             />
             { invalid && (
-                <p className="giveflow-form-row__field-help" style={ { color: '#b42318' } }>{ tokenHelp }</p>
+                <p className="fundkit-form-row__field-help" style={ { color: '#b42318' } }>{ tokenHelp }</p>
             ) }
         </>
     );
@@ -130,7 +130,7 @@ export default function NumberingPanel( { s , active } ) {
 
     const loadCounters = () => {
         setLoadError( false );
-        apiFetch( { path: '/giveflow/v1/admin/numbering/counters' } )
+        apiFetch( { path: '/fundkit/v1/admin/numbering/counters' } )
             .then( ( data ) => {
                 setCounters( data || {} );
                 setDrafts( data || {} );
@@ -151,15 +151,15 @@ export default function NumberingPanel( { s , active } ) {
         setBusy( key );
         try {
             const res = await apiFetch( {
-                path:   '/giveflow/v1/admin/numbering/counter',
+                path:   '/fundkit/v1/admin/numbering/counter',
                 method: 'POST',
                 data:   { scope: key, next },
             } );
             setCounters( ( prev ) => ( { ...prev, [ key ]: res.next } ) );
             setDrafts( ( prev ) => ( { ...prev, [ key ]: res.next } ) );
-            notify.success( __( 'Next number updated.', 'giveflow-fundraising-campaigns' ) );
+            notify.success( __( 'Next number updated.', 'fundkit-fundraising-campaigns' ) );
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not update the counter.', 'giveflow-fundraising-campaigns' ) );
+            notify.error( err?.message || __( 'Could not update the counter.', 'fundkit-fundraising-campaigns' ) );
             setDrafts( ( prev ) => ( { ...prev, [ key ]: counters[ key ] } ) );
         } finally {
             setBusy( '' );
@@ -169,35 +169,35 @@ export default function NumberingPanel( { s , active } ) {
     const confirmSet = ( key, label ) => {
         const next = Number( drafts[ key ] );
         setConfirm( {
-            title:        __( 'Set next number', 'giveflow-fundraising-campaigns' ),
+            title:        __( 'Set next number', 'fundkit-fundraising-campaigns' ),
             message:      sprintf(
                 /* translators: 1: reference type, 2: the formatted next reference */
-                __( 'The next %1$s reference will be %2$s. A counter can only move forward, so this cannot be lowered later. Continue?', 'giveflow-fundraising-campaigns' ),
+                __( 'The next %1$s reference will be %2$s. A counter can only move forward, so this cannot be lowered later. Continue?', 'fundkit-fundraising-campaigns' ),
                 label.toLowerCase(),
                 buildRef( savedFmt, savedPrefix[ key ], next, year ),
             ),
-            confirmLabel: __( 'Set number', 'giveflow-fundraising-campaigns' ),
+            confirmLabel: __( 'Set number', 'fundkit-fundraising-campaigns' ),
             destructive:  false,
             onConfirm:    () => doSet( key ),
         } );
     };
 
     return (
-        <div className="giveflow-panel">
+        <div className="fundkit-panel">
             <Card
-                title={ __( 'Reference numbering', 'giveflow-fundraising-campaigns' ) }
-                sub={ __( 'How donations, receipts, and refunds are numbered. References are gap-free and increment automatically.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Reference numbering', 'fundkit-fundraising-campaigns' ) }
+                sub={ __( 'How donations, receipts, and refunds are numbered. References are gap-free and increment automatically.', 'fundkit-fundraising-campaigns' ) }
                 edited={ s.isDirty }
             >
-                <div className="giveflow-ref-previews">
+                <div className="fundkit-ref-previews">
                     { SCOPES.map( ( p ) => {
                         const { head, seq } = refParts( liveFmt, livePrefix[ p.key ], 1, year );
                         return (
-                            <div key={ p.key } className="giveflow-ref-preview">
-                                <span className="giveflow-ref-preview__label">{ p.label }</span>
-                                <span className="giveflow-ref-preview__value">
+                            <div key={ p.key } className="fundkit-ref-preview">
+                                <span className="fundkit-ref-preview__label">{ p.label }</span>
+                                <span className="fundkit-ref-preview__value">
                                     { head }
-                                    <span className="giveflow-ref-preview__seq">{ seq }</span>
+                                    <span className="fundkit-ref-preview__seq">{ seq }</span>
                                 </span>
                             </div>
                         );
@@ -205,8 +205,8 @@ export default function NumberingPanel( { s , active } ) {
                 </div>
 
                 <FormRow
-                    label={ __( 'Donation prefix', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Leads every donation reference.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Donation prefix', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Leads every donation reference.', 'fundkit-fundraising-campaigns' ) }
                 >
                     <TokenInput
                         value={ rawPrefix.donation }
@@ -217,8 +217,8 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Receipt prefix', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Leads every receipt number.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Receipt prefix', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Leads every receipt number.', 'fundkit-fundraising-campaigns' ) }
                 >
                     <TokenInput
                         value={ rawPrefix.receipt }
@@ -229,8 +229,8 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Refund prefix', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Leads every refund reference.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Refund prefix', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Leads every refund reference.', 'fundkit-fundraising-campaigns' ) }
                 >
                     <TokenInput
                         value={ rawPrefix.refund }
@@ -241,8 +241,8 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Separator', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Character between the prefix, year, and number.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Separator', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Character between the prefix, year, and number.', 'fundkit-fundraising-campaigns' ) }
                 >
                     <TokenInput
                         value={ rawSep }
@@ -254,12 +254,12 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Minimum digits', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Zero-padded width of the running number. 5 gives 00001.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Minimum digits', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Zero-padded width of the running number. 5 gives 00001.', 'fundkit-fundraising-campaigns' ) }
                 >
                     <input
                         type="number"
-                        className="giveflow-input"
+                        className="fundkit-input"
                         min={ 1 }
                         max={ 12 }
                         style={ { maxWidth: 90 } }
@@ -268,38 +268,38 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Include the year', 'giveflow-fundraising-campaigns' ) }
-                    sub={ __( 'Adds the current year, e.g. DON-2026-00001 instead of DON-00001.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Include the year', 'fundkit-fundraising-campaigns' ) }
+                    sub={ __( 'Adds the current year, e.g. DON-2026-00001 instead of DON-00001.', 'fundkit-fundraising-campaigns' ) }
                     checked={ liveFmt.includeYear }
                     onChange={ s.setValue( 'include_year' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Reset numbering each year', 'giveflow-fundraising-campaigns' ) }
-                    sub={ __( 'Start again at 1 every January. Turn off for one continuous sequence across years.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Reset numbering each year', 'fundkit-fundraising-campaigns' ) }
+                    sub={ __( 'Start again at 1 every January. Turn off for one continuous sequence across years.', 'fundkit-fundraising-campaigns' ) }
                     checked={ !! s.value( 'reset_yearly', true ) }
                     onChange={ s.setValue( 'reset_yearly' ) }
                 />
             </Card>
 
             <Card
-                title={ __( 'Next numbers', 'giveflow-fundraising-campaigns' ) }
-                sub={ __( 'The number each type will use next. Jump a counter forward to continue an existing sequence; it can only increase, never go back.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Next numbers', 'fundkit-fundraising-campaigns' ) }
+                sub={ __( 'The number each type will use next. Jump a counter forward to continue an existing sequence; it can only increase, never go back.', 'fundkit-fundraising-campaigns' ) }
             >
                 { s.isDirty && (
                     <p style={ { margin: '0 0 14px', fontSize: 12.5, color: '#b54708' } }>
-                        { __( 'You have unsaved format changes above. Previews here use the saved format, so save first if you want new references to use the updated format.', 'giveflow-fundraising-campaigns' ) }
+                        { __( 'You have unsaved format changes above. Previews here use the saved format, so save first if you want new references to use the updated format.', 'fundkit-fundraising-campaigns' ) }
                     </p>
                 ) }
                 { loadError ? (
                     <div style={ { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } }>
                         <p style={ { color: '#b42318', margin: 0 } }>
-                            { __( 'Could not load the current counters.', 'giveflow-fundraising-campaigns' ) }
+                            { __( 'Could not load the current counters.', 'fundkit-fundraising-campaigns' ) }
                         </p>
-                        <Btn variant="secondary" onClick={ loadCounters }>{ __( 'Retry', 'giveflow-fundraising-campaigns' ) }</Btn>
+                        <Btn variant="secondary" onClick={ loadCounters }>{ __( 'Retry', 'fundkit-fundraising-campaigns' ) }</Btn>
                     </div>
                 ) : counters === null ? (
-                    <p style={ { color: '#6b7280' } }>{ __( 'Loading…', 'giveflow-fundraising-campaigns' ) }</p>
+                    <p style={ { color: '#6b7280' } }>{ __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</p>
                 ) : (
                     SCOPES.map( ( p ) => {
                         const current = Number( counters[ p.key ] ?? 1 );
@@ -314,14 +314,14 @@ export default function NumberingPanel( { s , active } ) {
                                 label={ p.label }
                                 help={ sprintf(
                                     /* translators: %s: the formatted next reference */
-                                    __( 'Next reference: %s', 'giveflow-fundraising-campaigns' ),
+                                    __( 'Next reference: %s', 'fundkit-fundraising-campaigns' ),
                                     buildRef( savedFmt, savedPrefix[ p.key ], Number( draft ) || current, year ),
                                 ) }
                             >
                                 <div style={ { display: 'flex', gap: 8, alignItems: 'center' } }>
                                     <input
                                         type="number"
-                                        className="giveflow-input"
+                                        className="fundkit-input"
                                         min={ current }
                                         style={ { maxWidth: 120 } }
                                         value={ draft }
@@ -333,7 +333,7 @@ export default function NumberingPanel( { s , active } ) {
                                         disabled={ ! changed || busy === p.key }
                                         isBusy={ busy === p.key }
                                     >
-                                        { __( 'Set', 'giveflow-fundraising-campaigns' ) }
+                                        { __( 'Set', 'fundkit-fundraising-campaigns' ) }
                                     </Btn>
                                 </div>
                             </FormRow>

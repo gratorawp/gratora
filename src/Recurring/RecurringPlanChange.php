@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Recurring;
+namespace FundKit\Recurring;
 
 /**
  * Who asked for a change to a plan, and whether the donor should be told.

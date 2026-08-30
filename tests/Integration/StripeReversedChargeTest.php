@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donations\DonationRepository;
-use GiveFlow\Donations\Refund;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Gateways\GatewayManager;
-use GiveFlow\Gateways\Stripe\StripeAccount;
+use FundKit\Donations\Donation;
+use FundKit\Donations\DonationRepository;
+use FundKit\Donations\Refund;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\Stripe\StripeAccount;
 use WP_REST_Request;
 
 /**
@@ -42,7 +42,7 @@ final class StripeReversedChargeTest extends IntegrationTestCase
         $this->disputes      = [];
         $this->intents       = [];
         $this->secret        = 'whsec_live_' . bin2hex(random_bytes(8));
-        update_option('giveflow_gateway_config', [
+        update_option('fundkit_gateway_config', [
             'stripe' => ['webhook_secret_live' => $this->secret],
         ]);
 
@@ -53,15 +53,15 @@ final class StripeReversedChargeTest extends IntegrationTestCase
 
         $manager = $c->get(GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \GiveFlow\Gateways\Stripe\StripeGateway(
-                $c->get(\GiveFlow\Gateways\Stripe\StripeApi::class),
+            $manager->register(new \FundKit\Gateways\Stripe\StripeGateway(
+                $c->get(\FundKit\Gateways\Stripe\StripeApi::class),
                 $c->get(DonationRepository::class),
-                $c->get(\GiveFlow\Donations\DonationService::class),
+                $c->get(\FundKit\Donations\DonationService::class),
                 $account,
-                $c->get(\GiveFlow\Donors\DonorRepository::class),
+                $c->get(\FundKit\Donors\DonorRepository::class),
                 $c->get(DonorService::class),
-                $c->get(\GiveFlow\Foundation\Time\Clock::class),
-                $c->get(\GiveFlow\Recurring\RecurringPlanRepository::class),
+                $c->get(\FundKit\Foundation\Time\Clock::class),
+                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
             ));
         }
 
@@ -297,7 +297,7 @@ final class StripeReversedChargeTest extends IntegrationTestCase
         $this->chargeRefunds[$chargeId] = [$refund];
         $this->intents[(string) $donation->gateway_intent_id] = $this->succeededIntent($donation, $chargeId);
 
-        $req = new WP_REST_Request('POST', "/giveflow/v1/donations/{$donation->reference}/confirm");
+        $req = new WP_REST_Request('POST', "/fundkit/v1/donations/{$donation->reference}/confirm");
         $req->set_header('content-type', 'application/json');
         $req->set_body('{}');
         $this->assertSame(200, rest_do_request($req)->get_status());
@@ -540,7 +540,7 @@ final class StripeReversedChargeTest extends IntegrationTestCase
         $timestamp = (string) time();
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $this->secret);
 
-        $req = new WP_REST_Request('POST', '/giveflow/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);

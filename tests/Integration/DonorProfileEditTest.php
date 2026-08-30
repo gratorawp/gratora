@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
 
 /**
- * editProfile() must write (and fire giveflow.donor.updated) only on a real change.
+ * editProfile() must write (and fire fundkit.donor.updated) only on a real change.
  * The phone/address branches used to force $changed = true and also issue their
  * own direct UPDATE, so any request merely including a phone/address key wrote
  * twice and re-ran every donor.updated listener on a no-op edit.
@@ -28,7 +28,7 @@ final class DonorProfileEditTest extends IntegrationTestCase
         $svc->editProfile($donor, ['phone' => '+1 555 0100']); // establishes the phone
 
         $fired = 0;
-        add_action('giveflow.donor.updated', function () use (&$fired): void {
+        add_action('fundkit.donor.updated', function () use (&$fired): void {
             $fired++;
         });
 
@@ -48,7 +48,7 @@ final class DonorProfileEditTest extends IntegrationTestCase
         $donor = $svc->findOrCreate('edit2@example.com', ['first_name' => 'Ann']);
 
         $fired = 0;
-        add_action('giveflow.donor.updated', function () use (&$fired): void {
+        add_action('fundkit.donor.updated', function () use (&$fired): void {
             $fired++;
         });
 

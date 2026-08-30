@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\Maintenance;
+namespace FundKit\Foundation\Maintenance;
 
-use GiveFlow\Async\AsyncDispatcher;
-use GiveFlow\Foundation\Batch\BatchProcessor;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Async\AsyncDispatcher;
+use FundKit\Foundation\Batch\BatchProcessor;
+use FundKit\Vendor\Queryable\DB;
 
 /**
- * Defensive GC for GiveFlow's own expired transients.
+ * Defensive GC for FundKit's own expired transients.
  *
  * Runs independently of wp_scheduled_delete (which may be disabled by perf plugins).
  * Uses delete_transient() so object cache entries are cleared too. Capped per run.
@@ -18,7 +18,7 @@ use GiveFlow\Vendor\Queryable\DB;
  */
 final class TransientGc
 {
-    public const HOOK = 'giveflow.cron.transient_gc';
+    public const HOOK = 'fundkit.cron.transient_gc';
     private const DAILY = 86400;
     private const BATCH = 2000;
 
@@ -48,7 +48,7 @@ final class TransientGc
             // Prefix LIKE (no leading %) keeps the option_name index usable.
             fn (int $n) => DB::table('options')
                 ->select('option_name')
-                ->whereLike('option_name', '_transient_timeout_giveflow_%')
+                ->whereLike('option_name', '_transient_timeout_fundkit_%')
                 ->where('option_value', (string) $now, '<')
                 ->limit($n)
                 ->getAll(),

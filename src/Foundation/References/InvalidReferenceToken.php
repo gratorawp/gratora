@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Foundation\References;
+namespace FundKit\Foundation\References;
 
 use RuntimeException;
 
@@ -18,7 +18,7 @@ final class InvalidReferenceToken extends RuntimeException
     {
         parent::__construct(sprintf(
             /* translators: 1: the field name as the settings screen labels it, 2: the value entered. */
-            __('%1$s can only use letters, numbers, hyphens and underscores, and cannot be empty. "%2$s" would be stripped down before a single reference was minted, so the numbering an accountant is given would not be the one on screen.', 'giveflow-fundraising-campaigns'),
+            __('%1$s can only use letters, numbers, hyphens and underscores, and cannot be empty. "%2$s" would be stripped down before a single reference was minted, so the numbering an accountant is given would not be the one on screen.', 'fundkit-fundraising-campaigns'),
             $field,
             $value
         ));

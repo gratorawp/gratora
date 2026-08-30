@@ -1,7 +1,7 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { formatDate } from '@giveflow/ui/utils/format';
+import { formatDate } from '@fundkit/ui/utils/format';
 
 import Card from '../../_shared/components/Card';
 import FormRow from '../../_shared/components/FormRow';
@@ -26,7 +26,7 @@ function RetentionPreview( { years, inForce } ) {
         // Choosing a window is several keystrokes, and each one is a count over
         // the donor table.
         const timer = setTimeout( () => {
-            apiFetch( { path: `/giveflow/v1/admin/settings/retention-preview?days=30&years=${ years }` } )
+            apiFetch( { path: `/fundkit/v1/admin/settings/retention-preview?days=30&years=${ years }` } )
                 .then( ( d ) => { if ( ! aborted ) setData( d ); } )
                 .catch( () => { if ( ! aborted ) setData( null ); } );
         }, 400 );
@@ -39,7 +39,7 @@ function RetentionPreview( { years, inForce } ) {
     if ( ! data.years ) {
         return (
             <Notice status="info" isDismissible={ false }>
-                { __( 'No window is set, so nothing is erased automatically. Enter a number of years above.', 'giveflow-fundraising-campaigns' ) }
+                { __( 'No window is set, so nothing is erased automatically. Enter a number of years above.', 'fundkit-fundraising-campaigns' ) }
             </Notice>
         );
     }
@@ -58,7 +58,7 @@ function RetentionPreview( { years, inForce } ) {
                 '%s donor is past this window.',
                 '%s donors are past this window.',
                 now,
-                'giveflow-fundraising-campaigns'
+                'fundkit-fundraising-campaigns'
             ),
             now.toLocaleString()
         ) );
@@ -70,7 +70,7 @@ function RetentionPreview( { years, inForce } ) {
                     '%s in total reaches it within 30 days.',
                     '%s in total reach it within 30 days.',
                     soon,
-                    'giveflow-fundraising-campaigns'
+                    'fundkit-fundraising-campaigns'
                 ),
                 soon.toLocaleString()
             ) );
@@ -82,18 +82,18 @@ function RetentionPreview( { years, inForce } ) {
                 '%s donor reaches this window within 30 days.',
                 '%s donors reach this window within 30 days.',
                 soon,
-                'giveflow-fundraising-campaigns'
+                'fundkit-fundraising-campaigns'
             ),
             soon.toLocaleString()
         ) );
     }
 
     if ( lines.length === 0 ) {
-        lines.push( __( 'No donor is due for erasure in the next 30 days.', 'giveflow-fundraising-campaigns' ) );
+        lines.push( __( 'No donor is due for erasure in the next 30 days.', 'fundkit-fundraising-campaigns' ) );
     } else if ( ! inForce ) {
-        lines.push( __( 'Nothing is erased until this is saved.', 'giveflow-fundraising-campaigns' ) );
+        lines.push( __( 'Nothing is erased until this is saved.', 'fundkit-fundraising-campaigns' ) );
     } else if ( ! pending ) {
-        lines.push( __( 'They are erased on the next nightly run.', 'giveflow-fundraising-campaigns' ) );
+        lines.push( __( 'They are erased on the next nightly run.', 'fundkit-fundraising-campaigns' ) );
     }
 
     // Only once the window is the saved one. While it is still being chosen the
@@ -102,7 +102,7 @@ function RetentionPreview( { years, inForce } ) {
     if ( pending && inForce ) {
         lines.push( sprintf(
             /* translators: %s: a date. */
-            __( 'Nothing is erased before %s.', 'giveflow-fundraising-campaigns' ),
+            __( 'Nothing is erased before %s.', 'fundkit-fundraising-campaigns' ),
             formatDate( new Date( startsAt ).toISOString() )
         ) );
     }
@@ -125,34 +125,34 @@ export default function PrivacyPanel( { s } ) {
         && Number( s.savedRecord.donor_retention_years ) === Number( years );
 
     return (
-        <div className="giveflow-panel">
+        <div className="fundkit-panel">
             <Card
-                title={ __( 'Donor data handling', 'giveflow-fundraising-campaigns' ) }
-                sub={ __( 'Controls applied to the donor record, IP logs, and what donors can do from their portal.', 'giveflow-fundraising-campaigns' ) }
+                title={ __( 'Donor data handling', 'fundkit-fundraising-campaigns' ) }
+                sub={ __( 'Controls applied to the donor record, IP logs, and what donors can do from their portal.', 'fundkit-fundraising-campaigns' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'Privacy policy URL', 'giveflow-fundraising-campaigns' ) }
-                    help={ __( 'Linked from the donation form, wherever a privacy notice block is placed.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Privacy policy URL', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Linked from the donation form, wherever a privacy notice block is placed.', 'fundkit-fundraising-campaigns' ) }
                 >
                     <input
                         type="url"
-                        className="giveflow-input"
+                        className="fundkit-input"
                         value={ s.value( 'privacy_policy_url', '' ) }
                         onChange={ ( e ) => s.edit( { privacy_policy_url: e.target.value } ) }
-                        placeholder={ __( 'Enter your privacy policy URL', 'giveflow-fundraising-campaigns' ) }
+                        placeholder={ __( 'Enter your privacy policy URL', 'fundkit-fundraising-campaigns' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Reunite window after redaction (days)', 'giveflow-fundraising-campaigns' ) }
-                    fieldHelp={ __( 'An erased donor who gives again within this window keeps their giving history. After it, they start over as a new donor. Past donations stay counted either way. 0 severs the link at once; it does not mean off.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Reunite window after redaction (days)', 'fundkit-fundraising-campaigns' ) }
+                    fieldHelp={ __( 'An erased donor who gives again within this window keeps their giving history. After it, they start over as a new donor. Past donations stay counted either way. 0 severs the link at once; it does not mean off.', 'fundkit-fundraising-campaigns' ) }
                 >
                     <input
                         type="number"
                         min={ 0 }
                         max={ 3650 }
-                        className="giveflow-input"
+                        className="fundkit-input"
                         style={ { maxWidth: 120 } }
                         value={ s.value( 'retention_days_after_redaction', 90 ) }
                         onChange={ ( e ) => s.edit( { retention_days_after_redaction: parseInt( e.target.value, 10 ) || 0 } ) }
@@ -160,8 +160,8 @@ export default function PrivacyPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Erase inactive donors automatically', 'giveflow-fundraising-campaigns' ) }
-                    sub={ __( 'While this is off, a donor is only ever erased because they asked or because an admin erased them. Turning it on lets a nightly run erase donors who have gone years without giving.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Erase inactive donors automatically', 'fundkit-fundraising-campaigns' ) }
+                    sub={ __( 'While this is off, a donor is only ever erased because they asked or because an admin erased them. Turning it on lets a nightly run erase donors who have gone years without giving.', 'fundkit-fundraising-campaigns' ) }
                     checked={ eraseInactive }
                     onChange={ s.setValue( 'erase_inactive_donors' ) }
                 />
@@ -169,14 +169,14 @@ export default function PrivacyPanel( { s } ) {
                 { eraseInactive && (
                     <>
                         <FormRow
-                            label={ __( 'Erase donors inactive for (years)', 'giveflow-fundraising-campaigns' ) }
-                            fieldHelp={ __( 'Donors with no donation for this long are erased on the nightly run, as if they had asked. Anyone on a recurring plan is skipped. Their donations stay counted.', 'giveflow-fundraising-campaigns' ) }
+                            label={ __( 'Erase donors inactive for (years)', 'fundkit-fundraising-campaigns' ) }
+                            fieldHelp={ __( 'Donors with no donation for this long are erased on the nightly run, as if they had asked. Anyone on a recurring plan is skipped. Their donations stay counted.', 'fundkit-fundraising-campaigns' ) }
                         >
                             <input
                                 type="number"
                                 min={ 1 }
                                 max={ 100 }
-                                className="giveflow-input"
+                                className="fundkit-input"
                                 style={ { maxWidth: 120 } }
                                 { ...s.bindNumber( 'donor_retention_years' ) }
                             />
@@ -187,14 +187,14 @@ export default function PrivacyPanel( { s } ) {
                 ) }
 
                 <FormRow
-                    label={ __( 'Keep the activity log for (days)', 'giveflow-fundraising-campaigns' ) }
-                    fieldHelp={ __( 'Older entries are deleted. Only the log is affected; donations, donors and receipts are kept. 0 turns this off.', 'giveflow-fundraising-campaigns' ) }
+                    label={ __( 'Keep the activity log for (days)', 'fundkit-fundraising-campaigns' ) }
+                    fieldHelp={ __( 'Older entries are deleted. Only the log is affected; donations, donors and receipts are kept. 0 turns this off.', 'fundkit-fundraising-campaigns' ) }
                 >
                     <input
                         type="number"
                         min={ 0 }
                         max={ 36500 }
-                        className="giveflow-input"
+                        className="fundkit-input"
                         style={ { maxWidth: 120 } }
                         value={ s.value( 'event_retention_days', 730 ) }
                         onChange={ ( e ) => s.edit( { event_retention_days: parseInt( e.target.value, 10 ) || 0 } ) }
@@ -202,36 +202,36 @@ export default function PrivacyPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Anonymize IPs in event logs', 'giveflow-fundraising-campaigns' ) }
-                    sub={ __( 'IPs are hashed (SHA-256) before storage. Only the country is kept in clear text.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Anonymize IPs in event logs', 'fundkit-fundraising-campaigns' ) }
+                    sub={ __( 'IPs are hashed (SHA-256) before storage. Only the country is kept in clear text.', 'fundkit-fundraising-campaigns' ) }
                     checked={ !! s.value( 'anonymize_ips', true ) }
                     onChange={ s.setValue( 'anonymize_ips' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Show Gravatar profile pictures', 'giveflow-fundraising-campaigns' ) }
-                    sub={ __( "Donor lists show Gravatars instead of initials. Each one sends a hash of the donor's email to gravatar.com from the visitor's browser. Anonymous donors are never shown one.", 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Show Gravatar profile pictures', 'fundkit-fundraising-campaigns' ) }
+                    sub={ __( "Donor lists show Gravatars instead of initials. Each one sends a hash of the donor's email to gravatar.com from the visitor's browser. Anonymous donors are never shown one.", 'fundkit-fundraising-campaigns' ) }
                     checked={ !! s.value( 'gravatar_avatars', false ) }
                     onChange={ s.setValue( 'gravatar_avatars' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Default new donations to anonymous', 'giveflow-fundraising-campaigns' ) }
-                    sub={ __( 'Pre-check the anonymous toggle on every donation form. Donors can opt out.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Default new donations to anonymous', 'fundkit-fundraising-campaigns' ) }
+                    sub={ __( 'Pre-check the anonymous toggle on every donation form. Donors can opt out.', 'fundkit-fundraising-campaigns' ) }
                     checked={ !! s.value( 'always_anonymous_default', false ) }
                     onChange={ s.setValue( 'always_anonymous_default' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Allow data export from portal', 'giveflow-fundraising-campaigns' ) }
-                    sub={ __( 'Donors can download a JSON archive of their data from the portal.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Allow data export from portal', 'fundkit-fundraising-campaigns' ) }
+                    sub={ __( 'Donors can download a JSON archive of their data from the portal.', 'fundkit-fundraising-campaigns' ) }
                     checked={ !! s.value( 'allow_data_export', true ) }
                     onChange={ s.setValue( 'allow_data_export' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Allow account delete from portal', 'giveflow-fundraising-campaigns' ) }
-                    sub={ __( 'Donors can request redaction directly. Donations and receipts are kept either way, for tax and accounting; only the personal details are erased.', 'giveflow-fundraising-campaigns' ) }
+                    title={ __( 'Allow account delete from portal', 'fundkit-fundraising-campaigns' ) }
+                    sub={ __( 'Donors can request redaction directly. Donations and receipts are kept either way, for tax and accounting; only the personal details are erased.', 'fundkit-fundraising-campaigns' ) }
                     checked={ !! s.value( 'allow_account_delete', true ) }
                     onChange={ s.setValue( 'allow_account_delete' ) }
                 />

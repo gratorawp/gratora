@@ -1,5 +1,5 @@
 /**
- * Convenience wrapper over @wordpress/core-data's useEntityRecord for giveflow/v1
+ * Convenience wrapper over @wordpress/core-data's useEntityRecord for fundkit/v1
  * entities (campaign, form, ...). Returns the merged record (saved + pending
  * edits) plus bind/bindNumber/setValue helpers for plain inputs.
  */
@@ -7,9 +7,9 @@
 import { useEntityRecord, store as coreDataStore } from '@wordpress/core-data';
 import { useSelect, useDispatch } from '@wordpress/data';
 
-const KIND = 'giveflow/v1';
+const KIND = 'fundkit/v1';
 
-export function useGiveFlowRecord( name, id ) {
+export function useFundKitRecord( name, id ) {
     const {
         record,
         editedRecord,

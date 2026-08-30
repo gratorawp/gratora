@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donations\Donation;
-use GiveFlow\Donors\Donor;
-use GiveFlow\Foundation\Helpers\View;
+use FundKit\Donations\Donation;
+use FundKit\Donors\Donor;
+use FundKit\Foundation\Helpers\View;
 
 /**
  * The receipt renders in the donor's locale, so the recurring lede has to name
@@ -19,7 +19,7 @@ final class ReceiptFrequencyLabelTest extends IntegrationTestCase
         $now = gmdate('Y-m-d H:i:s');
 
         $donation = Donation::make();
-        $donation->reference    = 'GIVEFLOW-FREQ-' . strtoupper(bin2hex(random_bytes(3)));
+        $donation->reference    = 'FUNDKIT-FREQ-' . strtoupper(bin2hex(random_bytes(3)));
         $donation->donor_id     = 0;
         $donation->amount_cents = 2500;
         $donation->net_cents    = 2500;
@@ -52,7 +52,7 @@ final class ReceiptFrequencyLabelTest extends IntegrationTestCase
         // Stands in for a locale being active during the render, which is what
         // ReceiptIssuer switches to before calling the renderer.
         add_filter('gettext', static function ($translation, $text, $domain) {
-            if ($domain === 'giveflow-fundraising-campaigns' && $text === 'Monthly') return 'Mensuel';
+            if ($domain === 'fundkit-fundraising-campaigns' && $text === 'Monthly') return 'Mensuel';
             return $translation;
         }, 10, 3);
 

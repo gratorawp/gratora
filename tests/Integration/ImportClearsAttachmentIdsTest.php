@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Tests\Integration;
+namespace FundKit\Tests\Integration;
 
-use GiveFlow\Donors\Donor;
-use GiveFlow\Donors\DonorService;
-use GiveFlow\Foundation\Plugin;
-use GiveFlow\Foundation\Transfer\DataExporter;
-use GiveFlow\Foundation\Transfer\DataImporter;
-use GiveFlow\Vendor\Queryable\DB;
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Transfer\DataExporter;
+use FundKit\Foundation\Transfer\DataImporter;
+use FundKit\Vendor\Queryable\DB;
 
 /**
  * An export carries no media, so a WordPress attachment id in it means nothing
@@ -43,8 +43,8 @@ final class ImportClearsAttachmentIdsTest extends IntegrationTestCase
     private function import(array $export): void
     {
         (new DataImporter(
-            Plugin::instance()->container->get(\GiveFlow\Foundation\Crypto\Crypto::class),
-            Plugin::instance()->container->get(\GiveFlow\Foundation\Identity\IdentityHasher::class),
+            Plugin::instance()->container->get(\FundKit\Foundation\Crypto\Crypto::class),
+            Plugin::instance()->container->get(\FundKit\Foundation\Identity\IdentityHasher::class),
         ))->import($export);
     }
 
@@ -63,8 +63,8 @@ final class ImportClearsAttachmentIdsTest extends IntegrationTestCase
 
         // Wipe the row so the import creates it rather than matching it.
         $prefix = DB::getPrefix();
-        DB::raw("DELETE FROM {$prefix}giveflow_donations");
-        DB::raw("DELETE FROM {$prefix}giveflow_donors");
+        DB::raw("DELETE FROM {$prefix}fundkit_donations");
+        DB::raw("DELETE FROM {$prefix}fundkit_donors");
 
         $this->import($export);
 

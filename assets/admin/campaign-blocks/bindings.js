@@ -4,18 +4,18 @@ import { dispatch, select as dataSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
- * Client-side half of the giveflow/campaign binding source.
+ * Client-side half of the fundkit/campaign binding source.
  *
  * PHP registers the source, but the editor resolves bindings on the client and
  * cannot call a PHP callback. Registering only server-side leaves a bound block
- * showing the source's label, "GiveFlow campaign", locked and unreadable, so an
+ * showing the source's label, "FundKit campaign", locked and unreadable, so an
  * organiser would be composing a page they cannot see.
  *
  * The values come from the server, computed by the same code that renders the
  * page, so the preview cannot drift from the result.
  */
 
-const ENTITY_KIND = 'giveflow/v1';
+const ENTITY_KIND = 'fundkit/v1';
 const ENTITY_NAME = 'campaign-binding-preview';
 
 function ensureEntity() {
@@ -27,8 +27,8 @@ function ensureEntity() {
         {
             kind: ENTITY_KIND,
             name: ENTITY_NAME,
-            baseURL: '/giveflow/v1/campaign-binding-preview',
-            label: __( 'GiveFlow campaign binding preview', 'giveflow-fundraising-campaigns' ),
+            baseURL: '/fundkit/v1/campaign-binding-preview',
+            label: __( 'FundKit campaign binding preview', 'fundkit-fundraising-campaigns' ),
         },
     ] );
 }
@@ -50,8 +50,8 @@ export function registerCampaignBindingSource( fields ) {
     ensureEntity();
 
     registerBlockBindingsSource( {
-        name: 'giveflow/campaign',
-        label: __( 'GiveFlow campaign', 'giveflow-fundraising-campaigns' ),
+        name: 'fundkit/campaign',
+        label: __( 'FundKit campaign', 'fundkit-fundraising-campaigns' ),
         usesContext: [ 'postId' ],
         getValues: ( { select, context, bindings } ) => {
             const record = preview( select, context );

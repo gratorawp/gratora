@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace GiveFlow\Onboarding;
+namespace FundKit\Onboarding;
 
-use GiveFlow\Foundation\Hooks\HookProvider;
+use FundKit\Foundation\Hooks\HookProvider;
 
 /**
- * Redirects to the onboarding page while `giveflow_onboarding_status` is 'pending'.
+ * Redirects to the onboarding page while `fundkit_onboarding_status` is 'pending'.
  *
  * @since 1.0.0
  */
 final class Onboarding extends HookProvider
 {
-    public const OPTION = 'giveflow_onboarding_status';
+    public const OPTION = 'fundkit_onboarding_status';
 
     /** Set at activation, spent on the first admin page load. */
-    private const GREET = 'giveflow_onboarding_greet';
+    private const GREET = 'fundkit_onboarding_greet';
 
     /** @since 1.0.0 */
     protected function actions(): array
