@@ -113,7 +113,7 @@ Terms and privacy: https://frankfurter.dev
 The JavaScript and CSS in `build/` are compiled. The sources they are built
 from, and the tooling that builds them, are in the public repository:
 
-https://github.com/fundkitorg/giveflow
+https://github.com/fundkitorg/fundkit
 
 == Installation ==
 
