@@ -7,6 +7,7 @@ namespace GiveFlow\Campaigns;
 use GiveFlow\Donations\Donation;
 use GiveFlow\Forms\Form;
 use GiveFlow\Forms\FormService;
+use GiveFlow\Forms\FormTemplates;
 use GiveFlow\Foundation\Helpers\Money;
 use GiveFlow\Foundation\Time\Clock;
 use GiveFlow\Recurring\RecurringPlan;
@@ -96,7 +97,7 @@ final class CampaignService
         // the database, and the object cache entries for the discarded page.
         DB::transaction(function () use ($campaign, $skipTemplate, $pageTemplate) {
             $campaign->save();
-            $campaign->default_form_id = $this->createDefaultFormFor($campaign, $skipTemplate);
+            $campaign->default_form_id = $this->createDefaultFormFor($campaign, $skipTemplate, $pageTemplate);
             $campaign->page_id         = $this->createPageFor($campaign, $skipTemplate, $pageTemplate);
             $campaign->save();
         });
@@ -663,8 +664,12 @@ final class CampaignService
     }
 
     /** @since 1.0.0 */
-    private function createDefaultFormFor(Campaign $campaign, bool $skipTemplate = false): int
+    private function createDefaultFormFor(Campaign $campaign, bool $skipTemplate = false, string $pageTemplate = ''): int
     {
+        $starter = $skipTemplate
+            ? ['blocks' => '', 'settings' => null]
+            : $this->starterForm($campaign, $pageTemplate);
+
         $form = $this->forms->create([
             /* translators: %s: campaign title */
             'title'       => sprintf(__('%s donation form', 'giveflow-fundraising-campaigns'), $campaign->title),
@@ -672,9 +677,41 @@ final class CampaignService
             // readiness checks; keep it as draft until the user picks a template.
             'status'      => $skipTemplate ? 'draft' : 'published',
             'campaign_id' => $campaign->id,
-            'blocks'      => $skipTemplate ? '' : $this->starterBlocks($campaign->currency),
+            'blocks'      => $starter['blocks'],
+            'settings'    => $starter['settings'],
         ]);
         return $form->id;
+    }
+
+    /**
+     * The form the chosen page template asks for.
+     *
+     * Every campaign used to arrive with the same six fields whichever template
+     * built its page, which made the choice of template a choice of decoration.
+     * A page that leads with the ask wants the shortest form there is, and a
+     * page built to be read can carry one split across steps.
+     *
+     * @return array{blocks: string, settings: array<string, mixed>|null}
+     *
+     * @since 1.0.0
+     */
+    private function starterForm(Campaign $campaign, string $pageTemplate): array
+    {
+        $id = CampaignTemplates::formTemplate($pageTemplate, (string) $campaign->campaign_type);
+
+        // An add-on that replaces the page templates wholesale names forms for
+        // its own, and core has never heard of either id.
+        $id = (string) apply_filters('giveflow.campaign.starter_form_template', $id, $campaign, $pageTemplate);
+
+        $template = FormTemplates::find($id);
+        $blocks   = is_array($template) ? trim((string) ($template['blocks'] ?? '')) : '';
+        if ($blocks === '') {
+            return ['blocks' => $this->starterBlocks($campaign->currency), 'settings' => null];
+        }
+
+        $settings = is_array($template['settings'] ?? null) ? $template['settings'] : null;
+
+        return ['blocks' => $blocks, 'settings' => $settings];
     }
 
     /** @since 1.0.0 */

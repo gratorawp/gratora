@@ -41,6 +41,7 @@ final class CampaignTemplates
                 'name'        => __( 'Standard campaign', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'Image, raised and goal figures, a progress bar, your description, then recent donations and top donors, with the form alongside.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'Most campaigns. Start here if none of the others obviously fit.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'campaign-page',
             ],
             [
                 'id'          => 'hero',
@@ -48,6 +49,7 @@ final class CampaignTemplates
                 'name'        => __( 'Colour hero', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'Opens on a full-width band in your campaign colour carrying the title, the figures and the progress bar, with everything else below it.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'A campaign that should look like an event rather than a page.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'everyday',
             ],
             [
                 'id'          => 'cover',
@@ -55,6 +57,7 @@ final class CampaignTemplates
                 'name'        => __( 'Photo cover', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'Opens on the campaign image running the full width, with the title, the figures and the progress bar laid over it.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'A campaign with one photograph strong enough to carry the page.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'quick-give',
             ],
             [
                 'id'          => 'split',
@@ -62,6 +65,7 @@ final class CampaignTemplates
                 'name'        => __( 'Split panel', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'The figures sit in a coloured panel next to the form, so the ask and the progress share the first screen.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'A short campaign where the number is the argument.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'everyday',
             ],
             [
                 'id'          => 'story',
@@ -69,6 +73,7 @@ final class CampaignTemplates
                 'name'        => __( 'Story first', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'A full-width image and the description before any figures at all. The ask comes after the reader knows what they are being asked about.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'An appeal that has to explain itself before it asks, and campaigns with a strong photograph.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'guided',
             ],
             [
                 'id'          => 'gallery',
@@ -76,6 +81,7 @@ final class CampaignTemplates
                 'name'        => __( 'With other campaigns', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'The usual layout, then a band at the foot showing your other campaigns, so somebody who has just given sees what else needs them.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'An organisation running several appeals at once.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'campaign-page',
             ],
             [
                 'id'          => 'deadline',
@@ -83,6 +89,7 @@ final class CampaignTemplates
                 'name'        => __( 'Appeal with a deadline', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'Leads with the goal and how far off it is, puts the form above the fold, and holds the description back until after the ask.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'A crisis or a matched appeal, where the reason to give now is the deadline.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'emergency-appeal',
             ],
             [
                 'id'          => 'urgent',
@@ -90,6 +97,7 @@ final class CampaignTemplates
                 'name'        => __( 'Emergency appeal', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'A colour band carrying what is still needed and how long is left, then the form. Nothing on the page that is not the ask.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'A crisis, where anything the reader has to scroll past is a reader you lose.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'emergency-appeal',
             ],
             [
                 'id'          => 'matched',
@@ -97,6 +105,7 @@ final class CampaignTemplates
                 'name'        => __( 'Matched giving', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'Raised, goal and donor count together in a coloured band under the title, so the size of the effort reads before the description.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'A match or a challenge, where how many have joined in matters as much as the total.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'everyday',
             ],
             [
                 'id'          => 'supporters',
@@ -104,6 +113,7 @@ final class CampaignTemplates
                 'name'        => __( 'Supporter wall', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'The people who have already given are the main content, with their messages shown and the wall running the full width beneath the form.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'A community appeal where seeing familiar names is the reason somebody gives.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'campaign-page',
             ],
             [
                 'id'          => 'leaderboard',
@@ -111,6 +121,7 @@ final class CampaignTemplates
                 'name'        => __( 'Leaderboard', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'Top donors and recent donations carry the page, over a tinted panel of the donor and donation counts.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'A competitive campaign, a challenge between teams or offices.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'campaign-page',
             ],
             [
                 'id'          => 'thermometer',
@@ -118,6 +129,7 @@ final class CampaignTemplates
                 'name'        => __( 'Thermometer', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'The percentage, the amount raised and what is left, large and in colour, with the supporter wall beneath.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'A campaign with one number everybody is watching.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'campaign-page',
             ],
             [
                 'id'          => 'tiers',
@@ -125,6 +137,7 @@ final class CampaignTemplates
                 'name'        => __( 'Impact figures', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'Three tinted cards carrying the raised total, the number of donors and the average donation, above the image and the form.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'An appeal where the shape of the giving is the story.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'impact-tiers',
             ],
             [
                 'id'          => 'transparency',
@@ -132,6 +145,7 @@ final class CampaignTemplates
                 'name'        => __( 'Open books', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'Four figures across a tinted band: raised, donors, donations and the average, with the image above them.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'An organisation that wants the numbers visible before the ask.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'campaign-page',
             ],
             [
                 'id'          => 'minimal',
@@ -139,6 +153,7 @@ final class CampaignTemplates
                 'name'        => __( 'Just the form', 'giveflow-fundraising-campaigns' ),
                 'description' => __( 'Title, description and the donation form. No figures, no donor lists, nothing that needs data to look right.', 'giveflow-fundraising-campaigns' ),
                 'best_for'    => __( 'A page you will design yourself, and a campaign with no goal to show.', 'giveflow-fundraising-campaigns' ),
+                'form'        => 'quick-give',
             ],
         ];
 
@@ -1113,6 +1128,24 @@ BLOCKS;
             case 'minimal':      return self::MINIMAL;
             default:             return self::STANDARD;
         }
+    }
+
+    /**
+     * The donation form a template asks for.
+     *
+     * A template is a whole page and the form is the largest thing on it, so a
+     * page built to lead with the ask and a page built to be read should not
+     * arrive with the same six fields. Falls back to the campaign-page form,
+     * which is what every campaign used to get.
+     *
+     * @since 1.0.0
+     */
+    public static function formTemplate(string $id, string $campaignType = ''): string
+    {
+        $template = self::find($id, $campaignType);
+        $form     = is_array($template) ? (string) ($template['form'] ?? '') : '';
+
+        return $form !== '' ? $form : 'campaign-page';
     }
 
     /** Whether an id names a template that exists. @since 1.0.0 */
