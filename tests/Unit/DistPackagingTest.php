@@ -266,7 +266,7 @@ final class DistPackagingTest extends TestCase
     public function test_the_per_path_matcher_agrees_with_the_packager(): void
     {
         $root = $this->pluginRoot(false);
-        foreach (['giveflow/queryable', 'dompdf/dompdf'] as $prefixed) {
+        foreach (['fundkit/queryable', 'dompdf/dompdf'] as $prefixed) {
             mkdir($root . '/vendor/vendor-prefixed/' . $prefixed, 0777, true);
         }
 

@@ -168,9 +168,8 @@ if ( vendor.withDev || vendor.present.length > 0 ) {
  * is present whether or not the build produced it.
  */
 const REQUIRED_PREFIXED = [
-    // The vendor directory is the composer package name, which still reads
-    // giveflow/queryable on Packagist. Only the namespace inside it is ours.
-    [ 'giveflow', 'queryable' ],   // every database call
+    // The vendor directory is the composer package name, not the namespace.
+    [ 'fundkit', 'queryable' ],   // every database call
     [ 'dompdf', 'dompdf' ],    // receipts and annual statements
 ];
 

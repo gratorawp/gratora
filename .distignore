@@ -82,9 +82,9 @@ tests
 .gitignore
 .php-cs-fixer.php
 
-/vendor/vendor-prefixed/giveflow/queryable/bin
-/vendor/vendor-prefixed/giveflow/queryable/tests
-/vendor/vendor-prefixed/giveflow/queryable/phpunit.xml
+/vendor/vendor-prefixed/fundkit/queryable/bin
+/vendor/vendor-prefixed/fundkit/queryable/tests
+/vendor/vendor-prefixed/fundkit/queryable/phpunit.xml
 /vendor/vendor-prefixed/dompdf/dompdf/tests
 /vendor/vendor-prefixed/dompdf/php-font-lib/tests
 /vendor/vendor-prefixed/dompdf/php-svg-lib/tests
