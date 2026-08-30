@@ -4,12 +4,13 @@ import Notice from '../_shared/components/Notice';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Copy as CopyIcon, Trash2 as TrashIcon, ExternalLink as ViewIcon, Target, Plus } from 'lucide-react';
+import { Copy as CopyIcon, Trash2 as TrashIcon, ExternalLink as ViewIcon, Target, Plus, SearchX } from 'lucide-react';
 
 import { StatusBadge, STATUS_LABEL, formatAmount, formatDate, timeAgo, detailHref } from '../_shared/format';
 import { dashboardHref } from '../_shared/adminPages';
 import Btn from '../_shared/components/Btn';
 import EmptyState from '../_shared/components/EmptyState';
+import { isViewFiltered, clearedView } from '../_shared/viewFilters';
 import { rowLinkProps } from '../_shared/rowLink';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import KpiStrip from '../_shared/components/KpiStrip';
@@ -92,6 +93,12 @@ export default function List() {
     );
 
     const statusFilter = view.filters?.find( ( f ) => f.field === 'status' );
+
+    // Which empty this screen shows depends on it. See _shared/viewFilters.
+    const filtered = isViewFiltered( view );
+    const clearFilters = () => {
+        setView( clearedView( view ) );
+    };
 
     const load = useCallback( () => {
         let aborted = false;
@@ -375,7 +382,7 @@ export default function List() {
             ) }
 
 
-            { ! loading && total === 0 && ! view.search && ! statusFilter ? (
+            { ! loading && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <Target size={ 22 } strokeWidth={ 1.75 } /> }
                     title={ __( 'No campaigns yet', 'giveflow-fundraising-campaigns' ) }
@@ -387,7 +394,7 @@ export default function List() {
                     }
                 />
             ) : (
-                <div className="giveflow-dataviews">
+                <div className={ `giveflow-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
                     <DataViews
                         data={ data }
                         isLoading={ loading }
@@ -399,6 +406,20 @@ export default function List() {
                         defaultLayouts={ { table: {}, list: {} } }
                         getItemId={ ( item ) => String( item.id ) }
                     />
+
+                    { ! loading && data.length === 0 && filtered && (
+                        <EmptyState
+                            compact
+                            icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
+                            title={ __( 'Nothing matches these filters', 'giveflow-fundraising-campaigns' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'giveflow-fundraising-campaigns' ) }
+                            action={
+                                <Btn variant="secondary" onClick={ clearFilters }>
+                                    { __( 'Clear filters', 'giveflow-fundraising-campaigns' ) }
+                                </Btn>
+                            }
+                        />
+                    ) }
                 </div>
             ) }
 

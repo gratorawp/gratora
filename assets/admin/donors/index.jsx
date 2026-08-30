@@ -7,11 +7,13 @@ import { DataViews } from '@wordpress/dataviews';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { UserX as RedactIcon, Users as UsersIcon, Trash2 as DeleteIcon } from 'lucide-react';
+import { UserX as RedactIcon, Users as UsersIcon, Trash2 as DeleteIcon, SearchX } from 'lucide-react';
 import Notice from '../_shared/components/Notice';
 import Toaster from '../_shared/components/Toaster';
 
+import Btn from '../_shared/components/Btn';
 import EmptyState from '../_shared/components/EmptyState';
+import { isViewFiltered, clearedView } from '../_shared/viewFilters';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import { rowLinkProps } from '../_shared/rowLink';
 import { dashboardHref } from '../_shared/adminPages';
@@ -65,6 +67,10 @@ export function DonorsApp( { toggleSlot } ) {
         search:  '',
         fields:  [ 'name', 'email', 'country', 'donations_count', 'total_donated', 'last_donation_at' ],
     } );
+
+    // Which empty this screen shows depends on it. See _shared/viewFilters.
+    const filtered = isViewFiltered( view );
+    const clearFilters = () => setView( clearedView( view ) );
 
     const [ data, setData ]       = useState( [] );
     const [ total, setTotal ]     = useState( 0 );
@@ -362,14 +368,14 @@ export function DonorsApp( { toggleSlot } ) {
 
             <KpiStrip items={ donorKpis( stats ) } loading={ loading && ! stats } />
 
-            { ! loading && ! error && total === 0 && ! view.search && ! view.filters?.length ? (
+            { ! loading && ! error && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
                     title={ __( 'No donors yet', 'giveflow-fundraising-campaigns' ) }
                     body={ __( 'Anyone who donates is added here. Publish a form to take the first one.', 'giveflow-fundraising-campaigns' ) }
                 />
             ) : (
-                <div className="giveflow-dataviews">
+                <div className={ `giveflow-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
                     <DataViews
                         data={ data }
                         isLoading={ loading }
@@ -381,6 +387,20 @@ export function DonorsApp( { toggleSlot } ) {
                         defaultLayouts={ { table: {}, list: {} } }
                         getItemId={ ( item ) => String( item.id ) }
                     />
+
+                    { ! loading && data.length === 0 && filtered && (
+                        <EmptyState
+                            compact
+                            icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
+                            title={ __( 'Nothing matches these filters', 'giveflow-fundraising-campaigns' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'giveflow-fundraising-campaigns' ) }
+                            action={
+                                <Btn variant="secondary" onClick={ clearFilters }>
+                                    { __( 'Clear filters', 'giveflow-fundraising-campaigns' ) }
+                                </Btn>
+                            }
+                        />
+                    ) }
                 </div>
             ) }
 

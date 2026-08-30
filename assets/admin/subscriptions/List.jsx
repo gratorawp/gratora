@@ -6,10 +6,11 @@ import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
-import { RotateCw } from 'lucide-react';
+import { RotateCw, SearchX } from 'lucide-react';
 
 import Btn from '../_shared/components/Btn';
 import EmptyState from '../_shared/components/EmptyState';
+import { isViewFiltered, clearedView } from '../_shared/viewFilters';
 import KpiStrip from '../_shared/components/KpiStrip';
 import Notice from '../_shared/components/Notice';
 import StatusBadge from '../_shared/components/StatusBadge';
@@ -432,6 +433,12 @@ export default function List() {
     };
     const filterValue = ( field ) => view.filters?.find( ( f ) => f.field === field )?.value;
     const statusFilter   = filterValue( 'status' );
+
+    // Which empty this screen shows depends on it. See _shared/viewFilters.
+    const filtered = isViewFiltered( view );
+    const clearFilters = () => {
+        setView( clearedView( view ) );
+    };
     const gatewayFilter  = filterValue( 'gateway' );
     const campaignFilter = filterValue( 'campaign' );
     const intervalFilter = filterValue( 'interval' );
@@ -842,12 +849,12 @@ export default function List() {
                 <Notice status="error" isDismissible={ false }>{ fetchError }</Notice>
             ) }
 
-            { ! loading && total === 0 && ! fetchError ? (
+            { ! loading && total === 0 && ! filtered && ! fetchError ? (
                 <EmptyState { ...emptyStateCopy( unlinked, testHidden ) } />
             ) : (
                 // The card chrome the other list screens sit in lives on this
                 // wrapper, so without it the table renders bare on the page.
-                <div className="giveflow-dataviews">
+                <div className={ `giveflow-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
                     <DataViews
                         data={ data }
                         fields={ fields }
@@ -859,6 +866,20 @@ export default function List() {
                         defaultLayouts={ { table: {} } }
                         getItemId={ ( item ) => String( item.id ) }
                     />
+
+                    { ! loading && data.length === 0 && filtered && (
+                        <EmptyState
+                            compact
+                            icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
+                            title={ __( 'Nothing matches these filters', 'giveflow-fundraising-campaigns' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'giveflow-fundraising-campaigns' ) }
+                            action={
+                                <Btn variant="secondary" onClick={ clearFilters }>
+                                    { __( 'Clear filters', 'giveflow-fundraising-campaigns' ) }
+                                </Btn>
+                            }
+                        />
+                    ) }
                 </div>
             ) }
 
