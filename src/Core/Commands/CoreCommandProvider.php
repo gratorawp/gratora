@@ -8,6 +8,7 @@ use GiveFlow\Analytics\Event;
 use GiveFlow\Campaigns\CampaignMetricsService;
 use GiveFlow\Campaigns\CampaignRepository;
 use GiveFlow\Campaigns\CampaignService;
+use GiveFlow\Campaigns\CampaignTemplates;
 use GiveFlow\Currency\BaseCurrencyLocked;
 use GiveFlow\Currency\Currency;
 use GiveFlow\Currency\SupportedCurrencies;
@@ -544,6 +545,49 @@ final class CoreCommandProvider
         // downgraded to standard with a misleading success.
         $campaignTypes = array_keys((array) apply_filters('giveflow.campaign.types', ['standard' => '']));
 
+        // Which page layouts exist depends on the campaign type: a type whose
+        // add-on replaces the list wholesale carries ids core has never heard
+        // of. A command schema is fixed when it is registered and cannot branch
+        // on another field, so the enum is the union of every type's list and
+        // the description says which belong where. The handler is what actually
+        // holds the pairing.
+        $templatesFor = [];
+        foreach ($campaignTypes as $type) {
+            $templatesFor[$type] = array_values(array_filter(array_map(
+                static fn (array $t): string => (string) ($t['id'] ?? ''),
+                CampaignTemplates::all((string) $type)
+            )));
+        }
+        $templateIds  = array_values(array_unique(array_merge(...array_values($templatesFor) ?: [[]])));
+        $templateList = implode('; ', array_map(
+            static fn (string $type): string => $type . ': ' . implode(', ', $templatesFor[$type]),
+            array_keys($templatesFor)
+        ));
+
+        $r->register(new Command(
+            'campaign.templates',
+            'List the starter page layouts a campaign type offers, and the donation form each one builds.',
+            $this->schema([
+                'campaign_type' => ['type' => 'string', 'enum' => $campaignTypes, 'description' => 'Whose layouts to list. Defaults to standard.'],
+            ]),
+            [],
+            'giveflow_manage_campaigns',
+            true,
+            false,
+            static function (array $in): array {
+                $type = (string) ($in['campaign_type'] ?? 'standard');
+
+                return ['templates' => array_map(static fn (array $t): array => [
+                    'id'          => (string) ($t['id'] ?? ''),
+                    'name'        => (string) ($t['name'] ?? ''),
+                    'description' => (string) ($t['description'] ?? ''),
+                    'best_for'    => (string) ($t['best_for'] ?? ''),
+                    'form'        => CampaignTemplates::formTemplate((string) ($t['id'] ?? ''), $type),
+                ], CampaignTemplates::all($type))];
+            },
+            self::META,
+        ));
+
         $r->register(new Command(
             'campaign.create',
             'Create a campaign with its default form and page.',
@@ -558,16 +602,30 @@ final class CoreCommandProvider
                 'goal_count'  => ['type' => ['integer', 'null'], 'minimum' => 0],
                 'campaign_type' => ['type' => 'string', 'enum' => $campaignTypes, 'description' => 'Campaign type. Only these registered types exist; a type contributed by a Pro add-on (e.g. peer_to_peer) is listed only when that add-on is active.'],
                 'image_attachment_id' => ['type' => ['integer', 'null'], 'minimum' => 1, 'description' => 'Media-library attachment ID to use as the campaign photo.'],
+                'page_template' => ['type' => 'string', 'enum' => $templateIds, 'description' => 'Which starter layout builds the campaign page, and with it the donation form that page carries. Valid ids depend on campaign_type. ' . $templateList . '. Defaults to that type\'s own default.'],
             ]),
             [],
             'giveflow_manage_campaigns',
             false,
             true,
             function (array $in) use ($c): array {
+                // Rejected here rather than downgraded. CampaignService falls
+                // back to the default for an id it does not recognise, which is
+                // right for the picker (where a stored id can go stale) and
+                // wrong for a caller who asked in words: it would report the
+                // layout it was told to build and build a different one.
+                $template = (string) ($in['page_template'] ?? '');
+                $type     = (string) ($in['campaign_type'] ?? 'standard');
+                if ($template !== '' && ! CampaignTemplates::exists($template, $type)) {
+                    throw new CommandError(esc_html(
+                        'That page layout is not one this campaign type offers. Call campaign.templates to see which are.'
+                    ));
+                }
+
                 $campaign = $c->get(CampaignService::class)->create($in);
                 return ['campaign_id' => (int) $campaign->id, 'slug' => (string) $campaign->slug];
             },
-            self::META,
+            $this->meta(['agent_hint' => 'The page layout also decides the donation form the campaign gets. Call campaign.templates first when the ask names a style, an audience or a kind of appeal; the layout cannot be changed from here afterwards, only in the page editor.']),
         ));
 
         $r->register(new Command(
