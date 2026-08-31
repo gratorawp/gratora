@@ -6,6 +6,7 @@ namespace FundKit\Admin;
 
 use FundKit\Settings\SettingsService;
 use FundKit\Campaigns\Styling\StylePresets;
+use FundKit\Currency\CurrencyFormats;
 use FundKit\Campaigns\Styling\Tokens;
 use FundKit\Forms\FormService;
 use FundKit\Foundation\Auth\Capabilities;
@@ -51,6 +52,8 @@ final class AdminGlobals extends HookProvider
                 : ['USD'],
             // Org-wide number format: admin JS reads from here; donor runtime gets it via shortcode config.
             'number_format' => Money::jsNumberFormat(),
+            // Presets the currency settings panel fills the format from.
+            'currency_formats' => CurrencyFormats::all(),
             'wp' => [
                 'site_name'    => (string) get_bloginfo('name'),
                 'admin_email'  => (string) get_option('admin_email', ''),

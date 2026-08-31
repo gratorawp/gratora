@@ -73,4 +73,18 @@ final class AdminGlobalsPageMatchTest extends IntegrationTestCase
     {
         $this->assertStringContainsString('number_format', $this->payloadOn('fundkit'));
     }
+
+    /**
+     * The settings panel fills the format from window.fundkit.currency_formats
+     * when a base currency is picked. Without it the pick still saves and the
+     * format silently stays whatever it was, which is the bug this replaced.
+     */
+    public function test_the_payload_carries_the_currency_format_presets(): void
+    {
+        $payload = $this->payloadOn('fundkit-settings');
+
+        $this->assertStringContainsString('currency_formats', $payload);
+        $this->assertStringContainsString('"USD"', $payload);
+        $this->assertStringContainsString('"EUR"', $payload);
+    }
 }

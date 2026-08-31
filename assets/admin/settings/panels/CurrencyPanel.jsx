@@ -215,13 +215,37 @@ export default function CurrencyPanel( { s, fx } ) {
     const baseLocked = !! s.record.base_currency_locked;
     const supported = Array.isArray( s.record.supported_currencies ) ? s.record.supported_currencies : [ 'USD' ];
 
+    const [ presetApplied, setPresetApplied ] = useState( '' );
+
+    // These fell back to European separators while the server's defaults are
+    // '.' and ',', so an unsaved panel disagreed with what PHP would render.
     const decimalPlaces  = Number( s.value( 'format.decimal_places', 2 ) );
-    const decimalSep     = String( s.value( 'format.decimal_sep', ',' ) );
-    const thousandSep    = String( s.value( 'format.thousand_sep', '.' ) );
+    const decimalSep     = String( s.value( 'format.decimal_sep', '.' ) );
+    const thousandSep    = String( s.value( 'format.thousand_sep', ',' ) );
     const symbolPosition = String( s.value( 'format.symbol_position', 'before' ) );
 
     const symbol = currencyByCode( defaultCurrency )?.symbol || defaultCurrency;
     const preview = previewAmount( 1234.56, { decimalPlaces, decimalSep, thousandSep, symbol, symbolPosition } );
+
+    // Presets come from the server so PHP stays the one place a currency's
+    // conventions are written down.
+    const presetFor = ( code ) => window.fundkit?.currency_formats?.[ code ] || null;
+
+    const applyCurrency = ( code ) => {
+        // Base is always accepted, so persist it into the supported list too -
+        // otherwise the UI shows it on while the saved set silently excludes it.
+        const nextSupported = supported.includes( code ) ? supported : [ ...supported, code ];
+        const patch = { default_currency: code, supported_currencies: nextSupported };
+
+        // Picking a currency is the only moment we know what the format should
+        // be. Nothing is written until save, so the fields change in front of
+        // the admin and can be edited back.
+        const preset = presetFor( code );
+        if ( preset ) patch.format = { ...preset };
+
+        s.edit( patch );
+        setPresetApplied( preset ? code : '' );
+    };
 
     const toggleSupported = ( code ) => {
         if ( code === defaultCurrency ) return; // base is always on
@@ -248,14 +272,7 @@ export default function CurrencyPanel( { s, fx } ) {
                         className="fundkit-select"
                         disabled={ baseLocked }
                         value={ defaultCurrency }
-                        onChange={ ( e ) => {
-                            const code = e.target.value;
-                            // Base is always accepted, so persist it into the
-                            // supported list too - otherwise the UI shows it on
-                            // while the saved set silently excludes it.
-                            const nextSupported = supported.includes( code ) ? supported : [ ...supported, code ];
-                            s.edit( { default_currency: code, supported_currencies: nextSupported } );
-                        } }
+                        onChange={ ( e ) => applyCurrency( e.target.value ) }
                     >
                         { CURRENCIES.map( ( c ) => (
                             <option key={ c.code } value={ c.code }>{ c.code } · { c.label } ({ c.symbol })</option>
@@ -314,6 +331,15 @@ export default function CurrencyPanel( { s, fx } ) {
                 meta={ __( 'Receipts, exports, donation form', 'fundkit-fundraising-campaigns' ) }
                 edited={ s.isDirty }
             >
+                { presetApplied && (
+                    <p className="fundkit-muted" style={ { marginTop: 0 } }>
+                        { sprintf(
+                            /* translators: %s: currency code */
+                            __( 'Set to how %s is usually written. Change anything below if your organisation writes it differently.', 'fundkit-fundraising-campaigns' ),
+                            presetApplied
+                        ) }
+                    </p>
+                ) }
                 <div className="fundkit-currency-preview">
                     <span className="fundkit-currency-preview__label">{ __( 'Preview', 'fundkit-fundraising-campaigns' ) }</span>
                     <span className="fundkit-currency-preview__value num">{ preview }</span>
