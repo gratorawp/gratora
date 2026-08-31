@@ -11,14 +11,14 @@
  * Settings > Currency. It lands at N=0, before the first donation.
  */
 
-const { chosenFormat } = require( '../../assets/admin/onboarding/Onboarding' );
+const { chosenFormat, formatForCurrency } = require( '../../assets/admin/onboarding/Onboarding' );
 
 // What SettingsService merges in when nobody has chosen anything.
 const asServerReturnsIt = ( overrides = {} ) => ( {
     format: { decimal_sep: '.', thousand_sep: ',', symbol_position: 'before', ...overrides },
 } );
 
-describe( 'a country the operator picked decides the separators', () => {
+describe( 'the currency the operator picked decides the separators', () => {
     test( 'an EU install gets EU separators, not the shipped defaults', () => {
         const currency = asServerReturnsIt();
 
@@ -53,5 +53,75 @@ describe( 'a value the operator actually chose is kept', () => {
     test( 'and a missing group falls back to the derived value', () => {
         expect( chosenFormat( undefined, 'decimal_sep', ',' ) ).toBe( ',' );
         expect( chosenFormat( {}, 'thousand_sep', '.' ) ).toBe( '.' );
+    } );
+} );
+
+
+/**
+ * The wizard derived this from the country, on a hardcoded list of nations that
+ * write money the American way. An organisation outside that list which chose
+ * USD was written 1.234,56 $ regardless, because its country decided the format
+ * and its currency was never consulted.
+ */
+describe( 'the format follows the currency, not the country', () => {
+    const PRESETS = {
+        USD: { decimal_places: 2, decimal_sep: '.', thousand_sep: ',', symbol_position: 'before' },
+        EUR: { decimal_places: 2, decimal_sep: ',', thousand_sep: '.', symbol_position: 'after' },
+        JPY: { decimal_places: 0, decimal_sep: '.', thousand_sep: ',', symbol_position: 'before' },
+    };
+
+    beforeEach( () => {
+        global.window = { fundkit: { currency_formats: PRESETS } };
+    } );
+
+    afterEach( () => {
+        delete global.window;
+    } );
+
+    test( 'choosing dollars writes dollars, wherever the organisation is', () => {
+        expect( formatForCurrency( 'USD' ) ).toEqual( {
+            decimal: '.', thousand: ',', symbolPosition: 'before', places: 2,
+        } );
+    } );
+
+    test( 'choosing euros writes euros', () => {
+        expect( formatForCurrency( 'EUR' ) ).toEqual( {
+            decimal: ',', thousand: '.', symbolPosition: 'after', places: 2,
+        } );
+    } );
+
+    test( 'a currency with no minor unit asks for no decimal places', () => {
+        expect( formatForCurrency( 'JPY' ).places ).toBe( 0 );
+    } );
+
+    test( 'the lookup does not care about case or stray space', () => {
+        expect( formatForCurrency( ' eur ' ) ).toEqual( formatForCurrency( 'EUR' ) );
+    } );
+
+    test( 'a currency with no preset falls back rather than guessing', () => {
+        expect( formatForCurrency( 'XYZ' ) ).toEqual( {
+            decimal: '.', thousand: ',', symbolPosition: 'before', places: 2,
+        } );
+    } );
+
+    test( 'and so does a build with no presets on the page', () => {
+        global.window = {};
+        expect( formatForCurrency( 'EUR' ).symbolPosition ).toBe( 'before' );
+    } );
+} );
+
+describe( 'zero decimal places is a choice, not an absence', () => {
+    test( 'a yen org that set none keeps none', () => {
+        // Falsy, so the previous truthiness test read this as unset and
+        // replaced it with the derived value.
+        const currency = { format: { decimal_places: 0 } };
+
+        expect( chosenFormat( currency, 'decimal_places', 2 ) ).toBe( 0 );
+    } );
+
+    test( 'and the shipped 2 still defers to the derived value', () => {
+        const currency = { format: { decimal_places: 2 } };
+
+        expect( chosenFormat( currency, 'decimal_places', 0 ) ).toBe( 0 );
     } );
 } );

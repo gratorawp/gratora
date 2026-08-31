@@ -44,9 +44,31 @@ const STATES_BY_COUNTRY = {
 };
 
 // Derives digit separators from country (US: 1,234.56; EU: 1.234,56).
-function deriveNumberFormat( country ) {
-    const us = [ 'US', 'CA', 'GB', 'AU', 'NZ', 'IN', 'IE', 'ZA', 'SG', 'HK', 'JP' ];
-    return us.includes( ( country || '' ).toUpperCase() ) ? 'us' : 'eu';
+/**
+ * How the chosen currency is conventionally written, from the presets the
+ * server publishes (CurrencyFormats).
+ *
+ * This used to be derived from the country instead, on a list of which nations
+ * write money the American way. That conflates where an organisation is with
+ * what it counts in: a Croatian charity raising in USD picked USD and got
+ * 1.234,56 $ anyway, because its country was not on the list. Deriving from the
+ * currency keeps every case the country list existed to protect, since a German
+ * org raising euros still gets euro separators.
+ */
+export function formatForCurrency( code ) {
+    const preset = ( typeof window !== 'undefined' ? window.fundkit?.currency_formats : null )
+        ?.[ String( code || '' ).trim().toUpperCase() ];
+
+    if ( ! preset ) {
+        return { decimal: '.', thousand: ',', symbolPosition: 'before', places: 2 };
+    }
+
+    return {
+        decimal:        preset.decimal_sep,
+        thousand:       preset.thousand_sep,
+        symbolPosition: preset.symbol_position,
+        places:         preset.decimal_places,
+    };
 }
 
 
@@ -191,15 +213,13 @@ export default function Onboarding() {
                     state:          org.state,
                 } );
 
-                const fmt = numberFormatPair( deriveNumberFormat( org.country ) );
+                const fmt = formatForCurrency( currency.default_currency );
                 await persist( 'currency-locale', {
                     default_currency:     currency.default_currency,
                     supported_currencies: chosenCurrencies( currency ),
                     locale:               currency.locale || '',
                     format: {
-                        decimal_places:  Number.isFinite( currency.format?.decimal_places )
-                            ? currency.format.decimal_places
-                            : 2,
+                        decimal_places:  chosenFormat( currency, 'decimal_places', fmt.places ),
                         // Keep separators the operator already chose; derive
                         // the rest from the country they just picked.
                         //
@@ -729,17 +749,12 @@ function ChecklistItem( { title, description, href, cta, onClick, busy } ) {
     );
 }
 
-function numberFormatPair( fmt ) {
-    return fmt === 'eu'
-        ? { decimal: ',', thousand: '.', symbolPosition: 'after' }
-        : { decimal: '.', thousand: ',', symbolPosition: 'before' };
-}
-
 /**
  * What ships when nobody has chosen anything, mirroring the currency-locale
  * defaults in SettingsService.
  */
 const SHIPPED_FORMAT = {
+    decimal_places:  2,
     decimal_sep:     '.',
     thousand_sep:    ',',
     symbol_position: 'before',
@@ -782,6 +797,10 @@ export function chosenCurrencies( currency ) {
 export function chosenFormat( currency, key, derived ) {
     const value = currency?.format?.[ key ];
 
-    return value && value !== SHIPPED_FORMAT[ key ] ? value : derived;
+    // Tested for presence rather than truthiness: decimal_places of 0 is a
+    // real choice, and a yen org that made it would have had it read as unset.
+    if ( value === undefined || value === null || value === '' ) return derived;
+
+    return value !== SHIPPED_FORMAT[ key ] ? value : derived;
 }
 
