@@ -58,6 +58,12 @@ export const STATUS_LABEL = {
     draft:     __( 'Draft', 'fundkit-fundraising-campaigns' ),
     published: __( 'Active', 'fundkit-fundraising-campaigns' ),
     archived:  __( 'Archived', 'fundkit-fundraising-campaigns' ),
+    // Derived on the server, not stored: a published campaign outside its
+    // schedule or past a goal it closes on. Filterable because the list shows
+    // them, and a badge you cannot filter by is a dead end.
+    scheduled: __( 'Scheduled', 'fundkit-fundraising-campaigns' ),
+    ended:     __( 'Ended', 'fundkit-fundraising-campaigns' ),
+    goal_met:  __( 'Goal met', 'fundkit-fundraising-campaigns' ),
 };
 
 export function listHref() {

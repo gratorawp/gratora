@@ -105,6 +105,68 @@ final class CampaignRepository
             ->getAll();
     }
 
+
+    /**
+     * Narrow a query to one status, stored or derived.
+     *
+     * Three of the states the list shows are not in the status column: a
+     * campaign outside its schedule, or past a goal it is set to close on, is
+     * still "published" in the row. The badge derives them, so the filter has
+     * to derive the same ones or picking Ended returns nothing.
+     *
+     * The order matters and mirrors Campaign::notAcceptingReason(): a campaign
+     * that both ended and met its goal reads as Ended, so it must not also
+     * answer to Goal met, or the two filters would return overlapping sets that
+     * disagree with the badges in them.
+     *
+     * @since 1.0.0
+     */
+    private function whereStatus($q, string $status)
+    {
+        $now = gmdate('Y-m-d H:i:s');
+
+        if ($status === 'scheduled') {
+            return $q->where('status', 'published')
+                ->whereIsNotNull('starts_at')
+                ->where('starts_at', $now, '>');
+        }
+
+        if ($status === 'ended') {
+            return $q->where('status', 'published')
+                ->whereIsNotNull('ends_at')
+                ->where('ends_at', $now, '<');
+        }
+
+        if ($status === 'goal_met') {
+            return $q->where('status', 'published')
+                ->where('close_at_goal', 1)
+                ->where(function ($g) use ($now): void {
+                    $g->whereIsNull('ends_at')->orWhere('ends_at', $now, '>=');
+                })
+                ->where(function ($g) use ($now): void {
+                    $g->whereIsNull('starts_at')->orWhere('starts_at', $now, '<=');
+                })
+                ->where(function ($g): void {
+                    // A goal of zero or null is not a goal, so it is never met.
+                    $g->where(function ($a): void {
+                        $a->where('goal_type', 'amount')
+                          ->where('goal_cents', 0, '>')
+                          ->whereColumn('raised_cents', 'goal_cents', '>=');
+                    })->orWhere(function ($a): void {
+                        $a->where('goal_type', 'donations')
+                          ->where('goal_count', 0, '>')
+                          ->whereColumn('donations_count', 'goal_count', '>=');
+                    })->orWhere(function ($a): void {
+                        $a->where('goal_type', 'donors')
+                          ->where('goal_count', 0, '>')
+                          ->whereColumn('donors_count', 'goal_count', '>=');
+                    });
+                });
+        }
+
+        return $q->where('status', $status);
+    }
+
     /**
      * @param array{page?:int,per_page?:int,orderby?:string,order?:string,status?:string,search?:string} $args
      * @return array{items: array<Campaign>, total: int}
@@ -127,7 +189,7 @@ final class CampaignRepository
 
         $applyFilters = function ($q) use ($args, $term) {
             if (! empty($args['status'])) {
-                $q = $q->where('status', (string) $args['status']);
+                $q = $this->whereStatus($q, (string) $args['status']);
             }
             if ($term !== '') {
                 $q = $q->where(function ($g) use ($term): void {
@@ -163,7 +225,7 @@ final class CampaignRepository
 
         $applyFilters = function ($q) use ($args, $term) {
             if (! empty($args['status'])) {
-                $q = $q->where('status', (string) $args['status']);
+                $q = $this->whereStatus($q, (string) $args['status']);
             }
             if ($term !== '') {
                 $q = $q->where(function ($g) use ($term): void {
