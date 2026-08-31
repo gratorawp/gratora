@@ -13,6 +13,15 @@ use FundKit\Foundation\Hooks\HookProvider;
  */
 final class AdminFooter extends HookProvider
 {
+    /**
+     * The directory permalink, which is also the text domain and the folder
+     * the packaged zip installs to. Change all four together or the review
+     * link points at a plugin page that does not exist.
+     *
+     * @since 1.0.0
+     */
+    private const SLUG = 'fundkit-fundraising-campaigns';
+
     /** @since 1.0.0 */
     protected function filters(): array
     {
@@ -42,25 +51,10 @@ final class AdminFooter extends HookProvider
         );
     }
 
-    /**
-     * The directory the plugin is installed into is the slug the directory
-     * serves it under, so the link follows a permalink change without an edit.
-     *
-     * Read off the path rather than through plugin_basename(), which returns
-     * the whole absolute path when the plugin is not inside the registered
-     * plugin directory, symlinked checkouts included.
-     *
-     * @since 1.0.0
-     */
-    private function slug(): string
-    {
-        return basename(dirname(FUNDKIT_FILE));
-    }
-
     /** @since 1.0.0 */
     private function reviewUrl(): string
     {
-        return 'https://wordpress.org/support/plugin/' . $this->slug() . '/reviews/?rate=5#new-post';
+        return 'https://wordpress.org/support/plugin/' . self::SLUG . '/reviews/?rate=5#new-post';
     }
 
     /** @since 1.0.0 */

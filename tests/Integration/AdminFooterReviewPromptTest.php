@@ -57,19 +57,28 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
         $this->assertStringContainsString('rate=5', $out);
     }
 
-    /**
-     * The slug is derived from where the plugin sits on disk, and the first
-     * attempt at that emitted the whole absolute path into the href. Assert the
-     * shape of a directory slug rather than recomputing it, so the test can
-     * still fail when the derivation is wrong.
-     */
-    public function test_the_link_is_a_directory_url_and_not_a_filesystem_path(): void
+    public function test_the_link_points_at_the_assigned_permalink(): void
     {
-        $out = $this->footerOn('fundkit');
+        $this->assertStringContainsString(
+            'https://wordpress.org/support/plugin/fundkit-fundraising-campaigns/reviews/?rate=5#new-post',
+            $this->footerOn('fundkit')
+        );
+    }
 
-        $this->assertMatchesRegularExpression('#https://wordpress\.org/support/plugin/[a-z0-9-]+/reviews/\?rate=5#', $out);
-        $this->assertStringNotContainsString('%2F', $out);
-        $this->assertStringNotContainsString('%20', $out);
+    /**
+     * The slug has to match the text domain, which has to match the folder the
+     * zip installs to. Reading it off a header keeps the three from drifting
+     * apart silently, which is how the link ends up 404ing after a rename.
+     */
+    public function test_the_slug_matches_the_plugins_text_domain(): void
+    {
+        $header = get_file_data(FUNDKIT_FILE, ['TextDomain' => 'Text Domain']);
+
+        $this->assertSame(
+            $header['TextDomain'],
+            'fundkit-fundraising-campaigns',
+            'the review link slug and the Text Domain header have drifted apart'
+        );
     }
 
     /**
