@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Core;
 
 use FundKit\Analytics\ErrorLog;
+use FundKit\Admin\AdminFooter;
 use FundKit\Admin\AdminGlobals;
 use FundKit\Admin\AdminMenu;
 use FundKit\Admin\Pages\CampaignsPage;
@@ -1204,6 +1205,7 @@ final class CoreModule implements FundKitModule
             (new OnboardingPage())->register();
             (new Onboarding())->register();
             (new AdminGlobals($c->get(LicenseService::class)))->register();
+            (new AdminFooter())->register();
             (new LicenseNotice($c->get(LicenseService::class)))->register();
 
             // Persist admin notice until the lost-key flag is cleared.
