@@ -49,6 +49,9 @@ final class Campaign extends Model
      */
     public ?array $style = null;
 
+    /** Stops accepting donations the moment the goal is reached. */
+    public bool $close_at_goal = false;
+
     public bool $hide_header = false;
     public bool $hide_footer = false;
 
@@ -72,7 +75,7 @@ final class Campaign extends Model
     }
 
     /**
-     * @return null|'draft'|'archived'|'scheduled'|'ended'
+     * @return null|'draft'|'archived'|'scheduled'|'ended'|'goal_met'
      *
      * @since 1.0.0
      */
@@ -89,7 +92,30 @@ final class Campaign extends Model
         $ends = $this->endsAtUtc();
         if ($ends !== null && $ends < $now) return 'ended';
 
+        if ($this->close_at_goal && $this->goalMet()) return 'goal_met';
+
         return null;
+    }
+
+    /**
+     * Whether the campaign has reached the target its goal_type measures.
+     *
+     * A goal of null or zero is not a goal, and must never read as met: it is
+     * what every campaign without one holds, and treating it as reached would
+     * close them all on their first donation.
+     *
+     * @since 1.0.0
+     */
+    public function goalMet(): bool
+    {
+        return match ($this->goal_type) {
+            'donations' => $this->goal_count !== null && $this->goal_count > 0
+                && $this->donations_count >= $this->goal_count,
+            'donors'    => $this->goal_count !== null && $this->goal_count > 0
+                && $this->donors_count >= $this->goal_count,
+            default     => $this->goal_cents !== null && $this->goal_cents > 0
+                && $this->raised_cents >= $this->goal_cents,
+        };
     }
 
     /**
@@ -138,6 +164,7 @@ Campaign::schema(function (Table $t): void {
     $t->bigInteger('default_fund_id')->unsigned()->nullable()->index();
     $t->json('default_amount_presets')->nullable();
     $t->json('style')->nullable();
+    $t->boolean('close_at_goal')->default(0);
     $t->boolean('hide_header')->default(0);
     $t->boolean('hide_footer')->default(0);
     $t->datetime('created_at');

@@ -1869,8 +1869,12 @@ function GeneralPanel( { c, campaign } ) {
 
 function GoalPanel( { c } ) {
     const r = c.record;
-    const editedCount = [ 'goal_type', 'goal_cents', 'goal_count' ]
+    const editedCount = [ 'goal_type', 'goal_cents', 'goal_count', 'close_at_goal' ]
         .reduce( ( n, k ) => n + ( c.edits?.[ k ] !== undefined ? 1 : 0 ), 0 );
+
+    const hasGoal = r.goal_type === 'amount'
+        ? Number( r.goal_cents ) > 0
+        : Number( r.goal_count ) > 0;
     return (
         <div className="fundkit-section-block">
             <Card
@@ -1910,6 +1914,22 @@ function GoalPanel( { c } ) {
                     <FormRow label={ __( 'Target donors', 'fundkit-fundraising-campaigns' ) }>
                         <input type="number" className={ inputCls( c, 'goal_count' ) } min="0" { ...c.bindNumber( 'goal_count' ) } />
                     </FormRow>
+                ) }
+
+                <ToggleRow
+                    title={ __( 'Close when the goal is met', 'fundkit-fundraising-campaigns' ) }
+                    sub={ hasGoal
+                        ? __( 'The campaign stops accepting donations as soon as it reaches the target. Reopen it by raising the target or turning this off.', 'fundkit-fundraising-campaigns' )
+                        : __( 'Set a target above first. Without one there is nothing to reach.', 'fundkit-fundraising-campaigns' ) }
+                    disabled={ ! hasGoal }
+                    checked={ !! r.close_at_goal }
+                    onChange={ ( v ) => c.edit( { close_at_goal: !! v } ) }
+                />
+
+                { r.close_at_goal && r.goal_met && (
+                    <p className="fundkit-muted">
+                        { __( 'This campaign has reached its goal and is not accepting donations.', 'fundkit-fundraising-campaigns' ) }
+                    </p>
                 ) }
             </Card>
 

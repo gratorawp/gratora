@@ -229,7 +229,7 @@ final class CampaignService
             $campaign->style = $this->sanitiseStyle($input['style']);
         }
 
-        foreach (['hide_header', 'hide_footer'] as $flag) {
+        foreach (['hide_header', 'hide_footer', 'close_at_goal'] as $flag) {
             if (array_key_exists($flag, $input)) {
                 $campaign->$flag = (bool) $input[$flag];
             }
@@ -395,6 +395,7 @@ final class CampaignService
         $copy->goal_cents  = $source->goal_cents;
         $copy->goal_count  = $source->goal_count;
         $copy->default_fund_id = $source->default_fund_id;
+        $copy->close_at_goal = $source->close_at_goal;
         $copy->hide_header = $source->hide_header;
         $copy->hide_footer = $source->hide_footer;
         $copy->starts_at   = null;

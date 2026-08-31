@@ -36,7 +36,7 @@ final class SchemaVersionTest extends IntegrationTestCase
      * iterates registered models, and dbDelta never drops a table, so there is
      * nothing for a migration to do and the orphaned table is inert either way.
      */
-    private const FINGERPRINT = 'b88ed1259e50f7db3df1d56eaa6bbc49b982769b621a5ac5586637371c78bcb1';
+    private const FINGERPRINT = '795de32ef4e71c49139533ebe7a4877ee2fd21f4dbc23769d7709ab3e0eae27e';
 
     public function test_the_schema_matches_the_declared_db_version(): void
     {

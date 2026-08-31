@@ -78,9 +78,11 @@ final class DonateButtonBlock extends CampaignBlock
         // that is no better than a button opening nothing.
         $hasForm = str_contains($formHtml, 'data-form-slug=');
         if (! $editorPreview && ! $hasForm) {
-            $message = $campaign->notAcceptingReason() === 'ended'
-                ? __('This campaign has finished accepting donations.', 'fundkit-fundraising-campaigns')
-                : __('Donations are not open for this campaign yet.', 'fundkit-fundraising-campaigns');
+            $message = match ($campaign->notAcceptingReason()) {
+                'ended'    => __('This campaign has finished accepting donations.', 'fundkit-fundraising-campaigns'),
+                'goal_met' => __('This campaign has reached its goal. Thank you.', 'fundkit-fundraising-campaigns'),
+                default    => __('Donations are not open for this campaign yet.', 'fundkit-fundraising-campaigns'),
+            };
 
             $notice = (is_user_logged_in() && current_user_can('edit_posts'))
                 ? '<div class="fundkit-block-notice">'

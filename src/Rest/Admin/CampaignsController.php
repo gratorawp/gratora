@@ -495,6 +495,8 @@ final class CampaignsController
             'default_form_id'     => $c->default_form_id,
             'default_fund_id'     => $c->default_fund_id,
             'style'               => is_array($c->style) ? $c->style : null,
+            'close_at_goal'       => (bool) $c->close_at_goal,
+            'goal_met'            => $c->goalMet(),
             'hide_header'         => (bool) $c->hide_header,
             'hide_footer'         => (bool) $c->hide_footer,
             'accent'              => $c->accentColor(),
