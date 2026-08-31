@@ -90,20 +90,33 @@ export async function campaignDeleteMessage( campaign ) {
 // The reason comes from the server, which reads it off the same rule the
 // donation gate uses. Deriving it here from status and dates would be a second
 // answer to the question, free to disagree with the one that matters.
-function NotAcceptingNotice( { campaign, onPublish } ) {
-    const reason = campaign?.not_accepting;
-    if ( ! reason ) return null;
-
+/**
+ * The sentence for one not_accepting reason.
+ *
+ * A reason with no copy gets the plain truth rather than another reason's
+ * sentence. This fell back to the draft line, so a published campaign that met
+ * its goal was told it was a draft, and every reason added later would have
+ * been told the same.
+ */
+export function notAcceptingMessage( reason ) {
     const COPY = {
         draft:     __( 'This campaign is a draft, so it is not taking donations yet. Anyone who opens its form is turned away.', 'fundkit-fundraising-campaigns' ),
         archived:  __( 'This campaign is archived and is not taking donations.', 'fundkit-fundraising-campaigns' ),
         scheduled: __( 'This campaign has not started yet, so it is not taking donations until its start date.', 'fundkit-fundraising-campaigns' ),
         ended:     __( 'This campaign has ended and is no longer taking donations.', 'fundkit-fundraising-campaigns' ),
+        goal_met:  __( 'This campaign has reached its goal and is set to close when it does, so it is no longer taking donations. Raise the target or turn that setting off in Goal to reopen it.', 'fundkit-fundraising-campaigns' ),
     };
 
+    return COPY[ reason ] || __( 'This campaign is not taking donations.', 'fundkit-fundraising-campaigns' );
+}
+
+function NotAcceptingNotice( { campaign, onPublish } ) {
+    const reason = campaign?.not_accepting;
+    if ( ! reason ) return null;
+
     return (
-        <Notice status="warning" isDismissible={ false }>
-            { COPY[ reason ] || COPY.draft }
+        <Notice status={ reason === 'goal_met' ? 'success' : 'warning' } isDismissible={ false }>
+            { notAcceptingMessage( reason ) }
             { reason === 'draft' && (
                 <>
                     { ' ' }
