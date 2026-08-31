@@ -7,9 +7,9 @@ namespace FundKit\Tests\Integration;
 use FundKit\Admin\AdminFooter;
 
 /**
- * The footer filters are global: every plugin that hooks them is fighting for
- * one line on every screen in wp-admin. Ours has to leave the other screens
- * exactly as it found them.
+ * admin_footer_text is global: every plugin that hooks it is fighting for one
+ * line on every screen in wp-admin. Ours has to leave the other screens exactly
+ * as it found them.
  */
 final class AdminFooterReviewPromptTest extends IntegrationTestCase
 {
@@ -22,21 +22,6 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
         }
 
         $out = (new AdminFooter())->reviewPrompt($original);
-
-        unset($_GET['page']);
-
-        return $out;
-    }
-
-    private function versionOn(?string $page, string $original = 'ORIGINAL'): string
-    {
-        if ($page === null) {
-            unset($_GET['page']);
-        } else {
-            $_GET['page'] = $page;
-        }
-
-        $out = (new AdminFooter())->version($original);
 
         unset($_GET['page']);
 
@@ -61,7 +46,6 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
     {
         foreach ([null, '', 'wc-settings', 'givewp-donations', 'donations', 'metropolis'] as $page) {
             $this->assertSame('ORIGINAL', $this->footerOn($page), var_export($page, true) . ' should keep its own footer');
-            $this->assertSame('ORIGINAL', $this->versionOn($page), var_export($page, true) . ' should keep its own version slot');
         }
     }
 
@@ -79,29 +63,27 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
      * shape of a directory slug rather than recomputing it, so the test can
      * still fail when the derivation is wrong.
      */
-    public function test_the_links_are_directory_urls_and_not_a_filesystem_path(): void
+    public function test_the_link_is_a_directory_url_and_not_a_filesystem_path(): void
     {
         $out = $this->footerOn('fundkit');
 
-        $this->assertMatchesRegularExpression('#https://wordpress\.org/plugins/[a-z0-9-]+/#', $out);
         $this->assertMatchesRegularExpression('#https://wordpress\.org/support/plugin/[a-z0-9-]+/reviews/\?rate=5#', $out);
         $this->assertStringNotContainsString('%2F', $out);
         $this->assertStringNotContainsString('%20', $out);
     }
 
-    public function test_both_links_name_the_same_slug(): void
+    /**
+     * update_footer is core's, and it carries the WordPress version. Taking it
+     * for a plugin version is the kind of thing that gets a footer filter
+     * removed by the site owner.
+     */
+    public function test_it_does_not_touch_the_wordpress_version_slot(): void
     {
-        $out = $this->footerOn('fundkit');
+        // has_filter() is the wrong probe here: core registers its own
+        // core_update_footer. Read what this provider declares instead.
+        $filters = (new \ReflectionMethod(AdminFooter::class, 'filters'));
+        $filters->setAccessible(true);
 
-        preg_match('#/plugins/([a-z0-9-]+)/#', $out, $plugin);
-        preg_match('#/support/plugin/([a-z0-9-]+)/#', $out, $support);
-
-        $this->assertNotEmpty($plugin[1] ?? '');
-        $this->assertSame($plugin[1], $support[1] ?? '');
-    }
-
-    public function test_the_version_slot_names_the_running_version(): void
-    {
-        $this->assertStringContainsString(FUNDKIT_VERSION, $this->versionOn('fundkit'));
+        $this->assertSame(['admin_footer_text'], array_keys($filters->invoke(new AdminFooter())));
     }
 }

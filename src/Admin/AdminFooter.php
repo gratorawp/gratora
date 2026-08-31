@@ -7,8 +7,7 @@ namespace FundKit\Admin;
 use FundKit\Foundation\Hooks\HookProvider;
 
 /**
- * Replaces the admin footer on FundKit screens with a review prompt and the
- * plugin version.
+ * Replaces the admin footer text on FundKit screens with a review prompt.
  *
  * @since 1.0.0
  */
@@ -17,12 +16,7 @@ final class AdminFooter extends HookProvider
     /** @since 1.0.0 */
     protected function filters(): array
     {
-        return [
-            'admin_footer_text' => 'reviewPrompt',
-            // Core sets update_footer at 10; a later priority is the only way
-            // to take the right-hand slot from it.
-            'update_footer'     => ['version', 11],
-        ];
+        return ['admin_footer_text' => 'reviewPrompt'];
     }
 
     /** @since 1.0.0 */
@@ -41,32 +35,16 @@ final class AdminFooter extends HookProvider
         );
 
         return sprintf(
-            /* translators: 1: plugin name, 2: five star icons linking to the review form, 3: link to the plugin page on WordPress.org */
-            esc_html__('Thank you for raising with %1$s. A %2$s review on %3$s helps other nonprofits find it.', 'fundkit-fundraising-campaigns'),
+            /* translators: 1: plugin name, 2: five star icons linking to the review form */
+            esc_html__('If you like %1$s please leave us a %2$s rating. Thanks in advance!', 'fundkit-fundraising-campaigns'),
             '<strong>' . esc_html__('FundKit', 'fundkit-fundraising-campaigns') . '</strong>',
-            $stars,
-            sprintf(
-                '<a href="%s" target="_blank" rel="noopener noreferrer">WordPress.org</a>',
-                esc_url($this->pluginUrl())
-            )
-        );
-    }
-
-    /** @since 1.0.0 */
-    public function version(string $text): string
-    {
-        if (! $this->isFundKitAdminPage()) return $text;
-
-        return sprintf(
-            /* translators: %s: plugin version number */
-            esc_html__('FundKit %s', 'fundkit-fundraising-campaigns'),
-            esc_html(FUNDKIT_VERSION)
+            $stars
         );
     }
 
     /**
      * The directory the plugin is installed into is the slug the directory
-     * serves it under, so the links follow a permalink change without an edit.
+     * serves it under, so the link follows a permalink change without an edit.
      *
      * Read off the path rather than through plugin_basename(), which returns
      * the whole absolute path when the plugin is not inside the registered
@@ -77,12 +55,6 @@ final class AdminFooter extends HookProvider
     private function slug(): string
     {
         return basename(dirname(FUNDKIT_FILE));
-    }
-
-    /** @since 1.0.0 */
-    private function pluginUrl(): string
-    {
-        return 'https://wordpress.org/plugins/' . $this->slug() . '/';
     }
 
     /** @since 1.0.0 */
