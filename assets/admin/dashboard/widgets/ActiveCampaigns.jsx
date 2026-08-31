@@ -35,7 +35,7 @@ export default function ActiveCampaigns( { rows = [] } ) {
                     <a key={ c.id } href={ detailHref( c.id ) } className="fundkit-active-campaigns__row">
                         <div className="fundkit-active-campaigns__head">
                             <span className="fundkit-active-campaigns__title">{ c.title }</span>
-                            <StatusBadge status={ c.status } />
+                            <StatusBadge status={ c.not_accepting || c.status } />
                         </div>
                         <div className="fundkit-active-campaigns__bar">
                             <div className="fundkit-active-campaigns__bar-fill" style={ { width: `${ pct }%` } } />

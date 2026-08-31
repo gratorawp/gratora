@@ -14,6 +14,10 @@ const DAYS = [
 
 const HOUR_LABELS = [ 0, 6, 12, 18 ];
 
+// The violet the distribution histogram fills its bars with, so the two
+// charts on the overview read as one scale rather than two palettes.
+const RAMP = '138, 123, 255';
+
 export default function DowHourHeatmap( { data } ) {
     const [ hovered, setHovered ] = useState( null ); // { day, hour, count } | null
 
@@ -62,7 +66,7 @@ export default function DowHourHeatmap( { data } ) {
                                 className={ `fundkit-heatmap__cell${ isPeak ? ' is-peak' : '' }` }
                                 style={ {
                                     background: count > 0
-                                        ? `rgba(33, 29, 63, ${ 0.15 + intensity * 0.75 })`
+                                        ? `rgba(${ RAMP }, ${ 0.15 + intensity * 0.75 })`
                                         : '#f8fafb',
                                 } }
                                 onMouseEnter={ () => setHovered( { day, hour, count } ) }
@@ -93,7 +97,7 @@ export default function DowHourHeatmap( { data } ) {
                     <span
                         key={ a }
                         className="fundkit-heatmap__legend-cell"
-                        style={ { background: `rgba(33, 29, 63, ${ a })` } }
+                        style={ { background: `rgba(${ RAMP }, ${ a })` } }
                     />
                 ) ) }
                 <span className="fundkit-heatmap__legend-label">{ __( 'More', 'fundkit-fundraising-campaigns' ) }</span>

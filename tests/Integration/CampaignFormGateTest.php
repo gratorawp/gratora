@@ -54,18 +54,31 @@ final class CampaignFormGateTest extends IntegrationTestCase
     }
 
     /**
-     * No form rendered. For a manager the output explains itself; for everyone
-     * else it is empty.
+     * No form rendered. A manager is always told why. A visitor sees a sentence
+     * when the campaign closed on its own schedule or goal, and nothing when the
+     * form is missing because someone has not finished setting it up: that is
+     * not a state to announce to the public.
      */
-    private function assertNoForm(string $html, string $because = ''): void
+    private function assertNoForm(string $html, string $because = '', bool $publicMessage = false): void
     {
         $this->assertStringNotContainsString('data-form-slug=', $html, 'no form is rendered');
 
         if (current_user_can('manage_options') || current_user_can('manage_fundkit')) {
-            $this->assertStringContainsString('fundkit-donation-form__error', $html, 'and a manager is told why');
+            // One notice either way: the closed states carry the manager's line
+            // inside the visitor's, the misconfigured ones are manager-only.
+            $this->assertStringContainsString(
+                $publicMessage ? 'fundkit-donation-form__closed-note' : 'fundkit-donation-form__error',
+                $html,
+                'and a manager is told why'
+            );
             if ($because !== '') {
                 $this->assertStringContainsString($because, $html);
             }
+            return;
+        }
+
+        if ($publicMessage) {
+            $this->assertStringContainsString('fundkit-donation-form__closed', $html, 'a visitor is told the campaign closed');
             return;
         }
 
@@ -182,7 +195,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
     {
         $this->schedule(null, gmdate('Y-m-d', strtotime('-1 day')));
 
-        $this->assertNoForm(do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]'));
+        $this->assertNoForm(do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]'), '', true);
     }
 
     /**
@@ -219,7 +232,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
     {
         $this->schedule(gmdate('Y-m-d', strtotime('+2 days')), null);
 
-        $this->assertNoForm(do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]'));
+        $this->assertNoForm(do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]'), '', true);
         $this->assertSame(403, $this->postDonation()->get_status());
     }
 

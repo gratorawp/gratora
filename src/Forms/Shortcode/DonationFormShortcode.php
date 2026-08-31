@@ -163,10 +163,7 @@ final class DonationFormShortcode extends HookProvider
                 return $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'fundkit-fundraising-campaigns'));
             }
             if (! $campaign->acceptsDonations()) {
-                return $this->renderError(
-                    $campaign->notAcceptingReason()
-                    ?? __('This campaign is not accepting donations, so the form is hidden.', 'fundkit-fundraising-campaigns')
-                );
+                return $this->renderNotAccepting($campaign->notAcceptingReason());
             }
         }
 
@@ -1583,6 +1580,56 @@ final class DonationFormShortcode extends HookProvider
         }
 
         return ['base' => $base, 'rates' => $rates];
+    }
+
+    /**
+     * A campaign that closed on its schedule or its goal is not a
+     * misconfiguration, and a visitor who followed a link to it is owed a
+     * sentence rather than an empty page. A draft or archived campaign still
+     * says nothing publicly: there the form is missing because someone has not
+     * finished, and that is for whoever can act on it.
+     *
+     * @since 1.0.0
+     */
+    private function renderNotAccepting(?string $reason): string
+    {
+        $public = match ($reason) {
+            'ended'     => __('This campaign has finished accepting donations. Thank you to everyone who gave.', 'fundkit-fundraising-campaigns'),
+            'goal_met'  => __('This campaign has reached its goal. Thank you to everyone who gave.', 'fundkit-fundraising-campaigns'),
+            'scheduled' => __('This campaign is not open for donations yet. Please check back soon.', 'fundkit-fundraising-campaigns'),
+            default     => null,
+        };
+
+        if ($public === null) {
+            return $this->renderError(__('This campaign is not accepting donations, so the form is hidden. Publish the campaign to show it.', 'fundkit-fundraising-campaigns'));
+        }
+
+        // The visitor's sentence explains the situation; it does not say what to
+        // change. Whoever can act gets that as a second line in the same notice:
+        // a closed campaign is not an error, and two stacked boxes read as one
+        // thing having gone wrong twice.
+        $note = '';
+        if (current_user_can('manage_options') || current_user_can('manage_fundkit')) {
+            $for = match ($reason) {
+                'ended'     => __('The end date on this campaign has passed. Change the schedule to reopen it.', 'fundkit-fundraising-campaigns'),
+                'goal_met'  => __('This campaign is set to close when it meets its goal, and it has. Raise the target or turn that setting off to reopen it.', 'fundkit-fundraising-campaigns'),
+                'scheduled' => __('It opens on its start date. Only you can see this note.', 'fundkit-fundraising-campaigns'),
+                default     => '',
+            };
+
+            if ($for !== '') {
+                $note = sprintf(
+                    '<span class="fundkit-donation-form__closed-note" style="display:block;margin-top:8px;font-size:13px;color:#6b6558;">%s</span>',
+                    esc_html($for)
+                );
+            }
+        }
+
+        return sprintf(
+            '<div class="fundkit-donation-form__closed" style="padding:16px 20px;border:1px solid #e5e0d8;border-radius:10px;background:#faf8f4;color:#3f3a33;font-size:15px;line-height:1.55;">%s%s</div>',
+            esc_html($public),
+            $note
+        );
     }
 
     /** @since 1.0.0 */

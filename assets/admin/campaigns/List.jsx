@@ -176,7 +176,7 @@ export default function List() {
             label:    __( 'Status', 'fundkit-fundraising-campaigns' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
-            render:   ( { item } ) => <StatusBadge status={ item.status } />,
+            render:   ( { item } ) => <StatusBadge status={ item.not_accepting || item.status } />,
         },
         {
             id:            'raised',

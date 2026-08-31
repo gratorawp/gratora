@@ -13,6 +13,12 @@ const STATUS = {
     draft:              { variant: 'amber', label: __( 'Draft', 'fundkit-fundraising-campaigns' ) },
     published:          { variant: 'green', label: __( 'Active', 'fundkit-fundraising-campaigns' ) },
     archived:           { variant: 'gray',  label: __( 'Archived', 'fundkit-fundraising-campaigns' ) },
+    // Derived, not stored: a published campaign outside its window or past its
+    // goal is still "published" in the row. Showing that as Active is what the
+    // status column is for avoiding.
+    scheduled:          { variant: 'amber', label: __( 'Scheduled', 'fundkit-fundraising-campaigns' ) },
+    ended:              { variant: 'gray',  label: __( 'Ended', 'fundkit-fundraising-campaigns' ) },
+    goal_met:           { variant: 'blue',  label: __( 'Goal met', 'fundkit-fundraising-campaigns' ) },
     // Donation lifecycle
     paid:               { variant: 'green', label: __( 'Paid', 'fundkit-fundraising-campaigns' ) },
     pending:            { variant: 'amber', label: __( 'Pending', 'fundkit-fundraising-campaigns' ) },
