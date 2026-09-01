@@ -68,8 +68,10 @@ test.describe('record a donation', () => {
         const warning = page.locator('.fundkit-notice--warning');
         await expect(warning).toBeVisible();
         await expect(warning).toContainText('already down for this donor');
-        // It names what it matched, so the admin can go and look.
-        await expect(warning).toContainText(/FUNDKIT/i);
+        // It names what it matched, so the admin can go and look. Matched by
+        // shape, not by prefix: the prefix is an org setting (DON by default),
+        // so pinning one tests the fixture's configuration and not the notice.
+        await expect(warning).toContainText(/\b[A-Z]{2,}-\d{4}-\d+\b/);
 
         // The button becomes the answer to the question just asked.
         await expect(page.getByRole('button', { name: 'Record it anyway' })).toBeVisible();

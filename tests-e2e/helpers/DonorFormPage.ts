@@ -138,7 +138,21 @@ export class DonorFormPage {
         const radio = this.form.locator(`.fundkit-form__gateway input[type="radio"][value="${id}"]`);
         if (await radio.count() > 0) {
             await radio.check();
+            return;
         }
+
+        // Skipping quietly is how a form that offers no usable gateway got to
+        // fail at the thank-you card instead, with nothing saying the payment
+        // step was never reachable. Say it here, and name what was on offer.
+        const offered = await this.gatewayOptions().evaluateAll(
+            (nodes) => nodes.map((n) => (n as HTMLInputElement).value)
+        );
+
+        throw new Error(
+            `The form does not offer the "${id}" gateway. On offer: ${
+                offered.length ? offered.join(', ') : '(none)'
+            }. A form with no usable gateway cannot be submitted, so the fixture is wrong.`
+        );
     }
 
     async submit(): Promise<void> {
