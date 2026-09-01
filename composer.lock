@@ -163,16 +163,16 @@
         },
         {
             "name": "fundkit/queryable",
-            "version": "v1.1.0",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fundkitorg/queryable.git",
-                "reference": "0440fdeb750e62662bece5d14c22ff61ba12f900"
+                "reference": "5a8208fe15f52724ecaaa0cec405defb5621b553"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fundkitorg/queryable/zipball/0440fdeb750e62662bece5d14c22ff61ba12f900",
-                "reference": "0440fdeb750e62662bece5d14c22ff61ba12f900",
+                "url": "https://api.github.com/repos/fundkitorg/queryable/zipball/5a8208fe15f52724ecaaa0cec405defb5621b553",
+                "reference": "5a8208fe15f52724ecaaa0cec405defb5621b553",
                 "shasum": ""
             },
             "require": {
@@ -207,10 +207,10 @@
             ],
             "description": "A fluent SQL query builder for WordPress",
             "support": {
-                "source": "https://github.com/fundkitorg/queryable/tree/v1.1.0",
+                "source": "https://github.com/fundkitorg/queryable/tree/v1.2.0",
                 "issues": "https://github.com/fundkitorg/queryable/issues"
             },
-            "time": "2026-08-30T14:04:45+00:00"
+            "time": "2026-09-01T06:09:38+00:00"
         },
         {
             "name": "masterminds/html5",

@@ -37,6 +37,7 @@ declare(strict_types=1);
 
 use FundKit\Admin\Pages\FormsPage;
 use FundKit\Cli\CliCommands;
+use FundKit\Foundation\Database\WordPressSchema;
 use FundKit\Foundation\Plugin;
 
 if (! defined('ABSPATH')) {
@@ -46,6 +47,8 @@ if (! defined('ABSPATH')) {
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/vendor/vendor-prefixed/autoload.php';
 require_once __DIR__ . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
+
+WordPressSchema::register();
 
 define('FUNDKIT_VERSION', '1.0.0');
 define('FUNDKIT_DB_VERSION', '1.0.7');
