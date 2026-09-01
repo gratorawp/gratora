@@ -5,6 +5,7 @@ import apiFetch from '@wordpress/api-fetch';
 import Btn from '../components/Btn';
 import Dialog from '../components/Dialog';
 import { Switch } from '../components/Switch';
+import AmountInput from '../components/AmountInput';
 
 /**
  * The five plan actions, in one place.
@@ -84,7 +85,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
     // Telling the donor is the default: the change was not theirs.
     const [ notify, setNotify ] = useState( true );
     const [ months, setMonths ] = useState( 1 );
-    const [ amount, setAmount ] = useState( ( ( plan.amount_cents || 0 ) / 100 ).toFixed( 2 ) );
+    const [ amount, setAmount ] = useState( ( plan.amount_cents || 0 ) / 100 );
     const [ reason, setReason ] = useState( '' );
 
     const submit = () => {
@@ -92,7 +93,9 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
         if ( action === 'pause' ) body.months = Number( months ) || 1;
         if ( action === 'cancel' && reason.trim() ) body.reason = reason.trim();
         if ( action === 'change_amount' ) {
-            const cents = Math.round( parseFloat( String( amount ).replace( ',', '.' ) ) * 100 );
+            // AmountInput reports a number, so the separator handling that was
+            // here belongs to it now.
+            const cents = Math.round( Number( amount ) * 100 );
             if ( ! Number.isFinite( cents ) || cents <= 0 ) {
                 setError( __( 'Enter an amount.', 'fundkit-fundraising-campaigns' ) );
                 return;
@@ -141,19 +144,16 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             { action === 'change_amount' && (
                 <p>
                     <label>
+                        { /* The currency is on the control itself, so the label
+                             does not name it a second time. */ }
                         <span style={ { display: 'block', marginBottom: 4 } }>
-                            { sprintf(
-                                /* translators: %s: currency code, e.g. USD */
-                                __( 'New amount (%s)', 'fundkit-fundraising-campaigns' ),
-                                plan.currency
-                            ) }
+                            { __( 'New amount', 'fundkit-fundraising-campaigns' ) }
                         </span>
-                        <input
-                            type="text"
-                            inputMode="decimal"
-                            className="fundkit-input"
+                        <AmountInput
                             value={ amount }
-                            onChange={ ( e ) => setAmount( e.target.value ) }
+                            onChange={ setAmount }
+                            currency={ plan.currency }
+                            autoFocus
                         />
                     </label>
                 </p>

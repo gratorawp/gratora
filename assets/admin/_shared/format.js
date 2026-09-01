@@ -2,7 +2,7 @@
  * Re-exports @fundkit/ui's generic formatters so call sites importing '_shared/format'
  * stay stable; the FundKit-specific admin routing helpers stay local.
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
     currencyDecimals,
     groupDigits,
@@ -26,6 +26,10 @@ export { currencyDecimals, groupDigits, formatDate };
  *
  * A minute of slack, because a server clock and a browser clock disagree by
  * seconds and a donation made this instant must not read as a date.
+ *
+ * Past a week the shared helper returns the date, and these columns already
+ * print the date underneath: the row then said "Aug 25, 2026" twice and the
+ * relative line stopped telling anyone anything. It keeps counting instead.
  */
 export function timeAgo( iso ) {
     if ( ! iso ) {
@@ -33,11 +37,33 @@ export function timeAgo( iso ) {
     }
 
     const at = parseTimestamp( iso );
-    if ( ! Number.isNaN( at.getTime() ) && at.getTime() > Date.now() + 60000 ) {
+    if ( Number.isNaN( at.getTime() ) ) {
+        return relativeTimeAgo( iso );
+    }
+
+    if ( at.getTime() > Date.now() + 60000 ) {
         return formatDate( iso );
     }
 
-    return relativeTimeAgo( iso );
+    const days = ( Date.now() - at.getTime() ) / 86400000;
+
+    // Below a week the shared helper already answers in minutes, hours and days.
+    if ( days < 7 ) {
+        return relativeTimeAgo( iso );
+    }
+
+    if ( days < 30 ) {
+        /* translators: %d: number of weeks */
+        return sprintf( __( '%dw ago', 'fundkit-fundraising-campaigns' ), Math.floor( days / 7 ) );
+    }
+
+    if ( days < 365 ) {
+        /* translators: %d: number of months */
+        return sprintf( __( '%dmo ago', 'fundkit-fundraising-campaigns' ), Math.max( 1, Math.floor( days / 30.44 ) ) );
+    }
+
+    /* translators: %d: number of years */
+    return sprintf( __( '%dy ago', 'fundkit-fundraising-campaigns' ), Math.max( 1, Math.floor( days / 365.25 ) ) );
 }
 // Amounts and the org bridge they read come from the local formatter: the org's
 // "decimal places" preference belongs to the base currency and may only drop
