@@ -562,6 +562,10 @@ final class CliCommands
             );
         }
 
+        [$adminUser, $adminPass] = $this->ensureE2eAdmin();
+
+        WP_CLI::log('  export FUNDKIT_E2E_ADMIN_USER="' . $adminUser . '"');
+        WP_CLI::log('  export FUNDKIT_E2E_ADMIN_PASS="' . $adminPass . '"');
         WP_CLI::log('  export FUNDKIT_E2E_FORM_PATH="' . wp_parse_url($singleUrl, PHP_URL_PATH) . '"');
         WP_CLI::log('  export FUNDKIT_E2E_MULTI_STEP_FORM_PATH="' . wp_parse_url($multiUrl, PHP_URL_PATH) . '"');
         WP_CLI::log('  export FUNDKIT_E2E_CONDITIONAL_FORM_PATH="' . wp_parse_url($condUrl, PHP_URL_PATH) . '"');
@@ -662,6 +666,50 @@ final class CliCommands
      *
      * @since 1.0.0
      */
+    /**
+     * A dedicated administrator for the admin specs, so they run the same on a
+     * Local site as in CI and never lean on whatever real account the install
+     * happens to have. Idempotent, and overridable through the same two env
+     * vars the specs read.
+     *
+     * The P2P seed already provisions this account; core did not, which is why
+     * the admin specs could only run against wp-env and its default login.
+     *
+     * @return array{0:string,1:string} login, password
+     */
+    private function ensureE2eAdmin(): array
+    {
+        $login = (string) (getenv('FUNDKIT_E2E_ADMIN_USER') ?: 'fundkit-e2e-admin');
+        $pass  = (string) (getenv('FUNDKIT_E2E_ADMIN_PASS') ?: 'fundkit-e2e-pass');
+
+        $user = get_user_by('login', $login);
+
+        if ($user === false) {
+            $id = wp_insert_user([
+                'user_login' => $login,
+                'user_pass'  => $pass,
+                'user_email' => $login . '@fundkit.test',
+                'role'       => 'administrator',
+            ]);
+
+            if (is_wp_error($id)) {
+                WP_CLI::warning('e2e admin not created: ' . $id->get_error_message());
+
+                return [$login, $pass];
+            }
+
+            WP_CLI::log('  admin created: ' . $login);
+
+            return [$login, $pass];
+        }
+
+        wp_set_password($pass, (int) $user->ID);
+        $user->set_role('administrator');
+        WP_CLI::log('  admin reused: ' . $login);
+
+        return [$login, $pass];
+    }
+
     private function e2ePinFxRates(): void
     {
         update_option(FxRates::OPTION, [
