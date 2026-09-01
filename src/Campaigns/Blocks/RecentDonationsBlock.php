@@ -7,6 +7,7 @@ namespace FundKit\Campaigns\Blocks;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Donations\DonationRepository;
 use FundKit\Donors\Donor;
+use FundKit\Donors\PublicDonorNames;
 use FundKit\Donors\DonorAvatars;
 use FundKit\Foundation\Helpers\View;
 
@@ -82,9 +83,7 @@ final class RecentDonationsBlock extends CampaignBlock
             $isAnonymous = (bool) $donation->is_anonymous;
             $donor       = $donorsById[(int) $donation->donor_id] ?? null;
             $hidden      = $donor !== null && $donor->public_hidden_at !== null;
-            $name        = $donor
-                ? trim((string) $donor->first_name . ' ' . (string) $donor->last_name)
-                : '';
+            $name        = PublicDonorNames::of($donor);
 
             // An admin hiding a donor has to reach the name and the message
             // too. A suppressed picture beside their name and their words

@@ -8,6 +8,7 @@ use FundKit\Campaigns\CampaignRepository;
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationQueries;
 use FundKit\Donors\Donor;
+use FundKit\Donors\PublicDonorNames;
 use FundKit\Donors\DonorAvatars;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Helpers\View;
@@ -163,7 +164,7 @@ final class SupporterWallBlock extends CampaignBlock
             // The wall is names and their words, so a hidden donor has nothing
             // left to show here. Their donation still counts toward the total.
             if ($donor->public_hidden_at !== null) continue;
-            $name = trim((string) $donor->first_name . ' ' . (string) $donor->last_name);
+            $name = PublicDonorNames::of($donor);
             if ($name === '') continue;
 
             $entries[] = [

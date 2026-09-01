@@ -7,6 +7,7 @@ namespace FundKit\Campaigns\Blocks;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Donations\DonationRepository;
 use FundKit\Donors\Donor;
+use FundKit\Donors\PublicDonorNames;
 use FundKit\Donors\DonorAvatars;
 use FundKit\Foundation\Helpers\View;
 
@@ -73,9 +74,7 @@ final class TopDonorsBlock extends CampaignBlock
         foreach ($rows as $row) {
             $donorId = (int) $row['donor_id'];
             $donor   = $donorsById[$donorId] ?? null;
-            $name    = $donor
-                ? trim((string) $donor->first_name . ' ' . (string) $donor->last_name)
-                : '';
+            $name    = PublicDonorNames::of($donor);
             // Hidden reads the same as unnamed: the amount still ranks, the
             // person behind it does not appear.
             $isAnonymousAggregate = ($name === '' || ($donor && $donor->public_hidden_at !== null));
