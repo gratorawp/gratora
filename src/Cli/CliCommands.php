@@ -536,20 +536,30 @@ final class CliCommands
         WP_CLI::log('  export FUNDKIT_E2E_URL="' . untrailingslashit(home_url()) . '"');
         // The specs select gateways by name, and a form that offers none still
         // renders perfectly: the failure only shows up much later, as a
-        // thank-you card that never arrives. Prove the payment step is
-        // reachable here, while there is still something useful to say.
-        $offered = $this->container()->get(GatewayManager::class)
-            ->optionsFor(['offline', 'sandbox'], null, 'EUR');
+        // thank-you card that never arrives. Check here, while there is still
+        // something useful to say.
+        //
+        // Config, not the registry: CoreModule registers SandboxGateway at boot
+        // if test mode is on, and boot already happened in this process. Asking
+        // the registry now would report sandbox missing however right the
+        // fixture is. What the next request will see is the option.
+        $written = get_option('fundkit_gateway_config', []);
 
-        foreach (['offline', 'sandbox'] as $needed) {
-            if (! in_array($needed, $offered, true)) {
-                WP_CLI::error(sprintf(
-                    'The seeded forms do not offer the "%s" gateway (on offer: %s). Every spec that '
-                    . 'submits would fail at the thank-you card without saying why.',
-                    $needed,
-                    $offered ? implode(', ', $offered) : 'none'
-                ));
-            }
+        if (empty($written['test_mode'])) {
+            WP_CLI::error('Test mode did not stick, so the sandbox gateway will not be registered.');
+        }
+
+        // From the registry: offline is registered whatever test mode says, so
+        // this asks the same object the request will, rather than restating its
+        // rule here and letting the two drift.
+        $offline = $this->container()->get(GatewayManager::class)->get('offline');
+
+        if ($offline === null || ! $offline->canCharge()) {
+            WP_CLI::error(
+                'The offline gateway has neither instructions nor bank details, so it reports itself '
+                . 'unable to charge and is never offered. Every spec that submits would fail at the '
+                . 'thank-you card without saying why.'
+            );
         }
 
         WP_CLI::log('  export FUNDKIT_E2E_FORM_PATH="' . wp_parse_url($singleUrl, PHP_URL_PATH) . '"');

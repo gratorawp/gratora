@@ -79,8 +79,17 @@ jobs:
       # with exit 0, so the step passes having seeded nothing.
       - name: Seed core fixtures
         run: |
+          # The step runs under `bash -e`, so a failing seed would abort the
+          # assignment before the echo and take its own explanation with it.
+          set +e
           OUT="$(npx wp-env run cli wp fundkit e2e-seed --yes 2>&1)"
+          CODE=$?
+          set -e
           echo "$OUT"
+          if [ "$CODE" -ne 0 ]; then
+            echo "::error::the seed failed (exit $CODE). Its output is above."
+            exit 1
+          fi
           VARS="$(echo "$OUT" | grep -oE 'FUNDKIT_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' || true)"
           if [ -z "$VARS" ]; then
             echo "::error::the seed printed no FUNDKIT_E2E_* variables, so every spec would open / instead of the seeded form and time out waiting for it. See the seed output above."
@@ -91,8 +100,17 @@ jobs:
       - name: Seed P2P fixtures
         if: vars.FUNDKIT_P2P_REPO != ''
         run: |
+          # The step runs under `bash -e`, so a failing seed would abort the
+          # assignment before the echo and take its own explanation with it.
+          set +e
           OUT="$(npx wp-env run cli wp fundkit-p2p e2e-seed 2>&1)"
+          CODE=$?
+          set -e
           echo "$OUT"
+          if [ "$CODE" -ne 0 ]; then
+            echo "::error::the P2P seed failed (exit $CODE). Its output is above."
+            exit 1
+          fi
           VARS="$(echo "$OUT" | grep -oE 'FUNDKIT_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' || true)"
           if [ -z "$VARS" ]; then
             echo "::error::the P2P seed printed no FUNDKIT_E2E_* variables. See the seed output above."
