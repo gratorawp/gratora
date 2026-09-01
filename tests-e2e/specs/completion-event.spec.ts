@@ -25,6 +25,19 @@ async function collected( page ): Promise<Detail[]> {
     return page.evaluate( () => window.__fundkitCompleted ?? [] );
 }
 
+/**
+ * The data keys of each event, judged in the page.
+ *
+ * page.evaluate serialises, and a function does not survive that: waitUntil
+ * arrives here as a key with no value, so a typeof check on this side sees
+ * nothing to exclude. Asking the browser keeps the distinction that matters.
+ */
+async function collectedDataKeys( page ): Promise<string[][]> {
+    return page.evaluate( () => ( window.__fundkitCompleted ?? [] ).map(
+        ( d ) => Object.keys( d ).filter( ( k ) => typeof d[ k ] !== 'function' ).sort()
+    ) );
+}
+
 test.describe( 'donation completion event', () => {
     test( 'a paid donation announces itself once', async ( { donor, page } ) => {
         await page.evaluate( COLLECT );
@@ -59,7 +72,12 @@ test.describe( 'donation completion event', () => {
         await expect.poll( () => collected( page ) ).toHaveLength( 1 );
 
         const [ detail ] = await collected( page );
-        expect( Object.keys( detail ).sort() ).toEqual( [ 'reference', 'status', 'statusToken' ] );
+
+        // Data only. waitUntil is a callback a listener uses to hold the page
+        // open until its own async work finishes; a function identifies nobody.
+        // What this guards is that no extra *data* rides along.
+        const [ data ] = await collectedDataKeys( page );
+        expect( data ).toEqual( [ 'reference', 'status', 'statusToken' ] );
         // The donor's own details were on this page a moment ago. Nothing that
         // identifies them may ride along to whatever is listening.
         expect( JSON.stringify( detail ) ).not.toContain( 'Nadia' );
