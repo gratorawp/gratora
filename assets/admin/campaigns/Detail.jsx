@@ -1442,6 +1442,10 @@ function FormsTab( { campaign } ) {
 
 
 const GOAL_TYPES = [
+    // "No goal" is not a fourth goal_type: a null target is already how every
+    // campaign without a goal is stored, and goalMet() and the progress blocks
+    // read it that way. This names the state that existed and had no control.
+    { value: 'none',      label: __( 'No goal', 'fundkit-fundraising-campaigns' ) },
     { value: 'amount',    label: __( 'Amount raised', 'fundkit-fundraising-campaigns' ) },
     { value: 'donations', label: __( 'Number of donations', 'fundkit-fundraising-campaigns' ) },
     { value: 'donors',    label: __( 'Number of donors', 'fundkit-fundraising-campaigns' ) },
@@ -1880,14 +1884,30 @@ function GeneralPanel( { c, campaign } ) {
     );
 }
 
-function GoalPanel( { c } ) {
+export function GoalPanel( { c } ) {
     const r = c.record;
     const editedCount = [ 'goal_type', 'goal_cents', 'goal_count', 'close_at_goal' ]
         .reduce( ( n, k ) => n + ( c.edits?.[ k ] !== undefined ? 1 : 0 ), 0 );
 
-    const hasGoal = r.goal_type === 'amount'
+    const targetSet = r.goal_type === 'amount'
         ? Number( r.goal_cents ) > 0
         : Number( r.goal_count ) > 0;
+
+    // Held here rather than derived from the target on every render: deriving
+    // it meant emptying the field to retype an amount flipped the dropdown to
+    // "No goal" and took the field away mid-edit.
+    const [ mode, setMode ] = useState( targetSet ? ( r.goal_type ?? 'amount' ) : 'none' );
+
+    const chooseMode = ( next ) => {
+        setMode( next );
+        if ( next === 'none' ) {
+            c.edit( { goal_cents: null, goal_count: null } );
+            return;
+        }
+        c.edit( { goal_type: next } );
+    };
+
+    const hasGoal = mode !== 'none' && targetSet;
     return (
         <div className="fundkit-section-block">
             <Card
@@ -1896,18 +1916,19 @@ function GoalPanel( { c } ) {
                 edited={ editedCount }
             >
                 <FormRow label={ __( 'Goal type', 'fundkit-fundraising-campaigns' ) }>
-                    <select className={ selectCls( c, 'goal_type' ) } { ...c.bind( 'goal_type', 'amount' ) }>
+                    <select
+                        className={ `fundkit-select${ [ 'goal_type', 'goal_cents', 'goal_count' ].some( ( k ) => c.isEdited( k ) ) ? ' fundkit-input--edited' : '' }` }
+                        value={ mode }
+                        onChange={ ( e ) => chooseMode( e.target.value ) }
+                    >
                         { GOAL_TYPES.map( ( t ) => (
                             <option key={ t.value } value={ t.value }>{ t.label }</option>
                         ) ) }
                     </select>
                 </FormRow>
 
-                { r.goal_type === 'amount' && (
-                    <FormRow
-                        label={ __( 'Target amount', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Leave empty for no goal.', 'fundkit-fundraising-campaigns' ) }
-                    >
+                { mode === 'amount' && (
+                    <FormRow label={ __( 'Target amount', 'fundkit-fundraising-campaigns' ) }>
                         <AmountInput
                             currency={ defaultCurrency() }
                             min={ 0 }
@@ -1917,13 +1938,13 @@ function GoalPanel( { c } ) {
                     </FormRow>
                 ) }
 
-                { r.goal_type === 'donations' && (
+                { mode === 'donations' && (
                     <FormRow label={ __( 'Target donations', 'fundkit-fundraising-campaigns' ) }>
                         <input type="number" className={ inputCls( c, 'goal_count' ) } min="0" { ...c.bindNumber( 'goal_count' ) } />
                     </FormRow>
                 ) }
 
-                { r.goal_type === 'donors' && (
+                { mode === 'donors' && (
                     <FormRow label={ __( 'Target donors', 'fundkit-fundraising-campaigns' ) }>
                         <input type="number" className={ inputCls( c, 'goal_count' ) } min="0" { ...c.bindNumber( 'goal_count' ) } />
                     </FormRow>
@@ -1948,7 +1969,7 @@ function GoalPanel( { c } ) {
 
             <AmbitionMeter
                 campaignId={ r.id }
-                goalType={ r.goal_type }
+                goalType={ mode }
                 goalCents={ r.goal_cents }
                 currency={ r.currency }
             />

@@ -1,9 +1,9 @@
 // Money in minor units; REST dates are MySQL strings in UTC with no zone
 // marker, which a browser reads as local time. parseTimestamp marks them.
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { parseTimestamp } from '@fundkit/ui/utils/format';
 
-export { formatAmount, formatAmountCompact, currencyDecimals, amountEntry } from '../../_shared/format';
+export { formatAmount, formatAmountCompact, currencyDecimals, amountEntry, timeAgo } from '../../_shared/format';
 
 export function formatDateTime( iso ) {
     if ( ! iso ) return '-';
@@ -29,18 +29,6 @@ export function formatDate( iso ) {
     return d.toLocaleDateString( undefined, { year: 'numeric', month: 'short', day: '2-digit' } );
 }
 
-export function timeAgo( iso ) {
-    if ( ! iso ) return '-';
-    const d = parseTimestamp( iso );
-    if ( Number.isNaN( d.getTime() ) ) return iso;
-    const diff = Math.max( 0, ( Date.now() - d.getTime() ) / 1000 );
-    if ( diff < 60 )      return __( 'just now', 'fundkit-fundraising-campaigns' );
-    if ( diff < 3600 )    return sprintf( /* translators: %d: number of minutes */ __( '%dm ago', 'fundkit-fundraising-campaigns' ),  Math.floor( diff / 60 ) );
-    if ( diff < 86400 )   return sprintf( /* translators: %d: number of hours */ __( '%dh ago', 'fundkit-fundraising-campaigns' ),  Math.floor( diff / 3600 ) );
-    if ( diff < 604800 )  return sprintf( /* translators: %d: number of days */ __( '%dd ago', 'fundkit-fundraising-campaigns' ),  Math.floor( diff / 86400 ) );
-    if ( diff < 2628000 ) return sprintf( /* translators: %d: number of weeks */ __( '%dw ago', 'fundkit-fundraising-campaigns' ),  Math.floor( diff / 604800 ) );
-    return formatDateShort( iso );
-}
 
 export function initials( name ) {
     if ( ! name ) return '?';

@@ -1,11 +1,11 @@
 // Shared formatters and event-mapping for the donor profile views.
 
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 // Timestamps arrive as MySQL strings in UTC with no zone marker, which a
 // browser reads as local time. parseTimestamp marks them.
 import { parseTimestamp } from '@fundkit/ui/utils/format';
 
-export { formatAmount, formatAmountCompact } from '../../_shared/format';
+export { formatAmount, formatAmountCompact, timeAgo } from '../../_shared/format';
 
 export function formatMonth( iso ) {
     if ( ! iso ) return '-';
@@ -31,18 +31,6 @@ export function formatDateTime( iso ) {
     } );
 }
 
-export function timeAgo( iso ) {
-    if ( ! iso ) return '-';
-    const d = parseTimestamp( iso );
-    if ( Number.isNaN( d.getTime() ) ) return iso;
-    const diff = Math.max( 0, ( Date.now() - d.getTime() ) / 1000 );
-    if ( diff < 60 )      return __( 'just now', 'fundkit-fundraising-campaigns' );
-    if ( diff < 3600 )    return sprintf( /* translators: %d: number of minutes */ __( '%dm ago', 'fundkit-fundraising-campaigns' ),  Math.floor( diff / 60 ) );
-    if ( diff < 86400 )   return sprintf( /* translators: %d: number of hours */ __( '%dh ago', 'fundkit-fundraising-campaigns' ),  Math.floor( diff / 3600 ) );
-    if ( diff < 604800 )  return sprintf( /* translators: %d: number of days */ __( '%dd ago', 'fundkit-fundraising-campaigns' ),  Math.floor( diff / 86400 ) );
-    if ( diff < 2628000 ) return sprintf( /* translators: %d: number of weeks */ __( '%dw ago', 'fundkit-fundraising-campaigns' ),  Math.floor( diff / 604800 ) );
-    return formatDate( iso );
-}
 
 export function initials( name ) {
     if ( ! name ) return '?';
