@@ -74,18 +74,31 @@ jobs:
       - name: Start wp-env
         run: npx wp-env start
 
+      # --yes because the seed asks before overwriting org money settings, and
+      # a runner has no stdin: WP-CLI reads EOF, treats it as "no" and halts
+      # with exit 0, so the step passes having seeded nothing.
       - name: Seed core fixtures
         run: |
-          OUT="$(npx wp-env run cli wp fundkit e2e-seed 2>&1)"
+          OUT="$(npx wp-env run cli wp fundkit e2e-seed --yes 2>&1)"
           echo "$OUT"
-          echo "$OUT" | grep -oE 'FUNDKIT_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' >> "$GITHUB_ENV"
+          VARS="$(echo "$OUT" | grep -oE 'FUNDKIT_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' || true)"
+          if [ -z "$VARS" ]; then
+            echo "::error::the seed printed no FUNDKIT_E2E_* variables, so every spec would open / instead of the seeded form and time out waiting for it. See the seed output above."
+            exit 1
+          fi
+          echo "$VARS" >> "$GITHUB_ENV"
 
       - name: Seed P2P fixtures
         if: vars.FUNDKIT_P2P_REPO != ''
         run: |
           OUT="$(npx wp-env run cli wp fundkit-p2p e2e-seed 2>&1)"
           echo "$OUT"
-          echo "$OUT" | grep -oE 'FUNDKIT_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' >> "$GITHUB_ENV"
+          VARS="$(echo "$OUT" | grep -oE 'FUNDKIT_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' || true)"
+          if [ -z "$VARS" ]; then
+            echo "::error::the P2P seed printed no FUNDKIT_E2E_* variables. See the seed output above."
+            exit 1
+          fi
+          echo "$VARS" >> "$GITHUB_ENV"
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
