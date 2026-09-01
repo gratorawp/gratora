@@ -4,6 +4,7 @@ import { Modal } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 
 import { formatAmount, amountEntry, formatDate } from './helpers';
+import AmountInput from '../../_shared/components/AmountInput';
 import { IconAlert } from './icons';
 
 // A schedule in one of these will not charge again, so it needs no warning.
@@ -13,8 +14,8 @@ export default function RefundDialog( { donation, onClose, onSuccess, plan = nul
     const planLive = !! plan && ! PLAN_ENDED.includes( plan.status );
     const maxCents = donation.refundable_cents;
     const pendingCents = donation.refund_pending_cents || 0;
-    const { dp, step } = amountEntry( donation.currency );
-    const [ amount, setAmount ] = useState( ( maxCents / 100 ).toFixed( dp ) );
+    const { step } = amountEntry( donation.currency );
+    const [ amount, setAmount ] = useState( maxCents / 100 );
     const [ reason, setReason ] = useState( '' );
     const [ saving, setSaving ] = useState( false );
     const [ error, setError ]   = useState( null );
@@ -68,14 +69,13 @@ export default function RefundDialog( { donation, onClose, onSuccess, plan = nul
                 </p>
                 <label>
                     { __( 'Amount', 'fundkit-fundraising-campaigns' ) }
-                    <input
-                        className="fundkit-input"
-                        type="number"
-                        step={ step }
-                        min={ step }
-                        max={ ( maxCents / 100 ).toFixed( dp ) }
+                    <AmountInput
                         value={ amount }
-                        onChange={ ( e ) => setAmount( e.target.value ) }
+                        onChange={ setAmount }
+                        currency={ donation.currency }
+                        min={ step }
+                        max={ maxCents / 100 }
+                        autoFocus
                     />
                 </label>
                 <label>
