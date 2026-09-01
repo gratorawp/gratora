@@ -319,12 +319,85 @@ final class Plugin
         do_action('fundkit.activated');
     }
 
+    /**
+     * Switch off the add-ons that cannot run without core.
+     *
+     * An add-on extends core's classes, and core's autoloader goes with core, so
+     * an add-on left active afterwards fatals the moment anything touches one of
+     * those classes, including its own deactivation hook. That leaves the site
+     * owner unable to switch off the thing that is breaking their site from the
+     * screen that would switch it off.
+     *
+     * Done here, inside core's own deactivation, because core is still loaded
+     * for the rest of this request: each add-on's deactivation hook runs with
+     * the classes it expects still in memory.
+     *
+     * @since 1.0.0
+     */
+    private static function deactivateDependents(): void
+    {
+        if (! function_exists('deactivate_plugins')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        // The slug an add-on names is the one the directory distributes core
+        // under, which is the text domain, not whatever folder this checkout
+        // happens to sit in. plugin_basename() is no good either: it returns the
+        // whole absolute path when the plugin is outside the registered plugin
+        // directory, and the slug would then match no add-on at all.
+        $slug = (string) (get_file_data(FUNDKIT_FILE, ['TextDomain' => 'Text Domain'])['TextDomain'] ?? '');
+        $here = basename(dirname(FUNDKIT_FILE));
+
+        $dependents = [];
+
+        foreach ((array) get_option('active_plugins', []) as $plugin) {
+            $plugin = (string) $plugin;
+            if (dirname($plugin) === $here) {
+                continue;
+            }
+
+            $file = WP_PLUGIN_DIR . '/' . $plugin;
+            if (! is_readable($file)) {
+                continue;
+            }
+
+            // The header WordPress itself reads for plugin dependencies, so an
+            // add-on declares this once and both core and WordPress honour it.
+            $requires = get_file_data($file, ['RequiresPlugins' => 'Requires Plugins'])['RequiresPlugins'] ?? '';
+            $names    = array_filter(array_map('trim', explode(',', (string) $requires)));
+
+            if ($slug !== '' && in_array($slug, $names, true)) {
+                $dependents[] = $plugin;
+            }
+        }
+
+        /**
+         * Add-ons that must go off with core.
+         *
+         * The header covers anything that declares itself properly; this is for
+         * an add-on that cannot, and for tests.
+         *
+         * @param list<string> $dependents Plugin basenames.
+         * @since 1.0.0
+         */
+        $dependents = (array) apply_filters('fundkit.dependent_plugins', $dependents);
+
+        if ($dependents !== []) {
+            // Silent: each add-on's own deactivation hook still runs, but
+            // "deactivated" notices from a deactivation nobody triggered read
+            // as errors on the plugins screen.
+            deactivate_plugins(array_values(array_unique($dependents)), true);
+        }
+    }
+
     /** @since 1.0.0 */
     public static function onDeactivation(): void
     {
         // Anything that reads FundKit's own tables runs before the wipe, because
         // the plugin is still loaded and hooked for the rest of this request.
         flush_rewrite_rules();
+
+        self::deactivateDependents();
 
         do_action('fundkit.deactivated');
 

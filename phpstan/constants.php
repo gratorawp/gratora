@@ -25,3 +25,4 @@ define('DAY_IN_SECONDS', 86400);
 define('WEEK_IN_SECONDS', 604800);
 define('MONTH_IN_SECONDS', 2592000);
 define('YEAR_IN_SECONDS', 31536000);
+define('WP_PLUGIN_DIR', '/wp-content/plugins');
