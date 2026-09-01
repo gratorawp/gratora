@@ -23,6 +23,17 @@
     * { box-sizing: border-box; }
 }
 
+// A block theme's constrained layout caps its children at the theme's content
+// size with `.is-layout-constrained > :where(...)`. The :where() contributes no
+// specificity, so that rule and the one above are both 0,1,0 and the winner is
+// whichever is printed last: the theme's global styles are, so the portal
+// rendered at the theme's measure, 645px on Twenty Twenty-Five, while the rule
+// above asked for 1200. One class deeper is enough to settle it, and
+// --dp-measure still lets a site say otherwise.
+.is-layout-constrained > .fundkit-donor-portal {
+    max-width: var(--dp-measure, 1200px);
+}
+
 .dp {
     display: flex;
     flex-direction: column;
