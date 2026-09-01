@@ -960,6 +960,14 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
                         <iframe
                             className="fundkit-form-editor__preview-frame"
                             title={ __( 'Form preview', 'fundkit-fundraising-campaigns' ) }
+                            // allow-scripts without allow-same-origin: the preview
+                            // needs to run the form's own JS, but a srcdoc frame
+                            // otherwise inherits this admin origin, so anything
+                            // scripted inside it would carry the admin's cookies
+                            // and nonce. An opaque origin costs nothing here -
+                            // both sides of the token push already identify each
+                            // other by window reference rather than by origin.
+                            sandbox="allow-scripts"
                             srcDoc={ html }
                         />
                         { loading && (

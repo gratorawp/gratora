@@ -663,6 +663,14 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
                             ref={ frameRef }
                             className="fundkit-onboarding__preview-frame"
                             title={ __( 'Donation form preview', 'fundkit-fundraising-campaigns' ) }
+                            // allow-scripts without allow-same-origin: the preview
+                            // needs to run the form's own JS, but a srcdoc frame
+                            // otherwise inherits this admin origin, so anything
+                            // scripted inside it would carry the admin's cookies
+                            // and nonce. An opaque origin costs nothing here -
+                            // both sides of the token push already identify each
+                            // other by window reference rather than by origin.
+                            sandbox="allow-scripts"
                             srcDoc={ previewHtml }
                             style={ loadState === 'loaded' ? undefined : { visibility: 'hidden' } }
                         />
