@@ -1893,13 +1893,18 @@ export function GoalPanel( { c } ) {
         ? Number( r.goal_cents ) > 0
         : Number( r.goal_count ) > 0;
 
-    // Held here rather than derived from the target on every render: deriving
-    // it meant emptying the field to retype an amount flipped the dropdown to
-    // "No goal" and took the field away mid-edit.
-    const [ mode, setMode ] = useState( targetSet ? ( r.goal_type ?? 'amount' ) : 'none' );
+    // No target means no goal, which is how a campaign without one is stored.
+    const shown = targetSet ? ( r.goal_type ?? 'amount' ) : 'none';
+
+    // The pick only overrides that to hold the panel open on a measurement type
+    // whose target is momentarily blank, which is every keystroke of typing one.
+    // It never wins the other way, so discarding an edit puts the panel back on
+    // the goal the campaign still has.
+    const [ picked, setPicked ] = useState( null );
+    const mode = ( picked && picked !== 'none' && shown === 'none' ) ? picked : shown;
 
     const chooseMode = ( next ) => {
-        setMode( next );
+        setPicked( next );
         if ( next === 'none' ) {
             c.edit( { goal_cents: null, goal_count: null } );
             return;
@@ -1950,15 +1955,17 @@ export function GoalPanel( { c } ) {
                     </FormRow>
                 ) }
 
-                <ToggleRow
-                    title={ __( 'Close when the goal is met', 'fundkit-fundraising-campaigns' ) }
-                    sub={ hasGoal
-                        ? __( 'The campaign stops accepting donations as soon as it reaches the target. Reopen it by raising the target or turning this off.', 'fundkit-fundraising-campaigns' )
-                        : __( 'Set a target above first. Without one there is nothing to reach.', 'fundkit-fundraising-campaigns' ) }
-                    disabled={ ! hasGoal }
-                    checked={ !! r.close_at_goal }
-                    onChange={ ( v ) => c.edit( { close_at_goal: !! v } ) }
-                />
+                { mode !== 'none' && (
+                    <ToggleRow
+                        title={ __( 'Close when the goal is met', 'fundkit-fundraising-campaigns' ) }
+                        sub={ hasGoal
+                            ? __( 'The campaign stops accepting donations as soon as it reaches the target. Reopen it by raising the target or turning this off.', 'fundkit-fundraising-campaigns' )
+                            : __( 'Set a target above first. Without one there is nothing to reach.', 'fundkit-fundraising-campaigns' ) }
+                        disabled={ ! hasGoal }
+                        checked={ !! r.close_at_goal }
+                        onChange={ ( v ) => c.edit( { close_at_goal: !! v } ) }
+                    />
+                ) }
 
                 { r.close_at_goal && r.goal_met && (
                     <p className="fundkit-muted">
