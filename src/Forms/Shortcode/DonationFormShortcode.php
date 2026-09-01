@@ -1235,7 +1235,14 @@ final class DonationFormShortcode extends HookProvider
                             'purpose'  => TermsBlock::PURPOSE,
                             'label'    => (string) ($attrs['label']    ?? ''),
                             'terms'    => (string) ($attrs['terms']    ?? ''),
-                            'linkUrl'  => (string) ($attrs['linkUrl']  ?? ''),
+                            // esc_url_raw, not a bare cast: block attributes are not
+                            // run through kses (sanitizeBlocks only reaches
+                            // innerContent), so a javascript: URL saved here would
+                            // travel to the donor's browser intact. The server-
+                            // rendered fallback for this block has always escaped
+                            // it; the hydrated path that replaces that fallback is
+                            // what a donor actually clicks.
+                            'linkUrl'  => esc_url_raw((string) ($attrs['linkUrl'] ?? '')),
                             'linkText' => (string) ($attrs['linkText'] ?? ''),
                         ], $row, $attrs);
                     }

@@ -4,6 +4,7 @@ import { evaluateCondition } from '../state/conditions';
 import { fieldEntry } from '../state/fields';
 import { formatAmount } from '../util/format';
 import { decodeEntities } from '../util/entities';
+import { safeUrl } from '../util/url';
 import { computeFees } from '../state/store';
 import ErrorBoundary from '../components/ErrorBoundary';
 import CountrySelect from '../components/CountrySelect';
@@ -433,7 +434,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     ) }
                     { f.linkUrl && (
                         <p class="fundkit-form__terms-link">
-                            <a href={ f.linkUrl } target="_blank" rel="noopener noreferrer">
+                            <a href={ safeUrl( f.linkUrl ) } target="_blank" rel="noopener noreferrer">
                                 { decodeEntities( f.linkText || '' ) || ( config.i18n.readTerms || 'Read the terms' ) }
                             </a>
                         </p>
