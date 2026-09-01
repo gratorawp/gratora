@@ -38,7 +38,7 @@ test.describe('consent block', () => {
         await donor.fillName('E2E', 'Consent');
         await donor.fillEmail(`e2e+consent+${Date.now()}@example.com`);
         await donor.selectGateway('offline');
-        await donor.submit();
+        await donor.submit({ consents: false });
 
         await donor.expectFieldError('consent');
         await expect(donor.successCard()).toBeHidden();

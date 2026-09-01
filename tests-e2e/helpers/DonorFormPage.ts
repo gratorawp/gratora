@@ -166,7 +166,30 @@ export class DonorFormPage {
         );
     }
 
-    async submit(): Promise<void> {
+    /** Tick every purpose the form marks required-by-law. */
+    async acceptRequiredConsents(): Promise<void> {
+        const required = this.consentFieldset()
+            .locator('label:has(.fundkit-form__consent-required-pill) input[type="checkbox"]');
+
+        for (let i = 0; i < await required.count(); i++) {
+            const box = required.nth(i);
+            if (! await box.isChecked()) await box.check();
+        }
+    }
+
+    /**
+     * @param opts.consents pass false to leave required consents untouched,
+     *                      which is the refusal the consent spec asserts.
+     */
+    async submit(opts: { consents?: boolean } = {}): Promise<void> {
+        // A required purpose starts unticked on purpose - a pre-ticked box is
+        // not consent - so giving it is part of completing the form, the same
+        // as typing an email. Every spec that submits has to do what a donor
+        // would, or it is blocked by a field it never filled in.
+        if (opts.consents !== false) {
+            await this.acceptRequiredConsents();
+        }
+
         // AntiSpamGuard rejects submits faster than MIN_RENDER_SECONDS (2s)
         // from form render. Wait the remainder (with a small buffer for
         // server-side time drift) if the spec hasn't already burned enough
@@ -192,8 +215,16 @@ export class DonorFormPage {
             // objected to. Read those out before giving up, or every failure
             // here is fifteen silent seconds.
             const banner = await this.form.locator('.fundkit-form__error').allTextContents();
+            // "Required." on its own does not say which field, and every
+            // required field says it. Name what it is attached to.
             const fields = await this.form.locator('.fundkit-form__field-error')
-                .filter({ hasText: /\S/ }).allTextContents();
+                .filter({ hasText: /\S/ })
+                .evaluateAll((nodes) => nodes.map((n) => {
+                    const field = n.closest('label, .fundkit-form__field, fieldset');
+                    const input = field?.querySelector('input, select, textarea') as HTMLInputElement | null;
+                    const named = input?.name || input?.id || field?.querySelector('legend, .fundkit-form__label')?.textContent;
+                    return `${(named || 'unnamed field').trim()}: ${n.textContent?.trim()}`;
+                }));
             const failed  = this.lastFailure;
 
             const said = [
