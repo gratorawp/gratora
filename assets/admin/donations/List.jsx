@@ -101,7 +101,17 @@ export default function List() {
         // picker, and still a filter.
         // 'form' is defined but not shown: most orgs run one form per campaign,
         // so the column repeats the campaign next to it. Still in the picker.
-        fields:  [ 'reference', 'frequency', 'status', 'donor', 'amount', 'gateway', 'campaign', 'created_at' ],
+        fields:  [ 'reference', 'status', 'donor', 'amount', 'frequency', 'gateway', 'campaign', 'created_at' ],
+        // Widths are read from here, not from the field. The donor is what a
+        // row is about, and the reference is a fixed short string that would
+        // otherwise take the space as the first column.
+        layout: {
+            styles: {
+                reference: { width: '170px' },
+                donor:     { width: '28%', minWidth: '240px' },
+                frequency: { width: '110px' },
+            },
+        },
     } );
 
     const toggleTest = ( on ) => {
