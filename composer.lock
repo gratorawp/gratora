@@ -167,12 +167,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fundkitorg/queryable.git",
-                "reference": "5a8208fe15f52724ecaaa0cec405defb5621b553"
+                "reference": "3b3254187b15226a39230ab294f76664a54ba8e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fundkitorg/queryable/zipball/5a8208fe15f52724ecaaa0cec405defb5621b553",
-                "reference": "5a8208fe15f52724ecaaa0cec405defb5621b553",
+                "url": "https://api.github.com/repos/fundkitorg/queryable/zipball/3b3254187b15226a39230ab294f76664a54ba8e0",
+                "reference": "3b3254187b15226a39230ab294f76664a54ba8e0",
                 "shasum": ""
             },
             "require": {
