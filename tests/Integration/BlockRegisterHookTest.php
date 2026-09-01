@@ -43,12 +43,19 @@ final class BlockRegisterHookTest extends IntegrationTestCase
         // WordPress; re-firing it is what a late-booting module effectively
         // sees. Everything core registered on the first `init` is re-offered
         // and rejected by name, which is only noise here.
-        $this->expected_doing_it_wrong = [
-            'WP_Block_Type_Registry::register',
-            'WP_Block_Bindings_Registry::register',
-            'WP_Block_Templates_Registry::register',
-        ];
         do_action('init');
+
+        // Which of WordPress's registries complain is a function of the version
+        // under test - 7.1 added two for icons - and the harness fails both on
+        // an unexpected notice and on an expected one that never fired, so a
+        // hardcoded list is wrong on every version but one. Tolerate the
+        // duplicate complaints from core's own registries, and let anything
+        // else fail: a notice from FundKit is the defect this would hide.
+        foreach (array_keys($this->caught_doing_it_wrong) as $caught) {
+            if (preg_match('/^WP_\w+Registry::register$/', $caught)) {
+                $this->expected_doing_it_wrong[] = $caught;
+            }
+        }
 
         $this->assertTrue(Plugin::instance()->container->get(BlockRegistry::class)->has('acme/keepsake'));
         $this->assertTrue(\WP_Block_Type_Registry::get_instance()->is_registered('acme/keepsake'));
