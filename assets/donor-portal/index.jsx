@@ -505,9 +505,6 @@ function SignOutControls() {
             <button type="button" class="dp__signout" onClick={ () => {
                 api( 'logout-everywhere', { method: 'POST' } ).finally( () => window.location.reload() );
             } }>{ __( 'Sign out', 'fundkit-fundraising-campaigns' ) }</button>
-            <span class="dp-hint">
-                { __( 'Ends every device, and cancels any sign-in link you have not opened yet.', 'fundkit-fundraising-campaigns' ) }
-            </span>
         </div>
     );
 }

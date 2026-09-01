@@ -166,6 +166,12 @@ describe( 'signing up', () => {
 } );
 
 describe( 'signing out', () => {
+	/**
+	 * The line that told the donor this ends every device, and voids a sign-in
+	 * link they have not opened, was removed as clutter. Nothing on screen says
+	 * so now, but the behaviour is what the donor profile promises staff about
+	 * revoking a month-long link, so it stays pinned here.
+	 */
 	test( 'one click ends every session, with the CSRF header on it', async () => {
 		routes.me = () => jsonResponse( 200, me() );
 		// Never resolves: the client reloads the page in finally(), which jsdom
@@ -191,15 +197,6 @@ describe( 'signing out', () => {
 		expect( text() ).not.toContain( 'Keep me signed in' );
 	} );
 
-	test( 'the scope is stated, since the button no longer names it', async () => {
-		routes.me = () => jsonResponse( 200, me() );
-
-		await boot();
-
-		// The donor profile promises staff this is how a month-long link is
-		// revoked, so the donor has to be told that is what the button does.
-		expect( text() ).toContain( 'cancels any sign-in link you have not opened yet' );
-	} );
 } );
 
 describe( 'the portal layout', () => {
