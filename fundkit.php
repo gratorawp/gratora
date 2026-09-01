@@ -35,7 +35,6 @@
 
 declare(strict_types=1);
 
-use FundKit\Admin\Pages\FormsPage;
 use FundKit\Cli\CliCommands;
 use FundKit\Foundation\Database\WordPressSchema;
 use FundKit\Foundation\Plugin;
@@ -70,11 +69,4 @@ add_action('plugins_loaded', static function (): void {
         WP_CLI::add_command('fundkit demo-seed', [$cli, 'demo_seed']);
         WP_CLI::add_command('fundkit e2e-seed', [$cli, 'e2e_seed']);
     }
-});
-
-add_filter('show_admin_bar', static function ($show) {
-    if ( FormsPage::isFormEditView()) {
-        return false;
-    }
-    return $show;
 });

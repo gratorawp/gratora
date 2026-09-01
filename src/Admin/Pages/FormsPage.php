@@ -23,7 +23,23 @@ final class FormsPage extends HookProvider
     /** @since 1.0.0 */
     protected function filters(): array
     {
-        return ['fundkit.admin.pages' => 'registerPage'];
+        return [
+            'fundkit.admin.pages' => 'registerPage',
+            'show_admin_bar'      => 'hideAdminBar',
+        ];
+    }
+
+    /**
+     * The editor is fullscreen, and the bar is chrome it does not have room
+     * for. FULLSCREEN_CSS hides it too, but only after it has rendered and
+     * pushed the page down; refusing it here means it never does.
+     *
+     * @param bool $show
+     * @since 1.0.0
+     */
+    public function hideAdminBar($show)
+    {
+        return self::isFormEditView() ? false : $show;
     }
 
     /** @since 1.0.0 */
