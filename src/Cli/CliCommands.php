@@ -14,6 +14,7 @@ use FundKit\Donors\Donor;
 use FundKit\Donors\DonorService;
 use FundKit\Forms\Form;
 use FundKit\Forms\FormService;
+use FundKit\Gateways\GatewayManager;
 use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Funds\Fund;
@@ -443,6 +444,21 @@ final class CliCommands
         $gatewayConfig = get_option('fundkit_gateway_config', []);
         if (! is_array($gatewayConfig)) $gatewayConfig = [];
         $gatewayConfig['test_mode'] = true;
+
+        // The specs pick "offline" by name, and OfflineGateway::canCharge()
+        // answers no until it has something to tell the donor. Without this it
+        // is registered, allowed by the form, and still never offered, so every
+        // spec that submits fails at the thank-you card with nothing saying the
+        // payment step was unreachable.
+        $gatewayConfig['offline'] = array_merge(
+            is_array($gatewayConfig['offline'] ?? null) ? $gatewayConfig['offline'] : [],
+            [
+                'enabled'      => true,
+                'instructions' => 'Transfer to the account below and quote your reference.',
+                'bank_details' => "Wildwater Trust\nIBAN NL00 BANK 0123 4567 89",
+            ]
+        );
+
         update_option('fundkit_gateway_config', $gatewayConfig, false);
 
         // Drop AntiSpamGuard rate-limit transients so a run isn't penalized
@@ -518,6 +534,24 @@ final class CliCommands
 
         WP_CLI::success("Canonical forms ready.");
         WP_CLI::log('  export FUNDKIT_E2E_URL="' . untrailingslashit(home_url()) . '"');
+        // The specs select gateways by name, and a form that offers none still
+        // renders perfectly: the failure only shows up much later, as a
+        // thank-you card that never arrives. Prove the payment step is
+        // reachable here, while there is still something useful to say.
+        $offered = $this->container()->get(GatewayManager::class)
+            ->optionsFor(['offline', 'sandbox'], null, 'EUR');
+
+        foreach (['offline', 'sandbox'] as $needed) {
+            if (! in_array($needed, $offered, true)) {
+                WP_CLI::error(sprintf(
+                    'The seeded forms do not offer the "%s" gateway (on offer: %s). Every spec that '
+                    . 'submits would fail at the thank-you card without saying why.',
+                    $needed,
+                    $offered ? implode(', ', $offered) : 'none'
+                ));
+            }
+        }
+
         WP_CLI::log('  export FUNDKIT_E2E_FORM_PATH="' . wp_parse_url($singleUrl, PHP_URL_PATH) . '"');
         WP_CLI::log('  export FUNDKIT_E2E_MULTI_STEP_FORM_PATH="' . wp_parse_url($multiUrl, PHP_URL_PATH) . '"');
         WP_CLI::log('  export FUNDKIT_E2E_CONDITIONAL_FORM_PATH="' . wp_parse_url($condUrl, PHP_URL_PATH) . '"');

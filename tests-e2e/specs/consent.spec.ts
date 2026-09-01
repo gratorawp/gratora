@@ -16,21 +16,32 @@ test.describe('consent block', () => {
         expect(await checkboxes.count(), 'consent purposes present').toBeGreaterThan(0);
     });
 
-    test('required-by-law purposes are pre-checked and disabled', async ({ donor }) => {
+    test('a required purpose is the donor\'s to give, and the form insists on it', async ({ donor }) => {
         const fs = donor.consentFieldset();
         test.skip(await fs.count() === 0, 'no consent block on the test form');
 
-        // The "Required" pill marks legally-required purposes. Their checkbox
-        // must be `checked` AND `disabled` so the donor cannot un-opt.
         const requiredLabels = fs.locator('label:has(.fundkit-form__consent-required-pill)');
         const reqCount = await requiredLabels.count();
         if (reqCount === 0) test.skip(true, 'no required-by-law purposes configured');
 
+        // Not pre-ticked, and not disabled. A box the donor did not tick is not
+        // consent - pre-ticking it is exactly what makes consent invalid - so
+        // the form asks, and refuses to proceed until they answer.
         for (let i = 0; i < reqCount; i++) {
             const cb = requiredLabels.nth(i).locator('input[type="checkbox"]');
-            expect(await cb.isChecked(), `required purpose #${i + 1} checked`).toBe(true);
-            expect(await cb.isDisabled(), `required purpose #${i + 1} disabled`).toBe(true);
+            expect(await cb.isChecked(), `required purpose #${i + 1} starts unticked`).toBe(false);
+            expect(await cb.isEnabled(), `required purpose #${i + 1} is the donor's to tick`).toBe(true);
         }
+
+        // Leaving it unticked is a refusal to submit, not a silent pass.
+        await donor.selectPresetAt(0);
+        await donor.fillName('E2E', 'Consent');
+        await donor.fillEmail(`e2e+consent+${Date.now()}@example.com`);
+        await donor.selectGateway('offline');
+        await donor.submit();
+
+        await donor.expectFieldError('consent');
+        await expect(donor.successCard()).toBeHidden();
     });
 
     test('optional purposes start unchecked and toggle freely', async ({ donor }) => {
