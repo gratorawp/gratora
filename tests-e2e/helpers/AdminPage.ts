@@ -16,7 +16,12 @@ export class AdminPage {
         await this.page.fill('#user_login', user);
         await this.page.fill('#user_pass', pass);
         await this.page.click('#wp-submit');
-        await this.page.waitForURL(/\/wp-admin\//, { timeout: 15_000 });
+
+        // The first wp-admin load of a run is the slow one: a cold wp-env
+        // compiles and warms on it, and 15s was not enough, so the first admin
+        // spec failed while every one after it passed. This waits on arriving,
+        // not on a guess about how long arriving takes.
+        await this.page.waitForURL(/\/wp-admin\//, { timeout: 45_000 });
     }
 
     /** Open the FundKit campaign-detail React screen for a campaign id + main tab. */

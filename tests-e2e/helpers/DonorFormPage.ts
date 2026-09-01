@@ -11,7 +11,18 @@ export class DonorFormPage {
      */
     private renderedAt = 0;
 
+    /** The first REST call that came back an error, for expectThankYou to quote. */
+    private lastFailure: string | null = null;
+
     constructor(page: Page) {
+        page.on('response', async (res) => {
+            if (this.lastFailure || res.status() < 400 || ! res.url().includes('/fundkit/v1/')) {
+                return;
+            }
+            const body = await res.text().catch(() => '');
+            this.lastFailure = `${res.status()} ${res.url()} ${body.slice(0, 400)}`;
+        });
+
         this.page = page;
         this.form = page.locator('form.fundkit-donation-form').first();
     }
@@ -171,7 +182,32 @@ export class DonorFormPage {
     }
 
     async expectThankYou(): Promise<void> {
-        await expect(this.successCard()).toBeVisible({ timeout: 15_000 });
+        try {
+            await expect(this.successCard()).toBeVisible({ timeout: 15_000 });
+            return;
+        } catch (original) {
+            // "element not found" says the submission did not finish, and
+            // nothing about why. The form usually knows: it puts the server's
+            // refusal in its own error banner, and field errors next to what it
+            // objected to. Read those out before giving up, or every failure
+            // here is fifteen silent seconds.
+            const banner = await this.form.locator('.fundkit-form__error').allTextContents();
+            const fields = await this.form.locator('.fundkit-form__field-error')
+                .filter({ hasText: /\S/ }).allTextContents();
+            const failed  = this.lastFailure;
+
+            const said = [
+                banner.length ? `form said: ${banner.join(' | ')}` : null,
+                fields.length ? `fields said: ${fields.join(' | ')}` : null,
+                failed        ? `last failed request: ${failed}`    : null,
+            ].filter(Boolean).join('\n');
+
+            if (said === '') {
+                throw original;
+            }
+
+            throw new Error(`The donation never completed.\n${said}`);
+        }
     }
 
     async expectFieldError(field: string): Promise<void> {
