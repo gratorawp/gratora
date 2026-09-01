@@ -155,11 +155,44 @@ final class SettingsController
     {
         foreach ($data as $key => $value) {
             if (is_string($value)) {
-                $data[$key] = sanitize_textarea_field($value);
+                $data[$key] = in_array($key, self::WHITESPACE_IS_THE_VALUE, true)
+                    ? $this->sanitizeSeparator($value)
+                    : sanitize_textarea_field($value);
             } elseif (is_array($value)) {
                 $data[$key] = $this->sanitize($value);
             }
         }
         return $data;
+    }
+
+    /**
+     * Settings whose value can legitimately be a space.
+     *
+     * sanitize_textarea_field() trims, so a thousands separator of " " arrived
+     * as "" and the screen came back saying none. Swedish, Norwegian, Polish,
+     * Czech and South African money is written that way, so the format they
+     * need is the one that could not be saved.
+     */
+    private const WHITESPACE_IS_THE_VALUE = ['decimal_sep', 'thousand_sep'];
+
+    /**
+     * Strip what sanitize_textarea_field() strips, without the trim: tags,
+     * invalid UTF-8 and control characters, leaving ordinary and non-breaking
+     * spaces intact.
+     *
+     * @since 1.0.0
+     */
+    private function sanitizeSeparator(string $value): string
+    {
+        $clean = wp_check_invalid_utf8($value);
+
+        // wp_strip_all_tags() is what this wants, minus its closing trim(),
+        // which is the very thing being avoided: it took the ordinary space and
+        // left the non-breaking one, so the bug looked like it depended on
+        // which space had been typed.
+        $clean = (string) preg_replace('@<(script|style)[^>]*?>.*?</\1>@si', '', $clean);
+        $clean = strip_tags($clean);
+
+        return (string) preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $clean);
     }
 }
