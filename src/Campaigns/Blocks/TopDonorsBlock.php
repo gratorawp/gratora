@@ -83,7 +83,11 @@ final class TopDonorsBlock extends CampaignBlock
             if ($hideAnonymous && $isAnonymousAggregate) continue;
 
             $entries[] = [
-                'name'            => $name !== '' ? $name : __('Anonymous', 'fundkit-fundraising-campaigns'),
+                // Masked on the aggregate flag, not on whether a name exists:
+                // a hidden donor has one, and printing it is the whole thing
+                // hiding was meant to stop. It also keeps the real initial out
+                // of the avatar, which is built from this string.
+                'name'            => $isAnonymousAggregate ? __('Anonymous', 'fundkit-fundraising-campaigns') : $name,
                 'amount_cents'    => (int) $row['amount_cents'],
                 'donations_count' => (int) $row['donations_count'],
                 'is_anonymous'    => $isAnonymousAggregate,
