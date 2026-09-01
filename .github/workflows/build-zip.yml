@@ -34,7 +34,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       # @fundkit/ui is a public git dependency, but npm locks it as
       # ssh://git@github.com, which a runner has no key for: the install
