@@ -10,6 +10,7 @@ use FundKit\Currency\CurrencyFormats;
 use FundKit\Campaigns\Styling\Tokens;
 use FundKit\Forms\FormService;
 use FundKit\Foundation\Auth\Capabilities;
+use FundKit\Foundation\Http\ClientIp;
 use FundKit\Foundation\Hooks\HookProvider;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\License\LicenseService;
@@ -99,6 +100,12 @@ final class AdminGlobals extends HookProvider
                 'manage_options' => current_user_can('manage_options'),
                 'export_donors'  => Capabilities::userCan('fundkit_export_donors'),
             ],
+            // What is in front of this site, if the site has not said. The
+            // Spam protection screen turns this into one button, because the
+            // people who need the setting are not the people who know what a
+            // CIDR range is, and the ranges are ours to know rather than
+            // theirs to look up.
+            'detectedProxy' => ClientIp::undeclaredProxy(),
         ];
 
         // A src-less handle in the head, so every screen bundle that reads

@@ -201,6 +201,59 @@ final class TrustedProxyTest extends IntegrationTestCase
         $this->assertFalse(ClientIp::looksProxied(), 'declared is not a problem to report');
     }
 
+    /**
+     * Cloudflare's edge is public, so the private-address test alone misses the
+     * commonest proxied site there is. CF-Ray is on every request it proxies.
+     */
+    public function test_cloudflare_is_detected_and_names_its_own_fix(): void
+    {
+        $_SERVER['REMOTE_ADDR'] = '162.158.1.1';
+        $_SERVER['HTTP_CF_RAY'] = '8a1b2c3d4e5f6789-LHR';
+
+        $this->assertSame('cloudflare', ClientIp::undeclaredProxy());
+
+        $this->trust(['cloudflare']);
+        $this->assertNull(ClientIp::undeclaredProxy());
+
+        unset($_SERVER['HTTP_CF_RAY']);
+    }
+
+    public function test_a_private_edge_names_its_own_fix(): void
+    {
+        $this->request('10.0.0.7', '203.0.113.5');
+
+        $this->assertSame('private_ranges', ClientIp::undeclaredProxy());
+    }
+
+    /** The setting takes a word, because the people who need it do not write CIDRs. */
+    public function test_the_cloudflare_keyword_trusts_cloudflares_edge(): void
+    {
+        $this->trust(['cloudflare']);
+        $this->request('162.158.1.1', '203.0.113.5');
+
+        $this->assertSame('203.0.113.5', ClientIp::resolve());
+    }
+
+    public function test_the_private_ranges_keyword_trusts_an_internal_edge(): void
+    {
+        $this->trust(['private_ranges']);
+
+        $this->request('10.0.0.7', '203.0.113.5');
+        $this->assertSame('203.0.113.5', ClientIp::resolve());
+
+        // And says nothing about the public internet.
+        $this->request('198.51.100.9', '1.2.3.4');
+        $this->assertSame('198.51.100.9', ClientIp::resolve());
+    }
+
+    public function test_an_unknown_keyword_is_not_a_wildcard(): void
+    {
+        $this->trust(['everyone', 'all', '*']);
+        $this->request('198.51.100.9', '1.2.3.4');
+
+        $this->assertSame('198.51.100.9', ClientIp::resolve(), 'junk must never widen the list');
+    }
+
     public function test_an_ordinary_public_request_is_not_reported(): void
     {
         $this->request('198.51.100.9');

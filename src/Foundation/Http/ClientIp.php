@@ -22,6 +22,36 @@ namespace FundKit\Foundation\Http;
  */
 final class ClientIp
 {
+    /** RFC1918, loopback and unique-local: addresses only reachable from inside. */
+    private const PRIVATE_RANGES = [
+        '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', '127.0.0.0/8',
+        '169.254.0.0/16', '::1/128', 'fc00::/7', 'fe80::/10',
+    ];
+
+    /**
+     * Cloudflare's published edge ranges.
+     *
+     * Pinned rather than fetched: a site's spam limits must not depend on an
+     * outbound request succeeding, and these change rarely and only by
+     * addition. A range added after this ships makes that edge unrecognised,
+     * which costs the shared-bucket behaviour the site had anyway, and never
+     * trusts anything it should not.
+     */
+    private const CLOUDFLARE_RANGES = [
+        '173.245.48.0/20', '103.21.244.0/22', '103.22.200.0/22', '103.31.4.0/22',
+        '141.101.64.0/18', '108.162.192.0/18', '190.93.240.0/20', '188.114.96.0/20',
+        '197.234.240.0/22', '198.41.128.0/17', '162.158.0.0/15', '104.16.0.0/13',
+        '104.24.0.0/14', '172.64.0.0/13', '131.0.72.0/22',
+        '2400:cb00::/32', '2606:4700::/32', '2803:f800::/32', '2405:b500::/32',
+        '2405:8100::/32', '2a06:98c0::/29', '2c0f:f248::/32',
+    ];
+
+    /** @var array<string, list<string>> */
+    private const KEYWORDS = [
+        'cloudflare'     => self::CLOUDFLARE_RANGES,
+        'private_ranges' => self::PRIVATE_RANGES,
+    ];
+
     /**
      * The address to attribute this request to.
      *
@@ -85,8 +115,23 @@ final class ClientIp
 
         $clean = [];
         foreach ($ranges as $range) {
-            $range = trim((string) $range);
-            if ($range !== '' && self::isValidRange($range)) {
+            $range = strtolower(trim((string) $range));
+            if ($range === '') {
+                continue;
+            }
+
+            // Words, because the people who need this setting are not the
+            // people who know what a CIDR is. "cloudflare" is a fact about
+            // the site an admin can confirm from their own dashboard; the
+            // ranges behind it are ours to keep current.
+            if (isset(self::KEYWORDS[$range])) {
+                foreach (self::KEYWORDS[$range] as $expanded) {
+                    $clean[] = $expanded;
+                }
+                continue;
+            }
+
+            if (self::isValidRange($range)) {
                 $clean[] = $range;
             }
         }
@@ -95,25 +140,33 @@ final class ClientIp
     }
 
     /**
-     * Whether this request arrived through a proxy the site has not declared.
+     * What is sitting in front of this site, if the site has not said.
      *
-     * A private or loopback REMOTE_ADDR on a site being reached from outside
-     * can only mean something in front is terminating the connection, so the
-     * per-address cap is already one bucket for everyone. This is a fact about
-     * the request rather than a guess, which is what makes it worth telling an
-     * admin about.
+     * Returns the keyword that would fix it, so the answer an admin is given
+     * is the answer they can act on rather than a description of a problem.
+     *
+     * Cloudflare announces itself: CF-Ray is on every request it proxies, and
+     * its edge is public, so the private-address test alone would miss the
+     * commonest case of all. A private REMOTE_ADDR is the other: an address
+     * only reachable from inside can only be this site's own infrastructure.
+     *
+     * @return 'cloudflare'|'private_ranges'|null
      *
      * @since 1.0.0
      */
-    public static function looksProxied(): bool
+    public static function undeclaredProxy(): ?string
     {
         if (self::trustedProxies() !== []) {
-            return false;
+            return null;
+        }
+
+        if (self::header('HTTP_CF_RAY') !== '') {
+            return 'cloudflare';
         }
 
         $remote = self::remote();
         if ($remote === '') {
-            return false;
+            return null;
         }
 
         // A forwarded header from an undeclared source is not believed, but it
@@ -121,7 +174,13 @@ final class ClientIp
         $forwarded = self::header('HTTP_X_FORWARDED_FOR') !== ''
             || self::header('HTTP_CF_CONNECTING_IP') !== '';
 
-        return $forwarded && self::isPrivate($remote);
+        return $forwarded && self::isPrivate($remote) ? 'private_ranges' : null;
+    }
+
+    /** @since 1.0.0 */
+    public static function looksProxied(): bool
+    {
+        return self::undeclaredProxy() !== null;
     }
 
     /**

@@ -108,14 +108,13 @@ final class SettingsService
                 // Prune fundkit_events older than N days; 0 disables.
                 'event_retention_days'           => 730,
                 'anonymize_ips'                  => true,
-                // CIDRs of this site's own edge: a CDN, a load balancer, a
-                // reverse proxy. Empty means REMOTE_ADDR is taken at face
-                // value and no forwarded header is believed, which is right
-                // for a site nothing sits in front of and wrong for one where
-                // something does, because then every visitor shares an address
-                // and every per-visitor limit becomes a limit for the site.
-                // Declaring nothing is safe; declaring the wrong thing is not,
-                // so it stays empty until an admin says otherwise.
+                // What sits in front of this site: the word 'cloudflare', the
+                // word 'private_ranges', or addresses and CIDR ranges. Empty
+                // means REMOTE_ADDR is taken at face value and no forwarded
+                // header is believed, which is right for a site nothing sits
+                // in front of and wrong for one where something does, because
+                // then every visitor arrives as the same address and every
+                // per-visitor limit becomes a limit for the whole site.
                 'trusted_proxies'                => [],
                 // Off by default: a Gravatar request carries a hash of the
                 // donor's address to a third party, from the visitor's browser,

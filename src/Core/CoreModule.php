@@ -1246,6 +1246,7 @@ final class CoreModule implements FundKitModule
         // when something in front terminates the connection, and nothing else
         // would say so: the limits do not fail loudly, they refuse a donor.
         (new ProxyNotice())->register();
+
     }
 
     /** @since 1.0.0 */

@@ -101,10 +101,51 @@ export function SettingsGroup( { of, children } ) {
     }
 
     if ( groups.some( ( g ) => g.isLoading ) ) {
-        return <p>{ __( 'Loading…', 'fundraising-toolkit' ) }</p>;
+        return <PanelSkeleton />;
     }
 
     return children;
+}
+
+/**
+ * The panel's own shape while its settings arrive.
+ *
+ * A line of text sets nothing aside, so the screen jumped once the real card
+ * landed, and on a slow request an almost-empty page reads as a broken one
+ * rather than as work still happening. This holds the space the card is about
+ * to take.
+ *
+ * The shapes carry no meaning, so they are hidden from assistive technology and
+ * the status message is what it announces instead.
+ */
+function PanelSkeleton() {
+    return (
+        <>
+            <p className="screen-reader-text" role="status">
+                { __( 'Loading settings…', 'fundraising-toolkit' ) }
+            </p>
+            <div className="fundkit-card" aria-hidden="true">
+                <div className="fundkit-card__head">
+                    <div className="fundkit-card__head-left">
+                        <span className="fundkit-skeleton fundkit-skeleton--lg" />
+                        <span className="fundkit-skeleton" style={ { display: 'block', marginTop: 8, width: 220 } } />
+                    </div>
+                </div>
+                <div className="fundkit-card__body">
+                    { [ 0, 1, 2 ].map( ( i ) => (
+                        <div className="fundkit-form-row" key={ i }>
+                            <div className="fundkit-form-row__label">
+                                <span className="fundkit-skeleton" />
+                            </div>
+                            <div className="fundkit-form-row__field">
+                                <span className="fundkit-skeleton" style={ { width: '100%', height: 32 } } />
+                            </div>
+                        </div>
+                    ) ) }
+                </div>
+            </div>
+        </>
+    );
 }
 
 export default function Settings() {

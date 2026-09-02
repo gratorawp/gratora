@@ -38,9 +38,9 @@ function RetentionPreview( { years, inForce } ) {
 
     if ( ! data.years ) {
         return (
-            <Notice status="info" isDismissible={ false }>
+            <p className="fundkit-muted">
                 { __( 'No window is set, so nothing is erased automatically. Enter a number of years above.', 'fundraising-toolkit' ) }
-            </Notice>
+            </p>
         );
     }
 
@@ -107,9 +107,64 @@ function RetentionPreview( { years, inForce } ) {
         ) );
     }
 
+    // A notice for a count of donors about to be erased, which is the one
+    // answer somebody should be stopped by. Nobody due is the ordinary reading
+    // of the field above, and dressing it as an announcement gives a calm
+    // answer the weight of an alarming one.
+    if ( now > 0 || soon > 0 ) {
+        return (
+            <Notice status="warning" isDismissible={ false }>
+                { lines.join( ' ' ) }
+            </Notice>
+        );
+    }
+
+    return <p className="fundkit-muted">{ lines.join( ' ' ) }</p>;
+}
+
+/**
+ * What sits in front of the site, said in a sentence and fixed with a button.
+ *
+ * Behind a CDN or reverse proxy every visitor arrives as the same address, so
+ * limits meant for one visitor apply to everyone at once: donors are refused
+ * because of somebody else, and one caller can close the form for all of them.
+ * It fails quietly, by turning a donor away, so nothing surfaces it unless this
+ * does.
+ *
+ * The ranges are ours to know. Telling an org to go and find their proxy's CIDR
+ * blocks is telling them to leave it broken.
+ */
+function ProxyFix( { s } ) {
+    const detected = window.fundkit?.detectedProxy || null;
+    const current  = s.value( 'trusted_proxies', [] ) || [];
+
+    if ( ! detected || current.length ) {
+        return null;
+    }
+
+    const label = detected === 'cloudflare'
+        ? __( 'This site is behind Cloudflare.', 'fundraising-toolkit' )
+        : __( 'This site is behind a proxy or load balancer.', 'fundraising-toolkit' );
+
     return (
-        <Notice status={ now > 0 || soon > 0 ? 'warning' : 'info' } isDismissible={ false }>
-            { lines.join( ' ' ) }
+        <Notice status="warning" isDismissible={ false }>
+            <p>
+                <strong>{ label }</strong>{ ' ' }
+                { __( 'Every visitor is reaching the site as the same address, so spam limits are counting the whole site as one visitor. Donors can be turned away because of somebody else.', 'fundraising-toolkit' ) }
+            </p>
+            <p>
+                <button
+                    type="button"
+                    className="button button-primary"
+                    onClick={ () => s.setValue( 'trusted_proxies' )( [ detected ] ) }
+                >
+                    { __( 'Fix this', 'fundraising-toolkit' ) }
+                </button>
+                { ' ' }
+                <span className="fundkit-muted">
+                    { __( 'Then save. Nothing else to look up.', 'fundraising-toolkit' ) }
+                </span>
+            </p>
         </Notice>
     );
 }
@@ -208,16 +263,18 @@ export default function PrivacyPanel( { s } ) {
                     onChange={ s.setValue( 'anonymize_ips' ) }
                 />
 
+                <ProxyFix s={ s } />
+
                 <FormRow
-                    label={ __( 'Trusted proxy ranges', 'fundraising-toolkit' ) }
-                    help={ __( "One address or CIDR range per line. Leave empty unless a CDN, load balancer or reverse proxy sits in front of this site: spam limits count visitors by address, and behind a proxy every visitor arrives as the proxy, so the whole site shares one visitor's allowance. Only ranges listed here are believed when they say who a visitor really is.", 'fundraising-toolkit' ) }
+                    label={ __( 'What is in front of this site', 'fundraising-toolkit' ) }
+                    help={ __( 'Leave empty unless a CDN, load balancer or reverse proxy serves this site. Write cloudflare, or private_ranges for a proxy on your own network, or list addresses and CIDR ranges one per line. Spam limits count visitors by address, and behind a proxy every visitor arrives as the proxy, so the whole site would share one visitor\'s allowance.', 'fundraising-toolkit' ) }
                     wide
                 >
                     <textarea
                         className="fundkit-textarea"
-                        rows={ 4 }
+                        rows={ 3 }
                         spellCheck={ false }
-                        placeholder={ '173.245.48.0/20\n2400:cb00::/32\n10.0.0.0/8' }
+                        placeholder={ 'cloudflare' }
                         value={ ( s.value( 'trusted_proxies', [] ) || [] ).join( '\n' ) }
                         onChange={ ( e ) => s.setValue( 'trusted_proxies' )(
                             e.target.value.split( '\n' ).map( ( l ) => l.trim() ).filter( Boolean )
