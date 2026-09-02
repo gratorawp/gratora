@@ -35,8 +35,18 @@ final class AntiSpamGuard
     // The token is a coarse day bucket, not a per-render timestamp, so a form
     // served from a page cache still validates. Replay inside the window is
     // bounded by the IP/email rate limits.
+    //
+    // Thirty days is long for a scraped token, and shortening it is the
+    // obvious tightening. It is not taken here: a CDN serving a campaign page
+    // that has not been rebuilt for weeks is a real deployment, and a form
+    // whose token has expired refuses the donor with nothing they can do about
+    // it. Sites that know their own cache horizon set it through
+    // fundkit.spam.token_window_days.
     private const TOKEN_WINDOW_DAYS  = 30;
     private const MIN_AMOUNT_CENTS   = 100;
+
+    // Room for a test run and an automated suite, still a ceiling.
+    private const TEST_MODE_RELIEF   = 10;
 
     // A donor who backs out of one gateway and picks another is still making
     // one donation, so the attempts that follow spend the first attempt's own
@@ -51,11 +61,26 @@ final class AntiSpamGuard
     }
 
     /**
-     * Rate limits relax under the org-wide test-mode switch: test submissions
-     * move no real money, and automation bursts through the production caps.
+     * The cap in force, raised but never removed under the org-wide test-mode
+     * switch.
+     *
+     * Test submissions move no real money and automation bursts through the
+     * production caps, so the caps give way. They do not disappear: the same
+     * switch registers a gateway that confirms in the request, and a confirmed
+     * donation mails a rendered receipt to whatever address the caller typed.
+     * Removed, that is an unmetered mail cannon aimed at strangers from the
+     * org's own sending domain, and a site left in test mode by accident is
+     * the ordinary way to arrive there. Sending reputation is the one thing
+     * the test-data purge cannot undo.
      *
      * @since 1.0.0
      */
+    private function relaxed(int $max): int
+    {
+        return $this->inGlobalTestMode() ? $max * self::TEST_MODE_RELIEF : $max;
+    }
+
+    /** @since 1.0.0 */
     private function inGlobalTestMode(): bool
     {
         if ($this->testMode !== null) {
@@ -239,7 +264,8 @@ final class AntiSpamGuard
 
         // A future bucket is a clock game; a past one inside the window is a
         // cached page.
-        if ($bucket > $current || $bucket < $current - self::TOKEN_WINDOW_DAYS) {
+        $days = max(1, (int) apply_filters('fundkit.spam.token_window_days', self::TOKEN_WINDOW_DAYS));
+        if ($bucket > $current || $bucket < $current - $days) {
             return $generic;
         }
 
@@ -282,6 +308,20 @@ final class AntiSpamGuard
         return $ip;
     }
 
+    /**
+     * A counter base naming whoever is calling, under the caller's namespace.
+     *
+     * Exposed so a surface that has to count something other than "this
+     * request" - a failure, say - keys it the same way, rather than each one
+     * deriving an address and getting IPv6 wrong on its own.
+     *
+     * @since 1.0.0
+     */
+    public function subjectKey(string $namespace): string
+    {
+        return $namespace . '_' . hash('sha256', $this->quotaSubject());
+    }
+
     /** @since 1.0.0 */
     public function consumeIpQuota(): ?WP_Error
     {
@@ -301,9 +341,7 @@ final class AntiSpamGuard
      */
     public function consumeIpBudget(string $namespace, int $max, int $window): ?WP_Error
     {
-        if ($this->inGlobalTestMode()) return null;
-
-        if ($this->hit($namespace . '_' . hash('sha256', $this->quotaSubject()), $window) <= $max) {
+        if ($this->hit($this->subjectKey($namespace), $window) <= $this->relaxed($max)) {
             return null;
         }
 
@@ -318,7 +356,6 @@ final class AntiSpamGuard
     public function consumeEmailQuota(string $email): ?WP_Error
     {
         if ($email === '') return null;
-        if ($this->inGlobalTestMode()) return null;
 
         // The mailbox, not the address: one inbox answers to unlimited
         // addresses, because every plus tag is a distinct address and on some
@@ -329,7 +366,7 @@ final class AntiSpamGuard
         // people's giving history into one record.
         $hash = $this->hasher->emailHash($this->hasher->rateLimitMailbox($email));
         $key  = 'fundkit_donate_email_' . substr($hash, 0, 32);
-        if ($this->hit($key, self::EMAIL_WINDOW) <= self::EMAIL_MAX) {
+        if ($this->hit($key, self::EMAIL_WINDOW) <= $this->relaxed(self::EMAIL_MAX)) {
             return null;
         }
 
@@ -544,6 +581,26 @@ final class AntiSpamGuard
         // caller reads a low number as room to spare. Refusing is the only
         // answer that does not turn a database in trouble into an open door.
         return $count === null ? PHP_INT_MAX : (int) $count;
+    }
+
+    /**
+     * Read a counter without spending it.
+     *
+     * hit() answers what this attempt has now used, which is the right shape
+     * when the attempt itself is what counts. A limiter that counts only
+     * failures has to ask before it knows whether this attempt is one, and the
+     * asking must not itself become an attempt.
+     *
+     * Same key hit() writes, so the two see one counter.
+     *
+     * @since 1.0.0
+     */
+    public function peek(string $base, int $window, ?int $bucket = null): int
+    {
+        $key   = $base . '_' . ($bucket ?? (int) floor(time() / $window));
+        $value = get_option('_transient_' . $key, null);
+
+        return $value === null || $value === false ? 0 : (int) $value;
     }
 
     /** @since 1.0.0 */

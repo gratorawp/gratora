@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FundKit\Donors;
 
+use FundKit\Donations\AntiSpamGuard;
+use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Time\Clock;
 
 /**
@@ -13,7 +15,10 @@ use FundKit\Foundation\Time\Clock;
  */
 final class MagicLinkService
 {
-    /** @since 1.0.0 */
+    /** Guesses one address may spend on one purpose before it is shut out. */
+    private const FAIL_MAX    = 20;
+    private const FAIL_WINDOW = 900;
+
     public function __construct(private Clock $clock)
     {
     }
@@ -150,14 +155,34 @@ final class MagicLinkService
      */
     private function isRateLimited(string $purpose): bool
     {
-        return (int) get_transient($this->rateKey($purpose)) >= 20;
+        return $this->guard()->peek($this->rateKey($purpose), self::FAIL_WINDOW) >= self::FAIL_MAX;
     }
 
-    /** @since 1.0.0 */
+    /**
+     * Counted through AntiSpamGuard, which exists because this was the shape
+     * that does not work. Read-then-write let two guesses read the same value
+     * and write the same increment back, so the ceiling was walked past as
+     * fast as connections could be opened. And re-setting a transient pushed
+     * its expiry out on every guess, so a caller who kept trying held the
+     * lockout open indefinitely: the key is per address, so the person that
+     * strands is a donor sharing an office or a campus with them.
+     *
+     * @since 1.0.0
+     */
     private function recordFailure(string $purpose): void
     {
-        $key = $this->rateKey($purpose);
-        set_transient($key, ((int) get_transient($key)) + 1, 900);
+        $this->guard()->hit($this->rateKey($purpose), self::FAIL_WINDOW);
+    }
+
+    /**
+     * Resolved on use rather than injected: this service is bound well before
+     * the guard is, and it needs it only when a token has already missed.
+     *
+     * @since 1.0.0
+     */
+    private function guard(): AntiSpamGuard
+    {
+        return Plugin::instance()->container->get(AntiSpamGuard::class);
     }
 
     /** @since 1.0.0 */

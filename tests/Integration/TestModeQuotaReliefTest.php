@@ -1,0 +1,94 @@
+<?php
+
+declare(strict_types=1);
+
+namespace FundKit\Tests\Integration;
+
+use FundKit\Donations\AntiSpamGuard;
+use FundKit\Foundation\Plugin;
+use WP_Error;
+
+/**
+ * What the org-wide test-mode switch does to the rate limits.
+ *
+ * It used to remove them. The same switch registers a gateway that confirms in
+ * the request, and a confirmed donation mails a rendered receipt to whatever
+ * address the caller typed, so removing the caps made the public endpoint an
+ * unmetered mail cannon aimed at strangers from the org's own sending domain.
+ * A site left in test mode by accident is the ordinary way to arrive there, and
+ * sending reputation is the one thing the test-data purge cannot undo.
+ *
+ * They give way instead. Automation still bursts through the production caps;
+ * it no longer runs without one.
+ */
+final class TestModeQuotaReliefTest extends IntegrationTestCase
+{
+    protected function tearDown(): void
+    {
+        delete_option('fundkit_gateway_config');
+        parent::tearDown();
+    }
+
+    private function guard(): AntiSpamGuard
+    {
+        // Rebuilt per test: TestMode is injected, and it reads the switch.
+        return new AntiSpamGuard(
+            Plugin::instance()->container->get(\FundKit\Foundation\Identity\IdentityHasher::class),
+            Plugin::instance()->container->get(\FundKit\Gateways\TestMode::class)
+        );
+    }
+
+    private function testMode(bool $on): void
+    {
+        update_option('fundkit_gateway_config', ['test_mode' => $on]);
+    }
+
+    /** Spend the per-IP budget until refused, and answer how many got through. */
+    private function drain(AntiSpamGuard $guard, string $namespace, int $max): int
+    {
+        $allowed = 0;
+        for ($i = 0; $i < ($max * 20) + 5; $i++) {
+            if ($guard->consumeIpBudget($namespace, $max, 900) instanceof WP_Error) {
+                return $allowed;
+            }
+            $allowed++;
+        }
+
+        return $allowed;
+    }
+
+    public function test_production_caps_hold_exactly(): void
+    {
+        $this->testMode(false);
+
+        $this->assertSame(5, $this->drain($this->guard(), 'fundkit_relief_' . uniqid(), 5));
+    }
+
+    public function test_test_mode_raises_the_cap_without_removing_it(): void
+    {
+        $this->testMode(true);
+
+        $allowed = $this->drain($this->guard(), 'fundkit_relief_' . uniqid(), 5);
+
+        $this->assertGreaterThan(5, $allowed, 'automation must not be held to the production cap');
+        $this->assertSame(50, $allowed, 'but there is still a ceiling');
+    }
+
+    public function test_the_email_quota_also_keeps_a_ceiling_in_test_mode(): void
+    {
+        $this->testMode(true);
+        $guard = $this->guard();
+        $email = 'relief-' . uniqid() . '@example.test';
+
+        $allowed = 0;
+        for ($i = 0; $i < 100; $i++) {
+            if ($guard->consumeEmailQuota($email) instanceof WP_Error) {
+                break;
+            }
+            $allowed++;
+        }
+
+        $this->assertGreaterThan(3, $allowed);
+        $this->assertLessThan(100, $allowed, 'an unmetered receipt-mail path is what this prevents');
+    }
+}

@@ -160,6 +160,54 @@ final class DonationQuotaSubjectTest extends IntegrationTestCase
         $this->assertSame('site_captcha_failed', $refusal->get_error_code());
     }
 
+    /**
+     * Shortening the window is the obvious tightening, and the default does not
+     * take it: a CDN serving a campaign page weeks old is a real deployment, and
+     * an expired token refuses a donor who can do nothing about it. A site that
+     * knows its own cache horizon decides instead.
+     */
+    public function test_a_site_can_shorten_the_token_window(): void
+    {
+        $guard = $this->guard();
+        $day   = (int) floor(time() / DAY_IN_SECONDS);
+        $aged  = $this->tokenForDay($guard, $day - 20, 0);
+
+        $this->assertNull($guard->verifyFormToken($aged, 0), 'the shipped window keeps a cached form working');
+
+        add_filter('fundkit.spam.token_window_days', static fn (): int => 7);
+        try {
+            $this->assertNotNull($guard->verifyFormToken($aged, 0), 'and a site under attack can cut it');
+        } finally {
+            remove_all_filters('fundkit.spam.token_window_days');
+        }
+    }
+
+    public function test_a_site_can_lengthen_it_for_a_longer_cache(): void
+    {
+        $guard = $this->guard();
+        $day   = (int) floor(time() / DAY_IN_SECONDS);
+        $stale = $this->tokenForDay($guard, $day - 40, 0);
+
+        $this->assertNotNull($guard->verifyFormToken($stale, 0));
+
+        add_filter('fundkit.spam.token_window_days', static fn (): int => 60);
+        try {
+            $this->assertNull($guard->verifyFormToken($stale, 0));
+        } finally {
+            remove_all_filters('fundkit.spam.token_window_days');
+        }
+    }
+
+    /** A token as the guard would have minted it on a given day bucket. */
+    private function tokenForDay(AntiSpamGuard $guard, int $bucket, int $formId): string
+    {
+        $secret = (new \ReflectionMethod($guard, 'secret'));
+        $secret->setAccessible(true);
+        $sig = hash_hmac('sha256', $formId . '|' . $bucket, $secret->invoke($guard));
+
+        return $bucket . '.' . $sig;
+    }
+
     /** A filter that returns junk must not be read as a refusal, or as a pass it cannot express. */
     public function test_pre_check_ignores_a_non_error_return(): void
     {

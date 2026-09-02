@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Rest;
 
 use FundKit\Analytics\ErrorLog;
+use FundKit\Donations\AntiSpamGuard;
 use FundKit\Analytics\Event;
 use FundKit\Analytics\EventRecorder;
 use FundKit\Gateways\GatewayManager;
@@ -25,7 +26,29 @@ final class WebhookController
 {
     private const NAMESPACE = 'fundkit/v1';
 
+    /**
+     * Signature failures one address may spend on one gateway before this
+     * route stops doing the work of refusing it.
+     *
+     * ONLY failures are counted, which is what makes this safe: a gateway
+     * whose signatures verify never accumulates one, so a real event is never
+     * turned away. Dropping a payment_intent.succeeded would leave money that
+     * moved unrecorded, and no rate limit is worth that.
+     *
+     * It is worth counting because refusing is not free. PayPal verifies by
+     * calling PayPal, and tries live then test, so an unauthenticated POST
+     * carrying nothing but junk costs this site up to two blocking outbound
+     * requests before anything has been authenticated at all.
+     *
+     * A site with the wrong secret configured trips this, and that is the
+     * right outcome: those events were already being rejected, and 429 tells
+     * the gateway to back off and redeliver rather than to keep hammering.
+     */
+    private const FAIL_MAX    = 10;
+    private const FAIL_WINDOW = 900;
+
     /** One recorded refusal per gateway per window. */
+    private const FAIL_KEY          = 'fundkit_wh_fail_';
     private const REJECT_NOTICE_KEY = 'fundkit_webhook_rejected_';
     private const REJECT_NOTICE_TTL = 15 * MINUTE_IN_SECONDS;
 
@@ -51,6 +74,7 @@ final class WebhookController
     public function __construct(
         private GatewayManager $gateways,
         private EventRecorder $events,
+        private AntiSpamGuard $spam,
     ) {
     }
 
@@ -78,6 +102,16 @@ final class WebhookController
             return new WP_Error('fundkit_unknown_gateway', sprintf(__('Unknown gateway: %s', 'fundraising-toolkit'), $gatewayId), ['status' => 404]);
         }
 
+        // Asked before the handler, because the handler is the expensive part.
+        $failKey = $this->spam->subjectKey(self::FAIL_KEY . $gatewayId);
+        if ($this->spam->peek($failKey, self::FAIL_WINDOW) >= self::FAIL_MAX) {
+            return new WP_Error(
+                'fundkit_webhook_rejected',
+                __('Too many rejected deliveries. Please try again shortly.', 'fundraising-toolkit'),
+                ['status' => 429]
+            );
+        }
+
         try {
             $outcome = $gateway->handleWebhook($request);
         } catch (\Throwable $e) {
@@ -90,6 +124,12 @@ final class WebhookController
                 error:        'Handler exception: ' . $e->getMessage(),
                 http_status:  500,
             );
+        }
+
+        // Counted after the fact and only for a refusal, so a verifying
+        // gateway never spends one.
+        if (! $outcome->signature_ok) {
+            $this->spam->hit($failKey, self::FAIL_WINDOW);
         }
 
         $this->logDelivery($gatewayId, $outcome);

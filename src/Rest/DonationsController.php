@@ -318,6 +318,16 @@ final class DonationsController
             extra:              $extra,
             custom:             $custom,
             retry:              $retry,
+            // createPending commits before any gateway is contacted, so what
+            // reaches here is a form submission, not money. Someone exercised
+            // their right to erasure, and an unauthenticated stranger typing
+            // their address is not them asking to come back: the row would be
+            // un-redacted and their name, company, phone and address refilled
+            // from the caller's own payload, by a request that never pays.
+            //
+            // The money is recorded against the erased shell instead, which is
+            // the choice the admin path already makes for the same reason.
+            reactivate_redacted_donor: false,
         );
 
         try {

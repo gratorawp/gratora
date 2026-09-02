@@ -222,6 +222,7 @@ use FundKit\Settings\ReadinessService;
 use FundKit\Settings\SettingsService;
 use FundKit\Analytics\EventRetention;
 use FundKit\Donors\DonorRetention;
+use FundKit\Foundation\Maintenance\AbandonedPendingReaper;
 use FundKit\Foundation\Maintenance\TransientGc;
 use FundKit\Vendor\Queryable\QueryException;
 
@@ -367,6 +368,7 @@ final class CoreModule implements FundKitModule
         (new DonorAggregateSyncer())->register();
         // Prunes our own expired rate-limit transients independently of WP core's wp_scheduled_delete.
         (new TransientGc($c->get(AsyncDispatcher::class)))->register();
+        (new AbandonedPendingReaper($c->get(AsyncDispatcher::class), $c->get(Clock::class)))->register();
 
         // Purge expired magic-link tokens daily to prevent unbounded table growth.
         $async = $c->get(AsyncDispatcher::class);
@@ -762,7 +764,8 @@ final class CoreModule implements FundKitModule
 
         $c->bind(WebhookController::class, fn (Container $c) => new WebhookController(
             $c->get(GatewayManager::class),
-            $c->get(EventRecorder::class)
+            $c->get(EventRecorder::class),
+            $c->get(AntiSpamGuard::class)
         ));
 
         $c->bind(ReceiptsController::class, fn (Container $c) => new ReceiptsController(
