@@ -1035,7 +1035,7 @@ function TopDonors( { rows, currency } ) {
     );
 }
 
-function GoalProgressCard( { campaign } ) {
+export function GoalProgressCard( { campaign } ) {
     const goalType = campaign.goal_type ?? 'amount';
     const target = goalType === 'amount'
         ? ( campaign.goal_cents ?? 0 )
@@ -1048,7 +1048,13 @@ function GoalProgressCard( { campaign } ) {
         : goalType === 'donations'
             ? ( campaign.donations_count ?? 0 )
             : ( campaign.donors_count ?? 0 );
-    const pct = target > 0 ? Math.min( 100, Math.round( ( current / target ) * 100 ) ) : null;
+    // A campaign with no target has no progress to report, and a card reading
+    // "-" over "No goal set" was taking a fifth of the row to say so.
+    if ( ! ( target > 0 ) ) {
+        return null;
+    }
+
+    const pct = Math.min( 100, Math.round( ( current / target ) * 100 ) );
 
     // Raised totals are summed in the org base currency, so they format with
     // the org default and take no per-campaign currency argument.
@@ -1069,18 +1075,12 @@ function GoalProgressCard( { campaign } ) {
             </div>
             <div className="fundkit-metric__label">{ __( 'Goal progress', 'fundkit-fundraising-campaigns' ) }</div>
             <div className="fundkit-metric__row">
-                <div className="fundkit-metric__value">{ pct === null ? '-' : `${ pct }%` }</div>
+                <div className="fundkit-metric__value">{ `${ pct }%` }</div>
             </div>
-            <div className="fundkit-metric__sub">
-                { target > 0
-                    ? `${ fmt( current ) } / ${ fmt( target ) }`
-                    : __( 'No goal set', 'fundkit-fundraising-campaigns' ) }
+            <div className="fundkit-metric__sub">{ `${ fmt( current ) } / ${ fmt( target ) }` }</div>
+            <div className="fundkit-metric__bar" aria-hidden="true">
+                <div className="fundkit-metric__bar-fill" style={ { width: `${ pct }%` } } />
             </div>
-            { target > 0 && (
-                <div className="fundkit-metric__bar" aria-hidden="true">
-                    <div className="fundkit-metric__bar-fill" style={ { width: `${ pct ?? 0 }%` } } />
-                </div>
-            ) }
         </div>
     );
 }
