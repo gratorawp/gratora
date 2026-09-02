@@ -685,7 +685,7 @@ export default function List() {
     );
 }
 
-function donationKpis( stats ) {
+export function donationKpis( stats ) {
     // Per card, not once above the strip: a single figure gets read out, quoted
     // and screenshotted on its own, and it has to carry its own disclaimer.
     const includesTest = !! stats?.includes_test;
@@ -705,12 +705,12 @@ function donationKpis( stats ) {
     return [
         {
             label: __( 'Total donations', 'fundraising-toolkit' ),
-            value: stats ? stats.total_count.toLocaleString() : '-',
+            value: stats ? String( stats.total_count ) : '-',
             sub:   testSub,
         },
         {
             label: __( 'Paid', 'fundraising-toolkit' ),
-            value: stats ? stats.paid_count.toLocaleString() : '-',
+            value: stats ? String( stats.paid_count ) : '-',
             sub:   testSub,
         },
         {
@@ -722,7 +722,7 @@ function donationKpis( stats ) {
         },
         {
             label: __( 'Unique donors', 'fundraising-toolkit' ),
-            value: stats ? stats.donors_count.toLocaleString() : '-',
+            value: stats ? String( stats.donors_count ) : '-',
             sub:   testSub,
         },
     ];

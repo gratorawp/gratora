@@ -433,15 +433,15 @@ export default function List() {
     );
 }
 
-function campaignKpis( stats ) {
+export function campaignKpis( stats ) {
     return [
         {
             label: __( 'Total', 'fundraising-toolkit' ),
-            value: stats ? stats.total_count.toLocaleString() : '-',
+            value: stats ? String( stats.total_count ) : '-',
         },
         {
             label: __( 'Active', 'fundraising-toolkit' ),
-            value: stats ? stats.active_count.toLocaleString() : '-',
+            value: stats ? String( stats.active_count ) : '-',
         },
         {
             label: __( 'Raised', 'fundraising-toolkit' ),
@@ -454,7 +454,7 @@ function campaignKpis( stats ) {
         },
         {
             label: __( 'Donations', 'fundraising-toolkit' ),
-            value: stats ? stats.donations_count.toLocaleString() : '-',
+            value: stats ? String( stats.donations_count ) : '-',
         },
     ];
 }

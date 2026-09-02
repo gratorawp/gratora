@@ -33,15 +33,15 @@ function initials( name ) {
     return parts.map( ( p ) => p[ 0 ] || '' ).join( '' ).toUpperCase() || '?';
 }
 
-function donorKpis( stats ) {
+export function donorKpis( stats ) {
     return [
         {
             label: __( 'Total donors', 'fundraising-toolkit' ),
-            value: stats ? stats.total_count.toLocaleString() : '-',
+            value: stats ? String( stats.total_count ) : '-',
         },
         {
             label: __( 'With donations', 'fundraising-toolkit' ),
-            value: stats ? stats.with_donations.toLocaleString() : '-',
+            value: stats ? String( stats.with_donations ) : '-',
         },
         {
             label: __( 'Lifetime given', 'fundraising-toolkit' ),
