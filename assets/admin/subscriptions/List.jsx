@@ -671,7 +671,12 @@ export default function List() {
             elements: gateways,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
-                <span style={ { textTransform: 'capitalize' } }>{ item.gateway }</span>
+                <div>
+                    <div style={ { textTransform: 'capitalize' } }>{ item.gateway }</div>
+                    { item.gateway_subscription_id
+                        ? <code className="fundkit-row__sub fundkit-row__sub--mono">{ item.gateway_subscription_id }</code>
+                        : <span className="fundkit-row__sub">{ __( 'Not linked', 'fundraising-toolkit' ) }</span> }
+                </div>
             ),
         },
         {
