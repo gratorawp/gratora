@@ -25,9 +25,10 @@ final class ReferenceGenerator
 
     public const DEFAULT_SETTINGS = [
         'prefixes' => [
-            'donation' => 'DON',
-            'receipt'  => 'REC',
-            'refund'   => 'REF',
+            'donation'     => 'DON',
+            'receipt'      => 'REC',
+            'refund'       => 'REF',
+            'subscription' => 'SUB',
         ],
         'padding'      => 5,
         'include_year' => true,
@@ -164,9 +165,10 @@ final class ReferenceGenerator
     public static function assertTokens(array $input): void
     {
         $labels = [
-            'donation' => __('Donation prefix', 'fundraising-toolkit'),
-            'receipt'  => __('Receipt prefix', 'fundraising-toolkit'),
-            'refund'   => __('Refund prefix', 'fundraising-toolkit'),
+            'donation'     => __('Donation prefix', 'fundraising-toolkit'),
+            'receipt'      => __('Receipt prefix', 'fundraising-toolkit'),
+            'refund'       => __('Refund prefix', 'fundraising-toolkit'),
+            'subscription' => __('Subscription prefix', 'fundraising-toolkit'),
         ];
 
         if (array_key_exists('separator', $input) && ! self::isToken((string) $input['separator'])) {

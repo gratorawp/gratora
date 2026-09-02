@@ -6,6 +6,8 @@ namespace FundKit\Recurring;
 
 defined('ABSPATH') || exit;
 
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\References\ReferenceGenerator;
 use FundKit\Vendor\Queryable\Model;
 use FundKit\Vendor\Queryable\Schema\Table;
 
@@ -20,6 +22,7 @@ final class RecurringPlan extends Model
     protected string $version = '1.0.1';
 
     public int $id;
+    public string $reference = '';
     public int $donor_id;
     public ?int $form_id = null;
     public ?int $campaign_id = null;
@@ -67,15 +70,38 @@ final class RecurringPlan extends Model
     public string $created_at;
     public string $updated_at;
 
-    /** Derived, like a donor's: every existing plan has one without a migration. */
+    /**
+     * The next number in the subscription series.
+     *
+     * Resolved from the container rather than injected: plans are created in
+     * four places, none of which holds the generator, and threading it through
+     * all of them costs more than it buys.
+     *
+     * @since 1.0.0
+     */
+    public static function mintReference(bool $isTest = false): string
+    {
+        return Plugin::instance()->container
+            ->get(ReferenceGenerator::class)
+            ->next($isTest ? 'test_subscription' : 'subscription');
+    }
+
+    /**
+     * The stored number, or one derived from the id.
+     *
+     * The fallback is for a row written before this column existed and for any
+     * creation path that forgets to mint: a plan without a number somewhere on
+     * screen is worse than one numbered differently.
+     */
     public function reference(): string
     {
-        return sprintf('SUB-%04d', (int) $this->id);
+        return $this->reference !== '' ? $this->reference : sprintf('SUB-%04d', (int) $this->id);
     }
 }
 
 RecurringPlan::schema(function (Table $t): void {
     $t->id();
+    $t->string('reference', 32)->default('')->index();
     $t->bigInteger('donor_id')->unsigned();
     $t->bigInteger('form_id')->unsigned()->nullable();
     $t->bigInteger('campaign_id')->unsigned()->nullable();
