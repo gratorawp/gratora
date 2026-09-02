@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Fundraising Toolkit
+ * Plugin Name: Fundraising Toolkit - Donation & Fundraising Platform
  * Plugin URI: https://fundkit.net
  * Description: Donation & Fundraising Platform for WordPress
  * Version: 1.0.0
