@@ -78,6 +78,13 @@ function initialFilters() {
 const TEST_PREF = 'fundkit.donations.includeTest';
 
 const readTestPref = () => {
+    // A link that asked for them outranks the standing preference: the
+    // dashboard's "failed test donations" item is the route to rows this
+    // screen hides by default, and it is now the only one.
+    if ( new URLSearchParams( window.location.search ).get( 'include_test' ) === '1' ) {
+        return true;
+    }
+
     try {
         return window.localStorage?.getItem( TEST_PREF ) === '1';
     } catch ( e ) {
@@ -95,11 +102,10 @@ export default function List() {
         sort:    { field: 'created_at', direction: 'desc' },
         filters: initialFilters(),
         search:  '',
-        // is_test stays out of the columns. A rehearsal donation that looks
-        // exactly like a real one is worse than not showing it at all, so it is
-        // badged on the reference instead: visible on the row it belongs to,
-        // without a column that reads the same on every other row. Still in the
-        // picker, and still a filter.
+        // Test and replaced attempts are badged on the reference rather than
+        // carrying columns: on a list that hides them the column reads the same
+        // on every row. The test scope toggle above the table is how they are
+        // asked for.
         // 'form' is defined but not shown: most orgs run one form per campaign,
         // so the column repeats the campaign next to it. Still in the picker.
         fields:  [ 'reference', 'status', 'donor', 'amount', 'frequency', 'gateway', 'campaign', 'created_at' ],
@@ -120,13 +126,7 @@ export default function List() {
         try {
             window.localStorage?.setItem( TEST_PREF, on ? '1' : '0' );
         } catch ( e ) { /* private mode: the toggle still works for this visit */ }
-        setView( ( v ) => ( {
-            ...v,
-            page: 1,
-            // The two exclusive filters and this scope answer different
-            // questions; leaving "Test only" on under it would be a contradiction.
-            filters: ( v.filters || [] ).filter( ( f ) => f.field !== 'is_test' ),
-        } ) );
+        setView( ( v ) => ( { ...v, page: 1 } ) );
     };
 
     const [ data, setData ]       = useState( [] );
@@ -193,8 +193,6 @@ export default function List() {
     const gatewayFilter  = filterValue( 'gateway' );
     const frequencyFilter = filterValue( 'frequency' );
     const campaignFilter = filterValue( 'campaign' );
-    const testFilter     = filterValue( 'is_test' );
-    const supersededFilter = filterValue( 'superseded' );
 
     const apiParams = useMemo( () => ( {
         page:         view.page,
@@ -206,12 +204,10 @@ export default function List() {
         gateway:      gatewayFilter || undefined,
         frequency:    frequencyFilter || undefined,
         campaign_id:  campaignFilter || undefined,
-        is_test:      testFilter === 'yes' ? true : ( testFilter === 'no' ? false : undefined ),
         include_test: includeTest || undefined,
-        superseded:   supersededFilter === 'yes' ? true : ( supersededFilter === 'no' ? false : undefined ),
         created_from: createdFrom || undefined,
         created_to:   createdTo   || undefined,
-    } ), [ view, statusFilter, gatewayFilter, frequencyFilter, campaignFilter, testFilter, supersededFilter, includeTest, createdFrom, createdTo ] );
+    } ), [ view, statusFilter, gatewayFilter, frequencyFilter, campaignFilter, includeTest, createdFrom, createdTo ] );
 
     useEffect( () => {
         let aborted = false;
@@ -379,36 +375,6 @@ export default function List() {
                     </div>
                 );
             },
-        },
-        {
-            id:       'is_test',
-            label:    __( 'Test mode', 'fundkit-fundraising-campaigns' ),
-            elements: [
-                { value: 'yes', label: __( 'Test only', 'fundkit-fundraising-campaigns' ) },
-                { value: 'no',  label: __( 'Live only', 'fundkit-fundraising-campaigns' ) },
-            ],
-            filterBy:    { operators: [ 'is' ] },
-            getValue:    ( { item } ) => ( item.is_test ? 'yes' : 'no' ),
-            render:      ( { item } ) => item.is_test
-                ? <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundkit-fundraising-campaigns' ) }</span>
-                : <span className="fundkit-row__sub">-</span>,
-        },
-        {
-            id:    'superseded',
-            label: __( 'Replaced attempt', 'fundkit-fundraising-campaigns' ),
-            // Out of the columns and out of the default view, for the reason
-            // the reference badge exists: on a list that hides them the column
-            // reads the same on every row. It is here so an admin who needs one
-            // of these can ask for it by name.
-            elements: [
-                { value: 'yes', label: __( 'Replaced only', 'fundkit-fundraising-campaigns' ) },
-                { value: 'no',  label: __( 'Live attempts only', 'fundkit-fundraising-campaigns' ) },
-            ],
-            filterBy: { operators: [ 'is' ] },
-            getValue: ( { item } ) => ( item.superseded ? 'yes' : 'no' ),
-            render:   ( { item } ) => item.superseded
-                ? <span className="fundkit-pill fundkit-pill--gray">{ __( 'Replaced', 'fundkit-fundraising-campaigns' ) }</span>
-                : <span className="fundkit-row__sub">-</span>,
         },
         {
             id:     'form',

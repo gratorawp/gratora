@@ -37,6 +37,13 @@ final class UserPrefsController
     private const PER_PAGE_MIN = 1;
     private const PER_PAGE_MAX = 100;
 
+    /**
+     * The per-scope cap bounds one view; this bounds the row. There is one
+     * scope per list screen, so a request inventing them past this is not a
+     * client of ours and has no claim on the space.
+     */
+    private const MAX_SCOPES = 40;
+
     /** @since 1.0.0 */
     public function registerRoutes(): void
     {
@@ -183,6 +190,9 @@ final class UserPrefsController
         if ($clean === []) {
             unset($all[$key]);
         } else {
+            if (! isset($all[$key]) && count($all) >= self::MAX_SCOPES) {
+                return new WP_REST_Response((object) [], 200);
+            }
             $all[$key] = $clean;
         }
 
@@ -199,9 +209,11 @@ final class UserPrefsController
      * record, not how they like to look at the list, and coming back to page 7 of
      * a list that has moved on since is disorienting.
      *
-     * `known` is the set of columns that existed when the view was saved. It is
-     * what lets a column added in a later release appear for someone who has
-     * saved a view, without un-hiding the columns they chose to hide.
+     * `order` is every column that existed when the view was saved, in the
+     * arrangement the reader had them in, whether or not each one was showing.
+     * Holding the hidden ones is what lets a column come back to its own place
+     * instead of the end, and knowing which columns were on offer is what lets
+     * one added in a later release appear without un-hiding the rest.
      *
      * @param array<string, mixed> $body
      * @return array<string, mixed>
@@ -212,7 +224,7 @@ final class UserPrefsController
     {
         $view = [];
 
-        foreach (['fields', 'known'] as $list) {
+        foreach (['fields', 'order'] as $list) {
             if (isset($body[$list]) && is_array($body[$list])) {
                 $view[$list] = array_values(array_filter($body[$list], 'is_string'));
             }
@@ -227,8 +239,10 @@ final class UserPrefsController
         }
 
         if (isset($body['sort']) && is_array($body['sort'])) {
-            $field     = (string) ($body['sort']['field'] ?? '');
-            $direction = strtolower((string) ($body['sort']['direction'] ?? ''));
+            $rawField     = $body['sort']['field'] ?? '';
+            $rawDirection = $body['sort']['direction'] ?? '';
+            $field     = is_scalar($rawField) ? (string) $rawField : '';
+            $direction = is_scalar($rawDirection) ? strtolower((string) $rawDirection) : '';
             if ($field !== '') {
                 $view['sort'] = [
                     'field'     => sanitize_key($field),
@@ -271,9 +285,14 @@ final class UserPrefsController
                 continue;
             }
 
+            $operator = $filter['operator'] ?? 'is';
+            if (! is_scalar($filter['field']) || ! is_scalar($operator)) {
+                continue;
+            }
+
             $clean[] = [
                 'field'    => sanitize_key((string) $filter['field']),
-                'operator' => sanitize_key((string) ($filter['operator'] ?? 'is')),
+                'operator' => sanitize_key((string) $operator),
                 'value'    => $value,
             ];
         }

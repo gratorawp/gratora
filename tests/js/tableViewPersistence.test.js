@@ -57,6 +57,13 @@ const DEFAULTS = {
 
 const flush = settle;
 
+// A state change re-renders on a microtask; nothing here waits on an effect.
+const act = async ( fn ) => {
+	await fn();
+	await Promise.resolve();
+	await Promise.resolve();
+};
+
 function load( saved, defaults = DEFAULTS, known = KNOWN ) {
 	apiFetch.mockReset();
 	apiFetch.mockResolvedValue( saved );
@@ -73,14 +80,14 @@ describe( 'a saved list view', () => {
 	} );
 
 	it( 'restores the columns the user left', async () => {
-		const { result } = load( { fields: [ 'reference', 'amount' ], known: KNOWN } );
+		const { result } = load( { fields: [ 'reference', 'amount' ], order: KNOWN } );
 		await flush();
 
 		expect( result.current[ 0 ].fields ).toEqual( [ 'reference', 'amount' ] );
 	} );
 
 	it( 'keeps a hidden column hidden', async () => {
-		const { result } = load( { fields: [ 'reference', 'amount' ], known: KNOWN } );
+		const { result } = load( { fields: [ 'reference', 'amount' ], order: KNOWN } );
 		await flush();
 
 		expect( result.current[ 0 ].fields ).not.toContain( 'gateway' );
@@ -92,7 +99,7 @@ describe( 'a saved list view', () => {
 	 */
 	it( 'shows a column added since the view was saved', async () => {
 		const { result } = load(
-			{ fields: [ 'reference', 'amount' ], known: [ 'reference', 'status', 'amount' ] },
+			{ fields: [ 'reference', 'amount' ], order: [ 'reference', 'status', 'amount' ] },
 			DEFAULTS,
 			[ ...KNOWN, 'campaign' ]
 		);
@@ -102,7 +109,7 @@ describe( 'a saved list view', () => {
 	} );
 
 	it( 'drops a column the screen no longer has', async () => {
-		const { result } = load( { fields: [ 'reference', 'retired_column' ], known: [ ...KNOWN, 'retired_column' ] } );
+		const { result } = load( { fields: [ 'reference', 'retired_column' ], order: [ ...KNOWN, 'retired_column' ] } );
 		await flush();
 
 		expect( result.current[ 0 ].fields ).toEqual( [ 'reference' ] );
@@ -185,7 +192,7 @@ describe( 'saving a list view', () => {
 		expect( apiFetch.mock.calls.filter( ( [ o ] ) => o.method === 'PUT' ) ).toHaveLength( 0 );
 	} );
 
-	it( 'records the columns the screen offered, so a later release can tell what is new', async () => {
+	it( 'records the whole arrangement, so a later release can tell what is new', async () => {
 		const { result } = load( {} );
 		await flush();
 
@@ -197,6 +204,159 @@ describe( 'saving a list view', () => {
 
 		const put = apiFetch.mock.calls.map( ( [ o ] ) => o ).find( ( o ) => o.method === 'PUT' );
 		expect( put.data.fields ).toEqual( [ 'reference' ] );
-		expect( put.data.known ).toEqual( KNOWN );
+		expect( put.data.order ).toEqual( KNOWN );
+	} );
+} );
+
+describe( 'column position', () => {
+	const hide = async ( result, id ) => {
+		const v = result.current[ 0 ];
+		await act( () => result.current[ 1 ]( { ...v, fields: v.fields.filter( ( f ) => f !== id ) } ) );
+	};
+
+	// dataviews appends a re-shown column to the end of view.fields; it keeps no
+	// record of where the column used to be.
+	const show = async ( result, id ) => {
+		const v = result.current[ 0 ];
+		await act( () => result.current[ 1 ]( { ...v, fields: [ ...v.fields, id ] } ) );
+	};
+
+	const move = async ( result, from, to ) => {
+		const v = result.current[ 0 ];
+		const next = v.fields.slice();
+		next.splice( to, 0, next.splice( from, 1 )[ 0 ] );
+		await act( () => result.current[ 1 ]( { ...v, fields: next } ) );
+	};
+
+	it( 'puts a re-shown column back where it was', async () => {
+		const { result } = load( {} );
+		await flush();
+
+		await hide( result, 'status' );
+		expect( result.current[ 0 ].fields ).toEqual( [ 'reference', 'amount', 'gateway' ] );
+
+		await show( result, 'status' );
+		expect( result.current[ 0 ].fields ).toEqual( KNOWN );
+	} );
+
+	it( 'puts it back after a reload too', async () => {
+		const { result } = load( { fields: [ 'reference', 'amount', 'gateway', 'status' ], order: KNOWN } );
+		await flush();
+
+		expect( result.current[ 0 ].fields ).toEqual( KNOWN );
+	} );
+
+	it( 'seats a column added since the view was saved in its own place, not at the end', async () => {
+		const { result } = load(
+			{ fields: [ 'reference', 'amount' ], order: [ 'reference', 'amount', 'gateway' ] },
+			{ ...DEFAULTS, fields: KNOWN },
+			KNOWN
+		);
+		await flush();
+
+		// 'status' is new to this reader and belongs second, not last.
+		expect( result.current[ 0 ].fields ).toEqual( [ 'reference', 'status', 'amount' ] );
+	} );
+
+	it( 'leaves an order the reader chose alone', async () => {
+		const { result } = load( {} );
+		await flush();
+
+		await move( result, 3, 0 );
+		expect( result.current[ 0 ].fields ).toEqual( [ 'gateway', 'reference', 'status', 'amount' ] );
+
+		// A hide must not now re-seat everything back to the screen's order.
+		await hide( result, 'status' );
+		expect( result.current[ 0 ].fields ).toEqual( [ 'gateway', 'reference', 'amount' ] );
+	} );
+
+	it( 'records the move so it survives a reload', async () => {
+		const { result } = load( {} );
+		await flush();
+
+		jest.useFakeTimers();
+		await move( result, 3, 0 );
+		jest.runAllTimers();
+		jest.useRealTimers();
+
+		const put = apiFetch.mock.calls.map( ( [ o ] ) => o ).filter( ( o ) => o.method === 'PUT' ).pop();
+		expect( put.data.order ).toEqual( [ 'gateway', 'reference', 'status', 'amount' ] );
+	} );
+
+	/**
+	 * The whole point of holding hidden columns in the arrangement: a column
+	 * comes back where the reader had it, not where the screen would have put
+	 * it and not at the end.
+	 */
+	it( 'returns a column to its place inside an arrangement the reader chose', async () => {
+		const { result } = load( { fields: [ 'gateway', 'reference', 'status', 'amount' ], order: [ 'gateway', 'reference', 'status', 'amount' ] } );
+		await flush();
+
+		await hide( result, 'status' );
+		expect( result.current[ 0 ].fields ).toEqual( [ 'gateway', 'reference', 'amount' ] );
+
+		await show( result, 'status' );
+		expect( result.current[ 0 ].fields ).toEqual( [ 'gateway', 'reference', 'status', 'amount' ] );
+	} );
+
+	it( 'keeps a hidden column\'s slot when visible columns are moved around it', async () => {
+		const { result } = load( { fields: [ 'reference', 'amount', 'gateway' ], order: KNOWN } );
+		await flush();
+
+		// status is hidden and sits second in the arrangement.
+		await move( result, 2, 0 );
+		expect( result.current[ 0 ].fields ).toEqual( [ 'gateway', 'reference', 'amount' ] );
+
+		await show( result, 'status' );
+		expect( result.current[ 0 ].fields ).toEqual( [ 'gateway', 'status', 'reference', 'amount' ] );
+	} );
+
+	/**
+	 * Seating a new column by scanning for the first higher-ranked one assumes
+	 * the arrangement is in the screen's order, which is the one thing it is
+	 * not. A reader who dragged a late column to the front would get every
+	 * column shipped after that landing at position zero.
+	 */
+	it( 'seats a new column beside its neighbours even in a rearranged list', async () => {
+		const LATER = [ 'reference', 'status', 'fund', 'amount', 'gateway' ];
+		const { result } = load(
+			// created the arrangement by dragging 'gateway' to the front
+			{ fields: [ 'gateway', 'reference', 'status', 'amount' ], order: [ 'gateway', 'reference', 'status', 'amount' ] },
+			{ ...DEFAULTS, fields: [ 'reference', 'status', 'fund', 'amount', 'gateway' ] },
+			LATER
+		);
+		await flush();
+
+		// 'fund' belongs after 'status', not at the front.
+		expect( result.current[ 0 ].fields ).toEqual( [ 'gateway', 'reference', 'status', 'fund', 'amount' ] );
+	} );
+
+	it( 'honours a saved arrangement across a reload', async () => {
+		const { result } = load( {
+			fields: [ 'gateway', 'reference', 'amount' ],
+			order: [ 'gateway', 'reference', 'status', 'amount' ],
+		} );
+		await flush();
+
+		expect( result.current[ 0 ].fields ).toEqual( [ 'gateway', 'reference', 'amount' ] );
+	} );
+} );
+
+describe( 'a filter on a column the screen no longer has', () => {
+	/**
+	 * Removing a column removes its filter chip with it, so a saved filter on
+	 * that field can no longer be seen or cleared, while the list goes on
+	 * counting itself as filtered and showing "nothing matches".
+	 */
+	it( 'is dropped rather than restored invisibly', async () => {
+		const { result } = load( {
+			filters: [
+				{ field: 'is_test', operator: 'is', value: 'yes' },
+				{ field: 'status', operator: 'is', value: 'failed' },
+			],
+		} );
+		await flush();
+
+		expect( result.current[ 0 ].filters ).toEqual( [ { field: 'status', operator: 'is', value: 'failed' } ] );
 	} );
 } );

@@ -46,7 +46,7 @@ final class TableViewPrefsTest extends IntegrationTestCase
 
         $this->save('donations', [
             'fields'  => ['reference', 'status', 'amount'],
-            'known'   => ['reference', 'status', 'amount', 'gateway'],
+            'order'   => ['reference', 'status', 'amount', 'gateway'],
             'sort'    => ['field' => 'created_at', 'direction' => 'asc'],
             'perPage' => 50,
             'filters' => [['field' => 'status', 'operator' => 'is', 'value' => 'failed']],
@@ -79,6 +79,25 @@ final class TableViewPrefsTest extends IntegrationTestCase
 
         $this->assertSame(['reference'], $this->read('donations')['fields']);
         $this->assertSame(['name', 'email'], $this->read('donors')['fields']);
+    }
+
+    /**
+     * The arrangement covers hidden columns too, which is what lets one come
+     * back to its own place rather than the end of the row.
+     */
+    public function test_the_arrangement_keeps_columns_that_are_not_showing(): void
+    {
+        $this->admin();
+
+        $this->save('donations', [
+            'fields' => ['amount', 'reference'],
+            'order'  => ['amount', 'status', 'reference'],
+        ]);
+
+        $view = $this->read('donations');
+
+        $this->assertSame(['amount', 'status', 'reference'], $view['order']);
+        $this->assertSame(['amount', 'reference'], $view['fields']);
     }
 
     public function test_a_page_size_is_held_to_a_sane_range(): void
@@ -141,6 +160,54 @@ final class TableViewPrefsTest extends IntegrationTestCase
         $this->save('donations', ['fields' => array_fill(0, 4000, 'column_with_a_long_name')]);
 
         $this->assertSame([], $this->read('donations'));
+    }
+
+    /**
+     * A bare (string) cast on an array raises a PHP warning and stores the word
+     * "Array" as the field name.
+     */
+    public function test_a_filter_whose_field_is_not_a_string_is_dropped(): void
+    {
+        $this->admin();
+
+        $view = $this->save('donations', [
+            'filters' => [
+                ['field' => ['nested'], 'operator' => 'is', 'value' => 'x'],
+                ['field' => 'status', 'operator' => ['is'], 'value' => 'x'],
+                ['field' => 'status', 'operator' => 'is', 'value' => 'paid'],
+            ],
+        ]);
+
+        $this->assertCount(1, $view['filters']);
+        $this->assertSame('status', $view['filters'][0]['field']);
+    }
+
+    public function test_a_sort_field_that_is_not_a_string_is_ignored(): void
+    {
+        $this->admin();
+
+        $view = $this->save('donations', ['sort' => ['field' => ['x'], 'direction' => 'asc']]);
+
+        $this->assertArrayNotHasKey('sort', $view);
+    }
+
+    /**
+     * The per-scope cap bounds one view; this bounds the row a client could
+     * grow by inventing scopes.
+     */
+    public function test_scopes_cannot_be_invented_without_bound(): void
+    {
+        $this->admin();
+
+        for ($i = 0; $i < 60; $i++) {
+            $this->save('scope' . $i, ['perPage' => 25]);
+        }
+
+        $stored = json_decode((string) get_user_meta(get_current_user_id(), 'fundkit_table_views', true), true);
+
+        $this->assertLessThanOrEqual(40, count($stored));
+        // The ones that did land are still readable, not corrupted by the cap.
+        $this->assertSame(25, $this->read('scope0')['perPage']);
     }
 
     public function test_a_screen_with_no_saved_view_says_so(): void
