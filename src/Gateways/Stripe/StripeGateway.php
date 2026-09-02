@@ -6,12 +6,14 @@ namespace FundKit\Gateways\Stripe;
 
 use FundKit\Analytics\ErrorLog;
 use FundKit\Currency\Currency;
+use FundKit\Donations\AntiSpamGuard;
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationRepository;
 use FundKit\Donations\DonationService;
 use FundKit\Donations\Refund;
 use FundKit\Donors\DonorRepository;
 use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Gateways\GatewayConfirmResult;
 use FundKit\Gateways\AccountFingerprint;
@@ -60,6 +62,24 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     private ?bool $verifiedIsTest = null;
 
     /** @since 1.0.0 */
+    /**
+     * Declines one PaymentIntent may see before it is cancelled at Stripe.
+     *
+     * A PaymentIntent returns to requires_payment_method after a decline and
+     * is confirmable again, so without a ceiling one intent is an unbounded
+     * card-testing oracle: the donation quota counts intents, and the prober
+     * only ever needs one. The confirmations happen between the caller and
+     * Stripe, so this is the only place the site can see them at all.
+     *
+     * Three, because a donor whose card declines genuinely retypes a CVC or
+     * reaches for a second card, and the form supports exactly that.
+     */
+    private const MAX_INTENT_DECLINES = 3;
+
+    // Long enough that an intent cannot outlive its own counter and win a
+    // fresh allowance, short enough that the bucket is reclaimed.
+    private const DECLINE_WINDOW = DAY_IN_SECONDS;
+
     public function __construct(
         private StripeApi $api,
         private DonationRepository $donations,
@@ -520,6 +540,13 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         }
 
         $reason = $intent['last_payment_error']['message'] ?? __('Payment declined.', 'fundraising-toolkit');
+
+        // Counted before the row is judged. markFailed refuses to re-run once
+        // the row reads failed, so declines after the first apply no row and
+        // fire no event: without a counter of its own, an intent probed five
+        // hundred times is indistinguishable here from one declined once.
+        $this->boundDeclines($intentId, $donation);
+
         $this->donationService->markFailed($donation, $reason);
 
         return new WebhookOutcome(
@@ -527,6 +554,65 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             external_id:  $eventId,
             event_type:   $type,
             handled:      true,
+        );
+    }
+
+    /**
+     * Count this decline against the intent, and retire the intent once it has
+     * seen more than a donor plausibly would.
+     *
+     * Cancelling is what ends the channel: a failed PaymentIntent is otherwise
+     * confirmable for as long as it exists, and every confirmation is a card
+     * the prober has learned something about. It is webhook-driven, so this
+     * bounds the burst rather than stopping the first one.
+     *
+     * @since 1.0.0
+     */
+    private function boundDeclines(string $intentId, Donation $donation): void
+    {
+        if ($intentId === '') {
+            return;
+        }
+
+        // Asked of the container rather than held, so a gateway registered
+        // before the guard is bound still counts. hit() answers PHP_INT_MAX
+        // when it cannot count, which cancels: a channel nothing can meter is
+        // the one most worth closing.
+        $declines = Plugin::instance()->container->get(AntiSpamGuard::class)->hit(
+            'fundkit_pi_declines_' . hash('sha256', $intentId),
+            self::DECLINE_WINDOW
+        );
+
+        if ($declines <= self::MAX_INTENT_DECLINES) {
+            return;
+        }
+
+        try {
+            $this->api->post(
+                '/payment_intents/' . rawurlencode($intentId) . '/cancel',
+                ['cancellation_reason' => 'abandoned']
+            );
+        } catch (Throwable $e) {
+            // An intent Stripe has already settled or cancelled refuses this,
+            // and that is the outcome we wanted anyway.
+            ErrorLog::record('gateway.stripe', 'PaymentIntent cancel failed: ' . $e->getMessage(), [
+                'intent_id' => $intentId,
+                'declines'  => $declines,
+            ]);
+
+            return;
+        }
+
+        // The visible record of the attack. The donation row only ever shows
+        // one failure, so decline volume has nowhere else to surface.
+        ErrorLog::record(
+            'gateway.stripe',
+            sprintf('PaymentIntent cancelled after %d declines', $declines),
+            [
+                'intent_id'   => $intentId,
+                'donation_id' => (int) $donation->id,
+                'reference'   => (string) $donation->reference,
+            ]
         );
     }
 

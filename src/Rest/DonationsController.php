@@ -139,35 +139,6 @@ final class DonationsController
                 ['status' => 400]
             );
         }
-        // A submission carrying the status token of a named, never-funded
-        // pending donation is not a new attempt against the email quota, it is
-        // the same donation being tried a second way, and it spends that
-        // attempt tree's own budget.
-        $retry    = null;
-        $parent   = null;
-        $claim    = is_array($body['_retry'] ?? null) ? $body['_retry'] : [];
-        $claimRef = trim((string) ($claim['reference'] ?? ''));
-        if ($claimRef !== '') {
-            $parent = $this->repository->findByReference($claimRef);
-            if ($parent !== null) {
-                $retry = $this->spam->claimRetry(
-                    $parent,
-                    $this->donorEmailHash($parent),
-                    (string) ($claim['status_token'] ?? ''),
-                    $email,
-                    isset($body['form_id']) ? (int) $body['form_id'] : null,
-                    [
-                        'amount_cents' => $amount,
-                        'currency'     => $currency,
-                        'frequency'    => (string) ($body['frequency'] ?? 'one_time'),
-                    ]
-                );
-            }
-        }
-        if ($retry === null && ($err = $this->spam->consumeEmailQuota($email))) {
-            return $err;
-        }
-
         $profile = (array) ($body['profile'] ?? []);
         $country = $body['country'] ?? ($profile['country'] ?? null);
 
@@ -286,6 +257,43 @@ final class DonationsController
         }
         if ($custom !== [] && strlen((string) wp_json_encode($custom)) > 16384) {
             return new WP_Error('fundkit_custom_too_large', __('Submitted form data is too large.', 'fundraising-toolkit'), ['status' => 400]);
+        }
+
+        // Spent here, below every refusal that does not depend on who the donor
+        // is. The quota is addressable by a stranger: anyone can type anyone's
+        // address, so spending a slot on a submission that was never going to
+        // succeed lets an outsider hold a named donor out of donating with
+        // requests that create nothing and leave no row to find. Everything
+        // above refuses on the form, the campaign, the gateway or the payload,
+        // and none of it needs the donor's budget to say no.
+        //
+        // A submission carrying the status token of a named, never-funded
+        // pending donation is not a new attempt against the email quota, it is
+        // the same donation being tried a second way, and it spends that
+        // attempt tree's own budget.
+        $retry    = null;
+        $parent   = null;
+        $claim    = is_array($body['_retry'] ?? null) ? $body['_retry'] : [];
+        $claimRef = trim((string) ($claim['reference'] ?? ''));
+        if ($claimRef !== '') {
+            $parent = $this->repository->findByReference($claimRef);
+            if ($parent !== null) {
+                $retry = $this->spam->claimRetry(
+                    $parent,
+                    $this->donorEmailHash($parent),
+                    (string) ($claim['status_token'] ?? ''),
+                    $email,
+                    $formId,
+                    [
+                        'amount_cents' => $amount,
+                        'currency'     => $currency,
+                        'frequency'    => (string) ($body['frequency'] ?? 'one_time'),
+                    ]
+                );
+            }
+        }
+        if ($retry === null && ($err = $this->spam->consumeEmailQuota($email))) {
+            return $err;
         }
 
         $intent = new DonationIntent(
