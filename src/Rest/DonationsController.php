@@ -91,6 +91,7 @@ final class DonationsController
         if ($err = $this->spam->checkHoneypot((string) ($body['_hp'] ?? ''))) return $err;
         if ($err = $this->spam->verifyFormToken((string) ($body['_ft'] ?? ''), (int) ($body['form_id'] ?? 0))) return $err;
         if ($err = $this->spam->consumeIpQuota()) return $err;
+        if ($err = $this->spam->preCheck($body)) return $err;
 
         $email      = (string) ($body['email'] ?? '');
         $amount     = (int)    ($body['amount_cents'] ?? 0);

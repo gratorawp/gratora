@@ -122,6 +122,32 @@ final class AntiSpamGuard
         return new WP_Error('fundkit_invalid_submission', __('Submission rejected.', 'fundraising-toolkit'), ['status' => 400]);
     }
 
+    /**
+     * Where a site adds a check of its own: a captcha, an allow list, a
+     * reputation service. Return a WP_Error to refuse the submission; the
+     * error is passed to the donor, so word it for them.
+     *
+     * The checks here are the ones every site gets. They cannot be the ones
+     * every site needs, because what a captcha costs a donor is a judgement
+     * only the org can make, and a plugin that decides it for them is either
+     * too strict for a quiet charity or too weak for one under attack.
+     *
+     * Called after the IP quota, which is what bounds it: a check of this
+     * kind usually calls out to a third party, and running it before the
+     * quota would let a caller aim this site's outbound requests at that
+     * service as fast as they can open connections.
+     *
+     * @param array<string,mixed> $submission the raw request body
+     *
+     * @since 1.0.0
+     */
+    public function preCheck(array $submission): ?WP_Error
+    {
+        $refusal = apply_filters('fundkit.spam.pre_check', null, $submission);
+
+        return $refusal instanceof WP_Error ? $refusal : null;
+    }
+
     /** @since 1.0.0 */
     public function verifyFormToken(string $token, int $formId = 0): ?WP_Error
     {
@@ -159,13 +185,42 @@ final class AntiSpamGuard
         return (int) floor(time() / DAY_IN_SECONDS);
     }
 
+    /**
+     * The subject of the per-IP quota.
+     *
+     * REMOTE_ADDR only. A forwarded-for header is written by whoever is
+     * speaking to us, so honouring one would let any caller mint a fresh
+     * quota per request by changing a string.
+     *
+     * IPv6 is bucketed by its /64 rather than its full address. A single
+     * host is routinely routed a whole /64, so per-address counting hands
+     * one machine 2^64 quotas, which is no quota at all. v4 keeps its
+     * per-address bucket, where an address is the scarce thing.
+     *
+     * @since 1.0.0
+     */
+    private function quotaSubject(): string
+    {
+        $ip = filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: '';
+        if ($ip === '') {
+            return 'unknown';
+        }
+
+        $packed = @inet_pton($ip);
+        if ($packed !== false && strlen($packed) === 16) {
+            // The routed prefix, so every address behind it names one counter.
+            return 'v6/64:' . bin2hex(substr($packed, 0, 8));
+        }
+
+        return $ip;
+    }
+
     /** @since 1.0.0 */
     public function consumeIpQuota(): ?WP_Error
     {
         if ($this->inGlobalTestMode()) return null;
 
-        $ip = filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: 'unknown';
-        if ($this->hit('fundkit_donate_ip_' . hash('sha256', $ip), self::IP_WINDOW) <= self::IP_MAX) {
+        if ($this->hit('fundkit_donate_ip_' . hash('sha256', $this->quotaSubject()), self::IP_WINDOW) <= self::IP_MAX) {
             return null;
         }
 
@@ -182,7 +237,14 @@ final class AntiSpamGuard
         if ($email === '') return null;
         if ($this->inGlobalTestMode()) return null;
 
-        $hash = $this->hasher->emailHash($this->hasher->normalizeEmail($email));
+        // The mailbox, not the address: one inbox answers to unlimited
+        // addresses, because every plus tag is a distinct address and on some
+        // providers so is every placement of a dot. Counting addresses leaves
+        // the cap open to anyone who can type a '+'. Rate limiting only, never
+        // identity: emailHash over the normalised address is the UNIQUE key on
+        // the donor table, and collapsing addresses there would merge two
+        // people's giving history into one record.
+        $hash = $this->hasher->emailHash($this->hasher->rateLimitMailbox($email));
         $key  = 'fundkit_donate_email_' . substr($hash, 0, 32);
         if ($this->hit($key, self::EMAIL_WINDOW) <= self::EMAIL_MAX) {
             return null;
