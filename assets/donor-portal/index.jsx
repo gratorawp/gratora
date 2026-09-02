@@ -791,7 +791,10 @@ function DonationDetail( { reference, onClose } ) {
                                     checked={ d.is_anonymous }
                                     onChange={ ( e ) => toggleAnonymity( e.target.checked ) }
                                 />
-                                <span>{ __( 'Show as anonymous on public displays', 'fundraising-toolkit' ) }</span>
+                                <span>
+                                    { __( 'Hide my name from the public list of donors', 'fundraising-toolkit' ) }
+                                    <small class="dp-hint">{ __( 'The organization still sees your name on this donation, and your receipt is unchanged.', 'fundraising-toolkit' ) }</small>
+                                </span>
                             </label>
                         </div>
 

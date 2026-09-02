@@ -11,9 +11,9 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
     const isRefundable    = canRefundDonation( donation );
     const canResend       = canResendReceipt( donation, donor );
 
-    const name = donation.is_anonymous
-        ? __( 'Anonymous donor', 'fundraising-toolkit' )
-        : (donor?.name || donation.donor?.name || __( 'Donor', 'fundraising-toolkit' ));
+    // Anonymity is about public displays, not about hiding a donor from the
+    // org that has to receipt them.
+    const name = donor?.name || donation.donor?.name || __( 'Donor', 'fundraising-toolkit' );
 
     return (
         <header className="dd-head">
@@ -27,8 +27,19 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
 
             <div className="dd-page-head">
                 <div className="dd-page-head__left">
-                    <h1 className={ donation.is_anonymous ? 'is-anon' : '' }>{ name }</h1>
+                    <h1>{ name }</h1>
                     <div className="dd-page-head__meta">
+                        { !! donation.is_anonymous && (
+                            <>
+                                <span
+                                    className="dd-pill is-muted"
+                                    title={ __( 'Their name is hidden from public donor lists. It still appears here and on their receipt.', 'fundraising-toolkit' ) }
+                                >
+                                    { __( 'Anonymous publicly', 'fundraising-toolkit' ) }
+                                </span>
+                                <span className="dot-sep">·</span>
+                            </>
+                        ) }
                         <span className="mono">{ donation.reference }</span>
                         { donation.campaign && (
                             <>

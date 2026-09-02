@@ -3,17 +3,20 @@ import { __, sprintf } from '@wordpress/i18n';
 import { formatAmount, formatDate, initials } from '../helpers';
 
 export default function DonorCard( { donor, donationName, isAnonymous, onOpenDonor } ) {
-    if ( isAnonymous || ! donor ) {
+    if ( ! donor ) {
         return (
             <div className="dd-card">
                 <div className="dd-card__body">
-                    <p className="dd-empty">{ __( 'Anonymous donor: name and contact information were not collected.', 'fundraising-toolkit' ) }</p>
+                    <p className="dd-empty">{ __( 'No donor record is attached to this donation.', 'fundraising-toolkit' ) }</p>
                 </div>
             </div>
         );
     }
 
     const lifetime = donor.lifetime || { count: 0, total_cents: 0 };
+    const anonNote = isAnonymous
+        ? __( 'This donor asked not to be named on public donor lists. Their details are unchanged here and on their receipt.', 'fundraising-toolkit' )
+        : null;
 
     return (
         <div className="dd-card">
@@ -27,6 +30,7 @@ export default function DonorCard( { donor, donationName, isAnonymous, onOpenDon
                                 { sprintf( /* translators: %s: donor-provided name */ __( 'Given as "%s" on this donation', 'fundraising-toolkit' ), donationName ) }
                             </div>
                         ) }
+                        { anonNote && <div className="dd-donor-row__lifetime">{ anonNote }</div> }
                         { donor.email && (
                             <a className="dd-donor-row__email" href={ `mailto:${ donor.email }` }>{ donor.email }</a>
                         ) }
