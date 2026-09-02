@@ -290,7 +290,7 @@ export default function Onboarding() {
             <div className={ `fundkit-onboarding__top${ step === 2 ? ' is-wide' : '' }` }>
                 <span className="fundkit-onboarding__brand">
                     <FundKitMark size={ 28 } />
-                    <span className="fundkit-onboarding__brand-name">FundKit</span>
+                    <span className="fundkit-onboarding__brand-name">Fundraising Toolkit</span>
                 </span>
                 { ! isChecklist && (
                     <button type="button" className="fundkit-onboarding__skip" onClick={ skip }>
