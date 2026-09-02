@@ -28,6 +28,7 @@ use FundKit\Gateways\SupportsSubscriptionPause;
 use FundKit\Mail\Mailer;
 use FundKit\Receipts\Receipt;
 use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\GatewayUnreachable;
 use FundKit\Recurring\RecurringPlanActions;
 use FundKit\Recurring\RecurringPlanChange;
 use RuntimeException;
@@ -917,6 +918,16 @@ final class PortalController
                 'fundkit_change_needs_approval',
                 __('Your payment provider needs you to approve this change before it takes effect. Nothing has changed yet.', 'fundraising-toolkit'),
                 ['status' => 409, 'approve_url' => $e->approveUrl]
+            );
+        } catch (GatewayUnreachable $e) {
+            // Ahead of the RuntimeException arm, its parent, which would hand
+            // the donor an internal plan id and the word "gateway".
+            ErrorLog::record('portal.recurring', $e->getMessage());
+
+            return new WP_Error(
+                'fundkit_gateway_error',
+                __('We could not change this donation right now. Please contact the organization and they will sort it out.', 'fundraising-toolkit'),
+                ['status' => 503]
             );
         } catch (\InvalidArgumentException $e) {
             return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);

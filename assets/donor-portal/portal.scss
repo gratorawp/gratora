@@ -812,3 +812,30 @@
     opacity: 0.6;
     pointer-events: none;
 }
+
+.fundkit-donor-portal .fundkit-amount {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    border: 1px solid var(--dp-border);
+    border-radius: 8px;
+    background: #fff;
+
+    &:focus-within { border-color: var(--dp-accent); }
+
+    &__code {
+        font-size: 13px;
+        color: var(--dp-muted, #6b7280);
+    }
+
+    &__input {
+        flex: 1 1 auto;
+        border: 0;
+        padding: 10px 0;
+        font: inherit;
+        background: none;
+
+        &:focus { outline: none; box-shadow: none; }
+    }
+}

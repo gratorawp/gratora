@@ -95,6 +95,39 @@ final class PortalRecurringCancelTest extends IntegrationTestCase
         }
     }
 
+    /** A donor is not shown an internal plan id, a gateway name, or the word gateway. */
+    public function test_an_unreachable_gateway_is_not_explained_to_the_donor(): void
+    {
+        $donor = Plugin::instance()->container
+            ->get(\FundKit\Donors\DonorService::class)
+            ->findOrCreate('unreachable@example.com', ['first_name' => 'Un', 'last_name' => 'Reachable']);
+
+        $plan = $this->seedPlan((int) $donor->id);
+        $csrf = $this->openPortalFor((int) $donor->id);
+
+        // A gateway that was disconnected: its plans remain, nothing serves them.
+        RecurringPlan::query()->where('id', (int) $plan->id)->update(['gateway' => 'disconnected']);
+
+        try {
+            $req = new WP_REST_Request('POST', "/fundkit/v1/portal/recurring/{$plan->id}/action");
+            $req->set_header('content-type', 'application/json');
+            $req->set_header('X-FundKit-Csrf', $csrf);
+            $req->set_body((string) wp_json_encode(['action' => 'cancel']));
+            $res = rest_do_request($req);
+
+            $message = (string) ($res->get_data()['message'] ?? '');
+            $this->assertNotSame(200, $res->get_status());
+            $this->assertStringNotContainsString((string) $plan->id, $message);
+            $this->assertStringNotContainsStringIgnoringCase('gateway', $message);
+            $this->assertStringNotContainsStringIgnoringCase('disconnected', $message);
+            $this->assertNotSame('', $message, 'and it still says something');
+
+            $this->assertSame('active', RecurringPlan::query()->find('id', (int) $plan->id)->status);
+        } finally {
+            unset($_COOKIE['fundkit_donor_session']);
+        }
+    }
+
     private function seedPlan(int $donorId): RecurringPlan
     {
         $plan = RecurringPlan::make();

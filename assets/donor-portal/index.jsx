@@ -6,6 +6,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { parseTimestamp } from '@fundkit/ui/utils/format';
 import { formatAmount } from '../_shared/money';
 import { COUNTRIES } from '../_shared/countries';
+import AmountInput from '../donation-form/components/AmountInput';
 import { loadStripeJs } from '../donation-form/util/stripe';
 import { recurringStatusLabel } from './statusLabels';
 import './portal.scss';
@@ -1057,21 +1058,19 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
 }
 
 function ChangeAmountForm( { plan, onSubmit } ) {
-    const major = ( plan.amount_cents / 100 ).toFixed( 2 );
-    const [ value, setValue ] = useState( major );
-    const cents = Math.round( parseFloat( value ) * 100 );
+    const [ value, setValue ] = useState( plan.amount_cents / 100 );
+    const cents = Math.round( value * 100 );
     const valid = Number.isFinite( cents ) && cents >= 50;
     return (
         <>
             <h3>{ __( 'Change amount', 'fundraising-toolkit' ) }</h3>
             <p class="dp-hint">{ __( 'Current:', 'fundraising-toolkit' ) } { formatAmount( plan.amount_cents, plan.currency ) }</p>
-            <input
-                type="number"
-                step="0.01"
-                min="0.5"
+            <AmountInput
                 value={ value }
-                aria-label={ __( 'New donation amount', 'fundraising-toolkit' ) }
-                onInput={ ( e ) => setValue( e.target.value ) }
+                onChange={ setValue }
+                currency={ plan.currency }
+                min={ 0.5 }
+                inputProps={ { 'aria-label': __( 'New donation amount', 'fundraising-toolkit' ) } }
             />
             <button class="dp-action is-primary" disabled={ ! valid } onClick={ () => valid && onSubmit( cents ) }>{ __( 'Save new amount', 'fundraising-toolkit' ) }</button>
         </>

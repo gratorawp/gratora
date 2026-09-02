@@ -49,9 +49,10 @@ final class RecurringCanceller
         // card charged every month with the renewals no longer even handled.
         if ($gateway === null) {
             throw new GatewayUnreachable(esc_html(sprintf(
-                'Cannot cancel plan %d: the %s gateway is not available, so its subscription would keep billing.',
-                (int) $plan->id,
-                (string) $plan->gateway
+                'Cannot cancel subscription %1$s (%2$s, plan #%3$d): the gateway is not available, so it would keep billing.',
+                (string) ($plan->gateway_subscription_id ?: 'unlinked'),
+                (string) $plan->gateway,
+                (int) $plan->id
             )));
         }
 
