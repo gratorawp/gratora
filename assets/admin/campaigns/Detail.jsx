@@ -2235,15 +2235,22 @@ function AdvancedPanel( { campaign, onError } ) {
     );
 }
 
-function StatusPillGroup( { value, onChange } ) {
+// The only statuses a campaign stores. STATUS_LABEL carries three more, but
+// scheduled, ended and goal_met are derived on the server from the dates and
+// the goal, and the writer coerces anything outside this list to draft. Offered
+// as choices they did not fail loudly: picking "Ended" on a live campaign
+// silently sent it back to draft and stopped it taking donations.
+const SETTABLE_STATUSES = [ 'draft', 'published', 'archived' ];
+
+export function StatusPillGroup( { value, onChange } ) {
     // Archiving runs its own flow from the menu: it asks the server how many
     // live recurring donations the campaign carries and, when there are any,
     // names the count and the amount at stake and offers to cancel them. This
     // pill wrote the same state change with none of that, so it is offered
     // only when the campaign already is archived, to keep the state visible.
-    const options = Object.entries( STATUS_LABEL ).filter(
-        ( [ key ] ) => key !== 'archived' || value === 'archived'
-    );
+    const options = SETTABLE_STATUSES
+        .filter( ( key ) => key !== 'archived' || value === 'archived' )
+        .map( ( key ) => [ key, STATUS_LABEL[ key ] ] );
 
     return (
         <div className="fundkit-status-pills" role="radiogroup">
