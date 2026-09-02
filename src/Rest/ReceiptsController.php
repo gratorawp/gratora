@@ -8,6 +8,7 @@ use FundKit\Receipts\OrgProfile;
 
 use FundKit\Campaigns\Campaign;
 use FundKit\Donations\Donation;
+use FundKit\Donations\AntiSpamGuard;
 use FundKit\Donations\DonationRepository;
 use FundKit\Donors\Donor;
 use FundKit\Donors\DonorRepository;
@@ -30,6 +31,23 @@ final class ReceiptsController
 {
     private const NAMESPACE = 'fundkit/v1';
 
+    /**
+     * Renders per address per window.
+     *
+     * The token is the only auth here, it is good for thirty days, it is
+     * multi-use, and it travels as a query parameter in an emailed URL. The
+     * magic-link limiter counts misses, so a caller holding a working token is
+     * never counted at all, and every hit is two decryptions and a full PDF
+     * render that nothing caches. Being a GET, an <img src> on any page, a link
+     * prefetcher or a mail-security scanner fires it, so one forwarded receipt
+     * is an unbounded CPU amplifier pointed at this site.
+     *
+     * Well clear of a donor who saves their receipt a few times, or of several
+     * donors behind one office address.
+     */
+    private const RENDER_MAX    = 20;
+    private const RENDER_WINDOW = 900;
+
     /** @since 1.0.0 */
     public function __construct(
         private ReceiptRepository $receipts,
@@ -37,6 +55,7 @@ final class ReceiptsController
         private DonorRepository $donors,
         private DonorService $donorService,
         private MagicLinkService $magicLinks,
+        private AntiSpamGuard $spam,
     ) {
     }
 
@@ -57,6 +76,13 @@ final class ReceiptsController
     /** @since 1.0.0 */
     public function download(WP_REST_Request $request): WP_Error|null
     {
+        // Spent before the token is read, because a valid token is exactly what
+        // this bounds: an invalid one is already counted by the magic-link
+        // limiter, and a valid one was never counted anywhere.
+        if ($err = $this->spam->consumeIpBudget('fundkit_receipt', self::RENDER_MAX, self::RENDER_WINDOW)) {
+            return $err;
+        }
+
         $receiptId = (int) $request['receipt_id'];
         $rawToken  = (string) ($request['token'] ?? '');
 

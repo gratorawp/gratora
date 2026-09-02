@@ -88,6 +88,7 @@ final class DonationsController
         $body = (array) $request->get_json_params();
 
         // Anti-spam gates, cheapest first; failures return generic 400/429.
+        if ($err = $this->spam->checkOrigin()) return $err;
         if ($err = $this->spam->checkHoneypot((string) ($body['_hp'] ?? ''))) return $err;
         if ($err = $this->spam->verifyFormToken((string) ($body['_ft'] ?? ''), (int) ($body['form_id'] ?? 0))) return $err;
         if ($err = $this->spam->consumeIpQuota()) return $err;

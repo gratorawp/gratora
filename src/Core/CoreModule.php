@@ -770,7 +770,8 @@ final class CoreModule implements FundKitModule
             $c->get(DonationRepository::class),
             $c->get(DonorRepository::class),
             $c->get(DonorService::class),
-            $c->get(MagicLinkService::class)
+            $c->get(MagicLinkService::class),
+            $c->get(AntiSpamGuard::class)
         ));
 
         // Bound after ReceiptIssuer; order matters for eager route registration.

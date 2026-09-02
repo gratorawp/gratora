@@ -115,6 +115,73 @@ final class AntiSpamGuard
         return $this->verifyToken($token, 'portal');
     }
 
+    /**
+     * Refuse a browser request made by a page this site did not serve.
+     *
+     * WordPress answers REST with Access-Control-Allow-Origin reflecting
+     * whoever asked and Access-Control-Allow-Credentials: true, so any page
+     * anywhere can post here and read the reply. The reply carries the
+     * gateway's client secret, and every cap in this class is written on the
+     * assumption that an attacker spends addresses they have to obtain. A
+     * script on one busy page spends its visitors' addresses instead:
+     * residential, unblocklisted, and indistinguishable from donors, which is
+     * cheaper than proxies and leaves the per-IP cap measuring nothing.
+     *
+     * Only a present-and-disallowed Origin is refused. A browser always sends
+     * one cross-origin and script cannot suppress it, while a server-side
+     * caller sends none and stays bounded by the per-IP cap as before.
+     *
+     * The allow list is core's own, so a decoupled front end adds its origin
+     * through the documented allowed_http_origins filter instead of losing the
+     * endpoint.
+     *
+     * @since 1.0.0
+     */
+    public function checkOrigin(): ?WP_Error
+    {
+        $origin = get_http_origin();
+        if (! is_string($origin) || $origin === '') {
+            return null;
+        }
+
+        // This site, port included. Core's get_allowed_http_origins compares
+        // hosts and drops the port, carrying a "@todo Preserve port?" where it
+        // does, so a site served on an explicit port fails its own check and
+        // every donor with it.
+        $mine = array_filter([self::originOf(home_url()), self::originOf(site_url())]);
+        if (in_array(self::originOf($origin), $mine, true)) {
+            return null;
+        }
+
+        // Asked second and for what it adds: the allowed_http_origins filter,
+        // which is where a decoupled front end declares itself.
+        if (is_allowed_http_origin($origin)) {
+            return null;
+        }
+
+        return new WP_Error(
+            'fundkit_invalid_submission',
+            __('Please refresh the page and try again.', 'fundraising-toolkit'),
+            ['status' => 403]
+        );
+    }
+
+    /**
+     * scheme://host[:port], the whole of what makes two pages same-origin.
+     *
+     * @since 1.0.0
+     */
+    private static function originOf(string $url): string
+    {
+        $parts = wp_parse_url($url);
+        if (empty($parts['scheme']) || empty($parts['host'])) {
+            return '';
+        }
+
+        return strtolower($parts['scheme'] . '://' . $parts['host'])
+            . (isset($parts['port']) ? ':' . (int) $parts['port'] : '');
+    }
+
     /** @since 1.0.0 */
     public function checkHoneypot(string $value): ?WP_Error
     {
