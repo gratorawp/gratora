@@ -218,9 +218,25 @@ final class AntiSpamGuard
     /** @since 1.0.0 */
     public function consumeIpQuota(): ?WP_Error
     {
+        return $this->consumeIpBudget('fundkit_donate_ip', self::IP_MAX, self::IP_WINDOW);
+    }
+
+    /**
+     * A per-IP allowance under the caller's own namespace.
+     *
+     * Public because the donation endpoint is not the only unauthenticated
+     * surface that can be made expensive. A route that calls out to a gateway
+     * spends the site's own resources on the caller's schedule, and a blocking
+     * request holds a worker for the whole round trip, so one cheap call
+     * costing one expensive one is the shape that needs a ceiling.
+     *
+     * @since 1.0.0
+     */
+    public function consumeIpBudget(string $namespace, int $max, int $window): ?WP_Error
+    {
         if ($this->inGlobalTestMode()) return null;
 
-        if ($this->hit('fundkit_donate_ip_' . hash('sha256', $this->quotaSubject()), self::IP_WINDOW) <= self::IP_MAX) {
+        if ($this->hit($namespace . '_' . hash('sha256', $this->quotaSubject()), $window) <= $max) {
             return null;
         }
 

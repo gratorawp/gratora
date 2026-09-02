@@ -998,6 +998,7 @@ final class CoreModule implements FundKitModule
                 $c->get(PayPalApi::class),
                 $c->get(PayPalAccount::class),
                 $c->get(PayPalPlanRecorder::class),
+                $c->get(AntiSpamGuard::class),
             ),
             new FxController(
                 $c->get(FxRates::class),

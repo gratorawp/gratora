@@ -6,6 +6,7 @@ namespace FundKit\Rest;
 
 use FundKit\Analytics\ErrorLog;
 use FundKit\Donations\Donation;
+use FundKit\Donations\AntiSpamGuard;
 use FundKit\Donations\DonationRepository;
 use FundKit\Donations\DonationService;
 use FundKit\Gateways\GatewayManager;
@@ -39,7 +40,22 @@ final class PayPalController
 {
     private const NS = 'fundkit/v1';
 
-    /** @since 1.0.0 */
+    /**
+     * Both routes here call PayPal, so a caller who repeats one spends this
+     * site's workers and the org's PayPal rate limit rather than their own.
+     * Generous enough for a shared address: a donation costs one call, and a
+     * NAT'd office or a campus is many donors behind one IP.
+     */
+    private const CALLBACK_MAX    = 30;
+    private const CALLBACK_WINDOW = 900;
+
+    /**
+     * States a capture can no longer be part of. Mirrors the rule
+     * DonationService::confirm already enforces on the write itself, applied
+     * here so a settled donation costs no PayPal call to refuse.
+     */
+    private const SETTLED = ['paid', 'refunded', 'partial_refund'];
+
     public function __construct(
         private DonationRepository $donations,
         private DonationService $donationService,
@@ -47,6 +63,7 @@ final class PayPalController
         private PayPalApi $api,
         private PayPalAccount $account,
         private PayPalPlanRecorder $planRecorder,
+        private AntiSpamGuard $spam,
     ) {
     }
 
@@ -78,9 +95,28 @@ final class PayPalController
     /** @since 1.0.0 */
     public function capture(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
+        if ($err = $this->spam->consumeIpBudget('fundkit_paypal_cb', self::CALLBACK_MAX, self::CALLBACK_WINDOW)) {
+            return $err;
+        }
+
         $donation = $this->pendingDonation($request);
         if ($donation instanceof WP_Error) {
             return $donation;
+        }
+
+        // Money that has already moved. Re-capturing only asks PayPal to refuse,
+        // and the token that reaches this line is held for the life of the
+        // donation, so without this one settled donation is an endless supply of
+        // outbound calls made on the caller's schedule.
+        //
+        // Answered as the successful capture answered, not as an error: a double
+        // submit and a retried request both land here, and telling a donor whose
+        // money moved that their donation failed sends them to give again.
+        if (in_array($donation->status, self::SETTLED, true)) {
+            return new WP_REST_Response([
+                'status'    => $donation->status,
+                'reference' => $donation->reference,
+            ], 200);
         }
 
         $gateway = $this->gateways->get('paypal');
@@ -151,6 +187,10 @@ final class PayPalController
      */
     public function recordSubscription(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
+        if ($err = $this->spam->consumeIpBudget('fundkit_paypal_cb', self::CALLBACK_MAX, self::CALLBACK_WINDOW)) {
+            return $err;
+        }
+
         $donation = $this->pendingDonation($request);
         if ($donation instanceof WP_Error) {
             return $donation;
