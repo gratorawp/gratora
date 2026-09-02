@@ -2749,3 +2749,9 @@ $card-radius:   $radius-lg;
         color: var(--fundkit-color-text-muted, #6b7280);
     }
 }
+
+.fundkit-story__anon {
+    margin-inline-start: 6px;
+    font-size: 11px;
+    color: $text-muted;
+}

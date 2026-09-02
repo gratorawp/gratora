@@ -358,9 +358,16 @@
     &__toggle {
         display: flex;
         gap: 8px;
-        align-items: center;
+        // The label wraps to two lines, so the box sits with the first of them
+        // rather than centred against both.
+        align-items: flex-start;
         font-size: 14px;
         cursor: pointer;
+
+        input { margin-top: 2px; }
+
+        // Its own line: small is inline, so it ran on from the label.
+        .dp-hint { display: block; margin-top: 2px; }
     }
     &__msg { color: var(--dp-muted); font-size: 13px; margin: 4px 0; }
 }

@@ -17,8 +17,16 @@ export default function Stories( { rows = [] } ) {
                     <blockquote className="fundkit-story__quote">{ r.note }</blockquote>
                     <figcaption className="fundkit-story__meta">
                         <span className="fundkit-story__author">
-                            { r.is_anonymous ? __( 'Anonymous donor', 'fundraising-toolkit' ) : r.donor_name }
+                            { r.donor_name }
                         </span>
+                        { !! r.is_anonymous && (
+                            <span
+                                className="fundkit-story__anon"
+                                title={ __( 'Their name is hidden from public donor lists. It still appears here.', 'fundraising-toolkit' ) }
+                            >
+                                { __( 'anonymous publicly', 'fundraising-toolkit' ) }
+                            </span>
+                        ) }
                         <span className="fundkit-story__sep" aria-hidden="true">·</span>
                         <span className="fundkit-story__amount">
                             { formatAmount( r.amount_cents, r.currency ) }
