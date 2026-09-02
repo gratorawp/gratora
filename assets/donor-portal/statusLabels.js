@@ -16,3 +16,9 @@ export function recurringStatusLabel( s ) {
         default:          return String( s || '' ).replace( /_/g, ' ' );
     }
 }
+
+// Nothing is left to change once a plan has stopped, so the manage modal shows
+// facts and no actions.
+export function isTerminalPlan( s ) {
+    return s === 'cancelled' || s === 'expired';
+}

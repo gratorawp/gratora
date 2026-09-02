@@ -8,7 +8,7 @@ import { formatAmount } from '../_shared/money';
 import { COUNTRIES } from '../_shared/countries';
 import AmountInput from '../donation-form/components/AmountInput';
 import { loadStripeJs } from '../donation-form/util/stripe';
-import { recurringStatusLabel } from './statusLabels';
+import { recurringStatusLabel, isTerminalPlan } from './statusLabels';
 import './portal.scss';
 
 const cfg = window.fundkitPortal || { rest: '/wp-json/fundkit/v1/portal/', nonce: '' };
@@ -829,7 +829,15 @@ function Recurring() {
         <>
             <ul class="dp-list">
                 { list.map( ( p ) => (
-                    <li key={ p.id } class="dp-list__row">
+                    <li key={ p.id }>
+                        <div
+                            class="dp-list__row"
+                            role="button"
+                            tabIndex={ 0 }
+                            onClick={ () => setAction( p ) }
+                            onKeyDown={ ( e ) => { if ( e.key === 'Enter' || e.key === ' ' ) { e.preventDefault(); setAction( p ); } } }
+                            aria-label={ sprintf( /* translators: %s: subscription reference */ __( 'View recurring donation %s', 'fundraising-toolkit' ), p.reference || '' ) }
+                        >
                         <div>
                             <strong>{ formatAmount( p.amount_cents, p.currency ) }</strong>
                             <span class="dp-list__pill">{ intervalLabel( p.interval_count, p.interval_unit ) }</span>
@@ -839,16 +847,7 @@ function Recurring() {
                         </div>
                         <div class="dp-list__actions">
                             <span class={ `dp-pill dp-pill--${ p.status }` }>{ recurringStatusLabel( p.status ) }</span>
-                            { ( p.status === 'active' || p.status === 'past_due' ) && (
-                                <button class="dp-link" onClick={ () => setAction( p ) }>{ __( 'Manage', 'fundraising-toolkit' ) }</button>
-                            ) }
-                            { p.status === 'paused' && (
-                                <button class="dp-link" onClick={ () => {
-                                    api( `recurring/${ p.id }/action`, { method: 'POST', body: JSON.stringify( { action: 'resume' } ) } )
-                                        .then( load )
-                                        .catch( ( e ) => setError( e.message ) );
-                                } }>{ __( 'Resume', 'fundraising-toolkit' ) }</button>
-                            ) }
+                        </div>
                         </div>
                     </li>
                 ) ) }
@@ -928,23 +927,34 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                             ) ) }
                         </dl>
 
-                        <h3>{ __( 'Manage donation', 'fundraising-toolkit' ) }</h3>
+                        { ! isTerminalPlan( plan.status ) && (
+                            <h3>{ __( 'Manage donation', 'fundraising-toolkit' ) }</h3>
+                        ) }
+                        { plan.status === 'paused' && (
+                            <button class="dp-action is-primary" onClick={ () => call( { action: 'resume' } ) }>
+                                { __( 'Resume', 'fundraising-toolkit' ) }
+                            </button>
+                        ) }
                         { /* Two shipped gateways handle subscriptions and
                              refuse both of these: a Direct Debit mandate has no
                              pause, and stopping it means cancelling and asking
                              the donor to sign a new one. Offering the buttons
                              anyway got them a raw 422. */ }
-                        { plan.can_pause && (
+                        { ! isTerminalPlan( plan.status ) && (
                             <>
-                                <button class="dp-action" onClick={ () => setStage( 'pause' ) }>{ __( 'Pause', 'fundraising-toolkit' ) }</button>
-                                <button class="dp-action" onClick={ () => call( { action: 'skip_next' } ) }>{ __( 'Skip next charge', 'fundraising-toolkit' ) }</button>
+                                { plan.can_pause && plan.status !== 'paused' && (
+                                    <>
+                                        <button class="dp-action" onClick={ () => setStage( 'pause' ) }>{ __( 'Pause', 'fundraising-toolkit' ) }</button>
+                                        <button class="dp-action" onClick={ () => call( { action: 'skip_next' } ) }>{ __( 'Skip next charge', 'fundraising-toolkit' ) }</button>
+                                    </>
+                                ) }
+                                <button class="dp-action" onClick={ () => setStage( 'amount' ) }>{ __( 'Change amount', 'fundraising-toolkit' ) }</button>
+                                { plan.can_update_payment_method && (
+                                    <button class="dp-action" onClick={ () => setStage( 'payment' ) }>{ __( 'Update payment method', 'fundraising-toolkit' ) }</button>
+                                ) }
+                                <button class="dp-action dp-action--danger" onClick={ () => setStage( 'cancel' ) }>{ __( 'Cancel donation', 'fundraising-toolkit' ) }</button>
                             </>
                         ) }
-                        <button class="dp-action" onClick={ () => setStage( 'amount' ) }>{ __( 'Change amount', 'fundraising-toolkit' ) }</button>
-                        { plan.can_update_payment_method && (
-                            <button class="dp-action" onClick={ () => setStage( 'payment' ) }>{ __( 'Update payment method', 'fundraising-toolkit' ) }</button>
-                        ) }
-                        <button class="dp-action dp-action--danger" onClick={ () => setStage( 'cancel' ) }>{ __( 'Cancel donation', 'fundraising-toolkit' ) }</button>
                     </>
                 ) }
 
