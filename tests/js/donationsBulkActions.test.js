@@ -178,7 +178,12 @@ test( 'a batch that all succeeds says so and raises no failure', async () => {
 
 test( 'a selection with nothing eligible in it sends no requests', async () => {
     const calls = [];
-    seedApi( ( path ) => { calls.push( path ); return Promise.resolve( { ok: true } ); } );
+    // The screen also reads this reader's saved view on mount. The claim here
+    // is about what the ACTION sends, so that read is not one of these calls.
+    seedApi( ( path ) => {
+        if ( ! path.startsWith( '/fundkit/v1/admin/me/' ) ) calls.push( path );
+        return Promise.resolve( { ok: true } );
+    } );
 
     await mountList();
     const action = captured.actions.find( ( a ) => a.id === 'resend-receipt' );

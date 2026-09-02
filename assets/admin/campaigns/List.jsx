@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from '@wordpress/element';
 import { DataViews } from '@wordpress/dataviews';
 import Notice from '../_shared/components/Notice';
+import { useTableView } from '../_shared/useTableView';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
@@ -69,7 +70,7 @@ export function campaignsDeleteMessage( items ) {
 }
 
 export default function List() {
-    const [ view, setView ] = useState( {
+    const [ view, setView ] = useTableView( 'campaigns', {
         type:    'table',
         perPage: 25,
         page:    1,
@@ -77,7 +78,7 @@ export default function List() {
         filters: [],
         search:  '',
         fields:  [ 'title', 'status', 'raised', 'goal', 'donations_count', 'donors_count', 'forms_count', 'updated_at' ],
-    } );
+    }, () => fields.map( ( f ) => f.id ) );
 
     const [ data, setData ]       = useState( [] );
     const [ total, setTotal ]     = useState( 0 );

@@ -8,6 +8,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Mail as MailIcon, Check as CheckIcon, Coins, Plus, SearchX } from 'lucide-react';
 
 import Btn from '../_shared/components/Btn';
+import { useTableView } from '../_shared/useTableView';
 import Notice from '../_shared/components/Notice';
 import RecordDonationDrawer from './RecordDonationDrawer';
 import DateField from '../_shared/components/DateField';
@@ -87,7 +88,7 @@ const readTestPref = () => {
 export default function List() {
     const [ includeTest, setIncludeTest ] = useState( readTestPref );
 
-    const [ view, setView ] = useState( {
+    const [ view, setView ] = useTableView( 'donations', {
         type:    'table',
         perPage: 25,
         page:    1,
@@ -112,7 +113,7 @@ export default function List() {
                 frequency: { width: '110px' },
             },
         },
-    } );
+    }, () => fields.map( ( f ) => f.id ) );
 
     const toggleTest = ( on ) => {
         setIncludeTest( on );

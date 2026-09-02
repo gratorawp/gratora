@@ -9,6 +9,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { UserX as RedactIcon, Users as UsersIcon, Trash2 as DeleteIcon, SearchX } from 'lucide-react';
 import Notice from '../_shared/components/Notice';
+import { useTableView } from '../_shared/useTableView';
 import Toaster from '../_shared/components/Toaster';
 
 import Btn from '../_shared/components/Btn';
@@ -58,7 +59,7 @@ function donorKpis( stats ) {
 }
 
 export function DonorsApp( { toggleSlot } ) {
-    const [ view, setView ] = useState( {
+    const [ view, setView ] = useTableView( 'donors', {
         type:    'table',
         perPage: 25,
         page:    1,
@@ -77,7 +78,7 @@ export function DonorsApp( { toggleSlot } ) {
                 email:     { maxWidth: '230px' },
             },
         },
-    } );
+    }, () => fields.map( ( f ) => f.id ) );
 
     // Which empty this screen shows depends on it. See _shared/viewFilters.
     const filtered = isViewFiltered( view );

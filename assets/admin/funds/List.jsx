@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from '@wordpress/element';
 import { DataViews } from '@wordpress/dataviews';
 import Notice from '../_shared/components/Notice';
+import { useTableView } from '../_shared/useTableView';
 import { notify } from '../_shared/notify';
 import { dashboardHref } from '../_shared/adminPages';
 import apiFetch from '@wordpress/api-fetch';
@@ -88,7 +89,7 @@ function fundKpis( stats ) {
 }
 
 export default function List() {
-    const [ view, setView ] = useState( {
+    const [ view, setView ] = useTableView( 'funds', {
         type:    'table',
         perPage: 25,
         page:    1,
@@ -96,7 +97,7 @@ export default function List() {
         filters: [],
         search:  '',
         fields:  [ 'name', 'type', 'raised', 'goal', 'status' ],
-    } );
+    }, () => fields.map( ( f ) => f.id ) );
 
     const [ data, setData ]         = useState( [] );
     const [ total, setTotal ]       = useState( 0 );

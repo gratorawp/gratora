@@ -9,6 +9,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { RotateCw, SearchX } from 'lucide-react';
 
 import Btn from '../_shared/components/Btn';
+import { useTableView } from '../_shared/useTableView';
 import EmptyState from '../_shared/components/EmptyState';
 import { isViewFiltered, clearedView } from '../_shared/viewFilters';
 import KpiStrip from '../_shared/components/KpiStrip';
@@ -382,7 +383,7 @@ function emptyStateCopy( unlinked, testHidden ) {
 }
 
 export default function List() {
-    const [ view, setView ] = useState( {
+    const [ view, setView ] = useTableView( 'subscriptions', {
         type:    'table',
         perPage: 25,
         page:    1,
@@ -390,7 +391,7 @@ export default function List() {
         filters: [],
         search:  '',
         fields:  [ 'donor', 'amount', 'status', 'next_payment_at', 'started_at', 'campaign', 'gateway', 'lifetime' ],
-    } );
+    }, () => fields.map( ( f ) => f.id ) );
 
     const [ data, setData ]         = useState( [] );
     const [ total, setTotal ]       = useState( 0 );
