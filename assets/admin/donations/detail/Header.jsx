@@ -18,7 +18,7 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
     return (
         <header className="dd-head">
             <div className="dd-crumbs">
-                <button type="button" onClick={ onBack }>{ __( 'Fundraising Toolkit', 'fundraising-toolkit' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'Fundraising', 'fundraising-toolkit' ) }</button>
                 <span className="sep">›</span>
                 <button type="button" onClick={ onBack }>{ __( 'Donations', 'fundraising-toolkit' ) }</button>
                 <span className="sep">›</span>

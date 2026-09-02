@@ -273,7 +273,7 @@ export default function Settings() {
     return (
         <div className="fundkit-settings-page">
             <div className="fundkit-crumbs">
-                <a href="admin.php?page=fundkit">{ __( 'Fundraising Toolkit', 'fundraising-toolkit' ) }</a>
+                <a href="admin.php?page=fundkit">{ __( 'Fundraising', 'fundraising-toolkit' ) }</a>
                 <span className="sep">›</span>
                 <span>{ __( 'Settings', 'fundraising-toolkit' ) }</span>
                 <span className="sep">›</span>

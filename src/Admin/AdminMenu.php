@@ -76,12 +76,21 @@ final class AdminMenu extends HookProvider
         // data URI where there is no font to fall back on. Filled rather than
         // stroked, because svg-painter.js sets fill on the root element to
         // match the admin colour scheme: an open stroked path picks that up and
-        // fills into a blob. Sized to fill the 20px box so the letter carries
-        // the same optical weight as the core icons above and below it.
+        // fills into a blob. So the cupped hand is a closed crescent, drawn out
+        // along one arc and back along a tighter one.
+        //
+        // Two hands raised around a coin. The second hand is a mirror transform
+        // rather than a second path: hand-reversing the arc sweep flags is how
+        // the first attempt at this ended up drawing a spoon. Sized to fill the
+        // 20px box so it carries the same optical weight as the core icons
+        // above and below it.
+        $hand = 'M2.6 10.6a1.35 1.35 0 0 1 2.7 0v3.9a5.9 5.9 0 0 0 4.3 5.7l1.5.4v2.75l-2.2-.6'
+            . 'A8.6 8.6 0 0 1 2.6 14.5z';
+
         $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ffffff" stroke="none">'
-            . '<rect x="4.7" y="2.7" width="3.4" height="19.5" rx="1.7" />'
-            . '<rect x="4.7" y="2.7" width="14.6" height="3.4" rx="1.7" />'
-            . '<rect x="4.7" y="10.3" width="11.6" height="3.4" rx="1.7" />'
+            . '<circle cx="12" cy="7.4" r="4.3" />'
+            . '<path d="' . $hand . '" />'
+            . '<g transform="translate(24 0) scale(-1 1)"><path d="' . $hand . '" /></g>'
             . '</svg>';
         return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }

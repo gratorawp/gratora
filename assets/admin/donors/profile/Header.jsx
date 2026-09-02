@@ -42,7 +42,7 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
     return (
         <header className="dp-head">
             <div className="dp-crumbs">
-                <button type="button" onClick={ onBack }>{ __( 'Fundraising Toolkit', 'fundraising-toolkit' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'Fundraising', 'fundraising-toolkit' ) }</button>
                 <span className="sep">›</span>
                 <button type="button" onClick={ onBack }>{ __( 'Donors', 'fundraising-toolkit' ) }</button>
                 <span className="sep">›</span>
