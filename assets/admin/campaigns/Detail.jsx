@@ -1244,8 +1244,9 @@ function FormsTab( { campaign } ) {
             label:         __( 'Updated', 'fundkit-fundraising-campaigns' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <span className="fundkit-row__sub">
-                    { formatDate( item.updated_at ) }
+                <span className="fundkit-time" title={ formatDate( item.updated_at ) }>
+                    <span className="fundkit-time__rel">{ timeAgo( item.updated_at ) }</span>
+                    <span className="fundkit-time__abs">{ formatDate( item.updated_at ) }</span>
                 </span>
             ),
         },
