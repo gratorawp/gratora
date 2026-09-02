@@ -66,6 +66,12 @@ final class RecurringPlan extends Model
     public bool $is_test = false;
     public string $created_at;
     public string $updated_at;
+
+    /** Derived, like a donor's: every existing plan has one without a migration. */
+    public function reference(): string
+    {
+        return sprintf('SUB-%04d', (int) $this->id);
+    }
 }
 
 RecurringPlan::schema(function (Table $t): void {

@@ -9,6 +9,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { RotateCw, SearchX } from 'lucide-react';
 
 import Btn from '../_shared/components/Btn';
+import PlanDetailDialog from './PlanDetailDialog';
 import { useTableView } from '../_shared/useTableView';
 import EmptyState from '../_shared/components/EmptyState';
 import { isViewFiltered, clearedView } from '../_shared/viewFilters';
@@ -390,7 +391,7 @@ export default function List() {
         sort:    { field: 'next_payment_at', direction: 'asc' },
         filters: [],
         search:  '',
-        fields:  [ 'donor', 'amount', 'status', 'next_payment_at', 'started_at', 'campaign', 'gateway', 'lifetime' ],
+        fields:  [ 'reference', 'donor', 'amount', 'status', 'next_payment_at', 'started_at', 'campaign', 'gateway', 'lifetime' ],
     }, () => fields.map( ( f ) => f.id ) );
 
     const [ data, setData ]         = useState( [] );
@@ -401,6 +402,7 @@ export default function List() {
     const [ gateways, setGateways ] = useState( [] );
     const [ campaigns, setCampaigns ] = useState( [] );
     const [ dialog, setDialog ]     = useState( null );
+    const [ detail, setDetail ]     = useState( null );
     const [ unlinked, setUnlinked ] = useState( {
         total:      0,
         items:      [],
@@ -547,6 +549,21 @@ export default function List() {
     useEffect( () => { loadUnlinked(); }, [] );
 
     const fields = useMemo( () => [
+        {
+            id:    'reference',
+            label: __( 'Reference', 'fundraising-toolkit' ),
+            render: ( { item } ) => (
+                <span className="fundkit-ref-cell">
+                    <a
+                        className="fundkit-mono-link"
+                        href={ `#subscription/${ item.id }` }
+                        onClick={ ( e ) => { e.preventDefault(); setDetail( item ); } }
+                    >
+                        { item.reference }
+                    </a>
+                </span>
+            ),
+        },
         {
             id:    'donor',
             label: __( 'Donor', 'fundraising-toolkit' ),
@@ -887,6 +904,14 @@ export default function List() {
                         />
                     ) }
                 </div>
+            ) }
+
+            { detail && (
+                <PlanDetailDialog
+                    plan={ detail }
+                    onClose={ () => setDetail( null ) }
+                    onAction={ ( action ) => { setDialog( { plan: detail, action } ); setDetail( null ); } }
+                />
             ) }
 
             { dialog && (

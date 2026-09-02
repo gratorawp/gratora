@@ -351,6 +351,37 @@ final class RecurringController
     }
 
     /**
+     * The renewal that failed, so the reason is readable without hunting for
+     * the donation it belongs to. Queried only for a plan that has one.
+     *
+     * @return array{reference:string, reason:string, at:?string}|null
+     *
+     * @since 1.0.0
+     */
+    private function lastFailure(RecurringPlan $p): ?array
+    {
+        if ((int) $p->failed_renewals_count < 1) {
+            return null;
+        }
+
+        $donation = Donation::query()
+            ->where('recurring_plan_id', (int) $p->id)
+            ->where('status', 'failed')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        if (! $donation) {
+            return null;
+        }
+
+        return [
+            'reference' => (string) $donation->reference,
+            'reason'    => (string) $donation->failure_reason,
+            'at'        => $donation->created_at,
+        ];
+    }
+
+    /**
      * @return array<string,mixed>
      *
      * @since 1.0.0
@@ -363,6 +394,7 @@ final class RecurringController
         return [
             'id'                      => (int) $p->id,
             'gateway'                 => (string) $p->gateway,
+            'reference'               => $p->reference(),
             'gateway_subscription_id' => (string) $p->gateway_subscription_id,
             'amount_cents'            => (int) $p->amount_cents,
             'currency'                => (string) $p->currency,
@@ -377,6 +409,7 @@ final class RecurringController
             'payments_count'          => (int) $p->payments_count,
             'total_paid_cents'        => (int) $p->total_paid_cents,
             'failed_renewals_count'   => (int) $p->failed_renewals_count,
+            'last_failure'            => $this->lastFailure($p),
             // PayPal owns its own retry schedule and exposes no endpoint for it,
             // so the action is offered per gateway rather than per status.
             'can_retry'               => $this->gateways->get((string) $p->gateway) instanceof SupportsPaymentRetry,
