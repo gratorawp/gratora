@@ -115,6 +115,13 @@ final class DonorService
     }
 
     /** @since 1.0.0 */
+    /** @since 1.0.0 */
+    public function findById(int $id): ?Donor
+    {
+        return $this->donors->findById($id);
+    }
+
+    /** @since 1.0.0 */
     public function findByEmail(string $email): ?Donor
     {
         return $this->donors->findByEmailHash(
@@ -562,6 +569,41 @@ final class DonorService
      *
      * @since 1.0.0
      */
+    /**
+     * Reunite an erased donor with their record, because they gave again.
+     *
+     * The retention window exists for exactly this, and erasure keeps the
+     * handle so the record can still be found. What it does not do is decide
+     * on its own: the caller has to have watched money move, because the
+     * address alone proves nothing about who typed it.
+     *
+     * Idempotent, and silent on a donor who is not erased, so a replayed
+     * settlement cannot make it mean anything twice.
+     *
+     * @since 1.0.0
+     */
+    public function reactivateRedacted(Donor $donor, string $email): bool
+    {
+        if ($donor->redacted_at === null || trim($email) === '') {
+            return false;
+        }
+
+        // The address has to be the one this record answers to. A settlement
+        // carrying some other address would otherwise rewrite whose record it
+        // is, and the handle is what the whole reunification hangs on.
+        if (! hash_equals((string) $donor->email_hash, $this->hasher->emailHash($this->hasher->normalizeEmail($email)))) {
+            return false;
+        }
+
+        $donor->email_encrypted = $this->crypto->encrypt($email);
+        $donor->redacted_at     = null;
+        $donor->updated_at      = $this->clock->now()->format('Y-m-d H:i:s');
+        $donor->save();
+
+        return true;
+    }
+
+    /** @since 1.0.0 */
     public function decryptEmail(Donor $donor): ?string
     {
         if ($donor->redacted_at !== null || $donor->email_encrypted === '') {

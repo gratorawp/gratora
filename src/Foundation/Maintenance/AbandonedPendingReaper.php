@@ -127,6 +127,11 @@ final class AbandonedPendingReaper
                     ->update([
                         'status'         => 'failed',
                         'failure_reason' => 'Abandoned before payment.',
+                        // An attempt that never paid never earns the
+                        // reactivation it was carrying, and the address it
+                        // holds belongs to someone who asked to be erased. It
+                        // goes with the attempt.
+                        'pending_reactivation_email' => null,
                         'updated_at'     => $this->clock->now()->format('Y-m-d H:i:s'),
                     ]);
             },

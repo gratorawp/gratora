@@ -328,6 +328,10 @@ final class DonationsController
             // The money is recorded against the erased shell instead, which is
             // the choice the admin path already makes for the same reason.
             reactivate_redacted_donor: false,
+            // Deferred rather than declined: the donor asserted this address
+            // themselves, so a settlement on this donation is the proof that
+            // creating it could not be. DonationService::confirm spends it.
+            reactivate_redacted_donor_on_payment: true,
         );
 
         try {

@@ -116,6 +116,17 @@ final class DonationService
                 $intent->reactivate_redacted_donor
             );
 
+            // This row is committed before the gateway is contacted, so the
+            // public path declines the reactivation above: otherwise a stranger
+            // typing an erased donor's address un-erases them without paying.
+            // The address is kept here so confirm() can do it when money has
+            // actually moved, which is what the rule was always meant to be.
+            // Only for a donor who is erased, and only until it is spent.
+            $carriedEmail = null;
+            if ($donor->redacted_at !== null && $intent->reactivate_redacted_donor_on_payment) {
+                $carriedEmail = $this->crypto->encrypt($intent->email);
+            }
+
             $isTest = $intent->is_test ?? $this->testMode->forFormId($intent->form_id);
 
             $donation = Donation::make();
@@ -210,6 +221,14 @@ final class DonationService
                 $donation->note_to_org      = null;
                 $donation->note_public      = false;
             }
+
+            // The one exception to the rule above, and the reason it is narrow:
+            // encrypted, written only for an erased donor, and cleared the
+            // moment it is spent or the attempt is closed. Without it an erased
+            // donor who gives again is charged and then hears nothing, because
+            // every donor-facing email reads its address from the donor row and
+            // erasure emptied it.
+            $donation->pending_reactivation_email = $carriedEmail;
 
             $donation->save();
 
@@ -480,6 +499,25 @@ final class DonationService
                 : $donation->gateway_metadata;
             $donation->paid_at              = $paidAt;
             $donation->updated_at           = $now;
+
+            // Money has moved, which is the proof the public path could not
+            // have. Spent before donation.completed, because that event is what
+            // sends the receipt, and a receipt reads its address from the donor
+            // row: reuniting them afterwards would post it to an empty one.
+            //
+            // Cleared either way. It has done its work on success, and on a
+            // donor who is no longer erased, or whose record this address no
+            // longer answers to, it has none to do.
+            $carried = (string) ($donation->pending_reactivation_email ?? '');
+            if ($carried !== '') {
+                $donor = $this->donors->findById($donation->donor_id);
+                $plain = $this->crypto->decrypt($carried);
+                if ($donor !== null && is_string($plain) && $plain !== '') {
+                    $this->donors->reactivateRedacted($donor, $plain);
+                }
+                $donation->pending_reactivation_email = null;
+            }
+
             $donation->save();
 
             $this->events->record('donation.completed', [

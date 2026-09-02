@@ -68,6 +68,21 @@ final class DonationIntent
          */
         public readonly bool $reactivate_redacted_donor = true,
         /**
+         * Whether money settling on this donation may reunite an erased donor
+         * with their record, when creating it may not.
+         *
+         * The public form declines the reactivation above, because its row is
+         * written before the gateway is contacted and a stranger who types the
+         * address would otherwise undo an erasure for free. It sets this
+         * instead: the donor asserted the address themselves, and paying is
+         * the proof creating could not be.
+         *
+         * The admin path sets neither, and that is the difference between
+         * them. A donor who came back is re-engagement; an admin typing an
+         * address into a form is not, whether or not a cheque clears.
+         */
+        public readonly bool $reactivate_redacted_donor_on_payment = false,
+        /**
          * The attempt tree this submission continues, minted by
          * AntiSpamGuard::claimRetry. Null opens a new tree. Kept out of $extra
          * because $extra is caller-supplied and this is not the caller's to

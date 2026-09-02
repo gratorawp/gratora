@@ -44,6 +44,7 @@ final class CoreDonorDataHandler implements ErasureHandler
                 && $donation->gateway_metadata === null
                 && $attribution === $donation->source_attribution
                 && $donation->failure_reason === null
+                && $donation->pending_reactivation_email === null
             ) {
                 continue;
             }
@@ -58,6 +59,10 @@ final class CoreDonorDataHandler implements ErasureHandler
             $donation->source_attribution    = $attribution;
             // Raw gateway error text, which quotes back what was submitted.
             $donation->failure_reason        = null;
+            // An unpaid attempt was holding this address so a settlement could
+            // reunite them with this record. They have just asked to be erased
+            // instead, and that attempt must not undo it.
+            $donation->pending_reactivation_email = null;
             $donation->updated_at            = $request->at;
             $donation->save();
         }

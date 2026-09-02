@@ -67,6 +67,19 @@ final class Donation extends Model
     /** Name as given for this donation; the donor record stays canonical. */
     public ?string $donor_first_name = null;
     public ?string $donor_last_name = null;
+    /**
+     * AES-GCM ciphertext of the address this submission gave, written ONLY
+     * when the donor it names has been erased, and cleared the moment it is
+     * used or the attempt is closed.
+     *
+     * Someone who erased themselves and then gives again is the re-engagement
+     * the retention window exists for, and reuniting them needs the address.
+     * But the row is written before the gateway is contacted, so doing it then
+     * lets any stranger who types their address un-erase them without paying.
+     * The address waits here until money actually moves, and confirm() is what
+     * spends it.
+     */
+    public ?string $pending_reactivation_email = null;
     public bool $is_anonymous = false;
     /** Test-mode donation: excluded from all money reporting, never charged live. */
     public bool $is_test = false;
@@ -137,6 +150,7 @@ Donation::schema(function (Table $t): void {
     $t->longText('custom_data_encrypted')->nullable();
     $t->string('donor_first_name', 100)->nullable();
     $t->string('donor_last_name', 100)->nullable();
+    $t->longText('pending_reactivation_email')->nullable();
     $t->boolean('is_anonymous')->default(0);
     $t->boolean('is_test')->default(0)->index();
     $t->string('failure_reason', 255)->nullable();
