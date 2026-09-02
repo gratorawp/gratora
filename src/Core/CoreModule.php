@@ -17,6 +17,7 @@ use FundKit\Admin\Pages\FundsPage;
 use FundKit\Admin\Pages\ToolsPage;
 use FundKit\Admin\DeactivationDialog;
 use FundKit\Admin\ManagedPageStates;
+use FundKit\Admin\ProxyNotice;
 use FundKit\Admin\TestModeBadge;
 use FundKit\Admin\Pages\SettingsPage;
 use FundKit\Analytics\Event;
@@ -1240,6 +1241,11 @@ final class CoreModule implements FundKitModule
                 $c->get(StripeApi::class),
             ))->register();
         }
+
+        // Every per-address limit becomes a limit for the whole site at once
+        // when something in front terminates the connection, and nothing else
+        // would say so: the limits do not fail loudly, they refuse a donor.
+        (new ProxyNotice())->register();
     }
 
     /** @since 1.0.0 */

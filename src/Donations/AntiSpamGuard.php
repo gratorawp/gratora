@@ -6,6 +6,7 @@ namespace FundKit\Donations;
 
 use FundKit\Foundation\Config\SystemSetting;
 use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Http\ClientIp;
 use FundKit\Foundation\Identity\IdentityHasher;
 use FundKit\Foundation\Plugin;
 use FundKit\Gateways\GatewayManager;
@@ -281,9 +282,10 @@ final class AntiSpamGuard
     /**
      * The subject of the per-IP quota.
      *
-     * REMOTE_ADDR only. A forwarded-for header is written by whoever is
-     * speaking to us, so honouring one would let any caller mint a fresh
-     * quota per request by changing a string.
+     * REMOTE_ADDR unless the site has declared its own proxies, because a
+     * forwarded header is written by whoever is speaking to us and believing
+     * one unconditionally would let any caller mint a fresh quota per request
+     * by changing a string. ClientIp holds that rule.
      *
      * IPv6 is bucketed by its /64 rather than its full address. A single
      * host is routinely routed a whole /64, so per-address counting hands
@@ -294,7 +296,7 @@ final class AntiSpamGuard
      */
     private function quotaSubject(): string
     {
-        $ip = filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: '';
+        $ip = ClientIp::resolve();
         if ($ip === '') {
             return 'unknown';
         }

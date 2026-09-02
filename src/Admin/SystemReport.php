@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Admin;
 
+use FundKit\Foundation\Http\ClientIp;
 use FundKit\Foundation\Config\SystemSetting;
 use FundKit\Foundation\Modules\ModuleManager;
 use FundKit\Gateways\GatewayManager;
@@ -179,6 +180,28 @@ final class SystemReport
             self::row(__('PHP interface', 'fundraising-toolkit'), PHP_SAPI),
             self::row(__('Web server', 'fundraising-toolkit'), $software !== '' ? $software : __('unknown', 'fundraising-toolkit')),
             self::row(__('HTTPS', 'fundraising-toolkit'), self::yesNo(is_ssl())),
+            // The shape, never the address: this screen is written to be pasted
+            // into a ticket, and a visitor's IP is theirs. It still answers the
+            // only question an admin has here, which is whether the proxy
+            // configuration is doing anything: declare ranges and see this flip
+            // to "forwarded header", or it is not matching your edge.
+            self::row(
+                __('Trusted proxies', 'fundraising-toolkit'),
+                ($count = count(ClientIp::trustedProxies())) > 0
+                    /* translators: %d: number of declared CIDR ranges */
+                    ? sprintf(_n('%d range', '%d ranges', $count, 'fundraising-toolkit'), $count)
+                    : __('none declared', 'fundraising-toolkit')
+            ),
+            self::row(
+                __('Visitor address from', 'fundraising-toolkit'),
+                ClientIp::resolve() !== ClientIp::remote()
+                    ? __('forwarded header', 'fundraising-toolkit')
+                    : __('REMOTE_ADDR', 'fundraising-toolkit')
+            ),
+            self::row(
+                __('Undeclared proxy in front', 'fundraising-toolkit'),
+                self::yesNo(ClientIp::looksProxied())
+            ),
             self::row(__('Memory limit', 'fundraising-toolkit'), (string) ini_get('memory_limit')),
             self::row(__('Max execution time', 'fundraising-toolkit'), (string) ini_get('max_execution_time')),
             self::row(__('Upload max filesize', 'fundraising-toolkit'), (string) ini_get('upload_max_filesize')),

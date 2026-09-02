@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Donors;
 
 use FundKit\Donations\AntiSpamGuard;
+use FundKit\Foundation\Http\ClientIp;
 use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Time\Clock;
 
@@ -188,7 +189,9 @@ final class MagicLinkService
     /** @since 1.0.0 */
     private function rateKey(string $purpose): string
     {
-        $ip = filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: 'unknown';
+        // Through ClientIp like every other limit, so a site behind its own
+        // edge does not shut every donor out of receipts together.
+        $ip = ClientIp::resolve() ?: 'unknown';
 
         return 'fundkit_ml_val_' . hash('sha256', $purpose . '|' . $ip);
     }

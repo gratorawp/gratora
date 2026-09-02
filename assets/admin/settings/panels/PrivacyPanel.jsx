@@ -208,6 +208,23 @@ export default function PrivacyPanel( { s } ) {
                     onChange={ s.setValue( 'anonymize_ips' ) }
                 />
 
+                <FormRow
+                    label={ __( 'Trusted proxy ranges', 'fundraising-toolkit' ) }
+                    help={ __( "One address or CIDR range per line. Leave empty unless a CDN, load balancer or reverse proxy sits in front of this site: spam limits count visitors by address, and behind a proxy every visitor arrives as the proxy, so the whole site shares one visitor's allowance. Only ranges listed here are believed when they say who a visitor really is.", 'fundraising-toolkit' ) }
+                    wide
+                >
+                    <textarea
+                        className="fundkit-textarea"
+                        rows={ 4 }
+                        spellCheck={ false }
+                        placeholder={ '173.245.48.0/20\n2400:cb00::/32\n10.0.0.0/8' }
+                        value={ ( s.value( 'trusted_proxies', [] ) || [] ).join( '\n' ) }
+                        onChange={ ( e ) => s.setValue( 'trusted_proxies' )(
+                            e.target.value.split( '\n' ).map( ( l ) => l.trim() ).filter( Boolean )
+                        ) }
+                    />
+                </FormRow>
+
                 <ToggleRow
                     title={ __( 'Show Gravatar profile pictures', 'fundraising-toolkit' ) }
                     sub={ __( "Donor lists show Gravatars instead of initials. Each one sends a hash of the donor's email to gravatar.com from the visitor's browser. Anonymous donors are never shown one.", 'fundraising-toolkit' ) }

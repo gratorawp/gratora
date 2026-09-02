@@ -108,6 +108,15 @@ final class SettingsService
                 // Prune fundkit_events older than N days; 0 disables.
                 'event_retention_days'           => 730,
                 'anonymize_ips'                  => true,
+                // CIDRs of this site's own edge: a CDN, a load balancer, a
+                // reverse proxy. Empty means REMOTE_ADDR is taken at face
+                // value and no forwarded header is believed, which is right
+                // for a site nothing sits in front of and wrong for one where
+                // something does, because then every visitor shares an address
+                // and every per-visitor limit becomes a limit for the site.
+                // Declaring nothing is safe; declaring the wrong thing is not,
+                // so it stays empty until an admin says otherwise.
+                'trusted_proxies'                => [],
                 // Off by default: a Gravatar request carries a hash of the
                 // donor's address to a third party, from the visitor's browser,
                 // on a public page. That is the org's call to make, not ours.
