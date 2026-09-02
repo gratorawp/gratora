@@ -73,7 +73,7 @@ const ORDERBY_COLUMN = {
 /** @since 1.0.0 */
 export const orderbyFor = ( field ) => ORDERBY_COLUMN[ field ] || field || 'next_payment_at';
 
-function intervalLabel( unit, count ) {
+export function intervalLabel( unit, count ) {
     const n = Number( count ) || 1;
     switch ( unit ) {
         case 'week':

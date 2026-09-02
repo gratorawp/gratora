@@ -6,6 +6,7 @@ import Btn from '../_shared/components/Btn';
 import StatusBadge from '../_shared/components/StatusBadge';
 import { formatAmount, formatDate } from '../donations/format';
 import { actionsFor } from '../_shared/recurring/PlanActions';
+import { intervalLabel } from './List';
 
 // The donation screen owns the failed renewal, including its retry.
 function donationHref( reference ) {
@@ -16,23 +17,26 @@ function donationHref( reference ) {
     } );
 }
 
-function Row( { label, children } ) {
-    if ( children === null || children === undefined || children === '' ) return null;
+/** Empty rows are dropped, so a section never renders a column of dashes. */
+function Section( { title, rows } ) {
+    const present = rows.filter( ( r ) => r.value !== null && r.value !== undefined && r.value !== '' && r.value !== false );
+    if ( ! present.length ) return null;
 
     return (
-        <div className="dd-kv">
-            <div className="dd-kv__key">{ label }</div>
-            <div className="dd-kv__val">{ children }</div>
+        <div className="sd-group">
+            <h4 className="sd-group__title">{ title }</h4>
+            <dl className="sd-kv">
+                { present.map( ( r ) => (
+                    <div className="sd-kv__row" key={ r.label }>
+                        <dt className="sd-kv__lbl">{ r.label }</dt>
+                        <dd className="sd-kv__val">{ r.value }</dd>
+                    </div>
+                ) ) }
+            </dl>
         </div>
     );
 }
 
-/**
- * Everything held about one plan, and the actions that change it.
- *
- * The donor profile still owns the plan's history; this is the same record
- * without leaving the list somebody was working through.
- */
 export default function PlanDetailDialog( { plan, onClose, onAction } ) {
     const donorHref = addQueryArgs( window.location.pathname, { page: 'fundkit-donors' } )
         + `#donor/${ plan.donor?.id }`;
@@ -52,57 +56,65 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
                 </>
             }
         >
-            <Row label={ __( 'Donor', 'fundraising-toolkit' ) }>
-                <a href={ donorHref }>{ plan.donor?.name || __( 'Unknown', 'fundraising-toolkit' ) }</a>
-            </Row>
-            <Row label={ __( 'Amount', 'fundraising-toolkit' ) }>
-                { formatAmount( plan.amount_cents, plan.currency ) }
-            </Row>
-            <Row label={ __( 'Status', 'fundraising-toolkit' ) }>
+            <div className="sd-head">
+                <div className="sd-head__amount">
+                    { formatAmount( plan.amount_cents, plan.currency ) }
+                    <span className="sd-head__interval">
+                        { ' / ' }{ intervalLabel( plan.interval_unit, plan.interval_count ) }
+                    </span>
+                </div>
                 <StatusBadge status={ plan.status } />
-            </Row>
-            <Row label={ __( 'Gateway', 'fundraising-toolkit' ) }>
-                <span style={ { textTransform: 'capitalize' } }>{ plan.gateway }</span>
-            </Row>
-            <Row label={ __( 'Subscription ID', 'fundraising-toolkit' ) }>
-                { plan.gateway_subscription_id
-                    ? <code className="mono">{ plan.gateway_subscription_id }</code>
-                    : __( 'Not linked', 'fundraising-toolkit' ) }
-            </Row>
-            <Row label={ __( 'Started', 'fundraising-toolkit' ) }>
-                { plan.started_at ? formatDate( plan.started_at ) : null }
-            </Row>
-            <Row label={ __( 'Next payment', 'fundraising-toolkit' ) }>
-                { plan.next_payment_at ? formatDate( plan.next_payment_at ) : null }
-            </Row>
-            <Row label={ __( 'Last payment', 'fundraising-toolkit' ) }>
-                { plan.last_payment_at ? formatDate( plan.last_payment_at ) : null }
-            </Row>
-            <Row label={ __( 'Resumes', 'fundraising-toolkit' ) }>
-                { plan.resume_at ? formatDate( plan.resume_at ) : null }
-            </Row>
-            <Row label={ __( 'Cancelled', 'fundraising-toolkit' ) }>
-                { plan.cancelled_at ? formatDate( plan.cancelled_at ) : null }
-            </Row>
-            <Row label={ __( 'Payments', 'fundraising-toolkit' ) }>
-                { plan.payments_count }
-            </Row>
-            <Row label={ __( 'Lifetime', 'fundraising-toolkit' ) }>
-                { formatAmount( plan.total_paid_cents, plan.currency ) }
-            </Row>
-            <Row label={ __( 'Failed renewals', 'fundraising-toolkit' ) }>
-                { plan.failed_renewals_count > 0 ? plan.failed_renewals_count : null }
-            </Row>
-            <Row label={ __( 'Why it failed', 'fundraising-toolkit' ) }>
-                { plan.last_failure && (
-                    <>
-                        <div>{ plan.last_failure.reason || __( 'No reason was recorded.', 'fundraising-toolkit' ) }</div>
-                        <a href={ donationHref( plan.last_failure.reference ) }>
-                            { plan.last_failure.reference }
-                        </a>
-                    </>
-                ) }
-            </Row>
+            </div>
+
+            { plan.donor?.name && (
+                <p className="sd-head__donor">
+                    <a href={ donorHref }>{ plan.donor.name }</a>
+                </p>
+            ) }
+
+            { plan.last_failure && (
+                <div className="sd-failure">
+                    <div className="sd-failure__reason">
+                        { plan.last_failure.reason || __( 'The gateway gave no reason.', 'fundraising-toolkit' ) }
+                    </div>
+                    <a href={ donationHref( plan.last_failure.reference ) }>
+                        { plan.last_failure.reference }
+                    </a>
+                </div>
+            ) }
+
+            <Section
+                title={ __( 'Schedule', 'fundraising-toolkit' ) }
+                rows={ [
+                    { label: __( 'Next payment', 'fundraising-toolkit' ), value: plan.next_payment_at && formatDate( plan.next_payment_at ) },
+                    { label: __( 'Last payment', 'fundraising-toolkit' ), value: plan.last_payment_at && formatDate( plan.last_payment_at ) },
+                    { label: __( 'Started', 'fundraising-toolkit' ), value: plan.started_at && formatDate( plan.started_at ) },
+                    { label: __( 'Resumes', 'fundraising-toolkit' ), value: plan.resume_at && formatDate( plan.resume_at ) },
+                    { label: __( 'Cancelled', 'fundraising-toolkit' ), value: plan.cancelled_at && formatDate( plan.cancelled_at ) },
+                ] }
+            />
+
+            <Section
+                title={ __( 'Giving', 'fundraising-toolkit' ) }
+                rows={ [
+                    { label: __( 'Payments', 'fundraising-toolkit' ), value: plan.payments_count || null },
+                    { label: __( 'Lifetime', 'fundraising-toolkit' ), value: formatAmount( plan.total_paid_cents, plan.currency ) },
+                    { label: __( 'Failed renewals', 'fundraising-toolkit' ), value: plan.failed_renewals_count || null },
+                ] }
+            />
+
+            <Section
+                title={ __( 'Payment provider', 'fundraising-toolkit' ) }
+                rows={ [
+                    { label: __( 'Gateway', 'fundraising-toolkit' ), value: <span className="sd-cap">{ plan.gateway }</span> },
+                    {
+                        label: __( 'Subscription ID', 'fundraising-toolkit' ),
+                        value: plan.gateway_subscription_id
+                            ? <code className="sd-mono">{ plan.gateway_subscription_id }</code>
+                            : <span className="sd-muted">{ __( 'Not linked', 'fundraising-toolkit' ) }</span>,
+                    },
+                ] }
+            />
         </Dialog>
     );
 }

@@ -10,3 +10,83 @@
 @import '@fundkit/ui/scss/components/switch';
 @import '@fundkit/ui/scss/components/dialog';
 @import '@fundkit/ui/scss/components/form';
+
+.sd-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+
+    &__amount {
+        font-size: 22px;
+        font-weight: 600;
+        color: $text;
+    }
+
+    &__interval {
+        font-size: 14px;
+        font-weight: 400;
+        color: $text-muted;
+    }
+
+    &__donor {
+        margin: 2px 0 0;
+        font-size: 13px;
+    }
+}
+
+.sd-failure {
+    margin-top: 16px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #fdecec;
+    color: #b42318;
+    font-size: 13px;
+
+    &__reason { margin-bottom: 2px; }
+    a { color: inherit; }
+}
+
+.sd-group {
+    margin-top: 20px;
+
+    &__title {
+        margin: 0 0 8px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: $text-muted;
+    }
+}
+
+.sd-kv {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    row-gap: 8px;
+    column-gap: 16px;
+    margin: 0;
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+        row-gap: 4px;
+    }
+
+    &__row { display: contents; }
+
+    &__lbl {
+        margin: 0;
+        font-size: 13px;
+        color: $text-muted;
+    }
+
+    &__val {
+        margin: 0;
+        font-size: 13px;
+        color: $text;
+    }
+}
+
+.sd-cap  { text-transform: capitalize; }
+.sd-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+.sd-muted { color: $text-muted; }
