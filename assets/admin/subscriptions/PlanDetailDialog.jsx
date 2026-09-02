@@ -1,4 +1,4 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 
 import Dialog from '../_shared/components/Dialog';
@@ -40,6 +40,15 @@ function Section( { title, rows } ) {
 export default function PlanDetailDialog( { plan, onClose, onAction } ) {
     const donorHref = addQueryArgs( window.location.pathname, { page: 'fundkit-donors' } )
         + `#donor/${ plan.donor?.id }`;
+
+    // Named after the provider, because the dialog title is also a subscription
+    // id and the two never match.
+    const gatewayName = plan.gateway ? plan.gateway.charAt( 0 ).toUpperCase() + plan.gateway.slice( 1 ) : '';
+    let providerIdLabel = __( 'Provider ID', 'fundraising-toolkit' );
+    if ( gatewayName ) {
+        /* translators: %s: payment gateway name, e.g. Stripe. */
+        providerIdLabel = sprintf( __( '%s ID', 'fundraising-toolkit' ), gatewayName );
+    }
 
     return (
         <Dialog
@@ -108,7 +117,7 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
                 rows={ [
                     { label: __( 'Gateway', 'fundraising-toolkit' ), value: <span className="sd-cap">{ plan.gateway }</span> },
                     {
-                        label: __( 'Subscription ID', 'fundraising-toolkit' ),
+                        label: providerIdLabel,
                         value: plan.gateway_subscription_id
                             ? <code className="sd-mono">{ plan.gateway_subscription_id }</code>
                             : <span className="sd-muted">{ __( 'Not linked', 'fundraising-toolkit' ) }</span>,
