@@ -839,3 +839,35 @@
         &:focus { outline: none; box-shadow: none; }
     }
 }
+
+.dp-facts {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    row-gap: 8px;
+    column-gap: 16px;
+    margin: 16px 0 0;
+
+    @media (max-width: 560px) {
+        grid-template-columns: 1fr;
+        row-gap: 2px;
+    }
+
+    &__row { display: contents; }
+
+    dt {
+        margin: 0;
+        font-size: 13px;
+        color: var(--dp-muted, #6b7280);
+    }
+
+    dd {
+        margin: 0;
+        font-size: 13px;
+    }
+}
+
+.dp-detail__interval {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--dp-muted, #6b7280);
+}

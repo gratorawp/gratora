@@ -758,6 +758,24 @@ function DonationDetail( { reference, onClose } ) {
                             ) }
                         </div>
 
+
+                        <dl class="dp-facts">
+                            { [
+                                [ __( 'Campaign', 'fundraising-toolkit' ), d.campaign_title ],
+                                [ __( 'Form', 'fundraising-toolkit' ), d.form_title ],
+                                [ __( 'Fund', 'fundraising-toolkit' ), d.fund_name ],
+                                [ __( 'Frequency', 'fundraising-toolkit' ), d.frequency === 'one_time' ? __( 'One-off', 'fundraising-toolkit' ) : d.frequency ],
+                                [ __( 'Paid with', 'fundraising-toolkit' ), d.payment_method ],
+                                [ __( 'Fees you covered', 'fundraising-toolkit' ), d.fee_covered_cents > 0 ? formatAmount( d.fee_covered_cents, d.currency ) : null ],
+                                [ __( 'Your note', 'fundraising-toolkit' ), d.note_to_org ],
+                            ].filter( ( [ , v ] ) => v ).map( ( [ k, v ] ) => (
+                                <div class="dp-facts__row" key={ k }>
+                                    <dt>{ k }</dt>
+                                    <dd>{ v }</dd>
+                                </div>
+                            ) ) }
+                        </dl>
+
                         { d.give_again_url && (
                             <div class="dp-detail__section">
                                 <a class="dp-action is-primary" href={ d.give_again_url }>
@@ -880,6 +898,36 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
 
                 { stage === 'menu' && (
                     <>
+                        <div class="dp-detail__head">
+                            <div class="dp-detail__amount">
+                                { formatAmount( plan.amount_cents, plan.currency ) }
+                                <span class="dp-detail__interval">
+                                    { ' / ' }{ intervalLabel( plan.interval_count, plan.interval_unit ) }
+                                </span>
+                            </div>
+                            <div class="dp-detail__meta">
+                                { recurringStatusLabel( plan.status ) }{ plan.reference ? ` \u00b7 ${ plan.reference }` : '' }
+                            </div>
+                        </div>
+
+                        <dl class="dp-facts">
+                            { [
+                                [ __( 'Campaign', 'fundraising-toolkit' ), plan.campaign_title ],
+                                [ __( 'Fund', 'fundraising-toolkit' ), plan.fund_name ],
+                                [ __( 'Next charge', 'fundraising-toolkit' ), plan.next_payment_at ? formatDate( plan.next_payment_at ) : null ],
+                                [ __( 'Last charge', 'fundraising-toolkit' ), plan.last_payment_at ? formatDate( plan.last_payment_at ) : null ],
+                                [ __( 'Resumes', 'fundraising-toolkit' ), plan.resume_at ? formatDate( plan.resume_at ) : null ],
+                                [ __( 'Giving since', 'fundraising-toolkit' ), plan.started_at ? formatDate( plan.started_at ) : null ],
+                                [ __( 'Donations made', 'fundraising-toolkit' ), plan.payments_count || null ],
+                                [ __( 'Given in total', 'fundraising-toolkit' ), plan.total_paid_cents ? formatAmount( plan.total_paid_cents, plan.currency ) : null ],
+                            ].filter( ( [ , v ] ) => v ).map( ( [ k, v ] ) => (
+                                <div class="dp-facts__row" key={ k }>
+                                    <dt>{ k }</dt>
+                                    <dd>{ v }</dd>
+                                </div>
+                            ) ) }
+                        </dl>
+
                         <h3>{ __( 'Manage donation', 'fundraising-toolkit' ) }</h3>
                         { /* Two shipped gateways handle subscriptions and
                              refuse both of these: a Direct Debit mandate has no

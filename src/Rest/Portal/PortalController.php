@@ -7,6 +7,8 @@ namespace FundKit\Rest\Portal;
 use FundKit\Analytics\ErrorLog;
 use FundKit\Async\AsyncDispatcher;
 use FundKit\Campaigns\Campaign;
+use FundKit\Funds\Fund;
+use FundKit\Forms\Form;
 use FundKit\Donations\AntiSpamGuard;
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationQueries;
@@ -757,6 +759,7 @@ final class PortalController
         }
 
         $giveAgainUrl = null;
+        $campaign     = null;
         if ($d->campaign_id) {
             $campaign = Campaign::query()->find('id', (int) $d->campaign_id);
             if ($campaign && $campaign->page_id) {
@@ -778,6 +781,19 @@ final class PortalController
             }
         }
 
+        $form      = $d->form_id ? Form::query()->find('id', (int) $d->form_id) : null;
+        $formTitle = $form ? (string) $form->title : null;
+
+        $fund     = $d->fund_id ? Fund::query()->find('id', (int) $d->fund_id) : null;
+        $fundName = $fund ? (string) $fund->name : null;
+
+        // What the donor would recognise on their statement, not the gateway's
+        // own vocabulary.
+        $paymentMethod = trim(implode(' ', array_filter([
+            (string) ($d->payment_method_brand ?? ''),
+            $d->payment_method_last4 ? '•••• ' . $d->payment_method_last4 : '',
+        ]))) ?: null;
+
         // Add-ons own records that hang off a donation, and the filter is how
         // those reach the portal without core knowing what they are.
         $payload = (array) apply_filters('fundkit.portal.donation', [
@@ -790,7 +806,12 @@ final class PortalController
             'frequency'         => (string) $d->frequency,
             'gateway'           => (string) $d->gateway,
             'campaign_id'       => $d->campaign_id ? (int) $d->campaign_id : null,
+            'campaign_title'    => $campaign ? (string) $campaign->title : null,
             'form_id'           => $d->form_id ? (int) $d->form_id : null,
+            'form_title'        => $formTitle,
+            'fund_name'         => $fundName,
+            'note_to_org'       => $d->note_to_org ?: null,
+            'payment_method'    => $paymentMethod,
             'paid_at'           => $d->paid_at,
             'is_anonymous'      => (bool) $d->is_anonymous,
             'give_again_url'    => $giveAgainUrl,
@@ -847,6 +868,17 @@ final class PortalController
                 'status'          => (string) $p->status,
                 'next_payment_at' => $p->next_payment_at,
                 'campaign_id'     => $p->campaign_id ? (int) $p->campaign_id : null,
+                'campaign_title'  => $p->campaign_id
+                    ? (string) (Campaign::query()->find('id', (int) $p->campaign_id)->title ?? '')
+                    : null,
+                'fund_name'       => $p->fund_id
+                    ? (string) (Fund::query()->find('id', (int) $p->fund_id)->name ?? '')
+                    : null,
+                'started_at'      => $p->started_at,
+                'last_payment_at' => $p->last_payment_at,
+                'resume_at'       => $p->resume_at,
+                'payments_count'  => (int) $p->payments_count,
+                'total_paid_cents' => (int) $p->total_paid_cents,
                 // Offline plans have no card, and a gateway that cannot take a
                 // new one must not be offered the option.
                 'can_update_payment_method' => $this->gateways->get((string) $p->gateway)
