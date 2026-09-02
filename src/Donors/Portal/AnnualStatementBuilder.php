@@ -96,7 +96,7 @@ final class AnnualStatementBuilder
         $org      = OrgProfile::load();
         $orgName  = (string) $org['name'];
         $donorName = trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''));
-        if ($donorName === '') $donorName = __('Friend', 'fundkit-fundraising-campaigns');
+        if ($donorName === '') $donorName = __('Friend', 'fundraising-toolkit');
 
         $html = View::loadRelative(__DIR__, 'views/annual-statement', [
             'year'       => $year,
@@ -107,9 +107,9 @@ final class AnnualStatementBuilder
         ]);
 
         return $this->pdf->fromHtml($html, [
-            'title'   => sprintf(/* translators: %d: year */ __('Annual statement %d', 'fundkit-fundraising-campaigns'), $year),
+            'title'   => sprintf(/* translators: %d: year */ __('Annual statement %d', 'fundraising-toolkit'), $year),
             'author'  => $orgName,
-            'subject' => __('Annual donation statement', 'fundkit-fundraising-campaigns'),
+            'subject' => __('Annual donation statement', 'fundraising-toolkit'),
         ]);
     }
 }

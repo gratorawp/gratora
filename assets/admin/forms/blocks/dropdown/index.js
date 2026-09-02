@@ -25,7 +25,7 @@ function Edit( { attributes, setAttributes } ) {
     const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--dropdown' } );
 
     const selected = options.find( ( o ) => o.isDefault ) || options[ 0 ];
-    const previewText = placeholder || selected?.label || __( 'Select one…', 'fundkit-fundraising-campaigns' );
+    const previewText = placeholder || selected?.label || __( 'Select one…', 'fundraising-toolkit' );
 
     const updateOptionLabel = ( i, v ) => {
         const row     = options[ i ];
@@ -43,31 +43,31 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Dropdown', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Dropdown', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or an option to edit inline.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Click the label or an option to edit inline.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Placeholder', 'fundraising-toolkit' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
-                        placeholder={ __( 'Select one…', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'First option shown before a value is picked.', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Select one…', 'fundraising-toolkit' ) }
+                        help={ __( 'First option shown before a value is picked.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Field name', 'fundraising-toolkit' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugifyField( v ) } ) }
-                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Required', 'fundraising-toolkit' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -89,7 +89,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="fundkit-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Question', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Question', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
@@ -124,7 +124,7 @@ function Edit( { attributes, setAttributes } ) {
                             tagName="span"
                             value={ o.label }
                             onChange={ ( v ) => updateOptionLabel( i, v ) }
-                            placeholder={ __( 'Option label', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'Option label', 'fundraising-toolkit' ) }
                             allowedFormats={ [] }
                             style={ {
                                 fontSize:    12,
@@ -145,8 +145,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Dropdown', 'fundkit-fundraising-campaigns' ),
-        description: __( 'A select question where the donor picks one option from a dropdown list.', 'fundkit-fundraising-campaigns' ),
+        title:       __( 'Dropdown', 'fundraising-toolkit' ),
+        description: __( 'A select question where the donor picks one option from a dropdown list.', 'fundraising-toolkit' ),
         category:    'fundkit-fields',
         icon:        BlockIcons[ 'dropdown' ],
         supports: { html: false, anchor: false, inserter: true },

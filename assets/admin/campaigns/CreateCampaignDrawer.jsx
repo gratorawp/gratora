@@ -17,17 +17,17 @@ import CampaignTemplatePicker from '../_shared/components/CampaignTemplatePicker
 import { DollarSign, HandHeart, Users, Ban, ImagePlus, Plus } from 'lucide-react';
 
 const GOAL_OPTIONS = [
-    { value: 'amount',    label: __( 'Amount', 'fundkit-fundraising-campaigns' ),    icon: <DollarSign strokeWidth={ 1.75 } /> },
-    { value: 'donations', label: __( 'Donations', 'fundkit-fundraising-campaigns' ), icon: <HandHeart strokeWidth={ 1.75 } /> },
-    { value: 'donors',    label: __( 'Donors', 'fundkit-fundraising-campaigns' ),    icon: <Users strokeWidth={ 1.75 } /> },
-    { value: 'none',      label: __( 'No goal', 'fundkit-fundraising-campaigns' ),   icon: <Ban strokeWidth={ 1.75 } /> },
+    { value: 'amount',    label: __( 'Amount', 'fundraising-toolkit' ),    icon: <DollarSign strokeWidth={ 1.75 } /> },
+    { value: 'donations', label: __( 'Donations', 'fundraising-toolkit' ), icon: <HandHeart strokeWidth={ 1.75 } /> },
+    { value: 'donors',    label: __( 'Donors', 'fundraising-toolkit' ),    icon: <Users strokeWidth={ 1.75 } /> },
+    { value: 'none',      label: __( 'No goal', 'fundraising-toolkit' ),   icon: <Ban strokeWidth={ 1.75 } /> },
 ];
 
 const GOAL_DESC = {
-    amount:    __( 'Track progress toward a fundraising total.', 'fundkit-fundraising-campaigns' ),
-    donations: __( 'Track the number of completed donations.', 'fundkit-fundraising-campaigns' ),
-    donors:    __( 'Track the number of unique donors who give to this campaign.', 'fundkit-fundraising-campaigns' ),
-    none:      __( 'No progress bar or target.', 'fundkit-fundraising-campaigns' ),
+    amount:    __( 'Track progress toward a fundraising total.', 'fundraising-toolkit' ),
+    donations: __( 'Track the number of completed donations.', 'fundraising-toolkit' ),
+    donors:    __( 'Track the number of unique donors who give to this campaign.', 'fundraising-toolkit' ),
+    none:      __( 'No progress bar or target.', 'fundraising-toolkit' ),
 };
 
 function slugify( s ) {
@@ -38,8 +38,8 @@ function openCoverFrame( onSelect ) {
     const media = window.wp?.media;
     if ( ! media ) return;
     const frame = media( {
-        title:    __( 'Select or upload a cover image', 'fundkit-fundraising-campaigns' ),
-        button:   { text: __( 'Use this image', 'fundkit-fundraising-campaigns' ) },
+        title:    __( 'Select or upload a cover image', 'fundraising-toolkit' ),
+        button:   { text: __( 'Use this image', 'fundraising-toolkit' ) },
         multiple: false,
         library:  { type: 'image' },
     } );
@@ -73,7 +73,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
     const [ startsAt, setStartsAt ]     = useState( null );
     const [ endsAt, setEndsAt ]         = useState( null );
 
-    const [ pageTemplate, setPageTemplate ]   = useState( { id: 'standard', name: __( 'Standard campaign', 'fundkit-fundraising-campaigns' ) } );
+    const [ pageTemplate, setPageTemplate ]   = useState( { id: 'standard', name: __( 'Standard campaign', 'fundraising-toolkit' ) } );
     const [ pickingLayout, setPickingLayout ] = useState( false );
 
     const [ cover, setCover ]           = useState( null );
@@ -155,7 +155,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
             } );
             window.location.href = detailHref( c.id, 'overview' );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not create campaign.', 'fundkit-fundraising-campaigns' ) );
+            setError( err?.message || __( 'Could not create campaign.', 'fundraising-toolkit' ) );
             setSubmitting( false );
         }
     };
@@ -164,21 +164,21 @@ export default function CreateCampaignDrawer( { onClose } ) {
         <div className="fundkit-cc__foot">
             { /* eslint-disable-next-line jsx-a11y/label-has-associated-control -- Switch is self-labeled via its label prop; the wrapping label makes the whole row a click target */ }
             <label className="fundkit-cc__publish">
-                <Switch checked={ publishNow } onChange={ setPublishNow } label={ __( 'Publish now', 'fundkit-fundraising-campaigns' ) } />
+                <Switch checked={ publishNow } onChange={ setPublishNow } label={ __( 'Publish now', 'fundraising-toolkit' ) } />
                 <span className="fundkit-cc__publish-txt">
-                    <strong>{ publishNow ? __( 'Publish now', 'fundkit-fundraising-campaigns' ) : __( 'Create as draft', 'fundkit-fundraising-campaigns' ) }</strong>
+                    <strong>{ publishNow ? __( 'Publish now', 'fundraising-toolkit' ) : __( 'Create as draft', 'fundraising-toolkit' ) }</strong>
                     <span>{ publishNow
-                        ? __( 'Page goes live on create', 'fundkit-fundraising-campaigns' )
-                        : __( 'Toggle to publish now', 'fundkit-fundraising-campaigns' ) }</span>
+                        ? __( 'Page goes live on create', 'fundraising-toolkit' )
+                        : __( 'Toggle to publish now', 'fundraising-toolkit' ) }</span>
                 </span>
             </label>
             <div className="fundkit-cc__foot-actions">
                 <Btn variant="ghost" onClick={ onClose } disabled={ submitting }>
-                    { __( 'Cancel', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Cancel', 'fundraising-toolkit' ) }
                 </Btn>
                 <Btn variant="primary" onClick={ submit } isBusy={ submitting } disabled={ ! canCreate }>
                     <Plus size={ 14 } strokeWidth={ 1.75 } />
-                    { __( 'Create', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Create', 'fundraising-toolkit' ) }
                 </Btn>
             </div>
         </div>
@@ -187,12 +187,12 @@ export default function CreateCampaignDrawer( { onClose } ) {
     return (
         <>
         <Dialog
-            title={ __( 'New campaign', 'fundkit-fundraising-campaigns' ) }
+            title={ __( 'New campaign', 'fundraising-toolkit' ) }
             onClose={ submitting ? undefined : onClose }
             foot={ foot }
         >
             <p className="fundkit-dialog__help">
-                { __( 'A few quick details, then you are live. You can change everything later.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'A few quick details, then you are live. You can change everything later.', 'fundraising-toolkit' ) }
             </p>
             <div className="fundkit-cc">
             { error && (
@@ -201,34 +201,34 @@ export default function CreateCampaignDrawer( { onClose } ) {
                 </div>
             ) }
 
-            <Field label={ __( 'Campaign title', 'fundkit-fundraising-campaigns' ) }>
+            <Field label={ __( 'Campaign title', 'fundraising-toolkit' ) }>
                 <input
                     className="fundkit-input"
                     type="text"
                     value={ title }
                     autoFocus
-                    placeholder={ __( 'Enter campaign title', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Enter campaign title', 'fundraising-toolkit' ) }
                     onChange={ ( e ) => onTitle( e.target.value ) }
                 />
             </Field>
 
             { Object.keys( campaignTypes ).length > 1 && (
-                <Field label={ __( 'Campaign type', 'fundkit-fundraising-campaigns' ) }>
+                <Field label={ __( 'Campaign type', 'fundraising-toolkit' ) }>
                     <Segmented
-                        ariaLabel={ __( 'Campaign type', 'fundkit-fundraising-campaigns' ) }
+                        ariaLabel={ __( 'Campaign type', 'fundraising-toolkit' ) }
                         value={ campaignType }
                         onChange={ setCampaignType }
                         options={ Object.entries( campaignTypes ).map( ( [ value, label ] ) => ( { value, label } ) ) }
                     />
                     <div className="fundkit-cc__goal-desc">
                         { campaignType === 'standard'
-                            ? __( 'Collects donations directly on the campaign page.', 'fundkit-fundraising-campaigns' )
+                            ? __( 'Collects donations directly on the campaign page.', 'fundraising-toolkit' )
                             : ( typeNotices[ campaignType ] || '' ) }
                     </div>
                 </Field>
             ) }
 
-            <Field label={ __( 'Campaign template', 'fundkit-fundraising-campaigns' ) }>
+            <Field label={ __( 'Campaign template', 'fundraising-toolkit' ) }>
                 <button
                     type="button"
                     className="fundkit-cc__layout"
@@ -237,17 +237,17 @@ export default function CreateCampaignDrawer( { onClose } ) {
                 >
                     <span className="fundkit-cc__layout-name">{ pageTemplate.name }</span>
                     <span className="fundkit-cc__layout-change">
-                        { __( 'Change', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Change', 'fundraising-toolkit' ) }
                     </span>
                 </button>
                 <div className="fundkit-cc__goal-desc">
-                    { __( 'The starting arrangement of the campaign page. Blocks, so you can rearrange it afterwards.', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'The starting arrangement of the campaign page. Blocks, so you can rearrange it afterwards.', 'fundraising-toolkit' ) }
                 </div>
             </Field>
 
-            <Field label={ __( 'Goal', 'fundkit-fundraising-campaigns' ) }>
+            <Field label={ __( 'Goal', 'fundraising-toolkit' ) }>
                 <Segmented
-                    ariaLabel={ __( 'Goal type', 'fundkit-fundraising-campaigns' ) }
+                    ariaLabel={ __( 'Goal type', 'fundraising-toolkit' ) }
                     value={ goalType }
                     onChange={ setGoalType }
                     options={ GOAL_OPTIONS }
@@ -269,7 +269,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
                             type="number"
                             min="0"
                             value={ count }
-                            placeholder={ __( 'Enter a number', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'Enter a number', 'fundraising-toolkit' ) }
                             onChange={ ( e ) => setCount( e.target.value ) }
                         />
                     </div>
@@ -278,8 +278,8 @@ export default function CreateCampaignDrawer( { onClose } ) {
             </Field>
 
             <Field
-                label={ __( 'Description', 'fundkit-fundraising-campaigns' ) }
-                help={ __( 'One or two sentences. Shows on campaign cards and the page hero.', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Description', 'fundraising-toolkit' ) }
+                help={ __( 'One or two sentences. Shows on campaign cards and the page hero.', 'fundraising-toolkit' ) }
             >
                 <textarea
                     className="fundkit-textarea"
@@ -290,20 +290,20 @@ export default function CreateCampaignDrawer( { onClose } ) {
             </Field>
 
             <Field
-                label={ __( 'Fund', 'fundkit-fundraising-campaigns' ) }
-                help={ __( 'Donations to this campaign are designated to this fund.', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Fund', 'fundraising-toolkit' ) }
+                help={ __( 'Donations to this campaign are designated to this fund.', 'fundraising-toolkit' ) }
             >
                 <SearchableSelect
                     value={ fundId }
                     onChange={ setFundId }
                     options={ funds }
-                    placeholder={ __( 'Search funds', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Search funds', 'fundraising-toolkit' ) }
                 />
             </Field>
 
             <Field
-                label={ __( 'Schedule', 'fundkit-fundraising-campaigns' ) }
-                help={ __( 'By default the campaign is always on with no end date.', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Schedule', 'fundraising-toolkit' ) }
+                help={ __( 'By default the campaign is always on with no end date.', 'fundraising-toolkit' ) }
             >
                 <ScheduleFields
                     enabled={ scheduleOn }
@@ -315,16 +315,16 @@ export default function CreateCampaignDrawer( { onClose } ) {
                 />
             </Field>
 
-            <Field label={ __( 'Cover image', 'fundkit-fundraising-campaigns' ) }>
+            <Field label={ __( 'Cover image', 'fundraising-toolkit' ) }>
                 { cover ? (
                     <div className="fundkit-cc__cover-sel">
                         <img className="fundkit-cc__cover-thumb" src={ cover.url } alt="" />
-                        <span className="fundkit-cc__cover-name">{ __( 'Cover image selected', 'fundkit-fundraising-campaigns' ) }</span>
+                        <span className="fundkit-cc__cover-name">{ __( 'Cover image selected', 'fundraising-toolkit' ) }</span>
                         <Btn variant="ghost" size="sm" onClick={ () => openCoverFrame( setCover ) }>
-                            { __( 'Change', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Change', 'fundraising-toolkit' ) }
                         </Btn>
                         <Btn variant="ghost" size="sm" onClick={ () => setCover( null ) }>
-                            { __( 'Remove', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Remove', 'fundraising-toolkit' ) }
                         </Btn>
                     </div>
                 ) : (
@@ -337,15 +337,15 @@ export default function CreateCampaignDrawer( { onClose } ) {
                             <ImagePlus size={ 18 } strokeWidth={ 1.75 } />
                         </span>
                         <span className="fundkit-cc__cover-txt">
-                            <span className="fundkit-cc__cover-title">{ __( 'Select or upload an image', 'fundkit-fundraising-campaigns' ) }</span>
+                            <span className="fundkit-cc__cover-title">{ __( 'Select or upload an image', 'fundraising-toolkit' ) }</span>
                         </span>
                     </button>
                 ) }
             </Field>
 
             <Field
-                label={ __( 'Permalink', 'fundkit-fundraising-campaigns' ) }
-                help={ __( 'Auto-generated from the title.', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Permalink', 'fundraising-toolkit' ) }
+                help={ __( 'Auto-generated from the title.', 'fundraising-toolkit' ) }
             >
                 { editingSlug ? (
                     <>
@@ -356,7 +356,7 @@ export default function CreateCampaignDrawer( { onClose } ) {
                                 type="text"
                                 value={ slug }
                                 autoFocus
-                                aria-label={ __( 'Campaign slug', 'fundkit-fundraising-campaigns' ) }
+                                aria-label={ __( 'Campaign slug', 'fundraising-toolkit' ) }
                                 onChange={ ( e ) => {
                                     setSlug( e.target.value.toLowerCase().replace( /[^a-z0-9-]+/g, '-' ) );
                                     setSlugEdited( true );
@@ -365,21 +365,21 @@ export default function CreateCampaignDrawer( { onClose } ) {
                             />
                         </div>
                         <div className="fundkit-cc__slug-help">
-                            { __( 'Lowercase letters, numbers and hyphens. Must be unique across campaigns.', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Lowercase letters, numbers and hyphens. Must be unique across campaigns.', 'fundraising-toolkit' ) }
                         </div>
                     </>
                 ) : (
                     <div className="fundkit-cc__slug">
-                        <span className="fundkit-cc__slug-lbl">{ __( 'URL', 'fundkit-fundraising-campaigns' ) }</span>
+                        <span className="fundkit-cc__slug-lbl">{ __( 'URL', 'fundraising-toolkit' ) }</span>
                         <span className="fundkit-cc__slug-url">
-                            { slugBase }/<em>{ slug || __( 'campaign', 'fundkit-fundraising-campaigns' ) }</em>
+                            { slugBase }/<em>{ slug || __( 'campaign', 'fundraising-toolkit' ) }</em>
                         </span>
                         <button
                             type="button"
                             className="fundkit-cc__slug-btn"
                             onClick={ () => setEditingSlug( true ) }
                         >
-                            { __( 'Edit', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Edit', 'fundraising-toolkit' ) }
                         </button>
                     </div>
                 ) }

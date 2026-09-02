@@ -28,8 +28,8 @@ export default function TopCampaigns( { rows = [] } ) {
             <EmptyState
                 compact
                 icon={ <TrendingUp size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donations in this range', 'fundkit-fundraising-campaigns' ) }
-                body={ __( 'Pick a wider date range or wait for new donations to come in.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'No donations in this range', 'fundraising-toolkit' ) }
+                body={ __( 'Pick a wider date range or wait for new donations to come in.', 'fundraising-toolkit' ) }
             />
         );
     }
@@ -60,7 +60,7 @@ export default function TopCampaigns( { rows = [] } ) {
                                 </div>
                                 <div className="fundkit-table__sub">
                                     { sprintf(
-                                        /* translators: %d: number of donations */ _n( '%d donation', '%d donations', c.donations_count, 'fundkit-fundraising-campaigns' ),
+                                        /* translators: %d: number of donations */ _n( '%d donation', '%d donations', c.donations_count, 'fundraising-toolkit' ),
                                         c.donations_count
                                     ) }
                                 </div>

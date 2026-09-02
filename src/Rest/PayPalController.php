@@ -85,7 +85,7 @@ final class PayPalController
 
         $gateway = $this->gateways->get('paypal');
         if (! $gateway instanceof PayPalGateway) {
-            return $this->error('fundkit_paypal_unavailable', __('PayPal is not available.', 'fundkit-fundraising-campaigns'), 400);
+            return $this->error('fundkit_paypal_unavailable', __('PayPal is not available.', 'fundraising-toolkit'), 400);
         }
 
         // confirm() reads the stored gateway_intent_id: the client cannot
@@ -128,7 +128,7 @@ final class PayPalController
 
             return $this->error(
                 'fundkit_paypal_capture_failed',
-                __('PayPal could not complete this donation. If any money has left your account we will email your receipt, so please check before donating again.', 'fundkit-fundraising-campaigns'),
+                __('PayPal could not complete this donation. If any money has left your account we will email your receipt, so please check before donating again.', 'fundraising-toolkit'),
                 400
             );
         }
@@ -157,11 +157,11 @@ final class PayPalController
         }
 
         if (! FrequencyMap::isRecurring((string) $donation->frequency)) {
-            return $this->error('fundkit_paypal_not_recurring', __('That donation is not recurring.', 'fundkit-fundraising-campaigns'), 400);
+            return $this->error('fundkit_paypal_not_recurring', __('That donation is not recurring.', 'fundraising-toolkit'), 400);
         }
         $subId = trim((string) $request->get_param('subscription_id'));
         if ($subId === '') {
-            return $this->error('fundkit_paypal_bad_subscription', __('Missing subscription id.', 'fundkit-fundraising-campaigns'), 400);
+            return $this->error('fundkit_paypal_bad_subscription', __('Missing subscription id.', 'fundraising-toolkit'), 400);
         }
 
         $this->account->useTestMode((bool) $donation->is_test);
@@ -181,7 +181,7 @@ final class PayPalController
 
             return $this->error(
                 'fundkit_paypal_subscription_lookup',
-                __('PayPal has your donation, but we could not finish setting up the repeat schedule here. There is no need to donate again: we will email you once it is confirmed.', 'fundkit-fundraising-campaigns'),
+                __('PayPal has your donation, but we could not finish setting up the repeat schedule here. There is no need to donate again: we will email you once it is confirmed.', 'fundraising-toolkit'),
                 400
             );
         }
@@ -218,7 +218,7 @@ final class PayPalController
     {
         $notFound = $this->error(
             'fundkit_paypal_no_donation',
-            __('We could not find that donation.', 'fundkit-fundraising-campaigns'),
+            __('We could not find that donation.', 'fundraising-toolkit'),
             404
         );
 

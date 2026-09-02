@@ -24,7 +24,7 @@ export default function ImportTab( { setNotice } ) {
         try {
             parsed = JSON.parse( await file.text() );
         } catch ( e ) {
-            setNotice( { type: 'error', text: __( 'That file is not JSON. Use a file the Export tab produced.', 'fundkit-fundraising-campaigns' ) } );
+            setNotice( { type: 'error', text: __( 'That file is not JSON. Use a file the Export tab produced.', 'fundraising-toolkit' ) } );
             return;
         }
 
@@ -36,22 +36,22 @@ export default function ImportTab( { setNotice } ) {
 
         setConfirm( {
             title: isFullExport
-                ? __( 'Restore records from this file', 'fundkit-fundraising-campaigns' )
-                : __( 'Replace settings from this file', 'fundkit-fundraising-campaigns' ),
+                ? __( 'Restore records from this file', 'fundraising-toolkit' )
+                : __( 'Replace settings from this file', 'fundraising-toolkit' ),
             message: isFullExport
                 ? sprintf(
                     /* translators: %s: the chosen file name. */
-                    __( '%s will add its campaigns, funds, forms, donors, donations, recurring plans and receipts to this site. Anything already here is left as it is, so running it twice is safe. Donors erased on this site stay erased.', 'fundkit-fundraising-campaigns' ),
+                    __( '%s will add its campaigns, funds, forms, donors, donations, recurring plans and receipts to this site. Anything already here is left as it is, so running it twice is safe. Donors erased on this site stay erased.', 'fundraising-toolkit' ),
                     file.name
                 ) + ( hasSettings
-                    ? ' ' + __( 'It carries settings too, and those are written over yours: gateway, email, receipt, numbering and roles.', 'fundkit-fundraising-campaigns' )
+                    ? ' ' + __( 'It carries settings too, and those are written over yours: gateway, email, receipt, numbering and roles.', 'fundraising-toolkit' )
                     : '' )
                 : sprintf(
                     /* translators: %s: the chosen file name. */
-                    __( '%s will write its gateway, email, receipt, numbering and role settings over yours. A setting the file does not carry keeps the value it has here, except the role mapping, which is replaced whole: a role the file does not name loses its FundKit capabilities. Donations, donors and campaigns are untouched. This cannot be undone.', 'fundkit-fundraising-campaigns' ),
+                    __( '%s will write its gateway, email, receipt, numbering and role settings over yours. A setting the file does not carry keeps the value it has here, except the role mapping, which is replaced whole: a role the file does not name loses its Fundraising Toolkit capabilities. Donations, donors and campaigns are untouched. This cannot be undone.', 'fundraising-toolkit' ),
                     file.name
                 ),
-            confirmLabel: isFullExport ? __( 'Restore', 'fundkit-fundraising-campaigns' ) : __( 'Replace settings', 'fundkit-fundraising-campaigns' ),
+            confirmLabel: isFullExport ? __( 'Restore', 'fundraising-toolkit' ) : __( 'Replace settings', 'fundraising-toolkit' ),
             destructive:  ! isFullExport,
             onConfirm:    () => doImport( parsed ),
         } );
@@ -71,7 +71,7 @@ export default function ImportTab( { setNotice } ) {
 
             parts.push( sprintf(
                 /* translators: %d: number of records. */
-                _n( '%d record restored', '%d records restored', created, 'fundkit-fundraising-campaigns' ),
+                _n( '%d record restored', '%d records restored', created, 'fundraising-toolkit' ),
                 created
             ) );
             // Said plainly, because "already here" is the expected answer on
@@ -79,14 +79,14 @@ export default function ImportTab( { setNotice } ) {
             if ( existing ) {
                 parts.push( sprintf(
                     /* translators: %d: number of records. */
-                    _n( '%d was already here', '%d were already here', existing, 'fundkit-fundraising-campaigns' ),
+                    _n( '%d was already here', '%d were already here', existing, 'fundraising-toolkit' ),
                     existing
                 ) );
             }
             if ( skipped ) {
                 parts.push( sprintf(
                     /* translators: %d: number of records. */
-                    _n( '%d skipped', '%d skipped', skipped, 'fundkit-fundraising-campaigns' ),
+                    _n( '%d skipped', '%d skipped', skipped, 'fundraising-toolkit' ),
                     skipped
                 ) );
             }
@@ -96,7 +96,7 @@ export default function ImportTab( { setNotice } ) {
         if ( applied > 0 ) {
             parts.push( sprintf(
                 /* translators: %d: number of settings groups. */
-                _n( '%d settings group restored', '%d settings groups restored', applied, 'fundkit-fundraising-campaigns' ),
+                _n( '%d settings group restored', '%d settings groups restored', applied, 'fundraising-toolkit' ),
                 applied
             ) );
         }
@@ -118,11 +118,11 @@ export default function ImportTab( { setNotice } ) {
             const parts = landedParts( res );
 
             setNotice( parts.length
-                ? { type: 'success', text: parts.join( ', ' ) + '. ' + __( 'Reload the page to see it.', 'fundkit-fundraising-campaigns' ) }
-                : { type: 'error', text: __( 'Nothing in that file matched a FundKit setting or record.', 'fundkit-fundraising-campaigns' ) }
+                ? { type: 'success', text: parts.join( ', ' ) + '. ' + __( 'Reload the page to see it.', 'fundraising-toolkit' ) }
+                : { type: 'error', text: __( 'Nothing in that file matched a Fundraising Toolkit setting or record.', 'fundraising-toolkit' ) }
             );
         } catch ( err ) {
-            const reason = err?.message || __( 'Import failed. Check that the file is a FundKit settings export.', 'fundkit-fundraising-campaigns' );
+            const reason = err?.message || __( 'Import failed. Check that the file is a Fundraising Toolkit settings export.', 'fundraising-toolkit' );
             const landed = landedParts( err?.data );
 
             setNotice( {
@@ -130,7 +130,7 @@ export default function ImportTab( { setNotice } ) {
                 text: landed.length
                     ? reason + ' ' + sprintf(
                         /* translators: %s: a comma-separated list of what the refused import did restore. */
-                        __( 'What did land: %s. Running the file again is safe.', 'fundkit-fundraising-campaigns' ),
+                        __( 'What did land: %s. Running the file again is safe.', 'fundraising-toolkit' ),
                         landed.join( ', ' )
                     )
                     : reason,
@@ -144,8 +144,8 @@ export default function ImportTab( { setNotice } ) {
     return (
         <div className="fundkit-panel">
             <Card
-                title={ __( 'Import settings', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Reads a FundKit settings export and replaces the settings it carries. Anything it does not carry keeps the value it has here. Donations, donors and campaigns are left alone.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Import settings', 'fundraising-toolkit' ) }
+                sub={ __( 'Reads a Fundraising Toolkit settings export and replaces the settings it carries. Anything it does not carry keeps the value it has here. Donations, donors and campaigns are left alone.', 'fundraising-toolkit' ) }
             >
                 <div className="fundkit-advanced-actions">
                     <Btn
@@ -154,7 +154,7 @@ export default function ImportTab( { setNotice } ) {
                         disabled={ importing }
                         isBusy={ importing }
                     >
-                        { importing ? __( 'Importing…', 'fundkit-fundraising-campaigns' ) : __( 'Choose a JSON file', 'fundkit-fundraising-campaigns' ) }
+                        { importing ? __( 'Importing…', 'fundraising-toolkit' ) : __( 'Choose a JSON file', 'fundraising-toolkit' ) }
                     </Btn>
                     <input
                         ref={ fileRef }
@@ -165,7 +165,7 @@ export default function ImportTab( { setNotice } ) {
                     />
                 </div>
                 <p className="fundkit-tools-note">
-                    { __( 'A masked secret in the file leaves the stored key untouched, so importing an export cannot wipe a gateway key it was unable to carry.', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'A masked secret in the file leaves the stored key untouched, so importing an export cannot wipe a gateway key it was unable to carry.', 'fundraising-toolkit' ) }
                 </p>
             </Card>
 

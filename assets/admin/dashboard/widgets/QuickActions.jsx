@@ -44,29 +44,29 @@ export default function QuickActions() {
             const c = await apiFetch( {
                 path:   '/fundkit/v1/admin/campaigns',
                 method: 'POST',
-                data:   { title: __( 'Untitled campaign', 'fundkit-fundraising-campaigns' ) },
+                data:   { title: __( 'Untitled campaign', 'fundraising-toolkit' ) },
             } );
             window.location.href = detailHref( c.id, 'overview' );
         } catch ( err ) {
             setCreating( false );
-            notify.error( err?.message || __( 'Could not create the campaign. Please try again.', 'fundkit-fundraising-campaigns' ) );
+            notify.error( err?.message || __( 'Could not create the campaign. Please try again.', 'fundraising-toolkit' ) );
         }
     };
 
     return (
         <div className="fundkit-quick-actions">
             <Button variant="primary" onClick={ onNewCampaign } isBusy={ creating } disabled={ creating } className="fundkit-quick-actions__primary">
-                { ICON.plus } { __( 'New campaign', 'fundkit-fundraising-campaigns' ) }
+                { ICON.plus } { __( 'New campaign', 'fundraising-toolkit' ) }
             </Button>
 
             <a className="fundkit-quick-actions__item" href={ adminUrl( { page: 'fundkit-donations' } ) }>
-                { ICON.donations } { __( 'Donations', 'fundkit-fundraising-campaigns' ) }
+                { ICON.donations } { __( 'Donations', 'fundraising-toolkit' ) }
             </a>
             <a className="fundkit-quick-actions__item" href={ adminUrl( { page: 'fundkit-donors' } ) }>
-                { ICON.donors } { __( 'Donors', 'fundkit-fundraising-campaigns' ) }
+                { ICON.donors } { __( 'Donors', 'fundraising-toolkit' ) }
             </a>
             <a className="fundkit-quick-actions__item" href={ adminUrl( { page: 'fundkit-settings' } ) }>
-                { ICON.settings } { __( 'Settings', 'fundkit-fundraising-campaigns' ) }
+                { ICON.settings } { __( 'Settings', 'fundraising-toolkit' ) }
             </a>
         </div>
     );

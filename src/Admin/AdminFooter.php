@@ -20,7 +20,7 @@ final class AdminFooter extends HookProvider
      *
      * @since 1.0.0
      */
-    private const SLUG = 'fundkit-fundraising-campaigns';
+    private const SLUG = 'fundraising-toolkit';
 
     /** @since 1.0.0 */
     protected function filters(): array
@@ -36,7 +36,7 @@ final class AdminFooter extends HookProvider
         $stars = sprintf(
             '<a href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s" style="text-decoration:none;">%s</a>',
             esc_url($this->reviewUrl()),
-            esc_attr__('Leave a five star review on WordPress.org', 'fundkit-fundraising-campaigns'),
+            esc_attr__('Leave a five star review on WordPress.org', 'fundraising-toolkit'),
             str_repeat(
                 '<span class="dashicons dashicons-star-filled" style="font-size:15px;width:15px;height:15px;vertical-align:text-bottom;"></span>',
                 5
@@ -45,8 +45,8 @@ final class AdminFooter extends HookProvider
 
         return sprintf(
             /* translators: 1: plugin name, 2: five star icons linking to the review form */
-            esc_html__('If you like %1$s please leave us a %2$s rating. Thanks in advance!', 'fundkit-fundraising-campaigns'),
-            '<strong>' . esc_html__('FundKit', 'fundkit-fundraising-campaigns') . '</strong>',
+            esc_html__('If you like %1$s please leave us a %2$s rating. Thanks in advance!', 'fundraising-toolkit'),
+            '<strong>' . esc_html__('Fundraising Toolkit', 'fundraising-toolkit') . '</strong>',
             $stars
         );
     }

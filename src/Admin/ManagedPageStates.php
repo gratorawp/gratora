@@ -35,12 +35,12 @@ final class ManagedPageStates extends HookProvider
         }
 
         if (in_array((int) $post->ID, $this->campaignPageIds(), true)) {
-            $states['fundkit_campaign'] = __('FundKit Campaign', 'fundkit-fundraising-campaigns');
+            $states['fundkit_campaign'] = __('Fundraising Toolkit Campaign', 'fundraising-toolkit');
             return $states;
         }
 
         if ((int) get_option(PortalPage::OPTION_PAGE_ID, 0) === (int) $post->ID) {
-            $states['fundkit_portal'] = __('FundKit Donor Portal', 'fundkit-fundraising-campaigns');
+            $states['fundkit_portal'] = __('Fundraising Toolkit Donor Portal', 'fundraising-toolkit');
         }
 
         return $states;

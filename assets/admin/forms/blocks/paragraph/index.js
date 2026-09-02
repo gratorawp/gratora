@@ -8,9 +8,9 @@ import Segmented from '../../../_shared/components/Segmented';
 const NAME = 'fundkit/paragraph';
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'fundkit-fundraising-campaigns' ) },
-    { value: 'center', label: __( 'Center', 'fundkit-fundraising-campaigns' ) },
-    { value: 'right',  label: __( 'Right',  'fundkit-fundraising-campaigns' ) },
+    { value: 'left',   label: __( 'Left',   'fundraising-toolkit' ) },
+    { value: 'center', label: __( 'Center', 'fundraising-toolkit' ) },
+    { value: 'right',  label: __( 'Right',  'fundraising-toolkit' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -25,9 +25,9 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Paragraph', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Paragraph', 'fundraising-toolkit' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Alignment', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Alignment', 'fundraising-toolkit' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
@@ -43,7 +43,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="p"
                     value={ text }
                     onChange={ ( v ) => setAttributes( { text: v } ) }
-                    placeholder={ __( 'Add a short description for donors.', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Add a short description for donors.', 'fundraising-toolkit' ) }
                     allowedFormats={ [ 'core/bold', 'core/italic', 'core/link' ] }
                     style={ { margin: 0, lineHeight: 1.5 } }
                 />
@@ -55,8 +55,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Paragraph', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Short copy shown above the next field step.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Paragraph', 'fundraising-toolkit' ),
+        description: __( 'Short copy shown above the next field step.', 'fundraising-toolkit' ),
         category:   'fundkit-content',
         icon:       BlockIcons[ 'paragraph' ],
         supports: { html: false, anchor: false, inserter: true },

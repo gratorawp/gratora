@@ -55,7 +55,7 @@ final class DonateButtonBlock extends CampaignBlock
         if (! $form) {
             return (is_user_logged_in() && current_user_can('edit_posts'))
                 ? '<div class="fundkit-block-notice">'
-                    . esc_html__('This campaign has no published donation form yet.', 'fundkit-fundraising-campaigns')
+                    . esc_html__('This campaign has no published donation form yet.', 'fundraising-toolkit')
                     . '</div>'
                 : '';
         }
@@ -79,14 +79,14 @@ final class DonateButtonBlock extends CampaignBlock
         $hasForm = str_contains($formHtml, 'data-form-slug=');
         if (! $editorPreview && ! $hasForm) {
             $message = match ($campaign->notAcceptingReason()) {
-                'ended'    => __('This campaign has finished accepting donations.', 'fundkit-fundraising-campaigns'),
-                'goal_met' => __('This campaign has reached its goal. Thank you.', 'fundkit-fundraising-campaigns'),
-                default    => __('Donations are not open for this campaign yet.', 'fundkit-fundraising-campaigns'),
+                'ended'    => __('This campaign has finished accepting donations.', 'fundraising-toolkit'),
+                'goal_met' => __('This campaign has reached its goal. Thank you.', 'fundraising-toolkit'),
+                default    => __('Donations are not open for this campaign yet.', 'fundraising-toolkit'),
             };
 
             $notice = (is_user_logged_in() && current_user_can('edit_posts'))
                 ? '<div class="fundkit-block-notice">'
-                    . esc_html__('This campaign is not accepting donations, so the donate button is hidden. Publish the campaign and check its schedule.', 'fundkit-fundraising-campaigns')
+                    . esc_html__('This campaign is not accepting donations, so the donate button is hidden. Publish the campaign and check its schedule.', 'fundraising-toolkit')
                     . '</div>'
                 : '';
 
@@ -96,7 +96,7 @@ final class DonateButtonBlock extends CampaignBlock
         return View::loadRelative(__DIR__, 'views/donate-button', [
             // ?: not ??: the attribute exists and is an empty string when the
             // organizer has not renamed it, so ?? would hand the view ''.
-            'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'fundkit-fundraising-campaigns'),
+            'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'fundraising-toolkit'),
             'align'        => (string) ($attrs['align'] ?? 'left'),
             'size'         => in_array($attrs['size'] ?? 'md', ['sm', 'md', 'lg'], true)
                 ? (string) $attrs['size'] : 'md',

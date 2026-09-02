@@ -11,7 +11,7 @@ $wrapClasses = 'fundkit-block fundkit-block--currency-switcher fundkit-currency'
     . ' fundkit-currency--' . esc_attr($align);
 ?>
 <?php
-$ariaName = $label !== '' ? $label : __('Currency', 'fundkit-fundraising-campaigns');
+$ariaName = $label !== '' ? $label : __('Currency', 'fundraising-toolkit');
 ?>
 <div class="<?php echo esc_attr($wrapClasses); ?>">
     <?php if ($label !== ''): ?>

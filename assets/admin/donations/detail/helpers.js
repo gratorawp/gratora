@@ -38,28 +38,28 @@ export function initials( name ) {
 
 export function donationStatusPill( status ) {
     switch ( status ) {
-        case 'paid':           return { cls: 'is-ok',     label: __( 'Paid',     'fundkit-fundraising-campaigns' ) };
-        case 'pending':        return { cls: 'is-warn',   label: __( 'Pending',  'fundkit-fundraising-campaigns' ) };
-        case 'failed':         return { cls: 'is-error',  label: __( 'Failed',   'fundkit-fundraising-campaigns' ) };
-        case 'refunded':       return { cls: 'is-muted',  label: __( 'Refunded', 'fundkit-fundraising-campaigns' ) };
-        case 'partial_refund': return { cls: 'is-warn',   label: __( 'Partial',  'fundkit-fundraising-campaigns' ) };
-        case 'disputed':       return { cls: 'is-error',  label: __( 'Disputed', 'fundkit-fundraising-campaigns' ) };
-        case 'abandoned':      return { cls: 'is-muted',  label: __( 'Abandoned','fundkit-fundraising-campaigns' ) };
+        case 'paid':           return { cls: 'is-ok',     label: __( 'Paid',     'fundraising-toolkit' ) };
+        case 'pending':        return { cls: 'is-warn',   label: __( 'Pending',  'fundraising-toolkit' ) };
+        case 'failed':         return { cls: 'is-error',  label: __( 'Failed',   'fundraising-toolkit' ) };
+        case 'refunded':       return { cls: 'is-muted',  label: __( 'Refunded', 'fundraising-toolkit' ) };
+        case 'partial_refund': return { cls: 'is-warn',   label: __( 'Partial',  'fundraising-toolkit' ) };
+        case 'disputed':       return { cls: 'is-error',  label: __( 'Disputed', 'fundraising-toolkit' ) };
+        case 'abandoned':      return { cls: 'is-muted',  label: __( 'Abandoned','fundraising-toolkit' ) };
         default:               return { cls: 'is-muted',  label: status };
     }
 }
 
 export const CHANNEL_LABEL = {
-    direct:        __( 'Direct',         'fundkit-fundraising-campaigns' ),
-    email:         __( 'Email',          'fundkit-fundraising-campaigns' ),
-    social:        __( 'Social',         'fundkit-fundraising-campaigns' ),
-    'paid-social': __( 'Paid social',    'fundkit-fundraising-campaigns' ),
-    organic:       __( 'Organic search', 'fundkit-fundraising-campaigns' ),
-    cpc:           __( 'Paid search',    'fundkit-fundraising-campaigns' ),
-    referral:      __( 'Referral',       'fundkit-fundraising-campaigns' ),
-    qr:            __( 'QR code',        'fundkit-fundraising-campaigns' ),
-    peer:          __( 'Peer-to-peer',   'fundkit-fundraising-campaigns' ),
-    other:         __( 'Other',          'fundkit-fundraising-campaigns' ),
+    direct:        __( 'Direct',         'fundraising-toolkit' ),
+    email:         __( 'Email',          'fundraising-toolkit' ),
+    social:        __( 'Social',         'fundraising-toolkit' ),
+    'paid-social': __( 'Paid social',    'fundraising-toolkit' ),
+    organic:       __( 'Organic search', 'fundraising-toolkit' ),
+    cpc:           __( 'Paid search',    'fundraising-toolkit' ),
+    referral:      __( 'Referral',       'fundraising-toolkit' ),
+    qr:            __( 'QR code',        'fundraising-toolkit' ),
+    peer:          __( 'Peer-to-peer',   'fundraising-toolkit' ),
+    other:         __( 'Other',          'fundraising-toolkit' ),
 };
 
 /**

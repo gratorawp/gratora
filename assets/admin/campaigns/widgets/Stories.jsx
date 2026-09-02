@@ -5,7 +5,7 @@ export default function Stories( { rows = [] } ) {
     if ( rows.length === 0 ) {
         return (
             <p className="fundkit-panel__empty">
-                { __( 'No donor notes yet. Donors can leave a message at checkout, and it will appear here.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'No donor notes yet. Donors can leave a message at checkout, and it will appear here.', 'fundraising-toolkit' ) }
             </p>
         );
     }
@@ -17,7 +17,7 @@ export default function Stories( { rows = [] } ) {
                     <blockquote className="fundkit-story__quote">{ r.note }</blockquote>
                     <figcaption className="fundkit-story__meta">
                         <span className="fundkit-story__author">
-                            { r.is_anonymous ? __( 'Anonymous donor', 'fundkit-fundraising-campaigns' ) : r.donor_name }
+                            { r.is_anonymous ? __( 'Anonymous donor', 'fundraising-toolkit' ) : r.donor_name }
                         </span>
                         <span className="fundkit-story__sep" aria-hidden="true">·</span>
                         <span className="fundkit-story__amount">

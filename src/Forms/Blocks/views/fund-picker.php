@@ -8,8 +8,8 @@ defined('ABSPATH') || exit;
  * @var string                                                                              $emptyLabel
  * @var string                                                                              $emptyDescription
  */
-$labelText      = $label !== '' ? $label : __('Direct my donation to', 'fundkit-fundraising-campaigns');
-$emptyLabelText = $emptyLabel !== '' ? $emptyLabel : __('No specific fund', 'fundkit-fundraising-campaigns');
+$labelText      = $label !== '' ? $label : __('Direct my donation to', 'fundraising-toolkit');
+$emptyLabelText = $emptyLabel !== '' ? $emptyLabel : __('No specific fund', 'fundraising-toolkit');
 ?>
 <fieldset class="fundkit-block fundkit-block--fund fundkit-fund">
     <legend class="fundkit-fund__legend"><?php echo esc_html($labelText); ?></legend>

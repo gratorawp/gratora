@@ -31,54 +31,54 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Number input', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Number input', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Placeholder', 'fundraising-toolkit' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Help text', 'fundraising-toolkit' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        help={ __( 'For non-currency numbers (quantity, age, etc.). Use a donation-amount block for money.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'For non-currency numbers (quantity, age, etc.). Use a donation-amount block for money.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Field name', 'fundraising-toolkit' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugify( v ) } ) }
-                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Required', 'fundraising-toolkit' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <NumberControl
-                        label={ __( 'Minimum', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Minimum', 'fundraising-toolkit' ) }
                         value={ min === null ? '' : min }
                         onChange={ ( v ) => setAttributes( { min: v === '' || v === undefined ? null : Number( v ) } ) }
                         __nextHasNoMarginBottom
                     />
                     <NumberControl
-                        label={ __( 'Maximum', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Maximum', 'fundraising-toolkit' ) }
                         value={ max === null ? '' : max }
                         onChange={ ( v ) => setAttributes( { max: v === '' || v === undefined ? null : Number( v ) } ) }
                         __nextHasNoMarginBottom
                     />
                     <NumberControl
-                        label={ __( 'Step', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Step', 'fundraising-toolkit' ) }
                         value={ step }
                         min={ 0 }
                         onChange={ ( v ) => setAttributes( { step: Number( v ) || 1 } ) }
@@ -96,7 +96,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="fundkit-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Label', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
@@ -105,7 +105,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Help text', 'fundraising-toolkit' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', display: 'block', marginTop: 2 } }
                     />
@@ -119,8 +119,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Number input', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Generic numeric field for non-currency values (quantity, age, etc.).', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Number input', 'fundraising-toolkit' ),
+        description: __( 'Generic numeric field for non-currency values (quantity, age, etc.).', 'fundraising-toolkit' ),
         category:   'fundkit-fields',
         icon:       BlockIcons[ 'number-input' ],
         supports: { html: false, anchor: false, inserter: true },

@@ -12,40 +12,40 @@ function KvRow( { label, children, strike = false } ) {
 }
 
 export default function OverviewCard( { donation } ) {
-    const channelLabel = CHANNEL_LABEL[ donation.channel ] || donation.channel || __( 'Direct', 'fundkit-fundraising-campaigns' );
+    const channelLabel = CHANNEL_LABEL[ donation.channel ] || donation.channel || __( 'Direct', 'fundraising-toolkit' );
 
     return (
         <div className="dd-card">
             <div className="dd-card__body">
                 <div className="dd-kv">
-                    <KvRow label={ __( 'Amount', 'fundkit-fundraising-campaigns' ) }>
+                    <KvRow label={ __( 'Amount', 'fundraising-toolkit' ) }>
                         <span className="dd-kv__val--big num">{ formatAmount( donation.amount_cents, donation.currency ) }</span>
                     </KvRow>
 
-                    <KvRow label={ __( 'Fee & net', 'fundkit-fundraising-campaigns' ) }>
+                    <KvRow label={ __( 'Fee & net', 'fundraising-toolkit' ) }>
                         <span className="mono">
-                            { formatAmount( donation.fee_cents, donation.currency ) } { __( 'fee', 'fundkit-fundraising-campaigns' ) }
+                            { formatAmount( donation.fee_cents, donation.currency ) } { __( 'fee', 'fundraising-toolkit' ) }
                             { ' · ' }
                             <strong style={ { color: 'var(--dd-accent-dark, #34306b)' } }>
-                                { formatAmount( donation.net_cents, donation.currency ) } { __( 'net', 'fundkit-fundraising-campaigns' ) }
+                                { formatAmount( donation.net_cents, donation.currency ) } { __( 'net', 'fundraising-toolkit' ) }
                             </strong>
                         </span>
                     </KvRow>
 
-                    <KvRow label={ __( 'Gateway', 'fundkit-fundraising-campaigns' ) }>
+                    <KvRow label={ __( 'Gateway', 'fundraising-toolkit' ) }>
                         <span style={ { textTransform: 'capitalize' } }>{ donation.gateway }</span>
                     </KvRow>
 
                     { donation.payment_method_brand && donation.payment_method_last4 && (
-                        <KvRow label={ __( 'Payment method', 'fundkit-fundraising-campaigns' ) }>
+                        <KvRow label={ __( 'Payment method', 'fundraising-toolkit' ) }>
                             <span style={ { textTransform: 'capitalize' } }>{ donation.payment_method_brand }</span>
-                            { ' ' }{ __( 'ending', 'fundkit-fundraising-campaigns' ) }{ ' ' }
+                            { ' ' }{ __( 'ending', 'fundraising-toolkit' ) }{ ' ' }
                             <span className="mono">{ donation.payment_method_last4 }</span>
                         </KvRow>
                     ) }
 
                     { donation.campaign && (
-                        <KvRow label={ __( 'Campaign', 'fundkit-fundraising-campaigns' ) }>
+                        <KvRow label={ __( 'Campaign', 'fundraising-toolkit' ) }>
                             <a href={ campaignHref( donation.campaign.id ) }>{ donation.campaign.title }</a>
                         </KvRow>
                     ) }
@@ -55,51 +55,51 @@ export default function OverviewCard( { donation } ) {
                          site with nothing that owns the idea. */ }
                     { donation.attributed_to?.label && (
                         <KvRow label={ donation.attributed_to.kind === 'team'
-                            ? __( 'Team', 'fundkit-fundraising-campaigns' )
-                            : __( 'Fundraiser', 'fundkit-fundraising-campaigns' ) }
+                            ? __( 'Team', 'fundraising-toolkit' )
+                            : __( 'Fundraiser', 'fundraising-toolkit' ) }
                         >
                             { donation.attributed_to.label }
                         </KvRow>
                     ) }
 
                     { donation.fund && (
-                        <KvRow label={ __( 'Fund', 'fundkit-fundraising-campaigns' ) }>
+                        <KvRow label={ __( 'Fund', 'fundraising-toolkit' ) }>
                             { donation.fund.name }
                         </KvRow>
                     ) }
 
                     { donation.form && (
-                        <KvRow label={ __( 'Form', 'fundkit-fundraising-campaigns' ) }>
+                        <KvRow label={ __( 'Form', 'fundraising-toolkit' ) }>
                             <a href={ formEditorHref( donation.form.id ) }>{ donation.form.title }</a>
                         </KvRow>
                     ) }
 
-                    <KvRow label={ __( 'Channel', 'fundkit-fundraising-campaigns' ) }>
+                    <KvRow label={ __( 'Channel', 'fundraising-toolkit' ) }>
                         <span className="dd-channel-chip">{ channelLabel }</span>
                     </KvRow>
 
-                    <KvRow label={ __( 'Donated', 'fundkit-fundraising-campaigns' ) }>
-                        { donation.paid_at ? timeAgo( donation.paid_at ) : __( 'not paid', 'fundkit-fundraising-campaigns' ) }
+                    <KvRow label={ __( 'Donated', 'fundraising-toolkit' ) }>
+                        { donation.paid_at ? timeAgo( donation.paid_at ) : __( 'not paid', 'fundraising-toolkit' ) }
                         <span className="dd-kv__sub">{ formatDateTime( donation.paid_at || donation.created_at ) }</span>
                     </KvRow>
 
                     { donation.frequency && donation.frequency !== 'one_time' && (
-                        <KvRow label={ __( 'Frequency', 'fundkit-fundraising-campaigns' ) }>
+                        <KvRow label={ __( 'Frequency', 'fundraising-toolkit' ) }>
                             <span style={ { textTransform: 'capitalize' } }>{ donation.frequency }</span>
                             { donation.recurring_plan_id && (
-                                <span className="dd-kv__sub">{ __( 'Part of a recurring plan', 'fundkit-fundraising-campaigns' ) }</span>
+                                <span className="dd-kv__sub">{ __( 'Part of a recurring plan', 'fundraising-toolkit' ) }</span>
                             ) }
                         </KvRow>
                     ) }
 
                     { donation.note_to_org && (
-                        <KvRow label={ __( 'Donor note', 'fundkit-fundraising-campaigns' ) }>
+                        <KvRow label={ __( 'Donor note', 'fundraising-toolkit' ) }>
                             <em>&quot;{ donation.note_to_org }&quot;</em>
                         </KvRow>
                     ) }
 
                     { donation.custom_data && Object.keys( donation.custom_data ).length > 0 && (
-                        <KvRow label={ __( 'Form fields', 'fundkit-fundraising-campaigns' ) }>
+                        <KvRow label={ __( 'Form fields', 'fundraising-toolkit' ) }>
                             <div className="dd-kv__customs">
                                 { Object.entries( donation.custom_data ).map( ( [ k, val ] ) => (
                                     <div key={ k } className="dd-kv__custom">

@@ -9,10 +9,10 @@ import Segmented from '../../../_shared/components/Segmented';
 const NAME = 'fundkit/submit-button';
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'fundkit-fundraising-campaigns' ) },
-    { value: 'center', label: __( 'Center', 'fundkit-fundraising-campaigns' ) },
-    { value: 'right',  label: __( 'Right',  'fundkit-fundraising-campaigns' ) },
-    { value: 'full',   label: __( 'Full width', 'fundkit-fundraising-campaigns' ) },
+    { value: 'left',   label: __( 'Left',   'fundraising-toolkit' ) },
+    { value: 'center', label: __( 'Center', 'fundraising-toolkit' ) },
+    { value: 'right',  label: __( 'Right',  'fundraising-toolkit' ) },
+    { value: 'full',   label: __( 'Full width', 'fundraising-toolkit' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -36,15 +36,15 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Button', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Button', 'fundraising-toolkit' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Alignment', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Alignment', 'fundraising-toolkit' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
                     />
                     <p style={ { fontSize: 12, color: '#6b7280', margin: '12px 0 0' } }>
-                        { __( 'Use {amount} and {frequency} in the label to insert the live values at runtime, e.g. "Donate {amount} {frequency}".', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Use {amount} and {frequency} in the label to insert the live values at runtime, e.g. "Donate {amount} {frequency}".', 'fundraising-toolkit' ) }
                     </p>
                 </PanelBody>
             </InspectorControls>
@@ -53,7 +53,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Donate now', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Donate now', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                     style={ {
                         display:       'inline-block',
@@ -75,8 +75,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Donate button', 'fundkit-fundraising-campaigns' ),
-        description: __( 'The button that completes the donation.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Donate button', 'fundraising-toolkit' ),
+        description: __( 'The button that completes the donation.', 'fundraising-toolkit' ),
         category:   'fundkit-extras',
         icon:       BlockIcons[ 'submit-button' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

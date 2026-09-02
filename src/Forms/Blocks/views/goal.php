@@ -19,8 +19,8 @@ $fmt = static function (int $v) use ($isAmount, $currency): string {
         : (string) number_format_i18n($v);
 };
 $unitLabel = match ($goalType) {
-    'donations' => _n('donation', 'donations', $target, 'fundkit-fundraising-campaigns'),
-    'donors'    => _n('donor', 'donors', $target, 'fundkit-fundraising-campaigns'),
+    'donations' => _n('donation', 'donations', $target, 'fundraising-toolkit'),
+    'donors'    => _n('donor', 'donors', $target, 'fundraising-toolkit'),
     default     => '',
 };
 ?>
@@ -31,11 +31,11 @@ $unitLabel = match ($goalType) {
             <span><?php
             if ($isAmount) {
                 /* translators: %s formatted goal amount with currency */
-                printf(esc_html__('raised of %s goal', 'fundkit-fundraising-campaigns'), esc_html($fmt($target)));
+                printf(esc_html__('raised of %s goal', 'fundraising-toolkit'), esc_html($fmt($target)));
             } else {
                 printf(
                     /* translators: 1: target number, 2: unit label e.g. donations */
-                    esc_html__('of %1$s %2$s goal', 'fundkit-fundraising-campaigns'),
+                    esc_html__('of %1$s %2$s goal', 'fundraising-toolkit'),
                     esc_html($fmt($target)),
                     esc_html($unitLabel)
                 );
@@ -54,7 +54,7 @@ $unitLabel = match ($goalType) {
             <span class="fundkit-goal__donors">
                 <?php
                 /* translators: %d number of donors */
-                printf(esc_html(_n('%d donor', '%d donors', $donorsCount, 'fundkit-fundraising-campaigns')), (int) $donorsCount);
+                printf(esc_html(_n('%d donor', '%d donors', $donorsCount, 'fundraising-toolkit')), (int) $donorsCount);
                 ?>
             </span>
         <?php endif; ?>
@@ -64,7 +64,7 @@ $unitLabel = match ($goalType) {
                 <?php
                 $days = max(0, (int) floor((strtotime((string) $endsAt) - time()) / 86400));
                 /* translators: %d days remaining */
-                printf(esc_html(_n('%d day left', '%d days left', $days, 'fundkit-fundraising-campaigns')), (int) $days);
+                printf(esc_html(_n('%d day left', '%d days left', $days, 'fundraising-toolkit')), (int) $days);
                 ?>
             </span>
         <?php endif; ?>

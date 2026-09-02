@@ -46,7 +46,7 @@ final class PdfBuilder
             'Title'   => $options['title']   ?? '',
             'Author'  => $options['author']  ?? '',
             'Subject' => $options['subject'] ?? '',
-            'Creator' => 'FundKit',
+            'Creator' => 'Fundraising Toolkit',
         ] as $key => $value) {
             if ($value !== '') {
                 $dompdf->add_info($key, (string) $value);

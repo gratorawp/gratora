@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
  * @var string $placeholder
  * @var bool   $required
  */
-$labelText = $label !== '' ? $label : __('Country', 'fundkit-fundraising-campaigns');
+$labelText = $label !== '' ? $label : __('Country', 'fundraising-toolkit');
 $placeholderText = $placeholder !== '' ? $placeholder : 'DE';
 ?>
 <label class="fundkit-block fundkit-block--country fundkit-donor__field">

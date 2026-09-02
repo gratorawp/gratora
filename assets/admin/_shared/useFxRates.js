@@ -76,7 +76,7 @@ export function useFxRates() {
             // carry that across: they meant one of the two currencies and the
             // form does not know which.
             if ( moved && Object.values( manualEdits ).some( ( v ) => v !== null ) ) {
-                throw new Error( __( 'The base currency changed in this save, so the exchange rates you entered are in the currency you left. Reload the page and set them again.', 'fundkit-fundraising-campaigns' ) );
+                throw new Error( __( 'The base currency changed in this save, so the exchange rates you entered are in the currency you left. Reload the page and set them again.', 'fundraising-toolkit' ) );
             }
 
             const updated = await apiFetch( {
@@ -106,13 +106,13 @@ export function useFxRates() {
             // A 200 can still report a failed provider fetch in the body; don't
             // claim success when the rates did not actually refresh.
             if ( updated?.fetch_ok === false ) {
-                notify.error( __( 'Could not fetch exchange rates. Please try again.', 'fundkit-fundraising-campaigns' ) );
+                notify.error( __( 'Could not fetch exchange rates. Please try again.', 'fundraising-toolkit' ) );
             } else {
-                notify.success( __( 'Exchange rates updated.', 'fundkit-fundraising-campaigns' ) );
+                notify.success( __( 'Exchange rates updated.', 'fundraising-toolkit' ) );
             }
             return updated;
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not fetch exchange rates. Please try again.', 'fundkit-fundraising-campaigns' ) );
+            notify.error( err?.message || __( 'Could not fetch exchange rates. Please try again.', 'fundraising-toolkit' ) );
             return null;
         } finally {
             setFetching( false );

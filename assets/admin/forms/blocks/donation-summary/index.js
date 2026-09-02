@@ -16,25 +16,25 @@ function Edit( { attributes, setAttributes } ) {
     const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--summary' } );
 
     const rows = [
-        [ __( 'Amount', 'fundkit-fundraising-campaigns' ), '-' ],
-        ...( showDonor   ? [ [ __( 'Donor', 'fundkit-fundraising-campaigns' ), '-' ], [ __( 'Email', 'fundkit-fundraising-campaigns' ), '-' ] ] : [] ),
-        ...( showGateway ? [ [ __( 'Payment method', 'fundkit-fundraising-campaigns' ), '-' ] ] : [] ),
-        [ __( 'Total', 'fundkit-fundraising-campaigns' ), '-' ],
+        [ __( 'Amount', 'fundraising-toolkit' ), '-' ],
+        ...( showDonor   ? [ [ __( 'Donor', 'fundraising-toolkit' ), '-' ], [ __( 'Email', 'fundraising-toolkit' ), '-' ] ] : [] ),
+        ...( showGateway ? [ [ __( 'Payment method', 'fundraising-toolkit' ), '-' ] ] : [] ),
+        [ __( 'Total', 'fundraising-toolkit' ), '-' ],
     ];
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Summary', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Summary', 'fundraising-toolkit' ) } initialOpen>
                     <ToggleControl
-                        label={ __( 'Show who is giving', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Name, email and country, when the form collects them.', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show who is giving', 'fundraising-toolkit' ) }
+                        help={ __( 'Name, email and country, when the form collects them.', 'fundraising-toolkit' ) }
                         checked={ showDonor }
                         onChange={ ( v ) => setAttributes( { showDonor: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show payment method', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show payment method', 'fundraising-toolkit' ) }
                         checked={ showGateway }
                         onChange={ ( v ) => setAttributes( { showGateway: v } ) }
                         __nextHasNoMarginBottom
@@ -63,8 +63,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Donation summary', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Reads back what the donor is about to give. Put it wherever the recap belongs.', 'fundkit-fundraising-campaigns' ),
+        title:       __( 'Donation summary', 'fundraising-toolkit' ),
+        description: __( 'Reads back what the donor is about to give. Put it wherever the recap belongs.', 'fundraising-toolkit' ),
         category:    'fundkit-extras',
         icon:        BlockIcons[ 'donation-summary' ],
         // One recap per form. Two would disagree the moment a condition hid a

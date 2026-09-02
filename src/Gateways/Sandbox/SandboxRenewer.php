@@ -72,7 +72,7 @@ final class SandboxRenewer
         // itself then, and a plan whose gateway is gone cannot be cancelled at
         // all: RecurringCanceller has nothing to call and throws.
         if (! $this->testMode->forForm(null)) {
-            $this->expireAll(__('Test mode was switched off.', 'fundkit-fundraising-campaigns'));
+            $this->expireAll(__('Test mode was switched off.', 'fundraising-toolkit'));
             return;
         }
 
@@ -107,7 +107,7 @@ final class SandboxRenewer
         if ((int) $plan->payments_count >= self::MAX_CYCLES) {
             $this->expire($plan, sprintf(
                 /* translators: %d: how many simulated cycles the plan ran for. */
-                __('Sandbox rehearsal completed after %d cycles.', 'fundkit-fundraising-campaigns'),
+                __('Sandbox rehearsal completed after %d cycles.', 'fundraising-toolkit'),
                 self::MAX_CYCLES
             ));
             return;

@@ -53,10 +53,10 @@ final class TestModeBadge extends HookProvider
         // Both name FundKit: other plugins put their own test badge in this bar,
         // and a bare "test mode" leaves the operator guessing whose till is open.
         $title = $orgWide
-            ? __('FundKit Test Mode Active', 'fundkit-fundraising-campaigns')
+            ? __('Fundraising Toolkit Test Mode Active', 'fundraising-toolkit')
             : sprintf(
                 /* translators: %d: how many published forms are in test mode. */
-                _n('%d FundKit Form in Test Mode', '%d FundKit Forms in Test Mode', $forms, 'fundkit-fundraising-campaigns'),
+                _n('%d Fundraising Toolkit Form in Test Mode', '%d Fundraising Toolkit Forms in Test Mode', $forms, 'fundraising-toolkit'),
                 $forms
             );
 
@@ -70,8 +70,8 @@ final class TestModeBadge extends HookProvider
             'href'   => esc_url(admin_url('admin.php?page=fundkit-settings&tab=gateways')),
             'meta'  => [
                 'title' => $orgWide
-                    ? __('No card is charged and these donations stay out of your reporting. Turn this off before you go live.', 'fundkit-fundraising-campaigns')
-                    : __('These forms take no real money. Every other form on the site does.', 'fundkit-fundraising-campaigns'),
+                    ? __('No card is charged and these donations stay out of your reporting. Turn this off before you go live.', 'fundraising-toolkit')
+                    : __('These forms take no real money. Every other form on the site does.', 'fundraising-toolkit'),
             ],
         ]);
     }

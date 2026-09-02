@@ -98,30 +98,30 @@ final class DonationsController
         $gatewayId  = (string) ($body['gateway'] ?? '');
 
         if ($email === '' || ! is_email($email)) {
-            return new WP_Error('fundkit_invalid_email', __('A valid email is required.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_invalid_email', __('A valid email is required.', 'fundraising-toolkit'), ['status' => 400]);
         }
         if ($amount <= 0) {
-            return new WP_Error('fundkit_invalid_amount', __('Amount must be a positive integer (in cents).', 'fundkit-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_invalid_amount', __('Amount must be a positive integer (in cents).', 'fundraising-toolkit'), ['status' => 400]);
         }
         if ($err = $this->spam->checkMinAmount($amount)) return $err;
         if (strlen($currency) !== 3) {
-            return new WP_Error('fundkit_invalid_currency', __('Currency must be a 3-letter ISO code.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_invalid_currency', __('Currency must be a 3-letter ISO code.', 'fundraising-toolkit'), ['status' => 400]);
         }
         // The switcher only offers accepted currencies, but a crafted payload
         // could submit any code, and a donation in an unsupported currency has
         // no base conversion and so would be an unreportable row.
         if (! $this->isSupportedCurrency($currency)) {
-            return new WP_Error('fundkit_unsupported_currency', __('This currency is not accepted.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_unsupported_currency', __('This currency is not accepted.', 'fundraising-toolkit'), ['status' => 400]);
         }
         // Zero-decimal currencies (JPY, KRW, ...) have no sub-unit. Storage is
         // always major x 100, so the amount must land on a whole major unit or
         // the gateway conversion rounds and mischarges.
         if (Currency::minorUnits($currency) === 0 && $amount % 100 !== 0) {
-            return new WP_Error('fundkit_invalid_amount', __('This currency does not support fractional amounts.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_invalid_amount', __('This currency does not support fractional amounts.', 'fundraising-toolkit'), ['status' => 400]);
         }
         if ($gatewayId === '' || ! $this->gateways->get($gatewayId)) {
             /* translators: %s: gateway identifier */
-            return new WP_Error('fundkit_invalid_gateway', sprintf(__('Unknown gateway: %s', 'fundkit-fundraising-campaigns'), $gatewayId), ['status' => 400]);
+            return new WP_Error('fundkit_invalid_gateway', sprintf(__('Unknown gateway: %s', 'fundraising-toolkit'), $gatewayId), ['status' => 400]);
         }
         // A crafted payload could name a gateway that does not take this
         // currency. Refusing here says so, rather than failing at the gateway
@@ -131,7 +131,7 @@ final class DonationsController
                 'fundkit_gateway_currency',
                 sprintf(
                     /* translators: 1: gateway identifier, 2: currency code */
-                    __('%1$s cannot take payments in %2$s.', 'fundkit-fundraising-campaigns'),
+                    __('%1$s cannot take payments in %2$s.', 'fundraising-toolkit'),
                     $gatewayId,
                     $currency
                 ),
@@ -181,7 +181,7 @@ final class DonationsController
             if (! $form) {
                 return new WP_Error(
                     'fundkit_form_not_available',
-                    __('This form is not accepting donations.', 'fundkit-fundraising-campaigns'),
+                    __('This form is not accepting donations.', 'fundraising-toolkit'),
                     ['status' => 403]
                 );
             }
@@ -190,7 +190,7 @@ final class DonationsController
                 if ($form->status !== 'published') {
                     return new WP_Error(
                         'fundkit_form_not_available',
-                        __('This form is not accepting donations.', 'fundkit-fundraising-campaigns'),
+                        __('This form is not accepting donations.', 'fundraising-toolkit'),
                         ['status' => 403]
                     );
                 }
@@ -203,7 +203,7 @@ final class DonationsController
                     if (! $campaign || ! $campaign->acceptsDonations()) {
                         return new WP_Error(
                             'fundkit_campaign_not_available',
-                            __('This campaign is not accepting donations.', 'fundkit-fundraising-campaigns'),
+                            __('This campaign is not accepting donations.', 'fundraising-toolkit'),
                             ['status' => 403]
                         );
                     }
@@ -256,7 +256,7 @@ final class DonationsController
         if (! in_array($gatewayId, $allowedGateways, true)) {
             return new WP_Error(
                 'fundkit_gateway_not_allowed',
-                __('That payment method is not available for this form.', 'fundkit-fundraising-campaigns'),
+                __('That payment method is not available for this form.', 'fundraising-toolkit'),
                 ['status' => 400]
             );
         }
@@ -284,7 +284,7 @@ final class DonationsController
             unset($sourceAttribution['utm_medium']);
         }
         if ($custom !== [] && strlen((string) wp_json_encode($custom)) > 16384) {
-            return new WP_Error('fundkit_custom_too_large', __('Submitted form data is too large.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_custom_too_large', __('Submitted form data is too large.', 'fundraising-toolkit'), ['status' => 400]);
         }
 
         $intent = new DonationIntent(
@@ -321,7 +321,7 @@ final class DonationsController
             ]);
             return new WP_Error(
                 'fundkit_create_failed',
-                __('We could not process your donation just now. Please try again.', 'fundkit-fundraising-campaigns'),
+                __('We could not process your donation just now. Please try again.', 'fundraising-toolkit'),
                 ['status' => 500]
             );
         }
@@ -385,7 +385,7 @@ final class DonationsController
                 'gateway'     => $gatewayId,
             ]);
             $this->donations->markFailed($donation, 'Gateway createIntent threw: ' . $e->getMessage());
-            return new WP_Error('fundkit_gateway_intent_failed', __('We could not start your payment. Please try again in a moment.', 'fundkit-fundraising-campaigns'), ['status' => 502]);
+            return new WP_Error('fundkit_gateway_intent_failed', __('We could not start your payment. Please try again in a moment.', 'fundraising-toolkit'), ['status' => 502]);
         }
 
         try {
@@ -396,7 +396,7 @@ final class DonationsController
             );
         } catch (Throwable $e) {
             $this->donations->markFailed($donation, 'setGatewayIntent failed: ' . $e->getMessage());
-            return new WP_Error('fundkit_intent_persist_failed', __('Something went wrong saving your donation. Please try again.', 'fundkit-fundraising-campaigns'), ['status' => 500]);
+            return new WP_Error('fundkit_intent_persist_failed', __('Something went wrong saving your donation. Please try again.', 'fundraising-toolkit'), ['status' => 500]);
         }
 
         if ($gatewayResult->requires_action) {
@@ -564,7 +564,7 @@ final class DonationsController
     {
         $reference  = (string) $request['reference'];
         $rawToken   = trim((string) ($request['status_token'] ?? ''));
-        $notFound   = new WP_Error('fundkit_not_found', __('Donation not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+        $notFound   = new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
 
         if ($rawToken === '') return $notFound;
 
@@ -595,7 +595,7 @@ final class DonationsController
     {
         $donation = $this->repository->findByReference((string) $request['reference']);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         if ($donation->status === 'paid') {
@@ -613,7 +613,7 @@ final class DonationsController
                 'fundkit_invalid_transition',
                 sprintf(
                     /* translators: %s: current donation status. */
-                    __('Cannot confirm a %s donation.', 'fundkit-fundraising-campaigns'),
+                    __('Cannot confirm a %s donation.', 'fundraising-toolkit'),
                     $donation->status
                 ),
                 ['status' => 422]
@@ -623,7 +623,7 @@ final class DonationsController
         $gateway = $this->gateways->get($donation->gateway);
         if (! $gateway) {
             /* translators: %s: gateway identifier. */
-            return new WP_Error('fundkit_unknown_gateway', sprintf(__('Gateway "%s" is no longer registered.', 'fundkit-fundraising-campaigns'), $donation->gateway), ['status' => 500]);
+            return new WP_Error('fundkit_unknown_gateway', sprintf(__('Gateway "%s" is no longer registered.', 'fundraising-toolkit'), $donation->gateway), ['status' => 500]);
         }
 
         $payload = (array) ($request->get_json_params() ?? []);
@@ -632,7 +632,7 @@ final class DonationsController
         try {
             $result = $gateway->confirm($donation, $payload);
         } catch ( Throwable $e) {
-            return new WP_Error('fundkit_gateway_confirm_failed', __('We could not confirm your payment. Please try again in a moment.', 'fundkit-fundraising-campaigns'), ['status' => 502]);
+            return new WP_Error('fundkit_gateway_confirm_failed', __('We could not confirm your payment. Please try again in a moment.', 'fundraising-toolkit'), ['status' => 502]);
         }
 
         // A held capture is not a failure: the gateway has the money and will
@@ -667,14 +667,14 @@ final class DonationsController
         if (! $result->success && $result->reversed) {
             return new WP_Error(
                 'fundkit_confirm_reversed',
-                __('This payment has been returned to the donor, so it cannot be confirmed as paid.', 'fundkit-fundraising-campaigns'),
+                __('This payment has been returned to the donor, so it cannot be confirmed as paid.', 'fundraising-toolkit'),
                 ['status' => 409]
             );
         }
 
         if (! $result->success) {
-            $this->donations->markFailed($donation, $result->error ?? __('Gateway returned failure.', 'fundkit-fundraising-campaigns'));
-            return new WP_Error('fundkit_confirm_failed', $result->error ?? __('Confirmation failed.', 'fundkit-fundraising-campaigns'), ['status' => 402]);
+            $this->donations->markFailed($donation, $result->error ?? __('Gateway returned failure.', 'fundraising-toolkit'));
+            return new WP_Error('fundkit_confirm_failed', $result->error ?? __('Confirmation failed.', 'fundraising-toolkit'), ['status' => 402]);
         }
 
         $donation = $this->donations->confirm($donation, $result->toArray());

@@ -54,16 +54,16 @@ export function timeAgo( iso ) {
 
     if ( days < 30 ) {
         /* translators: %d: number of weeks */
-        return sprintf( __( '%dw ago', 'fundkit-fundraising-campaigns' ), Math.floor( days / 7 ) );
+        return sprintf( __( '%dw ago', 'fundraising-toolkit' ), Math.floor( days / 7 ) );
     }
 
     if ( days < 365 ) {
         /* translators: %d: number of months */
-        return sprintf( __( '%dmo ago', 'fundkit-fundraising-campaigns' ), Math.max( 1, Math.floor( days / 30.44 ) ) );
+        return sprintf( __( '%dmo ago', 'fundraising-toolkit' ), Math.max( 1, Math.floor( days / 30.44 ) ) );
     }
 
     /* translators: %d: number of years */
-    return sprintf( __( '%dy ago', 'fundkit-fundraising-campaigns' ), Math.max( 1, Math.floor( days / 365.25 ) ) );
+    return sprintf( __( '%dy ago', 'fundraising-toolkit' ), Math.max( 1, Math.floor( days / 365.25 ) ) );
 }
 // Amounts and the org bridge they read come from the local formatter: the org's
 // "decimal places" preference belongs to the base currency and may only drop
@@ -81,15 +81,15 @@ export { default as StatusBadge } from './components/StatusBadge';
 // list + the detail header). The shared StatusBadge owns its own render map;
 // this is just the campaign-scoped label set for filter dropdowns.
 export const STATUS_LABEL = {
-    draft:     __( 'Draft', 'fundkit-fundraising-campaigns' ),
-    published: __( 'Active', 'fundkit-fundraising-campaigns' ),
-    archived:  __( 'Archived', 'fundkit-fundraising-campaigns' ),
+    draft:     __( 'Draft', 'fundraising-toolkit' ),
+    published: __( 'Active', 'fundraising-toolkit' ),
+    archived:  __( 'Archived', 'fundraising-toolkit' ),
     // Derived on the server, not stored: a published campaign outside its
     // schedule or past a goal it closes on. Filterable because the list shows
     // them, and a badge you cannot filter by is a dead end.
-    scheduled: __( 'Scheduled', 'fundkit-fundraising-campaigns' ),
-    ended:     __( 'Ended', 'fundkit-fundraising-campaigns' ),
-    goal_met:  __( 'Goal met', 'fundkit-fundraising-campaigns' ),
+    scheduled: __( 'Scheduled', 'fundraising-toolkit' ),
+    ended:     __( 'Ended', 'fundraising-toolkit' ),
+    goal_met:  __( 'Goal met', 'fundraising-toolkit' ),
 };
 
 export function listHref() {

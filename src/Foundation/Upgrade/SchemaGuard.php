@@ -113,8 +113,8 @@ final class SchemaGuard
 
         printf(
             '<div class="notice notice-error"><p><strong>%s</strong> %s</p><p><code>%s</code></p></div>',
-            esc_html__('FundKit could not create its database tables.', 'fundkit-fundraising-campaigns'),
-            esc_html__('The plugin cannot run until they exist. This usually means the database user is not allowed to create tables, or the host caps how many a site may have. Ask your host to grant CREATE, then reload this page: FundKit retries on every request.', 'fundkit-fundraising-campaigns'),
+            esc_html__('Fundraising Toolkit could not create its database tables.', 'fundraising-toolkit'),
+            esc_html__('The plugin cannot run until they exist. This usually means the database user is not allowed to create tables, or the host caps how many a site may have. Ask your host to grant CREATE, then reload this page: Fundraising Toolkit retries on every request.', 'fundraising-toolkit'),
             esc_html($names)
         );
     }

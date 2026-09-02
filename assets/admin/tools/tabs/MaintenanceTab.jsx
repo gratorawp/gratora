@@ -16,7 +16,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
 
     const scopes = info?.recalc_scopes?.length
         ? info.recalc_scopes
-        : [ { value: 'all', label: __( 'Everything', 'fundkit-fundraising-campaigns' ) } ];
+        : [ { value: 'all', label: __( 'Everything', 'fundraising-toolkit' ) } ];
 
     // Tabs are hidden rather than unmounted. Saving a currency on another
     // screen changes which donations are stranded, so refetch on each visit.
@@ -31,12 +31,12 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
             setNotice( {
                 type: 'success',
                 text: left > 0
-                    ? __( 'Progress made. There is more to do, run it again.', 'fundkit-fundraising-campaigns' )
-                    : __( 'Data updates finished.', 'fundkit-fundraising-campaigns' ),
+                    ? __( 'Progress made. There is more to do, run it again.', 'fundraising-toolkit' )
+                    : __( 'Data updates finished.', 'fundraising-toolkit' ),
             } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not finish the data updates.', 'fundkit-fundraising-campaigns' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not finish the data updates.', 'fundraising-toolkit' ) } );
         } finally {
             setUpgrading( false );
         }
@@ -53,10 +53,10 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                 data:   { scope: recalcScope },
             } );
             setRecalcResult( res?.counts || {} );
-            setNotice( { type: 'success', text: __( 'Aggregates recomputed.', 'fundkit-fundraising-campaigns' ) } );
+            setNotice( { type: 'success', text: __( 'Aggregates recomputed.', 'fundraising-toolkit' ) } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Recalculation failed.', 'fundkit-fundraising-campaigns' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Recalculation failed.', 'fundraising-toolkit' ) } );
         } finally {
             setRecalcRunning( false );
         }
@@ -76,7 +76,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                 type: 'success',
                 text: sprintf(
                     /* translators: 1: donations removed, 2: recurring plans removed, 3: donors removed */
-                    __( 'Removed %1$d test donations, %2$d test recurring plans and %3$d donors left with nothing.', 'fundkit-fundraising-campaigns' ),
+                    __( 'Removed %1$d test donations, %2$d test recurring plans and %3$d donors left with nothing.', 'fundraising-toolkit' ),
                     res?.donations || 0,
                     res?.recurring_plans || 0,
                     res?.donors || 0,
@@ -84,7 +84,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
             } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not remove the test data.', 'fundkit-fundraising-campaigns' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not remove the test data.', 'fundraising-toolkit' ) } );
         } finally {
             setPurging( false );
         }
@@ -97,8 +97,8 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
         <div className="fundkit-panel">
             { info?.pending_upgrades?.length > 0 && (
                 <Card
-                    title={ __( 'Data updates are outstanding', 'fundkit-fundraising-campaigns' ) }
-                    sub={ __( 'These run by themselves in the background. If they are still here after a few minutes, this site\'s scheduled tasks are not running and you can finish them here.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Data updates are outstanding', 'fundraising-toolkit' ) }
+                    sub={ __( 'These run by themselves in the background. If they are still here after a few minutes, this site\'s scheduled tasks are not running and you can finish them here.', 'fundraising-toolkit' ) }
                 >
                     <ul className="fundkit-advanced-cron">
                         { info.pending_upgrades.map( ( u ) => (
@@ -112,7 +112,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                                                 'Stopped with: %1$s (failed %2$d time)',
                                                 'Stopped with: %1$s (failed %2$d times)',
                                                 u.failure.attempts,
-                                                'fundkit-fundraising-campaigns'
+                                                'fundraising-toolkit'
                                             ),
                                             u.failure.message,
                                             u.failure.attempts
@@ -124,7 +124,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                     </ul>
                     <div className="fundkit-advanced-actions" style={ { marginTop: 12 } }>
                         <Btn variant="primary" onClick={ doRunUpgrades } disabled={ upgrading } isBusy={ upgrading }>
-                            { upgrading ? __( 'Working…', 'fundkit-fundraising-campaigns' ) : __( 'Run them now', 'fundkit-fundraising-campaigns' ) }
+                            { upgrading ? __( 'Working…', 'fundraising-toolkit' ) : __( 'Run them now', 'fundraising-toolkit' ) }
                         </Btn>
                     </div>
                 </Card>
@@ -132,11 +132,11 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
 
             { info?.unconverted_donations?.length > 0 && (
                 <Card
-                    title={ __( 'Donations missing from your totals', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Donations missing from your totals', 'fundraising-toolkit' ) }
                     sub={
                         info.unconverted_donations.some( ( row ) => row.needs_rate )
-                            ? __( 'A donation is never refused for want of an exchange rate, so these completed donations were recorded in their own currency and left out of every total. Add a rate for the currency on Settings > Currency, then recalculate to bring them in.', 'fundkit-fundraising-campaigns' )
-                            : __( 'These completed donations were recorded without a value in your base currency, so every total leaves them out. Recalculate to bring them in; no exchange rate is needed.', 'fundkit-fundraising-campaigns' )
+                            ? __( 'A donation is never refused for want of an exchange rate, so these completed donations were recorded in their own currency and left out of every total. Add a rate for the currency on Settings > Currency, then recalculate to bring them in.', 'fundraising-toolkit' )
+                            : __( 'These completed donations were recorded without a value in your base currency, so every total leaves them out. Recalculate to bring them in; no exchange rate is needed.', 'fundraising-toolkit' )
                     }
                 >
                     <ul className="fundkit-advanced-cron">
@@ -146,14 +146,14 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                                 { ' ' }
                                 { sprintf(
                                     /* translators: 1: how many donations, 2: their total in that currency. */
-                                    _n( '%1$s donation, %2$s', '%1$s donations, %2$s', row.count, 'fundkit-fundraising-campaigns' ),
+                                    _n( '%1$s donation, %2$s', '%1$s donations, %2$s', row.count, 'fundraising-toolkit' ),
                                     row.count,
                                     formatAmount( row.amount_cents, row.currency )
                                 ) }
                                 { ! row.needs_rate && (
                                     <>
                                         { ' ' }
-                                        <em>{ __( '(your base currency: recalculate is all this needs)', 'fundkit-fundraising-campaigns' ) }</em>
+                                        <em>{ __( '(your base currency: recalculate is all this needs)', 'fundraising-toolkit' ) }</em>
                                     </>
                                 ) }
                             </li>
@@ -163,12 +163,12 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
             ) }
 
             <Card
-                title={ __( 'Recalculate aggregates', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Re-derive donor, fund, campaign and form counters from the donation rows. Safe to run any time; donations are only read.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Recalculate aggregates', 'fundraising-toolkit' ) }
+                sub={ __( 'Re-derive donor, fund, campaign and form counters from the donation rows. Safe to run any time; donations are only read.', 'fundraising-toolkit' ) }
             >
                 <div className="fundkit-advanced-actions">
                     <label className="fundkit-tools-field">
-                        { __( 'Scope', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Scope', 'fundraising-toolkit' ) }
                         <select
                             className="fundkit-select"
                             value={ recalcScope }
@@ -181,7 +181,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                         </select>
                     </label>
                     <Btn variant="primary" onClick={ doRecalculate } disabled={ recalcRunning } isBusy={ recalcRunning }>
-                        { recalcRunning ? __( 'Recalculating…', 'fundkit-fundraising-campaigns' ) : __( 'Recalculate', 'fundkit-fundraising-campaigns' ) }
+                        { recalcRunning ? __( 'Recalculating…', 'fundraising-toolkit' ) : __( 'Recalculate', 'fundraising-toolkit' ) }
                     </Btn>
                 </div>
                 { recalcResult && (
@@ -192,7 +192,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                                 <li key={ k }>
                                     { sprintf(
                                         /* translators: 1: scope label (Donors, Funds, ...), 2: count */
-                                        __( '%1$s: %2$d synced', 'fundkit-fundraising-campaigns' ),
+                                        __( '%1$s: %2$d synced', 'fundraising-toolkit' ),
                                         k.charAt( 0 ).toUpperCase() + k.slice( 1 ),
                                         n
                                     ) }
@@ -204,15 +204,15 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
 
             { testTotal > 0 && (
                 <Card
-                    title={ __( 'Test data', 'fundkit-fundraising-campaigns' ) }
-                    sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are left out of your reported totals unless you ask to see them, so this changes nothing you have quoted: it clears the ledger you read by eye before going live. There is no undo.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Test data', 'fundraising-toolkit' ) }
+                    sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are left out of your reported totals unless you ask to see them, so this changes nothing you have quoted: it clears the ledger you read by eye before going live. There is no undo.', 'fundraising-toolkit' ) }
                 >
                     <ul className="fundkit-advanced-cron">
                         { testData.donations > 0 && (
                             <li>
                                 { sprintf(
                                     /* translators: %d: number of test donations */
-                                    _n( '%d test donation', '%d test donations', testData.donations, 'fundkit-fundraising-campaigns' ),
+                                    _n( '%d test donation', '%d test donations', testData.donations, 'fundraising-toolkit' ),
                                     testData.donations
                                 ) }
                             </li>
@@ -221,7 +221,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                             <li>
                                 { sprintf(
                                     /* translators: %d: number of test recurring plans */
-                                    _n( '%d test recurring plan', '%d test recurring plans', testData.recurring_plans, 'fundkit-fundraising-campaigns' ),
+                                    _n( '%d test recurring plan', '%d test recurring plans', testData.recurring_plans, 'fundraising-toolkit' ),
                                     testData.recurring_plans
                                 ) }
                             </li>
@@ -234,7 +234,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                                         '%d donor, who would have nothing left on record',
                                         '%d donors, who would have nothing left on record',
                                         testData.donors,
-                                        'fundkit-fundraising-campaigns'
+                                        'fundraising-toolkit'
                                     ),
                                     testData.donors
                                 ) }
@@ -243,7 +243,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                     </ul>
                     <div className="fundkit-advanced-actions" style={ { marginTop: 12 } }>
                         <label className="fundkit-tools-field">
-                            { __( 'Type DELETE to confirm', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Type DELETE to confirm', 'fundraising-toolkit' ) }
                             <input
                                 type="text"
                                 className="fundkit-input"
@@ -258,19 +258,19 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                             disabled={ purging || purgeText.trim().toUpperCase() !== 'DELETE' }
                             isBusy={ purging }
                         >
-                            { purging ? __( 'Removing…', 'fundkit-fundraising-campaigns' ) : __( 'Delete test data', 'fundkit-fundraising-campaigns' ) }
+                            { purging ? __( 'Removing…', 'fundraising-toolkit' ) : __( 'Delete test data', 'fundraising-toolkit' ) }
                         </Btn>
                     </div>
                 </Card>
             ) }
 
             <Card
-                title={ __( 'Setup wizard', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Walks through currency, the first campaign, and a payment gateway. Re-running it changes nothing you have already set unless you complete a step.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Setup wizard', 'fundraising-toolkit' ) }
+                sub={ __( 'Walks through currency, the first campaign, and a payment gateway. Re-running it changes nothing you have already set unless you complete a step.', 'fundraising-toolkit' ) }
             >
                 <div className="fundkit-advanced-actions">
                     <Btn variant="secondary" href="admin.php?page=fundkit-onboarding">
-                        { __( 'Open setup wizard', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Open setup wizard', 'fundraising-toolkit' ) }
                     </Btn>
                 </div>
             </Card>

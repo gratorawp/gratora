@@ -8,9 +8,9 @@ import Segmented from '../../../_shared/components/Segmented';
 const NAME = 'fundkit/privacy-notice';
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'fundkit-fundraising-campaigns' ) },
-    { value: 'center', label: __( 'Center', 'fundkit-fundraising-campaigns' ) },
-    { value: 'right',  label: __( 'Right',  'fundkit-fundraising-campaigns' ) },
+    { value: 'left',   label: __( 'Left',   'fundraising-toolkit' ) },
+    { value: 'center', label: __( 'Center', 'fundraising-toolkit' ) },
+    { value: 'right',  label: __( 'Right',  'fundraising-toolkit' ) },
 ];
 
 function readPrivacyUrl() {
@@ -28,8 +28,8 @@ function Edit( { attributes, setAttributes } ) {
 
     // Fall back to the translated strings for the preview; the saved attrs stay
     // empty so the PHP render emits the localized default.
-    const text     = textAttr     || __( 'By donating you agree to our', 'fundkit-fundraising-campaigns' );
-    const linkText = linkTextAttr || __( 'Privacy Policy', 'fundkit-fundraising-campaigns' );
+    const text     = textAttr     || __( 'By donating you agree to our', 'fundraising-toolkit' );
+    const linkText = linkTextAttr || __( 'Privacy Policy', 'fundraising-toolkit' );
 
     const settingsUrl = readPrivacyUrl();
     const hasUrl      = settingsUrl !== '';
@@ -45,36 +45,36 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Privacy notice', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Privacy notice', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Leading text', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Leading text', 'fundraising-toolkit' ) }
                         value={ textAttr }
-                        placeholder={ __( 'By donating you agree to our', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'By donating you agree to our', 'fundraising-toolkit' ) }
                         onChange={ ( v ) => setAttributes( { text: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Link label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Link label', 'fundraising-toolkit' ) }
                         value={ linkTextAttr }
-                        placeholder={ __( 'Privacy Policy', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Privacy Policy', 'fundraising-toolkit' ) }
                         onChange={ ( v ) => setAttributes( { linkText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Alignment', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Alignment', 'fundraising-toolkit' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
                     />
                     { hasUrl ? (
                         <p style={ { fontSize: 12, color: '#6b7280', margin: '12px 0 0' } }>
-                            { __( 'Linking to:', 'fundkit-fundraising-campaigns' ) }{ ' ' }
+                            { __( 'Linking to:', 'fundraising-toolkit' ) }{ ' ' }
                             <ExternalLink href={ settingsUrl }>{ settingsUrl }</ExternalLink>
                         </p>
                     ) : (
                         <Notice status="warning" isDismissible={ false } style={ { marginTop: 12 } }>
-                            { __( 'No privacy policy URL is set. Donors will see the text but no link until you add one in', 'fundkit-fundraising-campaigns' ) }{ ' ' }
-                            <ExternalLink href={ settingsHref }>{ __( 'Settings → Privacy', 'fundkit-fundraising-campaigns' ) }</ExternalLink>.
+                            { __( 'No privacy policy URL is set. Donors will see the text but no link until you add one in', 'fundraising-toolkit' ) }{ ' ' }
+                            <ExternalLink href={ settingsHref }>{ __( 'Settings → Privacy', 'fundraising-toolkit' ) }</ExternalLink>.
                         </Notice>
                     ) }
                 </PanelBody>
@@ -105,8 +105,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Privacy notice', 'fundkit-fundraising-campaigns' ),
-        description: __( 'A short line of text plus a link to your privacy policy. Pair with the URL set in Settings → Privacy.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Privacy notice', 'fundraising-toolkit' ),
+        description: __( 'A short line of text plus a link to your privacy policy. Pair with the URL set in Settings → Privacy.', 'fundraising-toolkit' ),
         category:   'fundkit-content',
         icon:       BlockIcons[ 'privacy-notice' ] || BlockIcons[ 'paragraph' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

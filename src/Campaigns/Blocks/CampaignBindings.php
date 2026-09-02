@@ -44,17 +44,17 @@ final class CampaignBindings extends HookProvider
     public static function fields(): array
     {
         return [
-            'title'           => __('Title', 'fundkit-fundraising-campaigns'),
-            'description'     => __('Short description', 'fundkit-fundraising-campaigns'),
-            'image'           => __('Cover image', 'fundkit-fundraising-campaigns'),
-            'image_alt'       => __('Cover image description', 'fundkit-fundraising-campaigns'),
-            'url'             => __('Page link', 'fundkit-fundraising-campaigns'),
-            'raised'          => __('Raised', 'fundkit-fundraising-campaigns'),
-            'goal'            => __('Goal', 'fundkit-fundraising-campaigns'),
-            'percent_label'   => __('Percent of goal', 'fundkit-fundraising-campaigns'),
-            'donors_count'    => __('Donors', 'fundkit-fundraising-campaigns'),
-            'donations_count' => __('Donations', 'fundkit-fundraising-campaigns'),
-            'days_left'       => __('Days left', 'fundkit-fundraising-campaigns'),
+            'title'           => __('Title', 'fundraising-toolkit'),
+            'description'     => __('Short description', 'fundraising-toolkit'),
+            'image'           => __('Cover image', 'fundraising-toolkit'),
+            'image_alt'       => __('Cover image description', 'fundraising-toolkit'),
+            'url'             => __('Page link', 'fundraising-toolkit'),
+            'raised'          => __('Raised', 'fundraising-toolkit'),
+            'goal'            => __('Goal', 'fundraising-toolkit'),
+            'percent_label'   => __('Percent of goal', 'fundraising-toolkit'),
+            'donors_count'    => __('Donors', 'fundraising-toolkit'),
+            'donations_count' => __('Donations', 'fundraising-toolkit'),
+            'days_left'       => __('Days left', 'fundraising-toolkit'),
         ];
     }
 
@@ -82,7 +82,7 @@ final class CampaignBindings extends HookProvider
         if (! function_exists('register_block_bindings_source')) return;
 
         register_block_bindings_source('fundkit/campaign', [
-            'label'              => __('FundKit campaign', 'fundkit-fundraising-campaigns'),
+            'label'              => __('Fundraising Toolkit campaign', 'fundraising-toolkit'),
             'get_value_callback' => [$this, 'resolve'],
             'uses_context'       => ['postId'],
         ]);

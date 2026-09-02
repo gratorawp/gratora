@@ -31,8 +31,10 @@ final class AdminMenu extends HookProvider
     public function registerMenu(): void
     {
         add_menu_page(
-            __('FundKit', 'fundkit-fundraising-campaigns'),
-            __('FundKit', 'fundkit-fundraising-campaigns'),
+            __('Fundraising Toolkit', 'fundraising-toolkit'),
+            // The sidebar label is the one word that has to survive a narrow
+            // menu; the full name still titles the page it opens.
+            __('Fundraising', 'fundraising-toolkit'),
             self::CAPABILITY,
             self::SLUG,
             [$this, 'renderDashboard'],
@@ -41,11 +43,11 @@ final class AdminMenu extends HookProvider
         );
 
         // add_menu_page mints a first submenu carrying the parent's title, so the
-        // list opens with "FundKit" under "FundKit". Naming it here replaces it.
+        // list opens with "Fundraising" under "Fundraising". Naming it here replaces it.
         add_submenu_page(
             self::SLUG,
-            __('Dashboard', 'fundkit-fundraising-campaigns'),
-            __('Dashboard', 'fundkit-fundraising-campaigns'),
+            __('Dashboard', 'fundraising-toolkit'),
+            __('Dashboard', 'fundraising-toolkit'),
             self::CAPABILITY,
             self::SLUG,
             [$this, 'renderDashboard']
@@ -107,7 +109,7 @@ final class AdminMenu extends HookProvider
             $asset['version']      ?? FUNDKIT_VERSION,
             true
         );
-        wp_set_script_translations('fundkit-admin-command-palette', 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations('fundkit-admin-command-palette', 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
         wp_localize_script('fundkit-admin-command-palette', 'fundkitCommandPalette', [
             'adminUrl' => admin_url(),
         ]);
@@ -142,7 +144,7 @@ final class AdminMenu extends HookProvider
             $asset['version']      ?? FUNDKIT_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(

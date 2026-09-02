@@ -48,20 +48,20 @@ final class PayPalPlanRecorder
     {
         $subId = trim((string) ($sub['id'] ?? ''));
         if ($subId === '') {
-            throw new PayPalPlanRefused('fundkit_paypal_bad_subscription', esc_html__('Missing subscription id.', 'fundkit-fundraising-campaigns'));
+            throw new PayPalPlanRefused('fundkit_paypal_bad_subscription', esc_html__('Missing subscription id.', 'fundraising-toolkit'));
         }
 
         $reference = trim((string) ($sub['custom_id'] ?? ''));
         $donation  = $reference !== '' ? $this->donations->findByReference($reference) : null;
         if (! $donation instanceof Donation) {
             throw new PayPalPlanRefused('fundkit_paypal_subscription_mismatch',
-                esc_html__('That subscription does not belong to this donation.', 'fundkit-fundraising-campaigns'),
+                esc_html__('That subscription does not belong to this donation.', 'fundraising-toolkit'),
                 403
             );
         }
 
         if ((string) $donation->gateway !== 'paypal' || ! FrequencyMap::isRecurring((string) $donation->frequency)) {
-            throw new PayPalPlanRefused('fundkit_paypal_not_recurring', esc_html__('That donation is not recurring.', 'fundkit-fundraising-campaigns'));
+            throw new PayPalPlanRefused('fundkit_paypal_not_recurring', esc_html__('That donation is not recurring.', 'fundraising-toolkit'));
         }
 
         // Already recorded. Same subscription is the ordinary double delivery;
@@ -75,7 +75,7 @@ final class PayPalPlanRecorder
                     return $existing;
                 }
                 throw new PayPalPlanRefused('fundkit_paypal_subscription_conflict',
-                    esc_html__('This donation already has a different PayPal subscription.', 'fundkit-fundraising-campaigns'),
+                    esc_html__('This donation already has a different PayPal subscription.', 'fundraising-toolkit'),
                     409
                 );
             }
@@ -89,7 +89,7 @@ final class PayPalPlanRecorder
         $expectedPlan = (string) ($meta['paypal_plan_id'] ?? '');
         if ($expectedPlan === '' || (string) ($sub['plan_id'] ?? '') !== $expectedPlan) {
             throw new PayPalPlanRefused('fundkit_paypal_subscription_plan_mismatch',
-                esc_html__('That subscription is not for this donation amount.', 'fundkit-fundraising-campaigns'),
+                esc_html__('That subscription is not for this donation amount.', 'fundraising-toolkit'),
                 403
             );
         }
@@ -99,7 +99,7 @@ final class PayPalPlanRecorder
             throw new PayPalPlanRefused('fundkit_paypal_subscription_status',
                 esc_html(sprintf(
                     /* translators: %s: PayPal subscription status */
-                    __('PayPal reports this subscription as %s.', 'fundkit-fundraising-campaigns'),
+                    __('PayPal reports this subscription as %s.', 'fundraising-toolkit'),
                     $status
                 ))
             );

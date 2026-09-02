@@ -52,7 +52,7 @@ final class PayPalPlans
             'product_id' => $this->resolveProduct($test),
             'name'       => sprintf(
                 /* translators: 1: amount, 2: currency, 3: interval */
-                __('Donation %1$s %2$s / %3$s', 'fundkit-fundraising-campaigns'),
+                __('Donation %1$s %2$s / %3$s', 'fundraising-toolkit'),
                 PayPalMoney::toValue($amountCents, $currency),
                 $currency,
                 $this->intervalLabel($intervalUnit, $intervalCount)
@@ -109,8 +109,8 @@ final class PayPalPlans
         }
 
         $product = $this->api->post('/v1/catalogs/products', [
-            'name'        => __('Donation', 'fundkit-fundraising-campaigns'),
-            'description' => __('Recurring donation', 'fundkit-fundraising-campaigns'),
+            'name'        => __('Donation', 'fundraising-toolkit'),
+            'description' => __('Recurring donation', 'fundraising-toolkit'),
             'type'        => 'SERVICE',
             'category'    => 'NONPROFIT',
         ], ['PayPal-Request-Id' => 'fundkit_product_' . $key]);

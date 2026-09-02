@@ -27,23 +27,23 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
             setCopied( true );
             setTimeout( () => setCopied( false ), 2000 );
         } catch ( err ) {
-            setNotice( { type: 'error', text: __( 'Could not copy. Select the values instead.', 'fundkit-fundraising-campaigns' ) } );
+            setNotice( { type: 'error', text: __( 'Could not copy. Select the values instead.', 'fundraising-toolkit' ) } );
         }
     };
 
     return (
         <div className="fundkit-panel">
             <Card
-                title={ __( 'System info', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Everything a support request needs. No keys or credentials are included, so it is safe to paste.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'System info', 'fundraising-toolkit' ) }
+                sub={ __( 'Everything a support request needs. No keys or credentials are included, so it is safe to paste.', 'fundraising-toolkit' ) }
             >
                 { infoError ? (
                     <div className="fundkit-advanced-actions">
-                        <p style={ { color: '#b42318', margin: 0 } }>{ __( 'Could not load system info.', 'fundkit-fundraising-campaigns' ) }</p>
-                        <Btn variant="secondary" onClick={ loadInfo }>{ __( 'Retry', 'fundkit-fundraising-campaigns' ) }</Btn>
+                        <p style={ { color: '#b42318', margin: 0 } }>{ __( 'Could not load system info.', 'fundraising-toolkit' ) }</p>
+                        <Btn variant="secondary" onClick={ loadInfo }>{ __( 'Retry', 'fundraising-toolkit' ) }</Btn>
                     </div>
                 ) : ! info ? (
-                    <p className="fundkit-tools-empty">{ __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</p>
+                    <p className="fundkit-tools-empty">{ __( 'Loading…', 'fundraising-toolkit' ) }</p>
                 ) : (
                     <>
                         { sections.map( ( section ) => (
@@ -61,7 +61,7 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
                         ) ) }
                         <div className="fundkit-advanced-actions" style={ { marginTop: 12 } }>
                             <Btn variant="secondary" onClick={ copy }>
-                                { copied ? __( 'Copied', 'fundkit-fundraising-campaigns' ) : __( 'Copy to clipboard', 'fundkit-fundraising-campaigns' ) }
+                                { copied ? __( 'Copied', 'fundraising-toolkit' ) : __( 'Copy to clipboard', 'fundraising-toolkit' ) }
                             </Btn>
                         </div>
                     </>
@@ -69,8 +69,8 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
             </Card>
 
             <Card
-                title={ __( 'Scheduled tasks', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'FundKit jobs queued with Action Scheduler, and when each is due.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Scheduled tasks', 'fundraising-toolkit' ) }
+                sub={ __( 'Fundraising Toolkit jobs queued with Action Scheduler, and when each is due.', 'fundraising-toolkit' ) }
             >
                 { info?.cron?.length ? (
                     <ul className="fundkit-advanced-cron">
@@ -82,7 +82,7 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
                         ) ) }
                     </ul>
                 ) : (
-                    <p className="fundkit-tools-empty">{ __( 'Nothing queued right now.', 'fundkit-fundraising-campaigns' ) }</p>
+                    <p className="fundkit-tools-empty">{ __( 'Nothing queued right now.', 'fundraising-toolkit' ) }</p>
                 ) }
             </Card>
         </div>

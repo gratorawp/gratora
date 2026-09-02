@@ -24,7 +24,7 @@ export default function DowHourHeatmap( { data } ) {
     if ( ! data || ( data.total ?? 0 ) === 0 ) {
         return (
             <p className="fundkit-panel__empty">
-                { __( 'No donation activity yet to plot timing.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'No donation activity yet to plot timing.', 'fundraising-toolkit' ) }
             </p>
         );
     }
@@ -79,7 +79,7 @@ export default function DowHourHeatmap( { data } ) {
                                         '%1$s at %2$d:00, %3$d donation',
                                         '%1$s at %2$d:00, %3$d donations',
                                         count,
-                                        'fundkit-fundraising-campaigns'
+                                        'fundraising-toolkit'
                                     ),
                                     DAYS[ day ].long,
                                     hour,
@@ -92,7 +92,7 @@ export default function DowHourHeatmap( { data } ) {
             ) ) }
 
             <div className="fundkit-heatmap__legend">
-                <span className="fundkit-heatmap__legend-label">{ __( 'Fewer', 'fundkit-fundraising-campaigns' ) }</span>
+                <span className="fundkit-heatmap__legend-label">{ __( 'Fewer', 'fundraising-toolkit' ) }</span>
                 { [ 0.15, 0.35, 0.55, 0.75, 0.9 ].map( ( a ) => (
                     <span
                         key={ a }
@@ -100,7 +100,7 @@ export default function DowHourHeatmap( { data } ) {
                         style={ { background: `rgba(${ RAMP }, ${ a })` } }
                     />
                 ) ) }
-                <span className="fundkit-heatmap__legend-label">{ __( 'More', 'fundkit-fundraising-campaigns' ) }</span>
+                <span className="fundkit-heatmap__legend-label">{ __( 'More', 'fundraising-toolkit' ) }</span>
             </div>
 
             { hovered && (
@@ -111,7 +111,7 @@ export default function DowHourHeatmap( { data } ) {
                     { ' - ' }
                     { sprintf(
                         /* translators: %d: number of donations */
-                        _n( '%d donation', '%d donations', hovered.count, 'fundkit-fundraising-campaigns' ),
+                        _n( '%d donation', '%d donations', hovered.count, 'fundraising-toolkit' ),
                         hovered.count
                     ) }
                 </div>

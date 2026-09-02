@@ -164,14 +164,14 @@ final class ReferenceGenerator
     public static function assertTokens(array $input): void
     {
         $labels = [
-            'donation' => __('Donation prefix', 'fundkit-fundraising-campaigns'),
-            'receipt'  => __('Receipt prefix', 'fundkit-fundraising-campaigns'),
-            'refund'   => __('Refund prefix', 'fundkit-fundraising-campaigns'),
+            'donation' => __('Donation prefix', 'fundraising-toolkit'),
+            'receipt'  => __('Receipt prefix', 'fundraising-toolkit'),
+            'refund'   => __('Refund prefix', 'fundraising-toolkit'),
         ];
 
         if (array_key_exists('separator', $input) && ! self::isToken((string) $input['separator'])) {
             throw new InvalidReferenceToken(
-                __('Separator', 'fundkit-fundraising-campaigns'),
+                __('Separator', 'fundraising-toolkit'),
                 (string) $input['separator'],
             );
         }

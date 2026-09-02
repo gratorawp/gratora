@@ -8,8 +8,8 @@ defined('ABSPATH') || exit;
  * @var bool   $requireFirst
  * @var bool   $requireLast
  */
-$firstLabelText = $firstLabel !== '' ? $firstLabel : __('First name', 'fundkit-fundraising-campaigns');
-$lastLabelText  = $lastLabel  !== '' ? $lastLabel  : __('Last name', 'fundkit-fundraising-campaigns');
+$firstLabelText = $firstLabel !== '' ? $firstLabel : __('First name', 'fundraising-toolkit');
+$lastLabelText  = $lastLabel  !== '' ? $lastLabel  : __('Last name', 'fundraising-toolkit');
 ?>
 <div class="fundkit-block fundkit-block--name fundkit-donor__name">
     <label class="fundkit-donor__field">

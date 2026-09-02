@@ -37,15 +37,15 @@ function hasContext( row ) {
  */
 function deliveryOutcome( row ) {
     if ( ! row.verified ) {
-        return { tone: 'red', label: __( 'Not verified', 'fundkit-fundraising-campaigns' ) };
+        return { tone: 'red', label: __( 'Not verified', 'fundraising-toolkit' ) };
     }
     if ( row.error ) {
-        return { tone: 'red', label: __( 'Handling failed', 'fundkit-fundraising-campaigns' ) };
+        return { tone: 'red', label: __( 'Handling failed', 'fundraising-toolkit' ) };
     }
     if ( row.processed ) {
-        return { tone: 'green', label: __( 'Processed', 'fundkit-fundraising-campaigns' ) };
+        return { tone: 'green', label: __( 'Processed', 'fundraising-toolkit' ) };
     }
-    return { tone: 'gray', label: __( 'No action needed', 'fundkit-fundraising-campaigns' ) };
+    return { tone: 'gray', label: __( 'No action needed', 'fundraising-toolkit' ) };
 }
 
 function Pill( { tone, label } ) {
@@ -119,7 +119,7 @@ export default function LogsTab( { active, setNotice } ) {
                 // Deliberately not an empty result: "nothing has happened" and
                 // "we could not find out" are opposite answers, and this screen
                 // is read precisely when someone suspects the second.
-                setError( err?.message || __( 'The log could not be read.', 'fundkit-fundraising-campaigns' ) );
+                setError( err?.message || __( 'The log could not be read.', 'fundraising-toolkit' ) );
             } )
             .finally( () => {
                 if ( mine === generation.current ) setLoading( false );
@@ -143,12 +143,12 @@ export default function LogsTab( { active, setNotice } ) {
                 type: 'success',
                 text: sprintf(
                     /* translators: %d: number of log entries deleted. */
-                    _n( '%d entry cleared.', '%d entries cleared.', Number( res?.deleted ) || 0, 'fundkit-fundraising-campaigns' ),
+                    _n( '%d entry cleared.', '%d entries cleared.', Number( res?.deleted ) || 0, 'fundraising-toolkit' ),
                     Number( res?.deleted ) || 0
                 ),
             } );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not clear the log.', 'fundkit-fundraising-campaigns' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not clear the log.', 'fundraising-toolkit' ) } );
         } finally {
             setClearing( false );
         }
@@ -160,16 +160,16 @@ export default function LogsTab( { active, setNotice } ) {
     // alone, and the delivery history goes with the failures otherwise.
     const askClear = () => setConfirm( {
         title: source
-            ? __( 'Clear this source', 'fundkit-fundraising-campaigns' )
-            : __( 'Clear the log', 'fundkit-fundraising-campaigns' ),
+            ? __( 'Clear this source', 'fundraising-toolkit' )
+            : __( 'Clear the log', 'fundraising-toolkit' ),
         message: source
             ? sprintf(
                 /* translators: %s: the log source being cleared, e.g. webhook.stripe */
-                __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'fundkit-fundraising-campaigns' ),
+                __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'fundraising-toolkit' ),
                 source
             )
-            : __( 'Deletes every entry: the failures FundKit recorded and the history of what your gateways sent. The log fills again as things happen.', 'fundkit-fundraising-campaigns' ),
-        confirmLabel: __( 'Clear log', 'fundkit-fundraising-campaigns' ),
+            : __( 'Deletes every entry: the failures Fundraising Toolkit recorded and the history of what your gateways sent. The log fills again as things happen.', 'fundraising-toolkit' ),
+        confirmLabel: __( 'Clear log', 'fundraising-toolkit' ),
         destructive:  true,
         onConfirm:    doClear,
     } );
@@ -183,7 +183,7 @@ export default function LogsTab( { active, setNotice } ) {
     const fields = useMemo( () => [
         {
             id:            'occurred_at',
-            label:         __( 'When', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'When', 'fundraising-toolkit' ),
             enableSorting: true,
             enableHiding:  false,
             getValue:      ( { item } ) => item.occurred_at || '',
@@ -191,7 +191,7 @@ export default function LogsTab( { active, setNotice } ) {
         },
         {
             id:            'source',
-            label:         __( 'Source', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Source', 'fundraising-toolkit' ),
             enableSorting: true,
             elements:      sources.map( ( s ) => ( { value: s, label: s } ) ),
             filterBy:      { operators: [ 'is' ] },
@@ -200,7 +200,7 @@ export default function LogsTab( { active, setNotice } ) {
         },
         {
             id:            'message',
-            label:         __( 'What it says', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'What it says', 'fundraising-toolkit' ),
             enableSorting: false,
             getValue:      ( { item } ) => item.message || '',
             render: ( { item } ) => (
@@ -214,11 +214,11 @@ export default function LogsTab( { active, setNotice } ) {
         },
         {
             id:            'outcome',
-            label:         __( 'Outcome', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Outcome', 'fundraising-toolkit' ),
             enableSorting: false,
             // The one narrowing worth offering: everything else on this screen
             // is ordinary traffic an org reads by scanning, not by filtering.
-            elements:      [ { value: 'failed', label: __( 'Problems only', 'fundkit-fundraising-campaigns' ) } ],
+            elements:      [ { value: 'failed', label: __( 'Problems only', 'fundraising-toolkit' ) } ],
             filterBy:      { operators: [ 'is' ] },
             render: ( { item } ) => {
                 if ( item.kind === 'webhook' ) {
@@ -234,7 +234,7 @@ export default function LogsTab( { active, setNotice } ) {
     const actions = useMemo( () => [
         {
             id:         'detail',
-            label:      __( 'View detail', 'fundkit-fundraising-campaigns' ),
+            label:      __( 'View detail', 'fundraising-toolkit' ),
             isEligible: hasContext,
             callback:   ( [ item ] ) => setDetail( item ),
         },
@@ -254,7 +254,7 @@ export default function LogsTab( { active, setNotice } ) {
         <div className="fundkit-panel">
             <div className="fundkit-tools-logbar">
                 <Btn variant="secondary" onClick={ load } disabled={ loading }>
-                    { __( 'Refresh', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Refresh', 'fundraising-toolkit' ) }
                 </Btn>
                 <Btn
                     variant="secondary"
@@ -262,18 +262,18 @@ export default function LogsTab( { active, setNotice } ) {
                     disabled={ clearing || total === 0 }
                     isBusy={ clearing }
                 >
-                    { __( 'Clear log', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Clear log', 'fundraising-toolkit' ) }
                 </Btn>
             </div>
 
             { error ? (
                 <p className="fundkit-tools-empty">
-                    { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'fundraising-toolkit' ) }
                     { ' ' }
                     <code>{ error }</code>
                 </p>
             ) : emptyAndUnfiltered ? (
-                <p className="fundkit-tools-empty">{ __( 'Nothing recorded yet.', 'fundkit-fundraising-campaigns' ) }</p>
+                <p className="fundkit-tools-empty">{ __( 'Nothing recorded yet.', 'fundraising-toolkit' ) }</p>
             ) : (
                 // Carries the shared table styling every other list screen uses.
                 <div className="fundkit-dataviews">
@@ -294,12 +294,12 @@ export default function LogsTab( { active, setNotice } ) {
 
             { detail && (
                 <Dialog
-                    title={ __( 'Entry detail', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Entry detail', 'fundraising-toolkit' ) }
                     size="wide"
                     onClose={ () => setDetail( null ) }
                     foot={ (
                         <Btn variant="secondary" onClick={ () => setDetail( null ) }>
-                            { __( 'Close', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Close', 'fundraising-toolkit' ) }
                         </Btn>
                     ) }
                 >

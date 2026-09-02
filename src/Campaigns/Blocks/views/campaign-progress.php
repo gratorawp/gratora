@@ -32,9 +32,9 @@ echo get_block_wrapper_attributes(array_filter([
 ?></span>
                 <span class="fundkit-progress__caption">
                     <?php echo esc_html(match ($goalType) {
-                        'donations' => __('donations', 'fundkit-fundraising-campaigns'),
-                        'donors'    => __('donors', 'fundkit-fundraising-campaigns'),
-                        default     => __('raised', 'fundkit-fundraising-campaigns'),
+                        'donations' => __('donations', 'fundraising-toolkit'),
+                        'donors'    => __('donors', 'fundraising-toolkit'),
+                        default     => __('raised', 'fundraising-toolkit'),
                     });
 ?>
                 </span>
@@ -43,7 +43,7 @@ echo get_block_wrapper_attributes(array_filter([
                 <div class="fundkit-progress__target">
                     <?php echo esc_html(sprintf(
                         /* translators: %1$s: percent, %2$s: target value */
-                        __('%1$d%% of %2$s goal', 'fundkit-fundraising-campaigns'),
+                        __('%1$d%% of %2$s goal', 'fundraising-toolkit'),
                         $pct,
                         $formatValue($target, $goalType, $currency)
                     ));

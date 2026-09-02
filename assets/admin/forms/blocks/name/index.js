@@ -18,43 +18,43 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Name', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Name', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'First name label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'First name label', 'fundraising-toolkit' ) }
                         value={ firstLabel }
                         onChange={ ( v ) => setAttributes( { firstLabel: v } ) }
-                        placeholder={ __( 'First name', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'First name', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'First name placeholder', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'First name placeholder', 'fundraising-toolkit' ) }
                         value={ firstPlaceholder }
                         onChange={ ( v ) => setAttributes( { firstPlaceholder: v } ) }
                         placeholder="Jane"
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'First name required', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'First name required', 'fundraising-toolkit' ) }
                         checked={ requireFirst }
                         onChange={ ( v ) => setAttributes( { requireFirst: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Last name label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Last name label', 'fundraising-toolkit' ) }
                         value={ lastLabel }
                         onChange={ ( v ) => setAttributes( { lastLabel: v } ) }
-                        placeholder={ __( 'Last name', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Last name', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Last name placeholder', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Last name placeholder', 'fundraising-toolkit' ) }
                         value={ lastPlaceholder }
                         onChange={ ( v ) => setAttributes( { lastPlaceholder: v } ) }
                         placeholder="Doe"
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Last name required', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Last name required', 'fundraising-toolkit' ) }
                         checked={ requireLast }
                         onChange={ ( v ) => setAttributes( { requireLast: v } ) }
                         __nextHasNoMarginBottom
@@ -65,7 +65,7 @@ function Edit( { attributes, setAttributes } ) {
                 <div className="fundkit-block-preview__grid-2">
                     <div>
                         <span className="fundkit-block-preview__label">
-                            { firstLabel || __( 'First name', 'fundkit-fundraising-campaigns' ) }
+                            { firstLabel || __( 'First name', 'fundraising-toolkit' ) }
                             { requireFirst && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
                         </span>
                         <div className="fundkit-block-preview__field">
@@ -74,7 +74,7 @@ function Edit( { attributes, setAttributes } ) {
                     </div>
                     <div>
                         <span className="fundkit-block-preview__label">
-                            { lastLabel || __( 'Last name', 'fundkit-fundraising-campaigns' ) }
+                            { lastLabel || __( 'Last name', 'fundraising-toolkit' ) }
                             { requireLast && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
                         </span>
                         <div className="fundkit-block-preview__field">
@@ -90,7 +90,7 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Name', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Name', 'fundraising-toolkit' ),
         category:   'fundkit-donor',
         icon:       BlockIcons[ 'name' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

@@ -34,14 +34,14 @@ export function campaignsDeleteMessage( items ) {
     const withPages = items.filter( ( i ) => i.page_id ).length;
 
     const parts = [ n === 1
-        ? __( 'Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted.', 'fundkit-fundraising-campaigns' )
+        ? __( 'Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted.', 'fundraising-toolkit' )
         : sprintf(
             /* translators: %d: number of campaigns to delete */
             _n(
                 'Permanently delete %d campaign? Forms attached to it will be deleted too. Any campaign that has donations cannot be deleted.',
                 'Permanently delete %d campaigns? Forms attached to them will be deleted too. Any campaign that has donations cannot be deleted.',
                 n,
-                'fundkit-fundraising-campaigns'
+                'fundraising-toolkit'
             ),
             n
         ) ];
@@ -50,7 +50,7 @@ export function campaignsDeleteMessage( items ) {
     // several campaigns selected and one page between them, "the page it
     // created" leaves the admin guessing which campaign "it" is.
     if ( withPages > 0 && n === 1 ) {
-        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'fundkit-fundraising-campaigns' ) );
+        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'fundraising-toolkit' ) );
     } else if ( withPages > 0 ) {
         parts.push( sprintf(
             /* translators: %d: how many of the selected campaigns have a WordPress page */
@@ -58,13 +58,13 @@ export function campaignsDeleteMessage( items ) {
                 '%d of them has a WordPress page, which is deleted with it rather than sent to the trash, so any content you built on it is gone for good.',
                 '%d of them have WordPress pages, which are deleted with them rather than sent to the trash, so any content you built on those pages is gone for good.',
                 withPages,
-                'fundkit-fundraising-campaigns'
+                'fundraising-toolkit'
             ),
             withPages
         ) );
     }
 
-    parts.push( __( 'This cannot be undone.', 'fundkit-fundraising-campaigns' ) );
+    parts.push( __( 'This cannot be undone.', 'fundraising-toolkit' ) );
 
     return parts.join( ' ' );
 }
@@ -126,7 +126,7 @@ export default function List() {
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load campaigns.', 'fundkit-fundraising-campaigns' ) );
+                setError( err?.message || __( 'Failed to load campaigns.', 'fundraising-toolkit' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
@@ -150,7 +150,7 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:            'title',
-            label:         __( 'Title', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Title', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <div className="fundkit-row__body">
@@ -174,14 +174,14 @@ export default function List() {
         },
         {
             id:       'status',
-            label:    __( 'Status', 'fundkit-fundraising-campaigns' ),
+            label:    __( 'Status', 'fundraising-toolkit' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             render:   ( { item } ) => <StatusBadge status={ item.not_accepting || item.status } />,
         },
         {
             id:            'raised',
-            label:         __( 'Raised', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Raised', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums' } }>
@@ -191,7 +191,7 @@ export default function List() {
         },
         {
             id:    'goal',
-            label: __( 'Goal', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Goal', 'fundraising-toolkit' ),
             // DataViews offers sorting on every field that does not opt out,
             // and the server has no orderby for these, so the indicator moved
             // and the rows came back in the same order.
@@ -200,7 +200,7 @@ export default function List() {
         },
         {
             id:            'donations_count',
-            label:         __( 'Donations', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Donations', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -210,7 +210,7 @@ export default function List() {
         },
         {
             id:            'donors_count',
-            label:         __( 'Donors', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Donors', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -220,7 +220,7 @@ export default function List() {
         },
         {
             id:    'forms_count',
-            label: __( 'Forms', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Forms', 'fundraising-toolkit' ),
             enableSorting: false,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -230,7 +230,7 @@ export default function List() {
         },
         {
             id:            'updated_at',
-            label:         __( 'Updated', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Updated', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="fundkit-time" title={ formatDate( item.updated_at ) }>
@@ -249,7 +249,7 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:    'view',
-            label: __( 'View campaign', 'fundkit-fundraising-campaigns' ),
+            label: __( 'View campaign', 'fundraising-toolkit' ),
             icon:  () => <ViewIcon size={ 16 } strokeWidth={ 1.75 } />,
             // One page per invocation, so no bulk: opening six tabs at once is
             // not what anyone meant by selecting six campaigns.
@@ -265,7 +265,7 @@ export default function List() {
         },
         {
             id:           'duplicate',
-            label:        __( 'Duplicate', 'fundkit-fundraising-campaigns' ),
+            label:        __( 'Duplicate', 'fundraising-toolkit' ),
             icon:         () => <CopyIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             callback: async ( items ) => {
@@ -277,13 +277,13 @@ export default function List() {
                     } ) ) );
                     load();
                 } catch ( err ) {
-                    setError( err?.message || __( 'Could not duplicate one or more campaigns.', 'fundkit-fundraising-campaigns' ) );
+                    setError( err?.message || __( 'Could not duplicate one or more campaigns.', 'fundraising-toolkit' ) );
                 }
             },
         },
         {
             id:            'delete',
-            label:         __( 'Delete', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Delete', 'fundraising-toolkit' ),
             icon:          () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -297,9 +297,9 @@ export default function List() {
                 const n = items.length;
                 const message = campaignsDeleteMessage( items );
                 setConfirm( {
-                    title:        _n( 'Delete campaign', 'Delete campaigns', n, 'fundkit-fundraising-campaigns' ),
+                    title:        _n( 'Delete campaign', 'Delete campaigns', n, 'fundraising-toolkit' ),
                     message,
-                    confirmLabel: __( 'Delete', 'fundkit-fundraising-campaigns' ),
+                    confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
                     destructive:  true,
                     onConfirm: async () => {
                         // allSettled, not all: one refusal used to reject the
@@ -317,14 +317,14 @@ export default function List() {
                         if ( deleted > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: number of campaigns deleted */
-                                _n( '%d campaign deleted.', '%d campaigns deleted.', deleted, 'fundkit-fundraising-campaigns' ),
+                                _n( '%d campaign deleted.', '%d campaigns deleted.', deleted, 'fundraising-toolkit' ),
                                 deleted
                             ) );
                         }
                         if ( refused.length > 0 ) {
                             setError( sprintf(
                                 /* translators: %s: comma separated campaign titles */
-                                __( 'These campaigns were not deleted, because they have donations: %s', 'fundkit-fundraising-campaigns' ),
+                                __( 'These campaigns were not deleted, because they have donations: %s', 'fundraising-toolkit' ),
                                 refused.map( ( c ) => c.title || `#${ c.id }` ).join( ', ' )
                             ) );
                         }
@@ -339,21 +339,21 @@ export default function List() {
     return (
         <div>
             <div className="fundkit-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'FundKit', 'fundkit-fundraising-campaigns' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'fundraising-toolkit' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Campaigns', 'fundkit-fundraising-campaigns' ) }</span>
+                <span>{ __( 'Campaigns', 'fundraising-toolkit' ) }</span>
             </div>
             <div className="fundkit-page-head">
                 <div className="fundkit-page-head__title-row">
-                    <h1>{ __( 'Campaigns', 'fundkit-fundraising-campaigns' ) }</h1>
+                    <h1>{ __( 'Campaigns', 'fundraising-toolkit' ) }</h1>
                 </div>
                 <div className="fundkit-page-head__right">
                     <span className="fundkit-page-head__meta">
-                        { sprintf( /* translators: %s: number of campaigns */ _n( '%s campaign', '%s campaigns', total, 'fundkit-fundraising-campaigns' ), total.toLocaleString() ) }
+                        { sprintf( /* translators: %s: number of campaigns */ _n( '%s campaign', '%s campaigns', total, 'fundraising-toolkit' ), total.toLocaleString() ) }
                     </span>
                     <Btn variant="primary" onClick={ () => setDrawerOpen( true ) }>
                         <Plus size={ 16 } strokeWidth={ 1.75 } />
-                        { __( 'Add new campaign', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Add new campaign', 'fundraising-toolkit' ) }
                     </Btn>
                 </div>
             </div>
@@ -375,7 +375,7 @@ export default function List() {
                             '%d test donation is not counted in these figures.',
                             '%d test donations are not counted in these figures.',
                             testHidden,
-                            'fundkit-fundraising-campaigns'
+                            'fundraising-toolkit'
                         ),
                         testHidden
                     ) }
@@ -386,11 +386,11 @@ export default function List() {
             { ! loading && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <Target size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No campaigns yet', 'fundkit-fundraising-campaigns' ) }
-                    body={ __( 'A campaign groups one or more donation forms around a single fundraising goal. Create one to get started.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'No campaigns yet', 'fundraising-toolkit' ) }
+                    body={ __( 'A campaign groups one or more donation forms around a single fundraising goal. Create one to get started.', 'fundraising-toolkit' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setDrawerOpen( true ) }>
-                            { __( 'Create your first campaign', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Create your first campaign', 'fundraising-toolkit' ) }
                         </Btn>
                     }
                 />
@@ -412,11 +412,11 @@ export default function List() {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'fundkit-fundraising-campaigns' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundkit-fundraising-campaigns' ) }
+                            title={ __( 'Nothing matches these filters', 'fundraising-toolkit' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundraising-toolkit' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Clear filters', 'fundraising-toolkit' ) }
                                 </Btn>
                             }
                         />
@@ -436,24 +436,24 @@ export default function List() {
 function campaignKpis( stats ) {
     return [
         {
-            label: __( 'Total', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Total', 'fundraising-toolkit' ),
             value: stats ? stats.total_count.toLocaleString() : '-',
         },
         {
-            label: __( 'Active', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Active', 'fundraising-toolkit' ),
             value: stats ? stats.active_count.toLocaleString() : '-',
         },
         {
-            label: __( 'Raised', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Raised', 'fundraising-toolkit' ),
             value: stats && stats.raised_cents > 0
                 ? formatAmount( stats.raised_cents, stats.currency || undefined )
                 : '-',
             sub: stats?.currency
-                ? sprintf( /* translators: %s: currency code */ __( 'in %s', 'fundkit-fundraising-campaigns' ), stats.currency )
+                ? sprintf( /* translators: %s: currency code */ __( 'in %s', 'fundraising-toolkit' ), stats.currency )
                 : null,
         },
         {
-            label: __( 'Donations', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Donations', 'fundraising-toolkit' ),
             value: stats ? stats.donations_count.toLocaleString() : '-',
         },
     ];

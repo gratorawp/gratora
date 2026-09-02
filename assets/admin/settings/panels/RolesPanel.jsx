@@ -28,14 +28,14 @@ export default function RolesPanel( { s } ) {
             <div className="fundkit-panel">
                 <Card>
                     <p style={ { color: '#b42318', margin: '0 0 12px' } }>
-                        { __( 'Could not load roles.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Could not load roles.', 'fundraising-toolkit' ) }
                     </p>
-                    <Btn variant="secondary" onClick={ load }>{ __( 'Retry', 'fundkit-fundraising-campaigns' ) }</Btn>
+                    <Btn variant="secondary" onClick={ load }>{ __( 'Retry', 'fundraising-toolkit' ) }</Btn>
                 </Card>
             </div>
         );
     }
-    if ( ! data ) return <p>{ __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</p>;
+    if ( ! data ) return <p>{ __( 'Loading…', 'fundraising-toolkit' ) }</p>;
 
     // Both come from the server: an add-on registers capabilities through the
     // fundkit.capabilities filter, so a list kept here could never include them.
@@ -66,7 +66,7 @@ export default function RolesPanel( { s } ) {
             <Card edited={ s.isDirty }>
                 <div className="fundkit-roles-table" style={ { '--fundkit-role-count': roles.length } }>
                     <div className="fundkit-roles-table__head">
-                        <div className="fundkit-roles-table__role-cell">{ __( 'Capability', 'fundkit-fundraising-campaigns' ) }</div>
+                        <div className="fundkit-roles-table__role-cell">{ __( 'Capability', 'fundraising-toolkit' ) }</div>
                         { roles.map( ( r ) => (
                             <div key={ r.slug } className="fundkit-roles-table__role">
                                 <strong>{ r.name }</strong>
@@ -77,7 +77,7 @@ export default function RolesPanel( { s } ) {
                                         onClick={ () => setAll( r.slug, true ) }
                                         disabled={ r.slug === 'administrator' }
                                     >
-                                        { __( 'All', 'fundkit-fundraising-campaigns' ) }
+                                        { __( 'All', 'fundraising-toolkit' ) }
                                     </Btn>
                                     <Btn
                                         variant="ghost"
@@ -85,7 +85,7 @@ export default function RolesPanel( { s } ) {
                                         onClick={ () => setAll( r.slug, false ) }
                                         disabled={ r.slug === 'administrator' }
                                     >
-                                        { __( 'None', 'fundkit-fundraising-campaigns' ) }
+                                        { __( 'None', 'fundraising-toolkit' ) }
                                     </Btn>
                                 </div>
                             </div>

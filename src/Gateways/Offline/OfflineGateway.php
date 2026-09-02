@@ -37,13 +37,13 @@ final class OfflineGateway implements PaymentGateway, SettlesOutOfBand
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Offline donations', 'fundkit-fundraising-campaigns');
+        return __('Offline donations', 'fundraising-toolkit');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Pay by bank transfer, check or cash. We confirm it manually.', 'fundkit-fundraising-campaigns');
+        return __('Pay by bank transfer, check or cash. We confirm it manually.', 'fundraising-toolkit');
     }
 
     /** @since 1.0.0 */

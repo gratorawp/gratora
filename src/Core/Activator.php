@@ -61,8 +61,8 @@ final class Activator
 
         $fund = Fund::make();
         $fund->code           = 'general';
-        $fund->name           = __('General', 'fundkit-fundraising-campaigns');
-        $fund->description    = __('Default fund for unrestricted donations.', 'fundkit-fundraising-campaigns');
+        $fund->name           = __('General', 'fundraising-toolkit');
+        $fund->description    = __('Default fund for unrestricted donations.', 'fundraising-toolkit');
         $fund->is_restricted  = false;
         $fund->is_default     = true;
         $fund->is_active      = true;

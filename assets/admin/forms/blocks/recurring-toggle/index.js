@@ -9,12 +9,12 @@ import { BlockIcons } from '../_shared/block-icons';
 const NAME = 'fundkit/recurring-toggle';
 
 const FREQ_OPTIONS = [
-    { value: 'one-time',  label: __( 'One-time', 'fundkit-fundraising-campaigns' ) },
-    { value: 'weekly',    label: __( 'Weekly', 'fundkit-fundraising-campaigns' ) },
-    { value: 'biweekly',  label: __( 'Every 2 weeks', 'fundkit-fundraising-campaigns' ) },
-    { value: 'monthly',   label: __( 'Monthly', 'fundkit-fundraising-campaigns' ) },
-    { value: 'quarterly', label: __( 'Quarterly', 'fundkit-fundraising-campaigns' ) },
-    { value: 'yearly',    label: __( 'Yearly', 'fundkit-fundraising-campaigns' ) },
+    { value: 'one-time',  label: __( 'One-time', 'fundraising-toolkit' ) },
+    { value: 'weekly',    label: __( 'Weekly', 'fundraising-toolkit' ) },
+    { value: 'biweekly',  label: __( 'Every 2 weeks', 'fundraising-toolkit' ) },
+    { value: 'monthly',   label: __( 'Monthly', 'fundraising-toolkit' ) },
+    { value: 'quarterly', label: __( 'Quarterly', 'fundraising-toolkit' ) },
+    { value: 'yearly',    label: __( 'Yearly', 'fundraising-toolkit' ) },
 ];
 
 // One-time is not listed: every form accepts a single donation, so the server
@@ -61,32 +61,32 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Recurring toggle', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Recurring toggle', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Help text', 'fundraising-toolkit' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Style', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Style', 'fundraising-toolkit' ) }
                         value={ style }
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         options={ [
-                            { value: 'pills', label: __( 'Pills', 'fundkit-fundraising-campaigns' ) },
-                            { value: 'tabs',  label: __( 'Tabs',  'fundkit-fundraising-campaigns' ) },
+                            { value: 'pills', label: __( 'Pills', 'fundraising-toolkit' ) },
+                            { value: 'tabs',  label: __( 'Tabs',  'fundraising-toolkit' ) },
                         ] }
                     />
                     <Field
-                        label={ __( 'Recurring options', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Donors can always give once. Pick the recurring options to offer alongside it.', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Recurring options', 'fundraising-toolkit' ) }
+                        help={ __( 'Donors can always give once. Pick the recurring options to offer alongside it.', 'fundraising-toolkit' ) }
                     >
                         <div className="fundkit-sidebar-list">
                             { RECURRING_OPTIONS.map( ( f ) => (
@@ -103,11 +103,11 @@ function Edit( { attributes, setAttributes } ) {
                     </Field>
                     { willHide && (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'Pick at least one recurring option, or this block will not appear on the form.', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Pick at least one recurring option, or this block will not appear on the form.', 'fundraising-toolkit' ) }
                         </Notice>
                     ) }
                     <SelectControl
-                        label={ __( 'Default selection', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Default selection', 'fundraising-toolkit' ) }
                         value={ defaultFrequency }
                         options={ FREQ_OPTIONS.filter( ( f ) => effectiveFreqs.includes( f.value ) ) }
                         onChange={ ( v ) => setAttributes( { defaultFrequency: v } ) }
@@ -125,7 +125,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="fundkit-block-preview__title"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Make this recurring', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Make this recurring', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                     style={ { fontSize: 13, fontWeight: 500, marginBottom: 6 } }
                 />
@@ -180,7 +180,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="p"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Help text', 'fundraising-toolkit' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', margin: '6px 0 0', lineHeight: 1.4 } }
                     />
@@ -193,8 +193,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Recurring toggle', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Frequency selector (one-time / monthly / yearly / etc).', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Recurring toggle', 'fundraising-toolkit' ),
+        description: __( 'Frequency selector (one-time / monthly / yearly / etc).', 'fundraising-toolkit' ),
         category:   'fundkit-amount',
         icon:       BlockIcons[ 'recurring-toggle' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

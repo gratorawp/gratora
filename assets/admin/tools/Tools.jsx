@@ -10,11 +10,11 @@ import MaintenanceTab from './tabs/MaintenanceTab';
 import SystemInfoTab from './tabs/SystemInfoTab';
 
 const TABS = [
-    { key: 'maintenance', label: __( 'Maintenance', 'fundkit-fundraising-campaigns' ) },
-    { key: 'logs',        label: __( 'Logs', 'fundkit-fundraising-campaigns' ) },
-    { key: 'system',      label: __( 'System info', 'fundkit-fundraising-campaigns' ) },
-    { key: 'export',      label: __( 'Export', 'fundkit-fundraising-campaigns' ) },
-    { key: 'import',      label: __( 'Import', 'fundkit-fundraising-campaigns' ) },
+    { key: 'maintenance', label: __( 'Maintenance', 'fundraising-toolkit' ) },
+    { key: 'logs',        label: __( 'Logs', 'fundraising-toolkit' ) },
+    { key: 'system',      label: __( 'System info', 'fundraising-toolkit' ) },
+    { key: 'export',      label: __( 'Export', 'fundraising-toolkit' ) },
+    { key: 'import',      label: __( 'Import', 'fundraising-toolkit' ) },
 ];
 
 const fromHash = () => {
@@ -53,20 +53,20 @@ export default function Tools() {
     return (
         <div className="fundkit-settings-page">
             <div className="fundkit-crumbs">
-                <a href="admin.php?page=fundkit">{ __( 'FundKit', 'fundkit-fundraising-campaigns' ) }</a>
+                <a href="admin.php?page=fundkit">{ __( 'Fundraising Toolkit', 'fundraising-toolkit' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Tools', 'fundkit-fundraising-campaigns' ) }</span>
+                <span>{ __( 'Tools', 'fundraising-toolkit' ) }</span>
                 <span className="sep">›</span>
                 <span>{ TABS.find( ( t ) => t.key === tab )?.label || '' }</span>
             </div>
 
             <div className="fundkit-page-head">
                 <div className="fundkit-page-head__title-row">
-                    <h1>{ __( 'Tools', 'fundkit-fundraising-campaigns' ) }</h1>
+                    <h1>{ __( 'Tools', 'fundraising-toolkit' ) }</h1>
                 </div>
             </div>
 
-            <div className="fundkit-tabs" role="tablist" aria-label={ __( 'Tools sections', 'fundkit-fundraising-campaigns' ) }>
+            <div className="fundkit-tabs" role="tablist" aria-label={ __( 'Tools sections', 'fundraising-toolkit' ) }>
                 <div className="fundkit-tabs__scroll">
                     { TABS.map( ( t ) => (
                         <a

@@ -50,7 +50,7 @@ final class CampaignService
 
         $title = trim((string) ($input['title'] ?? ''));
         if ($title === '') {
-            $title = __('Untitled campaign', 'fundkit-fundraising-campaigns');
+            $title = __('Untitled campaign', 'fundraising-toolkit');
         }
 
         $campaign = Campaign::make();
@@ -130,10 +130,10 @@ final class CampaignService
             if ($raw !== '') {
                 $next = sanitize_title($raw);
                 if ($next === '') {
-                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'fundkit-fundraising-campaigns'));
+                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'fundraising-toolkit'));
                 }
                 if ($next !== $campaign->slug && $this->campaigns->slugExists($next, $campaign->id)) {
-                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'fundkit-fundraising-campaigns'));
+                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'fundraising-toolkit'));
                 }
                 $campaign->slug = $next;
             }
@@ -160,7 +160,7 @@ final class CampaignService
 
             if ($start !== false && $end !== false && $end < $start) {
                 throw new InvalidArgumentException(
-                    esc_html__('The campaign end date cannot be before its start date.', 'fundkit-fundraising-campaigns')
+                    esc_html__('The campaign end date cannot be before its start date.', 'fundraising-toolkit')
                 );
             }
         }
@@ -219,7 +219,7 @@ final class CampaignService
                 $formId = (int) $value;
                 $form = Form::query()->find('id', $formId);
                 if (! $form || $form->campaign_id !== $campaign->id) {
-                    throw new InvalidArgumentException(esc_html__('Selected form is not part of this campaign.', 'fundkit-fundraising-campaigns'));
+                    throw new InvalidArgumentException(esc_html__('Selected form is not part of this campaign.', 'fundraising-toolkit'));
                 }
                 $campaign->default_form_id = $formId;
             }
@@ -282,7 +282,7 @@ final class CampaignService
         $plans     = (int) RecurringPlan::query()->where('campaign_id', $campaign->id)->count();
 
         if ($donations > 0 || $plans > 0) {
-            return __('This campaign has donations and cannot be deleted. Archive it instead to keep its records.', 'fundkit-fundraising-campaigns');
+            return __('This campaign has donations and cannot be deleted. Archive it instead to keep its records.', 'fundraising-toolkit');
         }
 
         return null;
@@ -342,7 +342,7 @@ final class CampaignService
         }
         $attachmentId = (int) $value;
         if (! wp_attachment_is_image($attachmentId)) {
-            throw new InvalidArgumentException(esc_html__('Selected file is not an image.', 'fundkit-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('Selected file is not an image.', 'fundraising-toolkit'));
         }
         return $attachmentId;
     }
@@ -380,7 +380,7 @@ final class CampaignService
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
         /* translators: %s: original campaign title */
-        $newTitle = sprintf(__('Copy of %s', 'fundkit-fundraising-campaigns'), $source->title);
+        $newTitle = sprintf(__('Copy of %s', 'fundraising-toolkit'), $source->title);
 
         $copy = Campaign::make();
         $copy->title       = $newTitle;
@@ -620,20 +620,20 @@ final class CampaignService
         // so the editor rewrites dp-band--tight on its first save and the
         // revision shows a change nobody made. Cosmetic, and P2P's LayoutBlocks
         // writes it the same way.
-        $t0 = __('Campaign name', 'fundkit-fundraising-campaigns');
+        $t0 = __('Campaign name', 'fundraising-toolkit');
         // Bound, so this is only what an organizer who has written no
         // description sees in the editor. Nothing else is seeded as prose:
         // seeded words read to a donor as the campaign's own.
-        $t2 = __('What this campaign is raising for.', 'fundkit-fundraising-campaigns');
-        $t5 = __('Recent donations', 'fundkit-fundraising-campaigns');
-        $t6 = __('Top donors', 'fundkit-fundraising-campaigns');
-        $t7 = __('Our supporters', 'fundkit-fundraising-campaigns');
+        $t2 = __('What this campaign is raising for.', 'fundraising-toolkit');
+        $t5 = __('Recent donations', 'fundraising-toolkit');
+        $t6 = __('Top donors', 'fundraising-toolkit');
+        $t7 = __('Our supporters', 'fundraising-toolkit');
         // Section headings, so a starter page reads as a page rather than a
         // stack of blocks. Above the prose and above the form, which are the
         // two things no block titles for itself.
-        $t8 = __('About this campaign', 'fundkit-fundraising-campaigns');
-        $t9  = __('Donate', 'fundkit-fundraising-campaigns');
-        $t10 = __('Other campaigns', 'fundkit-fundraising-campaigns');
+        $t8 = __('About this campaign', 'fundraising-toolkit');
+        $t9  = __('Donate', 'fundraising-toolkit');
+        $t10 = __('Other campaigns', 'fundraising-toolkit');
 
         // These two sections are titled by the block itself rather than a
         // Heading above it, which would render the words twice. json_encode so
@@ -673,7 +673,7 @@ final class CampaignService
 
         $form = $this->forms->create([
             /* translators: %s: campaign title */
-            'title'       => sprintf(__('%s donation form', 'fundkit-fundraising-campaigns'), $campaign->title),
+            'title'       => sprintf(__('%s donation form', 'fundraising-toolkit'), $campaign->title),
             // Without a template the form lacks Name + Email and fails publish
             // readiness checks; keep it as draft until the user picks a template.
             'status'      => $skipTemplate ? 'draft' : 'published',

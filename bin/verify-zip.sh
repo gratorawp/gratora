@@ -18,7 +18,7 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-SLUG=fundkit-fundraising-campaigns
+SLUG=fundraising-toolkit
 
 ZIP="dist/$SLUG.zip"
 OUT="dist/$SLUG"

@@ -8,7 +8,7 @@ defined('ABSPATH') || exit;
  * @var string $maxDate
  * @var string $field
  */
-$labelText = $label !== '' ? $label : __('Date', 'fundkit-fundraising-campaigns');
+$labelText = $label !== '' ? $label : __('Date', 'fundraising-toolkit');
 $fieldName = $field !== '' ? $field : 'date';
 ?>
 <label class="fundkit-block fundkit-block--date fundkit-donor__field">

@@ -100,7 +100,7 @@ final class StripeKeysController
         if (! $this->applePay->isFileReady()) {
             return new WP_Error(
                 'fundkit_apple_pay_no_file',
-                __('Paste the domain association file from Stripe first. Apple checks for it before the button can appear.', 'fundkit-fundraising-campaigns'),
+                __('Paste the domain association file from Stripe first. Apple checks for it before the button can appear.', 'fundraising-toolkit'),
                 ['status' => 400]
             );
         }
@@ -185,7 +185,7 @@ final class StripeKeysController
                 'fundkit_stripe_unreachable',
                 sprintf(
                     /* translators: %s: transport error, e.g. a DNS failure */
-                    __('This site could not reach Stripe, so the key has not been checked or saved: %s. That is a problem with this server rather than with the key. Payments will not work until it is resolved.', 'fundkit-fundraising-campaigns'),
+                    __('This site could not reach Stripe, so the key has not been checked or saved: %s. That is a problem with this server rather than with the key. Payments will not work until it is resolved.', 'fundraising-toolkit'),
                     $e->getMessage()
                 ),
                 ['status' => 503]
@@ -196,7 +196,7 @@ final class StripeKeysController
                 'fundkit_stripe_key_rejected',
                 sprintf(
                     /* translators: %s: error message from Stripe */
-                    __('Stripe rejected that secret key: %s', 'fundkit-fundraising-campaigns'),
+                    __('Stripe rejected that secret key: %s', 'fundraising-toolkit'),
                     $e->getMessage()
                 ),
                 ['status' => 400]
@@ -232,23 +232,23 @@ final class StripeKeysController
         $bad = static fn (string $msg): WP_Error => new WP_Error('fundkit_stripe_bad_key', $msg, ['status' => 400]);
 
         if (! preg_match('/^(sk|rk)_(test|live)_/', $secret)) {
-            return $bad(__('That does not look like a Stripe secret key. It starts with sk_test_ or sk_live_.', 'fundkit-fundraising-campaigns'));
+            return $bad(__('That does not look like a Stripe secret key. It starts with sk_test_ or sk_live_.', 'fundraising-toolkit'));
         }
         if (! str_starts_with($publishable, 'pk_')) {
-            return $bad(__('That does not look like a Stripe publishable key. It starts with pk_test_ or pk_live_.', 'fundkit-fundraising-campaigns'));
+            return $bad(__('That does not look like a Stripe publishable key. It starts with pk_test_ or pk_live_.', 'fundraising-toolkit'));
         }
 
         $secretIsTest      = str_contains($secret, '_test_');
         $publishableIsTest = str_starts_with($publishable, 'pk_test_');
 
         if ($secretIsTest !== $publishableIsTest) {
-            return $bad(__('The secret and publishable keys are from different modes. Use the pair from the same Stripe mode.', 'fundkit-fundraising-campaigns'));
+            return $bad(__('The secret and publishable keys are from different modes. Use the pair from the same Stripe mode.', 'fundraising-toolkit'));
         }
         if ($secretIsTest !== $test) {
             return $bad(
                 $test
-                    ? __('Those are live keys. Paste your test keys here, or save them under Live.', 'fundkit-fundraising-campaigns')
-                    : __('Those are test keys. Paste your live keys here, or save them under Test.', 'fundkit-fundraising-campaigns')
+                    ? __('Those are live keys. Paste your test keys here, or save them under Live.', 'fundraising-toolkit')
+                    : __('Those are test keys. Paste your live keys here, or save them under Test.', 'fundraising-toolkit')
             );
         }
         return null;

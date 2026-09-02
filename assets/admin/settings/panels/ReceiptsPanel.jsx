@@ -51,7 +51,7 @@ export default function ReceiptsPanel( { s } ) {
 
     const pickLogo = () => {
         const frame = window.wp.media( {
-            title:    __( 'Choose receipt logo', 'fundkit-fundraising-campaigns' ),
+            title:    __( 'Choose receipt logo', 'fundraising-toolkit' ),
             multiple: false,
             library:  { type: 'image' },
         } );
@@ -77,9 +77,9 @@ export default function ReceiptsPanel( { s } ) {
         // confusing them with a stale PDF.
         if ( s.isDirty ) {
             setConfirm( {
-                title:        __( 'Unsaved changes', 'fundkit-fundraising-campaigns' ),
-                message:      __( 'You have unsaved changes that won\'t show in the preview. Continue anyway?', 'fundkit-fundraising-campaigns' ),
-                confirmLabel: __( 'Continue', 'fundkit-fundraising-campaigns' ),
+                title:        __( 'Unsaved changes', 'fundraising-toolkit' ),
+                message:      __( 'You have unsaved changes that won\'t show in the preview. Continue anyway?', 'fundraising-toolkit' ),
+                confirmLabel: __( 'Continue', 'fundraising-toolkit' ),
                 destructive:  false,
                 onConfirm: async () => {
                     openPreview();
@@ -93,18 +93,18 @@ export default function ReceiptsPanel( { s } ) {
     return (
         <div className="fundkit-panel">
             <Card
-                title={ __( 'Generic receipt template', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'The default receipt every donor gets, unless their country has its own format.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Generic receipt template', 'fundraising-toolkit' ) }
+                sub={ __( 'The default receipt every donor gets, unless their country has its own format.', 'fundraising-toolkit' ) }
                 edited={ s.isDirty }
             >
                 <div style={ { marginBottom: 16, display: 'flex', justifyContent: 'flex-end' } }>
                     <Btn variant="secondary" onClick={ previewReceipt }>
-                        { __( 'Preview receipt', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Preview receipt', 'fundraising-toolkit' ) }
                     </Btn>
                 </div>
                 <FormRow
-                    label={ __( 'Logo', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Shown above the header. PNG or JPG recommended.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Logo', 'fundraising-toolkit' ) }
+                    help={ __( 'Shown above the header. PNG or JPG recommended.', 'fundraising-toolkit' ) }
                 >
                     <div style={ { display: 'flex', alignItems: 'center', gap: 12 } }>
                         { logoId > 0 && logoUrl && (
@@ -115,33 +115,33 @@ export default function ReceiptsPanel( { s } ) {
                             />
                         ) }
                         <Btn variant="secondary" onClick={ pickLogo }>
-                            { logoId > 0 ? __( 'Replace logo', 'fundkit-fundraising-campaigns' ) : __( 'Select logo', 'fundkit-fundraising-campaigns' ) }
+                            { logoId > 0 ? __( 'Replace logo', 'fundraising-toolkit' ) : __( 'Select logo', 'fundraising-toolkit' ) }
                         </Btn>
                         { logoId > 0 && (
                             <Btn variant="ghost" onClick={ () => setLogoId( 0 ) }>
-                                { __( 'Remove', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Remove', 'fundraising-toolkit' ) }
                             </Btn>
                         ) }
                     </div>
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Header title', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Big heading at the top of the receipt. Leave blank for the default "Donation receipt".', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Header title', 'fundraising-toolkit' ) }
+                    help={ __( 'Big heading at the top of the receipt. Leave blank for the default "Donation receipt".', 'fundraising-toolkit' ) }
                 >
                     <input
                         type="text"
                         className="fundkit-input"
                         value={ headerTitle }
                         onChange={ ( e ) => setHeader( e.target.value ) }
-                        placeholder={ __( 'Donation receipt', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Donation receipt', 'fundraising-toolkit' ) }
                         maxLength={ 80 }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Intro paragraph', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Optional paragraph between the header and the donation details.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Intro paragraph', 'fundraising-toolkit' ) }
+                    help={ __( 'Optional paragraph between the header and the donation details.', 'fundraising-toolkit' ) }
                     wide
                 >
                     <MergeTagInserter onInsert={ ( t ) => setIntro( `${ intro }${ t }` ) } />
@@ -150,13 +150,13 @@ export default function ReceiptsPanel( { s } ) {
                         rows={ 3 }
                         value={ intro }
                         onChange={ ( e ) => setIntro( e.target.value ) }
-                        placeholder={ __( 'Enter an opening paragraph', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Enter an opening paragraph', 'fundraising-toolkit' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Signoff', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Short thank-you line near the bottom of the receipt.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Signoff', 'fundraising-toolkit' ) }
+                    help={ __( 'Short thank-you line near the bottom of the receipt.', 'fundraising-toolkit' ) }
                     wide
                 >
                     <MergeTagInserter onInsert={ ( t ) => setSignoff( `${ signoff }${ t }` ) } />
@@ -165,13 +165,13 @@ export default function ReceiptsPanel( { s } ) {
                         rows={ 2 }
                         value={ signoff }
                         onChange={ ( e ) => setSignoff( e.target.value ) }
-                        placeholder={ __( 'Thank you for your support, {donor_name}.', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Thank you for your support, {donor_name}.', 'fundraising-toolkit' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Footer note', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Small print at the bottom. Use this for the tax-deduction disclaimer, contact info, or organization registration details.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Footer note', 'fundraising-toolkit' ) }
+                    help={ __( 'Small print at the bottom. Use this for the tax-deduction disclaimer, contact info, or organization registration details.', 'fundraising-toolkit' ) }
                     wide
                 >
                     <MergeTagInserter onInsert={ ( t ) => setFooter( `${ footerNote }${ t }` ) } />
@@ -184,15 +184,15 @@ export default function ReceiptsPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Show organization tax ID', 'fundkit-fundraising-campaigns' ) }
-                    sub={ __( 'Includes the tax ID from your Organization settings in the reference block.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Show organization tax ID', 'fundraising-toolkit' ) }
+                    sub={ __( 'Includes the tax ID from your Organization settings in the reference block.', 'fundraising-toolkit' ) }
                     checked={ showTaxId }
                     onChange={ setShowTax }
                 />
 
                 <ToggleRow
-                    title={ __( 'Show donor address', 'fundkit-fundraising-campaigns' ) }
-                    sub={ __( 'Prints the donor billing address on the receipt (recommended for jurisdictions that require it).', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Show donor address', 'fundraising-toolkit' ) }
+                    sub={ __( 'Prints the donor billing address on the receipt (recommended for jurisdictions that require it).', 'fundraising-toolkit' ) }
                     checked={ showAddress }
                     onChange={ setShowAddr }
                 />
@@ -212,7 +212,7 @@ function MergeTagInserter( { onInsert } ) {
                     type="button"
                     className="fundkit-merge-tag"
                     onClick={ () => onInsert( t ) }
-                    title={ __( 'Insert merge tag', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Insert merge tag', 'fundraising-toolkit' ) }
                 >
                     { t }
                 </button>

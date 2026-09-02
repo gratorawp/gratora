@@ -153,7 +153,7 @@ final class CsvImporter
                 'donors_matched' => 0, 'skipped' => [], 'dry_run' => $dryRun,
                 'errors' => [sprintf(
                     /* translators: %s: comma-separated field names. */
-                    __('Map a column to %s before importing.', 'fundkit-fundraising-campaigns'),
+                    __('Map a column to %s before importing.', 'fundraising-toolkit'),
                     implode(', ', array_map(static fn (string $f): string => self::FIELDS[$f] ?? $f, $missing))
                 )],
             ];
@@ -179,7 +179,7 @@ final class CsvImporter
             } catch (Throwable $e) {
                 $errors[] = sprintf(
                     /* translators: 1: row number, 2: error message. */
-                    __('Row %1$d: %2$s', 'fundkit-fundraising-campaigns'),
+                    __('Row %1$d: %2$s', 'fundraising-toolkit'),
                     $i + 2,
                     $e->getMessage()
                 );

@@ -26,7 +26,7 @@ const root = path.resolve( path.dirname( fileURLToPath( import.meta.url ) ), '..
  * two have to agree: a zip that unpacks to a different directory than the
  * directory installs to leaves a site running the plugin twice.
  */
-const slug = 'fundkit-fundraising-campaigns';
+const slug = 'fundraising-toolkit';
 
 function rules() {
     const file = path.join( root, '.distignore' );

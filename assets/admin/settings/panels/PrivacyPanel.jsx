@@ -39,7 +39,7 @@ function RetentionPreview( { years, inForce } ) {
     if ( ! data.years ) {
         return (
             <Notice status="info" isDismissible={ false }>
-                { __( 'No window is set, so nothing is erased automatically. Enter a number of years above.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'No window is set, so nothing is erased automatically. Enter a number of years above.', 'fundraising-toolkit' ) }
             </Notice>
         );
     }
@@ -58,7 +58,7 @@ function RetentionPreview( { years, inForce } ) {
                 '%s donor is past this window.',
                 '%s donors are past this window.',
                 now,
-                'fundkit-fundraising-campaigns'
+                'fundraising-toolkit'
             ),
             now.toLocaleString()
         ) );
@@ -70,7 +70,7 @@ function RetentionPreview( { years, inForce } ) {
                     '%s in total reaches it within 30 days.',
                     '%s in total reach it within 30 days.',
                     soon,
-                    'fundkit-fundraising-campaigns'
+                    'fundraising-toolkit'
                 ),
                 soon.toLocaleString()
             ) );
@@ -82,18 +82,18 @@ function RetentionPreview( { years, inForce } ) {
                 '%s donor reaches this window within 30 days.',
                 '%s donors reach this window within 30 days.',
                 soon,
-                'fundkit-fundraising-campaigns'
+                'fundraising-toolkit'
             ),
             soon.toLocaleString()
         ) );
     }
 
     if ( lines.length === 0 ) {
-        lines.push( __( 'No donor is due for erasure in the next 30 days.', 'fundkit-fundraising-campaigns' ) );
+        lines.push( __( 'No donor is due for erasure in the next 30 days.', 'fundraising-toolkit' ) );
     } else if ( ! inForce ) {
-        lines.push( __( 'Nothing is erased until this is saved.', 'fundkit-fundraising-campaigns' ) );
+        lines.push( __( 'Nothing is erased until this is saved.', 'fundraising-toolkit' ) );
     } else if ( ! pending ) {
-        lines.push( __( 'They are erased on the next nightly run.', 'fundkit-fundraising-campaigns' ) );
+        lines.push( __( 'They are erased on the next nightly run.', 'fundraising-toolkit' ) );
     }
 
     // Only once the window is the saved one. While it is still being chosen the
@@ -102,7 +102,7 @@ function RetentionPreview( { years, inForce } ) {
     if ( pending && inForce ) {
         lines.push( sprintf(
             /* translators: %s: a date. */
-            __( 'Nothing is erased before %s.', 'fundkit-fundraising-campaigns' ),
+            __( 'Nothing is erased before %s.', 'fundraising-toolkit' ),
             formatDate( new Date( startsAt ).toISOString() )
         ) );
     }
@@ -127,26 +127,26 @@ export default function PrivacyPanel( { s } ) {
     return (
         <div className="fundkit-panel">
             <Card
-                title={ __( 'Donor data handling', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Controls applied to the donor record, IP logs, and what donors can do from their portal.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Donor data handling', 'fundraising-toolkit' ) }
+                sub={ __( 'Controls applied to the donor record, IP logs, and what donors can do from their portal.', 'fundraising-toolkit' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'Privacy policy URL', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Linked from the donation form, wherever a privacy notice block is placed.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Privacy policy URL', 'fundraising-toolkit' ) }
+                    help={ __( 'Linked from the donation form, wherever a privacy notice block is placed.', 'fundraising-toolkit' ) }
                 >
                     <input
                         type="url"
                         className="fundkit-input"
                         value={ s.value( 'privacy_policy_url', '' ) }
                         onChange={ ( e ) => s.edit( { privacy_policy_url: e.target.value } ) }
-                        placeholder={ __( 'Enter your privacy policy URL', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Enter your privacy policy URL', 'fundraising-toolkit' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Reunite window after redaction (days)', 'fundkit-fundraising-campaigns' ) }
-                    fieldHelp={ __( 'An erased donor who gives again within this window keeps their giving history. After it, they start over as a new donor. Past donations stay counted either way. 0 severs the link at once; it does not mean off.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Reunite window after redaction (days)', 'fundraising-toolkit' ) }
+                    fieldHelp={ __( 'An erased donor who gives again within this window keeps their giving history. After it, they start over as a new donor. Past donations stay counted either way. 0 severs the link at once; it does not mean off.', 'fundraising-toolkit' ) }
                 >
                     <input
                         type="number"
@@ -160,8 +160,8 @@ export default function PrivacyPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Erase inactive donors automatically', 'fundkit-fundraising-campaigns' ) }
-                    sub={ __( 'While this is off, a donor is only ever erased because they asked or because an admin erased them. Turning it on lets a nightly run erase donors who have gone years without giving.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Erase inactive donors automatically', 'fundraising-toolkit' ) }
+                    sub={ __( 'While this is off, a donor is only ever erased because they asked or because an admin erased them. Turning it on lets a nightly run erase donors who have gone years without giving.', 'fundraising-toolkit' ) }
                     checked={ eraseInactive }
                     onChange={ s.setValue( 'erase_inactive_donors' ) }
                 />
@@ -169,8 +169,8 @@ export default function PrivacyPanel( { s } ) {
                 { eraseInactive && (
                     <>
                         <FormRow
-                            label={ __( 'Erase donors inactive for (years)', 'fundkit-fundraising-campaigns' ) }
-                            fieldHelp={ __( 'Donors with no donation for this long are erased on the nightly run, as if they had asked. Anyone on a recurring plan is skipped. Their donations stay counted.', 'fundkit-fundraising-campaigns' ) }
+                            label={ __( 'Erase donors inactive for (years)', 'fundraising-toolkit' ) }
+                            fieldHelp={ __( 'Donors with no donation for this long are erased on the nightly run, as if they had asked. Anyone on a recurring plan is skipped. Their donations stay counted.', 'fundraising-toolkit' ) }
                         >
                             <input
                                 type="number"
@@ -187,8 +187,8 @@ export default function PrivacyPanel( { s } ) {
                 ) }
 
                 <FormRow
-                    label={ __( 'Keep the activity log for (days)', 'fundkit-fundraising-campaigns' ) }
-                    fieldHelp={ __( 'Older entries are deleted. Only the log is affected; donations, donors and receipts are kept. 0 turns this off.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Keep the activity log for (days)', 'fundraising-toolkit' ) }
+                    fieldHelp={ __( 'Older entries are deleted. Only the log is affected; donations, donors and receipts are kept. 0 turns this off.', 'fundraising-toolkit' ) }
                 >
                     <input
                         type="number"
@@ -202,36 +202,36 @@ export default function PrivacyPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Anonymize IPs in event logs', 'fundkit-fundraising-campaigns' ) }
-                    sub={ __( 'IPs are hashed (SHA-256) before storage. Only the country is kept in clear text.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Anonymize IPs in event logs', 'fundraising-toolkit' ) }
+                    sub={ __( 'IPs are hashed (SHA-256) before storage. Only the country is kept in clear text.', 'fundraising-toolkit' ) }
                     checked={ !! s.value( 'anonymize_ips', true ) }
                     onChange={ s.setValue( 'anonymize_ips' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Show Gravatar profile pictures', 'fundkit-fundraising-campaigns' ) }
-                    sub={ __( "Donor lists show Gravatars instead of initials. Each one sends a hash of the donor's email to gravatar.com from the visitor's browser. Anonymous donors are never shown one.", 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Show Gravatar profile pictures', 'fundraising-toolkit' ) }
+                    sub={ __( "Donor lists show Gravatars instead of initials. Each one sends a hash of the donor's email to gravatar.com from the visitor's browser. Anonymous donors are never shown one.", 'fundraising-toolkit' ) }
                     checked={ !! s.value( 'gravatar_avatars', false ) }
                     onChange={ s.setValue( 'gravatar_avatars' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Default new donations to anonymous', 'fundkit-fundraising-campaigns' ) }
-                    sub={ __( 'Pre-check the anonymous toggle on every donation form. Donors can opt out.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Default new donations to anonymous', 'fundraising-toolkit' ) }
+                    sub={ __( 'Pre-check the anonymous toggle on every donation form. Donors can opt out.', 'fundraising-toolkit' ) }
                     checked={ !! s.value( 'always_anonymous_default', false ) }
                     onChange={ s.setValue( 'always_anonymous_default' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Allow data export from portal', 'fundkit-fundraising-campaigns' ) }
-                    sub={ __( 'Donors can download a JSON archive of their data from the portal.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Allow data export from portal', 'fundraising-toolkit' ) }
+                    sub={ __( 'Donors can download a JSON archive of their data from the portal.', 'fundraising-toolkit' ) }
                     checked={ !! s.value( 'allow_data_export', true ) }
                     onChange={ s.setValue( 'allow_data_export' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Allow account delete from portal', 'fundkit-fundraising-campaigns' ) }
-                    sub={ __( 'Donors can request redaction directly. Donations and receipts are kept either way, for tax and accounting; only the personal details are erased.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Allow account delete from portal', 'fundraising-toolkit' ) }
+                    sub={ __( 'Donors can request redaction directly. Donations and receipts are kept either way, for tax and accounting; only the personal details are erased.', 'fundraising-toolkit' ) }
                     checked={ !! s.value( 'allow_account_delete', true ) }
                     onChange={ s.setValue( 'allow_account_delete' ) }
                 />

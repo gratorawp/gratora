@@ -13,14 +13,14 @@ import Icon from './Icon';
 
 // Category values are stable grouping keys; translate only for display.
 const CATEGORY_LABELS = {
-    All:       __( 'All', 'fundkit-fundraising-campaigns' ),
-    Blank:     __( 'Blank', 'fundkit-fundraising-campaigns' ),
-    Starter:   __( 'Starter', 'fundkit-fundraising-campaigns' ),
-    Standard:  __( 'Standard', 'fundkit-fundraising-campaigns' ),
-    Recurring: __( 'Recurring', 'fundkit-fundraising-campaigns' ),
-    Wizard:    __( 'Wizard', 'fundkit-fundraising-campaigns' ),
-    Formal:    __( 'Formal', 'fundkit-fundraising-campaigns' ),
-    Other:     __( 'Other', 'fundkit-fundraising-campaigns' ),
+    All:       __( 'All', 'fundraising-toolkit' ),
+    Blank:     __( 'Blank', 'fundraising-toolkit' ),
+    Starter:   __( 'Starter', 'fundraising-toolkit' ),
+    Standard:  __( 'Standard', 'fundraising-toolkit' ),
+    Recurring: __( 'Recurring', 'fundraising-toolkit' ),
+    Wizard:    __( 'Wizard', 'fundraising-toolkit' ),
+    Formal:    __( 'Formal', 'fundraising-toolkit' ),
+    Other:     __( 'Other', 'fundraising-toolkit' ),
 };
 
 export default function FormTemplatePicker( { onPick, onClose, creating = false, intro } ) {
@@ -60,16 +60,16 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
 
     return (
         <Modal
-            title={ __( 'Choose a starter template', 'fundkit-fundraising-campaigns' ) }
+            title={ __( 'Choose a starter template', 'fundraising-toolkit' ) }
             onRequestClose={ onClose }
             className="fundkit-template-picker"
             size="large"
         >
             { failed ? (
                 <div style={ { padding: 40, textAlign: 'center' } }>
-                    <p>{ __( 'The starter templates could not be loaded.', 'fundkit-fundraising-campaigns' ) }</p>
+                    <p>{ __( 'The starter templates could not be loaded.', 'fundraising-toolkit' ) }</p>
                     <button type="button" className="btn" onClick={ load }>
-                        { __( 'Try again', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Try again', 'fundraising-toolkit' ) }
                     </button>
                 </div>
             ) : loading ? (

@@ -141,7 +141,7 @@ final class ReadinessService
                 $ready[] = $gateway->label();
             }
         }
-        if ($this->offlineReady()) $ready[] = __('offline donations', 'fundkit-fundraising-campaigns');
+        if ($this->offlineReady()) $ready[] = __('offline donations', 'fundraising-toolkit');
 
         $ready = array_values(array_unique($ready));
 
@@ -149,10 +149,10 @@ final class ReadinessService
             return $this->fail(
                 'gateway',
                 'money',
-                __('No way to take a donation', 'fundkit-fundraising-campaigns'),
-                __('Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow.', 'fundkit-fundraising-campaigns'),
+                __('No way to take a donation', 'fundraising-toolkit'),
+                __('Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow.', 'fundraising-toolkit'),
                 'gateways',
-                __('Set up payments', 'fundkit-fundraising-campaigns'),
+                __('Set up payments', 'fundraising-toolkit'),
                 true
             );
         }
@@ -163,10 +163,10 @@ final class ReadinessService
             return $this->warn(
                 'gateway',
                 'money',
-                __('Stripe has keys but cannot charge yet', 'fundkit-fundraising-campaigns'),
-                __('Stripe has not enabled charges on this account. Finish the remaining verification steps in your Stripe dashboard.', 'fundkit-fundraising-campaigns'),
+                __('Stripe has keys but cannot charge yet', 'fundraising-toolkit'),
+                __('Stripe has not enabled charges on this account. Finish the remaining verification steps in your Stripe dashboard.', 'fundraising-toolkit'),
                 'gateways',
-                __('Open payments', 'fundkit-fundraising-campaigns')
+                __('Open payments', 'fundraising-toolkit')
             );
         }
 
@@ -175,7 +175,7 @@ final class ReadinessService
             'money',
             sprintf(
                 /* translators: %s: comma-separated list of payment methods that can take a donation. */
-                __('Donations can be taken through %s', 'fundkit-fundraising-campaigns'),
+                __('Donations can be taken through %s', 'fundraising-toolkit'),
                 implode(', ', $ready)
             )
         );
@@ -192,18 +192,18 @@ final class ReadinessService
             return $this->warn(
                 'mode',
                 'money',
-                __('Test mode is on for every form', 'fundkit-fundraising-campaigns'),
-                __('No real payment is taken and these donations are excluded from reporting. Turn it off when you are ready to go live.', 'fundkit-fundraising-campaigns'),
+                __('Test mode is on for every form', 'fundraising-toolkit'),
+                __('No real payment is taken and these donations are excluded from reporting. Turn it off when you are ready to go live.', 'fundraising-toolkit'),
                 'gateways',
-                __('Open payments', 'fundkit-fundraising-campaigns')
+                __('Open payments', 'fundraising-toolkit')
             );
         }
 
         // Live mode reading a test key charges nobody, and the donor sees a
         // success page for a payment that never happened.
         $missing = [];
-        if ($this->switchedOn('stripe') && $this->stripe->isConnected() && ! $this->stripe->hasKeysFor(false)) $missing[] = __('Stripe', 'fundkit-fundraising-campaigns');
-        if ($this->switchedOn('paypal') && $this->payPal->isConnected() && ! $this->payPal->hasKeysFor(false)) $missing[] = __('PayPal', 'fundkit-fundraising-campaigns');
+        if ($this->switchedOn('stripe') && $this->stripe->isConnected() && ! $this->stripe->hasKeysFor(false)) $missing[] = __('Stripe', 'fundraising-toolkit');
+        if ($this->switchedOn('paypal') && $this->payPal->isConnected() && ! $this->payPal->hasKeysFor(false)) $missing[] = __('PayPal', 'fundraising-toolkit');
 
         /**
          * A gateway that ships in an add-on owns its own credentials, so it
@@ -222,12 +222,12 @@ final class ReadinessService
                 'money',
                 sprintf(
                     /* translators: %s: comma-separated list of gateway names holding only test keys. */
-                    __('Live mode, but %s only has test keys', 'fundkit-fundraising-campaigns'),
+                    __('Live mode, but %s only has test keys', 'fundraising-toolkit'),
                     implode(', ', $missing)
                 ),
-                __('Donations through it will fail. Add the live key pair, or turn test mode back on.', 'fundkit-fundraising-campaigns'),
+                __('Donations through it will fail. Add the live key pair, or turn test mode back on.', 'fundraising-toolkit'),
                 'gateways',
-                __('Add live keys', 'fundkit-fundraising-campaigns'),
+                __('Add live keys', 'fundraising-toolkit'),
                 true
             );
         }
@@ -243,10 +243,10 @@ final class ReadinessService
         if ($this->switchedOn('paypal') && $this->payPal->hasKeysFor(false)) $live[] = 'paypal';
 
         if ($live === []) {
-            return $this->pass('mode', 'money', __('Live mode is on', 'fundkit-fundraising-campaigns'));
+            return $this->pass('mode', 'money', __('Live mode is on', 'fundraising-toolkit'));
         }
 
-        return $this->pass('mode', 'money', __('Live mode, with live keys on file', 'fundkit-fundraising-campaigns'));
+        return $this->pass('mode', 'money', __('Live mode, with live keys on file', 'fundraising-toolkit'));
     }
 
     /**
@@ -257,23 +257,23 @@ final class ReadinessService
     private function httpsCheck(): array
     {
         if (is_ssl()) {
-            return $this->pass('https', 'money', __('The site is served over HTTPS', 'fundkit-fundraising-campaigns'));
+            return $this->pass('https', 'money', __('The site is served over HTTPS', 'fundraising-toolkit'));
         }
 
         if ($this->testMode()) {
             return $this->warn(
                 'https',
                 'money',
-                __('The site is not on HTTPS', 'fundkit-fundraising-campaigns'),
-                __('Fine while you are rehearsing, but live card charges are rejected without it.', 'fundkit-fundraising-campaigns')
+                __('The site is not on HTTPS', 'fundraising-toolkit'),
+                __('Fine while you are rehearsing, but live card charges are rejected without it.', 'fundraising-toolkit')
             );
         }
 
         return $this->fail(
             'https',
             'money',
-            __('The site is not on HTTPS', 'fundkit-fundraising-campaigns'),
-            __('Card gateways reject live charges on plain HTTP. Install a certificate before taking donations.', 'fundkit-fundraising-campaigns'),
+            __('The site is not on HTTPS', 'fundraising-toolkit'),
+            __('Card gateways reject live charges on plain HTTP. Install a certificate before taking donations.', 'fundraising-toolkit'),
             null,
             null,
             true
@@ -291,16 +291,16 @@ final class ReadinessService
             return null;
         }
         if ($this->stripeApi->hasWebhookSecret()) {
-            return $this->pass('stripe-webhook', 'money', __('Stripe webhooks are signed', 'fundkit-fundraising-campaigns'));
+            return $this->pass('stripe-webhook', 'money', __('Stripe webhooks are signed', 'fundraising-toolkit'));
         }
 
         return $this->warn(
             'stripe-webhook',
             'money',
-            __('Stripe has no webhook signing secret', 'fundkit-fundraising-campaigns'),
-            __('Without it FundKit cannot trust what Stripe reports, so renewals, refunds and cancellations made in Stripe never reach this site.', 'fundkit-fundraising-campaigns'),
+            __('Stripe has no webhook signing secret', 'fundraising-toolkit'),
+            __('Without it Fundraising Toolkit cannot trust what Stripe reports, so renewals, refunds and cancellations made in Stripe never reach this site.', 'fundraising-toolkit'),
             'gateways',
-            __('Add the secret', 'fundkit-fundraising-campaigns')
+            __('Add the secret', 'fundraising-toolkit')
         );
     }
 
@@ -315,16 +315,16 @@ final class ReadinessService
             return null;
         }
         if ($this->payPal->webhookId($this->testMode()) !== '') {
-            return $this->pass('paypal-webhook', 'money', __('PayPal webhooks are registered', 'fundkit-fundraising-campaigns'));
+            return $this->pass('paypal-webhook', 'money', __('PayPal webhooks are registered', 'fundraising-toolkit'));
         }
 
         return $this->warn(
             'paypal-webhook',
             'money',
-            __('PayPal has no webhook registered', 'fundkit-fundraising-campaigns'),
-            __('Every PayPal notification will be rejected. Donations PayPal settles after checkout will stay unpaid, and refunds, disputes and renewals will not reach this site.', 'fundkit-fundraising-campaigns'),
+            __('PayPal has no webhook registered', 'fundraising-toolkit'),
+            __('Every PayPal notification will be rejected. Donations PayPal settles after checkout will stay unpaid, and refunds, disputes and renewals will not reach this site.', 'fundraising-toolkit'),
             'gateways',
-            __('Register the webhook', 'fundkit-fundraising-campaigns')
+            __('Register the webhook', 'fundraising-toolkit')
         );
     }
 
@@ -339,16 +339,16 @@ final class ReadinessService
             return null;
         }
         if ($this->applePay->isFileReady()) {
-            return $this->pass('apple-pay', 'money', __('Apple Pay is verified for this domain', 'fundkit-fundraising-campaigns'));
+            return $this->pass('apple-pay', 'money', __('Apple Pay is verified for this domain', 'fundraising-toolkit'));
         }
 
         return $this->warn(
             'apple-pay',
             'money',
-            __('Apple Pay is not verified for this domain', 'fundkit-fundraising-campaigns'),
-            __('The Apple Pay button simply does not appear until the domain association file is in place. Everything else keeps working.', 'fundkit-fundraising-campaigns'),
+            __('Apple Pay is not verified for this domain', 'fundraising-toolkit'),
+            __('The Apple Pay button simply does not appear until the domain association file is in place. Everything else keeps working.', 'fundraising-toolkit'),
             'gateways',
-            __('Verify the domain', 'fundkit-fundraising-campaigns')
+            __('Verify the domain', 'fundraising-toolkit')
         );
     }
 
@@ -381,7 +381,7 @@ final class ReadinessService
                 'page',
                 sprintf(
                     /* translators: %d: number of campaigns with a published donation form. */
-                    _n('%d campaign is live and can take donations', '%d campaigns are live and can take donations', count($live), 'fundkit-fundraising-campaigns'),
+                    _n('%d campaign is live and can take donations', '%d campaigns are live and can take donations', count($live), 'fundraising-toolkit'),
                     count($live)
                 )
             );
@@ -390,17 +390,17 @@ final class ReadinessService
         // Publishing a campaign whose form is still a draft leaves its page as a
         // draft too, so the operator sees "published" and the public sees a 404.
         $detail = $campaigns === []
-            ? __('Create a campaign, then publish it together with its donation form.', 'fundkit-fundraising-campaigns')
-            : __('Your published campaigns have no published donation form, so their pages stay drafts and donors see nothing.', 'fundkit-fundraising-campaigns');
+            ? __('Create a campaign, then publish it together with its donation form.', 'fundraising-toolkit')
+            : __('Your published campaigns have no published donation form, so their pages stay drafts and donors see nothing.', 'fundraising-toolkit');
 
         return [
             'id'           => 'donation-page',
             'group'        => 'page',
             'status'       => self::FAIL,
-            'label'        => __('No campaign a donor can reach', 'fundkit-fundraising-campaigns'),
+            'label'        => __('No campaign a donor can reach', 'fundraising-toolkit'),
             'detail'       => $detail,
             'action_url'   => admin_url('admin.php?page=fundkit-campaigns'),
-            'action_label' => __('Open campaigns', 'fundkit-fundraising-campaigns'),
+            'action_label' => __('Open campaigns', 'fundraising-toolkit'),
             'blocker'      => true,
         ];
     }
@@ -438,15 +438,15 @@ final class ReadinessService
             : trim((string) ($org['name'] ?? ''));
 
         $missing = [];
-        if ($name === '')  $missing[] = __('a name', 'fundkit-fundraising-campaigns');
-        if ($lines === []) $missing[] = __('a postal address', 'fundkit-fundraising-campaigns');
+        if ($name === '')  $missing[] = __('a name', 'fundraising-toolkit');
+        if ($lines === []) $missing[] = __('a postal address', 'fundraising-toolkit');
 
         if ($this->showTaxId() && trim((string) ($org['tax_id'] ?? '')) === '') {
-            $missing[] = __('a tax number', 'fundkit-fundraising-campaigns');
+            $missing[] = __('a tax number', 'fundraising-toolkit');
         }
 
         if ($missing === []) {
-            return $this->pass('org-identity', 'receipts', __('Receipts carry your name and address', 'fundkit-fundraising-campaigns'));
+            return $this->pass('org-identity', 'receipts', __('Receipts carry your name and address', 'fundraising-toolkit'));
         }
 
         return $this->warn(
@@ -454,12 +454,12 @@ final class ReadinessService
             'receipts',
             sprintf(
                 /* translators: %s: comma-separated list of missing organization details. */
-                __('Receipts are missing %s', 'fundkit-fundraising-campaigns'),
+                __('Receipts are missing %s', 'fundraising-toolkit'),
                 $this->join($missing)
             ),
-            __('Receipts print your organization details at the top. Donors claiming tax relief usually need them.', 'fundkit-fundraising-campaigns'),
+            __('Receipts print your organization details at the top. Donors claiming tax relief usually need them.', 'fundraising-toolkit'),
             'organization',
-            __('Add the details', 'fundkit-fundraising-campaigns')
+            __('Add the details', 'fundraising-toolkit')
         );
     }
 
@@ -479,14 +479,14 @@ final class ReadinessService
             return $this->warn(
                 'background-jobs',
                 'jobs',
-                __('Cannot tell whether background jobs are running', 'fundkit-fundraising-campaigns'),
-                __('Action Scheduler is not available, so receipts and other queued work cannot be checked from here.', 'fundkit-fundraising-campaigns')
+                __('Cannot tell whether background jobs are running', 'fundraising-toolkit'),
+                __('Action Scheduler is not available, so receipts and other queued work cannot be checked from here.', 'fundraising-toolkit')
             );
         }
 
         $oldest = $this->oldestPendingJob();
         if ($oldest === null) {
-            return $this->pass('background-jobs', 'jobs', __('No background work is waiting', 'fundkit-fundraising-campaigns'));
+            return $this->pass('background-jobs', 'jobs', __('No background work is waiting', 'fundraising-toolkit'));
         }
 
         [$count, $ageSeconds] = $oldest;
@@ -496,7 +496,7 @@ final class ReadinessService
                 'jobs',
                 sprintf(
                     /* translators: %d: number of queued background jobs. */
-                    _n('%d job is queued and moving', '%d jobs are queued and moving', $count, 'fundkit-fundraising-campaigns'),
+                    _n('%d job is queued and moving', '%d jobs are queued and moving', $count, 'fundraising-toolkit'),
                     $count
                 )
             );
@@ -507,10 +507,10 @@ final class ReadinessService
             'jobs',
             sprintf(
                 /* translators: %s: human-readable duration, e.g. "3 hours". */
-                __('Background jobs have been waiting %s', 'fundkit-fundraising-campaigns'),
+                __('Background jobs have been waiting %s', 'fundraising-toolkit'),
                 human_time_diff(time() - $ageSeconds)
             ),
-            __('Queued receipts and emails are not going out. WP-Cron is usually the cause: check that it is not disabled, or run it from a real cron job.', 'fundkit-fundraising-campaigns'),
+            __('Queued receipts and emails are not going out. WP-Cron is usually the cause: check that it is not disabled, or run it from a real cron job.', 'fundraising-toolkit'),
             null,
             null
         );
@@ -561,17 +561,17 @@ final class ReadinessService
     private function donorPortalCheck(): array
     {
         if ($this->portal->resolve() !== 0) {
-            return $this->pass('donor-portal', 'portal', __('The donor portal page is published', 'fundkit-fundraising-campaigns'));
+            return $this->pass('donor-portal', 'portal', __('The donor portal page is published', 'fundraising-toolkit'));
         }
 
         return [
             'id'           => 'donor-portal',
             'group'        => 'portal',
             'status'       => self::FAIL,
-            'label'        => __('The donor portal page is missing', 'fundkit-fundraising-campaigns'),
-            'detail'       => __('Receipt and sign-in emails link to it. Until it is published, every one of those links leads to a 404.', 'fundkit-fundraising-campaigns'),
+            'label'        => __('The donor portal page is missing', 'fundraising-toolkit'),
+            'detail'       => __('Receipt and sign-in emails link to it. Until it is published, every one of those links leads to a 404.', 'fundraising-toolkit'),
             'action_url'   => admin_url('edit.php?post_type=page'),
-            'action_label' => __('Open pages', 'fundkit-fundraising-campaigns'),
+            'action_label' => __('Open pages', 'fundraising-toolkit'),
             'blocker'      => true,
         ];
     }
@@ -601,7 +601,7 @@ final class ReadinessService
                         $group['headline'],
                         $group['detail']
                     ),
-                    __('Manage licenses', 'fundkit-fundraising-campaigns')
+                    __('Manage licenses', 'fundraising-toolkit')
                 );
             }
 
@@ -616,12 +616,12 @@ final class ReadinessService
                     'licenses',
                     sprintf(
                         /* translators: %s: comma-separated add-on names. */
-                        __('The license for %s has lapsed', 'fundkit-fundraising-campaigns'),
+                        __('The license for %s has lapsed', 'fundraising-toolkit'),
                         $this->names($lapsing)
                     ),
-                    __('Renew to keep receiving updates and security fixes.', 'fundkit-fundraising-campaigns')
+                    __('Renew to keep receiving updates and security fixes.', 'fundraising-toolkit')
                 ),
-                __('Manage licenses', 'fundkit-fundraising-campaigns')
+                __('Manage licenses', 'fundraising-toolkit')
             )];
         }
 
@@ -633,10 +633,10 @@ final class ReadinessService
                 $this->warn(
                     'licenses',
                     'licenses',
-                    __('Your add-ons are not linked to a license key', 'fundkit-fundraising-campaigns'),
-                    __('They keep running, but they will not receive updates or security fixes.', 'fundkit-fundraising-campaigns')
+                    __('Your add-ons are not linked to a license key', 'fundraising-toolkit'),
+                    __('They keep running, but they will not receive updates or security fixes.', 'fundraising-toolkit')
                 ),
-                __('Add a key', 'fundkit-fundraising-campaigns')
+                __('Add a key', 'fundraising-toolkit')
             )];
         }
 
@@ -645,7 +645,7 @@ final class ReadinessService
             'licenses',
             sprintf(
                 /* translators: %d: number of licensed add-ons. */
-                _n('%d add-on is licensed', '%d add-ons are licensed', count($addons), 'fundkit-fundraising-campaigns'),
+                _n('%d add-on is licensed', '%d add-ons are licensed', count($addons), 'fundraising-toolkit'),
                 count($addons)
             )
         )];
@@ -745,7 +745,7 @@ final class ReadinessService
         }
         $last = array_pop($items);
 
-        return implode(', ', $items) . ' ' . __('and', 'fundkit-fundraising-campaigns') . ' ' . $last;
+        return implode(', ', $items) . ' ' . __('and', 'fundraising-toolkit') . ' ' . $last;
     }
 
     /**
@@ -791,7 +791,7 @@ final class ReadinessService
         }
         if ($tab !== null) {
             $row['action_url']   = admin_url('admin.php?page=fundkit-settings#' . $tab);
-            $row['action_label'] = $actionLabel ?? __('Open settings', 'fundkit-fundraising-campaigns');
+            $row['action_label'] = $actionLabel ?? __('Open settings', 'fundraising-toolkit');
         }
         if ($blocker) {
             $row['blocker'] = true;

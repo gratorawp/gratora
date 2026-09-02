@@ -15,7 +15,7 @@ async function download( path, setNotice, setBusy, fallbackName ) {
         const blob = await res.blob();
 
         if ( blob.size === 0 ) {
-            setNotice( { type: 'error', text: __( 'That export came back empty.', 'fundkit-fundraising-campaigns' ) } );
+            setNotice( { type: 'error', text: __( 'That export came back empty.', 'fundraising-toolkit' ) } );
             return;
         }
 
@@ -29,7 +29,7 @@ async function download( path, setNotice, setBusy, fallbackName ) {
         a.remove();
         URL.revokeObjectURL( url );
     } catch ( err ) {
-        setNotice( { type: 'error', text: err?.message || __( 'That export could not be generated.', 'fundkit-fundraising-campaigns' ) } );
+        setNotice( { type: 'error', text: err?.message || __( 'That export could not be generated.', 'fundraising-toolkit' ) } );
     } finally {
         setBusy( false );
     }
@@ -87,7 +87,7 @@ export default function ExportTab( { setNotice } ) {
                 setOpts( { donor_columns: [], campaigns: [], years: [ new Date().getFullYear() ] } );
                 setNotice( {
                     type: 'error',
-                    text: __( 'The export options could not be loaded, so the choices below are incomplete. Reload the page to try again.', 'fundkit-fundraising-campaigns' ),
+                    text: __( 'The export options could not be loaded, so the choices below are incomplete. Reload the page to try again.', 'fundraising-toolkit' ),
                 } );
             } );
     }, [] );
@@ -136,7 +136,7 @@ export default function ExportTab( { setNotice } ) {
             a.remove();
             URL.revokeObjectURL( url );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Export failed.', 'fundkit-fundraising-campaigns' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Export failed.', 'fundraising-toolkit' ) } );
         } finally {
             setBusy( '' );
         }
@@ -147,32 +147,32 @@ export default function ExportTab( { setNotice } ) {
             <table className="fundkit-exports">
                 <thead>
                     <tr>
-                        <th scope="col">{ __( 'Export type', 'fundkit-fundraising-campaigns' ) }</th>
-                        <th scope="col">{ __( 'Options', 'fundkit-fundraising-campaigns' ) }</th>
+                        <th scope="col">{ __( 'Export type', 'fundraising-toolkit' ) }</th>
+                        <th scope="col">{ __( 'Options', 'fundraising-toolkit' ) }</th>
                     </tr>
                 </thead>
                 <tbody>
                     <Row
-                        title={ __( 'Donations', 'fundkit-fundraising-campaigns' ) }
-                        description={ __( 'Every donation as a CSV: reference, donor, amount, status, campaign and gateway.', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'Donations', 'fundraising-toolkit' ) }
+                        description={ __( 'Every donation as a CSV: reference, donor, amount, status, campaign and gateway.', 'fundraising-toolkit' ) }
                     >
                         <div className="fundkit-exports__controls">
                             <span className="fundkit-tools-field">
-                                { __( 'From', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'From', 'fundraising-toolkit' ) }
                                 <DateField
                                     value={ donationsFrom }
                                     onChange={ ( v ) => setDonationsFrom( v || '' ) }
-                                    ariaLabel={ __( 'Export donations from', 'fundkit-fundraising-campaigns' ) }
-                                    placeholder={ __( 'Any', 'fundkit-fundraising-campaigns' ) }
+                                    ariaLabel={ __( 'Export donations from', 'fundraising-toolkit' ) }
+                                    placeholder={ __( 'Any', 'fundraising-toolkit' ) }
                                 />
                             </span>
                             <span className="fundkit-tools-field">
-                                { __( 'To', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'To', 'fundraising-toolkit' ) }
                                 <DateField
                                     value={ donationsTo }
                                     onChange={ ( v ) => setDonationsTo( v || '' ) }
-                                    ariaLabel={ __( 'Export donations to', 'fundkit-fundraising-campaigns' ) }
-                                    placeholder={ __( 'Any', 'fundkit-fundraising-campaigns' ) }
+                                    ariaLabel={ __( 'Export donations to', 'fundraising-toolkit' ) }
+                                    placeholder={ __( 'Any', 'fundraising-toolkit' ) }
                                 />
                             </span>
                             <Btn
@@ -181,23 +181,23 @@ export default function ExportTab( { setNotice } ) {
                                 isBusy={ busy === 'donations' }
                                 onClick={ () => download( donationsPath, setNotice, ( b ) => setBusy( b ? 'donations' : '' ), 'donations.csv' ) }
                             >
-                                { __( 'Generate CSV', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Generate CSV', 'fundraising-toolkit' ) }
                             </Btn>
                         </div>
                         <label className="fundkit-exports__check">
                             <input type="checkbox" checked={ includeTest } onChange={ ( e ) => setIncludeTest( e.target.checked ) } />
-                            { __( 'Include test donations', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Include test donations', 'fundraising-toolkit' ) }
                         </label>
                     </Row>
 
                     { canReports && (
                         <Row
-                            title={ __( 'Revenue report (PDF)', 'fundkit-fundraising-campaigns' ) }
-                            description={ __( 'A one-page summary of a year: total raised, month by month, and the best month. No donor details, so it can go straight to a board.', 'fundkit-fundraising-campaigns' ) }
+                            title={ __( 'Revenue report (PDF)', 'fundraising-toolkit' ) }
+                            description={ __( 'A one-page summary of a year: total raised, month by month, and the best month. No donor details, so it can go straight to a board.', 'fundraising-toolkit' ) }
                         >
                             <div className="fundkit-exports__controls">
                                 <label className="fundkit-tools-field">
-                                    { __( 'Year', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Year', 'fundraising-toolkit' ) }
                                     <select className="fundkit-select" value={ pdfYear } onChange={ ( e ) => setPdfYear( Number( e.target.value ) ) }>
                                         { years.map( ( y ) => <option key={ y } value={ y }>{ y }</option> ) }
                                     </select>
@@ -208,7 +208,7 @@ export default function ExportTab( { setNotice } ) {
                                     isBusy={ busy === 'pdf' }
                                     onClick={ () => download( `/fundkit/v1/admin/exports/revenue.pdf?year=${ pdfYear }`, setNotice, ( b ) => setBusy( b ? 'pdf' : '' ), 'revenue.pdf' ) }
                                 >
-                                    { __( 'Generate PDF', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Generate PDF', 'fundraising-toolkit' ) }
                                 </Btn>
                             </div>
                         </Row>
@@ -216,28 +216,28 @@ export default function ExportTab( { setNotice } ) {
 
                     { canReports && (
                         <Row
-                            title={ __( 'Revenue by month', 'fundkit-fundraising-campaigns' ) }
-                            description={ __( 'Revenue, donation count and average donation for every month in the range. Quiet months are written as zero rows, so the file charts as a continuous series.', 'fundkit-fundraising-campaigns' ) }
+                            title={ __( 'Revenue by month', 'fundraising-toolkit' ) }
+                            description={ __( 'Revenue, donation count and average donation for every month in the range. Quiet months are written as zero rows, so the file charts as a continuous series.', 'fundraising-toolkit' ) }
                         >
                             <div className="fundkit-exports__controls">
                                 <span className="fundkit-tools-field">
-                                    { __( 'From', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'From', 'fundraising-toolkit' ) }
                                     <MonthField
                                         value={ statsFrom }
                                         onChange={ setStatsFrom }
                                         min={ opts?.first_month }
                                         max={ opts?.current_month }
-                                        ariaLabel={ __( 'Revenue from month', 'fundkit-fundraising-campaigns' ) }
+                                        ariaLabel={ __( 'Revenue from month', 'fundraising-toolkit' ) }
                                     />
                                 </span>
                                 <span className="fundkit-tools-field">
-                                    { __( 'To', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'To', 'fundraising-toolkit' ) }
                                     <MonthField
                                         value={ statsTo }
                                         onChange={ setStatsTo }
                                         min={ opts?.first_month }
                                         max={ opts?.current_month }
-                                        ariaLabel={ __( 'Revenue to month', 'fundkit-fundraising-campaigns' ) }
+                                        ariaLabel={ __( 'Revenue to month', 'fundraising-toolkit' ) }
                                     />
                                 </span>
                                 <Btn
@@ -246,7 +246,7 @@ export default function ExportTab( { setNotice } ) {
                                     isBusy={ busy === 'stats' }
                                     onClick={ () => download( statsPath, setNotice, ( b ) => setBusy( b ? 'stats' : '' ), 'revenue.csv' ) }
                                 >
-                                    { __( 'Generate CSV', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Generate CSV', 'fundraising-toolkit' ) }
                                 </Btn>
                             </div>
                         </Row>
@@ -254,32 +254,32 @@ export default function ExportTab( { setNotice } ) {
 
                     { canDonors && (
                         <Row
-                            title={ __( 'Donors', 'fundkit-fundraising-campaigns' ) }
-                            description={ __( 'The donor list as a CSV, by when each donor record was created. Take only the columns you need: names, emails, phone numbers and addresses are personal data, and this file is not encrypted once it leaves the site.', 'fundkit-fundraising-campaigns' ) }
+                            title={ __( 'Donors', 'fundraising-toolkit' ) }
+                            description={ __( 'The donor list as a CSV, by when each donor record was created. Take only the columns you need: names, emails, phone numbers and addresses are personal data, and this file is not encrypted once it leaves the site.', 'fundraising-toolkit' ) }
                         >
                             <div className="fundkit-exports__controls">
                                 <span className="fundkit-tools-field">
-                                    { __( 'From', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'From', 'fundraising-toolkit' ) }
                                     <DateField
                                         value={ donorsFrom }
                                         onChange={ ( v ) => setDonorsFrom( v || '' ) }
-                                        ariaLabel={ __( 'Export donors from', 'fundkit-fundraising-campaigns' ) }
-                                        placeholder={ __( 'Any', 'fundkit-fundraising-campaigns' ) }
+                                        ariaLabel={ __( 'Export donors from', 'fundraising-toolkit' ) }
+                                        placeholder={ __( 'Any', 'fundraising-toolkit' ) }
                                     />
                                 </span>
                                 <span className="fundkit-tools-field">
-                                    { __( 'To', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'To', 'fundraising-toolkit' ) }
                                     <DateField
                                         value={ donorsTo }
                                         onChange={ ( v ) => setDonorsTo( v || '' ) }
-                                        ariaLabel={ __( 'Export donors to', 'fundkit-fundraising-campaigns' ) }
-                                        placeholder={ __( 'Any', 'fundkit-fundraising-campaigns' ) }
+                                        ariaLabel={ __( 'Export donors to', 'fundraising-toolkit' ) }
+                                        placeholder={ __( 'Any', 'fundraising-toolkit' ) }
                                     />
                                 </span>
                                 <label className="fundkit-tools-field">
-                                    { __( 'Campaign', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Campaign', 'fundraising-toolkit' ) }
                                     <select className="fundkit-select" value={ donorsCampaign } onChange={ ( e ) => setDonorsCampaign( Number( e.target.value ) ) }>
-                                        <option value={ 0 }>{ __( 'All campaigns', 'fundkit-fundraising-campaigns' ) }</option>
+                                        <option value={ 0 }>{ __( 'All campaigns', 'fundraising-toolkit' ) }</option>
                                         { ( opts?.campaigns || [] ).map( ( c ) => (
                                             <option key={ c.id } value={ c.id }>{ c.title || `#${ c.id }` }</option>
                                         ) ) }
@@ -291,12 +291,12 @@ export default function ExportTab( { setNotice } ) {
                                     isBusy={ busy === 'donors' }
                                     onClick={ () => download( donorsPath, setNotice, ( b ) => setBusy( b ? 'donors' : '' ), 'donors.csv' ) }
                                 >
-                                    { __( 'Generate CSV', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Generate CSV', 'fundraising-toolkit' ) }
                                 </Btn>
                             </div>
 
                             <div className="fundkit-exports__columns">
-                                <p className="fundkit-exports__columns-head">{ __( 'Columns', 'fundkit-fundraising-campaigns' ) }</p>
+                                <p className="fundkit-exports__columns-head">{ __( 'Columns', 'fundraising-toolkit' ) }</p>
                                 <div className="fundkit-exports__grid">
                                     { ( opts?.donor_columns || [] ).map( ( c ) => (
                                         <label key={ c.key }>
@@ -314,8 +314,8 @@ export default function ExportTab( { setNotice } ) {
                     ) }
 
                     <Row
-                        title={ __( 'Everything', 'fundkit-fundraising-campaigns' ) }
-                        description={ __( 'Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another FundKit site.', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'Everything', 'fundraising-toolkit' ) }
+                        description={ __( 'Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another Fundraising Toolkit site.', 'fundraising-toolkit' ) }
                     >
                         <div className="fundkit-exports__controls">
                             <Btn
@@ -324,17 +324,17 @@ export default function ExportTab( { setNotice } ) {
                                 isBusy={ busy === 'everything' }
                                 onClick={ () => download( '/fundkit/v1/admin/tools/export-all', setNotice, ( b ) => setBusy( b ? 'everything' : '' ), 'fundkit-export.json' ) }
                             >
-                                { __( 'Export JSON', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Export JSON', 'fundraising-toolkit' ) }
                             </Btn>
                         </div>
                         <p className="fundkit-tools-note">
-                            { __( 'Donor names, email addresses and postal addresses are readable in this file. They have to be, or it could only ever be restored onto the site it came from. Treat it like the donor database it is.', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Donor names, email addresses and postal addresses are readable in this file. They have to be, or it could only ever be restored onto the site it came from. Treat it like the donor database it is.', 'fundraising-toolkit' ) }
                         </p>
                     </Row>
 
                     <Row
-                        title={ __( 'Settings', 'fundkit-fundraising-campaigns' ) }
-                        description={ __( 'Every FundKit setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included.', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'Settings', 'fundraising-toolkit' ) }
+                        description={ __( 'Every Fundraising Toolkit setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included.', 'fundraising-toolkit' ) }
                     >
                         <div className="fundkit-exports__controls">
                             <Btn
@@ -343,11 +343,11 @@ export default function ExportTab( { setNotice } ) {
                                 isBusy={ busy === 'settings' }
                                 onClick={ exportSettings }
                             >
-                                { __( 'Export JSON', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Export JSON', 'fundraising-toolkit' ) }
                             </Btn>
                         </div>
                         <p className="fundkit-tools-note">
-                            { __( 'Secrets are masked. A gateway key never leaves the site in an export, so an imported file cannot restore one.', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Secrets are masked. A gateway key never leaves the site in an export, so an imported file cannot restore one.', 'fundraising-toolkit' ) }
                         </p>
                     </Row>
                 </tbody>

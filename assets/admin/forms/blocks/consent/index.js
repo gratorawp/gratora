@@ -46,31 +46,31 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Consent', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Consent', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Heading', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Heading', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'How can we stay in touch?', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Click the heading on the form to edit it inline.', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'How can we stay in touch?', 'fundraising-toolkit' ) }
+                        help={ __( 'Click the heading on the form to edit it inline.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Help text', 'fundraising-toolkit' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Optional explanation shown below the heading.', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Optional explanation shown below the heading.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
 
                     { registry.length === 0 ? (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'No consent purposes exist yet. A purpose names something your organization actually does, so you define it once and every form asks for it the same way.', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'No consent purposes exist yet. A purpose names something your organization actually does, so you define it once and every form asks for it the same way.', 'fundraising-toolkit' ) }
                             { settingsUrl() && (
                                 <>
                                     { ' ' }
                                     <ExternalLink href={ settingsUrl() }>
-                                        { __( 'Add one in Settings, Consents.', 'fundkit-fundraising-campaigns' ) }
+                                        { __( 'Add one in Settings, Consents.', 'fundraising-toolkit' ) }
                                     </ExternalLink>
                                 </>
                             ) }
@@ -81,7 +81,7 @@ function Edit( { attributes, setAttributes } ) {
                                 <CheckboxControl
                                     key={ p.key }
                                     label={ p.required
-                                        ? `${ p.label } ${ __( '(required)', 'fundkit-fundraising-campaigns' ) }`
+                                        ? `${ p.label } ${ __( '(required)', 'fundraising-toolkit' ) }`
                                         : p.label }
                                     help={ p.description || undefined }
                                     checked={ picked.includes( p.key ) }
@@ -92,7 +92,7 @@ function Edit( { attributes, setAttributes } ) {
                             { settingsUrl() && (
                                 <p style={ { marginTop: 12 } }>
                                     <ExternalLink href={ settingsUrl() }>
-                                        { __( 'Edit the wording in Settings, Consents.', 'fundkit-fundraising-campaigns' ) }
+                                        { __( 'Edit the wording in Settings, Consents.', 'fundraising-toolkit' ) }
                                     </ExternalLink>
                                 </p>
                             ) }
@@ -110,7 +110,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="fundkit-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'How can we stay in touch?', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'How can we stay in touch?', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                 />
                 { helpText && <div className="fundkit-block-preview__hint">{ helpText }</div> }
@@ -118,13 +118,13 @@ function Edit( { attributes, setAttributes } ) {
                     ? (
                         <div className="fundkit-block-preview__field">
                             { registry.length === 0
-                                ? __( 'No consent purposes exist yet. Add one in Settings, Consents.', 'fundkit-fundraising-campaigns' )
-                                : __( 'Pick which purposes this form asks for.', 'fundkit-fundraising-campaigns' ) }
+                                ? __( 'No consent purposes exist yet. Add one in Settings, Consents.', 'fundraising-toolkit' )
+                                : __( 'Pick which purposes this form asks for.', 'fundraising-toolkit' ) }
                         </div>
                     )
                     : shown.map( ( p ) => (
                         <div key={ p.key } className="fundkit-block-preview__field">
-                            { p.required ? `${ p.label } (${ __( 'required', 'fundkit-fundraising-campaigns' ) })` : p.label }
+                            { p.required ? `${ p.label } (${ __( 'required', 'fundraising-toolkit' ) })` : p.label }
                         </div>
                     ) ) }
             </div>
@@ -135,8 +135,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Consent', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Asks the donor to opt in to purposes your organization has defined in Settings.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Consent', 'fundraising-toolkit' ),
+        description: __( 'Asks the donor to opt in to purposes your organization has defined in Settings.', 'fundraising-toolkit' ),
         category:   'fundkit-extras',
         icon:       BlockIcons[ 'consent' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

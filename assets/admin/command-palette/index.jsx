@@ -26,49 +26,49 @@ const goTo = ( page ) => ( { close } ) => {
 const commands = [
     {
         name:     'fundkit/dashboard',
-        label:    __( 'FundKit: Open dashboard', 'fundkit-fundraising-campaigns' ),
+        label:    __( 'Fundraising Toolkit: Open dashboard', 'fundraising-toolkit' ),
         icon:     chartBar,
         callback: goTo( 'fundkit' ),
     },
     {
         name:     'fundkit/donations',
-        label:    __( 'FundKit: View donations', 'fundkit-fundraising-campaigns' ),
+        label:    __( 'Fundraising Toolkit: View donations', 'fundraising-toolkit' ),
         icon:     currencyDollar,
         callback: goTo( 'fundkit-donations' ),
     },
     {
         name:     'fundkit/donors',
-        label:    __( 'FundKit: View donors', 'fundkit-fundraising-campaigns' ),
+        label:    __( 'Fundraising Toolkit: View donors', 'fundraising-toolkit' ),
         icon:     people,
         callback: goTo( 'fundkit-donors' ),
     },
     {
         name:     'fundkit/campaigns',
-        label:    __( 'FundKit: View campaigns', 'fundkit-fundraising-campaigns' ),
+        label:    __( 'Fundraising Toolkit: View campaigns', 'fundraising-toolkit' ),
         icon:     megaphone,
         callback: goTo( 'fundkit-campaigns' ),
     },
     {
         name:     'fundkit/funds',
-        label:    __( 'FundKit: View funds', 'fundkit-fundraising-campaigns' ),
+        label:    __( 'Fundraising Toolkit: View funds', 'fundraising-toolkit' ),
         icon:     archive,
         callback: goTo( 'fundkit-funds' ),
     },
     {
         name:     'fundkit/settings',
-        label:    __( 'FundKit: Open settings', 'fundkit-fundraising-campaigns' ),
+        label:    __( 'Fundraising Toolkit: Open settings', 'fundraising-toolkit' ),
         icon:     cog,
         callback: goTo( 'fundkit-settings' ),
     },
     {
         name:     'fundkit/onboarding',
-        label:    __( 'FundKit: Open onboarding wizard', 'fundkit-fundraising-campaigns' ),
+        label:    __( 'Fundraising Toolkit: Open onboarding wizard', 'fundraising-toolkit' ),
         icon:     plus,
         callback: goTo( 'fundkit-onboarding' ),
     },
     {
         name:     'fundkit/new-campaign',
-        label:    __( 'FundKit: New campaign', 'fundkit-fundraising-campaigns' ),
+        label:    __( 'Fundraising Toolkit: New campaign', 'fundraising-toolkit' ),
         icon:     plus,
         callback: ( { close } ) => {
             window.location.href = adminUrl( 'fundkit-campaigns' ) + '&action=new';

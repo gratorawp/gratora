@@ -48,18 +48,18 @@ final class CampaignReportBuilder
             'percent'        => $percent,
             'bar_width'      => $barWidth,
             'stats'          => [
-                ['label' => __('Donations', 'fundkit-fundraising-campaigns'),        'value' => number_format_i18n((int) $summary['donations_count'])],
-                ['label' => __('Unique donors', 'fundkit-fundraising-campaigns'),    'value' => number_format_i18n((int) $summary['donors_count'])],
-                ['label' => __('Average donation', 'fundkit-fundraising-campaigns'), 'value' => Money::format((int) $summary['avg_donation_cents'], $currency)],
+                ['label' => __('Donations', 'fundraising-toolkit'),        'value' => number_format_i18n((int) $summary['donations_count'])],
+                ['label' => __('Unique donors', 'fundraising-toolkit'),    'value' => number_format_i18n((int) $summary['donors_count'])],
+                ['label' => __('Average donation', 'fundraising-toolkit'), 'value' => Money::format((int) $summary['avg_donation_cents'], $currency)],
             ],
             'generated_date' => (string) wp_date(get_option('date_format')),
         ]);
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: campaign title. */
-            'title'   => sprintf(__('Campaign report: %s', 'fundkit-fundraising-campaigns'), (string) $campaign->title),
+            'title'   => sprintf(__('Campaign report: %s', 'fundraising-toolkit'), (string) $campaign->title),
             'author'  => $orgName,
-            'subject' => __('Campaign performance report', 'fundkit-fundraising-campaigns'),
+            'subject' => __('Campaign performance report', 'fundraising-toolkit'),
         ]);
     }
 
@@ -99,11 +99,11 @@ final class CampaignReportBuilder
         if ($type === 'donors') {
             $current = (int) $summary['donors_count'];
             /* translators: %s: donor goal count */
-            $display = sprintf(__('%s donors', 'fundkit-fundraising-campaigns'), number_format_i18n($goalCount));
+            $display = sprintf(__('%s donors', 'fundraising-toolkit'), number_format_i18n($goalCount));
         } else {
             $current = (int) $summary['donations_count'];
             /* translators: %s: donation goal count */
-            $display = sprintf(__('%s donations', 'fundkit-fundraising-campaigns'), number_format_i18n($goalCount));
+            $display = sprintf(__('%s donations', 'fundraising-toolkit'), number_format_i18n($goalCount));
         }
 
         $percent = (int) round(($current / $goalCount) * 100);
@@ -120,11 +120,11 @@ final class CampaignReportBuilder
     private function rangeLabel(string $range): string
     {
         return match ($range) {
-            'today'    => __('Today', 'fundkit-fundraising-campaigns'),
-            'last-7'   => __('Last 7 days', 'fundkit-fundraising-campaigns'),
-            'last-30'  => __('Last 30 days', 'fundkit-fundraising-campaigns'),
-            'last-90'  => __('Last 90 days', 'fundkit-fundraising-campaigns'),
-            'all-time' => __('All time', 'fundkit-fundraising-campaigns'),
+            'today'    => __('Today', 'fundraising-toolkit'),
+            'last-7'   => __('Last 7 days', 'fundraising-toolkit'),
+            'last-30'  => __('Last 30 days', 'fundraising-toolkit'),
+            'last-90'  => __('Last 90 days', 'fundraising-toolkit'),
+            'all-time' => __('All time', 'fundraising-toolkit'),
             default    => $range,
         };
     }

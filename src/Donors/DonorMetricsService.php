@@ -135,7 +135,7 @@ final class DonorMetricsService
             $reason = AtRiskReason::classify($r, $plans[(int) $r['id']] ?? null, $today);
             return [
                 'id'                  => $r['id'],
-                'name'                => $name !== '' ? $name : __('Donor', 'fundkit-fundraising-campaigns') . ' #' . $r['id'],
+                'name'                => $name !== '' ? $name : __('Donor', 'fundraising-toolkit') . ' #' . $r['id'],
                 'email'               => $email,
                 'country'             => $r['country'],
                 'donations_count'     => $r['donations_count'],
@@ -394,7 +394,7 @@ final class DonorMetricsService
         // Contextual banners.
         $banners = [];
         if ($donor->redacted_at !== null) {
-            $banners[] = ['kind' => 'redacted', 'message' => __('This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting.', 'fundkit-fundraising-campaigns')];
+            $banners[] = ['kind' => 'redacted', 'message' => __('This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting.', 'fundraising-toolkit')];
         }
         $pastDuePlan = null;
         foreach ($recurringPlans as $p) {
@@ -409,17 +409,17 @@ final class DonorMetricsService
             $name     = ucfirst((string) $pastDuePlan->gateway);
 
             if ($gateway instanceof \FundKit\Gateways\SupportsPaymentRetry) {
-                $message = __('A renewal was declined. Open the Recurring tab to collect it again.', 'fundkit-fundraising-campaigns');
+                $message = __('A renewal was declined. Open the Recurring tab to collect it again.', 'fundraising-toolkit');
             } elseif ($gateway === null) {
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. Stripe. */
-                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways.', 'fundkit-fundraising-campaigns'),
+                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways.', 'fundraising-toolkit'),
                     $name
                 );
             } elseif ($gateway instanceof \FundKit\Gateways\SupportsPaymentMethodUpdate) {
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. PayPal. */
-                    __('A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal.', 'fundkit-fundraising-campaigns'),
+                    __('A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal.', 'fundraising-toolkit'),
                     $name
                 );
             } else {
@@ -431,7 +431,7 @@ final class DonorMetricsService
                 // gateways, and the route answers 422.
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. GoCardless. */
-                    __('A renewal was declined. %s retries on its own schedule, and neither you nor the donor can change the payment details from here. If it keeps failing, ask the donor to set the donation up again.', 'fundkit-fundraising-campaigns'),
+                    __('A renewal was declined. %s retries on its own schedule, and neither you nor the donor can change the payment details from here. If it keeps failing, ask the donor to set the donation up again.', 'fundraising-toolkit'),
                     $name
                 );
             }
@@ -637,7 +637,7 @@ final class DonorMetricsService
     private function donorName(Donor $d): string
     {
         $name = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
-        return $name !== '' ? $name : __('Donor', 'fundkit-fundraising-campaigns') . ' #' . $d->id;
+        return $name !== '' ? $name : __('Donor', 'fundraising-toolkit') . ' #' . $d->id;
     }
 
     /**
@@ -678,7 +678,7 @@ final class DonorMetricsService
             $name = trim(($r['first_name'] ?? '') . ' ' . ($r['last_name'] ?? ''));
             return [
                 'id'                  => $r['id'],
-                'name'                => $name !== '' ? $name : __('Donor', 'fundkit-fundraising-campaigns') . ' #' . $r['id'],
+                'name'                => $name !== '' ? $name : __('Donor', 'fundraising-toolkit') . ' #' . $r['id'],
                 'email'               => $this->donorService->decryptEmail($donor),
                 'country'             => $r['country'],
                 'total_donated_cents' => $r['total_donated_cents'],

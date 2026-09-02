@@ -44,7 +44,7 @@ final class AdminGlobals extends HookProvider
             'rest'             => esc_url_raw(rest_url('fundkit/v1/')),
             'nonce'            => wp_create_nonce('wp_rest'),
             'pro'              => $this->license->snapshot(),
-            'campaign_types'   => apply_filters('fundkit.campaign.types', ['standard' => __('Standard', 'fundkit-fundraising-campaigns')]),
+            'campaign_types'   => apply_filters('fundkit.campaign.types', ['standard' => __('Standard', 'fundraising-toolkit')]),
             'campaign_type_notices' => apply_filters('fundkit.campaign.type_notices', []),
             'default_currency' => $defaultCurrency,
             'supported_currencies' => is_array($currencyLocale['supported_currencies'] ?? null)

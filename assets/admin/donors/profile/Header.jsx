@@ -25,7 +25,7 @@ function Banner( { kind, message, onAction } ) {
             { onAction && (
                 <div className="banner__actions">
                     <button type="button" className="btn btn--sm" onClick={ onAction }>
-                        { __( 'Open Recurring →', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Open Recurring →', 'fundraising-toolkit' ) }
                     </button>
                 </div>
             ) }
@@ -42,9 +42,9 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
     return (
         <header className="dp-head">
             <div className="dp-crumbs">
-                <button type="button" onClick={ onBack }>{ __( 'FundKit', 'fundkit-fundraising-campaigns' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'Fundraising Toolkit', 'fundraising-toolkit' ) }</button>
                 <span className="sep">›</span>
-                <button type="button" onClick={ onBack }>{ __( 'Donors', 'fundkit-fundraising-campaigns' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'Donors', 'fundraising-toolkit' ) }</button>
                 <span className="sep">›</span>
                 <span>{ donor.name }</span>
             </div>
@@ -57,19 +57,19 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
                     <div className="dp-page-head__chips">
                         { donor.first_donation_at && (
                             <HeadChip>
-                                { sprintf( /* translators: %s: month */ __( 'Donor since %s', 'fundkit-fundraising-campaigns' ), formatMonth( donor.first_donation_at ) ) }
+                                { sprintf( /* translators: %s: month */ __( 'Donor since %s', 'fundraising-toolkit' ), formatMonth( donor.first_donation_at ) ) }
                             </HeadChip>
                         ) }
                         { activeCount > 0 && (
                             <HeadChip tone="violet">
                                 <IconRotate className="ic" width="11" height="11" />
                                 { activeCount === 1
-                                    ? __( '1 active plan', 'fundkit-fundraising-campaigns' )
-                                    : sprintf( /* translators: %d: count */ __( '%d active plans', 'fundkit-fundraising-campaigns' ), activeCount ) }
+                                    ? __( '1 active plan', 'fundraising-toolkit' )
+                                    : sprintf( /* translators: %d: count */ __( '%d active plans', 'fundraising-toolkit' ), activeCount ) }
                             </HeadChip>
                         ) }
                         <HeadChip tone="gray" mono>{ donor.reference }</HeadChip>
-                        { isRedacted && <HeadChip tone="gray">{ __( 'Redacted', 'fundkit-fundraising-campaigns' ) }</HeadChip> }
+                        { isRedacted && <HeadChip tone="gray">{ __( 'Redacted', 'fundraising-toolkit' ) }</HeadChip> }
                     </div>
                 </div>
                 <div className="dp-page-head__actions">
@@ -78,7 +78,7 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
                          edited at all. */ }
                     { ! isRedacted && (
                         <button type="button" className="btn" onClick={ onEdit }>
-                            { __( 'Edit details', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Edit details', 'fundraising-toolkit' ) }
                         </button>
                     ) }
                 </div>

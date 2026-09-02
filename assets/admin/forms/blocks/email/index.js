@@ -14,16 +14,16 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Email', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Email', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Email', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Email', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Placeholder', 'fundraising-toolkit' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         placeholder="you@example.com"
@@ -35,7 +35,7 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <span className="fundkit-block-preview__label">
-                    { label || __( 'Email', 'fundkit-fundraising-campaigns' ) }
+                    { label || __( 'Email', 'fundraising-toolkit' ) }
                     <em className="fundkit-block-preview__req" aria-hidden="true">*</em>
                 </span>
                 <div className="fundkit-block-preview__field">
@@ -49,7 +49,7 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Email', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Email', 'fundraising-toolkit' ),
         category:   'fundkit-donor',
         icon:       BlockIcons[ 'email' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

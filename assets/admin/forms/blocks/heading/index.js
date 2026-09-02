@@ -15,9 +15,9 @@ const LEVEL_OPTIONS = [
 ];
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'fundkit-fundraising-campaigns' ) },
-    { value: 'center', label: __( 'Center', 'fundkit-fundraising-campaigns' ) },
-    { value: 'right',  label: __( 'Right',  'fundkit-fundraising-campaigns' ) },
+    { value: 'left',   label: __( 'Left',   'fundraising-toolkit' ) },
+    { value: 'center', label: __( 'Center', 'fundraising-toolkit' ) },
+    { value: 'right',  label: __( 'Right',  'fundraising-toolkit' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -32,15 +32,15 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Heading', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Heading', 'fundraising-toolkit' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Level', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Level', 'fundraising-toolkit' ) }
                         value={ level }
                         onChange={ ( v ) => setAttributes( { level: Number( v ) } ) }
                         options={ LEVEL_OPTIONS }
                     />
                     <Segmented
-                        label={ __( 'Alignment', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Alignment', 'fundraising-toolkit' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
@@ -56,7 +56,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName={ `h${ level }` }
                     value={ text }
                     onChange={ ( v ) => setAttributes( { text: v } ) }
-                    placeholder={ __( 'Section heading', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Section heading', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                     style={ { margin: 0, fontWeight: 600 } }
                 />
@@ -68,8 +68,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Heading', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Section heading shown above the next field step.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Heading', 'fundraising-toolkit' ),
+        description: __( 'Section heading shown above the next field step.', 'fundraising-toolkit' ),
         category:   'fundkit-content',
         icon:       BlockIcons[ 'heading' ],
         supports: { html: false, anchor: false, inserter: true },

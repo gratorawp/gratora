@@ -56,21 +56,21 @@ export default function GatewaysPanel( { s } ) {
     const [ offlineOpen, setOfflineOpen ] = useCardOpen( offlineEnabled && ! offlineConfigured, 'payments', 'offline' );
 
     const offlinePill = ! offlineEnabled
-        ? <span className="fundkit-pill fundkit-pill--gray"><span className="fundkit-pill__dot fundkit-pill__dot--soft" />{ __( 'Disabled', 'fundkit-fundraising-campaigns' ) }</span>
+        ? <span className="fundkit-pill fundkit-pill--gray"><span className="fundkit-pill__dot fundkit-pill__dot--soft" />{ __( 'Disabled', 'fundraising-toolkit' ) }</span>
         : offlineConfigured
-            ? <span className="fundkit-pill fundkit-pill--green"><span className="fundkit-pill__dot" />{ __( 'Configured', 'fundkit-fundraising-campaigns' ) }</span>
-            : <span className="fundkit-pill fundkit-pill--amber"><span className="fundkit-pill__dot" />{ __( 'Enabled, no way to pay', 'fundkit-fundraising-campaigns' ) }</span>;
+            ? <span className="fundkit-pill fundkit-pill--green"><span className="fundkit-pill__dot" />{ __( 'Configured', 'fundraising-toolkit' ) }</span>
+            : <span className="fundkit-pill fundkit-pill--amber"><span className="fundkit-pill__dot" />{ __( 'Enabled, no way to pay', 'fundraising-toolkit' ) }</span>;
 
     return (
         <div className="fundkit-panel">
             <Card
-                title={ __( 'Test mode', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Org-wide rehearsal switch, also settable per form', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Test mode', 'fundraising-toolkit' ) }
+                sub={ __( 'Org-wide rehearsal switch, also settable per form', 'fundraising-toolkit' ) }
                 edited={ s.isDirty }
             >
                 <ToggleRow
-                    title={ __( 'Enable test mode for all forms', 'fundkit-fundraising-campaigns' ) }
-                    sub={ __( 'No real payment is taken and these donations are excluded from reporting.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Enable test mode for all forms', 'fundraising-toolkit' ) }
+                    sub={ __( 'No real payment is taken and these donations are excluded from reporting.', 'fundraising-toolkit' ) }
                     checked={ !! s.value( 'test_mode', false ) }
                     onChange={ s.setValue( 'test_mode' ) }
                 />
@@ -86,8 +86,8 @@ export default function GatewaysPanel( { s } ) {
 
             <Card
                 leading={ <BrandMark letter="O" variant="offline" /> }
-                title={ __( 'Offline donations', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Donor sees your bank details and pays offline', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Offline donations', 'fundraising-toolkit' ) }
+                sub={ __( 'Donor sees your bank details and pays offline', 'fundraising-toolkit' ) }
                 meta={ offlinePill }
                 edited={ s.isDirty }
                 collapsible
@@ -95,28 +95,28 @@ export default function GatewaysPanel( { s } ) {
                 onToggle={ setOfflineOpen }
             >
                 <ToggleRow
-                    title={ __( 'Enable offline donations', 'fundkit-fundraising-campaigns' ) }
-                    sub={ __( 'For cash, check, or bank transfer donations marked paid by admin.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Enable offline donations', 'fundraising-toolkit' ) }
+                    sub={ __( 'For cash, check, or bank transfer donations marked paid by admin.', 'fundraising-toolkit' ) }
                     checked={ offlineEnabled }
                     onChange={ s.setValue( 'offline.enabled' ) }
                 />
 
                 <FormRow
-                    label={ __( 'Instructions', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Emailed to donors who choose bank transfer, with their donation reference.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Instructions', 'fundraising-toolkit' ) }
+                    help={ __( 'Emailed to donors who choose bank transfer, with their donation reference.', 'fundraising-toolkit' ) }
                     wide
                 >
                     <textarea
                         className="fundkit-textarea"
                         rows={ 4 }
-                        placeholder={ __( 'Please transfer the donation amount within 7 days. Use the reference number so we can match your donation to your receipt.', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Please transfer the donation amount within 7 days. Use the reference number so we can match your donation to your receipt.', 'fundraising-toolkit' ) }
                         { ...s.bind( 'offline.instructions' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Bank details template', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Click a placeholder to drop it in. They expand when the donor is shown their transfer details.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Bank details template', 'fundraising-toolkit' ) }
+                    help={ __( 'Click a placeholder to drop it in. They expand when the donor is shown their transfer details.', 'fundraising-toolkit' ) }
                     wide
                 >
                     <div className="fundkit-merge-tags">

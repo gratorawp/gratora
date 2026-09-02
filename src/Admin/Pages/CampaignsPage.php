@@ -29,7 +29,7 @@ final class CampaignsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Campaigns', 'fundkit-fundraising-campaigns'),
+            'title'      => __('Campaigns', 'fundraising-toolkit'),
             'capability' => 'fundkit_access_campaigns',
             'position'   => 5,
             'render'     => [$this, 'render'],
@@ -71,7 +71,7 @@ final class CampaignsPage extends HookProvider
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(

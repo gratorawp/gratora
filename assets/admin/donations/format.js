@@ -22,11 +22,11 @@ export function formatDate( iso, opts = {} ) {
 }
 
 export const STATUS_LABEL = {
-    pending:        __( 'Pending', 'fundkit-fundraising-campaigns' ),
-    processing:     __( 'Processing', 'fundkit-fundraising-campaigns' ),
-    paid:           __( 'Paid', 'fundkit-fundraising-campaigns' ),
-    failed:         __( 'Failed', 'fundkit-fundraising-campaigns' ),
-    refunded:       __( 'Refunded', 'fundkit-fundraising-campaigns' ),
-    partial_refund: __( 'Partially refunded', 'fundkit-fundraising-campaigns' ),
-    disputed:       __( 'Disputed', 'fundkit-fundraising-campaigns' ),
+    pending:        __( 'Pending', 'fundraising-toolkit' ),
+    processing:     __( 'Processing', 'fundraising-toolkit' ),
+    paid:           __( 'Paid', 'fundraising-toolkit' ),
+    failed:         __( 'Failed', 'fundraising-toolkit' ),
+    refunded:       __( 'Refunded', 'fundraising-toolkit' ),
+    partial_refund: __( 'Partially refunded', 'fundraising-toolkit' ),
+    disputed:       __( 'Disputed', 'fundraising-toolkit' ),
 };

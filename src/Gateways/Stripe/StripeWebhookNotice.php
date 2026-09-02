@@ -88,8 +88,8 @@ final class StripeWebhookNotice
             . 'background:#fffaf5;color:#b54708;padding:11px 14px;'
             . 'font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Oxygen,Ubuntu,sans-serif;'
             . 'font-size:13px;line-height:1.45;">'
-            . '<strong>FundKit:</strong> '
-            . esc_html__('Stripe is connected but its webhook signing secret is missing. Recurring renewals, payment confirmations, and account updates will not process until you add it under FundKit, Settings, Payment gateways.', 'fundkit-fundraising-campaigns')
+            . '<strong>Fundraising Toolkit:</strong> '
+            . esc_html__('Stripe is connected but its webhook signing secret is missing. Recurring renewals, payment confirmations, and account updates will not process until you add it under Fundraising Toolkit, Settings, Payment gateways.', 'fundraising-toolkit')
             . '</div>';
     }
 }

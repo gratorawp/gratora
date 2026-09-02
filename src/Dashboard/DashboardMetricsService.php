@@ -203,7 +203,7 @@ final class DashboardMetricsService
 
             $out[] = [
                 'id'             => (int) $d->id,
-                'donor_name'     => $name !== '' ? $name : __('Anonymous', 'fundkit-fundraising-campaigns'),
+                'donor_name'     => $name !== '' ? $name : __('Anonymous', 'fundraising-toolkit'),
                 'amount_cents'   => (int) $d->amount_cents,
                 'currency'       => (string) $d->currency,
                 'paid_at'        => $d->paid_at,
@@ -331,10 +331,10 @@ final class DashboardMetricsService
                 'tone'  => 'error',
                 'title' => sprintf(
                     /* translators: %d: failed donations count */
-                    _n('%d donation failed in the last 24 hours.', '%d donations failed in the last 24 hours.', $failed, 'fundkit-fundraising-campaigns'),
+                    _n('%d donation failed in the last 24 hours.', '%d donations failed in the last 24 hours.', $failed, 'fundraising-toolkit'),
                     $failed
                 ),
-                'action_label' => __('Review', 'fundkit-fundraising-campaigns'),
+                'action_label' => __('Review', 'fundraising-toolkit'),
                 'action_href'  => admin_url('admin.php?page=fundkit-donations&status=failed'),
                 'count'        => $failed,
             ];
@@ -357,10 +357,10 @@ final class DashboardMetricsService
                 'tone'  => 'error',
                 'title' => sprintf(
                     /* translators: %d: failed test donations count */
-                    _n('%d test donation failed in the last 24 hours.', '%d test donations failed in the last 24 hours.', $failedTest, 'fundkit-fundraising-campaigns'),
+                    _n('%d test donation failed in the last 24 hours.', '%d test donations failed in the last 24 hours.', $failedTest, 'fundraising-toolkit'),
                     $failedTest
                 ),
-                'action_label' => __('Review', 'fundkit-fundraising-campaigns'),
+                'action_label' => __('Review', 'fundraising-toolkit'),
                 // The live link hides test rows, so it would land on an empty
                 // screen.
                 'action_href'  => admin_url('admin.php?page=fundkit-donations&status=failed&include_test=1'),
@@ -386,11 +386,11 @@ final class DashboardMetricsService
                 'tone'  => 'warn',
                 'title' => sprintf(
                     /* translators: 1: campaign title, 2: days remaining */
-                    _n('"%1$s" ends in %2$d day.', '"%1$s" ends in %2$d days.', $daysLeft, 'fundkit-fundraising-campaigns'),
+                    _n('"%1$s" ends in %2$d day.', '"%1$s" ends in %2$d days.', $daysLeft, 'fundraising-toolkit'),
                     $c->title,
                     $daysLeft
                 ),
-                'action_label' => __('Open', 'fundkit-fundraising-campaigns'),
+                'action_label' => __('Open', 'fundraising-toolkit'),
                 'action_href'  => admin_url('admin.php?page=fundkit-campaigns&view=detail&id=' . $c->id . '&tab=overview'),
             ];
         }
@@ -410,10 +410,10 @@ final class DashboardMetricsService
                 'tone'  => 'warn',
                 'title' => sprintf(
                     /* translators: %s: campaign title */
-                    __('"%s" has no default form. The donate button on its page does nothing.', 'fundkit-fundraising-campaigns'),
+                    __('"%s" has no default form. The donate button on its page does nothing.', 'fundraising-toolkit'),
                     $c->title
                 ),
-                'action_label' => __('Set form', 'fundkit-fundraising-campaigns'),
+                'action_label' => __('Set form', 'fundraising-toolkit'),
                 'action_href'  => admin_url('admin.php?page=fundkit-campaigns&view=detail&id=' . $c->id . '&tab=settings'),
             ];
         }
@@ -464,11 +464,11 @@ final class DashboardMetricsService
                         '%d donor left a note in the last 7 days.',
                         '%d donors left notes in the last 7 days.',
                         $donorCount,
-                        'fundkit-fundraising-campaigns'
+                        'fundraising-toolkit'
                     ),
                     $donorCount
                 ),
-                'action_label' => __('Read', 'fundkit-fundraising-campaigns'),
+                'action_label' => __('Read', 'fundraising-toolkit'),
                 'action_href'  => $href,
                 'count'        => $noteCount,
             ];
@@ -480,8 +480,8 @@ final class DashboardMetricsService
             $items[] = [
                 'key'          => 'no-campaigns',
                 'tone'         => 'info',
-                'title'        => __('No published campaigns yet. Start one to begin collecting donations.', 'fundkit-fundraising-campaigns'),
-                'action_label' => __('Create campaign', 'fundkit-fundraising-campaigns'),
+                'title'        => __('No published campaigns yet. Start one to begin collecting donations.', 'fundraising-toolkit'),
+                'action_label' => __('Create campaign', 'fundraising-toolkit'),
                 'action_href'  => admin_url('admin.php?page=fundkit-campaigns'),
             ];
         }

@@ -60,7 +60,7 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
     public function test_the_link_points_at_the_assigned_permalink(): void
     {
         $this->assertStringContainsString(
-            'https://wordpress.org/support/plugin/fundkit-fundraising-campaigns/reviews/?rate=5#new-post',
+            'https://wordpress.org/support/plugin/fundraising-toolkit/reviews/?rate=5#new-post',
             $this->footerOn('fundkit')
         );
     }
@@ -76,7 +76,7 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
 
         $this->assertSame(
             $header['TextDomain'],
-            'fundkit-fundraising-campaigns',
+            'fundraising-toolkit',
             'the review link slug and the Text Domain header have drifted apart'
         );
     }

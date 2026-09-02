@@ -36,7 +36,7 @@ echo get_block_wrapper_attributes(array_filter([
                 <div class="fundkit-donate-modal__backdrop" data-fundkit-modal-close></div>
                 <div class="fundkit-donate-modal__panel" role="dialog" aria-modal="true" aria-label="<?php echo esc_attr($label);
 ?>">
-                    <button type="button" class="fundkit-donate-modal__close" aria-label="<?php esc_attr_e('Close', 'fundkit-fundraising-campaigns');
+                    <button type="button" class="fundkit-donate-modal__close" aria-label="<?php esc_attr_e('Close', 'fundraising-toolkit');
 ?>" data-fundkit-modal-close>
                         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                             <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>

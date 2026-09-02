@@ -22,9 +22,9 @@ import GoalBar from '../_shared/components/GoalBar';
 import SearchableSelect from '../_shared/components/SearchableSelect';
 
 const STATUS_OPTIONS = [
-    { value: 'active',     label: __( 'Active', 'fundkit-fundraising-campaigns' ) },
-    { value: 'inactive',   label: __( 'Inactive', 'fundkit-fundraising-campaigns' ) },
-    { value: 'restricted', label: __( 'Restricted', 'fundkit-fundraising-campaigns' ) },
+    { value: 'active',     label: __( 'Active', 'fundraising-toolkit' ) },
+    { value: 'inactive',   label: __( 'Inactive', 'fundraising-toolkit' ) },
+    { value: 'restricted', label: __( 'Restricted', 'fundraising-toolkit' ) },
 ];
 
 /**
@@ -58,32 +58,32 @@ export const fundIsOpen = ( item ) => !! item.is_active && ! item.schedule_state
 
 /** @since 1.0.0 */
 export function fundStatusLabel( item ) {
-    if ( ! item.is_active ) return __( 'Inactive', 'fundkit-fundraising-campaigns' );
-    if ( item.schedule_state === 'scheduled' ) return __( 'Scheduled', 'fundkit-fundraising-campaigns' );
-    if ( item.schedule_state === 'ended' ) return __( 'Ended', 'fundkit-fundraising-campaigns' );
-    return __( 'Active', 'fundkit-fundraising-campaigns' );
+    if ( ! item.is_active ) return __( 'Inactive', 'fundraising-toolkit' );
+    if ( item.schedule_state === 'scheduled' ) return __( 'Scheduled', 'fundraising-toolkit' );
+    if ( item.schedule_state === 'ended' ) return __( 'Ended', 'fundraising-toolkit' );
+    return __( 'Active', 'fundraising-toolkit' );
 }
 
 function fundKpis( stats ) {
     return [
         {
-            label: __( 'Total raised', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Total raised', 'fundraising-toolkit' ),
             value: stats ? formatAmount( stats.raised_cents ) : '-',
-            sub:   __( 'all funds', 'fundkit-fundraising-campaigns' ),
+            sub:   __( 'all funds', 'fundraising-toolkit' ),
         },
         {
-            label: __( 'Active funds', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Active funds', 'fundraising-toolkit' ),
             value: stats ? String( stats.active ) : '-',
-            sub:   stats ? `${ __( 'of', 'fundkit-fundraising-campaigns' ) } ${ stats.total }` : null,
+            sub:   stats ? `${ __( 'of', 'fundraising-toolkit' ) } ${ stats.total }` : null,
         },
         {
-            label: __( 'Restricted', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Restricted', 'fundraising-toolkit' ),
             value: stats ? String( stats.restricted ) : '-',
-            sub:   __( 'donor-restricted', 'fundkit-fundraising-campaigns' ),
+            sub:   __( 'donor-restricted', 'fundraising-toolkit' ),
         },
         {
-            label: __( 'Default fund', 'fundkit-fundraising-campaigns' ),
-            value: stats ? ( stats.default ? stats.default.name : __( 'None', 'fundkit-fundraising-campaigns' ) ) : '-',
+            label: __( 'Default fund', 'fundraising-toolkit' ),
+            value: stats ? ( stats.default ? stats.default.name : __( 'None', 'fundraising-toolkit' ) ) : '-',
         },
     ];
 }
@@ -144,7 +144,7 @@ export default function List() {
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load funds.', 'fundkit-fundraising-campaigns' ) );
+                setError( err?.message || __( 'Failed to load funds.', 'fundraising-toolkit' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
@@ -200,7 +200,7 @@ export default function List() {
             await apiFetch( { path: `/fundkit/v1/admin/funds/${ id }`, method: 'POST', data: payload } );
             afterChange();
         } catch ( err ) {
-            setError( err?.message || __( 'Action failed.', 'fundkit-fundraising-campaigns' ) );
+            setError( err?.message || __( 'Action failed.', 'fundraising-toolkit' ) );
         }
     }, [ afterChange ] );
 
@@ -220,7 +220,7 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:            'name',
-            label:         __( 'Fund', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Fund', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <div
@@ -238,7 +238,7 @@ export default function List() {
                         </button>
                         { item.is_default && (
                             <span className="fundkit-fund-badge fundkit-fund-badge--default">
-                                { __( 'Default', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Default', 'fundraising-toolkit' ) }
                             </span>
                         ) }
                         <div className="fundkit-fund-code">{ item.code }</div>
@@ -248,18 +248,18 @@ export default function List() {
         },
         {
             id:       'type',
-            label:    __( 'Type', 'fundkit-fundraising-campaigns' ),
+            label:    __( 'Type', 'fundraising-toolkit' ),
             render: ( { item } ) => (
                 <span className={ 'fundkit-fund-badge ' + ( item.is_restricted
                     ? 'fundkit-fund-badge--restricted'
                     : 'fundkit-fund-badge--unrestricted' ) }>
-                    { item.is_restricted ? __( 'Restricted', 'fundkit-fundraising-campaigns' ) : __( 'Unrestricted', 'fundkit-fundraising-campaigns' ) }
+                    { item.is_restricted ? __( 'Restricted', 'fundraising-toolkit' ) : __( 'Unrestricted', 'fundraising-toolkit' ) }
                 </span>
             ),
         },
         {
             id:    'raised',
-            label: __( 'Raised', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Raised', 'fundraising-toolkit' ),
             // Same reason the goal column is not sortable: a parent's raised is
             // rolled up in PHP after the query.
             enableSorting: false,
@@ -269,7 +269,7 @@ export default function List() {
         },
         {
             id:            'goal',
-            label:         __( 'Goal progress', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Goal progress', 'fundraising-toolkit' ),
             // Not sortable: the column shows raised-vs-goal percentage, but a
             // parent's raised is rolled up in PHP after the query, so no DB
             // sort key reflects what's displayed.
@@ -277,14 +277,14 @@ export default function List() {
             render: ( { item } ) => {
                 if ( ! item.goal_cents ) {
                     return (
-                        <GoalBar left={ __( 'No goal set', 'fundkit-fundraising-campaigns' ) } pct={ 0 } muted />
+                        <GoalBar left={ __( 'No goal set', 'fundraising-toolkit' ) } pct={ 0 } muted />
                     );
                 }
                 const pct = Math.min( 100, Math.round( ( item.raised_cents / item.goal_cents ) * 100 ) );
                 return (
                     <GoalBar
                         left={ formatAmount( item.raised_cents ) }
-                        right={ `${ __( 'of', 'fundkit-fundraising-campaigns' ) } ${ formatAmount( item.goal_cents ) }` }
+                        right={ `${ __( 'of', 'fundraising-toolkit' ) } ${ formatAmount( item.goal_cents ) }` }
                         pct={ pct }
                     />
                 );
@@ -292,14 +292,14 @@ export default function List() {
         },
         {
             id:       'status',
-            label:    __( 'Status', 'fundkit-fundraising-campaigns' ),
+            label:    __( 'Status', 'fundraising-toolkit' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => {
                 if ( item.reassign_pending ) {
                     return (
                         <span className="fundkit-fund-badge fundkit-fund-badge--pending">
-                            { __( 'Reassigning…', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Reassigning…', 'fundraising-toolkit' ) }
                         </span>
                     );
                 }
@@ -323,35 +323,35 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:         'edit',
-            label:      __( 'Edit', 'fundkit-fundraising-campaigns' ),
+            label:      __( 'Edit', 'fundraising-toolkit' ),
             icon:       () => <Pencil size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.reassign_pending,
             callback:   ( [ item ] ) => setEditing( item ),
         },
         {
             id:         'set-default',
-            label:      __( 'Set as default', 'fundkit-fundraising-campaigns' ),
+            label:      __( 'Set as default', 'fundraising-toolkit' ),
             icon:       () => <Star size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.is_default && item.is_active && ! item.reassign_pending,
             callback:   ( [ item ] ) => mutate( item.id, { is_default: true } ),
         },
         {
             id:         'deactivate',
-            label:      __( 'Deactivate', 'fundkit-fundraising-campaigns' ),
+            label:      __( 'Deactivate', 'fundraising-toolkit' ),
             icon:       () => <PowerOff size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.is_default && item.is_active && ! item.reassign_pending,
             callback:   ( [ item ] ) => mutate( item.id, { is_active: false } ),
         },
         {
             id:         'activate',
-            label:      __( 'Activate', 'fundkit-fundraising-campaigns' ),
+            label:      __( 'Activate', 'fundraising-toolkit' ),
             icon:       () => <Power size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.is_default && ! item.is_active && ! item.reassign_pending,
             callback:   ( [ item ] ) => mutate( item.id, { is_active: true } ),
         },
         {
             id:            'delete',
-            label:         __( 'Delete', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Delete', 'fundraising-toolkit' ),
             icon:          () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             isEligible:    ( item ) => ! item.is_default && ! item.reassign_pending,
@@ -362,27 +362,27 @@ export default function List() {
     return (
         <div>
             <div className="fundkit-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'FundKit', 'fundkit-fundraising-campaigns' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'fundraising-toolkit' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Funds', 'fundkit-fundraising-campaigns' ) }</span>
+                <span>{ __( 'Funds', 'fundraising-toolkit' ) }</span>
             </div>
             <div className="fundkit-page-head">
                 <div className="fundkit-page-head__title-row">
-                    <h1>{ __( 'Funds', 'fundkit-fundraising-campaigns' ) }</h1>
+                    <h1>{ __( 'Funds', 'fundraising-toolkit' ) }</h1>
                 </div>
                 <div className="fundkit-page-head__right">
                     <span className="fundkit-page-head__meta">
-                        { sprintf( /* translators: %s: number of funds */ _n( '%s fund', '%s funds', total, 'fundkit-fundraising-campaigns' ), total.toLocaleString() ) }
+                        { sprintf( /* translators: %s: number of funds */ _n( '%s fund', '%s funds', total, 'fundraising-toolkit' ), total.toLocaleString() ) }
                     </span>
                     <Btn variant="primary" onClick={ onCreate }>
                         <Plus size={ 16 } strokeWidth={ 1.75 } />
-                        { __( 'New fund', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'New fund', 'fundraising-toolkit' ) }
                     </Btn>
                 </div>
             </div>
 
             <p className="fundkit-funds-intro">
-                { __( 'Organization-wide designations donations are allocated to.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Organization-wide designations donations are allocated to.', 'fundraising-toolkit' ) }
             </p>
 
             <KpiStrip items={ fundKpis( stats ) } loading={ statsLoading } />
@@ -398,7 +398,7 @@ export default function List() {
                             '%d test donation is not counted in these figures.',
                             '%d test donations are not counted in these figures.',
                             testHidden,
-                            'fundkit-fundraising-campaigns'
+                            'fundraising-toolkit'
                         ),
                         testHidden
                     ) }
@@ -413,11 +413,11 @@ export default function List() {
             { ! loading && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <Wallet size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No funds yet', 'fundkit-fundraising-campaigns' ) }
-                    body={ __( 'Funds route donations to specific causes within your organization. Forms without a fund picker drop into the organization default.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'No funds yet', 'fundraising-toolkit' ) }
+                    body={ __( 'Funds route donations to specific causes within your organization. Forms without a fund picker drop into the organization default.', 'fundraising-toolkit' ) }
                     action={
                         <Btn variant="primary" onClick={ onCreate }>
-                            { __( 'Create your first fund', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Create your first fund', 'fundraising-toolkit' ) }
                         </Btn>
                     }
                 />
@@ -439,11 +439,11 @@ export default function List() {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'fundkit-fundraising-campaigns' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundkit-fundraising-campaigns' ) }
+                            title={ __( 'Nothing matches these filters', 'fundraising-toolkit' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundraising-toolkit' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Clear filters', 'fundraising-toolkit' ) }
                                 </Btn>
                             }
                         />
@@ -520,7 +520,7 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
             } );
             onSaved();
         } catch ( err ) {
-            setSaveError( err?.message || __( 'Failed to save fund.', 'fundkit-fundraising-campaigns' ) );
+            setSaveError( err?.message || __( 'Failed to save fund.', 'fundraising-toolkit' ) );
             setSaving( false );
         }
     };
@@ -530,16 +530,16 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
     return (
         <Dialog
             title={ fund.id
-                ? __( 'Edit fund', 'fundkit-fundraising-campaigns' )
-                : __( 'New fund', 'fundkit-fundraising-campaigns' ) }
+                ? __( 'Edit fund', 'fundraising-toolkit' )
+                : __( 'New fund', 'fundraising-toolkit' ) }
             onClose={ onClose }
             foot={ (
                 <>
-                    <Btn onClick={ onClose }>{ __( 'Cancel', 'fundkit-fundraising-campaigns' ) }</Btn>
+                    <Btn onClick={ onClose }>{ __( 'Cancel', 'fundraising-toolkit' ) }</Btn>
                     <Btn variant="primary" onClick={ save } isBusy={ saving } disabled={ saving }>
                         { fund.id
-                            ? __( 'Save fund', 'fundkit-fundraising-campaigns' )
-                            : __( 'Create fund', 'fundkit-fundraising-campaigns' ) }
+                            ? __( 'Save fund', 'fundraising-toolkit' )
+                            : __( 'Create fund', 'fundraising-toolkit' ) }
                     </Btn>
                 </>
             ) }
@@ -548,44 +548,44 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                         <Notice status="error" onRemove={ () => setSaveError( null ) }>{ saveError }</Notice>
                     ) }
                     <fieldset className="fundkit-fset">
-                        <legend>{ __( 'Identity', 'fundkit-fundraising-campaigns' ) }</legend>
+                        <legend>{ __( 'Identity', 'fundraising-toolkit' ) }</legend>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Name', 'fundkit-fundraising-campaigns' ) }</label>
+                            <label>{ __( 'Name', 'fundraising-toolkit' ) }</label>
                             <input className="fundkit-input" value={ form.name } onChange={ ( e ) => set( 'name', e.target.value ) } />
                         </div>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Code', 'fundkit-fundraising-campaigns' ) }</label>
+                            <label>{ __( 'Code', 'fundraising-toolkit' ) }</label>
                             <input className="fundkit-input fundkit-input--mono" value={ form.code } onChange={ ( e ) => set( 'code', e.target.value ) } />
-                            <p className="fundkit-fld__help">{ __( 'Stable identifier used in exports and accounting. Lowercase, no spaces. Avoid changing once donations exist.', 'fundkit-fundraising-campaigns' ) }</p>
+                            <p className="fundkit-fld__help">{ __( 'Stable identifier used in exports and accounting. Lowercase, no spaces. Avoid changing once donations exist.', 'fundraising-toolkit' ) }</p>
                         </div>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Description', 'fundkit-fundraising-campaigns' ) }</label>
+                            <label>{ __( 'Description', 'fundraising-toolkit' ) }</label>
                             <textarea className="fundkit-textarea" rows="3" value={ form.description } onChange={ ( e ) => set( 'description', e.target.value ) } />
                         </div>
                     </fieldset>
 
                     <fieldset className="fundkit-fset">
-                        <legend>{ __( 'Classification', 'fundkit-fundraising-campaigns' ) }</legend>
+                        <legend>{ __( 'Classification', 'fundraising-toolkit' ) }</legend>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Type', 'fundkit-fundraising-campaigns' ) }</label>
+                            <label>{ __( 'Type', 'fundraising-toolkit' ) }</label>
                             <div className="fundkit-seg2">
                                 <button type="button" className={ ! form.is_restricted ? 'is-active' : '' } onClick={ () => set( 'is_restricted', false ) }>
-                                    { __( 'Unrestricted', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Unrestricted', 'fundraising-toolkit' ) }
                                 </button>
                                 <button type="button" className={ form.is_restricted ? 'is-active' : '' } onClick={ () => set( 'is_restricted', true ) }>
-                                    { __( 'Restricted', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Restricted', 'fundraising-toolkit' ) }
                                 </button>
                             </div>
-                            <p className="fundkit-fld__help">{ __( 'Restricted funds are donor-designated and reported separately.', 'fundkit-fundraising-campaigns' ) }</p>
+                            <p className="fundkit-fld__help">{ __( 'Restricted funds are donor-designated and reported separately.', 'fundraising-toolkit' ) }</p>
                         </div>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Parent fund', 'fundkit-fundraising-campaigns' ) }</label>
+                            <label>{ __( 'Parent fund', 'fundraising-toolkit' ) }</label>
                             <SearchableSelect
                                 value={ form.parent_fund_id ? String( form.parent_fund_id ) : '' }
                                 onChange={ ( v ) => set( 'parent_fund_id', v ) }
-                                placeholder={ __( 'None (top-level fund)', 'fundkit-fundraising-campaigns' ) }
+                                placeholder={ __( 'None (top-level fund)', 'fundraising-toolkit' ) }
                                 options={ [
-                                    { value: '', label: __( 'None (top-level fund)', 'fundkit-fundraising-campaigns' ) },
+                                    { value: '', label: __( 'None (top-level fund)', 'fundraising-toolkit' ) },
                                     ...parents.map( ( p ) => ( { value: String( p.id ), label: p.name } ) ),
                                 ] }
                             />
@@ -593,10 +593,10 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                     </fieldset>
 
                     <fieldset className="fundkit-fset">
-                        <legend>{ __( 'Targets', 'fundkit-fundraising-campaigns' ) }</legend>
+                        <legend>{ __( 'Targets', 'fundraising-toolkit' ) }</legend>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Goal amount', 'fundkit-fundraising-campaigns' ) } <span className="fundkit-fld__opt">{ __( 'optional', 'fundkit-fundraising-campaigns' ) }</span></label>
-                            <input className="fundkit-input" type="number" min="0" step="0.01" placeholder={ __( 'No goal', 'fundkit-fundraising-campaigns' ) } value={ form.goal } onChange={ ( e ) => set( 'goal', e.target.value ) } />
+                            <label>{ __( 'Goal amount', 'fundraising-toolkit' ) } <span className="fundkit-fld__opt">{ __( 'optional', 'fundraising-toolkit' ) }</span></label>
+                            <input className="fundkit-input" type="number" min="0" step="0.01" placeholder={ __( 'No goal', 'fundraising-toolkit' ) } value={ form.goal } onChange={ ( e ) => set( 'goal', e.target.value ) } />
                         </div>
                         <ScheduleFields
                             enabled={ scheduleOn }
@@ -609,25 +609,25 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                     </fieldset>
 
                     <fieldset className="fundkit-fset">
-                        <legend>{ __( 'Accounting', 'fundkit-fundraising-campaigns' ) }</legend>
+                        <legend>{ __( 'Accounting', 'fundraising-toolkit' ) }</legend>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Accounting code', 'fundkit-fundraising-campaigns' ) } <span className="fundkit-fld__opt">{ __( 'optional', 'fundkit-fundraising-campaigns' ) }</span></label>
-                            <input className="fundkit-input fundkit-input--mono" placeholder={ __( 'Enter accounting code', 'fundkit-fundraising-campaigns' ) } value={ form.accounting_code } onChange={ ( e ) => set( 'accounting_code', e.target.value ) } />
-                            <p className="fundkit-fld__help">{ __( 'Maps this fund to a GL account in your bookkeeping. Included in exports.', 'fundkit-fundraising-campaigns' ) }</p>
+                            <label>{ __( 'Accounting code', 'fundraising-toolkit' ) } <span className="fundkit-fld__opt">{ __( 'optional', 'fundraising-toolkit' ) }</span></label>
+                            <input className="fundkit-input fundkit-input--mono" placeholder={ __( 'Enter accounting code', 'fundraising-toolkit' ) } value={ form.accounting_code } onChange={ ( e ) => set( 'accounting_code', e.target.value ) } />
+                            <p className="fundkit-fld__help">{ __( 'Maps this fund to a GL account in your bookkeeping. Included in exports.', 'fundraising-toolkit' ) }</p>
                         </div>
                     </fieldset>
 
                     <fieldset className="fundkit-fset">
-                        <legend>{ __( 'Behaviour', 'fundkit-fundraising-campaigns' ) }</legend>
+                        <legend>{ __( 'Behaviour', 'fundraising-toolkit' ) }</legend>
                         <ToggleRow
-                            title={ __( 'Default fund', 'fundkit-fundraising-campaigns' ) }
-                            sub={ __( 'Donations with no chosen fund (and campaigns with no default) are allocated here.', 'fundkit-fundraising-campaigns' ) }
+                            title={ __( 'Default fund', 'fundraising-toolkit' ) }
+                            sub={ __( 'Donations with no chosen fund (and campaigns with no default) are allocated here.', 'fundraising-toolkit' ) }
                             checked={ form.is_default }
                             onChange={ ( v ) => set( 'is_default', v ) }
                         />
                         <ToggleRow
-                            title={ __( 'Active', 'fundkit-fundraising-campaigns' ) }
-                            sub={ __( 'Inactive funds stay in reports but cannot receive new donations.', 'fundkit-fundraising-campaigns' ) }
+                            title={ __( 'Active', 'fundraising-toolkit' ) }
+                            sub={ __( 'Inactive funds stay in reports but cannot receive new donations.', 'fundraising-toolkit' ) }
                             checked={ form.is_active }
                             onChange={ ( v ) => set( 'is_active', v ) }
                         />
@@ -655,19 +655,19 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
             const res = await apiFetch( { path, method: 'DELETE' } );
             let msg;
             if ( res.action === 'deleted' ) {
-                msg = sprintf( /* translators: %s: fund name */ __( 'Fund “%s” was deleted.', 'fundkit-fundraising-campaigns' ), fund.name );
+                msg = sprintf( /* translators: %s: fund name */ __( 'Fund “%s” was deleted.', 'fundraising-toolkit' ), fund.name );
             } else if ( res.action === 'reassign_queued' ) {
-                msg = sprintf( /* translators: %s: fund name */ __( 'Reassigning donations from “%s”. It will be removed once complete.', 'fundkit-fundraising-campaigns' ), fund.name );
+                msg = sprintf( /* translators: %s: fund name */ __( 'Reassigning donations from “%s”. It will be removed once complete.', 'fundraising-toolkit' ), fund.name );
             } else {
                 msg = sprintf(
                     /* translators: %s: fund name */
-                    __( 'Fund “%s” was deactivated and kept for reporting.', 'fundkit-fundraising-campaigns' ),
+                    __( 'Fund “%s” was deactivated and kept for reporting.', 'fundraising-toolkit' ),
                     fund.name
                 );
             }
             onDone( msg );
         } catch ( err ) {
-            onError( err?.message || __( 'Could not delete the fund.', 'fundkit-fundraising-campaigns' ) );
+            onError( err?.message || __( 'Could not delete the fund.', 'fundraising-toolkit' ) );
             setBusy( false );
         }
     };
@@ -679,16 +679,16 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
     const deletable = fund.deletable === true;
     const reassignBlocked = choice === 'reassign' && ! targetId;
     const primaryLabel = deletable
-        ? __( 'Delete fund', 'fundkit-fundraising-campaigns' )
-        : ( choice === 'reassign' ? __( 'Reassign and delete', 'fundkit-fundraising-campaigns' ) : __( 'Deactivate fund', 'fundkit-fundraising-campaigns' ) );
+        ? __( 'Delete fund', 'fundraising-toolkit' )
+        : ( choice === 'reassign' ? __( 'Reassign and delete', 'fundraising-toolkit' ) : __( 'Deactivate fund', 'fundraising-toolkit' ) );
 
     return (
         <Dialog
-            title={ sprintf( /* translators: %s: fund name */ __( 'Delete fund: %s', 'fundkit-fundraising-campaigns' ), fund.name ) }
+            title={ sprintf( /* translators: %s: fund name */ __( 'Delete fund: %s', 'fundraising-toolkit' ), fund.name ) }
             onClose={ onClose }
             foot={ (
                 <>
-                    <Btn onClick={ onClose } disabled={ busy }>{ __( 'Cancel', 'fundkit-fundraising-campaigns' ) }</Btn>
+                    <Btn onClick={ onClose } disabled={ busy }>{ __( 'Cancel', 'fundraising-toolkit' ) }</Btn>
                     <Btn
                         variant="primary"
                         isBusy={ busy }
@@ -702,12 +702,12 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
         >
             { deletable ? (
                 <p className="fundkit-dialog__help">
-                    { __( 'Nothing points to this fund, so deleting it removes it entirely.', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Nothing points to this fund, so deleting it removes it entirely.', 'fundraising-toolkit' ) }
                 </p>
             ) : (
                 <>
                     <p className="fundkit-dialog__help">
-                        { __( 'This fund is still referenced, so it is never hard-deleted. Choose what to do:', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'This fund is still referenced, so it is never hard-deleted. Choose what to do:', 'fundraising-toolkit' ) }
                     </p>
 
                     <label className="fundkit-choice" htmlFor="fundkit-fund-delete-deactivate">
@@ -719,8 +719,8 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
                             onChange={ () => setChoice( 'deactivate' ) }
                         />
                         <span>
-                            <strong>{ __( 'Deactivate', 'fundkit-fundraising-campaigns' ) }</strong>
-                            <span>{ __( 'Keep all donation records. Recommended.', 'fundkit-fundraising-campaigns' ) }</span>
+                            <strong>{ __( 'Deactivate', 'fundraising-toolkit' ) }</strong>
+                            <span>{ __( 'Keep all donation records. Recommended.', 'fundraising-toolkit' ) }</span>
                         </span>
                     </label>
 
@@ -740,23 +740,23 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
                                 onChange={ () => setChoice( 'reassign' ) }
                             />
                             <span>
-                                <strong>{ __( 'Reassign to another fund, then delete', 'fundkit-fundraising-campaigns' ) }</strong>
-                                <span>{ __( 'Moves every donation, campaign and form that points here onto the chosen fund, then removes this one.', 'fundkit-fundraising-campaigns' ) }</span>
+                                <strong>{ __( 'Reassign to another fund, then delete', 'fundraising-toolkit' ) }</strong>
+                                <span>{ __( 'Moves every donation, campaign and form that points here onto the chosen fund, then removes this one.', 'fundraising-toolkit' ) }</span>
                             </span>
                         </label>
                     ) : (
                         <p className="fundkit-dialog__help">
-                            { __( 'There is no other active fund to reassign to, so deactivating is the only option here. Create another fund first if you want to move these donations.', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'There is no other active fund to reassign to, so deactivating is the only option here. Create another fund first if you want to move these donations.', 'fundraising-toolkit' ) }
                         </p>
                     ) }
 
                     { choice === 'reassign' && candidates.length > 0 && (
                         <div className="fundkit-fld" style={ { marginTop: 12 } }>
-                            <label className="fundkit-fld__label">{ __( 'Reassign donations to', 'fundkit-fundraising-campaigns' ) }</label>
+                            <label className="fundkit-fld__label">{ __( 'Reassign donations to', 'fundraising-toolkit' ) }</label>
                             <SearchableSelect
                                 value={ targetId }
                                 onChange={ ( v ) => setTargetId( v ) }
-                                placeholder={ __( 'Select a fund', 'fundkit-fundraising-campaigns' ) }
+                                placeholder={ __( 'Select a fund', 'fundraising-toolkit' ) }
                                 options={ candidates.map( ( f ) => ( { value: String( f.id ), label: f.name } ) ) }
                             />
                         </div>

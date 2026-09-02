@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
  * @var string $placeholder
  * @var bool   $required
  */
-$labelText = $label !== '' ? $label : __('Email', 'fundkit-fundraising-campaigns');
+$labelText = $label !== '' ? $label : __('Email', 'fundraising-toolkit');
 ?>
 <label class="fundkit-block fundkit-block--email fundkit-donor__field">
     <span class="fundkit-donor__label"><?php echo esc_html($labelText); ?></span>

@@ -74,8 +74,8 @@ function defaultFormSettings() {
 // Multi-page navigation is driven by the Steps block inside the form, not a
 // form-level toggle. Layout is just the embed style.
 const LAYOUT_OPTIONS = [
-    { value: 'inline', label: __( 'Inline (in-page)', 'fundkit-fundraising-campaigns' ) },
-    { value: 'modal',  label: __( 'Modal (button opens form)', 'fundkit-fundraising-campaigns' ) },
+    { value: 'inline', label: __( 'Inline (in-page)', 'fundraising-toolkit' ) },
+    { value: 'modal',  label: __( 'Modal (button opens form)', 'fundraising-toolkit' ) },
 ];
 
 function mergeFormSettings( stored, base = defaultFormSettings() ) {
@@ -221,13 +221,13 @@ export default function Editor( { formId } ) {
     useEffect( () => {
         apiFetch( { path: '/fundkit/v1/admin/forms/campaigns' } )
             .then( setCampaigns )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load campaigns.', 'fundkit-fundraising-campaigns' ) ) );
+            .catch( ( err ) => setError( err?.message || __( 'Could not load campaigns.', 'fundraising-toolkit' ) ) );
         apiFetch( { path: '/fundkit/v1/admin/forms/gateways' } )
             .then( setGateways )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load payment gateways.', 'fundkit-fundraising-campaigns' ) ) );
+            .catch( ( err ) => setError( err?.message || __( 'Could not load payment gateways.', 'fundraising-toolkit' ) ) );
         apiFetch( { path: '/fundkit/v1/admin/forms/funds' } )
             .then( setFunds )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load funds.', 'fundkit-fundraising-campaigns' ) ) );
+            .catch( ( err ) => setError( err?.message || __( 'Could not load funds.', 'fundraising-toolkit' ) ) );
     }, [] );
 
     // Expose form context to block edit components (Goal needs campaign progress).
@@ -300,7 +300,7 @@ export default function Editor( { formId } ) {
             } );
             setPreviewHtml( res.html || '' );
         } catch ( err ) {
-            setError( err?.message || __( 'Preview failed.', 'fundkit-fundraising-campaigns' ) );
+            setError( err?.message || __( 'Preview failed.', 'fundraising-toolkit' ) );
         } finally {
             setPreviewLoading( false );
         }
@@ -325,7 +325,7 @@ export default function Editor( { formId } ) {
             setLastSavedSerialized( serialized );
             return true;
         } catch ( err ) {
-            setError( err?.message || __( 'Save failed.', 'fundkit-fundraising-campaigns' ) );
+            setError( err?.message || __( 'Save failed.', 'fundraising-toolkit' ) );
             return false;
         }
     }, [ c, blocks ] );
@@ -337,8 +337,8 @@ export default function Editor( { formId } ) {
         if ( ok ) {
             notify.success(
                 c.record.status === 'published'
-                    ? __( 'Form saved.', 'fundkit-fundraising-campaigns' )
-                    : __( 'Draft saved.', 'fundkit-fundraising-campaigns' )
+                    ? __( 'Form saved.', 'fundraising-toolkit' )
+                    : __( 'Draft saved.', 'fundraising-toolkit' )
             );
         }
     }, [ persist, c.record.status ] );
@@ -419,14 +419,14 @@ export default function Editor( { formId } ) {
         setSavingAction( 'publish' );
         const ok = await persist( { status: 'published' } );
         setSavingAction( null );
-        if ( ok ) notify.success( __( 'Form published.', 'fundkit-fundraising-campaigns' ) );
+        if ( ok ) notify.success( __( 'Form published.', 'fundraising-toolkit' ) );
     }, [ persist, missingRequired ] );
 
     const onUnpublish = useCallback( async () => {
         setSavingAction( 'unpublish' );
         const ok = await persist( { status: 'draft' } );
         setSavingAction( null );
-        if ( ok ) notify.success( __( 'Form moved to draft.', 'fundkit-fundraising-campaigns' ) );
+        if ( ok ) notify.success( __( 'Form moved to draft.', 'fundraising-toolkit' ) );
     }, [ persist ] );
 
     const dirtyForUnload = c.isDirty || serialize( blocks ) !== lastSavedSerialized;
@@ -469,7 +469,7 @@ export default function Editor( { formId } ) {
     if ( c.notFound ) {
         return (
             <Notice status="error" isDismissible={ false }>
-                { __( 'Form not found.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Form not found.', 'fundraising-toolkit' ) }
             </Notice>
         );
     }
@@ -510,7 +510,7 @@ export default function Editor( { formId } ) {
                 <Notice status="warning" isDismissible={ false }>
                     { sprintf(
                         /* translators: %s: comma-separated list of missing block labels (Name, Email). */
-                        __( 'Add these blocks before publishing: %s.', 'fundkit-fundraising-campaigns' ),
+                        __( 'Add these blocks before publishing: %s.', 'fundraising-toolkit' ),
                         missingRequired.map( ( r ) => r.label ).join( ', ' )
                     ) }
                 </Notice>
@@ -657,7 +657,7 @@ export default function Editor( { formId } ) {
                                 ) : secondaryView === 'listview' ? (
                                     <div className="fundkit-form-editor__secondary fundkit-form-editor__secondary--listview">
                                         <div className="fundkit-form-editor__secondary-title">
-                                            { __( 'Form structure', 'fundkit-fundraising-campaigns' ) }
+                                            { __( 'Form structure', 'fundraising-toolkit' ) }
                                         </div>
                                         <BlockListView />
                                     </div>
@@ -671,7 +671,7 @@ export default function Editor( { formId } ) {
 
             { templatePickerOpen && (
                 <FormTemplatePicker
-                    intro={ __( "We didn't pre-build this form so you can pick a shape that fits. You can change it later.", 'fundkit-fundraising-campaigns' ) }
+                    intro={ __( "We didn't pre-build this form so you can pick a shape that fits. You can change it later.", 'fundraising-toolkit' ) }
                     onPick={ applyTemplate }
                     onClose={ () => setTemplatePickerOpen( false ) }
                 />
@@ -679,17 +679,17 @@ export default function Editor( { formId } ) {
 
             { pendingTemplate && (
                 <Modal
-                    title={ __( 'Apply template', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Apply template', 'fundraising-toolkit' ) }
                     onRequestClose={ () => setPendingTemplate( null ) }
                     size="small"
                 >
                     <p style={ { marginTop: 0 } }>
-                        { __( 'Replace the current form with this template? Its blocks take over, and so do the settings it carries: layout, style, gateways, recurring and the thank-you message. Undo brings the blocks back, but not the settings.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Replace the current form with this template? Its blocks take over, and so do the settings it carries: layout, style, gateways, recurring and the thank-you message. Undo brings the blocks back, but not the settings.', 'fundraising-toolkit' ) }
                     </p>
                     <div style={ { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 } }>
-                        <Btn onClick={ () => setPendingTemplate( null ) }>{ __( 'Cancel', 'fundkit-fundraising-campaigns' ) }</Btn>
+                        <Btn onClick={ () => setPendingTemplate( null ) }>{ __( 'Cancel', 'fundraising-toolkit' ) }</Btn>
                         <Btn variant="primary" onClick={ () => performApplyTemplate( pendingTemplate, true ) }>
-                            { __( 'Replace form', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Replace form', 'fundraising-toolkit' ) }
                         </Btn>
                     </div>
                 </Modal>
@@ -772,14 +772,14 @@ function AssistantBridge() {
 function CanvasEmpty() {
     return (
         <div className="fundkit-form-editor__empty">
-            <h3>{ __( 'Start building your donation form', 'fundkit-fundraising-campaigns' ) }</h3>
-            <p>{ __( 'Add a heading, an amount block, and a submit button to take your first donation.', 'fundkit-fundraising-campaigns' ) }</p>
+            <h3>{ __( 'Start building your donation form', 'fundraising-toolkit' ) }</h3>
+            <p>{ __( 'Add a heading, an amount block, and a submit button to take your first donation.', 'fundraising-toolkit' ) }</p>
             <Inserter
                 position="bottom center"
                 rootClientId=""
                 renderToggle={ ( { onToggle, isOpen } ) => (
                     <button type="button" onClick={ onToggle } aria-expanded={ isOpen }>
-                        + { __( 'Add your first block', 'fundkit-fundraising-campaigns' ) }
+                        + { __( 'Add your first block', 'fundraising-toolkit' ) }
                     </button>
                 ) }
             />
@@ -788,12 +788,12 @@ function CanvasEmpty() {
 }
 
 const VIEW_TABS = [
-    { id: 'develop',  label: __( 'Build', 'fundkit-fundraising-campaigns' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
-    { id: 'preview',  label: __( 'Preview', 'fundkit-fundraising-campaigns' ),  icon: <LocalIcon name="eye"      size={ 15 } /> },
+    { id: 'develop',  label: __( 'Build', 'fundraising-toolkit' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
+    { id: 'preview',  label: __( 'Preview', 'fundraising-toolkit' ),  icon: <LocalIcon name="eye"      size={ 15 } /> },
     // Settings is a third view of the same form, so it sits with the other two
     // rather than behind a cog, which reads as a tool acting on the current
     // view.
-    { id: 'settings', label: __( 'Settings', 'fundkit-fundraising-campaigns' ), icon: <LocalIcon name="settings" size={ 15 } /> },
+    { id: 'settings', label: __( 'Settings', 'fundraising-toolkit' ), icon: <LocalIcon name="settings" size={ 15 } /> },
 ];
 
 function EditorHeader( {
@@ -812,7 +812,7 @@ function EditorHeader( {
     const publishDisabledReason = missing.length > 0
         ? sprintf(
             /* translators: %s: comma-separated list of missing block labels. */
-            __( 'Add these blocks first: %s.', 'fundkit-fundraising-campaigns' ),
+            __( 'Add these blocks first: %s.', 'fundraising-toolkit' ),
             missing.join( ', ' )
         )
         : '';
@@ -825,30 +825,30 @@ function EditorHeader( {
             <div className="fundkit-editor-header__left">
                 <a className="fundkit-editor-header__back" href={ backHref }>
                     <LocalIcon name="chevron-left" size={ 20 } />
-                    <span>{ __( 'Campaign overview', 'fundkit-fundraising-campaigns' ) }</span>
+                    <span>{ __( 'Campaign overview', 'fundraising-toolkit' ) }</span>
                 </a>
                 { showAuthoringTools && (
                     <>
                         <span className="fundkit-editor-header__divider" aria-hidden="true" />
                         <Button
                             icon={ inserterOpen ? CloseIcon : PlusIcon }
-                            label={ inserterOpen ? __( 'Close block inserter', 'fundkit-fundraising-campaigns' ) : __( 'Toggle block inserter', 'fundkit-fundraising-campaigns' ) }
+                            label={ inserterOpen ? __( 'Close block inserter', 'fundraising-toolkit' ) : __( 'Toggle block inserter', 'fundraising-toolkit' ) }
                             onClick={ () => onToggleSecondaryView( 'inserter' ) }
                             isPressed={ inserterOpen }
                             showTooltip
                         />
                         <Button
                             icon={ ListViewIcon }
-                            label={ __( 'Toggle block outline', 'fundkit-fundraising-campaigns' ) }
+                            label={ __( 'Toggle block outline', 'fundraising-toolkit' ) }
                             onClick={ () => onToggleSecondaryView( 'listview' ) }
                             isPressed={ listViewOpen }
                             showTooltip
                         />
-                        <Button icon={ UndoIcon } label={ __( 'Undo', 'fundkit-fundraising-campaigns' ) } onClick={ onUndo } disabled={ ! canUndo } />
-                        <Button icon={ RedoIcon } label={ __( 'Redo', 'fundkit-fundraising-campaigns' ) } onClick={ onRedo } disabled={ ! canRedo } />
+                        <Button icon={ UndoIcon } label={ __( 'Undo', 'fundraising-toolkit' ) } onClick={ onUndo } disabled={ ! canUndo } />
+                        <Button icon={ RedoIcon } label={ __( 'Redo', 'fundraising-toolkit' ) } onClick={ onRedo } disabled={ ! canRedo } />
                         <Button
                             icon={ <LocalIcon name="layout-grid" size={ 20 } /> }
-                            label={ __( 'Start from a template', 'fundkit-fundraising-campaigns' ) }
+                            label={ __( 'Start from a template', 'fundraising-toolkit' ) }
                             onClick={ onOpenTemplates }
                             showTooltip
                         />
@@ -862,7 +862,7 @@ function EditorHeader( {
                     type="text"
                     value={ title }
                     onChange={ ( e ) => onTitleChange( e.target.value ) }
-                    placeholder={ __( 'Untitled donation form', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Untitled donation form', 'fundraising-toolkit' ) }
                 />
             </div>
 
@@ -888,7 +888,7 @@ function EditorHeader( {
                     disabled={ saving || ! isDirty }
                     isBusy={ saving && savingAction === 'save' }
                 >
-                    { isDirty ? __( 'Save', 'fundkit-fundraising-campaigns' ) : __( 'Saved', 'fundkit-fundraising-campaigns' ) }
+                    { isDirty ? __( 'Save', 'fundraising-toolkit' ) : __( 'Saved', 'fundraising-toolkit' ) }
                 </Button>
                 { isPublished ? (
                     <Button
@@ -897,7 +897,7 @@ function EditorHeader( {
                         disabled={ saving }
                         isBusy={ saving && savingAction === 'unpublish' }
                     >
-                        { __( 'Unpublish', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Unpublish', 'fundraising-toolkit' ) }
                     </Button>
                 ) : (
                     <Button
@@ -908,12 +908,12 @@ function EditorHeader( {
                         label={ publishDisabledReason || undefined }
                         showTooltip={ !! publishDisabledReason }
                     >
-                        { __( 'Publish', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Publish', 'fundraising-toolkit' ) }
                     </Button>
                 ) }
                 <Button
                     icon={ PanelRightIcon }
-                    label={ __( 'Toggle side panel', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Toggle side panel', 'fundraising-toolkit' ) }
                     onClick={ onToggleSidebar }
                     isPressed={ sidebarOpen }
                     showTooltip
@@ -924,9 +924,9 @@ function EditorHeader( {
 }
 
 const DEVICES = [
-    { id: 'desktop', label: __( 'Desktop', 'fundkit-fundraising-campaigns' ), icon: DesktopIcon, width: '100%'  },
-    { id: 'tablet',  label: __( 'Tablet', 'fundkit-fundraising-campaigns' ),  icon: TabletIcon,  width: '768px' },
-    { id: 'phone',   label: __( 'Phone', 'fundkit-fundraising-campaigns' ),   icon: MobileIcon,  width: '390px' },
+    { id: 'desktop', label: __( 'Desktop', 'fundraising-toolkit' ), icon: DesktopIcon, width: '100%'  },
+    { id: 'tablet',  label: __( 'Tablet', 'fundraising-toolkit' ),  icon: TabletIcon,  width: '768px' },
+    { id: 'phone',   label: __( 'Phone', 'fundraising-toolkit' ),   icon: MobileIcon,  width: '390px' },
 ];
 
 function PreviewPane( { loading, html, device, onDeviceChange } ) {
@@ -959,7 +959,7 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
                     >
                         <iframe
                             className="fundkit-form-editor__preview-frame"
-                            title={ __( 'Form preview', 'fundkit-fundraising-campaigns' ) }
+                            title={ __( 'Form preview', 'fundraising-toolkit' ) }
                             // allow-scripts without allow-same-origin: the preview
                             // needs to run the form's own JS, but a srcdoc frame
                             // otherwise inherits this admin origin, so anything
@@ -1002,7 +1002,7 @@ function FormSidebar( { hasSelection } ) {
     return (
         <div className="fundkit-form-sidebar">
             <div className="fundkit-form-sidebar__header">
-                <h2 className="fundkit-form-sidebar__title">{ __( 'Block', 'fundkit-fundraising-campaigns' ) }</h2>
+                <h2 className="fundkit-form-sidebar__title">{ __( 'Block', 'fundraising-toolkit' ) }</h2>
             </div>
             <div className="fundkit-form-sidebar__body">
                 { hasSelection ? (
@@ -1010,8 +1010,8 @@ function FormSidebar( { hasSelection } ) {
                 ) : (
                     <SidebarIntro
                         iconName="edit"
-                        title={ __( 'Block settings', 'fundkit-fundraising-campaigns' ) }
-                        description={ __( 'Select a block on the canvas to see its settings here. Form-wide settings live in the Settings tab.', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'Block settings', 'fundraising-toolkit' ) }
+                        description={ __( 'Select a block on the canvas to see its settings here. Form-wide settings live in the Settings tab.', 'fundraising-toolkit' ) }
                     />
                 ) }
             </div>
@@ -1039,7 +1039,7 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
             data:   { blocks: serialize( blocks ) },
         } )
             .then( ( res ) => { if ( ! cancelled ) setServerChecks( res.checks || [] ); } )
-            .catch( ( err ) => { if ( ! cancelled ) setError( err?.message || __( 'Could not load readiness checks.', 'fundkit-fundraising-campaigns' ) ); } );
+            .catch( ( err ) => { if ( ! cancelled ) setError( err?.message || __( 'Could not load readiness checks.', 'fundraising-toolkit' ) ); } );
         return () => { cancelled = true; };
     }, [ formId, blocks ] );
 
@@ -1051,16 +1051,16 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
                 status: 'fail',
                 label:  sprintf(
                     /* translators: %s: comma-separated list of missing block labels. */
-                    __( 'Missing required fields: %s', 'fundkit-fundraising-campaigns' ),
+                    __( 'Missing required fields: %s', 'fundraising-toolkit' ),
                     missingRequired.map( ( r ) => r.label ).join( ', ' )
                 ),
-                detail: __( 'Donors need these to complete a donation.', 'fundkit-fundraising-campaigns' ),
+                detail: __( 'Donors need these to complete a donation.', 'fundraising-toolkit' ),
             } );
         } else {
             out.push( {
                 id:     'required-blocks',
                 status: 'pass',
-                label:  __( 'Required fields present', 'fundkit-fundraising-campaigns' ),
+                label:  __( 'Required fields present', 'fundraising-toolkit' ),
             } );
         }
         return out;
@@ -1095,23 +1095,23 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
     const serverFail = useMemo( () => ( serverChecks || [] ).filter( ( c ) => c.status === 'fail' ).length, [ serverChecks ] );
 
     const summaryText = ( () => {
-        if ( ! serverChecks && ! error ) return __( 'Running checks…', 'fundkit-fundraising-campaigns' );
+        if ( ! serverChecks && ! error ) return __( 'Running checks…', 'fundraising-toolkit' );
         if ( blockFail > 0 ) return sprintf(
             /* translators: %d: number of failing required-field checks that block publishing. */
-            _n( '%d issue blocks publishing', '%d issues block publishing', blockFail, 'fundkit-fundraising-campaigns' ),
+            _n( '%d issue blocks publishing', '%d issues block publishing', blockFail, 'fundraising-toolkit' ),
             blockFail
         );
         if ( serverFail > 0 ) return sprintf(
             /* translators: %d: number of readiness issues to fix before the form can take donations. */
-            _n( '%d issue to fix before donors can give', '%d issues to fix before donors can give', serverFail, 'fundkit-fundraising-campaigns' ),
+            _n( '%d issue to fix before donors can give', '%d issues to fix before donors can give', serverFail, 'fundraising-toolkit' ),
             serverFail
         );
         if ( counts.warn > 0 ) return sprintf(
             /* translators: %d: number of warning readiness checks. */
-            _n( '%d thing to review', '%d things to review', counts.warn, 'fundkit-fundraising-campaigns' ),
+            _n( '%d thing to review', '%d things to review', counts.warn, 'fundraising-toolkit' ),
             counts.warn
         );
-        return __( 'Form is ready to publish', 'fundkit-fundraising-campaigns' );
+        return __( 'Form is ready to publish', 'fundraising-toolkit' );
     } )();
 
     const summaryStatus = counts.fail > 0 ? 'fail' : counts.warn > 0 ? 'warn' : 'pass';
@@ -1119,7 +1119,7 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
     return (
         <div className="fundkit-form-sidebar">
             <div className="fundkit-form-sidebar__header">
-                <h2 className="fundkit-form-sidebar__title">{ __( 'Pre-launch checks', 'fundkit-fundraising-campaigns' ) }</h2>
+                <h2 className="fundkit-form-sidebar__title">{ __( 'Pre-launch checks', 'fundraising-toolkit' ) }</h2>
                 <p className={ `fundkit-readiness__summary is-${ summaryStatus }` }>
                     <ReadinessStatusIcon status={ summaryStatus } />
                     <span>{ summaryText }</span>
@@ -1137,7 +1137,7 @@ function PreviewSidebar( { formId, blocks, missingRequired } ) {
                     </ul>
                 ) : ( serverChecks && ! error && (
                     <p className="fundkit-readiness__empty">
-                        { __( 'Everything looks good. This form is safe to publish.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Everything looks good. This form is safe to publish.', 'fundraising-toolkit' ) }
                     </p>
                 ) ) }
             </div>
@@ -1190,11 +1190,11 @@ function SidebarIntro( { iconName, title, description } ) {
 }
 
 const SETTINGS_TABS = [
-    { id: 'general',   label: __( 'General', 'fundkit-fundraising-campaigns' ) },
-    { id: 'goal',      label: __( 'Goal', 'fundkit-fundraising-campaigns' ) },
-    { id: 'gateways',  label: __( 'Gateways', 'fundkit-fundraising-campaigns' ) },
-    { id: 'after',     label: __( 'After donation', 'fundkit-fundraising-campaigns' ) },
-    { id: 'embed',     label: __( 'Embed', 'fundkit-fundraising-campaigns' ) },
+    { id: 'general',   label: __( 'General', 'fundraising-toolkit' ) },
+    { id: 'goal',      label: __( 'Goal', 'fundraising-toolkit' ) },
+    { id: 'gateways',  label: __( 'Gateways', 'fundraising-toolkit' ) },
+    { id: 'after',     label: __( 'After donation', 'fundraising-toolkit' ) },
+    { id: 'embed',     label: __( 'Embed', 'fundraising-toolkit' ) },
 ];
 
 function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
@@ -1210,7 +1210,7 @@ function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
 
     return (
         <div className="fundkit-form-settings">
-            <div className="fundkit-form-settings__nav" role="tablist" aria-label={ __( 'Settings sections', 'fundkit-fundraising-campaigns' ) }>
+            <div className="fundkit-form-settings__nav" role="tablist" aria-label={ __( 'Settings sections', 'fundraising-toolkit' ) }>
                 { SETTINGS_TABS.map( ( t ) => (
                     <button
                         key={ t.id }
@@ -1248,7 +1248,7 @@ function SettingsRow( { title, description, children } ) {
 }
 
 function fundSelectOptions( funds ) {
-    const out = [ { value: '0', label: __( '(Use campaign or org default)', 'fundkit-fundraising-campaigns' ) } ];
+    const out = [ { value: '0', label: __( '(Use campaign or org default)', 'fundraising-toolkit' ) } ];
     for ( const f of Array.isArray( funds ) ? funds : [] ) {
         if ( ! f.selectable ) {
             out.push( { value: `g:${ f.id }`, label: f.label, disabled: true } );
@@ -1266,27 +1266,27 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
     return (
         <>
             <SettingsRow
-                title={ __( 'Identity', 'fundkit-fundraising-campaigns' ) }
-                description={ __( 'The form name and the slug used in the URL and shortcode.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Identity', 'fundraising-toolkit' ) }
+                description={ __( 'The form name and the slug used in the URL and shortcode.', 'fundraising-toolkit' ) }
             >
                 <TextControl
-                    label={ __( 'Title', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Title', 'fundraising-toolkit' ) }
                     value={ c.value( 'title' ) }
                     onChange={ c.setValue( 'title' ) }
                     __nextHasNoMarginBottom
                 />
                 <TextControl
-                    label={ __( 'Slug', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Slug', 'fundraising-toolkit' ) }
                     value={ c.value( 'slug' ) }
                     onChange={ c.setValue( 'slug' ) }
-                    help={ __( 'Used in the shortcode and the form URL.', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Used in the shortcode and the form URL.', 'fundraising-toolkit' ) }
                     __nextHasNoMarginBottom
                 />
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Status', 'fundkit-fundraising-campaigns' ) }
-                description={ __( 'Use the Publish button in the header to go live. Archived forms stay in the system but stop accepting donations.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Status', 'fundraising-toolkit' ) }
+                description={ __( 'Use the Publish button in the header to go live. Archived forms stay in the system but stop accepting donations.', 'fundraising-toolkit' ) }
             >
                 <SelectControl
                     value={ c.value( 'status', 'draft' ) }
@@ -1311,8 +1311,8 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Campaign', 'fundkit-fundraising-campaigns' ) }
-                description={ __( 'Every form lives under a campaign. Move this form to a different one here.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Campaign', 'fundraising-toolkit' ) }
+                description={ __( 'Every form lives under a campaign. Move this form to a different one here.', 'fundraising-toolkit' ) }
             >
                 <SelectControl
                     value={ String( c.value( 'campaign_id', 0 ) || 0 ) }
@@ -1330,7 +1330,7 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                             opts.unshift( {
                                 value: current,
                                 label: c.value( 'campaign', null )?.title
-                                    || __( 'Current campaign', 'fundkit-fundraising-campaigns' ),
+                                    || __( 'Current campaign', 'fundraising-toolkit' ),
                             } );
                         }
                         return opts;
@@ -1344,24 +1344,24 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Default fund', 'fundkit-fundraising-campaigns' ) }
-                description={ __( 'Where donations land when this form has no fund picker, or the donor does not choose one.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Default fund', 'fundraising-toolkit' ) }
+                description={ __( 'Where donations land when this form has no fund picker, or the donor does not choose one.', 'fundraising-toolkit' ) }
             >
                 <SelectControl
                     value={ String( c.value( 'default_fund_id', 0 ) || 0 ) }
                     options={ fundSelectOptions( funds ) }
                     onChange={ ( v ) => c.edit( { default_fund_id: Number( v ) || null } ) }
-                    help={ __( 'Leave on the default to fall back to the campaign fund, then the organization default.', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Leave on the default to fall back to the campaign fund, then the organization default.', 'fundraising-toolkit' ) }
                     __nextHasNoMarginBottom
                 />
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Layout & style', 'fundkit-fundraising-campaigns' ) }
-                description={ __( 'How the form is presented: its layout, style preset, width, and whether it sits in a card.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Layout & style', 'fundraising-toolkit' ) }
+                description={ __( 'How the form is presented: its layout, style preset, width, and whether it sits in a card.', 'fundraising-toolkit' ) }
             >
                 <SelectControl
-                    label={ __( 'Layout', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Layout', 'fundraising-toolkit' ) }
                     value={ settings.layout }
                     options={ LAYOUT_OPTIONS }
                     onChange={ ( v ) => setSettings( { layout: v } ) }
@@ -1372,7 +1372,7 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                     onChange={ ( v ) => setSettings( { style: { ...settings.style, preset_id: v } } ) }
                 />
                 <Slider
-                    label={ __( 'Maximum width', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Maximum width', 'fundraising-toolkit' ) }
                     value={ settings.container?.width ?? 540 }
                     onChange={ ( v ) => setSettings( { container: { ...settings.container, width: v } } ) }
                     min={ 320 }
@@ -1380,14 +1380,14 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                     unit="px"
                 />
                 <Segmented
-                    label={ __( 'Container', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Container', 'fundraising-toolkit' ) }
                     value={ settings.container?.style ?? 'plain' }
                     onChange={ ( v ) => setSettings( { container: { ...settings.container, style: v } } ) }
                     options={ [
-                        { value: 'frame', label: __( 'Frame', 'fundkit-fundraising-campaigns' ) },
-                        { value: 'plain', label: __( 'Plain', 'fundkit-fundraising-campaigns' ) },
+                        { value: 'frame', label: __( 'Frame', 'fundraising-toolkit' ) },
+                        { value: 'plain', label: __( 'Plain', 'fundraising-toolkit' ) },
                     ] }
-                    help={ __( '"Frame" wraps the form in a card with a shadow; "Plain" renders it flush with the page.', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( '"Frame" wraps the form in a card with a shadow; "Plain" renders it flush with the page.', 'fundraising-toolkit' ) }
                 />
             </SettingsRow>
         </>
@@ -1395,17 +1395,17 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
 }
 
 const GOAL_TYPE_OPTIONS = [
-    { value: 'none',      label: __( 'No goal', 'fundkit-fundraising-campaigns' ) },
-    { value: 'amount',    label: __( 'Amount', 'fundkit-fundraising-campaigns' ) },
-    { value: 'donations', label: __( 'Donations', 'fundkit-fundraising-campaigns' ) },
-    { value: 'donors',    label: __( 'Donors', 'fundkit-fundraising-campaigns' ) },
+    { value: 'none',      label: __( 'No goal', 'fundraising-toolkit' ) },
+    { value: 'amount',    label: __( 'Amount', 'fundraising-toolkit' ) },
+    { value: 'donations', label: __( 'Donations', 'fundraising-toolkit' ) },
+    { value: 'donors',    label: __( 'Donors', 'fundraising-toolkit' ) },
 ];
 
 const GOAL_TYPE_DESC = {
-    none:      __( 'No progress bar or target on this form.', 'fundkit-fundraising-campaigns' ),
-    amount:    __( 'Track progress toward a fundraising total.', 'fundkit-fundraising-campaigns' ),
-    donations: __( 'Track the number of completed donations to this form.', 'fundkit-fundraising-campaigns' ),
-    donors:    __( 'Track the number of unique donors who give through this form.', 'fundkit-fundraising-campaigns' ),
+    none:      __( 'No progress bar or target on this form.', 'fundraising-toolkit' ),
+    amount:    __( 'Track progress toward a fundraising total.', 'fundraising-toolkit' ),
+    donations: __( 'Track the number of completed donations to this form.', 'fundraising-toolkit' ),
+    donors:    __( 'Track the number of unique donors who give through this form.', 'fundraising-toolkit' ),
 };
 
 function GoalSection( { settings, setSettings } ) {
@@ -1413,11 +1413,11 @@ function GoalSection( { settings, setSettings } ) {
 
     return (
         <SettingsRow
-            title={ __( 'Form goal', 'fundkit-fundraising-campaigns' ) }
-            description={ __( 'An optional goal tracked for this form alone. The Goal block can show this or the parent campaign goal.', 'fundkit-fundraising-campaigns' ) }
+            title={ __( 'Form goal', 'fundraising-toolkit' ) }
+            description={ __( 'An optional goal tracked for this form alone. The Goal block can show this or the parent campaign goal.', 'fundraising-toolkit' ) }
         >
             <SelectControl
-                label={ __( 'Goal type', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Goal type', 'fundraising-toolkit' ) }
                 value={ goal.type }
                 options={ GOAL_TYPE_OPTIONS }
                 onChange={ ( type ) => setSettings( { goal: { type, amount_cents: 0, count: 0 } } ) }
@@ -1427,8 +1427,8 @@ function GoalSection( { settings, setSettings } ) {
             { goal.type === 'amount' && (
                 <BaseControl
                     id="fundkit-form-goal-amount"
-                    label={ __( 'Target amount', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'In the currency this form uses.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Target amount', 'fundraising-toolkit' ) }
+                    help={ __( 'In the currency this form uses.', 'fundraising-toolkit' ) }
                     __nextHasNoMarginBottom
                 >
                     <AmountInput
@@ -1448,7 +1448,7 @@ function GoalSection( { settings, setSettings } ) {
             ) }
             { ( goal.type === 'donations' || goal.type === 'donors' ) && (
                 <TextControl
-                    label={ __( 'Target count', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Target count', 'fundraising-toolkit' ) }
                     type="number"
                     min={ 0 }
                     step="1"
@@ -1470,7 +1470,7 @@ function gatewayLabel( g ) {
     if ( g.enabled !== false ) return g.label;
 
     /* translators: %s: payment gateway name. */
-    return sprintf( __( '%s (off in Settings)', 'fundkit-fundraising-campaigns' ), g.label );
+    return sprintf( __( '%s (off in Settings)', 'fundraising-toolkit' ), g.label );
 }
 
 function GatewaysSection( { gateways, settings, setSettings } ) {
@@ -1501,8 +1501,8 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
     };
     return (
         <SettingsRow
-            title={ __( 'Allowed gateways', 'fundkit-fundraising-campaigns' ) }
-            description={ __( 'Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings.', 'fundkit-fundraising-campaigns' ) }
+            title={ __( 'Allowed gateways', 'fundraising-toolkit' ) }
+            description={ __( 'Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings.', 'fundraising-toolkit' ) }
         >
             <div className="fundkit-sidebar-list">
                 { gateways.map( ( g ) => (
@@ -1522,7 +1522,7 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
                     checked={ !! settings.test_mode }
                     onChange={ () => setSettings( { test_mode: ! settings.test_mode } ) }
                 />
-                <span>{ __( 'Test mode (no real payment, excluded from reporting)', 'fundkit-fundraising-campaigns' ) }</span>
+                <span>{ __( 'Test mode (no real payment, excluded from reporting)', 'fundraising-toolkit' ) }</span>
             </label>
         </SettingsRow>
     );
@@ -1532,8 +1532,8 @@ function AfterSection( { settings, setSettings } ) {
     return (
         <>
             <SettingsRow
-                title={ __( 'Thank-you message', 'fundkit-fundraising-campaigns' ) }
-                description={ __( 'Shown to the donor after a successful donation, unless a redirect URL is set.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Thank-you message', 'fundraising-toolkit' ) }
+                description={ __( 'Shown to the donor after a successful donation, unless a redirect URL is set.', 'fundraising-toolkit' ) }
             >
                 <TextareaControl
                     value={ settings.thank_you_message }
@@ -1543,8 +1543,8 @@ function AfterSection( { settings, setSettings } ) {
                 />
             </SettingsRow>
             <SettingsRow
-                title={ __( 'Redirect URL', 'fundkit-fundraising-campaigns' ) }
-                description={ __( 'If set, donors are sent here instead of seeing the thank-you message.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Redirect URL', 'fundraising-toolkit' ) }
+                description={ __( 'If set, donors are sent here instead of seeing the thank-you message.', 'fundraising-toolkit' ) }
             >
                 <TextControl
                     type="url"
@@ -1553,7 +1553,7 @@ function AfterSection( { settings, setSettings } ) {
                     placeholder="https://"
                     help={
                         settings.redirect_url && ! /^https?:\/\//i.test( settings.redirect_url.trim() )
-                            ? __( 'Use a full URL starting with http:// or https://', 'fundkit-fundraising-campaigns' )
+                            ? __( 'Use a full URL starting with http:// or https://', 'fundraising-toolkit' )
                             : undefined
                     }
                     __nextHasNoMarginBottom
@@ -1567,8 +1567,8 @@ function EmbedSection( { slug } ) {
     const shortcode = `[fundkit_donation_form slug="${ slug }"]`;
     return (
         <SettingsRow
-            title={ __( 'Embed', 'fundkit-fundraising-campaigns' ) }
-            description={ __( 'Paste this shortcode into any post or page to render the form.', 'fundkit-fundraising-campaigns' ) }
+            title={ __( 'Embed', 'fundraising-toolkit' ) }
+            description={ __( 'Paste this shortcode into any post or page to render the form.', 'fundraising-toolkit' ) }
         >
             <ShortcodeField value={ shortcode } />
         </SettingsRow>
@@ -1581,18 +1581,18 @@ function StylePresetField( { value, onChange } ) {
     const defaultName = presets.find( ( p ) => p.id === defaultId )?.name || defaultId;
     return (
         <SelectControl
-            label={ __( 'Style preset', 'fundkit-fundraising-campaigns' ) }
+            label={ __( 'Style preset', 'fundraising-toolkit' ) }
             value={ value }
             options={ [
                 {
                     value: '',
-                    label: __( 'Inherit (campaign or org default)', 'fundkit-fundraising-campaigns' ) +
+                    label: __( 'Inherit (campaign or org default)', 'fundraising-toolkit' ) +
                         ( defaultName ? ` (${ defaultName })` : '' ),
                 },
                 ...presets.map( ( p ) => ( { value: p.id, label: p.name } ) ),
             ] }
             onChange={ onChange }
-            help={ __( 'Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign\'s choice.', 'fundkit-fundraising-campaigns' ) }
+            help={ __( 'Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign\'s choice.', 'fundraising-toolkit' ) }
             __nextHasNoMarginBottom
             __next40pxDefaultSize
         />
@@ -1625,7 +1625,7 @@ function ShortcodeField( { value } ) {
                 onClick={ onCopy }
                 className="fundkit-shortcode__copy"
             >
-                { copied ? __( 'Copied', 'fundkit-fundraising-campaigns' ) : __( 'Copy', 'fundkit-fundraising-campaigns' ) }
+                { copied ? __( 'Copied', 'fundraising-toolkit' ) : __( 'Copy', 'fundraising-toolkit' ) }
             </Button>
         </div>
     );

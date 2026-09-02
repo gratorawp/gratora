@@ -25,11 +25,11 @@ const ALLOWED = [ 'fundkit/heading', 'fundkit/paragraph', 'fundkit/section' ];
 const BORDER_STYLES = [ 'none', 'solid', 'dashed', 'dotted' ];
 
 const SHADOW_PRESETS = [
-    { value: '',                                                                       label: __( 'None',       'fundkit-fundraising-campaigns' ) },
-    { value: '0 1px 2px rgba(15,23,42,.06)',                                           label: __( 'Subtle',     'fundkit-fundraising-campaigns' ) },
-    { value: '0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04)',             label: __( 'Soft',       'fundkit-fundraising-campaigns' ) },
-    { value: '0 4px 14px rgba(15,23,42,.10)',                                          label: __( 'Medium',     'fundkit-fundraising-campaigns' ) },
-    { value: '0 12px 32px rgba(15,23,42,.14)',                                         label: __( 'Pronounced', 'fundkit-fundraising-campaigns' ) },
+    { value: '',                                                                       label: __( 'None',       'fundraising-toolkit' ) },
+    { value: '0 1px 2px rgba(15,23,42,.06)',                                           label: __( 'Subtle',     'fundraising-toolkit' ) },
+    { value: '0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04)',             label: __( 'Soft',       'fundraising-toolkit' ) },
+    { value: '0 4px 14px rgba(15,23,42,.10)',                                          label: __( 'Medium',     'fundraising-toolkit' ) },
+    { value: '0 12px 32px rgba(15,23,42,.14)',                                         label: __( 'Pronounced', 'fundraising-toolkit' ) },
 ];
 
 /**
@@ -88,38 +88,38 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Section', 'fundkit-fundraising-campaigns' ) } initialOpen>
-                    <Field label={ __( 'Background color', 'fundkit-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Section', 'fundraising-toolkit' ) } initialOpen>
+                    <Field label={ __( 'Background color', 'fundraising-toolkit' ) }>
                         <ColorInput value={ background } onChange={ ( v ) => setAttributes( { background: v } ) } />
                     </Field>
 
-                    <Field label={ __( 'Text color', 'fundkit-fundraising-campaigns' ) }>
+                    <Field label={ __( 'Text color', 'fundraising-toolkit' ) }>
                         <ColorInput value={ textColor } onChange={ ( v ) => setAttributes( { textColor: v } ) } />
                     </Field>
 
-                    <Field label={ __( 'Border color', 'fundkit-fundraising-campaigns' ) }>
+                    <Field label={ __( 'Border color', 'fundraising-toolkit' ) }>
                         <ColorInput value={ border.color } onChange={ ( v ) => setBorder( { color: v } ) } />
                     </Field>
                     <Slider
-                        label={ __( 'Border width', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Border width', 'fundraising-toolkit' ) }
                         value={ border.width || 0 }
                         onChange={ ( v ) => setBorder( { width: v } ) }
                         min={ 0 } max={ 20 } unit="px"
                     />
                     <Segmented
-                        label={ __( 'Border style', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Border style', 'fundraising-toolkit' ) }
                         value={ border.style || 'solid' }
                         onChange={ ( v ) => setBorder( { style: v } ) }
                         options={ BORDER_STYLES }
                     />
                     <Slider
-                        label={ __( 'Border radius', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Border radius', 'fundraising-toolkit' ) }
                         value={ border.radius || 0 }
                         onChange={ ( v ) => setBorder( { radius: v } ) }
                         min={ 0 } max={ 60 } unit="px"
                     />
 
-                    <Field label={ __( 'Shadow', 'fundkit-fundraising-campaigns' ) }>
+                    <Field label={ __( 'Shadow', 'fundraising-toolkit' ) }>
                         <div className="fundkit-shadow-grid">
                             { SHADOW_PRESETS.map( ( p ) => {
                                 const isOn = ! showCustomShadow && shadow === p.value;
@@ -138,7 +138,7 @@ function Edit( { attributes, setAttributes } ) {
                                     >
                                         { p.value === '' ? (
                                             <span className="fundkit-shadow-grid__tile__none">
-                                                { __( 'None', 'fundkit-fundraising-campaigns' ) }
+                                                { __( 'None', 'fundraising-toolkit' ) }
                                             </span>
                                         ) : (
                                             <span
@@ -158,11 +158,11 @@ function Edit( { attributes, setAttributes } ) {
                                 checked={ showCustomShadow }
                                 onChange={ ( e ) => setShowCustomShadow( e.target.checked ) }
                             />
-                            <span>{ __( 'Use custom shadow value', 'fundkit-fundraising-campaigns' ) }</span>
+                            <span>{ __( 'Use custom shadow value', 'fundraising-toolkit' ) }</span>
                         </label>
                     </Field>
                     { showCustomShadow && (
-                        <Field label={ __( 'Custom shadow CSS', 'fundkit-fundraising-campaigns' ) } help={ __( 'Any valid box-shadow value.', 'fundkit-fundraising-campaigns' ) }>
+                        <Field label={ __( 'Custom shadow CSS', 'fundraising-toolkit' ) } help={ __( 'Any valid box-shadow value.', 'fundraising-toolkit' ) }>
                             <input
                                 type="text"
                                 className="fundkit-input"
@@ -174,7 +174,7 @@ function Edit( { attributes, setAttributes } ) {
                     ) }
 
                     <BoxControl
-                        title={ __( 'Padding', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'Padding', 'fundraising-toolkit' ) }
                         value={ padding }
                         onChange={ ( next ) => setAttributes( { padding: { ...padding, ...next } } ) }
                         sides="four"
@@ -182,7 +182,7 @@ function Edit( { attributes, setAttributes } ) {
                         linkable
                     />
                     <BoxControl
-                        title={ __( 'Margin', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'Margin', 'fundraising-toolkit' ) }
                         value={ margin }
                         onChange={ ( next ) => setAttributes( { margin: { ...margin, ...next } } ) }
                         sides="four"
@@ -190,7 +190,7 @@ function Edit( { attributes, setAttributes } ) {
                         linkable
                     />
                     <Slider
-                        label={ __( 'Minimum height', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Minimum height', 'fundraising-toolkit' ) }
                         value={ minHeight || 0 }
                         onChange={ ( v ) => setAttributes( { minHeight: v } ) }
                         min={ 0 } max={ 800 } unit="px"
@@ -214,8 +214,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Section', 'fundkit-fundraising-campaigns' ),
-        description: __( 'A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs.', 'fundkit-fundraising-campaigns' ),
+        title:       __( 'Section', 'fundraising-toolkit' ),
+        description: __( 'A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs.', 'fundraising-toolkit' ),
         category:    'fundkit-content',
         icon:        BlockIcons[ 'section' ],
         supports:    { html: false, anchor: false, inserter: true },

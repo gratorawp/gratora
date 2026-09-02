@@ -59,7 +59,7 @@ final class FormSubmissionValidator
         $freq = (string) ($body['frequency'] ?? 'one_time');
         if ($freq === '') $freq = 'one_time';
         if (! in_array($freq, $offered, true)) {
-            return $this->reject(__('That donation frequency is not available for this form.', 'fundkit-fundraising-campaigns'));
+            return $this->reject(__('That donation frequency is not available for this form.', 'fundraising-toolkit'));
         }
 
         return null;
@@ -165,10 +165,10 @@ final class FormSubmissionValidator
                 // requireFirst/requireLast default true (NameBlock); the editor
                 // omits an attr equal to its default, so absent means required.
                 if ((bool) ($attrs['requireFirst'] ?? true) && ! $this->filled($profile['first_name'] ?? null)) {
-                    return $this->requiredError(__('First name', 'fundkit-fundraising-campaigns'));
+                    return $this->requiredError(__('First name', 'fundraising-toolkit'));
                 }
                 if ((bool) ($attrs['requireLast'] ?? true) && ! $this->filled($profile['last_name'] ?? null)) {
-                    return $this->requiredError(__('Last name', 'fundkit-fundraising-campaigns'));
+                    return $this->requiredError(__('Last name', 'fundraising-toolkit'));
                 }
                 break;
 
@@ -178,33 +178,33 @@ final class FormSubmissionValidator
                 if (TermsBlock::isConfigured($attrs)) {
                     $consents = is_array($body['consents'] ?? null) ? $body['consents'] : [];
                     if (empty($consents[TermsBlock::PURPOSE])) {
-                        return $this->reject(__('Please agree to the terms to continue.', 'fundkit-fundraising-campaigns'));
+                        return $this->reject(__('Please agree to the terms to continue.', 'fundraising-toolkit'));
                     }
                 }
                 break;
 
             case 'fundkit/phone':
                 if (! empty($attrs['required']) && ! $this->filled($profile['phone'] ?? null)) {
-                    return $this->requiredError($this->label($attrs, __('Phone', 'fundkit-fundraising-campaigns')));
+                    return $this->requiredError($this->label($attrs, __('Phone', 'fundraising-toolkit')));
                 }
                 break;
 
             case 'fundkit/country':
                 if (! empty($attrs['required']) && ! $this->filled($profile['country'] ?? null)) {
-                    return $this->requiredError($this->label($attrs, __('Country', 'fundkit-fundraising-campaigns')));
+                    return $this->requiredError($this->label($attrs, __('Country', 'fundraising-toolkit')));
                 }
                 break;
 
             case 'fundkit/comment':
                 $note = (string) ($body['note_to_org'] ?? '');
                 if (! empty($attrs['required']) && ! $this->filled($note)) {
-                    return $this->requiredError($this->label($attrs, __('Comment', 'fundkit-fundraising-campaigns')));
+                    return $this->requiredError($this->label($attrs, __('Comment', 'fundraising-toolkit')));
                 }
                 // Cap length server-side: the note can surface publicly, and the
                 // client's maxlength is bypassable by a crafted POST.
                 $noteMax = (int) ($attrs['maxLength'] ?? 5000);
                 if ($noteMax > 0 && mb_strlen($note) > $noteMax) {
-                    return $this->reject(__('Your message is too long.', 'fundkit-fundraising-campaigns'));
+                    return $this->reject(__('Your message is too long.', 'fundraising-toolkit'));
                 }
                 break;
 
@@ -229,7 +229,7 @@ final class FormSubmissionValidator
                     if ($bar !== null && $net < $bar) {
                         return $this->reject(sprintf(
                             /* translators: %s: minimum donation amount, formatted. */
-                            __('The smallest donation this form accepts is %s.', 'fundkit-fundraising-campaigns'),
+                            __('The smallest donation this form accepts is %s.', 'fundraising-toolkit'),
                             Money::format($bar, $paying)
                         ));
                     }
@@ -273,7 +273,7 @@ final class FormSubmissionValidator
                         && $submittedCurrency !== $presetCurrency;
 
                     if (! $convertedByDonor && ! in_array($net, $allowedCents, true)) {
-                        return $this->reject(__('Choose one of the listed donation amounts.', 'fundkit-fundraising-campaigns'));
+                        return $this->reject(__('Choose one of the listed donation amounts.', 'fundraising-toolkit'));
                     }
                 }
                 break;
@@ -286,18 +286,18 @@ final class FormSubmissionValidator
                 $allowedFunds = array_values(array_filter(array_map('intval', (array) ($attrs['fundIds'] ?? []))));
                 $chosenFund   = (int) ($body['fund_id'] ?? 0);
                 if ($allowedFunds !== [] && $chosenFund !== 0 && ! in_array($chosenFund, $allowedFunds, true)) {
-                    return $this->reject(__('That fund is not available for this form.', 'fundkit-fundraising-campaigns'));
+                    return $this->reject(__('That fund is not available for this form.', 'fundraising-toolkit'));
                 }
                 break;
 
             case 'fundkit/address':
                 $addr = is_array($profile['address'] ?? null) ? $profile['address'] : [];
                 $sub  = [
-                    'line1'   => ['showLine1',   'requireLine1',   true,  __('Address', 'fundkit-fundraising-campaigns')],
-                    'city'    => ['showCity',    'requireCity',    true,  __('City', 'fundkit-fundraising-campaigns')],
-                    'region'  => ['showRegion',  'requireRegion',  false, __('Region', 'fundkit-fundraising-campaigns')],
-                    'postal'  => ['showPostal',  'requirePostal',  true,  __('Postal code', 'fundkit-fundraising-campaigns')],
-                    'country' => ['showCountry', 'requireCountry', true,  __('Country', 'fundkit-fundraising-campaigns')],
+                    'line1'   => ['showLine1',   'requireLine1',   true,  __('Address', 'fundraising-toolkit')],
+                    'city'    => ['showCity',    'requireCity',    true,  __('City', 'fundraising-toolkit')],
+                    'region'  => ['showRegion',  'requireRegion',  false, __('Region', 'fundraising-toolkit')],
+                    'postal'  => ['showPostal',  'requirePostal',  true,  __('Postal code', 'fundraising-toolkit')],
+                    'country' => ['showCountry', 'requireCountry', true,  __('Country', 'fundraising-toolkit')],
                 ];
                 foreach ($sub as $key => [$showAttr, $reqAttr, $reqDefault, $sLabel]) {
                     $shown    = (bool) ($attrs[$showAttr] ?? true);
@@ -317,11 +317,11 @@ final class FormSubmissionValidator
                 if ($this->filled($val)) {
                     $max = (int) ($attrs['maxLength'] ?? 0);
                     if ($max > 0 && mb_strlen((string) $val) > $max) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is too long.', 'fundkit-fundraising-campaigns'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is too long.', 'fundraising-toolkit'), $this->label($attrs, $key)));
                     }
                     $pattern = (string) ($attrs['pattern'] ?? '');
                     if ($pattern !== '' && ! $this->matchesPattern($pattern, (string) $val)) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is not in the expected format.', 'fundkit-fundraising-campaigns'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is not in the expected format.', 'fundraising-toolkit'), $this->label($attrs, $key)));
                     }
                 }
                 break;
@@ -334,14 +334,14 @@ final class FormSubmissionValidator
                 }
                 if ($this->filled($val)) {
                     if (! is_numeric($val)) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s must be a number.', 'fundkit-fundraising-campaigns'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s must be a number.', 'fundraising-toolkit'), $this->label($attrs, $key)));
                     }
                     $n = (float) $val;
                     if (isset($attrs['min']) && is_numeric($attrs['min']) && $n < (float) $attrs['min']) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is below the minimum.', 'fundkit-fundraising-campaigns'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is below the minimum.', 'fundraising-toolkit'), $this->label($attrs, $key)));
                     }
                     if (isset($attrs['max']) && is_numeric($attrs['max']) && $n > (float) $attrs['max']) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is above the maximum.', 'fundkit-fundraising-campaigns'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is above the maximum.', 'fundraising-toolkit'), $this->label($attrs, $key)));
                     }
                 }
                 break;
@@ -357,7 +357,7 @@ final class FormSubmissionValidator
                     $min = DateBlock::normalizeDate((string) ($attrs['minDate'] ?? ''));
                     $max = DateBlock::normalizeDate((string) ($attrs['maxDate'] ?? ''));
                     if (($min !== '' && $d < $min) || ($max !== '' && $d > $max)) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is outside the allowed range.', 'fundkit-fundraising-campaigns'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is outside the allowed range.', 'fundraising-toolkit'), $this->label($attrs, $key)));
                     }
                 }
                 break;
@@ -373,7 +373,7 @@ final class FormSubmissionValidator
             case 'fundkit/checkbox':
                 $key = $this->customKey($attrs);
                 if (! empty($attrs['required']) && empty($custom[$key])) {
-                    return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('Please check %s.', 'fundkit-fundraising-campaigns'), $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('Please check %s.', 'fundraising-toolkit'), $this->label($attrs, $key)));
                 }
                 break;
 
@@ -387,10 +387,10 @@ final class FormSubmissionValidator
                 $min = max(0, (int) ($attrs['minSelections'] ?? 0));
                 $max = max(0, (int) ($attrs['maxSelections'] ?? 0));
                 if ($count > 0 && $min > 0 && $count < $min) {
-                    return $this->reject(sprintf(/* translators: %1$d: smallest number of options allowed. %2$s: the label of the form field. */ __('Select at least %1$d for %2$s.', 'fundkit-fundraising-campaigns'), $min, $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %1$d: smallest number of options allowed. %2$s: the label of the form field. */ __('Select at least %1$d for %2$s.', 'fundraising-toolkit'), $min, $this->label($attrs, $key)));
                 }
                 if ($max > 0 && $count > $max) {
-                    return $this->reject(sprintf(/* translators: %1$d: largest number of options allowed. %2$s: the label of the form field. */ __('Select at most %1$d for %2$s.', 'fundkit-fundraising-campaigns'), $max, $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %1$d: largest number of options allowed. %2$s: the label of the form field. */ __('Select at most %1$d for %2$s.', 'fundraising-toolkit'), $max, $this->label($attrs, $key)));
                 }
                 break;
 
@@ -407,7 +407,7 @@ final class FormSubmissionValidator
                     if (! empty($p['required']) && empty($consents[$key])) {
                         return $this->reject(sprintf(
                             /* translators: %s: consent purpose label */
-                            __('Please agree to: %s', 'fundkit-fundraising-campaigns'),
+                            __('Please agree to: %s', 'fundraising-toolkit'),
                             (string) ($p['label'] ?? '')
                         ));
                     }
@@ -568,7 +568,7 @@ final class FormSubmissionValidator
     {
         return $this->reject(sprintf(
             /* translators: %s: form field label */
-            __('Please complete the %s field.', 'fundkit-fundraising-campaigns'),
+            __('Please complete the %s field.', 'fundraising-toolkit'),
             $label
         ));
     }

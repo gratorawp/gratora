@@ -153,7 +153,7 @@ final class PayPalKeysController
         if ($clientId === '' || $secret === '') {
             return new WP_Error(
                 'fundkit_paypal_bad_key',
-                __('Enter both the client id and the secret.', 'fundkit-fundraising-campaigns'),
+                __('Enter both the client id and the secret.', 'fundraising-toolkit'),
                 ['status' => 400]
             );
         }
@@ -181,7 +181,7 @@ final class PayPalKeysController
                 'fundkit_paypal_unreachable',
                 sprintf(
                     /* translators: 1: sandbox or live, 2: transport error, e.g. a DNS failure */
-                    __('This site could not reach PayPal, so the %1$s credentials have not been checked or saved: %2$s. That is a problem with this server rather than with the credentials.', 'fundkit-fundraising-campaigns'),
+                    __('This site could not reach PayPal, so the %1$s credentials have not been checked or saved: %2$s. That is a problem with this server rather than with the credentials.', 'fundraising-toolkit'),
                     $this->modeLabel($test),
                     $e->getMessage()
                 ),
@@ -193,7 +193,7 @@ final class PayPalKeysController
                 'fundkit_paypal_key_rejected',
                 sprintf(
                     /* translators: 1: sandbox or live, 2: error from PayPal */
-                    __('PayPal rejected those %1$s credentials: %2$s', 'fundkit-fundraising-campaigns'),
+                    __('PayPal rejected those %1$s credentials: %2$s', 'fundraising-toolkit'),
                     $this->modeLabel($test),
                     $e->getMessage()
                 ),
@@ -238,7 +238,7 @@ final class PayPalKeysController
                 'fundkit_paypal_bad_key',
                 sprintf(
                     /* translators: %s: sandbox or live */
-                    __('Save the %s client id and secret first. A webhook id can only be checked against the app it belongs to.', 'fundkit-fundraising-campaigns'),
+                    __('Save the %s client id and secret first. A webhook id can only be checked against the app it belongs to.', 'fundraising-toolkit'),
                     $this->modeLabel($test)
                 ),
                 ['status' => 400]
@@ -265,7 +265,7 @@ final class PayPalKeysController
             'fundkit_paypal_webhook_unchecked',
             sprintf(
                 /* translators: %s: reason PayPal could not be asked */
-                __('PayPal could not be asked whether that webhook id is right: %s. It has not been saved, because an id PayPal does not know rejects every notification. Try again in a moment.', 'fundkit-fundraising-campaigns'),
+                __('PayPal could not be asked whether that webhook id is right: %s. It has not been saved, because an id PayPal does not know rejects every notification. Try again in a moment.', 'fundraising-toolkit'),
                 $check['message']
             ),
             ['status' => 503]
@@ -389,7 +389,7 @@ final class PayPalKeysController
                     'status'  => self::HOOK_INCOMPLETE,
                     'message' => sprintf(
                         /* translators: %s: comma-separated PayPal event names */
-                        __('That webhook does not send: %s', 'fundkit-fundraising-campaigns'),
+                        __('That webhook does not send: %s', 'fundraising-toolkit'),
                         implode(', ', $missing)
                     ),
                 ];
@@ -428,14 +428,14 @@ final class PayPalKeysController
         $warning = $check['status'] === self::HOOK_MISSING
             ? sprintf(
                 /* translators: 1: the webhook id that was entered, 2: sandbox or live, 3: error from PayPal */
-                __('The credentials are saved, but the webhook id %1$s is not: your %2$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %3$s', 'fundkit-fundraising-campaigns'),
+                __('The credentials are saved, but the webhook id %1$s is not: your %2$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %3$s', 'fundraising-toolkit'),
                 $webhookId,
                 $this->modeLabel($test),
                 $check['message']
             )
             : sprintf(
                 /* translators: 1: the webhook id that was entered, 2: reason PayPal could not be asked */
-                __('The credentials are saved, but the webhook id %1$s is not: PayPal could not be asked whether it is right (%2$s). Add it again once PayPal answers.', 'fundkit-fundraising-campaigns'),
+                __('The credentials are saved, but the webhook id %1$s is not: PayPal could not be asked whether it is right (%2$s). Add it again once PayPal answers.', 'fundraising-toolkit'),
                 $webhookId,
                 $check['message']
             );
@@ -454,7 +454,7 @@ final class PayPalKeysController
             'fundkit_paypal_webhook_rejected',
             sprintf(
                 /* translators: 1: sandbox or live, 2: error from PayPal */
-                __('Your %1$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %2$s', 'fundkit-fundraising-campaigns'),
+                __('Your %1$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %2$s', 'fundraising-toolkit'),
                 $this->modeLabel($test),
                 $reason
             ),
@@ -484,7 +484,7 @@ final class PayPalKeysController
     /** @since 1.0.0 */
     private function modeLabel(bool $test): string
     {
-        return $test ? __('sandbox', 'fundkit-fundraising-campaigns') : __('live', 'fundkit-fundraising-campaigns');
+        return $test ? __('sandbox', 'fundraising-toolkit') : __('live', 'fundraising-toolkit');
     }
 
     /** @since 1.0.0 */

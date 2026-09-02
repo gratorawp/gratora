@@ -85,8 +85,8 @@ final class FormTemplates
     {
         return [
             'id'             => 'blank',
-            'name'           => __('Blank', 'fundkit-fundraising-campaigns'),
-            'description'    => __('Empty form. Build it from scratch.', 'fundkit-fundraising-campaigns'),
+            'name'           => __('Blank', 'fundraising-toolkit'),
+            'description'    => __('Empty form. Build it from scratch.', 'fundraising-toolkit'),
             'icon'           => 'admin-page',
             'category'       => 'Blank',
             'thumbnail_hint' => 'Empty canvas with a single + button.',
@@ -100,16 +100,16 @@ final class FormTemplates
     {
         // Short because that is the entire point. A goal bar, phone number,
         // message box and anonymity toggle all belong on some other template.
-        $blocks = self::block('fundkit/heading', ['text' => __('Chip in', 'fundkit-fundraising-campaigns'), 'level' => 2])
-                . self::block('fundkit/paragraph', ['text' => __('Every bit helps. Takes 20 seconds.', 'fundkit-fundraising-campaigns')])
+        $blocks = self::block('fundkit/heading', ['text' => __('Chip in', 'fundraising-toolkit'), 'level' => 2])
+                . self::block('fundkit/paragraph', ['text' => __('Every bit helps. Takes 20 seconds.', 'fundraising-toolkit')])
                 . self::block('fundkit/donation-amount', [
                     'presets' => self::presets(
                         [10, 25, 50, 100],
                         [
-                            __("A coffee's worth", 'fundkit-fundraising-campaigns'),
-                            __('A round of thanks', 'fundkit-fundraising-campaigns'),
-                            __('A bigger boost', 'fundkit-fundraising-campaigns'),
-                            __('MVP status', 'fundkit-fundraising-campaigns'),
+                            __("A coffee's worth", 'fundraising-toolkit'),
+                            __('A round of thanks', 'fundraising-toolkit'),
+                            __('A bigger boost', 'fundraising-toolkit'),
+                            __('MVP status', 'fundraising-toolkit'),
                         ]
                     ),
                     'allowCustom' => true,
@@ -117,14 +117,14 @@ final class FormTemplates
                 . self::block('fundkit/name', ['requireFirst' => true, 'requireLast' => false])
                 . self::block('fundkit/email', ['required' => true])
                 . self::checkout(
-                    __('Send {amount}', 'fundkit-fundraising-campaigns'),
-                    __("I'll cover the fees so 100% goes to the cause", 'fundkit-fundraising-campaigns')
+                    __('Send {amount}', 'fundraising-toolkit'),
+                    __("I'll cover the fees so 100% goes to the cause", 'fundraising-toolkit')
                 );
 
         return [
             'id'             => 'quick-give',
-            'name'           => __('Quick Give', 'fundkit-fundraising-campaigns'),
-            'description'    => __('Minimal single-page form. Amount, name, email, donate. Perfect first form.', 'fundkit-fundraising-campaigns'),
+            'name'           => __('Quick Give', 'fundraising-toolkit'),
+            'description'    => __('Minimal single-page form. Amount, name, email, donate. Perfect first form.', 'fundraising-toolkit'),
             'icon'           => 'share',
             'category'       => 'Starter',
             'thumbnail_hint' => 'Mobile-shaped card, three purple progress dots, rounded amount pills.',
@@ -134,7 +134,7 @@ final class FormTemplates
                 'recurring'         => ['enabled' => true, 'frequencies' => ['monthly']],
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
-                'thank_you_message' => __("You're amazing. Share to multiply your impact.", 'fundkit-fundraising-campaigns'),
+                'thank_you_message' => __("You're amazing. Share to multiply your impact.", 'fundraising-toolkit'),
             ],
             'blocks'         => $blocks,
         ];
@@ -143,18 +143,18 @@ final class FormTemplates
     /** @since 1.0.0 */
     private static function impactTiers(): array
     {
-        $blocks = self::block('fundkit/heading', ['text' => __('Every tier makes a real difference', 'fundkit-fundraising-campaigns'), 'level' => 1])
-                . self::block('fundkit/paragraph', ['text' => __('Last year, your support reached thousands of people across our community. Your donation moves a family from just getting by to getting ahead.', 'fundkit-fundraising-campaigns')])
+        $blocks = self::block('fundkit/heading', ['text' => __('Every tier makes a real difference', 'fundraising-toolkit'), 'level' => 1])
+                . self::block('fundkit/paragraph', ['text' => __('Last year, your support reached thousands of people across our community. Your donation moves a family from just getting by to getting ahead.', 'fundraising-toolkit')])
                 . self::block('fundkit/donation-amount', [
                     'presets' => self::presets(
                         [25, 50, 100, 250, 500, 1000],
                         [
-                            __('Friend - supports one person', 'fundkit-fundraising-campaigns'),
-                            __('Sustainer - supports a family for a week', 'fundkit-fundraising-campaigns'),
-                            __('Champion - supports a family for a month', 'fundkit-fundraising-campaigns'),
-                            __('Guardian - supports ten households', 'fundkit-fundraising-campaigns'),
-                            __('Patron - supports a community program', 'fundkit-fundraising-campaigns'),
-                            __('Benefactor - supports a person for a season', 'fundkit-fundraising-campaigns'),
+                            __('Friend - supports one person', 'fundraising-toolkit'),
+                            __('Sustainer - supports a family for a week', 'fundraising-toolkit'),
+                            __('Champion - supports a family for a month', 'fundraising-toolkit'),
+                            __('Guardian - supports ten households', 'fundraising-toolkit'),
+                            __('Patron - supports a community program', 'fundraising-toolkit'),
+                            __('Benefactor - supports a person for a season', 'fundraising-toolkit'),
                         ]
                     ),
                     'allowCustom' => true,
@@ -163,27 +163,27 @@ final class FormTemplates
                 . self::block('fundkit/name', ['requireFirst' => true, 'requireLast' => true])
                 . self::block('fundkit/email', ['required' => true])
                 . self::block('fundkit/comment', [
-                    'label' => __('Add a message of support', 'fundkit-fundraising-campaigns'),
-                    'placeholder' => __('Why this cause matters to you...', 'fundkit-fundraising-campaigns'),
+                    'label' => __('Add a message of support', 'fundraising-toolkit'),
+                    'placeholder' => __('Why this cause matters to you...', 'fundraising-toolkit'),
                     'required' => false,
                 ])
                 . self::block('fundkit/anonymous-toggle', [
-                    'label' => __('Hide my name from the donor wall', 'fundkit-fundraising-campaigns'),
+                    'label' => __('Hide my name from the donor wall', 'fundraising-toolkit'),
                     'defaultOn' => false,
                 ])
                 . self::block('fundkit/cover-fees', [
                     'percent' => 2.9, 'fixed' => 30,
-                    'label' => __("I'll cover the processing fee so 100% of my donation goes to the mission", 'fundkit-fundraising-campaigns'),
+                    'label' => __("I'll cover the processing fee so 100% of my donation goes to the mission", 'fundraising-toolkit'),
                     'defaultOn' => false,
                 ])
                 . self::block('fundkit/payment-gateways', ['style' => 'cards'])
                 . self::block('fundkit/donation-summary')
-                . self::block('fundkit/submit-button', ['label' => __('Give {amount}', 'fundkit-fundraising-campaigns')]);
+                . self::block('fundkit/submit-button', ['label' => __('Give {amount}', 'fundraising-toolkit')]);
 
         return [
             'id'             => 'impact-tiers',
-            'name'           => __('Impact Tiers', 'fundkit-fundraising-campaigns'),
-            'description'    => __('Long-scroll campaign page where each donation level maps to a named tier and a tangible outcome.', 'fundkit-fundraising-campaigns'),
+            'name'           => __('Impact Tiers', 'fundraising-toolkit'),
+            'description'    => __('Long-scroll campaign page where each donation level maps to a named tier and a tangible outcome.', 'fundraising-toolkit'),
             'icon'           => 'awards',
             'category'       => 'Standard',
             'thumbnail_hint' => 'Cream page, serif headline above six green tier cards stacked over a goal bar.',
@@ -193,7 +193,7 @@ final class FormTemplates
                 'recurring'         => ['enabled' => true, 'frequencies' => ['monthly', 'yearly']],
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
-                'thank_you_message' => __("Thank you. Your donation is already at work. Here's what happens next, and how to tell a friend.", 'fundkit-fundraising-campaigns'),
+                'thank_you_message' => __("Thank you. Your donation is already at work. Here's what happens next, and how to tell a friend.", 'fundraising-toolkit'),
             ],
             'blocks'         => $blocks,
         ];
@@ -231,13 +231,13 @@ final class FormTemplates
     /** @since 1.0.0 */
     private static function everyday(): array
     {
-        $blocks = self::block('fundkit/heading', ['text' => __('Make a donation', 'fundkit-fundraising-campaigns'), 'level' => 1])
+        $blocks = self::block('fundkit/heading', ['text' => __('Make a donation', 'fundraising-toolkit'), 'level' => 1])
                 . self::block('fundkit/donation-amount', [
                     'presets'     => self::presets([25, 50, 100, 250], [], 1),
                     'allowCustom' => true,
                 ])
                 . self::block('fundkit/recurring-toggle', [
-                    'label'            => __('Make this a recurring donation', 'fundkit-fundraising-campaigns'),
+                    'label'            => __('Make this a recurring donation', 'fundraising-toolkit'),
                     'defaultFrequency' => 'one-time',
                     'frequencies'      => ['one-time', 'monthly'],
                     'style'            => 'pills',
@@ -246,14 +246,14 @@ final class FormTemplates
                 . self::block('fundkit/email', ['required' => true])
                 . self::block('fundkit/country', ['required' => false])
                 . self::checkout(
-                    __('Donate {amount}', 'fundkit-fundraising-campaigns'),
-                    __('Cover the processing fee so the full amount reaches us', 'fundkit-fundraising-campaigns')
+                    __('Donate {amount}', 'fundraising-toolkit'),
+                    __('Cover the processing fee so the full amount reaches us', 'fundraising-toolkit')
                 );
 
         return [
             'id'             => 'everyday',
-            'name'           => __('Everyday donation', 'fundkit-fundraising-campaigns'),
-            'description'    => __('The general-purpose form: pick an amount, optionally make it monthly, pay. Start here if no other template fits.', 'fundkit-fundraising-campaigns'),
+            'name'           => __('Everyday donation', 'fundraising-toolkit'),
+            'description'    => __('The general-purpose form: pick an amount, optionally make it monthly, pay. Start here if no other template fits.', 'fundraising-toolkit'),
             'icon'           => 'heart',
             'category'       => 'Standard',
             'thumbnail_hint' => 'Single column, four amount tiles, one-time/monthly pills, three donor fields, pay button.',
@@ -267,13 +267,13 @@ final class FormTemplates
     {
         $amount = self::block(
             'fundkit/step',
-            ['title' => __('Your donation', 'fundkit-fundraising-campaigns')],
+            ['title' => __('Your donation', 'fundraising-toolkit')],
             self::block('fundkit/donation-amount', [
                 'presets'     => self::presets([25, 50, 100, 250], [], 1),
                 'allowCustom' => true,
             ])
             . self::block('fundkit/recurring-toggle', [
-                'label'            => __('Make this a recurring donation', 'fundkit-fundraising-campaigns'),
+                'label'            => __('Make this a recurring donation', 'fundraising-toolkit'),
                 'defaultFrequency' => 'one-time',
                 'frequencies'      => ['one-time', 'monthly'],
                 'style'            => 'pills',
@@ -282,7 +282,7 @@ final class FormTemplates
 
         $details = self::block(
             'fundkit/step',
-            ['title' => __('Your details', 'fundkit-fundraising-campaigns')],
+            ['title' => __('Your details', 'fundraising-toolkit')],
             self::block('fundkit/name', ['requireFirst' => true, 'requireLast' => true])
             . self::block('fundkit/email', ['required' => true])
             . self::block('fundkit/country', ['required' => false])
@@ -290,17 +290,17 @@ final class FormTemplates
 
         $confirm = self::block(
             'fundkit/step',
-            ['title' => __('Confirm', 'fundkit-fundraising-campaigns')],
+            ['title' => __('Confirm', 'fundraising-toolkit')],
             self::checkout(
-                __('Donate {amount}', 'fundkit-fundraising-campaigns'),
-                __('Cover the processing fee so the full amount reaches us', 'fundkit-fundraising-campaigns')
+                __('Donate {amount}', 'fundraising-toolkit'),
+                __('Cover the processing fee so the full amount reaches us', 'fundraising-toolkit')
             )
         );
 
         return [
             'id'             => 'guided',
-            'name'           => __('Guided donation', 'fundkit-fundraising-campaigns'),
-            'description'    => __('The same fields as the everyday form, split across three steps. Fewer decisions per screen, which suits longer forms and small screens.', 'fundkit-fundraising-campaigns'),
+            'name'           => __('Guided donation', 'fundraising-toolkit'),
+            'description'    => __('The same fields as the everyday form, split across three steps. Fewer decisions per screen, which suits longer forms and small screens.', 'fundraising-toolkit'),
             'icon'           => 'forms',
             'category'       => 'Wizard',
             'thumbnail_hint' => 'Three-step wizard with dot progress: amounts, then donor fields, then payment.',
@@ -312,12 +312,12 @@ final class FormTemplates
     /** @since 1.0.0 */
     private static function monthlySustainer(): array
     {
-        $blocks = self::block('fundkit/heading', ['text' => __('Become a monthly supporter', 'fundkit-fundraising-campaigns'), 'level' => 1])
-                . self::block('fundkit/paragraph', ['text' => __('A donation that arrives every month lets us plan further ahead than any single one can.', 'fundkit-fundraising-campaigns')])
+        $blocks = self::block('fundkit/heading', ['text' => __('Become a monthly supporter', 'fundraising-toolkit'), 'level' => 1])
+                . self::block('fundkit/paragraph', ['text' => __('A donation that arrives every month lets us plan further ahead than any single one can.', 'fundraising-toolkit')])
                 // Preselected monthly, and no one-time option: a form that offers
                 // both is the everyday one. Add one-time here if you want both.
                 . self::block('fundkit/recurring-toggle', [
-                    'label'            => __('How often', 'fundkit-fundraising-campaigns'),
+                    'label'            => __('How often', 'fundraising-toolkit'),
                     'defaultFrequency' => 'monthly',
                     'frequencies'      => ['monthly', 'yearly'],
                     'style'            => 'pills',
@@ -326,27 +326,27 @@ final class FormTemplates
                     // The amount renders above the label in the org's currency and
                     // the cadence is whichever pill is active, so labels name neither.
                     'presets' => self::presets([10, 25, 50, 100], [
-                        __('Supporter', 'fundkit-fundraising-campaigns'),
-                        __('Sustainer', 'fundkit-fundraising-campaigns'),
-                        __('Champion', 'fundkit-fundraising-campaigns'),
-                        __('Guardian', 'fundkit-fundraising-campaigns'),
+                        __('Supporter', 'fundraising-toolkit'),
+                        __('Sustainer', 'fundraising-toolkit'),
+                        __('Champion', 'fundraising-toolkit'),
+                        __('Guardian', 'fundraising-toolkit'),
                     ], 1),
                     'allowCustom' => true,
                 ])
                 . self::block('fundkit/name', ['requireFirst' => true, 'requireLast' => true])
                 . self::block('fundkit/email', ['required' => true])
-                . self::coverFees(__('Cover the processing fee on each payment', 'fundkit-fundraising-campaigns'))
+                . self::coverFees(__('Cover the processing fee on each payment', 'fundraising-toolkit'))
                 . self::block('fundkit/payment-gateways', ['style' => 'cards'])
                 . self::block('fundkit/donation-summary')
                 // Next to the button, not on a screen already passed: this is the
                 // last moment the donor can act on what they are agreeing to.
-                . self::block('fundkit/paragraph', ['text' => __('Your first payment is taken today. If you chose a repeating frequency, the same amount is taken on this date at that frequency, and you can change or stop it any time from your donor portal.', 'fundkit-fundraising-campaigns')])
-                . self::block('fundkit/submit-button', ['label' => __('Start my monthly donation', 'fundkit-fundraising-campaigns')]);
+                . self::block('fundkit/paragraph', ['text' => __('Your first payment is taken today. If you chose a repeating frequency, the same amount is taken on this date at that frequency, and you can change or stop it any time from your donor portal.', 'fundraising-toolkit')])
+                . self::block('fundkit/submit-button', ['label' => __('Start my monthly donation', 'fundraising-toolkit')]);
 
         return [
             'id'             => 'monthly-sustainer',
-            'name'           => __('Monthly sustainer', 'fundkit-fundraising-campaigns'),
-            'description'    => __('For recruiting regular givers. Monthly is preselected, amounts are named tiers, and the commitment is restated next to the button.', 'fundkit-fundraising-campaigns'),
+            'name'           => __('Monthly sustainer', 'fundraising-toolkit'),
+            'description'    => __('For recruiting regular givers. Monthly is preselected, amounts are named tiers, and the commitment is restated next to the button.', 'fundraising-toolkit'),
             'icon'           => 'update',
             'category'       => 'Recurring',
             'thumbnail_hint' => 'Monthly/yearly pills with monthly active, named amount tiles, commitment sentence above the button.',
@@ -356,7 +356,7 @@ final class FormTemplates
                 'recurring'         => ['enabled' => true, 'frequencies' => ['monthly', 'yearly']],
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
-                'thank_you_message' => __('Thank you. Your first payment is on its way, and we will email you before anything changes.', 'fundkit-fundraising-campaigns'),
+                'thank_you_message' => __('Thank you. Your first payment is on its way, and we will email you before anything changes.', 'fundraising-toolkit'),
             ],
             'blocks'         => $blocks,
         ];
@@ -365,8 +365,8 @@ final class FormTemplates
     /** @since 1.0.0 */
     private static function emergencyAppeal(): array
     {
-        $blocks = self::block('fundkit/heading', ['text' => __('Emergency appeal', 'fundkit-fundraising-campaigns'), 'level' => 1])
-                . self::block('fundkit/paragraph', ['text' => __('Say what happened, who it affects, and what a donation pays for today. Keep it to a few sentences.', 'fundkit-fundraising-campaigns')])
+        $blocks = self::block('fundkit/heading', ['text' => __('Emergency appeal', 'fundraising-toolkit'), 'level' => 1])
+                . self::block('fundkit/paragraph', ['text' => __('Say what happened, who it affects, and what a donation pays for today. Keep it to a few sentences.', 'fundraising-toolkit')])
                 . self::block('fundkit/goal', ['showAmount' => true, 'showDonors' => true, 'showDeadline' => true])
                 . self::block('fundkit/donation-amount', [
                     'presets'     => self::presets([25, 50, 100, 250], [], 1),
@@ -377,14 +377,14 @@ final class FormTemplates
                 . self::block('fundkit/name', ['requireFirst' => true, 'requireLast' => true])
                 . self::block('fundkit/email', ['required' => true])
                 . self::checkout(
-                    __('Give now', 'fundkit-fundraising-campaigns'),
-                    __('Cover the processing fee so the full amount reaches the response', 'fundkit-fundraising-campaigns')
+                    __('Give now', 'fundraising-toolkit'),
+                    __('Cover the processing fee so the full amount reaches the response', 'fundraising-toolkit')
                 );
 
         return [
             'id'             => 'emergency-appeal',
-            'name'           => __('Emergency appeal', 'fundkit-fundraising-campaigns'),
-            'description'    => __('For a crisis with a deadline. Leads with the goal and countdown, asks only for what a receipt needs, and offers no fund choice because the appeal is the fund.', 'fundkit-fundraising-campaigns'),
+            'name'           => __('Emergency appeal', 'fundraising-toolkit'),
+            'description'    => __('For a crisis with a deadline. Leads with the goal and countdown, asks only for what a receipt needs, and offers no fund choice because the appeal is the fund.', 'fundraising-toolkit'),
             'icon'           => 'megaphone',
             'category'       => 'Campaign',
             'thumbnail_hint' => 'Bold headline over a goal bar with countdown, four amount tiles, two donor fields, one button.',
@@ -394,7 +394,7 @@ final class FormTemplates
                 'recurring'         => ['enabled' => false, 'frequencies' => []],
                 'gateways'          => ['allowed' => []],
                 'anonymous_allowed' => true,
-                'thank_you_message' => __('Thank you. Your donation is already part of the response.', 'fundkit-fundraising-campaigns'),
+                'thank_you_message' => __('Thank you. Your donation is already part of the response.', 'fundraising-toolkit'),
             ],
             'blocks'         => $blocks,
         ];
@@ -403,15 +403,15 @@ final class FormTemplates
     /** @since 1.0.0 */
     private static function designated(): array
     {
-        $blocks = self::block('fundkit/heading', ['text' => __('Choose where your donation goes', 'fundkit-fundraising-campaigns'), 'level' => 1])
-                . self::block('fundkit/paragraph', ['text' => __('Pick the work you want to fund, or leave it to us to send it wherever it is needed most.', 'fundkit-fundraising-campaigns')])
+        $blocks = self::block('fundkit/heading', ['text' => __('Choose where your donation goes', 'fundraising-toolkit'), 'level' => 1])
+                . self::block('fundkit/paragraph', ['text' => __('Pick the work you want to fund, or leave it to us to send it wherever it is needed most.', 'fundraising-toolkit')])
                 // Needs at least two real funds to be worth showing. The
                 // greatest-need option is what a donor with no preference picks.
                 . self::block('fundkit/fund-picker', [
-                    'label'            => __('Fund', 'fundkit-fundraising-campaigns'),
+                    'label'            => __('Fund', 'fundraising-toolkit'),
                     'allowEmpty'       => true,
-                    'emptyLabel'       => __('Wherever the need is greatest', 'fundkit-fundraising-campaigns'),
-                    'emptyDescription' => __('We direct it to the most urgent work that month.', 'fundkit-fundraising-campaigns'),
+                    'emptyLabel'       => __('Wherever the need is greatest', 'fundraising-toolkit'),
+                    'emptyDescription' => __('We direct it to the most urgent work that month.', 'fundraising-toolkit'),
                 ])
                 . self::block('fundkit/donation-amount', [
                     'presets'     => self::presets([25, 50, 100, 250], [], 1),
@@ -421,14 +421,14 @@ final class FormTemplates
                 . self::block('fundkit/email', ['required' => true])
                 . self::block('fundkit/country', ['required' => false])
                 . self::checkout(
-                    __('Donate {amount}', 'fundkit-fundraising-campaigns'),
-                    __('Cover the processing fee so the full amount reaches this fund', 'fundkit-fundraising-campaigns')
+                    __('Donate {amount}', 'fundraising-toolkit'),
+                    __('Cover the processing fee so the full amount reaches this fund', 'fundraising-toolkit')
                 );
 
         return [
             'id'             => 'designated',
-            'name'           => __('Designated giving', 'fundkit-fundraising-campaigns'),
-            'description'    => __('Lets the donor say which fund their money goes to. Set up your funds first, since a picker with one option is just a label.', 'fundkit-fundraising-campaigns'),
+            'name'           => __('Designated giving', 'fundraising-toolkit'),
+            'description'    => __('Lets the donor say which fund their money goes to. Set up your funds first, since a picker with one option is just a label.', 'fundraising-toolkit'),
             'icon'           => 'portfolio',
             'category'       => 'Campaign',
             'thumbnail_hint' => 'Fund dropdown above the amount tiles, greatest-need option listed last.',
@@ -450,23 +450,23 @@ final class FormTemplates
                 // Both of these assume a public supporter list. Remove them if
                 // the page has none: a privacy promise about nothing reads badly.
                 . self::block('fundkit/comment', [
-                    'label'       => __('Add a message of support', 'fundkit-fundraising-campaigns'),
-                    'placeholder' => __('Shown on the supporter wall', 'fundkit-fundraising-campaigns'),
+                    'label'       => __('Add a message of support', 'fundraising-toolkit'),
+                    'placeholder' => __('Shown on the supporter wall', 'fundraising-toolkit'),
                     'required'    => false,
                 ])
                 . self::block('fundkit/anonymous-toggle', [
-                    'label'     => __('Hide my name from the supporter wall', 'fundkit-fundraising-campaigns'),
+                    'label'     => __('Hide my name from the supporter wall', 'fundraising-toolkit'),
                     'defaultOn' => false,
                 ])
                 . self::checkout(
-                    __('Donate {amount}', 'fundkit-fundraising-campaigns'),
-                    __('Cover the processing fee so 100% reaches the campaign', 'fundkit-fundraising-campaigns')
+                    __('Donate {amount}', 'fundraising-toolkit'),
+                    __('Cover the processing fee so 100% reaches the campaign', 'fundraising-toolkit')
                 );
 
         return [
             'id'             => 'campaign-page',
-            'name'           => __('Campaign page', 'fundkit-fundraising-campaigns'),
-            'description'    => __('For a public campaign with a goal and a supporter wall. Carries a progress bar, a message field and a name-hiding toggle.', 'fundkit-fundraising-campaigns'),
+            'name'           => __('Campaign page', 'fundraising-toolkit'),
+            'description'    => __('For a public campaign with a goal and a supporter wall. Carries a progress bar, a message field and a name-hiding toggle.', 'fundraising-toolkit'),
             'icon'           => 'chart-area',
             'category'       => 'Campaign',
             'thumbnail_hint' => 'Goal bar on top, amount tiles, message box and anonymity checkbox above the button.',

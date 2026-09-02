@@ -32,25 +32,25 @@ function Notice( { tone, icon, children } ) {
 
 function AccountFoot( { account, onRemove, removing } ) {
     const tail = account?.account_id ? account.account_id.slice( -4 ) : '';
-    const yes = <span style={ { color: 'var(--fundkit-color-accent)' } }>{ __( 'Enabled', 'fundkit-fundraising-campaigns' ) }</span>;
-    const no  = <span style={ { color: 'var(--fundkit-color-red)' } }>{ __( 'Disabled', 'fundkit-fundraising-campaigns' ) }</span>;
+    const yes = <span style={ { color: 'var(--fundkit-color-accent)' } }>{ __( 'Enabled', 'fundraising-toolkit' ) }</span>;
+    const no  = <span style={ { color: 'var(--fundkit-color-red)' } }>{ __( 'Disabled', 'fundraising-toolkit' ) }</span>;
     return (
         <div className="fundkit-gateway-foot">
             <div className="fundkit-gateway-foot__cell">
-                <div className="lbl">{ __( 'Account', 'fundkit-fundraising-campaigns' ) }</div>
+                <div className="lbl">{ __( 'Account', 'fundraising-toolkit' ) }</div>
                 <div className="val is-muted is-mono">{ tail ? `acct_…${ tail }` : '...' }</div>
             </div>
             <div className="fundkit-gateway-foot__cell">
-                <div className="lbl">{ __( 'Charges', 'fundkit-fundraising-campaigns' ) }</div>
+                <div className="lbl">{ __( 'Charges', 'fundraising-toolkit' ) }</div>
                 <div className="val">{ account?.charges_enabled ? yes : no }</div>
             </div>
             <div className="fundkit-gateway-foot__cell">
-                <div className="lbl">{ __( 'Payouts', 'fundkit-fundraising-campaigns' ) }</div>
+                <div className="lbl">{ __( 'Payouts', 'fundraising-toolkit' ) }</div>
                 <div className="val">{ account?.payouts_enabled ? yes : no }</div>
             </div>
             <div style={ { flex: 1 } } />
             <Btn variant="danger" size="sm" onClick={ onRemove } isBusy={ removing } disabled={ removing }>
-                { __( 'Remove keys', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Remove keys', 'fundraising-toolkit' ) }
             </Btn>
         </div>
     );
@@ -67,12 +67,12 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
     const [ pk, setPk ]     = useState( '' );
     const [ busy, setBusy ] = useState( false );
 
-    const label = isTest ? __( 'Test keys', 'fundkit-fundraising-campaigns' ) : __( 'Live keys', 'fundkit-fundraising-campaigns' );
+    const label = isTest ? __( 'Test keys', 'fundraising-toolkit' ) : __( 'Live keys', 'fundraising-toolkit' );
     const prefix = isTest ? 'test' : 'live';
 
     const save = () => {
         if ( ! sk.trim() || ! pk.trim() ) {
-            notify.error( __( 'Enter both the publishable key and the secret key.', 'fundkit-fundraising-campaigns' ) );
+            notify.error( __( 'Enter both the publishable key and the secret key.', 'fundraising-toolkit' ) );
             return;
         }
         setBusy( true );
@@ -87,12 +87,12 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
                 setOpen( false );
                 notify.success(
                     isTest
-                        ? __( 'Test keys verified and saved.', 'fundkit-fundraising-campaigns' )
-                        : __( 'Live keys verified and saved.', 'fundkit-fundraising-campaigns' )
+                        ? __( 'Test keys verified and saved.', 'fundraising-toolkit' )
+                        : __( 'Live keys verified and saved.', 'fundraising-toolkit' )
                 );
                 onSaved( res );
             } )
-            .catch( ( err ) => notify.error( err?.message || __( 'Could not verify those keys.', 'fundkit-fundraising-campaigns' ) ) )
+            .catch( ( err ) => notify.error( err?.message || __( 'Could not verify those keys.', 'fundraising-toolkit' ) ) )
             .finally( () => setBusy( false ) );
     };
 
@@ -101,8 +101,8 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
             <div className="fundkit-stripe-mode__head">
                 <strong>{ label }</strong>
                 { saved
-                    ? <Pill tone="green">{ __( 'Saved', 'fundkit-fundraising-campaigns' ) }</Pill>
-                    : <Pill tone="gray">{ __( 'Not set', 'fundkit-fundraising-campaigns' ) }</Pill> }
+                    ? <Pill tone="green">{ __( 'Saved', 'fundraising-toolkit' ) }</Pill>
+                    : <Pill tone="gray">{ __( 'Not set', 'fundraising-toolkit' ) }</Pill> }
             </div>
 
             { saved && ! open && (
@@ -110,10 +110,10 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
                     <span className="is-mono is-muted">{ publishable || '' }</span>
                     <div className="fundkit-stripe-mode__actions">
                         <Btn variant="secondary" size="sm" onClick={ () => setOpen( true ) }>
-                            { __( 'Replace', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Replace', 'fundraising-toolkit' ) }
                         </Btn>
                         <Btn variant="ghost" size="sm" onClick={ () => onRemove( mode ) }>
-                            { __( 'Remove', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Remove', 'fundraising-toolkit' ) }
                         </Btn>
                     </div>
                 </div>
@@ -122,24 +122,24 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
             { open && (
                 <>
                     <FormRow
-                        label={ __( 'Publishable key', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Safe to expose. Used in the browser to show the payment fields.', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Publishable key', 'fundraising-toolkit' ) }
+                        help={ __( 'Safe to expose. Used in the browser to show the payment fields.', 'fundraising-toolkit' ) }
                     >
                         <KeyField value={ pk } onChange={ setPk } placeholder={ `pk_${ prefix }_…` } />
                     </FormRow>
                     <FormRow
-                        label={ __( 'Secret key', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Stored encrypted and never shown again. FundKit verifies it with Stripe before saving.', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Secret key', 'fundraising-toolkit' ) }
+                        help={ __( 'Stored encrypted and never shown again. Fundraising Toolkit verifies it with Stripe before saving.', 'fundraising-toolkit' ) }
                     >
                         <KeyField value={ sk } onChange={ setSk } placeholder={ `sk_${ prefix }_…` } secret />
                     </FormRow>
                     <div className="fundkit-stripe-mode__actions">
                         <Btn variant="primary" size="sm" onClick={ save } isBusy={ busy } disabled={ busy }>
-                            { __( 'Save and verify', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Save and verify', 'fundraising-toolkit' ) }
                         </Btn>
                         { saved && (
                             <Btn variant="ghost" size="sm" onClick={ () => { setOpen( false ); setSk( '' ); setPk( '' ); } }>
-                                { __( 'Cancel', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Cancel', 'fundraising-toolkit' ) }
                             </Btn>
                         ) }
                     </div>
@@ -170,11 +170,11 @@ function ApplePaySection( { status, onDone } ) {
     const enable = () => {
         const pasted = file.trim();
         if ( ! hasFile && ! pasted ) {
-            notify.error( __( 'Paste the domain association file from Stripe first.', 'fundkit-fundraising-campaigns' ) );
+            notify.error( __( 'Paste the domain association file from Stripe first.', 'fundraising-toolkit' ) );
             return;
         }
         if ( ! modes.length ) {
-            notify.error( __( 'Save your Stripe keys first.', 'fundkit-fundraising-campaigns' ) );
+            notify.error( __( 'Save your Stripe keys first.', 'fundraising-toolkit' ) );
             return;
         }
 
@@ -194,12 +194,12 @@ function ApplePaySection( { status, onDone } ) {
                 if ( bad ) {
                     notify.error(
                         bad.message ||
-                        __( 'Stripe could not verify this domain yet. Check the file is reachable, then try again.', 'fundkit-fundraising-campaigns' )
+                        __( 'Stripe could not verify this domain yet. Check the file is reachable, then try again.', 'fundraising-toolkit' )
                     );
                 } else {
                     setFile( '' );
                     setOpen( false );
-                    notify.success( __( 'Apple Pay is verified for this domain.', 'fundkit-fundraising-campaigns' ) );
+                    notify.success( __( 'Apple Pay is verified for this domain.', 'fundraising-toolkit' ) );
                 }
                 onDone();
             } )
@@ -208,14 +208,14 @@ function ApplePaySection( { status, onDone } ) {
 
     const stateLabel = ( mode ) => {
         const st = apple?.[ mode ]?.status;
-        if ( st === 'active' )   return __( 'verified', 'fundkit-fundraising-campaigns' );
-        if ( st === 'inactive' ) return __( 'not verified', 'fundkit-fundraising-campaigns' );
-        return __( 'not checked yet', 'fundkit-fundraising-campaigns' );
+        if ( st === 'active' )   return __( 'verified', 'fundraising-toolkit' );
+        if ( st === 'inactive' ) return __( 'not verified', 'fundraising-toolkit' );
+        return __( 'not checked yet', 'fundraising-toolkit' );
     };
 
-    let pill = <Pill tone="gray">{ __( 'Not set up', 'fundkit-fundraising-campaigns' ) }</Pill>;
-    if ( hasFile && active )      pill = <Pill tone="green">{ __( 'Verified', 'fundkit-fundraising-campaigns' ) }</Pill>;
-    else if ( hasFile )           pill = <Pill tone="amber">{ __( 'Not verified', 'fundkit-fundraising-campaigns' ) }</Pill>;
+    let pill = <Pill tone="gray">{ __( 'Not set up', 'fundraising-toolkit' ) }</Pill>;
+    if ( hasFile && active )      pill = <Pill tone="green">{ __( 'Verified', 'fundraising-toolkit' ) }</Pill>;
+    else if ( hasFile )           pill = <Pill tone="amber">{ __( 'Not verified', 'fundraising-toolkit' ) }</Pill>;
 
     const firstMessage = modes.map( ( m ) => apple?.[ m ]?.message ).find( Boolean );
 
@@ -223,15 +223,15 @@ function ApplePaySection( { status, onDone } ) {
         <div className="fundkit-connect-options">
             <div className="fundkit-stripe-mode">
                 <div className="fundkit-stripe-mode__head">
-                    <strong>{ __( 'Apple Pay', 'fundkit-fundraising-campaigns' ) }</strong>
+                    <strong>{ __( 'Apple Pay', 'fundraising-toolkit' ) }</strong>
                     { pill }
                 </div>
 
                 <p className="fundkit-connect-p">
-                    { __( 'Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple checks that you own this domain first, and until it verifies, the Apple Pay button just never shows.', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple checks that you own this domain first, and until it verifies, the Apple Pay button just never shows.', 'fundraising-toolkit' ) }
                 </p>
 
-                <FormRow label={ __( 'Domain', 'fundkit-fundraising-campaigns' ) }>
+                <FormRow label={ __( 'Domain', 'fundraising-toolkit' ) }>
                     { /* No onChange: KeyField renders read-only with a Copy button. */ }
                     <KeyField value={ apple.domain || '' } />
                 </FormRow>
@@ -239,8 +239,8 @@ function ApplePaySection( { status, onDone } ) {
                 { open ? (
                     <>
                         <FormRow
-                            label={ __( 'Domain association file', 'fundkit-fundraising-campaigns' ) }
-                            help={ __( 'In Stripe, go to Settings, Payment method domains, and add the domain above. Stripe links a file to download, paste its whole contents here.', 'fundkit-fundraising-campaigns' ) }
+                            label={ __( 'Domain association file', 'fundraising-toolkit' ) }
+                            help={ __( 'In Stripe, go to Settings, Payment method domains, and add the domain above. Stripe links a file to download, paste its whole contents here.', 'fundraising-toolkit' ) }
                             wide
                         >
                             <textarea
@@ -253,11 +253,11 @@ function ApplePaySection( { status, onDone } ) {
                         </FormRow>
                         <div className="fundkit-stripe-mode__actions">
                             <Btn variant="primary" size="sm" onClick={ enable } isBusy={ busy } disabled={ busy }>
-                                { __( 'Enable Apple Pay', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Enable Apple Pay', 'fundraising-toolkit' ) }
                             </Btn>
                             { hasFile && (
                                 <Btn variant="ghost" size="sm" onClick={ () => { setOpen( false ); setFile( '' ); } }>
-                                    { __( 'Cancel', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Cancel', 'fundraising-toolkit' ) }
                                 </Btn>
                             ) }
                         </div>
@@ -267,17 +267,17 @@ function ApplePaySection( { status, onDone } ) {
                         <span className="is-muted">
                             { modes.map( ( m ) => sprintf(
                                 /* translators: 1: Stripe mode, test or live. 2: verification state. */
-                                __( '%1$s: %2$s', 'fundkit-fundraising-campaigns' ),
-                                m === 'test' ? __( 'Test', 'fundkit-fundraising-campaigns' ) : __( 'Live', 'fundkit-fundraising-campaigns' ),
+                                __( '%1$s: %2$s', 'fundraising-toolkit' ),
+                                m === 'test' ? __( 'Test', 'fundraising-toolkit' ) : __( 'Live', 'fundraising-toolkit' ),
                                 stateLabel( m )
                             ) ).join( '  ·  ' ) }
                         </span>
                         <div className="fundkit-stripe-mode__actions">
                             <Btn variant="secondary" size="sm" onClick={ enable } isBusy={ busy } disabled={ busy }>
-                                { __( 'Check again', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Check again', 'fundraising-toolkit' ) }
                             </Btn>
                             <Btn variant="ghost" size="sm" onClick={ () => setOpen( true ) }>
-                                { __( 'Replace file', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Replace file', 'fundraising-toolkit' ) }
                             </Btn>
                         </div>
                     </div>
@@ -312,17 +312,17 @@ export default function StripeKeysCard( { s } ) {
     const removeKeys = useCallback( ( mode ) => {
         const all = mode === 'all';
         setConfirm( {
-            title: all ? __( 'Remove Stripe keys', 'fundkit-fundraising-campaigns' ) : __( 'Remove these keys', 'fundkit-fundraising-campaigns' ),
+            title: all ? __( 'Remove Stripe keys', 'fundraising-toolkit' ) : __( 'Remove these keys', 'fundraising-toolkit' ),
             message: all
-                ? __( 'Remove both key pairs? Card donations will stop until you add keys again.', 'fundkit-fundraising-campaigns' )
-                : __( 'Remove this key pair? Donations in this mode will stop until you add keys again.', 'fundkit-fundraising-campaigns' ),
-            confirmLabel: __( 'Remove', 'fundkit-fundraising-campaigns' ),
+                ? __( 'Remove both key pairs? Card donations will stop until you add keys again.', 'fundraising-toolkit' )
+                : __( 'Remove this key pair? Donations in this mode will stop until you add keys again.', 'fundraising-toolkit' ),
+            confirmLabel: __( 'Remove', 'fundraising-toolkit' ),
             destructive: true,
             onConfirm: async () => {
                 setRemoving( true );
                 apiFetch( { path: `/fundkit/v1/gateways/stripe/keys?mode=${ mode }`, method: 'DELETE' } )
                     .then( ( res ) => setStatus( res ) )
-                    .catch( ( err ) => notify.error( err?.message || __( 'Could not remove the keys.', 'fundkit-fundraising-campaigns' ) ) )
+                    .catch( ( err ) => notify.error( err?.message || __( 'Could not remove the keys.', 'fundraising-toolkit' ) ) )
                     .finally( () => setRemoving( false ) );
             },
         } );
@@ -336,17 +336,17 @@ export default function StripeKeysCard( { s } ) {
 
     const head = {
         leading:     <BrandMark letter="S" variant="stripe" />,
-        title:       __( 'Stripe', 'fundkit-fundraising-campaigns' ),
+        title:       __( 'Stripe', 'fundraising-toolkit' ),
         collapsible: true,
         open,
         onToggle:    setOpen,
     };
-    const sub = __( 'Cards, SEPA, Apple Pay, Google Pay', 'fundkit-fundraising-campaigns' );
+    const sub = __( 'Cards, SEPA, Apple Pay, Google Pay', 'fundraising-toolkit' );
 
     if ( loading ) {
         return (
-            <Card { ...head } sub={ sub } meta={ <Pill tone="gray">{ __( 'Checking…', 'fundkit-fundraising-campaigns' ) }</Pill> }>
-                <p className="fundkit-connect-p">{ __( 'Loading Stripe status…', 'fundkit-fundraising-campaigns' ) }</p>
+            <Card { ...head } sub={ sub } meta={ <Pill tone="gray">{ __( 'Checking…', 'fundraising-toolkit' ) }</Pill> }>
+                <p className="fundkit-connect-p">{ __( 'Loading Stripe status…', 'fundraising-toolkit' ) }</p>
             </Card>
         );
     }
@@ -355,21 +355,21 @@ export default function StripeKeysCard( { s } ) {
     // through to a state that misreports the real setup.
     if ( loadError ) {
         return (
-            <Card { ...head } sub={ sub } meta={ <Pill tone="amber">{ __( 'Unavailable', 'fundkit-fundraising-campaigns' ) }</Pill> }>
+            <Card { ...head } sub={ sub } meta={ <Pill tone="amber">{ __( 'Unavailable', 'fundraising-toolkit' ) }</Pill> }>
                 <Notice tone="amber" icon="!">
-                    <strong>{ __( 'Could not check your Stripe setup.', 'fundkit-fundraising-campaigns' ) }</strong>{ ' ' }
-                    { __( 'Something went wrong loading the status. Please try again.', 'fundkit-fundraising-campaigns' ) }
+                    <strong>{ __( 'Could not check your Stripe setup.', 'fundraising-toolkit' ) }</strong>{ ' ' }
+                    { __( 'Something went wrong loading the status. Please try again.', 'fundraising-toolkit' ) }
                 </Notice>
                 <div style={ { marginTop: 18 } }>
-                    <Btn variant="primary" onClick={ load }>{ __( 'Retry', 'fundkit-fundraising-campaigns' ) }</Btn>
+                    <Btn variant="primary" onClick={ load }>{ __( 'Retry', 'fundraising-toolkit' ) }</Btn>
                 </div>
             </Card>
         );
     }
 
-    let meta = <Pill tone="gray">{ __( 'Not set up', 'fundkit-fundraising-campaigns' ) }</Pill>;
-    if ( connected && canCharge ) meta = <Pill tone="green">{ __( 'Ready', 'fundkit-fundraising-campaigns' ) }</Pill>;
-    else if ( connected ) meta = <Pill tone="amber">{ __( 'Action needed', 'fundkit-fundraising-campaigns' ) }</Pill>;
+    let meta = <Pill tone="gray">{ __( 'Not set up', 'fundraising-toolkit' ) }</Pill>;
+    if ( connected && canCharge ) meta = <Pill tone="green">{ __( 'Ready', 'fundraising-toolkit' ) }</Pill>;
+    else if ( connected ) meta = <Pill tone="amber">{ __( 'Action needed', 'fundraising-toolkit' ) }</Pill>;
 
     const bizName = account?.business_name || account?.email || '';
 
@@ -386,19 +386,19 @@ export default function StripeKeysCard( { s } ) {
             { ! connected && (
                 <>
                     <p className="fundkit-connect-p">
-                        { __( 'Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and FundKit never takes a cut.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and Fundraising Toolkit never takes a cut.', 'fundraising-toolkit' ) }
                     </p>
                     <p className="fundkit-connect-p">
-                        { __( 'Find them in the Stripe dashboard under Developers, API keys. Add your test keys first to try a donation safely.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Find them in the Stripe dashboard under Developers, API keys. Add your test keys first to try a donation safely.', 'fundraising-toolkit' ) }
                     </p>
                 </>
             ) }
 
             <ToggleRow
-                title={ __( 'Enable the Stripe gateway', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Enable the Stripe gateway', 'fundraising-toolkit' ) }
                 sub={ connected
-                    ? __( 'Your keys stay on file while it is off.', 'fundkit-fundraising-campaigns' )
-                    : __( 'Available once your keys are saved.', 'fundkit-fundraising-campaigns' ) }
+                    ? __( 'Your keys stay on file while it is off.', 'fundraising-toolkit' )
+                    : __( 'Available once your keys are saved.', 'fundraising-toolkit' ) }
                 checked={ connected && !! s.value( 'stripe.enabled', true ) }
                 onChange={ s.setValue( 'stripe.enabled' ) }
                 disabled={ ! connected }
@@ -406,15 +406,15 @@ export default function StripeKeysCard( { s } ) {
 
             { connected && ! canCharge && (
                 <Notice tone="amber" icon="⚠">
-                    <strong>{ __( 'Your Stripe account cannot take payments yet.', 'fundkit-fundraising-campaigns' ) }</strong>{ ' ' }
-                    { __( 'Stripe still needs some verification details (ID, bank account, business info). Finish that in your Stripe dashboard; live donations will fail until you do.', 'fundkit-fundraising-campaigns' ) }
+                    <strong>{ __( 'Your Stripe account cannot take payments yet.', 'fundraising-toolkit' ) }</strong>{ ' ' }
+                    { __( 'Stripe still needs some verification details (ID, bank account, business info). Finish that in your Stripe dashboard; live donations will fail until you do.', 'fundraising-toolkit' ) }
                 </Notice>
             ) }
 
             { connected && canCharge && (
                 <Notice tone="accent" icon="✓">
-                    <strong>{ __( 'You are all set.', 'fundkit-fundraising-campaigns' ) }</strong>{ ' ' }
-                    { __( 'Donations are charged on your Stripe account and paid out to your bank.', 'fundkit-fundraising-campaigns' ) }
+                    <strong>{ __( 'You are all set.', 'fundraising-toolkit' ) }</strong>{ ' ' }
+                    { __( 'Donations are charged on your Stripe account and paid out to your bank.', 'fundraising-toolkit' ) }
                 </Notice>
             ) }
 
@@ -439,17 +439,17 @@ export default function StripeKeysCard( { s } ) {
 
             <div className="fundkit-connect-options">
                 <p className="fundkit-connect-p">
-                    { __( 'Webhooks tell FundKit when a payment succeeds, fails or is refunded. FundKit registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below.', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Webhooks tell Fundraising Toolkit when a payment succeeds, fails or is refunded. Fundraising Toolkit registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below.', 'fundraising-toolkit' ) }
                 </p>
-                <FormRow label={ __( 'Webhook endpoint', 'fundkit-fundraising-campaigns' ) }>
+                <FormRow label={ __( 'Webhook endpoint', 'fundraising-toolkit' ) }>
                     { /* No onChange: KeyField renders read-only with a Copy button. */ }
                     <KeyField value={ status?.webhook_url || '' } />
                 </FormRow>
                 { s && (
                     <>
                         <FormRow
-                            label={ __( 'Webhook signing secret (test)', 'fundkit-fundraising-campaigns' ) }
-                            help={ __( 'From the test-mode Stripe webhook endpoint. Needed for paid, refund and dispute updates on test donations. Once saved it is hidden, so the dots mean it is set: type a new one to replace it, or clear the field to remove it.', 'fundkit-fundraising-campaigns' ) }
+                            label={ __( 'Webhook signing secret (test)', 'fundraising-toolkit' ) }
+                            help={ __( 'From the test-mode Stripe webhook endpoint. Needed for paid, refund and dispute updates on test donations. Once saved it is hidden, so the dots mean it is set: type a new one to replace it, or clear the field to remove it.', 'fundraising-toolkit' ) }
                         >
                             <KeyField
                                 value={ s.value( 'stripe.webhook_secret_test', '' ) }
@@ -459,8 +459,8 @@ export default function StripeKeysCard( { s } ) {
                             />
                         </FormRow>
                         <FormRow
-                            label={ __( 'Webhook signing secret (live)', 'fundkit-fundraising-campaigns' ) }
-                            help={ __( 'From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected. Once saved it is hidden, same as the test one.', 'fundkit-fundraising-campaigns' ) }
+                            label={ __( 'Webhook signing secret (live)', 'fundraising-toolkit' ) }
+                            help={ __( 'From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected. Once saved it is hidden, same as the test one.', 'fundraising-toolkit' ) }
                         >
                             <KeyField
                                 value={ s.value( 'stripe.webhook_secret_live', '' ) }

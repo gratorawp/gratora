@@ -38,11 +38,11 @@ export function dueIn( iso ) {
     const days = Math.round( ( then - Date.now() ) / 86400000 );
     if ( days < 0 ) {
         /* translators: %d: days a renewal is overdue by. */
-        return sprintf( _n( '%d day overdue', '%d days overdue', Math.abs( days ), 'fundkit-fundraising-campaigns' ), Math.abs( days ) );
+        return sprintf( _n( '%d day overdue', '%d days overdue', Math.abs( days ), 'fundraising-toolkit' ), Math.abs( days ) );
     }
-    if ( days === 0 ) return __( 'today', 'fundkit-fundraising-campaigns' );
+    if ( days === 0 ) return __( 'today', 'fundraising-toolkit' );
     /* translators: %d: days until the next charge. */
-    return sprintf( _n( 'in %d day', 'in %d days', days, 'fundkit-fundraising-campaigns' ), days );
+    return sprintf( _n( 'in %d day', 'in %d days', days, 'fundraising-toolkit' ), days );
 }
 
 export function retryActionFor( plan ) {
@@ -50,7 +50,7 @@ export function retryActionFor( plan ) {
     if ( ! plan.can_retry ) return null;
     if ( ! ( plan.failed_renewals_count > 0 || plan.status === 'past_due' ) ) return null;
 
-    return { id: 'retry', label: __( 'Retry payment', 'fundkit-fundraising-campaigns' ) };
+    return { id: 'retry', label: __( 'Retry payment', 'fundraising-toolkit' ) };
 }
 
 export function actionsFor( plan ) {
@@ -58,24 +58,24 @@ export function actionsFor( plan ) {
 
     const actions = [];
     if ( plan.status === 'paused' ) {
-        actions.push( { id: 'resume', label: __( 'Resume', 'fundkit-fundraising-campaigns' ) } );
+        actions.push( { id: 'resume', label: __( 'Resume', 'fundraising-toolkit' ) } );
     } else {
-        actions.push( { id: 'pause', label: __( 'Pause', 'fundkit-fundraising-campaigns' ) } );
-        actions.push( { id: 'skip_next', label: __( 'Skip next', 'fundkit-fundraising-campaigns' ) } );
+        actions.push( { id: 'pause', label: __( 'Pause', 'fundraising-toolkit' ) } );
+        actions.push( { id: 'skip_next', label: __( 'Skip next', 'fundraising-toolkit' ) } );
     }
-    actions.push( { id: 'change_amount', label: __( 'Change amount', 'fundkit-fundraising-campaigns' ) } );
-    actions.push( { id: 'cancel', label: __( 'Cancel', 'fundkit-fundraising-campaigns' ), destructive: true } );
+    actions.push( { id: 'change_amount', label: __( 'Change amount', 'fundraising-toolkit' ) } );
+    actions.push( { id: 'cancel', label: __( 'Cancel', 'fundraising-toolkit' ), destructive: true } );
 
     return actions;
 }
 
 const TITLES = {
-    retry:         __( 'Retry the payment', 'fundkit-fundraising-campaigns' ),
-    pause:         __( 'Pause this donation', 'fundkit-fundraising-campaigns' ),
-    resume:        __( 'Resume this donation', 'fundkit-fundraising-campaigns' ),
-    skip_next:     __( 'Skip the next payment', 'fundkit-fundraising-campaigns' ),
-    change_amount: __( 'Change the amount', 'fundkit-fundraising-campaigns' ),
-    cancel:        __( 'Cancel this donation', 'fundkit-fundraising-campaigns' ),
+    retry:         __( 'Retry the payment', 'fundraising-toolkit' ),
+    pause:         __( 'Pause this donation', 'fundraising-toolkit' ),
+    resume:        __( 'Resume this donation', 'fundraising-toolkit' ),
+    skip_next:     __( 'Skip the next payment', 'fundraising-toolkit' ),
+    change_amount: __( 'Change the amount', 'fundraising-toolkit' ),
+    cancel:        __( 'Cancel this donation', 'fundraising-toolkit' ),
 };
 
 export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
@@ -97,7 +97,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             // here belongs to it now.
             const cents = Math.round( Number( amount ) * 100 );
             if ( ! Number.isFinite( cents ) || cents <= 0 ) {
-                setError( __( 'Enter an amount.', 'fundkit-fundraising-campaigns' ) );
+                setError( __( 'Enter an amount.', 'fundraising-toolkit' ) );
                 return;
             }
             body.amount_cents = cents;
@@ -109,7 +109,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
         apiFetch( { path: `/fundkit/v1/admin/recurring/${ plan.id }/action`, method: 'POST', data: body } )
             .then( () => { onClose(); if ( onDone ) onDone(); } )
             .catch( ( e ) => {
-                setError( e?.message || __( 'That change could not be made.', 'fundkit-fundraising-campaigns' ) );
+                setError( e?.message || __( 'That change could not be made.', 'fundraising-toolkit' ) );
                 // PayPal answers a revision with a link the donor has to open.
                 // The API has always returned it and nothing rendered it, so
                 // the message said "approve this change" and gave no way to.
@@ -120,12 +120,12 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
 
     return (
         <Dialog
-            title={ TITLES[ action ] || __( 'Change this donation', 'fundkit-fundraising-campaigns' ) }
+            title={ TITLES[ action ] || __( 'Change this donation', 'fundraising-toolkit' ) }
             onClose={ () => ( busy ? null : onClose() ) }
             foot={
                 <>
                     <Btn variant="secondary" onClick={ onClose } disabled={ busy }>
-                        { __( 'Close', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Close', 'fundraising-toolkit' ) }
                     </Btn>
                     <Btn
                         variant="primary"
@@ -135,8 +135,8 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                         disabled={ busy }
                     >
                         { busy
-                            ? __( 'Working…', 'fundkit-fundraising-campaigns' )
-                            : ( action === 'retry' ? __( 'Retry now', 'fundkit-fundraising-campaigns' ) : __( 'Apply change', 'fundkit-fundraising-campaigns' ) ) }
+                            ? __( 'Working…', 'fundraising-toolkit' )
+                            : ( action === 'retry' ? __( 'Retry now', 'fundraising-toolkit' ) : __( 'Apply change', 'fundraising-toolkit' ) ) }
                     </Btn>
                 </>
             }
@@ -147,7 +147,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                         { /* The currency is on the control itself, so the label
                              does not name it a second time. */ }
                         <span style={ { display: 'block', marginBottom: 4 } }>
-                            { __( 'New amount', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'New amount', 'fundraising-toolkit' ) }
                         </span>
                         <AmountInput
                             value={ amount }
@@ -162,7 +162,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             { action === 'pause' && (
                 <p>
                     <label>
-                        <span style={ { display: 'block', marginBottom: 4 } }>{ __( 'Pause for', 'fundkit-fundraising-campaigns' ) }</span>
+                        <span style={ { display: 'block', marginBottom: 4 } }>{ __( 'Pause for', 'fundraising-toolkit' ) }</span>
                         <select
                             className="fundkit-select"
                             value={ String( months ) }
@@ -172,7 +172,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                                 <option key={ m } value={ m }>
                                     { sprintf(
                                         /* translators: %d: number of months */
-                                        _n( '%d month', '%d months', m, 'fundkit-fundraising-campaigns' ),
+                                        _n( '%d month', '%d months', m, 'fundraising-toolkit' ),
                                         m
                                     ) }
                                 </option>
@@ -185,7 +185,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             { action === 'cancel' && (
                 <p>
                     <label>
-                        <span style={ { display: 'block', marginBottom: 4 } }>{ __( 'Reason (optional)', 'fundkit-fundraising-campaigns' ) }</span>
+                        <span style={ { display: 'block', marginBottom: 4 } }>{ __( 'Reason (optional)', 'fundraising-toolkit' ) }</span>
                         <input
                             type="text"
                             className="fundkit-input"
@@ -198,16 +198,16 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
 
             { action === 'retry' && (
                 <p>
-                    { __( 'The gateway will try to collect the outstanding renewal again now. If it succeeds the donation appears within a few moments, once the gateway confirms it.', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'The gateway will try to collect the outstanding renewal again now. If it succeeds the donation appears within a few moments, once the gateway confirms it.', 'fundraising-toolkit' ) }
                 </p>
             ) }
 
             { action === 'skip_next' && (
-                <p>{ __( 'The next payment is skipped and the donation carries on one cycle later. Nothing is charged in between.', 'fundkit-fundraising-campaigns' ) }</p>
+                <p>{ __( 'The next payment is skipped and the donation carries on one cycle later. Nothing is charged in between.', 'fundraising-toolkit' ) }</p>
             ) }
 
             { action === 'resume' && (
-                <p>{ __( 'Charging restarts on the plan’s normal schedule.', 'fundkit-fundraising-campaigns' ) }</p>
+                <p>{ __( 'Charging restarts on the plan’s normal schedule.', 'fundraising-toolkit' ) }</p>
             ) }
 
             { /* Cancellation always emails through the canceller, so offering
@@ -217,9 +217,9 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                     <Switch
                         checked={ notify }
                         onChange={ setNotify }
-                        label={ __( 'Notify donor', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Notify donor', 'fundraising-toolkit' ) }
                     />
-                    <span>{ __( 'Email the donor about this change', 'fundkit-fundraising-campaigns' ) }</span>
+                    <span>{ __( 'Email the donor about this change', 'fundraising-toolkit' ) }</span>
                 </div>
             ) }
 
@@ -227,11 +227,11 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             { approveUrl && (
                 <p style={ { marginTop: 8 } }>
                     <a href={ approveUrl } target="_blank" rel="noreferrer noopener">
-                        { __( 'Open the approval page', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Open the approval page', 'fundraising-toolkit' ) }
                     </a>
                     { ' ' }
                     <span className="fundkit-muted">
-                        { __( 'The donor has to approve it while signed in to their own account.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'The donor has to approve it while signed in to their own account.', 'fundraising-toolkit' ) }
                     </span>
                 </p>
             ) }

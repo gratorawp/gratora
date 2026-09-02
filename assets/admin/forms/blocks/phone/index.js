@@ -17,23 +17,23 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Phone', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Phone', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Phone', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Phone', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Placeholder', 'fundraising-toolkit' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         placeholder="+1 (555) 123 4567"
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Required', 'fundraising-toolkit' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -46,7 +46,7 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <span className="fundkit-block-preview__label">
-                    { label || __( 'Phone', 'fundkit-fundraising-campaigns' ) }
+                    { label || __( 'Phone', 'fundraising-toolkit' ) }
                     { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
                 </span>
                 <div className="fundkit-block-preview__field">
@@ -60,7 +60,7 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Phone', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Phone', 'fundraising-toolkit' ),
         category:   'fundkit-donor',
         icon:       BlockIcons[ 'phone' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

@@ -33,8 +33,8 @@ final class CommentBlock implements Block
     public function render(array $attrs, string $content): string
     {
         return View::loadRelative(__DIR__, 'views/comment', [
-            'label'       => (string) ($attrs['label']       ?? '') ?: __('Add a message', 'fundkit-fundraising-campaigns'),
-            'placeholder' => (string) ($attrs['placeholder'] ?? '') ?: __('Anything you want to share?', 'fundkit-fundraising-campaigns'),
+            'label'       => (string) ($attrs['label']       ?? '') ?: __('Add a message', 'fundraising-toolkit'),
+            'placeholder' => (string) ($attrs['placeholder'] ?? '') ?: __('Anything you want to share?', 'fundraising-toolkit'),
             'required'    => (bool)   ($attrs['required']    ?? false),
         ]);
     }

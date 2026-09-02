@@ -60,9 +60,9 @@ final class FormService
     private static function requiredLabel(string $label): string
     {
         return match ($label) {
-            'Amount' => __('Amount', 'fundkit-fundraising-campaigns'),
-            'Name'   => __('Name', 'fundkit-fundraising-campaigns'),
-            'Email'  => __('Email', 'fundkit-fundraising-campaigns'),
+            'Amount' => __('Amount', 'fundraising-toolkit'),
+            'Name'   => __('Name', 'fundraising-toolkit'),
+            'Email'  => __('Email', 'fundraising-toolkit'),
             default  => $label,
         };
     }
@@ -98,7 +98,7 @@ final class FormService
 
         $title = trim((string) ($input['title'] ?? ''));
         if ($title === '') {
-            $title = __('Untitled donation form', 'fundkit-fundraising-campaigns');
+            $title = __('Untitled donation form', 'fundraising-toolkit');
         }
 
         $campaign = $this->resolveCampaign($input['campaign_id'] ?? null);
@@ -228,10 +228,10 @@ final class FormService
             if ($raw !== '') {
                 $next = sanitize_title($raw);
                 if ($next === '') {
-                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'fundkit-fundraising-campaigns'));
+                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'fundraising-toolkit'));
                 }
                 if ($next !== $form->slug && $this->forms->slugExists($next, $form->id)) {
-                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'fundkit-fundraising-campaigns'));
+                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'fundraising-toolkit'));
                 }
                 $form->slug = $next;
             }
@@ -302,7 +302,7 @@ final class FormService
 
         if ($defaultFormId === (int) $form->id) {
             throw new InvalidArgumentException(
-                esc_html__('This form is the campaign default. Pick a different default form before deleting it.', 'fundkit-fundraising-campaigns')
+                esc_html__('This form is the campaign default. Pick a different default form before deleting it.', 'fundraising-toolkit')
             );
         }
 
@@ -321,7 +321,7 @@ final class FormService
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
         /* translators: %s: original form title */
-        $title = sprintf(__('%s (copy)', 'fundkit-fundraising-campaigns'), $source->title);
+        $title = sprintf(__('%s (copy)', 'fundraising-toolkit'), $source->title);
 
         $copy = Form::make();
         $copy->title        = $title;
@@ -368,7 +368,7 @@ final class FormService
         throw new InvalidArgumentException(
             esc_html(sprintf(
                 /* translators: %s: comma-separated list of missing block labels (Amount, Name, Email). */
-                __('A published donation form needs these blocks: %s.', 'fundkit-fundraising-campaigns'),
+                __('A published donation form needs these blocks: %s.', 'fundraising-toolkit'),
                 implode(', ', $labels)
             ))
         );
@@ -383,11 +383,11 @@ final class FormService
     {
         $id = (int) ($idOrNull ?? 0);
         if ($id <= 0) {
-            throw new InvalidArgumentException(esc_html__('A campaign is required.', 'fundkit-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('A campaign is required.', 'fundraising-toolkit'));
         }
         $campaign = $this->campaigns->findById($id);
         if (! $campaign) {
-            throw new InvalidArgumentException(esc_html__('Campaign not found.', 'fundkit-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('Campaign not found.', 'fundraising-toolkit'));
         }
         return $campaign;
     }
@@ -463,7 +463,7 @@ final class FormService
 
         throw new InvalidArgumentException(esc_html(sprintf(
             /* translators: %s: campaign title. */
-            __('This is the default donation form for %s, so it cannot be moved. Make another form the default first.', 'fundkit-fundraising-campaigns'),
+            __('This is the default donation form for %s, so it cannot be moved. Make another form the default first.', 'fundraising-toolkit'),
             $campaign->title
         )));
     }

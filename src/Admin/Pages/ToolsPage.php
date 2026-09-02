@@ -28,7 +28,7 @@ final class ToolsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Tools', 'fundkit-fundraising-campaigns'),
+            'title'      => __('Tools', 'fundraising-toolkit'),
             'capability' => 'manage_fundkit',
             // After Settings: this is where someone goes once they already know
             // what they are looking for.
@@ -68,7 +68,7 @@ final class ToolsPage extends HookProvider
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         // The list is a DataViews table, and its own layout CSS is a vendor file

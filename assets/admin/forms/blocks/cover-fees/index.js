@@ -10,7 +10,7 @@ function Edit( { attributes, setAttributes } ) {
     const {
         percent   = 2.9,
         fixed     = 30,
-        label     = __( 'I\'d like to help cover the transaction fee', 'fundkit-fundraising-campaigns' ),
+        label     = __( 'I\'d like to help cover the transaction fee', 'fundraising-toolkit' ),
         defaultOn = false,
         condition = DEFAULT_CONDITION,
     } = attributes;
@@ -20,19 +20,19 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Cover the fees', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Cover the fees', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Percent fee', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Percent fee', 'fundraising-toolkit' ) }
                         type="number"
                         step="0.1"
                         min={ 0 }
                         value={ String( percent ) }
                         onChange={ ( v ) => setAttributes( { percent: parseFloat( v ) || 0 } ) }
-                        help={ __( 'e.g. 2.9 for Stripe', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'e.g. 2.9 for Stripe', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Fixed fee', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Fixed fee', 'fundraising-toolkit' ) }
                         type="number"
                         step="0.01"
                         min={ 0 }
@@ -41,14 +41,14 @@ function Edit( { attributes, setAttributes } ) {
                             const major = parseFloat( String( v ).replace( ',', '.' ) );
                             setAttributes( { fixed: isNaN( major ) ? 0 : Math.round( major * 100 ) } );
                         } }
-                        help={ __( 'e.g. 0.30 for Stripe', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'e.g. 0.30 for Stripe', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Default checked', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Default checked', 'fundraising-toolkit' ) }
                         checked={ defaultOn }
                         onChange={ ( v ) => setAttributes( { defaultOn: v } ) }
-                        help={ __( 'Best practice: leave off so donors opt in.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Best practice: leave off so donors opt in.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -72,7 +72,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'I\'d like to help cover the transaction fee', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'I\'d like to help cover the transaction fee', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                     style={ { fontSize: 13, flex: 1 } }
                 />
@@ -84,8 +84,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Cover the fees', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Lets the donor opt to cover the payment processing fee.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Cover the fees', 'fundraising-toolkit' ),
+        description: __( 'Lets the donor opt to cover the payment processing fee.', 'fundraising-toolkit' ),
         category:   'fundkit-amount',
         icon:       BlockIcons[ 'cover-fees' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

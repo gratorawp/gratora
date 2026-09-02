@@ -2,7 +2,7 @@ import { __, sprintf, _n } from '@wordpress/i18n';
 
 export default function DonorCohort( { cohort } ) {
     if ( ! cohort ) {
-        return <p className="fundkit-panel__empty">{ __( 'No donor activity yet.', 'fundkit-fundraising-campaigns' ) }</p>;
+        return <p className="fundkit-panel__empty">{ __( 'No donor activity yet.', 'fundraising-toolkit' ) }</p>;
     }
 
     const {
@@ -13,33 +13,33 @@ export default function DonorCohort( { cohort } ) {
     return (
         <div className="fundkit-cohort">
             <div className="fundkit-cohort__stat">
-                <div className="fundkit-cohort__label">{ __( 'New donors', 'fundkit-fundraising-campaigns' ) }</div>
+                <div className="fundkit-cohort__label">{ __( 'New donors', 'fundraising-toolkit' ) }</div>
                 <div className="fundkit-cohort__value">{ first_time }</div>
                 <div className="fundkit-cohort__sub">
                     { returning > 0
                         ? sprintf(
                             /* translators: 1: number of returning donors, 2: conversion percent */
-                            __( '%1$d came back (%2$s%%)', 'fundkit-fundraising-campaigns' ),
+                            __( '%1$d came back (%2$s%%)', 'fundraising-toolkit' ),
                             returning,
                             conversion_pct === null ? '-' : conversion_pct
                         )
-                        : __( 'No repeat donations yet.', 'fundkit-fundraising-campaigns' ) }
+                        : __( 'No repeat donations yet.', 'fundraising-toolkit' ) }
                 </div>
             </div>
 
             <div className="fundkit-cohort__divider" aria-hidden="true" />
 
             <div className="fundkit-cohort__stat">
-                <div className="fundkit-cohort__label">{ __( 'Recurring donors', 'fundkit-fundraising-campaigns' ) }</div>
+                <div className="fundkit-cohort__label">{ __( 'Recurring donors', 'fundraising-toolkit' ) }</div>
                 <div className="fundkit-cohort__value">{ recurring_active }</div>
                 <div className="fundkit-cohort__sub">
                     { recurring_new_in_range > 0
                         ? sprintf(
                             /* translators: %d: new recurring plans in this range */
-                            _n( '+%d new in range', '+%d new in range', recurring_new_in_range, 'fundkit-fundraising-campaigns' ),
+                            _n( '+%d new in range', '+%d new in range', recurring_new_in_range, 'fundraising-toolkit' ),
                             recurring_new_in_range
                         )
-                        : __( 'No new plans in range.', 'fundkit-fundraising-campaigns' ) }
+                        : __( 'No new plans in range.', 'fundraising-toolkit' ) }
                 </div>
             </div>
 
@@ -47,7 +47,7 @@ export default function DonorCohort( { cohort } ) {
                 <div className="fundkit-cohort__share-label">
                     { sprintf(
                         /* translators: %d: percent of revenue from recurring donors */
-                        __( '%d%% of revenue is recurring', 'fundkit-fundraising-campaigns' ),
+                        __( '%d%% of revenue is recurring', 'fundraising-toolkit' ),
                         recurring_share_pct
                     ) }
                 </div>

@@ -20,7 +20,7 @@ final class DefaultCampaignTypeHandler implements CampaignTypeHandler
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Standard', 'fundkit-fundraising-campaigns');
+        return __('Standard', 'fundraising-toolkit');
     }
 
     /** @since 1.0.0 */

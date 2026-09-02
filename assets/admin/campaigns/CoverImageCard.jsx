@@ -14,9 +14,9 @@ export default function CoverImageCard( { id, url, onChange } ) {
         return (
             <div className="fundkit-cover-card" style={ { gridTemplateColumns: '1fr' } }>
                 <div>
-                    <Btn variant="primary" onClick={ pick }>{ __( 'Select an image', 'fundkit-fundraising-campaigns' ) }</Btn>
+                    <Btn variant="primary" onClick={ pick }>{ __( 'Select an image', 'fundraising-toolkit' ) }</Btn>
                     <div style={ { marginTop: 8, fontSize: 12, color: '#6b7280' } }>
-                        { __( '1600 × 900 (16:9) recommended.', 'fundkit-fundraising-campaigns' ) }
+                        { __( '1600 × 900 (16:9) recommended.', 'fundraising-toolkit' ) }
                     </div>
                 </div>
             </div>
@@ -29,10 +29,10 @@ export default function CoverImageCard( { id, url, onChange } ) {
             <div className="fundkit-cover-card__meta">
                 <AttachmentMeta id={ id } url={ url } />
                 <div className="fundkit-cover-card__actions">
-                    <Btn variant="secondary" size="sm" onClick={ pick }>{ __( 'Replace', 'fundkit-fundraising-campaigns' ) }</Btn>
-                    <Btn variant="ghost" size="sm" onClick={ remove }>{ __( 'Remove', 'fundkit-fundraising-campaigns' ) }</Btn>
+                    <Btn variant="secondary" size="sm" onClick={ pick }>{ __( 'Replace', 'fundraising-toolkit' ) }</Btn>
+                    <Btn variant="ghost" size="sm" onClick={ remove }>{ __( 'Remove', 'fundraising-toolkit' ) }</Btn>
                 </div>
-                <span className="fundkit-cover-card__chip">{ __( 'Cropped on cards · 16:9 expected', 'fundkit-fundraising-campaigns' ) }</span>
+                <span className="fundkit-cover-card__chip">{ __( 'Cropped on cards · 16:9 expected', 'fundraising-toolkit' ) }</span>
             </div>
         </div>
     );
@@ -73,11 +73,11 @@ function AttachmentMeta( { id, url } ) {
 
     return (
         <>
-            <strong>{ meta.filename || __( 'Cover image', 'fundkit-fundraising-campaigns' ) }</strong>
+            <strong>{ meta.filename || __( 'Cover image', 'fundraising-toolkit' ) }</strong>
             { parts && <>{ parts }<br /></> }
             { meta.uploaded && sprintf(
                 /* translators: %s: relative time, e.g. "12d ago" */
-                __( 'Uploaded %s', 'fundkit-fundraising-campaigns' ),
+                __( 'Uploaded %s', 'fundraising-toolkit' ),
                 timeAgo( meta.uploaded ),
             ) }
         </>
@@ -93,12 +93,12 @@ function formatBytes( bytes ) {
 
 function openMediaFrame( { onSelect, currentId } ) {
     if ( ! window.wp?.media ) {
-        notify.error( __( 'Media library not loaded.', 'fundkit-fundraising-campaigns' ) );
+        notify.error( __( 'Media library not loaded.', 'fundraising-toolkit' ) );
         return;
     }
     const frame = window.wp.media( {
-        title:    __( 'Select campaign cover image', 'fundkit-fundraising-campaigns' ),
-        button:   { text: __( 'Use this image', 'fundkit-fundraising-campaigns' ) },
+        title:    __( 'Select campaign cover image', 'fundraising-toolkit' ),
+        button:   { text: __( 'Use this image', 'fundraising-toolkit' ) },
         library:  { type: 'image' },
         multiple: false,
     } );

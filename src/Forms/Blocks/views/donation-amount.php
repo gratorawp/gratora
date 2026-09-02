@@ -9,7 +9,7 @@ defined('ABSPATH') || exit;
 ?>
 <div class="fundkit-block fundkit-block--amount" data-block="fundkit/donation-amount">
     <fieldset class="fundkit-amount">
-        <legend class="fundkit-amount__legend"><?php esc_html_e('Choose an amount', 'fundkit-fundraising-campaigns'); ?></legend>
+        <legend class="fundkit-amount__legend"><?php esc_html_e('Choose an amount', 'fundraising-toolkit'); ?></legend>
         <input type="hidden" name="amount_cents" value="<?php echo esc_attr((string) $default); ?>">
         <input type="hidden" name="currency"     value="<?php echo esc_attr($currency); ?>">
 
@@ -37,13 +37,13 @@ defined('ABSPATH') || exit;
 
         <?php if ($allowCustom): ?>
             <label class="fundkit-amount__custom">
-                <span class="fundkit-amount__custom-label"><?php esc_html_e('Custom amount', 'fundkit-fundraising-campaigns'); ?></span>
+                <span class="fundkit-amount__custom-label"><?php esc_html_e('Custom amount', 'fundraising-toolkit'); ?></span>
                 <input type="number"
                        class="fundkit-amount__custom-input"
                        name="fundkit_amount_custom"
                        step="0.01"
                        min="0.5"
-                       placeholder="<?php esc_attr_e('0.00', 'fundkit-fundraising-campaigns'); ?>"
+                       placeholder="<?php esc_attr_e('0.00', 'fundraising-toolkit'); ?>"
                        inputmode="decimal">
             </label>
         <?php endif; ?>

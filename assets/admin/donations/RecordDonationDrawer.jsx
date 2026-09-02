@@ -14,10 +14,10 @@ import Btn from '../_shared/components/Btn';
 
 // The offline gateway's own list. Anything else is rejected server-side.
 const METHODS = [
-    { value: 'cheque',        label: __( 'Check', 'fundkit-fundraising-campaigns' ) },
-    { value: 'cash',          label: __( 'Cash', 'fundkit-fundraising-campaigns' ) },
-    { value: 'bank_transfer', label: __( 'Bank transfer', 'fundkit-fundraising-campaigns' ) },
-    { value: 'other',         label: __( 'Other', 'fundkit-fundraising-campaigns' ) },
+    { value: 'cheque',        label: __( 'Check', 'fundraising-toolkit' ) },
+    { value: 'cash',          label: __( 'Cash', 'fundraising-toolkit' ) },
+    { value: 'bank_transfer', label: __( 'Bank transfer', 'fundraising-toolkit' ) },
+    { value: 'other',         label: __( 'Other', 'fundraising-toolkit' ) },
 ];
 
 function today() {
@@ -62,7 +62,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
         apiFetch( { path: '/fundkit/v1/admin/donations/fund-options' } )
             .then( ( res ) => setFunds( ( Array.isArray( res ) ? res : [] ).map( ( f ) => {
                 /* translators: %s: fund name. */
-                const isDefault = __( '%s (default)', 'fundkit-fundraising-campaigns' );
+                const isDefault = __( '%s (default)', 'fundraising-toolkit' );
                 return {
                     value: String( f.id ),
                     label: f.is_default ? sprintf( isDefault, f.name ) : f.name,
@@ -80,7 +80,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     label: c.archived
                         ? sprintf(
                             /* translators: %s: campaign title. */
-                            __( '%s (archived)', 'fundkit-fundraising-campaigns' ),
+                            __( '%s (archived)', 'fundraising-toolkit' ),
                             c.title
                         )
                         : c.title,
@@ -160,7 +160,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
             if ( e?.code === 'fundkit_duplicate_donation' ) {
                 setDuplicate( e?.data?.reference || '?' );
             } else {
-                setError( e?.message || __( 'Could not record this donation.', 'fundkit-fundraising-campaigns' ) );
+                setError( e?.message || __( 'Could not record this donation.', 'fundraising-toolkit' ) );
             }
             setSaving( false );
         }
@@ -175,25 +175,25 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 isBusy={ saving }
             >
                 { saving
-                    ? __( 'Recording…', 'fundkit-fundraising-campaigns' )
+                    ? __( 'Recording…', 'fundraising-toolkit' )
                     : duplicate !== ''
-                        ? __( 'Record it anyway', 'fundkit-fundraising-campaigns' )
-                        : __( 'Record donation', 'fundkit-fundraising-campaigns' ) }
+                        ? __( 'Record it anyway', 'fundraising-toolkit' )
+                        : __( 'Record donation', 'fundraising-toolkit' ) }
             </Btn>
             <Btn variant="ghost" onClick={ onClose } disabled={ saving }>
-                { __( 'Cancel', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Cancel', 'fundraising-toolkit' ) }
             </Btn>
         </div>
     );
 
     return (
         <Dialog
-            title={ __( 'Record a donation', 'fundkit-fundraising-campaigns' ) }
+            title={ __( 'Record a donation', 'fundraising-toolkit' ) }
             onClose={ saving ? undefined : onClose }
             foot={ foot }
         >
             <p className="fundkit-dialog__help">
-                { __( 'Money that arrived off the site: a check, cash at an event, a bank transfer.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Money that arrived off the site: a check, cash at an event, a bank transfer.', 'fundraising-toolkit' ) }
             </p>
             <div className="fundkit-rd">
                 { error !== '' && (
@@ -204,13 +204,13 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     <Notice status="warning" isDismissible={ false }>
                         { sprintf(
                             /* translators: %s: the reference of the donation already on the books. */
-                            __( '%s is already down for this donor, this amount and this date. If they really gave twice, record it anyway. Otherwise change something above.', 'fundkit-fundraising-campaigns' ),
+                            __( '%s is already down for this donor, this amount and this date. If they really gave twice, record it anyway. Otherwise change something above.', 'fundraising-toolkit' ),
                             duplicate
                         ) }
                     </Notice>
                 ) }
 
-                <Field label={ __( 'Donor email', 'fundkit-fundraising-campaigns' ) } help={ __( 'Matches an existing donor, or creates one.', 'fundkit-fundraising-campaigns' ) }>
+                <Field label={ __( 'Donor email', 'fundraising-toolkit' ) } help={ __( 'Matches an existing donor, or creates one.', 'fundraising-toolkit' ) }>
                     <input
                         className="fundkit-input"
                         type="email"
@@ -221,30 +221,30 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 </Field>
 
                 <div className="fundkit-rd__row">
-                    <Field label={ __( 'First name', 'fundkit-fundraising-campaigns' ) }>
+                    <Field label={ __( 'First name', 'fundraising-toolkit' ) }>
                         <input className="fundkit-input" type="text" value={ firstName } onChange={ ( e ) => setFirstName( e.target.value ) } />
                     </Field>
-                    <Field label={ __( 'Last name', 'fundkit-fundraising-campaigns' ) }>
+                    <Field label={ __( 'Last name', 'fundraising-toolkit' ) }>
                         <input className="fundkit-input" type="text" value={ lastName } onChange={ ( e ) => setLastName( e.target.value ) } />
                     </Field>
                 </div>
 
-                <Field label={ __( 'Amount', 'fundkit-fundraising-campaigns' ) }>
+                <Field label={ __( 'Amount', 'fundraising-toolkit' ) }>
                     <AmountInput value={ amount } onChange={ edited( setAmount ) } currency={ currency } placeholder="0" />
                 </Field>
 
                 <Field
-                    label={ __( 'Date received', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'When the money arrived, which is not always today. A check banked last month belongs to last month, and the totals for that month depend on this.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Date received', 'fundraising-toolkit' ) }
+                    help={ __( 'When the money arrived, which is not always today. A check banked last month belongs to last month, and the totals for that month depend on this.', 'fundraising-toolkit' ) }
                 >
                     <DateField
                         value={ receivedAt }
                         onChange={ ( next ) => edited( setReceived )( next || '' ) }
-                        ariaLabel={ __( 'Date received', 'fundkit-fundraising-campaigns' ) }
+                        ariaLabel={ __( 'Date received', 'fundraising-toolkit' ) }
                     />
                 </Field>
 
-                <Field label={ __( 'How it arrived', 'fundkit-fundraising-campaigns' ) }>
+                <Field label={ __( 'How it arrived', 'fundraising-toolkit' ) }>
                     <select className="fundkit-select" value={ method } onChange={ ( e ) => setMethod( e.target.value ) }>
                         { METHODS.map( ( m ) => (
                             <option key={ m.value } value={ m.value }>{ m.label }</option>
@@ -253,63 +253,63 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 </Field>
 
                 <Field
-                    label={ __( 'Campaign', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Campaign', 'fundraising-toolkit' ) }
                     help={ campaignsFailed
-                        ? __( 'Campaigns could not be loaded, so this will be recorded without one. Someone with campaign access can set it afterwards.', 'fundkit-fundraising-campaigns' )
-                        : __( 'Optional. Leave empty for a general donation.', 'fundkit-fundraising-campaigns' ) }
+                        ? __( 'Campaigns could not be loaded, so this will be recorded without one. Someone with campaign access can set it afterwards.', 'fundraising-toolkit' )
+                        : __( 'Optional. Leave empty for a general donation.', 'fundraising-toolkit' ) }
                 >
                     <SearchableSelect
                         value={ campaignId }
                         onChange={ ( next ) => { setCampaign( next ); setAttributedTo( '' ); } }
                         options={ campaigns }
                         placeholder={ campaignsFailed
-                            ? __( 'Unavailable', 'fundkit-fundraising-campaigns' )
-                            : __( 'No campaign', 'fundkit-fundraising-campaigns' ) }
+                            ? __( 'Unavailable', 'fundraising-toolkit' )
+                            : __( 'No campaign', 'fundraising-toolkit' ) }
                     />
                 </Field>
 
                 { attributions.length > 0 && (
                     <Field
-                        label={ __( 'Credit to', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Optional. A check handed to somebody raising for this campaign counts towards their total as well as the campaign\'s.', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Credit to', 'fundraising-toolkit' ) }
+                        help={ __( 'Optional. A check handed to somebody raising for this campaign counts towards their total as well as the campaign\'s.', 'fundraising-toolkit' ) }
                     >
                         <SearchableSelect
                             value={ attributedTo }
                             onChange={ setAttributedTo }
                             options={ attributions }
-                            placeholder={ __( 'The campaign itself', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'The campaign itself', 'fundraising-toolkit' ) }
                         />
                     </Field>
                 ) }
 
                 { funds.length > 0 && (
                     <Field
-                        label={ __( 'Fund', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Optional. Leave empty to use the default fund.', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Fund', 'fundraising-toolkit' ) }
+                        help={ __( 'Optional. Leave empty to use the default fund.', 'fundraising-toolkit' ) }
                     >
                         <SearchableSelect
                             value={ fundId }
                             onChange={ setFund }
                             options={ funds }
-                            placeholder={ __( 'Default fund', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'Default fund', 'fundraising-toolkit' ) }
                         />
                     </Field>
                 ) }
 
-                <Field label={ __( 'Note', 'fundkit-fundraising-campaigns' ) } help={ __( 'Only your team sees this.', 'fundkit-fundraising-campaigns' ) }>
+                <Field label={ __( 'Note', 'fundraising-toolkit' ) } help={ __( 'Only your team sees this.', 'fundraising-toolkit' ) }>
                     <textarea className="fundkit-input" rows={ 2 } value={ note } onChange={ ( e ) => setNote( e.target.value ) } />
                 </Field>
 
                 { /* eslint-disable-next-line jsx-a11y/label-has-associated-control -- Switch is self-labeled via its label prop */ }
                 <label className="fundkit-rd__receipt">
-                    <Switch checked={ sendReceipt } onChange={ setReceipt } label={ __( 'Email the donor a receipt', 'fundkit-fundraising-campaigns' ) } />
+                    <Switch checked={ sendReceipt } onChange={ setReceipt } label={ __( 'Email the donor a receipt', 'fundraising-toolkit' ) } />
                     <span className="fundkit-rd__receipt-txt">
                         <strong>{ sendReceipt
-                            ? __( 'Email a receipt', 'fundkit-fundraising-campaigns' )
-                            : __( 'Do not email the donor', 'fundkit-fundraising-campaigns' ) }</strong>
+                            ? __( 'Email a receipt', 'fundraising-toolkit' )
+                            : __( 'Do not email the donor', 'fundraising-toolkit' ) }</strong>
                         <span>{ sendReceipt
-                            ? __( 'The donor gets a receipt for this donation.', 'fundkit-fundraising-campaigns' )
-                            : __( 'Nothing is sent, not even a receipt.', 'fundkit-fundraising-campaigns' ) }</span>
+                            ? __( 'The donor gets a receipt for this donation.', 'fundraising-toolkit' )
+                            : __( 'Nothing is sent, not even a receipt.', 'fundraising-toolkit' ) }</span>
                     </span>
                 </label>
             </div>

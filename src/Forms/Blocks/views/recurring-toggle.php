@@ -10,7 +10,7 @@ defined('ABSPATH') || exit;
  * from the form settings and renders the live pill row; this fallback shows
  * a single hidden value so the no-JS submission still includes a frequency.
  */
-$labelText = $label !== '' ? $label : __('Make this recurring', 'fundkit-fundraising-campaigns');
+$labelText = $label !== '' ? $label : __('Make this recurring', 'fundraising-toolkit');
 ?>
 <fieldset class="fundkit-block fundkit-block--recurring fundkit-recurring fundkit-recurring--<?php echo esc_attr($style); ?>">
     <legend class="fundkit-recurring__legend"><?php echo esc_html($labelText); ?></legend>

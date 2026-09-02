@@ -80,10 +80,10 @@ function CampaignPicker( { value, onChange, noneLabel } ) {
     return (
         <>
             <SelectControl
-                label={ __( 'Campaign', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Campaign', 'fundraising-toolkit' ) }
                 value={ String( value || 0 ) }
                 options={ [
-                    { value: '0', label: noneLabel || __( 'Select a campaign', 'fundkit-fundraising-campaigns' ) },
+                    { value: '0', label: noneLabel || __( 'Select a campaign', 'fundraising-toolkit' ) },
                     ...campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title } ) ),
                 ] }
                 onChange={ ( v ) => onChange( Number( v ) ) }
@@ -91,7 +91,7 @@ function CampaignPicker( { value, onChange, noneLabel } ) {
             />
             { empty && (
                 <Notice status="warning" isDismissible={ false }>
-                    { __( 'No campaigns are available to you. You may not have permission to view them, or none have been created yet.', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'No campaigns are available to you. You may not have permission to view them, or none have been created yet.', 'fundraising-toolkit' ) }
                 </Notice>
             ) }
         </>
@@ -143,8 +143,8 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
             <div { ...blockProps }>
                 <Placeholder
                     icon={ icon }
-                    label={ __( 'FundKit campaign block', 'fundkit-fundraising-campaigns' ) }
-                    instructions={ __( 'Choose which campaign this block should display.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Fundraising Toolkit campaign block', 'fundraising-toolkit' ) }
+                    instructions={ __( 'Choose which campaign this block should display.', 'fundraising-toolkit' ) }
                 >
                     <CampaignPicker
                         value={ attributes.campaignId }
@@ -217,7 +217,7 @@ function CampaignImagePicker( { campaign, campaignId } ) {
             // null clears it; the schema refuses 0.
             image_attachment_id: attachmentId,
         } )
-            .catch( () => setError( __( 'That image could not be saved to the campaign.', 'fundkit-fundraising-campaigns' ) ) )
+            .catch( () => setError( __( 'That image could not be saved to the campaign.', 'fundraising-toolkit' ) ) )
             .finally( () => setBusy( false ) );
     };
 
@@ -242,12 +242,12 @@ function CampaignImagePicker( { campaign, campaignId } ) {
                         <div className="fundkit-block-image-picker__actions">
                             <Button variant="secondary" onClick={ open } disabled={ busy }>
                                 { current
-                                    ? __( 'Replace image', 'fundkit-fundraising-campaigns' )
-                                    : __( 'Choose image', 'fundkit-fundraising-campaigns' ) }
+                                    ? __( 'Replace image', 'fundraising-toolkit' )
+                                    : __( 'Choose image', 'fundraising-toolkit' ) }
                             </Button>
                             { !! current && (
                                 <Button variant="tertiary" isDestructive onClick={ () => apply( null ) } disabled={ busy }>
-                                    { __( 'Remove', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Remove', 'fundraising-toolkit' ) }
                                 </Button>
                             ) }
                         </div>
@@ -256,7 +256,7 @@ function CampaignImagePicker( { campaign, campaignId } ) {
             </MediaUploadCheck>
 
             <p className="fundkit-block-image-picker__note">
-                { __( 'Saved to the campaign as soon as you choose, and used everywhere the campaign appears.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Saved to the campaign as soon as you choose, and used everywhere the campaign appears.', 'fundraising-toolkit' ) }
             </p>
 
             { error && <Notice status="error">{ error }</Notice> }
@@ -266,8 +266,8 @@ function CampaignImagePicker( { campaign, campaignId } ) {
 
 registerBlockType( 'fundkit/campaign-image', {
     apiVersion: 3,
-    title:       __( 'Campaign image', 'fundkit-fundraising-campaigns' ),
-    description: __( "The campaign's cover photo. Follows the campaign, not the page it sits on.", 'fundkit-fundraising-campaigns' ),
+    title:       __( 'Campaign image', 'fundraising-toolkit' ),
+    description: __( "The campaign's cover photo. Follows the campaign, not the page it sits on.", 'fundraising-toolkit' ),
     category:    'fundkit',
     icon:        'format-image',
     attributes: {
@@ -282,7 +282,7 @@ registerBlockType( 'fundkit/campaign-image', {
         const issues = [];
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Image', 'fundkit-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Image', 'fundraising-toolkit' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -291,27 +291,27 @@ registerBlockType( 'fundkit/campaign-image', {
                     />
                     <CampaignImagePicker campaign={ campaign } campaignId={ resolvedId } />
                     <SelectControl
-                        label={ __( 'Aspect ratio', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Aspect ratio', 'fundraising-toolkit' ) }
                         value={ attributes.aspectRatio }
                         options={ [
-                            { value: '16-9', label: __( 'Wide (16:9)',     'fundkit-fundraising-campaigns' ) },
-                            { value: '3-2',  label: __( 'Photo (3:2)',     'fundkit-fundraising-campaigns' ) },
-                            { value: '4-3',  label: __( 'Classic (4:3)',   'fundkit-fundraising-campaigns' ) },
-                            { value: '1-1',  label: __( 'Square (1:1)',    'fundkit-fundraising-campaigns' ) },
-                            { value: 'auto', label: __( "The image's own", 'fundkit-fundraising-campaigns' ) },
+                            { value: '16-9', label: __( 'Wide (16:9)',     'fundraising-toolkit' ) },
+                            { value: '3-2',  label: __( 'Photo (3:2)',     'fundraising-toolkit' ) },
+                            { value: '4-3',  label: __( 'Classic (4:3)',   'fundraising-toolkit' ) },
+                            { value: '1-1',  label: __( 'Square (1:1)',    'fundraising-toolkit' ) },
+                            { value: 'auto', label: __( "The image's own", 'fundraising-toolkit' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { aspectRatio: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Rounded corners', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Rounded corners', 'fundraising-toolkit' ) }
                         checked={ attributes.rounded }
                         onChange={ ( v ) => setAttributes( { rounded: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Load with priority', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Leave on when this is the first image a visitor sees. Turn it off further down the page so it loads only when needed.', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Load with priority', 'fundraising-toolkit' ) }
+                        help={ __( 'Leave on when this is the first image a visitor sees. Turn it off further down the page so it loads only when needed.', 'fundraising-toolkit' ) }
                         checked={ attributes.priority }
                         onChange={ ( v ) => setAttributes( { priority: v } ) }
                         __nextHasNoMarginBottom
@@ -334,15 +334,15 @@ registerBlockType( 'fundkit/campaign-image', {
 // Mirrors CampaignStatMetrics::labels() in PHP, which is what actually renders;
 // a key here that is not there falls back to raised.
 const STAT_METRICS = [
-    { value: 'raised',    label: __( 'Amount raised',    'fundkit-fundraising-campaigns' ) },
-    { value: 'goal',      label: __( 'Our goal',         'fundkit-fundraising-campaigns' ) },
-    { value: 'remaining', label: __( 'Still needed',     'fundkit-fundraising-campaigns' ) },
-    { value: 'percent',   label: __( 'Of goal reached',  'fundkit-fundraising-campaigns' ) },
-    { value: 'donations', label: __( 'Donations',        'fundkit-fundraising-campaigns' ) },
-    { value: 'donors',    label: __( 'Donors',           'fundkit-fundraising-campaigns' ) },
-    { value: 'average',   label: __( 'Average donation', 'fundkit-fundraising-campaigns' ) },
-    { value: 'top',       label: __( 'Top donation',     'fundkit-fundraising-campaigns' ) },
-    { value: 'days_left', label: __( 'Days left',        'fundkit-fundraising-campaigns' ) },
+    { value: 'raised',    label: __( 'Amount raised',    'fundraising-toolkit' ) },
+    { value: 'goal',      label: __( 'Our goal',         'fundraising-toolkit' ) },
+    { value: 'remaining', label: __( 'Still needed',     'fundraising-toolkit' ) },
+    { value: 'percent',   label: __( 'Of goal reached',  'fundraising-toolkit' ) },
+    { value: 'donations', label: __( 'Donations',        'fundraising-toolkit' ) },
+    { value: 'donors',    label: __( 'Donors',           'fundraising-toolkit' ) },
+    { value: 'average',   label: __( 'Average donation', 'fundraising-toolkit' ) },
+    { value: 'top',       label: __( 'Top donation',     'fundraising-toolkit' ) },
+    { value: 'days_left', label: __( 'Days left',        'fundraising-toolkit' ) },
 ];
 
 // Metrics this campaign cannot answer, so the editor says so instead of leaving
@@ -352,13 +352,13 @@ function statIssue( campaign, metric ) {
     const goalType = campaign.goal_type || 'amount';
     const noGoal = ! Number( goalType === 'amount' ? campaign.goal_cents : campaign.goal_count );
     if ( noGoal && [ 'goal', 'remaining', 'percent' ].includes( metric ) ) {
-        return __( 'This campaign has no goal, so this stat will not render.', 'fundkit-fundraising-campaigns' );
+        return __( 'This campaign has no goal, so this stat will not render.', 'fundraising-toolkit' );
     }
     if ( metric === 'days_left' && ! campaign.ends_at ) {
-        return __( 'This campaign has no end date, so this stat will not render.', 'fundkit-fundraising-campaigns' );
+        return __( 'This campaign has no end date, so this stat will not render.', 'fundraising-toolkit' );
     }
     if ( [ 'average', 'top' ].includes( metric ) && ! Number( campaign.donations_count ) ) {
-        return __( 'No donations yet, so this stat will not render until the first one arrives.', 'fundkit-fundraising-campaigns' );
+        return __( 'No donations yet, so this stat will not render until the first one arrives.', 'fundraising-toolkit' );
     }
     return null;
 }
@@ -383,8 +383,8 @@ function StatNotRendering( { label, issue } ) {
 
 registerBlockType( 'fundkit/campaign-stat', {
     apiVersion: 3,
-    title:       __( 'Campaign stat', 'fundkit-fundraising-campaigns' ),
-    description: __( 'A single campaign figure. Add one per number you want to show.', 'fundkit-fundraising-campaigns' ),
+    title:       __( 'Campaign stat', 'fundraising-toolkit' ),
+    description: __( 'A single campaign figure. Add one per number you want to show.', 'fundraising-toolkit' ),
     category:    'fundkit',
     icon:        'chart-bar',
     attributes: {
@@ -401,7 +401,7 @@ registerBlockType( 'fundkit/campaign-stat', {
         const fallbackLabel = ( STAT_METRICS.find( ( m ) => m.value === attributes.metric ) || {} ).label || '';
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Stat', 'fundkit-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Stat', 'fundraising-toolkit' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -409,37 +409,37 @@ registerBlockType( 'fundkit/campaign-stat', {
                         issues={ issues }
                     />
                     <SelectControl
-                        label={ __( 'Figure', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Figure', 'fundraising-toolkit' ) }
                         value={ attributes.metric }
                         options={ STAT_METRICS }
                         onChange={ ( v ) => setAttributes( { metric: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ attributes.label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
                         placeholder={ fallbackLabel }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Size', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Size', 'fundraising-toolkit' ) }
                         value={ attributes.size }
                         options={ [
-                            { value: 'sm', label: __( 'Small',  'fundkit-fundraising-campaigns' ) },
-                            { value: 'md', label: __( 'Medium', 'fundkit-fundraising-campaigns' ) },
-                            { value: 'lg', label: __( 'Large',  'fundkit-fundraising-campaigns' ) },
+                            { value: 'sm', label: __( 'Small',  'fundraising-toolkit' ) },
+                            { value: 'md', label: __( 'Medium', 'fundraising-toolkit' ) },
+                            { value: 'lg', label: __( 'Large',  'fundraising-toolkit' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { size: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Alignment', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Alignment', 'fundraising-toolkit' ) }
                         value={ attributes.align }
                         options={ [
-                            { value: 'left',   label: __( 'Left',   'fundkit-fundraising-campaigns' ) },
-                            { value: 'center', label: __( 'Center', 'fundkit-fundraising-campaigns' ) },
-                            { value: 'right',  label: __( 'Right',  'fundkit-fundraising-campaigns' ) },
+                            { value: 'left',   label: __( 'Left',   'fundraising-toolkit' ) },
+                            { value: 'center', label: __( 'Center', 'fundraising-toolkit' ) },
+                            { value: 'right',  label: __( 'Right',  'fundraising-toolkit' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         __nextHasNoMarginBottom
@@ -469,8 +469,8 @@ registerBlockType( 'fundkit/campaign-stat', {
 
 registerBlockType( 'fundkit/campaign-progress', {
     apiVersion: 3,
-    title:      __( 'Campaign progress', 'fundkit-fundraising-campaigns' ),
-    description: __( 'Progress bar toward the campaign goal.', 'fundkit-fundraising-campaigns' ),
+    title:      __( 'Campaign progress', 'fundraising-toolkit' ),
+    description: __( 'Progress bar toward the campaign goal.', 'fundraising-toolkit' ),
     category:   'fundkit',
     icon:       'chart-line',
     attributes: {
@@ -485,12 +485,12 @@ registerBlockType( 'fundkit/campaign-progress', {
             const goalType = campaign.goal_type || 'amount';
             const target = goalType === 'amount' ? ( campaign.goal_cents ?? 0 ) : ( campaign.goal_count ?? 0 );
             if ( ! target ) {
-                issues.push( __( 'No goal set on this campaign. Until you set one, the bar will sit at 0%.', 'fundkit-fundraising-campaigns' ) );
+                issues.push( __( 'No goal set on this campaign. Until you set one, the bar will sit at 0%.', 'fundraising-toolkit' ) );
             }
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Progress', 'fundkit-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Progress', 'fundraising-toolkit' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -498,17 +498,17 @@ registerBlockType( 'fundkit/campaign-progress', {
                         issues={ issues }
                     />
                     <ToggleControl
-                        label={ __( 'Show labels', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show labels', 'fundraising-toolkit' ) }
                         checked={ attributes.showLabels }
                         onChange={ ( v ) => setAttributes( { showLabels: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Alignment', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Alignment', 'fundraising-toolkit' ) }
                         value={ attributes.align }
                         options={ [
-                            { value: 'left',   label: __( 'Left',   'fundkit-fundraising-campaigns' ) },
-                            { value: 'center', label: __( 'Center', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'left',   label: __( 'Left',   'fundraising-toolkit' ) },
+                            { value: 'center', label: __( 'Center', 'fundraising-toolkit' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         __nextHasNoMarginBottom
@@ -530,8 +530,8 @@ registerBlockType( 'fundkit/campaign-progress', {
 
 registerBlockType( 'fundkit/donate-button', {
     apiVersion: 3,
-    title:      __( 'Donate button', 'fundkit-fundraising-campaigns' ),
-    description: __( 'Button that opens the campaign\'s default donation form.', 'fundkit-fundraising-campaigns' ),
+    title:      __( 'Donate button', 'fundraising-toolkit' ),
+    description: __( 'Button that opens the campaign\'s default donation form.', 'fundraising-toolkit' ),
     category:   'fundkit',
     icon:       'heart',
     attributes: {
@@ -545,14 +545,14 @@ registerBlockType( 'fundkit/donate-button', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && ! campaign.default_form_id ) {
-            issues.push( __( 'This campaign has no default form. The button will appear but clicking it won\'t open anything until a form is set.', 'fundkit-fundraising-campaigns' ) );
+            issues.push( __( 'This campaign has no default form. The button will appear but clicking it won\'t open anything until a form is set.', 'fundraising-toolkit' ) );
         }
         if ( campaign?.status === 'archived' ) {
-            issues.push( __( 'This campaign is archived. The button will render but submissions will be rejected.', 'fundkit-fundraising-campaigns' ) );
+            issues.push( __( 'This campaign is archived. The button will render but submissions will be rejected.', 'fundraising-toolkit' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Donate button', 'fundkit-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Donate button', 'fundraising-toolkit' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -560,36 +560,36 @@ registerBlockType( 'fundkit/donate-button', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ attributes.label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Donate now', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Donate now', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Alignment', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Alignment', 'fundraising-toolkit' ) }
                         value={ attributes.align }
                         options={ [
-                            { value: 'left',   label: __( 'Left',   'fundkit-fundraising-campaigns' ) },
-                            { value: 'center', label: __( 'Center', 'fundkit-fundraising-campaigns' ) },
-                            { value: 'right',  label: __( 'Right',  'fundkit-fundraising-campaigns' ) },
+                            { value: 'left',   label: __( 'Left',   'fundraising-toolkit' ) },
+                            { value: 'center', label: __( 'Center', 'fundraising-toolkit' ) },
+                            { value: 'right',  label: __( 'Right',  'fundraising-toolkit' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Button size', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Button size', 'fundraising-toolkit' ) }
                         value={ attributes.size }
                         options={ [
-                            { value: 'sm', label: __( 'Small',  'fundkit-fundraising-campaigns' ) },
-                            { value: 'md', label: __( 'Medium', 'fundkit-fundraising-campaigns' ) },
-                            { value: 'lg', label: __( 'Large',  'fundkit-fundraising-campaigns' ) },
+                            { value: 'sm', label: __( 'Small',  'fundraising-toolkit' ) },
+                            { value: 'md', label: __( 'Medium', 'fundraising-toolkit' ) },
+                            { value: 'lg', label: __( 'Large',  'fundraising-toolkit' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { size: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Full width', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Full width', 'fundraising-toolkit' ) }
                         checked={ attributes.fullWidth }
                         onChange={ ( v ) => setAttributes( { fullWidth: v } ) }
                         __nextHasNoMarginBottom
@@ -611,8 +611,8 @@ registerBlockType( 'fundkit/donate-button', {
 
 registerBlockType( 'fundkit/top-donors', {
     apiVersion: 3,
-    title:      __( 'Top donors', 'fundkit-fundraising-campaigns' ),
-    description: __( 'Leaderboard of the donors who gave the most to this campaign.', 'fundkit-fundraising-campaigns' ),
+    title:      __( 'Top donors', 'fundraising-toolkit' ),
+    description: __( 'Leaderboard of the donors who gave the most to this campaign.', 'fundraising-toolkit' ),
     category:   'fundkit',
     icon:       'awards',
     attributes: {
@@ -629,11 +629,11 @@ registerBlockType( 'fundkit/top-donors', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
-            issues.push( __( 'No donations yet, so the leaderboard will be empty on the page.', 'fundkit-fundraising-campaigns' ) );
+            issues.push( __( 'No donations yet, so the leaderboard will be empty on the page.', 'fundraising-toolkit' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Top donors', 'fundkit-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Top donors', 'fundraising-toolkit' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -641,32 +641,32 @@ registerBlockType( 'fundkit/top-donors', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Title', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Title', 'fundraising-toolkit' ) }
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Top supporters', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Top supporters', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Empty state text', 'fundraising-toolkit' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'No donors to rank yet.', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'No donors to rank yet.', 'fundraising-toolkit' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Layout', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Layout', 'fundraising-toolkit' ) }
                         value={ attributes.layout }
                         options={ [
-                            { value: 'list',   label: __( 'List',   'fundkit-fundraising-campaigns' ) },
-                            { value: 'podium', label: __( 'Podium', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'list',   label: __( 'List',   'fundraising-toolkit' ) },
+                            { value: 'podium', label: __( 'Podium', 'fundraising-toolkit' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { layout: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'Number of donors', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Number of donors', 'fundraising-toolkit' ) }
                         value={ attributes.limit }
                         onChange={ ( v ) => setAttributes( { limit: Number( v ) || 10 } ) }
                         min={ 3 }
@@ -674,22 +674,22 @@ registerBlockType( 'fundkit/top-donors', {
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donation amount', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show donation amount', 'fundraising-toolkit' ) }
                         checked={ attributes.showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donation count per donor', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show donation count per donor', 'fundraising-toolkit' ) }
                         checked={ attributes.showDonorCount }
                         onChange={ ( v ) => setAttributes( { showDonorCount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Hide anonymous donors', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Hide anonymous donors', 'fundraising-toolkit' ) }
                         checked={ attributes.hideAnonymous }
                         onChange={ ( v ) => setAttributes( { hideAnonymous: v } ) }
-                        help={ __( 'When off, anonymous donors appear as "Anonymous".', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'When off, anonymous donors appear as "Anonymous".', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -709,7 +709,7 @@ registerBlockType( 'fundkit/top-donors', {
                     className="fundkit-campaign-block-edit__title"
                     value={ attributes.title }
                     onChange={ ( v ) => setAttributes( { title: v } ) }
-                    placeholder={ __( 'Top supporters', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Top supporters', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                 />
             </CampaignCanvas>
@@ -720,8 +720,8 @@ registerBlockType( 'fundkit/top-donors', {
 
 registerBlockType( 'fundkit/recent-donations', {
     apiVersion: 3,
-    title:      __( 'Recent donations', 'fundkit-fundraising-campaigns' ),
-    description: __( 'Live feed of the most recent paid donations for this campaign.', 'fundkit-fundraising-campaigns' ),
+    title:      __( 'Recent donations', 'fundraising-toolkit' ),
+    description: __( 'Live feed of the most recent paid donations for this campaign.', 'fundraising-toolkit' ),
     category:   'fundkit',
     icon:       'list-view',
     attributes: {
@@ -738,11 +738,11 @@ registerBlockType( 'fundkit/recent-donations', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
-            issues.push( __( 'No donations yet, so the feed will be empty on the page.', 'fundkit-fundraising-campaigns' ) );
+            issues.push( __( 'No donations yet, so the feed will be empty on the page.', 'fundraising-toolkit' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Recent donations', 'fundkit-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Recent donations', 'fundraising-toolkit' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -750,22 +750,22 @@ registerBlockType( 'fundkit/recent-donations', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Title', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Title', 'fundraising-toolkit' ) }
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Recent donations', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Recent donations', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Empty state text', 'fundraising-toolkit' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'No donations to show yet.', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'No donations to show yet.', 'fundraising-toolkit' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'Number of donations', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Number of donations', 'fundraising-toolkit' ) }
                         value={ attributes.limit }
                         onChange={ ( v ) => setAttributes( { limit: Number( v ) || 10 } ) }
                         min={ 1 }
@@ -773,25 +773,25 @@ registerBlockType( 'fundkit/recent-donations', {
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show amount', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show amount', 'fundraising-toolkit' ) }
                         checked={ attributes.showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show time ago', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show time ago', 'fundraising-toolkit' ) }
                         checked={ attributes.showTime }
                         onChange={ ( v ) => setAttributes( { showTime: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donor message', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show donor message', 'fundraising-toolkit' ) }
                         checked={ attributes.showMessage }
                         onChange={ ( v ) => setAttributes( { showMessage: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Include anonymous donations', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Include anonymous donations', 'fundraising-toolkit' ) }
                         checked={ attributes.showAnonymous }
                         onChange={ ( v ) => setAttributes( { showAnonymous: v } ) }
                         __nextHasNoMarginBottom
@@ -813,7 +813,7 @@ registerBlockType( 'fundkit/recent-donations', {
                     className="fundkit-campaign-block-edit__title"
                     value={ attributes.title }
                     onChange={ ( v ) => setAttributes( { title: v } ) }
-                    placeholder={ __( 'Recent donations', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Recent donations', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                 />
             </CampaignCanvas>
@@ -824,8 +824,8 @@ registerBlockType( 'fundkit/recent-donations', {
 
 registerBlockType( 'fundkit/supporter-wall', {
     apiVersion: 3,
-    title:      __( 'Supporter wall', 'fundkit-fundraising-campaigns' ),
-    description: __( 'A wall of campaign supporters with optional messages.', 'fundkit-fundraising-campaigns' ),
+    title:      __( 'Supporter wall', 'fundraising-toolkit' ),
+    description: __( 'A wall of campaign supporters with optional messages.', 'fundraising-toolkit' ),
     category:   'fundkit',
     icon:       'groups',
     attributes: {
@@ -843,14 +843,14 @@ registerBlockType( 'fundkit/supporter-wall', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
-            issues.push( __( 'No donations yet, so the wall will be empty on the page.', 'fundkit-fundraising-campaigns' ) );
+            issues.push( __( 'No donations yet, so the wall will be empty on the page.', 'fundraising-toolkit' ) );
         }
         // Displayed in major units, stored as cents.
         const minAmountMajor = ( Number( attributes.minAmountCents ) || 0 ) / 100;
         const { step: minAmountStep } = amountEntry( defaultCurrency() );
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Supporter wall', 'fundkit-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Supporter wall', 'fundraising-toolkit' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -858,32 +858,32 @@ registerBlockType( 'fundkit/supporter-wall', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Title', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Title', 'fundraising-toolkit' ) }
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Thank you to our supporters', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Thank you to our supporters', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Empty state text', 'fundraising-toolkit' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'The supporter wall is empty.', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'The supporter wall is empty.', 'fundraising-toolkit' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Sort by', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Sort by', 'fundraising-toolkit' ) }
                         value={ attributes.sort }
                         options={ [
-                            { value: 'recent',       label: __( 'Most recent',  'fundkit-fundraising-campaigns' ) },
-                            { value: 'alphabetical', label: __( 'Alphabetical', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'recent',       label: __( 'Most recent',  'fundraising-toolkit' ) },
+                            { value: 'alphabetical', label: __( 'Alphabetical', 'fundraising-toolkit' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { sort: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'Number of supporters', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Number of supporters', 'fundraising-toolkit' ) }
                         value={ attributes.limit }
                         onChange={ ( v ) => setAttributes( { limit: Number( v ) || 50 } ) }
                         min={ 5 }
@@ -892,7 +892,7 @@ registerBlockType( 'fundkit/supporter-wall', {
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Minimum donation amount', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Minimum donation amount', 'fundraising-toolkit' ) }
                         type="number"
                         min={ 0 }
                         step={ minAmountStep }
@@ -904,29 +904,29 @@ registerBlockType( 'fundkit/supporter-wall', {
                                 : 0;
                             setAttributes( { minAmountCents: cents } );
                         } }
-                        help={ __( 'Only show donors who gave at least this amount. 0 = no minimum.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Only show donors who gave at least this amount. 0 = no minimum.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donor message', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show donor message', 'fundraising-toolkit' ) }
                         checked={ attributes.showMessage }
                         onChange={ ( v ) => setAttributes( { showMessage: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donation amount', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show donation amount', 'fundraising-toolkit' ) }
                         checked={ attributes.showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Columns', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Columns', 'fundraising-toolkit' ) }
                         value={ attributes.columns }
                         options={ [
-                            { value: 'auto', label: __( 'Auto', 'fundkit-fundraising-campaigns' ) },
-                            { value: '2',    label: __( '2', 'fundkit-fundraising-campaigns' ) },
-                            { value: '3',    label: __( '3', 'fundkit-fundraising-campaigns' ) },
-                            { value: '4',    label: __( '4', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'auto', label: __( 'Auto', 'fundraising-toolkit' ) },
+                            { value: '2',    label: __( '2', 'fundraising-toolkit' ) },
+                            { value: '3',    label: __( '3', 'fundraising-toolkit' ) },
+                            { value: '4',    label: __( '4', 'fundraising-toolkit' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { columns: v } ) }
                         __nextHasNoMarginBottom
@@ -948,7 +948,7 @@ registerBlockType( 'fundkit/supporter-wall', {
                     className="fundkit-campaign-block-edit__title"
                     value={ attributes.title }
                     onChange={ ( v ) => setAttributes( { title: v } ) }
-                    placeholder={ __( 'Thank you to our supporters', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Thank you to our supporters', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                 />
             </CampaignCanvas>
@@ -959,8 +959,8 @@ registerBlockType( 'fundkit/supporter-wall', {
 
 registerBlockType( 'fundkit/campaign-grid', {
     apiVersion: 3,
-    title:       __( 'Campaigns grid', 'fundkit-fundraising-campaigns' ),
-    description: __( 'A responsive grid of other published campaigns as cards.', 'fundkit-fundraising-campaigns' ),
+    title:       __( 'Campaigns grid', 'fundraising-toolkit' ),
+    description: __( 'A responsive grid of other published campaigns as cards.', 'fundraising-toolkit' ),
     category:   'fundkit',
     icon:       'grid-view',
     attributes: {
@@ -975,24 +975,24 @@ registerBlockType( 'fundkit/campaign-grid', {
         const revision = useCampaignsRevision();
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Campaigns grid', 'fundkit-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Campaigns grid', 'fundraising-toolkit' ) }>
                     <TextControl
-                        label={ __( 'Heading', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Heading', 'fundraising-toolkit' ) }
                         value={ attributes.heading }
                         onChange={ ( v ) => setAttributes( { heading: v } ) }
-                        help={ __( 'Leave empty when a Heading block above this one already names the section, as the seeded layout does.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Leave empty when a Heading block above this one already names the section, as the seeded layout does.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Empty state text', 'fundraising-toolkit' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'This is the only campaign running right now.', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'This is the only campaign running right now.', 'fundraising-toolkit' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'How many', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'How many', 'fundraising-toolkit' ) }
                         value={ attributes.count }
                         min={ 1 }
                         max={ 12 }
@@ -1000,12 +1000,12 @@ registerBlockType( 'fundkit/campaign-grid', {
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Order by', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Order by', 'fundraising-toolkit' ) }
                         value={ attributes.orderBy }
                         options={ [
-                            { value: 'recent',      label: __( 'Most recent', 'fundkit-fundraising-campaigns' ) },
-                            { value: 'most-funded', label: __( 'Most funded', 'fundkit-fundraising-campaigns' ) },
-                            { value: 'ending-soon', label: __( 'Ending soon', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'recent',      label: __( 'Most recent', 'fundraising-toolkit' ) },
+                            { value: 'most-funded', label: __( 'Most funded', 'fundraising-toolkit' ) },
+                            { value: 'ending-soon', label: __( 'Ending soon', 'fundraising-toolkit' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { orderBy: v } ) }
                         __nextHasNoMarginBottom
@@ -1015,10 +1015,10 @@ registerBlockType( 'fundkit/campaign-grid', {
                             <CampaignPicker
                                 value={ attributes.campaignId }
                                 onChange={ ( v ) => setAttributes( { campaignId: v } ) }
-                                noneLabel={ __( 'Exclude none', 'fundkit-fundraising-campaigns' ) }
+                                noneLabel={ __( 'Exclude none', 'fundraising-toolkit' ) }
                             />
                             <p className="fundkit-block-note fundkit-block-note--muted">
-                                { __( 'The selected campaign (or this page\'s campaign) is excluded from the grid.', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'The selected campaign (or this page\'s campaign) is excluded from the grid.', 'fundraising-toolkit' ) }
                             </p>
                         </>
                     ) }
@@ -1043,8 +1043,8 @@ registerBlockType( 'fundkit/campaign-grid', {
 
 registerBlockType( 'fundkit/donation-form', {
     apiVersion: 3,
-    title:       __( 'Donation form', 'fundkit-fundraising-campaigns' ),
-    description: __( 'Renders the campaign donation form inline on the page.', 'fundkit-fundraising-campaigns' ),
+    title:       __( 'Donation form', 'fundraising-toolkit' ),
+    description: __( 'Renders the campaign donation form inline on the page.', 'fundraising-toolkit' ),
     category:   'fundkit',
     icon:       'money-alt',
     attributes: {
@@ -1065,18 +1065,18 @@ registerBlockType( 'fundkit/donation-form', {
         ).href;
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Donation form', 'fundkit-fundraising-campaigns' ) }>
+                <PanelBody title={ __( 'Donation form', 'fundraising-toolkit' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
                         onCampaignPage={ onCampaignPage }
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Empty state text', 'fundraising-toolkit' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'Donations are not open for this campaign yet.', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Shown when the campaign is not taking donations, so the heading above this block never captions an empty space.', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Donations are not open for this campaign yet.', 'fundraising-toolkit' ) }
+                        help={ __( 'Shown when the campaign is not taking donations, so the heading above this block never captions an empty space.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     { campaign && (
@@ -1088,8 +1088,8 @@ registerBlockType( 'fundkit/donation-form', {
                                 __next40pxDefaultSize
                             >
                                 { formId
-                                    ? __( 'Edit donation form', 'fundkit-fundraising-campaigns' )
-                                    : __( 'Manage donation forms', 'fundkit-fundraising-campaigns' ) }
+                                    ? __( 'Edit donation form', 'fundraising-toolkit' )
+                                    : __( 'Manage donation forms', 'fundraising-toolkit' ) }
                             </Button>
                         </p>
                     ) }

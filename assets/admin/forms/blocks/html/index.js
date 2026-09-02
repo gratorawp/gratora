@@ -42,13 +42,13 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'HTML', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'HTML', 'fundraising-toolkit' ) } initialOpen>
                     <TextareaControl
-                        label={ __( 'HTML markup', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'HTML markup', 'fundraising-toolkit' ) }
                         value={ content }
                         onChange={ ( v ) => setAttributes( { content: v } ) }
                         rows={ 8 }
-                        help={ __( 'Sanitised on save: scripts, iframes and embeds, event handlers, and JavaScript URLs are stripped.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Sanitised on save: scripts, iframes and embeds, event handlers, and JavaScript URLs are stripped.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -60,7 +60,7 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 { ! content ? (
                     <div className="fundkit-block-preview__html-empty">
-                        { __( 'Add HTML in the block settings panel.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Add HTML in the block settings panel.', 'fundraising-toolkit' ) }
                     </div>
                 ) : preview.trim() ? (
                     <Disabled>
@@ -68,7 +68,7 @@ function Edit( { attributes, setAttributes } ) {
                     </Disabled>
                 ) : (
                     <div className="fundkit-block-preview__html-empty">
-                        { __( 'Nothing to preview: scripts and embeds are removed when the form is saved.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Nothing to preview: scripts and embeds are removed when the form is saved.', 'fundraising-toolkit' ) }
                     </div>
                 ) }
             </div>
@@ -79,8 +79,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'HTML', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Add a sponsor strip, formatted text, or other safe HTML. Scripts and embeds are stripped.', 'fundkit-fundraising-campaigns' ),
+        title:       __( 'HTML', 'fundraising-toolkit' ),
+        description: __( 'Add a sponsor strip, formatted text, or other safe HTML. Scripts and embeds are stripped.', 'fundraising-toolkit' ),
         category:    'fundkit-content',
         icon:        BlockIcons[ 'html' ],
         supports:    { html: false, anchor: false, inserter: true },

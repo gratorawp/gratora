@@ -244,12 +244,12 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         $params = $request->get_json_params() ?: $request->get_body_params();
         $body   = trim((string) ($params['body'] ?? ''));
         if ($body === '') {
-            return new WP_Error('fundkit_invalid', __('Note body is required.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_invalid', __('Note body is required.', 'fundraising-toolkit'), ['status' => 400]);
         }
         $note = $this->notes->create($donation->id, $body, get_current_user_id() ?: null);
         return new WP_REST_Response($note, 201);
@@ -261,10 +261,10 @@ final class DonationsController
         $noteId = (int) $request['note_id'];
         $note = $this->notes->findById($noteId);
         if (! $note) {
-            return new WP_Error('fundkit_not_found', __('Note not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Note not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         if ($note->author_user_id && $note->author_user_id !== get_current_user_id() && ! current_user_can('manage_options')) {
-            return new WP_Error('fundkit_forbidden', __('You cannot delete this note.', 'fundkit-fundraising-campaigns'), ['status' => 403]);
+            return new WP_Error('fundkit_forbidden', __('You cannot delete this note.', 'fundraising-toolkit'), ['status' => 403]);
         }
         $this->notes->delete($noteId);
         return new WP_REST_Response(['deleted' => true], 200);
@@ -405,14 +405,14 @@ final class DonationsController
     {
         $offline = $this->gateways->get('offline');
         if (! $offline) {
-            return new WP_Error('fundkit_offline_unavailable', __('The offline gateway is not available.', 'fundkit-fundraising-campaigns'), ['status' => 500]);
+            return new WP_Error('fundkit_offline_unavailable', __('The offline gateway is not available.', 'fundraising-toolkit'), ['status' => 500]);
         }
 
         $method = (string) $request['payment_method'];
         if (! in_array($method, $offline->paymentMethods(), true)) {
             return new WP_Error(
                 'fundkit_invalid_payment_method',
-                __('That is not a way money can arrive offline.', 'fundkit-fundraising-campaigns'),
+                __('That is not a way money can arrive offline.', 'fundraising-toolkit'),
                 ['status' => 400]
             );
         }
@@ -421,7 +421,7 @@ final class DonationsController
         if ($receivedAt === null) {
             return new WP_Error(
                 'fundkit_invalid_received_at',
-                __('Give the date the money arrived, and it cannot be in the future.', 'fundkit-fundraising-campaigns'),
+                __('Give the date the money arrived, and it cannot be in the future.', 'fundraising-toolkit'),
                 ['status' => 400]
             );
         }
@@ -436,7 +436,7 @@ final class DonationsController
         if (Currency::minorUnits($currency) === 0 && ((int) $request['amount_cents']) % 100 !== 0) {
             return new WP_Error(
                 'fundkit_invalid_amount',
-                __('This currency does not support fractional amounts.', 'fundkit-fundraising-campaigns'),
+                __('This currency does not support fractional amounts.', 'fundraising-toolkit'),
                 ['status' => 422]
             );
         }
@@ -446,7 +446,7 @@ final class DonationsController
                 'fundkit_unsupported_currency',
                 sprintf(
                     /* translators: 1: the currency code entered, 2: the accepted codes. */
-                    __('%1$s is not one of your accepted currencies (%2$s). Add it under Settings, Currency, so it can be converted into your reporting totals.', 'fundkit-fundraising-campaigns'),
+                    __('%1$s is not one of your accepted currencies (%2$s). Add it under Settings, Currency, so it can be converted into your reporting totals.', 'fundraising-toolkit'),
                     $currency,
                     implode(', ', SupportedCurrencies::all())
                 ),
@@ -464,7 +464,7 @@ final class DonationsController
             if ($existing !== null) {
                 return new WP_Error(
                     'fundkit_duplicate_donation',
-                    __('This donor is already down for the same amount on that date.', 'fundkit-fundraising-campaigns'),
+                    __('This donor is already down for the same amount on that date.', 'fundraising-toolkit'),
                     ['status' => 409, 'reference' => (string) $existing->reference]
                 );
             }
@@ -486,7 +486,7 @@ final class DonationsController
             if ($extra === []) {
                 return new WP_Error(
                     'fundkit_invalid_attribution',
-                    __('That is not somebody this campaign can credit a donation to.', 'fundkit-fundraising-campaigns'),
+                    __('That is not somebody this campaign can credit a donation to.', 'fundraising-toolkit'),
                     ['status' => 422]
                 );
             }
@@ -581,7 +581,7 @@ final class DonationsController
             if ($recorded !== null && (string) $recorded->status === 'pending') {
                 $this->donationService->markFailed(
                     $recorded,
-                    __('Recording this donation by hand did not finish.', 'fundkit-fundraising-campaigns')
+                    __('Recording this donation by hand did not finish.', 'fundraising-toolkit')
                 );
             }
 
@@ -592,7 +592,7 @@ final class DonationsController
             (int) $donation->id,
             sprintf(
                 /* translators: %s: how the money arrived, e.g. check. */
-                __('Recorded by hand. Received as %s.', 'fundkit-fundraising-campaigns'),
+                __('Recorded by hand. Received as %s.', 'fundraising-toolkit'),
                 $method
             ),
             get_current_user_id() ?: null
@@ -885,7 +885,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         $donor = $this->donors->findById($donation->donor_id);
@@ -1073,14 +1073,14 @@ final class DonationsController
     {
         $donation = $this->donations->findByReference((string) $request['reference']);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         $released = $this->donationService->failAwaitedRefund($donation, (string) $request['gateway_refund_id']);
         if (! $released) {
             return new WP_Error(
                 'fundkit_refund_not_awaiting',
-                __('That refund is not waiting to settle, so there is nothing to release.', 'fundkit-fundraising-campaigns'),
+                __('That refund is not waiting to settle, so there is nothing to release.', 'fundraising-toolkit'),
                 ['status' => 422]
             );
         }
@@ -1093,7 +1093,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         if ($donation->status === 'paid') {
             return new WP_REST_Response($this->show($request)->get_data(), 200);
@@ -1106,7 +1106,7 @@ final class DonationsController
                 'fundkit_invalid_transition',
                 sprintf(
                     /* translators: %s: current donation status. */
-                    __('Cannot mark a %s donation as paid.', 'fundkit-fundraising-campaigns'),
+                    __('Cannot mark a %s donation as paid.', 'fundraising-toolkit'),
                     $donation->status
                 ),
                 ['status' => 422]
@@ -1146,7 +1146,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         if ($donation->status === 'failed') {
             return new WP_REST_Response($this->show($request)->get_data(), 200);
@@ -1154,7 +1154,7 @@ final class DonationsController
         if ($donation->status === 'paid') {
             return new WP_Error(
                 'fundkit_invalid_transition',
-                __('A paid donation cannot be marked as failed. Use refund instead.', 'fundkit-fundraising-campaigns'),
+                __('A paid donation cannot be marked as failed. Use refund instead.', 'fundraising-toolkit'),
                 ['status' => 422]
             );
         }
@@ -1165,7 +1165,7 @@ final class DonationsController
                 'fundkit_invalid_transition',
                 sprintf(
                     /* translators: %s: current donation status. */
-                    __('Cannot mark a %s donation as failed.', 'fundkit-fundraising-campaigns'),
+                    __('Cannot mark a %s donation as failed.', 'fundraising-toolkit'),
                     $donation->status
                 ),
                 ['status' => 422]
@@ -1191,7 +1191,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         $body = (array) ($request->get_json_params() ?? []);
@@ -1208,7 +1208,7 @@ final class DonationsController
         if ($cancelPlan && $planId === 0) {
             return new WP_Error(
                 'fundkit_no_plan',
-                __('This donation is not part of a recurring schedule, so there is nothing to cancel. No refund was issued.', 'fundkit-fundraising-campaigns'),
+                __('This donation is not part of a recurring schedule, so there is nothing to cancel. No refund was issued.', 'fundraising-toolkit'),
                 ['status' => 422]
             );
         }
@@ -1272,7 +1272,7 @@ final class DonationsController
                 'id'      => $planId,
                 'status'  => null,
                 'stopped' => false,
-                'error'   => __('The recurring schedule could not be found, so it is still running.', 'fundkit-fundraising-campaigns'),
+                'error'   => __('The recurring schedule could not be found, so it is still running.', 'fundraising-toolkit'),
             ];
         }
 
@@ -1305,7 +1305,7 @@ final class DonationsController
             'stopped' => $stopped,
             'error'   => $stopped ? null : ($response->is_error()
                 ? $response->as_error()->get_error_message()
-                : __('The recurring schedule is still running.', 'fundkit-fundraising-campaigns')),
+                : __('The recurring schedule is still running.', 'fundraising-toolkit')),
         ];
     }
 
@@ -1315,7 +1315,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         // Erasure wiped the address, so the issuer would find nothing to send to
@@ -1326,7 +1326,7 @@ final class DonationsController
         if ($donor && $donor->redacted_at !== null) {
             return new WP_Error(
                 'fundkit_donor_redacted',
-                __('This donor has been erased, so there is no address to send a receipt to.', 'fundkit-fundraising-campaigns'),
+                __('This donor has been erased, so there is no address to send a receipt to.', 'fundraising-toolkit'),
                 ['status' => 422],
             );
         }
@@ -1335,7 +1335,7 @@ final class DonationsController
         if (! $ok) {
             return new WP_Error(
                 'fundkit_resend_unavailable',
-                __('Receipts can only be resent for paid donations.', 'fundkit-fundraising-campaigns'),
+                __('Receipts can only be resent for paid donations.', 'fundraising-toolkit'),
                 ['status' => 422],
             );
         }
@@ -1359,14 +1359,14 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation  = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         $flags = (array) ($donation->flags ?? []);
         if (empty($flags['subscription_creation_failed'])) {
             return new WP_Error(
                 'fundkit_no_retry_needed',
-                __('No subscription-creation failure is recorded for this donation.', 'fundkit-fundraising-campaigns'),
+                __('No subscription-creation failure is recorded for this donation.', 'fundraising-toolkit'),
                 ['status' => 422]
             );
         }
@@ -1377,7 +1377,7 @@ final class DonationsController
         if (! in_array((string) $donation->status, ['paid', 'partial_refund'], true)) {
             return new WP_Error(
                 'fundkit_retry_not_allowed',
-                __('A recurring plan can only be created from a donation the organisation was paid and still holds. This one was refunded, reversed, or never settled.', 'fundkit-fundraising-campaigns'),
+                __('A recurring plan can only be created from a donation the organisation was paid and still holds. This one was refunded, reversed, or never settled.', 'fundraising-toolkit'),
                 ['status' => 422]
             );
         }
@@ -1386,7 +1386,7 @@ final class DonationsController
         if (! $gateway instanceof \FundKit\Gateways\Stripe\StripeGateway) {
             return new WP_Error(
                 'fundkit_unsupported_gateway',
-                __('Only Stripe subscriptions can be retried.', 'fundkit-fundraising-campaigns'),
+                __('Only Stripe subscriptions can be retried.', 'fundraising-toolkit'),
                 ['status' => 422]
             );
         }
@@ -1416,14 +1416,14 @@ final class DonationsController
 
         $receipt = $this->receipts->findById($receiptId);
         if (! $receipt) {
-            return new WP_Error('fundkit_not_found', __('Receipt not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Receipt not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         $pdf = $this->receiptIssuer->renderReceiptPdf($receiptId);
         if ($pdf === null || $pdf === '') {
             return new WP_Error(
                 'fundkit_render_failed',
-                __('Could not regenerate the receipt PDF. The original renderer may have been removed.', 'fundkit-fundraising-campaigns'),
+                __('Could not regenerate the receipt PDF. The original renderer may have been removed.', 'fundraising-toolkit'),
                 ['status' => 500],
             );
         }
@@ -1612,29 +1612,29 @@ final class DonationsController
         fwrite($out, "\xEF\xBB\xBF");
 
         Csv::writeRow($out, array_merge([
-            __('Reference', 'fundkit-fundraising-campaigns'),
-            __('Status', 'fundkit-fundraising-campaigns'),
-            __('Amount', 'fundkit-fundraising-campaigns'),
-            __('Currency', 'fundkit-fundraising-campaigns'),
-            __('Base amount', 'fundkit-fundraising-campaigns'),
-            __('Base currency', 'fundkit-fundraising-campaigns'),
-            __('Fee', 'fundkit-fundraising-campaigns'),
-            __('Net', 'fundkit-fundraising-campaigns'),
+            __('Reference', 'fundraising-toolkit'),
+            __('Status', 'fundraising-toolkit'),
+            __('Amount', 'fundraising-toolkit'),
+            __('Currency', 'fundraising-toolkit'),
+            __('Base amount', 'fundraising-toolkit'),
+            __('Base currency', 'fundraising-toolkit'),
+            __('Fee', 'fundraising-toolkit'),
+            __('Net', 'fundraising-toolkit'),
             // Its own column rather than netted off Net: Net is the amount less
             // the processing fee, which is what the gateway settled, so a row
             // refunded afterwards has to carry both figures to reconcile.
-            __('Refunded', 'fundkit-fundraising-campaigns'),
-            __('Gateway', 'fundkit-fundraising-campaigns'),
-            __('Frequency', 'fundkit-fundraising-campaigns'),
-            __('Fund', 'fundkit-fundraising-campaigns'),
-            __('Country', 'fundkit-fundraising-campaigns'),
+            __('Refunded', 'fundraising-toolkit'),
+            __('Gateway', 'fundraising-toolkit'),
+            __('Frequency', 'fundraising-toolkit'),
+            __('Fund', 'fundraising-toolkit'),
+            __('Country', 'fundraising-toolkit'),
         ], $withDonorPii ? [
-            __('Donor name', 'fundkit-fundraising-campaigns'),
-            __('Donor email', 'fundkit-fundraising-campaigns'),
+            __('Donor name', 'fundraising-toolkit'),
+            __('Donor email', 'fundraising-toolkit'),
         ] : [], [
-            __('Created at', 'fundkit-fundraising-campaigns'),
-            __('Paid at', 'fundkit-fundraising-campaigns'),
-            __('Refunded at', 'fundkit-fundraising-campaigns'),
+            __('Created at', 'fundraising-toolkit'),
+            __('Paid at', 'fundraising-toolkit'),
+            __('Refunded at', 'fundraising-toolkit'),
         ]));
 
         $ids = $this->donations->listIdsForExport($filters + ['limit' => self::EXPORT_MAX_ROWS]);
@@ -1861,11 +1861,11 @@ final class DonationsController
     public static function gatewayLabel(string $slug): string
     {
         $known = [
-            'stripe'  => __('Stripe', 'fundkit-fundraising-campaigns'),
-            'paypal'  => __('PayPal', 'fundkit-fundraising-campaigns'),
-            'offline' => __('Offline', 'fundkit-fundraising-campaigns'),
-            'sandbox' => __('Test donation', 'fundkit-fundraising-campaigns'),
-            'manual'  => __('Manually entered', 'fundkit-fundraising-campaigns'),
+            'stripe'  => __('Stripe', 'fundraising-toolkit'),
+            'paypal'  => __('PayPal', 'fundraising-toolkit'),
+            'offline' => __('Offline', 'fundraising-toolkit'),
+            'sandbox' => __('Test donation', 'fundraising-toolkit'),
+            'manual'  => __('Manually entered', 'fundraising-toolkit'),
         ];
 
         if (isset($known[$slug])) {

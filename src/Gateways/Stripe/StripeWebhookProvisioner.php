@@ -104,7 +104,7 @@ final class StripeWebhookProvisioner
         $created = $this->api->post('/webhook_endpoints', [
             'url'            => $url,
             'enabled_events' => self::EVENTS,
-            'description'    => 'FundKit',
+            'description'    => 'Fundraising Toolkit',
             // Without this the endpoint renders events at whatever the account
             // defaults to, which on any account created since March 2025 is a
             // version that moved fields the handlers read.

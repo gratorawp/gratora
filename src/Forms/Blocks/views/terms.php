@@ -7,8 +7,8 @@ defined('ABSPATH') || exit;
  * @var string $linkText
  * @var string $purpose
  */
-$labelText = $label !== '' ? $label : __('I agree to the terms', 'fundkit-fundraising-campaigns');
-$linkLabel = $linkText !== '' ? $linkText : __('Read the terms', 'fundkit-fundraising-campaigns');
+$labelText = $label !== '' ? $label : __('I agree to the terms', 'fundraising-toolkit');
+$linkLabel = $linkText !== '' ? $linkText : __('Read the terms', 'fundraising-toolkit');
 ?>
 <div class="fundkit-block fundkit-block--terms fundkit-terms">
     <label class="fundkit-terms__agree">

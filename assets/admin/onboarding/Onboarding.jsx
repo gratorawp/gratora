@@ -77,26 +77,26 @@ const USER_TYPES = [
     {
         id:   'nonprofit',
         icon: 'building',
-        name: __( 'Nonprofit or charity', 'fundkit-fundraising-campaigns' ),
-        desc: __( 'Registered organization collecting tax-deductible donations.', 'fundkit-fundraising-campaigns' ),
+        name: __( 'Nonprofit or charity', 'fundraising-toolkit' ),
+        desc: __( 'Registered organization collecting tax-deductible donations.', 'fundraising-toolkit' ),
     },
     {
         id:   'community',
         icon: 'users',
-        name: __( 'Community or faith group', 'fundkit-fundraising-campaigns' ),
-        desc: __( 'Church, school, club, mutual-aid group.', 'fundkit-fundraising-campaigns' ),
+        name: __( 'Community or faith group', 'fundraising-toolkit' ),
+        desc: __( 'Church, school, club, mutual-aid group.', 'fundraising-toolkit' ),
     },
     {
         id:   'individual',
         icon: 'heart',
-        name: __( 'Individual fundraiser', 'fundkit-fundraising-campaigns' ),
-        desc: __( 'Personal cause, crowdfund, or memorial fund.', 'fundkit-fundraising-campaigns' ),
+        name: __( 'Individual fundraiser', 'fundraising-toolkit' ),
+        desc: __( 'Personal cause, crowdfund, or memorial fund.', 'fundraising-toolkit' ),
     },
     {
         id:   'exploring',
         icon: 'target',
-        name: __( 'Just exploring', 'fundkit-fundraising-campaigns' ),
-        desc: __( 'Trying FundKit out. Starts in test mode, so nothing takes real money until you switch it off.', 'fundkit-fundraising-campaigns' ),
+        name: __( 'Just exploring', 'fundraising-toolkit' ),
+        desc: __( 'Trying Fundraising Toolkit out. Starts in test mode, so nothing takes real money until you switch it off.', 'fundraising-toolkit' ),
     },
 ];
 
@@ -192,19 +192,19 @@ export default function Onboarding() {
         try {
             if ( step === 0 ) {
                 if ( ! who.user_type ) {
-                    throw new Error( __( 'Pick who is fundraising to continue.', 'fundkit-fundraising-campaigns' ) );
+                    throw new Error( __( 'Pick who is fundraising to continue.', 'fundraising-toolkit' ) );
                 }
                 await persist( 'org-profile', { user_type: who.user_type } );
             } else if ( step === 1 ) {
                 if ( ! org.country ) {
-                    throw new Error( __( 'Pick a country to continue.', 'fundkit-fundraising-campaigns' ) );
+                    throw new Error( __( 'Pick a country to continue.', 'fundraising-toolkit' ) );
                 }
                 // A country that subdivides still needs its state: it is part of
                 // where the organization is, and it is one click. The postal
                 // address is not asked for here -- it is optional in Settings,
                 // and the receipt renderer omits the block when it is unset.
                 if ( STATES_BY_COUNTRY[ org.country ] && ! ( org.state || '' ).trim() ) {
-                    throw new Error( __( 'Pick a state or province to continue.', 'fundkit-fundraising-campaigns' ) );
+                    throw new Error( __( 'Pick a state or province to continue.', 'fundraising-toolkit' ) );
                 }
                 await persist( 'org-profile', {
                     name:           org.name,
@@ -248,17 +248,17 @@ export default function Onboarding() {
                     method: 'POST',
                     data:   {
                         campaign_title: org.name
-                            ? `${ org.name } - ${ __( 'General donations', 'fundkit-fundraising-campaigns' ) }`
-                            : __( 'General donations', 'fundkit-fundraising-campaigns' ),
+                            ? `${ org.name } - ${ __( 'General donations', 'fundraising-toolkit' ) }`
+                            : __( 'General donations', 'fundraising-toolkit' ),
                         user_type:      who.user_type,
                     },
                 } );
-                if ( ! r?.ok ) throw new Error( __( 'Could not finalize onboarding.', 'fundkit-fundraising-campaigns' ) );
+                if ( ! r?.ok ) throw new Error( __( 'Could not finalize onboarding.', 'fundraising-toolkit' ) );
                 setFinalized( r );
             }
             setStep( ( s ) => Math.min( TOTAL - 1, s + 1 ) );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not save. Please try again.', 'fundkit-fundraising-campaigns' ) );
+            setError( err?.message || __( 'Could not save. Please try again.', 'fundraising-toolkit' ) );
         } finally {
             setBusy( false );
         }
@@ -277,7 +277,7 @@ export default function Onboarding() {
         } catch ( e ) {
             // A failed dismiss leaves onboarding 'pending', so admin_init would
             // bounce us straight back here; surface the error instead of looping.
-            setError( __( 'Could not skip setup. Please try again.', 'fundkit-fundraising-campaigns' ) );
+            setError( __( 'Could not skip setup. Please try again.', 'fundraising-toolkit' ) );
             return;
         }
         window.location.assign( wp.settings_url || wp.dashboard_url || '' );
@@ -294,7 +294,7 @@ export default function Onboarding() {
                 </span>
                 { ! isChecklist && (
                     <button type="button" className="fundkit-onboarding__skip" onClick={ skip }>
-                        { __( 'Skip for now', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Skip for now', 'fundraising-toolkit' ) }
                     </button>
                 ) }
             </div>
@@ -302,7 +302,7 @@ export default function Onboarding() {
             <section ref={ frameRef } className={ `fundkit-onboarding__frame${ step === 2 ? ' is-wide' : '' }` }>
                 <div className="fundkit-onboarding__meta">
                     <span className="fundkit-onboarding__caption">
-                        { sprintf( /* translators: %1$d: current step number. %2$d: total number of steps. */ __( 'Step %1$d of %2$d', 'fundkit-fundraising-campaigns' ), step + 1, TOTAL ) }
+                        { sprintf( /* translators: %1$d: current step number. %2$d: total number of steps. */ __( 'Step %1$d of %2$d', 'fundraising-toolkit' ), step + 1, TOTAL ) }
                     </span>
                     <span className="fundkit-onboarding__dots" aria-hidden="true">
                         { Array.from( { length: TOTAL } ).map( ( _, i ) => (
@@ -339,7 +339,7 @@ export default function Onboarding() {
                                 onClick={ back }
                                 disabled={ busy }
                             >
-                                ← { __( 'Back', 'fundkit-fundraising-campaigns' ) }
+                                ← { __( 'Back', 'fundraising-toolkit' ) }
                             </button>
                         ) }
 
@@ -359,10 +359,10 @@ export default function Onboarding() {
 }
 
 function ctaLabel( step, busy ) {
-    if ( busy ) return __( 'Saving…', 'fundkit-fundraising-campaigns' );
-    if ( step === 0 ) return __( 'Get started', 'fundkit-fundraising-campaigns' );
-    if ( step === 2 ) return __( 'Finish setup', 'fundkit-fundraising-campaigns' ) + ' →';
-    return __( 'Next', 'fundkit-fundraising-campaigns' ) + ' →';
+    if ( busy ) return __( 'Saving…', 'fundraising-toolkit' );
+    if ( step === 0 ) return __( 'Get started', 'fundraising-toolkit' );
+    if ( step === 2 ) return __( 'Finish setup', 'fundraising-toolkit' ) + ' →';
+    return __( 'Next', 'fundraising-toolkit' ) + ' →';
 }
 
 // Step 1: who is fundraising
@@ -371,10 +371,10 @@ function FundraiserTypeStep( { value, onChange } ) {
     return (
         <div>
             <h2 className="fundkit-onboarding__headline">
-                { __( "Who's fundraising?", 'fundkit-fundraising-campaigns' ) }
+                { __( "Who's fundraising?", 'fundraising-toolkit' ) }
             </h2>
             <p className="fundkit-onboarding__subtitle">
-                { __( 'Pick the one that fits best.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Pick the one that fits best.', 'fundraising-toolkit' ) }
             </p>
 
             <div className="fundkit-onboarding__section">
@@ -436,43 +436,43 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
 
     return (
         <div>
-            <h2 className="fundkit-onboarding__headline">{ __( 'Where are you based?', 'fundkit-fundraising-campaigns' ) }</h2>
+            <h2 className="fundkit-onboarding__headline">{ __( 'Where are you based?', 'fundraising-toolkit' ) }</h2>
             <p className="fundkit-onboarding__subtitle">
-                { __( "We use this for receipts and your default currency.", 'fundkit-fundraising-campaigns' ) }
+                { __( "We use this for receipts and your default currency.", 'fundraising-toolkit' ) }
             </p>
 
             <div className="fundkit-onboarding__section">
                 <div className="fundkit-onboarding__section-label">
-                    { isIndividual ? __( 'About you', 'fundkit-fundraising-campaigns' ) : __( 'Organization', 'fundkit-fundraising-campaigns' ) }
+                    { isIndividual ? __( 'About you', 'fundraising-toolkit' ) : __( 'Organization', 'fundraising-toolkit' ) }
                 </div>
                 <div className="fundkit-onboarding__address">
                     <div className="span-2">
                         <label className="fundkit-onboarding__field-label">
-                            { isIndividual ? __( 'Your name', 'fundkit-fundraising-campaigns' ) : __( 'Organization name', 'fundkit-fundraising-campaigns' ) }
+                            { isIndividual ? __( 'Your name', 'fundraising-toolkit' ) : __( 'Organization name', 'fundraising-toolkit' ) }
                         </label>
                         <input
                             type="text"
                             className="fundkit-onboarding__input"
                             value={ value.name }
                             onChange={ ( e ) => set( { name: e.target.value } ) }
-                            placeholder={ __( 'Shown on receipts and your campaign', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'Shown on receipts and your campaign', 'fundraising-toolkit' ) }
                         />
                     </div>
                     <div className="span-2">
-                        <label className="fundkit-onboarding__field-label">{ __( 'Contact email', 'fundkit-fundraising-campaigns' ) }</label>
+                        <label className="fundkit-onboarding__field-label">{ __( 'Contact email', 'fundraising-toolkit' ) }</label>
                         <input
                             type="email"
                             className="fundkit-onboarding__input"
                             value={ value.email }
                             onChange={ ( e ) => set( { email: e.target.value } ) }
-                            placeholder={ __( 'Where donors reply and receipts come from', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'Where donors reply and receipts come from', 'fundraising-toolkit' ) }
                         />
                     </div>
                 </div>
             </div>
 
             <div className="fundkit-onboarding__section">
-                <div className="fundkit-onboarding__section-label">{ __( 'Country', 'fundkit-fundraising-campaigns' ) }</div>
+                <div className="fundkit-onboarding__section-label">{ __( 'Country', 'fundraising-toolkit' ) }</div>
                 <div className="fundkit-onboarding__country-row">
                     <CountrySelect
                         value={ value.country }
@@ -480,12 +480,12 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
                     />
                     { states && (
                         <div>
-                            <label className="fundkit-onboarding__field-label">{ __( 'State', 'fundkit-fundraising-campaigns' ) }</label>
+                            <label className="fundkit-onboarding__field-label">{ __( 'State', 'fundraising-toolkit' ) }</label>
                             <SearchableSelect
                                 value={ value.state }
                                 onChange={ ( v ) => set( { state: v } ) }
                                 options={ states.map( ( s ) => ( { value: s, label: s } ) ) }
-                                placeholder={ __( 'Select state', 'fundkit-fundraising-campaigns' ) }
+                                placeholder={ __( 'Select state', 'fundraising-toolkit' ) }
                             />
                         </div>
                     ) }
@@ -494,12 +494,12 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
 
 
             <div className="fundkit-onboarding__section">
-                <div className="fundkit-onboarding__section-label">{ __( 'Currency', 'fundkit-fundraising-campaigns' ) }</div>
+                <div className="fundkit-onboarding__section-label">{ __( 'Currency', 'fundraising-toolkit' ) }</div>
                 <SearchableSelect
                     value={ currency.default_currency }
                     onChange={ ( code ) => onCurrencyChange( ( prev ) => ( { ...prev, default_currency: code } ) ) }
                     options={ currencyOptions }
-                    placeholder={ __( 'Pick a currency', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Pick a currency', 'fundraising-toolkit' ) }
                 />
             </div>
         </div>
@@ -513,25 +513,25 @@ const PRESET_CARDS = [
     {
         id:     'classic',
         thumb:  'classic',
-        name:   __( 'Classic', 'fundkit-fundraising-campaigns' ),
-        desc:   __( 'Friendly, rounded, green. The safe choice.', 'fundkit-fundraising-campaigns' ),
+        name:   __( 'Classic', 'fundraising-toolkit' ),
+        desc:   __( 'Friendly, rounded, green. The safe choice.', 'fundraising-toolkit' ),
     },
     {
         id:     'bold',
         thumb:  'bold',
-        name:   __( 'Bold', 'fundkit-fundraising-campaigns' ),
-        desc:   __( 'Deep navy, strong type, dramatic shadow.', 'fundkit-fundraising-campaigns' ),
+        name:   __( 'Bold', 'fundraising-toolkit' ),
+        desc:   __( 'Deep navy, strong type, dramatic shadow.', 'fundraising-toolkit' ),
     },
     {
         id:     'quiet',
         thumb:  'quiet',
-        name:   __( 'Quiet', 'fundkit-fundraising-campaigns' ),
-        desc:   __( 'Minimal lines, lots of white space.', 'fundkit-fundraising-campaigns' ),
+        name:   __( 'Quiet', 'fundraising-toolkit' ),
+        desc:   __( 'Minimal lines, lots of white space.', 'fundraising-toolkit' ),
     },
     {
         id:     'theme',
         thumb:  'theme',
-        name:   __( 'Use my theme', 'fundkit-fundraising-campaigns' ),
+        name:   __( 'Use my theme', 'fundraising-toolkit' ),
         // desc filled at runtime from theme detection.
     },
 ];
@@ -601,9 +601,9 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
 
     return (
         <div>
-            <h2 className="fundkit-onboarding__headline">{ __( 'Pick a starting look', 'fundkit-fundraising-campaigns' ) }</h2>
+            <h2 className="fundkit-onboarding__headline">{ __( 'Pick a starting look', 'fundraising-toolkit' ) }</h2>
             <p className="fundkit-onboarding__subtitle">
-                { __( 'You can edit colors and typography anytime.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'You can edit colors and typography anytime.', 'fundraising-toolkit' ) }
             </p>
             <div className="fundkit-onboarding__presets">
                 { PRESET_CARDS.map( ( card ) => {
@@ -612,8 +612,8 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
                     const isSel     = value.preset_id === card.id;
                     const desc      = isTheme
                         ? ( themePreset
-                            ? __( 'Inherits styles from your site theme.', 'fundkit-fundraising-campaigns' )
-                            : __( 'No theme palette detected.', 'fundkit-fundraising-campaigns' ) )
+                            ? __( 'Inherits styles from your site theme.', 'fundraising-toolkit' )
+                            : __( 'No theme palette detected.', 'fundraising-toolkit' ) )
                         : card.desc;
                     return (
                         <button
@@ -632,7 +632,7 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
                                 </span>
                             ) }
                             <div className={ `fundkit-onboarding__preset-thumb fundkit-onboarding__preset-thumb--${ card.thumb }` }>
-                                <span className="fundkit-onboarding__preset-btn">{ __( 'Donate', 'fundkit-fundraising-campaigns' ) }</span>
+                                <span className="fundkit-onboarding__preset-btn">{ __( 'Donate', 'fundraising-toolkit' ) }</span>
                             </div>
                             <strong className="fundkit-onboarding__preset-name">{ card.name }</strong>
                             <span className="fundkit-onboarding__preset-desc">{ desc }</span>
@@ -642,16 +642,16 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
             </div>
 
             <div className="fundkit-onboarding__preview">
-                <div className="fundkit-onboarding__preview-label">{ __( 'Live preview', 'fundkit-fundraising-campaigns' ) }</div>
+                <div className="fundkit-onboarding__preview-label">{ __( 'Live preview', 'fundraising-toolkit' ) }</div>
                 { loadState === 'error' ? (
                     <div className="fundkit-onboarding__preview-fallback">
-                        <p>{ __( 'Preview unavailable. Your choice is still saved.', 'fundkit-fundraising-campaigns' ) }</p>
+                        <p>{ __( 'Preview unavailable. Your choice is still saved.', 'fundraising-toolkit' ) }</p>
                         <button
                             type="button"
                             className="fundkit-btn fundkit-btn--ghost"
                             onClick={ () => setReloadKey( ( k ) => k + 1 ) }
                         >
-                            { __( 'Retry', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Retry', 'fundraising-toolkit' ) }
                         </button>
                     </div>
                 ) : (
@@ -662,7 +662,7 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
                         <iframe
                             ref={ frameRef }
                             className="fundkit-onboarding__preview-frame"
-                            title={ __( 'Donation form preview', 'fundkit-fundraising-campaigns' ) }
+                            title={ __( 'Donation form preview', 'fundraising-toolkit' ) }
                             // allow-scripts without allow-same-origin: the preview
                             // needs to run the form's own JS, but a srcdoc frame
                             // otherwise inherits this admin origin, so anything
@@ -694,31 +694,31 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } )
 
     return (
         <div>
-            <h1 className="fundkit-onboarding__headline">{ __( "You're set up", 'fundkit-fundraising-campaigns' ) }</h1>
+            <h1 className="fundkit-onboarding__headline">{ __( "You're set up", 'fundraising-toolkit' ) }</h1>
             <p className="fundkit-onboarding__subtitle">
-                { __( 'Your organization details are saved. Here is what is left before you can take a donation.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Your organization details are saved. Here is what is left before you can take a donation.', 'fundraising-toolkit' ) }
             </p>
 
             <ul className="fundkit-onboarding__checklist">
                 <ChecklistItem
-                    title={ __( 'Connect a payment gateway', 'fundkit-fundraising-campaigns' ) }
-                    description={ __( 'Stripe, PayPal, or a manual bank-transfer flow. You can change this any time.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Connect a payment gateway', 'fundraising-toolkit' ) }
+                    description={ __( 'Stripe, PayPal, or a manual bank-transfer flow. You can change this any time.', 'fundraising-toolkit' ) }
                     href={ gatewayUrl }
-                    cta={ __( 'Connect', 'fundkit-fundraising-campaigns' ) }
+                    cta={ __( 'Connect', 'fundraising-toolkit' ) }
                 />
                 { campaignId ? (
                     <ChecklistItem
-                        title={ __( 'Build your first form', 'fundkit-fundraising-campaigns' ) }
-                        description={ __( 'Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live.', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'Build your first form', 'fundraising-toolkit' ) }
+                        description={ __( 'Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live.', 'fundraising-toolkit' ) }
                         href={ finalized?.form_edit_url || finalized?.campaign_page || dashboardUrl || '#' }
-                        cta={ __( 'Build', 'fundkit-fundraising-campaigns' ) }
+                        cta={ __( 'Build', 'fundraising-toolkit' ) }
                     />
                 ) : (
                     <ChecklistItem
-                        title={ __( 'Create your first campaign', 'fundkit-fundraising-campaigns' ) }
-                        description={ __( 'A campaign holds your donation forms and totals. We can start one from your answers, or you can build your own later.', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'Create your first campaign', 'fundraising-toolkit' ) }
+                        description={ __( 'A campaign holds your donation forms and totals. We can start one from your answers, or you can build your own later.', 'fundraising-toolkit' ) }
                         href={ newCampaignUrl }
-                        cta={ __( 'Create', 'fundkit-fundraising-campaigns' ) }
+                        cta={ __( 'Create', 'fundraising-toolkit' ) }
                     />
                 ) }
             </ul>
@@ -726,7 +726,7 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } )
 
             <p className="fundkit-onboarding__checklist-foot">
                 <a className="fundkit-onboarding__checklist-skip" href={ dashboardUrl || '#' }>
-                    { __( 'Skip for now', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Skip for now', 'fundraising-toolkit' ) }
                 </a>
             </p>
         </div>

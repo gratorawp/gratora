@@ -119,14 +119,14 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
                             style={ { left: markerLeft( startPct ), cursor: 'ew-resize' } }
                             onPointerDown={ beginDrag( 'start' ) }
                             role="slider"
-                            aria-label={ __( 'Drag to change start date', 'fundkit-fundraising-campaigns' ) }
+                            aria-label={ __( 'Drag to change start date', 'fundraising-toolkit' ) }
                             aria-valuenow={ Math.round( startPct ) }
                             aria-valuemin={ 0 }
                             aria-valuemax={ 100 }
                         />
                         <div className="fundkit-schedule__label" style={ { left: markerLeft( startPct ) } }>
                             { shortDate( start ) }
-                            <small>{ __( 'Start', 'fundkit-fundraising-campaigns' ) }</small>
+                            <small>{ __( 'Start', 'fundraising-toolkit' ) }</small>
                         </div>
                     </>
                 ) }
@@ -138,14 +138,14 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
                             style={ { left: markerLeft( endPct ), cursor: 'ew-resize' } }
                             onPointerDown={ beginDrag( 'end' ) }
                             role="slider"
-                            aria-label={ __( 'Drag to change end date', 'fundkit-fundraising-campaigns' ) }
+                            aria-label={ __( 'Drag to change end date', 'fundraising-toolkit' ) }
                             aria-valuenow={ Math.round( endPct ) }
                             aria-valuemin={ 0 }
                             aria-valuemax={ 100 }
                         />
                         <div className="fundkit-schedule__label" style={ { left: markerLeft( endPct ) } }>
                             { shortDate( end ) }
-                            <small>{ __( 'End', 'fundkit-fundraising-campaigns' ) }</small>
+                            <small>{ __( 'End', 'fundraising-toolkit' ) }</small>
                         </div>
                     </>
                 ) }
@@ -157,25 +157,25 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
 
             <div className="fundkit-schedule__dates">
                 <label>
-                    <span>{ __( 'Starts at', 'fundkit-fundraising-campaigns' ) }</span>
+                    <span>{ __( 'Starts at', 'fundraising-toolkit' ) }</span>
                     <DateField
                         withTime
                         value={ startsAt || '' }
                         onChange={ setStart }
                         edited={ startEdited }
-                        placeholder={ __( 'No start scheduled', 'fundkit-fundraising-campaigns' ) }
-                        ariaLabel={ __( 'Pick a start date and time', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'No start scheduled', 'fundraising-toolkit' ) }
+                        ariaLabel={ __( 'Pick a start date and time', 'fundraising-toolkit' ) }
                     />
                 </label>
                 <label>
-                    <span>{ __( 'Ends at', 'fundkit-fundraising-campaigns' ) }</span>
+                    <span>{ __( 'Ends at', 'fundraising-toolkit' ) }</span>
                     <DateField
                         withTime
                         value={ endsAt || '' }
                         onChange={ setEnd }
                         edited={ endEdited }
-                        placeholder={ __( 'No end scheduled', 'fundkit-fundraising-campaigns' ) }
-                        ariaLabel={ __( 'Pick an end date and time', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'No end scheduled', 'fundraising-toolkit' ) }
+                        ariaLabel={ __( 'Pick an end date and time', 'fundraising-toolkit' ) }
                     />
                 </label>
             </div>

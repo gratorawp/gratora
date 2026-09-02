@@ -28,7 +28,7 @@ function ensureEntity() {
             kind: ENTITY_KIND,
             name: ENTITY_NAME,
             baseURL: '/fundkit/v1/campaign-binding-preview',
-            label: __( 'FundKit campaign binding preview', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Fundraising Toolkit campaign binding preview', 'fundraising-toolkit' ),
         },
     ] );
 }
@@ -51,7 +51,7 @@ export function registerCampaignBindingSource( fields ) {
 
     registerBlockBindingsSource( {
         name: 'fundkit/campaign',
-        label: __( 'FundKit campaign', 'fundkit-fundraising-campaigns' ),
+        label: __( 'Fundraising Toolkit campaign', 'fundraising-toolkit' ),
         usesContext: [ 'postId' ],
         getValues: ( { select, context, bindings } ) => {
             const record = preview( select, context );

@@ -55,7 +55,7 @@ final class WordPressPrivacy
     public function registerExporter(array $exporters): array
     {
         $exporters['fundkit'] = [
-            'exporter_friendly_name' => __('FundKit donations', 'fundkit-fundraising-campaigns'),
+            'exporter_friendly_name' => __('Fundraising Toolkit donations', 'fundraising-toolkit'),
             'callback'               => [$this, 'export'],
         ];
 
@@ -71,7 +71,7 @@ final class WordPressPrivacy
     public function registerEraser(array $erasers): array
     {
         $erasers['fundkit'] = [
-            'eraser_friendly_name' => __('FundKit donations', 'fundkit-fundraising-campaigns'),
+            'eraser_friendly_name' => __('Fundraising Toolkit donations', 'fundraising-toolkit'),
             'callback'             => [$this, 'erase'],
         ];
 
@@ -93,7 +93,7 @@ final class WordPressPrivacy
         return [
             'data' => [[
                 'group_id'    => self::GROUP,
-                'group_label' => __('Donor record', 'fundkit-fundraising-campaigns'),
+                'group_label' => __('Donor record', 'fundraising-toolkit'),
                 'item_id'     => 'fundkit-donor-' . (int) $donor->id,
                 'data'        => $this->donorFields($donor),
             ]],
@@ -122,7 +122,7 @@ final class WordPressPrivacy
             return [
                 'items_removed'  => false,
                 'items_retained' => false,
-                'messages'       => [__('This donor was already erased.', 'fundkit-fundraising-campaigns')],
+                'messages'       => [__('This donor was already erased.', 'fundraising-toolkit')],
                 'done'           => true,
             ];
         }
@@ -136,7 +136,7 @@ final class WordPressPrivacy
             // charity's books have to still add up after an erasure.
             'items_retained' => true,
             'messages'       => [
-                __('The donor record was erased. Their donations were kept as anonymous records, because the amounts are part of the accounts.', 'fundkit-fundraising-campaigns'),
+                __('The donor record was erased. Their donations were kept as anonymous records, because the amounts are part of the accounts.', 'fundraising-toolkit'),
             ],
             'done'           => true,
         ];
@@ -162,10 +162,10 @@ final class WordPressPrivacy
     private function donorFields(Donor $donor): array
     {
         $fields = [
-            [__('First name', 'fundkit-fundraising-campaigns'), (string) ($donor->first_name ?? '')],
-            [__('Last name', 'fundkit-fundraising-campaigns'), (string) ($donor->last_name ?? '')],
-            [__('Company', 'fundkit-fundraising-campaigns'), (string) ($donor->company ?? '')],
-            [__('First seen', 'fundkit-fundraising-campaigns'), (string) ($donor->created_at ?? '')],
+            [__('First name', 'fundraising-toolkit'), (string) ($donor->first_name ?? '')],
+            [__('Last name', 'fundraising-toolkit'), (string) ($donor->last_name ?? '')],
+            [__('Company', 'fundraising-toolkit'), (string) ($donor->company ?? '')],
+            [__('First seen', 'fundraising-toolkit'), (string) ($donor->created_at ?? '')],
         ];
 
         $out = [];

@@ -25,7 +25,7 @@ use RecursiveIteratorIterator;
  */
 final class ScriptTranslationsTest extends TestCase
 {
-    private const DOMAIN = 'fundkit-fundraising-campaigns';
+    private const DOMAIN = 'fundraising-toolkit';
 
     private function root(): string
     {

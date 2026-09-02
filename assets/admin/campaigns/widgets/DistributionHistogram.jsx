@@ -23,7 +23,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
     if ( ! distribution || distribution.total_count === 0 ) {
         return (
             <p className="fundkit-panel__empty">
-                { __( 'Not enough donations yet to plot a distribution.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Not enough donations yet to plot a distribution.', 'fundraising-toolkit' ) }
             </p>
         );
     }
@@ -47,7 +47,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
                     <strong>
                         { sprintf(
                             /* translators: %s: median donation amount */
-                            __( 'Median: %s', 'fundkit-fundraising-campaigns' ),
+                            __( 'Median: %s', 'fundraising-toolkit' ),
                             formatAmount( median_cents, currency )
                         ) }
                     </strong>
@@ -56,7 +56,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
                     <span className="fundkit-histogram__tail">
                         { sprintf(
                             /* translators: 1: donation count, 2: amount threshold (e.g. $100) */
-                            _n( '%1$d donation over %2$s', '%1$d donations over %2$s', longTailCount, 'fundkit-fundraising-campaigns' ),
+                            _n( '%1$d donation over %2$s', '%1$d donations over %2$s', longTailCount, 'fundraising-toolkit' ),
                             longTailCount,
                             formatAmountCompact( 10000, currency )
                         ) }
@@ -98,11 +98,11 @@ export default function DistributionHistogram( { distribution, currency } ) {
                         formatter={ ( value, _name, props ) => [
                             sprintf(
                                 /* translators: 1: donation count, 2: total amount in that bucket */
-                                __( '%1$d × %2$s', 'fundkit-fundraising-campaigns' ),
+                                __( '%1$d × %2$s', 'fundraising-toolkit' ),
                                 value,
                                 formatAmount( props.payload.amount_cents, currency )
                             ),
-                            __( 'Donations', 'fundkit-fundraising-campaigns' ),
+                            __( 'Donations', 'fundraising-toolkit' ),
                         ] }
                     />
                     <Bar dataKey="count" fill="#8a7bff" radius={ [ 4, 4, 0, 0 ] } isAnimationActive={ false } />
@@ -112,7 +112,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
                             stroke="#6b7280"
                             strokeDasharray="4 4"
                             label={ {
-                                value:     __( 'median', 'fundkit-fundraising-campaigns' ),
+                                value:     __( 'median', 'fundraising-toolkit' ),
                                 position:  'top',
                                 fill:      '#6b7280',
                                 fontSize:  10,
@@ -125,7 +125,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
             <p className="fundkit-histogram__total">
                 { sprintf(
                     /* translators: %d: total donation count */
-                    _n( '%d donation in this period', '%d donations in this period', total_count, 'fundkit-fundraising-campaigns' ),
+                    _n( '%d donation in this period', '%d donations in this period', total_count, 'fundraising-toolkit' ),
                     total_count
                 ) }
             </p>

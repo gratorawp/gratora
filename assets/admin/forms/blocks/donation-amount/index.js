@@ -86,25 +86,25 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Amounts', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Amounts', 'fundraising-toolkit' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Donation type', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Donation type', 'fundraising-toolkit' ) }
                         value={ donationType }
                         onChange={ ( v ) => setAttributes( { donationType: v } ) }
                         options={ [
-                            { value: 'multi', label: __( 'Multi-level', 'fundkit-fundraising-campaigns' ) },
-                            { value: 'fixed', label: __( 'Open amount', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'multi', label: __( 'Multi-level', 'fundraising-toolkit' ) },
+                            { value: 'fixed', label: __( 'Open amount', 'fundraising-toolkit' ) },
                         ] }
                     />
                     <p style={ { margin: '6px 0 12px', fontSize: 11, color: '#6b7280' } }>
                         { donationType === 'fixed'
-                            ? __( 'Donors enter any amount. No preset tiles.', 'fundkit-fundraising-campaigns' )
-                            : __( 'Show preset amounts donors can pick from.', 'fundkit-fundraising-campaigns' ) }
+                            ? __( 'Donors enter any amount. No preset tiles.', 'fundraising-toolkit' )
+                            : __( 'Show preset amounts donors can pick from.', 'fundraising-toolkit' ) }
                     </p>
 
                     { donationType === 'multi' && (
                         <ToggleControl
-                            label={ __( 'Allow custom amount', 'fundkit-fundraising-campaigns' ) }
+                            label={ __( 'Allow custom amount', 'fundraising-toolkit' ) }
                             checked={ allowCustom }
                             onChange={ ( v ) => setAttributes( { allowCustom: v } ) }
                             __nextHasNoMarginBottom
@@ -116,8 +116,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             type="number"
                             min="0"
                             step="0.01"
-                            label={ __( 'Minimum amount', 'fundkit-fundraising-campaigns' ) }
-                            help={ __( 'Leave empty for no minimum beyond the site default.', 'fundkit-fundraising-campaigns' ) }
+                            label={ __( 'Minimum amount', 'fundraising-toolkit' ) }
+                            help={ __( 'Leave empty for no minimum beyond the site default.', 'fundraising-toolkit' ) }
                             value={ minCents ? String( minCents / 100 ) : '' }
                             onChange={ ( v ) => setAttributes( {
                                 minCents: v === '' ? 0 : Math.max( 0, Math.round( parseFloat( v ) * 100 ) || 0 ),
@@ -130,13 +130,13 @@ function Edit( { attributes, setAttributes, clientId } ) {
                     { donationType === 'multi' && (
                     <>
                     <div className="fundkit-amounts-head">
-                        <span className="fundkit-amounts-head__label">{ __( 'Options', 'fundkit-fundraising-campaigns' ) }</span>
+                        <span className="fundkit-amounts-head__label">{ __( 'Options', 'fundraising-toolkit' ) }</span>
                         <button
                             type="button"
                             className="fundkit-amounts-add"
                             onClick={ addPreset }
-                            aria-label={ __( 'Add amount', 'fundkit-fundraising-campaigns' ) }
-                            title={ __( 'Add amount', 'fundkit-fundraising-campaigns' ) }
+                            aria-label={ __( 'Add amount', 'fundraising-toolkit' ) }
+                            title={ __( 'Add amount', 'fundraising-toolkit' ) }
                         >
                             +
                         </button>
@@ -164,8 +164,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                     if ( e.key === 'ArrowDown' ) { e.preventDefault(); reorder( i, i + 1 ); }
                                 } }
                                 role="button"
-                                aria-label={ __( 'Drag to reorder, or use the arrow keys', 'fundkit-fundraising-campaigns' ) }
-                                title={ __( 'Drag to reorder', 'fundkit-fundraising-campaigns' ) }
+                                aria-label={ __( 'Drag to reorder, or use the arrow keys', 'fundraising-toolkit' ) }
+                                title={ __( 'Drag to reorder', 'fundraising-toolkit' ) }
                             >
                                 ⠿
                             </span>
@@ -176,8 +176,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                 checked={ !! p.preselected }
                                 onChange={ () => setPreselected( i ) }
                                 onClick={ () => { if ( p.preselected ) setPreselected( i ); } }
-                                aria-label={ __( 'Preselect this amount', 'fundkit-fundraising-campaigns' ) }
-                                title={ __( 'Preselect this amount', 'fundkit-fundraising-campaigns' ) }
+                                aria-label={ __( 'Preselect this amount', 'fundraising-toolkit' ) }
+                                title={ __( 'Preselect this amount', 'fundraising-toolkit' ) }
                             />
                             <span className="fundkit-preset-row__amt">
                                 <AmountInput
@@ -193,15 +193,15 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                 className="fundkit-preset-row__remove"
                                 onClick={ () => removePreset( i ) }
                                 disabled={ presets.length <= 1 }
-                                aria-label={ __( 'Remove amount', 'fundkit-fundraising-campaigns' ) }
-                                title={ __( 'Remove amount', 'fundkit-fundraising-campaigns' ) }
+                                aria-label={ __( 'Remove amount', 'fundraising-toolkit' ) }
+                                title={ __( 'Remove amount', 'fundraising-toolkit' ) }
                             >
                                 −
                             </button>
                         </div>
                     ) ) }
                     <p style={ { margin: '6px 0 0', fontSize: 11, color: '#6b7280' } }>
-                        { __( 'Select a radio to preselect an amount.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Select a radio to preselect an amount.', 'fundraising-toolkit' ) }
                     </p>
                     </>
                     ) }
@@ -209,7 +209,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <div style={ { fontSize: 12, color: '#666', marginBottom: 8 } }>
-                    { __( 'Donation amount', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Donation amount', 'fundraising-toolkit' ) }
                 </div>
                 { donationType === 'multi' && (
                 <div style={ { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 } }>
@@ -241,7 +241,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                 tagName="div"
                                 value={ p.impact }
                                 onChange={ ( v ) => updatePreset( i, { impact: v } ) }
-                                placeholder={ __( 'Add a caption', 'fundkit-fundraising-campaigns' ) }
+                                placeholder={ __( 'Add a caption', 'fundraising-toolkit' ) }
                                 allowedFormats={ [] }
                                 style={ {
                                     fontSize: 11,
@@ -267,7 +267,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             textAlign:    'left',
                         } }
                     >
-                        { __( 'Custom amount', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Custom amount', 'fundraising-toolkit' ) }
                     </div>
                 ) }
             </div>
@@ -278,8 +278,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Donation amount', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Amount picker with preset buttons and an optional custom-amount input.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Donation amount', 'fundraising-toolkit' ),
+        description: __( 'Amount picker with preset buttons and an optional custom-amount input.', 'fundraising-toolkit' ),
         category:   'fundkit-amount',
         icon:       BlockIcons[ 'donation-amount' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

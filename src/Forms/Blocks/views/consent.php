@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
  * @var string                                                                            $helpText
  * @var list<array{key:string,label:string,description:string,required:bool,default:bool}> $purposes
  */
-$labelText = $label !== '' ? $label : __('How can we stay in touch?', 'fundkit-fundraising-campaigns');
+$labelText = $label !== '' ? $label : __('How can we stay in touch?', 'fundraising-toolkit');
 ?>
 <fieldset class="fundkit-block fundkit-block--consent fundkit-consent">
     <legend class="fundkit-consent__legend"><?php echo esc_html($labelText); ?></legend>
@@ -33,7 +33,7 @@ $labelText = $label !== '' ? $label : __('How can we stay in touch?', 'fundkit-f
                     <span class="fundkit-consent__purpose-label">
                         <?php echo esc_html($pLabel !== '' ? $pLabel : $id); ?>
                         <?php if ($required): ?>
-                            <span class="fundkit-consent__required-pill"><?php esc_html_e('Required', 'fundkit-fundraising-campaigns'); ?></span>
+                            <span class="fundkit-consent__required-pill"><?php esc_html_e('Required', 'fundraising-toolkit'); ?></span>
                         <?php endif; ?>
                     </span>
                     <?php if ($desc !== ''): ?>

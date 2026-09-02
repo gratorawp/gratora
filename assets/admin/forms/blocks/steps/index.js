@@ -16,20 +16,20 @@ const NAME = 'fundkit/steps';
 const ALLOWED = [ 'fundkit/step' ];
 
 const TEMPLATE = [
-    [ 'fundkit/step', { title: __( 'Your donation', 'fundkit-fundraising-campaigns' ) } ],
-    [ 'fundkit/step', { title: __( 'Your info', 'fundkit-fundraising-campaigns' ) } ],
+    [ 'fundkit/step', { title: __( 'Your donation', 'fundraising-toolkit' ) } ],
+    [ 'fundkit/step', { title: __( 'Your info', 'fundraising-toolkit' ) } ],
 ];
 
 const PROGRESS_STYLES = [
-    { value: 'dots', label: __( 'Dots',   'fundkit-fundraising-campaigns' ) },
-    { value: 'bar',  label: __( 'Bar',    'fundkit-fundraising-campaigns' ) },
-    { value: 'none', label: __( 'None',   'fundkit-fundraising-campaigns' ) },
+    { value: 'dots', label: __( 'Dots',   'fundraising-toolkit' ) },
+    { value: 'bar',  label: __( 'Bar',    'fundraising-toolkit' ) },
+    { value: 'none', label: __( 'None',   'fundraising-toolkit' ) },
 ];
 
 const PROGRESS_HELP = {
-    dots: __( 'Centered dots beneath the form.', 'fundkit-fundraising-campaigns' ),
-    bar:  __( 'Header bar with back arrow + title + progress fill.', 'fundkit-fundraising-campaigns' ),
-    none: __( 'No progress indicator.', 'fundkit-fundraising-campaigns' ),
+    dots: __( 'Centered dots beneath the form.', 'fundraising-toolkit' ),
+    bar:  __( 'Header bar with back arrow + title + progress fill.', 'fundraising-toolkit' ),
+    none: __( 'No progress indicator.', 'fundraising-toolkit' ),
 };
 
 function Edit( { attributes, setAttributes, clientId } ) {
@@ -48,7 +48,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
         const next = createBlock( 'fundkit/step', {
             title: sprintf(
                 /* translators: %d: new step number. */
-                __( 'Step %d', 'fundkit-fundraising-campaigns' ),
+                __( 'Step %d', 'fundraising-toolkit' ),
                 childCount + 1
             ),
         } );
@@ -58,30 +58,30 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Wizard navigation', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Wizard navigation', 'fundraising-toolkit' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Progress style', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Progress style', 'fundraising-toolkit' ) }
                         value={ progressStyle }
                         onChange={ ( v ) => setAttributes( { progressStyle: v } ) }
                         options={ PROGRESS_STYLES }
                         help={ PROGRESS_HELP[ progressStyle ] }
                     />
                     <TextControl
-                        label={ __( 'Back-button label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Back-button label', 'fundraising-toolkit' ) }
                         value={ prevLabel }
                         onChange={ ( v ) => setAttributes( { prevLabel: v } ) }
-                        placeholder={ __( 'Back', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Back', 'fundraising-toolkit' ) }
                         help={ progressStyle === 'bar'
-                            ? __( 'Used as the aria-label on the back arrow.', 'fundkit-fundraising-campaigns' )
+                            ? __( 'Used as the aria-label on the back arrow.', 'fundraising-toolkit' )
                             : undefined
                         }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Next-button label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Next-button label', 'fundraising-toolkit' ) }
                         value={ nextLabel }
                         onChange={ ( v ) => setAttributes( { nextLabel: v } ) }
-                        placeholder={ __( 'Continue', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Continue', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -95,7 +95,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                 />
                 <div className="fundkit-block-preview__steps-add">
                     <Button variant="secondary" onClick={ addStep }>
-                        { __( '+ Add step', 'fundkit-fundraising-campaigns' ) }
+                        { __( '+ Add step', 'fundraising-toolkit' ) }
                     </Button>
                 </div>
             </div>
@@ -106,8 +106,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Steps', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Split the form into pages a donor clicks through. Add a Step inside to make a new page.', 'fundkit-fundraising-campaigns' ),
+        title:       __( 'Steps', 'fundraising-toolkit' ),
+        description: __( 'Split the form into pages a donor clicks through. Add a Step inside to make a new page.', 'fundraising-toolkit' ),
         category:    'fundkit-content',
         icon:        BlockIcons[ 'steps' ],
         supports:    { html: false, anchor: false, inserter: true, multiple: false },

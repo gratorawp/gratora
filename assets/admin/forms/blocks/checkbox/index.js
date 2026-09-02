@@ -22,38 +22,38 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Checkbox', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Checkbox', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or help text to edit inline.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Click the label or help text to edit inline.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Help text', 'fundraising-toolkit' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Field name', 'fundraising-toolkit' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugifyField( v ) } ) }
-                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Default on', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Default on', 'fundraising-toolkit' ) }
                         checked={ defaultOn }
                         onChange={ ( v ) => setAttributes( { defaultOn: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Required', 'fundraising-toolkit' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
-                        help={ __( 'Donor must tick this to submit.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Donor must tick this to submit.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -79,7 +79,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'I agree to…', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'I agree to…', 'fundraising-toolkit' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 13, color: '#111827' } }
                     />
@@ -88,7 +88,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Optional help text', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Optional help text', 'fundraising-toolkit' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', lineHeight: 1.3 } }
                     />
@@ -101,8 +101,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Checkbox', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Single yes/no checkbox for agreements, opt-ins, or any boolean.', 'fundkit-fundraising-campaigns' ),
+        title:       __( 'Checkbox', 'fundraising-toolkit' ),
+        description: __( 'Single yes/no checkbox for agreements, opt-ins, or any boolean.', 'fundraising-toolkit' ),
         category:    'fundkit-fields',
         icon:        BlockIcons[ 'checkbox' ],
         supports: { html: false, anchor: false, inserter: true },

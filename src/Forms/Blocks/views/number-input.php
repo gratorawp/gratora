@@ -10,7 +10,7 @@ defined('ABSPATH') || exit;
  * @var float      $step
  * @var string     $field
  */
-$labelText = $label !== '' ? $label : __('Number', 'fundkit-fundraising-campaigns');
+$labelText = $label !== '' ? $label : __('Number', 'fundraising-toolkit');
 $fieldName = $field !== '' ? $field : 'number';
 ?>
 <label class="fundkit-block fundkit-block--number-input fundkit-donor__field">

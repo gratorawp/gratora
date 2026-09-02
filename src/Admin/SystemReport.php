@@ -50,13 +50,13 @@ final class SystemReport
     public function sections(): array
     {
         return [
-            ['title' => __('FundKit', 'fundkit-fundraising-campaigns'),      'rows' => $this->fundkit()],
-            ['title' => __('Add-ons', 'fundkit-fundraising-campaigns'),       'rows' => $this->addOns()],
-            ['title' => __('Payments', 'fundkit-fundraising-campaigns'),      'rows' => $this->payments()],
-            ['title' => __('WordPress', 'fundkit-fundraising-campaigns'),     'rows' => $this->wordpress()],
-            ['title' => __('Server', 'fundkit-fundraising-campaigns'),        'rows' => $this->server()],
-            ['title' => __('Database', 'fundkit-fundraising-campaigns'),      'rows' => $this->database()],
-            ['title' => __('Active plugins', 'fundkit-fundraising-campaigns'), 'rows' => $this->plugins()],
+            ['title' => __('Fundraising Toolkit', 'fundraising-toolkit'),      'rows' => $this->fundkit()],
+            ['title' => __('Add-ons', 'fundraising-toolkit'),       'rows' => $this->addOns()],
+            ['title' => __('Payments', 'fundraising-toolkit'),      'rows' => $this->payments()],
+            ['title' => __('WordPress', 'fundraising-toolkit'),     'rows' => $this->wordpress()],
+            ['title' => __('Server', 'fundraising-toolkit'),        'rows' => $this->server()],
+            ['title' => __('Database', 'fundraising-toolkit'),      'rows' => $this->database()],
+            ['title' => __('Active plugins', 'fundraising-toolkit'), 'rows' => $this->plugins()],
         ];
     }
 
@@ -69,14 +69,14 @@ final class SystemReport
         $keyLost = SystemSetting::read('encryption_key_lost_at');
 
         $rows = [
-            self::row(__('Version', 'fundkit-fundraising-campaigns'), defined('FUNDKIT_VERSION') ? FUNDKIT_VERSION : 'unknown'),
-            self::row(__('Encryption key', 'fundkit-fundraising-campaigns'), self::yesNo($keyHeld)),
+            self::row(__('Version', 'fundraising-toolkit'), defined('FUNDKIT_VERSION') ? FUNDKIT_VERSION : 'unknown'),
+            self::row(__('Encryption key', 'fundraising-toolkit'), self::yesNo($keyHeld)),
         ];
 
         // Loud on purpose: without the key the encrypted columns cannot be read
         // back, so a support answer starts here rather than anywhere else.
         if (is_string($keyLost) && $keyLost !== '') {
-            $rows[] = self::row(__('Encryption key lost at', 'fundkit-fundraising-campaigns'), $keyLost);
+            $rows[] = self::row(__('Encryption key lost at', 'fundraising-toolkit'), $keyLost);
         }
 
         return $rows;
@@ -103,14 +103,14 @@ final class SystemReport
                 (string) $id,
                 sprintf(
                     /* translators: 1: installed core version, 2: the version constraint the add-on asked for */
-                    __('not loaded: core %1$s does not satisfy %2$s', 'fundkit-fundraising-campaigns'),
+                    __('not loaded: core %1$s does not satisfy %2$s', 'fundraising-toolkit'),
                     (string) ($pair[0] ?? '?'),
                     (string) ($pair[1] ?? '?')
                 )
             );
         }
 
-        return $rows ?: [self::row(__('Installed', 'fundkit-fundraising-campaigns'), __('None', 'fundkit-fundraising-campaigns'))];
+        return $rows ?: [self::row(__('Installed', 'fundraising-toolkit'), __('None', 'fundraising-toolkit'))];
     }
 
     /** @return list<array{label:string, value:string}> */
@@ -124,12 +124,12 @@ final class SystemReport
             $rows[] = self::row(
                 (string) $gateway->label(),
                 $gateway->canCharge()
-                    ? __('ready', 'fundkit-fundraising-campaigns')
-                    : __('not configured', 'fundkit-fundraising-campaigns')
+                    ? __('ready', 'fundraising-toolkit')
+                    : __('not configured', 'fundraising-toolkit')
             );
         }
 
-        return $rows ?: [self::row(__('Gateways', 'fundkit-fundraising-campaigns'), __('None registered', 'fundkit-fundraising-campaigns'))];
+        return $rows ?: [self::row(__('Gateways', 'fundraising-toolkit'), __('None registered', 'fundraising-toolkit'))];
     }
 
     /** @return list<array{label:string, value:string}> */
@@ -139,26 +139,26 @@ final class SystemReport
         $parent = $theme->parent();
 
         return [
-            self::row(__('Version', 'fundkit-fundraising-campaigns'), get_bloginfo('version')),
-            self::row(__('Site URL', 'fundkit-fundraising-campaigns'), site_url()),
-            self::row(__('Home URL', 'fundkit-fundraising-campaigns'), home_url()),
-            self::row(__('REST root', 'fundkit-fundraising-campaigns'), esc_url_raw(rest_url('fundkit/v1/'))),
-            self::row(__('Multisite', 'fundkit-fundraising-campaigns'), self::yesNo(is_multisite())),
-            self::row(__('Locale', 'fundkit-fundraising-campaigns'), get_locale()),
-            self::row(__('Timezone', 'fundkit-fundraising-campaigns'), wp_timezone_string()),
-            self::row(__('Permalinks', 'fundkit-fundraising-campaigns'), (string) get_option('permalink_structure') ?: __('plain', 'fundkit-fundraising-campaigns')),
-            self::row(__('Theme', 'fundkit-fundraising-campaigns'), sprintf(
+            self::row(__('Version', 'fundraising-toolkit'), get_bloginfo('version')),
+            self::row(__('Site URL', 'fundraising-toolkit'), site_url()),
+            self::row(__('Home URL', 'fundraising-toolkit'), home_url()),
+            self::row(__('REST root', 'fundraising-toolkit'), esc_url_raw(rest_url('fundkit/v1/'))),
+            self::row(__('Multisite', 'fundraising-toolkit'), self::yesNo(is_multisite())),
+            self::row(__('Locale', 'fundraising-toolkit'), get_locale()),
+            self::row(__('Timezone', 'fundraising-toolkit'), wp_timezone_string()),
+            self::row(__('Permalinks', 'fundraising-toolkit'), (string) get_option('permalink_structure') ?: __('plain', 'fundraising-toolkit')),
+            self::row(__('Theme', 'fundraising-toolkit'), sprintf(
                 '%s %s%s',
                 (string) $theme->get('Name'),
                 (string) $theme->get('Version'),
                 $parent ? ' (child of ' . (string) $parent->get('Name') . ')' : ''
             )),
-            self::row(__('Block theme', 'fundkit-fundraising-campaigns'), self::yesNo(wp_is_block_theme())),
-            self::row(__('Memory limit', 'fundkit-fundraising-campaigns'), self::constantValue('WP_MEMORY_LIMIT')),
-            self::row(__('Debug mode', 'fundkit-fundraising-campaigns'), self::yesNo(defined('WP_DEBUG') && WP_DEBUG)),
+            self::row(__('Block theme', 'fundraising-toolkit'), self::yesNo(wp_is_block_theme())),
+            self::row(__('Memory limit', 'fundraising-toolkit'), self::constantValue('WP_MEMORY_LIMIT')),
+            self::row(__('Debug mode', 'fundraising-toolkit'), self::yesNo(defined('WP_DEBUG') && WP_DEBUG)),
             // Action Scheduler rides WP-cron, so a site with this on has a
             // backlog that never drains and a screen that has to say so.
-            self::row(__('WP-Cron disabled', 'fundkit-fundraising-campaigns'), self::yesNo(defined('DISABLE_WP_CRON') && DISABLE_WP_CRON)),
+            self::row(__('WP-Cron disabled', 'fundraising-toolkit'), self::yesNo(defined('DISABLE_WP_CRON') && DISABLE_WP_CRON)),
         ];
     }
 
@@ -175,18 +175,18 @@ final class SystemReport
             : '';
 
         return [
-            self::row(__('PHP version', 'fundkit-fundraising-campaigns'), PHP_VERSION),
-            self::row(__('PHP interface', 'fundkit-fundraising-campaigns'), PHP_SAPI),
-            self::row(__('Web server', 'fundkit-fundraising-campaigns'), $software !== '' ? $software : __('unknown', 'fundkit-fundraising-campaigns')),
-            self::row(__('HTTPS', 'fundkit-fundraising-campaigns'), self::yesNo(is_ssl())),
-            self::row(__('Memory limit', 'fundkit-fundraising-campaigns'), (string) ini_get('memory_limit')),
-            self::row(__('Max execution time', 'fundkit-fundraising-campaigns'), (string) ini_get('max_execution_time')),
-            self::row(__('Upload max filesize', 'fundkit-fundraising-campaigns'), (string) ini_get('upload_max_filesize')),
-            self::row(__('Post max size', 'fundkit-fundraising-campaigns'), (string) ini_get('post_max_size')),
-            self::row(__('Max input vars', 'fundkit-fundraising-campaigns'), (string) ini_get('max_input_vars')),
+            self::row(__('PHP version', 'fundraising-toolkit'), PHP_VERSION),
+            self::row(__('PHP interface', 'fundraising-toolkit'), PHP_SAPI),
+            self::row(__('Web server', 'fundraising-toolkit'), $software !== '' ? $software : __('unknown', 'fundraising-toolkit')),
+            self::row(__('HTTPS', 'fundraising-toolkit'), self::yesNo(is_ssl())),
+            self::row(__('Memory limit', 'fundraising-toolkit'), (string) ini_get('memory_limit')),
+            self::row(__('Max execution time', 'fundraising-toolkit'), (string) ini_get('max_execution_time')),
+            self::row(__('Upload max filesize', 'fundraising-toolkit'), (string) ini_get('upload_max_filesize')),
+            self::row(__('Post max size', 'fundraising-toolkit'), (string) ini_get('post_max_size')),
+            self::row(__('Max input vars', 'fundraising-toolkit'), (string) ini_get('max_input_vars')),
             self::row(
-                __('Missing PHP extensions', 'fundkit-fundraising-campaigns'),
-                $missing === [] ? __('None', 'fundkit-fundraising-campaigns') : implode(', ', $missing)
+                __('Missing PHP extensions', 'fundraising-toolkit'),
+                $missing === [] ? __('None', 'fundraising-toolkit') : implode(', ', $missing)
             ),
         ];
     }
@@ -203,10 +203,10 @@ final class SystemReport
         $version = (string) $wpdb->get_var('SELECT VERSION()');
 
         $rows = [
-            self::row(__('Server', 'fundkit-fundraising-campaigns'), $version !== '' ? $version : __('unknown', 'fundkit-fundraising-campaigns')),
-            self::row(__('Charset', 'fundkit-fundraising-campaigns'), (string) $wpdb->charset),
-            self::row(__('Collation', 'fundkit-fundraising-campaigns'), (string) $wpdb->collate),
-            self::row(__('Table prefix', 'fundkit-fundraising-campaigns'), (string) $wpdb->prefix),
+            self::row(__('Server', 'fundraising-toolkit'), $version !== '' ? $version : __('unknown', 'fundraising-toolkit')),
+            self::row(__('Charset', 'fundraising-toolkit'), (string) $wpdb->charset),
+            self::row(__('Collation', 'fundraising-toolkit'), (string) $wpdb->collate),
+            self::row(__('Table prefix', 'fundraising-toolkit'), (string) $wpdb->prefix),
         ];
 
         foreach (self::COUNTED as $base) {
@@ -218,10 +218,10 @@ final class SystemReport
                 $exists
                     ? sprintf(
                         /* translators: %s: a row count */
-                        __('%s rows', 'fundkit-fundraising-campaigns'),
+                        __('%s rows', 'fundraising-toolkit'),
                         number_format_i18n((int) $wpdb->get_var("SELECT COUNT(*) FROM `{$table}`")) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is built from $wpdb->prefix and a constant in this file, never from input.
                     )
-                    : __('MISSING', 'fundkit-fundraising-campaigns')
+                    : __('MISSING', 'fundraising-toolkit')
             );
         }
         // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -247,7 +247,7 @@ final class SystemReport
             $data = $all[$file] ?? null;
             if ($data === null) {
                 // Active but not on disk, which is itself worth reporting.
-                $rows[] = self::row((string) $file, __('active, but the file is missing', 'fundkit-fundraising-campaigns'));
+                $rows[] = self::row((string) $file, __('active, but the file is missing', 'fundraising-toolkit'));
                 continue;
             }
             $rows[] = self::row((string) $data['Name'], (string) $data['Version']);
@@ -258,13 +258,13 @@ final class SystemReport
                 (string) $data['Name'],
                 sprintf(
                     /* translators: %s: plugin version */
-                    __('%s (must-use)', 'fundkit-fundraising-campaigns'),
+                    __('%s (must-use)', 'fundraising-toolkit'),
                     (string) $data['Version']
                 )
             );
         }
 
-        return $rows ?: [self::row(__('Active', 'fundkit-fundraising-campaigns'), __('None', 'fundkit-fundraising-campaigns'))];
+        return $rows ?: [self::row(__('Active', 'fundraising-toolkit'), __('None', 'fundraising-toolkit'))];
     }
 
     /** @return array{label:string, value:string} */
@@ -276,12 +276,12 @@ final class SystemReport
     private static function yesNo(bool $value): string
     {
         return $value
-            ? __('Yes', 'fundkit-fundraising-campaigns')
-            : __('No', 'fundkit-fundraising-campaigns');
+            ? __('Yes', 'fundraising-toolkit')
+            : __('No', 'fundraising-toolkit');
     }
 
     private static function constantValue(string $name): string
     {
-        return defined($name) ? (string) constant($name) : __('not set', 'fundkit-fundraising-campaigns');
+        return defined($name) ? (string) constant($name) : __('not set', 'fundraising-toolkit');
     }
 }

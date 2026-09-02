@@ -56,7 +56,7 @@ use FundKit\Settings\SecretRedactor;
  */
 final class CoreCommandProvider
 {
-    private const META = ['add_on' => 'core', 'add_on_label' => 'FundKit'];
+    private const META = ['add_on' => 'core', 'add_on_label' => 'Fundraising Toolkit'];
 
     /** Date-range windows the dashboard metrics service accepts. */
     private const REPORT_RANGES = ['today', 'last-7', 'last-30', 'last-90', 'all-time'];
@@ -118,14 +118,14 @@ final class CoreCommandProvider
                 if (! SupportedCurrencies::accepts($currency)) {
                     throw new CommandError(esc_html(sprintf(
                         /* translators: 1: currency code, 2: the accepted codes. */
-                        __('%1$s is not one of your accepted currencies (%2$s).', 'fundkit-fundraising-campaigns'),
+                        __('%1$s is not one of your accepted currencies (%2$s).', 'fundraising-toolkit'),
                         $currency,
                         implode(', ', SupportedCurrencies::all())
                     )));
                 }
                 if (Currency::minorUnits($currency) === 0 && ((int) $in['amount_cents']) % 100 !== 0) {
                     throw new CommandError(
-                        esc_html__('This currency does not support fractional amounts.', 'fundkit-fundraising-campaigns')
+                        esc_html__('This currency does not support fractional amounts.', 'fundraising-toolkit')
                     );
                 }
 
@@ -1848,7 +1848,7 @@ final class CoreCommandProvider
         $life = (int) apply_filters('nonce_life', DAY_IN_SECONDS);
         return sprintf(
             /* translators: %s: human-readable duration, e.g. "1 day". */
-            __('Link is time-limited to your login session (about %s); regenerate it if it stops working.', 'fundkit-fundraising-campaigns'),
+            __('Link is time-limited to your login session (about %s); regenerate it if it stops working.', 'fundraising-toolkit'),
             human_time_diff(0, $life),
         );
     }

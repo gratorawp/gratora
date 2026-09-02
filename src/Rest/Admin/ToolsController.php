@@ -348,7 +348,7 @@ final class ToolsController
             'id'          => (int) $e->id,
             'kind'        => 'error',
             'source'      => substr((string) $e->type, strlen(ErrorLog::PREFIX)),
-            'message'     => $message !== '' ? $message : __('No detail recorded.', 'fundkit-fundraising-campaigns'),
+            'message'     => $message !== '' ? $message : __('No detail recorded.', 'fundraising-toolkit'),
             'context'     => $payload,
             'occurred_at' => (string) $e->occurred_at,
         ];
@@ -372,7 +372,7 @@ final class ToolsController
             'id'          => (int) $e->id,
             'kind'        => 'webhook',
             'source'      => substr((string) $e->type, strlen(self::WEBHOOK_PREFIX)),
-            'message'     => $event !== '' ? $event : __('Unnamed event.', 'fundkit-fundraising-campaigns'),
+            'message'     => $event !== '' ? $event : __('Unnamed event.', 'fundraising-toolkit'),
             'verified'    => (bool) ($payload['verified'] ?? false),
             'processed'   => (bool) ($payload['processed'] ?? false),
             'error'       => $error !== '' ? $error : null,
@@ -440,16 +440,16 @@ final class ToolsController
             $to = (string) ($user->user_email ?? '');
         }
         if (! is_email($to)) {
-            return new \WP_Error('fundkit_invalid_email', __('Provide a valid recipient email.', 'fundkit-fundraising-campaigns'), ['status' => 422]);
+            return new \WP_Error('fundkit_invalid_email', __('Provide a valid recipient email.', 'fundraising-toolkit'), ['status' => 422]);
         }
 
-        $subject = __('FundKit test email', 'fundkit-fundraising-campaigns');
-        $body    = '<p>' . esc_html__('This is a test email from FundKit.', 'fundkit-fundraising-campaigns') . '</p>'
-                 . '<p>' . esc_html__('If it landed in your inbox, your sender + transport settings are working.', 'fundkit-fundraising-campaigns') . '</p>'
+        $subject = __('Fundraising Toolkit test email', 'fundraising-toolkit');
+        $body    = '<p>' . esc_html__('This is a test email from Fundraising Toolkit.', 'fundraising-toolkit') . '</p>'
+                 . '<p>' . esc_html__('If it landed in your inbox, your sender + transport settings are working.', 'fundraising-toolkit') . '</p>'
                  . '<p style="color:#6b7280;font-size:12px">'
                  . esc_html(sprintf(
                      /* translators: %s: site URL */
-                     __('Sent at %1$s from %2$s', 'fundkit-fundraising-campaigns'),
+                     __('Sent at %1$s from %2$s', 'fundraising-toolkit'),
                      gmdate('c'),
                      site_url()
                  ))
@@ -492,10 +492,10 @@ final class ToolsController
                 $reason !== ''
                     ? sprintf(
                         /* translators: %s: the mail server's own error message. */
-                        __('The mail server refused it: %s', 'fundkit-fundraising-campaigns'),
+                        __('The mail server refused it: %s', 'fundraising-toolkit'),
                         $reason
                     )
-                    : __('wp_mail() returned false and reported no reason. The site most likely has no mail transport configured: install an SMTP plugin or check your host\'s mail logs.', 'fundkit-fundraising-campaigns'),
+                    : __('wp_mail() returned false and reported no reason. The site most likely has no mail transport configured: install an SMTP plugin or check your host\'s mail logs.', 'fundraising-toolkit'),
                 ['status' => 500]
             );
         }
@@ -695,7 +695,7 @@ final class ToolsController
     {
         $csv = (string) ($request->get_json_params()['csv'] ?? '');
         if (trim($csv) === '') {
-            return new \WP_Error('fundkit_invalid_csv', __('That file is empty.', 'fundkit-fundraising-campaigns'), ['status' => 422]);
+            return new \WP_Error('fundkit_invalid_csv', __('That file is empty.', 'fundraising-toolkit'), ['status' => 422]);
         }
 
         return new WP_REST_Response($this->csv->inspect($csv) + ['fields' => CsvImporter::FIELDS], 200);
@@ -710,7 +710,7 @@ final class ToolsController
         $dryRun  = (bool) ($body['dry_run'] ?? true);
 
         if (trim($csv) === '') {
-            return new \WP_Error('fundkit_invalid_csv', __('That file is empty.', 'fundkit-fundraising-campaigns'), ['status' => 422]);
+            return new \WP_Error('fundkit_invalid_csv', __('That file is empty.', 'fundraising-toolkit'), ['status' => 422]);
         }
 
         $result = $this->csv->import($csv, $mapping, $dryRun);
@@ -746,7 +746,7 @@ final class ToolsController
                 return new WP_REST_Response(['imported' => true, 'records' => $records, 'settings_applied' => 0], 200);
             }
 
-            return new \WP_Error('fundkit_invalid_import', __('No settings payload found.', 'fundkit-fundraising-campaigns'), ['status' => 422]);
+            return new \WP_Error('fundkit_invalid_import', __('No settings payload found.', 'fundraising-toolkit'), ['status' => 422]);
         }
 
         // Settings first, so every guard on the write reads the site as it
@@ -778,7 +778,7 @@ final class ToolsController
             // over the group defaults, so the option reads as the defaults, and
             // for the currency group that means the base silently becomes USD.
             if (! is_array($incoming)) {
-                $refused[$opt] = __('That entry is not a settings group.', 'fundkit-fundraising-campaigns');
+                $refused[$opt] = __('That entry is not a settings group.', 'fundraising-toolkit');
                 continue;
             }
 
@@ -796,7 +796,7 @@ final class ToolsController
             // it against and nothing that would read it back. Writing the option
             // anyway would restore a setting nobody honours, past every guard.
             if ($group === null) {
-                $refused[$opt] = __('This site has no settings group by that name.', 'fundkit-fundraising-campaigns');
+                $refused[$opt] = __('This site has no settings group by that name.', 'fundraising-toolkit');
                 continue;
             }
 
@@ -826,7 +826,7 @@ final class ToolsController
                 $locked ? 'fundkit_base_currency_locked' : 'fundkit_invalid_import',
                 sprintf(
                     /* translators: %s: one or more refusal messages, already sentences. */
-                    __('Part of that file was not restored. %s', 'fundkit-fundraising-campaigns'),
+                    __('Part of that file was not restored. %s', 'fundraising-toolkit'),
                     implode(' ', $refused)
                 ),
                 [
@@ -902,7 +902,7 @@ final class ToolsController
         if (strtoupper(trim((string) $request->get_param('confirmation'))) !== 'DELETE') {
             return new \WP_Error(
                 'fundkit_confirmation_required',
-                __('Type DELETE to confirm.', 'fundkit-fundraising-campaigns'),
+                __('Type DELETE to confirm.', 'fundraising-toolkit'),
                 ['status' => 400]
             );
         }
@@ -937,12 +937,12 @@ final class ToolsController
     public static function scopes(): array
     {
         $core = [
-            'all'       => __('Everything', 'fundkit-fundraising-campaigns'),
-            'currency'  => __('Currency conversions', 'fundkit-fundraising-campaigns'),
-            'donors'    => __('Donors', 'fundkit-fundraising-campaigns'),
-            'funds'     => __('Funds', 'fundkit-fundraising-campaigns'),
-            'campaigns' => __('Campaigns', 'fundkit-fundraising-campaigns'),
-            'forms'     => __('Forms', 'fundkit-fundraising-campaigns'),
+            'all'       => __('Everything', 'fundraising-toolkit'),
+            'currency'  => __('Currency conversions', 'fundraising-toolkit'),
+            'donors'    => __('Donors', 'fundraising-toolkit'),
+            'funds'     => __('Funds', 'fundraising-toolkit'),
+            'campaigns' => __('Campaigns', 'fundraising-toolkit'),
+            'forms'     => __('Forms', 'fundraising-toolkit'),
         ];
 
         $added = (array) apply_filters('fundkit.recalculate.scopes', []);

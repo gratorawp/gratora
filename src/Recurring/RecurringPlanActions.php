@@ -111,7 +111,7 @@ final class RecurringPlanActions
         $this->assertGatewayReachable($plan, 'skip a payment on');
 
         if (! $plan->next_payment_at) {
-            throw new InvalidArgumentException(esc_html__('This donation has no scheduled payment to skip.', 'fundkit-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('This donation has no scheduled payment to skip.', 'fundraising-toolkit'));
         }
 
         $unit   = in_array($plan->interval_unit, ['year', 'week'], true) ? $plan->interval_unit : 'month';
@@ -146,16 +146,16 @@ final class RecurringPlanActions
         $this->assertGatewayReachable($plan, 'change the amount of');
 
         if ($amountCents < 50) {
-            throw new InvalidArgumentException(esc_html__('Amount is too low.', 'fundkit-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('Amount is too low.', 'fundraising-toolkit'));
         }
         if ($amountCents > 99999999) {
-            throw new InvalidArgumentException(esc_html__('Amount is too high.', 'fundkit-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('Amount is too high.', 'fundraising-toolkit'));
         }
         // Storage is major units x 100, so a fractional amount in a zero-decimal
         // currency rounds at the gateway and the row keeps a figure nobody is
         // charging, on every renewal.
         if (Currency::minorUnits((string) $plan->currency) === 0 && $amountCents % 100 !== 0) {
-            throw new InvalidArgumentException(esc_html__('This currency does not support fractional amounts.', 'fundkit-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('This currency does not support fractional amounts.', 'fundraising-toolkit'));
         }
 
         $was = (int) $plan->amount_cents;
@@ -197,7 +197,7 @@ final class RecurringPlanActions
         if (! $gateway instanceof SupportsPaymentRetry) {
             throw new InvalidArgumentException(esc_html(sprintf(
                 /* translators: %s: the payment gateway name, e.g. PayPal. */
-                __('%s does not allow a renewal to be retried on demand. It retries on its own schedule; ask the donor to update their card from the donor portal.', 'fundkit-fundraising-campaigns'),
+                __('%s does not allow a renewal to be retried on demand. It retries on its own schedule; ask the donor to update their card from the donor portal.', 'fundraising-toolkit'),
                 ucfirst((string) $plan->gateway)
             )));
         }
@@ -234,7 +234,7 @@ final class RecurringPlanActions
     private function assertChangeable(RecurringPlan $plan): void
     {
         if (in_array((string) $plan->status, self::TERMINAL, true)) {
-            throw new RuntimeException(esc_html__('This donation is no longer active.', 'fundkit-fundraising-campaigns'));
+            throw new RuntimeException(esc_html__('This donation is no longer active.', 'fundraising-toolkit'));
         }
     }
 

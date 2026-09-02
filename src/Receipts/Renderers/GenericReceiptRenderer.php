@@ -36,7 +36,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Generic Receipt', 'fundkit-fundraising-campaigns');
+        return __('Generic Receipt', 'fundraising-toolkit');
     }
 
     /** @since 1.0.0 */
@@ -110,9 +110,9 @@ final class GenericReceiptRenderer implements ReceiptRenderer
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: human-readable donation reference. */
-            'title'  => sprintf(__('Donation receipt %s', 'fundkit-fundraising-campaigns'), $ctx->donation->reference),
-            'author' => $ctx->org['name'] ?? 'FundKit',
-            'subject' => __('Donation receipt', 'fundkit-fundraising-campaigns'),
+            'title'  => sprintf(__('Donation receipt %s', 'fundraising-toolkit'), $ctx->donation->reference),
+            'author' => $ctx->org['name'] ?? 'Fundraising Toolkit',
+            'subject' => __('Donation receipt', 'fundraising-toolkit'),
         ]);
     }
 
@@ -130,12 +130,12 @@ final class GenericReceiptRenderer implements ReceiptRenderer
         if (! is_array($stored)) $stored = [];
 
         $defaults = [
-            'header_title'       => __('Donation receipt', 'fundkit-fundraising-campaigns'),
+            'header_title'       => __('Donation receipt', 'fundraising-toolkit'),
             'intro'              => '',
-            'signoff'            => __('Thank you for your support.', 'fundkit-fundraising-campaigns'),
+            'signoff'            => __('Thank you for your support.', 'fundraising-toolkit'),
             'footer_note'        => __(
                 "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organization's status. Keep this receipt for your records.",
-                'fundkit-fundraising-campaigns'
+                'fundraising-toolkit'
             ),
             'show_tax_id'        => true,
             'show_donor_address' => false,
@@ -171,7 +171,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     {
         $donation = $ctx->donation;
         $donorName = trim((string) ($ctx->donor_name ?? ''));
-        if ($donorName === '') $donorName = __('Friend', 'fundkit-fundraising-campaigns');
+        if ($donorName === '') $donorName = __('Friend', 'fundraising-toolkit');
 
         $replacements = [
             '{donor_name}'        => $donorName,

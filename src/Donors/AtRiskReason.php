@@ -114,15 +114,15 @@ final class AtRiskReason
     public static function labels(): array
     {
         return [
-            self::PLAN_FAILING        => __('Recurring payments failing', 'fundkit-fundraising-campaigns'),
-            self::PLAN_PAUSED         => __('Recurring donation paused', 'fundkit-fundraising-campaigns'),
-            self::PLAN_CANCELLED      => __('Recurring plan cancelled', 'fundkit-fundraising-campaigns'),
-            self::PLAN_ACTIVE         => __('Recurring plan still active', 'fundkit-fundraising-campaigns'),
-            self::FIRST_DONATION_ONLY => __('First donation, never repeated', 'fundkit-fundraising-campaigns'),
-            self::NO_GAP_YET          => __('Not enough giving history to compare', 'fundkit-fundraising-campaigns'),
-            self::WELL_PAST_GAP       => __('Well past their average gap', 'fundkit-fundraising-campaigns'),
-            self::PAST_GAP            => __('Past their average gap', 'fundkit-fundraising-campaigns'),
-            self::WITHIN_GAP          => __('Within their average gap', 'fundkit-fundraising-campaigns'),
+            self::PLAN_FAILING        => __('Recurring payments failing', 'fundraising-toolkit'),
+            self::PLAN_PAUSED         => __('Recurring donation paused', 'fundraising-toolkit'),
+            self::PLAN_CANCELLED      => __('Recurring plan cancelled', 'fundraising-toolkit'),
+            self::PLAN_ACTIVE         => __('Recurring plan still active', 'fundraising-toolkit'),
+            self::FIRST_DONATION_ONLY => __('First donation, never repeated', 'fundraising-toolkit'),
+            self::NO_GAP_YET          => __('Not enough giving history to compare', 'fundraising-toolkit'),
+            self::WELL_PAST_GAP       => __('Well past their average gap', 'fundraising-toolkit'),
+            self::PAST_GAP            => __('Past their average gap', 'fundraising-toolkit'),
+            self::WITHIN_GAP          => __('Within their average gap', 'fundraising-toolkit'),
         ];
     }
 

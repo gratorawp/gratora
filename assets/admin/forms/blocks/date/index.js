@@ -29,42 +29,42 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Date', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Date', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Help text', 'fundraising-toolkit' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Field name', 'fundraising-toolkit' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugify( v ) } ) }
-                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Required', 'fundraising-toolkit' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Minimum date', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Minimum date', 'fundraising-toolkit' ) }
                         value={ minDate }
                         onChange={ ( v ) => setAttributes( { minDate: v } ) }
                         placeholder="YYYY-MM-DD"
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Maximum date', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Maximum date', 'fundraising-toolkit' ) }
                         value={ maxDate }
                         onChange={ ( v ) => setAttributes( { maxDate: v } ) }
                         placeholder="YYYY-MM-DD"
@@ -82,7 +82,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="fundkit-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Date', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Date', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
@@ -91,7 +91,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Help text', 'fundraising-toolkit' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', display: 'block', marginTop: 2 } }
                     />
@@ -105,8 +105,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Date', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Date picker for birthdays, dedication dates, event dates, etc.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Date', 'fundraising-toolkit' ),
+        description: __( 'Date picker for birthdays, dedication dates, event dates, etc.', 'fundraising-toolkit' ),
         category:   'fundkit-fields',
         icon:       BlockIcons[ 'date' ],
         supports: { html: false, anchor: false, inserter: true },

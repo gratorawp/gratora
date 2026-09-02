@@ -31,52 +31,52 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Text input', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Text input', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Placeholder', 'fundraising-toolkit' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Help text', 'fundraising-toolkit' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Field name', 'fundraising-toolkit' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugify( v ) } ) }
-                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Required', 'fundraising-toolkit' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <Slider
-                        label={ __( 'Maximum length', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Maximum length', 'fundraising-toolkit' ) }
                         value={ maxLength }
                         onChange={ ( v ) => setAttributes( { maxLength: Math.max( 0, v ) } ) }
                         min={ 0 }
                         max={ 500 }
-                        help={ __( '0 = no limit.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( '0 = no limit.', 'fundraising-toolkit' ) }
                     />
                     <TextControl
-                        label={ __( 'Pattern (regex)', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Pattern (regex)', 'fundraising-toolkit' ) }
                         value={ pattern }
                         onChange={ ( v ) => setAttributes( { pattern: v } ) }
-                        help={ __( 'HTML5 pattern attribute. Leave empty to skip.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'HTML5 pattern attribute. Leave empty to skip.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -91,7 +91,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="fundkit-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Label', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
@@ -100,12 +100,12 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Help text', 'fundraising-toolkit' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', display: 'block', marginTop: 2 } }
                     />
                 ) }
-                <div className="fundkit-block-preview__field">{ placeholder || __( 'Text', 'fundkit-fundraising-campaigns' ) }</div>
+                <div className="fundkit-block-preview__field">{ placeholder || __( 'Text', 'fundraising-toolkit' ) }</div>
             </div>
         </>
     );
@@ -114,8 +114,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Text input', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Single-line free text. For employer, dedication name, custom questions, etc.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Text input', 'fundraising-toolkit' ),
+        description: __( 'Single-line free text. For employer, dedication name, custom questions, etc.', 'fundraising-toolkit' ),
         category:   'fundkit-fields',
         icon:       BlockIcons[ 'text-input' ],
         supports: { html: false, anchor: false, inserter: true },

@@ -45,7 +45,7 @@ function Edit( { attributes, setAttributes } ) {
     const manageLink = (
         <p style={ { margin: '10px 0 0' } }>
             <ExternalLink href={ SETTINGS_URL }>
-                { __( 'Manage enabled currencies', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Manage enabled currencies', 'fundraising-toolkit' ) }
             </ExternalLink>
         </p>
     );
@@ -56,20 +56,20 @@ function Edit( { attributes, setAttributes } ) {
     } else if ( available.length === 0 ) {
         panelBody = (
             <Notice status="warning" isDismissible={ false }>
-                { __( 'No currencies are enabled yet. Enable them under Settings → Currency.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'No currencies are enabled yet. Enable them under Settings → Currency.', 'fundraising-toolkit' ) }
             </Notice>
         );
     } else if ( available.length === 1 ) {
         panelBody = (
             <Notice status="warning" isDismissible={ false }>
-                { __( 'Only one currency is enabled, so there is nothing for donors to switch between. Enable more under Settings → Currency.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Only one currency is enabled, so there is nothing for donors to switch between. Enable more under Settings → Currency.', 'fundraising-toolkit' ) }
             </Notice>
         );
     } else {
         panelBody = (
             <>
                 <p style={ { margin: '0 0 8px', fontSize: 12, color: '#6b7280' } }>
-                    { __( 'Choose which of your enabled currencies donors can switch between on this form.', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Choose which of your enabled currencies donors can switch between on this form.', 'fundraising-toolkit' ) }
                 </p>
                 <div style={ { display: 'flex', flexWrap: 'wrap', gap: 8 } }>
                     { available.map( ( code ) => {
@@ -114,7 +114,7 @@ function Edit( { attributes, setAttributes } ) {
                                 { code }
                                 { locked && (
                                     <span style={ { fontSize: 10, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '.04em' } }>
-                                        { __( 'base', 'fundkit-fundraising-campaigns' ) }
+                                        { __( 'base', 'fundraising-toolkit' ) }
                                     </span>
                                 ) }
                             </button>
@@ -131,30 +131,30 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Currency switcher', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Currency switcher', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Currency', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Currency', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Style', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Style', 'fundraising-toolkit' ) }
                         value={ style }
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         options={ [
-                            { value: 'dropdown', label: __( 'Dropdown', 'fundkit-fundraising-campaigns' ) },
-                            { value: 'pills',    label: __( 'Pills', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'dropdown', label: __( 'Dropdown', 'fundraising-toolkit' ) },
+                            { value: 'pills',    label: __( 'Pills', 'fundraising-toolkit' ) },
                         ] }
                     />
                     <Segmented
-                        label={ __( 'Alignment', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Alignment', 'fundraising-toolkit' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ [
-                            { value: 'left',  label: __( 'Left', 'fundkit-fundraising-campaigns' ) },
-                            { value: 'right', label: __( 'Right', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'left',  label: __( 'Left', 'fundraising-toolkit' ) },
+                            { value: 'right', label: __( 'Right', 'fundraising-toolkit' ) },
                         ] }
                     />
                     { panelBody }
@@ -229,8 +229,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Currency switcher', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Lets the donor pick which currency to donate in.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Currency switcher', 'fundraising-toolkit' ),
+        description: __( 'Lets the donor pick which currency to donate in.', 'fundraising-toolkit' ),
         category:   'fundkit-amount',
         icon:       BlockIcons[ 'currency-switcher' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

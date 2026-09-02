@@ -5,16 +5,16 @@ Notes for whoever regenerates the template. Kept out of the distributed zip by
 
 ## Text domain
 
-Every translatable string uses the `fundkit-fundraising-campaigns` text domain,
+Every translatable string uses the `fundraising-toolkit` text domain,
 which is the plugin slug and has to stay that way: WordPress.org derives the
 slug from the plugin name and refuses a domain that disagrees with it. File
 naming follows from the domain:
 
 ```
-fundkit-fundraising-campaigns.pot           - template
-fundkit-fundraising-campaigns-de_DE.po/.mo  - German
-fundkit-fundraising-campaigns-fr_FR.po/.mo  - French
-fundkit-fundraising-campaigns-hr.po/.mo     - Croatian
+fundraising-toolkit.pot           - template
+fundraising-toolkit-de_DE.po/.mo  - German
+fundraising-toolkit-fr_FR.po/.mo  - French
+fundraising-toolkit-hr.po/.mo     - Croatian
 ```
 
 ## Regenerating the POT file

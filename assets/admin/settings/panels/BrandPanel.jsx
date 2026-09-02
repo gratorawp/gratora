@@ -68,7 +68,7 @@ export default function BrandPanel( { s } ) {
         const source = presets.find( ( p ) => p.id === id );
         if ( ! source ) return;
         const newId   = generateId( source.name, presets );
-        const newName = `${ source.name } ${ __( '(copy)', 'fundkit-fundraising-campaigns' ) }`;
+        const newName = `${ source.name } ${ __( '(copy)', 'fundraising-toolkit' ) }`;
         const next    = [ ...presets, {
             id:      newId,
             name:    newName,
@@ -80,10 +80,10 @@ export default function BrandPanel( { s } ) {
     };
 
     const addPreset = () => {
-        const newId = generateId( __( 'Custom', 'fundkit-fundraising-campaigns' ), presets );
+        const newId = generateId( __( 'Custom', 'fundraising-toolkit' ), presets );
         const next  = [ ...presets, {
             id:      newId,
-            name:    __( 'New preset', 'fundkit-fundraising-campaigns' ),
+            name:    __( 'New preset', 'fundraising-toolkit' ),
             tokens:  {},
             builtin: false,
         } ];
@@ -95,8 +95,8 @@ export default function BrandPanel( { s } ) {
         const p = presets.find( ( x ) => x.id === id );
         if ( ! p || p.builtin ) return;
         setConfirm( {
-            title:       __( 'Delete preset', 'fundkit-fundraising-campaigns' ),
-            message:     __( 'Delete this brand preset? This cannot be undone.', 'fundkit-fundraising-campaigns' ),
+            title:       __( 'Delete preset', 'fundraising-toolkit' ),
+            message:     __( 'Delete this brand preset? This cannot be undone.', 'fundraising-toolkit' ),
             destructive: true,
             onConfirm:   () => {
                 const next = presets.filter( ( x ) => x.id !== id );
@@ -113,8 +113,8 @@ export default function BrandPanel( { s } ) {
             <div className="fundkit-brand-layout">
                 <div className="fundkit-brand-layout__main">
                     <Card
-                        title={ __( 'Brand presets', 'fundkit-fundraising-campaigns' ) }
-                        sub={ __( 'Named style presets. Campaigns and forms pick one as their look.', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'Brand presets', 'fundraising-toolkit' ) }
+                        sub={ __( 'Named style presets. Campaigns and forms pick one as their look.', 'fundraising-toolkit' ) }
                         edited={ s.isDirty }
                     >
                         <div className="fundkit-preset-mgr">
@@ -144,7 +144,7 @@ export default function BrandPanel( { s } ) {
                                                 { isDefault && (
                                                     <span className="fundkit-preset-mgr__default">
                                                         <Icon name="check" size={ 12 } />
-                                                        { __( 'Default', 'fundkit-fundraising-campaigns' ) }
+                                                        { __( 'Default', 'fundraising-toolkit' ) }
                                                     </span>
                                                 ) }
                                             </span>
@@ -157,7 +157,7 @@ export default function BrandPanel( { s } ) {
                                     onClick={ addPreset }
                                     icon={ PlusIcon }
                                 >
-                                    { __( 'Add preset', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Add preset', 'fundraising-toolkit' ) }
                                 </Button>
                             </div>
 
@@ -177,11 +177,11 @@ export default function BrandPanel( { s } ) {
                                     <EmptyState
                                         compact
                                         icon={ <Palette size={ 22 } strokeWidth={ 1.75 } /> }
-                                        title={ __( 'No presets yet', 'fundkit-fundraising-campaigns' ) }
-                                        body={ __( 'Brand presets give every campaign a consistent look. Create one to get started.', 'fundkit-fundraising-campaigns' ) }
+                                        title={ __( 'No presets yet', 'fundraising-toolkit' ) }
+                                        body={ __( 'Brand presets give every campaign a consistent look. Create one to get started.', 'fundraising-toolkit' ) }
                                         action={
                                             <Btn variant="secondary" onClick={ addPreset }>
-                                                { __( 'Add preset', 'fundkit-fundraising-campaigns' ) }
+                                                { __( 'Add preset', 'fundraising-toolkit' ) }
                                             </Btn>
                                         }
                                     />
@@ -192,7 +192,7 @@ export default function BrandPanel( { s } ) {
                 </div>
 
                 <aside className="fundkit-brand-layout__rail">
-                    <Card title={ __( 'Live preview', 'fundkit-fundraising-campaigns' ) }>
+                    <Card title={ __( 'Live preview', 'fundraising-toolkit' ) }>
                         { active && (
                             <StylePreview
                                 // Floor the preview with the built-in baseline so a
@@ -222,16 +222,16 @@ function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, o
                     className="fundkit-input fundkit-preset-editor__name"
                     value={ preset.name }
                     onChange={ ( e ) => onRename( e.target.value ) }
-                    placeholder={ __( 'Preset name', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Preset name', 'fundraising-toolkit' ) }
                 />
                 <div className="fundkit-preset-editor__actions">
                     { ! isDefault && (
                         <Button variant="secondary" size="small" onClick={ onMakeDefault }>
-                            { __( 'Make default', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Make default', 'fundraising-toolkit' ) }
                         </Button>
                     ) }
                     <Button variant="tertiary" size="small" icon={ CloneIcon } onClick={ onClone }>
-                        { __( 'Clone', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Clone', 'fundraising-toolkit' ) }
                     </Button>
                     { ! preset.builtin && (
                         <Button
@@ -241,7 +241,7 @@ function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, o
                             isDestructive
                             onClick={ onDelete }
                         >
-                            { __( 'Delete', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Delete', 'fundraising-toolkit' ) }
                         </Button>
                     ) }
                 </div>

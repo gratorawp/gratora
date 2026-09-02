@@ -50,9 +50,9 @@ export default function ConsentsPanel( { s } ) {
 
     const remove = ( i ) => {
         setConfirm( {
-            title:        __( 'Delete consent purpose', 'fundkit-fundraising-campaigns' ),
-            message:      __( 'Delete this consent purpose? Donor consent history stays in the audit log.', 'fundkit-fundraising-campaigns' ),
-            confirmLabel: __( 'Delete', 'fundkit-fundraising-campaigns' ),
+            title:        __( 'Delete consent purpose', 'fundraising-toolkit' ),
+            message:      __( 'Delete this consent purpose? Donor consent history stays in the audit log.', 'fundraising-toolkit' ),
+            confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
             destructive:  true,
             onConfirm: async () => {
                 setList( list.filter( ( _, idx ) => idx !== i ) );
@@ -68,8 +68,8 @@ export default function ConsentsPanel( { s } ) {
     return (
         <>
         <Card
-            title={ __( 'Consent purposes', 'fundkit-fundraising-campaigns' ) }
-            sub={ __( 'What donors can opt into. Each toggle is logged in an append-only audit trail. Bump the version when you change a description so existing donors are prompted to re-consent.', 'fundkit-fundraising-campaigns' ) }
+            title={ __( 'Consent purposes', 'fundraising-toolkit' ) }
+            sub={ __( 'What donors can opt into. Each toggle is logged in an append-only audit trail. Bump the version when you change a description so existing donors are prompted to re-consent.', 'fundraising-toolkit' ) }
             edited={ s.isDirty }
         >
             <div className="fundkit-consents">
@@ -77,11 +77,11 @@ export default function ConsentsPanel( { s } ) {
                     <EmptyState
                         compact
                         icon={ <ShieldCheck size={ 22 } strokeWidth={ 1.75 } /> }
-                        title={ __( 'No consent purposes yet', 'fundkit-fundraising-campaigns' ) }
-                        body={ __( 'Add the first purpose below. Each toggle becomes an opt-in on every donation form.', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'No consent purposes yet', 'fundraising-toolkit' ) }
+                        body={ __( 'Add the first purpose below. Each toggle becomes an opt-in on every donation form.', 'fundraising-toolkit' ) }
                         action={
                             <Btn variant="secondary" onClick={ add }>
-                                { __( 'Add a purpose', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Add a purpose', 'fundraising-toolkit' ) }
                             </Btn>
                         }
                     />
@@ -94,7 +94,7 @@ export default function ConsentsPanel( { s } ) {
                                 className="fundkit-input fundkit-consent-card__label"
                                 type="text"
                                 value={ p.label }
-                                placeholder={ __( 'Purpose name', 'fundkit-fundraising-campaigns' ) }
+                                placeholder={ __( 'Purpose name', 'fundraising-toolkit' ) }
                                 onChange={ ( e ) => update( i, {
                                     label: e.target.value,
                                     key:   p.key || slugify( e.target.value ),
@@ -104,9 +104,9 @@ export default function ConsentsPanel( { s } ) {
                                 type="button"
                                 className="fundkit-consent-card__delete"
                                 onClick={ () => remove( i ) }
-                                aria-label={ __( 'Delete purpose', 'fundkit-fundraising-campaigns' ) }
+                                aria-label={ __( 'Delete purpose', 'fundraising-toolkit' ) }
                             >
-                                { __( 'Delete', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Delete', 'fundraising-toolkit' ) }
                             </button>
                         </header>
 
@@ -114,13 +114,13 @@ export default function ConsentsPanel( { s } ) {
                             className="fundkit-textarea fundkit-consent-card__desc"
                             rows={ 3 }
                             value={ p.description }
-                            placeholder={ __( 'Enter a donor-facing description', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'Enter a donor-facing description', 'fundraising-toolkit' ) }
                             onChange={ ( e ) => update( i, { description: e.target.value } ) }
                         />
 
                         <footer className="fundkit-consent-card__foot">
                             <label className="fundkit-consent-card__meta-field">
-                                <span>{ __( 'Key', 'fundkit-fundraising-campaigns' ) }</span>
+                                <span>{ __( 'Key', 'fundraising-toolkit' ) }</span>
                                 <input
                                     className="fundkit-input fundkit-input--mono"
                                     type="text"
@@ -130,7 +130,7 @@ export default function ConsentsPanel( { s } ) {
                                 />
                             </label>
                             <label className="fundkit-consent-card__meta-field fundkit-consent-card__meta-field--narrow">
-                                <span>{ __( 'Version', 'fundkit-fundraising-campaigns' ) }</span>
+                                <span>{ __( 'Version', 'fundraising-toolkit' ) }</span>
                                 <input
                                     className="fundkit-input"
                                     type="number"
@@ -142,12 +142,12 @@ export default function ConsentsPanel( { s } ) {
 
                             <div className="fundkit-consent-card__toggles">
                                 <SwitchChip
-                                    label={ __( 'Required to donate', 'fundkit-fundraising-campaigns' ) }
+                                    label={ __( 'Required to donate', 'fundraising-toolkit' ) }
                                     checked={ !! p.required }
                                     onChange={ ( v ) => update( i, { required: v } ) }
                                 />
                                 <SwitchChip
-                                    label={ __( 'Pre-selected', 'fundkit-fundraising-campaigns' ) }
+                                    label={ __( 'Pre-selected', 'fundraising-toolkit' ) }
                                     checked={ !! p.default }
                                     onChange={ ( v ) => update( i, { default: v } ) }
                                 />
@@ -157,7 +157,7 @@ export default function ConsentsPanel( { s } ) {
                 ) ) }
 
                 <Btn variant="ghost" onClick={ add } className="fundkit-consents__add">
-                    + { __( 'Add consent purpose', 'fundkit-fundraising-campaigns' ) }
+                    + { __( 'Add consent purpose', 'fundraising-toolkit' ) }
                 </Btn>
             </div>
         </Card>

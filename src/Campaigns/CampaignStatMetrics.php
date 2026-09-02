@@ -31,15 +31,15 @@ final class CampaignStatMetrics
     public static function labels(): array
     {
         return [
-            'raised'    => __('Amount raised', 'fundkit-fundraising-campaigns'),
-            'goal'      => __('Our goal', 'fundkit-fundraising-campaigns'),
-            'remaining' => __('Still needed', 'fundkit-fundraising-campaigns'),
-            'percent'   => __('Of goal reached', 'fundkit-fundraising-campaigns'),
-            'donations' => __('Donations', 'fundkit-fundraising-campaigns'),
-            'donors'    => __('Donors', 'fundkit-fundraising-campaigns'),
-            'average'   => __('Average donation', 'fundkit-fundraising-campaigns'),
-            'top'       => __('Top donation', 'fundkit-fundraising-campaigns'),
-            'days_left' => __('Days left', 'fundkit-fundraising-campaigns'),
+            'raised'    => __('Amount raised', 'fundraising-toolkit'),
+            'goal'      => __('Our goal', 'fundraising-toolkit'),
+            'remaining' => __('Still needed', 'fundraising-toolkit'),
+            'percent'   => __('Of goal reached', 'fundraising-toolkit'),
+            'donations' => __('Donations', 'fundraising-toolkit'),
+            'donors'    => __('Donors', 'fundraising-toolkit'),
+            'average'   => __('Average donation', 'fundraising-toolkit'),
+            'top'       => __('Top donation', 'fundraising-toolkit'),
+            'days_left' => __('Days left', 'fundraising-toolkit'),
         ];
     }
 

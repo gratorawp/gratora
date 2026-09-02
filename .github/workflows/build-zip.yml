@@ -67,12 +67,12 @@ jobs:
         run: bash bin/verify-zip.sh
 
       # The packager names the zip after the Text Domain, so this is
-      # dist/fundkit-fundraising-campaigns.zip and not the folder name.
+      # dist/fundraising-toolkit.zip and not the folder name.
       - name: Upload the artefact
         uses: actions/upload-artifact@v4
         with:
           name: fundkit-plugin-${{ github.sha }}
-          path: dist/fundkit-fundraising-campaigns.zip
+          path: dist/fundraising-toolkit.zip
           # Default is a warning, so a run that uploads nothing still reports
           # success.
           if-no-files-found: error

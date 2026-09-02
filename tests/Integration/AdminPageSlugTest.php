@@ -61,8 +61,8 @@ final class AdminPageSlugTest extends IntegrationTestCase
                 continue;
             }
             $body = (string) file_get_contents($file->getPathname());
-            if (str_contains($body, "page: 'fundkit-fundraising-campaigns'")
-                || str_contains($body, "page=fundkit-fundraising-campaigns")) {
+            if (str_contains($body, "page: 'fundraising-toolkit'")
+                || str_contains($body, "page=fundraising-toolkit")) {
                 $hits[] = $file->getPathname();
             }
         }

@@ -16,31 +16,31 @@ function Edit( { attributes, setAttributes } ) {
 
     // Attributes default to '' and the walker injects these when empty; mirror
     // that in the preview so the canvas is never a nameless field.
-    const labelText       = label || __( 'Add a message', 'fundkit-fundraising-campaigns' );
-    const placeholderText = placeholder || __( 'Anything you want to share?', 'fundkit-fundraising-campaigns' );
+    const labelText       = label || __( 'Add a message', 'fundraising-toolkit' );
+    const placeholderText = placeholder || __( 'Anything you want to share?', 'fundraising-toolkit' );
 
     const blockProps = useBlockProps( { className: 'fundkit-block-preview' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Comment', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Comment', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ label }
-                        placeholder={ __( 'Add a message', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Add a message', 'fundraising-toolkit' ) }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Placeholder', 'fundraising-toolkit' ) }
                         value={ placeholder }
-                        placeholder={ __( 'Anything you want to share?', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Anything you want to share?', 'fundraising-toolkit' ) }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Required', 'fundraising-toolkit' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -65,8 +65,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Comment', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Optional message from the donor to the organization.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Comment', 'fundraising-toolkit' ),
+        description: __( 'Optional message from the donor to the organization.', 'fundraising-toolkit' ),
         category:   'fundkit-fields',
         icon:       BlockIcons[ 'comment' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

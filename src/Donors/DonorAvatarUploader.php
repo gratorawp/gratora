@@ -64,13 +64,13 @@ final class DonorAvatarUploader
             return self::tooLarge();
         }
         if ($error === UPLOAD_ERR_NO_FILE) {
-            return new WP_Error('fundkit_upload_missing', __('No picture was sent.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_upload_missing', __('No picture was sent.', 'fundraising-toolkit'), ['status' => 400]);
         }
         if ($error === UPLOAD_ERR_PARTIAL) {
-            return new WP_Error('fundkit_upload_failed', __('That upload was cut short. Try again.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_upload_failed', __('That upload was cut short. Try again.', 'fundraising-toolkit'), ['status' => 400]);
         }
         if ($error !== UPLOAD_ERR_OK) {
-            return new WP_Error('fundkit_upload_failed', __('That file did not upload. Try again.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_upload_failed', __('That file did not upload. Try again.', 'fundraising-toolkit'), ['status' => 400]);
         }
 
         if ((int) ($file['size'] ?? 0) > self::maxBytes()) {
@@ -81,7 +81,7 @@ final class DonorAvatarUploader
         // something else fails here rather than on someone's campaign page.
         $probe = @getimagesize((string) ($file['tmp_name'] ?? ''));
         if ($probe === false || ! in_array($probe[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_WEBP], true)) {
-            return new WP_Error('fundkit_upload_not_image', __('That does not look like a picture. JPEG, PNG, GIF or WebP.', 'fundkit-fundraising-campaigns'), ['status' => 415]);
+            return new WP_Error('fundkit_upload_not_image', __('That does not look like a picture. JPEG, PNG, GIF or WebP.', 'fundraising-toolkit'), ['status' => 415]);
         }
 
         require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -95,7 +95,7 @@ final class DonorAvatarUploader
 
         $moved = wp_handle_upload($file, $overrides);
         if (! is_array($moved) || isset($moved['error'])) {
-            return new WP_Error('fundkit_upload_failed', (string) ($moved['error'] ?? __('That file could not be saved.', 'fundkit-fundraising-campaigns')), ['status' => 400]);
+            return new WP_Error('fundkit_upload_failed', (string) ($moved['error'] ?? __('That file could not be saved.', 'fundraising-toolkit')), ['status' => 400]);
         }
 
         $attachmentId = wp_insert_attachment([
@@ -109,7 +109,7 @@ final class DonorAvatarUploader
 
         if (is_wp_error($attachmentId) || (int) $attachmentId <= 0) {
             wp_delete_file((string) $moved['file']);
-            return new WP_Error('fundkit_upload_failed', __('That file could not be saved.', 'fundkit-fundraising-campaigns'), ['status' => 500]);
+            return new WP_Error('fundkit_upload_failed', __('That file could not be saved.', 'fundraising-toolkit'), ['status' => 500]);
         }
 
         wp_update_attachment_metadata(
@@ -132,7 +132,7 @@ final class DonorAvatarUploader
             'fundkit_upload_too_large',
             sprintf(
                 /* translators: %s: file size, e.g. "2 MB". */
-                __('That picture is too large. The most this site takes is %s.', 'fundkit-fundraising-campaigns'),
+                __('That picture is too large. The most this site takes is %s.', 'fundraising-toolkit'),
                 size_format(self::maxBytes())
             ),
             ['status' => 413]

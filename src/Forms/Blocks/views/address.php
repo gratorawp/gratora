@@ -20,13 +20,13 @@ defined('ABSPATH') || exit;
  * @var string $postalLabel
  * @var string $countryLabel
  */
-$labelText   = $label !== ''        ? $label        : __('Mailing address', 'fundkit-fundraising-campaigns');
-$line1Text   = $line1Label !== ''   ? $line1Label   : __('Address line 1', 'fundkit-fundraising-campaigns');
-$line2Text   = $line2Label !== ''   ? $line2Label   : __('Apartment, suite, etc.', 'fundkit-fundraising-campaigns');
-$cityText    = $cityLabel !== ''    ? $cityLabel    : __('City', 'fundkit-fundraising-campaigns');
-$regionText  = $regionLabel !== ''  ? $regionLabel  : __('State / region', 'fundkit-fundraising-campaigns');
-$postalText  = $postalLabel !== ''  ? $postalLabel  : __('Postal code', 'fundkit-fundraising-campaigns');
-$countryText = $countryLabel !== '' ? $countryLabel : __('Country', 'fundkit-fundraising-campaigns');
+$labelText   = $label !== ''        ? $label        : __('Mailing address', 'fundraising-toolkit');
+$line1Text   = $line1Label !== ''   ? $line1Label   : __('Address line 1', 'fundraising-toolkit');
+$line2Text   = $line2Label !== ''   ? $line2Label   : __('Apartment, suite, etc.', 'fundraising-toolkit');
+$cityText    = $cityLabel !== ''    ? $cityLabel    : __('City', 'fundraising-toolkit');
+$regionText  = $regionLabel !== ''  ? $regionLabel  : __('State / region', 'fundraising-toolkit');
+$postalText  = $postalLabel !== ''  ? $postalLabel  : __('Postal code', 'fundraising-toolkit');
+$countryText = $countryLabel !== '' ? $countryLabel : __('Country', 'fundraising-toolkit');
 ?>
 <fieldset class="fundkit-block fundkit-block--address fundkit-address">
     <legend class="fundkit-address__legend"><?php echo esc_html($labelText); ?></legend>

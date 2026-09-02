@@ -18,8 +18,8 @@ export default function RecentActivity( { rows = [] } ) {
             <EmptyState
                 compact
                 icon={ <Coins size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donations yet', 'fundkit-fundraising-campaigns' ) }
-                body={ __( 'Donor activity rolls in here as soon as your first donation is received.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'No donations yet', 'fundraising-toolkit' ) }
+                body={ __( 'Donor activity rolls in here as soon as your first donation is received.', 'fundraising-toolkit' ) }
             />
         );
     }
@@ -30,15 +30,15 @@ export default function RecentActivity( { rows = [] } ) {
                 <li key={ r.id } className="fundkit-activity__row">
                     <span className={ `fundkit-activity__dot ${ freqDot[ r.frequency ] || 'is-onetime' }` }
                           title={ r.frequency === 'one_time'
-                              ? __( 'One-time', 'fundkit-fundraising-campaigns' )
-                              : __( 'Recurring', 'fundkit-fundraising-campaigns' ) }
+                              ? __( 'One-time', 'fundraising-toolkit' )
+                              : __( 'Recurring', 'fundraising-toolkit' ) }
                           aria-hidden="true" />
                     <div className="fundkit-activity__body">
                         <div className="fundkit-activity__top">
                             <span className="fundkit-activity__donor">
                                 { r.donor_name }
                                 { r.is_test && (
-                                    <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundkit-fundraising-campaigns' ) }</span>
+                                    <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundraising-toolkit' ) }</span>
                                 ) }
                             </span>
                             <span className="fundkit-activity__amount">
@@ -51,7 +51,7 @@ export default function RecentActivity( { rows = [] } ) {
                                     { r.campaign_title }
                                 </a>
                             ) : (
-                                <span className="fundkit-activity__campaign">{ __( 'No campaign', 'fundkit-fundraising-campaigns' ) }</span>
+                                <span className="fundkit-activity__campaign">{ __( 'No campaign', 'fundraising-toolkit' ) }</span>
                             ) }
                             <span className="fundkit-activity__when">{ timeAgo( r.paid_at ) }</span>
                         </div>

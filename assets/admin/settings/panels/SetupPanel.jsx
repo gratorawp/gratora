@@ -9,12 +9,12 @@ import useCardOpen from '../../_shared/useCardOpen';
 // Order: money first, then whether a donor can reach you, then whether they
 // hear back, then the machinery underneath.
 const GROUPS = [
-    { id: 'money',    title: __( 'Taking money', 'fundkit-fundraising-campaigns' ),          sub: __( 'What has to be true before a card is charged', 'fundkit-fundraising-campaigns' ) },
-    { id: 'page',     title: __( 'A live donation page', 'fundkit-fundraising-campaigns' ),  sub: __( 'Somewhere for a donor to land', 'fundkit-fundraising-campaigns' ) },
-    { id: 'receipts', title: __( 'Receipts and email', 'fundkit-fundraising-campaigns' ),    sub: __( 'What the donor gets back', 'fundkit-fundraising-campaigns' ) },
-    { id: 'jobs',     title: __( 'Background jobs', 'fundkit-fundraising-campaigns' ),       sub: __( 'Receipts and emails are queued, not sent inline', 'fundkit-fundraising-campaigns' ) },
-    { id: 'portal',   title: __( 'Donor portal', 'fundkit-fundraising-campaigns' ),          sub: __( 'Where sign-in and receipt links point', 'fundkit-fundraising-campaigns' ) },
-    { id: 'licenses', title: __( 'Add-ons and licenses', 'fundkit-fundraising-campaigns' ),  sub: __( 'Updates and security fixes for what you installed', 'fundkit-fundraising-campaigns' ) },
+    { id: 'money',    title: __( 'Taking money', 'fundraising-toolkit' ),          sub: __( 'What has to be true before a card is charged', 'fundraising-toolkit' ) },
+    { id: 'page',     title: __( 'A live donation page', 'fundraising-toolkit' ),  sub: __( 'Somewhere for a donor to land', 'fundraising-toolkit' ) },
+    { id: 'receipts', title: __( 'Receipts and email', 'fundraising-toolkit' ),    sub: __( 'What the donor gets back', 'fundraising-toolkit' ) },
+    { id: 'jobs',     title: __( 'Background jobs', 'fundraising-toolkit' ),       sub: __( 'Receipts and emails are queued, not sent inline', 'fundraising-toolkit' ) },
+    { id: 'portal',   title: __( 'Donor portal', 'fundraising-toolkit' ),          sub: __( 'Where sign-in and receipt links point', 'fundraising-toolkit' ) },
+    { id: 'licenses', title: __( 'Add-ons and licenses', 'fundraising-toolkit' ),  sub: __( 'Updates and security fixes for what you installed', 'fundraising-toolkit' ) },
 ];
 
 export default function SetupPanel( { onJumpTo, active } ) {
@@ -37,11 +37,11 @@ export default function SetupPanel( { onJumpTo, active } ) {
     if ( error ) {
         return (
             <div className="fundkit-panel">
-                <Card title={ __( 'Could not check your setup', 'fundkit-fundraising-campaigns' ) }>
+                <Card title={ __( 'Could not check your setup', 'fundraising-toolkit' ) }>
                     <p className="fundkit-connect-p">
-                        { __( 'Something went wrong reading the readiness report. Nothing is broken by this on its own.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Something went wrong reading the readiness report. Nothing is broken by this on its own.', 'fundraising-toolkit' ) }
                     </p>
-                    <Btn variant="primary" onClick={ load }>{ __( 'Try again', 'fundkit-fundraising-campaigns' ) }</Btn>
+                    <Btn variant="primary" onClick={ load }>{ __( 'Try again', 'fundraising-toolkit' ) }</Btn>
                 </Card>
             </div>
         );
@@ -51,7 +51,7 @@ export default function SetupPanel( { onJumpTo, active } ) {
         return (
             <div className="fundkit-panel">
                 <div className="fundkit-readiness__head">
-                    <div className="fundkit-readiness__title">{ __( 'Checking your setup…', 'fundkit-fundraising-campaigns' ) }</div>
+                    <div className="fundkit-readiness__title">{ __( 'Checking your setup…', 'fundraising-toolkit' ) }</div>
                 </div>
             </div>
         );
@@ -79,23 +79,23 @@ function Summary( { report } ) {
     const blockers = report.blockers || 0;
     const warnings = report.warnings || 0;
 
-    let title = __( 'Ready to accept donations', 'fundkit-fundraising-campaigns' );
-    let sub   = __( 'Nothing on this page is standing in a donor’s way.', 'fundkit-fundraising-campaigns' );
+    let title = __( 'Ready to accept donations', 'fundraising-toolkit' );
+    let sub   = __( 'Nothing on this page is standing in a donor’s way.', 'fundraising-toolkit' );
     let tone  = 'green';
 
     if ( blockers > 0 ) {
         tone  = 'red';
         title = sprintf(
             /* translators: %d: number of things preventing donations. */
-            _n( '%d thing is stopping donations', '%d things are stopping donations', blockers, 'fundkit-fundraising-campaigns' ),
+            _n( '%d thing is stopping donations', '%d things are stopping donations', blockers, 'fundraising-toolkit' ),
             blockers
         );
-        sub = __( 'Until these are fixed, a donor cannot complete a donation.', 'fundkit-fundraising-campaigns' );
+        sub = __( 'Until these are fixed, a donor cannot complete a donation.', 'fundraising-toolkit' );
     } else if ( warnings > 0 ) {
         tone = 'amber';
         sub  = sprintf(
             /* translators: %d: number of non-blocking issues. */
-            _n( '%d thing is worth a look, but donations work.', '%d things are worth a look, but donations work.', warnings, 'fundkit-fundraising-campaigns' ),
+            _n( '%d thing is worth a look, but donations work.', '%d things are worth a look, but donations work.', warnings, 'fundraising-toolkit' ),
             warnings
         );
     }
@@ -118,13 +118,13 @@ function Group( { group, rows, onJumpTo } ) {
     const [ open, setOpen ] = useCardOpen( trouble > 0 );
 
     const pill = trouble === 0
-        ? <span className="fundkit-pill fundkit-pill--green"><span className="fundkit-pill__dot" />{ __( 'All good', 'fundkit-fundraising-campaigns' ) }</span>
+        ? <span className="fundkit-pill fundkit-pill--green"><span className="fundkit-pill__dot" />{ __( 'All good', 'fundraising-toolkit' ) }</span>
         : (
             <span className="fundkit-pill fundkit-pill--amber">
                 <span className="fundkit-pill__dot" />
                 { sprintf(
                     /* translators: %d: number of checks in this group needing attention. */
-                    _n( '%d needs attention', '%d need attention', trouble, 'fundkit-fundraising-campaigns' ),
+                    _n( '%d needs attention', '%d need attention', trouble, 'fundraising-toolkit' ),
                     trouble
                 ) }
             </span>
@@ -167,7 +167,7 @@ function Row( { row, onJumpTo } ) {
             </div>
             { row.action_url && (
                 <a className="fundkit-readiness-row__action" href={ row.action_url } onClick={ jump }>
-                    { row.action_label || __( 'Fix', 'fundkit-fundraising-campaigns' ) } →
+                    { row.action_label || __( 'Fix', 'fundraising-toolkit' ) } →
                 </a>
             ) }
         </li>

@@ -45,8 +45,8 @@ final class AbilitiesBridge
     public function registerCategory(): void
     {
         wp_register_ability_category(self::CATEGORY, [
-            'label'       => __('FundKit', 'fundkit-fundraising-campaigns'),
-            'description' => __('Campaigns, donations, donors and everything the installed add-ons add.', 'fundkit-fundraising-campaigns'),
+            'label'       => __('Fundraising Toolkit', 'fundraising-toolkit'),
+            'description' => __('Campaigns, donations, donors and everything the installed add-ons add.', 'fundraising-toolkit'),
         ]);
     }
 
@@ -99,7 +99,7 @@ final class AbilitiesBridge
         if (! $result->ok) {
             return new \WP_Error(
                 (string) ($result->error_code ?? 'fundkit_command_failed'),
-                (string) ($result->error ?? __('The command did not run.', 'fundkit-fundraising-campaigns')),
+                (string) ($result->error ?? __('The command did not run.', 'fundraising-toolkit')),
                 $result->data
             );
         }

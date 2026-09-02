@@ -40,11 +40,11 @@ import registerHtmlBlock            from './html';
 import registerPrivacyNoticeBlock   from './privacy-notice';
 
 const FUNDKIT_CATEGORIES = [
-    { slug: 'fundkit-amount',  title: __( 'Donation amount',   'fundkit-fundraising-campaigns' ) },
-    { slug: 'fundkit-donor',   title: __( 'Donor information', 'fundkit-fundraising-campaigns' ) },
-    { slug: 'fundkit-fields',  title: __( 'Custom fields',     'fundkit-fundraising-campaigns' ) },
-    { slug: 'fundkit-content', title: __( 'Content & layout',  'fundkit-fundraising-campaigns' ) },
-    { slug: 'fundkit-extras',  title: __( 'Extras',            'fundkit-fundraising-campaigns' ) },
+    { slug: 'fundkit-amount',  title: __( 'Donation amount',   'fundraising-toolkit' ) },
+    { slug: 'fundkit-donor',   title: __( 'Donor information', 'fundraising-toolkit' ) },
+    { slug: 'fundkit-fields',  title: __( 'Custom fields',     'fundraising-toolkit' ) },
+    { slug: 'fundkit-content', title: __( 'Content & layout',  'fundraising-toolkit' ) },
+    { slug: 'fundkit-extras',  title: __( 'Extras',            'fundraising-toolkit' ) },
 ];
 
 function ensureCategories() {

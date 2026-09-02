@@ -78,7 +78,7 @@ final class DistPackagingTest extends TestCase
         // The packager reads the install directory out of the plugin header.
         file_put_contents(
             $dir . '/fundkit.php',
-            "<?php\n/**\n * Plugin Name: FundKit\n * Text Domain: fundkit-fundraising-campaigns\n */\n"
+            "<?php\n/**\n * Plugin Name: FundKit\n * Text Domain: fundraising-toolkit\n */\n"
         );
 
         file_put_contents(

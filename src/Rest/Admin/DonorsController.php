@@ -220,7 +220,7 @@ final class DonorsController
     {
         $payload = $this->metrics->profile((int) $request['id'], Capabilities::userCan('fundkit_edit_donors'));
         if (! $payload) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         return new WP_REST_Response($payload, 200);
     }
@@ -230,7 +230,7 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         $perPage = (int) $request['per_page'];
@@ -252,14 +252,14 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         // This handler writes name/company/country via a direct UPDATE and
         // phone/address via setEncryptedField, neither of which passes through
         // DonorService::editProfile's guard, so the whole edit is blocked here
         // or those writes would re-populate an erased row.
         if ($donor->redacted_at !== null) {
-            return new WP_Error('fundkit_donor_redacted', __('This donor has been erased and can no longer be edited.', 'fundkit-fundraising-campaigns'), ['status' => 422]);
+            return new WP_Error('fundkit_donor_redacted', __('This donor has been erased and can no longer be edited.', 'fundraising-toolkit'), ['status' => 422]);
         }
 
         // Present keys set the value, empty string clears to NULL. Direct
@@ -350,7 +350,7 @@ final class DonorsController
             return new WP_Error(
                 'fundkit_email_collision',
                 /* translators: %d: donor id that already owns the requested email */
-                sprintf(__('Another donor (#%d) already uses that email. Merge donors first if you want to consolidate them.', 'fundkit-fundraising-campaigns'), $e->existingDonorId),
+                sprintf(__('Another donor (#%d) already uses that email. Merge donors first if you want to consolidate them.', 'fundraising-toolkit'), $e->existingDonorId),
                 ['status' => 409, 'existing_donor_id' => $e->existingDonorId]
             );
         } catch (InvalidArgumentException $e) {
@@ -411,7 +411,7 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('fundkit_donor_not_found', __('Donor not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_donor_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         // Asked here rather than read off a null, because issuePortalLink also
@@ -421,7 +421,7 @@ final class DonorsController
         if ($donor->redacted_at !== null) {
             return new WP_Error(
                 'fundkit_portal_link_unavailable',
-                __('A sign-in link cannot be issued for an erased donor.', 'fundkit-fundraising-campaigns'),
+                __('A sign-in link cannot be issued for an erased donor.', 'fundraising-toolkit'),
                 ['status' => 409]
             );
         }
@@ -430,7 +430,7 @@ final class DonorsController
         if ($link === null) {
             return new WP_Error(
                 'fundkit_portal_link_failed',
-                __('The sign-in link could not be created. Please try again.', 'fundkit-fundraising-campaigns'),
+                __('The sign-in link could not be created. Please try again.', 'fundraising-toolkit'),
                 ['status' => 500]
             );
         }
@@ -446,12 +446,12 @@ final class DonorsController
     {
         $donorId = (int) $request['id'];
         if (! $this->donors->findById($donorId)) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         $params = $request->get_json_params() ?: $request->get_body_params();
         $body   = trim((string) ($params['body'] ?? ''));
         if ($body === '') {
-            return new WP_Error('fundkit_invalid', __('Note body is required.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_invalid', __('Note body is required.', 'fundraising-toolkit'), ['status' => 400]);
         }
         $note = $this->notes->create($donorId, $body, get_current_user_id() ?: null);
         return new WP_REST_Response($note, 201);
@@ -463,10 +463,10 @@ final class DonorsController
         $noteId = (int) $request['note_id'];
         $note = $this->notes->findById($noteId);
         if (! $note) {
-            return new WP_Error('fundkit_not_found', __('Note not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Note not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         if (! DonorNoteRepository::deletableBy($note, get_current_user_id())) {
-            return new WP_Error('fundkit_forbidden', __('You cannot delete this note.', 'fundkit-fundraising-campaigns'), ['status' => 403]);
+            return new WP_Error('fundkit_forbidden', __('You cannot delete this note.', 'fundraising-toolkit'), ['status' => 403]);
         }
         $this->notes->delete($noteId);
         return new WP_REST_Response(['deleted' => true], 200);
@@ -481,12 +481,12 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         $data = $this->metrics->exportData($donor->id);
         if ($data === null) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         $bundle = [
             'exported_at' => gmdate('c'),
@@ -567,7 +567,7 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         $reason = $this->donorService->undeletableReason($donor);
@@ -590,10 +590,10 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         if ($donor->redacted_at !== null) {
-            return new WP_Error('fundkit_already_redacted', __('This donor is already redacted.', 'fundkit-fundraising-campaigns'), ['status' => 409]);
+            return new WP_Error('fundkit_already_redacted', __('This donor is already redacted.', 'fundraising-toolkit'), ['status' => 409]);
         }
 
         $params = $request->get_json_params() ?: $request->get_body_params() ?: [];
@@ -603,7 +603,7 @@ final class DonorsController
         if ($confirmation === '' || strcasecmp($confirmation, $expected) !== 0) {
             return new WP_Error(
                 'fundkit_confirmation_mismatch',
-                __('Confirmation does not match the donor email. Redact cancelled.', 'fundkit-fundraising-campaigns'),
+                __('Confirmation does not match the donor email. Redact cancelled.', 'fundraising-toolkit'),
                 ['status' => 422],
             );
         }

@@ -52,8 +52,8 @@ final class CampaignPageTemplate extends HookProvider
             return;
         }
         register_block_template('fundkit//' . self::SLUG, [
-            'title'       => __('Campaign page', 'fundkit-fundraising-campaigns'),
-            'description' => __('Site header and footer around the campaign page content, without the theme page banner.', 'fundkit-fundraising-campaigns'),
+            'title'       => __('Campaign page', 'fundraising-toolkit'),
+            'description' => __('Site header and footer around the campaign page content, without the theme page banner.', 'fundraising-toolkit'),
             'content'     => '<!-- wp:template-part {"slug":"header","tagName":"header"} /-->'
                 . '<!-- wp:group {"tagName":"main","layout":{"type":"constrained","contentSize":"' . self::MEASURE . '","wideSize":"' . self::MEASURE . '"}} -->'
                 . '<main class="wp-block-group"><!-- wp:post-content /--></main>'

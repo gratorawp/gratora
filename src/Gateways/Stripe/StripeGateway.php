@@ -82,7 +82,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Stripe', 'fundkit-fundraising-campaigns');
+        return __('Stripe', 'fundraising-toolkit');
     }
 
     /**
@@ -94,7 +94,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     public function description(): string
     {
-        return __('Pay securely by card, or another method offered at checkout.', 'fundkit-fundraising-campaigns');
+        return __('Pay securely by card, or another method offered at checkout.', 'fundraising-toolkit');
     }
 
     /** @since 1.0.0 */
@@ -519,7 +519,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             return $this->refused($eventId, $type, $reason);
         }
 
-        $reason = $intent['last_payment_error']['message'] ?? __('Payment declined.', 'fundkit-fundraising-campaigns');
+        $reason = $intent['last_payment_error']['message'] ?? __('Payment declined.', 'fundraising-toolkit');
         $this->donationService->markFailed($donation, $reason);
 
         return new WebhookOutcome(
@@ -1592,13 +1592,13 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     public function refund(Donation $donation, int $amountCents, ?string $reason = null): RefundResult
     {
         if (! $donation->gateway_intent_id) {
-            return RefundResult::failure(__('No gateway intent on donation; cannot refund via Stripe.', 'fundkit-fundraising-campaigns'));
+            return RefundResult::failure(__('No gateway intent on donation; cannot refund via Stripe.', 'fundraising-toolkit'));
         }
 
         $this->account->useTestMode((bool) $donation->is_test);
 
         if (! $this->api->isConfigured()) {
-            return RefundResult::failure(__('Stripe is not configured.', 'fundkit-fundraising-campaigns'));
+            return RefundResult::failure(__('Stripe is not configured.', 'fundraising-toolkit'));
         }
 
         $params = [
@@ -1860,7 +1860,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
         if ($customerId === '') {
-            throw new RuntimeException(esc_html__('This donation has no Stripe customer to attach a card to.', 'fundkit-fundraising-campaigns'));
+            throw new RuntimeException(esc_html__('This donation has no Stripe customer to attach a card to.', 'fundraising-toolkit'));
         }
 
         $intent = $this->api->post('/setup_intents', [
@@ -1871,7 +1871,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $secret = (string) ($intent['client_secret'] ?? '');
         if ($secret === '') {
-            throw new RuntimeException(esc_html__('Stripe did not return a setup secret.', 'fundkit-fundraising-campaigns'));
+            throw new RuntimeException(esc_html__('Stripe did not return a setup secret.', 'fundraising-toolkit'));
         }
 
         return PaymentMethodUpdate::inline(
@@ -1894,12 +1894,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $token = trim($token);
         if ($token === '') {
-            throw new RuntimeException(esc_html__('No payment method was supplied.', 'fundkit-fundraising-campaigns'));
+            throw new RuntimeException(esc_html__('No payment method was supplied.', 'fundraising-toolkit'));
         }
 
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new RuntimeException(esc_html__('This plan has no Stripe subscription.', 'fundkit-fundraising-campaigns'));
+            throw new RuntimeException(esc_html__('This plan has no Stripe subscription.', 'fundraising-toolkit'));
         }
 
         $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
@@ -1931,7 +1931,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new PaymentRetryUnavailable(esc_html__('This plan never reached Stripe, so there is nothing to collect.', 'fundkit-fundraising-campaigns'));
+            throw new PaymentRetryUnavailable(esc_html__('This plan never reached Stripe, so there is nothing to collect.', 'fundraising-toolkit'));
         }
 
         $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
@@ -1941,7 +1941,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             ? (string) ($sub['latest_invoice']['id'] ?? '')
             : (string) ($sub['latest_invoice'] ?? '');
         if ($invoiceId === '') {
-            throw new PaymentRetryUnavailable(esc_html__('Stripe has no invoice outstanding on this subscription.', 'fundkit-fundraising-campaigns'));
+            throw new PaymentRetryUnavailable(esc_html__('Stripe has no invoice outstanding on this subscription.', 'fundraising-toolkit'));
         }
 
         $invoice = $this->api->get('/invoices/' . rawurlencode($invoiceId));
@@ -1953,8 +1953,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         if ($status !== 'open') {
             throw new PaymentRetryUnavailable(esc_html(sprintf(
                 /* translators: %s: the Stripe invoice status, e.g. paid. */
-                __('Nothing to collect: the latest invoice is %s.', 'fundkit-fundraising-campaigns'),
-                $status !== '' ? $status : __('unavailable', 'fundkit-fundraising-campaigns')
+                __('Nothing to collect: the latest invoice is %s.', 'fundraising-toolkit'),
+                $status !== '' ? $status : __('unavailable', 'fundraising-toolkit')
             )));
         }
 

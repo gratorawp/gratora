@@ -133,14 +133,14 @@ final class DonationFormShortcode extends HookProvider
         $atts = is_array($atts) ? $atts : [];
         $slug = trim((string) ($atts['slug'] ?? ''));
         if ($slug === '') {
-            return $this->renderError(__('Specify a form slug: [fundkit_donation_form slug="..."].', 'fundkit-fundraising-campaigns'));
+            return $this->renderError(__('Specify a form slug: [fundkit_donation_form slug="..."].', 'fundraising-toolkit'));
         }
 
         $form = $this->forms->findBySlug($slug);
         if (! $form) {
             return $this->renderError(sprintf(
                 /* translators: %s: form slug */
-                __('No donation form found for slug "%s".', 'fundkit-fundraising-campaigns'),
+                __('No donation form found for slug "%s".', 'fundraising-toolkit'),
                 $slug
             ));
         }
@@ -156,11 +156,11 @@ final class DonationFormShortcode extends HookProvider
             // its form does not depend on the admin thinking to check the
             // campaign screen. The equivalent block already explains itself.
             if ($form->status !== 'published') {
-                return $this->renderError(__('This form is not published, so it is hidden here.', 'fundkit-fundraising-campaigns'));
+                return $this->renderError(__('This form is not published, so it is hidden here.', 'fundraising-toolkit'));
             }
             $campaign = $this->campaigns ? $this->campaigns->findById($form->campaign_id) : null;
             if (! $campaign) {
-                return $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'fundkit-fundraising-campaigns'));
+                return $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'fundraising-toolkit'));
             }
             if (! $campaign->acceptsDonations()) {
                 return $this->renderNotAccepting($campaign->notAcceptingReason());
@@ -244,7 +244,7 @@ final class DonationFormShortcode extends HookProvider
         // Only a no-JS visitor sees this: a dead form would GET their inputs
         // into the URL on submit.
         $noscript = '<noscript><div class="fundkit-donation-form__noscript">'
-            . esc_html__('This donation form needs JavaScript enabled. Please turn it on and reload the page to donate.', 'fundkit-fundraising-campaigns')
+            . esc_html__('This donation form needs JavaScript enabled. Please turn it on and reload the page to donate.', 'fundraising-toolkit')
             . '</div></noscript>';
 
         return sprintf(
@@ -522,7 +522,7 @@ final class DonationFormShortcode extends HookProvider
 
         $thankYouMessage = trim((string) ($form->settings['thank_you_message'] ?? ''));
         if ($thankYouMessage === '') {
-            $thankYouMessage = __('Thanks for your donation. A receipt is on the way to your inbox.', 'fundkit-fundraising-campaigns');
+            $thankYouMessage = __('Thanks for your donation. A receipt is on the way to your inbox.', 'fundraising-toolkit');
         }
         $redirectUrl = trim((string) ($form->settings['redirect_url'] ?? ''));
 
@@ -659,37 +659,37 @@ final class DonationFormShortcode extends HookProvider
             'pageNav'    => $pageNav,
             'preamble'   => $preamble,
             'i18n'     => [
-                'chooseAmount'   => __('Choose an amount', 'fundkit-fundraising-campaigns'),
-                'customAmount'   => __('Custom amount', 'fundkit-fundraising-campaigns'),
-                'yourDetails'    => __('Your details', 'fundkit-fundraising-campaigns'),
-                'firstName'      => __('First name', 'fundkit-fundraising-campaigns'),
-                'lastName'       => __('Last name', 'fundkit-fundraising-campaigns'),
-                'email'          => __('Email', 'fundkit-fundraising-campaigns'),
-                'country'        => __('Country', 'fundkit-fundraising-campaigns'),
-                'reviewDonation' => __('Review your donation', 'fundkit-fundraising-campaigns'),
-                'amount'         => __('Amount', 'fundkit-fundraising-campaigns'),
-                'frequency'      => __('Donation frequency', 'fundkit-fundraising-campaigns'),
-                'fees'           => __('Processing fee', 'fundkit-fundraising-campaigns'),
-                'total'          => __('Total', 'fundkit-fundraising-campaigns'),
-                'manageGiving'   => __('Manage your giving', 'fundkit-fundraising-campaigns'),
-                'portalLinkSent' => __('Check your email', 'fundkit-fundraising-campaigns'),
-                'donor'          => __('Donor', 'fundkit-fundraising-campaigns'),
-                'paymentMethod'  => __('Payment method', 'fundkit-fundraising-campaigns'),
+                'chooseAmount'   => __('Choose an amount', 'fundraising-toolkit'),
+                'customAmount'   => __('Custom amount', 'fundraising-toolkit'),
+                'yourDetails'    => __('Your details', 'fundraising-toolkit'),
+                'firstName'      => __('First name', 'fundraising-toolkit'),
+                'lastName'       => __('Last name', 'fundraising-toolkit'),
+                'email'          => __('Email', 'fundraising-toolkit'),
+                'country'        => __('Country', 'fundraising-toolkit'),
+                'reviewDonation' => __('Review your donation', 'fundraising-toolkit'),
+                'amount'         => __('Amount', 'fundraising-toolkit'),
+                'frequency'      => __('Donation frequency', 'fundraising-toolkit'),
+                'fees'           => __('Processing fee', 'fundraising-toolkit'),
+                'total'          => __('Total', 'fundraising-toolkit'),
+                'manageGiving'   => __('Manage your giving', 'fundraising-toolkit'),
+                'portalLinkSent' => __('Check your email', 'fundraising-toolkit'),
+                'donor'          => __('Donor', 'fundraising-toolkit'),
+                'paymentMethod'  => __('Payment method', 'fundraising-toolkit'),
                 /* translators: %s: the selected currency code, e.g. INR. */
-                'noGatewayForCurrency' => __('No payment method here accepts %s. Choose another currency to continue.', 'fundkit-fundraising-campaigns'),
-                'noGatewayForFrequency' => __('No payment method here can take a recurring donation. Choose a one-time donation to continue.', 'fundkit-fundraising-campaigns'),
+                'noGatewayForCurrency' => __('No payment method here accepts %s. Choose another currency to continue.', 'fundraising-toolkit'),
+                'noGatewayForFrequency' => __('No payment method here can take a recurring donation. Choose a one-time donation to continue.', 'fundraising-toolkit'),
                 // Not a currency problem: no allowed gateway is switched on.
                 // Naming the currency sends donors hunting for a fix that is not
                 // theirs to make.
-                'noGatewayAvailable' => __('Online donations are unavailable right now. Please try again later.', 'fundkit-fundraising-campaigns'),
-                'testModeNotice' => __('Test mode is on. No real payment is taken and this donation is excluded from reporting.', 'fundkit-fundraising-campaigns'),
-                'back'           => __('Back', 'fundkit-fundraising-campaigns'),
-                'next'           => __('Continue', 'fundkit-fundraising-campaigns'),
-                'donateNow'      => __('Donate now', 'fundkit-fundraising-campaigns'),
-                'processing'     => __('Processing…', 'fundkit-fundraising-campaigns'),
-                'thanks'         => __('Thank you for your donation!', 'fundkit-fundraising-campaigns'),
-                'pendingTitle'   => __('Your donation is pending', 'fundkit-fundraising-campaigns'),
-                'pendingMessage' => __('Thank you. We have emailed you instructions to complete your payment.', 'fundkit-fundraising-campaigns'),
+                'noGatewayAvailable' => __('Online donations are unavailable right now. Please try again later.', 'fundraising-toolkit'),
+                'testModeNotice' => __('Test mode is on. No real payment is taken and this donation is excluded from reporting.', 'fundraising-toolkit'),
+                'back'           => __('Back', 'fundraising-toolkit'),
+                'next'           => __('Continue', 'fundraising-toolkit'),
+                'donateNow'      => __('Donate now', 'fundraising-toolkit'),
+                'processing'     => __('Processing…', 'fundraising-toolkit'),
+                'thanks'         => __('Thank you for your donation!', 'fundraising-toolkit'),
+                'pendingTitle'   => __('Your donation is pending', 'fundraising-toolkit'),
+                'pendingMessage' => __('Thank you. We have emailed you instructions to complete your payment.', 'fundraising-toolkit'),
                 // The donor has finished and nothing is expected of them. The
                 // pending copy would tell someone who has already paid that we
                 // are still waiting on them.
@@ -699,78 +699,78 @@ final class DonationFormShortcode extends HookProvider
                 // clearing, and by a card PayPal has held for review, and those
                 // owe the donor different explanations. Naming a bank told a
                 // card donor something untrue about their own payment.
-                'processingTitle'   => __('Thank you, your donation is on its way', 'fundkit-fundraising-campaigns'),
-                'processingMessage' => __('Your payment is being processed. This can take a few working days, and we will email you once it completes.', 'fundkit-fundraising-campaigns'),
-                'donateAgain'    => __('Donate again', 'fundkit-fundraising-campaigns'),
-                'error'          => __('Sorry, something went wrong. Please try again.', 'fundkit-fundraising-campaigns'),
+                'processingTitle'   => __('Thank you, your donation is on its way', 'fundraising-toolkit'),
+                'processingMessage' => __('Your payment is being processed. This can take a few working days, and we will email you once it completes.', 'fundraising-toolkit'),
+                'donateAgain'    => __('Donate again', 'fundraising-toolkit'),
+                'error'          => __('Sorry, something went wrong. Please try again.', 'fundraising-toolkit'),
                 // A donor who cancelled at their bank, or whose bank refused
                 // the debit, comes back to the same page as a donor whose
                 // payment broke. Only this one can promise the money stayed
                 // where it was, and the generic copy sends them to check a
                 // statement with nothing on it.
-                'notCompleted'   => __('Your payment was not completed, so nothing has been charged. Please try again when you are ready.', 'fundkit-fundraising-campaigns'),
+                'notCompleted'   => __('Your payment was not completed, so nothing has been charged. Please try again when you are ready.', 'fundraising-toolkit'),
                 // The other half of that pair: the browser could not find out
                 // what happened, which is not the same as knowing nothing
                 // happened. A donor whose bank has taken the money must not be
                 // sent back to the form to pay a second time.
-                'unresolvedTitle'  => __('We could not confirm your payment', 'fundkit-fundraising-campaigns'),
-                'returnUnresolved' => __('We could not check on your payment, and your bank may still have taken it. Please do not pay again yet. Check again in a moment, or contact us with your reference and we will look it up.', 'fundkit-fundraising-campaigns'),
-                'checkAgain'       => __('Check again', 'fundkit-fundraising-campaigns'),
-                'paymentTitle'   => __('Complete your donation', 'fundkit-fundraising-campaigns'),
-                'paymentLoading' => __('Loading secure payment…', 'fundkit-fundraising-campaigns'),
-                'payNow'         => __('Pay', 'fundkit-fundraising-campaigns'),
-                'confirming'     => __('Confirming your payment…', 'fundkit-fundraising-campaigns'),
-                'cancel'         => __('Cancel', 'fundkit-fundraising-campaigns'),
-                'comment'        => __('Add a message', 'fundkit-fundraising-campaigns'),
-                'notePublic'     => __('Show my message publicly on the supporter wall', 'fundkit-fundraising-campaigns'),
-                'anonymous'      => __('Make this donation anonymous', 'fundkit-fundraising-campaigns'),
-                'phone'          => __('Phone', 'fundkit-fundraising-campaigns'),
-                'addressLine1'   => __('Address line 1', 'fundkit-fundraising-campaigns'),
-                'addressLine2'   => __('Apartment, suite, etc.', 'fundkit-fundraising-campaigns'),
-                'addressCity'    => __('City', 'fundkit-fundraising-campaigns'),
-                'addressRegion'  => __('State / region', 'fundkit-fundraising-campaigns'),
-                'addressPostal'  => __('Postal code', 'fundkit-fundraising-campaigns'),
-                'addressCountry' => __('Country', 'fundkit-fundraising-campaigns'),
-                'noSpecificFund' => __('No specific fund', 'fundkit-fundraising-campaigns'),
-                'number'         => __('Number', 'fundkit-fundraising-campaigns'),
-                'impact'         => __('Provides', 'fundkit-fundraising-campaigns'),
-                'currency'       => __('Currency', 'fundkit-fundraising-campaigns'),
-                'coverFees'      => __('I\'d like to help cover the transaction fee', 'fundkit-fundraising-campaigns'),
-                'feesTotal'      => __('Total with fees:', 'fundkit-fundraising-campaigns'),
-                'formTitle'      => __('Donation form', 'fundkit-fundraising-campaigns'),
-                'close'          => __('Close', 'fundkit-fundraising-campaigns'),
-                'required'       => __('Required', 'fundkit-fundraising-campaigns'),
-                'freqOneTime'    => __('One-time', 'fundkit-fundraising-campaigns'),
-                'freqWeekly'     => __('Weekly', 'fundkit-fundraising-campaigns'),
-                'freqBiweekly'   => __('Every 2 weeks', 'fundkit-fundraising-campaigns'),
-                'freqMonthly'    => __('Monthly', 'fundkit-fundraising-campaigns'),
-                'freqQuarterly'  => __('Quarterly', 'fundkit-fundraising-campaigns'),
-                'freqYearly'     => __('Yearly', 'fundkit-fundraising-campaigns'),
-                'searchCountry'  => __('Search country…', 'fundkit-fundraising-campaigns'),
+                'unresolvedTitle'  => __('We could not confirm your payment', 'fundraising-toolkit'),
+                'returnUnresolved' => __('We could not check on your payment, and your bank may still have taken it. Please do not pay again yet. Check again in a moment, or contact us with your reference and we will look it up.', 'fundraising-toolkit'),
+                'checkAgain'       => __('Check again', 'fundraising-toolkit'),
+                'paymentTitle'   => __('Complete your donation', 'fundraising-toolkit'),
+                'paymentLoading' => __('Loading secure payment…', 'fundraising-toolkit'),
+                'payNow'         => __('Pay', 'fundraising-toolkit'),
+                'confirming'     => __('Confirming your payment…', 'fundraising-toolkit'),
+                'cancel'         => __('Cancel', 'fundraising-toolkit'),
+                'comment'        => __('Add a message', 'fundraising-toolkit'),
+                'notePublic'     => __('Show my message publicly on the supporter wall', 'fundraising-toolkit'),
+                'anonymous'      => __('Make this donation anonymous', 'fundraising-toolkit'),
+                'phone'          => __('Phone', 'fundraising-toolkit'),
+                'addressLine1'   => __('Address line 1', 'fundraising-toolkit'),
+                'addressLine2'   => __('Apartment, suite, etc.', 'fundraising-toolkit'),
+                'addressCity'    => __('City', 'fundraising-toolkit'),
+                'addressRegion'  => __('State / region', 'fundraising-toolkit'),
+                'addressPostal'  => __('Postal code', 'fundraising-toolkit'),
+                'addressCountry' => __('Country', 'fundraising-toolkit'),
+                'noSpecificFund' => __('No specific fund', 'fundraising-toolkit'),
+                'number'         => __('Number', 'fundraising-toolkit'),
+                'impact'         => __('Provides', 'fundraising-toolkit'),
+                'currency'       => __('Currency', 'fundraising-toolkit'),
+                'coverFees'      => __('I\'d like to help cover the transaction fee', 'fundraising-toolkit'),
+                'feesTotal'      => __('Total with fees:', 'fundraising-toolkit'),
+                'formTitle'      => __('Donation form', 'fundraising-toolkit'),
+                'close'          => __('Close', 'fundraising-toolkit'),
+                'required'       => __('Required', 'fundraising-toolkit'),
+                'freqOneTime'    => __('One-time', 'fundraising-toolkit'),
+                'freqWeekly'     => __('Weekly', 'fundraising-toolkit'),
+                'freqBiweekly'   => __('Every 2 weeks', 'fundraising-toolkit'),
+                'freqMonthly'    => __('Monthly', 'fundraising-toolkit'),
+                'freqQuarterly'  => __('Quarterly', 'fundraising-toolkit'),
+                'freqYearly'     => __('Yearly', 'fundraising-toolkit'),
+                'searchCountry'  => __('Search country…', 'fundraising-toolkit'),
                 'validation'     => [
-                    'required'       => __('Required.', 'fundkit-fundraising-campaigns'),
-                    'pickAmount'     => __('Pick or enter an amount.', 'fundkit-fundraising-campaigns'),
+                    'required'       => __('Required.', 'fundraising-toolkit'),
+                    'pickAmount'     => __('Pick or enter an amount.', 'fundraising-toolkit'),
                     /* translators: %s: minimum donation amount formatted */
-                    'minAmount'      => __('Minimum donation is %s.', 'fundkit-fundraising-campaigns'),
-                    'invalidEmail'   => __('Enter a valid email.', 'fundkit-fundraising-campaigns'),
-                    'enterName'      => __('Enter a name.', 'fundkit-fundraising-campaigns'),
-                    'invalidNumber'  => __('Enter a number.', 'fundkit-fundraising-campaigns'),
+                    'minAmount'      => __('Minimum donation is %s.', 'fundraising-toolkit'),
+                    'invalidEmail'   => __('Enter a valid email.', 'fundraising-toolkit'),
+                    'enterName'      => __('Enter a name.', 'fundraising-toolkit'),
+                    'invalidNumber'  => __('Enter a number.', 'fundraising-toolkit'),
                     /* translators: %s: minimum value */
-                    'minNumber'      => __('Must be at least %s.', 'fundkit-fundraising-campaigns'),
+                    'minNumber'      => __('Must be at least %s.', 'fundraising-toolkit'),
                     /* translators: %s: maximum value */
-                    'maxNumber'      => __('Must be at most %s.', 'fundkit-fundraising-campaigns'),
+                    'maxNumber'      => __('Must be at most %s.', 'fundraising-toolkit'),
                     /* translators: %s: earliest allowed date */
-                    'minDate'        => __('On or after %s.', 'fundkit-fundraising-campaigns'),
+                    'minDate'        => __('On or after %s.', 'fundraising-toolkit'),
                     /* translators: %s: latest allowed date */
-                    'maxDate'        => __('On or before %s.', 'fundkit-fundraising-campaigns'),
+                    'maxDate'        => __('On or before %s.', 'fundraising-toolkit'),
                     /* translators: %s: maximum length */
-                    'tooLong'        => __('Too long (max %s).', 'fundkit-fundraising-campaigns'),
-                    'invalidFormat'  => __('Invalid format.', 'fundkit-fundraising-campaigns'),
-                    'pickAtLeastOne' => __('Pick at least one.', 'fundkit-fundraising-campaigns'),
+                    'tooLong'        => __('Too long (max %s).', 'fundraising-toolkit'),
+                    'invalidFormat'  => __('Invalid format.', 'fundraising-toolkit'),
+                    'pickAtLeastOne' => __('Pick at least one.', 'fundraising-toolkit'),
                     /* translators: %s: minimum number of selections */
-                    'pickAtLeast'    => __('Pick at least %s.', 'fundkit-fundraising-campaigns'),
+                    'pickAtLeast'    => __('Pick at least %s.', 'fundraising-toolkit'),
                     /* translators: %s: maximum number of selections */
-                    'pickNoMoreThan' => __('Pick no more than %s.', 'fundkit-fundraising-campaigns'),
+                    'pickNoMoreThan' => __('Pick no more than %s.', 'fundraising-toolkit'),
                 ],
             ],
         ];
@@ -1081,8 +1081,8 @@ final class DonationFormShortcode extends HookProvider
                 case 'fundkit/comment':
                     $items[] = $tagRow([
                         'kind'        => 'comment',
-                        'label'       => (string) ($attrs['label']       ?? __('Add a message', 'fundkit-fundraising-campaigns')),
-                        'placeholder' => (string) ($attrs['placeholder'] ?? __('Anything you want to share?', 'fundkit-fundraising-campaigns')),
+                        'label'       => (string) ($attrs['label']       ?? __('Add a message', 'fundraising-toolkit')),
+                        'placeholder' => (string) ($attrs['placeholder'] ?? __('Anything you want to share?', 'fundraising-toolkit')),
                         'required'    => (bool)   ($attrs['required']    ?? false),
                     ], $row, $attrs);
                     break;
@@ -1092,7 +1092,7 @@ final class DonationFormShortcode extends HookProvider
                     $globalDefault  = is_array($privacyCfg) && ! empty($privacyCfg['always_anonymous_default']);
                     $items[] = $tagRow([
                         'kind'      => 'anonymous',
-                        'label'     => (string) ($attrs['label']     ?? __('Make this donation anonymous', 'fundkit-fundraising-campaigns')),
+                        'label'     => (string) ($attrs['label']     ?? __('Make this donation anonymous', 'fundraising-toolkit')),
                         'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false) || $globalDefault,
                     ], $row, $attrs);
                     break;
@@ -1100,7 +1100,7 @@ final class DonationFormShortcode extends HookProvider
                 case 'fundkit/cover-fees':
                     $items[] = $tagRow([
                         'kind'      => 'cover_fees',
-                        'label'     => (string) ($attrs['label']     ?? __('Cover the processing fee so 100% of my donation reaches you', 'fundkit-fundraising-campaigns')),
+                        'label'     => (string) ($attrs['label']     ?? __('Cover the processing fee so 100% of my donation reaches you', 'fundraising-toolkit')),
                         'percent'   => (float)  ($attrs['percent']   ?? 2.9),
                         'fixed'     => (int)    ($attrs['fixed']     ?? 30),
                         'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false),
@@ -1287,7 +1287,7 @@ final class DonationFormShortcode extends HookProvider
                     $steps[] = [
                         'type'        => 'submit',
                         'page'        => $currentPage,
-                        'label'       => (string) ($attrs['label'] ?? __('Donate now', 'fundkit-fundraising-campaigns')),
+                        'label'       => (string) ($attrs['label'] ?? __('Donate now', 'fundraising-toolkit')),
                         'align'       => $sbAlign,
                     ];
                     break;
@@ -1444,7 +1444,7 @@ final class DonationFormShortcode extends HookProvider
             if ($s['type'] === 'submit') { $hasSubmit = true; break; }
         }
         if (! $hasSubmit) {
-            $steps[] = ['type' => 'submit', 'page' => $currentPage, 'label' => __('Donate now', 'fundkit-fundraising-campaigns')];
+            $steps[] = ['type' => 'submit', 'page' => $currentPage, 'label' => __('Donate now', 'fundraising-toolkit')];
         }
 
         // Walker pages are 1-indexed; runtime wants dense 0-indexed.
@@ -1601,14 +1601,14 @@ final class DonationFormShortcode extends HookProvider
     private function renderNotAccepting(?string $reason): string
     {
         $public = match ($reason) {
-            'ended'     => __('This campaign has finished accepting donations. Thank you to everyone who gave.', 'fundkit-fundraising-campaigns'),
-            'goal_met'  => __('This campaign has reached its goal. Thank you to everyone who gave.', 'fundkit-fundraising-campaigns'),
-            'scheduled' => __('This campaign is not open for donations yet. Please check back soon.', 'fundkit-fundraising-campaigns'),
+            'ended'     => __('This campaign has finished accepting donations. Thank you to everyone who gave.', 'fundraising-toolkit'),
+            'goal_met'  => __('This campaign has reached its goal. Thank you to everyone who gave.', 'fundraising-toolkit'),
+            'scheduled' => __('This campaign is not open for donations yet. Please check back soon.', 'fundraising-toolkit'),
             default     => null,
         };
 
         if ($public === null) {
-            return $this->renderError(__('This campaign is not accepting donations, so the form is hidden. Publish the campaign to show it.', 'fundkit-fundraising-campaigns'));
+            return $this->renderError(__('This campaign is not accepting donations, so the form is hidden. Publish the campaign to show it.', 'fundraising-toolkit'));
         }
 
         // The visitor's sentence explains the situation; it does not say what to
@@ -1618,9 +1618,9 @@ final class DonationFormShortcode extends HookProvider
         $note = '';
         if (current_user_can('manage_options') || current_user_can('manage_fundkit')) {
             $for = match ($reason) {
-                'ended'     => __('The end date on this campaign has passed. Change the schedule to reopen it.', 'fundkit-fundraising-campaigns'),
-                'goal_met'  => __('This campaign is set to close when it meets its goal, and it has. Raise the target or turn that setting off to reopen it.', 'fundkit-fundraising-campaigns'),
-                'scheduled' => __('It opens on its start date. Only you can see this note.', 'fundkit-fundraising-campaigns'),
+                'ended'     => __('The end date on this campaign has passed. Change the schedule to reopen it.', 'fundraising-toolkit'),
+                'goal_met'  => __('This campaign is set to close when it meets its goal, and it has. Raise the target or turn that setting off to reopen it.', 'fundraising-toolkit'),
+                'scheduled' => __('It opens on its start date. Only you can see this note.', 'fundraising-toolkit'),
                 default     => '',
             };
 

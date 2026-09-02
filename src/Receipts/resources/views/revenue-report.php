@@ -31,10 +31,10 @@ table.months td.num,table.months th.num{text-align:right}
 .footer{margin-top:34px;padding-top:10px;border-top:1px solid #eee;font-size:11px;color:#888}
 </style></head><body>
 <p class="eyebrow"><?php echo esc_html($org_name); ?></p>
-<h1><?php echo esc_html(sprintf(/* translators: %s: four-digit year */ __('Revenue %s', 'fundkit-fundraising-campaigns'), $year)); ?></h1>
-<p class="range"><?php echo esc_html__('Donations received, by month', 'fundkit-fundraising-campaigns'); ?></p>
+<h1><?php echo esc_html(sprintf(/* translators: %s: four-digit year */ __('Revenue %s', 'fundraising-toolkit'), $year)); ?></h1>
+<p class="range"><?php echo esc_html__('Donations received, by month', 'fundraising-toolkit'); ?></p>
 
-<p class="raised"><?php echo esc_html(sprintf(/* translators: %s: formatted amount raised */ __('%s raised', 'fundkit-fundraising-campaigns'), $total)); ?></p>
+<p class="raised"><?php echo esc_html(sprintf(/* translators: %s: formatted amount raised */ __('%s raised', 'fundraising-toolkit'), $total)); ?></p>
 
 <table class="stats"><tr>
 <?php foreach ($stats as $stat) : ?>
@@ -48,9 +48,9 @@ table.months td.num,table.months th.num{text-align:right}
 <table class="months">
     <thead>
         <tr>
-            <th><?php echo esc_html__('Month', 'fundkit-fundraising-campaigns'); ?></th>
-            <th class="num"><?php echo esc_html__('Donations', 'fundkit-fundraising-campaigns'); ?></th>
-            <th class="num"><?php echo esc_html__('Revenue', 'fundkit-fundraising-campaigns'); ?></th>
+            <th><?php echo esc_html__('Month', 'fundraising-toolkit'); ?></th>
+            <th class="num"><?php echo esc_html__('Donations', 'fundraising-toolkit'); ?></th>
+            <th class="num"><?php echo esc_html__('Revenue', 'fundraising-toolkit'); ?></th>
         </tr>
     </thead>
     <tbody>
@@ -64,5 +64,5 @@ table.months td.num,table.months th.num{text-align:right}
     </tbody>
 </table>
 
-<p class="footer"><?php echo esc_html(sprintf(/* translators: %s: formatted date */ __('Generated %s', 'fundkit-fundraising-campaigns'), $generated_date)); ?></p>
+<p class="footer"><?php echo esc_html(sprintf(/* translators: %s: formatted date */ __('Generated %s', 'fundraising-toolkit'), $generated_date)); ?></p>
 </body></html>

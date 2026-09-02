@@ -15,20 +15,20 @@ export default function KpiRow( { kpi, compareOn, range, includesTest = false, l
     const currency = kpi.currency || 'USD';
     // The page banner explains the toggle, but these four cards are what gets
     // screenshotted, and a figure that leaves the page loses the caveat with it.
-    const testSub  = includesTest ? __( 'incl. test', 'fundkit-fundraising-campaigns' ) : '';
+    const testSub  = includesTest ? __( 'incl. test', 'fundraising-toolkit' ) : '';
     const withTest = ( base ) => [ base, testSub ].filter( Boolean ).join( ' · ' );
 
     const periodSub = withTest( rangeLabel( range ) );
     const donationsSub = withTest(
         rangeLabel( range )
-            ? `${ rangeLabel( range ) } · ${ __( 'paid only', 'fundkit-fundraising-campaigns' ) }`
-            : __( 'paid only', 'fundkit-fundraising-campaigns' )
+            ? `${ rangeLabel( range ) } · ${ __( 'paid only', 'fundraising-toolkit' ) }`
+            : __( 'paid only', 'fundraising-toolkit' )
     );
 
     return (
         <div className="fundkit-overview__metrics">
             <MetricCard
-                label={ __( 'Amount raised', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Amount raised', 'fundraising-toolkit' ) }
                 value={ formatAmount( kpi.amount_raised_cents, currency ) }
                 changePct={ cmp?.amount_raised_cents }
                 sub={ periodSub }
@@ -36,7 +36,7 @@ export default function KpiRow( { kpi, compareOn, range, includesTest = false, l
                 skeleton={ loading }
             />
             <MetricCard
-                label={ __( 'Donations', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Donations', 'fundraising-toolkit' ) }
                 value={ String( kpi.donations_count ) }
                 changePct={ cmp?.donations_count }
                 sub={ donationsSub }
@@ -44,7 +44,7 @@ export default function KpiRow( { kpi, compareOn, range, includesTest = false, l
                 skeleton={ loading }
             />
             <MetricCard
-                label={ __( 'Donors', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Donors', 'fundraising-toolkit' ) }
                 value={ String( kpi.donors_count ) }
                 changePct={ cmp?.donors_count }
                 sub={ periodSub }
@@ -52,7 +52,7 @@ export default function KpiRow( { kpi, compareOn, range, includesTest = false, l
                 skeleton={ loading }
             />
             <MetricCard
-                label={ __( 'Average donation', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Average donation', 'fundraising-toolkit' ) }
                 value={ formatAmount( kpi.avg_donation_cents, currency ) }
                 changePct={ cmp?.avg_donation_cents }
                 sub={ periodSub }

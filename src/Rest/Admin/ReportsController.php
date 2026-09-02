@@ -83,7 +83,7 @@ final class ReportsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('fundkit_campaign_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_campaign_not_found', __('Campaign not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         $range = (string) ($request['range'] ?? 'last-30');
@@ -101,17 +101,17 @@ final class ReportsController
     {
         $year = (int) $request['year'];
         if ($year < 2000 || $year > (int) wp_date('Y')) {
-            return new WP_Error('fundkit_invalid_year', __('Unsupported statement year.', 'fundkit-fundraising-campaigns'), ['status' => 422]);
+            return new WP_Error('fundkit_invalid_year', __('Unsupported statement year.', 'fundraising-toolkit'), ['status' => 422]);
         }
 
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor || $donor->redacted_at !== null) {
-            return new WP_Error('fundkit_donor_not_found', __('Donor not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_donor_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         $pdf = $this->taxStatement->build($donor, $year);
         if ($pdf === '') {
-            return new WP_Error('fundkit_no_donations', __('No donations found for that year.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_no_donations', __('No donations found for that year.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         return $this->stream($request, $pdf, TaxStatementBuilder::filename((int) $donor->id, $year));

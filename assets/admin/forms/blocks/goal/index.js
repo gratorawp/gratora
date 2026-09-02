@@ -97,43 +97,43 @@ function Edit( { attributes, setAttributes } ) {
         isAmount ? formatAmount( v, currency, { compact: true } ) : String( v.toLocaleString() );
 
     const missingHint = isFormSource
-        ? __( 'No goal set for this form. Set one in Settings, Goal.', 'fundkit-fundraising-campaigns' )
+        ? __( 'No goal set for this form. Set one in Settings, Goal.', 'fundraising-toolkit' )
         : ( campaign
-            ? __( 'The parent campaign has no goal set.', 'fundkit-fundraising-campaigns' )
-            : __( 'Link this form to a campaign to show its goal.', 'fundkit-fundraising-campaigns' ) );
+            ? __( 'The parent campaign has no goal set.', 'fundraising-toolkit' )
+            : __( 'Link this form to a campaign to show its goal.', 'fundraising-toolkit' ) );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Goal', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Goal', 'fundraising-toolkit' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Show', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show', 'fundraising-toolkit' ) }
                         value={ source }
                         onChange={ ( v ) => setAttributes( { source: v } ) }
                         options={ [
-                            { value: 'campaign', label: __( 'Campaign goal', 'fundkit-fundraising-campaigns' ) },
-                            { value: 'form',     label: __( 'Form goal', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'campaign', label: __( 'Campaign goal', 'fundraising-toolkit' ) },
+                            { value: 'form',     label: __( 'Form goal', 'fundraising-toolkit' ) },
                         ] }
                         help={ isFormSource
-                            ? __( 'Tracks this form’s own donations against the form goal set in Settings, Goal.', 'fundkit-fundraising-campaigns' )
-                            : __( 'Tracks the parent campaign total against the campaign goal.', 'fundkit-fundraising-campaigns' ) }
+                            ? __( 'Tracks this form’s own donations against the form goal set in Settings, Goal.', 'fundraising-toolkit' )
+                            : __( 'Tracks the parent campaign total against the campaign goal.', 'fundraising-toolkit' ) }
                     />
 
                     <ToggleControl
-                        label={ __( 'Show amount raised vs goal', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show amount raised vs goal', 'fundraising-toolkit' ) }
                         checked={ showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donor count', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show donor count', 'fundraising-toolkit' ) }
                         checked={ showDonors }
                         onChange={ ( v ) => setAttributes( { showDonors: v } ) }
                         __nextHasNoMarginBottom
                     />
                     { ! isFormSource && (
                         <ToggleControl
-                            label={ __( 'Show deadline', 'fundkit-fundraising-campaigns' ) }
+                            label={ __( 'Show deadline', 'fundraising-toolkit' ) }
                             checked={ showDeadline }
                             onChange={ ( v ) => setAttributes( { showDeadline: v } ) }
                             __nextHasNoMarginBottom
@@ -153,7 +153,7 @@ function Edit( { attributes, setAttributes } ) {
                         { showAmount && (
                             <div className="fundkit-block-preview__goal-top">
                                 <strong>{ fmtValue( current ) }</strong>
-                                <span>{ __( 'of', 'fundkit-fundraising-campaigns' ) } { fmtValue( target ) }</span>
+                                <span>{ __( 'of', 'fundraising-toolkit' ) } { fmtValue( target ) }</span>
                             </div>
                         ) }
                         <div className="fundkit-block-preview__goal-bar">
@@ -167,23 +167,23 @@ function Edit( { attributes, setAttributes } ) {
                             { showDonors && ! isFormSource && (
                                 <span>
                                     { donors === 1
-                                        ? __( '1 donor', 'fundkit-fundraising-campaigns' )
-                                        : `${ donors.toLocaleString() } ${ __( 'donors', 'fundkit-fundraising-campaigns' ) }` }
+                                        ? __( '1 donor', 'fundraising-toolkit' )
+                                        : `${ donors.toLocaleString() } ${ __( 'donors', 'fundraising-toolkit' ) }` }
                                 </span>
                             ) }
                             { showDeadline && ! isFormSource && days !== null && (
                                 <span>
                                     { days === 0
-                                        ? __( 'Last day', 'fundkit-fundraising-campaigns' )
+                                        ? __( 'Last day', 'fundraising-toolkit' )
                                         : days === 1
-                                            ? __( '1 day left', 'fundkit-fundraising-campaigns' )
-                                            : `${ days } ${ __( 'days left', 'fundkit-fundraising-campaigns' ) }` }
+                                            ? __( '1 day left', 'fundraising-toolkit' )
+                                            : `${ days } ${ __( 'days left', 'fundraising-toolkit' ) }` }
                                 </span>
                             ) }
                         </div>
                         { isFormSource && (
                             <p className="fundkit-block-preview__note">
-                                { __( 'Live progress appears on the published form.', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Live progress appears on the published form.', 'fundraising-toolkit' ) }
                             </p>
                         ) }
                     </>
@@ -196,8 +196,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Goal', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Progress bar for this form’s goal or its parent campaign’s goal.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Goal', 'fundraising-toolkit' ),
+        description: __( 'Progress bar for this form’s goal or its parent campaign’s goal.', 'fundraising-toolkit' ),
         category:   'fundkit-extras',
         icon:       BlockIcons[ 'goal' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

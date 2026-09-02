@@ -8,7 +8,7 @@ const NAME = 'fundkit/anonymous-toggle';
 
 function Edit( { attributes, setAttributes } ) {
     const {
-        label     = __( 'Make this donation anonymous', 'fundkit-fundraising-campaigns' ),
+        label     = __( 'Make this donation anonymous', 'fundraising-toolkit' ),
         defaultOn = false,
         condition = DEFAULT_CONDITION,
     } = attributes;
@@ -18,12 +18,12 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Anonymous toggle', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Anonymous toggle', 'fundraising-toolkit' ) } initialOpen>
                     <ToggleControl
-                        label={ __( 'Default on', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Default on', 'fundraising-toolkit' ) }
                         checked={ defaultOn }
                         onChange={ ( v ) => setAttributes( { defaultOn: v } ) }
-                        help={ __( 'Click the label to edit it inline.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Click the label to edit it inline.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -47,7 +47,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Make this donation anonymous', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Make this donation anonymous', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                     style={ { fontSize: 13, flex: 1 } }
                 />
@@ -59,8 +59,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Anonymous toggle', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Lets the donor hide their identity on public displays.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Anonymous toggle', 'fundraising-toolkit' ),
+        description: __( 'Lets the donor hide their identity on public displays.', 'fundraising-toolkit' ),
         category:   'fundkit-extras',
         icon:       BlockIcons[ 'anonymous-toggle' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

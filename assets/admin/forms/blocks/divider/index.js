@@ -27,9 +27,9 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Divider', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Divider', 'fundraising-toolkit' ) } initialOpen>
                     <Slider
-                        label={ __( 'Space above', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Space above', 'fundraising-toolkit' ) }
                         value={ marginTop }
                         onChange={ ( v ) => setAttributes( { marginTop: Number( v ) } ) }
                         min={ 0 }
@@ -37,7 +37,7 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <Slider
-                        label={ __( 'Space below', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Space below', 'fundraising-toolkit' ) }
                         value={ marginBottom }
                         onChange={ ( v ) => setAttributes( { marginBottom: Number( v ) } ) }
                         min={ 0 }
@@ -45,7 +45,7 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <Slider
-                        label={ __( 'Line thickness', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Line thickness', 'fundraising-toolkit' ) }
                         value={ thickness }
                         onChange={ ( v ) => setAttributes( { thickness: Number( v ) } ) }
                         min={ 1 }
@@ -53,12 +53,12 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <ColorInput
-                        label={ __( 'Line colour', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Line colour', 'fundraising-toolkit' ) }
                         value={ color }
                         onChange={ ( v ) => setAttributes( { color: v || '' } ) }
                     />
                     <p style={ { fontSize: 12, color: '#6b7280', margin: '8px 0 0' } }>
-                        { __( 'Leave the colour empty to follow the form border colour.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Leave the colour empty to follow the form border colour.', 'fundraising-toolkit' ) }
                     </p>
                 </PanelBody>
                 <ConditionPanel
@@ -83,8 +83,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Divider', 'fundkit-fundraising-campaigns' ),
-        description: __( 'A horizontal line with adjustable spacing and colour.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Divider', 'fundraising-toolkit' ),
+        description: __( 'A horizontal line with adjustable spacing and colour.', 'fundraising-toolkit' ),
         category:   'fundkit-content',
         icon:       BlockIcons.divider,
         supports: { html: false, anchor: false, inserter: true },

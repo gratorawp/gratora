@@ -57,9 +57,9 @@ final class DonationFormBlock extends CampaignBlock
             return View::loadRelative(__DIR__, 'views/donation-form', [
                 'mode'      => 'empty',
                 'emptyText' => (string) ($attrs['emptyText'] ?? '')
-                    ?: __('Donations are not open for this campaign yet.', 'fundkit-fundraising-campaigns'),
+                    ?: __('Donations are not open for this campaign yet.', 'fundraising-toolkit'),
                 'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
-                    ? __('This campaign has no published donation form yet.', 'fundkit-fundraising-campaigns')
+                    ? __('This campaign has no published donation form yet.', 'fundraising-toolkit')
                     : '',
                 'styleVars' => $this->styleVars($campaign),
             ]);
@@ -97,9 +97,9 @@ final class DonationFormBlock extends CampaignBlock
             return View::loadRelative(__DIR__, 'views/donation-form', [
                 'mode'      => 'empty',
                 'emptyText' => (string) ($attrs['emptyText'] ?? '')
-                    ?: __('Donations are not open for this campaign yet.', 'fundkit-fundraising-campaigns'),
+                    ?: __('Donations are not open for this campaign yet.', 'fundraising-toolkit'),
                 'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
-                    ? __('This campaign is not accepting donations, so the form is hidden. Publish the campaign and check its schedule.', 'fundkit-fundraising-campaigns')
+                    ? __('This campaign is not accepting donations, so the form is hidden. Publish the campaign and check its schedule.', 'fundraising-toolkit')
                     : '',
                 'styleVars' => $this->styleVars($campaign),
             ]);

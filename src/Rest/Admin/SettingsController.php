@@ -83,7 +83,7 @@ final class SettingsController
     {
         $group = (string) $request['group'];
         if (! $this->settings->knows($group)) {
-            return new WP_Error('fundkit_unknown_group', __('Unknown settings group.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_unknown_group', __('Unknown settings group.', 'fundraising-toolkit'), ['status' => 404]);
         }
         // Never hand a stored secret back out. The gateways group holds the
         // Stripe webhook signing secret, which is the only authentication on
@@ -105,13 +105,13 @@ final class SettingsController
     {
         $group = (string) $request['group'];
         if (! $this->settings->knows($group)) {
-            return new WP_Error('fundkit_unknown_group', __('Unknown settings group.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_unknown_group', __('Unknown settings group.', 'fundraising-toolkit'), ['status' => 404]);
         }
         // Assigning FundKit capabilities to roles grants privileges, so it needs
         // full admin - not the delegatable fundkit_manage_settings, which a scoped
         // role could otherwise use to grant itself refund/redact/export caps.
         if ($group === 'roles' && ! current_user_can('manage_options')) {
-            return new WP_Error('fundkit_forbidden', __('Managing roles requires full administrator access.', 'fundkit-fundraising-campaigns'), ['status' => 403]);
+            return new WP_Error('fundkit_forbidden', __('Managing roles requires full administrator access.', 'fundraising-toolkit'), ['status' => 403]);
         }
         $body = (array) $request->get_json_params();
         // Whitelist to known top-level keys for this group so arbitrary keys

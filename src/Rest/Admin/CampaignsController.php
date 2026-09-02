@@ -170,7 +170,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         $summary = $this->plans->liveForCampaign((int) $campaign->id);
         return new WP_REST_Response([
@@ -222,7 +222,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         return new WP_REST_Response($this->shapeFull($campaign, (string) ($request['range'] ?? 'all-time')), 200);
     }
@@ -246,7 +246,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         $body      = (array) ($request->get_json_params() ?? []);
         $wasActive = $campaign->status !== 'archived';
@@ -272,7 +272,7 @@ final class CampaignsController
                 ->where('is_test', false)
                 ->count();
 
-            $this->cancelJob->start((int) $campaign->id, __('Campaign archived', 'fundkit-fundraising-campaigns'));
+            $this->cancelJob->start((int) $campaign->id, __('Campaign archived', 'fundraising-toolkit'));
 
             $recurringCancel = ['queued' => $queued];
         }
@@ -290,7 +290,7 @@ final class CampaignsController
     {
         $current = $this->campaigns->findById((int) $request['id']);
         if (! $current) {
-            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         $others = Campaign::query()
@@ -338,7 +338,7 @@ final class CampaignsController
     {
         $source = $this->campaigns->findById((int) $request['id']);
         if (! $source) {
-            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         try {
             $copy = $this->campaignService->duplicate($source);
@@ -353,7 +353,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         try {
             $this->campaignService->delete($campaign);
@@ -368,7 +368,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         $range   = (string) ($request['range']   ?? 'all-time');
         $compare = (string) ($request['compare'] ?? 'none');
@@ -406,7 +406,7 @@ final class CampaignsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Campaign not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         // Checked against this campaign's own list. A type that lays out its
@@ -414,7 +414,7 @@ final class CampaignsController
         // replace every block that type exists for.
         $template = (string) $request['template'];
         if (! CampaignTemplates::exists($template, (string) $campaign->campaign_type)) {
-            return new WP_Error('fundkit_invalid_input', __('Unknown page layout.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_invalid_input', __('Unknown page layout.', 'fundraising-toolkit'), ['status' => 400]);
         }
 
         return new WP_REST_Response([

@@ -70,13 +70,13 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('PayPal', 'fundkit-fundraising-campaigns');
+        return __('PayPal', 'fundraising-toolkit');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Pay with your PayPal balance, a bank account, or a card. No PayPal account required.', 'fundkit-fundraising-campaigns');
+        return __('Pay with your PayPal balance, a bank account, or a card. No PayPal account required.', 'fundraising-toolkit');
     }
 
     /** @since 1.0.0 */
@@ -717,7 +717,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 'recurring.paypal',
                 sprintf(
                     /* translators: 1: PayPal subscription id, 2: the reason it was refused */
-                    __('PayPal subscription %1$s has no recurring plan here, so it cannot be cancelled from this site: %2$s', 'fundkit-fundraising-campaigns'),
+                    __('PayPal subscription %1$s has no recurring plan here, so it cannot be cancelled from this site: %2$s', 'fundraising-toolkit'),
                     $subId,
                     $e->getMessage()
                 ),
@@ -1322,7 +1322,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new RuntimeException(esc_html__('This donation has no PayPal subscription.', 'fundkit-fundraising-campaigns'));
+            throw new RuntimeException(esc_html__('This donation has no PayPal subscription.', 'fundraising-toolkit'));
         }
 
         // The subscription's own current plan, read back from PayPal, so this
@@ -1337,7 +1337,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         )['plan_id'] ?? '');
 
         if ($planId === '') {
-            throw new RuntimeException(esc_html__('PayPal did not say which plan this subscription is on.', 'fundkit-fundraising-campaigns'));
+            throw new RuntimeException(esc_html__('PayPal did not say which plan this subscription is on.', 'fundraising-toolkit'));
         }
 
         $revised = $this->api->post(
@@ -1354,7 +1354,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
 
-        throw new RuntimeException(esc_html__('PayPal did not return a link for changing the payment method.', 'fundkit-fundraising-campaigns'));
+        throw new RuntimeException(esc_html__('PayPal did not return a link for changing the payment method.', 'fundraising-toolkit'));
     }
 
     /**

@@ -16,13 +16,13 @@ export function registerFundKitEntities() {
             kind:    'fundkit/v1',
             name:    'campaign',
             baseURL: '/fundkit/v1/admin/campaigns',
-            label:   __( 'Campaign', 'fundkit-fundraising-campaigns' ),
+            label:   __( 'Campaign', 'fundraising-toolkit' ),
         },
         {
             kind:    'fundkit/v1',
             name:    'form',
             baseURL: '/fundkit/v1/admin/forms',
-            label:   __( 'Donation form', 'fundkit-fundraising-campaigns' ),
+            label:   __( 'Donation form', 'fundraising-toolkit' ),
         },
     ] );
 }

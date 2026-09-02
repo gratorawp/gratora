@@ -70,19 +70,19 @@ export async function campaignDeleteMessage( campaign ) {
                 'Permanently delete this campaign? Its %d form will also be deleted.',
                 'Permanently delete this campaign? Its %d forms will also be deleted.',
                 count,
-                'fundkit-fundraising-campaigns'
+                'fundraising-toolkit'
             ),
             count,
         )
-        : __( 'Permanently delete this campaign?', 'fundkit-fundraising-campaigns' ) ];
+        : __( 'Permanently delete this campaign?', 'fundraising-toolkit' ) ];
 
     // The page is deleted outright rather than trashed, so an admin who has
     // built it out in the block editor has nothing left to restore from.
     if ( campaign?.page_id ) {
-        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'fundkit-fundraising-campaigns' ) );
+        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'fundraising-toolkit' ) );
     }
 
-    parts.push( __( 'This cannot be undone.', 'fundkit-fundraising-campaigns' ) );
+    parts.push( __( 'This cannot be undone.', 'fundraising-toolkit' ) );
 
     return parts.join( ' ' );
 }
@@ -100,14 +100,14 @@ export async function campaignDeleteMessage( campaign ) {
  */
 export function notAcceptingMessage( reason ) {
     const COPY = {
-        draft:     __( 'This campaign is a draft, so it is not taking donations yet. Anyone who opens its form is turned away.', 'fundkit-fundraising-campaigns' ),
-        archived:  __( 'This campaign is archived and is not taking donations.', 'fundkit-fundraising-campaigns' ),
-        scheduled: __( 'This campaign has not started yet, so it is not taking donations until its start date.', 'fundkit-fundraising-campaigns' ),
-        ended:     __( 'This campaign has ended and is no longer taking donations.', 'fundkit-fundraising-campaigns' ),
-        goal_met:  __( 'This campaign has reached its goal and is set to close when it does, so it is no longer taking donations. Raise the target or turn that setting off in Goal to reopen it.', 'fundkit-fundraising-campaigns' ),
+        draft:     __( 'This campaign is a draft, so it is not taking donations yet. Anyone who opens its form is turned away.', 'fundraising-toolkit' ),
+        archived:  __( 'This campaign is archived and is not taking donations.', 'fundraising-toolkit' ),
+        scheduled: __( 'This campaign has not started yet, so it is not taking donations until its start date.', 'fundraising-toolkit' ),
+        ended:     __( 'This campaign has ended and is no longer taking donations.', 'fundraising-toolkit' ),
+        goal_met:  __( 'This campaign has reached its goal and is set to close when it does, so it is no longer taking donations. Raise the target or turn that setting off in Goal to reopen it.', 'fundraising-toolkit' ),
     };
 
-    return COPY[ reason ] || __( 'This campaign is not taking donations.', 'fundkit-fundraising-campaigns' );
+    return COPY[ reason ] || __( 'This campaign is not taking donations.', 'fundraising-toolkit' );
 }
 
 function NotAcceptingNotice( { campaign, onPublish } ) {
@@ -121,7 +121,7 @@ function NotAcceptingNotice( { campaign, onPublish } ) {
                 <>
                     { ' ' }
                     <Button variant="link" onClick={ onPublish }>
-                        { __( 'Publish it now', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Publish it now', 'fundraising-toolkit' ) }
                     </Button>
                 </>
             ) }
@@ -145,7 +145,7 @@ export default function Detail( { id, tab } ) {
         if ( ! from ) return;
         notify.success( sprintf(
             /* translators: %s: source campaign title */
-            __( 'Duplicated from "%s". Review and rename before publishing.', 'fundkit-fundraising-campaigns' ),
+            __( 'Duplicated from "%s". Review and rename before publishing.', 'fundraising-toolkit' ),
             from,
         ) );
         params.delete( 'duplicated_from' );
@@ -160,7 +160,7 @@ export default function Detail( { id, tab } ) {
     if ( c.notFound ) {
         return (
             <Notice status="error" isDismissible={ false }>
-                { __( 'Campaign not found.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Campaign not found.', 'fundraising-toolkit' ) }
             </Notice>
         );
     }
@@ -190,7 +190,7 @@ export default function Detail( { id, tab } ) {
                         'Campaign archived. Cancelling %d subscription in the background.',
                         'Campaign archived. Cancelling %d subscriptions in the background.',
                         queued,
-                        'fundkit-fundraising-campaigns'
+                        'fundraising-toolkit'
                     ),
                     queued
                 ) );
@@ -198,11 +198,11 @@ export default function Detail( { id, tab } ) {
                 return;
             }
             notify.success( nextStatus === 'archived'
-                ? __( 'Campaign archived.', 'fundkit-fundraising-campaigns' )
-                : __( 'Campaign restored to draft.', 'fundkit-fundraising-campaigns' ) );
+                ? __( 'Campaign archived.', 'fundraising-toolkit' )
+                : __( 'Campaign restored to draft.', 'fundraising-toolkit' ) );
             window.location.reload();
         } catch ( err ) {
-            setError( err?.message || __( 'Update failed.', 'fundkit-fundraising-campaigns' ) );
+            setError( err?.message || __( 'Update failed.', 'fundraising-toolkit' ) );
         }
     };
 
@@ -220,7 +220,7 @@ export default function Detail( { id, tab } ) {
                     window.location.href = url;
                 }
             } catch ( err ) {
-                setError( err?.message || __( 'Duplicate failed.', 'fundkit-fundraising-campaigns' ) );
+                setError( err?.message || __( 'Duplicate failed.', 'fundraising-toolkit' ) );
             }
             return;
         }
@@ -253,11 +253,11 @@ export default function Detail( { id, tab } ) {
                     data: { status: nextStatus },
                 } );
                 notify.success( name === 'publish'
-                    ? __( 'Campaign published.', 'fundkit-fundraising-campaigns' )
-                    : __( 'Campaign moved to draft.', 'fundkit-fundraising-campaigns' ) );
+                    ? __( 'Campaign published.', 'fundraising-toolkit' )
+                    : __( 'Campaign moved to draft.', 'fundraising-toolkit' ) );
                 window.location.reload();
             } catch ( err ) {
-                setError( err?.message || __( 'Update failed.', 'fundkit-fundraising-campaigns' ) );
+                setError( err?.message || __( 'Update failed.', 'fundraising-toolkit' ) );
             }
             return;
         }
@@ -267,9 +267,9 @@ export default function Detail( { id, tab } ) {
             // and ticket rows, every one of which still blocks a delete.
             if ( campaign.delete_blocked ) {
                 setConfirm( {
-                    title:        __( 'This campaign cannot be deleted', 'fundkit-fundraising-campaigns' ),
+                    title:        __( 'This campaign cannot be deleted', 'fundraising-toolkit' ),
                     message:      campaign.delete_blocked,
-                    confirmLabel: __( 'Archive instead', 'fundkit-fundraising-campaigns' ),
+                    confirmLabel: __( 'Archive instead', 'fundraising-toolkit' ),
                     onConfirm:    () => onHeaderAction( 'archive' ),
                 } );
                 return;
@@ -277,9 +277,9 @@ export default function Detail( { id, tab } ) {
 
             const message = await campaignDeleteMessage( campaign );
             setConfirm( {
-                title:        __( 'Delete campaign', 'fundkit-fundraising-campaigns' ),
+                title:        __( 'Delete campaign', 'fundraising-toolkit' ),
                 message,
-                confirmLabel: __( 'Delete', 'fundkit-fundraising-campaigns' ),
+                confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
                 destructive:  true,
                 onConfirm: async () => {
                     try {
@@ -289,7 +289,7 @@ export default function Detail( { id, tab } ) {
                         } );
                         window.location.href = listHref();
                     } catch ( err ) {
-                        setError( err?.message || __( 'Delete failed.', 'fundkit-fundraising-campaigns' ) );
+                        setError( err?.message || __( 'Delete failed.', 'fundraising-toolkit' ) );
                     }
                 },
             } );
@@ -343,7 +343,7 @@ export default function Detail( { id, tab } ) {
 
             { archivePrompt && (
                 <Modal
-                    title={ __( 'Archive campaign', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Archive campaign', 'fundraising-toolkit' ) }
                     onRequestClose={ () => setArchivePrompt( null ) }
                 >
                     <p style={ { marginTop: 0 } }>
@@ -353,30 +353,30 @@ export default function Detail( { id, tab } ) {
                                 'This campaign has %d live recurring donation.',
                                 'This campaign has %d live recurring donations.',
                                 archivePrompt.count,
-                                'fundkit-fundraising-campaigns'
+                                'fundraising-toolkit'
                             ),
                             archivePrompt.count
                         ) }
                         { ' ' }
-                        { __( 'Live counts active, paused and past-due donations: a paused one resumes and a past-due one is still being retried.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Live counts active, paused and past-due donations: a paused one resumes and a past-due one is still being retried.', 'fundraising-toolkit' ) }
                         { archivePrompt.mrr_cents > 0 && ' ' + sprintf(
                             /* translators: %s: formatted monthly amount */
-                            __( 'About %s a month is at stake.', 'fundkit-fundraising-campaigns' ),
+                            __( 'About %s a month is at stake.', 'fundraising-toolkit' ),
                             formatAmount( archivePrompt.mrr_cents, archivePrompt.currency )
                         ) }
                     </p>
                     <p>
-                        { __( 'Archiving stops new donations. These subscriptions are left as they are and stay credited to this campaign unless you cancel them.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Archiving stops new donations. These subscriptions are left as they are and stay credited to this campaign unless you cancel them.', 'fundraising-toolkit' ) }
                     </p>
                     <CheckboxControl
-                        label={ __( 'Also cancel these subscriptions (donors will be emailed)', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Also cancel these subscriptions (donors will be emailed)', 'fundraising-toolkit' ) }
                         checked={ cancelSubs }
                         onChange={ setCancelSubs }
                         __nextHasNoMarginBottom
                     />
                     <div style={ { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 } }>
                         <Button variant="tertiary" onClick={ () => setArchivePrompt( null ) }>
-                            { __( 'Cancel', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Cancel', 'fundraising-toolkit' ) }
                         </Button>
                         <Button
                             variant="primary"
@@ -386,7 +386,7 @@ export default function Detail( { id, tab } ) {
                                 runArchive( 'archived', cancelSubs );
                             } }
                         >
-                            { __( 'Archive campaign', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Archive campaign', 'fundraising-toolkit' ) }
                         </Button>
                     </div>
                 </Modal>
@@ -401,7 +401,7 @@ function Header( { campaign } ) {
     return (
         <>
             <div className="fundkit-crumbs">
-                <a href={ listHref() }>{ __( 'Campaigns', 'fundkit-fundraising-campaigns' ) }</a>
+                <a href={ listHref() }>{ __( 'Campaigns', 'fundraising-toolkit' ) }</a>
                 <span className="sep">›</span>
                 <span>{ campaign.title }</span>
             </div>
@@ -450,15 +450,15 @@ function IconSettingsTab( props ) {
 }
 
 const VIEW_TOGGLE_DEFS = [
-    { id: 'overview', label: __( 'Overview', 'fundkit-fundraising-campaigns' ), Icon: IconOverview },
-    { id: 'forms',    label: __( 'Forms',    'fundkit-fundraising-campaigns' ), Icon: IconFormsTab },
-    { id: 'settings', label: __( 'Settings', 'fundkit-fundraising-campaigns' ), Icon: IconSettingsTab },
+    { id: 'overview', label: __( 'Overview', 'fundraising-toolkit' ), Icon: IconOverview },
+    { id: 'forms',    label: __( 'Forms',    'fundraising-toolkit' ), Icon: IconFormsTab },
+    { id: 'settings', label: __( 'Settings', 'fundraising-toolkit' ), Icon: IconSettingsTab },
 ];
 
 function ViewToggle( { active, campaignId, extra = [] } ) {
     const views = [ ...VIEW_TOGGLE_DEFS, ...extra ];
     return (
-        <div className="fundkit-view-toggle" role="tablist" aria-label={ __( 'Campaign sections', 'fundkit-fundraising-campaigns' ) }>
+        <div className="fundkit-view-toggle" role="tablist" aria-label={ __( 'Campaign sections', 'fundraising-toolkit' ) }>
             { views.map( ( t ) => (
                 <a
                     key={ t.id }
@@ -483,11 +483,11 @@ function DetailNav( { campaign, activeTab, onAction, extraTabs = [] } ) {
             { campaign.page_edit_url && ( ! campaign.campaign_type || campaign.campaign_type === 'standard' ) && (
                 // Non-standard types (e.g. peer-to-peer) manage their pages from
                 // their own admin tab, so the single-page edit link is redundant.
-                <Btn href={ campaign.page_edit_url }>{ __( 'Edit campaign page', 'fundkit-fundraising-campaigns' ) }</Btn>
+                <Btn href={ campaign.page_edit_url }>{ __( 'Edit campaign page', 'fundraising-toolkit' ) }</Btn>
             ) }
             { campaign.page_url && (
                 <Btn variant="ghost" href={ campaign.page_url } target="_blank" rel="noreferrer">
-                    { __( 'View page ↗', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'View page ↗', 'fundraising-toolkit' ) }
                 </Btn>
             ) }
             <HeaderMenu campaign={ campaign } onAction={ onAction } />
@@ -546,7 +546,7 @@ function HeaderMenu( { campaign, onAction } ) {
                 type="button"
                 ref={ triggerRef }
                 className="fundkit-menu__trigger"
-                aria-label={ __( 'Campaign actions', 'fundkit-fundraising-campaigns' ) }
+                aria-label={ __( 'Campaign actions', 'fundraising-toolkit' ) }
                 aria-haspopup="menu"
                 aria-expanded={ open }
                 onClick={ () => setOpen( ( v ) => ! v ) }
@@ -557,22 +557,22 @@ function HeaderMenu( { campaign, onAction } ) {
                 <div className="fundkit-menu__list" role="menu">
                     { isDraft && (
                         <button type="button" role="menuitem" className="fundkit-menu__item is-primary" onClick={ () => fire( 'publish' ) }>
-                            { __( 'Publish campaign', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Publish campaign', 'fundraising-toolkit' ) }
                         </button>
                     ) }
                     { isPublished && (
                         <button type="button" role="menuitem" className="fundkit-menu__item" onClick={ () => fire( 'unpublish' ) }>
-                            { __( 'Move to draft', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Move to draft', 'fundraising-toolkit' ) }
                         </button>
                     ) }
                     <button type="button" role="menuitem" className="fundkit-menu__item" onClick={ () => fire( 'duplicate' ) }>
-                        { __( 'Duplicate campaign', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Duplicate campaign', 'fundraising-toolkit' ) }
                     </button>
                     <button type="button" role="menuitem" className="fundkit-menu__item" onClick={ () => fire( isArchived ? 'unarchive' : 'archive' ) }>
-                        { isArchived ? __( 'Restore to draft', 'fundkit-fundraising-campaigns' ) : __( 'Archive campaign', 'fundkit-fundraising-campaigns' ) }
+                        { isArchived ? __( 'Restore to draft', 'fundraising-toolkit' ) : __( 'Archive campaign', 'fundraising-toolkit' ) }
                     </button>
                     <button type="button" role="menuitem" className="fundkit-menu__item is-danger" onClick={ () => fire( 'delete' ) }>
-                        { __( 'Delete…', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Delete…', 'fundraising-toolkit' ) }
                     </button>
                 </div>
             ) }
@@ -595,7 +595,7 @@ function formatCardNames( names ) {
     if ( names.length <= 3 ) return names.join( ', ' );
     return sprintf(
         /* translators: 1: first three section names, 2: count of remaining */
-        __( '%1$s, and %2$d more', 'fundkit-fundraising-campaigns' ),
+        __( '%1$s, and %2$d more', 'fundraising-toolkit' ),
         names.slice( 0, 3 ).join( ', ' ),
         names.length - 3,
     );
@@ -611,7 +611,7 @@ function useLastSavedLabel( updatedAt ) {
     if ( ! updatedAt ) return null;
     return sprintf(
         /* translators: %s: relative time ago, e.g. "4m ago" */
-        __( 'Last saved %s', 'fundkit-fundraising-campaigns' ),
+        __( 'Last saved %s', 'fundraising-toolkit' ),
         timeAgo( updatedAt ),
     );
 }
@@ -653,7 +653,7 @@ function OverviewTab( { campaign, nav, onError } ) {
             .then( ( m ) => { if ( ! aborted ) setMetrics( ( prev ) => ( { ...( prev || {} ), ...m } ) ); } )
             // Surface the failure instead of leaving the zero-fallback metrics
             // on screen as if they were real data.
-            .catch( ( e ) => { if ( ! aborted ) onError?.( e?.message || __( 'Could not load campaign metrics.', 'fundkit-fundraising-campaigns' ) ); } )
+            .catch( ( e ) => { if ( ! aborted ) onError?.( e?.message || __( 'Could not load campaign metrics.', 'fundraising-toolkit' ) ); } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ range, compareMode, campaign.id, includeKey ] );
@@ -687,25 +687,25 @@ function OverviewTab( { campaign, nav, onError } ) {
 
     const registry = {
         kpis: {
-            title: __( 'Key metrics', 'fundkit-fundraising-campaigns' ),
+            title: __( 'Key metrics', 'fundraising-toolkit' ),
             span:  'full',
             bare:  true,
             render: () => (
                 <div className="fundkit-overview__metrics">
                     <GoalProgressCard campaign={ campaign } metrics={ m } />
-                    <MetricCard label={ __( 'Amount raised', 'fundkit-fundraising-campaigns' ) }
+                    <MetricCard label={ __( 'Amount raised', 'fundraising-toolkit' ) }
                                 value={ formatAmount( m.amount_raised_cents ) }
                                 changePct={ cmp?.amount_raised_cents }
                                 icon={ <IconCoins /> } />
-                    <MetricCard label={ __( 'Donations', 'fundkit-fundraising-campaigns' ) }
+                    <MetricCard label={ __( 'Donations', 'fundraising-toolkit' ) }
                                 value={ String( m.donations_count ) }
                                 changePct={ cmp?.donations_count }
                                 icon={ <IconHeart /> } />
-                    <MetricCard label={ __( 'Donors', 'fundkit-fundraising-campaigns' ) }
+                    <MetricCard label={ __( 'Donors', 'fundraising-toolkit' ) }
                                 value={ String( m.donors_count ) }
                                 changePct={ cmp?.donors_count }
                                 icon={ <IconUsers /> } />
-                    <MetricCard label={ __( 'Average donation', 'fundkit-fundraising-campaigns' ) }
+                    <MetricCard label={ __( 'Average donation', 'fundraising-toolkit' ) }
                                 value={ formatAmount( m.avg_donation_cents ) }
                                 changePct={ cmp?.avg_donation_cents }
                                 icon={ <IconActivity /> } />
@@ -713,7 +713,7 @@ function OverviewTab( { campaign, nav, onError } ) {
             ),
         },
         revenue: {
-            title: __( 'Revenue', 'fundkit-fundraising-campaigns' ),
+            title: __( 'Revenue', 'fundraising-toolkit' ),
             span:  'full',
             render: () => (
                 <RevenueChart
@@ -725,44 +725,44 @@ function OverviewTab( { campaign, nav, onError } ) {
             ),
         },
         cohort: {
-            title: __( 'Donor cohort', 'fundkit-fundraising-campaigns' ),
+            title: __( 'Donor cohort', 'fundraising-toolkit' ),
             render: () => <DonorCohort cohort={ m.cohort } />,
         },
         distribution: {
-            title: __( 'Donation shape', 'fundkit-fundraising-campaigns' ),
+            title: __( 'Donation shape', 'fundraising-toolkit' ),
             render: () => <DistributionHistogram distribution={ m.distribution } currency={ defaultCurrency() } />,
         },
         heatmap: {
-            title: __( 'When donors give', 'fundkit-fundraising-campaigns' ),
+            title: __( 'When donors give', 'fundraising-toolkit' ),
             span:  'full',
             render: () => <DowHourHeatmap data={ m.dow_hour } />,
         },
         timeline: {
-            title: __( 'Timeline', 'fundkit-fundraising-campaigns' ),
+            title: __( 'Timeline', 'fundraising-toolkit' ),
             render: () => <TimelineCard timeline={ m.timeline } />,
         },
         stories: {
-            title: __( 'Stories', 'fundkit-fundraising-campaigns' ),
+            title: __( 'Stories', 'fundraising-toolkit' ),
             render: () => <Stories rows={ m.notes || [] } />,
         },
         recent: {
-            title: __( 'Recent donations', 'fundkit-fundraising-campaigns' ),
+            title: __( 'Recent donations', 'fundraising-toolkit' ),
             render: () => <RecentDonations rows={ m.recent_donations } />,
         },
         'top-donors': {
-            title: __( 'Top donors', 'fundkit-fundraising-campaigns' ),
+            title: __( 'Top donors', 'fundraising-toolkit' ),
             render: () => <TopDonors rows={ m.top_donors } currency={ defaultCurrency() } />,
         },
         'top-forms': {
-            title: __( 'Top forms', 'fundkit-fundraising-campaigns' ),
+            title: __( 'Top forms', 'fundraising-toolkit' ),
             render: () => <TopForms rows={ m.top_forms } currency={ defaultCurrency() } donationsCount={ m.donations_count } />,
         },
         channel: {
-            title: __( 'By channel', 'fundkit-fundraising-campaigns' ),
+            title: __( 'By channel', 'fundraising-toolkit' ),
             render: () => <ChannelBreakdown rows={ m.by_channel } currency={ defaultCurrency() } />,
         },
         gateway: {
-            title: __( 'By payment method', 'fundkit-fundraising-campaigns' ),
+            title: __( 'By payment method', 'fundraising-toolkit' ),
             render: () => <GatewayBreakdown rows={ m.by_gateway } currency={ defaultCurrency() } />,
         },
     };
@@ -786,13 +786,13 @@ function CampaignReportButton( { campaignId, reportRange } ) {
                         `campaign-${ campaignId }.pdf`
                     );
                 } catch ( err ) {
-                    notify.error( err?.message || __( 'Could not build the report.', 'fundkit-fundraising-campaigns' ) );
+                    notify.error( err?.message || __( 'Could not build the report.', 'fundraising-toolkit' ) );
                 } finally {
                     setBusy( false );
                 }
             } }
         >
-            { __( 'Download report', 'fundkit-fundraising-campaigns' ) }
+            { __( 'Download report', 'fundraising-toolkit' ) }
         </Btn>
     );
 }
@@ -836,10 +836,10 @@ function TimelineCard( { timeline } ) {
 
     const { kind, days, total_days } = timeline;
     const label = kind === 'remaining'
-        ? __( 'Days remaining', 'fundkit-fundraising-campaigns' )
+        ? __( 'Days remaining', 'fundraising-toolkit' )
         : kind === 'ended'
-            ? __( 'Days since ended', 'fundkit-fundraising-campaigns' )
-            : __( 'Days running', 'fundkit-fundraising-campaigns' );
+            ? __( 'Days since ended', 'fundraising-toolkit' )
+            : __( 'Days running', 'fundraising-toolkit' );
 
     const pct = total_days
         ? Math.min( 100, Math.round( ( ( total_days - days ) / total_days ) * 100 ) )
@@ -851,7 +851,7 @@ function TimelineCard( { timeline } ) {
             <div className="fundkit-timeline__value">{ days }</div>
             <div className="fundkit-timeline__sub">
                 { kind === 'remaining' && total_days &&
-                    sprintf( /* translators: %d: total days */ __( 'of %d total', 'fundkit-fundraising-campaigns' ), total_days ) }
+                    sprintf( /* translators: %d: total days */ __( 'of %d total', 'fundraising-toolkit' ), total_days ) }
             </div>
             { pct !== null && (
                 <div className="fundkit-timeline__bar">
@@ -868,8 +868,8 @@ function RecentDonations( { rows } ) {
             <EmptyState
                 compact
                 icon={ <Coins size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donations yet', 'fundkit-fundraising-campaigns' ) }
-                body={ __( 'Recent donor activity will appear here once your form is live and the first donation lands.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'No donations yet', 'fundraising-toolkit' ) }
+                body={ __( 'Recent donor activity will appear here once your form is live and the first donation lands.', 'fundraising-toolkit' ) }
             />
         );
     }
@@ -904,11 +904,11 @@ function TopForms( { rows, currency, donationsCount = 0 } ) {
                 compact
                 icon={ <ListChecks size={ 22 } strokeWidth={ 1.75 } /> }
                 title={ gotDonations
-                    ? __( 'No donations through a form yet', 'fundkit-fundraising-campaigns' )
-                    : __( 'No form data yet', 'fundkit-fundraising-campaigns' ) }
+                    ? __( 'No donations through a form yet', 'fundraising-toolkit' )
+                    : __( 'No form data yet', 'fundraising-toolkit' ) }
                 body={ gotDonations
-                    ? __( 'This campaign\'s donations were recorded without a form, so there is nothing to rank. Donations made through a donation form appear here.', 'fundkit-fundraising-campaigns' )
-                    : __( 'Once donations come in, this card ranks your forms by total raised.', 'fundkit-fundraising-campaigns' ) }
+                    ? __( 'This campaign\'s donations were recorded without a form, so there is nothing to rank. Donations made through a donation form appear here.', 'fundraising-toolkit' )
+                    : __( 'Once donations come in, this card ranks your forms by total raised.', 'fundraising-toolkit' ) }
             />
         );
     }
@@ -930,7 +930,7 @@ function TopForms( { rows, currency, donationsCount = 0 } ) {
                             <td className="fundkit-table__right">
                                 <div className="fundkit-table__primary">{ formatAmount( r.amount_cents, currency ) }</div>
                                 <div className="fundkit-table__sub">
-                                    { sprintf( /* translators: %d: number of donations */ _n( '%d donation', '%d donations', r.donations_count, 'fundkit-fundraising-campaigns' ), r.donations_count ) }
+                                    { sprintf( /* translators: %d: number of donations */ _n( '%d donation', '%d donations', r.donations_count, 'fundraising-toolkit' ), r.donations_count ) }
                                 </div>
                             </td>
                         </tr>
@@ -956,8 +956,8 @@ function GatewayBreakdown( { rows, currency } ) {
             <EmptyState
                 compact
                 icon={ <HandHeart size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No payments yet', 'fundkit-fundraising-campaigns' ) }
-                body={ __( 'Gateway breakdown shows up after the first paid donation.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'No payments yet', 'fundraising-toolkit' ) }
+                body={ __( 'Gateway breakdown shows up after the first paid donation.', 'fundraising-toolkit' ) }
             />
         );
     }
@@ -1005,8 +1005,8 @@ function TopDonors( { rows, currency } ) {
             <EmptyState
                 compact
                 icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donors yet', 'fundkit-fundraising-campaigns' ) }
-                body={ __( 'Top supporters appear here after the first donation completes.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'No donors yet', 'fundraising-toolkit' ) }
+                body={ __( 'Top supporters appear here after the first donation completes.', 'fundraising-toolkit' ) }
             />
         );
     }
@@ -1020,7 +1020,7 @@ function TopDonors( { rows, currency } ) {
                             <div className="fundkit-table__sub">
                                 { sprintf(
                                     /* translators: %d: number of donations */
-                                    _n( '%d donation', '%d donations', r.donations_count, 'fundkit-fundraising-campaigns' ),
+                                    _n( '%d donation', '%d donations', r.donations_count, 'fundraising-toolkit' ),
                                     r.donations_count
                                 ) }
                             </div>
@@ -1073,7 +1073,7 @@ export function GoalProgressCard( { campaign } ) {
                     </svg>
                 </span>
             </div>
-            <div className="fundkit-metric__label">{ __( 'Goal progress', 'fundkit-fundraising-campaigns' ) }</div>
+            <div className="fundkit-metric__label">{ __( 'Goal progress', 'fundraising-toolkit' ) }</div>
             <div className="fundkit-metric__row">
                 <div className="fundkit-metric__value">{ `${ pct }%` }</div>
             </div>
@@ -1113,13 +1113,13 @@ function ShortcodeCell( { slug } ) {
             className="fundkit-shortcode-copy"
             onMouseDown={ stopRowSelect }
             onClick={ copy }
-            title={ __( 'Copy shortcode', 'fundkit-fundraising-campaigns' ) }
-            aria-label={ __( 'Copy shortcode', 'fundkit-fundraising-campaigns' ) }
+            title={ __( 'Copy shortcode', 'fundraising-toolkit' ) }
+            aria-label={ __( 'Copy shortcode', 'fundraising-toolkit' ) }
         >
             <code className="fundkit-shortcode-copy__code">{ code }</code>
             <span className="fundkit-shortcode-copy__hint">
                 { copied
-                    ? __( 'Copied', 'fundkit-fundraising-campaigns' )
+                    ? __( 'Copied', 'fundraising-toolkit' )
                     : <CopyIcon size={ 14 } strokeWidth={ 1.75 } /> }
             </span>
         </button>
@@ -1175,7 +1175,7 @@ function FormsTab( { campaign } ) {
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load forms.', 'fundkit-fundraising-campaigns' ) );
+                setError( err?.message || __( 'Failed to load forms.', 'fundraising-toolkit' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
@@ -1191,7 +1191,7 @@ function FormsTab( { campaign } ) {
             const payload = {
                 title:       template?.name
                     ? `${ template.name } form`
-                    : __( 'Untitled donation form', 'fundkit-fundraising-campaigns' ),
+                    : __( 'Untitled donation form', 'fundraising-toolkit' ),
                 campaign_id: campaign.id,
                 blocks:      template?.blocks || '',
             };
@@ -1205,7 +1205,7 @@ function FormsTab( { campaign } ) {
             } );
             window.location.href = formEditorHref( f.id );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not create form.', 'fundkit-fundraising-campaigns' ) );
+            setError( err?.message || __( 'Could not create form.', 'fundraising-toolkit' ) );
             setCreating( false );
             setPickerOpen( false );
         }
@@ -1214,7 +1214,7 @@ function FormsTab( { campaign } ) {
     const fields = useMemo( () => [
         {
             id:            'title',
-            label:         __( 'Title', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Title', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <div style={ { lineHeight: 1.3 } }>
@@ -1223,7 +1223,7 @@ function FormsTab( { campaign } ) {
                     </a>
                     { item.id === defaultFormId && (
                         <span className="fundkit-default-pill">
-                            { __( 'Default', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Default', 'fundraising-toolkit' ) }
                         </span>
                     ) }
                     <div className="fundkit-row__sub fundkit-row__sub--mono">
@@ -1234,14 +1234,14 @@ function FormsTab( { campaign } ) {
         },
         {
             id:       'status',
-            label:    __( 'Status', 'fundkit-fundraising-campaigns' ),
+            label:    __( 'Status', 'fundraising-toolkit' ),
             elements: FORM_STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             render:   ( { item } ) => <StatusBadge status={ item.status } />,
         },
         {
             id:            'updated_at',
-            label:         __( 'Updated', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Updated', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="fundkit-time" title={ formatDate( item.updated_at ) }>
@@ -1252,7 +1252,7 @@ function FormsTab( { campaign } ) {
         },
         {
             id:    'goal',
-            label: __( 'Goal', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Goal', 'fundraising-toolkit' ),
             // No orderby for these on the server, and DataViews offers sorting
             // on anything that does not opt out.
             enableSorting: false,
@@ -1260,7 +1260,7 @@ function FormsTab( { campaign } ) {
         },
         {
             id:     'shortcode',
-            label:  __( 'Shortcode', 'fundkit-fundraising-campaigns' ),
+            label:  __( 'Shortcode', 'fundraising-toolkit' ),
             enableSorting: false,
             render: ( { item } ) => <ShortcodeCell slug={ item.slug } />,
         },
@@ -1275,14 +1275,14 @@ function FormsTab( { campaign } ) {
             } );
             setDefaultFormId( formId );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not set default form.', 'fundkit-fundraising-campaigns' ) );
+            setError( err?.message || __( 'Could not set default form.', 'fundraising-toolkit' ) );
         }
     }, [ campaign.id ] );
 
     const actions = useMemo( () => [
         {
             id:       'edit',
-            label:    __( 'Edit', 'fundkit-fundraising-campaigns' ),
+            label:    __( 'Edit', 'fundraising-toolkit' ),
             isPrimary: true,
             callback: ( items ) => {
                 if ( items[ 0 ] ) window.location.href = formEditorHref( items[ 0 ].id );
@@ -1290,7 +1290,7 @@ function FormsTab( { campaign } ) {
         },
         {
             id:       'set-default',
-            label:    __( 'Set as default', 'fundkit-fundraising-campaigns' ),
+            label:    __( 'Set as default', 'fundraising-toolkit' ),
             isEligible: ( item ) =>
                 item.id !== defaultFormId && item.status === 'published',
             callback: ( items ) => {
@@ -1299,7 +1299,7 @@ function FormsTab( { campaign } ) {
         },
         {
             id:    'duplicate',
-            label: __( 'Duplicate', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Duplicate', 'fundraising-toolkit' ),
             // WP `<Icon>` cloneElements an icon-as-element with its own
             // size={24}. A render function takes the `typeof === 'function'`
             // branch instead, where the size sticks.
@@ -1322,7 +1322,7 @@ function FormsTab( { campaign } ) {
                     } ) ) );
                     load();
                 } catch ( err ) {
-                    setError( err?.message || __( 'Could not duplicate one or more forms.', 'fundkit-fundraising-campaigns' ) );
+                    setError( err?.message || __( 'Could not duplicate one or more forms.', 'fundraising-toolkit' ) );
                     // Some of the batch may have gone through. Leaving the
                     // table as it was makes the author reload to find out
                     // which.
@@ -1332,7 +1332,7 @@ function FormsTab( { campaign } ) {
         },
         {
             id:     'delete',
-            label:  __( 'Delete', 'fundkit-fundraising-campaigns' ),
+            label:  __( 'Delete', 'fundraising-toolkit' ),
             icon:   () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk: true,
@@ -1343,21 +1343,21 @@ function FormsTab( { campaign } ) {
                 const targets = items.filter( ( i ) => i.id !== defaultFormId );
                 if ( ! targets.length ) return;
                 const message = targets.length === 1
-                    ? __( 'Permanently delete this form? This cannot be undone.', 'fundkit-fundraising-campaigns' )
+                    ? __( 'Permanently delete this form? This cannot be undone.', 'fundraising-toolkit' )
                     : sprintf(
                         /* translators: %d: number of forms to delete */
                         _n(
                             'Permanently delete %d form? This cannot be undone.',
                             'Permanently delete %d forms? This cannot be undone.',
                             targets.length,
-                            'fundkit-fundraising-campaigns'
+                            'fundraising-toolkit'
                         ),
                         targets.length
                     );
                 setConfirm( {
-                    title:        _n( 'Delete form', 'Delete forms', targets.length, 'fundkit-fundraising-campaigns' ),
+                    title:        _n( 'Delete form', 'Delete forms', targets.length, 'fundraising-toolkit' ),
                     message,
-                    confirmLabel: __( 'Delete', 'fundkit-fundraising-campaigns' ),
+                    confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
                     destructive:  true,
                     onConfirm: async () => {
                         try {
@@ -1367,7 +1367,7 @@ function FormsTab( { campaign } ) {
                             } ) ) );
                             load();
                         } catch ( err ) {
-                            setError( err?.message || __( 'Could not delete one or more forms.', 'fundkit-fundraising-campaigns' ) );
+                            setError( err?.message || __( 'Could not delete one or more forms.', 'fundraising-toolkit' ) );
                             // Rows already deleted are still on screen
                             // otherwise, so the error reads as nothing having
                             // happened at all.
@@ -1388,12 +1388,12 @@ function FormsTab( { campaign } ) {
         <div>
             <div style={ { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 } }>
                 <h2 style={ { margin: 0, fontSize: 16 } }>
-                    { __( 'Forms', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Forms', 'fundraising-toolkit' ) }
                     <span style={ { color: '#666', fontWeight: 400, marginLeft: 8 } }>({ total })</span>
                 </h2>
                 <Btn variant="primary" onClick={ () => setPickerOpen( true ) } disabled={ creating }>
                     <Plus size={ 16 } strokeWidth={ 1.75 } />
-                    { __( 'Add new form', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Add new form', 'fundraising-toolkit' ) }
                 </Btn>
             </div>
 
@@ -1404,11 +1404,11 @@ function FormsTab( { campaign } ) {
             { ! loading && total === 0 && ! view.search && ! statusFilter ? (
                 <EmptyState
                     icon={ <ListChecks size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No forms yet', 'fundkit-fundraising-campaigns' ) }
-                    body={ __( 'Donation forms collect the actual donations for this campaign. Pick a template to get started, then customize everything inside.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'No forms yet', 'fundraising-toolkit' ) }
+                    body={ __( 'Donation forms collect the actual donations for this campaign. Pick a template to get started, then customize everything inside.', 'fundraising-toolkit' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setPickerOpen( true ) } disabled={ creating }>
-                            { __( 'Add your first form', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Add your first form', 'fundraising-toolkit' ) }
                         </Btn>
                     }
                 />
@@ -1446,18 +1446,18 @@ const GOAL_TYPES = [
     // "No goal" is not a fourth goal_type: a null target is already how every
     // campaign without a goal is stored, and goalMet() and the progress blocks
     // read it that way. This names the state that existed and had no control.
-    { value: 'none',      label: __( 'No goal', 'fundkit-fundraising-campaigns' ) },
-    { value: 'amount',    label: __( 'Amount raised', 'fundkit-fundraising-campaigns' ) },
-    { value: 'donations', label: __( 'Number of donations', 'fundkit-fundraising-campaigns' ) },
-    { value: 'donors',    label: __( 'Number of donors', 'fundkit-fundraising-campaigns' ) },
+    { value: 'none',      label: __( 'No goal', 'fundraising-toolkit' ) },
+    { value: 'amount',    label: __( 'Amount raised', 'fundraising-toolkit' ) },
+    { value: 'donations', label: __( 'Number of donations', 'fundraising-toolkit' ) },
+    { value: 'donors',    label: __( 'Number of donors', 'fundraising-toolkit' ) },
 ];
 
 const SUB_TABS = [
-    { key: 'general',    label: __( 'General', 'fundkit-fundraising-campaigns' ),    Icon: IconGeneral },
-    { key: 'goal',       label: __( 'Goal', 'fundkit-fundraising-campaigns' ),       Icon: IconGoal },
-    { key: 'appearance', label: __( 'Appearance', 'fundkit-fundraising-campaigns' ), Icon: IconAppearance },
-    { key: 'defaults',   label: __( 'Defaults', 'fundkit-fundraising-campaigns' ),   Icon: IconDefaults },
-    { key: 'advanced',   label: __( 'Advanced', 'fundkit-fundraising-campaigns' ),   Icon: IconAdvanced },
+    { key: 'general',    label: __( 'General', 'fundraising-toolkit' ),    Icon: IconGeneral },
+    { key: 'goal',       label: __( 'Goal', 'fundraising-toolkit' ),       Icon: IconGoal },
+    { key: 'appearance', label: __( 'Appearance', 'fundraising-toolkit' ), Icon: IconAppearance },
+    { key: 'defaults',   label: __( 'Defaults', 'fundraising-toolkit' ),   Icon: IconDefaults },
+    { key: 'advanced',   label: __( 'Advanced', 'fundraising-toolkit' ),   Icon: IconAdvanced },
 ];
 
 const FIELD_TO_SUBTAB = {
@@ -1470,22 +1470,22 @@ const FIELD_TO_SUBTAB = {
 };
 
 const fieldToCard = () => ( {
-    title:                __( 'Identity', 'fundkit-fundraising-campaigns' ),
-    description:          __( 'Identity', 'fundkit-fundraising-campaigns' ),
-    slug:                 __( 'Public address', 'fundkit-fundraising-campaigns' ),
-    image_attachment_id:  __( 'Cover image', 'fundkit-fundraising-campaigns' ),
-    image_url:            __( 'Cover image', 'fundkit-fundraising-campaigns' ),
-    status:               __( 'Status & schedule', 'fundkit-fundraising-campaigns' ),
-    starts_at:            __( 'Status & schedule', 'fundkit-fundraising-campaigns' ),
-    ends_at:              __( 'Status & schedule', 'fundkit-fundraising-campaigns' ),
-    goal_type:            __( 'Goal', 'fundkit-fundraising-campaigns' ),
-    goal_cents:           __( 'Goal', 'fundkit-fundraising-campaigns' ),
-    goal_count:           __( 'Goal', 'fundkit-fundraising-campaigns' ),
-    style:                __( 'Appearance', 'fundkit-fundraising-campaigns' ),
-    hide_header:          __( 'Page header & footer', 'fundkit-fundraising-campaigns' ),
-    hide_footer:          __( 'Page header & footer', 'fundkit-fundraising-campaigns' ),
-    default_form_id:      __( 'Default form', 'fundkit-fundraising-campaigns' ),
-    default_fund_id:      __( 'Default fund', 'fundkit-fundraising-campaigns' ),
+    title:                __( 'Identity', 'fundraising-toolkit' ),
+    description:          __( 'Identity', 'fundraising-toolkit' ),
+    slug:                 __( 'Public address', 'fundraising-toolkit' ),
+    image_attachment_id:  __( 'Cover image', 'fundraising-toolkit' ),
+    image_url:            __( 'Cover image', 'fundraising-toolkit' ),
+    status:               __( 'Status & schedule', 'fundraising-toolkit' ),
+    starts_at:            __( 'Status & schedule', 'fundraising-toolkit' ),
+    ends_at:              __( 'Status & schedule', 'fundraising-toolkit' ),
+    goal_type:            __( 'Goal', 'fundraising-toolkit' ),
+    goal_cents:           __( 'Goal', 'fundraising-toolkit' ),
+    goal_count:           __( 'Goal', 'fundraising-toolkit' ),
+    style:                __( 'Appearance', 'fundraising-toolkit' ),
+    hide_header:          __( 'Page header & footer', 'fundraising-toolkit' ),
+    hide_footer:          __( 'Page header & footer', 'fundraising-toolkit' ),
+    default_form_id:      __( 'Default form', 'fundraising-toolkit' ),
+    default_fund_id:      __( 'Default fund', 'fundraising-toolkit' ),
 } );
 
 function SettingsTab( { campaign, onError } ) {
@@ -1501,10 +1501,10 @@ function SettingsTab( { campaign, onError } ) {
             include: campaign?.default_fund_id || undefined,
         } ) } )
             .then( setFunds )
-            .catch( () => onError?.( __( 'Could not load funds.', 'fundkit-fundraising-campaigns' ) ) );
+            .catch( () => onError?.( __( 'Could not load funds.', 'fundraising-toolkit' ) ) );
         apiFetch( { path: `/fundkit/v1/admin/forms?campaign_id=${ campaign.id }&per_page=100` } )
             .then( ( res ) => setForms( Array.isArray( res ) ? res : ( res?.items || [] ) ) )
-            .catch( () => onError?.( __( 'Could not load forms.', 'fundkit-fundraising-campaigns' ) ) );
+            .catch( () => onError?.( __( 'Could not load forms.', 'fundraising-toolkit' ) ) );
     }, [ campaign.id ] );
 
     useEffect( () => {
@@ -1539,9 +1539,9 @@ function SettingsTab( { campaign, onError } ) {
     const onSave = async () => {
         try {
             await c.save();
-            notify.success( __( 'Campaign saved.', 'fundkit-fundraising-campaigns' ) );
+            notify.success( __( 'Campaign saved.', 'fundraising-toolkit' ) );
         } catch ( err ) {
-            onError( err?.message || __( 'Save failed.', 'fundkit-fundraising-campaigns' ) );
+            onError( err?.message || __( 'Save failed.', 'fundraising-toolkit' ) );
         }
     };
 
@@ -1568,7 +1568,7 @@ function SettingsTab( { campaign, onError } ) {
                         >
                             <Icon />
                             { t.label }
-                            { isDirty && <span className="fundkit-subtabs__dot" title={ __( 'Unsaved changes', 'fundkit-fundraising-campaigns' ) } /> }
+                            { isDirty && <span className="fundkit-subtabs__dot" title={ __( 'Unsaved changes', 'fundraising-toolkit' ) } /> }
                         </a>
                     );
                 } ) }
@@ -1628,9 +1628,9 @@ function SettingsTab( { campaign, onError } ) {
                     <span className="fundkit-save-bar__dot" aria-hidden="true" />
                     <span className="fundkit-save-bar__count">
                         <strong>{ editsCount }</strong>{ ' ' }
-                        { _n( 'unsaved change', 'unsaved changes', editsCount, 'fundkit-fundraising-campaigns' ) }
+                        { _n( 'unsaved change', 'unsaved changes', editsCount, 'fundraising-toolkit' ) }
                         { dirtyCardNames.length > 0 && (
-                            <em>{ ' ' }{ __( 'in', 'fundkit-fundraising-campaigns' ) } { formatCardNames( dirtyCardNames ) }</em>
+                            <em>{ ' ' }{ __( 'in', 'fundraising-toolkit' ) } { formatCardNames( dirtyCardNames ) }</em>
                         ) }
                     </span>
                     <button
@@ -1639,7 +1639,7 @@ function SettingsTab( { campaign, onError } ) {
                         onClick={ onDiscard }
                         disabled={ c.isSaving }
                     >
-                        { __( 'Discard', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Discard', 'fundraising-toolkit' ) }
                     </button>
                     <button
                         type="button"
@@ -1647,7 +1647,7 @@ function SettingsTab( { campaign, onError } ) {
                         onClick={ onSave }
                         disabled={ c.isSaving }
                     >
-                        { __( 'Save changes', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Save changes', 'fundraising-toolkit' ) }
                     </button>
                 </div>
             ) }
@@ -1680,21 +1680,21 @@ function CampaignTypeCard( { campaign } ) {
         } catch ( err ) {
             setBusy( false );
             setTarget( null );
-            notify.error( err?.message || __( 'Conversion failed.', 'fundkit-fundraising-campaigns' ) );
+            notify.error( err?.message || __( 'Conversion failed.', 'fundraising-toolkit' ) );
         }
     };
 
     return (
         <Card
-            title={ __( 'Campaign type', 'fundkit-fundraising-campaigns' ) }
-            sub={ __( 'Set when the campaign is created. A standard campaign can be converted to a richer type, but not back.', 'fundkit-fundraising-campaigns' ) }
+            title={ __( 'Campaign type', 'fundraising-toolkit' ) }
+            sub={ __( 'Set when the campaign is created. A standard campaign can be converted to a richer type, but not back.', 'fundraising-toolkit' ) }
         >
-            <FormRow label={ __( 'Type', 'fundkit-fundraising-campaigns' ) }>
+            <FormRow label={ __( 'Type', 'fundraising-toolkit' ) }>
                 <div style={ { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } }>
-                    <strong>{ types[ current ] || __( 'Standard', 'fundkit-fundraising-campaigns' ) }</strong>
+                    <strong>{ types[ current ] || __( 'Standard', 'fundraising-toolkit' ) }</strong>
                     { convertible.map( ( t ) => (
                         <Btn key={ t } variant="secondary" onClick={ () => setTarget( t ) }>
-                            { sprintf( /* translators: %s: campaign type label */ __( 'Convert to %s', 'fundkit-fundraising-campaigns' ), types[ t ] ) }
+                            { sprintf( /* translators: %s: campaign type label */ __( 'Convert to %s', 'fundraising-toolkit' ), types[ t ] ) }
                         </Btn>
                     ) ) }
                 </div>
@@ -1702,17 +1702,17 @@ function CampaignTypeCard( { campaign } ) {
 
             { target && (
                 <Modal
-                    title={ sprintf( /* translators: %s: campaign type label */ __( 'Convert to %s', 'fundkit-fundraising-campaigns' ), types[ target ] ) }
+                    title={ sprintf( /* translators: %s: campaign type label */ __( 'Convert to %s', 'fundraising-toolkit' ), types[ target ] ) }
                     onRequestClose={ () => ! busy && setTarget( null ) }
                 >
                     { notices[ target ] && <p>{ notices[ target ] }</p> }
-                    <p style={ { fontWeight: 600 } }>{ __( "This can't be undone.", 'fundkit-fundraising-campaigns' ) }</p>
+                    <p style={ { fontWeight: 600 } }>{ __( "This can't be undone.", 'fundraising-toolkit' ) }</p>
                     <div style={ { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 } }>
                         <Btn variant="tertiary" onClick={ () => setTarget( null ) } disabled={ busy }>
-                            { __( 'Cancel', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Cancel', 'fundraising-toolkit' ) }
                         </Btn>
                         <Btn variant="primary" onClick={ convert } disabled={ busy }>
-                            { busy ? __( 'Converting…', 'fundkit-fundraising-campaigns' ) : __( 'Convert', 'fundkit-fundraising-campaigns' ) }
+                            { busy ? __( 'Converting…', 'fundraising-toolkit' ) : __( 'Convert', 'fundraising-toolkit' ) }
                         </Btn>
                     </div>
                 </Modal>
@@ -1753,13 +1753,13 @@ export function PublicAddressCard( { c, pageUrl } ) {
 
     return (
         <Card
-            title={ __( 'Public address', 'fundkit-fundraising-campaigns' ) }
-            sub={ __( 'The URL donors land on. Changing this may break inbound links.', 'fundkit-fundraising-campaigns' ) }
+            title={ __( 'Public address', 'fundraising-toolkit' ) }
+            sub={ __( 'The URL donors land on. Changing this may break inbound links.', 'fundraising-toolkit' ) }
             edited={ edited ? 1 : 0 }
         >
             <FormRow
-                label={ __( 'Slug', 'fundkit-fundraising-campaigns' ) }
-                help={ __( 'Letters, numbers, and hyphens only.', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Slug', 'fundraising-toolkit' ) }
+                help={ __( 'Letters, numbers, and hyphens only.', 'fundraising-toolkit' ) }
             >
                 <div className={ `fundkit-input-prefixed${ edited ? ' is-edited' : '' }` }>
                     <span className="fundkit-input-prefixed__prefix">{ addr.prefix || `${ origin }/campaigns/` }</span>
@@ -1767,19 +1767,19 @@ export function PublicAddressCard( { c, pageUrl } ) {
                 </div>
                 { addr.url && (
                     <div className="fundkit-url-preview">
-                        <span className="lbl">{ __( 'Public URL', 'fundkit-fundraising-campaigns' ) }</span>
+                        <span className="lbl">{ __( 'Public URL', 'fundraising-toolkit' ) }</span>
                         <span className="url">{ addr.prefix }<em>{ addr.segment }</em></span>
-                        <a href={ addr.url } target="_blank" rel="noreferrer">{ __( 'Visit page ↗', 'fundkit-fundraising-campaigns' ) }</a>
+                        <a href={ addr.url } target="_blank" rel="noreferrer">{ __( 'Visit page ↗', 'fundraising-toolkit' ) }</a>
                     </div>
                 ) }
                 { addr.url && edited && (
                     <div className="fundkit-form-row__field-help">
-                        { __( 'Saving moves the page. WordPress adds a suffix if another page already holds the slug, so check this address again afterwards.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Saving moves the page. WordPress adds a suffix if another page already holds the slug, so check this address again afterwards.', 'fundraising-toolkit' ) }
                     </div>
                 ) }
                 { ! addr.url && !! slug && (
                     <div className="fundkit-form-row__field-help">
-                        { __( 'This campaign has no page yet, so it has no public address. One is created when the campaign is published.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'This campaign has no page yet, so it has no public address. One is created when the campaign is published.', 'fundraising-toolkit' ) }
                     </div>
                 ) }
             </FormRow>
@@ -1801,21 +1801,21 @@ function GeneralPanel( { c, campaign } ) {
     return (
         <div className="fundkit-section-block">
             <Card
-                title={ __( 'Identity', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Title and short description, used everywhere this campaign appears.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Identity', 'fundraising-toolkit' ) }
+                sub={ __( 'Title and short description, used everywhere this campaign appears.', 'fundraising-toolkit' ) }
                 edited={ editedCount( [ 'title', 'description' ] ) }
             >
                 <FormRow
-                    label={ __( 'Campaign title', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Donor-facing. Appears in the page header, on cards, in receipts.', 'fundkit-fundraising-campaigns' ) }
-                    fieldHelp={ __( 'Try to keep it under 6 words.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Campaign title', 'fundraising-toolkit' ) }
+                    help={ __( 'Donor-facing. Appears in the page header, on cards, in receipts.', 'fundraising-toolkit' ) }
+                    fieldHelp={ __( 'Try to keep it under 6 words.', 'fundraising-toolkit' ) }
                 >
                     <input type="text" className={ inputCls( c, 'title' ) } { ...c.bind( 'title' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Short description', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'One or two sentences. Shows on campaign cards and the page hero.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Short description', 'fundraising-toolkit' ) }
+                    help={ __( 'One or two sentences. Shows on campaign cards and the page hero.', 'fundraising-toolkit' ) }
                 >
                     <div className="fundkit-input-counter">
                         <textarea
@@ -1830,7 +1830,7 @@ function GeneralPanel( { c, campaign } ) {
                     </div>
                     { teaserSrc && (
                         <div className="fundkit-form-row__field-help">
-                            <strong style={ { color: '#111827', fontWeight: 500 } }>{ __( 'How donors will see this:', 'fundkit-fundraising-campaigns' ) }</strong>{ ' ' }
+                            <strong style={ { color: '#111827', fontWeight: 500 } }>{ __( 'How donors will see this:', 'fundraising-toolkit' ) }</strong>{ ' ' }
                             { teaserSrc }
                         </div>
                     ) }
@@ -1842,8 +1842,8 @@ function GeneralPanel( { c, campaign } ) {
             <PublicAddressCard c={ c } pageUrl={ campaign?.page_url || r.page_url || null } />
 
             <Card
-                title={ __( 'Cover image', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Recommended 1600 × 900 (16:9). Shows on the page hero and campaign grid.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Cover image', 'fundraising-toolkit' ) }
+                sub={ __( 'Recommended 1600 × 900 (16:9). Shows on the page hero and campaign grid.', 'fundraising-toolkit' ) }
                 edited={ editedCount( [ 'image_attachment_id', 'image_url' ] ) }
             >
                 <CoverImageCard
@@ -1857,19 +1857,19 @@ function GeneralPanel( { c, campaign } ) {
             </Card>
 
             <Card
-                title={ __( 'Status & schedule', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( "Whether donors can give right now, and when the campaign runs.", 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Status & schedule', 'fundraising-toolkit' ) }
+                sub={ __( "Whether donors can give right now, and when the campaign runs.", 'fundraising-toolkit' ) }
                 edited={ editedCount( [ 'status', 'starts_at', 'ends_at' ] ) }
             >
                 <FormRow
-                    label={ __( 'Status', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( "Active campaigns accept donations. Drafts and archived campaigns don't. Archive from the campaign menu, which handles any recurring donations first.", 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Status', 'fundraising-toolkit' ) }
+                    help={ __( "Active campaigns accept donations. Drafts and archived campaigns don't. Archive from the campaign menu, which handles any recurring donations first.", 'fundraising-toolkit' ) }
                 >
                     <StatusPillGroup value={ c.value( 'status', 'draft' ) } onChange={ c.setValue( 'status' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'Schedule', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Optional. Leave blank for an open-ended campaign.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Schedule', 'fundraising-toolkit' ) }
+                    help={ __( 'Optional. Leave blank for an open-ended campaign.', 'fundraising-toolkit' ) }
                     wide
                 >
                     <ScheduleTimeline
@@ -1917,11 +1917,11 @@ export function GoalPanel( { c } ) {
     return (
         <div className="fundkit-section-block">
             <Card
-                title={ __( 'Campaign goal', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Drives the progress widget on the campaign page and the goal donut on the overview.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Campaign goal', 'fundraising-toolkit' ) }
+                sub={ __( 'Drives the progress widget on the campaign page and the goal donut on the overview.', 'fundraising-toolkit' ) }
                 edited={ editedCount }
             >
-                <FormRow label={ __( 'Goal type', 'fundkit-fundraising-campaigns' ) }>
+                <FormRow label={ __( 'Goal type', 'fundraising-toolkit' ) }>
                     <select
                         className={ `fundkit-select${ [ 'goal_type', 'goal_cents', 'goal_count' ].some( ( k ) => c.isEdited( k ) ) ? ' fundkit-input--edited' : '' }` }
                         value={ mode }
@@ -1934,7 +1934,7 @@ export function GoalPanel( { c } ) {
                 </FormRow>
 
                 { mode === 'amount' && (
-                    <FormRow label={ __( 'Target amount', 'fundkit-fundraising-campaigns' ) }>
+                    <FormRow label={ __( 'Target amount', 'fundraising-toolkit' ) }>
                         <AmountInput
                             currency={ defaultCurrency() }
                             min={ 0 }
@@ -1945,23 +1945,23 @@ export function GoalPanel( { c } ) {
                 ) }
 
                 { mode === 'donations' && (
-                    <FormRow label={ __( 'Target donations', 'fundkit-fundraising-campaigns' ) }>
+                    <FormRow label={ __( 'Target donations', 'fundraising-toolkit' ) }>
                         <input type="number" className={ inputCls( c, 'goal_count' ) } min="0" { ...c.bindNumber( 'goal_count' ) } />
                     </FormRow>
                 ) }
 
                 { mode === 'donors' && (
-                    <FormRow label={ __( 'Target donors', 'fundkit-fundraising-campaigns' ) }>
+                    <FormRow label={ __( 'Target donors', 'fundraising-toolkit' ) }>
                         <input type="number" className={ inputCls( c, 'goal_count' ) } min="0" { ...c.bindNumber( 'goal_count' ) } />
                     </FormRow>
                 ) }
 
                 { mode !== 'none' && (
                     <ToggleRow
-                        title={ __( 'Close when the goal is met', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'Close when the goal is met', 'fundraising-toolkit' ) }
                         sub={ hasGoal
-                            ? __( 'The campaign stops accepting donations as soon as it reaches the target. Reopen it by raising the target or turning this off.', 'fundkit-fundraising-campaigns' )
-                            : __( 'Set a target above first. Without one there is nothing to reach.', 'fundkit-fundraising-campaigns' ) }
+                            ? __( 'The campaign stops accepting donations as soon as it reaches the target. Reopen it by raising the target or turning this off.', 'fundraising-toolkit' )
+                            : __( 'Set a target above first. Without one there is nothing to reach.', 'fundraising-toolkit' ) }
                         disabled={ ! hasGoal }
                         checked={ !! r.close_at_goal }
                         onChange={ ( v ) => c.edit( { close_at_goal: !! v } ) }
@@ -1970,7 +1970,7 @@ export function GoalPanel( { c } ) {
 
                 { r.close_at_goal && r.goal_met && (
                     <p className="fundkit-muted">
-                        { __( 'This campaign has reached its goal and is not accepting donations.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'This campaign has reached its goal and is not accepting donations.', 'fundraising-toolkit' ) }
                     </p>
                 ) }
             </Card>
@@ -2038,18 +2038,18 @@ function AppearancePanel( { c } ) {
     return (
         <div className="fundkit-section-block">
             <Card
-                title={ __( 'Campaign appearance', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( "Pick which brand preset this campaign uses. Optionally tweak individual tokens for a one-off look.", 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Campaign appearance', 'fundraising-toolkit' ) }
+                sub={ __( "Pick which brand preset this campaign uses. Optionally tweak individual tokens for a one-off look.", 'fundraising-toolkit' ) }
                 edited={ editedCount }
             >
-                <FormRow label={ __( 'Style preset', 'fundkit-fundraising-campaigns' ) }>
+                <FormRow label={ __( 'Style preset', 'fundraising-toolkit' ) }>
                     <select
                         className="fundkit-select"
                         value={ presetId }
                         onChange={ ( e ) => selectPreset( e.target.value ) }
                     >
                         <option value="">
-                            { __( 'Use org default', 'fundkit-fundraising-campaigns' ) +
+                            { __( 'Use org default', 'fundraising-toolkit' ) +
                                 ( defaultId ? ` (${ presets.find( ( p ) => p.id === defaultId )?.name || defaultId })` : '' ) }
                         </option>
                         { presets.map( ( p ) => (
@@ -2060,10 +2060,10 @@ function AppearancePanel( { c } ) {
 
                 <div className="fundkit-custom-style-toggle" style={ { marginTop: 16 } }>
                     <ToggleRow
-                        title={ __( 'Customize tokens for this campaign', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'Customize tokens for this campaign', 'fundraising-toolkit' ) }
                         sub={ isCustomizing
-                            ? __( 'Inline overrides applied on top of the chosen preset.', 'fundkit-fundraising-campaigns' )
-                            : __( 'Toggle on to tweak individual tokens without creating a new brand preset.', 'fundkit-fundraising-campaigns' )
+                            ? __( 'Inline overrides applied on top of the chosen preset.', 'fundraising-toolkit' )
+                            : __( 'Toggle on to tweak individual tokens without creating a new brand preset.', 'fundraising-toolkit' )
                         }
                         checked={ isCustomizing }
                         onChange={ toggleCustomizing }
@@ -2084,18 +2084,18 @@ function AppearancePanel( { c } ) {
             </Card>
 
             <Card
-                title={ __( 'Page header & footer', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( "Hide the theme's header or footer on every page this campaign renders on.", 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Page header & footer', 'fundraising-toolkit' ) }
+                sub={ __( "Hide the theme's header or footer on every page this campaign renders on.", 'fundraising-toolkit' ) }
                 edited={ ( c.edits?.hide_header !== undefined ? 1 : 0 ) + ( c.edits?.hide_footer !== undefined ? 1 : 0 ) }
             >
                 <ToggleRow
-                    title={ __( 'Hide theme header', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Hide theme header', 'fundraising-toolkit' ) }
                     checked={ !! c.value( 'hide_header', false ) }
                     onChange={ ( v ) => c.edit( { hide_header: v } ) }
                 />
                 <div style={ { marginTop: 16 } }>
                     <ToggleRow
-                        title={ __( 'Hide theme footer', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'Hide theme footer', 'fundraising-toolkit' ) }
                         checked={ !! c.value( 'hide_footer', false ) }
                         onChange={ ( v ) => c.edit( { hide_footer: v } ) }
                     />
@@ -2112,17 +2112,17 @@ function DefaultsPanel( { c, forms, funds } ) {
     return (
         <div className="fundkit-section-block">
             <Card
-                title={ __( 'Default form', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'The form the campaign page and donate-button block submit to by default.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Default form', 'fundraising-toolkit' ) }
+                sub={ __( 'The form the campaign page and donate-button block submit to by default.', 'fundraising-toolkit' ) }
                 edited={ hasFormEdit ? 1 : 0 }
             >
                 <FormRow
-                    label={ __( 'Form', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Only published forms that belong to this campaign appear here. A draft cannot be the default: the page would fall back to a different form without saying so.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Form', 'fundraising-toolkit' ) }
+                    help={ __( 'Only published forms that belong to this campaign appear here. A draft cannot be the default: the page would fall back to a different form without saying so.', 'fundraising-toolkit' ) }
                 >
                     <div className="fundkit-grid-2-eq" style={ { gridTemplateColumns: '1fr auto', alignItems: 'center' } }>
                         <select className={ selectCls( c, 'default_form_id' ) } { ...c.bindNumber( 'default_form_id' ) }>
-                            <option value="">{ __( '( None )', 'fundkit-fundraising-campaigns' ) }</option>
+                            <option value="">{ __( '( None )', 'fundraising-toolkit' ) }</option>
                             { /* The Forms tab's own "Set as default" already
                                  guards on published, and every runtime reader
                                  takes this id only when the form is published.
@@ -2140,7 +2140,7 @@ function DefaultsPanel( { c, forms, funds } ) {
                                             ? f.title
                                             : sprintf(
                                                 /* translators: %s: form title */
-                                                __( '%s (not published)', 'fundkit-fundraising-campaigns' ),
+                                                __( '%s (not published)', 'fundraising-toolkit' ),
                                                 f.title
                                             ) }
                                     </option>
@@ -2148,7 +2148,7 @@ function DefaultsPanel( { c, forms, funds } ) {
                         </select>
                         { r.default_form_id && (
                             <Btn variant="ghost" size="sm" href={ formEditorHref( Number( r.default_form_id ) ) }>
-                                { __( 'Edit form', 'fundkit-fundraising-campaigns' ) } →
+                                { __( 'Edit form', 'fundraising-toolkit' ) } →
                             </Btn>
                         ) }
                     </div>
@@ -2156,19 +2156,19 @@ function DefaultsPanel( { c, forms, funds } ) {
             </Card>
 
             <Card
-                title={ __( 'Default fund', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Where donations from this campaign are routed. Useful when separating restricted donations from general operations.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Default fund', 'fundraising-toolkit' ) }
+                sub={ __( 'Where donations from this campaign are routed. Useful when separating restricted donations from general operations.', 'fundraising-toolkit' ) }
                 edited={ hasFundEdit ? 1 : 0 }
             >
-                <FormRow label={ __( 'Fund', 'fundkit-fundraising-campaigns' ) }>
+                <FormRow label={ __( 'Fund', 'fundraising-toolkit' ) }>
                     <select className={ selectCls( c, 'default_fund_id' ) } { ...c.bindNumber( 'default_fund_id' ) }>
-                        <option value="">{ __( '( Unassigned )', 'fundkit-fundraising-campaigns' ) }</option>
+                        <option value="">{ __( '( Unassigned )', 'fundraising-toolkit' ) }</option>
                         { funds.map( ( f ) => (
                             <option key={ f.id } value={ f.id }>
                                 { f.is_active === false
                                     ? sprintf(
                                         /* translators: %s: fund name */
-                                        __( '%s (inactive)', 'fundkit-fundraising-campaigns' ),
+                                        __( '%s (inactive)', 'fundraising-toolkit' ),
                                         f.name
                                     )
                                     : f.name }
@@ -2188,9 +2188,9 @@ function AdvancedPanel( { campaign, onError } ) {
     const onDelete = async () => {
         const message = await campaignDeleteMessage( campaign );
         setConfirm( {
-            title:        __( 'Delete campaign', 'fundkit-fundraising-campaigns' ),
+            title:        __( 'Delete campaign', 'fundraising-toolkit' ),
             message,
-            confirmLabel: __( 'Delete', 'fundkit-fundraising-campaigns' ),
+            confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
             destructive:  true,
             onConfirm: async () => {
                 setDeleting( true );
@@ -2201,7 +2201,7 @@ function AdvancedPanel( { campaign, onError } ) {
                     } );
                     window.location.href = listHref();
                 } catch ( err ) {
-                    onError( err?.message || __( 'Delete failed.', 'fundkit-fundraising-campaigns' ) );
+                    onError( err?.message || __( 'Delete failed.', 'fundraising-toolkit' ) );
                     setDeleting( false );
                 }
             },
@@ -2211,21 +2211,21 @@ function AdvancedPanel( { campaign, onError } ) {
     return (
         <div className="fundkit-section-block">
             <Card
-                title={ __( 'Danger zone', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Irreversible actions. Use with care.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Danger zone', 'fundraising-toolkit' ) }
+                sub={ __( 'Irreversible actions. Use with care.', 'fundraising-toolkit' ) }
             >
                 <div className="fundkit-danger">
                     <div className="fundkit-danger__copy">
-                        <div className="fundkit-danger__title">{ __( 'Delete this campaign', 'fundkit-fundraising-campaigns' ) }</div>
+                        <div className="fundkit-danger__title">{ __( 'Delete this campaign', 'fundraising-toolkit' ) }</div>
                         <div className="fundkit-danger__help">
                             { __(
                                 'Removes the campaign, its forms, and the WordPress page it created. A campaign that has any donations or recurring plans is never deleted: archive it instead to keep its records.',
-                                'fundkit-fundraising-campaigns'
+                                'fundraising-toolkit'
                             ) }
                         </div>
                     </div>
                     <Btn variant="danger" onClick={ onDelete } isBusy={ deleting } disabled={ deleting }>
-                        { __( 'Delete campaign', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Delete campaign', 'fundraising-toolkit' ) }
                     </Btn>
                 </div>
             </Card>

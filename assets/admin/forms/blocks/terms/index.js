@@ -17,29 +17,29 @@ function Edit( { attributes, setAttributes } ) {
 
     const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--terms' } );
     const configured = terms.trim() !== '' || linkUrl.trim() !== '';
-    const labelText  = label.trim() || __( 'I agree to the terms', 'fundkit-fundraising-campaigns' );
+    const labelText  = label.trim() || __( 'I agree to the terms', 'fundraising-toolkit' );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Terms', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Terms', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Checkbox label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Checkbox label', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'I agree to the terms', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'I agree to the terms', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextareaControl
-                        label={ __( 'Terms', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Your own wording. Nothing is supplied: terms differ by country, cause and legal form, and sample text goes live unread.', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Terms', 'fundraising-toolkit' ) }
+                        help={ __( 'Your own wording. Nothing is supplied: terms differ by country, cause and legal form, and sample text goes live unread.', 'fundraising-toolkit' ) }
                         value={ terms }
                         onChange={ ( v ) => setAttributes( { terms: v } ) }
                         rows={ 10 }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Or link to a page', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Or link to a page', 'fundraising-toolkit' ) }
                         value={ linkUrl }
                         onChange={ ( v ) => setAttributes( { linkUrl: v } ) }
                         type="url"
@@ -47,10 +47,10 @@ function Edit( { attributes, setAttributes } ) {
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Link text', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Link text', 'fundraising-toolkit' ) }
                         value={ linkText }
                         onChange={ ( v ) => setAttributes( { linkText: v } ) }
-                        placeholder={ __( 'Read the terms', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Read the terms', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -63,7 +63,7 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 { ! configured && (
                     <Notice status="warning" isDismissible={ false }>
-                        { __( 'Add your terms or a link to them. Until then this block asks for nothing and is not enforced.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Add your terms or a link to them. Until then this block asks for nothing and is not enforced.', 'fundraising-toolkit' ) }
                     </Notice>
                 ) }
                 <label className="fundkit-block-preview__terms-agree">
@@ -75,7 +75,7 @@ function Edit( { attributes, setAttributes } ) {
                 ) }
                 { linkUrl.trim() !== '' && (
                     <p className="fundkit-block-preview__terms-link">
-                        { linkText.trim() || __( 'Read the terms', 'fundkit-fundraising-campaigns' ) }
+                        { linkText.trim() || __( 'Read the terms', 'fundraising-toolkit' ) }
                     </p>
                 ) }
             </div>
@@ -86,8 +86,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Terms', 'fundkit-fundraising-campaigns' ),
-        description: __( 'A required agreement to your own terms, recorded against the donation with the revision agreed to.', 'fundkit-fundraising-campaigns' ),
+        title:       __( 'Terms', 'fundraising-toolkit' ),
+        description: __( 'A required agreement to your own terms, recorded against the donation with the revision agreed to.', 'fundraising-toolkit' ),
         category:    'fundkit-extras',
         icon:        BlockIcons[ 'consent' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

@@ -30,7 +30,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
             setBody( '' );
             onChanged?.();
         } catch ( err ) {
-            setError( err?.message || __( 'Could not save', 'fundkit-fundraising-campaigns' ) );
+            setError( err?.message || __( 'Could not save', 'fundraising-toolkit' ) );
         } finally {
             setSaving( false );
         }
@@ -38,9 +38,9 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
 
     const remove = ( noteId ) => {
         setConfirm( {
-            title:        __( 'Delete note', 'fundkit-fundraising-campaigns' ),
-            message:      __( 'Delete this note?', 'fundkit-fundraising-campaigns' ),
-            confirmLabel: __( 'Delete', 'fundkit-fundraising-campaigns' ),
+            title:        __( 'Delete note', 'fundraising-toolkit' ),
+            message:      __( 'Delete this note?', 'fundraising-toolkit' ),
+            confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
             destructive:  true,
             onConfirm: async () => {
                 try {
@@ -51,7 +51,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                     setNotes( ( ns ) => ns.filter( ( n ) => n.id !== noteId ) );
                     onChanged?.();
                 } catch ( err ) {
-                    setError( err?.message || __( 'Could not delete', 'fundkit-fundraising-campaigns' ) );
+                    setError( err?.message || __( 'Could not delete', 'fundraising-toolkit' ) );
                 }
             },
         } );
@@ -65,14 +65,14 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                         <EmptyState
                             compact
                             icon={ <StickyNote size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'No notes yet', 'fundkit-fundraising-campaigns' ) }
-                            body={ __( 'Add notes to keep context attached to this donation: refund reasons, follow-ups, special handling.', 'fundkit-fundraising-campaigns' ) }
+                            title={ __( 'No notes yet', 'fundraising-toolkit' ) }
+                            body={ __( 'Add notes to keep context attached to this donation: refund reasons, follow-ups, special handling.', 'fundraising-toolkit' ) }
                         />
                     )
                     : (
                         <div className="dd-notes-list">
                             { notes.map( ( n ) => {
-                                const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'fundkit-fundraising-campaigns' ) : __( 'System', 'fundkit-fundraising-campaigns' ) );
+                                const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'fundraising-toolkit' ) : __( 'System', 'fundraising-toolkit' ) );
                                 return (
                                     <div key={ n.id } className="dd-note">
                                         <span className="dd-avatar dd-avatar--md">{ initials( author ) }</span>
@@ -89,7 +89,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                                         <button
                                             type="button"
                                             className="dd-note__delete"
-                                            aria-label={ __( 'Delete note', 'fundkit-fundraising-campaigns' ) }
+                                            aria-label={ __( 'Delete note', 'fundraising-toolkit' ) }
                                             onClick={ () => remove( n.id ) }
                                         >
                                             <IconTrash width="14" height="14" />
@@ -104,7 +104,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                     <textarea
                         value={ body }
                         onChange={ ( e ) => setBody( e.target.value ) }
-                        placeholder={ __( 'Write a note about this donation. Notes are visible to admins only.', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Write a note about this donation. Notes are visible to admins only.', 'fundraising-toolkit' ) }
                         rows={ 3 }
                     />
                     { error && <div className="dd-note-form__error">{ error }</div> }
@@ -114,7 +114,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                             className="btn btn--primary"
                             disabled={ saving || ! body.trim() }
                         >
-                            { saving ? __( 'Saving…', 'fundkit-fundraising-campaigns' ) : __( 'Add note', 'fundkit-fundraising-campaigns' ) }
+                            { saving ? __( 'Saving…', 'fundraising-toolkit' ) : __( 'Add note', 'fundraising-toolkit' ) }
                         </button>
                     </div>
                 </form>

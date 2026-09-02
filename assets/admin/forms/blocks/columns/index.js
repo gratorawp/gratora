@@ -48,16 +48,16 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Columns', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Columns', 'fundraising-toolkit' ) } initialOpen>
                     <Slider
-                        label={ __( 'Columns', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Columns', 'fundraising-toolkit' ) }
                         value={ columns }
                         onChange={ ( v ) => setAttributes( { columns: v } ) }
                         min={ 1 }
                         max={ 6 }
                     />
                     <Slider
-                        label={ __( 'Gap', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Gap', 'fundraising-toolkit' ) }
                         value={ gap }
                         onChange={ ( v ) => setAttributes( { gap: v } ) }
                         min={ 0 }
@@ -85,8 +85,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Columns', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Lay out content blocks side by side in a grid.', 'fundkit-fundraising-campaigns' ),
+        title:       __( 'Columns', 'fundraising-toolkit' ),
+        description: __( 'Lay out content blocks side by side in a grid.', 'fundraising-toolkit' ),
         category:    'fundkit-content',
         icon:        BlockIcons[ 'columns' ],
         supports:    { html: false, anchor: false, inserter: true },

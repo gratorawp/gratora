@@ -52,7 +52,7 @@ final class ConsentBlock implements Block
             }
 
             return '<div class="fundkit-block-notice">'
-                . esc_html__('Pick which consent purposes this form asks for, or add one in Settings, Consents.', 'fundkit-fundraising-campaigns')
+                . esc_html__('Pick which consent purposes this form asks for, or add one in Settings, Consents.', 'fundraising-toolkit')
                 . '</div>';
         }
 

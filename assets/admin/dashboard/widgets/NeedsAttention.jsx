@@ -19,18 +19,18 @@ export default function NeedsAttention( { items = [] } ) {
                 method: 'POST',
                 data:   { key: item.key, signature: item.signature || 'x' },
             } );
-            notify.success( __( 'Dismissed. It comes back if the situation changes.', 'fundkit-fundraising-campaigns' ), {
+            notify.success( __( 'Dismissed. It comes back if the situation changes.', 'fundraising-toolkit' ), {
                 // The default 4s is not long enough to read the sentence and
                 // decide, and the row is already gone by then.
                 duration: 10000,
                 action: {
-                    label:   __( 'Undo', 'fundkit-fundraising-campaigns' ),
+                    label:   __( 'Undo', 'fundraising-toolkit' ),
                     onClick: () => restore( item ),
                 },
             } );
         } catch ( err ) {
             setHidden( ( h ) => h.filter( ( k ) => k !== item.key ) );
-            notify.error( err?.message || __( 'Could not dismiss that.', 'fundkit-fundraising-campaigns' ) );
+            notify.error( err?.message || __( 'Could not dismiss that.', 'fundraising-toolkit' ) );
         }
     };
 
@@ -43,14 +43,14 @@ export default function NeedsAttention( { items = [] } ) {
             } );
             setHidden( ( h ) => h.filter( ( k ) => k !== item.key ) );
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not bring that back.', 'fundkit-fundraising-campaigns' ) );
+            notify.error( err?.message || __( 'Could not bring that back.', 'fundraising-toolkit' ) );
         }
     };
 
     if ( visible.length === 0 ) {
         return (
             <p className="fundkit-attention__empty">
-                { __( 'Nothing needs attention right now.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Nothing needs attention right now.', 'fundraising-toolkit' ) }
             </p>
         );
     }
@@ -63,15 +63,15 @@ export default function NeedsAttention( { items = [] } ) {
                     <span className="fundkit-attention__title">{ item.title }</span>
                     { item.action_href && (
                         <a className="fundkit-attention__action" href={ item.action_href }>
-                            { item.action_label || __( 'Open', 'fundkit-fundraising-campaigns' ) } →
+                            { item.action_label || __( 'Open', 'fundraising-toolkit' ) } →
                         </a>
                     ) }
                     <button
                         type="button"
                         className="fundkit-attention__dismiss"
                         onClick={ () => dismiss( item ) }
-                        aria-label={ __( 'Dismiss', 'fundkit-fundraising-campaigns' ) }
-                        title={ __( 'Dismiss', 'fundkit-fundraising-campaigns' ) }
+                        aria-label={ __( 'Dismiss', 'fundraising-toolkit' ) }
+                        title={ __( 'Dismiss', 'fundraising-toolkit' ) }
                     >
                         <DismissIcon size={ 14 } strokeWidth={ 2 } />
                     </button>

@@ -31,7 +31,7 @@ final class OnboardingPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Onboarding', 'fundkit-fundraising-campaigns'),
+            'title'      => __('Onboarding', 'fundraising-toolkit'),
             'capability' => 'manage_options',
             'position'   => 999,
             'hidden'     => true,
@@ -79,7 +79,7 @@ final class OnboardingPage extends HookProvider
             $asset['version']      ?? FUNDKIT_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(

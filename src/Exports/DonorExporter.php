@@ -140,20 +140,20 @@ final class DonorExporter
     public static function labels(): array
     {
         return [
-            'first_name'      => __('First name', 'fundkit-fundraising-campaigns'),
-            'last_name'       => __('Last name', 'fundkit-fundraising-campaigns'),
-            'email'           => __('Email', 'fundkit-fundraising-campaigns'),
-            'phone'           => __('Phone', 'fundkit-fundraising-campaigns'),
-            'address'         => __('Address', 'fundkit-fundraising-campaigns'),
-            'company'         => __('Company', 'fundkit-fundraising-campaigns'),
-            'country'         => __('Country', 'fundkit-fundraising-campaigns'),
-            'donor_type'      => __('Type', 'fundkit-fundraising-campaigns'),
-            'donations_count' => __('Donations', 'fundkit-fundraising-campaigns'),
-            'total_donated'   => __('Total donated', 'fundkit-fundraising-campaigns'),
-            'first_donation'  => __('First donation', 'fundkit-fundraising-campaigns'),
-            'last_donation'   => __('Last donation', 'fundkit-fundraising-campaigns'),
-            'created_at'      => __('Donor since', 'fundkit-fundraising-campaigns'),
-            'donor_id'        => __('Donor ID', 'fundkit-fundraising-campaigns'),
+            'first_name'      => __('First name', 'fundraising-toolkit'),
+            'last_name'       => __('Last name', 'fundraising-toolkit'),
+            'email'           => __('Email', 'fundraising-toolkit'),
+            'phone'           => __('Phone', 'fundraising-toolkit'),
+            'address'         => __('Address', 'fundraising-toolkit'),
+            'company'         => __('Company', 'fundraising-toolkit'),
+            'country'         => __('Country', 'fundraising-toolkit'),
+            'donor_type'      => __('Type', 'fundraising-toolkit'),
+            'donations_count' => __('Donations', 'fundraising-toolkit'),
+            'total_donated'   => __('Total donated', 'fundraising-toolkit'),
+            'first_donation'  => __('First donation', 'fundraising-toolkit'),
+            'last_donation'   => __('Last donation', 'fundraising-toolkit'),
+            'created_at'      => __('Donor since', 'fundraising-toolkit'),
+            'donor_id'        => __('Donor ID', 'fundraising-toolkit'),
         ];
     }
 

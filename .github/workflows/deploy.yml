@@ -109,7 +109,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fundkit-plugin
-          path: dist/fundkit-fundraising-campaigns.zip
+          path: dist/fundraising-toolkit.zip
           if-no-files-found: error
 
       # Only after everything above passed, and never on a dry run.
@@ -119,8 +119,8 @@ jobs:
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          SLUG: fundkit-fundraising-campaigns
-          BUILD_DIR: dist/fundkit-fundraising-campaigns
+          SLUG: fundraising-toolkit
+          BUILD_DIR: dist/fundraising-toolkit
           # The SVN tag directory is named after this, and Stable tag has to
           # resolve to it. The git tag carries a leading v and Stable tag does
           # not, so publish the stripped value the version gate already checked:

@@ -42,42 +42,42 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Multi-select', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Multi-select', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or any option to edit inline.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Click the label or any option to edit inline.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Field name', 'fundraising-toolkit' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugifyField( v ) } ) }
-                        help={ __( 'Key the array is stored under. Auto-derived from label if empty.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Key the array is stored under. Auto-derived from label if empty.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Required', 'fundraising-toolkit' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
-                        help={ __( 'At least one option must be selected.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'At least one option must be selected.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <Slider
-                        label={ __( 'Minimum selections', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Minimum selections', 'fundraising-toolkit' ) }
                         value={ minSelections }
                         onChange={ ( v ) => setAttributes( { minSelections: Math.max( 0, v ) } ) }
                         min={ 0 }
                         max={ 20 }
                     />
                     <Slider
-                        label={ __( 'Maximum selections', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Maximum selections', 'fundraising-toolkit' ) }
                         value={ maxSelections }
                         onChange={ ( v ) => setAttributes( { maxSelections: Math.max( 0, v ) } ) }
                         min={ 0 }
                         max={ 20 }
-                        help={ __( 'Set to 0 for no upper limit.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Set to 0 for no upper limit.', 'fundraising-toolkit' ) }
                     />
                     <OptionsEditor
                         options={ options }
@@ -95,7 +95,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="fundkit-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Pick any that apply', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Pick any that apply', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
@@ -130,7 +130,7 @@ function Edit( { attributes, setAttributes } ) {
                                 tagName="span"
                                 value={ o.label }
                                 onChange={ ( v ) => updateOptionLabel( i, v ) }
-                                placeholder={ __( 'Option label', 'fundkit-fundraising-campaigns' ) }
+                                placeholder={ __( 'Option label', 'fundraising-toolkit' ) }
                                 allowedFormats={ [] }
                                 style={ { fontSize: 13, color: '#111827' } }
                             />
@@ -145,8 +145,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Multi-select', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Donor picks any number of options from a checkbox list.', 'fundkit-fundraising-campaigns' ),
+        title:       __( 'Multi-select', 'fundraising-toolkit' ),
+        description: __( 'Donor picks any number of options from a checkbox list.', 'fundraising-toolkit' ),
         category:    'fundkit-fields',
         icon:        BlockIcons[ 'multi-select' ],
         supports: { html: false, anchor: false, inserter: true },

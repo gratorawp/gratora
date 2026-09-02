@@ -62,12 +62,12 @@ final class ReceiptsController
 
         $valid = $this->magicLinks->validate($rawToken, 'download_receipt', $receiptId);
         if (! $valid) {
-            return new WP_Error('fundkit_invalid_token', __('Link is invalid or expired.', 'fundkit-fundraising-campaigns'), ['status' => 403]);
+            return new WP_Error('fundkit_invalid_token', __('Link is invalid or expired.', 'fundraising-toolkit'), ['status' => 403]);
         }
 
         $receipt = $this->receipts->findById($receiptId);
         if (! $receipt) {
-            return new WP_Error('fundkit_receipt_not_found', __('Receipt not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_receipt_not_found', __('Receipt not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         if ($receipt->voided) {
@@ -76,20 +76,20 @@ final class ReceiptsController
             // donation was refunded in full, so say that instead.
             return new WP_Error(
                 'fundkit_receipt_voided',
-                __('This receipt was withdrawn because the donation it covers was refunded in full. If that is not what you expected, please contact the organization.', 'fundkit-fundraising-campaigns'),
+                __('This receipt was withdrawn because the donation it covers was refunded in full. If that is not what you expected, please contact the organization.', 'fundraising-toolkit'),
                 ['status' => 410]
             );
         }
 
         // Defense-in-depth: token must belong to the same donor as the receipt.
         if ($valid->donor_id !== $receipt->donor_id) {
-            return new WP_Error('fundkit_invalid_token', __('Link is invalid.', 'fundkit-fundraising-campaigns'), ['status' => 403]);
+            return new WP_Error('fundkit_invalid_token', __('Link is invalid.', 'fundraising-toolkit'), ['status' => 403]);
         }
 
         $donation = $this->donations->findById($receipt->donation_id);
         $donor    = $this->donors->findById($receipt->donor_id);
         if (! $donation || ! $donor) {
-            return new WP_Error('fundkit_receipt_data_missing', __('Receipt data is no longer available.', 'fundkit-fundraising-campaigns'), ['status' => 410]);
+            return new WP_Error('fundkit_receipt_data_missing', __('Receipt data is no longer available.', 'fundraising-toolkit'), ['status' => 410]);
         }
 
         $ctx = new ReceiptContext(
@@ -117,7 +117,7 @@ final class ReceiptsController
             // under the same receipt number.
             return new WP_Error(
                 'fundkit_renderer_missing',
-                __('This receipt was produced by an extension that is no longer active. Please contact the organization.', 'fundkit-fundraising-campaigns'),
+                __('This receipt was produced by an extension that is no longer active. Please contact the organization.', 'fundraising-toolkit'),
                 ['status' => 410, 'renderer_id' => (string) $receipt->renderer_id]
             );
         }

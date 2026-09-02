@@ -75,7 +75,7 @@ final class WebhookController
 
         if (! $gateway) {
             /* translators: %s: gateway identifier */
-            return new WP_Error('fundkit_unknown_gateway', sprintf(__('Unknown gateway: %s', 'fundkit-fundraising-campaigns'), $gatewayId), ['status' => 404]);
+            return new WP_Error('fundkit_unknown_gateway', sprintf(__('Unknown gateway: %s', 'fundraising-toolkit'), $gatewayId), ['status' => 404]);
         }
 
         try {
@@ -105,14 +105,14 @@ final class WebhookController
                 set_transient(self::REJECT_NOTICE_KEY . $gatewayId, 1, self::REJECT_NOTICE_TTL);
                 ErrorLog::record(
                     'webhook.' . $gatewayId,
-                    $outcome->error ?? __('Signature verification failed. The webhook will keep being rejected until the gateway credentials and webhook id match this site.', 'fundkit-fundraising-campaigns'),
+                    $outcome->error ?? __('Signature verification failed. The webhook will keep being rejected until the gateway credentials and webhook id match this site.', 'fundraising-toolkit'),
                     ['gateway' => $gatewayId, 'event_type' => $outcome->event_type ?? 'unknown']
                 );
             }
 
             return new WP_Error(
                 'fundkit_webhook_rejected',
-                $outcome->error ?? __('Webhook rejected.', 'fundkit-fundraising-campaigns'),
+                $outcome->error ?? __('Webhook rejected.', 'fundraising-toolkit'),
                 ['status' => $outcome->http_status]
             );
         }

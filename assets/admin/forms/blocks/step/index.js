@@ -29,19 +29,19 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Step', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Step', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        help={ __( 'Shown as the page title and on the progress indicator.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Shown as the page title and on the progress indicator.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Show label', 'fundraising-toolkit' ) }
                         checked={ showTitle }
                         onChange={ ( v ) => setAttributes( { showTitle: v } ) }
-                        help={ __( 'Off hides the label on the donor form. The progress indicator still uses it for screen-reader names.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Off hides the label on the donor form. The progress indicator still uses it for screen-reader names.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -50,7 +50,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                 <div className="fundkit-block-preview__step-meta">
                     { sprintf(
                         /* translators: %1$d: current step number. %2$d: total number of steps. */
-                        __( 'Step %1$d of %2$d', 'fundkit-fundraising-campaigns' ),
+                        __( 'Step %1$d of %2$d', 'fundraising-toolkit' ),
                         index + 1,
                         total
                     ) }
@@ -61,13 +61,13 @@ function Edit( { attributes, setAttributes, clientId } ) {
                         className="fundkit-block-preview__step-title"
                         value={ title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Untitled step', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Untitled step', 'fundraising-toolkit' ) }
                         allowedFormats={ [] }
                     />
                 ) }
                 { childCount === 0 && (
                     <Notice status="warning" isDismissible={ false }>
-                        { __( 'This step is empty. Add fields or content, or remove the step, so donors do not land on a blank page.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'This step is empty. Add fields or content, or remove the step, so donors do not land on a blank page.', 'fundraising-toolkit' ) }
                     </Notice>
                 ) }
                 <InnerBlocks
@@ -81,8 +81,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Step', 'fundkit-fundraising-campaigns' ),
-        description: __( 'One page inside a Steps wizard.', 'fundkit-fundraising-campaigns' ),
+        title:       __( 'Step', 'fundraising-toolkit' ),
+        description: __( 'One page inside a Steps wizard.', 'fundraising-toolkit' ),
         category:    'fundkit-content',
         icon:        BlockIcons[ 'step' ],
         parent:      [ 'fundkit/steps' ],

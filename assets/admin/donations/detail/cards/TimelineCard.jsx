@@ -30,9 +30,9 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             id:    'created',
             time:  donation.created_at,
             dot:   'is-info',
-            title: __( 'Donation created', 'fundkit-fundraising-campaigns' ),
+            title: __( 'Donation created', 'fundraising-toolkit' ),
             sub:   donation.form?.title
-                ? <>{ __( 'Through', 'fundkit-fundraising-campaigns' ) } <strong>{ donation.form.title }</strong></>
+                ? <>{ __( 'Through', 'fundraising-toolkit' ) } <strong>{ donation.form.title }</strong></>
                 : null,
         } );
     }
@@ -41,7 +41,7 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             id:    'paid',
             time:  donation.paid_at,
             dot:   'is-ok',
-            title: __( 'Payment captured', 'fundkit-fundraising-campaigns' ),
+            title: __( 'Payment captured', 'fundraising-toolkit' ),
             sub:   donation.gateway_intent_id
                 ? <><span style={ { textTransform: 'capitalize' } }>{ donation.gateway }</span>{ ' · ' }<span className="mono">{ donation.gateway_intent_id }</span></>
                 : <span style={ { textTransform: 'capitalize' } }>{ donation.gateway }</span>,
@@ -56,7 +56,7 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             id:    'failed',
             time:  donation.updated_at,
             dot:   'is-error',
-            title: __( 'Marked as failed', 'fundkit-fundraising-campaigns' ),
+            title: __( 'Marked as failed', 'fundraising-toolkit' ),
             sub:   donation.failure_reason
                 ? <em>&quot;{ donation.failure_reason }&quot;</em>
                 : null,
@@ -67,15 +67,15 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             id:    `receipt-${ ri }`,
             time:  r.issued_at,
             dot:   'is-info',
-            title: __( 'Receipt issued', 'fundkit-fundraising-campaigns' ),
-            sub:   <><span className="mono">{ r.receipt_number }</span>{ r.sent_to_email_at && <> · { __( 'emailed', 'fundkit-fundraising-campaigns' ) } { formatDateTime( r.sent_to_email_at ) }</> }</>,
+            title: __( 'Receipt issued', 'fundraising-toolkit' ),
+            sub:   <><span className="mono">{ r.receipt_number }</span>{ r.sent_to_email_at && <> · { __( 'emailed', 'fundraising-toolkit' ) } { formatDateTime( r.sent_to_email_at ) }</> }</>,
         } );
         if ( r.voided && r.voided_at ) {
             events.push( {
                 id:    `receipt-void-${ ri }`,
                 time:  r.voided_at,
                 dot:   'is-muted',
-                title: __( 'Receipt voided', 'fundkit-fundraising-campaigns' ),
+                title: __( 'Receipt voided', 'fundraising-toolkit' ),
                 sub:   <span className="mono">{ r.receipt_number }</span>,
             } );
         }
@@ -85,7 +85,7 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             id:    `refund-${ ri }`,
             time:  r.occurred_at,
             dot:   r.status === 'succeeded' ? 'is-warn' : 'is-error',
-            title: <>{ __( 'Refund', 'fundkit-fundraising-campaigns' ) } <strong>{ formatAmount( r.amount_cents, r.currency ) }</strong></>,
+            title: <>{ __( 'Refund', 'fundraising-toolkit' ) } <strong>{ formatAmount( r.amount_cents, r.currency ) }</strong></>,
             sub:   r.reason ? <em>&quot;{ r.reason }&quot;</em> : null,
         } );
     } );
@@ -94,7 +94,7 @@ function buildEvents( { donation, receipts, refunds, notes } ) {
             id:    `note-${ ni }`,
             time:  n.created_at,
             dot:   'is-muted',
-            title: __( 'Note added', 'fundkit-fundraising-campaigns' ),
+            title: __( 'Note added', 'fundraising-toolkit' ),
             sub:   <em>&quot;{ n.body.length > 120 ? n.body.slice( 0, 117 ) + '…' : n.body }&quot;</em>,
         } );
     } );

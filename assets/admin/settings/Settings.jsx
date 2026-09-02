@@ -30,16 +30,16 @@ import {
 // Ordered by how often an operator opens it, money first. Add-on tabs land
 // after these.
 const TABS = [
-    { key: 'setup',        label: __( 'Setup', 'fundkit-fundraising-campaigns' ),                Icon: IconSetup },
-    { key: 'gateways',     label: __( 'Payment gateways', 'fundkit-fundraising-campaigns' ),     Icon: IconGateways },
-    { key: 'organization', label: __( 'Organization', 'fundkit-fundraising-campaigns' ),         Icon: IconOrganization },
-    { key: 'brand',        label: __( 'Brand', 'fundkit-fundraising-campaigns' ),                Icon: IconBrand },
-    { key: 'email',        label: __( 'Emails', 'fundkit-fundraising-campaigns' ),               Icon: IconEmail },
-    { key: 'receipts',     label: __( 'Receipts', 'fundkit-fundraising-campaigns' ),             Icon: IconReceipt },
-    { key: 'currency',     label: __( 'Currency', 'fundkit-fundraising-campaigns' ),             Icon: IconCurrency },
-    { key: 'numbering',    label: __( 'Numbering', 'fundkit-fundraising-campaigns' ),            Icon: IconNumbering },
-    { key: 'privacy',      label: __( 'Privacy', 'fundkit-fundraising-campaigns' ),              Icon: IconPrivacy },
-    { key: 'roles',        label: __( 'Roles', 'fundkit-fundraising-campaigns' ),                Icon: IconRoles, adminOnly: true },
+    { key: 'setup',        label: __( 'Setup', 'fundraising-toolkit' ),                Icon: IconSetup },
+    { key: 'gateways',     label: __( 'Payment gateways', 'fundraising-toolkit' ),     Icon: IconGateways },
+    { key: 'organization', label: __( 'Organization', 'fundraising-toolkit' ),         Icon: IconOrganization },
+    { key: 'brand',        label: __( 'Brand', 'fundraising-toolkit' ),                Icon: IconBrand },
+    { key: 'email',        label: __( 'Emails', 'fundraising-toolkit' ),               Icon: IconEmail },
+    { key: 'receipts',     label: __( 'Receipts', 'fundraising-toolkit' ),             Icon: IconReceipt },
+    { key: 'currency',     label: __( 'Currency', 'fundraising-toolkit' ),             Icon: IconCurrency },
+    { key: 'numbering',    label: __( 'Numbering', 'fundraising-toolkit' ),            Icon: IconNumbering },
+    { key: 'privacy',      label: __( 'Privacy', 'fundraising-toolkit' ),              Icon: IconPrivacy },
+    { key: 'roles',        label: __( 'Roles', 'fundraising-toolkit' ),                Icon: IconRoles, adminOnly: true },
 ];
 
 // Always last, whatever add-ons register in between.
@@ -54,17 +54,17 @@ const TAIL_TABS = [];
 
 // Save-job slug -> human label, for failure messages (job slugs are not tab keys).
 const SECTION_LABELS = {
-    'org-profile':     __( 'Organization', 'fundkit-fundraising-campaigns' ),
-    'org-brand':       __( 'Brand', 'fundkit-fundraising-campaigns' ),
-    'currency-locale': __( 'Currency & locale', 'fundkit-fundraising-campaigns' ),
-    'exchange-rates':  __( 'Exchange rates', 'fundkit-fundraising-campaigns' ),
-    'gateways':        __( 'Payment gateways', 'fundkit-fundraising-campaigns' ),
-    'email':           __( 'Emails', 'fundkit-fundraising-campaigns' ),
-    'receipts':        __( 'Receipts', 'fundkit-fundraising-campaigns' ),
-    'numbering':       __( 'Numbering', 'fundkit-fundraising-campaigns' ),
-    'consents':        __( 'Consents', 'fundkit-fundraising-campaigns' ),
-    'privacy':         __( 'Data & privacy', 'fundkit-fundraising-campaigns' ),
-    'roles':           __( 'Roles & permissions', 'fundkit-fundraising-campaigns' ),
+    'org-profile':     __( 'Organization', 'fundraising-toolkit' ),
+    'org-brand':       __( 'Brand', 'fundraising-toolkit' ),
+    'currency-locale': __( 'Currency & locale', 'fundraising-toolkit' ),
+    'exchange-rates':  __( 'Exchange rates', 'fundraising-toolkit' ),
+    'gateways':        __( 'Payment gateways', 'fundraising-toolkit' ),
+    'email':           __( 'Emails', 'fundraising-toolkit' ),
+    'receipts':        __( 'Receipts', 'fundraising-toolkit' ),
+    'numbering':       __( 'Numbering', 'fundraising-toolkit' ),
+    'consents':        __( 'Consents', 'fundraising-toolkit' ),
+    'privacy':         __( 'Data & privacy', 'fundraising-toolkit' ),
+    'roles':           __( 'Roles & permissions', 'fundraising-toolkit' ),
 };
 
 function initialTab() {
@@ -93,7 +93,7 @@ export function SettingsGroup( { of, children } ) {
                 <Card>
                     <p style={ { color: '#b42318', margin: '0 0 12px' } }>{ failed.loadError }</p>
                     <Btn variant="secondary" onClick={ () => groups.forEach( ( g ) => g.reload?.() ) }>
-                        { __( 'Retry', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Retry', 'fundraising-toolkit' ) }
                     </Btn>
                 </Card>
             </div>
@@ -101,7 +101,7 @@ export function SettingsGroup( { of, children } ) {
     }
 
     if ( groups.some( ( g ) => g.isLoading ) ) {
-        return <p>{ __( 'Loading…', 'fundkit-fundraising-campaigns' ) }</p>;
+        return <p>{ __( 'Loading…', 'fundraising-toolkit' ) }</p>;
     }
 
     return children;
@@ -236,7 +236,7 @@ export default function Settings() {
             .filter( Boolean );
 
         if ( failed.length === 0 ) {
-            notify.success( __( 'All changes saved.', 'fundkit-fundraising-campaigns' ) );
+            notify.success( __( 'All changes saved.', 'fundraising-toolkit' ) );
             return;
         }
 
@@ -247,10 +247,10 @@ export default function Settings() {
         const base = failed.length < jobs.length
             ? sprintf(
                 /* translators: %s: comma-separated section names that failed */
-                __( 'Could not save: %s.', 'fundkit-fundraising-campaigns' ),
+                __( 'Could not save: %s.', 'fundraising-toolkit' ),
                 labels.join( ', ' ),
             )
-            : __( 'Save failed.', 'fundkit-fundraising-campaigns' );
+            : __( 'Save failed.', 'fundraising-toolkit' );
         notify.error( reason ? `${ base } ${ reason }` : base );
     };
 
@@ -273,20 +273,20 @@ export default function Settings() {
     return (
         <div className="fundkit-settings-page">
             <div className="fundkit-crumbs">
-                <a href="admin.php?page=fundkit">{ __( 'FundKit', 'fundkit-fundraising-campaigns' ) }</a>
+                <a href="admin.php?page=fundkit">{ __( 'Fundraising Toolkit', 'fundraising-toolkit' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Settings', 'fundkit-fundraising-campaigns' ) }</span>
+                <span>{ __( 'Settings', 'fundraising-toolkit' ) }</span>
                 <span className="sep">›</span>
                 <span>{ allTabs.find( ( t ) => t.key === tab )?.label || '' }</span>
             </div>
 
             <div className="fundkit-page-head">
                 <div className="fundkit-page-head__title-row">
-                    <h1>{ __( 'Settings', 'fundkit-fundraising-campaigns' ) }</h1>
+                    <h1>{ __( 'Settings', 'fundraising-toolkit' ) }</h1>
                 </div>
                 <div className="fundkit-page-head__right">
                     <span className="fundkit-page-head__meta">
-                        { __( 'Changes save when you click Save changes', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Changes save when you click Save changes', 'fundraising-toolkit' ) }
                     </span>
                 </div>
             </div>
@@ -295,7 +295,7 @@ export default function Settings() {
                 className="fundkit-tabs"
                 role="tablist"
                 tabIndex={ -1 }
-                aria-label={ __( 'Settings sections', 'fundkit-fundraising-campaigns' ) }
+                aria-label={ __( 'Settings sections', 'fundraising-toolkit' ) }
                 onKeyDown={ ( e ) => tablistKeyDown( e, allTabs.map( ( t ) => t.key ), tab, jumpTo ) }
             >
                 <div className="fundkit-tabs__scroll">
@@ -315,7 +315,7 @@ export default function Settings() {
                             >
                                 <Icon className="fundkit-tab__icon" />
                                 { t.label }
-                                { isDirty && <span className="fundkit-tab__dot" title={ __( 'Unsaved changes', 'fundkit-fundraising-campaigns' ) } /> }
+                                { isDirty && <span className="fundkit-tab__dot" title={ __( 'Unsaved changes', 'fundraising-toolkit' ) } /> }
                             </a>
                         );
                     } ) }
@@ -372,10 +372,10 @@ export default function Settings() {
                     <span className="fundkit-save-bar__dot" aria-hidden="true" />
                     <span className="fundkit-save-bar__count">
                         { dirtySections === 1
-                            ? __( 'Unsaved changes in 1 section', 'fundkit-fundraising-campaigns' )
+                            ? __( 'Unsaved changes in 1 section', 'fundraising-toolkit' )
                             : sprintf(
                                 /* translators: %d: number of sections with unsaved changes */
-                                _n( 'Unsaved changes across %d section', 'Unsaved changes across %d sections', dirtySections, 'fundkit-fundraising-campaigns' ),
+                                _n( 'Unsaved changes across %d section', 'Unsaved changes across %d sections', dirtySections, 'fundraising-toolkit' ),
                                 dirtySections,
                             ) }
                     </span>
@@ -385,7 +385,7 @@ export default function Settings() {
                         onClick={ discardAll }
                         disabled={ anySaving }
                     >
-                        { __( 'Discard', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Discard', 'fundraising-toolkit' ) }
                     </button>
                     <button
                         type="button"
@@ -393,7 +393,7 @@ export default function Settings() {
                         onClick={ saveAll }
                         disabled={ anySaving }
                     >
-                        { __( 'Save changes', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Save changes', 'fundraising-toolkit' ) }
                     </button>
                 </div>
             ) }

@@ -56,7 +56,7 @@ final class LicenseNotice
             $this->notice(
                 sprintf(
                     /* translators: %s: comma-separated add-on names */
-                    __('The license for %s has lapsed. Renew to keep receiving updates and security fixes.', 'fundkit-fundraising-campaigns'),
+                    __('The license for %s has lapsed. Renew to keep receiving updates and security fixes.', 'fundraising-toolkit'),
                     $this->names($lapsing)
                 )
             );
@@ -95,14 +95,14 @@ final class LicenseNotice
             ? sprintf(
                 ' <a href="%s">%s</a>',
                 esc_url($url),
-                esc_html__('Manage licenses', 'fundkit-fundraising-campaigns')
+                esc_html__('Manage licenses', 'fundraising-toolkit')
             )
             : '';
 
         printf(
             '<div class="notice fundkit-admin-notice" role="alert" style="%s"><strong>%s</strong> %s%s</div>',
             esc_attr($style),
-            esc_html__('FundKit:', 'fundkit-fundraising-campaigns'),
+            esc_html__('Fundraising Toolkit:', 'fundraising-toolkit'),
             esc_html($message),
             wp_kses_post($link)
         );

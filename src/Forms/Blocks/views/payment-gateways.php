@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 ?>
 <div class="fundkit-block fundkit-block--gateways" data-block="fundkit/payment-gateways">
     <fieldset class="fundkit-gateways">
-        <legend class="fundkit-gateways__legend"><?php esc_html_e('Payment method', 'fundkit-fundraising-campaigns'); ?></legend>
+        <legend class="fundkit-gateways__legend"><?php esc_html_e('Payment method', 'fundraising-toolkit'); ?></legend>
         <?php foreach ($options as $i => $o):
             $id    = (string) ($o['id'] ?? '');
             if ($id === '') continue;

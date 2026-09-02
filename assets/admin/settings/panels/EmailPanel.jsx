@@ -37,16 +37,16 @@ export default function EmailPanel( { s } ) {
                 type: unauthenticated ? 'warning' : 'success',
                 text: sprintf(
                     /* translators: %s: recipient address */
-                    __( 'Test email sent to %s. Check the inbox and the spam folder.', 'fundkit-fundraising-campaigns' ),
-                    res?.to || __( 'the recipient', 'fundkit-fundraising-campaigns' )
+                    __( 'Test email sent to %s. Check the inbox and the spam folder.', 'fundraising-toolkit' ),
+                    res?.to || __( 'the recipient', 'fundraising-toolkit' )
                 ) + ( unauthenticated
-                    ? ' ' + __( 'It went out over PHP mail, which does not authenticate your domain. Gmail and Outlook reject unauthenticated mail outright, so this can be accepted here and still never arrive.', 'fundkit-fundraising-campaigns' )
+                    ? ' ' + __( 'It went out over PHP mail, which does not authenticate your domain. Gmail and Outlook reject unauthenticated mail outright, so this can be accepted here and still never arrive.', 'fundraising-toolkit' )
                     : '' ),
             } );
         } catch ( err ) {
             setTestNotice( {
                 type: 'error',
-                text: err?.message || __( 'Send failed.', 'fundkit-fundraising-campaigns' ),
+                text: err?.message || __( 'Send failed.', 'fundraising-toolkit' ),
             } );
         } finally {
             setTesting( false );
@@ -56,51 +56,51 @@ export default function EmailPanel( { s } ) {
     return (
         <div className="fundkit-panel">
             <Card
-                title={ __( 'Sender identity', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Sender identity', 'fundraising-toolkit' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'From name', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Shown as the sender in the donor inbox.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'From name', 'fundraising-toolkit' ) }
+                    help={ __( 'Shown as the sender in the donor inbox.', 'fundraising-toolkit' ) }
                 >
                     <input type="text" className="fundkit-input" { ...s.bind( 'from_name' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'From email', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Use an address on a domain you control.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'From email', 'fundraising-toolkit' ) }
+                    help={ __( 'Use an address on a domain you control.', 'fundraising-toolkit' ) }
                 >
                     <input type="email" className="fundkit-input" { ...s.bind( 'from_email' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'Reply-to', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Where donor replies arrive. Defaults to From email.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Reply-to', 'fundraising-toolkit' ) }
+                    help={ __( 'Where donor replies arrive. Defaults to From email.', 'fundraising-toolkit' ) }
                 >
                     <input type="email" className="fundkit-input" { ...s.bind( 'reply_to' ) } />
                 </FormRow>
                 <ToggleRow
-                    title={ __( 'BCC me on every donation receipt', 'fundkit-fundraising-campaigns' ) }
-                    sub={ __( 'Sends a copy to the admin email.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'BCC me on every donation receipt', 'fundraising-toolkit' ) }
+                    sub={ __( 'Sends a copy to the admin email.', 'fundraising-toolkit' ) }
                     checked={ !! s.value( 'bcc_admin', false ) }
                     onChange={ s.setValue( 'bcc_admin' ) }
                 />
             </Card>
 
             <Card
-                title={ __( 'Send a test email', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank.', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Send a test email', 'fundraising-toolkit' ) }
+                sub={ __( 'Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank.', 'fundraising-toolkit' ) }
             >
-                <FormRow label={ __( 'Recipient', 'fundkit-fundraising-campaigns' ) }>
+                <FormRow label={ __( 'Recipient', 'fundraising-toolkit' ) }>
                     <input
                         type="email"
                         className="fundkit-input"
                         value={ testTo }
                         onChange={ ( e ) => setTestTo( e.target.value ) }
-                        placeholder={ __( 'Leave blank to send to your WP user email', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Leave blank to send to your WP user email', 'fundraising-toolkit' ) }
                     />
                 </FormRow>
                 <div style={ { display: 'flex', justifyContent: 'flex-end' } }>
                     <Btn variant="secondary" onClick={ sendTest } disabled={ testing } isBusy={ testing }>
-                        { testing ? __( 'Sending…', 'fundkit-fundraising-campaigns' ) : __( 'Send test email', 'fundkit-fundraising-campaigns' ) }
+                        { testing ? __( 'Sending…', 'fundraising-toolkit' ) : __( 'Send test email', 'fundraising-toolkit' ) }
                     </Btn>
                 </div>
                 { testNotice && (
@@ -115,18 +115,18 @@ export default function EmailPanel( { s } ) {
                      money they gave. Named as a category with a link to the
                      directory, not a recommendation of one vendor. */ }
                 <p className="fundkit-muted" style={ { marginTop: 12 } }>
-                    { __( 'If test emails arrive but donors report nothing, the cause is almost always authentication rather than FundKit. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends.', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'If test emails arrive but donors report nothing, the cause is almost always authentication rather than Fundraising Toolkit. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends.', 'fundraising-toolkit' ) }
                     { ' ' }
                     <a href="https://wordpress.org/plugins/tags/smtp/" target="_blank" rel="noreferrer noopener">
-                        { __( 'SMTP plugins on WordPress.org', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'SMTP plugins on WordPress.org', 'fundraising-toolkit' ) }
                     </a>
                 </p>
             </Card>
 
             <Card
-                title={ __( 'Donor emails', 'fundkit-fundraising-campaigns' ) }
-                sub={ __( 'Sent to donors automatically by FundKit', 'fundkit-fundraising-campaigns' ) }
-                meta={ __( 'Click a row to edit', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Donor emails', 'fundraising-toolkit' ) }
+                sub={ __( 'Sent to donors automatically by Fundraising Toolkit', 'fundraising-toolkit' ) }
+                meta={ __( 'Click a row to edit', 'fundraising-toolkit' ) }
             >
                 <div className="fundkit-email-list">
                     { templates.map( ( t ) => {
@@ -146,13 +146,13 @@ export default function EmailPanel( { s } ) {
                                     <span className="fundkit-email-row__title">
                                         { t.label }
                                         <span className="screen-reader-text">
-                                            { enabled ? __( '(enabled)', 'fundkit-fundraising-campaigns' ) : __( '(disabled)', 'fundkit-fundraising-campaigns' ) }
+                                            { enabled ? __( '(enabled)', 'fundraising-toolkit' ) : __( '(disabled)', 'fundraising-toolkit' ) }
                                         </span>
                                     </span>
                                     <span className="fundkit-email-row__desc">{ t.desc }</span>
                                 </span>
                                 <span className="fundkit-email-row__recipient">{ t.recipient }</span>
-                                <span className="fundkit-email-row__edit">{ __( 'Edit', 'fundkit-fundraising-campaigns' ) }</span>
+                                <span className="fundkit-email-row__edit">{ __( 'Edit', 'fundraising-toolkit' ) }</span>
                             </button>
                         );
                     } ) }
@@ -245,8 +245,8 @@ function TemplateDialog( { t, s, onClose } ) {
             onClose={ onClose }
             foot={ (
                 <>
-                    <Btn onClick={ onClose }>{ __( 'Cancel', 'fundkit-fundraising-campaigns' ) }</Btn>
-                    <Btn variant="primary" onClick={ done }>{ __( 'Done', 'fundkit-fundraising-campaigns' ) }</Btn>
+                    <Btn onClick={ onClose }>{ __( 'Cancel', 'fundraising-toolkit' ) }</Btn>
+                    <Btn variant="primary" onClick={ done }>{ __( 'Done', 'fundraising-toolkit' ) }</Btn>
                 </>
             ) }
         >
@@ -266,7 +266,7 @@ function TemplateDialog( { t, s, onClose } ) {
                     className={ `fundkit-email-editor-tab${ view === 'edit' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'edit' ) }
                 >
-                    { __( 'Edit', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Edit', 'fundraising-toolkit' ) }
                 </button>
                 <button
                     type="button"
@@ -276,7 +276,7 @@ function TemplateDialog( { t, s, onClose } ) {
                     className={ `fundkit-email-editor-tab${ view === 'preview' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'preview' ) }
                 >
-                    { __( 'Preview', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Preview', 'fundraising-toolkit' ) }
                 </button>
             </div>
 
@@ -284,25 +284,25 @@ function TemplateDialog( { t, s, onClose } ) {
                 <div className="fundkit-email-preview">
                     <div className="fundkit-email-preview__head">
                         <div>
-                            <strong>{ __( 'Subject:', 'fundkit-fundraising-campaigns' ) }</strong>{ ' ' }
+                            <strong>{ __( 'Subject:', 'fundraising-toolkit' ) }</strong>{ ' ' }
                             { draft.subject.trim()
                                 ? expandTags( draft.subject )
-                                : <em>{ __( '(no subject)', 'fundkit-fundraising-campaigns' ) }</em> }
+                                : <em>{ __( '(no subject)', 'fundraising-toolkit' ) }</em> }
                         </div>
-                        <div><strong>{ __( 'To:', 'fundkit-fundraising-campaigns' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
+                        <div><strong>{ __( 'To:', 'fundraising-toolkit' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
                     </div>
                     <pre className="fundkit-email-preview__body">{ expandTags( draft.body ) }</pre>
                 </div>
             ) : (
                 <>
                     <ToggleRow
-                        title={ __( 'Send this email', 'fundkit-fundraising-campaigns' ) }
-                        sub={ __( 'Disable to skip this notification entirely.', 'fundkit-fundraising-campaigns' ) }
+                        title={ __( 'Send this email', 'fundraising-toolkit' ) }
+                        sub={ __( 'Disable to skip this notification entirely.', 'fundraising-toolkit' ) }
                         checked={ draft.enabled }
                         onChange={ ( v ) => set( { enabled: v } ) }
                     />
 
-                    <FormRow label={ __( 'Subject', 'fundkit-fundraising-campaigns' ) } wide>
+                    <FormRow label={ __( 'Subject', 'fundraising-toolkit' ) } wide>
                         <input
                             type="text"
                             className="fundkit-input"
@@ -312,8 +312,8 @@ function TemplateDialog( { t, s, onClose } ) {
                     </FormRow>
 
                     <FormRow
-                        label={ __( 'Body', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Plain text. Merge tags expand at send time.', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Body', 'fundraising-toolkit' ) }
+                        help={ __( 'Plain text. Merge tags expand at send time.', 'fundraising-toolkit' ) }
                         wide
                     >
                         { !! t.tags.length && (

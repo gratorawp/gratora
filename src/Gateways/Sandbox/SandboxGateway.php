@@ -63,13 +63,13 @@ final class SandboxGateway implements PaymentGateway, SubscriptionAware, Subscri
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Test donation', 'fundkit-fundraising-campaigns');
+        return __('Test donation', 'fundraising-toolkit');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Simulated payment for testing. No real money moves and the form is in test mode.', 'fundkit-fundraising-campaigns');
+        return __('Simulated payment for testing. No real money moves and the form is in test mode.', 'fundraising-toolkit');
     }
 
     /** @since 1.0.0 */

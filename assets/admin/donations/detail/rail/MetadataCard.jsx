@@ -7,16 +7,16 @@ export default function MetadataCard( { donation } ) {
     return (
         <div className="dd-rail-card">
             <div className="dd-rail-card__head">
-                <span className="dd-rail-card__title">{ __( 'Metadata', 'fundkit-fundraising-campaigns' ) }</span>
+                <span className="dd-rail-card__title">{ __( 'Metadata', 'fundraising-toolkit' ) }</span>
             </div>
             <div className="dd-rail-card__body">
                 <div className="dd-rail-stat">
-                    <span className="dd-rail-stat__lbl">{ __( 'Created', 'fundkit-fundraising-campaigns' ) }</span>
+                    <span className="dd-rail-stat__lbl">{ __( 'Created', 'fundraising-toolkit' ) }</span>
                     <span className="dd-rail-stat__val" style={ { fontSize: 12.5 } }>{ formatDateTime( donation.created_at ) }</span>
                 </div>
                 { donation.frequency && (
                     <div className="dd-rail-stat">
-                        <span className="dd-rail-stat__lbl">{ __( 'Frequency', 'fundkit-fundraising-campaigns' ) }</span>
+                        <span className="dd-rail-stat__lbl">{ __( 'Frequency', 'fundraising-toolkit' ) }</span>
                         <span className="dd-rail-stat__val" style={ { textTransform: 'capitalize' } }>
                             { donation.frequency.replace( '_', ' ' ) }
                         </span>
@@ -24,7 +24,7 @@ export default function MetadataCard( { donation } ) {
                 ) }
                 { donation.country && (
                     <div className="dd-rail-stat">
-                        <span className="dd-rail-stat__lbl">{ __( 'Donor country', 'fundkit-fundraising-campaigns' ) }</span>
+                        <span className="dd-rail-stat__lbl">{ __( 'Donor country', 'fundraising-toolkit' ) }</span>
                         <span className="dd-rail-stat__val">{ countryName( donation.country ) }</span>
                     </div>
                 ) }

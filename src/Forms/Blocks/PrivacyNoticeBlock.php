@@ -46,8 +46,8 @@ final class PrivacyNoticeBlock implements Block
         $linkText = trim((string) ($attrs['linkText'] ?? ''));
 
         return View::loadRelative(__DIR__, 'views/privacy-notice', [
-            'text'     => $text     !== '' ? $text     : __('By donating you agree to our', 'fundkit-fundraising-campaigns'),
-            'linkText' => $linkText !== '' ? $linkText : __('Privacy Policy', 'fundkit-fundraising-campaigns'),
+            'text'     => $text     !== '' ? $text     : __('By donating you agree to our', 'fundraising-toolkit'),
+            'linkText' => $linkText !== '' ? $linkText : __('Privacy Policy', 'fundraising-toolkit'),
             'align'    => $align,
             'url'      => $url,
         ]);

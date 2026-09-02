@@ -18,7 +18,7 @@ function settingsReason( offInSettings ) {
         '%s is allowed here but switched off in Settings.',
         '%s are allowed here but switched off in Settings.',
         offInSettings.length,
-        'fundkit-fundraising-campaigns'
+        'fundraising-toolkit'
     );
 
     return sprintf( template, names );
@@ -52,17 +52,17 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Payment gateways', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Payment gateways', 'fundraising-toolkit' ) } initialOpen>
                     { gateways.length === 0 && (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'No gateways are connected yet. Set one up in Settings, Payment gateways.', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'No gateways are connected yet. Set one up in Settings, Payment gateways.', 'fundraising-toolkit' ) }
                         </Notice>
                     ) }
                     { gateways.map( ( g ) => (
                         <div key={ g.id } style={ { marginBottom: 12 } }>
                             <ToggleControl
                                 label={ g.enabled === false
-                                    ? `${ g.label } ${ __( '(off in Settings)', 'fundkit-fundraising-campaigns' ) }`
+                                    ? `${ g.label } ${ __( '(off in Settings)', 'fundraising-toolkit' ) }`
                                     : g.label }
                                 checked={ isOn( g.id ) }
                                 onChange={ () => toggle( g.id ) }
@@ -70,7 +70,7 @@ function Edit( { attributes, setAttributes } ) {
                             />
                             { isOn( g.id ) && (
                                 <TextControl
-                                    label={ __( 'Description (optional)', 'fundkit-fundraising-campaigns' ) }
+                                    label={ __( 'Description (optional)', 'fundraising-toolkit' ) }
                                     value={ descriptions[ g.id ] || '' }
                                     onChange={ ( v ) => setDesc( g.id, v ) }
                                     __nextHasNoMarginBottom
@@ -79,22 +79,22 @@ function Edit( { attributes, setAttributes } ) {
                         </div>
                     ) ) }
                     <SelectControl
-                        label={ __( 'Preselected', 'fundkit-fundraising-campaigns' ) }
-                        help={ __( 'Skipped for a donor whose currency or frequency it cannot take, who then gets the first one that works.', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Preselected', 'fundraising-toolkit' ) }
+                        help={ __( 'Skipped for a donor whose currency or frequency it cannot take, who then gets the first one that works.', 'fundraising-toolkit' ) }
                         value={ shown.some( ( g ) => g.id === preselected ) ? preselected : '' }
                         options={ [
-                            { value: '', label: __( 'First one that applies', 'fundkit-fundraising-campaigns' ) },
+                            { value: '', label: __( 'First one that applies', 'fundraising-toolkit' ) },
                             ...shown.map( ( g ) => ( { value: g.id, label: g.label } ) ),
                         ] }
                         onChange={ ( v ) => setAttributes( { preselected: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Style', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Style', 'fundraising-toolkit' ) }
                         value={ style }
                         options={ [
-                            { value: 'cards', label: __( 'Cards', 'fundkit-fundraising-campaigns' ) },
-                            { value: 'list',  label: __( 'Compact list', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'cards', label: __( 'Cards', 'fundraising-toolkit' ) },
+                            { value: 'list',  label: __( 'Compact list', 'fundraising-toolkit' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         __nextHasNoMarginBottom
@@ -102,9 +102,9 @@ function Edit( { attributes, setAttributes } ) {
                 </PanelBody>
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="fundkit-block-preview__label">{ __( 'Payment method', 'fundkit-fundraising-campaigns' ) }</span>
+                <span className="fundkit-block-preview__label">{ __( 'Payment method', 'fundraising-toolkit' ) }</span>
                 { shown.length === 0
-                    ? <div className="fundkit-block-preview__field">{ __( 'Gateways appear here for the donor.', 'fundkit-fundraising-campaigns' ) }</div>
+                    ? <div className="fundkit-block-preview__field">{ __( 'Gateways appear here for the donor.', 'fundraising-toolkit' ) }</div>
                     : shown.map( ( g ) => (
                         <div key={ g.id } className="fundkit-block-preview__field">
                             { g.label }
@@ -114,8 +114,8 @@ function Edit( { attributes, setAttributes } ) {
                 { shown.length <= 1 && (
                     <em className="fundkit-block-preview__hint">
                         { shown.length === 1
-                            ? __( 'One gateway is live, so the selector is hidden for donors.', 'fundkit-fundraising-campaigns' )
-                            : __( 'No gateway is live, so donors see nothing here.', 'fundkit-fundraising-campaigns' ) }
+                            ? __( 'One gateway is live, so the selector is hidden for donors.', 'fundraising-toolkit' )
+                            : __( 'No gateway is live, so donors see nothing here.', 'fundraising-toolkit' ) }
                         { offInSettings.length > 0 && ' ' + settingsReason( offInSettings ) }
                     </em>
                 ) }
@@ -127,8 +127,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Payment gateways', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Lets the donor choose how to pay. Hidden automatically when only one applies.', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Payment gateways', 'fundraising-toolkit' ),
+        description: __( 'Lets the donor choose how to pay. Hidden automatically when only one applies.', 'fundraising-toolkit' ),
         category:   'fundkit-amount',
         icon:       BlockIcons[ 'payment-gateways' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

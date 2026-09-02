@@ -30,7 +30,7 @@ export default function ConfirmDialog( { confirm, onClose } ) {
             foot={
                 <>
                     <Btn variant="secondary" onClick={ onClose }>
-                        { __( 'Cancel', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Cancel', 'fundraising-toolkit' ) }
                     </Btn>
                     <Btn
                         variant={ confirm.destructive ? 'danger' : 'primary' }
@@ -41,7 +41,7 @@ export default function ConfirmDialog( { confirm, onClose } ) {
                             if ( action ) await action();
                         } }
                     >
-                        { confirm.confirmLabel || __( 'Confirm', 'fundkit-fundraising-campaigns' ) }
+                        { confirm.confirmLabel || __( 'Confirm', 'fundraising-toolkit' ) }
                     </Btn>
                 </>
             }
@@ -49,7 +49,7 @@ export default function ConfirmDialog( { confirm, onClose } ) {
             <p style={ { margin: 0 } }>{ confirm.message }</p>
             { required !== '' && (
                 <label className="fundkit-fld" style={ { marginTop: 16, display: 'block' } }>
-                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'fundkit-fundraising-campaigns' ), required ) }
+                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'fundraising-toolkit' ), required ) }
                     <input
                         className="fundkit-input"
                         type="text"

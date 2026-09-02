@@ -87,18 +87,18 @@ function EditPanel( { donor, onCancel, onSaved } ) {
         // The footer lives outside the form element, so it calls this directly.
         if ( e ) e.preventDefault();
         if ( phoneInvalid ) {
-            setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'fundkit-fundraising-campaigns' ) );
+            setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'fundraising-toolkit' ) );
             return;
         }
         if ( emailInvalid ) {
-            setError( __( 'Email address looks malformed.', 'fundkit-fundraising-campaigns' ) );
+            setError( __( 'Email address looks malformed.', 'fundraising-toolkit' ) );
             return;
         }
         if ( emailChanged ) {
             setConfirm( {
-                title:        __( 'Change donor email', 'fundkit-fundraising-campaigns' ),
-                message:      __( 'Change this donor\'s email? Future donations from the new address will link to this record.', 'fundkit-fundraising-campaigns' ),
-                confirmLabel: __( 'Change email', 'fundkit-fundraising-campaigns' ),
+                title:        __( 'Change donor email', 'fundraising-toolkit' ),
+                message:      __( 'Change this donor\'s email? Future donations from the new address will link to this record.', 'fundraising-toolkit' ),
+                confirmLabel: __( 'Change email', 'fundraising-toolkit' ),
                 onConfirm:    doSave,
             } );
             return;
@@ -120,13 +120,13 @@ function EditPanel( { donor, onCancel, onSaved } ) {
     return (
         <>
             <Dialog
-                title={ __( 'Edit donor details', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Edit donor details', 'fundraising-toolkit' ) }
                 onClose={ () => ( saving ? null : onCancel() ) }
                 size="wide"
                 foot={
                     <>
                         <Btn variant="secondary" onClick={ onCancel } disabled={ saving }>
-                            { __( 'Cancel', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Cancel', 'fundraising-toolkit' ) }
                         </Btn>
                         <Btn
                             variant="primary"
@@ -134,14 +134,14 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                             isBusy={ saving }
                             disabled={ saving || phoneInvalid }
                         >
-                            { saving ? __( 'Saving…', 'fundkit-fundraising-campaigns' ) : __( 'Save', 'fundkit-fundraising-campaigns' ) }
+                            { saving ? __( 'Saving…', 'fundraising-toolkit' ) : __( 'Save', 'fundraising-toolkit' ) }
                         </Btn>
                     </>
                 }
             >
                 <form className="dp-edit-form" onSubmit={ submit }>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Email', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Email', 'fundraising-toolkit' ) }
                         <input className="fundkit-input"
                             type="email"
                             value={ form.email }
@@ -152,25 +152,25 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                         { emailChanged && (
                             <span className="dp-field__hint">
-                                { __( 'Saving rehashes the donor identity. Future donations from this address will link to this record.', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Saving rehashes the donor identity. Future donations from this address will link to this record.', 'fundraising-toolkit' ) }
                             </span>
                         ) }
                     </label>
                     <label>
-                        { __( 'First name', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'First name', 'fundraising-toolkit' ) }
                         <input className="fundkit-input" type="text" value={ form.first_name } onChange={ set( 'first_name' ) } maxLength={ 100 } />
                     </label>
                     <label>
-                        { __( 'Last name', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Last name', 'fundraising-toolkit' ) }
                         <input className="fundkit-input" type="text" value={ form.last_name } onChange={ set( 'last_name' ) } maxLength={ 100 } />
                     </label>
                     <label className="dp-edit-form__country">
-                        { __( 'Country', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Country', 'fundraising-toolkit' ) }
                         <div className="dp-edit-form__country-wrap">
                             <input className="fundkit-input"
                                 type="text"
                                 value={ countryQuery }
-                                placeholder={ __( 'Search country…', 'fundkit-fundraising-campaigns' ) }
+                                placeholder={ __( 'Search country…', 'fundraising-toolkit' ) }
                                 onFocus={ () => setCountryOpen( true ) }
                                 onBlur={ () => setTimeout( () => setCountryOpen( false ), 150 ) }
                                 onChange={ ( e ) => { setCountryQuery( e.target.value ); setCountryOpen( true ); } }
@@ -190,19 +190,19 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         </div>
                     </label>
                     <label>
-                        { __( 'Type', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Type', 'fundraising-toolkit' ) }
                         <select className="fundkit-select" value={ form.donor_type } onChange={ set( 'donor_type' ) }>
-                            <option value="individual">{ __( 'Individual', 'fundkit-fundraising-campaigns' ) }</option>
-                            <option value="organization">{ __( 'Organization', 'fundkit-fundraising-campaigns' ) }</option>
-                            <option value="household">{ __( 'Household', 'fundkit-fundraising-campaigns' ) }</option>
+                            <option value="individual">{ __( 'Individual', 'fundraising-toolkit' ) }</option>
+                            <option value="organization">{ __( 'Organization', 'fundraising-toolkit' ) }</option>
+                            <option value="household">{ __( 'Household', 'fundraising-toolkit' ) }</option>
                         </select>
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Company', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Company', 'fundraising-toolkit' ) }
                         <input className="fundkit-input" type="text" value={ form.company } onChange={ set( 'company' ) } maxLength={ 150 } />
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Phone', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Phone', 'fundraising-toolkit' ) }
                         <input className="fundkit-input"
                             type="tel"
                             value={ form.phone }
@@ -213,32 +213,32 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                         { phoneInvalid && (
                             <span className="dp-field__hint dp-field__hint--err">
-                                { __( 'Use digits, +, spaces, parentheses, or dashes.', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Use digits, +, spaces, parentheses, or dashes.', 'fundraising-toolkit' ) }
                             </span>
                         ) }
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Address line 1', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Address line 1', 'fundraising-toolkit' ) }
                         <input className="fundkit-input"
                             type="text"
                             value={ form.address.line1 }
                             onChange={ setAddr( 'line1' ) }
-                            placeholder={ __( 'Street and number', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'Street and number', 'fundraising-toolkit' ) }
                             maxLength={ 200 }
                         />
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Address line 2', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Address line 2', 'fundraising-toolkit' ) }
                         <input className="fundkit-input"
                             type="text"
                             value={ form.address.line2 }
                             onChange={ setAddr( 'line2' ) }
-                            placeholder={ __( 'Apartment, suite, etc. (optional)', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'Apartment, suite, etc. (optional)', 'fundraising-toolkit' ) }
                             maxLength={ 200 }
                         />
                     </label>
                     <label>
-                        { __( 'City', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'City', 'fundraising-toolkit' ) }
                         <input className="fundkit-input"
                             type="text"
                             value={ form.address.city }
@@ -247,7 +247,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     <label>
-                        { __( 'Region', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Region', 'fundraising-toolkit' ) }
                         <input className="fundkit-input"
                             type="text"
                             value={ form.address.region }
@@ -256,7 +256,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     <label>
-                        { __( 'Postal code', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Postal code', 'fundraising-toolkit' ) }
                         <input className="fundkit-input"
                             type="text"
                             value={ form.address.postal }
@@ -305,7 +305,7 @@ export default function DonorProfile( { id, onBack } ) {
         return () => { aborted = true; };
     }, [ id ] );
 
-    if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'fundkit-fundraising-campaigns' ) }</p>;
+    if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'fundraising-toolkit' ) }</p>;
     if ( error )              return <p className="dp-error">{ error }</p>;
     if ( ! data )             return null;
 

@@ -420,7 +420,7 @@ final class RecurringController
     {
         $plan = RecurringPlan::query()->find('id', (int) $request['id']);
         if (! $plan) {
-            return new WP_Error('fundkit_not_found', __('Recurring plan not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_not_found', __('Recurring plan not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         $action = (string) $request['action'];
@@ -456,7 +456,7 @@ final class RecurringController
                     break;
 
                 default:
-                    return new WP_Error('fundkit_invalid_action', __('Unknown action.', 'fundkit-fundraising-campaigns'), ['status' => 422]);
+                    return new WP_Error('fundkit_invalid_action', __('Unknown action.', 'fundraising-toolkit'), ['status' => 422]);
             }
         } catch (SubscriptionChangeNeedsApproval $e) {
             // Ahead of RuntimeException, which is its parent. Nothing was
@@ -465,7 +465,7 @@ final class RecurringController
             // what the card is actually charged.
             return new WP_Error(
                 'fundkit_change_needs_approval',
-                __('The payment provider needs the donor to approve this change before it takes effect. Nothing has changed yet.', 'fundkit-fundraising-campaigns'),
+                __('The payment provider needs the donor to approve this change before it takes effect. Nothing has changed yet.', 'fundraising-toolkit'),
                 ['status' => 409, 'approve_url' => $e->approveUrl]
             );
         } catch (GatewayTransportException $e) {
@@ -477,7 +477,7 @@ final class RecurringController
                 'fundkit_gateway_unreachable',
                 sprintf(
                     /* translators: %s: transport error, e.g. a DNS failure */
-                    __('This site could not reach the payment provider, so nothing has changed: %s. That is a problem with this server rather than with the plan. Try again in a moment.', 'fundkit-fundraising-campaigns'),
+                    __('This site could not reach the payment provider, so nothing has changed: %s. That is a problem with this server rather than with the plan. Try again in a moment.', 'fundraising-toolkit'),
                     $e->getMessage()
                 ),
                 ['status' => 503]
@@ -492,7 +492,7 @@ final class RecurringController
             \FundKit\Analytics\ErrorLog::record('admin.recurring', $e->getMessage());
             return new WP_Error(
                 'fundkit_gateway_error',
-                __('The payment provider would not accept that change. Nothing has been altered.', 'fundkit-fundraising-campaigns'),
+                __('The payment provider would not accept that change. Nothing has been altered.', 'fundraising-toolkit'),
                 ['status' => 502]
             );
         }

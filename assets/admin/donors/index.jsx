@@ -36,21 +36,21 @@ function initials( name ) {
 function donorKpis( stats ) {
     return [
         {
-            label: __( 'Total donors', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Total donors', 'fundraising-toolkit' ),
             value: stats ? stats.total_count.toLocaleString() : '-',
         },
         {
-            label: __( 'With donations', 'fundkit-fundraising-campaigns' ),
+            label: __( 'With donations', 'fundraising-toolkit' ),
             value: stats ? stats.with_donations.toLocaleString() : '-',
         },
         {
-            label: __( 'Lifetime given', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Lifetime given', 'fundraising-toolkit' ),
             value: stats && stats.total_donated_cents > 0
                 ? formatAmount( stats.total_donated_cents )
                 : '-',
         },
         {
-            label: __( 'Avg lifetime value', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Avg lifetime value', 'fundraising-toolkit' ),
             value: stats && stats.avg_ltv_cents > 0
                 ? formatAmount( stats.avg_ltv_cents )
                 : '-',
@@ -122,7 +122,7 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( aborted ) return;
                 setData( [] );
                 setTotal( 0 );
-                setError( err?.message || __( 'Failed to load donors.', 'fundkit-fundraising-campaigns' ) );
+                setError( err?.message || __( 'Failed to load donors.', 'fundraising-toolkit' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
@@ -146,7 +146,7 @@ export function DonorsApp( { toggleSlot } ) {
     const fields = useMemo( () => [
         {
             id:    'reference',
-            label: __( 'Reference', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Reference', 'fundraising-toolkit' ),
             render: ( { item } ) => (
                 <span className="fundkit-ref-cell">
                     <a className="fundkit-mono-link" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
@@ -157,9 +157,9 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'name',
-            label: __( 'Name', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Name', 'fundraising-toolkit' ),
             render: ( { item } ) => {
-                const name = item.name || __( '(no name)', 'fundkit-fundraising-campaigns' );
+                const name = item.name || __( '(no name)', 'fundraising-toolkit' );
                 return (
                     <div className="fundkit-row">
                         <span className="fundkit-row__avatar" aria-hidden="true">
@@ -174,7 +174,7 @@ export function DonorsApp( { toggleSlot } ) {
                                     { name }
                                 </a>
                                 { item.is_test_only && (
-                                    <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundkit-fundraising-campaigns' ) }</span>
+                                    <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundraising-toolkit' ) }</span>
                                 ) }
                             </span>
                             { item.donor_type && item.donor_type !== 'individual' && (
@@ -189,7 +189,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'email',
-            label: __( 'Email', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Email', 'fundraising-toolkit' ),
             render: ( { item } ) => (
                 item.email
                     ? <span className="fundkit-mono">{ item.email }</span>
@@ -198,7 +198,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'country',
-            label: __( 'Country', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Country', 'fundraising-toolkit' ),
             elements: COUNTRIES.map( ( c ) => ( { value: c.code, label: `${ c.code } - ${ c.name }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
@@ -213,11 +213,11 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'donor_type',
-            label: __( 'Donor type', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Donor type', 'fundraising-toolkit' ),
             elements: [
-                { value: 'individual',   label: __( 'Individual', 'fundkit-fundraising-campaigns' ) },
-                { value: 'organization', label: __( 'Organization', 'fundkit-fundraising-campaigns' ) },
-                { value: 'household',    label: __( 'Household', 'fundkit-fundraising-campaigns' ) },
+                { value: 'individual',   label: __( 'Individual', 'fundraising-toolkit' ) },
+                { value: 'organization', label: __( 'Organization', 'fundraising-toolkit' ) },
+                { value: 'household',    label: __( 'Household', 'fundraising-toolkit' ) },
             ],
             filterBy: { operators: [ 'is' ] },
             getValue: ( { item } ) => item.donor_type || 'individual',
@@ -229,7 +229,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'donations_count',
-            label:         __( 'Donations', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Donations', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="fundkit-amount fundkit-amount--num">{ item.donations_count }</span>
@@ -237,7 +237,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'total_donated',
-            label:         __( 'Total donated', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Total donated', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="fundkit-amount">
@@ -247,7 +247,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'last_donation_at',
-            label:         __( 'Last donation', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Last donation', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => (
                 item.last_donation_at
@@ -273,7 +273,7 @@ export function DonorsApp( { toggleSlot } ) {
     const actions = useMemo( () => [
         {
             id:            'delete',
-            label:         __( 'Delete', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Delete', 'fundraising-toolkit' ),
             icon:          () => <DeleteIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -287,20 +287,20 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( ! items.length ) return;
                 const n = items.length;
                 setConfirm( {
-                    title:        _n( 'Delete donor', 'Delete donors', n, 'fundkit-fundraising-campaigns' ),
+                    title:        _n( 'Delete donor', 'Delete donors', n, 'fundraising-toolkit' ),
                     message: n === 1
-                        ? __( 'Delete this donor? They have no donations, so nothing is kept: the record and anything describing it go for good.', 'fundkit-fundraising-campaigns' )
+                        ? __( 'Delete this donor? They have no donations, so nothing is kept: the record and anything describing it go for good.', 'fundraising-toolkit' )
                         : sprintf(
                             /* translators: %d: number of donors to delete */
                             _n(
                                 'Delete %d donor? They have no donations, so nothing is kept.',
                                 'Delete %d donors? They have no donations, so nothing is kept.',
                                 n,
-                                'fundkit-fundraising-campaigns'
+                                'fundraising-toolkit'
                             ),
                             n
                         ),
-                    confirmLabel: __( 'Delete', 'fundkit-fundraising-campaigns' ),
+                    confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
                     destructive:  true,
                     onConfirm: async () => {
                         try {
@@ -309,7 +309,7 @@ export function DonorsApp( { toggleSlot } ) {
                                 method: 'DELETE',
                             } ) ) );
                         } catch ( err ) {
-                            setError( err?.message || __( 'Could not delete one or more donors.', 'fundkit-fundraising-campaigns' ) );
+                            setError( err?.message || __( 'Could not delete one or more donors.', 'fundraising-toolkit' ) );
                         } finally {
                             load();
                         }
@@ -319,7 +319,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'redact',
-            label:         __( 'Redact (anonymize)', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Redact (anonymize)', 'fundraising-toolkit' ),
             icon:          () => <RedactIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -328,26 +328,26 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( ! items.length ) return;
                 const n = items.length;
                 const message = n === 1
-                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row and any active recurring plan is cancelled at the gateway, but their donations stay attached and counted. This cannot be undone.', 'fundkit-fundraising-campaigns' )
+                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row and any active recurring plan is cancelled at the gateway, but their donations stay attached and counted. This cannot be undone.', 'fundraising-toolkit' )
                     : sprintf(
                         /* translators: %d: number of donors to redact */
                         _n(
                             'Redact %d donor? Their PII is wiped from the donor rows and any active recurring plan is cancelled at the gateway, but donations stay attached and counted. This cannot be undone.',
                             'Redact %d donors? Their PII is wiped from the donor rows and any active recurring plan is cancelled at the gateway, but donations stay attached and counted. This cannot be undone.',
                             n,
-                            'fundkit-fundraising-campaigns'
+                            'fundraising-toolkit'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        _n( 'Redact donor', 'Redact donors', n, 'fundkit-fundraising-campaigns' ),
+                    title:        _n( 'Redact donor', 'Redact donors', n, 'fundraising-toolkit' ),
                     message,
-                    confirmLabel: __( 'Redact', 'fundkit-fundraising-campaigns' ),
+                    confirmLabel: __( 'Redact', 'fundraising-toolkit' ),
                     destructive:  true,
                     // The callback fills the server's confirmation from each
                     // row, so nothing else stands between one click and erased
                     // PII here.
-                    requireText:  __( 'REDACT', 'fundkit-fundraising-campaigns' ),
+                    requireText:  __( 'REDACT', 'fundraising-toolkit' ),
                     onConfirm: async () => {
                         try {
                             await Promise.all( items.map( ( i ) => apiFetch( {
@@ -356,7 +356,7 @@ export function DonorsApp( { toggleSlot } ) {
                                 data:   { confirmation: i.email || `DONOR_${ i.id }` },
                             } ) ) );
                         } catch ( err ) {
-                            setError( err?.message || __( 'Could not redact one or more donors.', 'fundkit-fundraising-campaigns' ) );
+                            setError( err?.message || __( 'Could not redact one or more donors.', 'fundraising-toolkit' ) );
                         } finally {
                             load();
                         }
@@ -369,17 +369,17 @@ export function DonorsApp( { toggleSlot } ) {
     return (
         <div>
             <div className="fundkit-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'FundKit', 'fundkit-fundraising-campaigns' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'fundraising-toolkit' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Donors', 'fundkit-fundraising-campaigns' ) }</span>
+                <span>{ __( 'Donors', 'fundraising-toolkit' ) }</span>
             </div>
             <div className="fundkit-page-head">
                 <div className="fundkit-page-head__title-row">
-                    <h1>{ __( 'Donors', 'fundkit-fundraising-campaigns' ) }</h1>
+                    <h1>{ __( 'Donors', 'fundraising-toolkit' ) }</h1>
                 </div>
                 <div className="fundkit-page-head__right">
                     <span className="fundkit-page-head__meta">
-                        { sprintf( /* translators: %s: number of donors */ _n( '%s donor', '%s donors', total, 'fundkit-fundraising-campaigns' ), total.toLocaleString() ) }
+                        { sprintf( /* translators: %s: number of donors */ _n( '%s donor', '%s donors', total, 'fundraising-toolkit' ), total.toLocaleString() ) }
                     </span>
                     { toggleSlot }
                 </div>
@@ -394,8 +394,8 @@ export function DonorsApp( { toggleSlot } ) {
             { ! loading && ! error && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No donors yet', 'fundkit-fundraising-campaigns' ) }
-                    body={ __( 'Anyone who donates is added here. Publish a form to take the first one.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'No donors yet', 'fundraising-toolkit' ) }
+                    body={ __( 'Anyone who donates is added here. Publish a form to take the first one.', 'fundraising-toolkit' ) }
                 />
             ) : (
                 <div className={ `fundkit-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
@@ -415,11 +415,11 @@ export function DonorsApp( { toggleSlot } ) {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'fundkit-fundraising-campaigns' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundkit-fundraising-campaigns' ) }
+                            title={ __( 'Nothing matches these filters', 'fundraising-toolkit' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundraising-toolkit' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Clear filters', 'fundraising-toolkit' ) }
                                 </Btn>
                             }
                         />
@@ -462,7 +462,7 @@ function ViewToggle( { active, onChange } ) {
             className="fundkit-view-toggle"
             role="tablist"
             tabIndex={ -1 }
-            aria-label={ __( 'Donor sections', 'fundkit-fundraising-campaigns' ) }
+            aria-label={ __( 'Donor sections', 'fundraising-toolkit' ) }
             onKeyDown={ ( e ) => tablistKeyDown( e, [ 'list', 'insights' ], active, onChange ) }
         >
             <button
@@ -474,7 +474,7 @@ function ViewToggle( { active, onChange } ) {
                 onClick={ () => onChange( 'list' ) }
             >
                 <IconList />
-                { __( 'List', 'fundkit-fundraising-campaigns' ) }
+                { __( 'List', 'fundraising-toolkit' ) }
             </button>
             <button
                 type="button"
@@ -485,7 +485,7 @@ function ViewToggle( { active, onChange } ) {
                 onClick={ () => onChange( 'insights' ) }
             >
                 <IconInsights />
-                { __( 'Insights', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Insights', 'fundraising-toolkit' ) }
             </button>
         </div>
     );

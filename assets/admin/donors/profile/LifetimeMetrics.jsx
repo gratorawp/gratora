@@ -52,21 +52,21 @@ export default function LifetimeMetrics( { lifetime } ) {
     if ( plan_counts?.past_due > 0 ) {
         dormant.push( sprintf(
             /* translators: %d: number of plans the gateway could not collect. */
-            _n( '%d past due', '%d past due', plan_counts.past_due, 'fundkit-fundraising-campaigns' ),
+            _n( '%d past due', '%d past due', plan_counts.past_due, 'fundraising-toolkit' ),
             plan_counts.past_due
         ) );
     }
     if ( plan_counts?.paused > 0 ) {
         dormant.push( sprintf(
             /* translators: %d: number of paused plans. */
-            _n( '%d paused', '%d paused', plan_counts.paused, 'fundkit-fundraising-campaigns' ),
+            _n( '%d paused', '%d paused', plan_counts.paused, 'fundraising-toolkit' ),
             plan_counts.paused
         ) );
     }
 
     const activePart = active_plan_count > 0
-        ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'fundkit-fundraising-campaigns' ), active_plan_count, formatDate( next_payment_at ) )
-        : __( 'No active plans', 'fundkit-fundraising-campaigns' );
+        ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'fundraising-toolkit' ), active_plan_count, formatDate( next_payment_at ) )
+        : __( 'No active plans', 'fundraising-toolkit' );
 
     const mrrSub = mrr_unconverted > 0
         ? sprintf(
@@ -75,7 +75,7 @@ export default function LifetimeMetrics( { lifetime } ) {
                 '%d plan has no exchange rate and is not counted',
                 '%d plans have no exchange rate and are not counted',
                 mrr_unconverted,
-                'fundkit-fundraising-campaigns'
+                'fundraising-toolkit'
             ),
             mrr_unconverted
         )
@@ -85,10 +85,10 @@ export default function LifetimeMetrics( { lifetime } ) {
         <div className="dp-metrics">
             <Card
                 icon={ <IconCoin width="16" height="16" /> }
-                label={ __( 'Lifetime given', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Lifetime given', 'fundraising-toolkit' ) }
                 value={ <span className="num">{ formatAmount( total_cents ) }</span> }
                 spark={ sparkline }
-                sub={ count > 0 ? sprintf( /* translators: %s: amount */ __( 'Largest donation %s', 'fundkit-fundraising-campaigns' ), formatAmountCompact( largest_cents ) ) : null }
+                sub={ count > 0 ? sprintf( /* translators: %s: amount */ __( 'Largest donation %s', 'fundraising-toolkit' ), formatAmountCompact( largest_cents ) ) : null }
             />
             <Card
                 icon={ <IconHeart width="16" height="16" /> }
@@ -97,21 +97,21 @@ export default function LifetimeMetrics( { lifetime } ) {
                 // average beside it, so it counts paid ones only. The tab
                 // counts every row the donor has, pending and failed included.
                 // Sharing one name made a pending donation look like a bug.
-                label={ __( 'Donations received', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Donations received', 'fundraising-toolkit' ) }
                 value={ <span className="num">{ count }</span> }
                 sub={ count > 0
-                    ? sprintf( /* translators: 1: one-time donation count, 2: recurring donation count */ __( '%1$d one-time, %2$d recurring', 'fundkit-fundraising-campaigns' ), one_time_count, recurring_count )
-                    : __( 'No donations yet', 'fundkit-fundraising-campaigns' ) }
+                    ? sprintf( /* translators: 1: one-time donation count, 2: recurring donation count */ __( '%1$d one-time, %2$d recurring', 'fundraising-toolkit' ), one_time_count, recurring_count )
+                    : __( 'No donations yet', 'fundraising-toolkit' ) }
             />
             <Card
                 icon={ <IconActivity width="16" height="16" /> }
-                label={ __( 'Avg. donation', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Avg. donation', 'fundraising-toolkit' ) }
                 value={ <span className="num">{ formatAmount( avg_cents ) }</span> }
-                sub={ count > 0 ? __( 'Per donation', 'fundkit-fundraising-campaigns' ) : null }
+                sub={ count > 0 ? __( 'Per donation', 'fundraising-toolkit' ) : null }
             />
             <Card
                 icon={ <IconRotate width="16" height="16" /> }
-                label={ __( 'Recurring MRR', 'fundkit-fundraising-campaigns' ) }
+                label={ __( 'Recurring MRR', 'fundraising-toolkit' ) }
                 value={ <span className="num">{ formatAmount( mrr_cents ) }<small> /mo</small></span> }
                 sub={ mrrSub }
             />

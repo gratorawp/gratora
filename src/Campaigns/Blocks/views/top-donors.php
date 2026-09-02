@@ -57,7 +57,7 @@ echo get_block_wrapper_attributes(array_filter([
                         <div class="fundkit-top-donors__podium-count">
                             <?php echo esc_html(sprintf(
                                 /* translators: %s: number of donations */
-                                _n('%s donation', '%s donations', $entry['donations_count'], 'fundkit-fundraising-campaigns'),
+                                _n('%s donation', '%s donations', $entry['donations_count'], 'fundraising-toolkit'),
                                 number_format_i18n($entry['donations_count'])
                             ));
 ?>
@@ -80,7 +80,7 @@ echo get_block_wrapper_attributes(array_filter([
                             <span class="fundkit-top-donors__count">
                                 <?php echo esc_html(sprintf(
                                     /* translators: %s: count */
-                                    _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'fundkit-fundraising-campaigns'),
+                                    _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'fundraising-toolkit'),
                                     number_format_i18n($entry['donations_count'])
                                 ));
 ?>
@@ -109,7 +109,7 @@ echo get_block_wrapper_attributes(array_filter([
                         <span class="fundkit-top-donors__count">
                             <?php echo esc_html(sprintf(
                                 /* translators: %s: count */
-                                _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'fundkit-fundraising-campaigns'),
+                                _n('(%s donation)', '(%s donations)', $entry['donations_count'], 'fundraising-toolkit'),
                                 number_format_i18n($entry['donations_count'])
                             ));
 ?>

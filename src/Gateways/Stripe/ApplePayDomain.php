@@ -166,7 +166,7 @@ final class ApplePayDomain extends HookProvider
         $first = $list['data'][0] ?? null;
 
         if (! is_array($first)) {
-            return ['status' => 'unknown', 'message' => __('This domain is not registered with Stripe yet.', 'fundkit-fundraising-campaigns')];
+            return ['status' => 'unknown', 'message' => __('This domain is not registered with Stripe yet.', 'fundraising-toolkit')];
         }
 
         // Asking Stripe to validate again is what turns a freshly-served file

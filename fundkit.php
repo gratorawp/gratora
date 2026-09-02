@@ -1,15 +1,15 @@
 <?php
 /**
- * Plugin Name: FundKit Fundraising Campaigns
+ * Plugin Name: Fundraising Toolkit
  * Plugin URI: https://fundkit.net
- * Description: A fundraising platform for WordPress
+ * Description: Donation & Fundraising Platform for WordPress
  * Version: 1.0.0
  * Requires at least: 7.0
  * Requires PHP: 8.1
- * Author: FundKit
+ * Author: Fundraising Toolkit
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: fundkit-fundraising-campaigns
+ * Text Domain: fundraising-toolkit
  * Domain Path: /languages
  */
 

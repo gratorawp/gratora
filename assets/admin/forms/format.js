@@ -4,9 +4,9 @@ import { __ } from '@wordpress/i18n';
 import { parseTimestamp } from '@fundkit/ui/utils/format';
 
 export const STATUS_LABEL = {
-    draft:     __( 'Draft', 'fundkit-fundraising-campaigns' ),
-    published: __( 'Published', 'fundkit-fundraising-campaigns' ),
-    archived:  __( 'Archived', 'fundkit-fundraising-campaigns' ),
+    draft:     __( 'Draft', 'fundraising-toolkit' ),
+    published: __( 'Published', 'fundraising-toolkit' ),
+    archived:  __( 'Archived', 'fundraising-toolkit' ),
 };
 
 export function formatDate( iso, opts = {} ) {

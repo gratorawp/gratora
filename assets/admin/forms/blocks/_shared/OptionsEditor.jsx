@@ -101,21 +101,21 @@ export function OptionsEditor( {
                     } }
                 >
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ o.label }
                         onChange={ ( v ) => updateLabel( i, v ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Value', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Value', 'fundraising-toolkit' ) }
                         value={ o.value }
                         onChange={ ( v ) => update( i, { value: slugify( v ) || `option-${ i + 1 }` } ) }
-                        help={ __( 'Stored when this option is picked. Auto-derived from the label.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Stored when this option is picked. Auto-derived from the label.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     { allowDefault && (
                         <ToggleControl
-                            label={ __( 'Default', 'fundkit-fundraising-campaigns' ) }
+                            label={ __( 'Default', 'fundraising-toolkit' ) }
                             checked={ !! o.isDefault }
                             onChange={ ( v ) => update( i, { isDefault: v } ) }
                             __nextHasNoMarginBottom
@@ -128,12 +128,12 @@ export function OptionsEditor( {
                         disabled={ rows.length <= 1 }
                         style={ { marginTop: 4 } }
                     >
-                        { __( 'Remove option', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Remove option', 'fundraising-toolkit' ) }
                     </Button>
                 </div>
             ) ) }
             <Button variant="secondary" onClick={ add }>
-                { addLabel || __( 'Add option', 'fundkit-fundraising-campaigns' ) }
+                { addLabel || __( 'Add option', 'fundraising-toolkit' ) }
             </Button>
         </div>
     );

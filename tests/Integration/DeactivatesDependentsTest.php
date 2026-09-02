@@ -66,7 +66,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
 
     public function test_an_addon_that_declares_core_is_switched_off_with_it(): void
     {
-        $addon = $this->givenActivePlugin('fundkit-test-addon', 'fundkit-fundraising-campaigns');
+        $addon = $this->givenActivePlugin('fundkit-test-addon', 'fundraising-toolkit');
 
         $this->deactivateCore();
 
@@ -98,7 +98,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
      */
     public function test_core_is_found_among_several_declared_dependencies(): void
     {
-        $addon = $this->givenActivePlugin('fundkit-test-addon', 'woocommerce, fundkit-fundraising-campaigns');
+        $addon = $this->givenActivePlugin('fundkit-test-addon', 'woocommerce, fundraising-toolkit');
 
         $this->deactivateCore();
 
@@ -107,7 +107,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
 
     public function test_core_does_not_deactivate_itself(): void
     {
-        $this->givenActivePlugin('fundkit-test-addon', 'fundkit-fundraising-campaigns');
+        $this->givenActivePlugin('fundkit-test-addon', 'fundraising-toolkit');
 
         $this->deactivateCore();
 

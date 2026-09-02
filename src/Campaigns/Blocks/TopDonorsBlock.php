@@ -86,7 +86,7 @@ final class TopDonorsBlock extends CampaignBlock
                 // a hidden donor has one, and printing it is the whole thing
                 // hiding was meant to stop. It also keeps the real initial out
                 // of the avatar, which is built from this string.
-                'name'            => $isAnonymousAggregate ? __('Anonymous', 'fundkit-fundraising-campaigns') : $name,
+                'name'            => $isAnonymousAggregate ? __('Anonymous', 'fundraising-toolkit') : $name,
                 'amount_cents'    => (int) $row['amount_cents'],
                 'donations_count' => (int) $row['donations_count'],
                 'is_anonymous'    => $isAnonymousAggregate,
@@ -98,7 +98,7 @@ final class TopDonorsBlock extends CampaignBlock
             $anon = $this->donations->anonymousPaidTotal(null, null, (int) $campaign->id);
             if ($anon['donations_count'] > 0) {
                 $entries[] = [
-                    'name'            => __('Anonymous', 'fundkit-fundraising-campaigns'),
+                    'name'            => __('Anonymous', 'fundraising-toolkit'),
                     'amount_cents'    => $anon['amount_cents'],
                     'donations_count' => $anon['donations_count'],
                     'is_anonymous'    => true,
@@ -111,8 +111,8 @@ final class TopDonorsBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/top-donors', [
             'title'          => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donors to rank yet.', 'fundkit-fundraising-campaigns'),
-            'emptySubText' => __('The first donation starts the list.', 'fundkit-fundraising-campaigns'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donors to rank yet.', 'fundraising-toolkit'),
+            'emptySubText' => __('The first donation starts the list.', 'fundraising-toolkit'),
             'emptyIcon'    => 'donor',
             'entries'        => $entries,
             'currency'       => $campaign->currency,

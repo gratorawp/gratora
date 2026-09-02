@@ -138,8 +138,8 @@ final class SupporterWallBlock extends CampaignBlock
         if (! $byDonor) {
             return View::loadRelative(__DIR__, 'views/supporter-wall', [
                 'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'fundkit-fundraising-campaigns'),
-            'emptySubText' => __('Add the first name to it.', 'fundkit-fundraising-campaigns'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'fundraising-toolkit'),
+            'emptySubText' => __('Add the first name to it.', 'fundraising-toolkit'),
             'emptyIcon'    => 'supporters',
                 'entries'      => [],
                 'showMessage'  => $showMessage,
@@ -188,8 +188,8 @@ final class SupporterWallBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/supporter-wall', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'fundkit-fundraising-campaigns'),
-            'emptySubText' => __('Add the first name to it.', 'fundkit-fundraising-campaigns'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'fundraising-toolkit'),
+            'emptySubText' => __('Add the first name to it.', 'fundraising-toolkit'),
             'emptyIcon'    => 'supporters',
             'entries'      => $entries,
             'showMessage'  => $showMessage,

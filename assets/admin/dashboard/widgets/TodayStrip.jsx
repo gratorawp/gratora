@@ -11,7 +11,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'donations',
             label: sprintf(
-                /* translators: %d: number of donations */ _n( '%d donation', '%d donations', today.donations_count, 'fundkit-fundraising-campaigns' ),
+                /* translators: %d: number of donations */ _n( '%d donation', '%d donations', today.donations_count, 'fundraising-toolkit' ),
                 today.donations_count
             ),
         } );
@@ -26,7 +26,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'notes',
             label: sprintf(
-                /* translators: %d: number of donations */ _n( '%d note', '%d notes', today.notes_count, 'fundkit-fundraising-campaigns' ),
+                /* translators: %d: number of donations */ _n( '%d note', '%d notes', today.notes_count, 'fundraising-toolkit' ),
                 today.notes_count
             ),
         } );
@@ -36,7 +36,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'refunds',
             label: sprintf(
-                /* translators: %d: number of donations */ _n( '%d refund', '%d refunds', today.refunds_count, 'fundkit-fundraising-campaigns' ),
+                /* translators: %d: number of donations */ _n( '%d refund', '%d refunds', today.refunds_count, 'fundraising-toolkit' ),
                 today.refunds_count
             ),
             tone: 'warn',
@@ -46,7 +46,7 @@ export default function TodayStrip( { today } ) {
     if ( chips.length === 0 ) {
         return (
             <p className="fundkit-today__empty">
-                { __( 'Quiet so far today.', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Quiet so far today.', 'fundraising-toolkit' ) }
             </p>
         );
     }
@@ -54,7 +54,7 @@ export default function TodayStrip( { today } ) {
     return (
         <div className="fundkit-today">
             <span className="fundkit-today__pulse" aria-hidden="true" />
-            <span className="fundkit-today__label">{ __( 'Last 24 hours', 'fundkit-fundraising-campaigns' ) }</span>
+            <span className="fundkit-today__label">{ __( 'Last 24 hours', 'fundraising-toolkit' ) }</span>
             <ul className="fundkit-today__chips">
                 { chips.map( ( c ) => (
                     <li key={ c.key } className={ `fundkit-today__chip${ c.tone ? ' is-' + c.tone : '' }${ c.strong ? ' is-strong' : '' }` }>

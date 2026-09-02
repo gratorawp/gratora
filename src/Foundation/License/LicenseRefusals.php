@@ -58,7 +58,7 @@ final class LicenseRefusals
      */
     private static function copy(string $status, string $names): array
     {
-        $keepRunning = __('They keep running for now, but they will not receive updates or security fixes.', 'fundkit-fundraising-campaigns');
+        $keepRunning = __('They keep running for now, but they will not receive updates or security fixes.', 'fundraising-toolkit');
 
         switch ($status) {
             case 'invalid':
@@ -67,10 +67,10 @@ final class LicenseRefusals
                     'names'    => $names,
                     'headline' => sprintf(
                         /* translators: %s: comma-separated add-on names */
-                        __('The license key on this site was not recognised, so %s could not be checked', 'fundkit-fundraising-campaigns'),
+                        __('The license key on this site was not recognised, so %s could not be checked', 'fundraising-toolkit'),
                         $names
                     ),
-                    'detail'   => __('Check the key against your purchase email. Until it is accepted they keep running, but they will not receive updates or security fixes.', 'fundkit-fundraising-campaigns'),
+                    'detail'   => __('Check the key against your purchase email. Until it is accepted they keep running, but they will not receive updates or security fixes.', 'fundraising-toolkit'),
                 ];
 
             case 'over_limit':
@@ -79,12 +79,12 @@ final class LicenseRefusals
                     'names'    => $names,
                     'headline' => sprintf(
                         /* translators: %s: comma-separated add-on names */
-                        __('Your license has no sites left for %s', 'fundkit-fundraising-campaigns'),
+                        __('Your license has no sites left for %s', 'fundraising-toolkit'),
                         $names
                     ),
                     // Deactivating elsewhere is enough: the client re-activates
                     // on its own next check, with no need to re-enter the key.
-                    'detail'   => __('Deactivate the license on a site you no longer use, or move to a larger plan, and this site picks it up on its own.', 'fundkit-fundraising-campaigns'),
+                    'detail'   => __('Deactivate the license on a site you no longer use, or move to a larger plan, and this site picks it up on its own.', 'fundraising-toolkit'),
                 ];
 
             case 'revoked':
@@ -93,7 +93,7 @@ final class LicenseRefusals
                     'names'    => $names,
                     'headline' => sprintf(
                         /* translators: %s: comma-separated add-on names */
-                        __('The license for %s has been revoked', 'fundkit-fundraising-campaigns'),
+                        __('The license for %s has been revoked', 'fundraising-toolkit'),
                         $names
                     ),
                     'detail'   => $keepRunning,
@@ -106,7 +106,7 @@ final class LicenseRefusals
                     'names'    => $names,
                     'headline' => sprintf(
                         /* translators: %s: comma-separated add-on names */
-                        __('Your license does not cover %s', 'fundkit-fundraising-campaigns'),
+                        __('Your license does not cover %s', 'fundraising-toolkit'),
                         $names
                     ),
                     'detail'   => $keepRunning,

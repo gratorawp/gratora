@@ -322,7 +322,7 @@ final class PortalController
     {
         $refused = new WP_Error(
             'fundkit_cross_site',
-            __('Sign-in must start from this site.', 'fundkit-fundraising-campaigns'),
+            __('Sign-in must start from this site.', 'fundraising-toolkit'),
             ['status' => 403]
         );
 
@@ -385,7 +385,7 @@ final class PortalController
         $token = (string) $request['token'];
         $session = $this->session->startFromToken($token);
         if (! $session) {
-            return new WP_Error('fundkit_invalid_token', __('Sign-in link is invalid or expired.', 'fundkit-fundraising-campaigns'), ['status' => 401]);
+            return new WP_Error('fundkit_invalid_token', __('Sign-in link is invalid or expired.', 'fundraising-toolkit'), ['status' => 401]);
         }
         return new WP_REST_Response([
             'ok'        => true,
@@ -645,7 +645,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         if ($donorId === null) {
-            return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundkit-fundraising-campaigns'), ['status' => 401]);
+            return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundraising-toolkit'), ['status' => 401]);
         }
 
         return new WP_REST_Response(['ok' => true, 'ended' => $this->session->destroyAllFor($donorId)], 200);
@@ -659,7 +659,7 @@ final class PortalController
         if (! $donor || $donor->redacted_at !== null) {
             // A redacted donor's session is invalid even when a link was
             // already exchanged: the row no longer represents a real person.
-            return new WP_Error('fundkit_session_invalid', __('Session expired.', 'fundkit-fundraising-campaigns'), ['status' => 401]);
+            return new WP_Error('fundkit_session_invalid', __('Session expired.', 'fundraising-toolkit'), ['status' => 401]);
         }
 
         $name = trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''));
@@ -669,7 +669,7 @@ final class PortalController
             : 'USD';
         return new WP_REST_Response([
             'id'                  => (int) $donor->id,
-            'name'                => $name !== '' ? $name : __('Friend', 'fundkit-fundraising-campaigns'),
+            'name'                => $name !== '' ? $name : __('Friend', 'fundraising-toolkit'),
             'first_name'          => (string) ($donor->first_name ?? ''),
             'last_name'           => (string) ($donor->last_name ?? ''),
             'country'             => (string) ($donor->country ?? ''),
@@ -915,7 +915,7 @@ final class PortalController
             // would not agree with.
             return new WP_Error(
                 'fundkit_change_needs_approval',
-                __('Your payment provider needs you to approve this change before it takes effect. Nothing has changed yet.', 'fundkit-fundraising-campaigns'),
+                __('Your payment provider needs you to approve this change before it takes effect. Nothing has changed yet.', 'fundraising-toolkit'),
                 ['status' => 409, 'approve_url' => $e->approveUrl]
             );
         } catch (\InvalidArgumentException $e) {
@@ -928,7 +928,7 @@ final class PortalController
             ErrorLog::record('portal.recurring', $e->getMessage());
             return new WP_Error(
                 'fundkit_gateway_error',
-                __('We could not complete this change with the payment provider. Please try again in a moment.', 'fundkit-fundraising-campaigns'),
+                __('We could not complete this change with the payment provider. Please try again in a moment.', 'fundraising-toolkit'),
                 ['status' => 502]
             );
         }
@@ -956,7 +956,7 @@ final class PortalController
         if (! $gateway instanceof SupportsPaymentMethodUpdate) {
             return new WP_Error(
                 'fundkit_not_supported',
-                __('This donation\'s payment method cannot be changed here. Please contact us and we will help.', 'fundkit-fundraising-campaigns'),
+                __('This donation\'s payment method cannot be changed here. Please contact us and we will help.', 'fundraising-toolkit'),
                 ['status' => 422]
             );
         }
@@ -967,7 +967,7 @@ final class PortalController
             ErrorLog::record('portal.payment_method', $e->getMessage());
             return new WP_Error(
                 'fundkit_gateway_error',
-                __('We could not reach the payment provider. Please try again in a moment.', 'fundkit-fundraising-campaigns'),
+                __('We could not reach the payment provider. Please try again in a moment.', 'fundraising-toolkit'),
                 ['status' => 502]
             );
         }
@@ -1003,7 +1003,7 @@ final class PortalController
             ErrorLog::record('portal.payment_method', $e->getMessage());
             return new WP_Error(
                 'fundkit_gateway_error',
-                __('The new card could not be saved. Please try again in a moment.', 'fundkit-fundraising-campaigns'),
+                __('The new card could not be saved. Please try again in a moment.', 'fundraising-toolkit'),
                 ['status' => 502]
             );
         }
@@ -1092,7 +1092,7 @@ final class PortalController
             ->where('voided', 0)
             ->get();
         if (! $receipt) {
-            return new WP_Error('fundkit_receipt_not_found', __('Receipt not found.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_receipt_not_found', __('Receipt not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         $token = $this->magicLinks->issue($donorId, 'download_receipt', $receiptId, 3600);
@@ -1112,7 +1112,7 @@ final class PortalController
         }
         $pdf = $this->annualStatements->build($donor, $year);
         if ($pdf === '') {
-            return new WP_Error('fundkit_no_donations', __('No donations found for that year.', 'fundkit-fundraising-campaigns'), ['status' => 404]);
+            return new WP_Error('fundkit_no_donations', __('No donations found for that year.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
         // Streamed directly, so the REST server does not JSON-encode the binary
@@ -1142,7 +1142,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor || $donor->redacted_at !== null) return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundkit-fundraising-campaigns'), ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundraising-toolkit'), ['status' => 401]);
 
         return new WP_REST_Response([
             'email'      => (string) ($this->donorService->decryptEmail($donor) ?? ''),
@@ -1160,7 +1160,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor || $donor->redacted_at !== null) return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundkit-fundraising-campaigns'), ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundraising-toolkit'), ['status' => 401]);
 
         $body  = (array) ($request->get_json_params() ?? []);
         $patch = [];
@@ -1194,14 +1194,14 @@ final class PortalController
                     'fundkit_upload_too_large',
                     sprintf(
                         /* translators: %s: file size, e.g. "2 MB". */
-                        __('That picture is too large. The most this site takes is %s.', 'fundkit-fundraising-campaigns'),
+                        __('That picture is too large. The most this site takes is %s.', 'fundraising-toolkit'),
                         size_format(\FundKit\Donors\DonorAvatarUploader::maxBytes())
                     ),
                     ['status' => 413]
                 );
             }
 
-            return new WP_Error('fundkit_upload_missing', __('No picture was sent.', 'fundkit-fundraising-campaigns'), ['status' => 400]);
+            return new WP_Error('fundkit_upload_missing', __('No picture was sent.', 'fundraising-toolkit'), ['status' => 400]);
         }
 
         $result = $this->avatarUploader->store($donor, $file);
@@ -1401,7 +1401,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor || $donor->redacted_at !== null) return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundkit-fundraising-campaigns'), ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundraising-toolkit'), ['status' => 401]);
         return $donor;
     }
 
@@ -1433,7 +1433,7 @@ final class PortalController
         if (! $this->privacySetting('allow_data_export', true)) {
             return new WP_Error(
                 'fundkit_export_disabled',
-                __('Data export is disabled by the organization.', 'fundkit-fundraising-campaigns'),
+                __('Data export is disabled by the organization.', 'fundraising-toolkit'),
                 ['status' => 403]
             );
         }
@@ -1559,7 +1559,7 @@ final class PortalController
         if (! $this->privacySetting('allow_account_delete', true)) {
             return new WP_Error(
                 'fundkit_delete_disabled',
-                __('Account deletion is disabled by the organization.', 'fundkit-fundraising-campaigns'),
+                __('Account deletion is disabled by the organization.', 'fundraising-toolkit'),
                 ['status' => 403]
             );
         }
@@ -1569,7 +1569,7 @@ final class PortalController
         if (strtoupper((string) $request['confirm']) !== 'DELETE') {
             return new WP_Error(
                 'fundkit_invalid_confirmation',
-                __('Type DELETE to confirm.', 'fundkit-fundraising-campaigns'),
+                __('Type DELETE to confirm.', 'fundraising-toolkit'),
                 ['status' => 422]
             );
         }
@@ -1586,7 +1586,7 @@ final class PortalController
 
             return new WP_Error(
                 'fundkit_erasure_blocked',
-                __('We could not stop your recurring donation with the payment provider, so your account has not been deleted yet. Please contact the organization and they will finish this for you.', 'fundkit-fundraising-campaigns'),
+                __('We could not stop your recurring donation with the payment provider, so your account has not been deleted yet. Please contact the organization and they will finish this for you.', 'fundraising-toolkit'),
                 ['status' => 409]
             );
         }

@@ -46,7 +46,7 @@ function RateInput( { value, manual, onChange } ) {
             />
             { invalid && (
                 <div className="fundkit-fx__hint">
-                    <span>{ __( 'Not a rate. Enter a number like 1.09; the current rate stands until you do.', 'fundkit-fundraising-campaigns' ) }</span>
+                    <span>{ __( 'Not a rate. Enter a number like 1.09; the current rate stands until you do.', 'fundraising-toolkit' ) }</span>
                 </div>
             ) }
         </>
@@ -55,23 +55,23 @@ function RateInput( { value, manual, onChange } ) {
 
 function freshnessPill( fx ) {
     if ( ! fx.auto ) {
-        return <span className="fundkit-pill fundkit-pill--amber">{ __( 'Manual updates only', 'fundkit-fundraising-campaigns' ) }</span>;
+        return <span className="fundkit-pill fundkit-pill--amber">{ __( 'Manual updates only', 'fundraising-toolkit' ) }</span>;
     }
     if ( fx.stale ) {
-        return <span className="fundkit-pill fundkit-pill--amber">{ __( 'Rates are stale', 'fundkit-fundraising-campaigns' ) }</span>;
+        return <span className="fundkit-pill fundkit-pill--amber">{ __( 'Rates are stale', 'fundraising-toolkit' ) }</span>;
     }
     return (
         <span className="fundkit-pill fundkit-pill--green">
             { fx.date
-                ? sprintf( /* translators: %s: date */ __( 'Updated %s', 'fundkit-fundraising-campaigns' ), fx.date )
-                : __( 'Up to date', 'fundkit-fundraising-campaigns' ) }
+                ? sprintf( /* translators: %s: date */ __( 'Updated %s', 'fundraising-toolkit' ), fx.date )
+                : __( 'Up to date', 'fundraising-toolkit' ) }
         </span>
     );
 }
 
 function ExchangeRatesCard( { fx, base } ) {
     if ( fx.loading ) {
-        return <Card title={ __( 'Exchange rates', 'fundkit-fundraising-campaigns' ) }><p className="fundkit-muted">{ __( 'Loading rates…', 'fundkit-fundraising-campaigns' ) }</p></Card>;
+        return <Card title={ __( 'Exchange rates', 'fundraising-toolkit' ) }><p className="fundkit-muted">{ __( 'Loading rates…', 'fundraising-toolkit' ) }</p></Card>;
     }
 
     const head = (
@@ -81,19 +81,19 @@ function ExchangeRatesCard( { fx, base } ) {
                 <svg viewBox="0 0 16 16" fill="none" width="13" height="13" aria-hidden="true">
                     <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2v3h-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                { fx.fetching ? __( 'Fetching…', 'fundkit-fundraising-campaigns' ) : __( 'Fetch rates now', 'fundkit-fundraising-campaigns' ) }
+                { fx.fetching ? __( 'Fetching…', 'fundraising-toolkit' ) : __( 'Fetch rates now', 'fundraising-toolkit' ) }
             </Btn>
         </div>
     );
 
     const foot = fx.auto
-        ? __( 'Rates are snapshotted onto each donation when it is made. Editing a rate only affects donations created afterwards; existing donations and their totals never change.', 'fundkit-fundraising-campaigns' )
-        : __( 'Automatic updates are off. New donations use whatever rate is set here at the moment they are made.', 'fundkit-fundraising-campaigns' );
+        ? __( 'Rates are snapshotted onto each donation when it is made. Editing a rate only affects donations created afterwards; existing donations and their totals never change.', 'fundraising-toolkit' )
+        : __( 'Automatic updates are off. New donations use whatever rate is set here at the moment they are made.', 'fundraising-toolkit' );
 
     return (
         <Card
-            title={ __( 'Exchange rates', 'fundkit-fundraising-campaigns' ) }
-            sub={ sprintf( /* translators: %s: base currency code */ __( '1 %s equals the amounts below. Used to value non-base donations for reporting.', 'fundkit-fundraising-campaigns' ), base ) }
+            title={ __( 'Exchange rates', 'fundraising-toolkit' ) }
+            sub={ sprintf( /* translators: %s: base currency code */ __( '1 %s equals the amounts below. Used to value non-base donations for reporting.', 'fundraising-toolkit' ), base ) }
             meta={ head }
             foot={ foot }
             edited={ fx.isDirty }
@@ -105,11 +105,11 @@ function ExchangeRatesCard( { fx, base } ) {
                         <strong>
                             { sprintf(
                                 /* translators: %s: comma-separated currency codes */
-                                __( 'No exchange rate for %s.', 'fundkit-fundraising-campaigns' ),
+                                __( 'No exchange rate for %s.', 'fundraising-toolkit' ),
                                 ( fx.unconvertible || [] ).join( ', ' )
                             ) }
                         </strong>{ ' ' }
-                        { __( 'Donations in these currencies are still accepted, but nothing about them converts. A donor who switches is offered your preset amounts at face value, so a preset authored as 100 asks for 100 of that currency however little that is worth, and the donation counts as zero in campaign, fund and donor totals. Add a rate below, or stop offering the currency.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Donations in these currencies are still accepted, but nothing about them converts. A donor who switches is offered your preset amounts at face value, so a preset authored as 100 asks for 100 of that currency however little that is worth, and the donation counts as zero in campaign, fund and donor totals. Add a rate below, or stop offering the currency.', 'fundraising-toolkit' ) }
                     </div>
                 </div>
             ) }
@@ -121,21 +121,21 @@ function ExchangeRatesCard( { fx, base } ) {
                         <strong>
                             { sprintf(
                                 /* translators: %s: comma-separated currency codes */
-                                __( 'No payment method accepts %s.', 'fundkit-fundraising-campaigns' ),
+                                __( 'No payment method accepts %s.', 'fundraising-toolkit' ),
                                 ( fx.no_gateway || [] ).join( ', ' )
                             ) }
                         </strong>{ ' ' }
-                        { __( 'A donor who picks one of these gets as far as the payment step and can go no further. Enable a gateway that takes the currency, or stop offering it.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'A donor who picks one of these gets as far as the payment step and can go no further. Enable a gateway that takes the currency, or stop offering it.', 'fundraising-toolkit' ) }
                     </div>
                 </div>
             ) }
 
             <ToggleRow
-                title={ __( 'Update rates automatically every day', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Update rates automatically every day', 'fundraising-toolkit' ) }
                 sub={ sprintf(
                     /* translators: %s: rate source */
-                    __( 'Pulled from %s (free, no key). When off, rates only change when you fetch or edit them here.', 'fundkit-fundraising-campaigns' ),
-                    fx.source || __( 'the European Central Bank', 'fundkit-fundraising-campaigns' )
+                    __( 'Pulled from %s (free, no key). When off, rates only change when you fetch or edit them here.', 'fundraising-toolkit' ),
+                    fx.source || __( 'the European Central Bank', 'fundraising-toolkit' )
                 ) }
                 checked={ fx.auto }
                 onChange={ fx.setAuto }
@@ -144,11 +144,11 @@ function ExchangeRatesCard( { fx, base } ) {
             <table className="fundkit-fx">
                 <thead>
                     <tr>
-                        <th>{ __( 'Currency', 'fundkit-fundraising-campaigns' ) }</th>
+                        <th>{ __( 'Currency', 'fundraising-toolkit' ) }</th>
                         <th className="fundkit-fx__num">
-                            { sprintf( /* translators: %s: base currency code */ __( 'Rate (1 %s =)', 'fundkit-fundraising-campaigns' ), base ) }
+                            { sprintf( /* translators: %s: base currency code */ __( 'Rate (1 %s =)', 'fundraising-toolkit' ), base ) }
                         </th>
-                        <th>{ __( 'Source', 'fundkit-fundraising-campaigns' ) }</th>
+                        <th>{ __( 'Source', 'fundraising-toolkit' ) }</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -177,13 +177,13 @@ function ExchangeRatesCard( { fx, base } ) {
                                             />
                                             { row.is_manual && row.auto_rate != null && (
                                                 <div className="fundkit-fx__hint">
-                                                    <span>{ sprintf( /* translators: %s: rate */ __( 'auto: %s', 'fundkit-fundraising-campaigns' ), fmtRate( row.auto_rate ) ) }</span>
+                                                    <span>{ sprintf( /* translators: %s: rate */ __( 'auto: %s', 'fundraising-toolkit' ), fmtRate( row.auto_rate ) ) }</span>
                                                     <a
                                                         href="#reset"
                                                         className="fundkit-fx__reset"
                                                         onClick={ ( e ) => { e.preventDefault(); fx.resetManual( row.code ); } }
                                                     >
-                                                        { __( 'Reset', 'fundkit-fundraising-campaigns' ) }
+                                                        { __( 'Reset', 'fundraising-toolkit' ) }
                                                     </a>
                                                 </div>
                                             ) }
@@ -192,11 +192,11 @@ function ExchangeRatesCard( { fx, base } ) {
                                 </td>
                                 <td>
                                     { row.is_base ? (
-                                        <span className="fundkit-pill fundkit-pill--gray">{ __( 'Base currency', 'fundkit-fundraising-campaigns' ) }</span>
+                                        <span className="fundkit-pill fundkit-pill--gray">{ __( 'Base currency', 'fundraising-toolkit' ) }</span>
                                     ) : row.is_manual ? (
-                                        <span className="fundkit-fx__src">{ __( 'Set by you', 'fundkit-fundraising-campaigns' ) }</span>
+                                        <span className="fundkit-fx__src">{ __( 'Set by you', 'fundraising-toolkit' ) }</span>
                                     ) : (
-                                        <span className="fundkit-fx__src">{ __( 'Auto', 'fundkit-fundraising-campaigns' ) }</span>
+                                        <span className="fundkit-fx__src">{ __( 'Auto', 'fundraising-toolkit' ) }</span>
                                     ) }
                                 </td>
                             </tr>
@@ -257,16 +257,16 @@ export default function CurrencyPanel( { s, fx } ) {
 
     return (
         <div className="fundkit-panel">
-            <Card title={ __( 'Currencies', 'fundkit-fundraising-campaigns' ) } edited={ s.isDirty }>
+            <Card title={ __( 'Currencies', 'fundraising-toolkit' ) } edited={ s.isDirty }>
                 <FormRow
-                    label={ __( 'Base currency', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Base currency', 'fundraising-toolkit' ) }
                     help={ baseLocked
                         ? sprintf(
                             /* translators: %s: base currency code */
-                            __( 'Locked to %s: donations are already recorded against it, and their stored totals would be reread as the new currency. Existing campaigns keep their own currency.', 'fundkit-fundraising-campaigns' ),
+                            __( 'Locked to %s: donations are already recorded against it, and their stored totals would be reread as the new currency. Existing campaigns keep their own currency.', 'fundraising-toolkit' ),
                             defaultCurrency
                         )
-                        : __( 'All reporting and totals roll up to this, and it cannot be changed once donations come in. Existing campaigns keep their own currency.', 'fundkit-fundraising-campaigns' ) }
+                        : __( 'All reporting and totals roll up to this, and it cannot be changed once donations come in. Existing campaigns keep their own currency.', 'fundraising-toolkit' ) }
                 >
                     <select
                         className="fundkit-select"
@@ -281,10 +281,10 @@ export default function CurrencyPanel( { s, fx } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Currencies donors can use', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Currencies donors can use', 'fundraising-toolkit' ) }
                     help={ sprintf(
                         /* translators: %s: base currency code */
-                        __( '%s is always on as the base. Enable more to accept donations in other currencies.', 'fundkit-fundraising-campaigns' ),
+                        __( '%s is always on as the base. Enable more to accept donations in other currencies.', 'fundraising-toolkit' ),
                         defaultCurrency
                     ) }
                     wide
@@ -309,7 +309,7 @@ export default function CurrencyPanel( { s, fx } ) {
                                         ) }
                                     </span>
                                     { c.code }
-                                    { locked && <span className="fundkit-cur-chip__tag">{ __( 'base', 'fundkit-fundraising-campaigns' ) }</span> }
+                                    { locked && <span className="fundkit-cur-chip__tag">{ __( 'base', 'fundraising-toolkit' ) }</span> }
                                 </button>
                             );
                         } ) }
@@ -327,61 +327,61 @@ export default function CurrencyPanel( { s, fx } ) {
             ) }
 
             <Card
-                title={ __( 'Currency settings', 'fundkit-fundraising-campaigns' ) }
-                meta={ __( 'Receipts, exports, donation form', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Currency settings', 'fundraising-toolkit' ) }
+                meta={ __( 'Receipts, exports, donation form', 'fundraising-toolkit' ) }
                 edited={ s.isDirty }
             >
                 { presetApplied && (
                     <p className="fundkit-muted" style={ { marginTop: 0 } }>
                         { sprintf(
                             /* translators: %s: currency code */
-                            __( 'Set to how %s is usually written. Change anything below if your organisation writes it differently.', 'fundkit-fundraising-campaigns' ),
+                            __( 'Set to how %s is usually written. Change anything below if your organisation writes it differently.', 'fundraising-toolkit' ),
                             presetApplied
                         ) }
                     </p>
                 ) }
                 <div className="fundkit-currency-preview">
-                    <span className="fundkit-currency-preview__label">{ __( 'Preview', 'fundkit-fundraising-campaigns' ) }</span>
+                    <span className="fundkit-currency-preview__label">{ __( 'Preview', 'fundraising-toolkit' ) }</span>
                     <span className="fundkit-currency-preview__value num">{ preview }</span>
                 </div>
 
-                <FormRow label={ __( 'Decimal places', 'fundkit-fundraising-campaigns' ) }>
+                <FormRow label={ __( 'Decimal places', 'fundraising-toolkit' ) }>
                     <select
                         className="fundkit-select"
                         value={ String( decimalPlaces ) }
                         onChange={ ( e ) => s.edit( { format: { decimal_places: Number( e.target.value ) } } ) }
                     >
-                        <option value="0">{ __( '0 (no cents)', 'fundkit-fundraising-campaigns' ) }</option>
-                        <option value="2">{ __( '2 (standard)', 'fundkit-fundraising-campaigns' ) }</option>
+                        <option value="0">{ __( '0 (no cents)', 'fundraising-toolkit' ) }</option>
+                        <option value="2">{ __( '2 (standard)', 'fundraising-toolkit' ) }</option>
                     </select>
                 </FormRow>
 
-                <FormRow label={ __( 'Decimal separator', 'fundkit-fundraising-campaigns' ) }>
+                <FormRow label={ __( 'Decimal separator', 'fundraising-toolkit' ) }>
                     <select
                         className="fundkit-select"
                         value={ decimalSep }
                         onChange={ ( e ) => s.edit( { format: { decimal_sep: e.target.value } } ) }
                     >
-                        <option value=",">{ __( 'Comma (1.234,56)', 'fundkit-fundraising-campaigns' ) }</option>
-                        <option value=".">{ __( 'Period (1,234.56)', 'fundkit-fundraising-campaigns' ) }</option>
+                        <option value=",">{ __( 'Comma (1.234,56)', 'fundraising-toolkit' ) }</option>
+                        <option value=".">{ __( 'Period (1,234.56)', 'fundraising-toolkit' ) }</option>
                     </select>
                 </FormRow>
 
-                <FormRow label={ __( 'Thousands separator', 'fundkit-fundraising-campaigns' ) }>
+                <FormRow label={ __( 'Thousands separator', 'fundraising-toolkit' ) }>
                     <select
                         className="fundkit-select"
                         value={ thousandSep }
                         onChange={ ( e ) => s.edit( { format: { thousand_sep: e.target.value } } ) }
                     >
-                        <option value=".">{ __( 'Period (1.234,56)', 'fundkit-fundraising-campaigns' ) }</option>
-                        <option value=",">{ __( 'Comma (1,234.56)', 'fundkit-fundraising-campaigns' ) }</option>
-                        <option value=" ">{ __( 'Space (1 234,56)', 'fundkit-fundraising-campaigns' ) }</option>
-                        <option value="'">{ __( "Apostrophe (1'234.56)", 'fundkit-fundraising-campaigns' ) }</option>
-                        <option value="">{ __( 'None (1234,56)', 'fundkit-fundraising-campaigns' ) }</option>
+                        <option value=".">{ __( 'Period (1.234,56)', 'fundraising-toolkit' ) }</option>
+                        <option value=",">{ __( 'Comma (1,234.56)', 'fundraising-toolkit' ) }</option>
+                        <option value=" ">{ __( 'Space (1 234,56)', 'fundraising-toolkit' ) }</option>
+                        <option value="'">{ __( "Apostrophe (1'234.56)", 'fundraising-toolkit' ) }</option>
+                        <option value="">{ __( 'None (1234,56)', 'fundraising-toolkit' ) }</option>
                     </select>
                 </FormRow>
 
-                <FormRow label={ __( 'Symbol position', 'fundkit-fundraising-campaigns' ) }>
+                <FormRow label={ __( 'Symbol position', 'fundraising-toolkit' ) }>
                     <select
                         className="fundkit-select"
                         value={ symbolPosition }
@@ -392,14 +392,14 @@ export default function CurrencyPanel( { s, fx } ) {
                         <option value="before">
                             { sprintf(
                                 /* translators: %s: an example amount, e.g. $10.00 */
-                                __( 'Before amount (%s)', 'fundkit-fundraising-campaigns' ),
+                                __( 'Before amount (%s)', 'fundraising-toolkit' ),
                                 previewAmount( 10, { decimalPlaces, decimalSep, thousandSep, symbol, symbolPosition: 'before' } )
                             ) }
                         </option>
                         <option value="after">
                             { sprintf(
                                 /* translators: %s: an example amount, e.g. 10.00 $ */
-                                __( 'After amount (%s)', 'fundkit-fundraising-campaigns' ),
+                                __( 'After amount (%s)', 'fundraising-toolkit' ),
                                 previewAmount( 10, { decimalPlaces, decimalSep, thousandSep, symbol, symbolPosition: 'after' } )
                             ) }
                         </option>

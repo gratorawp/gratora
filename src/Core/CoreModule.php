@@ -241,7 +241,7 @@ final class CoreModule implements FundKitModule
     /** @since 1.0.0 */
     public function name(): string
     {
-        return __('FundKit Core', 'fundkit-fundraising-campaigns');
+        return __('Fundraising Toolkit Core', 'fundraising-toolkit');
     }
 
     /** @since 1.0.0 */
@@ -1218,10 +1218,10 @@ final class CoreModule implements FundKitModule
                     . 'background:#fff7f7;color:#b42318;padding:11px 14px;'
                     . 'font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Oxygen,Ubuntu,sans-serif;'
                     . 'font-size:13px;line-height:1.45;">'
-                    . '<strong>FundKit:</strong> '
+                    . '<strong>Fundraising Toolkit:</strong> '
                     . esc_html(sprintf(
                         /* translators: %s: timestamp the key loss was detected */
-                        __('Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore fundkit_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key.', 'fundkit-fundraising-campaigns'),
+                        __('Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore fundkit_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key.', 'fundraising-toolkit'),
                         $lostAt
                     ))
                     . '</div>';

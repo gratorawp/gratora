@@ -17,23 +17,23 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Country', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Country', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Country', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Country', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Placeholder', 'fundraising-toolkit' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
-                        placeholder={ __( 'Search country…', 'fundkit-fundraising-campaigns' ) }
+                        placeholder={ __( 'Search country…', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Required', 'fundraising-toolkit' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -46,11 +46,11 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <span className="fundkit-block-preview__label">
-                    { label || __( 'Country', 'fundkit-fundraising-campaigns' ) }
+                    { label || __( 'Country', 'fundraising-toolkit' ) }
                     { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
                 </span>
                 <div className="fundkit-block-preview__field">
-                    { placeholder || __( 'Search country…', 'fundkit-fundraising-campaigns' ) }
+                    { placeholder || __( 'Search country…', 'fundraising-toolkit' ) }
                 </div>
             </div>
         </>
@@ -60,7 +60,7 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Country', 'fundkit-fundraising-campaigns' ),
+        title:      __( 'Country', 'fundraising-toolkit' ),
         category:   'fundkit-donor',
         icon:       BlockIcons[ 'country' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },

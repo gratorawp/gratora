@@ -38,41 +38,41 @@ export default function OrganizationPanel( { s } ) {
     return (
         <div className="fundkit-panel">
             <Card
-                title={ __( 'Identity', 'fundkit-fundraising-campaigns' ) }
-                meta={ __( 'Used by receipts and footer', 'fundkit-fundraising-campaigns' ) }
+                title={ __( 'Identity', 'fundraising-toolkit' ) }
+                meta={ __( 'Used by receipts and footer', 'fundraising-toolkit' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'Legal name', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Legal name', 'fundraising-toolkit' ) }
                     required
-                    help={ __( 'The entity that legally receives donations.', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'The entity that legally receives donations.', 'fundraising-toolkit' ) }
                 >
                     <input type="text" className="fundkit-input" { ...s.bind( 'legal_name' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Display name', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Donor-facing name in subject lines and headers.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Display name', 'fundraising-toolkit' ) }
+                    help={ __( 'Donor-facing name in subject lines and headers.', 'fundraising-toolkit' ) }
                 >
                     <input type="text" className="fundkit-input" { ...s.bind( 'name' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Contact email', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Printed on receipts, so donors know where to reply.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Contact email', 'fundraising-toolkit' ) }
+                    help={ __( 'Printed on receipts, so donors know where to reply.', 'fundraising-toolkit' ) }
                 >
                     <input type="email" className="fundkit-input" { ...s.bind( 'email' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Address', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'Optional. Receipts print it when set; donors claiming tax relief usually need it.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Address', 'fundraising-toolkit' ) }
+                    help={ __( 'Optional. Receipts print it when set; donors claiming tax relief usually need it.', 'fundraising-toolkit' ) }
                 >
                     <div className="fundkit-stack-12">
                         <input
                             type="text"
                             className="fundkit-input"
-                            placeholder={ __( 'Street', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'Street', 'fundraising-toolkit' ) }
                             value={ addressLines[ 0 ] || '' }
                             onChange={ ( e ) => updateAddressLine( 0, e.target.value ) }
                         />
@@ -80,14 +80,14 @@ export default function OrganizationPanel( { s } ) {
                             <input
                                 type="text"
                                 className="fundkit-input"
-                                placeholder={ __( 'Postcode', 'fundkit-fundraising-campaigns' ) }
+                                placeholder={ __( 'Postcode', 'fundraising-toolkit' ) }
                                 value={ addressLines[ 1 ] || '' }
                                 onChange={ ( e ) => updateAddressLine( 1, e.target.value ) }
                             />
                             <input
                                 type="text"
                                 className="fundkit-input"
-                                placeholder={ __( 'City', 'fundkit-fundraising-campaigns' ) }
+                                placeholder={ __( 'City', 'fundraising-toolkit' ) }
                                 value={ addressLines[ 2 ] || '' }
                                 onChange={ ( e ) => updateAddressLine( 2, e.target.value ) }
                             />
@@ -96,16 +96,16 @@ export default function OrganizationPanel( { s } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Country', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Country', 'fundraising-toolkit' ) }
                     required
-                    help={ __( 'Drives tax-ID format and VAT visibility.', 'fundkit-fundraising-campaigns' ) }
+                    help={ __( 'Drives tax-ID format and VAT visibility.', 'fundraising-toolkit' ) }
                 >
                     <select
                         className="fundkit-select"
                         value={ country }
                         onChange={ ( e ) => s.setValue( 'country' )( e.target.value ) }
                     >
-                        <option value="">{ __( 'Select a country', 'fundkit-fundraising-campaigns' ) }</option>
+                        <option value="">{ __( 'Select a country', 'fundraising-toolkit' ) }</option>
                         { COUNTRIES.map( ( c ) => (
                             <option key={ c.code } value={ c.code }>{ c.name }</option>
                         ) ) }
@@ -113,21 +113,21 @@ export default function OrganizationPanel( { s } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Tax ID / EU VAT', 'fundkit-fundraising-campaigns' ) }
-                    help={ __( 'VIES validation is not performed.', 'fundkit-fundraising-campaigns' ) }
+                    label={ __( 'Tax ID / EU VAT', 'fundraising-toolkit' ) }
+                    help={ __( 'VIES validation is not performed.', 'fundraising-toolkit' ) }
                 >
                     <div className="fundkit-grid-2-eq">
                         <input
                             type="text"
                             className="fundkit-input fundkit-input--mono"
-                            placeholder={ __( 'Tax number', 'fundkit-fundraising-campaigns' ) }
+                            placeholder={ __( 'Tax number', 'fundraising-toolkit' ) }
                             { ...s.bind( 'tax_id' ) }
                         />
                         { showVat && (
                             <input
                                 type="text"
                                 className="fundkit-input fundkit-input--mono"
-                                placeholder={ __( 'EU VAT ID', 'fundkit-fundraising-campaigns' ) }
+                                placeholder={ __( 'EU VAT ID', 'fundraising-toolkit' ) }
                                 { ...s.bind( 'vat_id' ) }
                             />
                         ) }

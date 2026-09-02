@@ -43,32 +43,32 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Radio group', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Radio group', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Label', 'fundraising-toolkit' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or any option to edit inline.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Click the label or any option to edit inline.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Field name', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Field name', 'fundraising-toolkit' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: slugifyField( v ) } ) }
-                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Layout', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Layout', 'fundraising-toolkit' ) }
                         value={ layout }
                         onChange={ ( v ) => setAttributes( { layout: v } ) }
                         options={ [
-                            { value: 'vertical',   label: __( 'Vertical',   'fundkit-fundraising-campaigns' ) },
-                            { value: 'horizontal', label: __( 'Horizontal', 'fundkit-fundraising-campaigns' ) },
+                            { value: 'vertical',   label: __( 'Vertical',   'fundraising-toolkit' ) },
+                            { value: 'horizontal', label: __( 'Horizontal', 'fundraising-toolkit' ) },
                         ] }
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Required', 'fundraising-toolkit' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -90,7 +90,7 @@ function Edit( { attributes, setAttributes } ) {
                     className="fundkit-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Question', 'fundkit-fundraising-campaigns' ) }
+                    placeholder={ __( 'Question', 'fundraising-toolkit' ) }
                     allowedFormats={ [] }
                 />
                 { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
@@ -126,7 +126,7 @@ function Edit( { attributes, setAttributes } ) {
                                 tagName="span"
                                 value={ o.label }
                                 onChange={ ( v ) => updateOptionLabel( i, v ) }
-                                placeholder={ __( 'Option label', 'fundkit-fundraising-campaigns' ) }
+                                placeholder={ __( 'Option label', 'fundraising-toolkit' ) }
                                 allowedFormats={ [] }
                                 style={ { fontSize: 13, color: '#111827' } }
                             />
@@ -141,8 +141,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Radio group', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Single-choice radio buttons. Donor picks one option from the list.', 'fundkit-fundraising-campaigns' ),
+        title:       __( 'Radio group', 'fundraising-toolkit' ),
+        description: __( 'Single-choice radio buttons. Donor picks one option from the list.', 'fundraising-toolkit' ),
         category:    'fundkit-fields',
         icon:        BlockIcons[ 'radio' ],
         supports: { html: false, anchor: false, inserter: true },

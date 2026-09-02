@@ -29,7 +29,7 @@ final class SubscriptionsPage extends HookProvider
     {
         $pages[] = [
             'id'    => self::PAGE_ID,
-            'title' => __('Subscriptions', 'fundkit-fundraising-campaigns'),
+            'title' => __('Subscriptions', 'fundraising-toolkit'),
             // Reading the list is a donations-level view; changing a plan is
             // gated separately on the REST route that does it.
             'capability' => 'fundkit_access_donations',
@@ -66,7 +66,7 @@ final class SubscriptionsPage extends HookProvider
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(

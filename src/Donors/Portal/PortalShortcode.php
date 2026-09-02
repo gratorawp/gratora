@@ -92,7 +92,7 @@ final class PortalShortcode extends HookProvider
                 'avatarMaxBytes' => \FundKit\Donors\DonorAvatarUploader::maxBytes(),
                 'avatarMaxLabel' => size_format(\FundKit\Donors\DonorAvatarUploader::maxBytes()),
             ]);
-            wp_set_script_translations(self::HANDLE, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
+            wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
         }
         $cssPath = FUNDKIT_DIR . 'build/donor-portal/index.css';
         if (file_exists($cssPath)) {

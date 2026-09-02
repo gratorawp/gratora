@@ -89,7 +89,7 @@ final class RecentDonationsBlock extends CampaignBlock
             // too. A suppressed picture beside their name and their words
             // would be no answer at all.
             if ($isAnonymous || $name === '' || $hidden) {
-                $name = __('Anonymous', 'fundkit-fundraising-campaigns');
+                $name = __('Anonymous', 'fundraising-toolkit');
                 $isAnonymous = true;
             }
 
@@ -97,7 +97,7 @@ final class RecentDonationsBlock extends CampaignBlock
             $paidTs = strtotime((string) $paidAt) ?: $nowTs;
             $timeAgo = sprintf(
                 /* translators: %s: human-readable time difference, e.g. "5 minutes" */
-                __('%s ago', 'fundkit-fundraising-campaigns'),
+                __('%s ago', 'fundraising-toolkit'),
                 human_time_diff($paidTs, $nowTs)
             );
 
@@ -122,8 +122,8 @@ final class RecentDonationsBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/recent-donations', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donations to show yet.', 'fundkit-fundraising-campaigns'),
-            'emptySubText' => __('Donations tend to follow the first one.', 'fundkit-fundraising-campaigns'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donations to show yet.', 'fundraising-toolkit'),
+            'emptySubText' => __('Donations tend to follow the first one.', 'fundraising-toolkit'),
             'emptyIcon'    => 'donation',
             'entries'      => $entries,
             'showAmount'   => (bool) ($attrs['showAmount'] ?? true),

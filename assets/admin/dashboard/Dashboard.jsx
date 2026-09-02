@@ -97,21 +97,21 @@ export default function Dashboard() {
 
     const registry = {
         today: {
-            title:  __( 'Activity (last 24h)', 'fundkit-fundraising-campaigns' ),
+            title:  __( 'Activity (last 24h)', 'fundraising-toolkit' ),
             render: () => <TodayStrip today={ m.today } />,
         },
         kpis: {
-            title:  __( 'Key metrics', 'fundkit-fundraising-campaigns' ),
+            title:  __( 'Key metrics', 'fundraising-toolkit' ),
             span:   'full',
             bare:   true,
             render: () => <KpiRow kpi={ m.kpi } compareOn={ compareOn } range={ range } includesTest={ !! m.test?.includes_test } loading={ metrics === null && loading } />,
         },
         attention: {
-            title:  __( 'Needs attention', 'fundkit-fundraising-campaigns' ),
+            title:  __( 'Needs attention', 'fundraising-toolkit' ),
             render: () => <NeedsAttention items={ m.attention } />,
         },
         revenue: {
-            title:  __( 'Revenue', 'fundkit-fundraising-campaigns' ),
+            title:  __( 'Revenue', 'fundraising-toolkit' ),
             span:   'full',
             render: () => (
                 <RevenueChart
@@ -123,27 +123,27 @@ export default function Dashboard() {
             ),
         },
         'active-campaigns': {
-            title:  __( 'Active campaigns', 'fundkit-fundraising-campaigns' ),
+            title:  __( 'Active campaigns', 'fundraising-toolkit' ),
             render: () => <ActiveCampaigns rows={ m.active_campaigns } />,
         },
         recurring: {
-            title:  __( 'Recurring revenue', 'fundkit-fundraising-campaigns' ),
+            title:  __( 'Recurring revenue', 'fundraising-toolkit' ),
             render: () => <RecurringForecast recurring={ m.recurring } />,
         },
         'top-campaigns': {
-            title:  __( 'Top campaigns', 'fundkit-fundraising-campaigns' ),
+            title:  __( 'Top campaigns', 'fundraising-toolkit' ),
             render: () => <TopCampaigns rows={ m.top_campaigns } />,
         },
         channel: {
-            title:  __( 'Channels', 'fundkit-fundraising-campaigns' ),
+            title:  __( 'Channels', 'fundraising-toolkit' ),
             render: () => <ChannelBreakdown rows={ m.by_channel } currency={ currency } />,
         },
         'recent-activity': {
-            title:  __( 'Recent donations', 'fundkit-fundraising-campaigns' ),
+            title:  __( 'Recent donations', 'fundraising-toolkit' ),
             render: () => <RecentActivity rows={ m.recent_activity } />,
         },
         'quick-actions': {
-            title:  __( 'Quick actions', 'fundkit-fundraising-campaigns' ),
+            title:  __( 'Quick actions', 'fundraising-toolkit' ),
             render: () => <QuickActions />,
         },
     };
@@ -152,7 +152,7 @@ export default function Dashboard() {
         <div className="fundkit-dashboard" data-loading={ loading ? 'true' : undefined }>
             <div className="fundkit-page-head">
                 <div className="fundkit-page-head__title-row">
-                    <h1>{ __( 'Dashboard', 'fundkit-fundraising-campaigns' ) }</h1>
+                    <h1>{ __( 'Dashboard', 'fundraising-toolkit' ) }</h1>
                 </div>
                 <div className="fundkit-page-head__right">
                     <SectionBar
@@ -182,23 +182,23 @@ export default function Dashboard() {
                             '%d test record is not counted here.',
                             '%d test records are not counted here.',
                             hiddenTotal,
-                            'fundkit-fundraising-campaigns'
+                            'fundraising-toolkit'
                         ),
                         hiddenTotal
                     ) }
                     { ' ' }
                     <Button variant="link" onClick={ () => setIncludeTest( true ) }>
-                        { __( 'Show them', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Show them', 'fundraising-toolkit' ) }
                     </Button>
                 </Notice>
             ) }
 
             { metrics?.test?.includes_test && (
                 <Notice status="warning" isDismissible={ false }>
-                    { __( 'These figures include test records. They contain money that was never actually taken, so they cannot be quoted as income.', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'These figures include test records. They contain money that was never actually taken, so they cannot be quoted as income.', 'fundraising-toolkit' ) }
                     { ' ' }
                     <Button variant="link" onClick={ () => setIncludeTest( false ) }>
-                        { __( 'Hide them', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Hide them', 'fundraising-toolkit' ) }
                     </Button>
                 </Notice>
             ) }
@@ -208,18 +208,18 @@ export default function Dashboard() {
                  the range now selected. */ }
             { metrics !== null && fetchError && (
                 <Notice status="error" onRemove={ () => setFetchError( false ) }>
-                    { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'fundraising-toolkit' ) }
                 </Notice>
             ) }
 
             { metrics === null && fetchError ? (
                 <EmptyState
                     icon={ <AlertTriangle size={ 24 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'Could not load your dashboard', 'fundkit-fundraising-campaigns' ) }
-                    body={ __( 'Something went wrong fetching your metrics. Check your connection and try again.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'Could not load your dashboard', 'fundraising-toolkit' ) }
+                    body={ __( 'Something went wrong fetching your metrics. Check your connection and try again.', 'fundraising-toolkit' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setReloadKey( ( k ) => k + 1 ) }>
-                            { __( 'Retry', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Retry', 'fundraising-toolkit' ) }
                         </Btn>
                     }
                 />

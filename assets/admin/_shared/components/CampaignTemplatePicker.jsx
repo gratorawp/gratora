@@ -25,13 +25,13 @@ import { __ } from '@wordpress/i18n';
 
 // Grouping keys are stable; only the display text is translated.
 const CATEGORY_LABELS = {
-    All:       __( 'All', 'fundkit-fundraising-campaigns' ),
-    General:   __( 'General', 'fundkit-fundraising-campaigns' ),
-    Appeals:   __( 'Appeals', 'fundkit-fundraising-campaigns' ),
-    Community: __( 'Community', 'fundkit-fundraising-campaigns' ),
-    Impact:    __( 'Impact', 'fundkit-fundraising-campaigns' ),
-    Bare:      __( 'Bare', 'fundkit-fundraising-campaigns' ),
-    Other:     __( 'Other', 'fundkit-fundraising-campaigns' ),
+    All:       __( 'All', 'fundraising-toolkit' ),
+    General:   __( 'General', 'fundraising-toolkit' ),
+    Appeals:   __( 'Appeals', 'fundraising-toolkit' ),
+    Community: __( 'Community', 'fundraising-toolkit' ),
+    Impact:    __( 'Impact', 'fundraising-toolkit' ),
+    Bare:      __( 'Bare', 'fundraising-toolkit' ),
+    Other:     __( 'Other', 'fundraising-toolkit' ),
 };
 
 const CATEGORY_ORDER = [ 'General', 'Appeals', 'Community', 'Impact', 'Bare' ];
@@ -278,16 +278,16 @@ export default function CampaignTemplatePicker( { value, campaignType, onPick, o
 
     return (
         <Modal
-            title={ __( 'Campaign templates', 'fundkit-fundraising-campaigns' ) }
+            title={ __( 'Campaign templates', 'fundraising-toolkit' ) }
             onRequestClose={ onClose }
             className="fundkit-template-picker fundkit-ctp"
             size="large"
         >
             { failed ? (
                 <div className="fundkit-template-picker__state">
-                    <p>{ __( 'The campaign templates could not be loaded.', 'fundkit-fundraising-campaigns' ) }</p>
+                    <p>{ __( 'The campaign templates could not be loaded.', 'fundraising-toolkit' ) }</p>
                     <button type="button" className="btn" onClick={ load }>
-                        { __( 'Try again', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Try again', 'fundraising-toolkit' ) }
                     </button>
                 </div>
             ) : loading ? (
@@ -295,7 +295,7 @@ export default function CampaignTemplatePicker( { value, campaignType, onPick, o
             ) : (
                 <>
                     <p className="fundkit-template-picker__intro">
-                        { __( 'Where things sit on the campaign page. Everything here is blocks, so you can rearrange any of it afterwards.', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Where things sit on the campaign page. Everything here is blocks, so you can rearrange any of it afterwards.', 'fundraising-toolkit' ) }
                     </p>
 
                     { categories.length > 2 && (

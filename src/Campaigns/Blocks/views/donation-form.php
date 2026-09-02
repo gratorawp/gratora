@@ -29,7 +29,7 @@ echo get_block_wrapper_attributes(array_filter([
         <?php if (($previewDoc ?? '') !== ''): ?>
             <iframe
                 class="fundkit-donation-form__editor-preview"
-                title="<?php echo esc_attr($formTitle ?? __('Donation form', 'fundkit-fundraising-campaigns'));
+                title="<?php echo esc_attr($formTitle ?? __('Donation form', 'fundraising-toolkit'));
 ?>"
                 loading="lazy"
                 style="width:100%;border:0;display:block;min-height:520px"
@@ -40,7 +40,7 @@ echo get_block_wrapper_attributes(array_filter([
             <div class="fundkit-donation-form__placeholder">
                 <strong><?php echo esc_html($formTitle ?? '');
 ?></strong>
-                <span><?php esc_html_e('Donation form - shown to visitors here.', 'fundkit-fundraising-campaigns');
+                <span><?php esc_html_e('Donation form - shown to visitors here.', 'fundraising-toolkit');
 ?></span>
             </div>
         <?php endif; ?>

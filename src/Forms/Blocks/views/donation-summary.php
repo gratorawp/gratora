@@ -10,11 +10,11 @@ defined('ABSPATH') || exit;
      data-show-gateway="<?php echo esc_attr($showGateway ? '1' : '0'); ?>">
     <dl class="fundkit-form__summary">
         <div class="fundkit-form__summary-row">
-            <dt><?php esc_html_e('Amount', 'fundkit-fundraising-campaigns'); ?></dt>
+            <dt><?php esc_html_e('Amount', 'fundraising-toolkit'); ?></dt>
             <dd class="fundkit-form__summary-amount"></dd>
         </div>
         <div class="fundkit-form__summary-row fundkit-form__summary-row--total">
-            <dt><?php esc_html_e('Total', 'fundkit-fundraising-campaigns'); ?></dt>
+            <dt><?php esc_html_e('Total', 'fundraising-toolkit'); ?></dt>
             <dd class="fundkit-form__summary-amount"></dd>
         </div>
     </dl>

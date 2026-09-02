@@ -40,15 +40,15 @@ final class FundService
 
         $code = $this->normalizeCode((string) ($input['code'] ?? ''));
         if ($code === '') {
-            throw new InvalidArgumentException(esc_html__('A fund code is required.', 'fundkit-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('A fund code is required.', 'fundraising-toolkit'));
         }
         if ($this->funds->codeExists($code)) {
-            throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'fundkit-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'fundraising-toolkit'));
         }
 
         $name = trim((string) ($input['name'] ?? ''));
         if ($name === '') {
-            throw new InvalidArgumentException(esc_html__('A fund name is required.', 'fundkit-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('A fund name is required.', 'fundraising-toolkit'));
         }
 
         $fund = Fund::make();
@@ -89,10 +89,10 @@ final class FundService
         if (array_key_exists('code', $input)) {
             $code = $this->normalizeCode((string) $input['code']);
             if ($code === '') {
-                throw new InvalidArgumentException(esc_html__('A fund code is required.', 'fundkit-fundraising-campaigns'));
+                throw new InvalidArgumentException(esc_html__('A fund code is required.', 'fundraising-toolkit'));
             }
             if ($code !== $fund->code && $this->funds->codeExists($code, (int) $fund->id)) {
-                throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'fundkit-fundraising-campaigns'));
+                throw new InvalidArgumentException(esc_html__('Fund code is already in use.', 'fundraising-toolkit'));
             }
             $fund->code = $code;
         }
@@ -115,7 +115,7 @@ final class FundService
         // accepts it directly), so a lexicographic compare is enough.
         if ($fund->starts_at && $fund->ends_at && $fund->starts_at > $fund->ends_at) {
             throw new InvalidArgumentException(
-                esc_html__('Fund "Active from" date must be before "Active until".', 'fundkit-fundraising-campaigns')
+                esc_html__('Fund "Active from" date must be before "Active until".', 'fundraising-toolkit')
             );
         }
 
@@ -127,7 +127,7 @@ final class FundService
             $next = (bool) $input['is_active'];
             if (! $next && $fund->is_default) {
                 throw new InvalidArgumentException(
-                    esc_html__('The default fund cannot be deactivated. Set another fund as default first.', 'fundkit-fundraising-campaigns')
+                    esc_html__('The default fund cannot be deactivated. Set another fund as default first.', 'fundraising-toolkit')
                 );
             }
             $fund->is_active = $next;
@@ -152,7 +152,7 @@ final class FundService
             $next = (bool) $input['is_default'];
             if (! $next && $fund->is_default) {
                 throw new InvalidArgumentException(
-                    esc_html__('Set another fund as the default rather than clearing this one.', 'fundkit-fundraising-campaigns')
+                    esc_html__('Set another fund as the default rather than clearing this one.', 'fundraising-toolkit')
                 );
             }
             $becomesDefault = $next && ! $fund->is_default;
@@ -189,12 +189,12 @@ final class FundService
     {
         if ($fund->is_default) {
             throw new RuntimeException(
-                esc_html__('The default fund cannot be deleted. Set another fund as default first.', 'fundkit-fundraising-campaigns')
+                esc_html__('The default fund cannot be deleted. Set another fund as default first.', 'fundraising-toolkit')
             );
         }
         if ($this->hasChildren((int) $fund->id)) {
             throw new RuntimeException(
-                esc_html__('Reassign or remove the sub-funds under this fund before deleting it.', 'fundkit-fundraising-campaigns')
+                esc_html__('Reassign or remove the sub-funds under this fund before deleting it.', 'fundraising-toolkit')
             );
         }
 
@@ -210,12 +210,12 @@ final class FundService
             $target = $this->funds->findById($reassignTo);
             if (! $target || (int) $target->id === (int) $fund->id) {
                 throw new InvalidArgumentException(
-                    esc_html__('Choose a different, existing fund to reassign donations to.', 'fundkit-fundraising-campaigns')
+                    esc_html__('Choose a different, existing fund to reassign donations to.', 'fundraising-toolkit')
                 );
             }
             if (! $target->is_active) {
                 throw new InvalidArgumentException(
-                    esc_html__('Reassign donations to an active fund.', 'fundkit-fundraising-campaigns')
+                    esc_html__('Reassign donations to an active fund.', 'fundraising-toolkit')
                 );
             }
 
@@ -341,20 +341,20 @@ final class FundService
         }
         $parentId = (int) $value;
         if ($selfId !== null && $parentId === $selfId) {
-            throw new InvalidArgumentException(esc_html__('A fund cannot be its own parent.', 'fundkit-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('A fund cannot be its own parent.', 'fundraising-toolkit'));
         }
         $parent = $this->funds->findById($parentId);
         if (! $parent) {
-            throw new InvalidArgumentException(esc_html__('Parent fund not found.', 'fundkit-fundraising-campaigns'));
+            throw new InvalidArgumentException(esc_html__('Parent fund not found.', 'fundraising-toolkit'));
         }
         if ($parent->parent_fund_id !== null) {
             throw new InvalidArgumentException(
-                esc_html__('Funds nest only one level deep. Pick a top-level fund as the parent.', 'fundkit-fundraising-campaigns')
+                esc_html__('Funds nest only one level deep. Pick a top-level fund as the parent.', 'fundraising-toolkit')
             );
         }
         if ($selfId !== null && $this->hasChildren($selfId)) {
             throw new InvalidArgumentException(
-                esc_html__('This fund has sub-funds, so it cannot also become a sub-fund.', 'fundkit-fundraising-campaigns')
+                esc_html__('This fund has sub-funds, so it cannot also become a sub-fund.', 'fundraising-toolkit')
             );
         }
         return $parentId;

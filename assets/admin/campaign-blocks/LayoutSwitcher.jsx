@@ -130,13 +130,13 @@ function CampaignLayoutButton() {
 
             createNotice(
                 'info',
-                __( 'Campaign template applied. Undo puts the old page back.', 'fundkit-fundraising-campaigns' ),
+                __( 'Campaign template applied. Undo puts the old page back.', 'fundraising-toolkit' ),
                 { type: 'snackbar' }
             );
         } catch ( err ) {
             createNotice(
                 'error',
-                err?.message || __( 'The campaign template could not be applied.', 'fundkit-fundraising-campaigns' ),
+                err?.message || __( 'The campaign template could not be applied.', 'fundraising-toolkit' ),
                 { type: 'snackbar' }
             );
         } finally {
@@ -152,7 +152,7 @@ function CampaignLayoutButton() {
         >
             { applying ? <Spinner /> : <BrandMark /> }
             <span className="fundkit-layout-btn__label">
-                { __( 'Campaign templates', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Campaign templates', 'fundraising-toolkit' ) }
             </span>
         </Button>
     );

@@ -31,8 +31,8 @@ final class StylePresets
         return [
             [
                 'id'          => 'classic',
-                'name'        => __('Classic', 'fundkit-fundraising-campaigns'),
-                'description' => __('Balanced, friendly, accent green. The FundKit default.', 'fundkit-fundraising-campaigns'),
+                'name'        => __('Classic', 'fundraising-toolkit'),
+                'description' => __('Balanced, friendly, accent green. The Fundraising Toolkit default.', 'fundraising-toolkit'),
                 'tokens'      => [
                     // Signature FundKit pill donate button. Other presets fall
                     // back to --fundkit-radius-sm; the Theme preset inherits the
@@ -43,8 +43,8 @@ final class StylePresets
             ],
             [
                 'id'          => 'bold',
-                'name'        => __('Bold', 'fundkit-fundraising-campaigns'),
-                'description' => __('Deep navy with strong typography and a dramatic shadow.', 'fundkit-fundraising-campaigns'),
+                'name'        => __('Bold', 'fundraising-toolkit'),
+                'description' => __('Deep navy with strong typography and a dramatic shadow.', 'fundraising-toolkit'),
                 'tokens'      => [
                     'fundkit-accent'         => '#0F3D5C',
                     'fundkit-accent-soft'    => '#dde6ed',
@@ -60,8 +60,8 @@ final class StylePresets
             ],
             [
                 'id'          => 'quiet',
-                'name'        => __('Quiet', 'fundkit-fundraising-campaigns'),
-                'description' => __('Minimal lines and lots of white space. Outlined button, no color, no shadows.', 'fundkit-fundraising-campaigns'),
+                'name'        => __('Quiet', 'fundraising-toolkit'),
+                'description' => __('Minimal lines and lots of white space. Outlined button, no color, no shadows.', 'fundraising-toolkit'),
                 'tokens'      => [
                     'fundkit-accent'          => '#111827',
                     'fundkit-accent-soft'     => '#f3f4f6',
@@ -191,8 +191,8 @@ final class StylePresets
 
         return [
             'id'          => 'theme',
-            'name'        => __('Site theme', 'fundkit-fundraising-campaigns'),
-            'description' => __('Picks up accent, background, and button styles from the active WordPress theme (theme.json).', 'fundkit-fundraising-campaigns'),
+            'name'        => __('Site theme', 'fundraising-toolkit'),
+            'description' => __('Picks up accent, background, and button styles from the active WordPress theme (theme.json).', 'fundraising-toolkit'),
             'tokens'      => $tokens,
             'builtin'     => true,
             'source'      => 'theme',

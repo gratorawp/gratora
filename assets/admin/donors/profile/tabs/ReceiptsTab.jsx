@@ -75,14 +75,14 @@ function TaxStatement( { donor, donations } ) {
     return (
         <div className="dp-tax-statement">
             <div className="dp-tax-statement__text">
-                <strong>{ __( 'Annual tax statement', 'fundkit-fundraising-campaigns' ) }</strong>
-                <span>{ __( 'Every paid donation for the year on one document, net of refunds.', 'fundkit-fundraising-campaigns' ) }</span>
+                <strong>{ __( 'Annual tax statement', 'fundraising-toolkit' ) }</strong>
+                <span>{ __( 'Every paid donation for the year on one document, net of refunds.', 'fundraising-toolkit' ) }</span>
             </div>
             <select
                 className="fundkit-input dp-tax-statement__year"
                 value={ chosen }
                 onChange={ ( e ) => setYear( Number( e.target.value ) ) }
-                aria-label={ __( 'Statement year', 'fundkit-fundraising-campaigns' ) }
+                aria-label={ __( 'Statement year', 'fundraising-toolkit' ) }
             >
                 { years.map( ( y ) => <option key={ y } value={ y }>{ y }</option> ) }
             </select>
@@ -99,13 +99,13 @@ function TaxStatement( { donor, donations } ) {
                             `tax-statement-${ chosen }.pdf`
                         );
                     } catch ( err ) {
-                        notify.error( err?.message || __( 'Could not build the statement.', 'fundkit-fundraising-campaigns' ) );
+                        notify.error( err?.message || __( 'Could not build the statement.', 'fundraising-toolkit' ) );
                     } finally {
                         setBusy( false );
                     }
                 } }
             >
-                { __( 'Download statement', 'fundkit-fundraising-campaigns' ) }
+                { __( 'Download statement', 'fundraising-toolkit' ) }
             </Btn>
         </div>
     );
@@ -126,7 +126,7 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
     const fields = useMemo( () => [
         {
             id:    'receipt_number',
-            label: __( 'Receipt', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Receipt', 'fundraising-toolkit' ),
             enableSorting: true,
             enableGlobalSearch: true,
             // Plain mono, not a link: a receipt has no page of its own, and the
@@ -135,7 +135,7 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
         },
         {
             id:    'donation_reference',
-            label: __( 'Donation', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Donation', 'fundraising-toolkit' ),
             enableSorting: true,
             enableGlobalSearch: true,
             render: ( { item } ) => item.donation_reference
@@ -148,24 +148,24 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
         },
         {
             id:    'issued_at',
-            label: __( 'Issued', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Issued', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => <StackedDate iso={ item.issued_at } />,
         },
         {
             id:    'sent_to_email_at',
-            label: __( 'Sent', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Sent', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => <StackedDate iso={ item.sent_to_email_at } />,
         },
         {
             id:    'status',
-            label: __( 'Status', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Status', 'fundraising-toolkit' ),
             enableSorting: false,
             getValue: ( { item } ) => item.voided ? 'voided' : 'issued',
             render: ( { item } ) => item.voided
-                ? <span className="dp-pill is-muted">{ __( 'Voided', 'fundkit-fundraising-campaigns' ) }</span>
-                : <span className="dp-pill is-ok">{ __( 'Issued', 'fundkit-fundraising-campaigns' ) }</span>,
+                ? <span className="dp-pill is-muted">{ __( 'Voided', 'fundraising-toolkit' ) }</span>
+                : <span className="dp-pill is-ok">{ __( 'Issued', 'fundraising-toolkit' ) }</span>,
         },
     ], [] );
 
@@ -177,18 +177,18 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
     const actions = useMemo( () => [
         {
             id:       'download-pdf',
-            label:    __( 'Download PDF', 'fundkit-fundraising-campaigns' ),
+            label:    __( 'Download PDF', 'fundraising-toolkit' ),
             icon:     () => <DownloadIcon size={ 16 } strokeWidth={ 1.75 } />,
             callback: ( items ) => {
                 items.forEach( ( r ) => downloadFile(
                     `/fundkit/v1/admin/receipts/${ r.id }/pdf`,
                     `${ r.receipt_number }.pdf`
-                ).catch( ( e ) => notify.error( e?.message || __( 'Could not download a receipt.', 'fundkit-fundraising-campaigns' ) ) ) );
+                ).catch( ( e ) => notify.error( e?.message || __( 'Could not download a receipt.', 'fundraising-toolkit' ) ) ) );
             },
         },
         {
             id:           'resend',
-            label:        __( 'Resend receipt', 'fundkit-fundraising-campaigns' ),
+            label:        __( 'Resend receipt', 'fundraising-toolkit' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Resend goes out over the donation, so a receipt with no reference
@@ -202,16 +202,16 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Resend this receipt to the donor?', 'fundkit-fundraising-campaigns' )
+                    ? __( 'Resend this receipt to the donor?', 'fundraising-toolkit' )
                     : sprintf(
                         /* translators: %d: receipt count */
-                        _n( 'Resend %d receipt to the donor?', 'Resend %d receipts to the donor?', n, 'fundkit-fundraising-campaigns' ),
+                        _n( 'Resend %d receipt to the donor?', 'Resend %d receipts to the donor?', n, 'fundraising-toolkit' ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Resend receipts', 'fundkit-fundraising-campaigns' ),
+                    title:        __( 'Resend receipts', 'fundraising-toolkit' ),
                     message,
-                    confirmLabel: __( 'Resend', 'fundkit-fundraising-campaigns' ),
+                    confirmLabel: __( 'Resend', 'fundraising-toolkit' ),
                     onConfirm: async () => {
                         // Silence reads as nothing happening, so admins press it
                         // again and the donor gets the receipt twice.
@@ -226,14 +226,14 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                         if ( sent > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'fundkit-fundraising-campaigns' ),
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'fundraising-toolkit' ),
                                 sent
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'fundkit-fundraising-campaigns' ),
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'fundraising-toolkit' ),
                                 failed
                             ) );
                         }
@@ -255,8 +255,8 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 <EmptyState
                     compact
                     icon={ <Receipt size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No receipts yet', 'fundkit-fundraising-campaigns' ) }
-                    body={ __( 'Receipts are issued automatically once a donation lands as paid.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'No receipts yet', 'fundraising-toolkit' ) }
+                    body={ __( 'Receipts are issued automatically once a donation lands as paid.', 'fundraising-toolkit' ) }
                     />
                 </div>
             </>
@@ -275,7 +275,7 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 <p className="dp-tab-note">
                     { sprintf(
                         /* translators: 1: receipts shown, 2: receipts in total */
-                        __( 'Showing the %1$d most recent of %2$d receipts.', 'fundkit-fundraising-campaigns' ),
+                        __( 'Showing the %1$d most recent of %2$d receipts.', 'fundraising-toolkit' ),
                         receipts.length,
                         total
                     ) }
@@ -291,7 +291,7 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 paginationInfo={ paginationInfo }
                 defaultLayouts={ { table: {} } }
                 getItemId={ ( item ) => String( item.id ) }
-                searchLabel={ __( 'Search receipts', 'fundkit-fundraising-campaigns' ) }
+                searchLabel={ __( 'Search receipts', 'fundraising-toolkit' ) }
             />
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </div>

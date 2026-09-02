@@ -67,7 +67,7 @@ final class CampaignImageBlock extends CampaignBlock
         }
 
         return '<div class="fundkit-block-notice">'
-            . esc_html__('This campaign has no cover image yet. Add one in the campaign settings.', 'fundkit-fundraising-campaigns')
+            . esc_html__('This campaign has no cover image yet. Add one in the campaign settings.', 'fundraising-toolkit')
             . '</div>';
     }
 }

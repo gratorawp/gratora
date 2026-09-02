@@ -15,14 +15,14 @@ import Btn from '../../_shared/components/Btn';
 
 // Why a row did not make it, in the admin's words rather than a code.
 const SKIP_LABELS = {
-    no_email:          __( 'no email address', 'fundkit-fundraising-campaigns' ),
-    invalid_email:     __( 'the email address is not one', 'fundkit-fundraising-campaigns' ),
-    invalid_amount:    __( 'the amount is missing, zero or unreadable', 'fundkit-fundraising-campaigns' ),
-    invalid_date:      __( 'the date is missing or unreadable', 'fundkit-fundraising-campaigns' ),
-    duplicate_in_file: __( 'the same row appears earlier in this file', 'fundkit-fundraising-campaigns' ),
-    already_imported:  __( 'already imported by an earlier run', 'fundkit-fundraising-campaigns' ),
-    donor_erased:      __( 'the donor was erased on this site', 'fundkit-fundraising-campaigns' ),
-    error:             __( 'the row could not be read', 'fundkit-fundraising-campaigns' ),
+    no_email:          __( 'no email address', 'fundraising-toolkit' ),
+    invalid_email:     __( 'the email address is not one', 'fundraising-toolkit' ),
+    invalid_amount:    __( 'the amount is missing, zero or unreadable', 'fundraising-toolkit' ),
+    invalid_date:      __( 'the date is missing or unreadable', 'fundraising-toolkit' ),
+    duplicate_in_file: __( 'the same row appears earlier in this file', 'fundraising-toolkit' ),
+    already_imported:  __( 'already imported by an earlier run', 'fundraising-toolkit' ),
+    donor_erased:      __( 'the donor was erased on this site', 'fundraising-toolkit' ),
+    error:             __( 'the row could not be read', 'fundraising-toolkit' ),
 };
 
 // Two groups, because the second one decides what the import does at all.
@@ -66,7 +66,7 @@ export default function CsvImportCard( { setNotice } ) {
             // a control the admin can change.
             setMapping( res.mapping || {} );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'That file could not be read as a CSV.', 'fundkit-fundraising-campaigns' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'That file could not be read as a CSV.', 'fundraising-toolkit' ) } );
         } finally {
             setBusy( '' );
         }
@@ -93,11 +93,11 @@ export default function CsvImportCard( { setNotice } ) {
 
             setNotice( {
                 type: landed > 0 ? 'success' : 'error',
-                text: landed > 0 ? summarise( res ) : __( 'Nothing was imported. The preview above says why.', 'fundkit-fundraising-campaigns' ),
+                text: landed > 0 ? summarise( res ) : __( 'Nothing was imported. The preview above says why.', 'fundraising-toolkit' ),
             } );
             if ( landed > 0 ) reset();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'The import failed.', 'fundkit-fundraising-campaigns' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'The import failed.', 'fundraising-toolkit' ) } );
         } finally {
             setBusy( '' );
         }
@@ -137,7 +137,7 @@ export default function CsvImportCard( { setNotice } ) {
                 </th>
                 <td>
                     <select className="fundkit-input" value={ chosen } onChange={ setField( field ) }>
-                        <option value="">{ __( 'Not imported', 'fundkit-fundraising-campaigns' ) }</option>
+                        <option value="">{ __( 'Not imported', 'fundraising-toolkit' ) }</option>
                         { headers.map( ( h ) => (
                             <option key={ h } value={ h }>{ h }</option>
                         ) ) }
@@ -150,8 +150,8 @@ export default function CsvImportCard( { setNotice } ) {
 
     return (
         <Card
-            title={ __( 'Import from a CSV', 'fundkit-fundraising-campaigns' ) }
-            sub={ __( 'A file from another platform or a spreadsheet. Donors are matched on their email address, so a donor who is already here gains the donations rather than a second record. A file with no amounts imports the people on their own.', 'fundkit-fundraising-campaigns' ) }
+            title={ __( 'Import from a CSV', 'fundraising-toolkit' ) }
+            sub={ __( 'A file from another platform or a spreadsheet. Donors are matched on their email address, so a donor who is already here gains the donations rather than a second record. A file with no amounts imports the people on their own.', 'fundraising-toolkit' ) }
         >
             <div className="fundkit-advanced-actions">
                 <Btn
@@ -160,11 +160,11 @@ export default function CsvImportCard( { setNotice } ) {
                     disabled={ busy !== '' }
                     isBusy={ busy === 'inspect' }
                 >
-                    { inspected ? __( 'Choose a different file', 'fundkit-fundraising-campaigns' ) : __( 'Choose a CSV file', 'fundkit-fundraising-campaigns' ) }
+                    { inspected ? __( 'Choose a different file', 'fundraising-toolkit' ) : __( 'Choose a CSV file', 'fundraising-toolkit' ) }
                 </Btn>
                 { inspected && (
                     <Btn variant="tertiary" onClick={ reset } disabled={ busy !== '' }>
-                        { __( 'Cancel', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Cancel', 'fundraising-toolkit' ) }
                     </Btn>
                 ) }
                 <input
@@ -181,29 +181,29 @@ export default function CsvImportCard( { setNotice } ) {
                     <p className="fundkit-tools-note">
                         { sprintf(
                             /* translators: 1: number of rows, 2: number of columns. */
-                            _n( '%1$d row, %2$d columns.', '%1$d rows, %2$d columns.', inspected.rows, 'fundkit-fundraising-campaigns' ),
+                            _n( '%1$d row, %2$d columns.', '%1$d rows, %2$d columns.', inspected.rows, 'fundraising-toolkit' ),
                             inspected.rows,
                             headers.length
                         ) }
                     </p>
 
-                    <h4 className="fundkit-csv-map__heading">{ __( 'The donor', 'fundkit-fundraising-campaigns' ) }</h4>
+                    <h4 className="fundkit-csv-map__heading">{ __( 'The donor', 'fundraising-toolkit' ) }</h4>
                     <table className="fundkit-csv-map">
                         <thead>
                             <tr>
-                                <th scope="col">{ __( 'FundKit field', 'fundkit-fundraising-campaigns' ) }</th>
-                                <th scope="col">{ __( 'Column in your file', 'fundkit-fundraising-campaigns' ) }</th>
-                                <th scope="col">{ __( 'First value', 'fundkit-fundraising-campaigns' ) }</th>
+                                <th scope="col">{ __( 'Fundraising Toolkit field', 'fundraising-toolkit' ) }</th>
+                                <th scope="col">{ __( 'Column in your file', 'fundraising-toolkit' ) }</th>
+                                <th scope="col">{ __( 'First value', 'fundraising-toolkit' ) }</th>
                             </tr>
                         </thead>
                         <tbody>{ DONOR_FIELDS.map( rowFor ) }</tbody>
                     </table>
 
-                    <h4 className="fundkit-csv-map__heading">{ __( 'The donation', 'fundkit-fundraising-campaigns' ) }</h4>
+                    <h4 className="fundkit-csv-map__heading">{ __( 'The donation', 'fundraising-toolkit' ) }</h4>
                     <p className="fundkit-tools-note">
-                        { ! withAmount && __( 'No amount column is mapped, so this file will import donors only. Map Amount to bring their donations in as well.', 'fundkit-fundraising-campaigns' ) }
-                        { withAmount && ! needsDate && __( 'Each row will be imported as a donation.', 'fundkit-fundraising-campaigns' ) }
-                        { needsDate && __( 'Map the Date column as well. A donation has to say when the money arrived, and every row without a date is skipped.', 'fundkit-fundraising-campaigns' ) }
+                        { ! withAmount && __( 'No amount column is mapped, so this file will import donors only. Map Amount to bring their donations in as well.', 'fundraising-toolkit' ) }
+                        { withAmount && ! needsDate && __( 'Each row will be imported as a donation.', 'fundraising-toolkit' ) }
+                        { needsDate && __( 'Map the Date column as well. A donation has to say when the money arrived, and every row without a date is skipped.', 'fundraising-toolkit' ) }
                     </p>
                     <table className="fundkit-csv-map">
                         <tbody>{ DONATION_FIELDS.map( rowFor ) }</tbody>
@@ -216,7 +216,7 @@ export default function CsvImportCard( { setNotice } ) {
                             disabled={ ! ready || busy !== '' }
                             isBusy={ busy === 'preview' }
                         >
-                            { __( 'Preview', 'fundkit-fundraising-campaigns' ) }
+                            { __( 'Preview', 'fundraising-toolkit' ) }
                         </Btn>
                         { preview && hasWork( preview ) && (
                             <Btn
@@ -225,7 +225,7 @@ export default function CsvImportCard( { setNotice } ) {
                                 disabled={ busy !== '' }
                                 isBusy={ busy === 'import' }
                             >
-                                { __( 'Import', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Import', 'fundraising-toolkit' ) }
                             </Btn>
                         ) }
                     </div>
@@ -233,8 +233,8 @@ export default function CsvImportCard( { setNotice } ) {
                     { ! ready && (
                         <p className="fundkit-tools-note">
                             { ! mapping.email
-                                ? __( 'Email has to be mapped before this file can be previewed.', 'fundkit-fundraising-campaigns' )
-                                : __( 'Date has to be mapped as well, or every row is skipped for want of one.', 'fundkit-fundraising-campaigns' ) }
+                                ? __( 'Email has to be mapped before this file can be previewed.', 'fundraising-toolkit' )
+                                : __( 'Date has to be mapped as well, or every row is skipped for want of one.', 'fundraising-toolkit' ) }
                         </p>
                     ) }
 
@@ -247,7 +247,7 @@ export default function CsvImportCard( { setNotice } ) {
                                         <li key={ reason }>
                                             { sprintf(
                                                 /* translators: 1: number of rows, 2: the reason. */
-                                                _n( '%1$d row skipped: %2$s', '%1$d rows skipped: %2$s', n, 'fundkit-fundraising-campaigns' ),
+                                                _n( '%1$d row skipped: %2$s', '%1$d rows skipped: %2$s', n, 'fundraising-toolkit' ),
                                                 n,
                                                 SKIP_LABELS[ reason ] || reason
                                             ) }
@@ -263,8 +263,8 @@ export default function CsvImportCard( { setNotice } ) {
                             { preview.dry_run && (
                                 <p className="fundkit-tools-note">
                                     { preview.mode === 'donors'
-                                        ? __( 'Nothing has been written yet.', 'fundkit-fundraising-campaigns' )
-                                        : __( 'Nothing has been written yet. Imported donations are marked as coming from a CSV and can be told apart from donations this site took.', 'fundkit-fundraising-campaigns' ) }
+                                        ? __( 'Nothing has been written yet.', 'fundraising-toolkit' )
+                                        : __( 'Nothing has been written yet. Imported donations are marked as coming from a CSV and can be told apart from donations this site took.', 'fundraising-toolkit' ) }
                                 </p>
                             ) }
                         </div>
@@ -284,13 +284,13 @@ function summarise( res ) {
     const people = res.dry_run
         ? sprintf(
             /* translators: 1: donors to create, 2: donors already here. */
-            __( '%1$d donors would be created and %2$d matched to donors already here.', 'fundkit-fundraising-campaigns' ),
+            __( '%1$d donors would be created and %2$d matched to donors already here.', 'fundraising-toolkit' ),
             res.donors_created,
             res.donors_matched
         )
         : sprintf(
             /* translators: 1: donors created, 2: donors already here. */
-            __( 'Created %1$d donors and matched %2$d to donors already here.', 'fundkit-fundraising-campaigns' ),
+            __( 'Created %1$d donors and matched %2$d to donors already here.', 'fundraising-toolkit' ),
             res.donors_created,
             res.donors_matched
         );
@@ -302,12 +302,12 @@ function summarise( res ) {
     const donations = res.dry_run
         ? sprintf(
             /* translators: %d: number of donations. */
-            _n( '%d donation would be imported.', '%d donations would be imported.', res.donations_imported, 'fundkit-fundraising-campaigns' ),
+            _n( '%d donation would be imported.', '%d donations would be imported.', res.donations_imported, 'fundraising-toolkit' ),
             res.donations_imported
         )
         : sprintf(
             /* translators: %d: number of donations. */
-            _n( 'Imported %d donation.', 'Imported %d donations.', res.donations_imported, 'fundkit-fundraising-campaigns' ),
+            _n( 'Imported %d donation.', 'Imported %d donations.', res.donations_imported, 'fundraising-toolkit' ),
             res.donations_imported
         );
 

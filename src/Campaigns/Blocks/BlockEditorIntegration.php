@@ -200,7 +200,7 @@ final class BlockEditorIntegration
         }
         array_unshift($categories, [
             'slug'  => 'fundkit',
-            'title' => __('FundKit', 'fundkit-fundraising-campaigns'),
+            'title' => __('Fundraising Toolkit', 'fundraising-toolkit'),
             'icon'  => 'heart',
         ]);
         return $categories;
@@ -220,7 +220,7 @@ final class BlockEditorIntegration
             $asset['version']      ?? FUNDKIT_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE_EDITOR, 'fundkit-fundraising-campaigns', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE_EDITOR, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
 
         // Editor-chrome styles (the layout picker's modal). Kept out of
         // campaign-blocks.css, which the front end also loads, and only sent to

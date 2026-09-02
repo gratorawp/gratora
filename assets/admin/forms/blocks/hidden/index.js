@@ -15,15 +15,15 @@ import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 const NAME = 'fundkit/hidden';
 
 const SOURCES = [
-    { value: 'fixed',        label: __( 'Fixed value',                    'fundkit-fundraising-campaigns' ) },
-    { value: 'query',        label: __( 'URL query string',               'fundkit-fundraising-campaigns' ) },
-    { value: 'utm_source',   label: __( 'UTM: Source',                    'fundkit-fundraising-campaigns' ) },
-    { value: 'utm_medium',   label: __( 'UTM: Medium',                    'fundkit-fundraising-campaigns' ) },
-    { value: 'utm_campaign', label: __( 'UTM: Campaign',                  'fundkit-fundraising-campaigns' ) },
-    { value: 'utm_term',     label: __( 'UTM: Term',                      'fundkit-fundraising-campaigns' ) },
-    { value: 'utm_content',  label: __( 'UTM: Content',                   'fundkit-fundraising-campaigns' ) },
-    { value: 'referrer',     label: __( 'Referrer URL',                   'fundkit-fundraising-campaigns' ) },
-    { value: 'landing',      label: __( 'Landing page URL',               'fundkit-fundraising-campaigns' ) },
+    { value: 'fixed',        label: __( 'Fixed value',                    'fundraising-toolkit' ) },
+    { value: 'query',        label: __( 'URL query string',               'fundraising-toolkit' ) },
+    { value: 'utm_source',   label: __( 'UTM: Source',                    'fundraising-toolkit' ) },
+    { value: 'utm_medium',   label: __( 'UTM: Medium',                    'fundraising-toolkit' ) },
+    { value: 'utm_campaign', label: __( 'UTM: Campaign',                  'fundraising-toolkit' ) },
+    { value: 'utm_term',     label: __( 'UTM: Term',                      'fundraising-toolkit' ) },
+    { value: 'utm_content',  label: __( 'UTM: Content',                   'fundraising-toolkit' ) },
+    { value: 'referrer',     label: __( 'Referrer URL',                   'fundraising-toolkit' ) },
+    { value: 'landing',      label: __( 'Landing page URL',               'fundraising-toolkit' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -33,16 +33,16 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Hidden field', 'fundkit-fundraising-campaigns' ) } initialOpen>
+                <PanelBody title={ __( 'Hidden field', 'fundraising-toolkit' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Field key', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Field key', 'fundraising-toolkit' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v.replace( /[^a-z0-9_]/gi, '_' ).toLowerCase() } ) }
-                        help={ __( 'Lowercase, underscores. This is the column name in donation reports.', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Lowercase, underscores. This is the column name in donation reports.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Source', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Source', 'fundraising-toolkit' ) }
                         value={ source }
                         options={ SOURCES }
                         onChange={ ( v ) => setAttributes( { source: v } ) }
@@ -50,7 +50,7 @@ function Edit( { attributes, setAttributes } ) {
                     />
                     { source === 'query' && (
                         <TextControl
-                            label={ __( 'Query parameter name', 'fundkit-fundraising-campaigns' ) }
+                            label={ __( 'Query parameter name', 'fundraising-toolkit' ) }
                             value={ queryParam }
                             onChange={ ( v ) => setAttributes( { queryParam: v } ) }
                             placeholder="appeal_code"
@@ -58,10 +58,10 @@ function Edit( { attributes, setAttributes } ) {
                         />
                     ) }
                     <TextControl
-                        label={ __( 'Fallback value', 'fundkit-fundraising-campaigns' ) }
+                        label={ __( 'Fallback value', 'fundraising-toolkit' ) }
                         value={ defaultValue }
                         onChange={ ( v ) => setAttributes( { defaultValue: v } ) }
-                        help={ __( 'Used when the source above resolves to empty (e.g. donor arrived directly).', 'fundkit-fundraising-campaigns' ) }
+                        help={ __( 'Used when the source above resolves to empty (e.g. donor arrived directly).', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -71,9 +71,9 @@ function Edit( { attributes, setAttributes } ) {
                 />
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="fundkit-block-preview__hidden-tag">{ __( 'Hidden', 'fundkit-fundraising-campaigns' ) }</span>
+                <span className="fundkit-block-preview__hidden-tag">{ __( 'Hidden', 'fundraising-toolkit' ) }</span>
                 <span className="fundkit-block-preview__hidden-meta">
-                    { field ? `${ field } ← ${ source }` : __( '(no field key set)', 'fundkit-fundraising-campaigns' ) }
+                    { field ? `${ field } ← ${ source }` : __( '(no field key set)', 'fundraising-toolkit' ) }
                 </span>
             </div>
         </>
@@ -83,8 +83,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Hidden field', 'fundkit-fundraising-campaigns' ),
-        description: __( 'Invisible value captured with the donation. Use it for UTM tags, referrer URL, or any appeal code.', 'fundkit-fundraising-campaigns' ),
+        title:       __( 'Hidden field', 'fundraising-toolkit' ),
+        description: __( 'Invisible value captured with the donation. Use it for UTM tags, referrer URL, or any appeal code.', 'fundraising-toolkit' ),
         category:    'fundkit-fields',
         icon:        BlockIcons[ 'hidden' ],
         supports:    { html: false, anchor: false, inserter: true },

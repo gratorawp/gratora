@@ -35,23 +35,23 @@ const STATUS_OPTIONS = Object.entries( STATUS_LABEL ).map( ( [ value, label ] ) 
  */
 function frequencyLabel( frequency ) {
     switch ( frequency ) {
-        case 'monthly':   return __( 'Monthly', 'fundkit-fundraising-campaigns' );
-        case 'yearly':    return __( 'Yearly', 'fundkit-fundraising-campaigns' );
-        case 'weekly':    return __( 'Weekly', 'fundkit-fundraising-campaigns' );
-        case 'quarterly': return __( 'Quarterly', 'fundkit-fundraising-campaigns' );
-        default:          return __( 'Recurring', 'fundkit-fundraising-campaigns' );
+        case 'monthly':   return __( 'Monthly', 'fundraising-toolkit' );
+        case 'yearly':    return __( 'Yearly', 'fundraising-toolkit' );
+        case 'weekly':    return __( 'Weekly', 'fundraising-toolkit' );
+        case 'quarterly': return __( 'Quarterly', 'fundraising-toolkit' );
+        default:          return __( 'Recurring', 'fundraising-toolkit' );
     }
 }
 
 // 'recurring' is the useful default question ("which of these repeat?");
 // the individual cadences are there for orgs that run more than one.
 const FREQUENCY_OPTIONS = [
-    { value: 'recurring', label: __( 'Recurring (any)', 'fundkit-fundraising-campaigns' ) },
-    { value: 'one_time',  label: __( 'One time', 'fundkit-fundraising-campaigns' ) },
-    { value: 'monthly',   label: __( 'Monthly', 'fundkit-fundraising-campaigns' ) },
-    { value: 'yearly',    label: __( 'Yearly', 'fundkit-fundraising-campaigns' ) },
-    { value: 'weekly',    label: __( 'Weekly', 'fundkit-fundraising-campaigns' ) },
-    { value: 'quarterly', label: __( 'Quarterly', 'fundkit-fundraising-campaigns' ) },
+    { value: 'recurring', label: __( 'Recurring (any)', 'fundraising-toolkit' ) },
+    { value: 'one_time',  label: __( 'One time', 'fundraising-toolkit' ) },
+    { value: 'monthly',   label: __( 'Monthly', 'fundraising-toolkit' ) },
+    { value: 'yearly',    label: __( 'Yearly', 'fundraising-toolkit' ) },
+    { value: 'weekly',    label: __( 'Weekly', 'fundraising-toolkit' ) },
+    { value: 'quarterly', label: __( 'Quarterly', 'fundraising-toolkit' ) },
 ];
 
 function detailHref( reference ) {
@@ -161,7 +161,7 @@ export default function List() {
             .catch( ( err ) => {
                 if ( aborted ) return;
                 setCampaigns( [] );
-                notify.error( err?.message || __( 'The campaign filter could not be loaded.', 'fundkit-fundraising-campaigns' ) );
+                notify.error( err?.message || __( 'The campaign filter could not be loaded.', 'fundraising-toolkit' ) );
             } );
         return () => { aborted = true; };
     }, [] );
@@ -227,7 +227,7 @@ export default function List() {
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setFetchError( err?.message || __( 'Failed to load donations.', 'fundkit-fundraising-campaigns' ) );
+                setFetchError( err?.message || __( 'Failed to load donations.', 'fundraising-toolkit' ) );
                 setData( [] );
                 setTotal( 0 );
                 setTestHidden( 0 );
@@ -252,7 +252,7 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:            'reference',
-            label:         __( 'Reference', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Reference', 'fundraising-toolkit' ),
             enableSorting: true,
             // The badge rides the reference rather than occupying a column of
             // its own: on a live-only list that column is the same value on
@@ -264,11 +264,11 @@ export default function List() {
                         { item.reference }
                     </a>
                     { item.is_test && (
-                        <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundkit-fundraising-campaigns' ) }</span>
+                        <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundraising-toolkit' ) }</span>
                     ) }
                     { item.superseded && (
-                        <span className="fundkit-pill fundkit-pill--gray" title={ __( 'The donor started again on another gateway. Nothing they do now can collect this attempt.', 'fundkit-fundraising-campaigns' ) }>
-                            { __( 'Replaced', 'fundkit-fundraising-campaigns' ) }
+                        <span className="fundkit-pill fundkit-pill--gray" title={ __( 'The donor started again on another gateway. Nothing they do now can collect this attempt.', 'fundraising-toolkit' ) }>
+                            { __( 'Replaced', 'fundraising-toolkit' ) }
                         </span>
                     ) }
                 </span>
@@ -276,7 +276,7 @@ export default function List() {
         },
         {
             id:    'frequency',
-            label: __( 'Frequency', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Frequency', 'fundraising-toolkit' ),
             // Nothing on the row said whether the money came from a standing
             // recurring or a one-off, which is the first thing asked of it.
             elements: FREQUENCY_OPTIONS,
@@ -286,16 +286,16 @@ export default function List() {
             render: ( { item } ) => (
                 item.frequency && item.frequency !== 'one_time'
                     ? <span className="fundkit-pill fundkit-pill--blue">{ frequencyLabel( item.frequency ) }</span>
-                    : <span className="fundkit-pill fundkit-pill--gray">{ __( 'One time', 'fundkit-fundraising-campaigns' ) }</span>
+                    : <span className="fundkit-pill fundkit-pill--gray">{ __( 'One time', 'fundraising-toolkit' ) }</span>
             ),
         },
         {
             id:    'donor',
-            label: __( 'Donor', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Donor', 'fundraising-toolkit' ),
             render: ( { item } ) => {
                 const d = item.donor;
                 if ( ! d ) return <span className="fundkit-row__sub">-</span>;
-                const name = d.name || __( '(no name)', 'fundkit-fundraising-campaigns' );
+                const name = d.name || __( '(no name)', 'fundraising-toolkit' );
                 return (
                     <div className="fundkit-row">
                         <div className="fundkit-row__body">
@@ -308,7 +308,7 @@ export default function List() {
         },
         {
             id:            'amount',
-            label:         __( 'Amount', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Amount', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => {
                 const showBase =
@@ -329,7 +329,7 @@ export default function List() {
         },
         {
             id:            'status',
-            label:         __( 'Status', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Status', 'fundraising-toolkit' ),
             elements:      STATUS_OPTIONS,
             filterBy:      { operators: [ 'is' ] },
             enableSorting: true,
@@ -337,7 +337,7 @@ export default function List() {
         },
         {
             id:       'gateway',
-            label:    __( 'Gateway', 'fundkit-fundraising-campaigns' ),
+            label:    __( 'Gateway', 'fundraising-toolkit' ),
             elements: gatewayOptions,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => {
@@ -350,7 +350,7 @@ export default function List() {
         },
         {
             id:       'campaign',
-            label:    __( 'Campaign', 'fundkit-fundraising-campaigns' ),
+            label:    __( 'Campaign', 'fundraising-toolkit' ),
             elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => {
@@ -378,7 +378,7 @@ export default function List() {
         },
         {
             id:     'form',
-            label:  __( 'Form', 'fundkit-fundraising-campaigns' ),
+            label:  __( 'Form', 'fundraising-toolkit' ),
             render: ( { item } ) => (
                 item.form?.title
                     ? <a className="fundkit-row__link" href={ formEditorHref( item.form.id ) } { ...rowLinkProps }>{ item.form.title }</a>
@@ -387,7 +387,7 @@ export default function List() {
         },
         {
             id:            'created_at',
-            label:         __( 'Created', 'fundkit-fundraising-campaigns' ),
+            label:         __( 'Created', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span className="fundkit-time" title={ formatDate( item.created_at ) }>
@@ -411,7 +411,7 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:           'mark-paid',
-            label:        __( 'Mark as paid', 'fundkit-fundraising-campaigns' ),
+            label:        __( 'Mark as paid', 'fundraising-toolkit' ),
             icon:         () => <CheckIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Pending and still-settling donations can be flipped to paid;
@@ -424,21 +424,21 @@ export default function List() {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'fundkit-fundraising-campaigns' )
+                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'fundraising-toolkit' )
                     : sprintf(
                         /* translators: %d: number of donations */
                         _n(
                             'Mark %d donation as paid? Receipts will be sent to each donor.',
                             'Mark %d donations as paid? Receipts will be sent to each donor.',
                             n,
-                            'fundkit-fundraising-campaigns'
+                            'fundraising-toolkit'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Mark donations as paid', 'fundkit-fundraising-campaigns' ),
+                    title:        __( 'Mark donations as paid', 'fundraising-toolkit' ),
                     message,
-                    confirmLabel: __( 'Mark as paid', 'fundkit-fundraising-campaigns' ),
+                    confirmLabel: __( 'Mark as paid', 'fundraising-toolkit' ),
                     onConfirm: async () => {
                         // allSettled, and the refetch outside the counts: a
                         // partial failure still paid some of them and emailed
@@ -455,14 +455,14 @@ export default function List() {
                         if ( done > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'fundkit-fundraising-campaigns' ),
+                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'fundraising-toolkit' ),
                                 done
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'fundkit-fundraising-campaigns' ),
+                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'fundraising-toolkit' ),
                                 failed
                             ) );
                         }
@@ -474,7 +474,7 @@ export default function List() {
         },
         {
             id:           'resend-receipt',
-            label:        __( 'Resend receipt', 'fundkit-fundraising-campaigns' ),
+            label:        __( 'Resend receipt', 'fundraising-toolkit' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Only paid donations have a receipt to resend, and an erased donor
@@ -485,16 +485,16 @@ export default function List() {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Resend the receipt for this donation?', 'fundkit-fundraising-campaigns' )
+                    ? __( 'Resend the receipt for this donation?', 'fundraising-toolkit' )
                     : sprintf(
                         /* translators: %d: number of donations */
-                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'fundkit-fundraising-campaigns' ),
+                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'fundraising-toolkit' ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Resend receipts', 'fundkit-fundraising-campaigns' ),
+                    title:        __( 'Resend receipts', 'fundraising-toolkit' ),
                     message,
-                    confirmLabel: __( 'Resend', 'fundkit-fundraising-campaigns' ),
+                    confirmLabel: __( 'Resend', 'fundraising-toolkit' ),
                     onConfirm: async () => {
                         // Counted separately: a batch reported as a single
                         // failure reads as nothing having happened, so admins
@@ -511,14 +511,14 @@ export default function List() {
                         if ( sent > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'fundkit-fundraising-campaigns' ),
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'fundraising-toolkit' ),
                                 sent
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'fundkit-fundraising-campaigns' ),
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'fundraising-toolkit' ),
                                 failed
                             ) );
                         }
@@ -531,29 +531,29 @@ export default function List() {
     return (
         <div>
             <div className="fundkit-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'FundKit', 'fundkit-fundraising-campaigns' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'fundraising-toolkit' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Donations', 'fundkit-fundraising-campaigns' ) }</span>
+                <span>{ __( 'Donations', 'fundraising-toolkit' ) }</span>
             </div>
             <div className="fundkit-page-head">
                 <div className="fundkit-page-head__title-row">
-                    <h1>{ __( 'Donations', 'fundkit-fundraising-campaigns' ) }</h1>
+                    <h1>{ __( 'Donations', 'fundraising-toolkit' ) }</h1>
                 </div>
                 <div className="fundkit-page-head__right">
                     <div className="fundkit-page-head__date-filters">
-                        <span className="fundkit-page-head__date-filters-label">{ __( 'From', 'fundkit-fundraising-campaigns' ) }</span>
+                        <span className="fundkit-page-head__date-filters-label">{ __( 'From', 'fundraising-toolkit' ) }</span>
                         <DateField
                             value={ createdFrom }
                             onChange={ ( v ) => setCreatedFrom( v || '' ) }
-                            ariaLabel={ __( 'Filter donations from', 'fundkit-fundraising-campaigns' ) }
-                            placeholder={ __( 'Any', 'fundkit-fundraising-campaigns' ) }
+                            ariaLabel={ __( 'Filter donations from', 'fundraising-toolkit' ) }
+                            placeholder={ __( 'Any', 'fundraising-toolkit' ) }
                         />
-                        <span className="fundkit-page-head__date-filters-label">{ __( 'To', 'fundkit-fundraising-campaigns' ) }</span>
+                        <span className="fundkit-page-head__date-filters-label">{ __( 'To', 'fundraising-toolkit' ) }</span>
                         <DateField
                             value={ createdTo }
                             onChange={ ( v ) => setCreatedTo( v || '' ) }
-                            ariaLabel={ __( 'Filter donations to', 'fundkit-fundraising-campaigns' ) }
-                            placeholder={ __( 'Any', 'fundkit-fundraising-campaigns' ) }
+                            ariaLabel={ __( 'Filter donations to', 'fundraising-toolkit' ) }
+                            placeholder={ __( 'Any', 'fundraising-toolkit' ) }
                         />
                         { ( createdFrom || createdTo ) && (
                             <button
@@ -561,12 +561,12 @@ export default function List() {
                                 className="fundkit-page-head__date-filters-clear"
                                 onClick={ () => { setCreatedFrom( '' ); setCreatedTo( '' ); } }
                             >
-                                { __( 'Clear', 'fundkit-fundraising-campaigns' ) }
+                                { __( 'Clear', 'fundraising-toolkit' ) }
                             </button>
                         ) }
                     </div>
                     <span className="fundkit-page-head__meta">
-                        { sprintf( /* translators: %s: number of donations */ _n( '%s donation', '%s donations', total, 'fundkit-fundraising-campaigns' ), total.toLocaleString() ) }
+                        { sprintf( /* translators: %s: number of donations */ _n( '%s donation', '%s donations', total, 'fundraising-toolkit' ), total.toLocaleString() ) }
                     </span>
                     { /* Nothing to reveal on a site that has never taken a test
                          donation, so the control is only offered once some
@@ -576,14 +576,14 @@ export default function List() {
                             <Switch
                                 checked={ includeTest }
                                 onChange={ toggleTest }
-                                label={ __( 'Show test donations', 'fundkit-fundraising-campaigns' ) }
+                                label={ __( 'Show test donations', 'fundraising-toolkit' ) }
                             />
-                            <span>{ __( 'Show test donations', 'fundkit-fundraising-campaigns' ) }</span>
+                            <span>{ __( 'Show test donations', 'fundraising-toolkit' ) }</span>
                         </label>
                     ) }
                     <Btn variant="primary" onClick={ () => setRecording( true ) }>
                         <Plus size={ 16 } strokeWidth={ 1.75 } />
-                        { __( 'Record a donation', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Record a donation', 'fundraising-toolkit' ) }
                     </Btn>
                 </div>
             </div>
@@ -601,7 +601,7 @@ export default function List() {
                         // they get, so it names the row.
                         notify.success( sprintf(
                             /* translators: %s: the new donation's reference. */
-                            __( 'Recorded as %s.', 'fundkit-fundraising-campaigns' ),
+                            __( 'Recorded as %s.', 'fundraising-toolkit' ),
                             created?.reference || ''
                         ) );
                     } }
@@ -621,13 +621,13 @@ export default function List() {
                             '%d test donation is hidden.',
                             '%d test donations are hidden.',
                             testHidden,
-                            'fundkit-fundraising-campaigns'
+                            'fundraising-toolkit'
                         ),
                         testHidden
                     ) }
                     { ' ' }
                     <Btn variant="link" onClick={ () => toggleTest( true ) }>
-                        { __( 'Show them', 'fundkit-fundraising-campaigns' ) }
+                        { __( 'Show them', 'fundraising-toolkit' ) }
                     </Btn>
                 </Notice>
             ) }
@@ -640,15 +640,15 @@ export default function List() {
                  test donations. */ }
             { stats?.includes_test && (
                 <p className="fundkit-list-note">
-                    { __( 'Test donations are counted in the figures above and shown in the list below. These totals include money that was never actually taken, so they cannot be quoted as income.', 'fundkit-fundraising-campaigns' ) }
+                    { __( 'Test donations are counted in the figures above and shown in the list below. These totals include money that was never actually taken, so they cannot be quoted as income.', 'fundraising-toolkit' ) }
                 </p>
             ) }
 
             { ! loading && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <Coins size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No donations yet', 'fundkit-fundraising-campaigns' ) }
-                    body={ __( 'Donations made through your published forms will appear here. Donors are created automatically from each completed donation.', 'fundkit-fundraising-campaigns' ) }
+                    title={ __( 'No donations yet', 'fundraising-toolkit' ) }
+                    body={ __( 'Donations made through your published forms will appear here. Donors are created automatically from each completed donation.', 'fundraising-toolkit' ) }
                 />
             ) : (
                 <div className={ `fundkit-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
@@ -668,11 +668,11 @@ export default function List() {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'fundkit-fundraising-campaigns' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundkit-fundraising-campaigns' ) }
+                            title={ __( 'Nothing matches these filters', 'fundraising-toolkit' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundraising-toolkit' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'fundkit-fundraising-campaigns' ) }
+                                    { __( 'Clear filters', 'fundraising-toolkit' ) }
                                 </Btn>
                             }
                         />
@@ -689,39 +689,39 @@ function donationKpis( stats ) {
     // Per card, not once above the strip: a single figure gets read out, quoted
     // and screenshotted on its own, and it has to carry its own disclaimer.
     const includesTest = !! stats?.includes_test;
-    const testSub = includesTest ? __( 'Includes test donations', 'fundkit-fundraising-campaigns' ) : null;
+    const testSub = includesTest ? __( 'Includes test donations', 'fundraising-toolkit' ) : null;
 
     let raisedSub = testSub;
     if ( stats?.currency ) {
         raisedSub = includesTest
             ? sprintf(
                 /* translators: %s: currency code */
-                __( 'in %s, includes test donations', 'fundkit-fundraising-campaigns' ),
+                __( 'in %s, includes test donations', 'fundraising-toolkit' ),
                 stats.currency
             )
-            : sprintf( /* translators: %s: currency code */ __( 'in %s', 'fundkit-fundraising-campaigns' ), stats.currency );
+            : sprintf( /* translators: %s: currency code */ __( 'in %s', 'fundraising-toolkit' ), stats.currency );
     }
 
     return [
         {
-            label: __( 'Total donations', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Total donations', 'fundraising-toolkit' ),
             value: stats ? stats.total_count.toLocaleString() : '-',
             sub:   testSub,
         },
         {
-            label: __( 'Paid', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Paid', 'fundraising-toolkit' ),
             value: stats ? stats.paid_count.toLocaleString() : '-',
             sub:   testSub,
         },
         {
-            label: __( 'Raised', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Raised', 'fundraising-toolkit' ),
             value: stats
                 ? formatAmount( stats.raised_cents, stats.currency || undefined )
                 : '-',
             sub: raisedSub,
         },
         {
-            label: __( 'Unique donors', 'fundkit-fundraising-campaigns' ),
+            label: __( 'Unique donors', 'fundraising-toolkit' ),
             value: stats ? stats.donors_count.toLocaleString() : '-',
             sub:   testSub,
         },

@@ -52,7 +52,7 @@ final class ReceiptFrequencyLabelTest extends IntegrationTestCase
         // Stands in for a locale being active during the render, which is what
         // ReceiptIssuer switches to before calling the renderer.
         add_filter('gettext', static function ($translation, $text, $domain) {
-            if ($domain === 'fundkit-fundraising-campaigns' && $text === 'Monthly') return 'Mensuel';
+            if ($domain === 'fundraising-toolkit' && $text === 'Monthly') return 'Mensuel';
             return $translation;
         }, 10, 3);
 

@@ -22,9 +22,9 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
     if ( ctx.historical_count === 0 ) {
         return (
             <div className="fundkit-ambition fundkit-ambition--info">
-                <div className="fundkit-ambition__title">{ __( 'Your first campaign', 'fundkit-fundraising-campaigns' ) }</div>
+                <div className="fundkit-ambition__title">{ __( 'Your first campaign', 'fundraising-toolkit' ) }</div>
                 <div className="fundkit-ambition__desc">
-                    { __( "We'll show you how this target compares to your other campaigns once you have a few finished ones.", 'fundkit-fundraising-campaigns' ) }
+                    { __( "We'll show you how this target compares to your other campaigns once you have a few finished ones.", 'fundraising-toolkit' ) }
                 </div>
             </div>
         );
@@ -52,7 +52,7 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
                 <div className="fundkit-ambition__ratio num">
                     { avg > 0 && cur > 0 && sprintf(
                         /* translators: %s: multiplier of historical average, e.g. "1.4×" */
-                        __( '%s× avg', 'fundkit-fundraising-campaigns' ),
+                        __( '%s× avg', 'fundraising-toolkit' ),
                         ( cur / avg ).toFixed( cur / avg < 10 ? 1 : 0 ),
                     ) }
                 </div>
@@ -71,16 +71,16 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
             <div className="fundkit-ambition__legend">
                 <span>
                     <span className="fundkit-ambition__legend-dot fundkit-ambition__legend-dot--current" />
-                    { __( 'Your target', 'fundkit-fundraising-campaigns' ) }: <strong>{ formatAmount( cur, cy ) }</strong>
+                    { __( 'Your target', 'fundraising-toolkit' ) }: <strong>{ formatAmount( cur, cy ) }</strong>
                 </span>
                 <span>
                     <span className="fundkit-ambition__legend-dot fundkit-ambition__legend-dot--avg" />
-                    { __( 'Past average', 'fundkit-fundraising-campaigns' ) }: <strong>{ formatAmount( avg, cy ) }</strong>
+                    { __( 'Past average', 'fundraising-toolkit' ) }: <strong>{ formatAmount( avg, cy ) }</strong>
                 </span>
                 { max > 0 && max !== avg && (
                     <span>
                         <span className="fundkit-ambition__legend-dot fundkit-ambition__legend-dot--max" />
-                        { __( 'Past best', 'fundkit-fundraising-campaigns' ) }: <strong>{ formatAmount( max, cy ) }</strong>
+                        { __( 'Past best', 'fundraising-toolkit' ) }: <strong>{ formatAmount( max, cy ) }</strong>
                     </span>
                 ) }
             </div>
@@ -89,15 +89,15 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
 }
 
 function localVerdict( cur, avg, count ) {
-    if ( count === 0 ) return { tone: 'info', title: __( 'No historical data', 'fundkit-fundraising-campaigns' ), desc: '' };
-    if ( cur <= 0 )    return { tone: 'info', title: __( 'No target set', 'fundkit-fundraising-campaigns' ), desc: __( 'Add a target above to see how it compares.', 'fundkit-fundraising-campaigns' ) };
-    if ( avg <= 0 )    return { tone: 'info', title: __( 'Limited history', 'fundkit-fundraising-campaigns' ), desc: '' };
+    if ( count === 0 ) return { tone: 'info', title: __( 'No historical data', 'fundraising-toolkit' ), desc: '' };
+    if ( cur <= 0 )    return { tone: 'info', title: __( 'No target set', 'fundraising-toolkit' ), desc: __( 'Add a target above to see how it compares.', 'fundraising-toolkit' ) };
+    if ( avg <= 0 )    return { tone: 'info', title: __( 'Limited history', 'fundraising-toolkit' ), desc: '' };
 
     const r = cur / avg;
-    if ( r < 0.5 )  return { tone: 'modest',         title: __( 'Modest target', 'fundkit-fundraising-campaigns' ),         desc: __( "You've raised more than this in past campaigns. Consider aiming higher.", 'fundkit-fundraising-campaigns' ) };
-    if ( r < 1.5 )  return { tone: 'in-line',        title: __( 'In line with past campaigns', 'fundkit-fundraising-campaigns' ), desc: __( 'Right around your historical average.', 'fundkit-fundraising-campaigns' ) };
-    if ( r < 3.0 )  return { tone: 'ambitious',      title: __( 'Ambitious target', 'fundkit-fundraising-campaigns' ),       desc: __( 'About double your average. Realistic for a strong campaign.', 'fundkit-fundraising-campaigns' ) };
-    return                  { tone: 'very-ambitious', title: __( 'Very ambitious', 'fundkit-fundraising-campaigns' ),         desc: __( "Substantially above what you've raised before. Make sure outreach plans match.", 'fundkit-fundraising-campaigns' ) };
+    if ( r < 0.5 )  return { tone: 'modest',         title: __( 'Modest target', 'fundraising-toolkit' ),         desc: __( "You've raised more than this in past campaigns. Consider aiming higher.", 'fundraising-toolkit' ) };
+    if ( r < 1.5 )  return { tone: 'in-line',        title: __( 'In line with past campaigns', 'fundraising-toolkit' ), desc: __( 'Right around your historical average.', 'fundraising-toolkit' ) };
+    if ( r < 3.0 )  return { tone: 'ambitious',      title: __( 'Ambitious target', 'fundraising-toolkit' ),       desc: __( 'About double your average. Realistic for a strong campaign.', 'fundraising-toolkit' ) };
+    return                  { tone: 'very-ambitious', title: __( 'Very ambitious', 'fundraising-toolkit' ),         desc: __( "Substantially above what you've raised before. Make sure outreach plans match.", 'fundraising-toolkit' ) };
 }
 
 function clamp( n, lo = 0, hi = 100 ) {
