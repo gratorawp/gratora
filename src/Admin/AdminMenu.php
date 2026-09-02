@@ -38,7 +38,7 @@ final class AdminMenu extends HookProvider
             self::CAPABILITY,
             self::SLUG,
             [$this, 'renderDashboard'],
-            self::menuIcon(),
+            'dashicons-heart',
             30
         );
 
@@ -67,44 +67,6 @@ final class AdminMenu extends HookProvider
                 $page['render'] ?? '__return_null'
             );
         }
-    }
-
-    /** @since 1.0.0 */
-    private static function menuIcon(): string
-    {
-        // lucide's heart-plus, redrawn as filled shapes.
-        //
-        // It cannot be used as lucide ships it. svg-painter.js recolours this
-        // icon by rewriting every fill="..." in the markup to the admin scheme
-        // colour (wp-admin/js/svg-painter.js), so lucide's fill="none" becomes
-        // a colour and the heart fills into a blob. It never touches stroke,
-        // and the icon is repainted as a background image rather than inlined,
-        // so stroke="currentColor" has nothing to inherit from and resolves to
-        // black. Painting therefore has to happen through fill, which means the
-        // outline is a ring: the heart drawn twice, once inset, with evenodd
-        // clearing the middle. fill-rule survives the rewrite because the
-        // pattern matches fill=" and not fill-rule=".
-        //
-        // The plus sits clear of the lower-right lobe rather than over it as in
-        // lucide, which interrupts its heart stroke to make room; two filled
-        // shapes cannot interrupt each other, and overlapped they read as a
-        // Venus symbol at 20px. Its round caps are why each 6-long arm of
-        // stroke-width 2 becomes a 7.3 x 1.9 rounded rect.
-        $outer = 'M12 20.7l-1.45-1.32C5.4 14.36 2 11.28 2 7.5 2 4.42 4.42 2 7.5 2'
-            . 'c1.74 0 3.41.81 4.5 2.09C13.09 2.81 14.76 2 16.5 2 19.58 2 22 4.42 22 7.5'
-            . 'c0 3.78-3.4 6.86-8.55 11.54L12 20.7z';
-        $inner = 'M12 18.68l-1.13-1.03C6.85 13.73 4.2 11.33 4.2 8.38 4.2 5.98 6.09 4.09 8.49 4.09'
-            . 'c1.36 0 2.66.63 3.51 1.63C12.85 4.72 14.15 4.09 15.51 4.09 17.91 4.09 19.8 5.98 19.8 8.38'
-            . 'c0 2.95-2.65 5.35-6.67 9L12 18.68z';
-
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ffffff" stroke="none">'
-            . '<g transform="translate(-1.6 -1.4) scale(0.9)">'
-            . '<path fill-rule="evenodd" d="' . $outer . ' ' . $inner . '" />'
-            . '</g>'
-            . '<rect x="14.95" y="16.45" width="7.3" height="1.9" rx="0.95" />'
-            . '<rect x="17.65" y="13.75" width="1.9" height="7.3" rx="0.95" />'
-            . '</svg>';
-        return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }
 
     /**
