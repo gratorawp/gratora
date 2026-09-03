@@ -43,7 +43,15 @@ if out="$(composer test 2>&1)"; then
 fi
 
 echo
-printf '%s\n' "$out" | grep -E "^(FAILURES|ERRORS|Tests:|[0-9]+\)|.*Error:| *\[ERROR\])" | head -12
+# The tail whenever nothing matches, so a failure the patterns do not know
+# about still says something. A composer process timeout prints none of these,
+# and refusing in silence reads as a green suite rejected for no reason.
+matched="$(printf '%s\n' "$out" | grep -E "^(FAILURES|ERRORS|Tests:|[0-9]+\)|.*Error:| *\[ERROR\])" | head -12)"
+if [ -n "$matched" ]; then
+    printf '%s\n' "$matched"
+else
+    printf '%s\n' "$out" | tail -12
+fi
 echo
 echo "pre-push: refused. Fix the above, or push anyway with --no-verify."
 exit 1

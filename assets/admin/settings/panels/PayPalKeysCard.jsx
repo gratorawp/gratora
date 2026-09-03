@@ -294,7 +294,7 @@ export default function PayPalKeysCard( { s } ) {
     if ( loadError ) {
         return (
             <Card { ...head } sub={ sub } meta={ <Pill tone="amber">{ __( 'Unavailable', 'fundraising-toolkit' ) }</Pill> }>
-                <Notice tone="amber" icon="!">
+                <Notice status="warning">
                     <strong>{ __( 'Could not check your PayPal setup.', 'fundraising-toolkit' ) }</strong>{ ' ' }
                     { __( 'Something went wrong loading the status. Please try again.', 'fundraising-toolkit' ) }
                 </Notice>
@@ -339,7 +339,7 @@ export default function PayPalKeysCard( { s } ) {
             />
 
             { connected && (
-                <Notice tone="accent" icon="✓">
+                <Notice status="success">
                     <strong>{ __( 'You are all set.', 'fundraising-toolkit' ) }</strong>{ ' ' }
                     { __( 'PayPal buttons will appear on your donation forms.', 'fundraising-toolkit' ) }
                 </Notice>

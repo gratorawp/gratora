@@ -284,7 +284,7 @@ function ApplePaySection( { status, onDone } ) {
                 ) }
 
                 { ! active && firstMessage && (
-                    <Notice tone="amber" icon="!">{ firstMessage }</Notice>
+                    <Notice status="warning">{ firstMessage }</Notice>
                 ) }
             </div>
         </div>
@@ -356,7 +356,7 @@ export default function StripeKeysCard( { s } ) {
     if ( loadError ) {
         return (
             <Card { ...head } sub={ sub } meta={ <Pill tone="amber">{ __( 'Unavailable', 'fundraising-toolkit' ) }</Pill> }>
-                <Notice tone="amber" icon="!">
+                <Notice status="warning">
                     <strong>{ __( 'Could not check your Stripe setup.', 'fundraising-toolkit' ) }</strong>{ ' ' }
                     { __( 'Something went wrong loading the status. Please try again.', 'fundraising-toolkit' ) }
                 </Notice>
@@ -405,14 +405,14 @@ export default function StripeKeysCard( { s } ) {
             />
 
             { connected && ! canCharge && (
-                <Notice tone="amber" icon="⚠">
+                <Notice status="warning">
                     <strong>{ __( 'Your Stripe account cannot take payments yet.', 'fundraising-toolkit' ) }</strong>{ ' ' }
                     { __( 'Stripe still needs some verification details (ID, bank account, business info). Finish that in your Stripe dashboard; live donations will fail until you do.', 'fundraising-toolkit' ) }
                 </Notice>
             ) }
 
             { connected && canCharge && (
-                <Notice tone="accent" icon="✓">
+                <Notice status="success">
                     <strong>{ __( 'You are all set.', 'fundraising-toolkit' ) }</strong>{ ' ' }
                     { __( 'Donations are charged on your Stripe account and paid out to your bank.', 'fundraising-toolkit' ) }
                 </Notice>
