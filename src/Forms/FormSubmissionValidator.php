@@ -26,6 +26,9 @@ use WP_Error;
  */
 final class FormSubmissionValidator
 {
+    /** How far a converted preset may sit from the figure the donor was shown. */
+    private const PRESET_TOLERANCE = 0.15;
+
     private ?Form $form = null;
 
     private bool $offersCurrencyChoice = false;
@@ -258,21 +261,33 @@ final class FormSubmissionValidator
                     $gross = (int) ($body['amount_cents'] ?? 0);
                     $fee   = min($gross, max(0, (int) ($body['fee_covered_cents'] ?? 0)));
                     $net   = $gross - $fee;
-                    // Presets are authored in the org base currency. A donor who
-                    // switched currency pays a converted, rounded value this side
-                    // cannot reproduce (rates drift between render and submit), so
-                    // membership is only enforceable in the authored currency; the
-                    // amount floor/cap still apply. Keyed on the form offering that
-                    // choice, not on the currency posted: a form with no switcher
-                    // can only be paid in the authored currency, so naming another
-                    // one in the JSON would skip the allow-list entirely.
+                    // Keyed on the form offering the choice, not on the currency
+                    // posted: a form with no switcher can only be paid in the
+                    // authored currency, so naming another in the JSON would skip
+                    // the allow-list entirely.
                     $submittedCurrency = strtoupper((string) ($body['currency'] ?? ''));
                     $presetCurrency    = strtoupper(Money::defaultCurrency());
                     $convertedByDonor  = $this->offersCurrencyChoice
                         && $submittedCurrency !== ''
                         && $submittedCurrency !== $presetCurrency;
 
-                    if (! $convertedByDonor && ! in_array($net, $allowedCents, true)) {
+                    if (! $convertedByDonor) {
+                        if (! in_array($net, $allowedCents, true)) {
+                            return $this->reject(__('Choose one of the listed donation amounts.', 'fundraising-toolkit'));
+                        }
+                        break;
+                    }
+
+                    // Converted, the exact figure is not reproducible: the rate
+                    // moves between render and submit. Near one of them is, and
+                    // the alternative was accepting any amount at all, which let
+                    // a crafted payload name a currency and pay what it liked on
+                    // a form whose whole point is a fixed menu.
+                    //
+                    // Wide on purpose. A day of rate movement is a fraction of
+                    // this, so no donor is refused the figure they were shown,
+                    // and it still holds the amount to the menu.
+                    if (! self::nearAnyPreset($net, $allowedCents, $presetCurrency, $submittedCurrency)) {
                         return $this->reject(__('Choose one of the listed donation amounts.', 'fundraising-toolkit'));
                     }
                 }
@@ -502,6 +517,41 @@ final class FormSubmissionValidator
      *
      * @since 1.0.0
      */
+    /**
+     * Whether a converted amount is one of the offered ones.
+     *
+     * Unconvertible currencies pass: no rate is a fact about this site, not
+     * about the donor, and refusing them would close the form.
+     *
+     * @param list<int> $presetsInBase
+     *
+     * @since 1.0.0
+     */
+    private static function nearAnyPreset(int $net, array $presetsInBase, string $base, string $paying): bool
+    {
+        $fx = new FxRates();
+
+        foreach ($presetsInBase as $cents) {
+            if ($cents <= 0) {
+                continue;
+            }
+
+            $converted = $fx->convertCents($cents, $base, $paying);
+            if ($converted === null) {
+                return true;
+            }
+
+            // What the form showed, and the exact conversion, both count.
+            foreach ([$converted, self::niceAmount($converted)] as $target) {
+                if ($target > 0 && abs($net - $target) <= (int) round($target * self::PRESET_TOLERANCE)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private static function niceAmount(int $cents): int
     {
         if ($cents <= 0) {
