@@ -4,6 +4,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 
 import { formatAmount } from '../../_shared/format';
 import Card from '../../_shared/components/Card';
+import Notice from '../../_shared/components/Notice';
 import Btn from '../../_shared/components/Btn';
 
 export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) {
@@ -105,7 +106,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                             <li key={ u.id }>
                                 { u.description }
                                 { u.failure && (
-                                    <div className="fundkit-advanced-notice fundkit-advanced-notice--error" style={ { marginTop: 6 } }>
+                                    <Notice status="error" compact>
                                         { sprintf(
                                             /* translators: 1: error message, 2: number of attempts */
                                             _n(
@@ -117,7 +118,7 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
                                             u.failure.message,
                                             u.failure.attempts
                                         ) }
-                                    </div>
+                                    </Notice>
                                 ) }
                             </li>
                         ) ) }

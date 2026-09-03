@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 
+import Notice from '../_shared/components/Notice';
 import Toaster from '../_shared/components/Toaster';
 import ExportTab from './tabs/ExportTab';
 import ImportTab from './tabs/ImportTab';
@@ -87,9 +88,9 @@ export default function Tools() {
             <Toaster />
 
             { notice && (
-                <div className={ `fundkit-advanced-notice fundkit-advanced-notice--${ notice.type }` }>
+                <Notice status={ notice.type } onRemove={ () => setNotice( null ) }>
                     { notice.text }
-                </div>
+                </Notice>
             ) }
 
             <div className="fundkit-settings-page__body">

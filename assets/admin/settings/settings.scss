@@ -844,16 +844,6 @@ $border: $border-mid;
     }
     em { color: $text-muted; font-style: normal; font-size: 12px; }
 }
-.fundkit-advanced-notice {
-    padding: 10px 12px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    font-size: 13px;
-
-    &--success { background: $accent-soft; color: $accent-dark; }
-    &--error   { background: $red-soft; color: $red; }
-}
-
 .fundkit-consents {
     display: flex;
     flex-direction: column;
