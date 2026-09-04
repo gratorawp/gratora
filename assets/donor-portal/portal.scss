@@ -664,7 +664,17 @@
 
     &__col {
         h4 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--dp-muted); }
-        label { display: flex; gap: 8px; align-items: center; padding: 4px 0; font-size: 14px; }
+        label {
+            display: flex; gap: 8px; padding: 4px 0; font-size: 14px;
+            // Top-aligned because the label carries a hint under it, so the box
+            // belongs beside the first line rather than centred on both.
+            align-items: flex-start;
+
+            input { margin-top: 2px; }
+
+            // Its own line: small is inline, so it ran on from the label.
+            .dp-hint { display: block; margin-top: 2px; }
+        }
     }
 
     .dp-action {

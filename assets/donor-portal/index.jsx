@@ -1788,7 +1788,10 @@ function Preferences() {
                 <h4>{ __( 'Privacy', 'fundraising-toolkit' ) }</h4>
                 <label>
                     <input type="checkbox" checked={ p.always_anonymous } onChange={ ( e ) => setP( { ...p, always_anonymous: e.target.checked } ) } />
-                    { __( 'Make all future donations anonymous', 'fundraising-toolkit' ) }
+                    <span>
+                        { __( 'Hide my name from the public list of donors', 'fundraising-toolkit' ) }
+                        <small class="dp-hint">{ __( 'Applies to every future donation. The organization still sees your name, and your receipts are unchanged.', 'fundraising-toolkit' ) }</small>
+                    </span>
                 </label>
             </div>
             <button class="dp-action is-primary" disabled={ saving } onClick={ save }>{ saving ? __( 'Saving…', 'fundraising-toolkit' ) : __( 'Save preferences', 'fundraising-toolkit' ) }</button>
