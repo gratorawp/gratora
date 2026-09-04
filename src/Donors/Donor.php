@@ -56,19 +56,6 @@ final class Donor extends Model
     public string $created_at;
     public string $updated_at;
 
-    /**
-     * What a donor is called in the admin and on a receipt.
-     *
-     * Derived from the id rather than stored, and written in one place: it was
-     * spelled out at each call site, so a change to the format would have had
-     * to find them all.
-     *
-     * @since 1.0.0
-     */
-    public function reference(): string
-    {
-        return sprintf('DONOR_%04d', (int) $this->id);
-    }
 }
 
 Donor::schema(function (Table $t): void {

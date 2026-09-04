@@ -728,6 +728,10 @@ final class DonorService
                 $q->whereLike('first_name', $term)
                   ->orWhereLike('last_name', $term)
                   ->orWhere('email_hash', $hash);
+
+                if (ctype_digit($term)) {
+                    $q->orWhere('id', (int) $term);
+                }
             })
             ->getAll();
 

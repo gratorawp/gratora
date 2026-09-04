@@ -450,7 +450,6 @@ final class DonorMetricsService
         return [
             'donor' => [
                 'id'                  => (int) $donor->id,
-                'reference'           => $donor->reference(),
                 'name'                => $this->donorName($donor),
                 'email'               => $donor->redacted_at === null ? $this->donorService->decryptEmail($donor) : null,
                 'phone'               => $donor->redacted_at === null ? $this->donorService->decryptPhone($donor) : null,
@@ -1057,7 +1056,6 @@ final class DonorMetricsService
         return [
             'donor' => [
                 'id'                => (int) $donor->id,
-                'reference'         => $donor->reference(),
                 'name'              => $this->donorName($donor),
                 'email'             => $live ? $this->donorService->decryptEmail($donor) : null,
                 'phone'             => $live ? $this->donorService->decryptPhone($donor) : null,

@@ -391,7 +391,7 @@ export default function List() {
         sort:    { field: 'next_payment_at', direction: 'asc' },
         filters: [],
         search:  '',
-        fields:  [ 'reference', 'donor', 'amount', 'status', 'next_payment_at', 'started_at', 'campaign', 'gateway', 'lifetime' ],
+        fields:  [ 'id', 'donor', 'amount', 'status', 'next_payment_at', 'started_at', 'campaign', 'gateway', 'lifetime' ],
     }, () => fields.map( ( f ) => f.id ) );
 
     const [ data, setData ]         = useState( [] );
@@ -550,8 +550,8 @@ export default function List() {
 
     const fields = useMemo( () => [
         {
-            id:    'reference',
-            label: __( 'Reference', 'fundraising-toolkit' ),
+            id:    'id',
+            label: __( 'ID', 'fundraising-toolkit' ),
             render: ( { item } ) => (
                 <span className="fundkit-ref-cell">
                     <a
@@ -559,7 +559,7 @@ export default function List() {
                         href={ `#subscription/${ item.id }` }
                         onClick={ ( e ) => { e.preventDefault(); setDetail( item ); } }
                     >
-                        { item.reference }
+                        { item.id }
                     </a>
                 </span>
             ),

@@ -894,7 +894,6 @@ final class DemoSeeder
             $donor    = $donors[$spec['donor']];
 
             $plan = RecurringPlan::make();
-            $plan->reference               = RecurringPlan::mintReference();
             $plan->donor_id                = (int) $donor->id;
             $plan->form_id                 = ((int) ($campaign->default_form_id ?? 0)) ?: null;
             $plan->campaign_id             = (int) $campaign->id;

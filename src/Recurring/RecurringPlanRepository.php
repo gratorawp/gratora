@@ -347,10 +347,20 @@ final class RecurringPlanRepository
 
         // A search term that resolved to no donor must return nothing, not
         // everything: falling through would silently widen the result to the
-        // whole book and read as "no such donor has plans" being false.
+        // whole book and read as "no such donor has plans" being false. A
+        // numeric term also names a plan, so it matches either side.
         if (($args['search'] ?? '') !== '') {
-            $ids = array_values(array_filter(array_map('intval', (array) ($args['donor_ids'] ?? []))));
-            $q = $q->whereIn('donor_id', $ids ?: [0]);
+            $ids    = array_values(array_filter(array_map('intval', (array) ($args['donor_ids'] ?? []))));
+            $term   = trim((string) $args['search']);
+            $planId = ctype_digit($term) ? (int) $term : 0;
+
+            $q = $q->where(function ($sub) use ($ids, $planId): void {
+                $sub->whereIn('donor_id', $ids ?: [0]);
+
+                if ($planId > 0) {
+                    $sub->orWhere('id', $planId);
+                }
+            });
         }
 
         return $q;

@@ -66,14 +66,13 @@ export function DonorsApp( { toggleSlot } ) {
         sort:    { field: 'last_donation_at', direction: 'desc' },
         filters: [],
         search:  '',
-        fields:  [ 'reference', 'name', 'email', 'country', 'donations_count', 'total_donated', 'last_donation_at' ],
-        // The table reads column widths from here, not from the field: without
-        // them the first column is treated as the primary one and DONOR_0003
-        // took more room than the name it belongs to. The name is what the
-        // screen is for, so it gets the space.
+        fields:  [ 'id', 'name', 'email', 'country', 'donations_count', 'total_donated', 'last_donation_at' ],
+        // The table reads column widths from here, not from the field, and
+        // without them the first column is treated as the primary one and takes
+        // room from the name. The name is what the screen is for.
         layout: {
             styles: {
-                reference: { width: '150px' },
+                id:        { width: '80px' },
                 name:      { width: '32%', minWidth: '260px' },
                 email:     { maxWidth: '230px' },
             },
@@ -145,12 +144,12 @@ export function DonorsApp( { toggleSlot } ) {
 
     const fields = useMemo( () => [
         {
-            id:    'reference',
-            label: __( 'Reference', 'fundraising-toolkit' ),
+            id:    'id',
+            label: __( 'ID', 'fundraising-toolkit' ),
             render: ( { item } ) => (
                 <span className="fundkit-ref-cell">
                     <a className="fundkit-mono-link" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
-                        { item.reference }
+                        { item.id }
                     </a>
                 </span>
             ),

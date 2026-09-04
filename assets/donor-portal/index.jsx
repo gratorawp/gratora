@@ -839,7 +839,7 @@ function Recurring() {
                             tabIndex={ 0 }
                             onClick={ () => setAction( p ) }
                             onKeyDown={ ( e ) => { if ( e.key === 'Enter' || e.key === ' ' ) { e.preventDefault(); setAction( p ); } } }
-                            aria-label={ sprintf( /* translators: %s: subscription reference */ __( 'View recurring donation %s', 'fundraising-toolkit' ), p.reference || '' ) }
+                            aria-label={ sprintf( /* translators: %d: subscription id */ __( 'View recurring donation %d', 'fundraising-toolkit' ), p.id ) }
                         >
                         <div>
                             <strong>{ formatAmount( p.amount_cents, p.currency ) }</strong>
@@ -908,7 +908,7 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                                 </span>
                             </div>
                             <div class="dp-detail__meta">
-                                { recurringStatusLabel( plan.status ) }{ plan.reference ? ` \u00b7 ${ plan.reference }` : '' }
+                                { recurringStatusLabel( plan.status ) }{ plan.id ? ` \u00b7 ${ plan.id }` : '' }
                             </div>
                         </div>
 

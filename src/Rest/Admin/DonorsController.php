@@ -679,7 +679,6 @@ final class DonorsController
         $shaped = array_map(
             fn (Donor $d): array => [
                 'id'                  => $d->id,
-                'reference'           => $d->reference(),
                 'is_test_only'        => isset($testOnly[(int) $d->id]),
                 'name'                => $this->donorName($d),
                 'email'               => $this->donorService->decryptEmail($d),

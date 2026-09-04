@@ -28,7 +28,6 @@ final class ReferenceGenerator
             'donation'     => 'DON',
             'receipt'      => 'REC',
             'refund'       => 'REF',
-            'subscription' => 'SUB',
         ],
         'padding'      => 5,
         'include_year' => true,
@@ -168,7 +167,6 @@ final class ReferenceGenerator
             'donation'     => __('Donation prefix', 'fundraising-toolkit'),
             'receipt'      => __('Receipt prefix', 'fundraising-toolkit'),
             'refund'       => __('Refund prefix', 'fundraising-toolkit'),
-            'subscription' => __('Subscription prefix', 'fundraising-toolkit'),
         ];
 
         if (array_key_exists('separator', $input) && ! self::isToken((string) $input['separator'])) {

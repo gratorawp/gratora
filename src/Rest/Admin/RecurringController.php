@@ -394,7 +394,6 @@ final class RecurringController
         return [
             'id'                      => (int) $p->id,
             'gateway'                 => (string) $p->gateway,
-            'reference'               => $p->reference(),
             'gateway_subscription_id' => (string) $p->gateway_subscription_id,
             'amount_cents'            => (int) $p->amount_cents,
             'currency'                => (string) $p->currency,

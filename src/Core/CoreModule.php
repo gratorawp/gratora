@@ -65,7 +65,6 @@ use FundKit\Donors\Erasure\AnalyticsEventHandler;
 use FundKit\Foundation\Transfer\CsvImporter;
 use FundKit\Foundation\Transfer\DataExporter;
 use FundKit\Foundation\Transfer\DataImporter;
-use FundKit\Foundation\Upgrade\NumberExistingSubscriptions;
 use FundKit\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
 use FundKit\Foundation\Upgrade\UpgradeRunner;
 use FundKit\Foundation\Upgrade\UpgradeJob;
@@ -286,7 +285,6 @@ final class CoreModule implements FundKitModule
     {
         return [
             new RestoreReceiptsRetainingMoney(),
-            new NumberExistingSubscriptions(),
         ];
     }
 

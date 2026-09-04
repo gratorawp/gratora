@@ -68,7 +68,11 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
                                     : sprintf( /* translators: %d: count */ __( '%d active plans', 'fundraising-toolkit' ), activeCount ) }
                             </HeadChip>
                         ) }
-                        <HeadChip tone="gray" mono>{ donor.reference }</HeadChip>
+                        { donor.id > 0 && (
+                            <HeadChip tone="gray" mono>
+                                { sprintf( /* translators: %d: donor id */ __( 'ID %d', 'fundraising-toolkit' ), donor.id ) }
+                            </HeadChip>
+                        ) }
                         { isRedacted && <HeadChip tone="gray">{ __( 'Redacted', 'fundraising-toolkit' ) }</HeadChip> }
                     </div>
                 </div>

@@ -860,7 +860,6 @@ final class PortalController
         foreach ($rows as $p) {
             $out[] = [
                 'id'              => (int) $p->id,
-                'reference'       => $p->reference(),
                 'amount_cents'    => (int) $p->amount_cents,
                 'currency'        => (string) $p->currency,
                 'interval_unit'   => (string) $p->interval_unit,

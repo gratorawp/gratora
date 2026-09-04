@@ -52,7 +52,8 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
 
     return (
         <Dialog
-            title={ plan.reference }
+            /* translators: %d: subscription id */
+            title={ sprintf( __( 'Subscription %d', 'fundraising-toolkit' ), plan.id ) }
             onClose={ onClose }
             foot={
                 <>

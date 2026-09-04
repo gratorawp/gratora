@@ -119,7 +119,6 @@ final class PayPalPlanRecorder
         [$unit, $count] = FrequencyMap::toStripe((string) $donation->frequency);
 
         $plan = RecurringPlan::make();
-        $plan->reference          = RecurringPlan::mintReference((bool) $donation->is_test);
         $plan->donor_id           = (int) $donation->donor_id;
         $plan->form_id            = $donation->form_id;
         $plan->campaign_id        = $donation->campaign_id;
