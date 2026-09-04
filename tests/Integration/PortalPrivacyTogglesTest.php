@@ -1,0 +1,93 @@
+<?php
+
+declare(strict_types=1);
+
+namespace FundKit\Tests\Integration;
+
+use FundKit\Donors\Donor;
+use FundKit\Donors\DonorService;
+use FundKit\Foundation\Plugin;
+use WP_REST_Request;
+
+/**
+ * The org can turn account deletion and data export off. The portal hides the
+ * buttons, but hiding a button is a courtesy: the routes are what has to
+ * refuse, because the caller writes the request.
+ */
+final class PortalPrivacyTogglesTest extends IntegrationTestCase
+{
+    protected function tearDown(): void
+    {
+        unset($_COOKIE['fundkit_donor_session']);
+        delete_option('fundkit_privacy');
+        parent::tearDown();
+    }
+
+    private string $csrf = '';
+
+    private function signedInDonor(): Donor
+    {
+        $donor = Plugin::instance()->container->get(DonorService::class)
+            ->findOrCreate('toggle-' . uniqid() . '@example.test', ['first_name' => 'Sam']);
+
+        $this->csrf = bin2hex(random_bytes(8));
+        $_COOKIE['fundkit_donor_session'] = $this->portalSession((int) $donor->id, $this->csrf);
+
+        return $donor;
+    }
+
+    /** Portal writes sit behind sessionWithCsrf, so a write without the header never reaches the route. */
+    private function write(string $route, array $body = []): int
+    {
+        $req = new WP_REST_Request('POST', $route);
+        $req->set_header('X-FundKit-Csrf', $this->csrf);
+        $req->set_body_params($body);
+
+        return rest_do_request($req)->get_status();
+    }
+
+    private function forget(): int
+    {
+        return $this->write('/fundkit/v1/portal/forget', ['confirm' => 'DELETE']);
+    }
+
+    public function test_deletion_is_refused_when_the_org_turned_it_off(): void
+    {
+        $donor = $this->signedInDonor();
+        update_option('fundkit_privacy', ['allow_account_delete' => false]);
+
+        $this->assertSame(403, $this->forget());
+        $this->assertNull(
+            Donor::query()->find('id', (int) $donor->id)->redacted_at,
+            'a refused deletion must not have erased anything'
+        );
+    }
+
+    public function test_export_is_refused_when_the_org_turned_it_off(): void
+    {
+        $this->signedInDonor();
+        update_option('fundkit_privacy', ['allow_data_export' => false]);
+
+        $this->assertSame(403, $this->write('/fundkit/v1/portal/data-export'));
+    }
+
+    public function test_deletion_still_works_when_it_is_left_on(): void
+    {
+        $donor = $this->signedInDonor();
+
+        $this->assertSame(200, $this->forget());
+        $this->assertNotNull(Donor::query()->find('id', (int) $donor->id)->redacted_at);
+    }
+
+    /** So the portal can hide what would be refused instead of offering it. */
+    public function test_the_session_response_carries_both_toggles(): void
+    {
+        $this->signedInDonor();
+        update_option('fundkit_privacy', ['allow_account_delete' => false, 'allow_data_export' => true]);
+
+        $me = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/portal/me'))->get_data();
+
+        $this->assertFalse($me['allow_account_delete']);
+        $this->assertTrue($me['allow_data_export']);
+    }
+}

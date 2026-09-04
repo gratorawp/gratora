@@ -688,6 +688,8 @@ final class PortalController
             'primary_currency'    => $defaultCurrency,
             'csrf'                => (string) ($this->session->csrfToken() ?? ''),
             'consents_pending'    => $this->staleConsentCount((int) $donor->id),
+            'allow_data_export'   => (bool) $this->privacySetting('allow_data_export', true),
+            'allow_account_delete' => (bool) $this->privacySetting('allow_account_delete', true),
         ], 200);
     }
 

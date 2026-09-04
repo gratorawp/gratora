@@ -1444,6 +1444,18 @@ function PrivacyActions() {
     const [ deleting, setDeleting ]   = useState( false );
     const [ confirmOpen, setConfirmOpen ] = useState( false );
     const [ error, setError ]         = useState( null );
+    // Both routes refuse when the org has turned them off, so this only decides
+    // whether the donor is offered something that would be refused.
+    const [ allowed, setAllowed ]     = useState( null );
+
+    useEffect( () => {
+        api( 'me' )
+            .then( ( me ) => setAllowed( {
+                export: me.allow_data_export !== false,
+                remove: me.allow_account_delete !== false,
+            } ) )
+            .catch( () => setAllowed( { export: false, remove: false } ) );
+    }, [] );
 
     const downloadData = async () => {
         setExporting( true );
@@ -1493,21 +1505,31 @@ function PrivacyActions() {
         }
     };
 
+    if ( ! allowed || ( ! allowed.export && ! allowed.remove ) ) return null;
+
+    const note = allowed.export && allowed.remove
+        ? __( "Download returns a JSON copy of everything we hold on you. Deletion anonymizes your record; donation totals stay for the organization's tax records.", 'fundraising-toolkit' )
+        : allowed.export
+            ? __( 'Download returns a JSON copy of everything we hold on you.', 'fundraising-toolkit' )
+            : __( "Deletion anonymizes your record; donation totals stay for the organization's tax records.", 'fundraising-toolkit' );
+
     return (
         <div class="dp-privacy">
             <h4>{ __( 'Your data', 'fundraising-toolkit' ) }</h4>
             { error && <p class="dp-error">{ error }</p> }
             <div class="dp-privacy__actions">
-                <button class="dp-action" disabled={ exporting } onClick={ downloadData }>
-                    { exporting ? __( 'Preparing…', 'fundraising-toolkit' ) : __( 'Download my data', 'fundraising-toolkit' ) }
-                </button>
-                <button class="dp-action is-destructive" disabled={ deleting } onClick={ () => { setError( null ); setConfirmOpen( true ); } }>
-                    { deleting ? __( 'Deleting…', 'fundraising-toolkit' ) : __( 'Delete my account', 'fundraising-toolkit' ) }
-                </button>
+                { allowed.export && (
+                    <button class="dp-action" disabled={ exporting } onClick={ downloadData }>
+                        { exporting ? __( 'Preparing…', 'fundraising-toolkit' ) : __( 'Download my data', 'fundraising-toolkit' ) }
+                    </button>
+                ) }
+                { allowed.remove && (
+                    <button class="dp-action is-destructive" disabled={ deleting } onClick={ () => { setError( null ); setConfirmOpen( true ); } }>
+                        { deleting ? __( 'Deleting…', 'fundraising-toolkit' ) : __( 'Delete my account', 'fundraising-toolkit' ) }
+                    </button>
+                ) }
             </div>
-            <p class="dp-privacy__note">
-                { __( "Download returns a JSON copy of everything we hold on you. Deletion anonymizes your record; donation totals stay for the organization's tax records.", 'fundraising-toolkit' ) }
-            </p>
+            <p class="dp-privacy__note">{ note }</p>
             { confirmOpen && (
                 <DeleteAccountModal
                     deleting={ deleting }
