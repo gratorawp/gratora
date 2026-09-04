@@ -161,12 +161,14 @@ export function DonorsApp( { toggleSlot } ) {
                 const name = item.name || __( '(no name)', 'fundraising-toolkit' );
                 return (
                     <div className="fundkit-row">
-                        <span className="fundkit-row__avatar" aria-hidden="true">
-                            { initials( name ) }
-                            { item.avatar_url && (
-                                <img className="fundkit-row__avatar-photo" src={ item.avatar_url } alt="" loading="lazy" decoding="async" />
-                            ) }
-                        </span>
+                        { ! item.redacted && (
+                            <span className="fundkit-row__avatar" aria-hidden="true">
+                                { initials( name ) }
+                                { item.avatar_url && (
+                                    <img className="fundkit-row__avatar-photo" src={ item.avatar_url } alt="" loading="lazy" decoding="async" />
+                                ) }
+                            </span>
+                        ) }
                         <div className="fundkit-row__body">
                             <span className="fundkit-ref-cell">
                                 <a className="fundkit-row__link fundkit-row__link--strong" href={ `#donor/${ item.id }` } { ...rowLinkProps }>

@@ -79,9 +79,9 @@ final class ErasedDonorStaysErasedTest extends IntegrationTestCase
         $this->assertEmpty($reloaded->last_name);
         $this->assertEmpty($reloaded->company);
         $this->assertEmpty($reloaded->phone_encrypted);
-        // country survives redact() on purpose: a country on its own does not
-        // identify anyone and the totals stay reportable by geography.
-        $this->assertSame('DE', $reloaded->country);
+        // Country goes with the address. Geography stays reportable from
+        // Analytics\Event, which carries its own country column.
+        $this->assertNull($reloaded->country);
         $this->assertNotNull($reloaded->redacted_at, 'and it is still marked erased');
     }
 

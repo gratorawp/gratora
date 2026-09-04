@@ -704,8 +704,18 @@ final class DonorsController
     }
 
     /** @since 1.0.0 */
+    /**
+     * A redacted donor is named as erased rather than as nameless: the dash a
+     * missing name earns reads as data that was never collected.
+     *
+     * @since 1.0.0
+     */
     private function donorName(Donor $d): string
     {
+        if ($d->redacted_at !== null) {
+            return __('[redacted]', 'fundraising-toolkit');
+        }
+
         $full = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
         return $full !== '' ? $full : '-';
     }

@@ -37,6 +37,7 @@ final class DonorErasureCompletenessTest extends IntegrationTestCase
         $d->email_hash = hash('sha256', self::NEEDLE);
         $d->first_name = 'Needle';
         $d->last_name  = 'Person';
+        $d->country    = 'NL';
         $d->created_at = $now;
         $d->updated_at = $now;
         $d->save();
@@ -201,5 +202,33 @@ final class DonorErasureCompletenessTest extends IntegrationTestCase
         $this->assertSame(5000, (int) $donation->amount_cents);
         $this->assertSame('FUNDKIT-ERASE-1', $donation->reference);
         $this->assertSame('paid', $donation->status);
+    }
+
+    public function test_the_country_goes_with_the_address(): void
+    {
+        $this->erase();
+
+        $this->assertNull(Donor::query()->find('id', $this->donorId)->country);
+    }
+
+    public function test_the_admin_names_an_erased_donor_as_redacted(): void
+    {
+        $this->erase();
+
+        $uid  = self::factory()->user->create(['role' => 'administrator']);
+        wp_set_current_user($uid);
+
+        $rows = rest_do_request(new \WP_REST_Request('GET', '/fundkit/v1/admin/donors'))->get_data();
+        $row  = null;
+        foreach ((array) ($rows['items'] ?? $rows) as $item) {
+            if ((int) ($item['id'] ?? 0) === $this->donorId) {
+                $row = $item;
+                break;
+            }
+        }
+
+        $this->assertIsArray($row, 'the donor was not in the list');
+        $this->assertSame('[redacted]', $row['name']);
+        $this->assertNull($row['country']);
     }
 }

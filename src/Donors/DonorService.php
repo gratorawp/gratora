@@ -426,6 +426,7 @@ final class DonorService
         $donor->tax_id_encrypted   = null;
         $donor->notes_encrypted    = null;
         $donor->company            = null;
+        $donor->country            = null;
         $donor->redacted_at        = $this->clock->now()->format('Y-m-d H:i:s');
         $donor->updated_at         = $donor->redacted_at;
 

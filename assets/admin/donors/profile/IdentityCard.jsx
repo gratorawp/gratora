@@ -51,8 +51,8 @@ export default function IdentityCard( { donor } ) {
 
     const avatarText = isAnon
         ? `#${ donor.id.toString( 16 ).toUpperCase().padStart( 2, '0' ) }`
-        : isRedacted ? '--' : initials( donor.name );
-    const avatarClass = isAnon ? 'dp-avatar is-hash' : isRedacted ? 'dp-avatar is-redacted' : 'dp-avatar';
+        : initials( donor.name );
+    const avatarClass = isAnon ? 'dp-avatar is-hash' : 'dp-avatar';
 
     const segment = donor.segment || 'other';
     const statusLabel = isRedacted
@@ -98,12 +98,14 @@ export default function IdentityCard( { donor } ) {
         <div className="dp-card dp-identity">
             <div className="dp-card__body">
                 <div className="dp-id-top">
-                    <span className={ avatarClass }>
-                        { avatarText }
-                        { donor.avatar_url && ! isRedacted && (
-                            <img className="dp-avatar__photo" src={ donor.avatar_url } alt="" loading="lazy" decoding="async" />
-                        ) }
-                    </span>
+                    { ! isRedacted && (
+                        <span className={ avatarClass }>
+                            { avatarText }
+                            { donor.avatar_url && (
+                                <img className="dp-avatar__photo" src={ donor.avatar_url } alt="" loading="lazy" decoding="async" />
+                            ) }
+                        </span>
+                    ) }
                     <div className="dp-id-name-block">
                         <div className={ `dp-id-name ${ isRedacted ? 'is-redacted' : isAnon ? 'is-anon' : '' }` }>
                             { donor.name }

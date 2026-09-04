@@ -442,6 +442,10 @@ final class RecurringController
     /** @since 1.0.0 */
     private function donorName(Donor $d): string
     {
+        if ($d->redacted_at !== null) {
+            return __('[redacted]', 'fundraising-toolkit');
+        }
+
         $full = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
 
         return $full !== '' ? $full : '-';
