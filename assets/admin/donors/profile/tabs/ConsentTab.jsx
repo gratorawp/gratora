@@ -37,7 +37,12 @@ function RedactDialog( { donor, onClose, onDone } ) {
     };
 
     return (
-        <Modal title={ __( 'Redact this donor', 'fundraising-toolkit' ) } onRequestClose={ onClose } className="dp-modal">
+        <Modal
+            title={ __( 'Redact this donor', 'fundraising-toolkit' ) }
+            onRequestClose={ onClose }
+            className="dp-modal"
+            size="medium"
+        >
             <form onSubmit={ submit } className="dp-edit-form">
                 <p style={ { gridColumn: '1 / -1', color: '#6b7280', fontSize: 13, marginTop: 0 } }>
                     { __( 'PII (name, email, phone, address, tax id, notes) will be permanently removed, and any active recurring plan is cancelled at the gateway. Lifetime totals, donations, and receipts are retained for accounting. This cannot be undone.', 'fundraising-toolkit' ) }
