@@ -21,7 +21,7 @@ export default function DonorCard( { donor, donationName, isAnonymous, onOpenDon
     return (
         <div className="dd-card">
             <div className="dd-card__body">
-                <div className="dd-donor-row">
+                <div className={ `dd-donor-row${ donor.redacted ? ' is-faceless' : '' }` }>
                     { ! donor.redacted && (
                         <span className="dd-avatar">{ initials( donor.name ) }</span>
                     ) }
