@@ -22,7 +22,9 @@ export default function DonorCard( { donor, donationName, isAnonymous, onOpenDon
         <div className="dd-card">
             <div className="dd-card__body">
                 <div className="dd-donor-row">
-                    <span className="dd-avatar">{ initials( donor.name ) }</span>
+                    { ! donor.redacted && (
+                        <span className="dd-avatar">{ initials( donor.name ) }</span>
+                    ) }
                     <div className="dd-donor-row__main">
                         <div className="dd-donor-row__name">{ donor.name }</div>
                         { donationName && donationName !== donor.name && (
