@@ -146,7 +146,7 @@ final class DonorService
         if ($donor->redacted_at !== null) {
             throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'fundraising-toolkit'));
         }
-        $changed = false;
+        $dirty = [];
         $textFields = ['first_name' => 100, 'last_name' => 100, 'company' => 150, 'locale' => 10];
 
         foreach ($textFields as $f => $maxLen) {
@@ -156,16 +156,14 @@ final class DonorService
             if ($value === '') $value = null;
             if ($value !== null && $maxLen) $value = substr($value, 0, $maxLen);
             if (($donor->$f ?? null) === $value) continue;
-            $donor->$f = $value;
-            $changed = true;
+            $dirty[$f] = $value;
         }
 
         if (array_key_exists('country', $patch)) {
             $raw = $patch['country'];
             $value = $raw === null || $raw === '' ? null : strtoupper(substr((string) $raw, 0, 2));
             if (($donor->country ?? null) !== $value) {
-                $donor->country = $value;
-                $changed = true;
+                $dirty['country'] = $value;
             }
         }
 
@@ -173,8 +171,7 @@ final class DonorService
             $raw     = is_string($patch['phone']) ? trim($patch['phone']) : '';
             $current = $this->decryptPhone($donor) ?? '';
             if ($raw !== $current) {
-                $donor->phone_encrypted = $raw === '' ? null : $this->crypto->encrypt($raw);
-                $changed = true;
+                $dirty['phone_encrypted'] = $raw === '' ? null : $this->crypto->encrypt($raw);
             }
         }
 
@@ -183,18 +180,17 @@ final class DonorService
             $newPayload = $this->addressPayload($addr);
             $current    = $donor->address_encrypted ? $this->crypto->decrypt($donor->address_encrypted) : null;
             if ($newPayload !== $current) {
-                $donor->address_encrypted = ($newPayload === null || $newPayload === '')
+                $dirty['address_encrypted'] = ($newPayload === null || $newPayload === '')
                     ? null : $this->crypto->encrypt($newPayload);
-                $changed = true;
             }
         }
 
-        // The encrypted fields are set on the model above and persisted by this
-        // single save(), so an unchanged phone or address costs no second
-        // UPDATE and fires no donor.updated on a no-op.
-        if ($changed) {
-            $donor->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
-            $donor->save();
+        // One UPDATE of the fields that moved, so an unchanged phone or address
+        // costs no second write and fires no donor.updated on a no-op, and the
+        // lifetime giving aggregates are left to whoever owns them.
+        if ($dirty !== []) {
+            $dirty['updated_at'] = $this->clock->now()->format('Y-m-d H:i:s');
+            $donor->updateColumns($dirty);
             do_action('fundkit.donor.updated', $donor);
         }
 

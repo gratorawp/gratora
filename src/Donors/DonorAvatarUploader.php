@@ -118,8 +118,14 @@ final class DonorAvatarUploader
         );
 
         $previous = (int) ($donor->avatar_attachment_id ?? 0);
-        $donor->avatar_attachment_id = (int) $attachmentId;
-        $donor->save();
+
+        // One column, because seconds of image work sit between the read and
+        // this write: a whole-row save would put the donor's giving totals
+        // back to whatever they were when the upload started.
+        $donor->updateColumns([
+            'avatar_attachment_id' => (int) $attachmentId,
+            'updated_at'           => gmdate('Y-m-d H:i:s'),
+        ]);
         $this->deleteAttachment($previous);
 
         return (int) $attachmentId;
@@ -147,8 +153,11 @@ final class DonorAvatarUploader
     public function remove(Donor $donor): void
     {
         $previous = (int) ($donor->avatar_attachment_id ?? 0);
-        $donor->avatar_attachment_id = null;
-        $donor->save();
+
+        $donor->updateColumns([
+            'avatar_attachment_id' => null,
+            'updated_at'           => gmdate('Y-m-d H:i:s'),
+        ]);
         $this->deleteAttachment($previous);
     }
 

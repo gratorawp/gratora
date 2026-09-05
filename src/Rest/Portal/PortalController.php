@@ -837,9 +837,15 @@ final class PortalController
             return new WP_Error('fundkit_not_found', '', ['status' => 404]);
         }
         $body = (array) ($request->get_json_params() ?? []);
-        $d->is_anonymous = (bool) ($body['is_anonymous'] ?? false);
-        $d->updated_at   = gmdate('Y-m-d H:i:s');
-        $d->save();
+
+        // The one column, not the whole row: a refund or dispute that commits
+        // between the read above and this write would otherwise be replaced by
+        // the snapshot's status and refunded_cents, leaving the donation row
+        // and the refund ledger disagreeing.
+        $d->updateColumns([
+            'is_anonymous' => (bool) ($body['is_anonymous'] ?? false),
+            'updated_at'   => gmdate('Y-m-d H:i:s'),
+        ]);
 
         do_action('fundkit.donation.updated', $d);
         return new WP_REST_Response(['ok' => true, 'is_anonymous' => $d->is_anonymous], 200);
@@ -1312,9 +1318,13 @@ final class PortalController
         $next  = self::normalizePrefs($body);
         $flags = is_array($donor->flags) ? $donor->flags : [];
         $flags['prefs'] = $next;
-        $donor->flags      = $flags;
-        $donor->updated_at = gmdate('Y-m-d H:i:s');
-        $donor->save();
+
+        // Not the whole donor row: the lifetime giving aggregates a renewal
+        // webhook may be writing right now are not this request's to restate.
+        $donor->updateColumns([
+            'flags'      => $flags,
+            'updated_at' => gmdate('Y-m-d H:i:s'),
+        ]);
 
         return new WP_REST_Response($next, 200);
     }

@@ -6,6 +6,7 @@ namespace FundKit\Donations;
 
 defined('ABSPATH') || exit;
 
+use FundKit\Foundation\Database\UpdatesColumns;
 use FundKit\Vendor\Queryable\Model;
 use FundKit\Vendor\Queryable\Schema\Table;
 
@@ -20,6 +21,8 @@ use FundKit\Vendor\Queryable\Schema\Table;
  */
 final class Donation extends Model
 {
+    use UpdatesColumns;
+
     protected string $table = 'fundkit_donations';
     protected string $version = '1.0.0';
 
