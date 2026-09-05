@@ -17,6 +17,7 @@ use FundKit\Foundation\Helpers\Csv;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Receipts\Receipt;
+use FundKit\Recurring\PlanRow;
 use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\RecurringPlanRepository;
 use FundKit\Settings\SettingsService;
@@ -740,30 +741,7 @@ final class DonorMetricsService
      */
     private function mapRecurringPlanRow(RecurringPlan $p): array
     {
-        return [
-            'id'                    => (int) $p->id,
-            'gateway'               => (string) $p->gateway,
-            'gateway_subscription_id'=> (string) $p->gateway_subscription_id,
-            'amount_cents'          => (int) $p->amount_cents,
-            'currency'              => (string) $p->currency,
-            'interval_unit'         => (string) $p->interval_unit,
-            'interval_count'        => (int) $p->interval_count,
-            'status'                => (string) $p->status,
-            'started_at'            => (string) $p->started_at,
-            'next_payment_at'       => $p->next_payment_at,
-            'last_payment_at'       => $p->last_payment_at,
-            'cancelled_at'          => $p->cancelled_at,
-            'payments_count'        => (int) $p->payments_count,
-            'total_paid_cents'      => (int) $p->total_paid_cents,
-            'failed_renewals_count' => (int) $p->failed_renewals_count,
-            // The Recurring tab offers Retry only where the gateway can do it;
-            // this shaper is separate from the Subscriptions one, so the flag
-            // has to be set in both or the tab silently loses the action.
-            'can_retry'             => $this->gateways->get((string) $p->gateway)
-                instanceof \FundKit\Gateways\SupportsPaymentRetry,
-            'campaign_id'           => $p->campaign_id !== null ? (int) $p->campaign_id : null,
-            'is_test'               => (bool) $p->is_test,
-        ];
+        return PlanRow::common($p, $this->gateways);
     }
 
     /**

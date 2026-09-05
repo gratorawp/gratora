@@ -19,6 +19,7 @@ import StatusBadge from '../_shared/components/StatusBadge';
 import { Switch } from '../_shared/components/Switch';
 import PlanActionDialog, { actionsFor, dueIn, isTerminal, retryActionFor } from '../_shared/recurring/PlanActions';
 import notify from '../_shared/notify';
+import { renderHealth, viewDetailsAction, copySubscriptionIdAction } from '../_shared/recurring/planColumns';
 import { dashboardHref } from '../_shared/adminPages';
 import { rowLinkProps } from '../_shared/rowLink';
 import { formatAmount, formatDate } from '../donations/format';
@@ -703,29 +704,7 @@ export default function List() {
                 { value: 'yes', label: __( 'Has failed renewals', 'fundraising-toolkit' ) },
             ],
             filterBy: { operators: [ 'is' ] },
-            // A declined renewal and a failed operation are different facts, so
-            // the column names whichever it has rather than folding them into
-            // one number. OK is only said when there is neither.
-            render: ( { item } ) => {
-                if ( item.failed_renewals_count > 0 ) {
-                    return <span className="fundkit-pill fundkit-pill--amber">{ sprintf(
-                        /* translators: %d: consecutive failed renewals. */
-                        _n( '%d failure', '%d failures', item.failed_renewals_count, 'fundraising-toolkit' ),
-                        item.failed_renewals_count
-                    ) }</span>;
-                }
-
-                const problems = item.errors?.length || 0;
-                if ( problems > 0 ) {
-                    return <span className="fundkit-pill fundkit-pill--red">{ sprintf(
-                        /* translators: %d: recorded problems on this subscription. */
-                        _n( '%d problem', '%d problems', problems, 'fundraising-toolkit' ),
-                        problems
-                    ) }</span>;
-                }
-
-                return <span className="fundkit-row__sub">{ __( 'OK', 'fundraising-toolkit' ) }</span>;
-            },
+            render: ( { item } ) => renderHealth( item ),
         },
         {
             id:       'interval',
@@ -754,30 +733,8 @@ export default function List() {
     ], [ gateways, campaigns ] );
 
     const actions = useMemo( () => [
-        {
-            id:    'view_details',
-            label: __( 'View details', 'fundraising-toolkit' ),
-            // The row's id opens the same dialog, but a row menu is where an
-            // admin looks for what they can do with a row, and this is the only
-            // place the plan's problems are readable.
-            callback: ( items ) => setDetail( items[ 0 ] ),
-        },
-        {
-            id:          'copy_subscription_id',
-            label:       __( 'Copy subscription id', 'fundraising-toolkit' ),
-            isPrimary:   false,
-            isEligible:  ( item ) => !! item.gateway_subscription_id,
-            callback:    async ( [ item ] ) => {
-                try {
-                    await window.navigator?.clipboard?.writeText( item.gateway_subscription_id );
-                    notify.success( __( 'Subscription id copied.', 'fundraising-toolkit' ) );
-                } catch ( e ) {
-                    // No clipboard permission, so show it instead of failing
-                    // silently: it is a lookup key and reading it is the point.
-                    notify.error( item.gateway_subscription_id );
-                }
-            },
-        },
+        viewDetailsAction( setDetail ),
+        copySubscriptionIdAction(),
         {
             id:    'retry',
             label: __( 'Retry payment', 'fundraising-toolkit' ),

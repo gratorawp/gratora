@@ -5,6 +5,13 @@ import { RotateCw } from 'lucide-react';
 
 import EmptyState from '../../../_shared/components/EmptyState';
 import PlanActionDialog, { actionsFor, dueIn, isTerminal, retryActionFor } from '../../../_shared/recurring/PlanActions';
+import PlanDetailDialog from '../../../subscriptions/PlanDetailDialog';
+import {
+    intervalLabel,
+    renderHealth,
+    viewDetailsAction,
+    copySubscriptionIdAction,
+} from '../../../_shared/recurring/planColumns';
 import { formatAmount, formatDateTime, planStatusPill } from '../helpers';
 
 const STATUS_OPTIONS = [
@@ -15,35 +22,11 @@ const STATUS_OPTIONS = [
     { value: 'expired',   label: __( 'Expired', 'fundraising-toolkit' ) },
 ];
 
-/**
- * "month", "2 week" and so on came straight from the database, so the cell
- * never translated and never pluralised. Spelled out per unit because a
- * translator needs both forms and the singular is not the column value.
- */
-function intervalLabel( unit, count ) {
-    const n = Number( count ) || 1;
-    switch ( unit ) {
-        case 'day':
-            /* translators: %d: number of days between charges. */
-            return sprintf( _n( '%d day', '%d days', n, 'fundraising-toolkit' ), n );
-        case 'week':
-            /* translators: %d: number of weeks between charges. */
-            return sprintf( _n( '%d week', '%d weeks', n, 'fundraising-toolkit' ), n );
-        case 'month':
-            /* translators: %d: number of months */
-            return sprintf( _n( '%d month', '%d months', n, 'fundraising-toolkit' ), n );
-        case 'year':
-            /* translators: %d: number of years between charges. */
-            return sprintf( _n( '%d year', '%d years', n, 'fundraising-toolkit' ), n );
-        default:
-            return n > 1 ? `${ n } ${ unit }` : String( unit );
-    }
-}
-
 export default function RecurringTab( { recurring, onChange } ) {
     // A fresh [] each render would re-sort and re-paginate on every keystroke.
     const plans = useMemo( () => recurring?.plans || [], [ recurring ] );
     const [ dialog, setDialog ] = useState( null );
+    const [ detail, setDetail ] = useState( null );
 
     const [ view, setView ] = useState( {
         type:    'table',
@@ -122,20 +105,36 @@ export default function RecurringTab( { recurring, onChange } ) {
         },
         {
             id:    'failed',
-            label: __( 'Renewal health', 'fundraising-toolkit' ),
+            label: __( 'Health', 'fundraising-toolkit' ),
             enableSorting: true,
             getValue: ( { item } ) => item.failed_renewals_count || 0,
-            render: ( { item } ) => item.failed_renewals_count > 0
-                ? (
-                    <span className="fundkit-pill is-warn">
-                        { sprintf(
-                            /* translators: %d: consecutive failed renewals. */
-                            _n( '%d failure', '%d failures', item.failed_renewals_count, 'fundraising-toolkit' ),
-                            item.failed_renewals_count
-                        ) }
-                    </span>
-                )
-                : <span className="fundkit-row__sub">{ __( 'OK', 'fundraising-toolkit' ) }</span>,
+            render: ( { item } ) => renderHealth( item ),
+        },
+        {
+            id:    'gateway',
+            label: __( 'Gateway', 'fundraising-toolkit' ),
+            render: ( { item } ) => (
+                <div className="fundkit-row">
+                    <div className="fundkit-row__body">
+                        <div className="fundkit-row__name" style={ { textTransform: 'capitalize' } }>{ item.gateway }</div>
+                        { item.gateway_subscription_id
+                            ? <div className="fundkit-row__sub mono">{ item.gateway_subscription_id }</div>
+                            : <div className="fundkit-row__sub">{ __( 'Not linked', 'fundraising-toolkit' ) }</div> }
+                    </div>
+                </div>
+            ),
+        },
+        {
+            id:    'interval',
+            label: __( 'Interval', 'fundraising-toolkit' ),
+            render: ( { item } ) => <span>{ intervalLabel( item.interval_unit, item.interval_count ) }</span>,
+        },
+        {
+            id:    'started_at',
+            label: __( 'Started', 'fundraising-toolkit' ),
+            enableSorting: true,
+            getValue: ( { item } ) => item.started_at || '',
+            render: ( { item } ) => <span>{ item.started_at ? formatDateTime( item.started_at ) : '-' }</span>,
         },
         {
             id:    'lifetime',
@@ -167,6 +166,8 @@ export default function RecurringTab( { recurring, onChange } ) {
     // Same set the Subscriptions screen offers, resolved through the shared
     // PlanActions helpers so the two cannot drift apart.
     const actions = useMemo( () => [
+        viewDetailsAction( setDetail ),
+        copySubscriptionIdAction(),
         {
             id:    'retry',
             label: __( 'Retry payment', 'fundraising-toolkit' ),
@@ -248,6 +249,14 @@ export default function RecurringTab( { recurring, onChange } ) {
                     // The plan row, the donor's counters and the activity list
                     // all move together, so the whole profile is refetched.
                     onDone={ onChange }
+                />
+            ) }
+
+            { detail && (
+                <PlanDetailDialog
+                    plan={ detail }
+                    onClose={ () => setDetail( null ) }
+                    onAction={ ( action ) => { setDialog( { plan: detail, action } ); setDetail( null ); } }
                 />
             ) }
         </div>
