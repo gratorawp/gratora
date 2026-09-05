@@ -800,14 +800,6 @@ final class ToolsController
                 continue;
             }
 
-            $stored = get_option($opt, []);
-            $stored = is_array($stored) ? $stored : [];
-
-            // A masked value in the file means "whatever is already stored",
-            // so importing an export cannot wipe the secrets it could not
-            // carry.
-            $incoming = SecretRedactor::restore($incoming, $stored);
-
             $group = self::groupFor($writer, $opt);
 
             // Nothing on this install declares it, so there is no shape to check
@@ -817,6 +809,13 @@ final class ToolsController
                 $refused[$opt] = __('This site has no settings group by that name.', 'fundraising-toolkit');
                 continue;
             }
+
+            // A masked value in the file means "whatever is already stored",
+            // so importing an export cannot wipe the secrets it could not
+            // carry. Read through the settings writer rather than the raw
+            // option, which on a site that has never saved this group is
+            // absent entirely.
+            $incoming = SecretRedactor::restore($incoming, $writer->get($group));
 
             // Through the settings writer, so a restore inherits what every
             // other writer does: the base-currency lock, the per-group type

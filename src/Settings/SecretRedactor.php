@@ -76,11 +76,17 @@ final class SecretRedactor
     public static function restore(array $incoming, array $stored): array
     {
         foreach ($incoming as $key => $value) {
-            if (! array_key_exists($key, $stored)) {
+            $has = array_key_exists($key, $stored);
+
+            // The mask stands for a secret this site holds. Where it holds
+            // none, the mask is not a secret, it is four characters that read
+            // as one: stored, it satisfies every "is the key set" check while
+            // failing every signature it is used for.
+            if ($value === self::MASK) {
+                $incoming[$key] = $has ? $stored[$key] : '';
                 continue;
             }
-            if ($value === self::MASK) {
-                $incoming[$key] = $stored[$key];
+            if (! $has) {
                 continue;
             }
             if (is_array($value) && is_array($stored[$key])) {
