@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Donors;
 
 use FundKit\Analytics\ErrorLog;
+use FundKit\Analytics\EventRecorder;
 use FundKit\Donations\Donation;
 use FundKit\Foundation\Maintenance\AbandonedPendingReaper;
 use FundKit\Donors\Erasure\AnalyticsEventHandler;
@@ -15,6 +16,7 @@ use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\RecurringPlanRepository;
 use FundKit\Foundation\Crypto\Crypto;
 use FundKit\Foundation\Identity\IdentityHasher;
+use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Time\Clock;
 use InvalidArgumentException;
 use Throwable;
@@ -456,6 +458,15 @@ final class DonorService
                 DB::table('fundkit_donations')->whereIn('id', $dids)->delete();
             }
 
+            $this->events()->record('donor.deleted', [
+                'payload' => [
+                    'by'                => self::actorKind(),
+                    'actor_name'        => self::actorName(),
+                    'was_redacted'      => $donor->redacted_at !== null,
+                    'donations_deleted' => count($dids),
+                ],
+            ]);
+
             Donor::query()->where('id', $id)->delete();
 
             // After the row is gone, so a listener cannot resurrect it by
@@ -516,6 +527,15 @@ final class DonorService
             if ($this->purge->purgesOnRedaction()) {
                 $this->purge->purge($donor);
             }
+
+            $this->events()->record('donor.redacted', [
+                'donor_id' => (int) $donor->id,
+                'payload'  => [
+                    'by'                  => self::actorKind(),
+                    'actor_name'          => self::actorName(),
+                    'donations_retained'  => count($request->donationIds),
+                ],
+            ]);
         });
 
         // After the commit: file deletion cannot be rolled back, so a failed
@@ -584,6 +604,42 @@ final class DonorService
      *
      * @since 1.0.0
      */
+    /**
+     * Resolved from the container rather than injected: EventRecorder needs
+     * SettingsService, which is not bound yet where this service is first
+     * resolved during boot.
+     *
+     * @since 1.0.0
+     */
+    private function events(): EventRecorder
+    {
+        return Plugin::instance()->container->get(EventRecorder::class);
+    }
+
+    /**
+     * Who acted, in a form that survives the user row being deleted later.
+     *
+     * Two of these callers have no user id: the nightly sweep runs unattended
+     * and the portal's forget route acts as the donor.
+     *
+     * @since 1.0.0
+     */
+    private static function actorKind(): string
+    {
+        if (defined('WP_CLI') && WP_CLI) return 'cli';
+        if (wp_doing_cron()) return 'retention';
+
+        return get_current_user_id() > 0 ? 'admin' : 'donor';
+    }
+
+    /** @since 1.0.0 */
+    private static function actorName(): string
+    {
+        $user = wp_get_current_user();
+
+        return $user && $user->ID > 0 ? (string) $user->display_name : '';
+    }
+
     private function erasureRequest(Donor $donor): ErasureRequest
     {
         $donations = Donation::query()->where('donor_id', $donor->id)->getAll();

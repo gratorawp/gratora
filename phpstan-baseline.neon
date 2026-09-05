@@ -49,12 +49,6 @@ parameters:
 			path: src/Donors/DonorMetricsService.php
 
 		-
-			message: '#^Anonymous function has an unused use \$donor\.$#'
-			identifier: closure.unusedUse
-			count: 1
-			path: src/Donors/DonorService.php
-
-		-
 			message: '#^Right side of && is always true\.$#'
 			identifier: booleanAnd.rightAlwaysTrue
 			count: 1

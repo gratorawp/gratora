@@ -171,6 +171,12 @@ final class ToolsController
     /** Inbound gateway deliveries, written as `webhook.<gateway id>`. */
     private const WEBHOOK_PREFIX = 'webhook.';
 
+    /**
+     * The record of what an admin did to a donor. Readable here, and
+     * deliberately outside isDiagnostic(), which is what Clear log deletes by.
+     */
+    private const AUDIT_PREFIX = 'donor.';
+
     /** Columns the list may be ordered by. Nothing outside this reaches the query. */
     private const LOG_ORDER_COLUMNS = ['occurred_at', 'type'];
 
@@ -259,6 +265,12 @@ final class ToolsController
     }
 
     /** @since 1.0.0 */
+    private static function isReadable(string $source): bool
+    {
+        return self::isDiagnostic($source) || str_starts_with($source, self::AUDIT_PREFIX);
+    }
+
+    /** @since 1.0.0 */
     private static function isDiagnostic(string $source): bool
     {
         return str_starts_with($source, ErrorLog::PREFIX)
@@ -277,7 +289,7 @@ final class ToolsController
     {
         $source = preg_replace('/[^a-z0-9_.\-]/', '', strtolower(trim($raw))) ?: '';
 
-        return self::isDiagnostic($source) ? $source : '';
+        return self::isReadable($source) ? $source : '';
     }
 
     /** @since 1.0.0 */
@@ -290,7 +302,8 @@ final class ToolsController
         } else {
             $query->where(static function ($q): void {
                 $q->whereLike('type', ErrorLog::PREFIX . '%')
-                    ->orWhereLike('type', self::WEBHOOK_PREFIX . '%');
+                    ->orWhereLike('type', self::WEBHOOK_PREFIX . '%')
+                    ->orWhereLike('type', self::AUDIT_PREFIX . '%');
             });
         }
 
@@ -398,7 +411,8 @@ final class ToolsController
             ->distinct()
             ->where(static function ($q): void {
                 $q->whereLike('type', ErrorLog::PREFIX . '%')
-                    ->orWhereLike('type', self::WEBHOOK_PREFIX . '%');
+                    ->orWhereLike('type', self::WEBHOOK_PREFIX . '%')
+                    ->orWhereLike('type', self::AUDIT_PREFIX . '%');
             })
             ->orderBy('type', 'ASC')
             ->getAll();

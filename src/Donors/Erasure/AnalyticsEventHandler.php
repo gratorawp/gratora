@@ -19,6 +19,9 @@ use FundKit\Analytics\Event;
  */
 final class AnalyticsEventHandler implements ErasureHandler
 {
+    /** The record of what an admin did, which is not the donor's data. */
+    private const AUDIT = 'donor.';
+
     private const CLEARED = [
         'payload'         => null,
         'session_hash'    => null,
@@ -36,12 +39,20 @@ final class AnalyticsEventHandler implements ErasureHandler
     /** @since 1.0.0 */
     public function erase(ErasureRequest $request): void
     {
-        Event::query()->where('donor_id', $request->donorId)->update(self::CLEARED);
+        // The record of a destructive act outlives its subject, or nobody can
+         // answer who removed this donor. It carries no donor detail to clear.
+        Event::query()
+            ->where('type', self::AUDIT . '%', 'NOT LIKE')
+            ->where('donor_id', $request->donorId)
+            ->update(self::CLEARED);
 
         if ($request->donationIds !== []) {
             // A donation-scoped event may predate the donor being resolved, so
             // donor_id alone misses it.
-            Event::query()->whereIn('donation_id', $request->donationIds)->update(self::CLEARED);
+            Event::query()
+                ->where('type', self::AUDIT . '%', 'NOT LIKE')
+                ->whereIn('donation_id', $request->donationIds)
+                ->update(self::CLEARED);
         }
 
         // Backstop for events attached to neither: an abandoned checkout keeps
@@ -52,6 +63,7 @@ final class AnalyticsEventHandler implements ErasureHandler
 
         $patterns = $request->likePatterns();
         Event::query()
+            ->where('type', self::AUDIT . '%', 'NOT LIKE')
             ->where(static function ($q) use ($patterns): void {
                 $first = array_shift($patterns);
                 $q->whereLike('payload', $first);

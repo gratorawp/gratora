@@ -52,6 +52,7 @@ final class EventRetention
                 DB::raw(
                     "SELECT id FROM {$prefix}fundkit_events
                      WHERE occurred_at < %s
+                       AND type NOT LIKE 'donor.%%'
                      ORDER BY id ASC
                      LIMIT %d",
                     [$cutoff, $n]
