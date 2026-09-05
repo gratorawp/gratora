@@ -64,7 +64,7 @@ export function actionsFor( plan ) {
         actions.push( { id: 'skip_next', label: __( 'Skip next', 'fundraising-toolkit' ) } );
     }
     actions.push( { id: 'change_amount', label: __( 'Change amount', 'fundraising-toolkit' ) } );
-    actions.push( { id: 'cancel', label: __( 'Cancel', 'fundraising-toolkit' ), destructive: true } );
+    actions.push( { id: 'cancel', label: __( 'Cancel subscription', 'fundraising-toolkit' ), destructive: true } );
 
     return actions;
 }

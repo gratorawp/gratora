@@ -559,7 +559,7 @@ export default function List() {
                         href={ `#subscription/${ item.id }` }
                         onClick={ ( e ) => { e.preventDefault(); setDetail( item ); } }
                     >
-                        { item.id }
+                        { `#${ item.id }` }
                     </a>
                 </span>
             ),

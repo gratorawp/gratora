@@ -53,13 +53,19 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
     return (
         <Dialog
             /* translators: %d: subscription id */
-            title={ sprintf( __( 'Subscription %d', 'fundraising-toolkit' ), plan.id ) }
+            title={ sprintf( __( 'Subscription #%d', 'fundraising-toolkit' ), plan.id ) }
             onClose={ onClose }
             foot={
                 <>
-                    <Btn variant="secondary" onClick={ onClose }>{ __( 'Close', 'fundraising-toolkit' ) }</Btn>
+                    <Btn className="sd-foot__close" variant="secondary" onClick={ onClose }>
+                        { __( 'Close', 'fundraising-toolkit' ) }
+                    </Btn>
                     { actionsFor( plan ).map( ( a ) => (
-                        <Btn key={ a.id } variant="secondary" onClick={ () => onAction( a.id ) }>
+                        <Btn
+                            key={ a.id }
+                            variant={ a.destructive ? 'danger' : 'secondary' }
+                            onClick={ () => onAction( a.id ) }
+                        >
                             { a.label }
                         </Btn>
                     ) ) }
