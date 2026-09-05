@@ -338,7 +338,47 @@ final class ToolsController
             return self::deliveryRow($e);
         }
 
+        if (str_starts_with((string) $e->type, self::AUDIT_PREFIX)) {
+            return self::auditRow($e);
+        }
+
         return self::errorRow($e);
+    }
+
+    /**
+     * The record of something done TO a donor, which is not a failure.
+     *
+     * These rows are readable here on purpose, and the error branch stamped
+     * them kind 'error' and then cut ErrorLog's prefix off a type that never
+     * carried it: an erasure appeared in the log as an error from a source
+     * called "redacted", with no message at all.
+     *
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
+    private static function auditRow(Event $e): array
+    {
+        $payload = is_array($e->payload) ? $e->payload : [];
+        $who     = trim((string) ($payload['actor_name'] ?? '')) ?: trim((string) ($payload['by'] ?? ''));
+
+        foreach (['donation_id', 'donor_id', 'campaign_id', 'form_id', 'recurring_plan_id'] as $col) {
+            if (! empty($e->{$col})) {
+                $payload = [$col => (int) $e->{$col}] + $payload;
+            }
+        }
+
+        return [
+            'id'      => (int) $e->id,
+            'kind'    => 'audit',
+            'source'  => (string) $e->type,
+            'message' => $who !== ''
+                /* translators: %s: who performed the action, a staff name or "donor". */
+                ? sprintf(__('Recorded by %s.', 'fundraising-toolkit'), $who)
+                : __('No detail recorded.', 'fundraising-toolkit'),
+            'context'     => $payload,
+            'occurred_at' => (string) $e->occurred_at,
+        ];
     }
 
     /**
@@ -932,6 +972,12 @@ final class ToolsController
             // absent entirely.
             $incoming = SecretRedactor::restore($incoming, $writer->get($group));
 
+            // An attachment id means nothing on another site: the export carries
+            // no media, so the id either resolves to a different picture or to
+            // none. Dropped rather than restored, which leaves the receipt with
+            // no logo until one is uploaded here.
+            unset($incoming['logo_attachment_id']);
+
             // Through the settings writer, so a restore inherits what every
             // other writer does: the base-currency lock, the per-group type
             // whitelist, and the fundkit.settings.updated broadcast that the FX
@@ -942,6 +988,13 @@ final class ToolsController
             } catch (BaseCurrencyLocked $e) {
                 $refused[$opt] = $e->getMessage();
                 $locked        = true;
+                continue;
+            } catch (\RuntimeException | \InvalidArgumentException $e) {
+                // Every other refusal the writer raises: a numbering format with
+                // a token nothing answers to, a currency that is not a code.
+                // Uncaught, one of them ended the restore as a fatal after nine
+                // groups were already written, with no report of what landed.
+                $refused[$opt] = $e->getMessage();
                 continue;
             }
 

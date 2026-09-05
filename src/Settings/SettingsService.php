@@ -578,6 +578,7 @@ final class SettingsService
      *
      * @throws BaseCurrencyLocked when the write would re-denominate recorded money
      * @throws InvalidReferenceToken when a numbering prefix or separator is not a token
+     * @throws InvalidArgumentException when a currency is not a three-letter code
      *
      * @since 1.0.0
      */

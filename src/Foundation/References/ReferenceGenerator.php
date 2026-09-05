@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Foundation\References;
 
+use InvalidArgumentException;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Vendor\Queryable\DB;
 use RuntimeException;
@@ -34,6 +35,9 @@ final class ReferenceGenerator
         'reset_yearly' => true,
         'separator'    => '-',
     ];
+
+    /** What donations.reference holds. */
+    private const MAX_REFERENCE = 32;
 
     /** @since 1.0.0 */
     public function __construct(private Clock $clock)
@@ -182,6 +186,55 @@ final class ReferenceGenerator
                 throw new InvalidReferenceToken($label, (string) $prefixes[$scope]);
             }
         }
+
+        self::assertFits($input);
+    }
+
+    /**
+     * The longest reference this numbering can mint has to fit the column.
+     *
+     * donations.reference is VARCHAR(32) with a unique index, and the panel's
+     * own maxima are HTML attributes with nothing behind them. WordPress
+     * removes STRICT_TRANS_TABLES, so an overflowing reference is silently
+     * truncated rather than refused, and two truncated to the same 32
+     * characters collide on that index.
+     *
+     * @param array<string,mixed> $input
+     *
+     * @throws InvalidArgumentException
+     */
+    private static function assertFits(array $input): void
+    {
+        $sep     = (string) ($input['separator'] ?? self::DEFAULT_SETTINGS['separator']);
+        $padding = max(1, (int) ($input['padding'] ?? self::DEFAULT_SETTINGS['padding']));
+        $year    = array_key_exists('include_year', $input)
+            ? ! empty($input['include_year'])
+            : (bool) self::DEFAULT_SETTINGS['include_year'];
+
+        $prefixes = array_merge(
+            self::DEFAULT_SETTINGS['prefixes'],
+            is_array($input['prefixes'] ?? null) ? array_map('strval', $input['prefixes']) : [],
+            // A scope with no configured prefix falls back to its own name in
+            // capitals, and test_donation is thirteen characters of it: the
+            // widest reference the product mints is one the panel never shows.
+            ['test_donation' => 'TEST_DONATION']
+        );
+
+        $longest = 0;
+        foreach ($prefixes as $prefix) {
+            $length  = strlen((string) $prefix) + strlen($sep) + $padding
+                + ($year ? 4 + strlen($sep) : 0);
+            $longest = max($longest, $length);
+        }
+
+        if ($longest > self::MAX_REFERENCE) {
+            throw new InvalidArgumentException(esc_html(sprintf(
+                /* translators: 1: length this numbering would produce, 2: the maximum. */
+                __('This numbering would produce references of up to %1$d characters and the limit is %2$d. Shorten a prefix, the separator or the padding.', 'fundraising-toolkit'),
+                $longest,
+                self::MAX_REFERENCE
+            )));
+        }
     }
 
     /** @since 1.0.0 */
@@ -232,6 +285,17 @@ final class ReferenceGenerator
 
         wp_cache_delete($key, 'options');
         wp_cache_delete('alloptions', 'options');
+
+        // Which year the continuous counter's numbers were printed against.
+        // Without it a year-scoped counter cannot tell whether the continuous
+        // one ran ahead of it this year, which is a collision, or in an earlier
+        // one, which is not: the year is in the reference.
+        // Deliberately not under the counter prefix: seedFor scans every
+        // fundkit_reference_counter* option for the highest number, and a year
+        // sitting among them would read as a counter that had reached 2027.
+        if ($key === "fundkit_reference_counter_{$scope}") {
+            update_option("fundkit_reference_year_{$scope}", (string) $year, false);
+        }
 
         return $new;
     }
@@ -291,7 +355,17 @@ final class ReferenceGenerator
         $continuous = "fundkit_reference_counter_{$scope}";
 
         if ($key !== $continuous) {
-            return (int) get_option($continuous, 0);
+            // The continuous counter prints the same string as this one while
+            // the year is in the reference, so a number it reached THIS year is
+            // one this counter must clear. A number it reached in an earlier
+            // year is not: that reference carries the earlier year and cannot
+            // collide. Flooring on it regardless meant "reset numbering each
+            // year" never produced 00001 again on any site that had ever
+            // numbered continuously.
+            $mintedIn = (int) get_option("fundkit_reference_year_{$scope}", 0);
+            $thisYear = (int) substr($key, strrpos($key, '_') + 1);
+
+            return $mintedIn === $thisYear ? (int) get_option($continuous, 0) : 0;
         }
 
         $result = DB::raw(

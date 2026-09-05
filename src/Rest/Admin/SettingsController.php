@@ -128,6 +128,11 @@ final class SettingsController
             return new WP_Error('fundkit_base_currency_locked', $e->getMessage(), ['status' => 409]);
         } catch (InvalidReferenceToken $e) {
             return new WP_Error('fundkit_invalid_reference_token', $e->getMessage(), ['status' => 400]);
+        } catch (\InvalidArgumentException $e) {
+            // A value the writer refuses on its own terms: a currency that is
+            // not a code, a numbering format too long for the column. The
+            // sentence is written for the admin, so it is the response.
+            return new WP_Error('fundkit_invalid_setting', $e->getMessage(), ['status' => 422]);
         }
 
         // The same read-only fields the GET carries. The client replaces its

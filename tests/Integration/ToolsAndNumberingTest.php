@@ -1,0 +1,146 @@
+<?php
+
+declare(strict_types=1);
+
+namespace FundKit\Tests\Integration;
+
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\References\ReferenceGenerator;
+use FundKit\Foundation\Time\FrozenClock;
+use FundKit\Settings\SettingsService;
+use DateTimeImmutable;
+use DateTimeZone;
+use InvalidArgumentException;
+use WP_REST_Request;
+
+/**
+ * Numbering the panel would accept and the column could not hold, and a
+ * restore that ended as a fatal halfway through.
+ */
+final class ToolsAndNumberingTest extends IntegrationTestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+    }
+
+    private function settings(): SettingsService
+    {
+        return Plugin::instance()->container->get(SettingsService::class);
+    }
+
+    private function generatorAt(string $utc): ReferenceGenerator
+    {
+        return new ReferenceGenerator(new FrozenClock(new DateTimeImmutable($utc, new DateTimeZone('UTC'))));
+    }
+
+    // --- a reference the column cannot hold ---------------------------------
+
+    public function test_a_numbering_format_too_long_for_the_column_is_refused(): void
+    {
+        // Values the panel itself offers: a twelve-digit counter beside the
+        // thirteen-character prefix test-mode donations mint under.
+        $this->expectException(InvalidArgumentException::class);
+        $this->settings()->update('numbering', ['padding' => 12, 'separator' => '---']);
+    }
+
+    public function test_an_over_long_prefix_is_refused(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->settings()->update('numbering', ['prefixes' => ['donation' => str_repeat('A', 40)]]);
+    }
+
+    public function test_a_format_that_fits_is_accepted(): void
+    {
+        $saved = $this->settings()->update('numbering', ['padding' => 6, 'separator' => '-']);
+
+        $this->assertSame(6, (int) $saved['padding']);
+    }
+
+    public function test_the_route_says_why_rather_than_erroring(): void
+    {
+        $req = new WP_REST_Request('PUT', '/fundkit/v1/admin/settings/numbering');
+        $req->set_param('group', 'numbering');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body('{"padding":12,"separator":"---"}');
+
+        $res = rest_do_request($req);
+
+        $this->assertSame(422, $res->get_status());
+        $this->assertSame('fundkit_invalid_setting', (string) $res->get_data()['code']);
+    }
+
+    // --- a year that actually resets ----------------------------------------
+
+    private function numbering(bool $resetYearly): void
+    {
+        update_option('fundkit_reference_settings', [
+            'include_year' => true,
+            'reset_yearly' => $resetYearly,
+            'padding'      => 5,
+            'separator'    => '-',
+        ]);
+    }
+
+    public function test_a_new_year_starts_at_one_after_a_year_of_continuous_numbering(): void
+    {
+        $this->numbering(false);
+        $this->generatorAt('2026-06-01 10:00:00')->next('donation');
+        $this->generatorAt('2026-06-01 10:00:00')->next('donation');
+
+        $this->numbering(true);
+        $first = $this->generatorAt('2027-01-02 10:00:00')->next('donation');
+
+        $this->assertSame('DON-2027-00001', $first, 'the yearly reset never produced 00001 again');
+    }
+
+    /** Within the same year both counters print the same string, so one must clear the other. */
+    public function test_turning_the_reset_on_mid_year_does_not_reissue(): void
+    {
+        $this->numbering(false);
+        $this->generatorAt('2026-06-01 10:00:00')->next('donation');
+        $this->generatorAt('2026-06-01 10:00:00')->next('donation');
+
+        $this->numbering(true);
+        $next = $this->generatorAt('2026-06-02 10:00:00')->next('donation');
+
+        $this->assertSame('DON-2026-00003', $next);
+    }
+
+    // --- a restore that reports rather than fatals ---------------------------
+
+    private function import(array $settings): \WP_REST_Response|\WP_Error
+    {
+        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/import');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode(['settings' => $settings]));
+
+        return rest_do_request($req);
+    }
+
+    public function test_a_restore_carrying_an_impossible_numbering_format_is_reported(): void
+    {
+        $res = $this->import([
+            'fundkit_reference_settings' => ['padding' => 12, 'separator' => '---'],
+        ]);
+
+        $this->assertInstanceOf(\WP_REST_Response::class, $res);
+        $this->assertGreaterThanOrEqual(400, $res->get_status(), 'the restore has to say what it refused');
+    }
+
+    /** The logo id means nothing on another site: the export carries no media. */
+    public function test_a_restore_does_not_carry_a_logo_id_across_sites(): void
+    {
+        update_option('fundkit_receipt_settings', ['logo_attachment_id' => 0]);
+
+        $this->import([
+            'fundkit_receipt_settings' => ['logo_attachment_id' => 4242, 'header_title' => 'Their receipt'],
+        ]);
+
+        $stored = (array) get_option('fundkit_receipt_settings', []);
+
+        $this->assertSame(0, (int) ($stored['logo_attachment_id'] ?? 0));
+        $this->assertSame('Their receipt', (string) ($stored['header_title'] ?? ''), 'the rest of the group still lands');
+    }
+}
