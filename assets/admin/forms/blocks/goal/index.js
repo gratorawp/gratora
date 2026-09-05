@@ -1,5 +1,5 @@
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, ToggleControl } from '@wordpress/components';
+import { PanelBody, ToggleControl, ExternalLink } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { formatAmount } from '../../../_shared/format';
@@ -138,6 +138,13 @@ function Edit( { attributes, setAttributes } ) {
                             onChange={ ( v ) => setAttributes( { showDeadline: v } ) }
                             __nextHasNoMarginBottom
                         />
+                    ) }
+                    { ! isFormSource && campaign && ! hasGoal && (
+                        <p style={ { margin: '16px 0 0' } }>
+                            <ExternalLink href={ `admin.php?page=fundkit-campaigns&view=detail&id=${ campaign.id }&tab=settings` }>
+                                { __( 'Set the campaign goal', 'fundraising-toolkit' ) }
+                            </ExternalLink>
+                        </p>
                     ) }
                 </PanelBody>
                 <ConditionPanel

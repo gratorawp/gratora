@@ -45,7 +45,7 @@ function Edit( { attributes, setAttributes } ) {
     const manageLink = (
         <p style={ { margin: '10px 0 0' } }>
             <ExternalLink href={ SETTINGS_URL }>
-                { __( 'Manage enabled currencies', 'fundraising-toolkit' ) }
+                { __( 'Manage currencies', 'fundraising-toolkit' ) }
             </ExternalLink>
         </p>
     );
@@ -55,15 +55,21 @@ function Edit( { attributes, setAttributes } ) {
         panelBody = <div style={ { display: 'flex', justifyContent: 'center', padding: 12 } }><Spinner /></div>;
     } else if ( available.length === 0 ) {
         panelBody = (
-            <Notice status="warning" isDismissible={ false }>
-                { __( 'No currencies are enabled yet. Enable them under Settings → Currency.', 'fundraising-toolkit' ) }
-            </Notice>
+            <>
+                <Notice status="warning" isDismissible={ false }>
+                    { __( 'No currencies are enabled yet.', 'fundraising-toolkit' ) }
+                </Notice>
+                { manageLink }
+            </>
         );
     } else if ( available.length === 1 ) {
         panelBody = (
-            <Notice status="warning" isDismissible={ false }>
-                { __( 'Only one currency is enabled, so there is nothing for donors to switch between. Enable more under Settings → Currency.', 'fundraising-toolkit' ) }
-            </Notice>
+            <>
+                <Notice status="warning" isDismissible={ false }>
+                    { __( 'Only one currency is enabled, so there is nothing for donors to switch between.', 'fundraising-toolkit' ) }
+                </Notice>
+                { manageLink }
+            </>
         );
     } else {
         panelBody = (

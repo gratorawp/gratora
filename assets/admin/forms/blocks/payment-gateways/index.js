@@ -1,10 +1,12 @@
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, ToggleControl, TextControl, SelectControl, Notice } from '@wordpress/components';
+import { PanelBody, ToggleControl, TextControl, SelectControl, Notice, ExternalLink } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 import { gatewayIsOn, toggleGatewayAllowed } from '../../../_shared/gatewayAllowList';
 
 const NAME = 'fundkit/payment-gateways';
+
+const SETTINGS_URL = 'admin.php?page=fundkit-settings#gateways';
 
 /**
  * Why the count is lower than the switches suggest. Without this the hint reads
@@ -55,7 +57,7 @@ function Edit( { attributes, setAttributes } ) {
                 <PanelBody title={ __( 'Payment gateways', 'fundraising-toolkit' ) } initialOpen>
                     { gateways.length === 0 && (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'No gateways are connected yet. Set one up in Settings, Payment gateways.', 'fundraising-toolkit' ) }
+                            { __( 'No gateways are connected yet.', 'fundraising-toolkit' ) }
                         </Notice>
                     ) }
                     { gateways.map( ( g ) => (
@@ -99,6 +101,11 @@ function Edit( { attributes, setAttributes } ) {
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         __nextHasNoMarginBottom
                     />
+                    <p style={ { margin: '16px 0 0' } }>
+                        <ExternalLink href={ SETTINGS_URL }>
+                            { __( 'Manage payment gateways', 'fundraising-toolkit' ) }
+                        </ExternalLink>
+                    </p>
                 </PanelBody>
             </InspectorControls>
             <div { ...blockProps }>
