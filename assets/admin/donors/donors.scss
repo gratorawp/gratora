@@ -1,6 +1,7 @@
 @import '@fundkit/ui/scss/tokens';
 @import '../_shared/admin-base';
 @import '@fundkit/ui/scss/components/empty-state';
+@import '../_shared/plan-dialog';
 
 // Donor-profile-specific accent palette not in the shared tokens.
 $violet:        #7c5cff;
