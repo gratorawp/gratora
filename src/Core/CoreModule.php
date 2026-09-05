@@ -748,8 +748,6 @@ final class CoreModule implements FundKitModule
             $gateways->register(new SandboxGateway($c->get(Clock::class), $c->get(RecurringPlanRepository::class)));
         }
 
-        do_action('fundkit.gateways.register', $gateways, $c);
-
         $c->bind( AntiSpamGuard::class, fn (Container $c) => new AntiSpamGuard(
             $c->get(IdentityHasher::class),
             $c->get( TestMode::class),

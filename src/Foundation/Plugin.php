@@ -9,6 +9,7 @@ use FundKit\Campaigns\CampaignPermalinks;
 use FundKit\Core\Activator;
 use FundKit\Core\CoreModule;
 use FundKit\Donors\DonorRetention;
+use FundKit\Gateways\GatewayManager;
 use FundKit\Foundation\Commands\CommandRegistry;
 use FundKit\Donors\Portal\PortalPage;
 use FundKit\Foundation\Auth\Capabilities;
@@ -76,6 +77,21 @@ final class Plugin
         do_action('fundkit.modules.register', $self->modules);
 
         $self->modules->bootAll();
+
+        // After every module has booted, not from inside core's own boot().
+        // bootAll() runs core first, so a listener an add-on attaches during
+        // its boot() would miss a broadcast fired in there, and the five
+        // gateways in the payment-gateways add-on would never register: their
+        // settings tabs would still save keys while no donor could ever be
+        // offered them and an inbound webhook would throw. Core already learned
+        // this on the commands seam below.
+        if ($self->container->has(GatewayManager::class)) {
+            do_action(
+                'fundkit.gateways.register',
+                $self->container->get(GatewayManager::class),
+                $self->container
+            );
+        }
 
         // Command metadata carries translated summaries and schema labels, so
         // no pack may be built before init: WordPress resolves the catalogue
