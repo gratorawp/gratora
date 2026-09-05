@@ -61,14 +61,25 @@ final class DonationFormSubmitErrorCopyTest extends TestCase
      * PayPal's helper throws the server's curated message on a refusal, which
      * is right to show. A dropped connection rejects before that, with the
      * engine's own wording, and the same banner renders it.
+     *
+     * Counted rather than matched once: the helper sends twice, retrying
+     * without a stale nonce, and a rejection on either send reaches the same
+     * banner. Pinning one occurrence let the second arrive uncurated.
      */
-    public function test_the_paypal_helper_curates_a_transport_failure_too(): void
+    public function test_every_paypal_send_curates_a_transport_failure(): void
     {
         $src = $this->source('components/PayPalPayment.jsx');
 
-        $this->assertMatchesRegularExpression(
-            '/\}\s*\)\.catch\(\s*\(\)\s*=>\s*\{\s*throw new Error\(\s*i18n\.error\s*\)/',
-            $src,
+        $sends   = preg_match_all('/await send\(/', $src);
+        $curated = preg_match_all(
+            '/\.catch\(\s*\(\)\s*=>\s*\{\s*throw new Error\(\s*i18n\.error\s*\)/',
+            $src
+        );
+
+        $this->assertGreaterThan(0, $sends, 'the helper has to make a request at all');
+        $this->assertSame(
+            $sends,
+            $curated,
             'a failed fetch must become the curated string before any caller reads .message.'
         );
     }

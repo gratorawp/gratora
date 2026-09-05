@@ -190,9 +190,9 @@ final class StripeSubscriptionNoDuplicateTest extends IntegrationTestCase
     {
         $donation = $this->orphanedDonation();
 
-        // The same donor's other monthly gift. Same customer, different donation.
+        // The same donor's other monthly donation, on the same customer.
         $this->remoteSubscriptions = [[
-            'id'       => 'sub_someone_elses_gift',
+            'id'       => 'sub_another_donation',
             'status'   => 'active',
             'metadata' => ['fundkit_initial_donation_id' => (string) ((int) $donation->id + 1000)],
         ]];
@@ -200,7 +200,7 @@ final class StripeSubscriptionNoDuplicateTest extends IntegrationTestCase
         $plan = $this->gateway()->retrySubscriptionCreation($donation);
 
         $this->assertCount(1, $this->subscriptionCreates(), 'this donation has no subscription yet');
-        $this->assertNotSame('sub_someone_elses_gift', (string) $plan->gateway_subscription_id);
+        $this->assertNotSame('sub_another_donation', (string) $plan->gateway_subscription_id);
     }
 
     public function test_the_lookup_asks_before_it_creates(): void

@@ -13,13 +13,13 @@ use WP_REST_Request;
 /**
  * A ticket order rides the donations table with kind='order' and carries the
  * campaign_id so it can be reported against, but it is a purchase rather than
- * a gift. Every rollup already excludes it. The narrative widgets on the same
+ * a donation. Every rollup already excludes it. The narrative widgets on the same
  * screen did not, so one response listed a ticket buyer in Recent donations and
  * counted them as a donor while the totals above them left the purchase out.
  */
 final class ReportingExcludesOrdersTest extends IntegrationTestCase
 {
-    private const GIFT  = 500000;
+    private const DONATION  = 500000;
     private const ORDER = 4000;
 
     private int $campaignId;
@@ -71,9 +71,9 @@ final class ReportingExcludesOrdersTest extends IntegrationTestCase
         return Plugin::instance()->container->get(DonationRepository::class);
     }
 
-    public function test_recent_donations_lists_gifts_only(): void
+    public function test_recent_donations_lists_donations_only(): void
     {
-        $this->row('donation', self::GIFT);
+        $this->row('donation', self::DONATION);
         $this->row('order', self::ORDER);
 
         $amounts = array_map(
@@ -81,13 +81,13 @@ final class ReportingExcludesOrdersTest extends IntegrationTestCase
             $this->metrics()->recentDonations($this->campaignId)
         );
 
-        $this->assertContains(self::GIFT, $amounts, 'the gift is listed');
+        $this->assertContains(self::DONATION, $amounts, 'the donation is listed');
         $this->assertNotContains(self::ORDER, $amounts, 'the ticket purchase is not a donation');
     }
 
     public function test_the_stories_widget_does_not_quote_a_checkout_note(): void
     {
-        $this->row('donation', self::GIFT, 'For the roof fund');
+        $this->row('donation', self::DONATION, 'For the roof fund');
         $this->row('order', self::ORDER, 'Table of eight please');
 
         $notes = array_map(
@@ -101,7 +101,7 @@ final class ReportingExcludesOrdersTest extends IntegrationTestCase
 
     public function test_the_cohort_split_does_not_count_a_ticket_buyer_as_a_donor(): void
     {
-        $this->row('donation', self::GIFT);
+        $this->row('donation', self::DONATION);
         $this->row('order', self::ORDER);
 
         $rows = $this->repo()->donorCohortRowsForCampaign($this->campaignId, null, null);
@@ -113,7 +113,7 @@ final class ReportingExcludesOrdersTest extends IntegrationTestCase
 
     public function test_the_median_is_the_median_of_the_buckets_beside_it(): void
     {
-        // Ten gifts well above the ticket price, and ten cheaper tickets. With
+        // Ten donations well above the ticket price, and ten cheaper tickets. With
         // orders in the ordering, the offset taken from a donation-only count
         // lands inside the block of ticket rows.
         for ($i = 0; $i < 10; $i++) {
@@ -124,13 +124,13 @@ final class ReportingExcludesOrdersTest extends IntegrationTestCase
         $distribution = $this->metrics()->distributionBuckets($this->campaignId);
         $median = (int) $distribution['median_cents'];
 
-        $this->assertSame(10, (int) $distribution['total_count'], 'the buckets count gifts only');
-        $this->assertSame(100000, $median, 'so the median has to be a gift, not a ticket');
+        $this->assertSame(10, (int) $distribution['total_count'], 'the buckets count donations only');
+        $this->assertSame(100000, $median, 'so the median has to be a donation, not a ticket');
     }
 
     public function test_the_public_recent_donations_block_shows_no_ticket_orders(): void
     {
-        $this->row('donation', self::GIFT);
+        $this->row('donation', self::DONATION);
         $this->row('order', self::ORDER);
 
         $amounts = array_map(
@@ -138,7 +138,7 @@ final class ReportingExcludesOrdersTest extends IntegrationTestCase
             $this->repo()->recentForCampaign($this->campaignId)
         );
 
-        $this->assertContains(self::GIFT, $amounts);
+        $this->assertContains(self::DONATION, $amounts);
         $this->assertNotContains(self::ORDER, $amounts, 'a campaign page must not name a ticket buyer as a donor');
     }
 }
