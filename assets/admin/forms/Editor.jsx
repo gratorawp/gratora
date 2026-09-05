@@ -529,6 +529,7 @@ export default function Editor( { formId } ) {
             <PreviewSidebar
                 formId={ formId }
                 blocks={ blocks }
+                settings={ mergeFormSettings( c.record.settings ) }
                 missingRequired={ missingRequired }
             />
         );
@@ -1023,25 +1024,32 @@ const STATUS_RANK = { fail: 0, warn: 1, pass: 2 };
 
 // Server checks come from /admin/forms/{id}/readiness; the block-level checks
 // are added here because they depend on the in-memory, unsaved block markup.
-function PreviewSidebar( { formId, blocks, missingRequired } ) {
+function PreviewSidebar( { formId, blocks, settings, missingRequired } ) {
     const [ serverChecks, setServerChecks ] = useState( null );
     const [ error, setError ] = useState( null );
+
+    // mergeFormSettings builds a fresh object every render, so the effect keys
+    // on the content rather than the identity or it would refetch forever.
+    const settingsJson = JSON.stringify( settings || {} );
 
     useEffect( () => {
         if ( ! formId ) return;
         let cancelled = false;
         setServerChecks( null );
         setError( null );
-        // The live blocks are posted so the checks reflect unsaved edits.
+        // The live blocks and settings are posted so the checks reflect unsaved
+        // edits. Test mode and the gateway allow-list live in settings, and
+        // the preview iframe beside this panel already renders them, so
+        // grading the saved ones had the two disagree about the same form.
         apiFetch( {
             path:   `/fundkit/v1/admin/forms/${ formId }/readiness`,
             method: 'POST',
-            data:   { blocks: serialize( blocks ) },
+            data:   { blocks: serialize( blocks ), settings: JSON.parse( settingsJson ) },
         } )
             .then( ( res ) => { if ( ! cancelled ) setServerChecks( res.checks || [] ); } )
             .catch( ( err ) => { if ( ! cancelled ) setError( err?.message || __( 'Could not load readiness checks.', 'fundraising-toolkit' ) ); } );
         return () => { cancelled = true; };
-    }, [ formId, blocks ] );
+    }, [ formId, blocks, settingsJson ] );
 
     const blockChecks = useMemo( () => {
         const out = [];

@@ -280,11 +280,19 @@ final class FormsController
             return new WP_Error('fundkit_not_found', __('Form not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
 
-        // A POST carries the live editor blocks so checks reflect unsaved edits;
-        // applied in-memory only (never persisted). Settings stay as saved.
+        // A POST carries the live editor blocks and settings so the checks
+        // reflect unsaved edits; applied in-memory only, never persisted.
+        //
+        // Settings used to stay as saved while the preview iframe beside the
+        // panel rendered the posted ones, so the two read different forms: an
+        // author who ticked test mode was told the form was ready to publish
+        // while looking at a preview that took no real payment.
         $body = (array) ($request->get_json_params() ?? []);
         if (array_key_exists('blocks', $body)) {
             $form->blocks = $this->formService->sanitizeBlocks((string) $body['blocks']);
+        }
+        if (is_array($body['settings'] ?? null)) {
+            $form->settings = $body['settings'];
         }
 
         return new WP_REST_Response([
