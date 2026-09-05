@@ -741,6 +741,14 @@ export default function List() {
 
     const actions = useMemo( () => [
         {
+            id:    'view_details',
+            label: __( 'View details', 'fundraising-toolkit' ),
+            // The row's id opens the same dialog, but a row menu is where an
+            // admin looks for what they can do with a row, and this is the only
+            // place the plan's problems are readable.
+            callback: ( items ) => setDetail( items[ 0 ] ),
+        },
+        {
             id:          'copy_subscription_id',
             label:       __( 'Copy subscription id', 'fundraising-toolkit' ),
             isPrimary:   false,
