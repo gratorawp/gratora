@@ -15,6 +15,8 @@ use FundKit\Gateways\PaymentGateway;
 use FundKit\Gateways\RefundResult;
 use FundKit\Gateways\PaymentMethodUpdate;
 use FundKit\Gateways\SubscriptionAware;
+use FundKit\Gateways\SupportsScheduleChange;
+use FundKit\Gateways\SubscriptionSchedule;
 use FundKit\Gateways\SupportsSubscriptionPause;
 use FundKit\Gateways\SupportsPaymentMethodUpdate;
 use FundKit\Gateways\WebhookOutcome;
@@ -40,7 +42,7 @@ use WP_REST_Request;
  *
  * @since 1.0.0
  */
-final class PayPalGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentMethodUpdate, SupportsSubscriptionPause
+final class PayPalGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentMethodUpdate, SupportsSubscriptionPause, SupportsScheduleChange
 {
     /**
      * Mode of the credentials that verified the current webhook. Set once per
@@ -1401,14 +1403,43 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     public function updateSubscriptionAmount(RecurringPlan $plan, int $amountCents): void
     {
+        $this->updateSubscriptionSchedule(
+            $plan,
+            $amountCents,
+            (string) $plan->interval_unit,
+            (int) $plan->interval_count
+        );
+    }
+
+    /**
+     * A PayPal plan IS the amount and the cadence together, so both are minted
+     * into one plan id and applied in one revise. Two revises would put two
+     * approval links in front of the donor, approvable in either order, and
+     * approving the amount last would silently put the cadence back.
+     *
+     * @since 1.0.0
+     */
+    public function updateSubscriptionSchedule(
+        RecurringPlan $plan,
+        int $amountCents,
+        string $intervalUnit,
+        int $intervalCount
+    ): SubscriptionSchedule {
         $this->account->useTestMode((bool) $plan->is_test);
+
+        if ($amountCents <= 0) {
+            throw new RuntimeException(esc_html('Amount must be positive.'));
+        }
+        if (! in_array($intervalUnit, ['day', 'week', 'month', 'year'], true) || $intervalCount < 1) {
+            throw new RuntimeException(esc_html('Unsupported billing interval.'));
+        }
 
         $planId = $this->plans->resolvePlan(
             (bool) $plan->is_test,
             $amountCents,
             strtoupper((string) $plan->currency),
-            (string) $plan->interval_unit,
-            (int) $plan->interval_count
+            $intervalUnit,
+            $intervalCount
         );
 
         $revised = $this->api->post(
@@ -1437,6 +1468,11 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 esc_url_raw($approveUrl)
             );
         }
+
+        // Applied without approval, so PayPal is billing the new schedule from
+        // its own next cycle. It does not answer with that date, and the
+        // subscription webhook reconciles the row when it arrives.
+        return SubscriptionSchedule::unknown();
     }
 
     /**

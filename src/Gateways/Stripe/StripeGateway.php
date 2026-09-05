@@ -22,6 +22,8 @@ use FundKit\Gateways\PaymentGateway;
 use FundKit\Gateways\RefundResult;
 use FundKit\Gateways\PaymentRetryUnavailable;
 use FundKit\Gateways\SubscriptionAware;
+use FundKit\Gateways\SubscriptionSchedule;
+use FundKit\Gateways\SupportsScheduleChange;
 use FundKit\Gateways\SupportsSubscriptionPause;
 use FundKit\Gateways\PaymentMethodUpdate;
 use FundKit\Gateways\SupportsPaymentMethodUpdate;
@@ -42,7 +44,7 @@ use Throwable;
  *
  * @since 1.0.0
  */
-final class StripeGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentRetry, SupportsPaymentMethodUpdate, SupportsSubscriptionPause
+final class StripeGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentRetry, SupportsPaymentMethodUpdate, SupportsSubscriptionPause, SupportsScheduleChange
 {
     /**
      * Dispute statuses for which the money is on the org's balance: settled in
@@ -2139,10 +2141,34 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     public function updateSubscriptionAmount(RecurringPlan $plan, int $amountCents): void
     {
+        // The cadence it already has, read from the live price rather than the
+        // local row, so a drifted row cannot re-cadence a mandate.
+        $this->updateSubscriptionSchedule($plan, $amountCents, '', 0);
+    }
+
+    /**
+     * An empty $intervalUnit means "leave the cadence as the processor has it",
+     * which is what an amount-only change wants and is the one reading that
+     * cannot move a donor onto a schedule nobody asked for.
+     *
+     * @since 1.0.0
+     */
+    public function updateSubscriptionSchedule(
+        RecurringPlan $plan,
+        int $amountCents,
+        string $intervalUnit,
+        int $intervalCount
+    ): SubscriptionSchedule {
         $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
-        if ($subId === '') return;
+        if ($subId === '') return SubscriptionSchedule::unknown();
         if ($amountCents <= 0) throw new RuntimeException(esc_html('Amount must be positive.'));
+
+        $changingCadence = $intervalUnit !== '';
+        if ($changingCadence
+            && (! in_array($intervalUnit, ['day', 'week', 'month', 'year'], true) || $intervalCount < 1)) {
+            throw new RuntimeException(esc_html('Unsupported billing interval.'));
+        }
 
         // Stripe Prices are immutable, so a new one is minted and swapped onto
         // the subscription's first item.
@@ -2154,9 +2180,14 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $itemId = (string) ($items[0]['id'] ?? '');
         $oldPrice = $items[0]['price'] ?? [];
         $productId = (string) ($oldPrice['product'] ?? '');
-        $interval = (string) ($oldPrice['recurring']['interval'] ?? 'month');
-        $intervalCount = (int) ($oldPrice['recurring']['interval_count'] ?? 1);
         $currency = strtolower((string) ($oldPrice['currency'] ?? strtolower($plan->currency)));
+
+        $interval = $changingCadence
+            ? $intervalUnit
+            : (string) ($oldPrice['recurring']['interval'] ?? 'month');
+        $count = $changingCadence
+            ? $intervalCount
+            : (int) ($oldPrice['recurring']['interval_count'] ?? 1);
 
         if ($itemId === '' || $productId === '') {
             throw new RuntimeException(esc_html('Stripe subscription item is missing required fields.'));
@@ -2164,11 +2195,13 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $newPrice = $this->api->post('/prices', [
             'product'     => $productId,
-            'unit_amount' => Currency::toMinorUnits($amountCents, $plan->currency),
+            // The live price's currency, so the conversion and the price agree
+            // even where the local row has drifted.
+            'unit_amount' => Currency::toMinorUnits($amountCents, strtoupper($currency)),
             'currency'    => $currency,
             'recurring'   => [
                 'interval'       => $interval,
-                'interval_count' => $intervalCount,
+                'interval_count' => $count,
             ],
         ]);
         $newPriceId = (string) ($newPrice['id'] ?? '');
@@ -2176,15 +2209,27 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             throw new RuntimeException(esc_html('Stripe price creation returned no id.'));
         }
 
-        // Proration off: this changes future renewals only, so there is no
-        // mid-cycle delta charge.
-        $this->api->post('/subscriptions/' . rawurlencode($subId), [
+        $params = [
             'items' => [[
                 'id'    => $itemId,
                 'price' => $newPriceId,
             ]],
+            // Proration off: this changes future renewals only, so there is no
+            // mid-cycle delta charge.
             'proration_behavior' => 'none',
-        ]);
+        ];
+
+        if ($changingCadence) {
+            // Sent explicitly rather than left to the API default, which a
+            // Stripe change could move. 'now' would close the current period
+            // and invoice on the spot, billing the donor sooner than they
+            // agreed; 'unchanged' leaves them paid through the date they were.
+            $params['billing_cycle_anchor'] = 'unchanged';
+        }
+
+        $updated = $this->api->post('/subscriptions/' . rawurlencode($subId), $params);
+
+        return SubscriptionSchedule::fromStripe($updated);
     }
 
     /**

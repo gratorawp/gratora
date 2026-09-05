@@ -11,6 +11,8 @@ use FundKit\Gateways\GatewayIntentResult;
 use FundKit\Gateways\PaymentGateway;
 use FundKit\Gateways\RefundResult;
 use FundKit\Gateways\SubscriptionAware;
+use FundKit\Gateways\SupportsScheduleChange;
+use FundKit\Gateways\SubscriptionSchedule;
 use FundKit\Gateways\SubscriptionCreator;
 use FundKit\Gateways\WebhookOutcome;
 use FundKit\Recurring\FrequencyMap;
@@ -26,7 +28,7 @@ use WP_REST_Request;
  *
  * @since 1.0.0
  */
-final class SandboxGateway implements PaymentGateway, SubscriptionAware, SubscriptionCreator
+final class SandboxGateway implements PaymentGateway, SubscriptionAware, SubscriptionCreator, SupportsScheduleChange
 {
     /** @since 1.0.0 */
     public const SUB_PREFIX = 'sandbox_sub_';
@@ -235,5 +237,21 @@ final class SandboxGateway implements PaymentGateway, SubscriptionAware, Subscri
     /** @since 1.0.0 */
     public function updateSubscriptionAmount(RecurringPlan $plan, int $amountCents): void
     {
+    }
+
+    /**
+     * A rehearsal cycle is CYCLE_MINUTES per interval_count and ignores
+     * interval_unit, so it cannot answer with a real date and says so. The
+     * renewer recomputes the next run from the stored cadence on its own tick.
+     *
+     * @since 1.0.0
+     */
+    public function updateSubscriptionSchedule(
+        RecurringPlan $plan,
+        int $amountCents,
+        string $intervalUnit,
+        int $intervalCount
+    ): SubscriptionSchedule {
+        return SubscriptionSchedule::unknown();
     }
 }
