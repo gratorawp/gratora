@@ -140,6 +140,13 @@ export default function List() {
     const [ testHidden, setTestHidden ]   = useState( 0 );
     const [ createdFrom, setCreatedFrom ] = useState( '' );
     const [ createdTo,   setCreatedTo ]   = useState( '' );
+
+    // A date bound narrows the list from outside the view, so it puts the
+    // reader back on the first page itself.
+    const setDateFilter = ( set, value ) => {
+        set( value || '' );
+        setView( ( v ) => ( { ...v, page: 1 } ) );
+    };
     const [ stats, setStats ]     = useState( null );
     const [ campaigns, setCampaigns ] = useState( [] );
     // Pending confirm dialog. Shape: { title, message, confirmLabel, isDestructive, onConfirm }.
@@ -544,14 +551,14 @@ export default function List() {
                         <span className="fundkit-page-head__date-filters-label">{ __( 'From', 'fundraising-toolkit' ) }</span>
                         <DateField
                             value={ createdFrom }
-                            onChange={ ( v ) => setCreatedFrom( v || '' ) }
+                            onChange={ ( v ) => setDateFilter( setCreatedFrom, v ) }
                             ariaLabel={ __( 'Filter donations from', 'fundraising-toolkit' ) }
                             placeholder={ __( 'Any', 'fundraising-toolkit' ) }
                         />
                         <span className="fundkit-page-head__date-filters-label">{ __( 'To', 'fundraising-toolkit' ) }</span>
                         <DateField
                             value={ createdTo }
-                            onChange={ ( v ) => setCreatedTo( v || '' ) }
+                            onChange={ ( v ) => setDateFilter( setCreatedTo, v ) }
                             ariaLabel={ __( 'Filter donations to', 'fundraising-toolkit' ) }
                             placeholder={ __( 'Any', 'fundraising-toolkit' ) }
                         />

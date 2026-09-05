@@ -88,7 +88,7 @@ export default function ConsentsPanel( { s } ) {
                 ) }
 
                 { list.map( ( p, i ) => (
-                    <div key={ p.key } className="fundkit-consent-card">
+                    <div key={ i } className="fundkit-consent-card">
                         <header className="fundkit-consent-card__head">
                             <input
                                 className="fundkit-input fundkit-consent-card__label"

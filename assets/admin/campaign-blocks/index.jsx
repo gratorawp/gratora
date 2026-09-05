@@ -212,12 +212,16 @@ function CampaignImagePicker( { campaign, campaignId } ) {
     const apply = ( attachmentId ) => {
         setBusy( true );
         setError( null );
+        // core-data reports a failed save through the store, not the promise,
+        // unless it is told to throw.
         saveEntityRecord( 'fundkit/v1', 'campaign', {
             id: campaignId,
             // null clears it; the schema refuses 0.
             image_attachment_id: attachmentId,
-        } )
-            .catch( () => setError( __( 'That image could not be saved to the campaign.', 'fundraising-toolkit' ) ) )
+        }, { throwOnError: true } )
+            .catch( ( err ) => setError(
+                err?.message || __( 'That image could not be saved to the campaign.', 'fundraising-toolkit' )
+            ) )
             .finally( () => setBusy( false ) );
     };
 

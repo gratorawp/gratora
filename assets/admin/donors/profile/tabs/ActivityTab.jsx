@@ -3,6 +3,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { Coins, History } from 'lucide-react';
 
 import EmptyState from '../../../_shared/components/EmptyState';
+import { intervalLabel } from '../../../_shared/recurring/planColumns';
 
 // Deep-link to a donation's detail view (same target the Donations tab uses).
 function donationHref( reference ) {
@@ -232,7 +233,7 @@ function ActivePlanCard( { plans } ) {
             <div className="dp-card__body" style={ { padding: '14px 18px' } }>
                 <div style={ { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 } }>
                     <strong className="num" style={ { fontSize: 15 } }>
-                        { formatAmount( active.amount_cents, active.currency ) } / { active.interval_unit }
+                        { formatAmount( active.amount_cents, active.currency ) } / { intervalLabel( active.interval_unit, active.interval_count ) }
                     </strong>
                     <span className={ `dp-pill ${ pill.cls }` }>{ pill.label }</span>
                 </div>
