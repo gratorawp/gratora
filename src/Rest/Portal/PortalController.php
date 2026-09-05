@@ -51,17 +51,17 @@ final class PortalController
     private const NAMESPACE = 'fundkit/v1';
 
     public const SEND_LINK_HOOK          = 'fundkit.async.send_portal_link';
-    private const SEND_LINK_IP_MAX       = 10;
+    private const SEND_LINK_IP_MAX       = 4;
     private const SEND_LINK_IP_WINDOW    = 15 * MINUTE_IN_SECONDS;
-    private const SEND_LINK_EMAIL_MAX    = 3;
-    private const SEND_LINK_EMAIL_WINDOW = 5 * MINUTE_IN_SECONDS;
+    private const SEND_LINK_EMAIL_MAX    = 2;
+    private const SEND_LINK_EMAIL_WINDOW = 15 * MINUTE_IN_SECONDS;
 
     /**
      * The inbox limit, spent at the moment a link is mailed rather than when it
      * is asked for. An address that reaches a mailbox but resolves to no donor
      * mails nothing, so it must cost that mailbox nothing.
      */
-    private const SEND_LINK_MAILBOX_MAX    = 5;
+    private const SEND_LINK_MAILBOX_MAX    = 3;
     private const SEND_LINK_MAILBOX_WINDOW = 15 * MINUTE_IN_SECONDS;
 
     /**
@@ -590,8 +590,10 @@ final class PortalController
     {
         $ip = filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: 'unknown';
 
+        $max = (int) apply_filters('fundkit.portal.send_link_ip_max', self::SEND_LINK_IP_MAX);
+
         return $this->spam->hit('fundkit_send_link_ip_' . hash('sha256', $ip), self::SEND_LINK_IP_WINDOW)
-            <= self::SEND_LINK_IP_MAX;
+            <= max(1, $max);
     }
 
     /**
@@ -611,7 +613,9 @@ final class PortalController
         $key = 'fundkit_send_link_addr_'
             . substr($this->hasher->emailHash($this->hasher->normalizeEmail($email)), 0, 32);
 
-        return $this->spam->hit($key, self::SEND_LINK_EMAIL_WINDOW) <= self::SEND_LINK_EMAIL_MAX;
+        $max = (int) apply_filters('fundkit.portal.send_link_email_max', self::SEND_LINK_EMAIL_MAX);
+
+        return $this->spam->hit($key, self::SEND_LINK_EMAIL_WINDOW) <= max(1, $max);
     }
 
     /**

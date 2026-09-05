@@ -127,7 +127,7 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
 
         // Enough aliases to exhaust the per-address allowance outright, so the
         // donor's own address is refused unless its key is genuinely its own.
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 2; $i++) {
             $alias = substr($email, 0, $at) . '+attacker' . $i . substr($email, $at);
             $this->assertSame(200, $this->post('send-link', ['email' => $alias])->get_status());
             $this->runPendingAsyncJobs();
@@ -177,7 +177,7 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         global $wpdb;
         $email = 'counted-' . uniqid() . '@example.test';
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 4; $i++) {
             $this->post('send-link', ['email' => $email]);
         }
 
@@ -187,7 +187,7 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
              ORDER BY option_id DESC LIMIT 1"
         );
 
-        $this->assertSame(5, $stored, 'the counter is atomic and counts every attempt');
+        $this->assertSame(4, $stored, 'the counter is atomic and counts every attempt');
     }
 
     /**
