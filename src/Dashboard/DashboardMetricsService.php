@@ -567,6 +567,8 @@ final class DashboardMetricsService
         // Batch the per-campaign lookups + the sparkline series so we only
         // hit the campaigns table + the donations table once each.
         $campaignIds = array_values(array_filter(array_map(static fn ($r) => (int) $r['campaign_id'], $tops)));
+        if ($campaignIds === []) return [];
+
         $campaignsById = [];
         foreach (Campaign::query()->whereIn('id', $campaignIds)->getAll() as $c) {
             $campaignsById[(int) $c->id] = $c;
