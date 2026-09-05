@@ -17,7 +17,7 @@ import { ToggleRow } from '../_shared/components/Switch';
 import Btn from '../_shared/components/Btn';
 import { downloadFile } from '../_shared/download';
 import TokenEditor from '../_shared/styling/TokenEditor';
-import { Copy as CopyIcon, Trash2 as TrashIcon, Coins, HandHeart, Users as UsersIcon, ListChecks, Plus, Download as DownloadIcon } from 'lucide-react';
+import { Copy as CopyIcon, Trash2 as TrashIcon, Coins, HandHeart, Users as UsersIcon, ListChecks, Plus, Download as DownloadIcon, AlertTriangle } from 'lucide-react';
 import EmptyState from '../_shared/components/EmptyState';
 import FormTemplatePicker from '../_shared/components/FormTemplatePicker';
 import { GoalCell } from '../_shared/components/GoalBar';
@@ -85,6 +85,31 @@ export async function campaignDeleteMessage( campaign ) {
     parts.push( __( 'This cannot be undone.', 'fundraising-toolkit' ) );
 
     return parts.join( ' ' );
+}
+
+/**
+ * One gate for every place that offers the delete, so a second caller cannot
+ * skip it. The reason is the server's own, not one worked out here from
+ * donations_count: that counter ignores pending, failed, test-mode and ticket
+ * rows, every one of which still blocks a delete.
+ */
+export async function campaignDeleteConfirm( campaign, { onArchive, onDelete } ) {
+    if ( campaign?.delete_blocked ) {
+        return {
+            title:        __( 'This campaign cannot be deleted', 'fundraising-toolkit' ),
+            message:      campaign.delete_blocked,
+            confirmLabel: __( 'Archive instead', 'fundraising-toolkit' ),
+            onConfirm:    onArchive,
+        };
+    }
+
+    return {
+        title:        __( 'Delete campaign', 'fundraising-toolkit' ),
+        message:      await campaignDeleteMessage( campaign ),
+        confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
+        destructive:  true,
+        onConfirm:    onDelete,
+    };
 }
 
 // The reason comes from the server, which reads it off the same rule the
@@ -262,26 +287,9 @@ export default function Detail( { id, tab } ) {
             return;
         }
         if ( name === 'delete' ) {
-            // The gate's own reason, not one worked out here from
-            // donations_count: that counter ignores pending, failed, test-mode
-            // and ticket rows, every one of which still blocks a delete.
-            if ( campaign.delete_blocked ) {
-                setConfirm( {
-                    title:        __( 'This campaign cannot be deleted', 'fundraising-toolkit' ),
-                    message:      campaign.delete_blocked,
-                    confirmLabel: __( 'Archive instead', 'fundraising-toolkit' ),
-                    onConfirm:    () => onHeaderAction( 'archive' ),
-                } );
-                return;
-            }
-
-            const message = await campaignDeleteMessage( campaign );
-            setConfirm( {
-                title:        __( 'Delete campaign', 'fundraising-toolkit' ),
-                message,
-                confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
-                destructive:  true,
-                onConfirm: async () => {
+            setConfirm( await campaignDeleteConfirm( campaign, {
+                onArchive: () => onHeaderAction( 'archive' ),
+                onDelete: async () => {
                     try {
                         await apiFetch( {
                             path: `/fundkit/v1/admin/campaigns/${ campaign.id }`,
@@ -292,7 +300,7 @@ export default function Detail( { id, tab } ) {
                         setError( err?.message || __( 'Delete failed.', 'fundraising-toolkit' ) );
                     }
                 },
-            } );
+            } ) );
         }
     };
 
@@ -325,6 +333,7 @@ export default function Detail( { id, tab } ) {
                         <DetailNav campaign={ campaign } activeTab={ activeTab } extraTabs={ extTabs } onAction={ onHeaderAction } />
                         <SettingsTab
                             campaign={ campaign }
+                            onArchive={ () => onHeaderAction( 'archive' ) }
                             onError={ setError }
                         />
                     </>
@@ -636,27 +645,61 @@ const WIDGET_KEYS = [
 function OverviewTab( { campaign, nav, onError } ) {
     const [ range, setRange ] = useState( 'all-time' );
     const [ compareMode, setCompareMode ] = useState( 'none' );
-    const [ metrics, setMetrics ] = useState( campaign.metrics );
-    const [ loading, setLoading ] = useState( false );
+    const [ metrics, setMetrics ] = useState( null );
+    const [ loading, setLoading ] = useState( true );
+    const [ fetchError, setFetchError ] = useState( false );
+    const [ reloadKey, setReloadKey ] = useState( 0 );
 
     // Layout is a UI preference shared across all campaigns, not per-campaign.
     const layout = useFundKitLayout( 'campaign_overview', WIDGET_KEYS );
 
     const includeKey = useMemo( () => layout.visibleOrder.join( ',' ), [ layout.visibleOrder ] );
 
+    // What the held metrics were fetched for, so showing a widget again asks
+    // only for what is missing and hiding one asks for nothing.
+    const fetched = useRef( { signature: '', keys: new Set() } );
+
     useEffect( () => {
+        // The saved layout lands after the first render, so asking before it
+        // does spends the aggregate on a widget set nobody chose.
+        if ( ! layout.loaded ) {
+            return undefined;
+        }
+
+        const signature = `${ campaign.id }|${ range }|${ compareMode }|${ reloadKey }`;
+        const wanted    = includeKey ? includeKey.split( ',' ) : [];
+        const fresh     = fetched.current.signature !== signature;
+
+        if ( ! fresh && wanted.every( ( k ) => fetched.current.keys.has( k ) ) ) {
+            return undefined;
+        }
+
+        const include = fresh
+            ? wanted
+            : [ ...new Set( [ ...fetched.current.keys, ...wanted ] ) ];
+        fetched.current = { signature, keys: new Set( include ) };
+
         let aborted = false;
         setLoading( true );
+        setFetchError( false );
         const url = `/fundkit/v1/admin/campaigns/${ campaign.id }/metrics`
-            + `?range=${ range }&compare=${ compareMode }&include=${ encodeURIComponent( includeKey ) }`;
+            + `?range=${ range }&compare=${ compareMode }&include=${ encodeURIComponent( include.join( ',' ) ) }`;
         apiFetch( { path: url } )
             .then( ( m ) => { if ( ! aborted ) setMetrics( ( prev ) => ( { ...( prev || {} ), ...m } ) ); } )
-            // Surface the failure instead of leaving the zero-fallback metrics
-            // on screen as if they were real data.
-            .catch( ( e ) => { if ( ! aborted ) onError?.( e?.message || __( 'Could not load campaign metrics.', 'fundraising-toolkit' ) ); } )
+            // Zero-filled defaults next to a goal card reading the campaign's
+            // real lifetime total is a screen that measured nothing and says it
+            // measured zero, so a load that never landed shows as itself.
+            .catch( ( e ) => {
+                if ( aborted ) return;
+                fetched.current = { signature: '', keys: new Set() };
+                setFetchError( true );
+                if ( metrics ) {
+                    onError?.( e?.message || __( 'Could not load campaign metrics.', 'fundraising-toolkit' ) );
+                }
+            } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
-    }, [ range, compareMode, campaign.id, includeKey ] );
+    }, [ range, compareMode, campaign.id, includeKey, reloadKey, layout.loaded ] ); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Merged always, not just while metrics is null: an include=-limited
     // response omits the excluded keys, and the wrappers below deref rows
@@ -816,16 +859,29 @@ function CampaignReportButton( { campaignId, reportRange } ) {
                     </>
                 }
             />
-            <WidgetGrid
-                visibleOrder={ layout.visibleOrder }
-                registry={ registry }
-                onReorder={ ( from, to ) => {
-                    const fromAll = layout.order.indexOf( layout.visibleOrder[ from ] );
-                    const toAll   = layout.order.indexOf( layout.visibleOrder[ to ] );
-                    layout.moveTo( fromAll, toAll );
-                } }
-                onHide={ layout.hide }
-            />
+            { ! metrics && fetchError ? (
+                <EmptyState
+                    icon={ <AlertTriangle size={ 24 } strokeWidth={ 1.75 } /> }
+                    title={ __( 'Could not load these metrics', 'fundraising-toolkit' ) }
+                    body={ __( 'Nothing was measured, so nothing is shown. Check your connection and try again.', 'fundraising-toolkit' ) }
+                    action={
+                        <Btn variant="primary" onClick={ () => setReloadKey( ( n ) => n + 1 ) }>
+                            { __( 'Try again', 'fundraising-toolkit' ) }
+                        </Btn>
+                    }
+                />
+            ) : (
+                <WidgetGrid
+                    visibleOrder={ layout.visibleOrder }
+                    registry={ registry }
+                    onReorder={ ( from, to ) => {
+                        const fromAll = layout.order.indexOf( layout.visibleOrder[ from ] );
+                        const toAll   = layout.order.indexOf( layout.visibleOrder[ to ] );
+                        layout.moveTo( fromAll, toAll );
+                    } }
+                    onHide={ layout.hide }
+                />
+            ) }
         </div>
     );
 }
@@ -1488,7 +1544,7 @@ const fieldToCard = () => ( {
     default_fund_id:      __( 'Default fund', 'fundraising-toolkit' ),
 } );
 
-function SettingsTab( { campaign, onError } ) {
+function SettingsTab( { campaign, onArchive, onError } ) {
     const c = useFundKitRecord( 'campaign', campaign.id );
     const extSubTabs = useExtensionTabs( 'campaign-settings' );
 
@@ -1602,7 +1658,7 @@ function SettingsTab( { campaign, onError } ) {
                             <div hidden={ subTab !== 'goal' }><GoalPanel c={ c } /></div>
                             <div hidden={ subTab !== 'appearance' }><AppearancePanel c={ c } /></div>
                             <div hidden={ subTab !== 'defaults' }><DefaultsPanel c={ c } forms={ forms } funds={ funds } /></div>
-                            <div hidden={ subTab !== 'advanced' }><AdvancedPanel campaign={ campaign } onError={ onError } /></div>
+                            <div hidden={ subTab !== 'advanced' }><AdvancedPanel campaign={ campaign } onArchive={ onArchive } onError={ onError } /></div>
                             { extSubTabs.filter( ( t ) => ! t.visible || t.visible( campaign ) ).map( ( t ) => (
                                 <div key={ `ext-${ t.id }` } hidden={ subTab !== `ext-${ t.id }` }>
                                     <ExtensionTabPanel tab={ t } context={ { campaign } } />
@@ -2187,18 +2243,14 @@ function DefaultsPanel( { c, forms, funds } ) {
     );
 }
 
-function AdvancedPanel( { campaign, onError } ) {
+function AdvancedPanel( { campaign, onArchive, onError } ) {
     const [ deleting, setDeleting ] = useState( false );
     const [ confirm, setConfirm ] = useState( null );
 
     const onDelete = async () => {
-        const message = await campaignDeleteMessage( campaign );
-        setConfirm( {
-            title:        __( 'Delete campaign', 'fundraising-toolkit' ),
-            message,
-            confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
-            destructive:  true,
-            onConfirm: async () => {
+        setConfirm( await campaignDeleteConfirm( campaign, {
+            onArchive,
+            onDelete: async () => {
                 setDeleting( true );
                 try {
                     await apiFetch( {
@@ -2211,7 +2263,7 @@ function AdvancedPanel( { campaign, onError } ) {
                     setDeleting( false );
                 }
             },
-        } );
+        } ) );
     };
 
     return (
