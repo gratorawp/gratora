@@ -50,7 +50,7 @@ require_once __DIR__ . '/vendor/woocommerce/action-scheduler/action-scheduler.ph
 WordPressSchema::register();
 
 define('FUNDKIT_VERSION', '1.0.0');
-define('FUNDKIT_DB_VERSION', '1.1.1');
+define('FUNDKIT_DB_VERSION', '1.1.2');
 define('FUNDKIT_FILE', __FILE__);
 define('FUNDKIT_DIR', plugin_dir_path(__FILE__));
 define('FUNDKIT_URL', plugin_dir_url(__FILE__));

@@ -97,7 +97,12 @@ final class ReceiptIssuer
     }
 
     /**
-     * Admin "resend receipt": clear sent_to_email_at and re-queue the issuer.
+     * Admin "resend receipt": release the send lock and re-queue the issuer.
+     *
+     * sent_to_email_at is left alone. It records a send that really happened,
+     * and clearing it for a resend that then fails, because the template is
+     * switched off or wp_mail refuses, destroyed the only record of the first
+     * one and put the donation into the never-received-a-receipt sweep.
      *
      * @since 1.0.0
      */
@@ -111,8 +116,8 @@ final class ReceiptIssuer
         $existing = $this->receipts->forDonation($donationId);
         foreach ($existing as $r) {
             if ($r->voided) continue;
-            $r->sent_to_email_at = null;
-            $r->save();
+            Receipt::query()->where('id', $r->id)->update(['send_claimed_at' => null]);
+            $r->send_claimed_at = null;
         }
 
         $this->async->enqueue(self::HOOK, ['donation_id' => $donationId]);
@@ -216,7 +221,9 @@ final class ReceiptIssuer
     {
         $existing = $this->receipts->findFor($ctx->donation->id, $renderer->id());
 
-        if ($existing && $existing->sent_to_email_at !== null) {
+        // The lock, not the record: an ordinary re-run of the job must not send
+        // a second copy, but a resend released the lock and is asking for one.
+        if ($existing && $existing->send_claimed_at !== null) {
             return;
         }
 
@@ -264,26 +271,31 @@ final class ReceiptIssuer
             }
 
             if ($ctx->donor_email !== null && $ctx->donor_email !== '') {
-                // Atomic single-sender claim: flip sent_to_email_at from NULL in
+                // Atomic single-sender claim: flip send_claimed_at from NULL in
                 // one UPDATE so only one of two racing runners sends the email.
                 // Released back to NULL on a soft failure so a retry can resend.
                 $now     = $this->clock->now()->format('Y-m-d H:i:s');
                 $claimed = Receipt::query()
                     ->where('id', $receipt->id)
-                    ->whereNull('sent_to_email_at')
-                    ->update(['sent_to_email_at' => $now])
+                    ->whereNull('send_claimed_at')
+                    ->update(['send_claimed_at' => $now])
                     ->affectedRows;
 
                 if ($claimed > 0) {
                     $sent = $this->sendEmail($receipt, $ctx, $pdfBytes);
                     if ($sent) {
+                        Receipt::query()
+                            ->where('id', $receipt->id)
+                            ->update(['sent_to_email_at' => $now]);
                         $receipt->sent_to_email_at = $now;
                         do_action('fundkit.receipt.email_sent', $receipt);
                     } else {
+                        // Only the lock goes. Whatever sent_to_email_at holds is
+                        // the record of a send that did happen.
                         Receipt::query()
                             ->where('id', $receipt->id)
-                            ->update(['sent_to_email_at' => null]);
-                        $receipt->sent_to_email_at = null;
+                            ->update(['send_claimed_at' => null]);
+                        $receipt->send_claimed_at = null;
                         do_action('fundkit.receipt.email_failed', $receipt);
                     }
                 }
