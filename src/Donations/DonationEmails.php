@@ -11,6 +11,7 @@ use FundKit\Donors\Portal\PortalPage;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Hooks\HookProvider;
 use FundKit\Mail\Mailer;
+use FundKit\Recurring\FrequencyMap;
 use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\RecurringPlanChange;
 use FundKit\Settings\SettingsService;
@@ -164,7 +165,8 @@ final class DonationEmails extends HookProvider
         if (! $change->notifyDonor) return;
 
         $template = match ($change->action) {
-            'change_amount' => 'recurring_amount_changed',
+            'change_amount'   => 'recurring_amount_changed',
+            'change_interval' => 'recurring_interval_changed',
             'pause'         => 'recurring_paused',
             'resume'        => 'recurring_resumed',
             'skip_next'     => 'recurring_skipped',
@@ -186,6 +188,11 @@ final class DonationEmails extends HookProvider
             'organisation_name' => (string) get_bloginfo('name'),
             'amount'            => Money::format((int) $plan->amount_cents, $currency),
             'old_amount'        => $oldCents !== null ? Money::format($oldCents, $currency) : '',
+            'frequency'         => FrequencyMap::label(
+                FrequencyMap::fromInterval((string) $plan->interval_unit, (int) $plan->interval_count)
+                    ?? ''
+            ),
+            'old_frequency'     => FrequencyMap::label((string) ($change->detail['from'] ?? '')),
             'resumes_at'        => $this->onDate($plan->resume_at),
             'next_payment_at'   => $this->onDate($plan->next_payment_at),
             'portal_url'        => (new PortalPage())->url(),

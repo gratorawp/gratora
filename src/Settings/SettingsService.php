@@ -306,6 +306,11 @@ final class SettingsService
                 'subject' => __('Your recurring donation amount has changed', 'fundraising-toolkit'),
                 'body'    => __("Hi {donor_first_name},\n\nYour recurring donation to {campaign_title} has been changed from {old_amount} to {amount}, starting with your next payment.\n\nIf that is not what you expected, you can change it back or stop the donation here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'fundraising-toolkit'),
             ],
+            'recurring_interval_changed' => [
+                'enabled' => true,
+                'subject' => __('Your recurring donation schedule has changed', 'fundraising-toolkit'),
+                'body'    => __("Hi {donor_first_name},\n\nYour recurring donation of {amount} to {campaign_title} was taken {old_frequency}. It will now be taken {frequency}, starting with the payment after your current one.\n\nIf that is not what you expected, you can change it back or stop the donation here:\n{portal_url}\n\nThanks,\n{organisation_name}", 'fundraising-toolkit'),
+            ],
             'recurring_paused' => [
                 'enabled' => true,
                 'subject' => __('Your recurring donation is paused', 'fundraising-toolkit'),
@@ -362,6 +367,7 @@ final class SettingsService
             'subscription_payment_failed' => array_merge($donation, ['portal_url']),
             'subscription_cancelled'      => $donation,
             'recurring_amount_changed'    => array_merge($donation, ['old_amount', 'portal_url']),
+            'recurring_interval_changed'  => array_merge($donation, ['frequency', 'old_frequency', 'portal_url']),
             'recurring_paused'            => array_merge($donation, ['resumes_at', 'portal_url']),
             'recurring_resumed'           => array_merge($donation, ['next_payment_at', 'portal_url']),
             'recurring_skipped'           => array_merge($donation, ['next_payment_at', 'portal_url']),

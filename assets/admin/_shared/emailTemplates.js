@@ -148,6 +148,13 @@ function coreTemplates() {
             tags:      tagsFor( 'recurring_amount_changed', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{old_amount}', '{portal_url}' ] ),
         },
         {
+            id:        'recurring_interval_changed',
+            label:     __( 'Recurring schedule changed', 'fundraising-toolkit' ),
+            desc:      __( 'Sent when someone at the organization changes how often a recurring donation is taken. A donor who changes their own in the portal is not emailed.', 'fundraising-toolkit' ),
+            recipient: __( 'Donor', 'fundraising-toolkit' ),
+            tags:      tagsFor( 'recurring_interval_changed', [ '{donor_first_name}', '{donor_name}', '{organisation_name}', '{amount}', '{campaign_title}', '{frequency}', '{old_frequency}', '{portal_url}' ] ),
+        },
+        {
             id:        'recurring_paused',
             label:     __( 'Recurring donation paused', 'fundraising-toolkit' ),
             desc:      __( 'Sent when someone at the organization pauses a recurring donation, with the date it restarts. A donor who pauses their own in the portal is not emailed.', 'fundraising-toolkit' ),

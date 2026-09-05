@@ -87,6 +87,24 @@ final class FrequencyMap
         return null;
     }
 
+    /**
+     * What a donor is told a cadence is called. A pair this product has no
+     * name for reads as its interval rather than as an empty string.
+     *
+     * @since 1.0.0
+     */
+    public static function label(string $frequency): string
+    {
+        return match ($frequency) {
+            'weekly'    => __('every week', 'fundraising-toolkit'),
+            'biweekly'  => __('every 2 weeks', 'fundraising-toolkit'),
+            'monthly'   => __('every month', 'fundraising-toolkit'),
+            'quarterly' => __('every 3 months', 'fundraising-toolkit'),
+            'yearly'    => __('every year', 'fundraising-toolkit'),
+            default     => $frequency,
+        };
+    }
+
     /** @since 1.0.0 */
     public static function isRecurring(string $frequency): bool
     {
