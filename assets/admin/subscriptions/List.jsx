@@ -698,20 +698,34 @@ export default function List() {
         },
         {
             id:       'failing',
-            label:    __( 'Renewal health', 'fundraising-toolkit' ),
+            label:    __( 'Health', 'fundraising-toolkit' ),
             elements: [
                 { value: 'yes', label: __( 'Has failed renewals', 'fundraising-toolkit' ) },
             ],
             filterBy: { operators: [ 'is' ] },
-            render: ( { item } ) => (
-                item.failed_renewals_count > 0
-                    ? <span className="fundkit-pill is-warn">{ sprintf(
+            // A declined renewal and a failed operation are different facts, so
+            // the column names whichever it has rather than folding them into
+            // one number. OK is only said when there is neither.
+            render: ( { item } ) => {
+                if ( item.failed_renewals_count > 0 ) {
+                    return <span className="fundkit-pill fundkit-pill--amber">{ sprintf(
                         /* translators: %d: consecutive failed renewals. */
                         _n( '%d failure', '%d failures', item.failed_renewals_count, 'fundraising-toolkit' ),
                         item.failed_renewals_count
-                    ) }</span>
-                    : <span className="fundkit-row__sub">{ __( 'OK', 'fundraising-toolkit' ) }</span>
-            ),
+                    ) }</span>;
+                }
+
+                const problems = item.errors?.length || 0;
+                if ( problems > 0 ) {
+                    return <span className="fundkit-pill fundkit-pill--red">{ sprintf(
+                        /* translators: %d: recorded problems on this subscription. */
+                        _n( '%d problem', '%d problems', problems, 'fundraising-toolkit' ),
+                        problems
+                    ) }</span>;
+                }
+
+                return <span className="fundkit-row__sub">{ __( 'OK', 'fundraising-toolkit' ) }</span>;
+            },
         },
         {
             id:       'interval',
