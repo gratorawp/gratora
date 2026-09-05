@@ -316,14 +316,20 @@ final class DonorsController
 
         // One transaction so a partial failure can't leave mismatched
         // name / encrypted PII / hash. donor.updated fires after commit.
-        $plainFieldsUpdated = false;
+        //
+        // Phone and address count towards it: the admin dialog PATCHes the
+        // whole form, so a correction to only the phone number leaves $update
+        // empty, and firing on that alone meant a CRM kept the old number for
+        // good. changeEmail fires the event itself, so an email change is not
+        // counted here and cannot double it.
+        $changed = false;
 
         try {
-            DB::transaction(function () use ($donor, $params, $update, &$plainFieldsUpdated): void {
+            DB::transaction(function () use ($donor, $params, $update, &$changed): void {
                 if ($update) {
                     $update['updated_at'] = gmdate('Y-m-d H:i:s');
                     DB::table('fundkit_donors')->where('id', $donor->id)->update($update);
-                    $plainFieldsUpdated = true;
+                    $changed = true;
 
                     // The email write below saves the whole model, so the model
                     // has to be carrying what this just wrote. Left stale, its
@@ -335,11 +341,24 @@ final class DonorsController
                 }
 
                 if (array_key_exists('phone', $params)) {
-                    $this->donorService->setEncryptedField($donor, 'phone_encrypted', is_string($params['phone']) ? trim($params['phone']) : '');
+                    $phone = is_string($params['phone']) ? trim($params['phone']) : '';
+                    if ($phone !== ($this->donorService->decryptPhone($donor) ?? '')) {
+                        $this->donorService->setEncryptedField($donor, 'phone_encrypted', $phone);
+                        $changed = true;
+                    }
                 }
                 if (array_key_exists('address', $params)) {
-                    $addr = is_array($params['address']) ? $params['address'] : null;
-                    $this->donorService->setEncryptedField($donor, 'address_encrypted', $this->donorService->addressPayload($addr));
+                    $addr    = is_array($params['address']) ? $params['address'] : null;
+                    $payload = $this->donorService->addressPayload($addr);
+                    // Both sides through addressPayload, so a reordered or
+                    // whitespace-only difference is not a change.
+                    $current = $this->donorService->addressPayload(
+                        $this->donorService->decryptAddressStruct($donor)
+                    );
+                    if ($payload !== $current) {
+                        $this->donorService->setEncryptedField($donor, 'address_encrypted', $payload);
+                        $changed = true;
+                    }
                 }
 
                 if (array_key_exists('email', $params) && is_string($params['email']) && trim($params['email']) !== '') {
@@ -357,7 +376,7 @@ final class DonorsController
             return new WP_Error('fundkit_invalid_email', $e->getMessage(), ['status' => 422]);
         }
 
-        if ($plainFieldsUpdated) {
+        if ($changed) {
             do_action('fundkit.donor.updated', $this->donors->findById($donor->id));
         }
 
