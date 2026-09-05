@@ -558,7 +558,7 @@ final class RecurringController
         } catch (RuntimeException $e) {
             return new WP_Error('fundkit_plan_terminal', $e->getMessage(), ['status' => 422]);
         } catch (\Throwable $e) {
-            \FundKit\Analytics\ErrorLog::record('admin.recurring', $e->getMessage());
+            \FundKit\Analytics\ErrorLog::record('admin.recurring', $e->getMessage(), ['recurring_plan_id' => (int) $plan->id]);
             return new WP_Error(
                 'fundkit_gateway_error',
                 __('The payment provider would not accept that change. Nothing has been altered.', 'fundraising-toolkit'),

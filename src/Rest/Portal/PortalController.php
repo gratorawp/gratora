@@ -960,7 +960,7 @@ final class PortalController
         } catch (GatewayUnreachable $e) {
             // Ahead of the RuntimeException arm, its parent, which would hand
             // the donor an internal plan id and the word "gateway".
-            ErrorLog::record('portal.recurring', $e->getMessage());
+            ErrorLog::record('portal.recurring', $e->getMessage(), ['recurring_plan_id' => (int) $plan->id]);
 
             return new WP_Error(
                 'fundkit_gateway_error',
@@ -974,7 +974,7 @@ final class PortalController
         } catch (\Throwable $e) {
             // Local state is deliberately left unchanged when the gateway or
             // anything downstream fails.
-            ErrorLog::record('portal.recurring', $e->getMessage());
+            ErrorLog::record('portal.recurring', $e->getMessage(), ['recurring_plan_id' => (int) $plan->id]);
             return new WP_Error(
                 'fundkit_gateway_error',
                 __('We could not complete this change with the payment provider. Please try again in a moment.', 'fundraising-toolkit'),
