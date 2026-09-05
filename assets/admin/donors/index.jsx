@@ -284,7 +284,12 @@ export function DonorsApp( { toggleSlot } ) {
             // to a donor whose only donation is a rehearsal, a refund or an
             // attempt that never completed, and the server would 409.
             isEligible:    ( item ) => !! item.deletable,
-            callback: ( items ) => {
+            // DataViews hands a bulk callback the whole selection, not the
+            // eligible subset, so isEligible only decides whether the button is
+            // drawn. Without re-filtering, the count in the sentence is wrong
+            // and the requests reach donors the gate exists to exclude.
+            callback: ( selection ) => {
+                const items = selection.filter( ( i ) => !! i.deletable );
                 if ( ! items.length ) return;
                 const n = items.length;
                 setConfirm( {
@@ -325,7 +330,8 @@ export function DonorsApp( { toggleSlot } ) {
             isDestructive: true,
             supportsBulk:  true,
             isEligible:    ( item ) => ! item.redacted,
-            callback: ( items ) => {
+            callback: ( selection ) => {
+                const items = selection.filter( ( i ) => ! i.redacted );
                 if ( ! items.length ) return;
                 const n = items.length;
                 const message = n === 1
