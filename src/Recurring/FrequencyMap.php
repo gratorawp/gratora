@@ -55,6 +55,38 @@ final class FrequencyMap
             ->getTimestamp();
     }
 
+    /**
+     * The frequencies this product can name, which is narrower than what a
+     * processor accepts. A plan put on a cadence outside this list has no label
+     * on any screen and no matching option on any form.
+     *
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
+    public static function recurringFrequencies(): array
+    {
+        return ['weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'];
+    }
+
+    /**
+     * The frequency an interval pair stands for, or null for a pair this
+     * product has no name for.
+     *
+     * @since 1.0.0
+     */
+    public static function fromInterval(string $unit, int $count): ?string
+    {
+        foreach (self::recurringFrequencies() as $frequency) {
+            [$u, $c] = self::toStripe($frequency);
+            if ($u === $unit && $c === $count) {
+                return $frequency;
+            }
+        }
+
+        return null;
+    }
+
     /** @since 1.0.0 */
     public static function isRecurring(string $frequency): bool
     {

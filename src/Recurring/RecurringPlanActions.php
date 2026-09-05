@@ -8,6 +8,7 @@ use FundKit\Analytics\EventRecorder;
 use FundKit\Currency\Currency;
 use FundKit\Gateways\GatewayManager;
 use FundKit\Gateways\SubscriptionAware;
+use FundKit\Gateways\SupportsScheduleChange;
 use FundKit\Gateways\SupportsPaymentRetry;
 use InvalidArgumentException;
 use RuntimeException;
@@ -231,6 +232,69 @@ final class RecurringPlanActions
     // ---------------------------------------------------------------- internals
 
     /** @since 1.0.0 */
+    /**
+     * Move the plan onto another cadence at the processor, then write what the
+     * processor said it will charge next.
+     *
+     * Takes a frequency rather than an interval pair on purpose: a processor
+     * accepts any pair, and this product can only name five of them. A plan put
+     * on a cadence outside that list has no label on any screen.
+     *
+     * @throws InvalidArgumentException when the frequency is one this product cannot name.
+     * @throws RuntimeException when the gateway cannot change a cadence at all.
+     *
+     * @since 1.0.0
+     */
+    public function changeInterval(RecurringPlan $plan, string $frequency, RecurringPlanChange $change): void
+    {
+        // Input first: a schedule this site cannot name is wrong whatever the
+        // processor is doing, and answering with a gateway error would send an
+        // admin looking at the wrong thing.
+        if (! in_array($frequency, FrequencyMap::recurringFrequencies(), true)) {
+            throw new InvalidArgumentException(esc_html__('That is not a schedule this site offers.', 'fundraising-toolkit'));
+        }
+
+        $this->assertChangeable($plan);
+        $this->assertGatewayReachable($plan, 'change the schedule of');
+
+        [$unit, $count] = FrequencyMap::toStripe($frequency);
+
+        $wasUnit  = (string) $plan->interval_unit;
+        $wasCount = (int) $plan->interval_count;
+        if ($wasUnit === $unit && $wasCount === $count) {
+            return;
+        }
+
+        $gateway = $this->gateways->get((string) $plan->gateway);
+        if (! $gateway instanceof SupportsScheduleChange) {
+            throw new RuntimeException(esc_html__('This payment provider cannot change how often a donation is taken. Cancel it and start a new one.', 'fundraising-toolkit'));
+        }
+
+        $schedule = $gateway->updateSubscriptionSchedule($plan, (int) $plan->amount_cents, $unit, $count);
+
+        $columns = [
+            'interval_unit'  => $unit,
+            'interval_count' => $count,
+        ];
+
+        // Only what the processor actually said, and only where the local date
+        // is not standing in for something else. A paused plan's next payment
+        // is paired with resume_at, and overwriting it here would restart a
+        // donor the org had agreed to pause.
+        if ($schedule->nextPaymentAt !== null && $plan->resume_at === null && $plan->status !== 'paused') {
+            $columns['next_payment_at'] = $schedule->nextPaymentAt;
+        }
+
+        $this->write($plan, $columns);
+
+        $change->detail = [
+            'from' => FrequencyMap::fromInterval($wasUnit, $wasCount) ?? "{$wasCount} {$wasUnit}",
+            'to'   => $frequency,
+        ];
+        $this->finish($plan, $change, 'recurring.interval_changed');
+        do_action('fundkit.recurring.plan_interval_changed', $plan);
+    }
+
     private function assertChangeable(RecurringPlan $plan): void
     {
         if (in_array((string) $plan->status, self::TERMINAL, true)) {
