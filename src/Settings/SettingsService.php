@@ -439,6 +439,32 @@ final class SettingsService
     }
 
     /**
+     * Drops template text identical to the default built for this read.
+     *
+     * Those defaults pass through __(), so a stored copy pins every donor's
+     * email to the locale of the admin who saved.
+     *
+     * @param array<string,mixed> $values
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
+    private function withoutDefaultTemplates(string $group, array $values): array
+    {
+        if ($group !== 'email' || ! is_array($values['templates'] ?? null)) return $values;
+
+        foreach ($this->emailTemplateDefaults() as $key => $default) {
+            foreach (['subject', 'body'] as $field) {
+                if (($values['templates'][$key][$field] ?? null) === $default[$field]) {
+                    unset($values['templates'][$key][$field]);
+                }
+            }
+        }
+
+        return $values;
+    }
+
+    /**
      * Write a group's settings, merging with current values so callers may
      * send partial payloads. Returns the resulting array.
      *
@@ -475,7 +501,7 @@ final class SettingsService
             $next['mapping'] = is_array($input['mapping']) ? $input['mapping'] : [];
         }
 
-        update_option($cfg['option'], $next, false);
+        update_option($cfg['option'], $this->withoutDefaultTemplates($group, $next), false);
 
         // The values as they were are handed along too: a listener that has to
         // act on a setting being switched on, rather than on every save of the

@@ -1490,7 +1490,7 @@ final class CoreCommandProvider
                     'amount_cents'    => (int) ($agg['amount_cents'] ?? 0),
                     'donations_count' => (int) ($agg['donations_count'] ?? 0),
                     'donors_count'    => (int) ($agg['donors_count'] ?? 0),
-                    'currency'        => $repo->topCurrencyForPaid($from, $to),
+                    'currency'        => strtoupper(Money::defaultCurrency()),
                     'from'            => $from,
                     'to'              => $to,
                     'campaign_id'     => $campaignId,

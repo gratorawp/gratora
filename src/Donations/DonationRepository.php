@@ -379,26 +379,6 @@ final class DonationRepository
     }
 
     /**
-     * A single currency to format aggregated totals against a mixed-currency
-     * pool.
-     *
-     * @since 1.0.0
-     */
-    public function topCurrencyForPaid(?string $from = null, ?string $to = null): ?string
-    {
-        $q = DonationQueries::live(DB::table('fundkit_donations')
-            ->selectRaw('currency, COUNT(*) AS c')
-            ->whereIn('status', ['paid', 'partial_refund']));
-
-        [$start, $end] = DonationQueries::dayBoundsUtc($from, $to);
-        if ($start !== null) $q = $q->where('paid_at', $start, '>=');
-        if ($end   !== null) $q = $q->where('paid_at', $end, '<=');
-
-        $row = $q->groupBy('currency')->orderBy('c', 'DESC')->get();
-        return $row['currency'] ?? null;
-    }
-
-    /**
      * @return array<array{utm_source:?string, utm_medium:?string, amount_cents:int, donations_count:int}>
      *
      * @since 1.0.0

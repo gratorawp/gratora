@@ -9,6 +9,7 @@ use FundKit\Donors\Donor;
 use FundKit\Donors\DonorService;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Helpers\View;
+use FundKit\Receipts\OrgProfile;
 use FundKit\Receipts\PdfBuilder;
 
 /**
@@ -51,9 +52,8 @@ final class TaxStatementBuilder
             return '';
         }
 
-        $org        = get_option('fundkit_org_profile', []);
-        $org        = is_array($org) ? $org : [];
-        $orgName    = trim((string) ($org['name'] ?? '')) ?: (string) get_bloginfo('name');
+        $org        = OrgProfile::load();
+        $orgName    = (string) $org['name'];
         $donorName  = trim(((string) ($donor->first_name ?? '')) . ' ' . ((string) ($donor->last_name ?? '')));
         $donorAddr  = $this->donors->decryptAddress($donor);
 

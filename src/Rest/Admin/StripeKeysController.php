@@ -203,7 +203,15 @@ final class StripeKeysController
             );
         }
 
-        $this->account->refresh(is_array($obj) ? $obj : []);
+        $account = is_array($obj) ? $obj : [];
+
+        // One charges_enabled is stored for both modes, so a test retrieve must
+        // not answer for the live connection.
+        if ($test && $this->account->hasKeysFor(false)) {
+            unset($account['charges_enabled'], $account['payouts_enabled']);
+        }
+
+        $this->account->refresh($account);
         $this->provisionWebhook($test);
 
         return $this->status();

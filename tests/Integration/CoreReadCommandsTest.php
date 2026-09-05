@@ -6,11 +6,13 @@ namespace FundKit\Tests\Integration;
 
 use FundKit\Analytics\EventRecorder;
 use FundKit\Campaigns\CampaignService;
+use FundKit\Donations\Donation;
 use FundKit\Donors\DonorService;
 use FundKit\Foundation\Commands\Command;
 use FundKit\Foundation\Commands\CommandContext;
 use FundKit\Foundation\Commands\CommandRegistry;
 use FundKit\Core\Commands\CoreCommandProvider;
+use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Plugin;
 use WP_REST_Request;
 
@@ -126,6 +128,62 @@ final class CoreReadCommandsTest extends IntegrationTestCase
         $this->assertTrue($res->ok, $res->error ?? '');
         $this->assertGreaterThan(0, $res->data['amount_cents']);
         $this->assertGreaterThanOrEqual(1, $res->data['donations_count']);
+    }
+
+    public function test_report_revenue_labels_the_total_with_the_org_base_currency(): void
+    {
+        $ctx     = $this->adminCtx();
+        $base    = strtoupper(Money::defaultCurrency());
+        $foreign = $base === 'EUR' ? 'GBP' : 'EUR';
+        $this->seedPaidDonation('FUNDKIT-REV-FX-1', $foreign, 4000);
+        $this->seedPaidDonation('FUNDKIT-REV-FX-2', $foreign, 4000);
+        $this->seedPaidDonation('FUNDKIT-REV-BASE', $base, 1000);
+
+        $res = $this->registry()->dispatch('report.revenue', [], $ctx);
+
+        $this->assertTrue($res->ok, $res->error ?? '');
+        $this->assertSame(9000, (int) $res->data['amount_cents'], 'the total is the base-currency sum');
+        $this->assertSame($base, $res->data['currency'], 'a base-currency total carries the base currency, not the commonest donation currency');
+    }
+
+    public function test_report_revenue_for_one_campaign_keeps_the_base_currency(): void
+    {
+        $ctx      = $this->adminCtx();
+        $base     = strtoupper(Money::defaultCurrency());
+        $foreign  = $base === 'EUR' ? 'GBP' : 'EUR';
+        $campaign = Plugin::instance()->container->get(CampaignService::class)->create(['title' => 'Base Currency Appeal']);
+        $this->seedPaidDonation('FUNDKIT-REV-CMP', $base, 2500, (int) $campaign->id);
+        $this->seedPaidDonation('FUNDKIT-REV-OTH-1', $foreign, 4000);
+        $this->seedPaidDonation('FUNDKIT-REV-OTH-2', $foreign, 4000);
+
+        $res = $this->registry()->dispatch('report.revenue', ['campaign_id' => (int) $campaign->id], $ctx);
+
+        $this->assertTrue($res->ok, $res->error ?? '');
+        $this->assertSame(2500, (int) $res->data['amount_cents']);
+        $this->assertSame($base, $res->data['currency']);
+    }
+
+    /** A paid donation whose base value equals its face value, matching the harness 1:1 rates. */
+    private function seedPaidDonation(string $reference, string $currency, int $cents, ?int $campaignId = null): void
+    {
+        $now = gmdate('Y-m-d H:i:s');
+        $don = Donation::make();
+        $don->reference         = $reference;
+        $don->donor_id          = 1;
+        $don->campaign_id       = $campaignId;
+        $don->amount_cents      = $cents;
+        $don->net_cents         = $cents;
+        $don->currency          = $currency;
+        $don->base_amount_cents = $cents;
+        $don->base_currency     = strtoupper(Money::defaultCurrency());
+        $don->fx_rate           = '1.00000000';
+        $don->gateway           = 'offline';
+        $don->status            = 'paid';
+        $don->is_test           = false;
+        $don->paid_at           = $now;
+        $don->created_at        = $now;
+        $don->updated_at        = $now;
+        $don->save();
     }
 
     public function test_admin_dispatches_everyday_commands_but_not_sensitive_ones(): void

@@ -27,9 +27,9 @@ final class StripeKeysControllerTest extends IntegrationTestCase
     }
 
     /** Intercept the /v1/account retrieve; $ok=false makes Stripe reject the key. */
-    private function mockStripe(bool $ok = true): void
+    private function mockStripe(bool $ok = true, bool $chargesEnabled = true): void
     {
-        add_filter('pre_http_request', function ($pre, $args, $url) use ($ok) {
+        add_filter('pre_http_request', function ($pre, $args, $url) use ($ok, $chargesEnabled) {
             if (! is_string($url) || ! str_starts_with($url, 'https://api.stripe.com/')) return $pre;
 
             $this->calls[] = [
@@ -49,8 +49,8 @@ final class StripeKeysControllerTest extends IntegrationTestCase
                 'headers'  => [],
                 'body'     => (string) wp_json_encode([
                     'id'                => 'acct_live_org',
-                    'charges_enabled'   => true,
-                    'payouts_enabled'   => true,
+                    'charges_enabled'   => $chargesEnabled,
+                    'payouts_enabled'   => $chargesEnabled,
                     'details_submitted' => true,
                     'email'             => 'org@example.test',
                     'country'           => 'US',
@@ -234,5 +234,61 @@ final class StripeKeysControllerTest extends IntegrationTestCase
 
         $this->assertSame(403, $res->get_status());
         $this->assertFalse($this->account()->hasKeysFor(true));
+    }
+
+    /**
+     * One charges_enabled is stored for both modes and GatewayManager::isOn()
+     * resolves the donor form's gateway list against it, so a sandbox that can
+     * charge must not answer for a live account Stripe has restricted.
+     */
+    public function test_saving_test_keys_cannot_start_a_restricted_live_connection_charging(): void
+    {
+        $this->mockStripe(true, false);
+        $this->save('live', 'sk_live_restricted', 'pk_live_restricted');
+        $this->assertFalse($this->account()->canCharge(), 'precondition: Stripe restricted the live account');
+
+        remove_all_filters('pre_http_request');
+        $this->mockStripe(true, true);
+        $res = $this->save('test', 'sk_test_sandbox', 'pk_test_sandbox');
+
+        $this->assertSame(200, $res->get_status(), 'the test keys still save');
+        $this->assertTrue($this->account()->hasKeysFor(true), 'and are stored');
+        $this->assertFalse(
+            $this->account()->canCharge(),
+            'the sandbox does not get to say the live account is in good standing'
+        );
+        $this->assertFalse((bool) ($res->get_data()['can_charge'] ?? true), 'the connection screen agrees');
+    }
+
+    public function test_saving_test_keys_leaves_a_healthy_live_connection_charging(): void
+    {
+        $this->mockStripe(true, true);
+        $this->save('live', 'sk_live_ok', 'pk_live_ok');
+        $this->assertTrue($this->account()->canCharge());
+
+        remove_all_filters('pre_http_request');
+        $this->mockStripe(true, false);
+        $this->save('test', 'sk_test_sandbox', 'pk_test_sandbox');
+
+        $this->assertTrue(
+            $this->account()->canCharge(),
+            'ignoring the test retrieve must keep what live said, not blank it'
+        );
+    }
+
+    public function test_saving_live_keys_still_records_what_the_live_account_can_do(): void
+    {
+        $this->mockStripe(true, true);
+        $this->save('test', 'sk_test_sandbox', 'pk_test_sandbox');
+        $this->assertTrue($this->account()->canCharge(), 'precondition: a test-only connection reads its own retrieve');
+
+        remove_all_filters('pre_http_request');
+        $this->mockStripe(true, false);
+        $this->save('live', 'sk_live_restricted', 'pk_live_restricted');
+
+        $this->assertFalse(
+            $this->account()->canCharge(),
+            'the mode that takes the donations is believed about itself'
+        );
     }
 }
