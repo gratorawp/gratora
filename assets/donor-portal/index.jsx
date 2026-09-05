@@ -886,7 +886,7 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
 
     return (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
-        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Manage donation', 'fundraising-toolkit' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
+        <div class="dp-modal" role="dialog" aria-modal="true" aria-label={ __( 'Manage subscription', 'fundraising-toolkit' ) } onClick={ ( e ) => { if ( e.target === e.currentTarget ) onClose(); } } ref={ panelRef }>
             <div class="dp-modal__panel">
                 <button class="dp-modal__close" onClick={ onClose } aria-label={ __( 'Close', 'fundraising-toolkit' ) }>×</button>
                 { err && <p class="dp-error">{ err }</p> }
@@ -931,7 +931,7 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                         </dl>
 
                         { ! isTerminalPlan( plan.status ) && (
-                            <h3>{ __( 'Manage donation', 'fundraising-toolkit' ) }</h3>
+                            <h3>{ __( 'Manage subscription', 'fundraising-toolkit' ) }</h3>
                         ) }
                         { plan.status === 'paused' && (
                             <button class="dp-action is-primary" onClick={ () => call( { action: 'resume' } ) }>
@@ -955,7 +955,7 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                                 { plan.can_update_payment_method && (
                                     <button class="dp-action" onClick={ () => setStage( 'payment' ) }>{ __( 'Update payment method', 'fundraising-toolkit' ) }</button>
                                 ) }
-                                <button class="dp-action dp-action--danger" onClick={ () => setStage( 'cancel' ) }>{ __( 'Cancel donation', 'fundraising-toolkit' ) }</button>
+                                <button class="dp-action dp-action--danger" onClick={ () => setStage( 'cancel' ) }>{ __( 'Cancel subscription', 'fundraising-toolkit' ) }</button>
                             </>
                         ) }
                     </>
@@ -1145,7 +1145,7 @@ function CancelDeflection( { onPause, onSkip, onReduce, onCancel } ) {
     if ( confirmed ) {
         return (
             <>
-                <h3>{ __( 'Cancel donation?', 'fundraising-toolkit' ) }</h3>
+                <h3>{ __( 'Cancel subscription?', 'fundraising-toolkit' ) }</h3>
                 <p>{ __( "You'll keep all donations you've made so far. The recurring schedule will stop after today.", 'fundraising-toolkit' ) }</p>
                 <textarea
                     placeholder={ __( 'Tell us why (optional, helps the org)', 'fundraising-toolkit' ) }
@@ -1153,7 +1153,7 @@ function CancelDeflection( { onPause, onSkip, onReduce, onCancel } ) {
                     value={ reason }
                     onInput={ ( e ) => setReason( e.target.value ) }
                 />
-                <button class="dp-action dp-action--danger" onClick={ () => onCancel( reason ) }>{ __( 'Cancel donation', 'fundraising-toolkit' ) }</button>
+                <button class="dp-action dp-action--danger" onClick={ () => onCancel( reason ) }>{ __( 'Cancel subscription', 'fundraising-toolkit' ) }</button>
             </>
         );
     }
@@ -1810,12 +1810,23 @@ function Kpi( { label, value } ) {
     );
 }
 
-function formatDate( iso ) {
+/**
+ * The same reading the admin gives a timestamp, so a donor and the org see one
+ * date for one event. parseTimestamp marks a zoneless MySQL string as UTC, and
+ * leaves a date-only value alone rather than pushing it to UTC midnight.
+ */
+export function formatDate( iso ) {
     if ( ! iso ) return '';
-    // Backend timestamps are GMT (PHP gmdate); mark as UTC so the local-date
-    // conversion doesn't skew a day near midnight.
-    const d = new Date( iso.replace( ' ', 'T' ) + 'Z' );
-    return d.toLocaleDateString();
+    const d = parseTimestamp( iso );
+    if ( Number.isNaN( d.getTime() ) ) return iso;
+
+    return d.toLocaleString( undefined, {
+        year:   'numeric',
+        month:  'short',
+        day:    '2-digit',
+        hour:   '2-digit',
+        minute: '2-digit',
+    } );
 }
 
 function intervalLabel( count, unit ) {
