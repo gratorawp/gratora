@@ -651,14 +651,18 @@ export default function List() {
                     : item.status === 'paused' && item.resume_at
                         ? (
                             <div className="fundkit-row">
-                                <div className="fundkit-row__name">{ formatDate( item.resume_at ) }</div>
-                                <div className="fundkit-row__sub">{ __( 'when it resumes', 'fundraising-toolkit' ) }</div>
+                                <div className="fundkit-row__body">
+                                    <div className="fundkit-row__name">{ formatDate( item.resume_at ) }</div>
+                                    <div className="fundkit-row__sub">{ __( 'when it resumes', 'fundraising-toolkit' ) }</div>
+                                </div>
                             </div>
                         )
                     : (
                         <div className="fundkit-row">
-                            <div className="fundkit-row__name">{ formatDate( item.next_payment_at ) }</div>
-                            { item.next_payment_at && <div className="fundkit-row__sub">{ dueIn( item.next_payment_at ) }</div> }
+                            <div className="fundkit-row__body">
+                                <div className="fundkit-row__name">{ formatDate( item.next_payment_at ) }</div>
+                                { item.next_payment_at && <div className="fundkit-row__sub">{ dueIn( item.next_payment_at ) }</div> }
+                            </div>
                         </div>
                     )
             ),
@@ -719,13 +723,15 @@ export default function List() {
             enableSorting: true,
             render: ( { item } ) => (
                 <div className="fundkit-row">
-                    <div className="fundkit-row__name">{ formatAmount( item.total_paid_cents, item.currency ) }</div>
-                    <div className="fundkit-row__sub">
-                        { sprintf(
-                            /* translators: %d: number of payments taken so far. */
-                            _n( '%d payment', '%d payments', item.payments_count, 'fundraising-toolkit' ),
-                            item.payments_count
-                        ) }
+                    <div className="fundkit-row__body">
+                        <div className="fundkit-row__name">{ formatAmount( item.total_paid_cents, item.currency ) }</div>
+                        <div className="fundkit-row__sub">
+                            { sprintf(
+                                /* translators: %d: number of payments taken so far. */
+                                _n( '%d payment', '%d payments', item.payments_count, 'fundraising-toolkit' ),
+                                item.payments_count
+                            ) }
+                        </div>
                     </div>
                 </div>
             ),

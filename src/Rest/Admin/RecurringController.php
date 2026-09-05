@@ -17,6 +17,7 @@ use FundKit\Gateways\SubscriptionAware;
 use FundKit\Gateways\SubscriptionChangeNeedsApproval;
 use FundKit\Gateways\Sandbox\SandboxGateway;
 use FundKit\Gateways\SupportsPaymentRetry;
+use FundKit\Recurring\GatewayUnreachable;
 use FundKit\Recurring\PlanRow;
 use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\RecurringPlanActions;
@@ -475,6 +476,13 @@ final class RecurringController
             return new WP_Error('fundkit_nothing_to_collect', $e->getMessage(), ['status' => 409]);
         } catch (InvalidArgumentException $e) {
             return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
+        } catch (GatewayUnreachable $e) {
+            // Ahead of the RuntimeException arm, its parent, which would answer
+            // the screen and record nothing. The plan is still billing, which
+            // is the thing an admin has to be able to find afterwards.
+            \FundKit\Analytics\ErrorLog::record('admin.recurring', $e->getMessage(), ['recurring_plan_id' => (int) $plan->id]);
+
+            return new WP_Error('fundkit_gateway_unreachable', $e->getMessage(), ['status' => 503]);
         } catch (RuntimeException $e) {
             return new WP_Error('fundkit_plan_terminal', $e->getMessage(), ['status' => 422]);
         } catch (\Throwable $e) {
