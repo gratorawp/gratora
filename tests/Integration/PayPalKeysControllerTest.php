@@ -336,4 +336,35 @@ final class PayPalKeysControllerTest extends IntegrationTestCase
             'and it names what is missing'
         );
     }
+
+    public function test_replacing_the_app_drops_a_webhook_id_belonging_to_the_old_one(): void
+    {
+        $this->mockPayPal();
+        $this->save('test', 'AeA1QIZ_client', 'EO422dn3_secret', 'WH-TEST-1');
+
+        $account = Plugin::instance()->container->get(PayPalAccount::class);
+        $this->assertSame('WH-TEST-1', $account->webhookId(true), 'the first app registered a webhook');
+
+        // A different PayPal app. Its webhook does not exist over there, so
+        // every delivery is refused while readiness says it is registered.
+        $this->save('test', 'AeA1QIZ_other', 'EO422dn3_other');
+
+        $this->assertSame(
+            '',
+            $account->webhookId(true),
+            'the old app\'s webhook id was kept against the new credentials'
+        );
+    }
+
+    public function test_resaving_the_same_app_keeps_its_webhook(): void
+    {
+        $this->mockPayPal();
+        $this->save('test', 'AeA1QIZ_client', 'EO422dn3_secret', 'WH-TEST-1');
+
+        // A secret rotation on the same app. The webhook is still that app's.
+        $this->save('test', 'AeA1QIZ_client', 'EO422dn3_rotated');
+
+        $account = Plugin::instance()->container->get(PayPalAccount::class);
+        $this->assertSame('WH-TEST-1', $account->webhookId(true));
+    }
 }

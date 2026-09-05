@@ -163,7 +163,8 @@ final class PayPalKeysController
         // transient failure during a routine rotation does not take the mode
         // down with it: forgetMode() blanks the webhook id too, and without
         // that id recurring stops being offered at all.
-        $previous = $this->account->snapshot();
+        $previous    = $this->account->snapshot();
+        $wasClientId = $this->account->clientIdFor($test);
 
         $this->account->saveKeys($test, $clientId, $secret);
 
@@ -202,6 +203,14 @@ final class PayPalKeysController
         }
 
         if ($webhookId === '') {
+            // A webhook belongs to the PayPal app that created it, so keeping
+            // the old id against a new client id leaves every delivery refused
+            // while readiness reports the webhook as registered. Dropping it
+            // says what is true: this app has no webhook yet.
+            if ($wasClientId !== '' && $wasClientId !== $clientId) {
+                $this->account->saveWebhookId($test, '');
+            }
+
             return $this->status();
         }
 
