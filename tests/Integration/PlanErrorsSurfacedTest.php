@@ -65,6 +65,31 @@ final class PlanErrorsSurfacedTest extends IntegrationTestCase
         $this->assertSame('recurring', $row['errors'][0]['source']);
     }
 
+    /**
+     * The stored source is a routing key. On a subscription the useful
+     * question is which surface the action came from.
+     */
+    public function test_the_row_says_where_it_happened_in_words(): void
+    {
+        $cases = [
+            'portal.recurring' => 'Donor portal',
+            'admin.recurring'  => 'Admin',
+            'recurring'        => 'Scheduled run',
+            'gateway.stripe'   => 'Stripe',
+            'gateway.paypal.subscription' => 'Paypal',
+        ];
+
+        foreach ($cases as $source => $expected) {
+            $plan = $this->plan();
+            ErrorLog::record($source, 'something went wrong', ['recurring_plan_id' => (int) $plan->id]);
+
+            $row = $this->detail((int) $plan->id);
+
+            $this->assertSame($expected, $row['errors'][0]['origin'], "{$source} should read as {$expected}");
+            $this->assertSame($source, $row['errors'][0]['source'], 'the routing key stays, for support');
+        }
+    }
+
     public function test_another_plans_errors_do_not_leak_onto_this_one(): void
     {
         $mine   = $this->plan();

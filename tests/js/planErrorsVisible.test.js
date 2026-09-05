@@ -41,12 +41,14 @@ test( 'the admin reads the failure reason, not just that there was one', () => {
 	const text = mount( {
 		...BASE,
 		errors: [
-			{ at: '2026-09-01 10:00:00', source: 'recurring', message: 'the gateway is not available' },
+			{ at: '2026-09-01 10:00:00', source: 'portal.recurring', origin: 'Donor portal', message: 'the gateway is not available' },
 		],
 	} );
 
 	expect( text ).toContain( 'the gateway is not available' );
-	expect( text ).toContain( 'recurring' );
+	// The surface it came from, not the routing key that got it there.
+	expect( text ).toContain( 'Donor portal' );
+	expect( text ).not.toContain( 'portal.recurring' );
 } );
 
 test( 'a plan with nothing wrong shows no problems section', () => {
@@ -57,8 +59,8 @@ test( 'every recorded problem is listed, newest first as the server ordered them
 	const text = mount( {
 		...BASE,
 		errors: [
-			{ at: '2026-09-02 10:00:00', source: 'recurring', message: 'resume failed' },
-			{ at: '2026-09-01 10:00:00', source: 'gateway.stripe', message: 'could not reach Stripe' },
+			{ at: '2026-09-02 10:00:00', source: 'recurring', origin: 'Scheduled run', message: 'resume failed' },
+			{ at: '2026-09-01 10:00:00', source: 'gateway.stripe', origin: 'Stripe', message: 'could not reach Stripe' },
 		],
 	} );
 

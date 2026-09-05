@@ -381,13 +381,44 @@ final class RecurringController
 
         return array_values(array_map(static function ($e): array {
             $payload = is_array($e->payload) ? $e->payload : [];
+            $source  = (string) substr((string) $e->type, strlen(ErrorLog::PREFIX));
 
             return [
-                'at'      => $e->occurred_at,
-                'source'  => (string) substr((string) $e->type, strlen(ErrorLog::PREFIX)),
+                'at' => $e->occurred_at,
+                // Kept for support, who read these against the log.
+                'source'  => $source,
+                'origin'  => self::originLabel($source),
                 'message' => (string) ($payload['message'] ?? ''),
             ];
         }, $rows));
+    }
+
+    /**
+     * Where the failure happened, in the words an admin uses for it.
+     *
+     * The source is an internal routing key. Read on a subscription, the
+     * useful question it answers is which surface the action came from, since
+     * that is what decides who to ask about it.
+     *
+     * @since 1.0.0
+     */
+    private static function originLabel(string $source): string
+    {
+        if (str_starts_with($source, 'gateway.') || str_starts_with($source, 'webhook.')) {
+            $name = (string) preg_replace('/^(gateway|webhook)\./', '', $source);
+            $name = (string) preg_replace('/\..*$/', '', $name);
+
+            // A gateway's own name, which is not ours to translate.
+            return $name !== '' ? ucfirst($name) : __('Payment provider', 'fundraising-toolkit');
+        }
+
+        return match ($source) {
+            'portal.recurring' => __('Donor portal', 'fundraising-toolkit'),
+            'admin.recurring'  => __('Admin', 'fundraising-toolkit'),
+            'recurring'        => __('Scheduled run', 'fundraising-toolkit'),
+            'command'          => __('WP-CLI', 'fundraising-toolkit'),
+            default            => __('Site', 'fundraising-toolkit'),
+        };
     }
 
     private function lastFailure(RecurringPlan $p): ?array

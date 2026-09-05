@@ -128,7 +128,7 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
                             <li className="sd-errors__row" key={ `${ e.at }-${ i }` }>
                                 <span className="sd-errors__when">{ formatDate( e.at ) }</span>
                                 <span className="sd-errors__msg">{ e.message }</span>
-                                <span className="sd-errors__src">{ e.source }</span>
+                                <span className="sd-errors__src" title={ e.source }>{ e.origin || e.source }</span>
                             </li>
                         ) ) }
                     </ul>
