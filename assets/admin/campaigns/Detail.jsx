@@ -179,8 +179,24 @@ export default function Detail( { id, tab } ) {
         window.history.replaceState( {}, '', url.toString() );
     }, [] );
 
-    if ( c.isLoading || ( ! c.savedRecord && ! c.notFound ) ) {
+    if ( c.isLoading || ( ! c.savedRecord && ! c.notFound && ! c.loadError ) ) {
         return <div style={ { padding: 40, textAlign: 'center' } }><Spinner /></div>;
+    }
+    // A request that failed is not a campaign that is gone, and telling the
+    // reader it is leaves them with nothing to do about it.
+    if ( c.loadError ) {
+        return (
+            <div style={ { padding: 24 } }>
+                <Notice status="error" isDismissible={ false }>
+                    { c.loadError.message || __( 'This campaign could not be loaded.', 'fundraising-toolkit' ) }
+                </Notice>
+                <p>
+                    <Btn variant="secondary" onClick={ c.reload }>{ __( 'Try again', 'fundraising-toolkit' ) }</Btn>
+                    { ' ' }
+                    <Btn href={ listHref() }>{ __( 'Back to campaigns', 'fundraising-toolkit' ) }</Btn>
+                </p>
+            </div>
+        );
     }
     if ( c.notFound ) {
         return (

@@ -1,6 +1,6 @@
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, TextControl, Spinner, Notice, ExternalLink } from '@wordpress/components';
-import { useState, useEffect } from '@wordpress/element';
+import { PanelBody, TextControl, Spinner, Notice, ExternalLink, Button } from '@wordpress/components';
+import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
@@ -17,13 +17,22 @@ function Edit( { attributes, setAttributes } ) {
     // org = { base, currencies: [codes] } enabled under Settings → Currency.
     const [ org, setOrg ] = useState( null );
 
-    useEffect( () => {
-        let cancelled = false;
+    // A failure used to be stored as an empty list, which reads back as "no
+    // currencies are enabled" - a statement about the org, not about the
+    // request. The route always answers with at least the base currency.
+    const [ failed, setFailed ] = useState( false );
+    const alive = useRef( true );
+    useEffect( () => () => { alive.current = false; }, [] );
+
+    const load = useCallback( () => {
+        setOrg( null );
+        setFailed( false );
         apiFetch( { path: '/fundkit/v1/admin/forms/currencies' } )
-            .then( ( r ) => { if ( ! cancelled ) setOrg( r && Array.isArray( r.currencies ) ? r : { base: '', currencies: [] } ); } )
-            .catch( () => { if ( ! cancelled ) setOrg( { base: '', currencies: [] } ); } );
-        return () => { cancelled = true; };
+            .then( ( r ) => { if ( alive.current ) setOrg( r && Array.isArray( r.currencies ) ? r : { base: '', currencies: [] } ); } )
+            .catch( () => { if ( alive.current ) setFailed( true ); } );
     }, [] );
+
+    useEffect( () => { load(); }, [ load ] );
 
     const available = org?.currencies || [];
     const base      = org?.base || '';
@@ -51,7 +60,20 @@ function Edit( { attributes, setAttributes } ) {
     );
 
     let panelBody;
-    if ( org === null ) {
+    if ( failed ) {
+        panelBody = (
+            <>
+                <Notice status="error" isDismissible={ false }>
+                    { __( 'The currencies this site offers could not be loaded, so this block cannot say which ones it will show.', 'fundraising-toolkit' ) }
+                </Notice>
+                <p style={ { margin: '10px 0 0' } }>
+                    <Button variant="secondary" onClick={ load }>
+                        { __( 'Try again', 'fundraising-toolkit' ) }
+                    </Button>
+                </p>
+            </>
+        );
+    } else if ( org === null ) {
         panelBody = <div style={ { display: 'flex', justifyContent: 'center', padding: 12 } }><Spinner /></div>;
     } else if ( available.length === 0 ) {
         panelBody = (

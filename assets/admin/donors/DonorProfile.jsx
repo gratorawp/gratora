@@ -6,6 +6,7 @@ import Header from './profile/Header';
 import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import Dialog from '../_shared/components/Dialog';
 import Btn from '../_shared/components/Btn';
+import Notice from '../_shared/components/Notice';
 import { COUNTRIES } from '../../_shared/countries';
 import LifetimeMetrics from './profile/LifetimeMetrics';
 import Tabs from './profile/Tabs';
@@ -288,9 +289,10 @@ export default function DonorProfile( { id, onBack } ) {
 
     const load = () => {
         setLoading( true );
+        setError( null );
         return apiFetch( { path: `/fundkit/v1/admin/donors/${ id }/profile` } )
             .then( ( d ) => { setData( d ); setError( null ); } )
-            .catch( ( e ) => setError( e?.message || 'Error' ) )
+            .catch( ( e ) => setError( e?.message || __( 'Could not load this donor.', 'fundraising-toolkit' ) ) )
             .finally( () => setLoading( false ) );
     };
 
@@ -300,13 +302,29 @@ export default function DonorProfile( { id, onBack } ) {
         setData( null );
         apiFetch( { path: `/fundkit/v1/admin/donors/${ id }/profile` } )
             .then( ( d ) => { if ( ! aborted ) { setData( d ); setError( null ); } } )
-            .catch( ( e ) => { if ( ! aborted ) setError( e?.message || 'Error' ); } )
+            .catch( ( e ) => { if ( ! aborted ) setError( e?.message || __( 'Could not load this donor.', 'fundraising-toolkit' ) ); } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ id ] );
 
     if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'fundraising-toolkit' ) }</p>;
-    if ( error )              return <p className="dp-error">{ error }</p>;
+
+    // Only when there is nothing to fall back to. A refresh that fails after a
+    // note or a plan change used to replace the whole profile with one line,
+    // leaving nothing on screen that could ask again.
+    if ( error && ! data ) {
+        return (
+            <div className="dp-shell">
+                <Notice status="error" isDismissible={ false }>{ error }</Notice>
+                <p>
+                    <Btn variant="secondary" onClick={ load }>{ __( 'Try again', 'fundraising-toolkit' ) }</Btn>
+                    { ' ' }
+                    <Btn onClick={ onBack }>{ __( 'Back to donors', 'fundraising-toolkit' ) }</Btn>
+                </p>
+            </div>
+        );
+    }
+
     if ( ! data )             return null;
 
     const {
@@ -335,6 +353,10 @@ export default function DonorProfile( { id, onBack } ) {
 
     return (
         <div className="dp-shell">
+            { error && (
+                <Notice status="error" onRemove={ () => setError( null ) }>{ error }</Notice>
+            ) }
+
             <Header
                 donor={ donor }
                 lifetime={ lifetime }

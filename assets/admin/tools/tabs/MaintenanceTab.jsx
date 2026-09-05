@@ -7,7 +7,7 @@ import Card from '../../_shared/components/Card';
 import Notice from '../../_shared/components/Notice';
 import Btn from '../../_shared/components/Btn';
 
-export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) {
+export default function MaintenanceTab( { info, infoError, active, loadInfo, setNotice } ) {
     const [ recalcScope, setRecalcScope ]     = useState( 'all' );
     const [ recalcRunning, setRecalcRunning ] = useState( false );
     const [ recalcResult, setRecalcResult ]   = useState( null );
@@ -114,6 +114,17 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
 
     return (
         <div className="fundkit-panel">
+            { infoError && (
+                <Card
+                    title={ __( 'Could not check this site', 'fundraising-toolkit' ) }
+                    sub={ __( 'The checks behind this screen did not run, so it cannot say whether data updates are outstanding, whether completed donations are missing from your totals, or whether test data is still here. Nothing below is a clean bill of health until it does.', 'fundraising-toolkit' ) }
+                >
+                    <Btn variant="secondary" onClick={ loadInfo }>
+                        { __( 'Check again', 'fundraising-toolkit' ) }
+                    </Btn>
+                </Card>
+            ) }
+
             { info?.pending_upgrades?.length > 0 && (
                 <Card
                     title={ __( 'Data updates are outstanding', 'fundraising-toolkit' ) }

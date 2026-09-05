@@ -463,14 +463,31 @@ export default function Editor( { formId } ) {
         return () => window.removeEventListener( 'keydown', onKey );
     }, [ dirtyForUnload, c.isSaving, onSave, undo, redo, history.past.length, history.future.length ] );
 
-    if ( c.isLoading || ( ! c.savedRecord && ! c.notFound ) ) {
+    if ( c.isLoading || ( ! c.savedRecord && ! c.notFound && ! c.loadError ) ) {
         return <div className="fundkit-form-editor__loading"><Spinner /></div>;
     }
-    if ( c.notFound ) {
+    // This screen hides the admin bar and the menu, so a bare sentence here is
+    // a dead end: whatever went wrong, there has to be a way onward from it.
+    if ( c.notFound || c.loadError ) {
         return (
-            <Notice status="error" isDismissible={ false }>
-                { __( 'Form not found.', 'fundraising-toolkit' ) }
-            </Notice>
+            <div className="fundkit-form-editor__loading">
+                <Notice status="error" isDismissible={ false }>
+                    { c.loadError
+                        ? ( c.loadError.message || __( 'This form could not be loaded.', 'fundraising-toolkit' ) )
+                        : __( 'Form not found.', 'fundraising-toolkit' ) }
+                </Notice>
+                <p>
+                    { c.loadError && (
+                        <>
+                            <Btn variant="secondary" onClick={ c.reload }>
+                                { __( 'Try again', 'fundraising-toolkit' ) }
+                            </Btn>
+                            { ' ' }
+                        </>
+                    ) }
+                    <Btn href={ formsBackHref( 0 ) }>{ __( 'Back to forms', 'fundraising-toolkit' ) }</Btn>
+                </p>
+            </div>
         );
     }
 

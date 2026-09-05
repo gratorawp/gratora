@@ -19,18 +19,27 @@ export function useFxRates() {
     const [ loading, setLoading ]         = useState( true );
     const [ isSaving, setSaving ]         = useState( false );
     const [ fetching, setFetching ]       = useState( false );
+    const [ error, setError ]             = useState( null );
+    const [ reloadKey, setReloadKey ]     = useState( 0 );
+
+    const reload = useCallback( () => setReloadKey( ( k ) => k + 1 ), [] );
 
     const load = useCallback( async () => {
+        setError( null );
+        setLoading( true );
         try {
             setServer( await apiFetch( { path: PATH } ) );
         } catch ( e ) {
-            // Leave server null; panel shows a quiet unavailable state.
+            // Swallowed, this card simply vanished: the panel reads a missing
+            // rate table as a site with one currency, which is a different
+            // fact about the org than "the rates could not be loaded".
+            setError( e?.message || __( 'Could not load exchange rates.', 'fundraising-toolkit' ) );
         } finally {
             setLoading( false );
         }
     }, [] );
 
-    useEffect( () => { load(); }, [ load ] );
+    useEffect( () => { load(); }, [ load, reloadKey ] );
 
     const auto = autoEdit !== null ? autoEdit : !! server?.auto;
 
@@ -135,6 +144,11 @@ export function useFxRates() {
         rows,
         auto,
         loading,
+        // The contract Settings.jsx folds every group into: a group still
+        // loading holds the Save bar, and a group that failed takes the screen.
+        isLoading: loading,
+        loadError: error,
+        reload,
         isSaving,
         fetching,
         isDirty,

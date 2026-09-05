@@ -32,7 +32,16 @@ export function useFundKitRecord( name, id ) {
         [ name, id ]
     );
 
-    const { editEntityRecord, saveEntityRecord } = useDispatch( coreDataStore );
+    // Why the resolution ended, not just that it ended: a 500 or a dropped
+    // connection resolves the same way a missing record does, and telling a
+    // reader their form does not exist is a different sentence.
+    const loadError = useSelect(
+        ( select ) =>
+            select( coreDataStore ).getResolutionError( 'getEntityRecord', [ KIND, name, id ] ),
+        [ name, id ]
+    );
+
+    const { editEntityRecord, saveEntityRecord, invalidateResolution } = useDispatch( coreDataStore );
 
     const discard = () => {
         if ( ! record || ! edits ) return;
@@ -68,7 +77,9 @@ export function useFundKitRecord( name, id ) {
         isDirty:   hasEdits,
         isSaving,
         isLoading: ! hasResolved && isResolving,
-        notFound:  hasResolved && ! record,
+        loadError,
+        notFound:  hasResolved && ! record && ! loadError,
+        reload:    () => invalidateResolution( 'getEntityRecord', [ KIND, name, id ] ),
         value,
         bind: ( key, fallback = '' ) => ( {
             value:    value( key, fallback ),
