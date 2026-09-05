@@ -199,6 +199,27 @@ final class ReceiptIssuer
     }
 
     /**
+     * The donor's own answers, added to a context about to be rendered.
+     *
+     * One owner of the rule: the PDF's "Additional information" block renders
+     * from these, and a path that built its context without them handed the
+     * donor a materially different document under the same receipt number.
+     *
+     * @since 1.0.0
+     */
+    public function withCustomFields(ReceiptContext $ctx, Donation $donation): ReceiptContext
+    {
+        $custom = $this->decryptCustomData($donation);
+        if ($custom === []) {
+            return $ctx;
+        }
+
+        return $ctx
+            ->with('custom_data', $custom)
+            ->with('custom_field_labels', $this->loadCustomFieldLabels($donation));
+    }
+
+    /**
      * Field labels keyed by custom_data key. Pulled from the form's block
      * markup so the receipt PDF can render "Question -> Answer" instead of
      * raw machine-keyed JSON.
@@ -239,11 +260,7 @@ final class ReceiptIssuer
         $ctx = $ctx->with('receipt_number', (string) $receipt->receipt_number);
 
         // The PDF renders these as "Question - Answer" rows.
-        $custom = $this->decryptCustomData($ctx->donation);
-        if ($custom !== []) {
-            $ctx = $ctx->with('custom_data', $custom);
-            $ctx = $ctx->with('custom_field_labels', $this->loadCustomFieldLabels($ctx->donation));
-        }
+        $ctx = $this->withCustomFields($ctx, $ctx->donation);
 
         // Switch WP locale to the donor's for the duration of render + email
         // so __() resolves in their language, then restore.
@@ -270,7 +287,9 @@ final class ReceiptIssuer
                 ]);
             }
 
-            if ($ctx->donor_email !== null && $ctx->donor_email !== '') {
+            // The receipt row and its PDF still exist for the admin screen and
+            // the donor portal; there is simply nothing to send.
+            if ($ctx->donor_email !== null && $ctx->donor_email !== '' && $this->receiptEmailEnabled()) {
                 // Atomic single-sender claim: flip send_claimed_at from NULL in
                 // one UPDATE so only one of two racing runners sends the email.
                 // Released back to NULL on a soft failure so a retry can resend.
@@ -378,17 +397,26 @@ final class ReceiptIssuer
     }
 
     /** @since 1.0.0 */
+    /**
+     * Whether the org has switched the receipt email off.
+     *
+     * Asked separately from sending, because "nobody was meant to receive this"
+     * and "the transport refused it" are different answers. Treating the first
+     * as a failure released the send lock on every receipt, fired
+     * receipt.email_failed for each, and put every donation into the sweep that
+     * reports donors who never got their receipt.
+     */
+    private function receiptEmailEnabled(): bool
+    {
+        $template = $this->settings->get('email')['templates']['donation_receipt'] ?? [];
+
+        return ! array_key_exists('enabled', $template) || ! empty($template['enabled']);
+    }
+
     private function sendEmail(Receipt $receipt, ReceiptContext $ctx, string $pdfBytes): bool
     {
         $emailCfg = $this->settings->get('email');
         $template = $emailCfg['templates']['donation_receipt'] ?? [];
-
-        // Admin can disable the receipt email entirely from Settings → Email.
-        // The receipt row + PDF still exist so they can be downloaded from the
-        // admin / donor portal, but no email goes out.
-        if (array_key_exists('enabled', $template) && empty($template['enabled'])) {
-            return false;
-        }
 
         $orgName = (string) ($ctx->org['name'] ?? get_bloginfo('name'));
 
@@ -536,11 +564,7 @@ final class ReceiptIssuer
         );
         $ctx = $ctx->with('receipt_number', (string) $receipt->receipt_number);
 
-        $custom = $this->decryptCustomData($donation);
-        if ($custom !== []) {
-            $ctx = $ctx->with('custom_data', $custom);
-            $ctx = $ctx->with('custom_field_labels', $this->loadCustomFieldLabels($donation));
-        }
+        $ctx = $this->withCustomFields($ctx, $donation);
 
         $ctx = apply_filters('fundkit.receipt.context', $ctx);
 

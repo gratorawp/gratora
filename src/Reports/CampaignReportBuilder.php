@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Reports;
 
+use FundKit\Receipts\OrgProfile;
 use FundKit\Campaigns\Campaign;
 use FundKit\Campaigns\CampaignMetricsService;
 use FundKit\Foundation\Helpers\Money;
@@ -36,7 +37,7 @@ final class CampaignReportBuilder
         [$hasGoal, $goalDisplay, $percent, $barWidth] = $this->goal($campaign, $summary, $currency);
 
         $org     = get_option('fundkit_org_profile', []);
-        $orgName = trim((string) (is_array($org) ? ($org['name'] ?? '') : '')) ?: (string) get_bloginfo('name');
+        $orgName = OrgProfile::load()['name'];
 
         $html = View::load('Receipts.campaign-report', [
             'org_name'       => $orgName,

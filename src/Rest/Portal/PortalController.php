@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Rest\Portal;
 
+use FundKit\Receipts\OrgProfile;
 use FundKit\Analytics\ErrorLog;
 use FundKit\Async\AsyncDispatcher;
 use FundKit\Campaigns\Campaign;
@@ -603,7 +604,7 @@ final class PortalController
     {
         $this->mailer->sendTemplate('magic_link', $email, [
             'donor_name'        => $name !== '' ? $name : $email,
-            'organisation_name' => (string) get_bloginfo('name'),
+            'organisation_name' => OrgProfile::load()['name'],
             'portal_url'        => add_query_arg('token', $rawToken, $this->portalUrl()),
             'link_expiry'       => human_time_diff(0, $ttlSeconds),
         ]);

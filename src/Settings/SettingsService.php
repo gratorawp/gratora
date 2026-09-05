@@ -451,6 +451,22 @@ final class SettingsService
      */
     private function withoutDefaultTemplates(string $group, array $values): array
     {
+        // The receipts panel round-trips its whole form, so a default the admin
+        // never touched came back and was stored verbatim. Two things read the
+        // stored option to mean "the org configured this": the annual statement
+        // appends only a footer the org wrote, and the receipt treats a blank
+        // field as never-set. Both were answered wrongly by a stored default.
+        if ($group === 'receipts') {
+            $cfg = $this->groups()['receipts'] ?? ['defaults' => []];
+            foreach ($this->resolveDynamicDefaults('receipts', $cfg['defaults']) as $key => $default) {
+                if (array_key_exists($key, $values) && $values[$key] === $default) {
+                    unset($values[$key]);
+                }
+            }
+
+            return $values;
+        }
+
         if ($group !== 'email' || ! is_array($values['templates'] ?? null)) return $values;
 
         foreach ($this->emailTemplateDefaults() as $key => $default) {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Donations;
 
+use FundKit\Receipts\OrgProfile;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Donors\DonorRepository;
 use FundKit\Donors\DonorService;
@@ -83,7 +84,7 @@ final class DonationEmails extends HookProvider
 
         $this->mailer->sendTemplate($this->templateFor('offline_instructions', $donation), $email, [
             'donor_name'        => $donorName,
-            'organisation_name' => (string) get_bloginfo('name'),
+            'organisation_name' => OrgProfile::load()['name'],
             'campaign_title'    => $this->campaignTitle($donation),
             'amount'            => $amount,
             'reference'         => $reference,
@@ -101,7 +102,7 @@ final class DonationEmails extends HookProvider
         $this->mailer->sendTemplate($this->templateFor('donation_pending', $donation), $email, [
             'donor_first_name'  => $this->donorFirstName($donation),
             'donor_name'        => $this->donorName($donation),
-            'organisation_name' => (string) get_bloginfo('name'),
+            'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $donation->amount_cents, (string) $donation->currency),
             'campaign_title'    => $this->campaignTitle($donation),
             'reference'         => (string) $donation->reference,
@@ -120,7 +121,7 @@ final class DonationEmails extends HookProvider
         $this->mailer->sendTemplate('recurring_renewal', $email, [
             'donor_first_name'  => $this->donorFirstName($donation),
             'donor_name'        => $this->donorName($donation),
-            'organisation_name' => (string) get_bloginfo('name'),
+            'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $donation->amount_cents, (string) $donation->currency),
             'campaign_title'    => $this->campaignTitle($donation),
             'reference'         => (string) $donation->reference,
@@ -141,7 +142,7 @@ final class DonationEmails extends HookProvider
         $this->mailer->sendTemplate('subscription_cancelled', $email, [
             'donor_first_name'  => $first,
             'donor_name'        => $name,
-            'organisation_name' => (string) get_bloginfo('name'),
+            'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $plan->amount_cents, (string) $plan->currency),
             'campaign_title'    => $plan->campaign_id
                 ? (($c = $this->campaigns->findById((int) $plan->campaign_id)) ? (string) $c->title : '')
@@ -185,7 +186,7 @@ final class DonationEmails extends HookProvider
         $this->mailer->sendTemplate($template, $email, [
             'donor_first_name'  => trim((string) ($donor->first_name ?? '')),
             'donor_name'        => trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
-            'organisation_name' => (string) get_bloginfo('name'),
+            'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $plan->amount_cents, $currency),
             'old_amount'        => $oldCents !== null ? Money::format($oldCents, $currency) : '',
             'frequency'         => FrequencyMap::label(
@@ -242,7 +243,7 @@ final class DonationEmails extends HookProvider
         $this->mailer->sendTemplate('subscription_payment_failed', $email, [
             'donor_first_name'  => trim((string) ($donor->first_name ?? '')),
             'donor_name'        => trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
-            'organisation_name' => (string) get_bloginfo('name'),
+            'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $plan->amount_cents, (string) $plan->currency),
             'campaign_title'    => $plan->campaign_id
                 ? (($c = $this->campaigns->findById((int) $plan->campaign_id)) ? (string) $c->title : '')
@@ -263,7 +264,7 @@ final class DonationEmails extends HookProvider
         $this->mailer->sendTemplate($this->templateFor('donation_refunded', $donation), $email, [
             'donor_first_name'  => $this->donorFirstName($donation),
             'donor_name'        => $this->donorName($donation),
-            'organisation_name' => (string) get_bloginfo('name'),
+            'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $refund->amount_cents, (string) $donation->currency),
             'campaign_title'    => $this->campaignTitle($donation),
             'reference'         => (string) $donation->reference,
@@ -302,7 +303,7 @@ final class DonationEmails extends HookProvider
         $this->mailer->sendTemplate('donation_first', $email, [
             'donor_first_name'  => trim((string) ($donor->first_name ?? '')),
             'donor_name'        => trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
-            'organisation_name' => (string) get_bloginfo('name'),
+            'organisation_name' => OrgProfile::load()['name'],
         ]);
     }
 

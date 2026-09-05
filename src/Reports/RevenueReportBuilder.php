@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Reports;
 
+use FundKit\Receipts\OrgProfile;
 use FundKit\Exports\RevenueExporter;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Helpers\View;
@@ -52,7 +53,7 @@ final class RevenueReportBuilder
         }
 
         $org     = get_option('fundkit_org_profile', []);
-        $orgName = trim((string) (is_array($org) ? ($org['name'] ?? '') : '')) ?: (string) get_bloginfo('name');
+        $orgName = OrgProfile::load()['name'];
 
         $html = View::load('Receipts.revenue-report', [
             'org_name'       => $orgName,

@@ -1498,8 +1498,11 @@ final class DonationsController
      */
     public function previewReceipt(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
-        $org = get_option('fundkit_org_profile', []);
-        if (! is_array($org)) $org = [];
+        // The resolver both real render paths use, not the raw option: the
+        // preview exists to show the document, and reading the option directly
+        // skipped the name -> legal name -> site name chain and the email
+        // default, so it showed a different organisation than the receipt.
+        $org = \FundKit\Receipts\OrgProfile::load();
 
         $donor                    = \FundKit\Donors\Donor::make();
         $donor->id                = 0;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Rest;
 
+use FundKit\Receipts\ReceiptIssuer;
 use FundKit\Receipts\OrgProfile;
 
 use FundKit\Campaigns\Campaign;
@@ -56,6 +57,7 @@ final class ReceiptsController
         private DonorService $donorService,
         private MagicLinkService $magicLinks,
         private AntiSpamGuard $spam,
+        private ReceiptIssuer $issuer,
     ) {
     }
 
@@ -129,6 +131,9 @@ final class ReceiptsController
             campaign:      $this->loadCampaign($donation),
         );
         $ctx = $ctx->with('receipt_number', (string) $receipt->receipt_number);
+        // The same answers the attached copy carried: without them the emailed
+        // link handed the donor a different document under the same number.
+        $ctx = $this->issuer->withCustomFields($ctx, $donation);
         $ctx = apply_filters('fundkit.receipt.context', $ctx);
 
         $renderer = $this->findRendererById($receipt->renderer_id);

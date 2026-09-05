@@ -66,7 +66,7 @@ final class TaxStatementBuilder
             'donor_address_lines' => $donorAddr !== null ? explode("\n", $donorAddr) : [],
             'lines'               => $itemized['lines'],
             'totals'              => $itemized['totals'],
-            'org_disclaimer'      => $this->orgDisclaimer(),
+            'org_disclaimer'      => $this->orgDisclaimer($orgName, $donorName),
             'generated_date'      => (string) wp_date(get_option('date_format')),
         ]);
 
@@ -226,12 +226,35 @@ final class TaxStatementBuilder
      *
      * @since 1.0.0
      */
-    private function orgDisclaimer(): string
+    /**
+     * The footer the org wrote, if it wrote one.
+     *
+     * Only what is stored, never the default: the built-in receipt footer says
+     * the document is a non-fiscal acknowledgement, which is the opposite of
+     * what an annual statement is for.
+     */
+    private function orgDisclaimer(string $orgName, string $donorName): string
     {
         $stored = get_option('fundkit_receipt_settings', []);
         if (! is_array($stored)) {
             return '';
         }
-        return trim((string) ($stored['footer_note'] ?? ''));
+
+        $note = trim((string) ($stored['footer_note'] ?? ''));
+        if ($note === '') {
+            return '';
+        }
+
+        // The panel offers merge-tag buttons on this field and the receipt
+        // expands them. Handed over raw, a tax document printed literal braces.
+        // Only the two tags a year has an answer for: the rest belong to a
+        // single donation, and a receipt-scoped tag left in place would print
+        // as {amount} on the document a donor files with their return.
+        $note = strtr($note, [
+            '{organisation_name}' => $orgName,
+            '{donor_name}'        => $donorName,
+        ]);
+
+        return trim((string) preg_replace('/\{[a-z_]+\}/', '', $note));
     }
 }

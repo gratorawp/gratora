@@ -132,7 +132,9 @@ final class GenericReceiptRenderer implements ReceiptRenderer
         $defaults = [
             'header_title'       => __('Donation receipt', 'fundraising-toolkit'),
             'intro'              => '',
-            'signoff'            => __('Thank you for your support.', 'fundraising-toolkit'),
+            // The wording the Receipts panel shows and the admin believes is in
+            // effect. Two default sets for one field disagreed about it.
+            'signoff'            => __('Thank you for your support, {donor_name}.', 'fundraising-toolkit'),
             'footer_note'        => __(
                 "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organization's status. Keep this receipt for your records.",
                 'fundraising-toolkit'
@@ -150,10 +152,14 @@ final class GenericReceiptRenderer implements ReceiptRenderer
         $accent      = (string) ($brandTokens['fundkit-accent'] ?? '#211d3f');
 
         return [
-            'header_title'       => trim((string) ($stored['header_title'] ?? '')) !== '' ? (string) $stored['header_title'] : $defaults['header_title'],
+            // Absent means never set, so the default applies; an empty string
+            // means the admin cleared the field. Treating the two the same put
+            // back text they had deliberately removed, and made one field mean
+            // the opposite of what it means on the annual statement.
+            'header_title'       => array_key_exists('header_title', $stored) ? (string) $stored['header_title'] : $defaults['header_title'],
             'intro'              => (string) ($stored['intro'] ?? ''),
-            'signoff'            => trim((string) ($stored['signoff']      ?? '')) !== '' ? (string) $stored['signoff']      : $defaults['signoff'],
-            'footer_note'        => trim((string) ($stored['footer_note']  ?? '')) !== '' ? (string) $stored['footer_note']  : $defaults['footer_note'],
+            'signoff'            => array_key_exists('signoff', $stored)      ? (string) $stored['signoff']      : $defaults['signoff'],
+            'footer_note'        => array_key_exists('footer_note', $stored)  ? (string) $stored['footer_note']  : $defaults['footer_note'],
             'show_tax_id'        => array_key_exists('show_tax_id', $stored)        ? (bool) $stored['show_tax_id']        : $defaults['show_tax_id'],
             'show_donor_address' => array_key_exists('show_donor_address', $stored) ? (bool) $stored['show_donor_address'] : $defaults['show_donor_address'],
             'logo_url'           => $logoUrl,
