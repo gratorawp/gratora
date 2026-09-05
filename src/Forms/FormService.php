@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace FundKit\Forms;
 
 use FundKit\Campaigns\Campaign;
+use FundKit\Donations\Donation;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Foundation\Time\Clock;
+use FundKit\Recurring\RecurringPlan;
 use InvalidArgumentException;
+use RuntimeException;
 
 /**
  * Form CRUD. Lifecycle: draft, published, archived.
@@ -306,9 +309,41 @@ final class FormService
             );
         }
 
+        $blocked = $this->deleteBlockedReason($form);
+        if ($blocked !== null) {
+            throw new RuntimeException(esc_html($blocked));
+        }
+
         Form::query()->where('id', $form->id)->delete();
 
         do_action('fundkit.form.deleted', $form);
+    }
+
+    /**
+     * Why this form cannot be hard-deleted, or null when it can be.
+     *
+     * Mirrors CampaignService::deleteBlockedReason. A form's donation rows keep
+     * pointing at form_id after the row goes: the per-form breakdown can no
+     * longer name them, the donations list shows a blank form for each, and the
+     * stats row holding that form's raised total stays in the table with no
+     * form to belong to. Setting it back to draft takes it off the site and
+     * keeps the records.
+     *
+     * Every row counts, whatever its status or mode: a form whose only donation
+     * is pending, failed or test-mode still owns records that would be orphaned.
+     *
+     * @since 1.0.0
+     */
+    public function deleteBlockedReason(Form $form): ?string
+    {
+        $donations = (int) Donation::query()->where('form_id', $form->id)->count();
+        $plans     = (int) RecurringPlan::query()->where('form_id', $form->id)->count();
+
+        if ($donations > 0 || $plans > 0) {
+            return __('This form has donations and cannot be deleted. Its records would be left pointing at nothing. Set it back to draft instead.', 'fundraising-toolkit');
+        }
+
+        return null;
     }
 
     /**
