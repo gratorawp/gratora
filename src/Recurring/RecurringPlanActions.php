@@ -52,6 +52,8 @@ final class RecurringPlanActions
      */
     public function pause(RecurringPlan $plan, string $resumesAt, RecurringPlanChange $change): void
     {
+        $resumesAt = self::resumeDate($resumesAt);
+
         $this->assertChangeable($plan);
         $this->assertGatewayReachable($plan, 'pause');
 
@@ -66,6 +68,42 @@ final class RecurringPlanActions
         $change->detail += ['resumes_at' => $resumesAt];
         $this->finish($plan, $change, 'recurring.paused');
         do_action('fundkit.recurring.plan_paused', $plan, $resumesAt);
+    }
+
+    /**
+     * A date the plan can actually be restarted on.
+     *
+     * WordPress removes STRICT_TRANS_TABLES, so MySQL stores a datetime it
+     * cannot parse as '0000-00-00 00:00:00' rather than refusing it. That is
+     * not null and it is already past, so RecurringResumer matched the plan on
+     * its next daily run and lifted the pause: a three-month pause the org
+     * authorised lasted under a day and the donor was charged on the next
+     * cycle, with next_payment_at left sorting to the top of the admin list as
+     * a broken date.
+     *
+     * @throws InvalidArgumentException
+     *
+     * @since 1.0.0
+     */
+    public static function resumeDate(string $resumesAt): string
+    {
+        $at = strtotime($resumesAt);
+        if ($at === false) {
+            throw new InvalidArgumentException(
+                esc_html__('That is not a date this donation can restart on.', 'fundraising-toolkit')
+            );
+        }
+
+        $now = time();
+        if ($at <= $now) {
+            throw new InvalidArgumentException(
+                esc_html__('A donation can only be paused until a date in the future.', 'fundraising-toolkit')
+            );
+        }
+
+        // The ceiling the pause UI offers, so no caller can set a pause that
+        // nothing is ever going to lift.
+        return gmdate('Y-m-d H:i:s', min($at, (int) strtotime('+12 months', $now)));
     }
 
     /**
