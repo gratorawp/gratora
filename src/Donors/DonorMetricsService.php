@@ -488,7 +488,7 @@ final class DonorMetricsService
             ],
             'donations' => array_map(fn (Donation $d) => $this->mapDonationRow($d), $donations),
             'recurring' => [
-                'plans' => array_map(fn (RecurringPlan $p) => $this->mapRecurringPlanRow($p), $recurringPlans),
+                'plans' => array_values(PlanRow::commonMany($recurringPlans, $this->gateways)),
             ],
             'receipts' => $this->mapReceiptRows($receipts),
             'events' => array_map(function (Event $e) use ($eventNotes, $eventReceipts) {
@@ -732,16 +732,6 @@ final class DonorMetricsService
             ->getAll();
 
         return array_map(fn (Donation $d) => $this->mapDonationRow($d), $rows);
-    }
-
-    /**
-     * @return array<string,mixed>
-     *
-     * @since 1.0.0
-     */
-    private function mapRecurringPlanRow(RecurringPlan $p): array
-    {
-        return PlanRow::common($p, $this->gateways);
     }
 
     /**
@@ -1055,7 +1045,7 @@ final class DonorMetricsService
             ],
             'donations' => $this->donationsForExport($donorId),
             'recurring' => [
-                'plans' => array_map(fn (RecurringPlan $p) => $this->mapRecurringPlanRow($p), $recurringPlans),
+                'plans' => array_values(PlanRow::commonMany($recurringPlans, $this->gateways)),
             ],
             'receipts'  => $this->mapReceiptRows($receipts),
             'events'    => array_map(fn (Event $e) => $this->mapEventRow($e), $events),

@@ -21,6 +21,25 @@ final class CampaignRepository
     }
 
     /**
+     * @param array<int|string> $ids
+     * @return array<int, Campaign> keyed by id
+     *
+     * @since 1.0.0
+     */
+    public function findManyByIds(array $ids): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if ($ids === []) return [];
+
+        $byId = [];
+        foreach (Campaign::query()->whereIn('id', $ids)->getAll() as $c) {
+            $byId[(int) $c->id] = $c;
+        }
+
+        return $byId;
+    }
+
+    /**
      * Resolve a campaign for PUBLIC rendering: published only, except that
      * edit-capable users still get draft/archived so they can preview a
      * campaign's pages while building it. Null when it must not render.

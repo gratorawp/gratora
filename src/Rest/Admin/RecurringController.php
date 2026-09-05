@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
 
+use FundKit\Campaigns\Campaign;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Donations\Donation;
 use FundKit\Donors\Donor;
@@ -176,7 +177,7 @@ final class RecurringController
             'offset'  => ($page - 1) * $perPage,
         ]);
 
-        $shaped = array_map(fn (RecurringPlan $p): array => $this->shape($p), $rows);
+        $shaped = $this->shapeMany($rows);
 
         $response = new WP_REST_Response($shaped, 200);
         $response->header('X-WP-Total', (string) $total);
@@ -369,12 +370,43 @@ final class RecurringController
      *
      * @since 1.0.0
      */
-    private function shape(RecurringPlan $p): array
+    /**
+     * A whole page in a fixed number of queries. Shaping row by row cost a
+     * donor, a campaign, a declined renewal and an error lookup each, so a
+     * hundred-row page ran four hundred queries.
+     *
+     * @param list<RecurringPlan> $plans
+     * @return list<array<string,mixed>>
+     */
+    private function shapeMany(array $plans): array
     {
-        $donor    = $p->donor_id ? $this->donors->findById((int) $p->donor_id) : null;
-        $campaign = $p->campaign_id ? $this->campaigns->findById((int) $p->campaign_id) : null;
+        $donors = $this->donors->findManyByIds(array_map(
+            static fn (RecurringPlan $p): int => (int) $p->donor_id,
+            $plans
+        ));
+        $campaigns = $this->campaigns->findManyByIds(array_map(
+            static fn (RecurringPlan $p): int => (int) $p->campaign_id,
+            $plans
+        ));
+        $common = PlanRow::commonMany($plans, $this->gateways);
 
-        return PlanRow::common($p, $this->gateways) + [
+        return array_map(
+            fn (RecurringPlan $p): array => $this->withRelations(
+                $common[(int) $p->id] ?? PlanRow::common($p, $this->gateways),
+                $donors[(int) $p->donor_id] ?? null,
+                $campaigns[(int) $p->campaign_id] ?? null
+            ),
+            $plans
+        );
+    }
+
+    /**
+     * @param array<string,mixed> $row
+     * @return array<string,mixed>
+     */
+    private function withRelations(array $row, ?Donor $donor, ?Campaign $campaign): array
+    {
+        return $row + [
             'donor' => $donor ? [
                 'id'   => (int) $donor->id,
                 'name' => $this->donorName($donor),
