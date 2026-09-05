@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 
-import { COUNTRIES, countryName } from '../../_shared/countries';
+import { countryName, localizedCountries } from '../../_shared/countries';
 
 export default function CountrySelect( {
     value,
@@ -42,13 +42,21 @@ export default function CountrySelect( {
         return () => document.removeEventListener( 'mousedown', onDoc );
     }, [ open ] );
 
+    const countries = useMemo( () => localizedCountries(), [] );
+
     const matches = useMemo( () => {
         const q = query.trim().toLowerCase();
-        if ( q === '' ) return COUNTRIES.slice( 0, 50 );
-        return COUNTRIES.filter( ( c ) => (
-            c.name.toLowerCase().includes( q ) || c.code.toLowerCase().includes( q )
+        if ( q === '' ) return countries.slice( 0, 50 );
+
+        // Their own language first, then English and the code, so a donor who
+        // knows the form as a translation and one who knows the ISO list both
+        // find their country.
+        return countries.filter( ( c ) => (
+            c.label.toLowerCase().includes( q )
+            || c.name.toLowerCase().includes( q )
+            || c.code.toLowerCase().includes( q )
         ) ).slice( 0, 50 );
-    }, [ query ] );
+    }, [ query, countries ] );
 
     useEffect( () => { setActive( 0 ); }, [ query ] );
 
@@ -101,6 +109,12 @@ export default function CountrySelect( {
                 aria-activedescendant={ open && matches[ active ] ? optId( matches[ active ] ) : undefined }
                 role="combobox"
                 onFocus={ () => { setOpen( true ); setQuery( '' ); } }
+                // Leaving the field has to close the list. Without this it stays
+                // over the next fields and swallows a click meant for them,
+                // while the input keeps showing the half-typed search as though
+                // a country had been chosen. Clicking an option does not blur:
+                // the wrapper's onMouseDown prevents it.
+                onBlur={ () => { setOpen( false ); setQuery( '' ); } }
                 onInput={ ( e ) => { setQuery( e.target.value ); if ( ! open ) setOpen( true ); } }
                 onKeyDown={ onKeyDown }
             />
@@ -123,7 +137,7 @@ export default function CountrySelect( {
                             onMouseEnter={ () => setActive( i ) }
                             onClick={ () => pick( c ) }
                         >
-                            <span class="fundkit-form__country-select-label">{ c.name }</span>
+                            <span class="fundkit-form__country-select-label">{ c.label }</span>
                             <span class="fundkit-form__country-select-hint">{ c.code }</span>
                         </li>
                     ) ) }

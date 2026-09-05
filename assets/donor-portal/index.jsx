@@ -1142,19 +1142,31 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
 
 function ChangeAmountForm( { plan, onSubmit, busy } ) {
     const [ value, setValue ] = useState( plan.amount_cents / 100 );
-    const cents = Math.round( value * 100 );
-    const valid = Number.isFinite( cents ) && cents >= 50;
+
+    const floor = 50;
+    const cents = Math.round( Number( value ) * 100 );
+    const valid = Number.isFinite( cents ) && cents >= floor;
+
     return (
         <>
             <h3>{ __( 'Change amount', 'fundraising-toolkit' ) }</h3>
             <p class="dp-hint">{ __( 'Current:', 'fundraising-toolkit' ) } { formatAmount( plan.amount_cents, plan.currency ) }</p>
+            { /* No min: AmountInput clamps every keystroke to it, so clearing
+                 the box emitted the minimum and left Save live on an amount the
+                 donor never typed. */ }
             <AmountInput
                 value={ value }
                 onChange={ setValue }
                 currency={ plan.currency }
-                min={ 0.5 }
                 inputProps={ { 'aria-label': __( 'New donation amount', 'fundraising-toolkit' ) } }
             />
+            <p class="dp-hint">
+                { sprintf(
+                    /* translators: %s: the smallest amount this donation can be changed to. */
+                    __( 'The smallest amount is %s.', 'fundraising-toolkit' ),
+                    formatAmount( floor, plan.currency )
+                ) }
+            </p>
             <button class="dp-action is-primary" disabled={ busy || ! valid } onClick={ () => valid && onSubmit( cents ) }>{ __( 'Save new amount', 'fundraising-toolkit' ) }</button>
         </>
     );

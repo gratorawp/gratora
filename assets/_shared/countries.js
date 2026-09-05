@@ -1,5 +1,6 @@
-// ISO 3166-1 alpha-2 list, shared by all bundles. Labels are not i18n'd yet;
-// a country-name catalog can layer on top once translation is in scope.
+// ISO 3166-1 alpha-2 list, shared by all bundles. The English names below are
+// the fallback and the second thing a search matches; what a donor reads and
+// types is their own language, via Intl.
 
 export const COUNTRIES = [
     { code: 'AF', name: 'Afghanistan' },
@@ -252,7 +253,62 @@ export const COUNTRIES = [
 ];
 
 const BY_CODE = Object.fromEntries( COUNTRIES.map( ( c ) => [ c.code, c.name ] ) );
-export const countryName = ( code ) => BY_CODE[ String( code || '' ).toUpperCase() ] || code || '';
+const regionNames = new Map();
+
+/** The page's own language, which is what a donor is reading the form in. */
+function displayNames() {
+    const lang = typeof document === 'undefined'
+        ? ''
+        : String( document.documentElement?.lang || '' ).trim();
+
+    if ( ! regionNames.has( lang ) ) {
+        try {
+            regionNames.set( lang, new Intl.DisplayNames( lang ? [ lang ] : undefined, { type: 'region' } ) );
+        } catch ( e ) {
+            regionNames.set( lang, null );
+        }
+    }
+
+    return regionNames.get( lang );
+}
+
+export const countryName = ( code ) => {
+    const upper = String( code || '' ).toUpperCase();
+    if ( upper === '' ) return '';
+
+    const names = displayNames();
+    if ( names ) {
+        try {
+            const local = names.of( upper );
+            // Intl hands back the code unchanged for one it does not know.
+            if ( local && local !== upper ) return local;
+        } catch ( e ) {
+            // A malformed code, which the fallback below answers anyway.
+        }
+    }
+
+    return BY_CODE[ upper ] || code || '';
+};
+
+/**
+ * The list a donor picks from: their language for reading, sorted their way,
+ * with the English name kept so a search matches either.
+ *
+ * @return {Array<{code: string, name: string, label: string}>} countries
+ */
+export function localizedCountries() {
+    const collator = ( () => {
+        try {
+            return new Intl.Collator( undefined, { sensitivity: 'base' } );
+        } catch ( e ) {
+            return null;
+        }
+    } )();
+
+    const out = COUNTRIES.map( ( c ) => ( { ...c, label: countryName( c.code ) } ) );
+
+    return collator ? out.sort( ( a, b ) => collator.compare( a.label, b.label ) ) : out;
+}
 export const countryByCode = ( code ) => COUNTRIES.find( ( c ) => c.code === String( code || '' ).toUpperCase() ) || null;
 
 // EU member states (as of 2026). Gates the VAT field on Settings -> Organization.

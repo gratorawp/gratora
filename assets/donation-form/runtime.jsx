@@ -4,7 +4,7 @@ import { render } from 'preact';
 import { useCallback, useMemo, useReducer, useRef, useState, useEffect } from 'preact/hooks';
 
 import { reducer, initialState, validateStep, buildPayload, fieldSteps } from './state/store';
-import { visibleGateways, emptyMessage } from './util/gateways';
+import { visibleGateways, emptyMessage, keepGatewayValid } from './util/gateways';
 import AmountStep   from './steps/AmountStep';
 import DonorStep    from './steps/DonorStep';
 import ConfirmStep  from './steps/ConfirmStep';
@@ -773,6 +773,13 @@ function SinglePageView( { state, dispatch, config, onSubmit } ) {
     // Same rule as the paged view: without it a single-page form shows a live
     // Donate button under "No payment method accepts X".
     const noGateway  = visibleGateways( config, state ).length === 0;
+
+    // Owned here rather than in the selector, which only renders where the
+    // author placed its block.
+    const gatewayIds = visibleGateways( config, state ).map( ( o ) => o.id ).join( ',' );
+    useEffect( () => {
+        keepGatewayValid( config, state, dispatch );
+    }, [ gatewayIds, state.gateway ] );
     const unexplained = noGateway && ! gatewaysExplainedBeside( state.steps, config );
     const submitStep = state.steps.find( ( s ) => s.type === 'submit' );
     const submitLabel = interpolateLabel(
@@ -849,6 +856,13 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     // the choice is made; this stops the donor reaching a server refusal by
     // pressing the button anyway.
     const noGateway = visibleGateways( config, state ).length === 0;
+
+    // Owned here rather than in the selector, which only renders where the
+    // author placed its block.
+    const gatewayIds = visibleGateways( config, state ).map( ( o ) => o.id ).join( ',' );
+    useEffect( () => {
+        keepGatewayValid( config, state, dispatch );
+    }, [ gatewayIds, state.gateway ] );
     const unexplained = isLast && noGateway && ! gatewaysExplainedBeside( pageSteps, config );
 
     const submit = useCallback( () => {

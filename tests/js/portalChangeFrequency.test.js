@@ -235,6 +235,56 @@ test( 'a rail that cannot move a mandate does not offer the control', async () =
     expect( button( 'Change amount' ) ).toBeTruthy();
 } );
 
+test( 'clearing the amount box does not leave a saveable amount behind', async () => {
+    await openSheet();
+
+    button( 'Change amount' ).click();
+    await until( () => document.querySelector( '.dp-modal input' ), 'the amount control to render' );
+
+    const box = document.querySelector( '.dp-modal input' );
+    box.value = '';
+    box.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+    box.dispatchEvent( new Event( 'blur', { bubbles: true } ) );
+    box.dispatchEvent( new Event( 'focusout', { bubbles: true } ) );
+    await new Promise( ( r ) => setTimeout( r, 20 ) );
+
+    // The clamp used to emit the minimum here, so an empty-looking box sat
+    // behind a live Save that would have set the plan to 50 cents.
+    expect( button( 'Save new amount' ).disabled ).toBe( true );
+    expect( posted ).toEqual( [] );
+} );
+
+test( 'a zero-decimal currency can be changed at all', async () => {
+    await openSheet( plan( { currency: 'JPY', amount_cents: 300000 } ) );
+
+    button( 'Change amount' ).click();
+    await until( () => document.querySelector( '.dp-modal input' ), 'the amount control to render' );
+
+    const box = document.querySelector( '.dp-modal input' );
+    box.value = '5000';
+    box.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+    await new Promise( ( r ) => setTimeout( r, 20 ) );
+
+    // Storage is major units times 100, so a JPY plan has to land on whole
+    // hundreds or the server refuses it as fractional.
+    expect( button( 'Save new amount' ).disabled ).toBe( false );
+
+    box.value = '0';
+    box.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+    await new Promise( ( r ) => setTimeout( r, 20 ) );
+    expect( button( 'Save new amount' ).disabled ).toBe( true );
+
+    box.value = '5000';
+    box.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+    await new Promise( ( r ) => setTimeout( r, 20 ) );
+    button( 'Save new amount' ).click();
+
+    await until( () => posted.some( ( p ) => p.path === 'recurring/38/action' ), 'the change to be sent' );
+    const sent = posted.find( ( p ) => p.path === 'recurring/38/action' );
+    expect( sent.body.amount_cents % 100 ).toBe( 0 );
+} );
+
+
 test( 'a finished subscription is offered no changes at all', async () => {
     await openSheet( plan( { status: 'cancelled' } ) );
 

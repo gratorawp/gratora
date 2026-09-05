@@ -79,3 +79,24 @@ export function emptyMessage( config, state ) {
 
     return template.replace( '%s', String( ( state && state.currency ) || '' ).toUpperCase() );
 }
+
+/**
+ * Keep the selected gateway one the donor can actually be charged through.
+ *
+ * The visible set narrows when the currency or the frequency changes, and the
+ * selector that used to own this correction only renders where the author put
+ * its block. On a form whose gateway block sits on an earlier page, or was
+ * removed, the stale choice survived to submit and the server refused it with
+ * no control on screen to change it.
+ *
+ * @param {Object}   config   form config
+ * @param {Object}   state    form state
+ * @param {Function} dispatch store dispatch
+ */
+export function keepGatewayValid( config, state, dispatch ) {
+    const ids = visibleGateways( config, state ).map( ( o ) => o.id );
+
+    if ( ids.length && ! ids.includes( state.gateway ) ) {
+        dispatch( { type: 'SET_GATEWAY', gateway: ids[ 0 ] } );
+    }
+}

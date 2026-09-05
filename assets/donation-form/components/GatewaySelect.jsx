@@ -1,6 +1,5 @@
 /** @jsxImportSource preact */
 
-import { useEffect } from 'preact/hooks';
 import { visibleGateways, emptyMessage } from '../util/gateways';
 
 /**
@@ -10,18 +9,8 @@ import { visibleGateways, emptyMessage } from '../util/gateways';
 export default function GatewaySelect( { state, dispatch, config } ) {
     const testMode = !! ( config && config.testMode );
     const opts     = visibleGateways( config, state );
-    const ids      = opts.map( ( o ) => o.id );
     const current  = state.gateway;
-    const idsKey   = ids.join( ',' );
     const style    = ( config && config.gateways && config.gateways.style ) === 'list' ? 'list' : 'cards';
-
-    // Keep the selected gateway valid: currency/frequency changes can drop
-    // the current option, and a hidden single option still auto-selects.
-    useEffect( () => {
-        if ( ids.length && ! ids.includes( current ) ) {
-            dispatch( { type: 'SET_GATEWAY', gateway: ids[ 0 ] } );
-        }
-    }, [ idsKey, current ] );
 
     // Nothing to offer. The section used to render nothing at all, which read
     // as "no payment step", and the stale gateway stayed selected because the
