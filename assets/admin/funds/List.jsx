@@ -89,7 +89,7 @@ function fundKpis( stats ) {
 }
 
 export default function List() {
-    const [ view, setView ] = useTableView( 'funds', {
+    const [ view, setView, viewReady ] = useTableView( 'funds', {
         type:    'table',
         perPage: 25,
         page:    1,
@@ -102,7 +102,7 @@ export default function List() {
     const [ data, setData ]         = useState( [] );
     const [ total, setTotal ]       = useState( 0 );
     const [ testHidden, setTestHidden ] = useState( 0 );
-    const [ loading, setLoading ]   = useState( false );
+    const [ loading, setLoading ]   = useState( true );
     const [ error, setError ]       = useState( null );
     const [ editing, setEditing ]   = useState( null );
     const [ deleteTarget, setDeleteTarget ] = useState( null );
@@ -120,6 +120,13 @@ export default function List() {
     };
 
     const load = useCallback( () => {
+        // Nothing until the saved view lands: fetching under the screen's
+        // defaults first spends a request on rows the reader's own sort is
+        // about to replace.
+        if ( ! viewReady ) {
+            return undefined;
+        }
+
         let aborted = false;
         setLoading( true );
         setError( null );
@@ -149,7 +156,7 @@ export default function List() {
             .finally( () => ! aborted && setLoading( false ) );
 
         return () => { aborted = true; };
-    }, [ view, statusFilter ] );
+    }, [ view, statusFilter, viewReady ] );
 
     // The parent and reassign pickers were fed the table's current page, so a
     // second page of funds was unreachable as a parent and as a reassign

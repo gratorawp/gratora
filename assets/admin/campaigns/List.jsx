@@ -70,7 +70,7 @@ export function campaignsDeleteMessage( items ) {
 }
 
 export default function List() {
-    const [ view, setView ] = useTableView( 'campaigns', {
+    const [ view, setView, viewReady ] = useTableView( 'campaigns', {
         type:    'table',
         perPage: 25,
         page:    1,
@@ -83,7 +83,7 @@ export default function List() {
     const [ data, setData ]       = useState( [] );
     const [ total, setTotal ]     = useState( 0 );
     const [ testHidden, setTestHidden ] = useState( 0 );
-    const [ loading, setLoading ] = useState( false );
+    const [ loading, setLoading ] = useState( true );
     const [ error, setError ]     = useState( null );
     const [ stats, setStats ]     = useState( null );
     const [ confirm, setConfirm ] = useState( null );
@@ -102,6 +102,13 @@ export default function List() {
     };
 
     const load = useCallback( () => {
+        // Nothing until the saved view lands: fetching under the screen's
+        // defaults first spends a request on rows the reader's own sort is
+        // about to replace.
+        if ( ! viewReady ) {
+            return undefined;
+        }
+
         let aborted = false;
         setLoading( true );
         setError( null );
@@ -142,7 +149,7 @@ export default function List() {
             .catch( () => { if ( ! aborted ) setStats( null ); } );
 
         return () => { aborted = true; };
-    }, [ view, statusFilter ] );
+    }, [ view, statusFilter, viewReady ] );
 
     useEffect( () => load(), [ load ] );
 

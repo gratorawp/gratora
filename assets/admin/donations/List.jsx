@@ -95,7 +95,7 @@ const readTestPref = () => {
 export default function List() {
     const [ includeTest, setIncludeTest ] = useState( readTestPref );
 
-    const [ view, setView ] = useTableView( 'donations', {
+    const [ view, setView, viewReady ] = useTableView( 'donations', {
         type:    'table',
         perPage: 25,
         page:    1,
@@ -131,7 +131,7 @@ export default function List() {
 
     const [ data, setData ]       = useState( [] );
     const [ total, setTotal ]     = useState( 0 );
-    const [ loading, setLoading ] = useState( false );
+    const [ loading, setLoading ] = useState( true );
     const [ recording, setRecording ] = useState( false );
     const [ fetchError, setFetchError ]   = useState( null );
     // Test donations are excluded unless asked for. Saying how many were left
@@ -217,6 +217,13 @@ export default function List() {
     } ), [ view, statusFilter, gatewayFilter, frequencyFilter, campaignFilter, includeTest, createdFrom, createdTo ] );
 
     useEffect( () => {
+        // Nothing until the saved view lands: fetching under the screen's
+        // defaults first spends a request on rows the reader's own sort is
+        // about to replace.
+        if ( ! viewReady ) {
+            return undefined;
+        }
+
         let aborted = false;
         setLoading( true );
 
@@ -254,7 +261,7 @@ export default function List() {
         return () => {
             aborted = true;
         };
-    }, [ apiParams ] );
+    }, [ apiParams, viewReady ] );
 
     const fields = useMemo( () => [
         {

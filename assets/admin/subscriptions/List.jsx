@@ -385,7 +385,7 @@ function emptyStateCopy( unlinked, testHidden ) {
 }
 
 export default function List() {
-    const [ view, setView ] = useTableView( 'subscriptions', {
+    const [ view, setView, viewReady ] = useTableView( 'subscriptions', {
         type:    'table',
         perPage: 25,
         page:    1,
@@ -397,7 +397,7 @@ export default function List() {
 
     const [ data, setData ]         = useState( [] );
     const [ total, setTotal ]       = useState( 0 );
-    const [ loading, setLoading ]   = useState( false );
+    const [ loading, setLoading ]   = useState( true );
     const [ stats, setStats ]       = useState( null );
     const [ fetchError, setError ]  = useState( null );
     const [ gateways, setGateways ] = useState( [] );
@@ -482,6 +482,13 @@ export default function List() {
     };
 
     useEffect( () => {
+        // Nothing until the saved view lands: fetching under the screen's
+        // defaults first spends a request on rows the reader's own sort is
+        // about to replace.
+        if ( ! viewReady ) {
+            return undefined;
+        }
+
         let aborted = false;
         setLoading( true );
         apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/recurring', apiParams ), parse: false } )
@@ -502,7 +509,7 @@ export default function List() {
             } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
-    }, [ apiParams ] );
+    }, [ apiParams, viewReady ] );
 
     // The strip totals the whole book, so the list filters are deliberately not
     // passed. The test toggle is not one of them: it decides what counts as the

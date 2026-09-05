@@ -59,7 +59,7 @@ export function donorKpis( stats ) {
 }
 
 export function DonorsApp( { toggleSlot } ) {
-    const [ view, setView ] = useTableView( 'donors', {
+    const [ view, setView, viewReady ] = useTableView( 'donors', {
         type:    'table',
         perPage: 25,
         page:    1,
@@ -85,7 +85,7 @@ export function DonorsApp( { toggleSlot } ) {
 
     const [ data, setData ]       = useState( [] );
     const [ total, setTotal ]     = useState( 0 );
-    const [ loading, setLoading ] = useState( false );
+    const [ loading, setLoading ] = useState( true );
     const [ error, setError ]     = useState( null );
     const [ stats, setStats ]     = useState( null );
     const [ confirm, setConfirm ] = useState( null );
@@ -93,6 +93,13 @@ export function DonorsApp( { toggleSlot } ) {
     const filterValue = ( field ) => view.filters?.find( ( f ) => f.field === field )?.value;
 
     const load = useCallback( () => {
+        // Nothing until the saved view lands: fetching under the screen's
+        // defaults first spends a request on rows the reader's own sort is
+        // about to replace.
+        if ( ! viewReady ) {
+            return undefined;
+        }
+
         let aborted = false;
         setLoading( true );
         setError( null );
@@ -138,7 +145,7 @@ export function DonorsApp( { toggleSlot } ) {
         return () => {
             aborted = true;
         };
-    }, [ view ] );
+    }, [ view, viewReady ] );
 
     useEffect( () => load(), [ load ] );
 
