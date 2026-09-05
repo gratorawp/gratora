@@ -1,10 +1,40 @@
 import { useBlockProps, InspectorControls, RichText } from '@wordpress/block-editor';
 import { PanelBody, TextControl, ToggleControl } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
 const NAME = 'fundkit/cover-fees';
+
+/**
+ * A decimal field that survives being typed into.
+ *
+ * An input[type=number] reports an empty value for anything partly typed, so a
+ * controlled field recomputed from its attribute on every keystroke collapses
+ * the moment a decimal point is pressed and the box is rewritten under the
+ * caret. Typing 2.9 leaves 9 behind, and these two numbers decide what a donor
+ * is charged.
+ */
+function DecimalControl( { label, help, display, onCommit } ) {
+    const [ draft, setDraft ] = useState( null );
+
+    return (
+        <TextControl
+            label={ label }
+            help={ help }
+            inputMode="decimal"
+            value={ draft !== null ? draft : display }
+            onChange={ ( v ) => {
+                setDraft( v );
+                const n = parseFloat( String( v ).replace( ',', '.' ) );
+                onCommit( Number.isFinite( n ) && n >= 0 ? n : 0 );
+            } }
+            onBlur={ () => setDraft( null ) }
+            __nextHasNoMarginBottom
+        />
+    );
+}
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -21,28 +51,17 @@ function Edit( { attributes, setAttributes } ) {
         <>
             <InspectorControls>
                 <PanelBody title={ __( 'Cover the fees', 'fundraising-toolkit' ) } initialOpen>
-                    <TextControl
+                    <DecimalControl
                         label={ __( 'Percent fee', 'fundraising-toolkit' ) }
-                        type="number"
-                        step="0.1"
-                        min={ 0 }
-                        value={ String( percent ) }
-                        onChange={ ( v ) => setAttributes( { percent: parseFloat( v ) || 0 } ) }
                         help={ __( 'e.g. 2.9 for Stripe', 'fundraising-toolkit' ) }
-                        __nextHasNoMarginBottom
+                        display={ String( percent ) }
+                        onCommit={ ( n ) => setAttributes( { percent: n } ) }
                     />
-                    <TextControl
+                    <DecimalControl
                         label={ __( 'Fixed fee', 'fundraising-toolkit' ) }
-                        type="number"
-                        step="0.01"
-                        min={ 0 }
-                        value={ fixed ? ( fixed / 100 ).toFixed( 2 ) : '' }
-                        onChange={ ( v ) => {
-                            const major = parseFloat( String( v ).replace( ',', '.' ) );
-                            setAttributes( { fixed: isNaN( major ) ? 0 : Math.round( major * 100 ) } );
-                        } }
                         help={ __( 'e.g. 0.30 for Stripe', 'fundraising-toolkit' ) }
-                        __nextHasNoMarginBottom
+                        display={ ( fixed / 100 ).toFixed( 2 ) }
+                        onCommit={ ( n ) => setAttributes( { fixed: Math.round( n * 100 ) } ) }
                     />
                     <ToggleControl
                         label={ __( 'Default checked', 'fundraising-toolkit' ) }
