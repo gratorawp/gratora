@@ -42,7 +42,7 @@ import Slider    from '../_shared/components/Slider';
 import Segmented from '../_shared/components/Segmented';
 import AmountInput from '../_shared/components/AmountInput';
 import FormTemplatePicker from '../_shared/components/FormTemplatePicker';
-import { STATUS_LABEL, campaignHref } from './format';
+import { STATUS_LABEL, formsBackHref } from './format';
 import { defaultCurrency } from '../_shared/format';
 import blockRegistry, { runBlockRegistration } from './registry';
 import './blocks';
@@ -479,7 +479,7 @@ export default function Editor( { formId } ) {
 
     const header = (
         <EditorHeader
-            backHref={ campaignHref( c.value( 'campaign_id', 0 ) ) }
+            backHref={ formsBackHref( c.value( 'campaign_id', 0 ) ) }
             title={ c.value( 'title' ) }
             onTitleChange={ ( v ) => c.edit( { title: v } ) }
             view={ view }
@@ -825,7 +825,7 @@ function EditorHeader( {
             <div className="fundkit-editor-header__left">
                 <a className="fundkit-editor-header__back" href={ backHref }>
                     <LocalIcon name="chevron-left" size={ 20 } />
-                    <span>{ __( 'Campaign overview', 'fundraising-toolkit' ) }</span>
+                    <span>{ __( 'Forms', 'fundraising-toolkit' ) }</span>
                 </a>
                 { showAuthoringTools && (
                     <>

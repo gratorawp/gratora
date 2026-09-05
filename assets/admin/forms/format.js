@@ -39,3 +39,17 @@ export function campaignHref( campaignId ) {
     p.set( 'tab', 'forms' );
     return `${ window.location.pathname }?${ p.toString() }`;
 }
+
+/**
+ * Where the editor's back link goes. Both destinations are a list of forms,
+ * which is what the link says; a form with no campaign has no campaign detail
+ * page and was being sent to campaign id 0.
+ */
+export function formsBackHref( campaignId ) {
+    const id = Number( campaignId ) || 0;
+    if ( id > 0 ) return campaignHref( id );
+
+    const p = new URLSearchParams();
+    p.set( 'page', 'fundkit-forms' );
+    return `${ window.location.pathname }?${ p.toString() }`;
+}
