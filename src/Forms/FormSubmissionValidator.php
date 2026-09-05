@@ -128,6 +128,42 @@ final class FormSubmissionValidator
         return false;
     }
 
+    /**
+     * Whether this submission was actually offered the block.
+     *
+     * Present is not the same as offered: a block hidden by its own display
+     * condition submits nothing and validateBlock returns before its rules run,
+     * so a gate keyed on presence let a crafted payload send a value the block
+     * would never have accepted. Stays in lockstep with validateBlock, which
+     * tests a block's own condition and nothing else.
+     *
+     * @since 1.0.0
+     */
+    public static function offersBlock(string $blocks, string $blockName, array $body): bool
+    {
+        return self::treeOffersBlock(parse_blocks($blocks), $blockName, $body);
+    }
+
+    /** @param array<string,mixed> $body */
+    private static function treeOffersBlock(array $blocks, string $blockName, array $body): bool
+    {
+        foreach ($blocks as $block) {
+            if (($block['blockName'] ?? '') === $blockName) {
+                $attrs  = is_array($block['attrs'] ?? null) ? $block['attrs'] : [];
+                $hidden = isset($attrs['condition']) && is_array($attrs['condition'])
+                    && ! ConditionEvaluator::passes($attrs['condition'], $body);
+                if (! $hidden) {
+                    return true;
+                }
+            }
+            if (! empty($block['innerBlocks']) && is_array($block['innerBlocks'])
+                && self::treeOffersBlock($block['innerBlocks'], $blockName, $body)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** @since 1.0.0 */
     private function walk(array $blocks, array $body, array &$offered, ?array $campaignPresets): ?WP_Error
     {

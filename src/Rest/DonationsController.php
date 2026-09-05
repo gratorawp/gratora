@@ -192,14 +192,18 @@ final class DonationsController
                 // or a crafted POST routes money to any active fund the form
                 // never listed. Cleared, the resolver falls back to the
                 // form/campaign/org default chain.
-                if (! FormSubmissionValidator::hasBlock((string) ($form->blocks ?? ''), 'fundkit/fund-picker')) {
+                // Offered, not merely present: a picker behind a display
+                // condition the submission does not meet is a picker the donor
+                // never saw, and the browser suppresses the value for exactly
+                // that case.
+                if (! FormSubmissionValidator::offersBlock((string) ($form->blocks ?? ''), 'fundkit/fund-picker', $body)) {
                     unset($body['fund_id']);
                 }
 
                 // Same rule for the donor's message. note_public puts text on
                 // the campaign's supporter wall, so a form with no comment
                 // block accepting one is an unmoderated publish route.
-                if (! FormSubmissionValidator::hasBlock((string) ($form->blocks ?? ''), 'fundkit/comment')) {
+                if (! FormSubmissionValidator::offersBlock((string) ($form->blocks ?? ''), 'fundkit/comment', $body)) {
                     unset($body['note_to_org'], $body['note_public']);
                 }
             }
