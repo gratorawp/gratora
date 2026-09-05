@@ -30,6 +30,22 @@ final class AnalyticsEventHandler implements ErasureHandler
         'country'         => null,
     ];
 
+    /**
+     * What an audit row keeps of the request that made it.
+     *
+     * The row itself outlives the donor on purpose, and its payload names the
+     * actor. What it must not keep is the request's own re-identification
+     * handles: for a portal self-erasure those are the erased donor's IP and
+     * user agent, sitting next to their donor_id for good, which is exactly
+     * the linkage this class exists to break.
+     */
+    private const AUDIT_CLEARED = [
+        'session_hash'    => null,
+        'ip_hash'         => null,
+        'user_agent_hash' => null,
+        'country'         => null,
+    ];
+
     /** @since 1.0.0 */
     public function key(): string
     {
@@ -40,7 +56,12 @@ final class AnalyticsEventHandler implements ErasureHandler
     public function erase(ErasureRequest $request): void
     {
         // The record of a destructive act outlives its subject, or nobody can
-         // answer who removed this donor. It carries no donor detail to clear.
+        // answer who removed this donor. Its own handles still go.
+        Event::query()
+            ->where('type', self::AUDIT . '%', 'LIKE')
+            ->where('donor_id', $request->donorId)
+            ->update(self::AUDIT_CLEARED);
+
         Event::query()
             ->where('type', self::AUDIT . '%', 'NOT LIKE')
             ->where('donor_id', $request->donorId)

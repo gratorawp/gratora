@@ -95,6 +95,30 @@ final class PortalController
     ) {
     }
 
+    /**
+     * Nothing a donor sees here may be stored by a cache in front of the site.
+     *
+     * A donor signs in with this plugin's own cookie, never as a WordPress
+     * user, so is_user_logged_in() is false and WordPress sends none of the
+     * no-cache headers it sends for wp-admin. A CDN or shared proxy with a
+     * cache-everything rule is then free to store one donor's decrypted email,
+     * phone and address keyed on the URL alone and hand it to the next person
+     * who asks for it.
+     *
+     * @param mixed $result
+     *
+     * @since 1.0.0
+     */
+    public function sendPrivateCacheHeaders(mixed $result, mixed $handler, WP_REST_Request $request): mixed
+    {
+        if ($result instanceof WP_REST_Response && str_starts_with((string) $request->get_route(), '/' . self::NAMESPACE . '/portal')) {
+            $result->header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+            $result->header('Vary', 'Cookie');
+        }
+
+        return $result;
+    }
+
     /** @since 1.0.0 */
     public function registerHooks(): void
     {
@@ -105,6 +129,8 @@ final class PortalController
     /** @since 1.0.0 */
     public function registerRoutes(): void
     {
+        add_filter('rest_request_after_callbacks', [$this, 'sendPrivateCacheHeaders'], 10, 3);
+
         register_rest_route(self::NAMESPACE, '/portal/exchange', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'exchange'],

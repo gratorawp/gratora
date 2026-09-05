@@ -371,17 +371,31 @@ final class DonationsController
             // registry, so the row still answers "what did they agree to" after
             // the terms are edited.
             $termsRevision = $form ? FormSubmissionValidator::termsRevision((string) $form->blocks) : null;
+            $held          = $this->consents->latestByPurpose((int) $donation->donor_id);
             foreach ($consents as $key => $granted) {
                 $key     = (string) $key;
+                $granted = (bool) $granted;
                 $isTerms = $key === TermsBlock::PURPOSE && $termsRevision !== null;
-                if (! $isTerms
-                    && $this->consents->findPurpose($key) === null
-                    && ! isset($formConsentIds[$key])
-                ) {
+                $purpose = $this->consents->findPurpose($key);
+                if (! $isTerms && $purpose === null && ! isset($formConsentIds[$key])) {
                     continue;
                 }
+
+                // An unticked box is not a withdrawal. The form seeds each box
+                // from the purpose's own default and never from the donor's
+                // record, so a box that renders unticked says nothing about
+                // what this donor already granted: reading it as a revocation
+                // wrote withdrawals nobody made into an append-only log, and
+                // the portal is where a donor actually withdraws. A box the
+                // form renders ticked is the other case, and unticking that
+                // one is deliberate.
+                $rendersTicked = $purpose !== null && ! $purpose['required'] && $purpose['default'];
+                if (! $granted && ! $rendersTicked && (bool) ($held[$key]->granted ?? false)) {
+                    continue;
+                }
+
                 try {
-                    $this->consents->record((int) $donation->donor_id, $key, (bool) $granted, array_filter([
+                    $this->consents->record((int) $donation->donor_id, $key, $granted, array_filter([
                         'source'      => 'donation',
                         'form_id'     => $formId,
                         'donation_id' => (int) $donation->id,
