@@ -1406,7 +1406,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      * the flat fields are missing the invoice is re-read through the API, which
      * is pinned by the Stripe-Version header.
      *
-     * @return array{0: string, 1: string} [subscription id, payment intent id]
+     * @return array{0: string, 1: string, 2: bool} [subscription id, payment intent id, whether reaching Stripe failed]
      *
      * @since 1.0.0
      */
@@ -1423,18 +1423,30 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         }
 
         if ($subscriptionId !== '' && $piId !== '') {
-            return [$subscriptionId, $piId];
+            return [$subscriptionId, $piId, false];
         }
 
         $invoiceId = (string) ($invoice['id'] ?? '');
         if ($invoiceId === '') {
-            return [$subscriptionId, $piId];
+            return [$subscriptionId, $piId, false];
         }
 
         try {
             $fresh = $this->api->get('/invoices/' . rawurlencode($invoiceId));
         } catch (Throwable $e) {
-            return [$subscriptionId, $piId];
+            // Reaching Stripe failed, which is not the same as the invoice not
+            // naming a charge. The caller has to be able to tell them apart:
+            // one is worth asking Stripe to send again, the other never will
+            // be, and answering 200 to both stops redelivery on a renewal that
+            // was charged and never recorded.
+            ErrorLog::record('stripe.webhook', sprintf(
+                /* translators: 1: Stripe invoice id, 2: error message. */
+                __('Could not re-read invoice %1$s while handling its webhook: %2$s', 'fundraising-toolkit'),
+                $invoiceId,
+                $e->getMessage()
+            ));
+
+            return [$subscriptionId, $piId, true];
         }
 
         if ($subscriptionId === '') {
@@ -1444,7 +1456,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             $piId = (string) ($fresh['payment_intent'] ?? '');
         }
 
-        return [$subscriptionId, $piId];
+        return [$subscriptionId, $piId, false];
     }
 
     /**
@@ -1466,7 +1478,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             );
         }
 
-        [$subscriptionId, $piId] = $this->invoiceRefs($invoice);
+        [$subscriptionId, $piId, $lookupFailed] = $this->invoiceRefs($invoice);
 
         $plan = $this->plans->findBySubscriptionId($this->id(), $subscriptionId);
         if (! $plan) {
@@ -1485,6 +1497,29 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $amountCents = Currency::fromMinorUnits((int) ($invoice['amount_paid'] ?? 0), $currency);
 
         if ($piId === '' || $amountCents <= 0) {
+            // A donor was charged and this is the only notice of it. Where the
+            // charge is missing because Stripe could not be reached, ask to be
+            // told again: 200 here retires the delivery and the renewal is
+            // never recorded, never receipted and in no total. An invoice that
+            // genuinely names no charge will never name one, so that answers
+            // 200 and is recorded for an admin instead.
+            if ($lookupFailed) {
+                return new WebhookOutcome(
+                    signature_ok: true,
+                    external_id:  $eventId,
+                    event_type:   $type,
+                    handled:      false,
+                    error:        'invoice could not be re-read; asking Stripe to redeliver',
+                    http_status:  503,
+                );
+            }
+
+            ErrorLog::record('stripe.webhook', sprintf(
+                /* translators: %s: Stripe subscription id. */
+                __('A renewal on subscription %s named no charge, so nothing was recorded for it.', 'fundraising-toolkit'),
+                $subscriptionId
+            ), ['recurring_plan_id' => (int) $plan->id, 'donor_id' => (int) $plan->donor_id]);
+
             return new WebhookOutcome(
                 signature_ok: true,
                 external_id:  $eventId,

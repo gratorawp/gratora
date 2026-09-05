@@ -76,12 +76,29 @@ final class ReceiptIssuer
         // right one: a gala ticket is a deductible contribution minus the
         // value of the meal, and an add-on that can state that value should be
         // able to turn issuance back on. The default is unchanged.
-        $shouldIssue = (string) ($donation->kind ?? 'donation') === 'donation';
-        if (! apply_filters('fundkit.receipt.should_issue', $shouldIssue, $donation)) {
+        if (! self::shouldIssueFor($donation)) {
             return;
         }
 
         $this->async->enqueue(self::HOOK, ['donation_id' => $donation->id]);
+    }
+
+    /**
+     * Whether this donation is one this site issues a receipt for.
+     *
+     * Every path that can produce a receipt asks this, not just the one that
+     * runs at completion. A resend and the queued job both reached issuance
+     * without it, so anything a policy listener suppressed was receipted anyway
+     * the moment an admin pressed Resend, and that receipt feeds the
+     * tax-deductible statement.
+     *
+     * @since 1.0.0
+     */
+    public static function shouldIssueFor(Donation $donation): bool
+    {
+        $shouldIssue = (string) ($donation->kind ?? 'donation') === 'donation';
+
+        return (bool) apply_filters('fundkit.receipt.should_issue', $shouldIssue, $donation);
     }
 
     /**
@@ -92,7 +109,7 @@ final class ReceiptIssuer
     public function requeueForDonation(int $donationId): bool
     {
         $donation = $this->donations->findById($donationId);
-        if (! $donation || ! self::isReceiptable($donation)) {
+        if (! $donation || ! self::isReceiptable($donation) || ! self::shouldIssueFor($donation)) {
             return false;
         }
 
@@ -118,7 +135,7 @@ final class ReceiptIssuer
         if ($donationId <= 0) return;
 
         $donation = $this->donations->findById($donationId);
-        if (! $donation || ! self::isReceiptable($donation)) return;
+        if (! $donation || ! self::isReceiptable($donation) || ! self::shouldIssueFor($donation)) return;
 
         $donor = $this->donors->findById($donation->donor_id);
         if (! $donor) return;

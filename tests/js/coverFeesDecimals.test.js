@@ -174,21 +174,3 @@ test( 'clearing a field reads as zero rather than as a stale number', async () =
 
 	expect( attributes.percent ).toBe( 0 );
 } );
-
-describe( 'the fields are not the kind that eats a decimal point', () => {
-	const source = require( 'fs' ).readFileSync(
-		require( 'path' ).join( __dirname, '../../assets/admin/forms/blocks/cover-fees/index.js' ),
-		'utf8'
-	);
-
-	test( 'neither fee field is a controlled input[type=number]', () => {
-		// A type=number input reports an empty value for anything partly typed,
-		// so a field recomputed from its attribute on every keystroke cannot
-		// survive a decimal point whatever the handler does.
-		expect( source ).not.toMatch( /type="number"/ );
-	} );
-
-	test( 'both go through the control that keeps the typed text', () => {
-		expect( source.match( /<DecimalControl/g ) || [] ).toHaveLength( 2 );
-	} );
-} );

@@ -58,6 +58,16 @@ final class FundService
         $fund->is_restricted   = (bool) ($input['is_restricted'] ?? false);
         $fund->is_default      = (bool) ($input['is_default'] ?? false);
         $fund->is_active       = array_key_exists('is_active', $input) ? (bool) $input['is_active'] : true;
+        // The same rule update() holds. The default fund is where every
+        // untagged donation lands, and an inactive one is offered to nobody, so
+        // creating a fund that is both demotes the working default and sends
+        // that money to whichever fund the resolver reaches next. Both toggles
+        // sit side by side in the New fund dialog.
+        if ($fund->is_default && ! $fund->is_active) {
+            throw new InvalidArgumentException(
+                esc_html__('A fund that is not active cannot be the default. Every donation with no fund chosen goes to the default.', 'fundraising-toolkit')
+            );
+        }
         $fund->sort_order      = (int) ($input['sort_order'] ?? 0);
         $fund->parent_fund_id  = $this->resolveParent($input['parent_fund_id'] ?? null, null);
         $fund->goal_cents      = $this->nullableInt($input['goal_cents'] ?? null);

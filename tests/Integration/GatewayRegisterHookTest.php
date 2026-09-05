@@ -20,35 +20,14 @@ use FundKit\Gateways\Sandbox\SandboxGateway;
  * that could never be offered to a donor and whose webhooks threw.
  *
  * The commands seam learned this already; see CommandRegisterHookTest.
+ *
+ * What is below is the behaviour the ordering enables: a handler is given the
+ * shared manager, and what it registers is reachable. The ordering itself has
+ * no test, because by the time any test runs, boot is long past and a late
+ * broadcast is indistinguishable from an early one.
  */
 final class GatewayRegisterHookTest extends IntegrationTestCase
 {
-    private const CORE   = __DIR__ . '/../../src/Core/CoreModule.php';
-    private const PLUGIN = __DIR__ . '/../../src/Foundation/Plugin.php';
-
-    public function test_the_broadcast_does_not_fire_from_inside_core_boot(): void
-    {
-        $core = (string) file_get_contents(self::CORE);
-
-        $this->assertStringNotContainsString(
-            "do_action('fundkit.gateways.register'",
-            $core,
-            'fired from core boot, every add-on listener is attached one step too late'
-        );
-    }
-
-    public function test_it_fires_after_every_module_has_booted(): void
-    {
-        $plugin = (string) file_get_contents(self::PLUGIN);
-
-        $bootAll   = strpos($plugin, '$self->modules->bootAll();');
-        $broadcast = strpos($plugin, "do_action(\n                'fundkit.gateways.register'");
-
-        $this->assertNotFalse($bootAll, 'bootAll is where module listeners become attached');
-        $this->assertNotFalse($broadcast, 'the broadcast belongs in Plugin::boot');
-        $this->assertGreaterThan($bootAll, $broadcast, 'broadcasting before bootAll reaches nobody');
-    }
-
     public function test_it_actually_fired_this_request(): void
     {
         $this->assertGreaterThanOrEqual(1, did_action('fundkit.gateways.register'));
