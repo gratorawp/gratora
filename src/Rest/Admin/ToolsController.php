@@ -533,117 +533,232 @@ final class ToolsController
 
     /**
      * Recompute denormalized aggregates from source-of-truth donation rows.
-     * Synchronous; the underlying syncs are idempotent and read-then-write
-     * only on the derived counters.
+     *
+     * One request does as much as fits in a time budget and records where it
+     * got to; the caller posts again until done is true. Walking every donor,
+     * fund, campaign and form in one request could not finish on any site big
+     * enough to need the tool: PHP hit max_execution_time part-way through the
+     * donor pass, the later passes never ran, and pressing the button again
+     * restarted from the first donor and timed out in the same place forever.
      *
      * @since 1.0.0
      */
     public function recalculate(\WP_REST_Request $request): WP_REST_Response
     {
         $scope = (string) ($request['scope'] ?? 'all');
+        $state = $this->recalcState($scope);
 
-        $counts = ['donors' => 0, 'funds' => 0, 'campaigns' => 0, 'forms' => 0];
+        /**
+         * Seconds one request spends rebuilding before handing the rest back.
+         *
+         * @param float $seconds
+         *
+         * @since 1.0.0
+         */
+        $until = microtime(true) + (float) apply_filters(
+            'fundkit.recalculate.budget_seconds',
+            self::RECALC_BUDGET_SECONDS
+        );
 
-        // Before the aggregate passes, so a donation that finally has a rate is
-        // counted by them rather than waiting for the next run. Recording a
-        // donation never blocks on FX, so these rows are real payments sitting
-        // outside every total until a rate exists for their currency.
-        $converted = 0;
-        if ($scope === 'all' || $scope === 'currency') {
-            $fx        = $this->fxBackfill->run();
-            $converted = $fx['converted'];
-            $counts['converted_donations'] = $converted;
-            if (($fx['plans'] ?? 0) > 0) {
-                $counts['converted_plans'] = (int) $fx['plans'];
+        // The clock is read after a step rather than before, so every request
+        // makes progress however tight the budget is. A request that returned
+        // done:false having done nothing would loop the caller forever.
+        $stepped = false;
+
+        while ($state['pass'] !== null) {
+            if ($stepped && microtime(true) >= $until) {
+                break;
             }
-            // A plan carries its own base amount, so converting one changes
-            // recurring revenue even when no donation moved.
-            $converted += (int) ($fx['plans'] ?? 0);
-            if ($fx['unconvertible'] > 0) {
-                $counts['still_unconvertible'] = $fx['unconvertible'];
+            $stepped = true;
+
+            $pass = (string) $state['pass'];
+
+            if ($pass === 'currency') {
+                if ($scope === 'all' || $scope === 'currency') {
+                    $this->recalcCurrencyPass($state);
+                }
+                $state = self::recalcAdvance($state);
+                continue;
+            }
+
+            // Add-ons recompute theirs from the same source rows, after the
+            // core passes, so anything derived from a campaign total is
+            // rebuilt from a campaign total that is already correct.
+            if ($pass === 'addons') {
+                $state['counts'] = (array) apply_filters(
+                    'fundkit.recalculate.counts',
+                    $state['counts'],
+                    $state['rebuild_all'] ? 'all' : $scope
+                );
+                $state = self::recalcAdvance($state);
+                continue;
+            }
+
+            if (! $state['rebuild_all'] && $scope !== $pass) {
+                $state = self::recalcAdvance($state);
+                continue;
+            }
+
+            $ids = self::recalcChunk(self::RECALC_TABLES[$pass], (int) $state['after']);
+            if ($ids === []) {
+                $state = self::recalcAdvance($state);
+                continue;
+            }
+
+            foreach ($ids as $id) {
+                $this->recalcOne($pass, $id);
+                $state['after'] = $id;
+                $state['counts'][$pass] = (int) ($state['counts'][$pass] ?? 0) + 1;
+
+                if (microtime(true) >= $until) {
+                    break;
+                }
             }
         }
 
-        // Converting a donation changes every total it belongs to, so the
-        // aggregate passes have to run whatever the scope was. Without it, a
-        // currency-only pass writes base amounts, rebuilds nothing, and reports
-        // success while every total stays wrong.
-        $rebuildAll = $scope === 'all' || $converted > 0;
-
-        if ($rebuildAll || $scope === 'donors') {
-            foreach (self::eachId('fundkit_donors') as $id) {
-                $this->aggregates->syncDonor($id);
-                $counts['donors']++;
-            }
+        $done = $state['pass'] === null;
+        if ($done) {
+            delete_option(self::RECALC_CURSOR_OPTION);
+        } else {
+            update_option(self::RECALC_CURSOR_OPTION, $state, false);
         }
-        if ($rebuildAll || $scope === 'funds') {
-            foreach (self::eachId('fundkit_funds') as $id) {
-                $this->aggregates->syncFund($id);
-                $counts['funds']++;
-            }
-        }
-        if ($rebuildAll || $scope === 'campaigns') {
-            foreach (self::eachId('fundkit_campaigns') as $id) {
-                $this->aggregates->syncCampaign($id);
-                $counts['campaigns']++;
-            }
-        }
-        if ($rebuildAll || $scope === 'forms') {
-            foreach (self::eachId('fundkit_forms') as $id) {
-                $this->aggregates->syncForm($id);
-                $counts['forms']++;
-            }
-        }
-
-        // Add-ons recompute theirs from the same source rows. Fired after the
-        // core passes so anything derived from a campaign total is rebuilt from
-        // a campaign total that is already correct.
-        $counts = (array) apply_filters('fundkit.recalculate.counts', $counts, $rebuildAll ? 'all' : $scope);
 
         return new WP_REST_Response([
             'ok'     => true,
             'scope'  => $scope,
-            'counts' => $counts,
+            'counts' => $state['counts'],
+            'done'   => $done,
         ], 200);
+    }
+
+    /**
+     * How long one request spends rebuilding before handing the rest back to
+     * the caller. Well inside the usual max_execution_time and gateway
+     * timeouts, so the admin gets an answer rather than a 504.
+     */
+    private const RECALC_BUDGET_SECONDS = 15.0;
+
+    /** Where an unfinished run got to. Absent between runs. */
+    private const RECALC_CURSOR_OPTION = 'fundkit_recalculate_cursor';
+
+    /** In order. currency runs first so a donation that finally has a rate is counted. */
+    private const RECALC_PASSES = ['currency', 'donors', 'funds', 'campaigns', 'forms', 'addons'];
+
+    private const RECALC_TABLES = [
+        'donors'    => 'fundkit_donors',
+        'funds'     => 'fundkit_funds',
+        'campaigns' => 'fundkit_campaigns',
+        'forms'     => 'fundkit_forms',
+    ];
+
+    /**
+     * The unfinished run's state, or a fresh one. A run for a different scope
+     * replaces it: the admin asked for something else.
+     *
+     * @return array<string,mixed>
+     */
+    private function recalcState(string $scope): array
+    {
+        $stored = get_option(self::RECALC_CURSOR_OPTION);
+        if (is_array($stored) && ($stored['scope'] ?? null) === $scope && isset($stored['counts'])) {
+            return $stored;
+        }
+
+        return [
+            'scope'       => $scope,
+            'pass'        => self::RECALC_PASSES[0],
+            'after'       => 0,
+            'rebuild_all' => $scope === 'all',
+            'counts'      => ['donors' => 0, 'funds' => 0, 'campaigns' => 0, 'forms' => 0],
+        ];
+    }
+
+    /**
+     * @param array<string,mixed> $state
+     * @return array<string,mixed>
+     */
+    private static function recalcAdvance(array $state): array
+    {
+        $at = array_search($state['pass'], self::RECALC_PASSES, true);
+
+        $state['pass']  = self::RECALC_PASSES[(int) $at + 1] ?? null;
+        $state['after'] = 0;
+
+        return $state;
+    }
+
+    /**
+     * Recording a donation never blocks on FX, so rows with no rate yet are
+     * real payments sitting outside every total until one exists.
+     *
+     * @param array<string,mixed> $state
+     */
+    private function recalcCurrencyPass(array &$state): void
+    {
+        $fx        = $this->fxBackfill->run();
+        $converted = (int) $fx['converted'];
+
+        $state['counts']['converted_donations'] = $converted;
+        if (($fx['plans'] ?? 0) > 0) {
+            $state['counts']['converted_plans'] = (int) $fx['plans'];
+        }
+        // A plan carries its own base amount, so converting one changes
+        // recurring revenue even when no donation moved.
+        $converted += (int) ($fx['plans'] ?? 0);
+        if ($fx['unconvertible'] > 0) {
+            $state['counts']['still_unconvertible'] = (int) $fx['unconvertible'];
+        }
+
+        // Converting a donation changes every total it belongs to, so the
+        // aggregate passes have to run whatever the scope was. Without it, a
+        // currency-only pass writes base amounts, rebuilds nothing, and
+        // reports success while every total stays wrong.
+        if ($converted > 0) {
+            $state['rebuild_all'] = true;
+        }
+    }
+
+    private function recalcOne(string $pass, int $id): void
+    {
+        match ($pass) {
+            'donors'    => $this->aggregates->syncDonor($id),
+            'funds'     => $this->aggregates->syncFund($id),
+            'campaigns' => $this->aggregates->syncCampaign($id),
+            'forms'     => $this->aggregates->syncForm($id),
+            default     => null,
+        };
+    }
+
+    /**
+     * Ids only, never hydrated models, so the memory a rebuild needs does not
+     * grow with the org.
+     *
+     * @return list<int>
+     */
+    private static function recalcChunk(string $table, int $after): array
+    {
+        $rows = DB::table($table)
+            ->select('id')
+            ->where('id', $after, '>')
+            ->orderBy('id')
+            ->limit(self::RECALC_CHUNK)
+            ->getAll();
+
+        $ids = [];
+        foreach ($rows as $row) {
+            // DB::table() yields plain rows, not hydrated models.
+            $id = (int) (is_array($row) ? ($row['id'] ?? 0) : $row->id);
+            if ($id <= 0) {
+                break;
+            }
+            $ids[] = $id;
+        }
+
+        return $ids;
     }
 
     /** How many ids to hold at once while walking a table. */
     private const RECALC_CHUNK = 500;
-
-    /**
-     * Every id in a table, a chunk at a time. Ids only, never hydrated models,
-     * so the memory a rebuild needs does not grow with the org.
-     *
-     * @return \Generator<int>
-     *
-     * @since 1.0.0
-     */
-    private static function eachId(string $table): \Generator
-    {
-        $after = 0;
-
-        while (true) {
-            $rows = DB::table($table)
-                ->select('id')
-                ->where('id', $after, '>')
-                ->orderBy('id')
-                ->limit(self::RECALC_CHUNK)
-                ->getAll();
-
-            if (! $rows) {
-                return;
-            }
-
-            foreach ($rows as $row) {
-                // DB::table() yields plain rows, not hydrated models.
-                $after = (int) (is_array($row) ? ($row['id'] ?? 0) : $row->id);
-                if ($after <= 0) {
-                    return;
-                }
-                yield $after;
-            }
-        }
-    }
 
     private const SETTINGS_OPTIONS = [
         'fundkit_org_profile',

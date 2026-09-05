@@ -43,18 +43,36 @@ export default function MaintenanceTab( { info, active, loadInfo, setNotice } ) 
         }
     };
 
+    // The server does as much as fits in one request and says whether it
+    // finished, so a big org's rebuild arrives as a series of requests instead
+    // of one that times out half way through the donors.
     const doRecalculate = async () => {
         setRecalcRunning( true );
         setRecalcResult( null );
         setNotice( null );
         try {
-            const res = await apiFetch( {
-                path:   '/fundkit/v1/admin/tools/recalculate',
-                method: 'POST',
-                data:   { scope: recalcScope },
-            } );
-            setRecalcResult( res?.counts || {} );
-            setNotice( { type: 'success', text: __( 'Aggregates recomputed.', 'fundraising-toolkit' ) } );
+            let counts = {};
+            let done   = false;
+
+            for ( let round = 0; ! done && round < 500; round++ ) {
+                const res = await apiFetch( {
+                    path:   '/fundkit/v1/admin/tools/recalculate',
+                    method: 'POST',
+                    data:   { scope: recalcScope },
+                } );
+
+                counts = res?.counts || counts;
+                done   = res?.done !== false;
+                setRecalcResult( counts );
+
+                if ( ! done ) {
+                    setNotice( { type: 'info', text: __( 'Still recomputing. Leave this open.', 'fundraising-toolkit' ) } );
+                }
+            }
+
+            setNotice( done
+                ? { type: 'success', text: __( 'Aggregates recomputed.', 'fundraising-toolkit' ) }
+                : { type: 'warning', text: __( 'Progress made. There is more to do, run it again.', 'fundraising-toolkit' ) } );
             loadInfo();
         } catch ( err ) {
             setNotice( { type: 'error', text: err?.message || __( 'Recalculation failed.', 'fundraising-toolkit' ) } );
