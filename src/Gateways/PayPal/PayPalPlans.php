@@ -153,6 +153,22 @@ final class PayPalPlans
      */
     public function amountForPlan(string $planId): ?int
     {
+        return $this->scheduleForPlan($planId)['amount_cents'] ?? null;
+    }
+
+    /**
+     * The whole schedule the plan id stands for, not only its amount.
+     *
+     * A PayPal plan IS the amount and the cadence together, and the key holds
+     * both. Reading one and discarding the other leaves a revise that moved
+     * the cadence invisible to everything downstream.
+     *
+     * @return array{amount_cents:int, interval_unit:string, interval_count:int}|null
+     *
+     * @since 1.0.0
+     */
+    public function scheduleForPlan(string $planId): ?array
+    {
         if ($planId === '') {
             return null;
         }
@@ -167,9 +183,20 @@ final class PayPalPlans
             if (count($parts) < 6) {
                 continue;
             }
-            $amount = $parts[count($parts) - 3];
 
-            return ctype_digit($amount) ? (int) $amount : null;
+            $amount = $parts[count($parts) - 3];
+            $unit   = $parts[count($parts) - 2];
+            $count  = $parts[count($parts) - 1];
+
+            if (! ctype_digit($amount) || ! ctype_digit($count) || $unit === '') {
+                continue;
+            }
+
+            return [
+                'amount_cents'   => (int) $amount,
+                'interval_unit'  => $unit,
+                'interval_count' => (int) $count,
+            ];
         }
 
         return null;

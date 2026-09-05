@@ -877,26 +877,50 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             return $this->refused($eventId, $type, $reason);
         }
 
-        $amount = $this->plans->amountForPlan((string) ($sub['plan_id'] ?? ''));
+        $schedule = $this->plans->scheduleForPlan((string) ($sub['plan_id'] ?? ''));
 
-        // A plan this site did not mint says nothing about the amount, and
-        // guessing would be worse than leaving the row as it stands.
-        if ($amount !== null && $amount > 0 && $amount !== (int) $plan->amount_cents) {
-            RecurringPlan::query()
-                ->where('id', (int) $plan->id)
-                ->update([
-                    'amount_cents' => $amount,
-                    // Every base-currency rollup reads this ahead of
-                    // amount_cents, so leaving it pins the recurring revenue
-                    // figure to an amount nobody is charging.
-                    'base_amount_cents' => $plan->fx_rate !== null
-                        ? (int) round($amount * (float) $plan->fx_rate)
-                        : null,
-                    'updated_at' => $this->now(),
-                ]);
+        // A plan this site did not mint says nothing about either half of the
+        // schedule, and guessing would be worse than leaving the row as it
+        // stands. A revise can move the cadence without moving the amount, so
+        // the two are reconciled apart.
+        if ($schedule !== null) {
+            $amount = (int) $schedule['amount_cents'];
+            $unit   = (string) $schedule['interval_unit'];
+            $count  = (int) $schedule['interval_count'];
 
-            $plan->amount_cents = $amount;
-            do_action('fundkit.recurring.plan_amount_changed', $plan);
+            $patch = [];
+
+            if ($amount > 0 && $amount !== (int) $plan->amount_cents) {
+                $patch['amount_cents'] = $amount;
+                // Every base-currency rollup reads this ahead of amount_cents,
+                // so leaving it pins the recurring revenue figure to an amount
+                // nobody is charging.
+                $patch['base_amount_cents'] = $plan->fx_rate !== null
+                    ? (int) round($amount * (float) $plan->fx_rate)
+                    : null;
+            }
+
+            if ($unit !== '' && $count > 0
+                && ($unit !== (string) $plan->interval_unit || $count !== (int) $plan->interval_count)) {
+                $patch['interval_unit']  = $unit;
+                $patch['interval_count'] = $count;
+            }
+
+            if ($patch !== []) {
+                $patch['updated_at'] = $this->now();
+                RecurringPlan::query()->where('id', (int) $plan->id)->update($patch);
+            }
+
+            if (isset($patch['amount_cents'])) {
+                $plan->amount_cents = $amount;
+                do_action('fundkit.recurring.plan_amount_changed', $plan);
+            }
+
+            if (isset($patch['interval_unit'])) {
+                $plan->interval_unit  = $unit;
+                $plan->interval_count = $count;
+                do_action('fundkit.recurring.plan_interval_changed', $plan);
+            }
         }
 
         return new WebhookOutcome(
