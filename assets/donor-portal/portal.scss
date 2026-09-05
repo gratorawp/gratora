@@ -318,6 +318,25 @@
         flex-direction: column;
         gap: 10px;
     }
+    select,
+    textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--dp-border);
+        border-radius: 8px;
+        background: var(--dp-bg);
+        color: var(--dp-text);
+        font: inherit;
+        font-size: 15px;
+    }
+    textarea { resize: vertical; }
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        > span { font-size: 13px; color: var(--dp-muted); }
+    }
     &__close {
         position: absolute;
         top: 8px;

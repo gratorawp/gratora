@@ -952,6 +952,9 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                                     </>
                                 ) }
                                 <button class="dp-action" onClick={ () => setStage( 'amount' ) }>{ __( 'Change amount', 'fundraising-toolkit' ) }</button>
+                                { plan.can_change_interval && (
+                                    <button class="dp-action" onClick={ () => setStage( 'interval' ) }>{ __( 'Change frequency', 'fundraising-toolkit' ) }</button>
+                                ) }
                                 { plan.can_update_payment_method && (
                                     <button class="dp-action" onClick={ () => setStage( 'payment' ) }>{ __( 'Update payment method', 'fundraising-toolkit' ) }</button>
                                 ) }
@@ -974,6 +977,10 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
 
                 { stage === 'amount' && (
                     <ChangeAmountForm plan={ plan } onSubmit={ ( cents ) => call( { action: 'change_amount', amount_cents: cents } ) } />
+                ) }
+
+                { stage === 'interval' && (
+                    <ChangeFrequencyForm plan={ plan } onSubmit={ ( frequency ) => call( { action: 'change_interval', frequency } ) } />
                 ) }
 
                 { stage === 'payment' && (
@@ -1134,6 +1141,43 @@ function ChangeAmountForm( { plan, onSubmit } ) {
                 inputProps={ { 'aria-label': __( 'New donation amount', 'fundraising-toolkit' ) } }
             />
             <button class="dp-action is-primary" disabled={ ! valid } onClick={ () => valid && onSubmit( cents ) }>{ __( 'Save new amount', 'fundraising-toolkit' ) }</button>
+        </>
+    );
+}
+
+function ChangeFrequencyForm( { plan, onSubmit } ) {
+    const options = plan.frequency_options || [];
+    const current = plan.frequency || '';
+    const [ value, setValue ] = useState( current || options[ 0 ] || '' );
+    const perYear = FREQUENCY_PER_YEAR[ value ];
+
+    return (
+        <>
+            <h3>{ __( 'Change frequency', 'fundraising-toolkit' ) }</h3>
+            <p class="dp-hint">{ __( 'Current:', 'fundraising-toolkit' ) } { intervalLabel( plan.interval_count, plan.interval_unit ) }</p>
+            <label class="dp-modal__field">
+                <span>{ __( 'How often', 'fundraising-toolkit' ) }</span>
+                <select value={ value } onChange={ ( e ) => setValue( e.target.value ) } aria-label={ __( 'How often to donate', 'fundraising-toolkit' ) }>
+                    { options.map( ( f ) => (
+                        <option key={ f } value={ f }>{ frequencyLabel( f ) }</option>
+                    ) ) }
+                </select>
+            </label>
+            { /* A donor moving from monthly to weekly is agreeing to give four
+                 times as much, and the cadence label alone does not say so. */ }
+            { perYear && (
+                <p class="dp-hint">
+                    { sprintf(
+                        /* translators: %s: formatted amount, e.g. $120.00 */
+                        __( 'That comes to %s a year.', 'fundraising-toolkit' ),
+                        formatAmount( plan.amount_cents * perYear, plan.currency )
+                    ) }
+                </p>
+            ) }
+            <p class="dp-hint">{ __( 'You stay paid up to your current date. The new schedule starts from the charge after that.', 'fundraising-toolkit' ) }</p>
+            <button class="dp-action is-primary" disabled={ ! value || value === current } onClick={ () => onSubmit( value ) }>
+                { __( 'Save new frequency', 'fundraising-toolkit' ) }
+            </button>
         </>
     );
 }
@@ -1827,6 +1871,20 @@ export function formatDate( iso ) {
         hour:   '2-digit',
         minute: '2-digit',
     } );
+}
+
+const FREQUENCY_LABELS = {
+    weekly:    __( 'Every week', 'fundraising-toolkit' ),
+    biweekly:  __( 'Every 2 weeks', 'fundraising-toolkit' ),
+    monthly:   __( 'Every month', 'fundraising-toolkit' ),
+    quarterly: __( 'Every 3 months', 'fundraising-toolkit' ),
+    yearly:    __( 'Every year', 'fundraising-toolkit' ),
+};
+
+const FREQUENCY_PER_YEAR = { weekly: 52, biweekly: 26, monthly: 12, quarterly: 4, yearly: 1 };
+
+function frequencyLabel( frequency ) {
+    return FREQUENCY_LABELS[ frequency ] || frequency;
 }
 
 function intervalLabel( count, unit ) {
