@@ -7,6 +7,7 @@ namespace FundKit\Donors;
 use FundKit\Analytics\ErrorLog;
 use FundKit\Donations\Donation;
 use FundKit\Foundation\Maintenance\AbandonedPendingReaper;
+use FundKit\Donors\Erasure\AnalyticsEventHandler;
 use FundKit\Donors\Erasure\ErasureRegistry;
 use FundKit\Donors\Erasure\ErasureRequest;
 use FundKit\Recurring\RecurringCanceller;
@@ -386,12 +387,57 @@ final class DonorService
         $id   = (int) $donor->id;
         $hash = (string) $donor->email_hash;
 
+        // Built while the PII is still readable. The needle scan over payload
+        // is the only thing that reaches an abandoned checkout's email, and an
+        // abandoned checkout is what this delete releases.
+        $request = $this->erasureRequest($donor);
+        $dids    = $request->donationIds;
+
         // Read before the row goes, because the column is the only pointer to
         // the file: a picture the donor uploaded sits on a public URL, and
         // nothing else in the site knows it belonged to them.
         $avatarAttachmentId = (int) ($donor->avatar_attachment_id ?? 0);
 
-        DB::transaction(function () use ($donor, $id, $hash): void {
+        DB::transaction(function () use ($donor, $id, $hash, $dids, $request): void {
+            if ($dids !== []) {
+                // A receipt is an issued document and a settled refund is money
+                // that moved. The gate makes both unreachable; these are the
+                // belt, and they run before anything is destroyed.
+                if (DB::table('fundkit_receipts')->whereIn('donation_id', $dids)->count() > 0) {
+                    throw new InvalidArgumentException(esc_html__('This donor has a receipt on record, which has to be kept. Erase them instead.', 'fundraising-toolkit'));
+                }
+                if (DB::table('fundkit_refunds')->whereIn('donation_id', $dids)->where('status', 'succeeded')->count() > 0) {
+                    throw new InvalidArgumentException(esc_html__('This donor has a refund on record, which has to be kept. Erase them instead.', 'fundraising-toolkit'));
+                }
+
+                // Before anything is destroyed, so an add-on clears what it
+                // hangs off these donations. A listener that throws aborts.
+                do_action('fundkit.test_data.purge_donations', $dids);
+            }
+
+            (new AnalyticsEventHandler())->erase($request);
+
+            // Everything the donor left behind except the record of the
+            // destructive acts themselves. The wildcard is written out because
+            // the compiler wraps a bare value in its own.
+            DB::table('fundkit_events')
+                ->where('type', 'donor.%', 'NOT LIKE')
+                ->where('donor_id', $id)
+                ->delete();
+
+            if ($dids !== []) {
+                DB::table('fundkit_events')
+                    ->where('type', 'donor.%', 'NOT LIKE')
+                    ->whereIn('donation_id', $dids)
+                    ->delete();
+
+                DB::table('fundkit_donation_notes')->whereIn('donation_id', $dids)->delete();
+                DB::table('fundkit_refunds')->whereIn('donation_id', $dids)->delete();
+            }
+
+            // Only dead plans reach here; the gate refuses a cancellable one.
+            DB::table('fundkit_recurring_plans')->where('donor_id', $id)->delete();
+
             Consent::query()->where('donor_id', $id)->delete();
             DonorNote::query()->where('donor_id', $id)->delete();
             MagicLinkToken::query()->where('donor_id', $id)->delete();
@@ -404,6 +450,10 @@ final class DonorService
                     PendingSignupRepository::deleteSignupTokensFor((int) $claim->id);
                 }
                 PendingSignup::query()->where('email_hash', $hash)->delete();
+            }
+
+            if ($dids !== []) {
+                DB::table('fundkit_donations')->whereIn('id', $dids)->delete();
             }
 
             Donor::query()->where('id', $id)->delete();
