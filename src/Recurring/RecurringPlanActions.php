@@ -274,11 +274,11 @@ final class RecurringPlanActions
         }
 
         throw new GatewayUnreachable(esc_html(sprintf(
-            'Cannot %1$s subscription %2$d (%3$s %4$s): the gateway is not available, so it would keep billing.',
+            'Cannot %1$s subscription %2$s (%3$s, plan #%4$d): the gateway is not available, so it would keep billing.',
             $verb,
-            (int) $plan->id,
+            (string) ($plan->gateway_subscription_id ?: 'unlinked'),
             (string) $plan->gateway,
-            (string) ($plan->gateway_subscription_id ?: 'unlinked')
+            (int) $plan->id
         )));
     }
 

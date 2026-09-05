@@ -113,6 +113,21 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
                 ] }
             />
 
+            { plan.errors?.length > 0 && (
+                <div className="sd-group">
+                    <h4 className="sd-group__title">{ __( 'Problems', 'fundraising-toolkit' ) }</h4>
+                    <ul className="sd-errors">
+                        { plan.errors.map( ( e, i ) => (
+                            <li className="sd-errors__row" key={ `${ e.at }-${ i }` }>
+                                <span className="sd-errors__when">{ formatDate( e.at ) }</span>
+                                <span className="sd-errors__msg">{ e.message }</span>
+                                <span className="sd-errors__src">{ e.source }</span>
+                            </li>
+                        ) ) }
+                    </ul>
+                </div>
+            ) }
+
             <Section
                 title={ __( 'Payment provider', 'fundraising-toolkit' ) }
                 rows={ [

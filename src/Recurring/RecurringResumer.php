@@ -108,7 +108,7 @@ final class RecurringResumer
                 'Cannot resume plan %1$d: the %2$s gateway is not available, so it is still paused at the processor.',
                 (int) $plan->id,
                 (string) $plan->gateway
-            ), ['plan_id' => (int) $plan->id, 'gateway' => (string) $plan->gateway]);
+            ), ['recurring_plan_id' => (int) $plan->id, 'gateway' => (string) $plan->gateway]);
 
             return;
         }
@@ -133,7 +133,7 @@ final class RecurringResumer
                     (int) $plan->id,
                     (string) $plan->gateway,
                     $e->getMessage()
-                ), ['plan_id' => (int) $plan->id, 'gateway' => (string) $plan->gateway]);
+                ), ['recurring_plan_id' => (int) $plan->id, 'gateway' => (string) $plan->gateway]);
 
                 do_action('fundkit.recurring.resume_failed', $plan, $e);
                 return;

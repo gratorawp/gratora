@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
 
+use FundKit\Analytics\ErrorLog;
+use FundKit\Analytics\Event;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Donations\Donation;
 use FundKit\Donors\Donor;
@@ -358,6 +360,36 @@ final class RecurringController
      *
      * @since 1.0.0
      */
+    /**
+     * What went wrong on this plan that is not a declined renewal: a gateway
+     * that could not be reached to cancel, a resume that failed, a webhook
+     * that could not be applied. The failure tag says a plan is in trouble;
+     * this says what the trouble was.
+     *
+     * @return list<array{at:?string, source:string, message:string}>
+     *
+     * @since 1.0.0
+     */
+    private static function planErrors(RecurringPlan $p): array
+    {
+        $rows = Event::query()
+            ->where('recurring_plan_id', (int) $p->id)
+            ->whereLike('type', ErrorLog::PREFIX . '%')
+            ->orderBy('occurred_at', 'DESC')
+            ->limit(10)
+            ->getAll();
+
+        return array_values(array_map(static function ($e): array {
+            $payload = is_array($e->payload) ? $e->payload : [];
+
+            return [
+                'at'      => $e->occurred_at,
+                'source'  => (string) substr((string) $e->type, strlen(ErrorLog::PREFIX)),
+                'message' => (string) ($payload['message'] ?? ''),
+            ];
+        }, $rows));
+    }
+
     private function lastFailure(RecurringPlan $p): ?array
     {
         if ((int) $p->failed_renewals_count < 1) {
@@ -409,6 +441,7 @@ final class RecurringController
             'total_paid_cents'        => (int) $p->total_paid_cents,
             'failed_renewals_count'   => (int) $p->failed_renewals_count,
             'last_failure'            => $this->lastFailure($p),
+            'errors'                  => self::planErrors($p),
             // PayPal owns its own retry schedule and exposes no endpoint for it,
             // so the action is offered per gateway rather than per status.
             'can_retry'               => $this->gateways->get((string) $p->gateway) instanceof SupportsPaymentRetry,
