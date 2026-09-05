@@ -125,11 +125,6 @@ export default function RecurringTab( { recurring, onChange } ) {
             ),
         },
         {
-            id:    'interval',
-            label: __( 'Interval', 'fundraising-toolkit' ),
-            render: ( { item } ) => <span>{ intervalLabel( item.interval_unit, item.interval_count ) }</span>,
-        },
-        {
             id:    'started_at',
             label: __( 'Started', 'fundraising-toolkit' ),
             enableSorting: true,

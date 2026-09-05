@@ -36,15 +36,25 @@ test( 'the tab can actually open the dialog it now offers', () => {
 } );
 
 test( 'the tab carries the columns the list has, hidden by default', () => {
-	for ( const id of [ "id:    'gateway'", "id:    'interval'", "id:    'started_at'" ] ) {
+	for ( const id of [ "id:    'gateway'", "id:    'started_at'" ] ) {
 		expect( tab ).toContain( id );
 	}
 
 	// Hidden, not absent: the default view lists fewer than it defines.
 	const defaults = tab.slice( tab.indexOf( 'fields:  [' ), tab.indexOf( ']', tab.indexOf( 'fields:  [' ) ) );
 	expect( defaults ).not.toContain( 'gateway' );
-	expect( defaults ).not.toContain( 'interval' );
 	expect( defaults ).not.toContain( 'started_at' );
+} );
+
+test( 'neither table repeats the interval in its own column', () => {
+	// The amount cell already reads "25.00 / month".
+	for ( const source of [ list, tab ] ) {
+		expect( source ).toContain( "/ { intervalLabel( item.interval_unit, item.interval_count ) }" );
+	}
+
+	const listDefaults = list.slice( list.indexOf( 'fields:  [' ), list.indexOf( ']', list.indexOf( 'fields:  [' ) ) );
+	expect( listDefaults ).not.toContain( 'interval' );
+	expect( tab ).not.toContain( "id:    'interval'" );
 } );
 
 test( 'interval wording is defined once, not per screen', () => {

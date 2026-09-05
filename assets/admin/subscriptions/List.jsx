@@ -599,7 +599,7 @@ export default function List() {
         },
         {
             id:            'amount',
-            label:         __( 'Amount', 'fundraising-toolkit' ),
+            label:         __( 'Amount / interval', 'fundraising-toolkit' ),
             enableSorting: true,
             render: ( { item } ) => (
                 // Muted once the plan has ended: it describes a charge that will
@@ -715,7 +715,10 @@ export default function List() {
             label:    __( 'Interval', 'fundraising-toolkit' ),
             elements: INTERVAL_OPTIONS,
             filterBy: { operators: [ 'is' ] },
-            render: ( { item } ) => <span>{ intervalLabel( item.interval_unit, item.interval_count ) }</span>,
+            // Filter only. The amount cell already reads "25.00 / month", so a
+            // column repeating the second half is a column saying nothing.
+            enableHiding: true,
+            render:   ( { item } ) => <span>{ intervalLabel( item.interval_unit, item.interval_count ) }</span>,
         },
         {
             id:            'lifetime',
