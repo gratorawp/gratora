@@ -12,6 +12,7 @@ use FundKit\Donations\Donation;
 use FundKit\Gateways\GatewayManager;
 use FundKit\Gateways\Sandbox\SandboxGateway;
 use FundKit\Gateways\SupportsPaymentRetry;
+use FundKit\Gateways\SupportsScheduleChange;
 
 /**
  * The one shape a plan takes on a screen.
@@ -62,6 +63,14 @@ final class PlanRow
             // PayPal owns its own retry schedule and exposes no endpoint for it,
             // so the action is offered per gateway rather than per status.
             'can_retry'               => $gateway instanceof SupportsPaymentRetry,
+            // Most processors mint a mandate against a fixed cadence, so the
+            // action is offered per gateway rather than per status.
+            'can_change_interval'     => $gateway instanceof SupportsScheduleChange,
+            'frequency'               => FrequencyMap::fromInterval(
+                (string) $p->interval_unit,
+                (int) $p->interval_count
+            ),
+            'frequency_options'       => FrequencyMap::recurringFrequencies(),
             // A sandbox cycle is minutes, not the donor's cadence, so the row
             // has to say so: a weekly plan whose next payment is five minutes
             // away otherwise reads as a bug rather than as a rehearsal.

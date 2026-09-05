@@ -64,17 +64,32 @@ export function actionsFor( plan ) {
         actions.push( { id: 'skip_next', label: __( 'Skip next', 'fundraising-toolkit' ) } );
     }
     actions.push( { id: 'change_amount', label: __( 'Change amount', 'fundraising-toolkit' ) } );
+    // Most processors mint a mandate against a fixed cadence, so this is a
+    // capability the row carries rather than something every plan can do.
+    if ( plan.can_change_interval ) {
+        actions.push( { id: 'change_interval', label: __( 'Change schedule', 'fundraising-toolkit' ) } );
+    }
     actions.push( { id: 'cancel', label: __( 'Cancel subscription', 'fundraising-toolkit' ), destructive: true } );
 
     return actions;
 }
+
+/** The five this product can name, in the order a donor reads them. */
+const FREQUENCY_LABELS = {
+    weekly:    __( 'Every week', 'fundraising-toolkit' ),
+    biweekly:  __( 'Every 2 weeks', 'fundraising-toolkit' ),
+    monthly:   __( 'Every month', 'fundraising-toolkit' ),
+    quarterly: __( 'Every 3 months', 'fundraising-toolkit' ),
+    yearly:    __( 'Every year', 'fundraising-toolkit' ),
+};
 
 const TITLES = {
     retry:         __( 'Retry the payment', 'fundraising-toolkit' ),
     pause:         __( 'Pause this donation', 'fundraising-toolkit' ),
     resume:        __( 'Resume this donation', 'fundraising-toolkit' ),
     skip_next:     __( 'Skip the next payment', 'fundraising-toolkit' ),
-    change_amount: __( 'Change the amount', 'fundraising-toolkit' ),
+    change_amount:   __( 'Change the amount', 'fundraising-toolkit' ),
+    change_interval: __( 'Change the schedule', 'fundraising-toolkit' ),
     cancel:        __( 'Cancel this donation', 'fundraising-toolkit' ),
 };
 
@@ -87,11 +102,19 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
     const [ months, setMonths ] = useState( 1 );
     const [ amount, setAmount ] = useState( ( plan.amount_cents || 0 ) / 100 );
     const [ reason, setReason ] = useState( '' );
+    const [ frequency, setFrequency ] = useState( plan.frequency || 'monthly' );
 
     const submit = () => {
         const body = { action, notify_donor: notify };
         if ( action === 'pause' ) body.months = Number( months ) || 1;
         if ( action === 'cancel' && reason.trim() ) body.reason = reason.trim();
+        if ( action === 'change_interval' ) {
+            if ( frequency === plan.frequency ) {
+                setError( __( 'That is the schedule it is on already.', 'fundraising-toolkit' ) );
+                return;
+            }
+            body.frequency = frequency;
+        }
         if ( action === 'change_amount' ) {
             // AmountInput reports a number, so the separator handling that was
             // here belongs to it now.
@@ -156,6 +179,29 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                             autoFocus
                         />
                     </label>
+                </p>
+            ) }
+
+            { action === 'change_interval' && (
+                <p>
+                    <label>
+                        <span style={ { display: 'block', marginBottom: 4 } }>
+                            { __( 'Charge this donation', 'fundraising-toolkit' ) }
+                        </span>
+                        <select
+                            className="fundkit-select"
+                            value={ frequency }
+                            onChange={ ( e ) => setFrequency( e.target.value ) }
+                            autoFocus
+                        >
+                            { ( plan.frequency_options || [] ).map( ( f ) => (
+                                <option key={ f } value={ f }>{ FREQUENCY_LABELS[ f ] || f }</option>
+                            ) ) }
+                        </select>
+                    </label>
+                    <span className="fundkit-row__sub" style={ { display: 'block', marginTop: 6 } }>
+                        { __( 'The donor stays paid up to their current date. The new schedule starts from the charge after that.', 'fundraising-toolkit' ) }
+                    </span>
                 </p>
             ) }
 

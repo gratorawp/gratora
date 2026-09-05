@@ -137,6 +137,7 @@ final class RecurringController
                 'action'       => ['type' => 'string', 'required' => true],
                 'amount_cents' => ['type' => 'integer', 'minimum' => 1],
                 'months'       => ['type' => 'integer', 'minimum' => 1, 'maximum' => 12],
+                'frequency'    => ['type' => 'string'],
                 'reason'       => ['type' => 'string'],
                 'notify_donor' => ['type' => 'boolean', 'default' => true],
             ],
@@ -435,6 +436,10 @@ final class RecurringController
 
                 case 'change_amount':
                     $this->actions->changeAmount($plan, (int) ($request['amount_cents'] ?? 0), $change);
+                    break;
+
+                case 'change_interval':
+                    $this->actions->changeInterval($plan, (string) ($request['frequency'] ?? ''), $change);
                     break;
 
                 case 'retry':

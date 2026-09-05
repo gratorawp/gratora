@@ -26,6 +26,8 @@ use FundKit\Foundation\Identity\IdentityHasher;
 use FundKit\Gateways\GatewayManager;
 use FundKit\Gateways\SubscriptionChangeNeedsApproval;
 use FundKit\Gateways\SupportsPaymentMethodUpdate;
+use FundKit\Recurring\FrequencyMap;
+use FundKit\Gateways\SupportsScheduleChange;
 use FundKit\Gateways\SupportsSubscriptionPause;
 use FundKit\Mail\Mailer;
 use FundKit\Receipts\Receipt;
@@ -888,6 +890,15 @@ final class PortalController
                 // new one must not be offered the option.
                 'can_update_payment_method' => $this->gateways->get((string) $p->gateway)
                     instanceof SupportsPaymentMethodUpdate,
+                // Same rule for the schedule: most processors mint a mandate
+                // against a fixed cadence and cannot move it.
+                'can_change_interval' => $this->gateways->get((string) $p->gateway)
+                    instanceof SupportsScheduleChange,
+                'frequency'         => FrequencyMap::fromInterval(
+                    (string) $p->interval_unit,
+                    (int) $p->interval_count
+                ),
+                'frequency_options' => FrequencyMap::recurringFrequencies(),
                 // Same rule for pausing. SubscriptionAware was being read as
                 // "this plan can be paused", and two shipped gateways declare
                 // it while refusing both pause and skip: a Direct Debit donor
@@ -935,6 +946,10 @@ final class PortalController
 
                 case 'change_amount':
                     $this->planActions->changeAmount($plan, (int) ($body['amount_cents'] ?? 0), $change);
+                    break;
+
+                case 'change_interval':
+                    $this->planActions->changeInterval($plan, (string) ($body['frequency'] ?? ''), $change);
                     break;
 
                 case 'cancel':
