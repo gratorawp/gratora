@@ -415,10 +415,6 @@ body.fundkit-modal-open { overflow: hidden; }
             min-height: 160px;
             border-color: var(--fundkit-accent, #{$accent-fallback});
             box-shadow: 0 4px 14px #{$accent-soft};
-            .fundkit-top-donors__podium-rank {
-                background: var(--fundkit-accent, #{$accent-fallback});
-                color: #fff;
-            }
         }
         &--2 { min-height: 140px; }
         &--3 { min-height: 120px; }
