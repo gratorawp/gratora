@@ -56,7 +56,7 @@ final class PortalMediumsTest extends IntegrationTestCase
         $order = $this->row('order', 'ORDER-' . uniqid());
 
         $refs = array_column(
-            (array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/portal/donations'))->get_data(),
+            (array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/portal/donations'))->get_data()['items'],
             'reference'
         );
 

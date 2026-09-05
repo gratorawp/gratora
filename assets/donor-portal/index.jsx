@@ -476,7 +476,7 @@ function App() {
                 { tab === 'receipts'    && <Receipts /> }
                 { tab === 'preferences' && <Preferences /> }
                 { tab === 'profile'     && <Profile  onSaved={ loadMe } /> }
-                { tab === 'consents'    && <Consents /> }
+                { tab === 'consents'    && <Consents onResolved={ ( pending ) => setMe( ( cur ) => cur ? { ...cur, consents_pending: pending } : cur ) } /> }
                 { visibleExtTabs.map( ( t ) => (
                     tab === t.id ? <ExtensionPanel key={ t.id } tab={ t } context={ extContext } /> : null
                 ) ) }
@@ -694,16 +694,30 @@ function freqLabel( f ) {
 }
 
 function Donations( { onOpen } ) {
-    const [ list, setList ]   = useState( null );
+    const [ page, setPage ]   = useState( null );
     const [ error, setError ] = useState( null );
-    useEffect( () => { api( 'donations' ).then( setList ).catch( ( e ) => setError( e.message ) ); }, [] );
+    useEffect( () => { api( 'donations' ).then( setPage ).catch( ( e ) => setError( e.message ) ); }, [] );
 
-    if ( error )    return <p class="dp-error">{ error }</p>;
-    if ( ! list )   return <p>{ __( 'Loading donations…', 'fundraising-toolkit' ) }</p>;
+    if ( error )   return <p class="dp-error">{ error }</p>;
+    if ( ! page )  return <p>{ __( 'Loading donations…', 'fundraising-toolkit' ) }</p>;
+
+    const list  = Array.isArray( page.items ) ? page.items : [];
+    const total = Number( page.total || list.length );
+
     if ( ! list.length ) return <p>{ __( 'No donations yet.', 'fundraising-toolkit' ) }</p>;
 
     return (
         <div class="dp-list">
+            { total > list.length && (
+                <p class="dp-list__note">
+                    { sprintf(
+                        /* translators: 1: how many donations are listed, 2: how many the donor has made in total. */
+                        __( 'Showing your %1$s most recent donations of %2$s. Ask the organization for the rest.', 'fundraising-toolkit' ),
+                        list.length.toLocaleString(),
+                        total.toLocaleString()
+                    ) }
+                </p>
+            ) }
             { list.map( ( d ) => (
                 <div
                     key={ d.id }
@@ -1325,12 +1339,21 @@ function Receipts() {
             .catch( () => {} );
     }, [] );
 
+    // The request behind this renders a whole PDF over every donation in the
+    // year, which takes seconds. Without a busy state the button looked dead
+    // and a second press started the render again.
+    const [ dlBusy, setDlBusy ] = useState( false );
+
     const downloadAnnual = async () => {
+        if ( dlBusy ) return;
+        setDlBusy( true );
         setDlError( '' );
         try {
             saveBlob( await api( `annual-statement/${ year }` ), `fundkit-annual-${ year }.pdf` );
         } catch ( err ) {
             setDlError( err.message || __( 'Could not generate statement.', 'fundraising-toolkit' ) );
+        } finally {
+            setDlBusy( false );
         }
     };
 
@@ -1361,7 +1384,9 @@ function Receipts() {
                             <option key={ y } value={ y }>{ y }</option>
                         ) ) }
                     </select>
-                    <button class="dp-action is-primary" onClick={ downloadAnnual }>{ __( 'Download statement', 'fundraising-toolkit' ) }</button>
+                    <button class="dp-action is-primary" onClick={ downloadAnnual } disabled={ dlBusy } aria-busy={ dlBusy }>
+                        { dlBusy ? __( 'Preparing…', 'fundraising-toolkit' ) : __( 'Download statement', 'fundraising-toolkit' ) }
+                    </button>
                 </div>
                 { dlError && <p class="dp-error">{ dlError }</p> }
             </div>
@@ -1748,7 +1773,14 @@ function CountryPicker( { value, onChange } ) {
                     value={ query }
                     placeholder={ __( 'Search country…', 'fundraising-toolkit' ) }
                     onFocus={ () => setOpen( true ) }
-                    onBlur={ () => setTimeout( () => setOpen( false ), 150 ) }
+                    onBlur={ () => setTimeout( () => {
+                        setOpen( false );
+                        // Free text nobody picked is not a country. Left as
+                        // typed it sat next to "Saved." showing one the donor
+                        // never chose and the account never stored.
+                        const chosen = COUNTRIES.find( ( c ) => c.code === ( value || '' ).toUpperCase() );
+                        setQuery( chosen ? chosen.name : '' );
+                    }, 150 ) }
                     onInput={ ( e ) => { setQuery( e.target.value ); setOpen( true ); } }
                     onKeyDown={ onKeyDown }
                 />
@@ -1775,7 +1807,7 @@ function CountryPicker( { value, onChange } ) {
     );
 }
 
-function Consents() {
+function Consents( { onResolved } ) {
     const [ list, setList ] = useState( null );
     const extSections = useExtensionPanels( 'portal-consents' );
     const [ saving, setSaving ] = useState( false );
@@ -1807,15 +1839,31 @@ function Consents() {
         </div>
     );
 
-    const toggle = ( key, next ) => {
-        const items = [ { key, granted: next } ];
-        setList( ( cur ) => cur.map( ( p ) => p.key === key ? { ...p, granted: next } : p ) );
+    // One save at a time. Each response replaces the whole list, so two in
+    // flight could settle on the older answer and leave the boxes disagreeing
+    // with the record behind them.
+    const send = ( items ) => {
+        if ( saving ) return;
         setSaving( true );
         setErr( '' );
-        api( 'consents', { method: 'POST', body: JSON.stringify( { items } ) } )
-            .then( ( fresh ) => { setList( fresh ); setSavedAt( Date.now() ); } )
+
+        return api( 'consents', { method: 'POST', body: JSON.stringify( { items } ) } )
+            .then( ( fresh ) => {
+                setList( fresh );
+                setSavedAt( Date.now() );
+                // What the tab dot and the banner on every other tab read.
+                if ( typeof onResolved === 'function' ) {
+                    onResolved( fresh.filter( ( p ) => p.stale ).length );
+                }
+            } )
             .catch( ( e ) => { setErr( e.message || __( 'Could not save your choice.', 'fundraising-toolkit' ) ); load(); } )
             .finally( () => setSaving( false ) );
+    };
+
+    const toggle = ( key, next ) => {
+        if ( saving ) return;
+        setList( ( cur ) => cur.map( ( p ) => p.key === key ? { ...p, granted: next } : p ) );
+        send( [ { key, granted: next } ] );
     };
 
     const confirmStale = ( key ) => {
@@ -1824,13 +1872,7 @@ function Consents() {
         // new purpose_version, clearing the stale flag.
         const cur = list.find( ( p ) => p.key === key );
         if ( ! cur ) return;
-        const items = [ { key, granted: !! cur.granted } ];
-        setSaving( true );
-        setErr( '' );
-        api( 'consents', { method: 'POST', body: JSON.stringify( { items } ) } )
-            .then( ( fresh ) => { setList( fresh ); setSavedAt( Date.now() ); } )
-            .catch( ( e ) => { setErr( e.message || __( 'Could not save your choice.', 'fundraising-toolkit' ) ); load(); } )
-            .finally( () => setSaving( false ) );
+        send( [ { key, granted: !! cur.granted } ] );
     };
 
     const staleCount = list.filter( ( p ) => p.stale ).length;
@@ -1855,7 +1897,7 @@ function Consents() {
                     <input
                         type="checkbox"
                         checked={ p.granted }
-                        disabled={ p.required }
+                        disabled={ p.required || saving }
                         onChange={ ( e ) => toggle( p.key, e.target.checked ) }
                     />
                     <div>

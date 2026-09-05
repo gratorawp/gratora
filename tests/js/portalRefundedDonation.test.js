@@ -125,7 +125,7 @@ beforeEach( () => {
 
 test( 'the row says what came back, so it can be read against a net lifetime total', async () => {
     routes.me = () => jsonResponse( 200, me() );
-    routes.donations = () => jsonResponse( 200, [ donation() ] );
+    routes.donations = () => jsonResponse( 200, { items: [ donation() ], total: 1 } );
 
     await boot();
     await clickButton( 'Donations' );
@@ -136,7 +136,7 @@ test( 'the row says what came back, so it can be read against a net lifetime tot
 
 test( 'the donation itself states the refund and what the organization kept', async () => {
     routes.me = () => jsonResponse( 200, me() );
-    routes.donations = () => jsonResponse( 200, [ donation() ] );
+    routes.donations = () => jsonResponse( 200, { items: [ donation() ], total: 1 } );
     routes[ 'donations/FUNDKIT-2026-00001' ] = () => jsonResponse( 200, donation() );
 
     await boot();
@@ -151,7 +151,7 @@ test( 'the donation itself states the refund and what the organization kept', as
 
 test( 'a donation nobody refunded says nothing about refunds', async () => {
     routes.me = () => jsonResponse( 200, me( { total_donated_cents: 5000 } ) );
-    routes.donations = () => jsonResponse( 200, [ donation( { refunded_cents: 0 } ) ] );
+    routes.donations = () => jsonResponse( 200, { items: [ donation( { refunded_cents: 0 } ) ], total: 1 } );
     routes[ 'donations/FUNDKIT-2026-00001' ] = () => jsonResponse( 200, donation( { refunded_cents: 0 } ) );
 
     await boot();

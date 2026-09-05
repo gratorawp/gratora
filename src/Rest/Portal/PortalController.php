@@ -55,6 +55,9 @@ final class PortalController
 {
     private const NAMESPACE = 'fundkit/v1';
 
+    /** How many donations one portal request returns. */
+    private const DONATION_PAGE = 100;
+
     public const SEND_LINK_HOOK          = 'fundkit.async.send_portal_link';
     private const SEND_LINK_IP_MAX       = 4;
     private const SEND_LINK_IP_WINDOW    = 15 * MINUTE_IN_SECONDS;
@@ -756,8 +759,16 @@ final class PortalController
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId)
             ->orderBy('paid_at', 'DESC')
-            ->limit(100)
+            ->limit(self::DONATION_PAGE)
             ->getAll();
+
+        // The same scope, uncapped: the Overview counts every donation the
+        // donor made, so a list that stops at a hundred and says nothing has
+        // the two screens disagreeing about how many times they gave.
+        $total = (int) DonationQueries::donationsOnly(Donation::query())
+            ->whereIn('status', ['paid', 'partial_refund'])
+            ->where('donor_id', $donorId)
+            ->count();
 
         $out = [];
         foreach ($rows as $d) {
@@ -777,7 +788,7 @@ final class PortalController
                 'is_anonymous'      => (bool) $d->is_anonymous,
             ];
         }
-        return new WP_REST_Response($out, 200);
+        return new WP_REST_Response(['items' => $out, 'total' => $total], 200);
     }
 
     /** @since 1.0.0 */

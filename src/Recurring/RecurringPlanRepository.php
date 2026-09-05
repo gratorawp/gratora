@@ -261,6 +261,12 @@ final class RecurringPlanRepository
                 'status'              => 'cancelled',
                 'cancelled_at'        => $occurredAt,
                 'cancellation_reason' => $reason,
+                // Nothing will be charged again, so there is no next payment
+                // and no resume owed. Left standing, the donor's portal kept
+                // showing a future charge date on a donation they had just
+                // stopped, which reads as though the cancellation did nothing.
+                'next_payment_at'     => null,
+                'resume_at'           => null,
                 'updated_at'          => $occurredAt,
             ]);
 
@@ -268,6 +274,8 @@ final class RecurringPlanRepository
         $plan->status              = 'cancelled';
         $plan->cancelled_at        = $occurredAt;
         $plan->cancellation_reason = $reason;
+        $plan->next_payment_at     = null;
+        $plan->resume_at           = null;
         $plan->updated_at          = $occurredAt;
 
         return ($result->affectedRows ?? 0) > 0;

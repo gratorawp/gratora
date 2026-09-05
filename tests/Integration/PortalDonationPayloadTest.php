@@ -149,7 +149,7 @@ final class PortalDonationPayloadTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function listDonations(string $reference): array
     {
-        $rows = (array) $this->asDonor($reference, '/fundkit/v1/portal/donations');
+        $rows = (array) $this->asDonor($reference, '/fundkit/v1/portal/donations')['items'];
         foreach ($rows as $row) {
             if (($row['reference'] ?? '') === $reference) {
                 return (array) $row;
