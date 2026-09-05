@@ -339,8 +339,19 @@ final class RecurringPlanRepository
         if (! empty($args['campaign_id'])) {
             $q = $q->where('campaign_id', (int) $args['campaign_id']);
         }
-        if (! empty($args['interval'])) {
-            $q = $q->where('interval_unit', (string) $args['interval']);
+        // A cadence, not a unit: quarterly is ('month', 3) and biweekly is
+        // ('week', 2), so filtering on the unit alone files both under the
+        // monthly and weekly chips they are not.
+        if (! empty($args['frequency'])) {
+            $frequency = (string) $args['frequency'];
+            if (in_array($frequency, FrequencyMap::recurringFrequencies(), true)) {
+                [$unit, $count] = FrequencyMap::toStripe($frequency);
+                $q = $q->where('interval_unit', $unit)->where('interval_count', $count);
+            } else {
+                // A cadence this product cannot name matches no plan. Widening
+                // to every plan is how a filter comes to disagree with its chip.
+                $q = $q->where('id', 0);
+            }
         }
         // Anything the gateway could not collect from. Not the same as
         // status = past_due: a plan can be carrying a decline before the
@@ -362,11 +373,16 @@ final class RecurringPlanRepository
             $term   = trim((string) $args['search']);
             $planId = ctype_digit($term) ? (int) $term : 0;
 
-            $q = $q->where(function ($sub) use ($ids, $planId): void {
+            $q = $q->where(function ($sub) use ($ids, $planId, $term): void {
                 $sub->whereIn('donor_id', $ids ?: [0]);
 
                 if ($planId > 0) {
                     $sub->orWhere('id', $planId);
+                    // A digit-only term names an id, so the handle stays exact:
+                    // LIKE would let "12" pull in every handle containing it.
+                    $sub->orWhere('gateway_subscription_id', $term);
+                } else {
+                    $sub->orWhereLike('gateway_subscription_id', $term);
                 }
             });
         }

@@ -197,14 +197,14 @@ export default function RecurringTab( { recurring, onChange } ) {
         {
             id:         'change_amount',
             label:      __( 'Change amount', 'fundraising-toolkit' ),
-            isEligible: ( item ) => ! isTerminal( item.status ),
+            isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'change_amount' ),
             callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'change_amount' } ),
         },
         {
             id:            'cancel',
             label:         __( 'Cancel', 'fundraising-toolkit' ),
             isDestructive: true,
-            isEligible:    ( item ) => ! isTerminal( item.status ),
+            isEligible:    ( item ) => actionsFor( item ).some( ( a ) => a.id === 'cancel' ),
             callback:      ( items ) => setDialog( { plan: items[ 0 ], action: 'cancel' } ),
         },
     ], [] );

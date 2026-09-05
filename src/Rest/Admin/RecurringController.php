@@ -18,6 +18,7 @@ use FundKit\Gateways\SubscriptionAware;
 use FundKit\Gateways\SubscriptionChangeNeedsApproval;
 use FundKit\Gateways\Sandbox\SandboxGateway;
 use FundKit\Gateways\SupportsPaymentRetry;
+use FundKit\Recurring\FrequencyMap;
 use FundKit\Recurring\GatewayUnreachable;
 use FundKit\Recurring\PlanRow;
 use FundKit\Recurring\RecurringPlan;
@@ -96,7 +97,7 @@ final class RecurringController
                 'status'       => ['type' => 'string'],
                 'gateway'      => ['type' => 'string'],
                 'campaign_id'  => ['type' => 'integer', 'minimum' => 1],
-                'interval'     => ['type' => 'string', 'enum' => ['week', 'month', 'year']],
+                'frequency'    => ['type' => 'string', 'enum' => FrequencyMap::recurringFrequencies()],
                 // Plans the gateway could not collect from, whatever their status.
                 'failing'      => ['type' => 'boolean', 'default' => false],
                 'search'       => ['type' => 'string'],
@@ -156,7 +157,7 @@ final class RecurringController
             'status'       => $request['status']      !== null ? (string) $request['status'] : null,
             'gateway'      => $request['gateway']     !== null ? (string) $request['gateway'] : null,
             'campaign_id'  => $request['campaign_id'] !== null ? (int) $request['campaign_id'] : null,
-            'interval'     => $request['interval']    !== null ? (string) $request['interval'] : null,
+            'frequency'    => $request['frequency']   !== null ? (string) $request['frequency'] : null,
             'failing'      => (bool) $request['failing'],
             'include_test' => (bool) $request['include_test'],
             // Donor identity is encrypted, so a LIKE over the donors table

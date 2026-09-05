@@ -97,8 +97,12 @@ final class AdminGlobals extends HookProvider
             // it. Without this the tab renders for a settings manager, who can
             // edit the grid and only learns it is refused on save.
             'can' => [
-                'manage_options' => current_user_can('manage_options'),
-                'export_donors'  => Capabilities::userCan('fundkit_export_donors'),
+                'manage_options'   => current_user_can('manage_options'),
+                'export_donors'    => Capabilities::userCan('fundkit_export_donors'),
+                // Changing what a donor is charged. The plan menus on the
+                // subscriptions list and the donor profile are the routes
+                // behind it, and both were offered to a reader who cannot.
+                'refund_donations' => Capabilities::userCan('fundkit_refund_donations'),
             ],
             // What is in front of this site, if the site has not said. The
             // Spam protection screen turns this into one button, because the

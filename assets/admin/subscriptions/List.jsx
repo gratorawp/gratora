@@ -32,10 +32,14 @@ const STATUS_OPTIONS = [
     { value: 'expired',   label: __( 'Expired', 'fundraising-toolkit' ) },
 ];
 
+// A cadence, not an interval unit: quarterly is three months and biweekly is
+// two weeks, so filtering on the unit filed both under a chip they are not.
 const INTERVAL_OPTIONS = [
-    { value: 'month', label: __( 'Monthly', 'fundraising-toolkit' ) },
-    { value: 'year',  label: __( 'Yearly', 'fundraising-toolkit' ) },
-    { value: 'week',  label: __( 'Weekly', 'fundraising-toolkit' ) },
+    { value: 'weekly',    label: __( 'Weekly', 'fundraising-toolkit' ) },
+    { value: 'biweekly',  label: __( 'Every 2 weeks', 'fundraising-toolkit' ) },
+    { value: 'monthly',   label: __( 'Monthly', 'fundraising-toolkit' ) },
+    { value: 'quarterly', label: __( 'Quarterly', 'fundraising-toolkit' ) },
+    { value: 'yearly',    label: __( 'Yearly', 'fundraising-toolkit' ) },
 ];
 
 // A donation carries the cadence the donor chose on the form, not the plan's
@@ -456,7 +460,7 @@ export default function List() {
         status:      statusFilter || undefined,
         gateway:     gatewayFilter || undefined,
         campaign_id: campaignFilter || undefined,
-        interval:    intervalFilter || undefined,
+        frequency:   intervalFilter || undefined,
         failing:     failingFilter === 'yes' ? true : undefined,
         search:      view.search || undefined,
         include_test: includeTest || undefined,
@@ -783,14 +787,14 @@ export default function List() {
         {
             id:       'change_amount',
             label:    __( 'Change amount', 'fundraising-toolkit' ),
-            isEligible: ( item ) => ! isTerminal( item.status ),
+            isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'change_amount' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'change_amount' } ),
         },
         {
             id:            'cancel',
             label:         __( 'Cancel', 'fundraising-toolkit' ),
             isDestructive: true,
-            isEligible: ( item ) => ! isTerminal( item.status ),
+            isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'cancel' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'cancel' } ),
         },
     ], [] );

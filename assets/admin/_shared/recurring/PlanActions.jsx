@@ -19,6 +19,13 @@ import AmountInput from '../components/AmountInput';
 export const isTerminal = ( status ) => status === 'cancelled' || status === 'expired';
 
 /**
+ * Changing what a donor is charged is refund-grade authority, and the routes
+ * behind these actions are gated on it. Default-permit on a missing key so a
+ * stale window.fundkit never strips an administrator's menu.
+ */
+export const canManagePlans = () => window.fundkit?.can?.refund_donations !== false;
+
+/**
  * Retry is deliberately not in the menu.
  *
  * It is the one thing an admin opens a failing subscription to do, and it is
@@ -46,6 +53,7 @@ export function dueIn( iso ) {
 }
 
 export function retryActionFor( plan ) {
+    if ( ! canManagePlans() ) return null;
     if ( isTerminal( plan.status ) ) return null;
     if ( ! plan.can_retry ) return null;
     if ( ! ( plan.failed_renewals_count > 0 || plan.status === 'past_due' ) ) return null;
@@ -54,6 +62,7 @@ export function retryActionFor( plan ) {
 }
 
 export function actionsFor( plan ) {
+    if ( ! canManagePlans() ) return [];
     if ( isTerminal( plan.status ) ) return [];
 
     const actions = [];
