@@ -290,12 +290,8 @@ final class DonationsController
     }
 
     /**
-     * Only funds the resolver will honour.
-     *
-     * A fund outside its schedule window, and a parent that exists to head a
-     * group, are both is_active, and FundResolver refuses both and falls
-     * through to the org default. Offering them here files restricted money in
-     * the general pot and reports success.
+     * Only funds the resolver will honour. It refuses a fund outside its
+     * window and a parent that heads a group, and falls back to the default.
      *
      * @since 1.0.0
      */

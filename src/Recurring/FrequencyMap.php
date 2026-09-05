@@ -88,8 +88,8 @@ final class FrequencyMap
     }
 
     /**
-     * What a donor is told a cadence is called. A pair this product has no
-     * name for reads as its interval rather than as an empty string.
+     * What a donor is told a cadence is called. An unnamed pair reads as
+     * itself.
      *
      * @since 1.0.0
      */

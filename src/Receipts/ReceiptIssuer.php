@@ -84,13 +84,8 @@ final class ReceiptIssuer
     }
 
     /**
-     * Whether this donation is one this site issues a receipt for.
-     *
-     * Every path that can produce a receipt asks this, not just the one that
-     * runs at completion. A resend and the queued job both reached issuance
-     * without it, so anything a policy listener suppressed was receipted anyway
-     * the moment an admin pressed Resend, and that receipt feeds the
-     * tax-deductible statement.
+     * Whether this site issues a receipt for this donation. Every path that
+     * can produce one asks here.
      *
      * @since 1.0.0
      */

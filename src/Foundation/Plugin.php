@@ -78,13 +78,8 @@ final class Plugin
 
         $self->modules->bootAll();
 
-        // After every module has booted, not from inside core's own boot().
-        // bootAll() runs core first, so a listener an add-on attaches during
-        // its boot() would miss a broadcast fired in there, and the five
-        // gateways in the payment-gateways add-on would never register: their
-        // settings tabs would still save keys while no donor could ever be
-        // offered them and an inbound webhook would throw. Core already learned
-        // this on the commands seam below.
+        // After bootAll, not inside core's own boot: an add-on attaches its
+        // listener during its boot and would miss a broadcast fired earlier.
         if ($self->container->has(GatewayManager::class)) {
             do_action(
                 'fundkit.gateways.register',

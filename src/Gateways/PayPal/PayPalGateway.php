@@ -1285,18 +1285,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * Whether this id could have come from PayPal at all.
-     *
-     * A plan row always carries a subscription id because the column cannot
-     * record its absence, so a seeded or imported plan carries one PayPal never
-     * issued: DemoSeeder mints 'demo-subNNN' and the Give importer
-     * 'give-import-<id>', and both land on whichever gateway the row names.
-     *
-     * Sending one answers RESOURCE_NOT_FOUND, which isAlreadyInThatState()
-     * does not recognise, so the throw stands: the donor's cancel fails, the
-     * plan stays active, and every retry fails the same way. Donor erasure
-     * cancels plans first, so it takes that down with it. The Stripe gateway
-     * guards exactly this.
+     * Whether this id could have come from PayPal. A seeded or imported plan
+     * carries one it could not.
      *
      * @since 1.0.0
      */
@@ -1308,8 +1298,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function cancelSubscription(RecurringPlan $plan, ?string $reason = null): void
     {
-        // Nothing is billing at PayPal under an id PayPal never issued, so the
-        // local cancel is the whole of it.
+        // Nothing is billing there, so the local cancel is the whole of it.
         if (! self::couldBePayPalSubscription((string) $plan->gateway_subscription_id)) {
             return;
         }

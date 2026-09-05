@@ -582,16 +582,9 @@ final class PortalController
     }
 
     /**
-     * Counted through the guard's atomic hit(), because get_transient followed
-     * by set_transient lets concurrent callers all read the last allowed value
-     * and all write it back.
-     *
-     * Keyed through subjectKey(), which is the only place that knows how to
-     * name a caller. It honours the proxies the org has declared, so a site
-     * behind a CDN counts donors rather than counting its edge as one caller;
-     * and it buckets IPv6 by the /64 a single host is routinely routed, so a
-     * fresh address per request does not mint a fresh allowance. This is the
-     * only ceiling on the two routes that mail a stranger's address.
+     * The only volume ceiling on the two routes that mail a stranger's
+     * address. Counted through the guard's atomic hit(), and keyed through
+     * subjectKey(), which honours declared proxies and buckets IPv6 by /64.
      *
      * @since 1.0.0
      */

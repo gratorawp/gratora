@@ -1300,11 +1300,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * A subscription this donation already opened, or '' for none.
-     *
-     * Listed by customer rather than searched: Stripe's search index lags by
-     * about a minute, which is the window a redelivery arrives in. The metadata
-     * matched here is written by the call this guards.
+     * A subscription this donation already opened, or '' for none. Listed
+     * rather than searched, because the search index lags about a minute.
      *
      * @since 1.0.0
      */
@@ -1329,13 +1326,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * Stripe is talking about a subscription this site has no record of.
-     *
-     * Answering 200 stops the redelivery, which is right because there is
-     * nothing here to retry against, but it also leaves the event with no
-     * trace. On a renewal that is money charged to a donor that appears in no
-     * total, no receipt and no screen, and no cancel path can reach it, so this
-     * record is the only way an admin finds out.
+     * Stripe is talking about a subscription this site has no record of. The
+     * 200 retires the delivery, so the record is the only trace left.
      *
      * @since 1.0.0
      */
