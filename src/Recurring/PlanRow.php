@@ -51,6 +51,7 @@ final class PlanRow
             'last_payment_at'         => $p->last_payment_at,
             'resume_at'               => $p->resume_at,
             'cancelled_at'            => $p->cancelled_at,
+            'cancellation_reason'     => $p->cancellation_reason,
             'payments_count'          => (int) $p->payments_count,
             'total_paid_cents'        => (int) $p->total_paid_cents,
             'failed_renewals_count'   => (int) $p->failed_renewals_count,

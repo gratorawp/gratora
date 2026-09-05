@@ -108,6 +108,7 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
                     { label: __( 'Started', 'fundraising-toolkit' ), value: plan.started_at && formatDate( plan.started_at ) },
                     { label: __( 'Resumes', 'fundraising-toolkit' ), value: plan.resume_at && formatDate( plan.resume_at ) },
                     { label: __( 'Cancelled', 'fundraising-toolkit' ), value: plan.cancelled_at && formatDate( plan.cancelled_at ) },
+                    { label: __( 'Reason', 'fundraising-toolkit' ), value: plan.cancellation_reason },
                 ] }
             />
 

@@ -51,6 +51,24 @@ test( 'the admin reads the failure reason, not just that there was one', () => {
 	expect( text ).not.toContain( 'portal.recurring' );
 } );
 
+test( 'a cancellation reason the admin typed is read back', () => {
+	const text = mount( {
+		...BASE,
+		status: 'cancelled',
+		cancelled_at: '2026-08-01 09:00:00',
+		cancellation_reason: 'donor moved abroad',
+	} );
+
+	expect( text ).toContain( 'Reason' );
+	expect( text ).toContain( 'donor moved abroad' );
+} );
+
+test( 'a plan cancelled with no reason shows no empty Reason row', () => {
+	const text = mount( { ...BASE, status: 'cancelled', cancelled_at: '2026-08-01 09:00:00' } );
+
+	expect( text ).not.toContain( 'Reason' );
+} );
+
 test( 'a plan with nothing wrong shows no problems section', () => {
 	expect( mount( BASE ) ).not.toContain( 'Problems' );
 } );
