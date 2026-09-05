@@ -421,3 +421,23 @@
 @media (hover: none) {
     .fundkit-attention__dismiss { opacity: 1; }
 }
+
+// A widget with nothing to draw yet. Without it every widget rendered its own
+// "no donations" empty state over a first fetch that was still in flight, so a
+// working site looked like an empty one for as long as the request took.
+.fundkit-widget-skeleton {
+    min-height: 120px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, .04) 25%, rgba(0, 0, 0, .07) 37%, rgba(0, 0, 0, .04) 63%);
+    background-size: 400% 100%;
+    animation: fundkit-widget-skeleton 1.4s ease infinite;
+}
+
+@keyframes fundkit-widget-skeleton {
+    0%   { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fundkit-widget-skeleton { animation: none; }
+}

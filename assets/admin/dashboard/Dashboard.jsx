@@ -71,7 +71,15 @@ export default function Dashboard() {
     const layout = useFundKitLayout( SCOPE, WIDGET_KEYS );
 
     // Only fetch sections for visible widgets; include= changes on hide/unhide.
-    const includeKey = useMemo( () => layout.visibleOrder.join( ',' ), [ layout.visibleOrder ] );
+    //
+    // Sorted, because the server reads include as a set: keyed on the visible
+    // order, dragging a widget produced a different string for an identical
+    // payload and refetched every metric, and so did the first render for every
+    // user whose saved order differs from the default.
+    const includeKey = useMemo(
+        () => [ ...layout.visibleOrder ].sort().join( ',' ),
+        [ layout.visibleOrder ]
+    );
 
     useEffect( () => {
         let aborted = false;
@@ -87,6 +95,12 @@ export default function Dashboard() {
     }, [ range, compareMode, includeKey, includeTest, reloadKey ] );
 
     const m = metrics || EMPTY_METRICS;
+
+    // Nothing has arrived yet, so the widgets have no data rather than no
+    // results. Only the KPI row knew the difference; the other seven rendered
+    // their genuine "no donations", "no campaigns" empty states over a fetch
+    // that was still in flight.
+    const firstLoad = loading && ! metrics;
     const hiddenTotal = ( metrics?.test?.hidden?.donations || 0 )
         + ( metrics?.test?.hidden?.plans || 0 );
 
@@ -95,10 +109,17 @@ export default function Dashboard() {
     const compareOn = compareMode !== 'none' && rangeIsComparable;
     const currency = m.kpi?.currency || defaultCurrency();
 
+    // Nothing has arrived yet, so a widget has no data rather than no results.
+    // The KPI row takes its own skeleton; the rest render whatever they are
+    // handed, and an empty array is indistinguishable from a real empty state.
+    const pending = ( render ) => ( firstLoad
+        ? () => <div className="fundkit-widget-skeleton" aria-hidden="true" />
+        : render );
+
     const registry = {
         today: {
             title:  __( 'Activity (last 24h)', 'fundraising-toolkit' ),
-            render: () => <TodayStrip today={ m.today } />,
+            render: pending( () => <TodayStrip today={ m.today } /> ),
         },
         kpis: {
             title:  __( 'Key metrics', 'fundraising-toolkit' ),
@@ -108,39 +129,39 @@ export default function Dashboard() {
         },
         attention: {
             title:  __( 'Needs attention', 'fundraising-toolkit' ),
-            render: () => <NeedsAttention items={ m.attention } />,
+            render: pending( () => <NeedsAttention items={ m.attention } /> ),
         },
         revenue: {
             title:  __( 'Revenue', 'fundraising-toolkit' ),
             span:   'full',
-            render: () => (
+            render: pending( () => (
                 <RevenueChart
                     series={ m.revenue?.series || [] }
                     currency={ currency }
                     compareOn={ compareOn }
                     comparison={ m.revenue?.previous_series ? { previous_series: m.revenue.previous_series } : null }
                 />
-            ),
+            ) ),
         },
         'active-campaigns': {
             title:  __( 'Active campaigns', 'fundraising-toolkit' ),
-            render: () => <ActiveCampaigns rows={ m.active_campaigns } />,
+            render: pending( () => <ActiveCampaigns rows={ m.active_campaigns } /> ),
         },
         recurring: {
             title:  __( 'Recurring revenue', 'fundraising-toolkit' ),
-            render: () => <RecurringForecast recurring={ m.recurring } />,
+            render: pending( () => <RecurringForecast recurring={ m.recurring } /> ),
         },
         'top-campaigns': {
             title:  __( 'Top campaigns', 'fundraising-toolkit' ),
-            render: () => <TopCampaigns rows={ m.top_campaigns } />,
+            render: pending( () => <TopCampaigns rows={ m.top_campaigns } /> ),
         },
         channel: {
             title:  __( 'Channels', 'fundraising-toolkit' ),
-            render: () => <ChannelBreakdown rows={ m.by_channel } currency={ currency } />,
+            render: pending( () => <ChannelBreakdown rows={ m.by_channel } currency={ currency } /> ),
         },
         'recent-activity': {
             title:  __( 'Recent donations', 'fundraising-toolkit' ),
-            render: () => <RecentActivity rows={ m.recent_activity } />,
+            render: pending( () => <RecentActivity rows={ m.recent_activity } /> ),
         },
         'quick-actions': {
             title:  __( 'Quick actions', 'fundraising-toolkit' ),

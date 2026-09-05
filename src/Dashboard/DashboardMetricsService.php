@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Dashboard;
 
+use FundKit\Foundation\Time\ScheduleWindow;
 use DateTimeImmutable;
 use FundKit\Campaigns\Campaign;
 use FundKit\Donations\ChannelClassifier;
@@ -96,51 +97,37 @@ final class DashboardMetricsService
      * @return array{donations_count:int,amount_raised_cents:int,refunds_count:int,notes_count:int,currency:string}
      * @since 1.0.0
      */
+    /**
+     * How many campaign-derived rows one attention source may contribute.
+     *
+     * Dismissals are stored capped at fifty, so an unbounded queue is one the
+     * user can never clear: the keys past the cap evict the oldest, which then
+     * reappears.
+     */
+    private const ATTENTION_MAX = 20;
+
     public function today(bool $includeTest = false): array
     {
         $since = $this->clock->now()->modify('-24 hours')->format('Y-m-d H:i:s');
 
-        $rows = DonationQueries::donationRows(Donation::query(), $includeTest)
+        // One grouped query, like every other aggregate here. Loading each
+        // donation and then its refunds, to produce four scalars, grew with the
+        // day's traffic and was the only surface doing its own netting: the
+        // campaign counter, the donor total and the revenue export all read
+        // refundedBaseExpr(), which sums a donation's refunds and rounds once.
+        //
+        // Base amounts throughout: a foreign donation with no FX rate has a
+        // NULL base and no known base value, so it and its refunds contribute
+        // nothing rather than folding raw foreign cents into the total.
+        $row = DonationQueries::donationRows(Donation::query(), $includeTest)
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('paid_at', $since, '>=')
-            ->getAll();
-
-        $amount = 0;
-        $notes  = 0;
-        // Single org reporting currency; sum base amounts so mixed-currency
-        // donations stay coherent. A foreign donation with no FX rate has a NULL
-        // base and no known base value, so it (and its refunds) contribute 0 -
-        // never fold its raw foreign cents into the base total.
-        $fxByDonation = [];
-        $currency = Money::defaultCurrency();
-        foreach ($rows as $d) {
-            $amount += (int) ($d->base_amount_cents ?? 0);
-            $fxByDonation[(int) $d->id] = $d->base_amount_cents !== null ? (float) $d->fx_rate : 0.0;
-            if (trim((string) ($d->note_to_org ?? '')) !== '') $notes++;
-        }
-        if ($fxByDonation !== []) {
-            // A foreign-currency refund must be scaled by its donation's fx
-            // rate before it can be subtracted from the base-currency total -
-            // subtracting raw amount_cents would mix currencies.
-            $refunds = Refund::query()
-                ->whereIn('donation_id', array_keys($fxByDonation))
-                ->where('status', 'succeeded')
-                ->getAll();
-            // Summed per donation before scaling, not scaled and then summed.
-            // base_amount_cents was rounded once from the whole amount, so
-            // rounding each instalment separately and adding them up need not
-            // come back to the same figure, and this is the only surface that
-            // does its own netting: the campaign counter, the donor total, the
-            // admin aggregate and the revenue export all read
-            // DonationQueries::refundedBaseExpr(), which rounds once at the end.
-            $byDonation = [];
-            foreach ($refunds as $r) {
-                $byDonation[(int) $r->donation_id] = ($byDonation[(int) $r->donation_id] ?? 0) + (int) $r->amount_cents;
-            }
-            foreach ($byDonation as $donationId => $refundedCents) {
-                $amount -= (int) round($refundedCents * ($fxByDonation[$donationId] ?? 1.0));
-            }
-        }
+            ->selectRaw(
+                'COUNT(*) AS donations_count, '
+                . 'COALESCE(SUM(COALESCE(base_amount_cents, 0) - ' . DonationQueries::refundedBaseExpr() . '), 0) AS amount, '
+                . "COALESCE(SUM(CASE WHEN TRIM(COALESCE(note_to_org, '')) <> '' THEN 1 ELSE 0 END), 0) AS notes"
+            )
+            ->get();
 
         // Both full and partial refunds stamp refunded_at; counting only
         // 'refunded' misses partial refunds issued in the window.
@@ -150,11 +137,11 @@ final class DashboardMetricsService
             ->count();
 
         return [
-            'donations_count'     => count($rows),
-            'amount_raised_cents' => $amount,
-            'refunds_count'       => $refunds,
-            'notes_count'         => $notes,
-            'currency'            => $currency,
+            'donations_count'     => (int) ($row['donations_count'] ?? 0),
+            'amount_raised_cents' => (int) ($row['amount'] ?? 0),
+            'refunds_count'       => (int) $refunds,
+            'notes_count'         => (int) ($row['notes'] ?? 0),
+            'currency'            => Money::defaultCurrency(),
         ];
     }
 
@@ -368,19 +355,34 @@ final class DashboardMetricsService
             ];
         }
 
-        // 2. Campaigns ending within 7 days. ends_at is a datetime, so bound on
-        // the full second range: from now (not midnight, else campaigns that
-        // already ended earlier today still match) to end-of-day 7 days out (not
-        // 00:00:00, else campaigns ending later on the 7th day are missed).
+        // 2. Campaigns ending within 7 days.
+        //
+        // ends_at is the admin's local calendar stamp and a bare date means the
+        // end of that day, which is what every other reader resolves through
+        // ScheduleWindow. Compared raw against a UTC clock, a campaign ending
+        // today read as having ended at midnight and never appeared, and the
+        // days-left label counted a different timezone's calendar.
+        //
+        // The SQL window is deliberately loose and the real boundary is applied
+        // below: no offset is more than a day, so a two-day margin cannot miss
+        // one.
         $now     = $this->clock->now()->format('Y-m-d H:i:s');
-        $soonEnd = $this->clock->now()->modify('+7 days')->format('Y-m-d 23:59:59');
+        $soonEnd = $this->clock->now()->modify('+7 days')->format('Y-m-d H:i:s');
         $ending  = Campaign::query()
             ->where('status', 'published')
-            ->where('ends_at', $now, '>=')
-            ->where('ends_at', $soonEnd, '<=')
+            ->whereIsNotNull('ends_at')
+            ->where('ends_at', $this->clock->now()->modify('-2 days')->format('Y-m-d H:i:s'), '>=')
+            ->where('ends_at', $this->clock->now()->modify('+9 days')->format('Y-m-d H:i:s'), '<=')
+            ->orderBy('ends_at')
+            ->limit(self::ATTENTION_MAX)
             ->getAll();
         foreach ($ending as $c) {
-            $daysLeft = max(0, (int) (new DateTimeImmutable($c->ends_at))->diff($this->clock->now())->format('%a'));
+            $endsUtc = ScheduleWindow::endsAtUtc((string) $c->ends_at);
+            if ($endsUtc === null || $endsUtc < $now || $endsUtc > $soonEnd) {
+                continue;
+            }
+
+            $daysLeft = max(0, (int) (new DateTimeImmutable($endsUtc))->diff($this->clock->now())->format('%a'));
             $items[] = [
                 'key'   => 'ending-' . $c->id,
                 'tone'  => 'warn',
@@ -398,11 +400,17 @@ final class DashboardMetricsService
         // 3. Published campaigns missing a default form. default_form_id is
         // nullable and update() clears it to NULL (not 0), and NULL <= 0 is NULL
         // in SQL, so the cleared-form case needs an explicit IS NULL.
+        //
+        // Capped: one row per campaign with no rollup, on a screen whose
+        // dismissals are themselves capped at fifty, meant an org past that
+        // could never clear the queue.
         $missingForm = Campaign::query()
             ->where('status', 'published')
             ->where(function ($q) {
                 $q->whereIsNull('default_form_id')->orWhere('default_form_id', 0, '<=');
             })
+            ->orderBy('id')
+            ->limit(self::ATTENTION_MAX)
             ->getAll();
         foreach ($missingForm as $c) {
             $items[] = [
@@ -725,6 +733,11 @@ final class DashboardMetricsService
                 'title'              => (string) $c->title,
                 'slug'               => (string) $c->slug,
                 'status'             => (string) $c->status,
+                // The widget badges not_accepting || status, the way the
+                // campaigns list does. Without it every row read as the green
+                // "Active" pill, including campaigns that had ended, were still
+                // scheduled, or had closed on their goal.
+                'not_accepting'      => $c->notAcceptingReason(),
                 'currency'           => Money::defaultCurrency(),
                 'goal_type'          => $c->goal_type ?: 'amount',
                 'goal_cents'         => $c->goal_cents,
