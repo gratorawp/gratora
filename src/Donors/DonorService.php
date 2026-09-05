@@ -8,7 +8,6 @@ use FundKit\Analytics\ErrorLog;
 use FundKit\Analytics\EventRecorder;
 use FundKit\Donations\Donation;
 use FundKit\Foundation\Maintenance\AbandonedPendingReaper;
-use FundKit\Donors\Erasure\AnalyticsEventHandler;
 use FundKit\Donors\Erasure\ErasureRegistry;
 use FundKit\Donors\Erasure\ErasureRequest;
 use FundKit\Recurring\RecurringCanceller;
@@ -415,7 +414,18 @@ final class DonorService
                 do_action('fundkit.test_data.purge_donations', $dids);
             }
 
-            (new AnalyticsEventHandler())->erase($request);
+            // The whole registry, not core's analytics handler alone. Deleting
+            // a donor destroys the rows that name them here and leaves every
+            // add-on holding what it copied: a Connect payload with the
+            // decrypted address, a delivery snapshot, a contact id in the org's
+            // CRM, an assistant transcript. Redaction runs the registry, and a
+            // delete that erases less than a redaction is not a delete.
+            //
+            // Before the rows go, so a handler can still resolve the donor and
+            // their donations, and inside the transaction, so one that cannot
+            // finish rolls the destruction back rather than reporting a
+            // compliance action that only partly happened.
+            $this->erasure->run($request);
 
             // Everything the donor left behind except the record of the
             // destructive acts themselves. The wildcard is written out because
