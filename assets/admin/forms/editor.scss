@@ -483,7 +483,9 @@ $sidebar-width: 300px;
         &:hover { background: $bg-soft; color: $text; }
     }
 
-    &__title {
+    // Core's input[type="text"] rule outweighs a lone class, so without the
+    // attribute selector this renders with core's 2px radius and grey border.
+    &__title[type="text"] {
         flex: 1 1 auto;
         max-width: 100%;
         min-width: 240px;
@@ -491,7 +493,7 @@ $sidebar-width: 300px;
         background: #fff;
         color: $text;
         border: 1px solid #e3e6ea;
-        border-radius: 8px;
+        border-radius: 10px;
         padding: 7px 14px;
         margin: 0;
         font: inherit;
