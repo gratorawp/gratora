@@ -75,6 +75,29 @@ final class RoleDefaultsAppliedTest extends IntegrationTestCase
         }
     }
 
+    /**
+     * Add-ons create fundkit_roles for their own capability self-heal, and the
+     * seed used to skip on the option merely existing: the administrator was
+     * then left holding nothing the Roles screen said they held.
+     */
+    public function test_an_option_another_plugin_created_does_not_count_as_seeded(): void
+    {
+        update_option('fundkit_roles', ['mapping' => ['bookkeeper' => ['fundkit_view_donations']]]);
+
+        do_action('admin_init');
+
+        $this->assertTrue(get_role('administrator')->has_cap('fundkit_refund_donations'));
+    }
+
+    public function test_an_administrator_deliberately_saved_with_nothing_stays_that_way(): void
+    {
+        update_option('fundkit_roles', ['mapping' => ['administrator' => []]]);
+
+        do_action('admin_init');
+
+        $this->assertFalse(get_role('administrator')->has_cap('fundkit_refund_donations'));
+    }
+
     public function test_no_other_role_is_given_donor_access_by_default(): void
     {
         do_action('admin_init');

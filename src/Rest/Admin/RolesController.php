@@ -56,7 +56,7 @@ final class RolesController
     private function roles(): array
     {
         // Core WP roles only; third-party roles aren't capability-mapping targets.
-        $core = ['administrator', 'editor', 'author', 'contributor', 'subscriber'];
+        $core = Capabilities::MANAGED_ROLES;
 
         $out = [];
         foreach ($core as $slug) {

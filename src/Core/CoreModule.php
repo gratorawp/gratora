@@ -1186,8 +1186,12 @@ final class CoreModule implements FundKitModule
         // by command dispatch on a screen that offers no way to grant them.
         // Writing the option once puts the two in agreement, through the
         // handler above.
+        // Another plugin may create the option before this runs, so the option
+        // existing is not evidence the administrator was ever seeded.
         add_action('admin_init', static function () use ($c): void {
-            if (get_option('fundkit_roles') !== false) return;
+            $stored  = get_option('fundkit_roles', []);
+            $mapping = is_array($stored) && is_array($stored['mapping'] ?? null) ? $stored['mapping'] : [];
+            if (array_key_exists('administrator', $mapping)) return;
             $c->get(SettingsService::class)->update('roles', []);
         });
 

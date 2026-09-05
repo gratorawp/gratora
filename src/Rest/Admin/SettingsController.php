@@ -120,6 +120,17 @@ final class SettingsController
         // any unrelated field would wipe the signing secret.
         $body  = SecretRedactor::restore($body, $this->settings->get($group));
 
+        // Arming or shortening the nightly sweep destroys donor contact details
+        // on a schedule and cannot be undone, so it cannot cost less capability
+        // than redacting one donor by hand does.
+        if ($group === 'privacy' && $this->widensErasure($body) && ! Capabilities::userCan('fundkit_redact_donors')) {
+            return new WP_Error(
+                'fundkit_forbidden',
+                __('Automatic donor erasure can only be changed by someone who may redact donors.', 'fundraising-toolkit'),
+                ['status' => 403]
+            );
+        }
+
         // The invariant lives in SettingsService so every writer inherits it;
         // the controller's job is only to give the refusal an HTTP shape.
         try {
@@ -139,6 +150,34 @@ final class SettingsController
         // whole record with this reply, so leaving them out unlocked the base
         // currency picker on a locked site the moment anything was saved.
         return new WP_REST_Response(self::withReadOnly($group, SecretRedactor::redact($saved)), 200);
+    }
+
+    /**
+     * Whether this save turns the sweep on, or aims it at donors it did not
+     * reach before. Turning it off or lengthening the window is not a widening.
+     *
+     * @param array<string,mixed> $body
+     */
+    private function widensErasure(array $body): bool
+    {
+        $current = $this->settings->get('privacy');
+
+        if (array_key_exists('erase_inactive_donors', $body)
+            && ! empty($body['erase_inactive_donors'])
+            && empty($current['erase_inactive_donors'])) {
+            return true;
+        }
+
+        if (! array_key_exists('donor_retention_years', $body)) {
+            return false;
+        }
+
+        $armed = array_key_exists('erase_inactive_donors', $body)
+            ? ! empty($body['erase_inactive_donors'])
+            : ! empty($current['erase_inactive_donors']);
+
+        return $armed
+            && (int) $body['donor_retention_years'] < (int) ($current['donor_retention_years'] ?? 7);
     }
 
     /**

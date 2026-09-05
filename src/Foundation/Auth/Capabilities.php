@@ -139,6 +139,16 @@ final class Capabilities
      *
      * @var array<string,string> menu meta-cap => the granular cap it maps to
      */
+    /**
+     * The roles the Roles screen can edit, and so the only roles whose absence
+     * from the mapping means revoke. A role granted FundKit capabilities by a
+     * role editor, a theme or an add-on is invisible to that screen, and had
+     * them stripped on the next save of it.
+     *
+     * @var list<string>
+     */
+    public const MANAGED_ROLES = ['administrator', 'editor', 'author', 'contributor', 'subscriber'];
+
     public const MENU_AREAS = [
         'fundkit_access_reports'   => 'fundkit_view_reports',
         'fundkit_access_campaigns' => 'fundkit_manage_campaigns',
@@ -193,17 +203,29 @@ final class Capabilities
     }
 
     /**
-     * Apply a role-to-caps mapping to all registered WP roles. A role that
-     * receives at least one granular cap also gets the MANAGE umbrella so it
-     * can see the FundKit menu; the administrator always keeps MANAGE. Runs on
-     * activation and whenever the roles mapping is saved.
+     * Apply a role-to-caps mapping to the roles the mapping names and the roles
+     * the Roles screen edits. A role that receives at least one granular cap
+     * also gets the MANAGE umbrella so it can see the FundKit menu; the
+     * administrator always keeps MANAGE. Runs on activation and whenever the
+     * roles mapping is saved.
+     *
+     * @param array<string, list<string>> $mapping
+     * @param list<string>                $alsoGovern extra role slugs to treat as described
      *
      * @since 1.0.0
      */
-    public static function applyMapping(array $mapping): void
+    public static function applyMapping(array $mapping, array $alsoGovern = []): void
     {
-        $allCaps = self::all();
+        $allCaps  = self::all();
+        // A role nobody wrote into the mapping is a role this mapping says
+        // nothing about, so it is left alone rather than stripped.
+        $governed = array_unique(array_merge(self::MANAGED_ROLES, array_keys($mapping), $alsoGovern));
+
         foreach (wp_roles()->role_objects as $slug => $role) {
+            if (! in_array($slug, $governed, true)) {
+                continue;
+            }
+
             $granted = is_array($mapping[$slug] ?? null) ? $mapping[$slug] : [];
             $hasAny  = false;
             foreach ($allCaps as $cap) {

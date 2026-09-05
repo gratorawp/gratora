@@ -34,7 +34,9 @@ final class UpgradeNotice
     /** @since 1.0.0 */
     public function render(): void
     {
-        if (! current_user_can('manage_fundkit')) {
+        // Its only call to action is the Tools screen, so it addresses whoever
+        // can open that screen rather than everyone holding a FundKit cap.
+        if (! current_user_can('fundkit_access_settings')) {
             return;
         }
 

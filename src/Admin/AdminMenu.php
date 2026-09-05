@@ -30,7 +30,7 @@ final class AdminMenu extends HookProvider
     /** @since 1.0.0 */
     public function registerMenu(): void
     {
-        add_menu_page(
+        $hook = add_menu_page(
             __('Fundraising Toolkit', 'fundraising-toolkit'),
             // The sidebar label is the one word that has to survive a narrow
             // menu; the full name still titles the page it opens.
@@ -41,6 +41,12 @@ final class AdminMenu extends HookProvider
             'dashicons-heart',
             30
         );
+
+        // load- fires before the admin header, so headers are still open; the
+        // render callback would be too late to forward.
+        if ($hook) {
+            add_action("load-{$hook}", [$this, 'redirectToFirstReachablePage']);
+        }
 
         // add_menu_page mints a first submenu carrying the parent's title, so the
         // list opens with "Fundraising" under "Fundraising". Naming it here replaces it.
@@ -53,10 +59,7 @@ final class AdminMenu extends HookProvider
             [$this, 'renderDashboard']
         );
 
-        $pages = apply_filters('fundkit.admin.pages', []);
-        usort($pages, fn ($a, $b) => ($a['position'] ?? 50) <=> ($b['position'] ?? 50));
-
-        foreach ($pages as $page) {
+        foreach ($this->pages() as $page) {
             $parent = ! empty($page['hidden']) ? null : self::SLUG;
             add_submenu_page(
                 $parent,
@@ -66,6 +69,56 @@ final class AdminMenu extends HookProvider
                 $page['id'] ?? '',
                 $page['render'] ?? '__return_null'
             );
+        }
+
+        // Registered and then withdrawn, rather than declared on the reports
+        // cap: a parent with no submenu of its own has core mint one under the
+        // parent's capability the moment the next page is added, which puts the
+        // dashboard back for a reader who cannot hold its data. WP then links
+        // the top-level item at the first surviving submenu, so a role scoped
+        // to one area lands on that area.
+        if (! current_user_can('fundkit_access_reports')) {
+            remove_submenu_page(self::SLUG, self::SLUG);
+        }
+    }
+
+    /**
+     * The subpages add-ons and core register, in the order they are shown.
+     *
+     * @return list<array<string, mixed>>
+     *
+     * @since 1.0.0
+     */
+    private function pages(): array
+    {
+        $pages = apply_filters('fundkit.admin.pages', []);
+        usort($pages, fn ($a, $b) => ($a['position'] ?? 50) <=> ($b['position'] ?? 50));
+
+        return $pages;
+    }
+
+    /**
+     * A bookmark or a typed URL reaches the dashboard past the menu, so a
+     * reader who cannot hold its data is forwarded to the first page they can
+     * open rather than left on an empty screen retrying a refused request.
+     *
+     * @since 1.0.0
+     */
+    public function redirectToFirstReachablePage(): void
+    {
+        if (current_user_can('fundkit_access_reports')) {
+            return;
+        }
+
+        foreach ($this->pages() as $page) {
+            $cap = (string) ($page['capability'] ?? self::CAPABILITY);
+            $id  = (string) ($page['id'] ?? '');
+            if ($id === '' || ! empty($page['hidden']) || ! current_user_can($cap)) {
+                continue;
+            }
+
+            wp_safe_redirect(admin_url('admin.php?page=' . rawurlencode($id)));
+            exit;
         }
     }
 

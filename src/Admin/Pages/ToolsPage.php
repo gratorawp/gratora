@@ -29,7 +29,10 @@ final class ToolsPage extends HookProvider
         $pages[] = [
             'id'         => self::PAGE_ID,
             'title'      => __('Tools', 'fundraising-toolkit'),
-            'capability' => 'manage_fundkit',
+            // Every Tools route wants fundkit_manage_settings; this virtual menu cap
+            // is granted on exactly that (or manage_options), so what the menu shows
+            // and what the screen can do agree.
+            'capability' => 'fundkit_access_settings',
             // After Settings: this is where someone goes once they already know
             // what they are looking for.
             'position'   => 95,
