@@ -101,10 +101,10 @@ final class ReferenceGenerator
      * persisted.
      *
      * Turning "reset numbering each year" on or off changes which option holds
-     * the counter, and the new one does not exist yet. Reading it raw answers 0
-     * while sibling counters hold the real high-water mark, so peekNext() and
-     * nextNumber() must seed through seedFor() the way next() does, or they
-     * hand out references already printed on someone else's receipt.
+     * the counter, and the one it moves to can be either absent or stale.
+     * Reading it raw answers a number a sibling counter has already printed, so
+     * every reader takes the high-water mark of the counters that could have
+     * printed the same string, not just the value on this key.
      *
      * @since 1.0.0
      */
@@ -112,7 +112,7 @@ final class ReferenceGenerator
     {
         $stored = get_option($key, null);
 
-        return $stored === null ? $this->seedFor($scope, $key) : (int) $stored;
+        return max((int) ($stored ?? 0), $this->seedFor($scope, $key));
     }
 
     /**
@@ -202,15 +202,25 @@ final class ReferenceGenerator
     {
         $key = $this->counterOption($scope, $year);
 
+        // The floor is not a first-run concern. A numbering setting can move
+        // the generator back onto a key it used before and left behind while a
+        // sibling ran ahead, and that key exists, so seeding it only when it is
+        // absent leaves it re-issuing references already printed.
+        $floor = $this->seedFor($scope, $key);
+
         if (get_option($key, null) === null) {
-            add_option($key, (string) $this->seedFor($scope, $key), '', false);
+            add_option($key, (string) $floor, '', false);
         }
 
+        // GREATEST inside the same statement, so raising the counter to the
+        // floor and incrementing it are one atomic act. Reading it, comparing
+        // it and writing it back would let a concurrent caller that read the
+        // lower value write it back over the raise.
         DB::raw(
             'UPDATE ' . DB::getPrefix() . 'options
-             SET option_value = LAST_INSERT_ID(CAST(option_value AS UNSIGNED) + 1)
+             SET option_value = LAST_INSERT_ID(GREATEST(CAST(option_value AS UNSIGNED), %d) + 1)
              WHERE option_name = %s',
-            [$key]
+            [$floor, $key]
         );
 
         $result = DB::raw('SELECT LAST_INSERT_ID() AS id');
