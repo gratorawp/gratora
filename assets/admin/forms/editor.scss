@@ -484,17 +484,19 @@ $sidebar-width: 300px;
     }
 
     // Core's input[type="text"] rule outweighs a lone class, so without the
-    // attribute selector this renders with core's 2px radius and grey border.
+    // attribute selector this renders with core's 2px radius, grey border and
+    // 40px min-height, which no amount of padding here can undercut.
     &__title[type="text"] {
         flex: 1 1 auto;
         max-width: 100%;
         min-width: 240px;
+        min-height: 32px;
         appearance: none;
         background: #fff;
         color: $text;
         border: 1px solid #e3e6ea;
         border-radius: 10px;
-        padding: 7px 14px;
+        padding: 5px 14px;
         margin: 0;
         font: inherit;
         font-size: 14px;

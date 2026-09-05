@@ -27,6 +27,15 @@ test( 'the input still carries the type that selector matches', () => {
 	expect( el[ 0 ] ).toContain( 'type="text"' );
 } );
 
+test( 'the height is ours too, since core sets a 40px floor', () => {
+	const rule = SCSS.match( /&__title\[type="text"\] \{[\s\S]*?\n    \}/ );
+
+	expect( rule ).not.toBeNull();
+	const min = rule[ 0 ].match( /min-height:\s*(\d+)px/ );
+	expect( min ).not.toBeNull();
+	expect( Number( min[ 1 ] ) ).toBeLessThan( 40 );
+} );
+
 test( 'the corners are ours, not core\'s', () => {
 	const rule = SCSS.match( /&__title\[type="text"\] \{[\s\S]*?\n    \}/ );
 
