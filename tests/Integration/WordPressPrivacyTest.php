@@ -25,6 +25,8 @@ final class WordPressPrivacyTest extends IntegrationTestCase
             $c->get(DonorRepository::class),
             $c->get(\FundKit\Donors\DonorService::class),
             $c->get(IdentityHasher::class),
+            $c->get(\FundKit\Donors\DonorMetricsService::class),
+            $c->get(\FundKit\Donors\ConsentService::class),
         );
     }
 
@@ -121,5 +123,117 @@ final class WordPressPrivacyTest extends IntegrationTestCase
 
         $this->assertTrue($second['done']);
         $this->assertFalse($second['items_removed']);
+    }
+
+    /**
+     * The screen a DPO is told to use is the answer to a subject access
+     * request, so what it leaves out is what the organisation failed to
+     * disclose.
+     */
+    public function test_the_export_discloses_the_contact_details_the_site_holds(): void
+    {
+        $email = 'contact-' . uniqid() . '@example.test';
+        $donor = $this->makeDonor($email);
+        $svc   = Plugin::instance()->container->get(\FundKit\Donors\DonorService::class);
+        $svc->setEncryptedField($donor, 'phone_encrypted', '+44 20 7946 0000');
+        $svc->setEncryptedField($donor, 'address_encrypted', (string) $svc->addressPayload([
+            'line1'  => '12 Hill Road',
+            'city'   => 'London',
+            'postal' => 'NW1 6XE',
+        ]));
+        $donor->save();
+
+        $values = $this->valuesIn($this->privacy()->export($email), WordPressPrivacy::GROUP);
+
+        $this->assertContains($email, $values, 'the address the request was made from is held and was not disclosed');
+        $this->assertContains('+44 20 7946 0000', $values);
+        $this->assertContains("12 Hill Road\nLondon, NW1 6XE", $values);
+    }
+
+    public function test_the_export_lists_every_donation_the_donor_made(): void
+    {
+        $email = 'history-' . uniqid() . '@example.test';
+        $donor = $this->makeDonor($email);
+        $this->seedDonation($donor, 'FUNDKIT-DSAR-A', 12_500);
+        $this->seedDonation($donor, 'FUNDKIT-DSAR-B', 4_000);
+
+        $values = $this->valuesIn($this->privacy()->export($email), 'fundkit-donation');
+
+        $this->assertContains('FUNDKIT-DSAR-A', $values, 'a donation the site holds was not in the DSAR answer');
+        $this->assertContains('FUNDKIT-DSAR-B', $values);
+    }
+
+    public function test_the_export_lists_the_recurring_plan_still_charging_the_donor(): void
+    {
+        $email = 'plan-' . uniqid() . '@example.test';
+        $donor = $this->makeDonor($email);
+
+        $plan = \FundKit\Recurring\RecurringPlan::make();
+        $plan->donor_id                = (int) $donor->id;
+        $plan->gateway                 = 'offline';
+        $plan->gateway_subscription_id = 'sub_dsar_' . $donor->id;
+        $plan->amount_cents            = 2_000;
+        $plan->currency                = 'USD';
+        $plan->interval_unit           = 'month';
+        $plan->interval_count          = 1;
+        $plan->status                  = 'active';
+        $plan->started_at              = gmdate('Y-m-d H:i:s');
+        $plan->created_at              = gmdate('Y-m-d H:i:s');
+        $plan->updated_at              = gmdate('Y-m-d H:i:s');
+        $plan->save();
+
+        $groups = array_column($this->privacy()->export($email)['data'], 'group_id');
+
+        $this->assertContains('fundkit-recurring', $groups, 'an active mandate against the donor was not disclosed');
+    }
+
+    /** Staff notes are the organisation's words about a donor, not the donor's data. */
+    public function test_the_export_does_not_hand_over_staff_notes(): void
+    {
+        $email = 'notes-' . uniqid() . '@example.test';
+        $donor = $this->makeDonor($email);
+        Plugin::instance()->container->get(\FundKit\Donors\DonorNoteRepository::class)
+            ->create((int) $donor->id, 'Never call this donor before noon.', null);
+
+        $export = $this->privacy()->export($email);
+        $all    = [];
+        foreach ($export['data'] as $group) {
+            $all = array_merge($all, array_column($group['data'], 'value'));
+        }
+
+        $this->assertNotContains('Never call this donor before noon.', $all);
+    }
+
+    /** @return list<string> */
+    private function valuesIn(array $export, string $groupId): array
+    {
+        $out = [];
+        foreach ($export['data'] as $group) {
+            if (($group['group_id'] ?? '') !== $groupId) continue;
+            $out = array_merge($out, array_column($group['data'], 'value'));
+        }
+
+        return $out;
+    }
+
+    private function seedDonation(Donor $donor, string $reference, int $cents): void
+    {
+        $now = gmdate('Y-m-d H:i:s');
+        $d   = \FundKit\Donations\Donation::make();
+        $d->reference         = $reference;
+        $d->donor_id          = (int) $donor->id;
+        $d->amount_cents      = $cents;
+        $d->net_cents         = $cents;
+        $d->currency          = 'USD';
+        $d->base_amount_cents = $cents;
+        $d->base_currency     = 'USD';
+        $d->fx_rate           = '1.00000000';
+        $d->gateway           = 'offline';
+        $d->status            = 'paid';
+        $d->is_test           = false;
+        $d->paid_at           = $now;
+        $d->created_at        = $now;
+        $d->updated_at        = $now;
+        $d->save();
     }
 }

@@ -1134,6 +1134,8 @@ final class CoreModule implements FundKitModule
             $c->get(DonorRepository::class),
             $c->get(DonorService::class),
             $c->get(IdentityHasher::class),
+            $c->get(\FundKit\Donors\DonorMetricsService::class),
+            $c->get(\FundKit\Donors\ConsentService::class),
         ))->register();
 
         (new CampaignBlockEditorIntegration())->register();
