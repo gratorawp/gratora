@@ -43,7 +43,7 @@ final class ConditionalBlockGateTest extends IntegrationTestCase
         return (int) $fund->id;
     }
 
-    /** A picker shown only when the donor asks to designate their gift. */
+    /** A picker shown only when the donor asks to designate their donation. */
     private function form(): Form
     {
         $picker = wp_json_encode([

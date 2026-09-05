@@ -71,8 +71,9 @@ final class CampaignService
         $campaign->default_fund_id     = isset($input['default_fund_id']) && $input['default_fund_id'] !== '' && $input['default_fund_id'] !== null
             ? (int) $input['default_fund_id'] : null;
         $campaign->image_attachment_id = $this->validateImageAttachment($input['image_attachment_id'] ?? null);
-        $campaign->starts_at   = $input['starts_at'] ?? null;
-        $campaign->ends_at     = $input['ends_at']   ?? null;
+        $campaign->starts_at   = self::campaignDate($input['starts_at'] ?? null, __('start date', 'fundraising-toolkit'));
+        $campaign->ends_at     = self::campaignDate($input['ends_at'] ?? null, __('end date', 'fundraising-toolkit'));
+        self::assertWindowOrder($campaign->starts_at, $campaign->ends_at);
         $campaign->created_at  = $now;
         $campaign->updated_at  = $now;
 
@@ -144,26 +145,23 @@ final class CampaignService
         // that as 0000-00-00: a campaign whose dates could be set once and
         // never removed.
         foreach (['description', 'starts_at', 'ends_at'] as $field) {
-            if (array_key_exists($field, $input)) {
-                $value = $input[$field];
+            if (! array_key_exists($field, $input)) continue;
+
+            $value = $input[$field];
+            if ($field === 'description') {
                 $campaign->$field = ($value === null || $value === '') ? null : (string) $value;
+                continue;
             }
+
+            $campaign->$field = self::campaignDate(
+                $value,
+                $field === 'starts_at'
+                    ? __('start date', 'fundraising-toolkit')
+                    : __('end date', 'fundraising-toolkit')
+            );
         }
 
-        // A campaign whose end precedes its start refuses every donation and
-        // says only "has not started yet" or "has ended", never that the two
-        // dates contradict each other. The timeline's drag handles already
-        // refuse the crossing; the date pickers wrote it straight through.
-        if ($campaign->starts_at !== null && $campaign->ends_at !== null) {
-            $start = strtotime((string) $campaign->starts_at);
-            $end   = strtotime((string) $campaign->ends_at);
-
-            if ($start !== false && $end !== false && $end < $start) {
-                throw new InvalidArgumentException(
-                    esc_html__('The campaign end date cannot be before its start date.', 'fundraising-toolkit')
-                );
-            }
-        }
+        self::assertWindowOrder($campaign->starts_at, $campaign->ends_at);
 
         // Currency is not editable: campaigns always report in the org currency.
 
@@ -257,6 +255,56 @@ final class CampaignService
             do_action('fundkit.campaign.converted', $campaign, $prevType);
         }
         return $campaign;
+    }
+
+    /**
+     * A campaign date, parsed rather than trusted.
+     *
+     * The column is DATETIME and the args schema keeps these loose, so nothing
+     * between the request body and the database read the value. WordPress
+     * removes STRICT_TRANS_TABLES, so MySQL stored anything it could not parse
+     * as the zero date: a campaign that had ended before it began and refused
+     * every donation, with the screen showing a blank window.
+     *
+     * @throws InvalidArgumentException
+     *
+     * @since 1.0.0
+     */
+    private static function campaignDate(mixed $value, string $label): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $at = strtotime((string) $value);
+        if ($at === false) {
+            throw new InvalidArgumentException(esc_html(sprintf(
+                /* translators: %s: the name of the date field, e.g. "start date". */
+                __('That is not a date the campaign %s can be set to.', 'fundraising-toolkit'),
+                $label
+            )));
+        }
+
+        return gmdate('Y-m-d H:i:s', $at);
+    }
+
+    /**
+     * A campaign whose end precedes its start refuses every donation and says
+     * only "has not started yet" or "has ended", never that the two dates
+     * contradict each other. The timeline's drag handles already refuse the
+     * crossing; the date pickers wrote it straight through.
+     *
+     * @throws InvalidArgumentException
+     */
+    private static function assertWindowOrder(?string $startsAt, ?string $endsAt): void
+    {
+        if ($startsAt === null || $endsAt === null || $endsAt >= $startsAt) {
+            return;
+        }
+
+        throw new InvalidArgumentException(
+            esc_html__('The campaign end date cannot be before its start date.', 'fundraising-toolkit')
+        );
     }
 
     /**

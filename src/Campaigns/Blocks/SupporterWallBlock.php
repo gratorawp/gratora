@@ -66,7 +66,11 @@ final class SupporterWallBlock extends CampaignBlock
         // Pull a generous pool of paid non-anonymous donations, then collapse
         // to one card per donor, keeping the most recent message.
         $poolSize = max($limit * 4, 200);
-        $query = DonationQueries::live(Donation::query())
+        // donationsOnly, not live: a ticket order rides the same table with
+        // kind='order' and is a purchase rather than a donation. Listing one
+        // here put a ticket buyer on the wall and made it disagree with the
+        // campaign counter beside it, which excludes orders.
+        $query = DonationQueries::donationsOnly(Donation::query())
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('campaign_id', (int) $campaign->id)
             ->where('is_anonymous', false);
@@ -115,7 +119,7 @@ final class SupporterWallBlock extends CampaignBlock
         // with the campaign counter and the Top Donors block (which both net).
         $donorIds = array_keys($byDonor);
         if ($donorIds) {
-            $netQuery = DonationQueries::live(Donation::query())
+            $netQuery = DonationQueries::donationsOnly(Donation::query())
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->where('campaign_id', (int) $campaign->id)
                 ->where('is_anonymous', false)

@@ -1486,9 +1486,17 @@ final class PortalController
             }
         }
 
+        // One decision per purpose, whatever the body repeats. Nothing bounds
+        // the array (the route registers no args), and the no-op test reads a
+        // snapshot taken before the loop, so the same key sent a thousand times
+        // failed that test a thousand times and wrote a thousand rows into an
+        // append-only log.
+        $seen = [];
+
         foreach ($items as $it) {
             $key = (string) ($it['key'] ?? '');
-            if (! isset($byKey[$key])) continue;
+            if (! isset($byKey[$key]) || isset($seen[$key])) continue;
+            $seen[$key] = true;
             $granted = (bool) ($it['granted'] ?? false);
             // Required purposes cannot be revoked, even via a crafted request.
             if (! $granted && ! empty($byKey[$key]['required'])) continue;
@@ -1706,10 +1714,28 @@ final class PortalController
             // with nothing for the donor to do next.
             ErrorLog::record('portal.forget', $e->getMessage(), ['donor_id' => (int) $donor->id]);
 
+            // Which half failed, asked of the plans rather than of the
+            // exception: the cancellations run before the transaction and are
+            // not rolled back with it, so a failure inside the erasure told the
+            // donor their subscription was still running when it had already
+            // been stopped.
+            $stillBilling = RecurringPlan::query()
+                ->where('donor_id', (int) $donor->id)
+                ->whereIn('status', ['active', 'paused', 'past_due'])
+                ->exists();
+
+            if ($stillBilling) {
+                return new WP_Error(
+                    'fundkit_erasure_blocked',
+                    __('We could not stop your recurring donation with the payment provider, so your account has not been deleted yet. Please contact the organization and they will finish this for you.', 'fundraising-toolkit'),
+                    ['status' => 409]
+                );
+            }
+
             return new WP_Error(
-                'fundkit_erasure_blocked',
-                __('We could not stop your recurring donation with the payment provider, so your account has not been deleted yet. Please contact the organization and they will finish this for you.', 'fundraising-toolkit'),
-                ['status' => 409]
+                'fundkit_erasure_failed',
+                __('Your recurring donations have been stopped, but we could not finish deleting your account. Please contact the organization and they will finish this for you.', 'fundraising-toolkit'),
+                ['status' => 500]
             );
         }
 

@@ -464,9 +464,23 @@ final class DonorsController
     public function createNote(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donorId = (int) $request['id'];
-        if (! $this->donors->findById($donorId)) {
+        $donor   = $this->donors->findById($donorId);
+        if (! $donor) {
             return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
+
+        // redact() early-returns on an already-redacted row, so free text
+        // written after an erasure is reachable by no erasure path: it would
+        // sit against that donor for good, and a note is where a name, a phone
+        // number or a reason for the erasure gets typed.
+        if ($donor->redacted_at !== null) {
+            return new WP_Error(
+                'fundkit_donor_redacted',
+                __('This donor has been erased, so nothing further can be recorded against them.', 'fundraising-toolkit'),
+                ['status' => 422]
+            );
+        }
+
         $params = $request->get_json_params() ?: $request->get_body_params();
         $body   = trim((string) ($params['body'] ?? ''));
         if ($body === '') {
