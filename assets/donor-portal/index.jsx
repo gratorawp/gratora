@@ -871,18 +871,33 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
     const [ stage, setStage ] = useState( 'menu' );
     const [ err, setErr ] = useState( '' );
     const [ approveUrl, setApproveUrl ] = useState( null );
+    const [ busy, setBusy ] = useState( false );
+    const inFlight = useRef( false );
     const panelRef = useRef( null );
     useFocusTrap( panelRef, true, onClose );
 
-    const call = ( body ) => api( `recurring/${ plan.id }/action`, { method: 'POST', body: JSON.stringify( body ) } )
-        .then( onDone )
-        .catch( ( e ) => {
-            setErr( e.message || __( 'Something went wrong.', 'fundraising-toolkit' ) );
-            // PayPal answers a revision with a link the donor must open. The
-            // API returned it all along and nothing showed it, so the message
-            // asked them to approve the change and gave them no way to.
-            setApproveUrl( e?.data?.approve_url || null );
-        } );
+    // Every action here moves money on a schedule, so a second press while the
+    // first is in flight must not reach the processor. The gate is a ref, not
+    // the busy state: two presses in one tick both read the state their render
+    // closed over, which is still false.
+    const call = ( body ) => {
+        if ( inFlight.current ) return Promise.resolve();
+        inFlight.current = true;
+        setBusy( true );
+        setErr( '' );
+        setApproveUrl( null );
+
+        return api( `recurring/${ plan.id }/action`, { method: 'POST', body: JSON.stringify( body ) } )
+            .then( onDone )
+            .catch( ( e ) => {
+                setErr( e.message || __( 'Something went wrong.', 'fundraising-toolkit' ) );
+                // PayPal answers a revision with a link the donor must open.
+                // refusal() hands back the whole REST body, so the payload the
+                // route set sits one level in.
+                setApproveUrl( e?.data?.data?.approve_url || e?.data?.approve_url || null );
+            } )
+            .finally( () => { inFlight.current = false; setBusy( false ); } );
+    };
 
     return (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events -- click-outside-to-close is a mouse convenience; Escape (focus trap) and the close button provide keyboard dismissal
@@ -934,7 +949,7 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                             <h3>{ __( 'Manage subscription', 'fundraising-toolkit' ) }</h3>
                         ) }
                         { plan.status === 'paused' && (
-                            <button class="dp-action is-primary" onClick={ () => call( { action: 'resume' } ) }>
+                            <button class="dp-action is-primary" disabled={ busy } onClick={ () => call( { action: 'resume' } ) }>
                                 { __( 'Resume', 'fundraising-toolkit' ) }
                             </button>
                         ) }
@@ -948,7 +963,7 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                                 { plan.can_pause && plan.status !== 'paused' && (
                                     <>
                                         <button class="dp-action" onClick={ () => setStage( 'pause' ) }>{ __( 'Pause', 'fundraising-toolkit' ) }</button>
-                                        <button class="dp-action" onClick={ () => call( { action: 'skip_next' } ) }>{ __( 'Skip next charge', 'fundraising-toolkit' ) }</button>
+                                        <button class="dp-action" disabled={ busy } onClick={ () => call( { action: 'skip_next' } ) }>{ __( 'Skip next charge', 'fundraising-toolkit' ) }</button>
                                     </>
                                 ) }
                                 <button class="dp-action" onClick={ () => setStage( 'amount' ) }>{ __( 'Change amount', 'fundraising-toolkit' ) }</button>
@@ -968,7 +983,7 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                     <>
                         <h3>{ __( 'Pause for how long?', 'fundraising-toolkit' ) }</h3>
                         { [ 1, 3, 6, 12 ].map( ( m ) => (
-                            <button key={ m } class="dp-action" onClick={ () => call( { action: 'pause', months: m } ) }>
+                            <button key={ m } class="dp-action" disabled={ busy } onClick={ () => call( { action: 'pause', months: m } ) }>
                                 { sprintf( /* translators: %d: number of months */ _n( '%d month', '%d months', m, 'fundraising-toolkit' ), m ) }
                             </button>
                         ) ) }
@@ -976,11 +991,11 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                 ) }
 
                 { stage === 'amount' && (
-                    <ChangeAmountForm plan={ plan } onSubmit={ ( cents ) => call( { action: 'change_amount', amount_cents: cents } ) } />
+                    <ChangeAmountForm plan={ plan } busy={ busy } onSubmit={ ( cents ) => call( { action: 'change_amount', amount_cents: cents } ) } />
                 ) }
 
                 { stage === 'interval' && (
-                    <ChangeFrequencyForm plan={ plan } onSubmit={ ( frequency ) => call( { action: 'change_interval', frequency } ) } />
+                    <ChangeFrequencyForm plan={ plan } busy={ busy } onSubmit={ ( frequency ) => call( { action: 'change_interval', frequency } ) } />
                 ) }
 
                 { stage === 'payment' && (
@@ -988,7 +1003,7 @@ function RecurringActionSheet( { plan, onClose, onDone } ) {
                 ) }
 
                 { stage === 'cancel' && (
-                    <CancelDeflection plan={ plan }
+                    <CancelDeflection plan={ plan } busy={ busy }
                         onPause={  plan.can_pause ? () => setStage( 'pause' ) : null }
                         onSkip={   plan.can_pause ? () => call( { action: 'skip_next' } ) : null }
                         onReduce={ () => setStage( 'amount' ) }
@@ -1125,7 +1140,7 @@ function UpdatePaymentMethod( { plan, onDone, onError } ) {
     );
 }
 
-function ChangeAmountForm( { plan, onSubmit } ) {
+function ChangeAmountForm( { plan, onSubmit, busy } ) {
     const [ value, setValue ] = useState( plan.amount_cents / 100 );
     const cents = Math.round( value * 100 );
     const valid = Number.isFinite( cents ) && cents >= 50;
@@ -1140,15 +1155,18 @@ function ChangeAmountForm( { plan, onSubmit } ) {
                 min={ 0.5 }
                 inputProps={ { 'aria-label': __( 'New donation amount', 'fundraising-toolkit' ) } }
             />
-            <button class="dp-action is-primary" disabled={ ! valid } onClick={ () => valid && onSubmit( cents ) }>{ __( 'Save new amount', 'fundraising-toolkit' ) }</button>
+            <button class="dp-action is-primary" disabled={ busy || ! valid } onClick={ () => valid && onSubmit( cents ) }>{ __( 'Save new amount', 'fundraising-toolkit' ) }</button>
         </>
     );
 }
 
-function ChangeFrequencyForm( { plan, onSubmit } ) {
+function ChangeFrequencyForm( { plan, onSubmit, busy } ) {
     const options = plan.frequency_options || [];
+    // A plan can be on a cadence this product has no name for, and preselecting
+    // the first named one would offer a donor on a two-monthly plan a live Save
+    // button sitting on Every week.
     const current = plan.frequency || '';
-    const [ value, setValue ] = useState( current || options[ 0 ] || '' );
+    const [ value, setValue ] = useState( current );
     const perYear = FREQUENCY_PER_YEAR[ value ];
 
     return (
@@ -1158,6 +1176,9 @@ function ChangeFrequencyForm( { plan, onSubmit } ) {
             <label class="dp-modal__field">
                 <span>{ __( 'How often', 'fundraising-toolkit' ) }</span>
                 <select value={ value } onChange={ ( e ) => setValue( e.target.value ) } aria-label={ __( 'How often to donate', 'fundraising-toolkit' ) }>
+                    { current === '' && (
+                        <option value="">{ __( 'Choose a frequency', 'fundraising-toolkit' ) }</option>
+                    ) }
                     { options.map( ( f ) => (
                         <option key={ f } value={ f }>{ frequencyLabel( f ) }</option>
                     ) ) }
@@ -1175,14 +1196,14 @@ function ChangeFrequencyForm( { plan, onSubmit } ) {
                 </p>
             ) }
             <p class="dp-hint">{ __( 'You stay paid up to your current date. The new schedule starts from the charge after that.', 'fundraising-toolkit' ) }</p>
-            <button class="dp-action is-primary" disabled={ ! value || value === current } onClick={ () => onSubmit( value ) }>
+            <button class="dp-action is-primary" disabled={ busy || ! value || value === current } onClick={ () => onSubmit( value ) }>
                 { __( 'Save new frequency', 'fundraising-toolkit' ) }
             </button>
         </>
     );
 }
 
-function CancelDeflection( { onPause, onSkip, onReduce, onCancel } ) {
+function CancelDeflection( { onPause, onSkip, onReduce, onCancel, busy } ) {
     const [ confirmed, setConfirmed ] = useState( false );
     const [ reason, setReason ] = useState( '' );
 
@@ -1197,7 +1218,7 @@ function CancelDeflection( { onPause, onSkip, onReduce, onCancel } ) {
                     value={ reason }
                     onInput={ ( e ) => setReason( e.target.value ) }
                 />
-                <button class="dp-action dp-action--danger" onClick={ () => onCancel( reason ) }>{ __( 'Cancel subscription', 'fundraising-toolkit' ) }</button>
+                <button class="dp-action dp-action--danger" disabled={ busy } onClick={ () => onCancel( reason ) }>{ __( 'Cancel subscription', 'fundraising-toolkit' ) }</button>
             </>
         );
     }

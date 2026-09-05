@@ -157,6 +157,77 @@ test( 'picking the cadence they already have sends nothing', async () => {
     expect( posted ).toEqual( [] );
 } );
 
+test( 'PayPal answering with an approval link puts that link on screen', async () => {
+    routes[ 'recurring/38/action' ] = () => jsonResponse( 409, {
+        code:    'fundkit_change_needs_approval',
+        message: 'Your payment provider needs you to approve this change before it takes effect.',
+        // The shape WP_Error puts on the wire: the route's own payload sits
+        // inside data, under the status.
+        data: { status: 409, approve_url: 'https://paypal.test/approve/XYZ' },
+    } );
+
+    await openSheet();
+
+    button( 'Change frequency' ).click();
+    await until( () => document.querySelector( '.dp-modal select' ), 'the frequency control to render' );
+
+    const select = document.querySelector( '.dp-modal select' );
+    select.value = 'yearly';
+    select.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+
+    await until( () => ! button( 'Save new frequency' ).disabled, 'the save button to enable' );
+    button( 'Save new frequency' ).click();
+
+    await until( () => document.querySelector( '.dp-approve a' ), 'the approval link to render' );
+    expect( document.querySelector( '.dp-approve a' ).getAttribute( 'href' ) )
+        .toBe( 'https://paypal.test/approve/XYZ' );
+    expect( text() ).toContain( 'needs you to approve' );
+} );
+
+test( 'a second press while the first is in flight does not reach the processor twice', async () => {
+    let release;
+    routes[ 'recurring/38/action' ] = () => new Promise( ( r ) => {
+        release = () => r( jsonResponse( 200, { ok: true } ) );
+    } );
+
+    await openSheet();
+
+    button( 'Change frequency' ).click();
+    await until( () => document.querySelector( '.dp-modal select' ), 'the frequency control to render' );
+
+    const select = document.querySelector( '.dp-modal select' );
+    select.value = 'weekly';
+    select.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+    await until( () => ! button( 'Save new frequency' ).disabled, 'the save button to enable' );
+
+    // Both presses land in one tick, before any re-render can disable the
+    // button, which is the case a disabled attribute cannot cover.
+    const save = button( 'Save new frequency' );
+    save.click();
+    save.click();
+    save.click();
+
+    await until( () => posted.length >= 1, 'the request to go out' );
+    await new Promise( ( r ) => setTimeout( r, 30 ) );
+
+    expect( posted.filter( ( p ) => p.path === 'recurring/38/action' ) ).toHaveLength( 1 );
+
+    release();
+} );
+
+test( 'a cadence this product has no name for preselects nothing', async () => {
+    // Every two months: a real Stripe mandate, and none of the five named
+    // frequencies. Preselecting the first would sit a live Save on Every week.
+    await openSheet( plan( { frequency: null, interval_unit: 'month', interval_count: 2 } ) );
+
+    button( 'Change frequency' ).click();
+    await until( () => document.querySelector( '.dp-modal select' ), 'the frequency control to render' );
+
+    expect( document.querySelector( '.dp-modal select' ).value ).toBe( '' );
+    expect( button( 'Save new frequency' ).disabled ).toBe( true );
+    expect( text() ).toContain( 'Every 2 months' );
+} );
+
 test( 'a rail that cannot move a mandate does not offer the control', async () => {
     await openSheet( plan( { can_change_interval: false, gateway: 'gocardless' } ) );
 
