@@ -75,29 +75,21 @@ final class UninstallEntryPointTest extends TestCase
     }
 
     /**
-     * A blog the eraser threw on must still be switched back out of. The next
-     * iteration switches from wherever the last one left the stack, so a switch
-     * that outlives a failure points every site after it at the wrong blog's
-     * tables, and the erase lands on a site that never asked for it.
-     *
-     * The eraser is left to fail on its own: with no WordPress loaded, erase()
-     * reaches do_action on its first line and raises an Error. That is the
-     * shape of the real failure too, since the first thing it touches is a hook
-     * an add-on listens on.
+     * A site the erase throws on: an add-on listening on fundkit.uninstall, or
+     * simply a site the plugin was never active on and whose tables are not
+     * there to read. Stopping at it left every site after it holding its
+     * donors while the owner was told the data was gone, which is the same
+     * harm in a smaller shape.
      */
-    public function test_a_site_the_erase_failed_on_is_still_switched_back_out_of(): void
+    public function test_one_site_failing_does_not_end_the_wipe_for_the_rest(): void
     {
         $result = $this->runProbe('', [
             'multisite' => true,
             'sites'     => [1, 2, 3],
         ]);
 
-        // Reported from a shutdown handler because the Error is never caught,
-        // which is also why only the first site is reached: the point is that
-        // the switch is unwound on the way out, not that the failure is
-        // swallowed.
-        $this->assertStringContainsString('SWITCHED=1', $result, 'the first site was switched to');
-        $this->assertStringContainsString('RESTORED=1', $result, 'and switched back out of');
+        $this->assertStringContainsString('SWITCHED=1,2,3', $result, 'the wipe stopped at the site that failed');
+        $this->assertStringContainsString('RESTORED=3', $result, 'and every site is switched back out of');
     }
 
     /**
@@ -130,6 +122,7 @@ final class UninstallEntryPointTest extends TestCase
             . "function delete_option(\$name) { return true; }\n"
             . "function is_multisite() { \$GLOBALS['erased'] = true; return " . var_export($multisite, true) . "; }\n"
             . 'function get_sites($a = []) { return ' . var_export($sites, true) . "; }\n"
+            . "function get_current_network_id() { return 1; }\n"
             . "function switch_to_blog(\$id) { \$GLOBALS['switched'][] = \$id; return true; }\n"
             . "function restore_current_blog() { \$GLOBALS['restored']++; return true; }\n"
             // Only the multisite probe reports, so the others keep asserting on

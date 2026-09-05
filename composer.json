@@ -43,6 +43,7 @@
         ],
         "test:unit": "phpunit",
         "test:integration": "phpunit --configuration phpunit-integration.xml.dist",
+        "test:multisite": "WP_MULTISITE=1 phpunit --configuration phpunit-multisite.xml.dist",
         "strauss": [
             "@php -d memory_limit=1G vendor/bin/strauss",
             "find vendor/vendor-prefixed -type d -name .git -exec rm -rf {} +",

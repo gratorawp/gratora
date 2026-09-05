@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use FundKit\Analytics\ErrorLog;
 use FundKit\Foundation\Uninstall\DataEraser;
 
 defined('WP_UNINSTALL_PLUGIN') || exit;
@@ -24,10 +25,25 @@ if (! is_multisite()) {
 
 // Scoped so the loop variable cannot leak when this file is read at global scope.
 (static function (): void {
-    foreach (get_sites(['fields' => 'ids', 'number' => 0]) as $siteId) {
+    // Scoped to this network: a multi-network install's other networks are not
+    // what was uninstalled.
+    $sites = get_sites([
+        'fields'     => 'ids',
+        'number'     => 0,
+        'network_id' => get_current_network_id(),
+    ]);
+
+    foreach ($sites as $siteId) {
         switch_to_blog((int) $siteId);
         try {
             (new DataEraser())->erase();
+        } catch (Throwable $e) {
+            // A site the plugin was never active on has no tables to drop, and
+            // an add-on listening on fundkit.uninstall can throw for reasons of
+            // its own. Whatever the reason, one site cannot end the wipe: every
+            // site after it would silently keep its donors while the owner was
+            // told the data was gone.
+            ErrorLog::toDebugLog("deleting data on site {$siteId} failed: " . $e->getMessage());
         } finally {
             // Without this the switch outlives a failure and every site after it
             // is erased against the wrong blog's tables.
