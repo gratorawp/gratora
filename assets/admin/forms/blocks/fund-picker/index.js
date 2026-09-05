@@ -10,7 +10,7 @@ const NAME = 'fundkit/fund-picker';
 
 const FUNDS_ADMIN_URL = 'admin.php?page=fundkit-funds';
 
-function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescription, emptySelected } ) {
+function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescription, emptySelected, showDescriptions } ) {
     if ( funds === null ) {
         return (
             <div style={ { display: 'flex', justifyContent: 'center', padding: 16 } }>
@@ -58,7 +58,7 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
                     <span style={ { fontSize: 13, fontWeight: 600 } }>
                         { emptyLabel || __( 'No specific fund', 'fundraising-toolkit' ) }
                     </span>
-                    { emptyDescription && (
+                    { showDescriptions && emptyDescription && (
                         <span style={ { fontSize: 11, lineHeight: 1.3 } }>
                             { emptyDescription }
                         </span>
@@ -110,7 +110,7 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
                         >
                             { f.label }
                         </span>
-                        { f.description !== '' && (
+                        { showDescriptions && f.description !== '' && (
                             <span style={ { fontSize: 11, color: '#6b7280', lineHeight: 1.3 } }>
                                 { f.description }
                             </span>
@@ -129,6 +129,7 @@ function Edit( { attributes, setAttributes } ) {
         allowEmpty       = false,
         emptyLabel       = '',
         emptyDescription = '',
+        showDescriptions = true,
         fundIds          = [],
         condition        = DEFAULT_CONDITION,
     } = attributes;
@@ -202,7 +203,7 @@ function Edit( { attributes, setAttributes } ) {
                         help={ __( 'This picker always shows your active funds. Fund names and descriptions are managed under Donations → Funds.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
-                    <p style={ { margin: '8px 0 0' } }>
+                    <p style={ { margin: '8px 0 20px' } }>
                         <ExternalLink href={ FUNDS_ADMIN_URL }>
                             { __( 'Manage funds', 'fundraising-toolkit' ) }
                         </ExternalLink>
@@ -215,15 +216,24 @@ function Edit( { attributes, setAttributes } ) {
                         help={ __( 'Leave on the first fund to follow the form, campaign, then organization default order.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
-                    <ToggleControl
-                        label={ __( 'Allow "no specific fund"', 'fundraising-toolkit' ) }
-                        checked={ allowEmpty }
-                        onChange={ ( v ) => setAttributes( { allowEmpty: v } ) }
-                        help={ __( 'Adds a tile letting donors skip choosing a fund.', 'fundraising-toolkit' ) }
-                        __nextHasNoMarginBottom
-                    />
+                    <div style={ { display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 } }>
+                        <ToggleControl
+                            label={ __( 'Show fund descriptions', 'fundraising-toolkit' ) }
+                            checked={ showDescriptions }
+                            onChange={ ( v ) => setAttributes( { showDescriptions: v } ) }
+                            help={ __( 'Descriptions come from Donations → Funds. Turn this off to show fund names only.', 'fundraising-toolkit' ) }
+                            __nextHasNoMarginBottom
+                        />
+                        <ToggleControl
+                            label={ __( 'Allow "no specific fund"', 'fundraising-toolkit' ) }
+                            checked={ allowEmpty }
+                            onChange={ ( v ) => setAttributes( { allowEmpty: v } ) }
+                            help={ __( 'Adds a tile letting donors skip choosing a fund.', 'fundraising-toolkit' ) }
+                            __nextHasNoMarginBottom
+                        />
+                    </div>
                     { list.length > 0 && (
-                        <div style={ { marginTop: 16 } }>
+                        <div style={ { marginTop: 16, marginBottom: 24 } }>
                             <strong style={ { fontSize: 11, textTransform: 'uppercase', letterSpacing: '.04em', color: '#6b7280' } }>
                                 { __( 'Restrict to funds', 'fundraising-toolkit' ) }
                             </strong>
@@ -245,7 +255,7 @@ function Edit( { attributes, setAttributes } ) {
                         </div>
                     ) }
                     { allowEmpty && (
-                        <>
+                        <div style={ { display: 'flex', flexDirection: 'column', gap: 16 } }>
                             <TextControl
                                 label={ __( 'No-specific-fund label', 'fundraising-toolkit' ) }
                                 value={ emptyLabel }
@@ -253,14 +263,16 @@ function Edit( { attributes, setAttributes } ) {
                                 placeholder={ __( 'No specific fund', 'fundraising-toolkit' ) }
                                 __nextHasNoMarginBottom
                             />
-                            <TextControl
-                                label={ __( 'No-specific-fund description', 'fundraising-toolkit' ) }
-                                value={ emptyDescription }
-                                onChange={ ( v ) => setAttributes( { emptyDescription: v } ) }
-                                help={ __( 'Optional. Shown under the label on that tile.', 'fundraising-toolkit' ) }
-                                __nextHasNoMarginBottom
-                            />
-                        </>
+                            { showDescriptions && (
+                                <TextControl
+                                    label={ __( 'No-specific-fund description', 'fundraising-toolkit' ) }
+                                    value={ emptyDescription }
+                                    onChange={ ( v ) => setAttributes( { emptyDescription: v } ) }
+                                    help={ __( 'Optional. Shown under the label on that tile.', 'fundraising-toolkit' ) }
+                                    __nextHasNoMarginBottom
+                                />
+                            ) }
+                        </div>
                     ) }
                 </PanelBody>
                 <ConditionPanel
@@ -284,6 +296,7 @@ function Edit( { attributes, setAttributes } ) {
                     emptyLabel={ emptyLabel }
                     emptyDescription={ emptyDescription }
                     emptySelected={ emptyChosen }
+                    showDescriptions={ showDescriptions }
                 />
             </div>
         </>
@@ -304,6 +317,7 @@ export default function register( api ) {
             allowEmpty:       { type: 'boolean', default: false },
             emptyLabel:       { type: 'string',  default: '' },
             emptyDescription: { type: 'string',  default: '' },
+            showDescriptions: { type: 'boolean', default: true },
             fundIds:          { type: 'array',   default: [] },
             condition:        { type: 'object',  default: DEFAULT_CONDITION },
         },

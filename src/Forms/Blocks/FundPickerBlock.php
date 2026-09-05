@@ -32,6 +32,7 @@ final class FundPickerBlock implements Block
             'allowEmpty'       => ['type' => 'boolean', 'default' => false],
             'emptyLabel'       => ['type' => 'string',  'default' => ''],
             'emptyDescription' => ['type' => 'string',  'default' => ''],
+            'showDescriptions' => ['type' => 'boolean', 'default' => true],
             // Optional allowlist. Empty array (the default) shows every active fund.
             'fundIds'          => ['type' => 'array',   'default' => []],
         ];
@@ -42,7 +43,12 @@ final class FundPickerBlock implements Block
     {
         $funds      = new FundRepository();
         $allowedIds = array_values(array_filter(array_map('intval', (array) ($attrs['fundIds'] ?? []))));
-        $options    = $funds->pickerOptions($allowedIds !== [] ? $allowedIds : null, true);
+        $descriptions = (bool) ($attrs['showDescriptions'] ?? true);
+        $options    = $funds->pickerOptions(
+            $allowedIds !== [] ? $allowedIds : null,
+            true,
+            $descriptions
+        );
 
         $selectable = array_values(array_map(
             static fn (array $o): string => $o['id'],
@@ -82,7 +88,7 @@ final class FundPickerBlock implements Block
             'defaultId'        => $defaultId,
             'allowEmpty'       => $allowEmpty,
             'emptyLabel'       => trim((string) ($attrs['emptyLabel'] ?? '')),
-            'emptyDescription' => trim((string) ($attrs['emptyDescription'] ?? '')),
+            'emptyDescription' => $descriptions ? trim((string) ($attrs['emptyDescription'] ?? '')) : '',
         ]);
     }
 }

@@ -103,7 +103,7 @@ final class FundRepository
      *
      * @since 1.0.0
      */
-    public function pickerOptions(?array $allowedIds = null, bool $openOnly = false): array
+    public function pickerOptions(?array $allowedIds = null, bool $openOnly = false, bool $withDescriptions = true): array
     {
         $active = $openOnly ? $this->listOpen() : $this->listActive();
 
@@ -135,7 +135,7 @@ final class FundRepository
             $options[] = [
                 'id'          => (string) (int) $f->id,
                 'label'       => (string) $f->name,
-                'description' => (string) ($f->description ?? ''),
+                'description' => $withDescriptions ? (string) ($f->description ?? '') : '',
                 'depth'       => $isChild ? 1 : 0,
                 'selectable'  => $isChild || empty($hasChildren[(int) $f->id]),
             ];

@@ -1111,7 +1111,12 @@ final class DonationFormShortcode extends HookProvider
                     $fpAllow      = (bool) ($attrs['allowEmpty'] ?? false);
                     $fpRepo       = new \FundKit\Funds\FundRepository();
                     $fpAllowedIds = array_values(array_filter(array_map('intval', (array) ($attrs['fundIds'] ?? []))));
-                    $fpOptions    = $fpRepo->pickerOptions($fpAllowedIds !== [] ? $fpAllowedIds : null, true);
+                    $fpDescriptions = (bool) ($attrs['showDescriptions'] ?? true);
+                    $fpOptions    = $fpRepo->pickerOptions(
+                        $fpAllowedIds !== [] ? $fpAllowedIds : null,
+                        true,
+                        $fpDescriptions
+                    );
 
                     $fpSelectable = array_values(array_map(
                         static fn ($o) => $o['id'],
@@ -1160,7 +1165,7 @@ final class DonationFormShortcode extends HookProvider
                         'default_id'        => $fpDefault,
                         'allow_empty'       => $fpAllow,
                         'empty_label'       => trim((string) ($attrs['emptyLabel'] ?? '')),
-                        'empty_description' => trim((string) ($attrs['emptyDescription'] ?? '')),
+                        'empty_description' => $fpDescriptions ? trim((string) ($attrs['emptyDescription'] ?? '')) : '',
                     ], $row, $attrs);
                     break;
 
