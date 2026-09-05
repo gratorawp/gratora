@@ -920,7 +920,7 @@ final class CoreCommandProvider
                 'goal_cents'    => ['type' => ['integer', 'null'], 'minimum' => 0],
             ], ['code', 'name']),
             [],
-            'fundkit_manage_settings',
+            'fundkit_manage_campaigns',
             false,
             true,
             function (array $in) use ($c): array {
@@ -943,7 +943,7 @@ final class CoreCommandProvider
                 'goal_cents'    => ['type' => ['integer', 'null'], 'minimum' => 0],
             ], ['fund_id']),
             [],
-            'fundkit_manage_settings',
+            'fundkit_manage_campaigns',
             true,
             true,
             function (array $in) use ($c): array {
@@ -966,7 +966,7 @@ final class CoreCommandProvider
                 'reassign_to' => ['type' => ['integer', 'null'], 'minimum' => 1],
             ], ['fund_id']),
             [],
-            'fundkit_manage_settings',
+            'fundkit_manage_campaigns',
             true,
             true,
             function (array $in) use ($c): array {

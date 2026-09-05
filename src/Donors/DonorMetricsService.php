@@ -6,6 +6,7 @@ namespace FundKit\Donors;
 
 use DateTimeImmutable;
 use FundKit\Analytics\Event;
+use FundKit\Analytics\EventRecorder;
 use FundKit\Campaigns\Campaign;
 use FundKit\Donations\ChannelClassifier;
 use FundKit\Donations\Donation;
@@ -14,6 +15,7 @@ use FundKit\Donors\DonorNoteRepository;
 use FundKit\Donors\Portal\PortalPage;
 use FundKit\Donors\Portal\PortalSession;
 use FundKit\Foundation\Helpers\Csv;
+use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Receipts\Receipt;
@@ -604,7 +606,30 @@ final class DonorMetricsService
      */
     public function issuePortalLink(Donor $donor): ?array
     {
-        return $donor->redacted_at === null ? $this->magicLinkUrl($donor) : null;
+        if ($donor->redacted_at !== null) {
+            return null;
+        }
+
+        $link = $this->magicLinkUrl($donor);
+        if ($link === null) {
+            return null;
+        }
+
+        // A credential that signs its bearer in as this donor for a month, and
+        // nothing else records that it was minted: the token row holds a hash
+        // and a donor id, not who asked for it. Without this an insider can
+        // read a donor's whole history and cancel their plans, and afterwards
+        // nothing in the system says which staff account did it.
+        Plugin::instance()->container->get(EventRecorder::class)->record('donor.portal_link_issued', [
+            'donor_id' => (int) $donor->id,
+            'payload'  => [
+                'actor_user_id' => get_current_user_id(),
+                'actor_name'    => wp_get_current_user()->display_name ?: '',
+                'expires_at'    => $link['expires_at'],
+            ],
+        ]);
+
+        return $link;
     }
 
     /**

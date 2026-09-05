@@ -11,7 +11,6 @@ use FundKit\Gateways\SubscriptionAware;
 use FundKit\Gateways\SupportsScheduleChange;
 use FundKit\Gateways\SupportsPaymentRetry;
 use InvalidArgumentException;
-use RuntimeException;
 
 /**
  * Every change a plan can undergo, in one place.
@@ -279,7 +278,7 @@ final class RecurringPlanActions
      * on a cadence outside that list has no label on any screen.
      *
      * @throws InvalidArgumentException when the frequency is one this product cannot name.
-     * @throws RuntimeException when the gateway cannot change a cadence at all.
+     * @throws PlanChangeRefused when the gateway cannot change a cadence at all.
      *
      * @since 1.0.0
      */
@@ -305,7 +304,7 @@ final class RecurringPlanActions
 
         $gateway = $this->gateways->get((string) $plan->gateway);
         if (! $gateway instanceof SupportsScheduleChange) {
-            throw new RuntimeException(esc_html__('This payment provider cannot change how often a donation is taken. Cancel it and start a new one.', 'fundraising-toolkit'));
+            throw new PlanChangeRefused(esc_html__('This payment provider cannot change how often a donation is taken. Cancel it and start a new one.', 'fundraising-toolkit'));
         }
 
         $schedule = $gateway->updateSubscriptionSchedule($plan, (int) $plan->amount_cents, $unit, $count);
@@ -336,7 +335,7 @@ final class RecurringPlanActions
     private function assertChangeable(RecurringPlan $plan): void
     {
         if (in_array((string) $plan->status, self::TERMINAL, true)) {
-            throw new RuntimeException(esc_html__('This donation is no longer active.', 'fundraising-toolkit'));
+            throw new PlanChangeRefused(esc_html__('This donation is no longer active.', 'fundraising-toolkit'));
         }
     }
 

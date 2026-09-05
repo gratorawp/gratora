@@ -24,6 +24,7 @@ use FundKit\Donors\Portal\AnnualStatementBuilder;
 use FundKit\Donors\Portal\PortalSession;
 use FundKit\Foundation\Identity\IdentityHasher;
 use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\GatewayTransportException;
 use FundKit\Gateways\SubscriptionChangeNeedsApproval;
 use FundKit\Gateways\SupportsPaymentMethodUpdate;
 use FundKit\Recurring\FrequencyMap;
@@ -33,6 +34,7 @@ use FundKit\Mail\Mailer;
 use FundKit\Receipts\Receipt;
 use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\GatewayUnreachable;
+use FundKit\Recurring\PlanChangeRefused;
 use FundKit\Recurring\RecurringPlanActions;
 use FundKit\Recurring\RecurringPlanChange;
 use RuntimeException;
@@ -1017,8 +1019,24 @@ final class PortalController
             );
         } catch (\InvalidArgumentException $e) {
             return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
-        } catch (\RuntimeException $e) {
+        } catch (PlanChangeRefused $e) {
+            // The only RuntimeException whose message is written for a donor.
             return new WP_Error('fundkit_plan_terminal', $e->getMessage(), ['status' => 422]);
+        } catch (GatewayTransportException $e) {
+            // The request never left this server, so nothing about the plan is
+            // settled and the donor should try again. Answering 422 called a
+            // timeout permanent, the card kept being charged, and the log held
+            // nothing for the organization to find.
+            ErrorLog::record('portal.recurring', $e->getMessage(), [
+                'recurring_plan_id' => (int) $plan->id,
+                'donor_id'          => (int) $plan->donor_id,
+            ]);
+
+            return new WP_Error(
+                'fundkit_gateway_unreachable',
+                __('We could not reach the payment provider just now, so nothing has changed. Please try again in a moment.', 'fundraising-toolkit'),
+                ['status' => 503]
+            );
         } catch (\Throwable $e) {
             // Local state is deliberately left unchanged when the gateway or
             // anything downstream fails.
