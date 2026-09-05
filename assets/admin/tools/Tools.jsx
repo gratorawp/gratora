@@ -10,13 +10,17 @@ import ImportTab from './tabs/ImportTab';
 import LogsTab from './tabs/LogsTab';
 import MaintenanceTab from './tabs/MaintenanceTab';
 import SystemInfoTab from './tabs/SystemInfoTab';
+import { userCan } from '../_shared/caps';
 
+// Import restores a settings file that carries the role mapping and can grant
+// capabilities, so every route behind that tab wants a full administrator. A
+// settings manager reaching it finds a screen where nothing works.
 const TABS = [
     { key: 'maintenance', label: __( 'Maintenance', 'fundraising-toolkit' ) },
     { key: 'logs',        label: __( 'Logs', 'fundraising-toolkit' ) },
     { key: 'system',      label: __( 'System info', 'fundraising-toolkit' ) },
     { key: 'export',      label: __( 'Export', 'fundraising-toolkit' ) },
-    { key: 'import',      label: __( 'Import', 'fundraising-toolkit' ) },
+    ...( userCan( 'manage_options' ) ? [ { key: 'import', label: __( 'Import', 'fundraising-toolkit' ) } ] : [] ),
 ];
 
 const fromHash = () => {
@@ -105,7 +109,9 @@ export default function Tools() {
                 <div hidden={ tab !== 'logs' }><LogsTab { ...shared } active={ tab === 'logs' } /></div>
                 <div hidden={ tab !== 'system' }><SystemInfoTab { ...shared } /></div>
                 <div hidden={ tab !== 'export' }><ExportTab { ...shared } /></div>
-                <div hidden={ tab !== 'import' }><ImportTab { ...shared } /></div>
+                { userCan( 'manage_options' ) && (
+                    <div hidden={ tab !== 'import' }><ImportTab { ...shared } /></div>
+                ) }
             </div>
         </div>
     );

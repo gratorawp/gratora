@@ -6,6 +6,7 @@ import Btn from '../components/Btn';
 import Dialog from '../components/Dialog';
 import { Switch } from '../components/Switch';
 import AmountInput from '../components/AmountInput';
+import { userCan } from '../caps';
 
 /**
  * The five plan actions, in one place.
@@ -20,10 +21,9 @@ export const isTerminal = ( status ) => status === 'cancelled' || status === 'ex
 
 /**
  * Changing what a donor is charged is refund-grade authority, and the routes
- * behind these actions are gated on it. Default-permit on a missing key so a
- * stale window.fundkit never strips an administrator's menu.
+ * behind these actions are gated on it.
  */
-export const canManagePlans = () => window.fundkit?.can?.refund_donations !== false;
+export const canManagePlans = () => userCan( 'refund_donations' );
 
 /**
  * Retry is deliberately not in the menu.

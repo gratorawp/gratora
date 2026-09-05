@@ -4,19 +4,27 @@ import { formatAmount, canRefundDonation, canResendReceipt, isDonorRedacted } fr
 import { IconRefund, IconMail, IconDownload, IconNote, IconCheck, IconAlert } from '../icons';
 import { downloadFile } from '../../../_shared/download';
 import notify from '../../../_shared/notify';
+import { userCan } from '../../../_shared/caps';
 
 export default function ActionsCard( {
     donation, donor, receipts,
     onRefund, onResend, onAddNote,
     onMarkPaid, onMarkFailed,
 } ) {
-    const canRefund     = canRefundDonation( donation );
+    // What the routes behind these buttons enforce. Offering a button whose
+    // request is refused makes the reader find out after filling a dialog in.
+    const mayChange = userCan( 'refund_donations' );
+    const mayResendReceipt = userCan( 'resend_receipt' );
+    const mayNote   = userCan( 'edit_donations' );
+    const mayReadPii = userCan( 'view_donors' );
+
+    const canRefund     = mayChange && canRefundDonation( donation );
     const isRedacted    = isDonorRedacted( donation, donor );
-    const canResend     = canResendReceipt( donation, donor );
+    const canResend     = mayResendReceipt && canResendReceipt( donation, donor );
     // `processing` is a bank debit on its way: it can still land, and it can
     // still bounce, so both actions stay open until it resolves.
-    const canMarkPaid   = [ 'pending', 'processing', 'failed' ].includes( donation.status );
-    const canMarkFailed = [ 'pending', 'processing' ].includes( donation.status );
+    const canMarkPaid   = mayChange && [ 'pending', 'processing', 'failed' ].includes( donation.status );
+    const canMarkFailed = mayChange && [ 'pending', 'processing' ].includes( donation.status );
     const primaryReceipt = ( receipts || [] ).find( ( r ) => ! r.voided );
 
     return (
@@ -46,27 +54,31 @@ export default function ActionsCard( {
                             { __( 'Mark as failed', 'fundraising-toolkit' ) }
                         </button>
                     ) }
-                    <button
-                        type="button"
-                        className="btn btn--danger btn--block"
-                        disabled={ ! canRefund }
-                        onClick={ onRefund }
-                    >
-                        <IconRefund className="ic" />
-                        { __( 'Refund donation', 'fundraising-toolkit' ) }
-                    </button>
-                    <button
-                        type="button"
-                        className="btn btn--block"
-                        disabled={ ! canResend }
-                        onClick={ onResend }
-                    >
-                        <IconMail className="ic" />
-                        { isRedacted
-                            ? __( 'Donor erased, cannot email', 'fundraising-toolkit' )
-                            : __( 'Resend receipt', 'fundraising-toolkit' ) }
-                    </button>
-                    { primaryReceipt
+                    { mayChange && (
+                        <button
+                            type="button"
+                            className="btn btn--danger btn--block"
+                            disabled={ ! canRefund }
+                            onClick={ onRefund }
+                        >
+                            <IconRefund className="ic" />
+                            { __( 'Refund donation', 'fundraising-toolkit' ) }
+                        </button>
+                    ) }
+                    { mayResendReceipt && (
+                        <button
+                            type="button"
+                            className="btn btn--block"
+                            disabled={ ! canResend }
+                            onClick={ onResend }
+                        >
+                            <IconMail className="ic" />
+                            { isRedacted
+                                ? __( 'Donor erased, cannot email', 'fundraising-toolkit' )
+                                : __( 'Resend receipt', 'fundraising-toolkit' ) }
+                        </button>
+                    ) }
+                    { mayReadPii && ( primaryReceipt
                         ? (
                             <button
                                 type="button"
@@ -82,15 +94,17 @@ export default function ActionsCard( {
                                 <IconDownload className="ic" />
                                 { __( 'No receipt yet', 'fundraising-toolkit' ) }
                             </button>
-                        ) }
-                    <button
-                        type="button"
-                        className="btn btn--block"
-                        onClick={ onAddNote }
-                    >
-                        <IconNote className="ic" />
-                        { __( 'Add note', 'fundraising-toolkit' ) }
-                    </button>
+                        ) ) }
+                    { mayNote && (
+                        <button
+                            type="button"
+                            className="btn btn--block"
+                            onClick={ onAddNote }
+                        >
+                            <IconNote className="ic" />
+                            { __( 'Add note', 'fundraising-toolkit' ) }
+                        </button>
+                    ) }
                 </div>
                 { canRefund && (
                     <div className="dd-rail-actions__hint">

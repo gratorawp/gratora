@@ -5,6 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import Btn from '../../_shared/components/Btn';
 import DateField from '../../_shared/components/DateField';
 import MonthField from '../../_shared/components/MonthField';
+import { userCan } from '../../_shared/caps';
 
 /** Fetch rather than a bare link: the REST route needs the nonce header. */
 async function download( path, setNotice, setBusy, fallbackName ) {
@@ -132,8 +133,17 @@ export default function ExportTab( { setNotice } ) {
 
     const statsPath = `/fundkit/v1/admin/exports/revenue.csv?from=${ statsFrom }&to=${ statsTo }`;
 
-    const canDonors  = opts?.can_export_donors !== false;
-    const canReports = opts?.can_view_reports !== false;
+    // From the server-rendered capability snapshot, not from the options
+    // payload: that payload is absent for exactly the reader the options route
+    // refused, and its absence was read as permission.
+    const canDonors     = userCan( 'export_donors' );
+    const canReports    = userCan( 'view_reports' );
+    const canDonations  = userCan( 'view_donations' );
+    const canEverything = userCan( 'manage_options' );
+
+    // Unchecking every box exported the fallback set, which is names and email
+    // addresses: the opposite of what the reader asked for.
+    const noColumns = columns.length === 0;
 
     const exportSettings = async () => {
         setBusy( 'settings' );
@@ -166,6 +176,7 @@ export default function ExportTab( { setNotice } ) {
                     </tr>
                 </thead>
                 <tbody>
+                    { canDonations && (
                     <Row
                         title={ __( 'Donations', 'fundraising-toolkit' ) }
                         description={ __( 'Every donation as a CSV: reference, donor, amount, status, campaign and gateway.', 'fundraising-toolkit' ) }
@@ -203,6 +214,7 @@ export default function ExportTab( { setNotice } ) {
                             { __( 'Include test donations', 'fundraising-toolkit' ) }
                         </label>
                     </Row>
+                    ) }
 
                     { canReports && (
                         <Row
@@ -301,7 +313,7 @@ export default function ExportTab( { setNotice } ) {
                                 </label>
                                 <Btn
                                     variant="secondary"
-                                    disabled={ busy === 'donors' }
+                                    disabled={ busy === 'donors' || noColumns }
                                     isBusy={ busy === 'donors' }
                                     onClick={ () => download( donorsPath, setNotice, ( b ) => setBusy( b ? 'donors' : '' ), 'donors.csv' ) }
                                 >
@@ -323,10 +335,16 @@ export default function ExportTab( { setNotice } ) {
                                         </label>
                                     ) ) }
                                 </div>
+                                { noColumns && (
+                                    <p className="fundkit-tools-note">
+                                        { __( 'Pick at least one column. With none selected the file would still carry names and email addresses.', 'fundraising-toolkit' ) }
+                                    </p>
+                                ) }
                             </div>
                         </Row>
                     ) }
 
+                    { canEverything && (
                     <Row
                         title={ __( 'Everything', 'fundraising-toolkit' ) }
                         description={ __( 'Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another Fundraising Toolkit site.', 'fundraising-toolkit' ) }
@@ -345,7 +363,9 @@ export default function ExportTab( { setNotice } ) {
                             { __( 'Donor names, email addresses and postal addresses are readable in this file. They have to be, or it could only ever be restored onto the site it came from. Treat it like the donor database it is.', 'fundraising-toolkit' ) }
                         </p>
                     </Row>
+                    ) }
 
+                    { canEverything && (
                     <Row
                         title={ __( 'Settings', 'fundraising-toolkit' ) }
                         description={ __( 'Every Fundraising Toolkit setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included.', 'fundraising-toolkit' ) }
@@ -364,6 +384,7 @@ export default function ExportTab( { setNotice } ) {
                             { __( 'Secrets are masked. A gateway key never leaves the site in an export, so an imported file cannot restore one.', 'fundraising-toolkit' ) }
                         </p>
                     </Row>
+                    ) }
                 </tbody>
             </table>
         </div>

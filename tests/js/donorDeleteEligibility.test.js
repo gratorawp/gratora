@@ -62,9 +62,17 @@ beforeEach( () => {
     } );
 } );
 
+let root = null;
+
 async function mountList() {
+    // Unmounted, not just detached: a tree left mounted goes on re-rendering
+    // its own state, and the confirmation it still holds lands in __confirm
+    // after the next test has cleared it.
+    if ( root ) render( null, root );
+
     document.body.innerHTML = '<div id="root"></div>';
-    render( <DonorsApp />, document.getElementById( 'root' ) );
+    root = document.getElementById( 'root' );
+    render( <DonorsApp />, root );
     await waitFor( () => !! captured.actions, { what: 'the list to register its actions' } );
 }
 
@@ -87,8 +95,8 @@ describe( 'a bulk action acts only on the rows it was offered for', () => {
 	const DELETABLE   = rows[ 1 ];
 
 	const fire = async ( id, selection ) => {
-		global.__confirm = null;
 		await mountList();
+		global.__confirm = null;
 
 		const action = captured.actions.find( ( a ) => a.id === id );
 		expect( action.supportsBulk ).toBe( true );

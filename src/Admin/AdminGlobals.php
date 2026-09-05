@@ -93,17 +93,12 @@ final class AdminGlobals extends HookProvider
             // Templates that ship outside core: the editor has no other way to
             // learn they exist.
             'email_template_meta' => SettingsService::templateMeta(),
-            // Roles assigns capabilities, so only a full administrator may save
-            // it. Without this the tab renders for a settings manager, who can
-            // edit the grid and only learns it is refused on save.
-            'can' => [
-                'manage_options'   => current_user_can('manage_options'),
-                'export_donors'    => Capabilities::userCan('fundkit_export_donors'),
-                // Changing what a donor is charged. The plan menus on the
-                // subscriptions list and the donor profile are the routes
-                // behind it, and both were offered to a reader who cannot.
-                'refund_donations' => Capabilities::userCan('fundkit_refund_donations'),
-            ],
+            // What this reader may do, so a screen offers what its routes will
+            // accept rather than what its data happens to allow. Read through
+            // Capabilities::userCan, not current_user_can, so the answer here
+            // is the same one the REST gate gives, manage_options bypass and
+            // all. Keys drop the fundkit_ prefix; see assets/admin/_shared/caps.
+            'can' => self::capabilities(),
             // What is in front of this site, if the site has not said. The
             // Spam protection screen turns this into one button, because the
             // people who need the setting are not the people who know what a
@@ -129,6 +124,26 @@ final class AdminGlobals extends HookProvider
             'fundkit-admin-globals',
             'window.fundkit = window.fundkit || {}; Object.assign(window.fundkit, ' . $json . ');'
         );
+    }
+
+    /**
+     * @return array<string, bool>
+     *
+     * @since 1.0.0
+     */
+    private static function capabilities(): array
+    {
+        // Roles assigns capabilities, so only a full administrator may save it.
+        // Without this the tab renders for a settings manager, who can edit the
+        // grid and only learns it is refused on save.
+        $can = ['manage_options' => current_user_can('manage_options')];
+
+        foreach (Capabilities::all() as $cap) {
+            $key = str_starts_with($cap, 'fundkit_') ? substr($cap, strlen('fundkit_')) : $cap;
+            $can[$key] = Capabilities::userCan($cap);
+        }
+
+        return $can;
     }
 
     /** @since 1.0.0 */

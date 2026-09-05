@@ -18,6 +18,7 @@ import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import { rowLinkProps } from '../_shared/rowLink';
 import { dashboardHref } from '../_shared/adminPages';
 import notify from '../_shared/notify';
+import { userCan } from '../_shared/caps';
 import KpiStrip from '../_shared/components/KpiStrip';
 import { Switch } from '../_shared/components/Switch';
 import StatusBadge from '../_shared/components/StatusBadge';
@@ -432,7 +433,8 @@ export default function List() {
             // failed ones use the per-row detail action (which captures a
             // reason). A bank debit sits in processing until it lands, and an
             // admin reconciling a statement is often the first to know.
-            isEligible:   ( item ) => item.status === 'pending' || item.status === 'processing',
+            isEligible:   ( item ) => userCan( 'refund_donations' )
+                && ( item.status === 'pending' || item.status === 'processing' ),
             callback: ( items ) => {
                 const targets = items.filter( ( i ) => i.status === 'pending' || i.status === 'processing' );
                 if ( ! targets.length ) return;
@@ -493,7 +495,8 @@ export default function List() {
             supportsBulk: true,
             // Only paid donations have a receipt to resend, and an erased donor
             // has no address left to send it to.
-            isEligible:   ( item ) => item.status === 'paid' && ! item.donor?.redacted,
+            isEligible:   ( item ) => userCan( 'resend_receipt' )
+                && item.status === 'paid' && ! item.donor?.redacted,
             callback: ( items ) => {
                 const targets = items.filter( ( i ) => i.status === 'paid' && ! i.donor?.redacted );
                 if ( ! targets.length ) return;
@@ -595,10 +598,12 @@ export default function List() {
                             <span>{ __( 'Show test donations', 'fundraising-toolkit' ) }</span>
                         </label>
                     ) }
-                    <Btn variant="primary" onClick={ () => setRecording( true ) }>
-                        <Plus size={ 16 } strokeWidth={ 1.75 } />
-                        { __( 'Record a donation', 'fundraising-toolkit' ) }
-                    </Btn>
+                    { userCan( 'refund_donations' ) && (
+                        <Btn variant="primary" onClick={ () => setRecording( true ) }>
+                            <Plus size={ 16 } strokeWidth={ 1.75 } />
+                            { __( 'Record a donation', 'fundraising-toolkit' ) }
+                        </Btn>
+                    ) }
                 </div>
             </div>
 

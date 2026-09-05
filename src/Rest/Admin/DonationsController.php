@@ -218,7 +218,7 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/receipts/preview', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'previewReceipt'],
-            'permission_callback' => [$this, 'canAccess'],
+            'permission_callback' => [$this, 'canPreviewReceipt'],
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/notes', [
@@ -276,6 +276,18 @@ final class DonationsController
     public function canAccess(): bool
     {
         return Capabilities::userCan('fundkit_view_donations');
+    }
+
+    /**
+     * The preview renders the template against a made-up donor and donation, so
+     * it discloses nothing but the Receipts tab's own settings. Its only caller
+     * is that tab, which a donations capability does not open.
+     *
+     * @since 1.0.0
+     */
+    public function canPreviewReceipt(): bool
+    {
+        return Capabilities::userCan('fundkit_manage_settings');
     }
 
     /**

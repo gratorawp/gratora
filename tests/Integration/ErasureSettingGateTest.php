@@ -96,6 +96,27 @@ final class ErasureSettingGateTest extends IntegrationTestCase
         $this->assertFalse((bool) $this->privacy()['erase_inactive_donors']);
     }
 
+    /**
+     * Its only caller is the Receipts tab on Settings, which a donations
+     * capability does not open, and it renders a made-up donor.
+     */
+    public function test_receipt_preview_follows_the_screen_it_lives_on(): void
+    {
+        Capabilities::applyMapping(['editor' => ['fundkit_manage_settings']]);
+        wp_set_current_user(self::factory()->user->create(['role' => 'editor']));
+        $this->assertSame(
+            200,
+            rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/receipts/preview'))->get_status()
+        );
+
+        Capabilities::applyMapping(['author' => ['fundkit_view_donations']]);
+        wp_set_current_user(self::factory()->user->create(['role' => 'author']));
+        $this->assertSame(
+            403,
+            rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/receipts/preview'))->get_status()
+        );
+    }
+
     public function test_the_rest_of_the_privacy_group_stays_delegatable(): void
     {
         $this->asSettingsManager();

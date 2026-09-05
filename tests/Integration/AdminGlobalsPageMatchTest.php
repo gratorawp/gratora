@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Tests\Integration;
 
 use FundKit\Admin\AdminGlobals;
+use FundKit\Foundation\Auth\Capabilities;
 use FundKit\Foundation\License\LicenseService;
 use FundKit\Foundation\Plugin;
 
@@ -88,6 +89,20 @@ final class AdminGlobalsPageMatchTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
         $payload = $this->payloadOn('fundkit-subscriptions');
         $this->assertStringContainsString('"refund_donations":false', $payload);
+    }
+
+    /**
+     * The admin screens decide what to offer from this map, so a capability
+     * missing from it reads as permission rather than as silence.
+     */
+    public function test_the_payload_carries_every_capability_the_screens_ask_about(): void
+    {
+        $payload = $this->payloadOn('fundkit-donations');
+
+        foreach (Capabilities::all() as $cap) {
+            $key = substr($cap, strlen('fundkit_'));
+            $this->assertStringContainsString("\"{$key}\":", $payload, "{$cap} is answered");
+        }
     }
 
     /**
