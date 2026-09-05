@@ -85,6 +85,7 @@ function Edit( { attributes, setAttributes } ) {
                         ] }
                     />
                     <Field
+                        group
                         label={ __( 'Recurring options', 'fundraising-toolkit' ) }
                         help={ __( 'Donors can always give once. Pick the recurring options to offer alongside it.', 'fundraising-toolkit' ) }
                     >

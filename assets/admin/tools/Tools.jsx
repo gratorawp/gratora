@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from '@wordpress/element';
+import { tablistKeyDown } from '../_shared/tablistKeys';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 
@@ -67,7 +68,13 @@ export default function Tools() {
                 </div>
             </div>
 
-            <div className="fundkit-tabs" role="tablist" aria-label={ __( 'Tools sections', 'fundraising-toolkit' ) }>
+            <div
+                className="fundkit-tabs"
+                role="tablist"
+                tabIndex={ -1 }
+                aria-label={ __( 'Tools sections', 'fundraising-toolkit' ) }
+                onKeyDown={ ( e ) => tablistKeyDown( e, TABS.map( ( t ) => t.key ), tab, jumpTo ) }
+            >
                 <div className="fundkit-tabs__scroll">
                     { TABS.map( ( t ) => (
                         <a

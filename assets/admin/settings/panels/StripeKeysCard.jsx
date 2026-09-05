@@ -9,6 +9,7 @@ import BrandMark from '../../_shared/components/BrandMark';
 import FormRow from '../../_shared/components/FormRow';
 import KeyField from '../../_shared/components/KeyField';
 import ConfirmDialog from '../../_shared/components/ConfirmDialog';
+import Notice from '../../_shared/components/Notice';
 import { notify } from '../../_shared/notify';
 import useCardOpen from '../../_shared/useCardOpen';
 
@@ -18,15 +19,6 @@ function Pill( { tone, children } ) {
             <span className="fundkit-pill__dot" />
             { children }
         </span>
-    );
-}
-
-function Notice( { tone, icon, children } ) {
-    return (
-        <div className={ `fundkit-connect-notice fundkit-connect-notice--${ tone }` }>
-            <span className="fundkit-connect-notice__icon" aria-hidden="true">{ icon }</span>
-            <div>{ children }</div>
-        </div>
     );
 }
 

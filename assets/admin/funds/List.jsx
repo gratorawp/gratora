@@ -550,25 +550,25 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                     <fieldset className="fundkit-fset">
                         <legend>{ __( 'Identity', 'fundraising-toolkit' ) }</legend>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Name', 'fundraising-toolkit' ) }</label>
-                            <input className="fundkit-input" value={ form.name } onChange={ ( e ) => set( 'name', e.target.value ) } />
+                            <label htmlFor="fundkit-fund-name">{ __( 'Name', 'fundraising-toolkit' ) }</label>
+                            <input id="fundkit-fund-name" className="fundkit-input" value={ form.name } onChange={ ( e ) => set( 'name', e.target.value ) } />
                         </div>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Code', 'fundraising-toolkit' ) }</label>
-                            <input className="fundkit-input fundkit-input--mono" value={ form.code } onChange={ ( e ) => set( 'code', e.target.value ) } />
-                            <p className="fundkit-fld__help">{ __( 'Stable identifier used in exports and accounting. Lowercase, no spaces. Avoid changing once donations exist.', 'fundraising-toolkit' ) }</p>
+                            <label htmlFor="fundkit-fund-code">{ __( 'Code', 'fundraising-toolkit' ) }</label>
+                            <input id="fundkit-fund-code" aria-describedby="fundkit-fund-code-help" className="fundkit-input fundkit-input--mono" value={ form.code } onChange={ ( e ) => set( 'code', e.target.value ) } />
+                            <p id="fundkit-fund-code-help" className="fundkit-fld__help">{ __( 'Stable identifier used in exports and accounting. Lowercase, no spaces. Avoid changing once donations exist.', 'fundraising-toolkit' ) }</p>
                         </div>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Description', 'fundraising-toolkit' ) }</label>
-                            <textarea className="fundkit-textarea" rows="3" value={ form.description } onChange={ ( e ) => set( 'description', e.target.value ) } />
+                            <label htmlFor="fundkit-fund-description">{ __( 'Description', 'fundraising-toolkit' ) }</label>
+                            <textarea id="fundkit-fund-description" className="fundkit-textarea" rows="3" value={ form.description } onChange={ ( e ) => set( 'description', e.target.value ) } />
                         </div>
                     </fieldset>
 
                     <fieldset className="fundkit-fset">
                         <legend>{ __( 'Classification', 'fundraising-toolkit' ) }</legend>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Type', 'fundraising-toolkit' ) }</label>
-                            <div className="fundkit-seg2">
+                            <span id="fundkit-fund-type-label" className="fundkit-fld__label">{ __( 'Type', 'fundraising-toolkit' ) }</span>
+                            <div className="fundkit-seg2" role="group" aria-labelledby="fundkit-fund-type-label">
                                 <button type="button" className={ ! form.is_restricted ? 'is-active' : '' } onClick={ () => set( 'is_restricted', false ) }>
                                     { __( 'Unrestricted', 'fundraising-toolkit' ) }
                                 </button>
@@ -579,7 +579,9 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                             <p className="fundkit-fld__help">{ __( 'Restricted funds are donor-designated and reported separately.', 'fundraising-toolkit' ) }</p>
                         </div>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Parent fund', 'fundraising-toolkit' ) }</label>
+                            { /* SearchableSelect takes no id, so the group carries the name instead. */ }
+                            <span id="fundkit-fund-parent-label" className="fundkit-fld__label">{ __( 'Parent fund', 'fundraising-toolkit' ) }</span>
+                            <div role="group" aria-labelledby="fundkit-fund-parent-label">
                             <SearchableSelect
                                 value={ form.parent_fund_id ? String( form.parent_fund_id ) : '' }
                                 onChange={ ( v ) => set( 'parent_fund_id', v ) }
@@ -589,14 +591,15 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                                     ...parents.map( ( p ) => ( { value: String( p.id ), label: p.name } ) ),
                                 ] }
                             />
+                            </div>
                         </div>
                     </fieldset>
 
                     <fieldset className="fundkit-fset">
                         <legend>{ __( 'Targets', 'fundraising-toolkit' ) }</legend>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Goal amount', 'fundraising-toolkit' ) } <span className="fundkit-fld__opt">{ __( 'optional', 'fundraising-toolkit' ) }</span></label>
-                            <input className="fundkit-input" type="number" min="0" step="0.01" placeholder={ __( 'No goal', 'fundraising-toolkit' ) } value={ form.goal } onChange={ ( e ) => set( 'goal', e.target.value ) } />
+                            <label htmlFor="fundkit-fund-goal">{ __( 'Goal amount', 'fundraising-toolkit' ) } <span className="fundkit-fld__opt">{ __( 'optional', 'fundraising-toolkit' ) }</span></label>
+                            <input id="fundkit-fund-goal" className="fundkit-input" type="number" min="0" step="0.01" placeholder={ __( 'No goal', 'fundraising-toolkit' ) } value={ form.goal } onChange={ ( e ) => set( 'goal', e.target.value ) } />
                         </div>
                         <ScheduleFields
                             enabled={ scheduleOn }
@@ -611,9 +614,9 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                     <fieldset className="fundkit-fset">
                         <legend>{ __( 'Accounting', 'fundraising-toolkit' ) }</legend>
                         <div className="fundkit-fld">
-                            <label>{ __( 'Accounting code', 'fundraising-toolkit' ) } <span className="fundkit-fld__opt">{ __( 'optional', 'fundraising-toolkit' ) }</span></label>
-                            <input className="fundkit-input fundkit-input--mono" placeholder={ __( 'Enter accounting code', 'fundraising-toolkit' ) } value={ form.accounting_code } onChange={ ( e ) => set( 'accounting_code', e.target.value ) } />
-                            <p className="fundkit-fld__help">{ __( 'Maps this fund to a GL account in your bookkeeping. Included in exports.', 'fundraising-toolkit' ) }</p>
+                            <label htmlFor="fundkit-fund-accounting">{ __( 'Accounting code', 'fundraising-toolkit' ) } <span className="fundkit-fld__opt">{ __( 'optional', 'fundraising-toolkit' ) }</span></label>
+                            <input id="fundkit-fund-accounting" aria-describedby="fundkit-fund-accounting-help" className="fundkit-input fundkit-input--mono" placeholder={ __( 'Enter accounting code', 'fundraising-toolkit' ) } value={ form.accounting_code } onChange={ ( e ) => set( 'accounting_code', e.target.value ) } />
+                            <p id="fundkit-fund-accounting-help" className="fundkit-fld__help">{ __( 'Maps this fund to a GL account in your bookkeeping. Included in exports.', 'fundraising-toolkit' ) }</p>
                         </div>
                     </fieldset>
 
