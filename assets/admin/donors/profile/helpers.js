@@ -109,6 +109,13 @@ export function eventMeta( event ) {
         case 'recurring.subscription_creation_failed':
             return { dot: 'is-error',  label: __( 'Subscription not created',  'fundraising-toolkit' ) };
         default:
+            // An error carries its own words in the payload, and the fallback
+            // would read "error.admin.recurring" as "Recurring", muted, which
+            // is worse than absent.
+            if ( String( type || '' ).startsWith( 'error.' ) ) {
+                return { dot: 'is-error', label: __( 'Action failed', 'fundraising-toolkit' ) };
+            }
+
             return { dot: 'is-muted',  label: readableEventType( type ) };
     }
 }

@@ -98,6 +98,11 @@ export function eventTitle( event, campaignTitle ) {
             break;
         }
         default:
+            // What actually went wrong, in the words the failure used, rather
+            // than a label saying only that something did.
+            if ( String( event.type || '' ).startsWith( 'error.' ) && event.payload?.message ) {
+                title = <>{ event.payload.message }</>;
+            }
             break;
     }
 

@@ -82,6 +82,21 @@ final class AdminCancelRecordsUnreachableTest extends IntegrationTestCase
         );
     }
 
+    /** The donor's timeline is keyed on donor_id, so a plan-only record never reaches it. */
+    public function test_it_reaches_the_donor_timeline(): void
+    {
+        $plan = $this->plan();
+
+        $this->cancel((int) $plan->id);
+
+        $rows = Event::query()
+            ->where('donor_id', (int) $plan->donor_id)
+            ->whereLike('type', 'error.%')
+            ->getAll();
+
+        $this->assertNotSame([], $rows, 'the attempt has to appear on the donor it was made against');
+    }
+
     public function test_the_screen_is_told_it_is_a_gateway_problem_not_a_dead_plan(): void
     {
         $this->assertSame(503, $this->cancel((int) $this->plan()->id));

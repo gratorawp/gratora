@@ -480,13 +480,19 @@ final class RecurringController
             // Ahead of the RuntimeException arm, its parent, which would answer
             // the screen and record nothing. The plan is still billing, which
             // is the thing an admin has to be able to find afterwards.
-            \FundKit\Analytics\ErrorLog::record('admin.recurring', $e->getMessage(), ['recurring_plan_id' => (int) $plan->id]);
+            \FundKit\Analytics\ErrorLog::record('admin.recurring', $e->getMessage(), [
+                'recurring_plan_id' => (int) $plan->id,
+                'donor_id'          => (int) $plan->donor_id,
+            ]);
 
             return new WP_Error('fundkit_gateway_unreachable', $e->getMessage(), ['status' => 503]);
         } catch (RuntimeException $e) {
             return new WP_Error('fundkit_plan_terminal', $e->getMessage(), ['status' => 422]);
         } catch (\Throwable $e) {
-            \FundKit\Analytics\ErrorLog::record('admin.recurring', $e->getMessage(), ['recurring_plan_id' => (int) $plan->id]);
+            \FundKit\Analytics\ErrorLog::record('admin.recurring', $e->getMessage(), [
+                'recurring_plan_id' => (int) $plan->id,
+                'donor_id'          => (int) $plan->donor_id,
+            ]);
             return new WP_Error(
                 'fundkit_gateway_error',
                 __('The payment provider would not accept that change. Nothing has been altered.', 'fundraising-toolkit'),
