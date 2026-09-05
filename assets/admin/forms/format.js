@@ -41,9 +41,10 @@ export function campaignHref( campaignId ) {
 }
 
 /**
- * Where the editor's back link goes. Both destinations are a list of forms,
- * which is what the link says; a form with no campaign has no campaign detail
- * page and was being sent to campaign id 0.
+ * Where the editor's back link goes. A form belongs to a campaign only
+ * optionally, and without one there is no campaign detail page to return to,
+ * so the link falls back to the forms list. Both destinations are a list of
+ * forms, which is what the link says.
  */
 export function formsBackHref( campaignId ) {
     const id = Number( campaignId ) || 0;

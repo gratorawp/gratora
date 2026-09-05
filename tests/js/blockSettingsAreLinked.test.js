@@ -49,3 +49,27 @@ describe( 'a block that sends the admin elsewhere gives them a link', () => {
 		} );
 	}
 } );
+
+describe( 'the goal block links at the field, not at the screen', () => {
+	const goal   = fs.readFileSync( path.join( BLOCKS, 'goal/index.js' ), 'utf8' );
+	const detail = fs.readFileSync(
+		path.join( __dirname, '../../assets/admin/campaigns/Detail.jsx' ),
+		'utf8'
+	);
+
+	test( 'it names the sub-tab that holds the goal fields', () => {
+		expect( goal ).toMatch( /tab=settings#goal/ );
+	} );
+
+	test( 'and that sub-tab is one the campaign screen actually has', () => {
+		const keys = [ ...detail.matchAll( /\{\s*key:\s*'([a-z-]+)'/g ) ].map( ( m ) => m[ 1 ] );
+
+		expect( keys ).toContain( 'goal' );
+	} );
+
+	test( 'the campaign screen opens on the sub-tab the fragment names', () => {
+		// Without this the link lands on General, which carries no goal field.
+		expect( detail ).toMatch( /location\.hash/ );
+		expect( detail ).toMatch( /SUB_TABS\.some\(/ );
+	} );
+} );

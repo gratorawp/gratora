@@ -1492,7 +1492,13 @@ function SettingsTab( { campaign, onError } ) {
     const c = useFundKitRecord( 'campaign', campaign.id );
     const extSubTabs = useExtensionTabs( 'campaign-settings' );
 
-    const [ subTab, setSubTab ] = useState( 'general' );
+    // Sub-tabs are addressable: the form editor's Goal block links straight at
+    // #goal, and landing on General with no goal field in sight reads as a
+    // broken link.
+    const [ subTab, setSubTab ] = useState( () => {
+        const hash = ( typeof window !== 'undefined' ? window.location.hash : '' ).replace( '#', '' );
+        return SUB_TABS.some( ( t ) => t.key === hash ) ? hash : 'general';
+    } );
     const [ funds, setFunds ]   = useState( [] );
     const [ forms, setForms ]   = useState( [] );
 

@@ -141,7 +141,7 @@ function Edit( { attributes, setAttributes } ) {
                     ) }
                     { ! isFormSource && campaign && ! hasGoal && (
                         <p style={ { margin: '16px 0 0' } }>
-                            <ExternalLink href={ `admin.php?page=fundkit-campaigns&view=detail&id=${ campaign.id }&tab=settings` }>
+                            <ExternalLink href={ `admin.php?page=fundkit-campaigns&view=detail&id=${ campaign.id }&tab=settings#goal` }>
                                 { __( 'Set the campaign goal', 'fundraising-toolkit' ) }
                             </ExternalLink>
                         </p>
