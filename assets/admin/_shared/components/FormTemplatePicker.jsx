@@ -10,6 +10,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 
 import Icon from './Icon';
+import { thumbFor } from './formThumb';
 
 // Category values are stable grouping keys; translate only for display.
 const CATEGORY_LABELS = {
@@ -116,6 +117,140 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
     );
 }
 
+function Band( { part } ) {
+    switch ( part.kind ) {
+        case 'title':
+            return <span className={ `fundkit-template-thumb__title${ part.small ? ' is-sm' : '' }` } />;
+
+        case 'text':
+        case 'fine-print':
+            return (
+                <span className={ `fundkit-template-thumb__text${ part.kind === 'fine-print' ? ' is-fine' : '' }` }>
+                    <i /><i />
+                </span>
+            );
+
+        case 'rule':
+            return <span className="fundkit-template-thumb__rule" />;
+
+        case 'tiles':
+            return (
+                <span
+                    className={ `fundkit-template-thumb__tiles${ part.labels ? ' has-labels' : '' }` }
+                    style={ { '--thumb-tile-cols': part.cols } }
+                >
+                    { Array.from( { length: part.count }, ( _, i ) => (
+                        <i key={ i } className={ i === part.active ? 'is-active' : '' }>
+                            { part.labels && <b /> }
+                        </i>
+                    ) ) }
+                </span>
+            );
+
+        case 'amount':
+            return <span className="fundkit-template-thumb__amount" />;
+
+        case 'pills':
+            return (
+                <span className={ `fundkit-template-thumb__pills${ part.joined ? ' is-joined' : '' }` }>
+                    { Array.from( { length: part.count }, ( _, i ) => (
+                        <i key={ i } className={ i === part.on ? 'is-on' : '' } />
+                    ) ) }
+                </span>
+            );
+
+        case 'goal':
+            return (
+                <span className="fundkit-template-thumb__goal">
+                    { part.figures > 0 && (
+                        <span className="figs">
+                            { Array.from( { length: part.figures }, ( _, i ) => <i key={ i } /> ) }
+                        </span>
+                    ) }
+                    <span className="track">
+                        <i />
+                        { part.pip && <b className="pip" /> }
+                    </span>
+                </span>
+            );
+
+        case 'choices':
+            return (
+                <span className="fundkit-template-thumb__choices">
+                    { Array.from( { length: part.count }, ( _, i ) => (
+                        <i key={ i } className={ i === part.on ? 'is-on' : '' }>
+                            <b className="dot" />
+                            <b className="lbl" />
+                            { i === part.on && part.sub && <b className="sub" /> }
+                        </i>
+                    ) ) }
+                </span>
+            );
+
+        case 'fields':
+            return (
+                <span className="fundkit-template-thumb__fields">
+                    { part.rows.map( ( row, i ) => ( row === 'pair' ? (
+                        <i key={ i } className="pair"><b /><b /></i>
+                    ) : (
+                        <i key={ i } className={ row === 'select' ? 'is-select' : '' } />
+                    ) ) ) }
+                </span>
+            );
+
+        case 'textarea':
+            return <span className="fundkit-template-thumb__textarea"><i /><i /></span>;
+
+        case 'check':
+            return (
+                <span className="fundkit-template-thumb__check">
+                    { Array.from( { length: part.count }, ( _, i ) => (
+                        <i key={ i } className={ part.on ? 'is-on' : '' }><b className="box" /><b className="lbl" /></i>
+                    ) ) }
+                </span>
+            );
+
+        case 'ghost':
+            return (
+                <span className="fundkit-template-thumb__ghost">
+                    { Array.from( { length: part.count }, ( _, i ) => <i key={ i } /> ) }
+                </span>
+            );
+
+        case 'panel':
+            return (
+                <span className="fundkit-template-thumb__panel">
+                    { part.children.map( ( child, i ) => <Band key={ i } part={ child } /> ) }
+                </span>
+            );
+
+        case 'cols':
+            return (
+                <span className="fundkit-template-thumb__cols" style={ { '--thumb-cols': part.cols } }>
+                    { part.children.map( ( child, i ) => <Band key={ i } part={ child } /> ) }
+                </span>
+            );
+
+        case 'checkout':
+            return (
+                <span className="fundkit-template-thumb__checkout">
+                    { part.chips > 0 && (
+                        <span className="cards">
+                            { Array.from( { length: part.chips }, ( _, i ) => <i key={ i } /> ) }
+                        </span>
+                    ) }
+                    <b className="bar" />
+                </span>
+            );
+
+        case 'advance':
+            return <span className="fundkit-template-thumb__checkout is-advance"><b className="bar" /></span>;
+
+        default:
+            return null;
+    }
+}
+
 function FormTemplateThumb( { template } ) {
     const settings = template.settings || {};
     const layout   = settings.layout  || 'inline';
@@ -131,7 +266,14 @@ function FormTemplateThumb( { template } ) {
         ? `${ settings.theme.radius }px`
         : ( tokens[ 'fundkit-radius-md' ] || tokens[ 'fundkit-radius' ] || '8px' );
 
-    if ( template.id === 'blank' ) {
+    // The sheet stands for a form about four times its width, so the template's
+    // own radius has to come down with it: 8px on an 11px tile is a capsule,
+    // and every template would look equally round.
+    const scaled = Math.max( 1, Math.round( ( parseFloat( radius ) || 8 ) / 4 ) );
+
+    const shape = thumbFor( template );
+
+    if ( shape.parts.length === 1 && shape.parts[ 0 ].kind === 'empty' ) {
         return (
             <div className="fundkit-template-thumb fundkit-template-thumb--blank">
                 <Icon name="plus" size={ 20 } aria-hidden="true" />
@@ -139,39 +281,31 @@ function FormTemplateThumb( { template } ) {
         );
     }
 
-    // Detect multi-step shape from block markup so the thumb shows a
-    // progress strip even though the form's layout field is still 'inline'.
-    const isWizard = /wp:fundkit\/steps/.test( template.blocks || '' );
-
     const sheet = (
         <div className="fundkit-template-thumb__sheet" style={ { borderRadius: radius } }>
-            { isWizard && (
-                <div className="fundkit-template-thumb__steps">
-                    <span className="is-active" />
-                    <span />
-                    <span />
-                </div>
+            { shape.chrome === 'bar' && (
+                <span className="fundkit-template-thumb__steps is-bar">
+                    { Array.from( { length: shape.steps }, ( _, i ) => (
+                        <i key={ i } className={ i === 0 ? 'is-active' : '' } />
+                    ) ) }
+                </span>
             ) }
-            <span className="fundkit-template-thumb__title" />
-            <span className="fundkit-template-thumb__sub" />
-            <div className="fundkit-template-thumb__tiles">
-                <span style={ { borderRadius: radius } } />
-                <span className="is-active" style={ { borderRadius: radius } } />
-                <span style={ { borderRadius: radius } } />
-                <span style={ { borderRadius: radius } } />
-            </div>
-            <span className="fundkit-template-thumb__field" style={ { borderRadius: radius } } />
-            <span
-                className="fundkit-template-thumb__button"
-                style={ { background: accent, borderRadius: radius } }
-            />
+            { shape.parts.map( ( part, i ) => <Band key={ i } part={ part } /> ) }
+            { /* The runtime renders the dot strip below the form, not above it. */ }
+            { shape.chrome === 'dots' && (
+                <span className="fundkit-template-thumb__steps">
+                    { Array.from( { length: shape.steps }, ( _, i ) => (
+                        <i key={ i } className={ i === 0 ? 'is-active' : '' } />
+                    ) ) }
+                </span>
+            ) }
         </div>
     );
 
     return (
         <div
             className={ `fundkit-template-thumb fundkit-template-thumb--${ layout }` }
-            style={ { '--thumb-accent': accent } }
+            style={ { '--thumb-accent': accent, '--thumb-radius': `${ scaled }px` } }
         >
             { layout === 'modal' ? (
                 <div className="fundkit-template-thumb__modal-backdrop">
