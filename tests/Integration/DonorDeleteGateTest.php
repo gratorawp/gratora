@@ -116,41 +116,32 @@ final class DonorDeleteGateTest extends IntegrationTestCase
         $this->assertNotNull($this->reason($donor), 'inside the window a retry is still expected');
     }
 
-    public function test_a_cancelled_plan_stops_blocking_but_a_live_one_does_not(): void
+    /**
+     * Any plan at all, whatever its local status. A cancelled row still holds
+     * the gateway handle, and an importer writes 'cancelled' over statuses it
+     * has no state for, which may still be billing.
+     */
+    public function test_any_recurring_plan_blocks_whatever_its_status(): void
     {
-        $now = gmdate('Y-m-d H:i:s');
+        foreach (['cancelled', 'active', 'pending', 'paused', 'past_due'] as $status) {
+            $donor = $this->donor();
+            $now   = gmdate('Y-m-d H:i:s');
 
-        $withCancelled = $this->donor();
-        $p = RecurringPlan::make();
-        $p->donor_id = (int) $withCancelled->id;
-        $p->gateway = 'stripe';
-        $p->amount_cents = 1000;
-        $p->currency = 'EUR';
-        $p->interval_unit = 'month';
-        $p->interval_count = 1;
-        $p->status = 'cancelled';
-        $p->is_test = false;
-        $p->created_at = $now;
-        $p->updated_at = $now;
-        $p->save();
+            $p = RecurringPlan::make();
+            $p->donor_id                = (int) $donor->id;
+            $p->gateway                 = 'stripe';
+            $p->gateway_subscription_id = 'sub_' . uniqid();
+            $p->amount_cents            = 1000;
+            $p->currency                = 'EUR';
+            $p->interval_unit           = 'month';
+            $p->interval_count          = 1;
+            $p->status                  = $status;
+            $p->is_test                 = false;
+            $p->created_at              = $now;
+            $p->updated_at              = $now;
+            $p->save();
 
-        $this->assertNull($this->reason($withCancelled));
-
-        $withLive = $this->donor();
-        $q = RecurringPlan::make();
-        $q->donor_id = (int) $withLive->id;
-        $q->gateway = 'paypal';
-        $q->amount_cents = 1000;
-        $q->currency = 'EUR';
-        $q->interval_unit = 'month';
-        $q->interval_count = 1;
-        // An approved PayPal mandate that has not charged yet.
-        $q->status = 'pending';
-        $q->is_test = false;
-        $q->created_at = $now;
-        $q->updated_at = $now;
-        $q->save();
-
-        $this->assertNotNull($this->reason($withLive), 'an approved mandate can still bill');
+            $this->assertNotNull($this->reason($donor), "a {$status} plan must keep its donor");
+        }
     }
 }

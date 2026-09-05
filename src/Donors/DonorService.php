@@ -343,14 +343,12 @@ final class DonorService
                 ->pluck('donor_id'),
         ));
 
-        // A plan cancelled years ago is not a mandate, so it stops blocking.
+        // Any plan at all. A local 'cancelled' is not proof the mandate is
+        // dead: an importer writes it over statuses it has no state for, and
+        // deleting the row takes the gateway handle needed to stop the billing.
         $withPlans = $ids === [] ? [] : array_flip(array_map(
             'intval',
-            RecurringPlan::query()
-                ->whereIn('donor_id', $ids)
-                ->whereIn('status', RecurringPlanRepository::CANCELLABLE_STATUSES)
-                ->distinct()
-                ->pluck('donor_id'),
+            RecurringPlan::query()->whereIn('donor_id', $ids)->distinct()->pluck('donor_id'),
         ));
 
         $out = [];
@@ -436,9 +434,6 @@ final class DonorService
                 DB::table('fundkit_donation_notes')->whereIn('donation_id', $dids)->delete();
                 DB::table('fundkit_refunds')->whereIn('donation_id', $dids)->delete();
             }
-
-            // Only dead plans reach here; the gate refuses a cancellable one.
-            DB::table('fundkit_recurring_plans')->where('donor_id', $id)->delete();
 
             Consent::query()->where('donor_id', $id)->delete();
             DonorNote::query()->where('donor_id', $id)->delete();

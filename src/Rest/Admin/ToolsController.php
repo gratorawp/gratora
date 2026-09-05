@@ -255,7 +255,11 @@ final class ToolsController
         });
 
         $source = self::logSource((string) $request['source']);
-        if ($source !== '' && self::isDiagnostic($source)) {
+        if ($source !== '') {
+            if (! self::isDiagnostic($source)) {
+                return new WP_REST_Response(['ok' => true, 'deleted' => 0], 200);
+            }
+
             $query = Event::query()->whereLike('type', $source . '%');
         }
 

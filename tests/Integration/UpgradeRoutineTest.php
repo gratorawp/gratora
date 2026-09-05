@@ -28,6 +28,11 @@ final class UpgradeRoutineTest extends IntegrationTestCase
         delete_option(UpgradeRunner::OPTION_DONE);
         delete_option('fundkit_upgrade_clear_consent_hashes_after');
         delete_option(UpgradeRunner::OPTION_FAILED);
+
+        // Action Scheduler writes outside this suite's transaction, so a job
+        // any earlier test queued is still pending and would be counted here.
+        global $wpdb;
+        $wpdb->delete($wpdb->prefix . 'actionscheduler_actions', ['hook' => UpgradeJob::HOOK]);
     }
 
     private function erasedDonorWithConsent(): int

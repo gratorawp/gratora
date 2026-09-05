@@ -149,10 +149,19 @@ final class DonorAuditTrailTest extends IntegrationTestCase
 
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/logs/clear');
-        $req->set_param('source', 'donor.');
-        rest_do_request($req);
+        $noise = Event::make();
+        $noise->type        = 'error.boom';
+        $noise->occurred_at = gmdate('Y-m-d H:i:s');
+        $noise->save();
 
+        $req = new WP_REST_Request('DELETE', '/fundkit/v1/admin/tools/log');
+        $req->set_param('source', 'donor.');
+        $res = rest_do_request($req);
+
+        $this->assertSame(200, $res->get_status(), 'the route exists, or this asserts nothing');
         $this->assertNotSame([], $this->auditRows(), 'Clear log must not reach the audit');
+        // Nor may asking for the audit clear what the admin did not ask about.
+        $this->assertNotNull(Event::query()->find('id', (int) $noise->id), 'a refused source deletes nothing');
+        $this->assertSame(0, (int) $res->get_data()['deleted']);
     }
 }
