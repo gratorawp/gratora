@@ -586,15 +586,20 @@ final class PortalController
      * by set_transient lets concurrent callers all read the last allowed value
      * and all write it back.
      *
+     * Keyed through subjectKey(), which is the only place that knows how to
+     * name a caller. It honours the proxies the org has declared, so a site
+     * behind a CDN counts donors rather than counting its edge as one caller;
+     * and it buckets IPv6 by the /64 a single host is routinely routed, so a
+     * fresh address per request does not mint a fresh allowance. This is the
+     * only ceiling on the two routes that mail a stranger's address.
+     *
      * @since 1.0.0
      */
     private function consumeIpQuota(): bool
     {
-        $ip = filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: 'unknown';
-
         $max = (int) apply_filters('fundkit.portal.send_link_ip_max', self::SEND_LINK_IP_MAX);
 
-        return $this->spam->hit('fundkit_send_link_ip_' . hash('sha256', $ip), self::SEND_LINK_IP_WINDOW)
+        return $this->spam->hit($this->spam->subjectKey('fundkit_send_link_ip'), self::SEND_LINK_IP_WINDOW)
             <= max(1, $max);
     }
 
