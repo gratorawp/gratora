@@ -248,7 +248,7 @@ final class CampaignMetricsService
      */
     public function recentDonations(int $campaignId, int $limit = 10): array
     {
-        $rows = DonationQueries::live(Donation::query())
+        $rows = DonationQueries::donationsOnly(Donation::query())
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('campaign_id', $campaignId)
             ->orderBy('paid_at', 'DESC')
@@ -400,7 +400,7 @@ final class CampaignMetricsService
     {
         // Queryable doesn't have whereNotNull: fetch a generous slice ordered
         // by recency, then filter to non-empty notes in PHP and take the first N.
-        $candidates = DonationQueries::live(Donation::query())
+        $candidates = DonationQueries::donationsOnly(Donation::query())
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('campaign_id', $campaignId)
             ->orderBy('paid_at', 'DESC')

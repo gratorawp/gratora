@@ -436,6 +436,10 @@ final class DonationRepository
     {
         $prefix = DB::getPrefix();
         $rows = $this->netPaidQuery($from, $to, null, $includeTest)
+            // Donations belonging to no campaign group into a row the caller
+            // cannot render as one, and a hand-recorded cheque is allowed to
+            // have no campaign, so this is ordinary data rather than an edge.
+            ->whereIsNotNull('campaign_id')
             ->selectRaw("{$prefix}fundkit_donations.campaign_id AS campaign_id, COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
             ->groupByRaw("{$prefix}fundkit_donations.campaign_id")
             ->orderByRaw('amount DESC')
@@ -570,7 +574,7 @@ final class DonationRepository
     /** @since 1.0.0 */
     public function recentForCampaign(int $campaignId, int $limit = 10, bool $includeAnonymous = true): array
     {
-        $q = DonationQueries::live(Donation::query()
+        $q = DonationQueries::donationsOnly(Donation::query()
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('campaign_id', $campaignId));
 
@@ -726,7 +730,7 @@ final class DonationRepository
         // currency it buckets by: an offset from a paid-only total would
         // overshoot, and donor-currency amount_cents would rank foreign donations
         // against org-currency ones.
-        $q = DonationQueries::live(
+        $q = DonationQueries::donationsOnly(
             DB::table('fundkit_donations')->whereIn('status', ['paid', 'partial_refund'])
         );
         [$start, $end] = DonationQueries::dayBoundsUtc($from, $to);
@@ -767,7 +771,7 @@ final class DonationRepository
 
         $netExpr = DonationQueries::netBaseExpr();
 
-        $rows = DonationQueries::live(DB::table('fundkit_donations')
+        $rows = DonationQueries::donationsOnly(DB::table('fundkit_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('campaign_id', $campaignId))
             ->selectRaw("
@@ -804,7 +808,7 @@ final class DonationRepository
      */
     public function countActiveRecurringForCampaign(int $campaignId): int
     {
-        $row = DonationQueries::live(DB::table('fundkit_donations')
+        $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('campaign_id', $campaignId))
             ->where('frequency', 'one_time', '<>')
