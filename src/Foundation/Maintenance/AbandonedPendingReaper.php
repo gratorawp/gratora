@@ -81,10 +81,23 @@ final class AbandonedPendingReaper
         return $ids;
     }
 
+    /**
+     * How long a pending checkout is still allowed to settle.
+     *
+     * Read by the delete gate too, which releases a donor once every donation
+     * of theirs is one this sweep has already retired.
+     *
+     * @since 1.0.0
+     */
+    public static function abandonAfterDays(): int
+    {
+        return max(1, (int) apply_filters('fundkit.donations.abandon_after_days', self::AFTER_DAYS));
+    }
+
     /** @since 1.0.0 */
     public function run(): void
     {
-        $days = max(1, (int) apply_filters('fundkit.donations.abandon_after_days', self::AFTER_DAYS));
+        $days = self::abandonAfterDays();
         $before = $this->clock->now()->modify("-{$days} days")->format('Y-m-d H:i:s');
         $skip = $this->outOfBandGateways();
 

@@ -6,6 +6,7 @@ namespace FundKit\Donors;
 
 use FundKit\Analytics\ErrorLog;
 use FundKit\Donations\Donation;
+use FundKit\Foundation\Maintenance\AbandonedPendingReaper;
 use FundKit\Donors\Erasure\ErasureRegistry;
 use FundKit\Donors\Erasure\ErasureRequest;
 use FundKit\Recurring\RecurringCanceller;
@@ -318,14 +319,35 @@ final class DonorService
             array_map(static fn (Donor $d): int => (int) $d->id, $donors),
         )));
 
+        $days   = AbandonedPendingReaper::abandonAfterDays();
+        $before = $this->clock->now()->modify("-{$days} days")->format('Y-m-d H:i:s');
+
+        // Not "has donations" but "has a donation that could still become
+        // money". A row is spent only once it is failed, carries neither of the
+        // marks money leaves behind, and is past the window the abandon sweep
+        // gives a checkout to settle. A pending cheque is none of those.
         $withDonations = $ids === [] ? [] : array_flip(array_map(
             'intval',
-            Donation::query()->whereIn('donor_id', $ids)->distinct()->pluck('donor_id'),
+            Donation::query()
+                ->whereIn('donor_id', $ids)
+                ->where(static function ($q) use ($before): void {
+                    $q->where('status', 'failed', '<>')
+                        ->orWhereIsNotNull('paid_at')
+                        ->orWhereIsNotNull('gateway_txn_id')
+                        ->orWhere('created_at', $before, '>=');
+                })
+                ->distinct()
+                ->pluck('donor_id'),
         ));
 
+        // A plan cancelled years ago is not a mandate, so it stops blocking.
         $withPlans = $ids === [] ? [] : array_flip(array_map(
             'intval',
-            RecurringPlan::query()->whereIn('donor_id', $ids)->distinct()->pluck('donor_id'),
+            RecurringPlan::query()
+                ->whereIn('donor_id', $ids)
+                ->whereIn('status', RecurringPlanRepository::CANCELLABLE_STATUSES)
+                ->distinct()
+                ->pluck('donor_id'),
         ));
 
         $out = [];
@@ -333,7 +355,7 @@ final class DonorService
             $id = (int) $donor->id;
 
             if (isset($withDonations[$id])) {
-                $out[$id] = __('This donor has donations on record, which have to be kept. Erase them instead.', 'fundraising-toolkit');
+                $out[$id] = __('This donor has donations that are still live or have taken money, which have to be kept. Erase them instead.', 'fundraising-toolkit');
                 continue;
             }
 
