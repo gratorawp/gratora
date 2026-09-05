@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Donors;
 
+use FundKit\Analytics\ErrorLog;
 use FundKit\Async\AsyncDispatcher;
 use FundKit\Foundation\Crypto\Crypto;
 use FundKit\Foundation\Identity\IdentityHasher;
@@ -125,9 +126,27 @@ final class DonorEmailRehasher
             if ($plain === null) continue;
 
             $newHash = $this->hasher->emailHash($plain);
-            DB::table('fundkit_donors')
-                ->where('id', $id)
-                ->update(['email_hash' => $newHash]);
+
+            // The duplicate is expected here, so the failure is handled rather
+            // than printed: wpdb would otherwise echo the statement into
+            // whatever request the queue happens to be running in.
+            global $wpdb;
+            $suppressed = $wpdb->suppress_errors(true);
+
+            try {
+                DB::table('fundkit_donors')
+                    ->where('id', $id)
+                    ->update(['email_hash' => $newHash]);
+            } catch (\Throwable $e) {
+                // email_hash is unique, and a donation arriving mid-walk has
+                // already created a second row for this address under the new
+                // pepper. Letting that abort the tick left the cursor unwritten
+                // and every donor after this one unfindable for good, which is
+                // far worse than the one duplicate.
+                $this->recordCollision($id, $newHash);
+            } finally {
+                $wpdb->suppress_errors($suppressed);
+            }
         }
 
         if (count($rows) === self::BATCH) {
@@ -137,6 +156,28 @@ final class DonorEmailRehasher
         }
 
         $this->finish();
+    }
+
+    /**
+     * The two rows are one person, and nothing here can merge them: the
+     * donations, plans and receipts on each would have to move. So it is
+     * written down where an admin can see it.
+     */
+    private function recordCollision(int $id, string $hash): void
+    {
+        $existing = DB::table('fundkit_donors')
+            ->where('email_hash', $hash)
+            ->select('id')
+            ->get();
+
+        ErrorLog::record(
+            'donor.rehash',
+            'Donor could not be rehashed: another donor row already holds this email. They are the same person and hold separate giving histories.',
+            [
+                'donor_id'     => $id,
+                'duplicate_of' => (int) ($existing['id'] ?? 0),
+            ]
+        );
     }
 
     /** @since 1.0.0 */
