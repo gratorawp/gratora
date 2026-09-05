@@ -21,6 +21,13 @@ import KpiStrip from '../_shared/components/KpiStrip';
 import GoalBar from '../_shared/components/GoalBar';
 import SearchableSelect from '../_shared/components/SearchableSelect';
 
+// A column header sorts by its field id; the server sorts by column name and
+// silently falls back to sort_order for a name it does not know, so an
+// unmapped id turns the arrow without turning the list.
+const ORDERBY_COLUMN = { type: 'is_restricted' };
+
+export const orderbyFor = ( field ) => ORDERBY_COLUMN[ field ] || field || 'sort_order';
+
 const STATUS_OPTIONS = [
     { value: 'active',     label: __( 'Active', 'fundraising-toolkit' ) },
     { value: 'inactive',   label: __( 'Inactive', 'fundraising-toolkit' ) },
@@ -135,7 +142,7 @@ export default function List() {
             path: addQueryArgs( '/fundkit/v1/admin/funds', {
                 page:     view.page,
                 per_page: view.perPage,
-                orderby:  view.sort?.field || 'sort_order',
+                orderby:  orderbyFor( view.sort?.field ),
                 order:    view.sort?.direction || 'asc',
                 search:   view.search || undefined,
                 status:   statusFilter?.value || undefined,
@@ -254,8 +261,9 @@ export default function List() {
             ),
         },
         {
-            id:       'type',
-            label:    __( 'Type', 'fundraising-toolkit' ),
+            id:            'type',
+            label:         __( 'Type', 'fundraising-toolkit' ),
+            enableSorting: true,
             render: ( { item } ) => (
                 <span className={ 'fundkit-fund-badge ' + ( item.is_restricted
                     ? 'fundkit-fund-badge--restricted'
@@ -302,6 +310,10 @@ export default function List() {
             label:    __( 'Status', 'fundraising-toolkit' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
+            // The cell reads Active / Scheduled / Ended / Inactive, and three
+            // of those four come from Fund::scheduleState() weighing the dates
+            // against now, after the query. No column carries what is shown.
+            enableSorting: false,
             render: ( { item } ) => {
                 if ( item.reassign_pending ) {
                     return (
@@ -472,7 +484,6 @@ export default function List() {
                     fund={ deleteTarget }
                     funds={ allFunds }
                     onClose={ () => setDeleteTarget( null ) }
-                    onError={ ( m ) => setError( m ) }
                     onDone={ ( msg ) => { setDeleteTarget( null ); notify.success( msg ); afterChange(); } }
                 />
             ) }
@@ -646,17 +657,25 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
     );
 }
 
-function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
+function FundDeleteModal( { fund, funds, onClose, onDone } ) {
     const [ choice, setChoice ]   = useState( 'deactivate' );
     const [ targetId, setTargetId ] = useState( '' );
     const [ busy, setBusy ]       = useState( false );
+    // Kept here rather than handed up: the page-level notice sits under the
+    // dialog's own scrim, so a refused delete read as nothing happening.
+    const [ error, setError ]     = useState( null );
 
-    const candidates = ( funds || [] ).filter(
+    // Reassigning removes this fund, which would orphan its sub-funds, so the
+    // server refuses that one outcome. Deactivating a parent is supported.
+    const hasChildren = fund.has_children === true;
+
+    const candidates = hasChildren ? [] : ( funds || [] ).filter(
         ( f ) => f.id !== fund.id && f.is_active && ! f.reassign_pending
     );
 
     const confirm = async () => {
         if ( choice === 'reassign' && ! targetId ) return;
+        setError( null );
         setBusy( true );
         try {
             const path = choice === 'reassign'
@@ -677,7 +696,7 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
             }
             onDone( msg );
         } catch ( err ) {
-            onError( err?.message || __( 'Could not delete the fund.', 'fundraising-toolkit' ) );
+            setError( err?.message || __( 'Could not delete the fund.', 'fundraising-toolkit' ) );
             setBusy( false );
         }
     };
@@ -710,6 +729,10 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
                 </>
             ) }
         >
+            { error && (
+                <Notice status="error" onRemove={ () => setError( null ) }>{ error }</Notice>
+            ) }
+
             { deletable ? (
                 <p className="fundkit-dialog__help">
                     { __( 'Nothing points to this fund, so deleting it removes it entirely.', 'fundraising-toolkit' ) }
@@ -756,7 +779,9 @@ function FundDeleteModal( { fund, funds, onClose, onError, onDone } ) {
                         </label>
                     ) : (
                         <p className="fundkit-dialog__help">
-                            { __( 'There is no other active fund to reassign to, so deactivating is the only option here. Create another fund first if you want to move these donations.', 'fundraising-toolkit' ) }
+                            { hasChildren
+                                ? __( 'This fund has sub-funds under it, so it cannot be removed. Deactivating keeps them; they move up to the top level. To remove it outright, move or delete the sub-funds first.', 'fundraising-toolkit' )
+                                : __( 'There is no other active fund to reassign to, so deactivating is the only option here. Create another fund first if you want to move these donations.', 'fundraising-toolkit' ) }
                         </p>
                     ) }
 

@@ -74,6 +74,10 @@ final class FundService
         $fund->raised_cents    = 0;
         $fund->created_at      = $now;
         $fund->updated_at      = $now;
+        // update() holds the same rule. A window that starts after it ends is
+        // never open, so the fund is offered to nobody and every later save is
+        // refused by the guard the create never ran.
+        $this->assertWindowOrder($fund);
 
         DB::transaction(function () use ($fund): void {
             $fund->save();
@@ -117,14 +121,7 @@ final class FundService
             }
         }
 
-        // Reject a window that starts after it ends. Both are stored as
-        // datetime strings (YYYY-MM-DD from the date input is fine, MySQL
-        // accepts it directly), so a lexicographic compare is enough.
-        if ($fund->starts_at && $fund->ends_at && $fund->starts_at > $fund->ends_at) {
-            throw new InvalidArgumentException(
-                esc_html__('Fund "Active from" date must be before "Active until".', 'fundraising-toolkit')
-            );
-        }
+        $this->assertWindowOrder($fund);
 
         if (array_key_exists('is_restricted', $input)) {
             $fund->is_restricted = (bool) $input['is_restricted'];
@@ -199,11 +196,7 @@ final class FundService
                 esc_html__('The default fund cannot be deleted. Set another fund as default first.', 'fundraising-toolkit')
             );
         }
-        if ($this->hasChildren((int) $fund->id)) {
-            throw new RuntimeException(
-                esc_html__('Reassign or remove the sub-funds under this fund before deleting it.', 'fundraising-toolkit')
-            );
-        }
+        $hasChildren = $this->hasChildren((int) $fund->id);
 
         $donations = (int) Donation::query()->where('fund_id', $fund->id)->count();
         $campaigns = (int) Campaign::query()->where('default_fund_id', $fund->id)->count();
@@ -214,6 +207,16 @@ final class FundService
         $plans = (int) RecurringPlan::query()->where('fund_id', $fund->id)->count();
 
         if ($reassignTo !== null) {
+            // Reassignment hard-deletes the source row once it completes, and
+            // never touches parent_fund_id, so this is the one outcome that
+            // would orphan a sub-fund. Deactivating a parent is supported:
+            // FundRepository falls an orphan back to top level.
+            if ($hasChildren) {
+                throw new RuntimeException(
+                    esc_html__('Move the sub-funds under this fund to another parent, or delete them, before reassigning and removing it.', 'fundraising-toolkit')
+                );
+            }
+
             $target = $this->funds->findById($reassignTo);
             if (! $target || (int) $target->id === (int) $fund->id) {
                 throw new InvalidArgumentException(
@@ -240,7 +243,7 @@ final class FundService
             return ['action' => 'reassign_queued', 'target_id' => (int) $target->id];
         }
 
-        if ($donations > 0 || $campaigns > 0 || $forms > 0 || $plans > 0) {
+        if ($donations > 0 || $campaigns > 0 || $forms > 0 || $plans > 0 || $hasChildren) {
             $fund->is_active  = false;
             $fund->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
             $fund->save();
@@ -333,6 +336,53 @@ final class FundService
     private function hasChildren(int $fundId): bool
     {
         return Fund::query()->where('parent_fund_id', $fundId)->get() !== null;
+    }
+
+    /**
+     * Which of these funds have sub-funds under them, in one query, so the
+     * admin list can say which deletes are on offer without a per-row check.
+     *
+     * @param int[] $ids
+     * @return array<int, bool>
+     *
+     * @since 1.0.0
+     */
+    public function childrenMap(array $ids): array
+    {
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+        if ($ids === []) {
+            return [];
+        }
+
+        $parents = [];
+        $rows = DB::table('fundkit_funds')
+            ->whereIn('parent_fund_id', $ids)
+            ->selectRaw('DISTINCT parent_fund_id AS ref')
+            ->getAll();
+        foreach ($rows as $r) {
+            $parents[(int) $r['ref']] = true;
+        }
+
+        $out = [];
+        foreach ($ids as $id) {
+            $out[$id] = isset($parents[$id]);
+        }
+        return $out;
+    }
+
+    /**
+     * @since 1.0.0
+     */
+    private function assertWindowOrder(Fund $fund): void
+    {
+        // Both are stored as datetime strings (YYYY-MM-DD from the date input
+        // is fine, MySQL accepts it directly), so a lexicographic compare is
+        // enough.
+        if ($fund->starts_at && $fund->ends_at && $fund->starts_at > $fund->ends_at) {
+            throw new InvalidArgumentException(
+                esc_html__('Fund "Active from" date must be before "Active until".', 'fundraising-toolkit')
+            );
+        }
     }
 
     /**

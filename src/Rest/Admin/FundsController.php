@@ -115,11 +115,16 @@ final class FundsController
 
         // donations_count is denormalized on the fund row (written by
         // AggregateSyncer::syncFund). Pass null so shape() reads the column.
-        $deletable = $this->fundService->deletableMap(
-            array_map(static fn (Fund $f) => (int) $f->id, $result['items'])
-        );
+        $ids       = array_map(static fn (Fund $f) => (int) $f->id, $result['items']);
+        $deletable = $this->fundService->deletableMap($ids);
+        $children  = $this->fundService->childrenMap($ids);
         $shaped = array_map(
-            fn (Fund $f) => $this->shape($f, null, $deletable[(int) $f->id] ?? false),
+            fn (Fund $f) => $this->shape(
+                $f,
+                null,
+                $deletable[(int) $f->id] ?? false,
+                $children[(int) $f->id] ?? false
+            ),
             $result['items']
         );
 
@@ -207,12 +212,19 @@ final class FundsController
      */
     private function shapeOne(Fund $f): array
     {
-        $deletable = $this->fundService->deletableMap([(int) $f->id]);
-        return $this->shape($f, null, $deletable[(int) $f->id] ?? false);
+        $id        = (int) $f->id;
+        $deletable = $this->fundService->deletableMap([$id]);
+        $children  = $this->fundService->childrenMap([$id]);
+        return $this->shape($f, null, $deletable[$id] ?? false, $children[$id] ?? false);
     }
 
     /** @since 1.0.0 */
-    private function shape(Fund $f, ?int $donationsCount = null, bool $deletable = false): array
+    private function shape(
+        Fund $f,
+        ?int $donationsCount = null,
+        bool $deletable = false,
+        bool $hasChildren = false
+    ): array
     {
         return [
             'id'              => (int) $f->id,
@@ -245,6 +257,10 @@ final class FundsController
             // so the delete dialog offers the action the server will actually
             // take instead of guessing from the live-only donation count.
             'deletable'        => $deletable,
+            // Reassigning removes the fund row, which would orphan a sub-fund,
+            // so that one outcome is refused. The dialog needs to know before
+            // it offers the choice.
+            'has_children'     => $hasChildren,
         ];
     }
 }

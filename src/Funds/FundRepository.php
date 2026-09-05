@@ -185,7 +185,7 @@ final class FundRepository
         $perPage = max(1, min(100, (int) ($args['per_page'] ?? 25)));
         $offset  = ($page - 1) * $perPage;
 
-        $allowedSort = ['sort_order', 'name', 'code', 'raised_cents', 'created_at', 'updated_at'];
+        $allowedSort = ['sort_order', 'name', 'code', 'is_restricted', 'raised_cents', 'created_at', 'updated_at'];
         $orderBy = in_array($args['orderby'] ?? '', $allowedSort, true)
             ? $args['orderby']
             : 'sort_order';
