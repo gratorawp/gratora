@@ -46,17 +46,37 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
         if ( renderedRef.current ) return undefined;
 
         const post = async ( path, body ) => {
-            const headers = { 'Content-Type': 'application/json' };
-            if ( config.nonce ) headers[ 'X-WP-Nonce' ] = config.nonce;
+            const send = ( nonce ) => fetch( restBase + path, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...( nonce ? { 'X-WP-Nonce': nonce } : {} ),
+                },
+                body: JSON.stringify( body ),
+            } );
+
             // A dropped connection rejects with the engine's own untranslated
             // wording, and the callers show err.message to the donor.
-            const res = await fetch( restBase + path, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify( body ),
-            } ).catch( () => {
+            let res = await send( config.nonce ).catch( () => {
                 throw new Error( i18n.error );
             } );
+
+            // Neither confirm route needs the nonce: both are public and
+            // authenticated by the donation's own status token. But WordPress
+            // rejects a PRESENT-and-stale one before any permission callback,
+            // so a donor who left the tab open overnight approves at PayPal
+            // and then cannot be captured at all. PayPal has already taken the
+            // first payment of a subscription by that point, and no retry can
+            // clear a nonce that is baked into the config at render.
+            if ( res.status === 403 ) {
+                const why = await res.clone().json().catch( () => null );
+                if ( why?.code === 'rest_cookie_invalid_nonce' ) {
+                    res = await send( '' ).catch( () => {
+                        throw new Error( i18n.error );
+                    } );
+                }
+            }
+
             const data = await res.json().catch( () => ( {} ) );
             if ( ! res.ok ) {
                 throw new Error( data.message || i18n.error );

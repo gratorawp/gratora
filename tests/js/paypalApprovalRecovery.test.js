@@ -274,3 +274,88 @@ describe( 'a PayPal approval whose server round trip fails', () => {
         await settle();
     } );
 } );
+
+describe( 'an expired nonce cannot strand an approved payment', () => {
+	// Neither confirm route needs the nonce: both are public and authenticated
+	// by the donation's own status token. WordPress rejects a present-and-stale
+	// one before any permission callback, so a donor who left the tab open
+	// approves at PayPal and then cannot be captured at all. On a subscription
+	// PayPal has already taken the first payment by that point.
+	function serveStaleNonceThen( ok ) {
+		const seen = [];
+		global.fetch = jest.fn( ( url, init ) => {
+			const nonce = ( init?.headers || {} )[ 'X-WP-Nonce' ];
+			seen.push( nonce === undefined ? null : nonce );
+
+			if ( nonce ) {
+				return Promise.resolve( {
+					ok:     false,
+					status: 403,
+					json:   async () => ( { code: 'rest_cookie_invalid_nonce', message: 'Cookie check failed' } ),
+					clone() { return this; },
+				} );
+			}
+
+			return Promise.resolve( {
+				ok:     true,
+				status: 200,
+				json:   async () => ok,
+				clone() { return this; },
+			} );
+		} );
+
+		return seen;
+	}
+
+	test( 'a capture retries without the dead nonce rather than failing', async () => {
+		const seen = serveStaleNonceThen( { status: 'paid' } );
+		const dispatch = await mount( oneTimePayment() );
+
+		sdkButtons.onClick();
+		await sdkButtons.onApprove( {} );
+		await settle();
+
+		expect( seen ).toEqual( [ 'n0nce', null ] );
+		expect( dispatch ).toHaveBeenCalledWith( {
+			type: 'SUBMIT_SUCCESS',
+			data: { status: 'paid' },
+		} );
+		expect( screen().text ).not.toContain( 'Cookie check failed' );
+	} );
+
+	test( 'so does a subscription, whose first payment PayPal has already taken', async () => {
+		const seen = serveStaleNonceThen( { status: 'paid' } );
+		const dispatch = await mount( subscriptionPayment() );
+
+		sdkButtons.onClick();
+		await sdkButtons.onApprove( { subscriptionID: 'I-SUB-9' } );
+		await settle();
+
+		expect( seen ).toEqual( [ 'n0nce', null ] );
+		expect( dispatch ).toHaveBeenCalledWith( {
+			type: 'SUBMIT_SUCCESS',
+			data: { status: 'paid' },
+		} );
+	} );
+
+	test( 'a 403 that is not about the nonce is still an error, not an endless retry', async () => {
+		const seen = [];
+		global.fetch = jest.fn( ( url, init ) => {
+			seen.push( ( init?.headers || {} )[ 'X-WP-Nonce' ] ?? null );
+			return Promise.resolve( {
+				ok:     false,
+				status: 403,
+				json:   async () => ( { code: 'fundkit_forbidden', message: 'NOT_YOURS' } ),
+				clone() { return this; },
+			} );
+		} );
+
+		await mount( oneTimePayment() );
+		sdkButtons.onClick();
+		await sdkButtons.onApprove( {} );
+		await settle();
+
+		expect( seen ).toEqual( [ 'n0nce' ] );
+		expect( screen().text ).toContain( 'NOT_YOURS' );
+	} );
+} );
