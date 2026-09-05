@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 import Btn from '../../_shared/components/Btn';
 import DateField from '../../_shared/components/DateField';
@@ -17,6 +17,20 @@ async function download( path, setNotice, setBusy, fallbackName ) {
         if ( blob.size === 0 ) {
             setNotice( { type: 'error', text: __( 'That export came back empty.', 'fundraising-toolkit' ) } );
             return;
+        }
+
+        // A truncated export downloads exactly like a complete one, and it is
+        // what a bookkeeper reconciles against, so say it on the way out.
+        const cap = res.headers.get( 'x-fundkit-export-truncated' );
+        if ( cap ) {
+            setNotice( {
+                type: 'warning',
+                text: sprintf(
+                    /* translators: %s: maximum number of rows an export can hold. */
+                    __( 'This export holds the most recent %s rows and stops there. Narrow the date range to get the rest.', 'fundraising-toolkit' ),
+                    Number( cap ).toLocaleString()
+                ),
+            } );
         }
 
         const match = ( res.headers.get( 'content-disposition' ) || '' ).match( /filename="([^"]+)"/ );

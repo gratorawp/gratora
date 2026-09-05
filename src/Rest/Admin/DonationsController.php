@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
+use FundKit\Analytics\ErrorLog;
 use FundKit\Rest\Paging;
 use FundKit\Foundation\Auth\Capabilities;
 
@@ -1589,7 +1590,7 @@ final class DonationsController
             // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output is the response body, not a filesystem path; WP_Filesystem has no streaming equivalent.
             $out = fopen('php://output', 'w');
             if ($out !== false) {
-                $this->writeCsv($out, $request);
+                $this->writeCsv($out, $request, $server);
                 // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://output is the response body, not a filesystem path; WP_Filesystem has no streaming equivalent.
                 fclose($out);
             }
@@ -1607,7 +1608,7 @@ final class DonationsController
      *
      * @since 1.0.0
      */
-    private function writeCsv($out, WP_REST_Request $request): void
+    private function writeCsv($out, WP_REST_Request $request, $server = null): void
     {
         $search  = $request['search']   !== null ? trim((string) $request['search']) : '';
         $donorId = $request['donor_id'] !== null ? (int) $request['donor_id'] : 0;
@@ -1641,6 +1642,37 @@ final class DonationsController
         // that is what fundkit_export_donors exists to gate.
         $withDonorPii = Capabilities::userCan('fundkit_export_donors');
 
+        /**
+         * How many rows one export may hold. The cap is memory, not policy: a
+         * whole export held as one string exhausts the limit well inside it.
+         *
+         * @param int $rows
+         *
+         * @since 1.0.0
+         */
+        $cap = max(1, (int) apply_filters('fundkit.export.max_rows', self::EXPORT_MAX_ROWS));
+
+        // Asked for before a byte is written, because whether the answer fits
+        // decides a header, and a header cannot follow the body.
+        $ids = $this->donations->listIdsForExport($filters + ['limit' => $cap + 1]);
+        if (count($ids) > $cap) {
+            array_pop($ids);
+
+            // A truncated export is otherwise indistinguishable from a complete
+            // one: same 200, same filename, same clean ending. It is what a
+            // bookkeeper reconciles against, so the screen is told on the way
+            // out and the log keeps it for whoever asks later.
+            if ($server !== null) {
+                $server->send_header('X-FundKit-Export-Truncated', (string) $cap);
+            }
+
+            ErrorLog::record(
+                'export.donations',
+                sprintf('A donations export was cut at %d rows. The rest of the matching donations are not in that file.', $cap),
+                ['rows' => $cap]
+            );
+        }
+
         // UTF-8 BOM so Excel auto-detects the encoding for accented donor names.
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- $out is a php:// stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fwrite($out, "\xEF\xBB\xBF");
@@ -1670,8 +1702,6 @@ final class DonationsController
             __('Paid at', 'fundraising-toolkit'),
             __('Refunded at', 'fundraising-toolkit'),
         ]));
-
-        $ids = $this->donations->listIdsForExport($filters + ['limit' => self::EXPORT_MAX_ROWS]);
 
         foreach (array_chunk($ids, self::EXPORT_PAGE) as $idChunk) {
             $byId = $this->donations->findManyDonationsByIds($idChunk);

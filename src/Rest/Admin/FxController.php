@@ -127,11 +127,18 @@ final class FxController
         // here to add a rate for a stranded currency, and that is not
         // necessarily one the org still accepts: the same union
         // FxRatesUpdater::needsRates() asks for the same reason.
-        $codes = array_values(array_unique(
-            array_merge([$base], $supported, FxBackfill::strandedCurrencies())
-        ));
         $manual   = $this->fx->manual();
         $fetched  = $this->fx->fetchedRates();
+
+        // Plus every currency that already carries a hand-set rate. This screen
+        // is the whole set: a write posts the overrides it was shown and a blank
+        // one clears that currency, so an override missing from the rows here is
+        // deleted by the next save of the panel for any unrelated reason. A
+        // stranded currency leaves strandedCurrencies() as soon as its rate is
+        // added and the backfill runs, which is exactly when that happened.
+        $codes = array_values(array_unique(
+            array_merge([$base], $supported, FxBackfill::strandedCurrencies(), array_keys($manual))
+        ));
 
         $rows = [];
         foreach ($codes as $code) {
