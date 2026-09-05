@@ -66,6 +66,35 @@ final class ReferenceGeneratorTest extends IntegrationTestCase
             'Counter continues across years when reset_yearly = false');
     }
 
+    /**
+     * The reset is what would collide, and the year is what would tell the two
+     * runs apart. Asking for the reset without the year asks for a duplicate,
+     * so the reset is the half that is ignored.
+     */
+    public function test_a_yearly_reset_without_the_year_does_not_repeat_a_reference(): void
+    {
+        update_option(ReferenceGenerator::OPTION_SETTINGS, [
+            'prefixes'     => ['donation' => 'DON'],
+            'padding'      => 5,
+            'include_year' => false,
+            'reset_yearly' => true,
+        ]);
+
+        $gen2026 = $this->generatorAt('2026-06-01');
+        $this->assertSame('DON-00001', $gen2026->next('donation'));
+        $this->assertSame('DON-00002', $gen2026->next('donation'));
+
+        $gen2027 = $this->generatorAt('2027-01-01');
+        $this->assertSame(
+            'DON-00003',
+            $gen2027->next('donation'),
+            'the counter carries across the year rather than reissuing DON-00001'
+        );
+
+        $gen2028 = $this->generatorAt('2028-01-01');
+        $this->assertSame('DON-00004', $gen2028->next('donation'));
+    }
+
     public function test_next_number_override_jumps_counter_forward(): void
     {
         $gen = $this->generatorAt('2026-05-13');

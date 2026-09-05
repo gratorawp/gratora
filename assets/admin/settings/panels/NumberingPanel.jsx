@@ -276,9 +276,12 @@ export default function NumberingPanel( { s , active } ) {
 
                 <ToggleRow
                     title={ __( 'Reset numbering each year', 'fundraising-toolkit' ) }
-                    sub={ __( 'Start again at 1 every January. Turn off for one continuous sequence across years.', 'fundraising-toolkit' ) }
-                    checked={ !! s.value( 'reset_yearly', true ) }
+                    sub={ liveFmt.includeYear
+                        ? __( 'Start again at 1 every January. Turn off for one continuous sequence across years.', 'fundraising-toolkit' )
+                        : __( 'Needs the year, which is off. Restarting at 1 without it would reissue numbers already printed, so numbering stays continuous.', 'fundraising-toolkit' ) }
+                    checked={ liveFmt.includeYear && !! s.value( 'reset_yearly', true ) }
                     onChange={ s.setValue( 'reset_yearly' ) }
+                    disabled={ ! liveFmt.includeYear }
                 />
             </Card>
 
