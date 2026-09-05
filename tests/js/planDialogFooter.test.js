@@ -71,3 +71,7 @@ test( 'Close closes and starts no action', () => {
 test( 'the title names the plan as an identifier', () => {
 	expect( mount().textContent ).toContain( 'Subscription #39' );
 } );
+
+test( 'the dialog takes the wide size, which the shared styles define', () => {
+	expect( mount().querySelector( '.fundkit-dialog--wide' ) ).not.toBeNull();
+} );

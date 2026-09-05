@@ -55,6 +55,7 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
             /* translators: %d: subscription id */
             title={ sprintf( __( 'Subscription #%d', 'fundraising-toolkit' ), plan.id ) }
             onClose={ onClose }
+            size="wide"
             foot={
                 <>
                     <Btn className="sd-foot__close" variant="secondary" onClick={ onClose }>
