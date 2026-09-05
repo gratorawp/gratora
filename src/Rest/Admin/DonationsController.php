@@ -26,6 +26,7 @@ use FundKit\Foundation\Helpers\Money;
 use FundKit\Forms\Blocks\CustomFieldLabels;
 use FundKit\Forms\Form;
 use FundKit\Funds\Fund;
+use FundKit\Funds\FundRepository;
 use FundKit\Receipts\Receipt;
 use FundKit\Receipts\ReceiptIssuer;
 use FundKit\Receipts\ReceiptRepository;
@@ -288,23 +289,44 @@ final class DonationsController
         return $this->canAccess() && $this->canReadDonorPii();
     }
 
-    /** @since 1.0.0 */
+    /**
+     * Only funds the resolver will honour.
+     *
+     * A fund outside its schedule window, and a parent that exists to head a
+     * group, are both is_active, and FundResolver refuses both and falls
+     * through to the org default. Offering them here files restricted money in
+     * the general pot and reports success.
+     *
+     * @since 1.0.0
+     */
     public function fundOptions(): WP_REST_Response
     {
-        $rows = Fund::query()
-            ->where('is_active', 1)
-            ->orderBy('sort_order', 'ASC')
-            ->limit(500)
-            ->getAll();
+        $funds     = new FundRepository();
+        $default   = $funds->default();
+        $defaultId = $default ? (int) $default->id : 0;
 
-        return new WP_REST_Response(array_map(
-            static fn (Fund $f): array => [
-                'id'         => (int) $f->id,
-                'name'       => (string) $f->name,
-                'is_default' => (bool) $f->is_default,
+        return new WP_REST_Response(array_values(array_map(
+            static fn (array $o): array => [
+                'id'         => (int) $o['id'],
+                'name'       => (string) $o['label'],
+                'depth'      => (int) $o['depth'],
+                'is_default' => (int) $o['id'] === $defaultId,
             ],
-            $rows,
-        ), 200);
+            $this->selectableFunds(),
+        )), 200);
+    }
+
+    /**
+     * @return list<array{id:string,label:string,description:string,depth:int,selectable:bool}>
+     *
+     * @since 1.0.0
+     */
+    private function selectableFunds(): array
+    {
+        return array_values(array_filter(
+            (new FundRepository())->pickerOptions(null, true),
+            static fn (array $o): bool => ! empty($o['selectable'])
+        ));
     }
 
     /**
@@ -492,13 +514,29 @@ final class DonationsController
             }
         }
 
+        // Same rule as the attribution above: only what the picker offered. A
+        // fund the resolver will not honour is silently replaced by the org
+        // default, so accepting one records money against a designation nobody
+        // chose.
+        $fundId = $request['fund_id'] !== null ? (int) $request['fund_id'] : null;
+        if ($fundId !== null) {
+            $offered = array_map(static fn (array $o): int => (int) $o['id'], $this->selectableFunds());
+            if (! in_array($fundId, $offered, true)) {
+                return new WP_Error(
+                    'fundkit_invalid_fund',
+                    __('That fund is not open for donations right now. Pick another.', 'fundraising-toolkit'),
+                    ['status' => 422]
+                );
+            }
+        }
+
         $intent = new DonationIntent(
             email: (string) $request['email'],
             amount_cents: (int) $request['amount_cents'],
             currency: $currency,
             gateway: 'offline',
             campaign_id: $request['campaign_id'] !== null ? (int) $request['campaign_id'] : null,
-            fund_id: $request['fund_id'] !== null ? (int) $request['fund_id'] : null,
+            fund_id: $fundId,
             profile: array_filter([
                 'first_name' => (string) $request['first_name'],
                 'last_name'  => (string) $request['last_name'],

@@ -63,9 +63,10 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
             .then( ( res ) => setFunds( ( Array.isArray( res ) ? res : [] ).map( ( f ) => {
                 /* translators: %s: fund name. */
                 const isDefault = __( '%s (default)', 'fundraising-toolkit' );
+                const name = f.depth ? `- ${ f.name }` : f.name;
                 return {
                     value: String( f.id ),
-                    label: f.is_default ? sprintf( isDefault, f.name ) : f.name,
+                    label: f.is_default ? sprintf( isDefault, name ) : name,
                 };
             } ) ) )
             // Silent: leaving this empty just means the org default applies,
