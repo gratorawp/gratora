@@ -298,9 +298,19 @@ function registeredGateway( id ) {
 
 // On a long or paged form the invalid field may be off-screen, so the button
 // reads as a dead click. Runs after the error re-render has committed.
-function focusFirstInvalid() {
+function formRoot( hostId ) {
+    return hostId ? document.getElementById( hostId ) : null;
+}
+
+function focusFirstInvalid( hostId ) {
     requestAnimationFrame( () => {
-        const el = document.querySelector( '.fundkit-donation-form [aria-invalid="true"]' );
+        // This form, not the first one on the page: two forms on one page had
+        // the second one's failed submit scroll the reader to a field in the
+        // first, or to nothing at all.
+        const root = formRoot( hostId );
+        const el   = root
+            ? root.querySelector( '[aria-invalid="true"]' )
+            : document.querySelector( '.fundkit-donation-form [aria-invalid="true"]' );
         if ( el && typeof el.focus === 'function' ) {
             el.focus( { preventScroll: true } );
             el.scrollIntoView( { behavior: 'smooth', block: 'center' } );
@@ -397,7 +407,7 @@ function FormBody( { state, dispatch, config } ) {
                     // dead-ends with no feedback when the error is on a page
                     // before the submit button.
                     dispatch( { type: 'SET_ERRORS', errors, step: s.page || 0 } );
-                    focusFirstInvalid();
+                    focusFirstInvalid( config.hostId );
                     return;
                 }
             }
@@ -833,7 +843,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     const pageMounted = useRef( false );
     useEffect( () => {
         if ( ! pageMounted.current ) { pageMounted.current = true; return; }
-        const root = document.querySelector( '.fundkit-donation-form' );
+        const root = formRoot( config.hostId ) || document.querySelector( '.fundkit-donation-form' );
         const h    = root?.querySelector( '.fundkit-form__page-title, .fundkit-form__bar-title' );
         if ( h ) {
             h.setAttribute( 'tabindex', '-1' );
@@ -849,7 +859,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
             Object.assign( errors, validateStep( s, state ) );
         }
         dispatch( { type: 'NEXT', errors } );
-        if ( Object.keys( errors ).length > 0 ) focusFirstInvalid();
+        if ( Object.keys( errors ).length > 0 ) focusFirstInvalid( config.hostId );
     }, [ checkSteps, state, dispatch ] );
 
     // No enabled gateway takes the chosen currency. GatewaySelect says so where
@@ -874,7 +884,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
         }
         if ( Object.keys( errors ).length > 0 ) {
             dispatch( { type: 'SET_ERRORS', errors } );
-            focusFirstInvalid();
+            focusFirstInvalid( config.hostId );
             return;
         }
         onSubmit();

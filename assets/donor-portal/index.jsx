@@ -16,20 +16,29 @@ const cfg = window.fundkitPortal || { rest: '/wp-json/fundkit/v1/portal/', nonce
 const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function useFocusTrap( ref, active, onClose ) {
     useEffect( () => {
-        if ( ! active || ! ref.current ) return;
-        const el = ref.current;
-        const doc = el.ownerDocument;
+        if ( ! active ) return;
+
+        // Not gated on ref.current: the panel is a child that may not be
+        // attached yet when this runs, and bailing out here left the sheet with
+        // no trap and no Escape at all until something happened to remount it.
+        const doc  = ( ref.current && ref.current.ownerDocument ) || document;
         const prev = doc.activeElement;
-        const first = el.querySelector( FOCUSABLE );
+        const first = ref.current && ref.current.querySelector( FOCUSABLE );
         if ( first ) first.focus();
         const onKey = ( e ) => {
+            // Read the ref rather than the element captured above: the sheet
+            // swaps its contents as the donor moves between stages, and a
+            // handler bound to the element of the first stage goes with it.
+            const node = ref.current;
+            if ( ! node ) return;
+
             if ( e.key === 'Escape' && typeof onClose === 'function' ) {
                 e.preventDefault();
                 onClose();
                 return;
             }
             if ( e.key !== 'Tab' ) return;
-            const nodes = [ ...el.querySelectorAll( FOCUSABLE ) ];
+            const nodes = [ ...node.querySelectorAll( FOCUSABLE ) ];
             if ( ! nodes.length ) return;
             if ( e.shiftKey && doc.activeElement === nodes[ 0 ] ) {
                 e.preventDefault();
@@ -39,9 +48,12 @@ function useFocusTrap( ref, active, onClose ) {
                 nodes[ 0 ].focus();
             }
         };
-        el.addEventListener( 'keydown', onKey );
+
+        // On the document, not the sheet: focus that has escaped the sheet
+        // still has to be brought back, and Escape still has to close it.
+        doc.addEventListener( 'keydown', onKey );
         return () => {
-            el.removeEventListener( 'keydown', onKey );
+            doc.removeEventListener( 'keydown', onKey );
             if ( prev && typeof prev.focus === 'function' ) prev.focus();
         };
     }, [ active ] );
@@ -1674,10 +1686,14 @@ function withDefaults( v ) {
     };
 }
 
+let countryPickerSeq = 0;
+
 function CountryPicker( { value, onChange } ) {
     const current = COUNTRIES.find( ( c ) => c.code === ( value || '' ).toUpperCase() );
     const [ query, setQuery ] = useState( current ? current.name : '' );
     const [ open, setOpen ]   = useState( false );
+    const [ active, setActive ] = useState( 0 );
+    const [ id ] = useState( () => `dp-country-${ ++countryPickerSeq }` );
 
     useEffect( () => {
         const c = COUNTRIES.find( ( cur ) => cur.code === ( value || '' ).toUpperCase() );
@@ -1688,6 +1704,9 @@ function CountryPicker( { value, onChange } ) {
     const matches = q === ''
         ? COUNTRIES
         : COUNTRIES.filter( ( c ) => c.name.toLowerCase().includes( q ) || c.code.toLowerCase().startsWith( q ) );
+    const visible = matches.slice( 0, 50 );
+
+    useEffect( () => { setActive( 0 ); }, [ query ] );
 
     const pick = ( c ) => {
         onChange( c.code );
@@ -1695,23 +1714,55 @@ function CountryPicker( { value, onChange } ) {
         setOpen( false );
     };
 
+    // Mouse was the only way in: the options were buttons activated on
+    // mousedown, so a donor on a keyboard could type a search and never choose
+    // anything, on a field the account form requires.
+    const onKeyDown = ( e ) => {
+        if ( e.key === 'ArrowDown' || e.key === 'ArrowUp' ) {
+            e.preventDefault();
+            if ( ! open ) { setOpen( true ); return; }
+            setActive( ( i ) => e.key === 'ArrowDown'
+                ? Math.min( visible.length - 1, i + 1 )
+                : Math.max( 0, i - 1 ) );
+        } else if ( e.key === 'Enter' ) {
+            if ( ! open || ! visible[ active ] ) return;
+            e.preventDefault();
+            pick( visible[ active ] );
+        } else if ( e.key === 'Escape' ) {
+            setOpen( false );
+        }
+    };
+
     return (
-        <label class="dp-country">
+        <label class="dp-country" for={ id }>
             { __( 'Country', 'fundraising-toolkit' ) }
             <div class="dp-country__wrap">
                 <input
+                    id={ id }
                     type="text"
+                    role="combobox"
+                    aria-expanded={ open }
+                    aria-autocomplete="list"
+                    aria-controls={ open ? `${ id }-list` : undefined }
+                    aria-activedescendant={ open && visible[ active ] ? `${ id }-opt-${ visible[ active ].code }` : undefined }
                     value={ query }
                     placeholder={ __( 'Search country…', 'fundraising-toolkit' ) }
                     onFocus={ () => setOpen( true ) }
                     onBlur={ () => setTimeout( () => setOpen( false ), 150 ) }
                     onInput={ ( e ) => { setQuery( e.target.value ); setOpen( true ); } }
+                    onKeyDown={ onKeyDown }
                 />
-                { open && matches.length > 0 && (
-                    <ul class="dp-country__list">
-                        { matches.slice( 0, 50 ).map( ( c ) => (
-                            <li key={ c.code }>
-                                <button type="button" onMouseDown={ ( e ) => { e.preventDefault(); pick( c ); } }>
+                { open && visible.length > 0 && (
+                    <ul id={ `${ id }-list` } class="dp-country__list" role="listbox">
+                        { visible.map( ( c, i ) => (
+                            <li
+                                key={ c.code }
+                                id={ `${ id }-opt-${ c.code }` }
+                                role="option"
+                                aria-selected={ i === active }
+                                class={ i === active ? 'is-active' : undefined }
+                            >
+                                <button type="button" tabIndex={ -1 } onMouseEnter={ () => setActive( i ) } onMouseDown={ ( e ) => { e.preventDefault(); pick( c ); } }>
                                     <span>{ c.name }</span>
                                     <span class="dp-country__code">{ c.code }</span>
                                 </button>
