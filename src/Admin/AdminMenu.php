@@ -136,5 +136,6 @@ final class AdminMenu extends HookProvider
             ['wp-components'],
             (string) (@filemtime(FUNDKIT_DIR . 'build/admin/dashboard.css') ?: FUNDKIT_VERSION)
         );
+        wp_style_add_data(self::HANDLE, 'rtl', 'replace');
     }
 }

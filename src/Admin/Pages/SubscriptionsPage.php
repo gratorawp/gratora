@@ -81,5 +81,6 @@ final class SubscriptionsPage extends HookProvider
             ['wp-components'],
             (string) (@filemtime(FUNDKIT_DIR . 'build/admin/subscriptions.css') ?: FUNDKIT_VERSION)
         );
+        wp_style_add_data('fundkit-admin-subscriptions', 'rtl', 'replace');
     }
 }

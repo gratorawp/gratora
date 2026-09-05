@@ -544,10 +544,20 @@ final class ReceiptIssuer
 
         $ctx = apply_filters('fundkit.receipt.context', $ctx);
 
+        // The donor's locale, the way processRenderer renders it. Without the
+        // switch, a re-download hands back a receipt written in whatever
+        // language the request happens to be in, so the copy the admin sees and
+        // the copy the donor was emailed are two different documents.
+        $switched = $this->switchLocale($ctx->locale);
+
         try {
             return $renderer->render($ctx);
         } catch (\Throwable $e) {
             return null;
+        } finally {
+            if ($switched) {
+                restore_previous_locale();
+            }
         }
     }
 

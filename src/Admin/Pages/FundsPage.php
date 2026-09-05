@@ -78,5 +78,6 @@ final class FundsPage extends HookProvider
             ['wp-components'],
             (string) (@filemtime(FUNDKIT_DIR . 'build/admin/funds.css') ?: FUNDKIT_VERSION)
         );
+        wp_style_add_data('fundkit-admin-funds', 'rtl', 'replace');
     }
 }

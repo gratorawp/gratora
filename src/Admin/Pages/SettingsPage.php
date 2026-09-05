@@ -81,5 +81,6 @@ final class SettingsPage extends HookProvider
             ['wp-components'],
             (string) (@filemtime(FUNDKIT_DIR . 'build/admin/settings.css') ?: FUNDKIT_VERSION)
         );
+        wp_style_add_data(self::HANDLE, 'rtl', 'replace');
     }
 }

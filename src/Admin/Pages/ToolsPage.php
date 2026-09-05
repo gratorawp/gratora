@@ -85,5 +85,6 @@ final class ToolsPage extends HookProvider
             ['wp-components'],
             (string) (@filemtime(FUNDKIT_DIR . 'build/admin/tools.css') ?: FUNDKIT_VERSION)
         );
+        wp_style_add_data('fundkit-admin-tools', 'rtl', 'replace');
     }
 }

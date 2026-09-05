@@ -747,8 +747,13 @@ final class DonationFormShortcode extends HookProvider
                 'freqQuarterly'  => __('Quarterly', 'fundraising-toolkit'),
                 'freqYearly'     => __('Yearly', 'fundraising-toolkit'),
                 'searchCountry'  => __('Search country…', 'fundraising-toolkit'),
+                // The same source strings the server-rendered terms field
+                // uses, so one translation covers both render paths.
+                'agreeToTerms'   => __('I agree to the terms', 'fundraising-toolkit'),
+                'readTerms'      => __('Read the terms', 'fundraising-toolkit'),
                 'validation'     => [
                     'required'       => __('Required.', 'fundraising-toolkit'),
+                    'termsRequired'  => __('Please agree to continue.', 'fundraising-toolkit'),
                     'pickAmount'     => __('Pick or enter an amount.', 'fundraising-toolkit'),
                     /* translators: %s: minimum donation amount formatted */
                     'minAmount'      => __('Minimum donation is %s.', 'fundraising-toolkit'),

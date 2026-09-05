@@ -204,6 +204,7 @@ final class FormsPage extends HookProvider
             ['wp-edit-post', 'wp-block-editor', 'wp-components'],
             (string) (@filemtime(FUNDKIT_DIR . 'build/admin/forms.css') ?: FUNDKIT_VERSION)
         );
+        wp_style_add_data('fundkit-admin-forms', 'rtl', 'replace');
 
         if (self::isFormEditView()) {
             wp_add_inline_style('fundkit-admin-forms', self::FULLSCREEN_CSS);

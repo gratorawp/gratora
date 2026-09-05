@@ -40,6 +40,7 @@ export function donationStatusPill( status ) {
     switch ( status ) {
         case 'paid':           return { cls: 'is-ok',     label: __( 'Paid',     'fundraising-toolkit' ) };
         case 'pending':        return { cls: 'is-warn',   label: __( 'Pending',  'fundraising-toolkit' ) };
+        case 'processing':     return { cls: 'is-info',   label: __( 'Processing', 'fundraising-toolkit' ) };
         case 'failed':         return { cls: 'is-error',  label: __( 'Failed',   'fundraising-toolkit' ) };
         case 'refunded':       return { cls: 'is-muted',  label: __( 'Refunded', 'fundraising-toolkit' ) };
         case 'partial_refund': return { cls: 'is-warn',   label: __( 'Partial',  'fundraising-toolkit' ) };

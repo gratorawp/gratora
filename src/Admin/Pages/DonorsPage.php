@@ -81,5 +81,6 @@ final class DonorsPage extends HookProvider
             ['wp-components'],
             (string) (@filemtime(FUNDKIT_DIR . 'build/admin/donors.css') ?: FUNDKIT_VERSION)
         );
+        wp_style_add_data('fundkit-admin-donors', 'rtl', 'replace');
     }
 }

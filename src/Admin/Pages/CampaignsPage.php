@@ -86,5 +86,6 @@ final class CampaignsPage extends HookProvider
             ['wp-components'],
             (string) (@filemtime(FUNDKIT_DIR . 'build/admin/campaigns.css') ?: FUNDKIT_VERSION)
         );
+        wp_style_add_data('fundkit-admin-campaigns', 'rtl', 'replace');
     }
 }

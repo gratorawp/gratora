@@ -234,6 +234,7 @@ final class BlockEditorIntegration
                 ['wp-components'],
                 (string) filemtime(FUNDKIT_DIR . $uiCss)
             );
+            wp_style_add_data(self::HANDLE_EDITOR_UI, 'rtl', 'replace');
         }
 
         // The binding picker's field list is handed over rather than repeated in
