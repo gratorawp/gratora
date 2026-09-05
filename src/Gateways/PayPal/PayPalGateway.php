@@ -12,15 +12,16 @@ use FundKit\Foundation\Time\Clock;
 use FundKit\Gateways\GatewayConfirmResult;
 use FundKit\Gateways\GatewayIntentResult;
 use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\RefundResult;
 use FundKit\Gateways\PaymentMethodUpdate;
+use FundKit\Gateways\RefundResult;
 use FundKit\Gateways\SubscriptionAware;
-use FundKit\Gateways\SupportsScheduleChange;
-use FundKit\Gateways\SubscriptionSchedule;
-use FundKit\Gateways\SupportsSubscriptionPause;
-use FundKit\Gateways\SupportsPaymentMethodUpdate;
-use FundKit\Gateways\WebhookOutcome;
 use FundKit\Gateways\SubscriptionChangeNeedsApproval;
+use FundKit\Gateways\SubscriptionSchedule;
+use FundKit\Gateways\SupportsPaymentMethodUpdate;
+use FundKit\Gateways\SupportsScheduleChange;
+use FundKit\Gateways\SupportsSubscriptionPause;
+use FundKit\Gateways\TestMode;
+use FundKit\Gateways\WebhookOutcome;
 use FundKit\Gateways\WebhookPaymentGuard;
 use FundKit\Recurring\FrequencyMap;
 use FundKit\Recurring\RecurringPlan;
@@ -90,7 +91,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         // signature has nothing to verify against and every delivery is
         // refused, so a recurring donation would be charged and banked nowhere.
         // One-time survives that, because the browser confirms its capture.
-        if ($this->account->webhookId($this->siteTestMode()) === '') {
+        if ($this->account->webhookId(TestMode::siteWide()) === '') {
             return ['one_time'];
         }
 
@@ -104,13 +105,6 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      *
      * @since 1.0.0
      */
-    private function siteTestMode(): bool
-    {
-        $cfg = get_option('fundkit_gateway_config', []);
-
-        return is_array($cfg) && ! empty($cfg['test_mode']);
-    }
-
     /** @since 1.0.0 */
     public function paymentMethods(): array
     {
@@ -149,7 +143,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function canCharge(): bool
     {
-        return $this->account->canCharge();
+        // See StripeGateway::canCharge: the site's mode picks the credentials.
+        return $this->account->canCharge() && $this->account->hasKeysFor(TestMode::siteWide());
     }
 
     /**

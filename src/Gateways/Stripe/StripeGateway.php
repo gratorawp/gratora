@@ -15,19 +15,19 @@ use FundKit\Donors\DonorRepository;
 use FundKit\Donors\DonorService;
 use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\GatewayConfirmResult;
 use FundKit\Gateways\AccountFingerprint;
+use FundKit\Gateways\GatewayConfirmResult;
 use FundKit\Gateways\GatewayIntentResult;
 use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\RefundResult;
+use FundKit\Gateways\PaymentMethodUpdate;
 use FundKit\Gateways\PaymentRetryUnavailable;
+use FundKit\Gateways\RefundResult;
 use FundKit\Gateways\SubscriptionAware;
 use FundKit\Gateways\SubscriptionSchedule;
-use FundKit\Gateways\SupportsScheduleChange;
-use FundKit\Gateways\SupportsSubscriptionPause;
-use FundKit\Gateways\PaymentMethodUpdate;
 use FundKit\Gateways\SupportsPaymentMethodUpdate;
 use FundKit\Gateways\SupportsPaymentRetry;
+use FundKit\Gateways\SupportsScheduleChange;
+use FundKit\Gateways\SupportsSubscriptionPause;
 use FundKit\Gateways\TestMode;
 use FundKit\Gateways\WebhookOutcome;
 use FundKit\Gateways\WebhookPaymentGuard;
@@ -35,8 +35,8 @@ use FundKit\Recurring\FrequencyMap;
 use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\RecurringPlanRepository;
 use RuntimeException;
-use WP_REST_Request;
 use Throwable;
+use WP_REST_Request;
 
 /**
  * Stripe gateway via PaymentIntents for one-time donations and Subscriptions
@@ -149,8 +149,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     public function canCharge(): bool
     {
         // A mid-onboarding account cannot charge yet, and gating here keeps the
-        // donor options and the admin readiness check on one signal.
-        return $this->account->canCharge();
+        // donor options and the admin readiness check on one signal. The mode
+        // the site is in picks the key pair, so keys for the other mode are no
+        // help: offering it would only fail at createIntent.
+        return $this->account->canCharge() && $this->account->hasKeysFor(TestMode::siteWide());
     }
 
     /** @since 1.0.0 */

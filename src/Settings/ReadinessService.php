@@ -182,6 +182,41 @@ final class ReadinessService
     }
 
     /**
+     * Gateways switched on and connected that hold no key pair for $test.
+     *
+     * @return list<string>
+     */
+    private function modeGaps(bool $test): array
+    {
+        $missing = [];
+        if ($this->switchedOn('stripe') && $this->stripe->isConnected() && ! $this->stripe->hasKeysFor($test)) $missing[] = __('Stripe', 'fundraising-toolkit');
+        if ($this->switchedOn('paypal') && $this->payPal->isConnected() && ! $this->payPal->hasKeysFor($test)) $missing[] = __('PayPal', 'fundraising-toolkit');
+
+        /**
+         * A gateway that ships in an add-on owns its own credentials, so it
+         * reports its own gap. Without this the screen is silent about a
+         * processor set up for one mode and never for the other. The two modes
+         * are separate filters because a listener written for one would report
+         * the wrong gap under the other.
+         *
+         * @param list<string> $missing gateway labels with no credentials for this mode
+         *
+         * @since 1.0.0
+         */
+        $missing = (array) apply_filters(
+            $test ? 'fundkit.readiness.test_mode_gaps' : 'fundkit.readiness.live_mode_gaps',
+            $missing
+        );
+
+        // A label is what the sentence is built from, so anything else is
+        // dropped rather than rendered as the word "Array".
+        return array_values(array_filter(
+            $missing,
+            static fn ($label): bool => is_string($label) && $label !== ''
+        ));
+    }
+
+    /**
      * @return array<string,mixed>
      *
      * @since 1.0.0
@@ -189,6 +224,26 @@ final class ReadinessService
     private function modeCheck(): array
     {
         if ($this->testMode()) {
+            // Test keys are optional, so the usual live site has none. Flipping
+            // the switch then fails every donation at createIntent, which the
+            // donor sees as "we could not start your payment".
+            $noSandbox = $this->modeGaps(true);
+            if ($noSandbox !== []) {
+                return $this->fail(
+                    'mode',
+                    'money',
+                    sprintf(
+                        /* translators: %s: comma-separated list of gateway names holding no test keys. */
+                        __('Test mode is on, but %s has no test keys', 'fundraising-toolkit'),
+                        implode(', ', $noSandbox)
+                    ),
+                    __('Every donation will fail while this is on. Add the test key pair, or turn test mode off.', 'fundraising-toolkit'),
+                    'gateways',
+                    __('Add test keys', 'fundraising-toolkit'),
+                    true
+                );
+            }
+
             return $this->warn(
                 'mode',
                 'money',
@@ -201,20 +256,7 @@ final class ReadinessService
 
         // Live mode reading a test key charges nobody, and the donor sees a
         // success page for a payment that never happened.
-        $missing = [];
-        if ($this->switchedOn('stripe') && $this->stripe->isConnected() && ! $this->stripe->hasKeysFor(false)) $missing[] = __('Stripe', 'fundraising-toolkit');
-        if ($this->switchedOn('paypal') && $this->payPal->isConnected() && ! $this->payPal->hasKeysFor(false)) $missing[] = __('PayPal', 'fundraising-toolkit');
-
-        /**
-         * A gateway that ships in an add-on owns its own credentials, so it
-         * reports its own gap. Without this the screen is silent about a
-         * processor set up for test and never for live.
-         *
-         * @param list<string> $missing gateway labels with no live credentials
-         *
-         * @since 1.0.0
-         */
-        $missing = (array) apply_filters('fundkit.readiness.live_mode_gaps', $missing);
+        $missing = $this->modeGaps(false);
 
         if ($missing !== []) {
             return $this->fail(
