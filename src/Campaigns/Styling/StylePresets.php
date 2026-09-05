@@ -92,6 +92,23 @@ final class StylePresets
      *
      * @since 1.0.0
      */
+    /**
+     * The shipped presets plus the one derived from the active theme, which is
+     * the set the Brand panel is seeded from.
+     *
+     * @return array<int, array<string,mixed>>
+     *
+     * @since 1.0.0
+     */
+    public static function builtinsWithTheme(): array
+    {
+        $out   = self::builtins();
+        $theme = self::themePreset();
+        if ($theme) $out[] = $theme;
+
+        return $out;
+    }
+
     public static function all(): array
     {
         $option = get_option(self::OPTION, []);
@@ -216,7 +233,18 @@ final class StylePresets
     public static function tokensFor(string $id): array
     {
         $p = self::find($id);
-        return is_array($p['tokens'] ?? null) ? $p['tokens'] : [];
+        if (is_array($p['tokens'] ?? null)) {
+            return $p['tokens'];
+        }
+
+        // An id nothing answers to is a preset that was deleted while forms and
+        // campaigns still pointed at it. Returning nothing dropped them to the
+        // bare catalogue defaults, which is not a look the org ever chose, and
+        // on the form path it also discarded the campaign's own overrides.
+        // The org default is the nearest thing to what they had.
+        $fallback = self::find(self::defaultId());
+
+        return is_array($fallback['tokens'] ?? null) ? $fallback['tokens'] : [];
     }
 
     /**

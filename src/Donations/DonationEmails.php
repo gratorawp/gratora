@@ -84,6 +84,10 @@ final class DonationEmails extends HookProvider
 
         $this->mailer->sendTemplate($this->templateFor('offline_instructions', $donation), $email, [
             'donor_name'        => $donorName,
+            // Advertised on this template by templateTags, and interpolate
+            // replaces only what it is handed: unfilled it reached the donor as
+            // literal braces in the one email that tells them how to pay.
+            'donor_first_name'  => $this->donorFirstName($donation),
             'organisation_name' => OrgProfile::load()['name'],
             'campaign_title'    => $this->campaignTitle($donation),
             'amount'            => $amount,

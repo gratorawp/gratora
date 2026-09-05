@@ -90,14 +90,7 @@ final class SettingsController
         // the webhook route: reading it is enough to forge a paid donation.
         $data = SecretRedactor::redact($this->settings->get($group));
 
-        // Read-only, and not part of the stored shape: accept() drops it on the
-        // way back in. The screen needs it to disable the picker rather than
-        // let someone choose a currency the save will refuse.
-        if ($group === 'currency-locale') {
-            $data['base_currency_locked'] = BaseCurrencyLock::isLocked();
-        }
-
-        return new WP_REST_Response($data, 200);
+        return new WP_REST_Response(self::withReadOnly($group, $data), 200);
     }
 
     /** @since 1.0.0 */
@@ -137,7 +130,26 @@ final class SettingsController
             return new WP_Error('fundkit_invalid_reference_token', $e->getMessage(), ['status' => 400]);
         }
 
-        return new WP_REST_Response(SecretRedactor::redact($saved), 200);
+        // The same read-only fields the GET carries. The client replaces its
+        // whole record with this reply, so leaving them out unlocked the base
+        // currency picker on a locked site the moment anything was saved.
+        return new WP_REST_Response(self::withReadOnly($group, SecretRedactor::redact($saved)), 200);
+    }
+
+    /**
+     * Fields the screen needs that are not part of the stored shape: accept()
+     * drops them on the way back in.
+     *
+     * @param array<string,mixed> $data
+     * @return array<string,mixed>
+     */
+    private static function withReadOnly(string $group, array $data): array
+    {
+        if ($group === 'currency-locale') {
+            $data['base_currency_locked'] = BaseCurrencyLock::isLocked();
+        }
+
+        return $data;
     }
 
     /**

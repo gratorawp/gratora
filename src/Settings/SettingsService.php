@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FundKit\Settings;
 
+use FundKit\Campaigns\Styling\StylePresets;
+use InvalidArgumentException;
 use FundKit\Analytics\ErrorLog;
 use FundKit\Currency\BaseCurrencyLock;
 use FundKit\Currency\BaseCurrencyLocked;
@@ -439,6 +441,93 @@ final class SettingsService
     }
 
     /**
+     * Built-in presets the org never edited are not theirs to store.
+     *
+     * The Brand panel seeds its working list from every preset it was shown and
+     * writes the whole list back on any change, so the first save froze a
+     * snapshot of the Site theme's derived tokens into the option. Saved tokens
+     * win over derived ones in StylePresets::all(), so the theme preset then
+     * stopped tracking theme.json for good.
+     *
+     * @param array<int,mixed> $presets
+     * @return array<int,mixed>
+     */
+    private static function withoutUntouchedBuiltins(array $presets): array
+    {
+        $shipped = [];
+        foreach (StylePresets::builtinsWithTheme() as $b) {
+            $shipped[(string) ($b['id'] ?? '')] = $b;
+        }
+
+        $kept = [];
+        foreach ($presets as $preset) {
+            $id = is_array($preset) ? (string) ($preset['id'] ?? '') : '';
+            if ($id !== '' && isset($shipped[$id]) && self::samePreset($preset, $shipped[$id])) {
+                continue;
+            }
+            $kept[] = $preset;
+        }
+
+        return $kept;
+    }
+
+    /**
+     * @param array<string,mixed> $a
+     * @param array<string,mixed> $b
+     */
+    private static function samePreset(array $a, array $b): bool
+    {
+        $normalise = static function (array $p): array {
+            $tokens = is_array($p['tokens'] ?? null) ? $p['tokens'] : [];
+            ksort($tokens);
+
+            return ['name' => (string) ($p['name'] ?? ''), 'tokens' => $tokens];
+        };
+
+        return $normalise($a) === $normalise($b);
+    }
+
+    /**
+     * Currency codes are three letters, checked here rather than at the REST
+     * controller.
+     *
+     * The panel's select is not the only writer: the settings.update command
+     * exposes this group to the assistant, and nothing between the request and
+     * the option looked at the value. A default_currency of "dollars" reaches
+     * Money::format, the FX snapshot, every base amount and the receipt.
+     *
+     * @param array<string,mixed> $input
+     *
+     * @throws InvalidArgumentException
+     */
+    private static function assertCurrencyCodes(array $input): void
+    {
+        // Only strings: a value of the wrong shape entirely is accept()'s to
+        // drop, and refusing it here would raise an error over something that
+        // could never have been stored.
+        $valid = static fn ($code): bool => ! is_string($code)
+            || preg_match('/^[A-Za-z]{3}$/', $code) === 1;
+
+        if (array_key_exists('default_currency', $input) && ! $valid($input['default_currency'])) {
+            throw new InvalidArgumentException(
+                esc_html__('A currency is a three-letter code, like USD or EUR.', 'fundraising-toolkit')
+            );
+        }
+
+        if (! array_key_exists('supported_currencies', $input)) {
+            return;
+        }
+
+        foreach ((array) $input['supported_currencies'] as $code) {
+            if (! $valid($code)) {
+                throw new InvalidArgumentException(
+                    esc_html__('Every accepted currency is a three-letter code, like USD or EUR.', 'fundraising-toolkit')
+                );
+            }
+        }
+    }
+
+    /**
      * Drops template text identical to the default built for this read.
      *
      * Those defaults pass through __(), so a stored copy pins every donor's
@@ -503,11 +592,18 @@ final class SettingsService
         // the CLI and any add-on writer all land on this method, and an
         // invariant about recorded money cannot depend on which door was used.
         if ($group === 'currency-locale') {
+            // The lock first: it is about money already recorded, and it has to
+            // win over a complaint about the shape of the value refusing it.
             BaseCurrencyLock::assert($input, $current);
+            self::assertCurrencyCodes($input);
         }
 
         if ($group === 'numbering') {
             ReferenceGenerator::assertTokens($input);
+        }
+
+        if ($group === 'org-brand' && is_array($input['presets'] ?? null)) {
+            $input['presets'] = self::withoutUntouchedBuiltins($input['presets']);
         }
 
         $next    = $this->merge($current, $this->accept($group, $cfg, $input));

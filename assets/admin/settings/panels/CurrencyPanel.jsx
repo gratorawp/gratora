@@ -208,6 +208,8 @@ function ExchangeRatesCard( { fx, base } ) {
     );
 }
 
+const SHIPPED_CURRENCY = 'USD';
+
 export default function CurrencyPanel( { s, fx } ) {
     const defaultCurrency = s.value( 'default_currency', 'USD' );
     // Server-computed, read-only: once money is in, every stored base amount is
@@ -234,7 +236,15 @@ export default function CurrencyPanel( { s, fx } ) {
     const applyCurrency = ( code ) => {
         // Base is always accepted, so persist it into the supported list too -
         // otherwise the UI shows it on while the saved set silently excludes it.
-        const nextSupported = supported.includes( code ) ? supported : [ ...supported, code ];
+        //
+        // A lone USD is what ships rather than a choice, and every settings read
+        // merges it back in, so a length test can never see "unset". Kept beside
+        // a EUR base it makes a single-currency charity look multi-currency to
+        // the rate fetcher and leaves USD unremovable on this very screen. Same
+        // rule as the wizard's chosenCurrencies.
+        const onlyShipped = supported.length === 1 && supported[ 0 ] === SHIPPED_CURRENCY;
+        const base        = onlyShipped ? [] : supported;
+        const nextSupported = base.includes( code ) ? base : [ ...base, code ];
         const patch = { default_currency: code, supported_currencies: nextSupported };
 
         // Picking a currency is the only moment we know what the format should
