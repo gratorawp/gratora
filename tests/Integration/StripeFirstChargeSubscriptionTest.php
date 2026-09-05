@@ -115,7 +115,7 @@ final class StripeFirstChargeSubscriptionTest extends IntegrationTestCase
         $this->assertNotNull($this->findStripeCall('/v1/customers/cus_test_seed'), 'Customer default PM is set');
         $this->assertNotNull($this->findStripeCall('/v1/products'), 'Donation product is provisioned');
         $this->assertNotNull($this->findStripeCall('/v1/prices'), 'Price for amount + interval is created');
-        $subCall = $this->findStripeCall('/v1/subscriptions');
+        $subCall = $this->findStripeCall('/v1/subscriptions', 'POST');
         $this->assertNotNull($subCall, 'Subscription is created');
 
         $subBody = $this->parseForm($subCall['body']);
@@ -240,9 +240,14 @@ final class StripeFirstChargeSubscriptionTest extends IntegrationTestCase
         return (string) ($parts['path'] ?? '');
     }
 
-    private function findStripeCall(string $pathPrefix): ?array
+    /**
+     * The subscription path is now read before it is written, so a match has to
+     * name the method or it finds the lookup and reads an empty body.
+     */
+    private function findStripeCall(string $pathPrefix, string $method = ''): ?array
     {
         foreach ($this->stripeCalls as $c) {
+            if ($method !== '' && strtoupper((string) ($c['method'] ?? '')) !== $method) continue;
             if (str_starts_with($this->stripPath($c['url']), $pathPrefix)) return $c;
         }
         return null;

@@ -1231,14 +1231,25 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             ],
         ];
 
-        $sub = $this->api->post('/subscriptions', $subParams, [
-            // Deterministic, so a redelivered webhook re-POSTs the same key and
-            // Stripe returns the original subscription rather than a second one
-            // that would double-charge the donor every renewal.
-            'Idempotency-Key' => 'fundkit_sub_' . $donation->id,
-        ]);
+        // Ask Stripe what it already has before asking it for another.
+        //
+        // The idempotency key below expires after 24 hours, and both paths back
+        // into here outlive that: Stripe redelivers a failed webhook for three
+        // days, and the admin retry is offered for ninety. A response lost on
+        // the way back leaves a subscription billing at Stripe with no plan row
+        // here, so without this the retry opens a second one, the donor pays
+        // twice every month, and the first is invisible to every screen.
+        $subId = $this->existingSubscriptionFor($customerId, (int) $donation->id);
 
-        $subId = (string) ($sub['id'] ?? '');
+        if ($subId === '') {
+            $sub = $this->api->post('/subscriptions', $subParams, [
+                // Deterministic, so a redelivery inside the window re-POSTs the
+                // same key and Stripe returns the original subscription.
+                'Idempotency-Key' => 'fundkit_sub_' . $donation->id,
+            ]);
+
+            $subId = (string) ($sub['id'] ?? '');
+        }
 
         // Redelivery can re-enter here with the same idempotent subscription;
         // reuse the plan already linked to it rather than inserting a duplicate.
@@ -1286,6 +1297,69 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             ->where('id', (int) $donation->id)
             ->update(['recurring_plan_id' => (int) $plan->id]);
         $donation->recurring_plan_id = (int) $plan->id;
+    }
+
+    /**
+     * A subscription this donation already opened, or '' for none.
+     *
+     * Listed by customer rather than searched: Stripe's search index lags by
+     * about a minute, which is the window a redelivery arrives in. The metadata
+     * matched here is written by the call this guards.
+     *
+     * @since 1.0.0
+     */
+    private function existingSubscriptionFor(string $customerId, int $donationId): string
+    {
+        if ($customerId === '' || $donationId <= 0) {
+            return '';
+        }
+
+        $res = $this->api->get(
+            '/subscriptions?limit=100&status=all&customer=' . rawurlencode($customerId)
+        );
+
+        foreach ((array) ($res['data'] ?? []) as $sub) {
+            $metadata = (array) ($sub['metadata'] ?? []);
+            if ((string) ($metadata['fundkit_initial_donation_id'] ?? '') === (string) $donationId) {
+                return (string) ($sub['id'] ?? '');
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Stripe is talking about a subscription this site has no record of.
+     *
+     * Answering 200 stops the redelivery, which is right because there is
+     * nothing here to retry against, but it also leaves the event with no
+     * trace. On a renewal that is money charged to a donor that appears in no
+     * total, no receipt and no screen, and no cancel path can reach it, so this
+     * record is the only way an admin finds out.
+     *
+     * @since 1.0.0
+     */
+    private function unknownSubscription(string $eventId, string $type, string $subscriptionId): WebhookOutcome
+    {
+        ErrorLog::record(
+            'stripe.webhook',
+            sprintf(
+                /* translators: 1: Stripe event type, 2: Stripe subscription id. */
+                __('Stripe sent %1$s for subscription %2$s, which this site has no plan for. It is live at Stripe and nothing here is recording it.', 'fundraising-toolkit'),
+                $type,
+                $subscriptionId
+            ),
+            ['external_id' => $eventId]
+        );
+
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id:  $eventId,
+            event_type:   $type,
+            handled:      false,
+            error:        "No local plan for subscription {$subscriptionId}",
+            http_status:  200,
+        );
     }
 
     /**
@@ -1396,14 +1470,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $plan = $this->plans->findBySubscriptionId($this->id(), $subscriptionId);
         if (! $plan) {
-            return new WebhookOutcome(
-                signature_ok: true,
-                external_id:  $eventId,
-                event_type:   $type,
-                handled:      false,
-                error:        "No local plan for subscription {$subscriptionId}",
-                http_status:  200,
-            );
+            return $this->unknownSubscription($eventId, $type, $subscriptionId);
         }
 
         // A signature only proves Stripe sent it, not which mode signed it. A
@@ -1516,14 +1583,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         [$subscriptionId] = $this->invoiceRefs($invoice);
         $plan = $this->plans->findBySubscriptionId($this->id(), $subscriptionId);
         if (! $plan) {
-            return new WebhookOutcome(
-                signature_ok: true,
-                external_id:  $eventId,
-                event_type:   $type,
-                handled:      false,
-                error:        "No local plan for subscription {$subscriptionId}",
-                http_status:  200,
-            );
+            return $this->unknownSubscription($eventId, $type, $subscriptionId);
         }
 
         // A signature only proves Stripe sent it, not which mode signed it. A
@@ -1586,14 +1646,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $plan = $this->plans->findBySubscriptionId($this->id(), $subscriptionId);
         if (! $plan) {
-            return new WebhookOutcome(
-                signature_ok: true,
-                external_id:  $eventId,
-                event_type:   $type,
-                handled:      false,
-                error:        "No local plan for subscription {$subscriptionId}",
-                http_status:  200,
-            );
+            return $this->unknownSubscription($eventId, $type, $subscriptionId);
         }
 
         // A signature only proves Stripe sent it, not which mode signed it. A
@@ -1638,14 +1691,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $subscriptionId = (string) ($sub['id'] ?? '');
         $plan = $this->plans->findBySubscriptionId($this->id(), $subscriptionId);
         if (! $plan) {
-            return new WebhookOutcome(
-                signature_ok: true,
-                external_id:  $eventId,
-                event_type:   $type,
-                handled:      false,
-                error:        "No local plan for subscription {$subscriptionId}",
-                http_status:  200,
-            );
+            return $this->unknownSubscription($eventId, $type, $subscriptionId);
         }
 
         // A signature only proves Stripe sent it, not which mode signed it. A
