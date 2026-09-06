@@ -28,6 +28,12 @@ final class PayPalCallbackCostTest extends IntegrationTestCase
         parent::setUp();
         $this->outbound = 0;
 
+        // The ceiling is relaxed tenfold while the site is in test mode, which
+        // is deliberate and not what this measures: left to whatever an earlier
+        // test left behind, 40 calls sit under a 300 cap and no refusal comes.
+        $cfg = get_option('fundkit_gateway_config', []);
+        update_option('fundkit_gateway_config', array_merge(is_array($cfg) ? $cfg : [], ['test_mode' => false]));
+
         add_filter('pre_http_request', function ($pre, $args, $url) {
             if (is_string($url) && str_contains($url, 'paypal.com')) {
                 $this->outbound++;
