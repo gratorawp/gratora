@@ -17,7 +17,7 @@ const COUNT_LABELS = {
     converted_plans:     __( 'Recurring plans given a value in your base currency', 'fundraising-toolkit' ),
 };
 
-// An add-on can contribute a count through fundkit.recalculate.counts, and a
+// An add-on can contribute a count through fundkit.recalculate.addons, and a
 // raw key is not a sentence.
 const countLabel = ( key ) => COUNT_LABELS[ key ]
     || ( key.charAt( 0 ).toUpperCase() + key.slice( 1 ) ).replace( /_/g, ' ' );

@@ -634,11 +634,46 @@ final class ToolsController
             // core passes, so anything derived from a campaign total is
             // rebuilt from a campaign total that is already correct.
             if ($pass === 'addons') {
-                $state['counts'] = (array) apply_filters(
-                    'fundkit.recalculate.counts',
-                    $state['counts'],
-                    $state['rebuild_all'] ? 'all' : $scope
+                /**
+                 * One page of an add-on's own rebuild.
+                 *
+                 * The old contract passed counts alone, so a subscriber had no
+                 * way to stop and nowhere to record where it got to: it walked
+                 * its whole table inside this request, and a big one took the
+                 * request down with it.
+                 *
+                 * Store your resume point under your own key in `cursor` and
+                 * return `done => false` while rows remain. Read the clock
+                 * AFTER a row, never before, or you return having done nothing
+                 * and spin the caller. An add-on with nothing to do returns the
+                 * bag untouched.
+                 *
+                 * @param array{counts:array<string,int>,cursor:array<string,mixed>,done:bool} $bag
+                 * @param string $scope  'all' or the one scope asked for
+                 * @param float  $until  microtime to stop at
+                 *
+                 * @since 1.0.0
+                 */
+                $bag = (array) apply_filters(
+                    'fundkit.recalculate.addons',
+                    [
+                        'counts' => $state['counts'],
+                        'cursor' => (array) ($state['addon_cursor'] ?? []),
+                        'done'   => true,
+                    ],
+                    $state['rebuild_all'] ? 'all' : $scope,
+                    $until
                 );
+
+                $state['counts']       = (array) ($bag['counts'] ?? $state['counts']);
+                $state['addon_cursor'] = (array) ($bag['cursor'] ?? []);
+
+                // Left on this pass, so the cursor is stored and the caller's
+                // next request picks the add-on up where it stopped.
+                if (! ($bag['done'] ?? true)) {
+                    break;
+                }
+
                 $state = self::recalcAdvance($state);
                 continue;
             }
@@ -725,6 +760,7 @@ final class ToolsController
             // run has to carry its answer forward.
             'still_unconvertible'      => 0,
             'unconvertible_currencies' => [],
+            'addon_cursor'             => [],
         ];
     }
 
