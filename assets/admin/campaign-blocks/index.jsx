@@ -15,6 +15,7 @@ import {
 } from '@wordpress/block-editor';
 import {
     Button,
+    ComboboxControl,
     Disabled,
     PanelBody,
     Placeholder,
@@ -28,6 +29,7 @@ import ServerSideRender from '@wordpress/server-side-render';
 import { __ } from '@wordpress/i18n';
 
 import { registerFundKitEntities } from '../_shared/entities';
+import { CampaignPicker, useBoundCampaign } from './campaign-field';
 import './LayoutSwitcher';
 import { registerCampaignBindingSource } from './bindings.js';
 import { defaultCurrency, amountEntry } from '../_shared/format';
@@ -38,65 +40,6 @@ registerFundKitEntities();
 // The client half of the binding source PHP registers. Without it a bound core
 // block shows the source's label instead of the campaign's own value.
 registerCampaignBindingSource( ( window.fundkitCampaignBlocks || {} ).bindingFields || {} );
-
-function useBoundCampaign( campaignId ) {
-    const postMetaId = useSelect( ( select ) => {
-        const editor = select( 'core/editor' );
-        if ( ! editor || ! editor.getEditedPostAttribute ) return 0;
-        const meta = editor.getEditedPostAttribute( 'meta' ) || {};
-        return Number( meta._fundkit_campaign_id || 0 );
-    }, [] );
-
-    const resolvedId = campaignId || postMetaId || 0;
-    const { record, hasResolved } = useEntityRecord( 'fundkit/v1', 'campaign', resolvedId, {
-        enabled: resolvedId > 0,
-    } );
-
-    // A page keeps _fundkit_campaign_id after the campaign it names is deleted.
-    // Treating the meta alone as context hid the picker on a page that could no
-    // longer resolve a campaign at all, so the canvas said to pick one in a
-    // sidebar that was not offering the control.
-    const orphaned = postMetaId > 0 && hasResolved && ! record;
-
-    // Blocks on a campaign landing page inherit its campaign, so there is
-    // nothing to pick. Undecided while the lookup is in flight, or the picker
-    // flashes in and out on every load.
-    const onCampaignPage = postMetaId > 0 && ! orphaned;
-
-    return { campaign: record, onCampaignPage, resolvedId };
-}
-
-function CampaignPicker( { value, onChange, noneLabel } ) {
-    const { records } = useEntityRecords( 'fundkit/v1', 'campaign', { per_page: 100 } );
-    // useEntityRecords yields `records: null` until the fetch resolves, and a
-    // destructuring default only replaces `undefined`, so this guard is what
-    // keeps the inspector from throwing on selection.
-    const campaigns = Array.isArray( records ) ? records : [];
-    // The blocks are registered for every block-editor user, but the campaign
-    // list is gated on a FundKit capability. Without this an Editor gets a picker
-    // whose only option is "Select a campaign" and no idea why.
-    const empty = Array.isArray( records ) && records.length === 0;
-
-    return (
-        <>
-            <SelectControl
-                label={ __( 'Campaign', 'fundraising-toolkit' ) }
-                value={ String( value || 0 ) }
-                options={ [
-                    { value: '0', label: noneLabel || __( 'Select a campaign', 'fundraising-toolkit' ) },
-                    ...campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title } ) ),
-                ] }
-                onChange={ ( v ) => onChange( Number( v ) ) }
-                __nextHasNoMarginBottom
-            />
-            { empty && (
-                <Notice status="warning" isDismissible={ false }>
-                    { __( 'No campaigns are available to you. You may not have permission to view them, or none have been created yet.', 'fundraising-toolkit' ) }
-                </Notice>
-            ) }
-        </>
-    );
-}
 
 /**
  * The campaign a block reads from.
@@ -109,7 +52,7 @@ function CampaignPicker( { value, onChange, noneLabel } ) {
 function CampaignField( { attributes, setAttributes, onCampaignPage, issues = [] } ) {
     return (
         <>
-            { ! onCampaignPage && (
+            { ! onCampaignPage && ( canManageCampaigns() || ! attributes.campaignId ) && (
                 <CampaignPicker
                     value={ attributes.campaignId }
                     onChange={ ( v ) => setAttributes( { campaignId: v } ) }

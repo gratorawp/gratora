@@ -12,6 +12,7 @@ use FundKit\Donors\PublicDonorNames;
 use FundKit\Donors\DonorAvatars;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Helpers\View;
+use FundKit\Vendor\Queryable\DB;
 
 /**
  * Renders a supporter wall: one card per non-anonymous donor, optionally
@@ -63,79 +64,79 @@ final class SupporterWallBlock extends CampaignBlock
         $columns        = in_array((string) ($attrs['columns'] ?? 'auto'), ['auto', '2', '3', '4'], true)
             ? (string) $attrs['columns'] : 'auto';
 
-        // Pull a generous pool of paid non-anonymous donations, then collapse
-        // to one card per donor, keeping the most recent message.
-        $poolSize = max($limit * 4, 200);
+        $prefix   = DB::getPrefix();
+        $donations = $prefix . 'fundkit_donations';
+        $donors    = $prefix . 'fundkit_donors';
+
+        // Grouped and limited by DONOR, not by donation. Reading a slice of
+        // recent donations and collapsing it left every earlier supporter off
+        // the wall entirely, and made "alphabetical" A to Z of that slice.
+        //
         // donationsOnly, not live: a ticket order rides the same table with
         // kind='order' and is a purchase rather than a donation. Listing one
         // here put a ticket buyer on the wall and made it disagree with the
         // campaign counter beside it, which excludes orders.
         $query = DonationQueries::donationsOnly(Donation::query())
-            ->whereIn('status', ['paid', 'partial_refund'])
-            ->where('campaign_id', (int) $campaign->id)
-            ->where('is_anonymous', false);
+            ->whereIn("{$donations}.status", ['paid', 'partial_refund'])
+            ->where("{$donations}.campaign_id", (int) $campaign->id)
+            ->where("{$donations}.is_anonymous", false);
 
         if ($minAmountCents > 0) {
             // Threshold is an org-currency figure, so compare against the base
             // amount, not the donor's (possibly foreign) amount_cents.
-            $query = $query->where('base_amount_cents', $minAmountCents, '>=');
+            $query = $query->where("{$donations}.base_amount_cents", $minAmountCents, '>=');
         }
 
-        $donations = $query->orderBy('paid_at', 'DESC')->limit($poolSize)->getAll();
+        // The two rules that decide whether a donor can appear at all, pushed
+        // into SQL so the limit counts rows the wall will actually show.
+        $nameExpr = "TRIM(CONCAT(COALESCE(dn.first_name, ''), ' ', COALESCE(dn.last_name, '')))";
+
+        // In the join, not in a where: whereRaw contributes no AND connector,
+        // and these belong to which donor rows are joinable anyway.
+        $rows = $query
+            ->joinRaw(
+                "JOIN {$donors} dn ON dn.id = {$donations}.donor_id"
+                . " AND dn.public_hidden_at IS NULL AND {$nameExpr} <> ''"
+            )
+            ->selectRaw(
+                "{$donations}.donor_id AS donor_id,"
+                . ' COALESCE(SUM(' . DonationQueries::netBaseExpr() . '), 0) AS net_cents,'
+                . " MAX(COALESCE({$donations}.paid_at, {$donations}.created_at)) AS latest_paid_at,"
+                . " {$nameExpr} AS donor_name"
+            )
+            ->groupByRaw("{$donations}.donor_id, {$nameExpr}")
+            ->orderByRaw($sort === 'alphabetical' ? 'donor_name ASC' : 'latest_paid_at DESC')
+            ->limit($limit)
+            ->getAll();
 
         $byDonor = [];
-        foreach ($donations as $donation) {
-            $id = (int) $donation->donor_id;
-            // Base/org currency so totals stay coherent across mixed-currency donations.
-            $amount = (int) ($donation->base_amount_cents ?? $donation->amount_cents);
-            $paidAt = (string) ($donation->paid_at ?: $donation->created_at);
-            // Only donors who opted in to a public message are shown; note_to_org
-            // is otherwise a private note to the organization.
-            $note   = $donation->note_public ? trim((string) ($donation->note_to_org ?? '')) : '';
-
-            if (! isset($byDonor[$id])) {
-                $byDonor[$id] = [
-                    'donor_id'        => $id,
-                    'total_cents'     => 0,
-                    'currency'        => Money::defaultCurrency(),
-                    'latest_paid_at'  => $paidAt,
-                    'message'         => $note,
-                    'message_paid_at' => $note !== '' ? $paidAt : '',
-                ];
-            }
-            $byDonor[$id]['total_cents'] += $amount;
-            if (strcmp($paidAt, $byDonor[$id]['latest_paid_at']) > 0) {
-                $byDonor[$id]['latest_paid_at'] = $paidAt;
-            }
-            // Keep the most recent non-empty message.
-            if ($note !== '' && strcmp($paidAt, $byDonor[$id]['message_paid_at']) >= 0) {
-                $byDonor[$id]['message']         = $note;
-                $byDonor[$id]['message_paid_at'] = $paidAt;
-            }
+        foreach ($rows as $r) {
+            $byDonor[(int) $r['donor_id']] = [
+                'donor_id'       => (int) $r['donor_id'],
+                'total_cents'    => max(0, (int) $r['net_cents']),
+                'currency'       => Money::defaultCurrency(),
+                'latest_paid_at' => (string) $r['latest_paid_at'],
+                'message'        => '',
+            ];
         }
 
-        // The pool sum above is gross. Net each donor's total against refunds
-        // in base currency so a partially-refunded donor's wall figure agrees
-        // with the campaign counter and the Top Donors block (which both net).
-        $donorIds = array_keys($byDonor);
-        if ($donorIds) {
-            $netQuery = DonationQueries::donationsOnly(Donation::query())
+        // The most recent public message per donor on the wall. Only donors who
+        // opted in are shown; note_to_org is otherwise a private note.
+        if ($byDonor && $showMessage) {
+            $messages = DonationQueries::donationsOnly(Donation::query())
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->where('campaign_id', (int) $campaign->id)
                 ->where('is_anonymous', false)
-                ->whereIn('donor_id', $donorIds);
-            if ($minAmountCents > 0) {
-                $netQuery = $netQuery->where('base_amount_cents', $minAmountCents, '>=');
-            }
-            $netRows = $netQuery
-                ->selectRaw('donor_id, COALESCE(SUM(' . DonationQueries::netBaseExpr() . '), 0) AS net_cents')
-                ->groupByRaw('donor_id')
+                ->where('note_public', true)
+                ->whereIn('donor_id', array_keys($byDonor))
+                ->orderBy('paid_at', 'ASC')
                 ->getAll();
-            foreach ($netRows as $r) {
-                $did = (int) $r['donor_id'];
-                if (isset($byDonor[$did])) {
-                    $byDonor[$did]['total_cents'] = max(0, (int) $r['net_cents']);
-                }
+
+            foreach ($messages as $m) {
+                $note = trim((string) ($m->note_to_org ?? ''));
+                if ($note === '') continue;
+                $did = (int) $m->donor_id;
+                if (isset($byDonor[$did])) $byDonor[$did]['message'] = $note;
             }
         }
 
@@ -153,9 +154,8 @@ final class SupporterWallBlock extends CampaignBlock
             ]);
         }
 
-        $donorIds = array_keys($byDonor);
         $donorsById = [];
-        foreach (Donor::query()->whereIn('id', $donorIds)->getAll() as $d) {
+        foreach (Donor::query()->whereIn('id', array_keys($byDonor))->getAll() as $d) {
             $donorsById[(int) $d->id] = $d;
         }
 
@@ -181,14 +181,13 @@ final class SupporterWallBlock extends CampaignBlock
             ];
         }
 
+        // The order is the query's; this only settles ties MySQL left open.
         usort($entries, static function (array $a, array $b) use ($sort): int {
             if ($sort === 'alphabetical') {
                 return strcasecmp($a['name'], $b['name']);
             }
             return strcmp($b['latest_paid_at'], $a['latest_paid_at']);
         });
-
-        $entries = array_slice($entries, 0, $limit);
 
         return View::loadRelative(__DIR__, 'views/supporter-wall', [
             'title'        => (string) ($attrs['title'] ?? ''),

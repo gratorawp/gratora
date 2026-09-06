@@ -33,6 +33,24 @@ final class CampaignGridBlock extends CampaignBlock
         ];
     }
 
+    /** What a card shows where an amount-goal card shows the amount raised. */
+    private static function cardValue(string $type, int $current, string $currency): string
+    {
+        return match ($type) {
+            'donations' => sprintf(
+                /* translators: %s: number of donations */
+                _n('%s donation', '%s donations', $current, 'fundraising-toolkit'),
+                number_format_i18n($current)
+            ),
+            'donors' => sprintf(
+                /* translators: %s: number of donors */
+                _n('%s donor', '%s donors', $current, 'fundraising-toolkit'),
+                number_format_i18n($current)
+            ),
+            default => Money::compact($current, $currency),
+        };
+    }
+
     /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
@@ -45,8 +63,8 @@ final class CampaignGridBlock extends CampaignBlock
         }
 
         $count   = max(1, min(12, (int) ($attrs['count'] ?? 3)));
-        $orderBy = in_array($attrs['orderBy'] ?? 'recent', ['recent', 'most-funded', 'ending-soon'], true)
-            ? (string) $attrs['orderBy'] : 'recent';
+        $orderBy = (string) ($attrs['orderBy'] ?? 'recent');
+        $orderBy = in_array($orderBy, ['recent', 'most-funded', 'ending-soon'], true) ? $orderBy : 'recent';
 
         $campaigns = $this->campaigns->otherPublished($excludeId, $count, $orderBy);
         if (empty($campaigns)) {
@@ -72,10 +90,18 @@ final class CampaignGridBlock extends CampaignBlock
 
         $cards = [];
         foreach ($campaigns as $c) {
-            $goalCents = $c->goal_type === 'amount' ? (int) $c->goal_cents : 0;
-            $percent   = $goalCents > 0
-                ? min(100, (int) round((int) $c->raised_cents / $goalCents * 100))
-                : 0;
+            // Read the way CampaignProgressBlock reads it: a campaign can
+            // measure its goal in donations or donors, and reading only
+            // raised_cents rendered those as nothing raised against no target.
+            $type    = in_array($c->goal_type, ['amount', 'donations', 'donors'], true) ? $c->goal_type : 'amount';
+            $current = match ($type) {
+                'donations' => (int) $c->donations_count,
+                'donors'    => (int) $c->donors_count,
+                default     => (int) $c->raised_cents,
+            };
+            $target  = $type === 'amount' ? (int) ($c->goal_cents ?? 0) : (int) ($c->goal_count ?? 0);
+            $percent = $target > 0 ? min(100, (int) round($current / $target * 100)) : 0;
+
             $cards[] = [
                 'title'     => (string) $c->title,
                 'blurb'     => (string) ($c->description ?? ''),
@@ -83,10 +109,12 @@ final class CampaignGridBlock extends CampaignBlock
                     ? wp_get_attachment_image_url((int) $c->image_attachment_id, 'medium_large')
                     : null,
                 'url'       => $c->page_id ? get_permalink((int) $c->page_id) : '',
-                'raised'    => Money::compact((int) $c->raised_cents, $c->currency),
-                'goalLabel' => $goalCents > 0
-                    /* translators: %s: formatted goal amount */
-                    ? sprintf(__('of %s', 'fundraising-toolkit'), Money::compact($goalCents, $c->currency))
+                'raised'    => self::cardValue($type, $current, (string) $c->currency),
+                'goalLabel' => $target > 0
+                    /* translators: %s: the goal, as money or a count */
+                    ? sprintf(__('of %s', 'fundraising-toolkit'), $type === 'amount'
+                        ? Money::compact($target, $c->currency)
+                        : number_format_i18n($target))
                     : '',
                 'percent'   => $percent,
                 'accent'    => $c->accentColor(),

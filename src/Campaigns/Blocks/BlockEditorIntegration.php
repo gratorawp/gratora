@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Campaigns\Blocks;
 
+use FundKit\Foundation\Auth\Capabilities;
 use FundKit\Campaigns\Campaign;
 use FundKit\Campaigns\CampaignPageTemplate;
 use FundKit\Campaigns\CampaignRepository;
@@ -247,6 +248,10 @@ final class BlockEditorIntegration
                 'bindingFields' => CampaignBindings::fields(),
                 'pageTemplates' => self::pageTemplatesAvailable(),
                 'campaignType'  => self::editedCampaignType(),
+                // The blocks register for every block-editor user, but the
+                // campaign list is gated. Without this the editor reads a
+                // refused fetch as a campaign that no longer exists.
+                'canManageCampaigns' => Capabilities::userCan('fundkit_manage_campaigns'),
             ]) . ' );',
             'before'
         );
