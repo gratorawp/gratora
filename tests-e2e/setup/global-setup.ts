@@ -1,5 +1,7 @@
 import { request, type FullConfig } from '@playwright/test';
 
+import { assertCanonicalForm } from './fixture-contract';
+
 function requireEnv(name: string): string {
     const v = process.env[name];
     if (! v || v.trim() === '') {
@@ -42,6 +44,18 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
                 throw new Error(
                     `Page ${formPath} did not render a FundKit donation form. ` +
                     `Run \`wp fundkit e2e-seed\` and ensure the form is published.`,
+                );
+            }
+            assertCanonicalForm(html, formPath);
+        }
+
+        const paymentPath = process.env.FUNDKIT_E2E_PAYMENT_FORM_PATH;
+        if (paymentPath && paymentPath.trim() !== '') {
+            const res = await ctx.get(paymentPath);
+            if (! res.ok()) {
+                throw new Error(
+                    `Payment form page not reachable: GET ${baseURL}${paymentPath} -> ${res.status()}. ` +
+                    `Run \`wp fundkit e2e-seed\`. See tests-e2e/README.md.`,
                 );
             }
         }

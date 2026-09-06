@@ -12,9 +12,13 @@ use FundKit\Donations\DonationIntent;
 use FundKit\Donations\DonationService;
 use FundKit\Donors\Donor;
 use FundKit\Donors\DonorService;
+use FundKit\Donors\MagicLinkService;
+use FundKit\Donors\Portal\PortalPage;
+use FundKit\Donors\Portal\PortalSession;
 use FundKit\Forms\Form;
 use FundKit\Forms\FormService;
 use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\Stripe\StripeAccount;
 use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Funds\Fund;
@@ -33,6 +37,10 @@ use WP_CLI;
  */
 final class CliCommands
 {
+    /** Fixture credentials for a throwaway site: they charge nothing and reach no network. */
+    private const E2E_STRIPE_SECRET      = 'sk_test_fundkit_e2e_fixture';
+    private const E2E_STRIPE_PUBLISHABLE = 'pk_test_fundkit_e2e_fixture';
+
     /** @since 1.0.0 */
     private function container(): \FundKit\Foundation\Container\Container
     {
@@ -461,6 +469,8 @@ final class CliCommands
 
         update_option('fundkit_gateway_config', $gatewayConfig, false);
 
+        $this->e2eSeedStripeFixtureKeys();
+
         // Drop AntiSpamGuard rate-limit transients so a run isn't penalized
         // by prior attempts from the same IP / email range.
         global $wpdb;
@@ -531,6 +541,19 @@ final class CliCommands
             'FundKit E2E Layout',
             self::e2eLayoutBlocks()
         );
+        // Its own form, not the canonical one: only a gateway that pays in the
+        // browser can reach the payment step, and offering Stripe on every
+        // fixture form would load Stripe.js into every other spec.
+        $paymentUrl = $this->e2eUpsertFormAndPage(
+            $forms,
+            (int) $campaign->id,
+            'fundkit-e2e-payment',
+            'FundKit E2E Payment',
+            'fundkit-e2e-payment',
+            'FundKit E2E Payment',
+            self::e2ePaymentBlocks(),
+            ['offline', 'sandbox', 'stripe']
+        );
 
         WP_CLI::success("Canonical forms ready.");
         WP_CLI::log('  export FUNDKIT_E2E_URL="' . untrailingslashit(home_url()) . '"');
@@ -571,6 +594,88 @@ final class CliCommands
         WP_CLI::log('  export FUNDKIT_E2E_CONDITIONAL_FORM_PATH="' . wp_parse_url($condUrl, PHP_URL_PATH) . '"');
         WP_CLI::log('  export FUNDKIT_E2E_CUSTOM_FIELDS_FORM_PATH="' . wp_parse_url($customUrl, PHP_URL_PATH) . '"');
         WP_CLI::log('  export FUNDKIT_E2E_LAYOUT_FORM_PATH="' . wp_parse_url($layoutUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export FUNDKIT_E2E_PAYMENT_FORM_PATH="' . wp_parse_url($paymentUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export FUNDKIT_E2E_PORTAL_REOPEN_URL="' . $this->e2eMintPortalLink() . '"');
+    }
+
+    /**
+     * A fresh single-use sign-in link for the portal spec.
+     *
+     * Minted here because it is single use: a link left in a shell from an
+     * earlier run is already spent, and the spec would then skip itself and
+     * read as coverage.
+     *
+     * @since 1.0.0
+     */
+    private function e2eMintPortalLink(): string
+    {
+        $donor = $this->container()->get(DonorService::class)->findOrCreate(
+            'fundkit-e2e-portal@example.test',
+            ['first_name' => 'Portal', 'last_name' => 'Tester']
+        );
+
+        $token = $this->container()->get(MagicLinkService::class)
+            ->issue((int) $donor->id, PortalSession::PORTAL_PURPOSE, null, 3600);
+
+        $page = new PortalPage();
+        $page->ensure();
+
+        return add_query_arg('token', $token, $page->url());
+    }
+
+    /**
+     * Test credentials for the fixture site, so a browser-paying gateway is on
+     * offer at all. Without one the payment-step specs cannot reach the phase
+     * they exist to check and skip themselves in every run.
+     *
+     * No network call: nothing here charges anything. The specs answer the
+     * donation POST themselves, and Stripe.js failing on the invented secret is
+     * past every claim they make.
+     *
+     * @since 1.0.0
+     */
+    private function e2eSeedStripeFixtureKeys(): void
+    {
+        $account = $this->container()->get(StripeAccount::class);
+
+        if ($account->isConnected() && $account->publishableKeyFor(true) !== self::E2E_STRIPE_PUBLISHABLE) {
+            WP_CLI::warning('  stripe: keeping the keys this install already has');
+
+            return;
+        }
+
+        try {
+            $account->saveKeys(true, self::E2E_STRIPE_SECRET, self::E2E_STRIPE_PUBLISHABLE);
+            $account->refresh([
+                'id'                => 'acct_fundkit_e2e',
+                'charges_enabled'   => true,
+                'details_submitted' => true,
+                'country'           => 'NL',
+                'business_profile'  => ['name' => 'Wildwater Trust'],
+            ]);
+            WP_CLI::log('  stripe: fixture test keys written');
+        } catch (\Throwable $e) {
+            WP_CLI::warning('  stripe: could not write fixture keys (' . $e->getMessage() . ')');
+        }
+    }
+
+    /**
+     * The payment-step fixture: everything the submit needs and nothing else,
+     * so the walk to the gateway block is short and the pay screen is what the
+     * specs are looking at.
+     *
+     * @since 1.0.0
+     */
+    private static function e2ePaymentBlocks(): string
+    {
+        return implode("\n", [
+            '<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
+            '<!-- wp:fundkit/name {"requireFirst":true,"requireLast":true} /-->',
+            '<!-- wp:fundkit/email {"required":true} /-->',
+            '<!-- wp:fundkit/payment-gateways {"style":"radio","allowed":["offline","sandbox","stripe"]} /-->',
+            '<!-- wp:fundkit/donation-summary /-->',
+            '<!-- wp:fundkit/submit-button {"label":"Donate now"} /-->',
+        ]);
     }
 
     /**
@@ -586,13 +691,14 @@ final class CliCommands
         string $formTitle,
         string $pageSlug,
         string $pageTitle,
-        string $blocks
+        string $blocks,
+        array $allowedGateways = ['offline', 'sandbox']
     ): string {
         // Pinned rather than left to the shortcode default. The default is a
         // product decision that is allowed to change, and every visual golden
         // moves with it: the fixture asserts its own appearance.
         $settings = [
-            'gateways'  => ['allowed' => ['offline', 'sandbox']],
+            'gateways'  => ['allowed' => $allowedGateways],
             'container' => ['style' => 'frame', 'width' => 540],
         ];
 

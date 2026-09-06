@@ -1,6 +1,5 @@
 /**
  * Standalone `fundkit/country` block - searchable picker (CountrySelect).
- * Skips itself when the canonical form lacks the block.
  */
 
 import { test, expect } from '../fixtures/donor-form';
@@ -8,14 +7,12 @@ import { test, expect } from '../fixtures/donor-form';
 test.describe('country block', () => {
     test('renders the searchable picker', async ({ donor }) => {
         const cs = donor.countrySelect();
-        test.skip(await cs.count() === 0, 'no country picker on the test form');
         await expect(cs).toBeVisible();
         await expect(cs.locator('.fundkit-form__country-select-input')).toBeVisible();
     });
 
     test('typing filters the option list and clicking picks the country', async ({ donor }) => {
         const cs = donor.countrySelect();
-        test.skip(await cs.count() === 0, 'no country picker on the test form');
 
         const input = cs.locator('.fundkit-form__country-select-input');
         await input.click();
@@ -36,7 +33,6 @@ test.describe('country block', () => {
 
     test('Escape closes the list without selecting', async ({ donor }) => {
         const cs = donor.countrySelect();
-        test.skip(await cs.count() === 0, 'no country picker on the test form');
 
         const input = cs.locator('.fundkit-form__country-select-input');
         await input.click();

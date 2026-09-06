@@ -62,18 +62,19 @@ kitchen-sink block set below in step with them.
    export FUNDKIT_E2E_CONDITIONAL_FORM_PATH='/fundkit-e2e-conditional/'
    export FUNDKIT_E2E_CUSTOM_FIELDS_FORM_PATH='/fundkit-e2e-custom-fields/'
    export FUNDKIT_E2E_LAYOUT_FORM_PATH='/fundkit-e2e-layout/'
+   export FUNDKIT_E2E_PAYMENT_FORM_PATH='/fundkit-e2e-payment/'
+   export FUNDKIT_E2E_PORTAL_REOPEN_URL='http://localhost:10075/donor-portal/?token=...'
    ```
+
+   The portal link is single use, so re-run the seed for a fresh one rather
+   than reusing the line from an earlier run.
 
 If you'd rather build the canonical form by hand instead of running the CLI,
 the kitchen-sink block set is documented at the bottom of this file.
 
-Two specs need env the seeder cannot mint for you, and skip themselves by name
-without it:
-
-- `specs/portal-magic-link.spec.ts` wants a fresh single-use portal link in
-  `FUNDKIT_E2E_PORTAL_REOPEN_URL`; a donor's admin profile shows one.
-- the `screenshots` project wants `FUNDKIT_E2E_ADMIN_USER` / `FUNDKIT_E2E_ADMIN_PASS`
-  (the defaults match wp-env, so a hermetic run needs nothing).
+The `screenshots` project wants `FUNDKIT_E2E_ADMIN_USER` / `FUNDKIT_E2E_ADMIN_PASS`,
+which the seed also prints (the defaults match wp-env, so a hermetic run needs
+nothing).
 
 ## Run
 
@@ -266,8 +267,10 @@ the add-on's own repository.
 ## Manual canonical form (if you skip `wp fundkit e2e-seed`)
 
 The canonical specs assume the form behind `FUNDKIT_E2E_FORM_PATH` includes
-these blocks (the required minimum + every block any spec targets). Specs
-whose target block is missing skip themselves with a clear reason.
+these blocks (the required minimum + every block any spec targets). A missing
+one fails global setup by name: the specs assert on their block rather than
+excusing themselves, so a form short of one would otherwise pass by testing
+nothing. The list is pinned in `setup/fixture-contract.ts`.
 
 Required for the core specs:
 - donation-amount (with at least one preset)

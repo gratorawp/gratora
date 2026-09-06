@@ -14,6 +14,10 @@ import { test, expect } from '../fixtures/donor-form';
  * fine: every claim below is about our own layout and our own state, not about
  * whether a card can be charged.
  */
+// Its own seeded form: the canonical one offers only gateways that settle
+// server-side, so this suite could never reach the payment phase from it.
+test.use({ formPath: process.env.FUNDKIT_E2E_PAYMENT_FORM_PATH ?? '' });
+
 test.describe('payment step placement', () => {
     const CLIENT_SECRET = 'pi_e2e_placement_secret_not_real';
 
@@ -123,21 +127,26 @@ test.describe('payment step placement', () => {
         return blocked = '';
     }
 
-    async function submitToPayment(donor, page): Promise<boolean> {
-        if (await whyBlocked(donor, page) !== '') return false;
-
+    /**
+     * Waits for the mount rather than counting it once: the phase is entered by
+     * a submit, so a bare count read the DOM before the answer arrived and the
+     * test excused itself for a race. Past whyBlocked() the phase is reachable,
+     * so failing to reach it is a defect and has to read as one.
+     */
+    async function submitToPayment(donor, page): Promise<void> {
         await stubStripeIntent(page);
         await fillAndSubmit(donor, page, 'stripe');
 
-        if (await donor.form.locator('.fundkit-form__payment-mount').count() === 0) return false;
+        await expect(donor.form.locator('.fundkit-form__payment-mount')).toHaveCount(1, { timeout: 10_000 });
         await expect(donor.form.locator('.fundkit-form--settled')).toHaveCount(1, { timeout: 10_000 });
-        return true;
     }
 
     /** Skips naming the real reason, so a skipped run is never mistaken for a passing one. */
     async function requirePayment(donor, page): Promise<void> {
         const why = await whyBlocked(donor, page);
-        test.skip(why !== '' || ! await submitToPayment(donor, page), why || 'payment phase not reached');
+        test.skip(why !== '', why);
+
+        await submitToPayment(donor, page);
     }
 
     test('payment mounts at the gateway block, not over the whole form', async ({ donor, page }) => {

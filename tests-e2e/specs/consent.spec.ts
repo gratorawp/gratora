@@ -1,7 +1,6 @@
 /**
  * `fundkit/consent` block - labelled consent purposes (e.g. marketing,
  * processing). Required-by-law purposes are pre-checked and locked.
- * Skips itself when the test form lacks the block.
  */
 
 import { test, expect } from '../fixtures/donor-form';
@@ -9,7 +8,6 @@ import { test, expect } from '../fixtures/donor-form';
 test.describe('consent block', () => {
     test('renders a fieldset with at least one purpose checkbox', async ({ donor }) => {
         const fs = donor.consentFieldset();
-        test.skip(await fs.count() === 0, 'no consent block on the test form');
 
         await expect(fs).toBeVisible();
         const checkboxes = fs.locator('input[type="checkbox"]');
@@ -18,11 +16,10 @@ test.describe('consent block', () => {
 
     test('a required purpose is the donor\'s to give, and the form insists on it', async ({ donor }) => {
         const fs = donor.consentFieldset();
-        test.skip(await fs.count() === 0, 'no consent block on the test form');
 
         const requiredLabels = fs.locator('label:has(.fundkit-form__consent-required-pill)');
         const reqCount = await requiredLabels.count();
-        if (reqCount === 0) test.skip(true, 'no required-by-law purposes configured');
+        expect(reqCount, 'the seeded form offers a required purpose').toBeGreaterThan(0);
 
         // Not pre-ticked, and not disabled. A box the donor did not tick is not
         // consent - pre-ticking it is exactly what makes consent invalid - so
@@ -46,11 +43,10 @@ test.describe('consent block', () => {
 
     test('optional purposes start unchecked and toggle freely', async ({ donor }) => {
         const fs = donor.consentFieldset();
-        test.skip(await fs.count() === 0, 'no consent block on the test form');
 
         const optional = fs.locator('label:not(:has(.fundkit-form__consent-required-pill)) input[type="checkbox"]');
         const optCount = await optional.count();
-        if (optCount === 0) test.skip(true, 'no optional purposes configured');
+        expect(optCount, 'the seeded form offers an optional purpose').toBeGreaterThan(0);
 
         const first = optional.first();
         const start = await first.isChecked();
