@@ -85,8 +85,7 @@ final class PayPalPlans
             throw new RuntimeException(esc_html('PayPal did not return a plan id.'));
         }
 
-        $cached[$key] = $planId;
-        update_option(self::PLANS_OPTION, $cached, false);
+        $this->remember(self::PLANS_OPTION, $key, $planId);
 
         return $planId;
     }
@@ -120,10 +119,22 @@ final class PayPalPlans
             throw new RuntimeException(esc_html('PayPal did not return a product id.'));
         }
 
-        $stored[$key] = $productId;
-        update_option(self::PRODUCT_OPTION, $stored, false);
+        $this->remember(self::PRODUCT_OPTION, $key, $productId);
 
         return $productId;
+    }
+
+    // Read fresh: the caller's snapshot predates a PayPal round trip, so
+    // writing it back drops whatever a concurrent checkout minted.
+    private function remember(string $option, string $key, string $value): void
+    {
+        wp_cache_delete($option, 'options');
+
+        $fresh = get_option($option, []);
+        $fresh = is_array($fresh) ? $fresh : [];
+        $fresh[$key] = $value;
+
+        update_option($option, $fresh, false);
     }
 
     /**

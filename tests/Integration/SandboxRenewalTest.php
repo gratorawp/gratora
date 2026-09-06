@@ -152,6 +152,35 @@ final class SandboxRenewalTest extends IntegrationTestCase
         $this->assertNull($after->next_payment_at);
     }
 
+    public function test_ending_the_rehearsal_also_ends_a_paused_plan(): void
+    {
+        $paused  = $this->plan(['status' => 'paused']);
+        $pastDue = $this->plan(['status' => 'past_due']);
+
+        update_option('fundkit_gateway_config', ['test_mode' => false]);
+
+        $this->renewer()->run();
+
+        $this->assertSame('expired', $this->reload($paused)->status);
+        $this->assertSame('expired', $this->reload($pastDue)->status);
+    }
+
+    public function test_an_ended_plan_stops_matching_the_resume_sweep(): void
+    {
+        $plan = $this->plan(['status' => 'paused']);
+        RecurringPlan::query()
+            ->where('id', (int) $plan->id)
+            ->update(['resume_at' => gmdate('Y-m-d H:i:s', time() - 86400)]);
+
+        update_option('fundkit_gateway_config', ['test_mode' => false]);
+        $this->renewer()->run();
+
+        $this->assertNull(
+            $this->reload($plan)->resume_at,
+            'a resume date left on an expired plan is picked up every day, for good'
+        );
+    }
+
     public function test_a_second_sweep_does_not_double_charge_the_same_cycle(): void
     {
         $plan = $this->plan();

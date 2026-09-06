@@ -187,7 +187,9 @@ final class PayPalApi
 
         $decoded = json_decode($raw, true);
         if (! is_array($decoded)) {
-            throw new RuntimeException(esc_html("PayPal returned a non-JSON response (HTTP {$code}): " . substr($raw, 0, 200)));
+            // A 5xx HTML page from an edge is an outage, not PayPal's answer.
+            $body = esc_html("PayPal returned a non-JSON response (HTTP {$code}): " . substr($raw, 0, 200));
+            throw $code >= 500 ? new GatewayTransportException($body) : new RuntimeException($body);
         }
 
         if ($code >= 400) {
@@ -271,6 +273,9 @@ final class PayPalApi
                 'webhook_id'        => $webhookId,
                 'webhook_event'     => $event,
             ]);
+        } catch (GatewayTransportException $e) {
+            // "Could not ask" is not "PayPal said no".
+            throw $e;
         } catch (RuntimeException $e) {
             return false;
         }

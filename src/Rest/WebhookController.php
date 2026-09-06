@@ -127,8 +127,9 @@ final class WebhookController
         }
 
         // Counted after the fact and only for a refusal, so a verifying
-        // gateway never spends one.
-        if (! $outcome->signature_ok) {
+        // gateway never spends one. A 5xx is this site failing to check, not
+        // a caller to throttle, and the gateway will redeliver.
+        if (! $outcome->signature_ok && $outcome->http_status < 500) {
             $this->spam->hit($failKey, self::FAIL_WINDOW);
         }
 

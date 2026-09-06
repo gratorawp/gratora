@@ -179,6 +179,9 @@ final class SandboxRenewer
             ->update([
                 'status'              => 'expired',
                 'next_payment_at'     => null,
+                // RecurringResumer excludes only 'cancelled', so a kept
+                // resume_at would match it every day, for good.
+                'resume_at'           => null,
                 'cancellation_reason' => $reason,
                 'updated_at'          => $now,
             ]);
@@ -189,9 +192,11 @@ final class SandboxRenewer
     /** @since 1.0.0 */
     private function expireAll(string $reason): void
     {
+        // Not just the active ones: the gateway deregisters when the
+        // rehearsal ends, so a paused plan could never be cancelled again.
         $plans = RecurringPlan::query()
             ->where('gateway', 'sandbox')
-            ->where('status', 'active')
+            ->whereNotIn('status', ['cancelled', 'expired'])
             ->limit(self::BATCH)
             ->getAll();
 

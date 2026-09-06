@@ -10,6 +10,7 @@ use FundKit\Donations\DonationRepository;
 use FundKit\Donations\DonationService;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Gateways\GatewayConfirmResult;
+use FundKit\Gateways\GatewayTransportException;
 use FundKit\Gateways\GatewayIntentResult;
 use FundKit\Gateways\PaymentGateway;
 use FundKit\Gateways\PaymentMethodUpdate;
@@ -370,16 +371,25 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         // are separate endpoints with separate ids, so try the mode whose
         // webhook id matches, preferring live.
         $verified = false;
-        foreach ([false, true] as $test) {
-            if ($this->account->webhookId($test) === '') continue;
-            $this->account->useTestMode($test);
-            if ($this->api->verifyWebhookSignature($headers, $raw)) {
-                // Which mode verified is what later stops a sandbox event
-                // confirming a live donation.
-                $this->verifiedIsTest = $test;
-                $verified = true;
-                break;
+        try {
+            foreach ([false, true] as $test) {
+                if ($this->account->webhookId($test) === '') continue;
+                $this->account->useTestMode($test);
+                if ($this->api->verifyWebhookSignature($headers, $raw)) {
+                    // Which mode verified is what later stops a sandbox event
+                    // confirming a live donation.
+                    $this->verifiedIsTest = $test;
+                    $verified = true;
+                    break;
+                }
             }
+        } catch (GatewayTransportException $e) {
+            // 5xx so PayPal redelivers and the router spends no rate limit.
+            return new WebhookOutcome(
+                signature_ok: false,
+                error: 'PayPal could not be reached to verify this delivery: ' . $e->getMessage(),
+                http_status: 503,
+            );
         }
 
         if (! $verified) {
@@ -817,8 +827,9 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     {
         // PAYMENT.SALE.DENIED names the subscription on billing_agreement_id;
         // BILLING.SUBSCRIPTION.PAYMENT.FAILED is the subscription itself.
-        $subId = (string) ($resource['billing_agreement_id'] ?? $resource['id'] ?? '');
-        $plan  = $subId !== '' ? $this->planRepo->findBySubscriptionId($this->id(), $subId) : null;
+        $agreement = (string) ($resource['billing_agreement_id'] ?? '');
+        $subId     = $agreement !== '' ? $agreement : (string) ($resource['id'] ?? '');
+        $plan      = $subId !== '' ? $this->planRepo->findBySubscriptionId($this->id(), $subId) : null;
         if (! $plan) {
             return $this->unmatched($eventId, $type, 'subscription');
         }
@@ -831,8 +842,9 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         // three days whenever it did not get a 2xx, and it reports one decline
         // under two event types: an org subscribed to both gets two deliveries,
         // two ids and, keyed on those, two attempts the donor's card never
-        // made. The sale is the thing that declined, so both name it.
-        $declined = (string) ($resource['id'] ?? '');
+        // made. The sale is the thing that declined, so both name it. Only
+        // the sale resource has one; on the other, `id` is the subscription.
+        $declined = $agreement !== '' ? (string) ($resource['id'] ?? '') : '';
         if ($this->planRepo->recordFailedRenewal($plan, $this->now(), $declined !== '' ? $declined : $eventId)) {
             // PayPal does not give a decline reason on these events, and
             // inventing one reads to the donor as though we know something we
