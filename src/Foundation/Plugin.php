@@ -442,14 +442,17 @@ final class Plugin
 
         do_action('fundkit.deactivated');
 
-        // Taking the answer is what spends it, so an erase that fails partway
-        // cannot be re-run by some later deactivation nobody asked about.
-        if (! DataEraser::claimRequest()) {
+        // The answer is spent by finishing, not by starting. An erase that dies
+        // on its third site of twelve has to leave the plugin delete something
+        // to act on, or the owner keeps donors they were told were gone.
+        if (! DataEraser::requested()) {
             return;
         }
 
+        $complete = false;
+
         try {
-            self::eraseEverywhere($networkDeactivating);
+            $complete = self::eraseEverywhere($networkDeactivating);
         } catch (\Throwable $e) {
             // WordPress writes active_plugins only after this hook returns, so
             // an exception escaping here leaves the plugin switched on with its
@@ -457,24 +460,32 @@ final class Plugin
             // screen you would deactivate it from.
             ErrorLog::toDebugLog('deleting data on deactivation failed: ' . $e->getMessage());
         }
+
+        // No return between the check above and this line: settling the answer
+        // exactly once is the property the old claim-then-erase call held.
+        $complete ? DataEraser::forgetRequest() : DataEraser::renewRequest();
     }
 
     /**
      * The wipe, over every site the deactivation covers.
      *
      * register_deactivation_hook fires exactly once for a network-wide
-     * deactivation, in the main site's context, and claimRequest() spends the
-     * consent as its first act. Erasing only the current blog therefore left
-     * every other site's donor rows, consent history, donations and receipts
-     * in place, and the later plugin delete found the flag already spent and
-     * erased nothing: an explicit request to delete all donor data deleted it
-     * from one site out of twelve, with the screen saying it was gone.
+     * deactivation, in the main site's context. Erasing only the current blog
+     * left every other site's donor rows, consent history, donations and
+     * receipts in place, and the later plugin delete found the answer already
+     * spent and erased nothing: an explicit request to delete all donor data
+     * deleted it from one site out of twelve, with the screen saying it was
+     * gone.
+     *
+     * @return bool whether every site was erased. The caller settles the answer
+     *              on it, because a wipe that stopped needs a retry to survive.
      */
-    private static function eraseEverywhere(bool $networkWide): void
+    private static function eraseEverywhere(bool $networkWide): bool
     {
         if (! $networkWide || ! is_multisite()) {
             (new DataEraser())->erase();
-            return;
+
+            return true;
         }
 
         // Scoped to this network: a multi-network install's other networks are
@@ -485,6 +496,8 @@ final class Plugin
             'network_id' => get_current_network_id(),
         ]);
 
+        $complete = true;
+
         foreach ($sites as $siteId) {
             switch_to_blog((int) $siteId);
             try {
@@ -493,6 +506,7 @@ final class Plugin
                 // A site the plugin was never active on has no tables to drop.
                 // Whatever the reason, one site cannot be allowed to end the
                 // wipe: every site after it would silently keep its donors.
+                $complete = false;
                 ErrorLog::toDebugLog("deleting data on site {$siteId} failed: " . $e->getMessage());
             } finally {
                 // Without this the switch outlives a failure and every site
@@ -500,5 +514,7 @@ final class Plugin
                 restore_current_blog();
             }
         }
+
+        return $complete;
     }
 }

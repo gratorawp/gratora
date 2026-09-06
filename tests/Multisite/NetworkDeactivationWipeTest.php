@@ -10,8 +10,8 @@ use FundKit\Tests\Integration\IntegrationTestCase;
 
 /**
  * register_deactivation_hook fires exactly once for a network-wide
- * deactivation, in the main site's context, and claimRequest() spends the
- * consent as its first act. So a network administrator who ticked "Delete all
+ * deactivation, in the main site's context, and the consent used to be spent
+ * as its first act. So a network administrator who ticked "Delete all
  * Fundraising Toolkit data as well" and network-deactivated erased site 1 and
  * spent the flag; the later plugin delete found requested() false and
  * uninstall.php erased nothing. Sites 2 through 12 kept every encrypted donor
@@ -131,5 +131,37 @@ final class NetworkDeactivationWipeTest extends IntegrationTestCase
         Plugin::onDeactivation(true);
 
         $this->assertGreaterThanOrEqual(1, count($this->erased), 'the wipe stopped at the first site that failed');
+    }
+
+    /**
+     * The answer is spent by finishing. A wipe that could not reach every site
+     * has to leave the plugin delete something to act on, or uninstall.php
+     * returns at its own requested() check and the sites it missed keep every
+     * donor row, with the screen saying the data is gone.
+     */
+    public function test_an_unfinished_wipe_leaves_the_answer_for_the_plugin_delete(): void
+    {
+        add_action('fundkit.uninstall', static function (): void {
+            if (get_current_blog_id() !== 1) {
+                throw new \RuntimeException('no tables on this site');
+            }
+        }, 5);
+
+        $this->askForTheWipe();
+        Plugin::onDeactivation(true);
+
+        $this->assertTrue(
+            DataEraser::requested(),
+            'the delete that follows is the retry, and it needs the answer'
+        );
+    }
+
+    /** A wipe that reached every site spends it, so nothing acts on it twice. */
+    public function test_a_finished_wipe_spends_the_answer(): void
+    {
+        $this->askForTheWipe();
+        Plugin::onDeactivation(true);
+
+        $this->assertFalse(DataEraser::requested());
     }
 }

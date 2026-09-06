@@ -19,7 +19,14 @@ if (! DataEraser::requested()) {
 }
 
 if (! is_multisite()) {
-    (new DataEraser())->erase();
+    try {
+        (new DataEraser())->erase();
+    } catch (Throwable $e) {
+        // Reachable as a retry over a site the deactivation half-erased, so it
+        // is guarded the way the network loop below already is.
+        ErrorLog::toDebugLog('deleting data on uninstall failed: ' . $e->getMessage());
+    }
+
     return;
 }
 

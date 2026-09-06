@@ -110,23 +110,20 @@ final class DataEraser
     }
 
     /**
-     * Take the answer if there is a good one, leaving none behind.
+     * Put the answer back, dated now, because the erase it belonged to did not
+     * finish.
      *
-     * One call rather than asking and then clearing, because the two-step
-     * version is one early return away from erasing on an answer it never
-     * spent, which is the failure this whole guard exists to stop.
+     * erase() removes this option along with everything else it plans, and the
+     * network wipe reaches the main site first, so a wipe that stopped halfway
+     * has already destroyed its own retry. The retry is the plugin delete
+     * seconds later, so the window starts again rather than counting from when
+     * the owner answered.
      *
      * @since 1.0.0
      */
-    public static function claimRequest(): bool
+    public static function renewRequest(): void
     {
-        if (! self::requested()) {
-            return false;
-        }
-
-        self::forgetRequest();
-
-        return true;
+        update_option(self::OPT_IN, time(), false);
     }
 
     /**

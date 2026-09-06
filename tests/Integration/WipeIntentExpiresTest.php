@@ -53,27 +53,45 @@ final class WipeIntentExpiresTest extends IntegrationTestCase
         );
     }
 
-    public function test_claiming_the_answer_spends_it(): void
+    public function test_finishing_the_wipe_spends_the_answer(): void
     {
         $this->answeredAt(time());
 
-        // This is the call deactivation makes. The erase itself cannot be run
-        // here: it drops the plugin's tables, and the harness rewrites that to
-        // a temporary-table drop, so exercising it would take the rest of the
-        // suite's schema with it.
-        $this->assertTrue(DataEraser::claimRequest());
+        // The two calls deactivation makes around the erase. The erase itself
+        // cannot be run here: it drops the plugin's tables, and the harness
+        // rewrites that to a temporary-table drop, so exercising it would take
+        // the rest of the suite's schema with it.
+        $this->assertTrue(DataEraser::requested());
+        DataEraser::forgetRequest();
 
         $this->assertFalse(
-            DataEraser::claimRequest(),
+            DataEraser::requested(),
             'a second deactivation must not find the same answer waiting'
         );
     }
 
-    public function test_a_stale_answer_is_not_claimable(): void
+    /**
+     * A wipe that stopped partway has already deleted the answer on the sites
+     * it reached, so the plugin delete that follows would find nothing to act
+     * on and the owner would keep donors they were told were gone.
+     */
+    public function test_an_unfinished_wipe_leaves_the_answer_for_the_retry(): void
+    {
+        $this->answeredAt(time());
+
+        DataEraser::forgetRequest();
+        $this->assertFalse(DataEraser::requested());
+
+        DataEraser::renewRequest();
+
+        $this->assertTrue(DataEraser::requested(), 'the plugin delete still has something to act on');
+    }
+
+    public function test_a_stale_answer_is_not_acted_on(): void
     {
         $this->answeredAt(time() - 3600);
 
-        $this->assertFalse(DataEraser::claimRequest());
+        $this->assertFalse(DataEraser::requested());
     }
 
     public function test_a_value_that_is_not_a_time_is_not_an_answer(): void
