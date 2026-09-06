@@ -7,6 +7,8 @@ namespace FundKit\Currency;
 use FundKit\Analytics\ErrorLog;
 use FundKit\Async\AsyncDispatcher;
 use FundKit\Foundation\Helpers\Money;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanRepository;
 
 /**
  * Daily refresh of fundkit_fx_rates from Frankfurter (ECB reference rates).
@@ -108,9 +110,11 @@ final class FxRatesUpdater
      * A single-currency site converts nothing, so the daily call to a third
      * party buys it nothing and still has to be disclosed and justified.
      *
-     * Two sources, not one. Accepted currencies cover what donors can give
+     * Three sources, not one. Accepted currencies cover what donors can give
      * next; donations already recorded without a rate cover what is stranded
-     * now, and those are not necessarily in a currency the org still accepts.
+     * now; and a live foreign recurring plan is money that will arrive in a
+     * currency the accepted list may no longer mention. None of the three
+     * implies the others.
      *
      * @since 1.0.0
      */
@@ -133,7 +137,35 @@ final class FxRatesUpdater
             }
         }
 
+        foreach ($this->renewingCurrencies() as $code) {
+            if ($code !== $base) {
+                return true;
+            }
+        }
+
         return false;
+    }
+
+    /**
+     * Currencies a live plan will renew in. Paused and past_due count: one
+     * resumes and the other is what dunning is for.
+     *
+     * @return list<string>
+     */
+    private function renewingCurrencies(): array
+    {
+        $out = [];
+
+        foreach (RecurringPlan::query()
+            ->selectRaw('UPPER(currency) AS currency')
+            ->whereIn('status', RecurringPlanRepository::LIVE_STATUSES)
+            ->groupByRaw('UPPER(currency)')
+            ->getAll() as $row) {
+            $code = strtoupper((string) ($row['currency'] ?? ''));
+            if ($code !== '') $out[] = $code;
+        }
+
+        return $out;
     }
 
     /**

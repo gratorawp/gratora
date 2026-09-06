@@ -100,7 +100,9 @@ Terms: https://www.paypal.com/legalhub/useragreement-full | Privacy: https://www
 
 **Frankfurter** (api.frankfurter.app, which redirects to api.frankfurter.dev, so
 allowlist both)
-Only when you accept a currency other than your own. Requests European Central
+Only when this site has money in a currency other than your own: a currency you
+accept, a donation already recorded without a rate, or a live recurring plan
+that will renew in one. Requests European Central
 Bank rates once a day, and again whenever you press "Fetch rates now" on
 Settings > Currency. Sends a three-letter currency code, along with the site
 address and WordPress version that WordPress itself puts in the user agent of

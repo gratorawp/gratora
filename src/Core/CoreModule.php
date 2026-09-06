@@ -384,6 +384,7 @@ final class CoreModule implements FundKitModule
         // Daily FX snapshot; last-good value on failure.
         $c->bind(FxRates::class, fn () => new FxRates());
         (new FxRatesUpdater($c->get(AsyncDispatcher::class)))->register();
+        (new \FundKit\Currency\OutstandingRebase())->register();
 
         // GDPR retention: donor PII wiped after inactivity where the org has
         // switched that on, events pruned by age.
