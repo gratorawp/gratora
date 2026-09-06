@@ -7,7 +7,7 @@
  * turned the rest off.
  */
 
-const { gatewayIsOn, toggleGatewayAllowed } = require( '../../assets/admin/_shared/gatewayAllowList' );
+const { gatewayIsOn, gatewayOnCount, toggleGatewayAllowed } = require( '../../assets/admin/_shared/gatewayAllowList' );
 
 const ALL = [ 'stripe', 'paypal', 'offline' ];
 
@@ -40,5 +40,23 @@ describe( 'toggling from the default turns one off, not all the others on', () =
 
     test( 'turning one off from a subset keeps the rest', () => {
         expect( toggleGatewayAllowed( [ 'stripe', 'paypal' ], 'paypal', ALL ) ).toEqual( [ 'stripe' ] );
+    } );
+
+    test( 'turning off the last one is refused, since [] means offer all', () => {
+        expect( toggleGatewayAllowed( [ 'paypal' ], 'paypal', ALL ) ).toEqual( [ 'paypal' ] );
+    } );
+
+    test( 'the only registered gateway cannot be turned off either', () => {
+        expect( toggleGatewayAllowed( [], 'stripe', [ 'stripe' ] ) ).toEqual( [] );
+    } );
+} );
+
+describe( 'how many gateways a form actually offers', () => {
+    test( 'an empty list is every one of them', () => {
+        expect( gatewayOnCount( [], ALL ) ).toBe( 3 );
+    } );
+
+    test( 'a subset is its own size', () => {
+        expect( gatewayOnCount( [ 'stripe', 'paypal' ], ALL ) ).toBe( 2 );
     } );
 } );

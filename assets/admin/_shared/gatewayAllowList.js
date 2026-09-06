@@ -19,5 +19,17 @@ export function toggleGatewayAllowed( allowed, id, allIds ) {
 
     const next = allIds.filter( ( x ) => on.has( x ) );
 
+    // [] already means "offer all", so emptying the set would turn every
+    // gateway back on.
+    if ( next.length === 0 ) {
+        return ( allowed || [] ).slice();
+    }
+
     return next.length === allIds.length ? [] : next;
 }
+
+/** How many gateways this form actually offers. */
+export const gatewayOnCount = ( allowed, allIds ) =>
+    ( allowed || [] ).length === 0
+        ? allIds.length
+        : allIds.filter( ( id ) => allowed.includes( id ) ).length;

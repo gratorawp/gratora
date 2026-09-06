@@ -3,8 +3,9 @@ import { PanelBody, TextControl, ToggleControl } from '@wordpress/components';
 import Slider from '../../../_shared/components/Slider';
 import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
-import { OptionsEditor, normalizeOptions, slugify, slugifyField } from '../_shared/OptionsEditor';
+import { OptionsEditor, normalizeOptions, slugify } from '../_shared/OptionsEditor';
 import { BlockIcons } from '../_shared/block-icons';
+import { SlugTextControl } from '../_shared/SlugTextControl';
 
 const NAME = 'fundkit/multi-select';
 
@@ -23,6 +24,21 @@ function Edit( { attributes, setAttributes } ) {
     } = attributes;
 
     const options = normalizeOptions( attributes.options, DEFAULT_OPTIONS );
+    const count   = options.length;
+
+    // A minimum above the option count, or above the maximum, is a field no
+    // donor can satisfy.
+    const setMin = ( v ) => {
+        const min = Math.min( Math.max( 0, v ), count );
+        setAttributes( maxSelections > 0 && min > maxSelections
+            ? { minSelections: min, maxSelections: min }
+            : { minSelections: min } );
+    };
+
+    const setMax = ( v ) => {
+        const max = Math.min( Math.max( 0, v ), count );
+        setAttributes( { maxSelections: max === 0 ? 0 : Math.max( max, minSelections ) } );
+    };
 
     const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--multi-select' } );
 
@@ -50,10 +66,10 @@ function Edit( { attributes, setAttributes } ) {
                         help={ __( 'Click the label or any option to edit inline.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
-                    <TextControl
+                    <SlugTextControl
                         label={ __( 'Field name', 'fundraising-toolkit' ) }
                         value={ field }
-                        onChange={ ( v ) => setAttributes( { field: slugifyField( v ) } ) }
+                        onChange={ ( v ) => setAttributes( { field: v } ) }
                         help={ __( 'Key the array is stored under. Auto-derived from label if empty.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
@@ -67,21 +83,25 @@ function Edit( { attributes, setAttributes } ) {
                     <Slider
                         label={ __( 'Minimum selections', 'fundraising-toolkit' ) }
                         value={ minSelections }
-                        onChange={ ( v ) => setAttributes( { minSelections: Math.max( 0, v ) } ) }
+                        onChange={ setMin }
                         min={ 0 }
-                        max={ 20 }
+                        max={ count }
                     />
                     <Slider
                         label={ __( 'Maximum selections', 'fundraising-toolkit' ) }
                         value={ maxSelections }
-                        onChange={ ( v ) => setAttributes( { maxSelections: Math.max( 0, v ) } ) }
+                        onChange={ setMax }
                         min={ 0 }
-                        max={ 20 }
+                        max={ count }
                         help={ __( 'Set to 0 for no upper limit.', 'fundraising-toolkit' ) }
                     />
                     <OptionsEditor
                         options={ options }
-                        onChange={ ( next ) => setAttributes( { options: next } ) }
+                        onChange={ ( next ) => setAttributes( {
+                            options: next,
+                            minSelections: Math.min( minSelections, next.length ),
+                            maxSelections: maxSelections > 0 ? Math.min( maxSelections, next.length ) : 0,
+                        } ) }
                     />
                 </PanelBody>
                 <ConditionPanel

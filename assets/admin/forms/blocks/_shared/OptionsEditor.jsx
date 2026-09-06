@@ -1,21 +1,10 @@
 import { Button, TextControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
-export function slugify( s ) {
-    return String( s || '' )
-        .toLowerCase()
-        .replace( /[^a-z0-9]+/g, '-' )
-        .replace( /^-+|-+$/g, '' );
-}
+import { slugify } from './slug';
+import { SlugTextControl } from './SlugTextControl';
 
-// Field keys are snake_case to match the server (DropdownBlock::slugifySnake)
-// and the runtime custom-value keys, so conditions targeting a field resolve.
-export function slugifyField( s ) {
-    return String( s || '' )
-        .toLowerCase()
-        .replace( /[^a-z0-9]+/g, '_' )
-        .replace( /^_+|_+$/g, '' );
-}
+export { slugify, slugifyField } from './slug';
 
 export function normalizeOptions( raw, fallback ) {
     const fb = Array.isArray( fallback ) && fallback.length > 0
@@ -106,10 +95,12 @@ export function OptionsEditor( {
                         onChange={ ( v ) => updateLabel( i, v ) }
                         __nextHasNoMarginBottom
                     />
-                    <TextControl
+                    <SlugTextControl
                         label={ __( 'Value', 'fundraising-toolkit' ) }
                         value={ o.value }
-                        onChange={ ( v ) => update( i, { value: slugify( v ) || `option-${ i + 1 }` } ) }
+                        separator="-"
+                        fallback={ `option-${ i + 1 }` }
+                        onChange={ ( v ) => update( i, { value: v } ) }
                         help={ __( 'Stored when this option is picked. Auto-derived from the label.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />

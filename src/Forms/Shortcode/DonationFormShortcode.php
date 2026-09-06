@@ -17,6 +17,7 @@ use FundKit\Forms\Blocks\DateBlock;
 use FundKit\Forms\Blocks\DividerBlock;
 use FundKit\Forms\Blocks\DonationAmountBlock;
 use FundKit\Forms\Blocks\DropdownBlock;
+use FundKit\Forms\Blocks\MultiSelectBlock;
 use FundKit\Forms\Blocks\FundPickerBlock;
 use FundKit\Forms\Blocks\HtmlBlock;
 use FundKit\Forms\Blocks\RecurringToggleBlock;
@@ -1427,8 +1428,8 @@ final class DonationFormShortcode extends HookProvider
                         'options'       => $msOptions,
                         'required'      => (bool)   ($attrs['required'] ?? false),
                         'field'         => DropdownBlock::deriveField((string) ($attrs['field'] ?? ''), (string) ($attrs['label'] ?? '')),
-                        'minSelections' => max(0, (int) ($attrs['minSelections'] ?? 0)),
-                        'maxSelections' => max(0, (int) ($attrs['maxSelections'] ?? 0)),
+                        'minSelections' => MultiSelectBlock::limits($attrs, count($msOptions))[0],
+                        'maxSelections' => MultiSelectBlock::limits($attrs, count($msOptions))[1],
                         'defaults'      => $msDefaults,
                     ], $row, $attrs);
                     break;

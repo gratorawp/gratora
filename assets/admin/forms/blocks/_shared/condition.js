@@ -2,6 +2,7 @@ import { PanelBody, SelectControl, TextControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
 import { __, sprintf } from '@wordpress/i18n';
+import { deriveFieldKey } from './slug';
 
 export const OP_OPTIONS = [
     { value: '=', label: __( 'equals', 'fundraising-toolkit' ) },
@@ -79,7 +80,7 @@ export function ConditionPanel( { condition, onChange, title } ) {
             }
 
             if ( ! CUSTOM_FIELD_BLOCKS.has( b.name ) ) continue;
-            const slug = String( b.attributes?.field || '' ).trim();
+            const slug = deriveFieldKey( b.attributes?.field, b.attributes?.label );
             if ( ! slug ) continue;
             const value = `custom.${ slug }`;
             if ( seen.has( value ) ) continue;

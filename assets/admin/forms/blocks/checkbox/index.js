@@ -2,8 +2,8 @@ import { useBlockProps, InspectorControls, RichText } from '@wordpress/block-edi
 import { PanelBody, TextControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
-import { slugifyField } from '../_shared/OptionsEditor';
 import { BlockIcons } from '../_shared/block-icons';
+import { SlugTextControl } from '../_shared/SlugTextControl';
 
 const NAME = 'fundkit/checkbox';
 
@@ -36,10 +36,10 @@ function Edit( { attributes, setAttributes } ) {
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
-                    <TextControl
+                    <SlugTextControl
                         label={ __( 'Field name', 'fundraising-toolkit' ) }
                         value={ field }
-                        onChange={ ( v ) => setAttributes( { field: slugifyField( v ) } ) }
+                        onChange={ ( v ) => setAttributes( { field: v } ) }
                         help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />

@@ -13,6 +13,7 @@ use FundKit\Forms\Blocks\TermsBlock;
 use FundKit\Forms\Blocks\DateBlock;
 use FundKit\Forms\Blocks\DonationAmountBlock;
 use FundKit\Forms\Blocks\DropdownBlock;
+use FundKit\Forms\Blocks\MultiSelectBlock;
 use FundKit\Forms\Blocks\RecurringToggleBlock;
 use FundKit\Foundation\Helpers\Money;
 use WP_Error;
@@ -435,8 +436,7 @@ final class FormSubmissionValidator
                 if (! empty($attrs['required']) && $count === 0) {
                     return $this->requiredError($this->label($attrs, $key));
                 }
-                $min = max(0, (int) ($attrs['minSelections'] ?? 0));
-                $max = max(0, (int) ($attrs['maxSelections'] ?? 0));
+                [$min, $max] = MultiSelectBlock::limits($attrs, count(DropdownBlock::normalizeOptions($attrs['options'] ?? null)));
                 if ($count > 0 && $min > 0 && $count < $min) {
                     return $this->reject(sprintf(/* translators: %1$d: smallest number of options allowed. %2$s: the label of the form field. */ __('Select at least %1$d for %2$s.', 'fundraising-toolkit'), $min, $this->label($attrs, $key)));
                 }

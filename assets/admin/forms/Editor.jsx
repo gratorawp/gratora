@@ -16,7 +16,7 @@ import {
 } from '@wordpress/components';
 import Notice from '../_shared/components/Notice';
 import { notify } from '../_shared/notify';
-import { gatewayIsOn, toggleGatewayAllowed } from '../_shared/gatewayAllowList';
+import { gatewayIsOn, gatewayOnCount, toggleGatewayAllowed } from '../_shared/gatewayAllowList';
 import {
     BlockEditorProvider,
     BlockInspector,
@@ -1514,6 +1514,7 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
     const { updateBlockAttributes } = useDispatch( 'core/block-editor' );
 
     const allowed = block ? block.allowed : ( settings.gateways.allowed || [] );
+    const onCount = gatewayOnCount( allowed, gateways.map( ( g ) => g.id ) );
 
     const toggleGateway = ( id ) => {
         const next = toggleGatewayAllowed( allowed, id, gateways.map( ( g ) => g.id ) );
@@ -1527,7 +1528,7 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
     return (
         <SettingsRow
             title={ __( 'Allowed gateways', 'fundraising-toolkit' ) }
-            description={ __( 'Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings.', 'fundraising-toolkit' ) }
+            description={ __( 'Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings. A form needs at least one.', 'fundraising-toolkit' ) }
         >
             <div className="fundkit-sidebar-list">
                 { gateways.map( ( g ) => (
@@ -1535,6 +1536,7 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
                         <input
                             type="checkbox"
                             checked={ gatewayIsOn( allowed, g.id ) }
+                            disabled={ gatewayIsOn( allowed, g.id ) && onCount <= 1 }
                             onChange={ () => toggleGateway( g.id ) }
                         />
                         <span>{ gatewayLabel( g ) }</span>

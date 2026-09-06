@@ -4,15 +4,9 @@ import Slider from '../../../_shared/components/Slider';
 import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
+import { SlugTextControl } from '../_shared/SlugTextControl';
 
 const NAME = 'fundkit/text-input';
-
-function slugify( s ) {
-    return String( s || '' )
-        .toLowerCase()
-        .replace( /[^a-z0-9]+/g, '_' )
-        .replace( /^_+|_+$/g, '' );
-}
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -51,10 +45,10 @@ function Edit( { attributes, setAttributes } ) {
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
-                    <TextControl
+                    <SlugTextControl
                         label={ __( 'Field name', 'fundraising-toolkit' ) }
                         value={ field }
-                        onChange={ ( v ) => setAttributes( { field: slugify( v ) } ) }
+                        onChange={ ( v ) => setAttributes( { field: v } ) }
                         help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />

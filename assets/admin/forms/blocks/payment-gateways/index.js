@@ -2,7 +2,7 @@ import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl, TextControl, SelectControl, Notice, ExternalLink } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
-import { gatewayIsOn, toggleGatewayAllowed } from '../../../_shared/gatewayAllowList';
+import { gatewayIsOn, gatewayOnCount, toggleGatewayAllowed } from '../../../_shared/gatewayAllowList';
 
 const NAME = 'fundkit/payment-gateways';
 
@@ -36,8 +36,9 @@ function Edit( { attributes, setAttributes } ) {
     const gateways = registeredGateways();
     const allIds   = gateways.map( ( g ) => g.id );
 
-    const isOn   = ( id ) => gatewayIsOn( allowed, id );
-    const toggle = ( id ) => setAttributes( { allowed: toggleGatewayAllowed( allowed, id, allIds ) } );
+    const isOn    = ( id ) => gatewayIsOn( allowed, id );
+    const onCount = gatewayOnCount( allowed, allIds );
+    const toggle  = ( id ) => setAttributes( { allowed: toggleGatewayAllowed( allowed, id, allIds ) } );
 
     const setDesc = ( id, text ) =>
         setAttributes( { descriptions: { ...descriptions, [ id ]: text } } );
@@ -67,6 +68,10 @@ function Edit( { attributes, setAttributes } ) {
                                     ? `${ g.label } ${ __( '(off in Settings)', 'fundraising-toolkit' ) }`
                                     : g.label }
                                 checked={ isOn( g.id ) }
+                                disabled={ isOn( g.id ) && onCount <= 1 }
+                                help={ isOn( g.id ) && onCount <= 1
+                                    ? __( 'A form needs at least one gateway.', 'fundraising-toolkit' )
+                                    : undefined }
                                 onChange={ () => toggle( g.id ) }
                                 __nextHasNoMarginBottom
                             />

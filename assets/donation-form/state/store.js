@@ -564,7 +564,9 @@ export function validateStep( step, state ) {
                         const max  = Math.max( 0, Number( f.maxSelections || 0 ) );
                         if ( f.required && sel.length === 0 ) {
                             e[ `custom.${ name }` ] = msg( 'pickAtLeastOne', 'Pick at least one.' );
-                        } else if ( min > 0 && sel.length < min ) {
+                        // Only once something is picked, matching the server:
+                        // "required" is what makes an empty answer an error.
+                        } else if ( sel.length > 0 && min > 0 && sel.length < min ) {
                             e[ `custom.${ name }` ] = msg( 'pickAtLeast', `Pick at least ${ min }.`, min );
                         } else if ( max > 0 && sel.length > max ) {
                             e[ `custom.${ name }` ] = msg( 'pickNoMoreThan', `Pick no more than ${ max }.`, max );
