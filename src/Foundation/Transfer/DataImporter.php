@@ -836,20 +836,23 @@ final class DataImporter
     {
         $syncer = new AggregateSyncer();
 
-        foreach ($this->map['fundkit_funds'] ?? [] as $id) {
-            $syncer->syncFund((int) $id);
-        }
-
+        // Campaign, form, fund, donor: the same order a donation takes these
+        // row locks in, so an import running beside live traffic queues behind
+        // it rather than deadlocking against it.
         foreach ($this->map['fundkit_campaigns'] ?? [] as $id) {
             $syncer->syncCampaign((int) $id);
         }
 
-        foreach ($this->map['fundkit_donors'] ?? [] as $id) {
-            $syncer->syncDonor((int) $id);
-        }
-
         foreach ($this->map['fundkit_forms'] ?? [] as $id) {
             $syncer->syncForm((int) $id);
+        }
+
+        foreach ($this->map['fundkit_funds'] ?? [] as $id) {
+            $syncer->syncFund((int) $id);
+        }
+
+        foreach ($this->map['fundkit_donors'] ?? [] as $id) {
+            $syncer->syncDonor((int) $id);
         }
     }
 

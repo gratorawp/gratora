@@ -31,26 +31,30 @@ final class AggregateSyncer
     {
         if ($campaignId <= 0) return;
 
-        $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
-            ->whereIn('status', ['paid', 'partial_refund'])
-            ->where('campaign_id', $campaignId))
-            ->selectRaw("
-                COALESCE(SUM(
-                    COALESCE(base_amount_cents, 0) - {$this->refundedSubquery()}
-                ), 0) AS raised,
-                COUNT(*)                        AS donations,
-                COUNT(DISTINCT donor_id)        AS donors
-            ")
-            ->get();
+        DB::transaction(function () use ($campaignId): void {
+            if (! $this->lockRow('fundkit_campaigns', $campaignId)) return;
 
-        DB::table('fundkit_campaigns')
-            ->where('id', $campaignId)
-            ->update([
-                'raised_cents'    => (int) ($row['raised']    ?? 0),
-                'donations_count' => (int) ($row['donations'] ?? 0),
-                'donors_count'    => (int) ($row['donors']    ?? 0),
-                'updated_at'      => gmdate('Y-m-d H:i:s'),
-            ]);
+            $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
+                ->whereIn('status', ['paid', 'partial_refund'])
+                ->where('campaign_id', $campaignId))
+                ->selectRaw("
+                    COALESCE(SUM(
+                        COALESCE(base_amount_cents, 0) - {$this->refundedSubquery()}
+                    ), 0) AS raised,
+                    COUNT(*)                        AS donations,
+                    COUNT(DISTINCT donor_id)        AS donors
+                ")
+                ->get();
+
+            DB::table('fundkit_campaigns')
+                ->where('id', $campaignId)
+                ->update([
+                    'raised_cents'    => (int) ($row['raised']    ?? 0),
+                    'donations_count' => (int) ($row['donations'] ?? 0),
+                    'donors_count'    => (int) ($row['donors']    ?? 0),
+                    'updated_at'      => gmdate('Y-m-d H:i:s'),
+                ]);
+        });
     }
 
     /** @since 1.0.0 */
@@ -58,28 +62,32 @@ final class AggregateSyncer
     {
         if ($fundId <= 0) return;
 
-        $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
-            ->whereIn('status', ['paid', 'partial_refund'])
-            ->where('fund_id', $fundId))
-            ->selectRaw("
-                COALESCE(SUM(
-                    COALESCE(base_amount_cents, 0) - {$this->refundedSubquery()}
-                ), 0) AS raised,
-                COUNT(*)                        AS donations,
-                COUNT(DISTINCT donor_id)        AS donors,
-                MAX(paid_at)                    AS last_paid
-            ")
-            ->get();
+        DB::transaction(function () use ($fundId): void {
+            if (! $this->lockRow('fundkit_funds', $fundId)) return;
 
-        DB::table('fundkit_funds')
-            ->where('id', $fundId)
-            ->update([
-                'raised_cents'    => (int) ($row['raised']    ?? 0),
-                'donations_count' => (int) ($row['donations'] ?? 0),
-                'donors_count'    => (int) ($row['donors']    ?? 0),
-                'last_paid_at'    => $row['last_paid'] ?? null,
-                'updated_at'      => gmdate('Y-m-d H:i:s'),
-            ]);
+            $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
+                ->whereIn('status', ['paid', 'partial_refund'])
+                ->where('fund_id', $fundId))
+                ->selectRaw("
+                    COALESCE(SUM(
+                        COALESCE(base_amount_cents, 0) - {$this->refundedSubquery()}
+                    ), 0) AS raised,
+                    COUNT(*)                        AS donations,
+                    COUNT(DISTINCT donor_id)        AS donors,
+                    MAX(paid_at)                    AS last_paid
+                ")
+                ->get();
+
+            DB::table('fundkit_funds')
+                ->where('id', $fundId)
+                ->update([
+                    'raised_cents'    => (int) ($row['raised']    ?? 0),
+                    'donations_count' => (int) ($row['donations'] ?? 0),
+                    'donors_count'    => (int) ($row['donors']    ?? 0),
+                    'last_paid_at'    => $row['last_paid'] ?? null,
+                    'updated_at'      => gmdate('Y-m-d H:i:s'),
+                ]);
+        });
     }
 
     /** @since 1.0.0 */
@@ -87,36 +95,61 @@ final class AggregateSyncer
     {
         if ($formId <= 0) return;
 
-        $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
-            ->whereIn('status', ['paid', 'partial_refund'])
-            ->where('form_id', $formId))
-            ->selectRaw("
-                COALESCE(SUM(
-                    COALESCE(base_amount_cents, 0) - {$this->refundedSubquery()}
-                ), 0) AS raised,
-                COUNT(*)                        AS donations,
-                COUNT(DISTINCT donor_id)        AS donors,
-                MIN(paid_at)                    AS first_paid,
-                MAX(paid_at)                    AS last_paid
-            ")
-            ->get();
+        DB::transaction(function () use ($formId): void {
+            // The form row, not the stats row the upsert may be creating: a key
+            // that is not there yet locks a gap rather than a row.
+            if (! $this->lockRow('fundkit_forms', $formId)) return;
 
-        $now = gmdate('Y-m-d H:i:s');
+            $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
+                ->whereIn('status', ['paid', 'partial_refund'])
+                ->where('form_id', $formId))
+                ->selectRaw("
+                    COALESCE(SUM(
+                        COALESCE(base_amount_cents, 0) - {$this->refundedSubquery()}
+                    ), 0) AS raised,
+                    COUNT(*)                        AS donations,
+                    COUNT(DISTINCT donor_id)        AS donors,
+                    MIN(paid_at)                    AS first_paid,
+                    MAX(paid_at)                    AS last_paid
+                ")
+                ->get();
 
-        // Separate table: only donation-type forms have donation aggregates.
-        DB::table('fundkit_form_donation_stats')->upsert(
-            [
-                'form_id'         => $formId,
-                'raised_cents'    => (int) ($row['raised']    ?? 0),
-                'donations_count' => (int) ($row['donations'] ?? 0),
-                'donors_count'    => (int) ($row['donors']    ?? 0),
-                'first_paid_at'   => $row['first_paid'] ?? null,
-                'last_paid_at'    => $row['last_paid']  ?? null,
-                'updated_at'      => $now,
-            ],
-            ['form_id'],
-            ['raised_cents', 'donations_count', 'donors_count', 'first_paid_at', 'last_paid_at', 'updated_at'],
-        );
+            $now = gmdate('Y-m-d H:i:s');
+
+            // Separate table: only donation-type forms have donation aggregates.
+            DB::table('fundkit_form_donation_stats')->upsert(
+                [
+                    'form_id'         => $formId,
+                    'raised_cents'    => (int) ($row['raised']    ?? 0),
+                    'donations_count' => (int) ($row['donations'] ?? 0),
+                    'donors_count'    => (int) ($row['donors']    ?? 0),
+                    'first_paid_at'   => $row['first_paid'] ?? null,
+                    'last_paid_at'    => $row['last_paid']  ?? null,
+                    'updated_at'      => $now,
+                ],
+                ['form_id'],
+                ['raised_cents', 'donations_count', 'donors_count', 'first_paid_at', 'last_paid_at', 'updated_at'],
+            );
+        });
+    }
+
+    /**
+     * Claim the row this recompute is about to overwrite, before reading the
+     * donations it sums.
+     *
+     * A plain read is served from the transaction's snapshot, so two
+     * confirmations in flight together each total the campaign without the
+     * other, then serialise on the UPDATE and the second overwrites the first.
+     * Locking first makes the loser re-read.
+     *
+     * @since 1.0.0
+     */
+    private function lockRow(string $table, int $id): bool
+    {
+        $prefix = DB::getPrefix();
+        $result = DB::raw("SELECT id FROM {$prefix}{$table} WHERE id = %d FOR UPDATE", [$id]);
+
+        return isset($result['rows'][0]);
     }
 
     // Nets refunded cents out of SUM(amount) so partial refunds reduce the

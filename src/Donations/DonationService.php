@@ -22,6 +22,7 @@ use FundKit\Gateways\TestMode;
 use FundKit\Receipts\Receipt;
 use FundKit\Vendor\Queryable\DB;
 use RuntimeException;
+use Throwable;
 
 /**
  * Donation state machine: createPending, setGatewayIntent, confirm, markFailed, refund.
@@ -531,16 +532,6 @@ final class DonationService
                 'payload'      => ['gateway' => $donation->gateway, 'frequency' => $donation->frequency],
             ]);
 
-            // Donor counters are deferred to the post-commit listener.
-            if ($donation->campaign_id) {
-                $this->aggregates->syncCampaign((int) $donation->campaign_id);
-            }
-            if ($donation->form_id) {
-                $this->aggregates->syncForm((int) $donation->form_id);
-            }
-            if ($donation->fund_id) {
-                $this->aggregates->syncFund((int) $donation->fund_id);
-            }
         });
 
         if ($affected < 1) {
@@ -548,6 +539,14 @@ final class DonationService
             // fired its side effects. Return the persisted row, fire nothing.
             return Donation::query()->find('id', (int) $donation->id) ?? $donation;
         }
+
+        // Outside the transaction that took the money: each of these is a whole
+        // aggregate over the campaign, form and fund, and a lock wait or a
+        // deadlock in one of them must not put a donation the gateway has
+        // already charged back to pending. Before the hook, so a listener still
+        // reads the figures this donation is part of. Donor counters are
+        // deferred to the post-commit listener.
+        $this->resyncAggregatesFor($donation);
 
         do_action('fundkit.donation.completed', $donation);
 
@@ -968,17 +967,31 @@ final class DonationService
         return $donation;
     }
 
-    /** @since 1.0.0 */
+    /**
+     * Counters, not money. Every caller runs this after its transaction has
+     * committed, so a recompute that cannot finish leaves a figure stale and
+     * nothing else: the donation stands, the receipt and the thank-you still
+     * go, and Tools, Recalculate is what puts the figure right.
+     *
+     * @since 1.0.0
+     */
     private function resyncAggregatesFor(Donation $donation): void
     {
-        if ($donation->campaign_id) {
-            $this->aggregates->syncCampaign((int) $donation->campaign_id);
-        }
-        if ($donation->form_id) {
-            $this->aggregates->syncForm((int) $donation->form_id);
-        }
-        if ($donation->fund_id) {
-            $this->aggregates->syncFund((int) $donation->fund_id);
+        try {
+            if ($donation->campaign_id) {
+                $this->aggregates->syncCampaign((int) $donation->campaign_id);
+            }
+            if ($donation->form_id) {
+                $this->aggregates->syncForm((int) $donation->form_id);
+            }
+            if ($donation->fund_id) {
+                $this->aggregates->syncFund((int) $donation->fund_id);
+            }
+        } catch (Throwable $e) {
+            ErrorLog::record('donations.aggregates', $e->getMessage(), [
+                'donation_id' => (int) $donation->id,
+                'campaign_id' => (int) ($donation->campaign_id ?? 0),
+            ]);
         }
     }
 
@@ -1190,15 +1203,6 @@ final class DonationService
                 ],
             ]);
 
-            if ($donation->campaign_id) {
-                $this->aggregates->syncCampaign((int) $donation->campaign_id);
-            }
-            if ($donation->form_id) {
-                $this->aggregates->syncForm((int) $donation->form_id);
-            }
-            if ($donation->fund_id) {
-                $this->aggregates->syncFund((int) $donation->fund_id);
-            }
         });
         } catch (\FundKit\Vendor\Queryable\QueryException $e) {
             // Lost the UNIQUE(gateway_refund_id) race: a concurrent or
@@ -1218,6 +1222,8 @@ final class DonationService
             }
             throw $e;
         }
+
+        $this->resyncAggregatesFor($donation);
 
         do_action('fundkit.donation.refunded', $donation, $refund);
 
@@ -1390,16 +1396,9 @@ final class DonationService
                 ],
             ]);
 
-            if ($donation->campaign_id) {
-                $this->aggregates->syncCampaign((int) $donation->campaign_id);
-            }
-            if ($donation->form_id) {
-                $this->aggregates->syncForm((int) $donation->form_id);
-            }
-            if ($donation->fund_id) {
-                $this->aggregates->syncFund((int) $donation->fund_id);
-            }
         });
+
+        $this->resyncAggregatesFor($donation);
 
         do_action('fundkit.donation.refund_reversed', $donation, $refund);
 
@@ -1590,17 +1589,12 @@ final class DonationService
                 ],
             ]);
 
-            // Donor sync runs from the post-commit fundkit.donation.refunded listener.
-            if ($donation->campaign_id) {
-                $this->aggregates->syncCampaign((int) $donation->campaign_id);
-            }
-            if ($donation->form_id) {
-                $this->aggregates->syncForm((int) $donation->form_id);
-            }
-            if ($donation->fund_id) {
-                $this->aggregates->syncFund((int) $donation->fund_id);
-            }
         });
+
+        // Outside the money transaction: a counter that cannot be recomputed
+        // must not undo a refund the gateway has already made. Donor counters
+        // run from the post-commit fundkit.donation.refunded listener.
+        $this->resyncAggregatesFor($donation);
 
         do_action('fundkit.donation.refunded', $donation, $refund);
 
