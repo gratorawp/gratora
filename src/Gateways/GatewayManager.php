@@ -223,7 +223,9 @@ final class GatewayManager
                 continue;
             }
 
-            $currencies = array_map('strtoupper', $g->currencies());
+            $currencies = array_map('strtoupper', $g instanceof ModeCredentialed
+                ? $g->currenciesInMode($test)
+                : $g->currencies());
             if (! in_array('*', $currencies, true) && ! in_array($currency, $currencies, true)) {
                 continue;
             }

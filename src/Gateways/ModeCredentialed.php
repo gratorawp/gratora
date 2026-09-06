@@ -31,4 +31,14 @@ interface ModeCredentialed
      * @return list<string>
      */
     public function frequenciesInMode(bool $test): array;
+
+    /**
+     * The currencies it settles in $test. A processor learns these from the
+     * account, and a sandbox usually settles a different set from the live one:
+     * filtering a test-mode form by the live list drops the gateway a donor
+     * needs, and passing one only the sandbox settles dies at createIntent.
+     *
+     * @return list<string>
+     */
+    public function currenciesInMode(bool $test): array;
 }

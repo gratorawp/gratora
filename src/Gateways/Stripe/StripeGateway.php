@@ -174,6 +174,16 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         return $this->frequencies();
     }
 
+    /**
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
+    public function currenciesInMode(bool $test): array
+    {
+        return $this->currencies();
+    }
+
     /** @since 1.0.0 */
     public function createIntent(Donation $donation): GatewayIntentResult
     {

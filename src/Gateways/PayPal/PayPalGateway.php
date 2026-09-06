@@ -110,6 +110,16 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             : ['one_time', 'recurring'];
     }
 
+    /**
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
+    public function currenciesInMode(bool $test): array
+    {
+        return $this->currencies();
+    }
+
     /** @since 1.0.0 */
     public function paymentMethods(): array
     {
