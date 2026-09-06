@@ -209,9 +209,10 @@ export default function List() {
         setReload( ( n ) => n + 1 );
     }, [] );
 
-    const mutate = useCallback( async ( id, payload ) => {
+    const mutate = useCallback( async ( id, payload, done = '' ) => {
         try {
             await apiFetch( { path: `/fundkit/v1/admin/funds/${ id }`, method: 'POST', data: payload } );
+            if ( done ) notify.success( done );
             afterChange();
         } catch ( err ) {
             setError( err?.message || __( 'Action failed.', 'fundraising-toolkit' ) );
@@ -352,7 +353,20 @@ export default function List() {
             label:      __( 'Set as default', 'fundraising-toolkit' ),
             icon:       () => <Star size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.is_default && item.is_active && ! item.reassign_pending,
-            callback:   ( [ item ] ) => mutate( item.id, { is_default: true } ),
+            // Promoting a scheduled fund drops its window, because the default
+            // cannot carry one. Said out loud: the pill just changes in the
+            // list otherwise, and the dates are gone.
+            callback:   ( [ item ] ) => mutate(
+                item.id,
+                { is_default: true },
+                ( item.starts_at || item.ends_at )
+                    ? sprintf(
+                        /* translators: %s: fund name */
+                        __( '%s is now the default fund. Its schedule was cleared, because the default has to stay open.', 'fundraising-toolkit' ),
+                        item.name
+                    )
+                    : ''
+            ),
         },
         {
             id:         'deactivate',
@@ -512,6 +526,14 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
 
     const set = ( key, value ) => setForm( ( s ) => ( { ...s, [ key ]: value } ) );
 
+    // The server refuses a default fund carrying a window, so the form drops
+    // the dates here rather than letting the reader fill in a schedule that
+    // comes back as a 422 on save.
+    const setIsDefault = ( on ) => {
+        setForm( ( s ) => ( on ? { ...s, is_default: true, starts_at: '', ends_at: '' } : { ...s, is_default: false } ) );
+        if ( on ) setScheduleOn( false );
+    };
+
     const save = async () => {
         setSaving( true );
         setSaveError( null );
@@ -626,6 +648,8 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                             onStartsAt={ ( v ) => set( 'starts_at', v || '' ) }
                             endsAt={ form.ends_at ? form.ends_at.slice( 0, 10 ) : '' }
                             onEndsAt={ ( v ) => set( 'ends_at', v || '' ) }
+                            disabled={ form.is_default }
+                            disabledNote={ __( 'The default fund takes every donation with no fund chosen, so it stays open. Make another fund the default to schedule this one.', 'fundraising-toolkit' ) }
                         />
                     </fieldset>
 
@@ -642,9 +666,9 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                         <legend>{ __( 'Behaviour', 'fundraising-toolkit' ) }</legend>
                         <ToggleRow
                             title={ __( 'Default fund', 'fundraising-toolkit' ) }
-                            sub={ __( 'Donations with no chosen fund (and campaigns with no default) are allocated here.', 'fundraising-toolkit' ) }
+                            sub={ __( 'Donations with no chosen fund (and campaigns with no default) are allocated here. The default has no schedule.', 'fundraising-toolkit' ) }
                             checked={ form.is_default }
-                            onChange={ ( v ) => set( 'is_default', v ) }
+                            onChange={ setIsDefault }
                         />
                         <ToggleRow
                             title={ __( 'Active', 'fundraising-toolkit' ) }

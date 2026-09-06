@@ -78,6 +78,7 @@ final class FundService
         // never open, so the fund is offered to nobody and every later save is
         // refused by the guard the create never ran.
         $this->assertWindowOrder($fund);
+        $this->assertDefaultHasNoWindow($fund);
 
         DB::transaction(function () use ($fund): void {
             $fund->save();
@@ -112,6 +113,17 @@ final class FundService
             $name = trim((string) $input['name']);
             if ($name !== '') {
                 $fund->name = $name;
+            }
+        }
+
+        // Asked for separately from what lands on the model: the default-fund
+        // rule below clears a window rather than refusing one, and it has to
+        // tell "the admin just picked these dates" from "this fund already had
+        // them".
+        $windowRequested = false;
+        foreach (['starts_at', 'ends_at'] as $field) {
+            if (array_key_exists($field, $input) && $this->nullableString($input[$field]) !== null) {
+                $windowRequested = true;
             }
         }
 
@@ -164,6 +176,19 @@ final class FundService
             if ($next) {
                 $fund->is_active = true;
             }
+        }
+
+        // Promotion drops the window the way it forces is_active: the default
+        // takes every donation with nowhere else to go, so a default that
+        // closes hands those donations to whichever fund happens to sort first.
+        // Asking for both in one save is a contradiction rather than something
+        // to repair, so that is refused instead.
+        if ($fund->is_default) {
+            if ($windowRequested) {
+                $this->assertDefaultHasNoWindow($fund);
+            }
+            $fund->starts_at = null;
+            $fund->ends_at   = null;
         }
 
         $fund->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
@@ -383,6 +408,25 @@ final class FundService
                 esc_html__('Fund "Active from" date must be before "Active until".', 'fundraising-toolkit')
             );
         }
+    }
+
+    /**
+     * The default fund is the one a donation lands in when nothing else claims
+     * it, so it has to be open whenever the site can take money. Outside its
+     * window it is closed, FundResolver skips it, and those donations are filed
+     * against whichever other fund happens to sort first.
+     *
+     * @since 1.0.0
+     */
+    private function assertDefaultHasNoWindow(Fund $fund): void
+    {
+        if (! $fund->is_default || ($fund->starts_at === null && $fund->ends_at === null)) {
+            return;
+        }
+
+        throw new InvalidArgumentException(
+            esc_html__('The default fund cannot have a schedule. Every donation with no fund chosen goes to the default, so it has to stay open.', 'fundraising-toolkit')
+        );
     }
 
     /**

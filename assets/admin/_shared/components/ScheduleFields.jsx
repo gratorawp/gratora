@@ -9,6 +9,10 @@ import DateField from './DateField';
  * Campaigns and funds both schedule the same way, and both default to "always
  * on" -- so the dates stay out of sight until someone asks for them, rather
  * than sitting empty in every form.
+ *
+ * `disabled` is for a record that cannot carry a window at all. The control is
+ * shown rather than removed, with `disabledNote` saying why, so the reader can
+ * see the setting exists and what would make it available.
  */
 export default function ScheduleFields( {
     enabled,
@@ -23,6 +27,8 @@ export default function ScheduleFields( {
     endLabel    = __( 'End date', 'fundraising-toolkit' ),
     startPlaceholder = __( 'Starts immediately', 'fundraising-toolkit' ),
     endPlaceholder   = __( 'No end date', 'fundraising-toolkit' ),
+    disabled = false,
+    disabledNote = '',
 } ) {
     // Turning the schedule off clears the dates: otherwise a value picked and
     // then hidden is still submitted, and the form says "always on" while
@@ -42,9 +48,12 @@ export default function ScheduleFields( {
                     <div className="fundkit-sched__toggle-title">{ title }</div>
                     <div className="fundkit-sched__toggle-sub">{ sub }</div>
                 </div>
-                <Switch checked={ enabled } onChange={ handleToggle } label={ title } />
+                <Switch checked={ enabled && ! disabled } onChange={ handleToggle } label={ title } disabled={ disabled } />
             </div>
-            { enabled && (
+            { disabled && disabledNote && (
+                <p className="fundkit-fld__help">{ disabledNote }</p>
+            ) }
+            { enabled && ! disabled && (
                 <div className="fundkit-sched__dates">
                     <div>
                         <span className="fundkit-sched__date-lbl">{ startLabel }</span>
