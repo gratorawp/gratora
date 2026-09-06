@@ -34,7 +34,7 @@ final class RevenueExporter
      */
     public function series(string $fromMonth, string $toMonth): array
     {
-        [$start, $end] = $this->bounds($fromMonth, $toMonth);
+        [$start, $end] = self::bounds($fromMonth, $toMonth);
 
         // Plain dates: the repository reads them as the org's calendar days and
         // buckets by the same, so a December donation given in the evening is
@@ -56,7 +56,7 @@ final class RevenueExporter
 
         $series = [];
         $cursor = $start;
-        while ($cursor <= $end && count($series) < self::MAX_MONTHS) {
+        while ($cursor <= $end) {
             $key      = $cursor->format('Y-m');
             $series[] = [
                 'month'           => $key,
@@ -110,7 +110,12 @@ final class RevenueExporter
     /** @since 1.0.0 */
     public static function filename(string $fromMonth, string $toMonth): string
     {
-        return sprintf('revenue-%s-to-%s.csv', $fromMonth, $toMonth);
+        // The range the file holds, not the one that was asked for: past the
+        // cap they differ, and a name that claims months the CSV does not
+        // carry is what an operator files and later reads back.
+        [$start, $end] = self::bounds($fromMonth, $toMonth);
+
+        return sprintf('revenue-%s-to-%s.csv', $start->format('Y-m'), $end->format('Y-m'));
     }
 
     /**
@@ -120,16 +125,25 @@ final class RevenueExporter
      * @return array{0:DateTimeImmutable,1:DateTimeImmutable}
      * @since 1.0.0
      */
-    private function bounds(string $fromMonth, string $toMonth): array
+    private static function bounds(string $fromMonth, string $toMonth): array
     {
-        $start = $this->month($fromMonth) ?? $this->month((string) wp_date('Y-01'));
-        $end   = $this->month($toMonth)   ?? $this->month((string) wp_date('Y-m'));
+        $start = self::month($fromMonth) ?? self::month((string) wp_date('Y-01'));
+        $end   = self::month($toMonth)   ?? self::month((string) wp_date('Y-m'));
 
-        return $start <= $end ? [$start, $end] : [$end, $start];
+        if ($start > $end) {
+            [$start, $end] = [$end, $start];
+        }
+
+        // Trimmed from the old end. A range past the cap has to lose the months
+        // furthest from the question being asked, not the ones the operator
+        // opened the export for.
+        $earliest = $end->modify('-' . (self::MAX_MONTHS - 1) . ' months');
+
+        return [$start < $earliest ? $earliest : $start, $end];
     }
 
     /** @since 1.0.0 */
-    private function month(string $value): ?DateTimeImmutable
+    private static function month(string $value): ?DateTimeImmutable
     {
         if (preg_match('/^(\d{4})-(\d{2})$/', trim($value), $m) !== 1) {
             return null;

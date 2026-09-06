@@ -235,4 +235,27 @@ final class RevenueExportTest extends IntegrationTestCase
         $this->assertSame(2000, $series['2026-11'], 'November, since it was four hours back on that one');
         $this->assertSame(0,    $series['2026-10']);
     }
+
+    /**
+     * An org that imported its history picks the first month the options
+     * endpoint offers. Capping from the near end hands them a file that stops
+     * years before today, with nothing in it saying so.
+     */
+    public function test_a_range_past_the_cap_keeps_the_newest_months(): void
+    {
+        $this->paid('2026-08-10 12:00:00', 12300);
+
+        $series = $this->exporter()->series('2000-01', '2026-09');
+
+        $this->assertCount(240, $series);
+        $this->assertSame('2026-09', end($series)['month'], 'the months the export was asked for are the ones it keeps');
+        $this->assertSame('2006-10', $series[0]['month']);
+        $this->assertSame(12300, $this->seriesTotal($series), 'and the revenue in them is in the file');
+    }
+
+    public function test_the_filename_states_the_range_the_file_holds(): void
+    {
+        $this->assertSame('revenue-2006-10-to-2026-09.csv', RevenueExporter::filename('2000-01', '2026-09'));
+        $this->assertSame('revenue-2025-01-to-2026-09.csv', RevenueExporter::filename('2025-01', '2026-09'));
+    }
 }

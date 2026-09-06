@@ -447,11 +447,39 @@ final class CampaignMetricsService
      *
      * @since 1.0.0
      */
+    /**
+     * The order of magnitude the donation-size ladder is drawn on.
+     *
+     * Storage is major units times 100 for every currency, so a base whose
+     * major unit is worth a hundredth of a dollar puts every donation past a
+     * ladder anchored to dollars and into the overflow bar. Anchored to what
+     * this campaign actually takes instead, rounded down to a power of ten so
+     * the rungs stay round numbers.
+     *
+     * @since 1.0.0
+     */
+    private static function ladderUnit(int $averageCents): int
+    {
+        // No donations yet: the dollar ladder, so an empty campaign looks the
+        // way it always has.
+        if ($averageCents <= 0) return 1000;
+
+        $target = max(1, (int) round($averageCents / 5));
+
+        return (int) (10 ** (int) floor(log10($target)));
+    }
+
     public function distributionBuckets(int $campaignId, string $range = 'all-time'): array
     {
         [$from, $to, $isAllTime] = $this->rangeArgs($range, $campaignId);
 
-        $thresholds = [1000, 2500, 5000, 10000, 25000, 50000];
+        $unit = self::ladderUnit($this->donations->averagePaidAmount(
+            $isAllTime ? null : $from,
+            $isAllTime ? null : $to,
+            $campaignId,
+        ));
+        $thresholds = array_map(static fn (float $m): int => (int) round($m * $unit), [1, 2.5, 5, 10, 25, 50]);
+
         $rows = $this->donations->amountHistogramBuckets(
             $thresholds,
             $isAllTime ? null : $from,
@@ -461,15 +489,14 @@ final class CampaignMetricsService
 
         // Re-shape from the repo's threshold-keyed shape into the
         // {min_cents, max_cents, count, amount_cents} buckets the UI expects.
-        $defs = [
-            [1,         1000],
-            [1001,      2500],
-            [2501,      5000],
-            [5001,      10000],
-            [10001,     25000],
-            [25001,     50000],
-            [50001,     null],
-        ];
+        // Built from the same ladder, so the two cannot drift apart.
+        $defs = [];
+        $floor = 1;
+        foreach ($thresholds as $t) {
+            $defs[] = [$floor, $t];
+            $floor  = $t + 1;
+        }
+        $defs[] = [$floor, null];
         $byThreshold = [];
         foreach ($rows as $r) {
             $byThreshold[$r['threshold'] ?? 'overflow'] = $r;

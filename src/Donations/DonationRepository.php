@@ -701,6 +701,24 @@ final class DonationRepository
     }
 
     /** @since 1.0.0 */
+    /**
+     * What a donation to this campaign is typically worth, in base cents.
+     *
+     * Over the same set the histogram counts, and gross like the CASE the
+     * buckets are built from, so the ladder describes the bars.
+     *
+     * @since 1.0.0
+     */
+    public function averagePaidAmount(?string $from, ?string $to, ?int $campaignId): int
+    {
+        $prefix = DB::getPrefix();
+        $row = $this->netPaidQuery($from, $to, $campaignId)
+            ->selectRaw("COALESCE(AVG(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0)), 0) AS avg_cents")
+            ->get();
+
+        return (int) round((float) ($row['avg_cents'] ?? 0));
+    }
+
     public function medianPaidAmount(?string $from, ?string $to, ?int $campaignId, int $totalCount): int
     {
         if ($totalCount === 0) return 0;

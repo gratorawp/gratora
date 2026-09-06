@@ -188,7 +188,7 @@ function DonationReceipt( { receipt, config } ) {
         <dl class="fundkit-form__summary fundkit-form__summary--receipt">
             { known && (
                 <div class="fundkit-form__summary-row">
-                    <dt>{ freq ? i18n.amount : i18n.total }</dt>
+                    <dt>{ i18n.total }</dt>
                     <dd class="fundkit-form__summary-amount">
                         { formatAmount( receipt.amountCents, receipt.currency ) }
                     </dd>

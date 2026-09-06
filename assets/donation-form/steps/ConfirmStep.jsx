@@ -2,6 +2,7 @@
 
 import { formatAmount, frequencyLabel } from '../util/format';
 import { coveredFeeCents } from '../state/store';
+import { countryName } from '../../_shared/countries';
 
 export default function ConfirmStep( { state, config, showDonor = true, showGateway = true } ) {
 
@@ -42,7 +43,7 @@ export default function ConfirmStep( { state, config, showDonor = true, showGate
                         <dd>{ fullName }</dd>
                     </div>
                 ) }
-                { showDonor && (
+                { showDonor && v.email && (
                     <div class="fundkit-form__summary-row">
                         <dt>{ config.i18n.email }</dt>
                         <dd>{ v.email }</dd>
@@ -51,7 +52,7 @@ export default function ConfirmStep( { state, config, showDonor = true, showGate
                 { showDonor && v.profile.country && (
                     <div class="fundkit-form__summary-row">
                         <dt>{ config.i18n.country }</dt>
-                        <dd>{ v.profile.country }</dd>
+                        <dd>{ countryName( v.profile.country ) }</dd>
                     </div>
                 ) }
                 { showGateway && (
