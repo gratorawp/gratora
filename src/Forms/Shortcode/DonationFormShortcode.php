@@ -748,6 +748,8 @@ final class DonationFormShortcode extends HookProvider
                 'freqQuarterly'  => __('Quarterly', 'fundraising-toolkit'),
                 'freqYearly'     => __('Yearly', 'fundraising-toolkit'),
                 'searchCountry'  => __('Search country…', 'fundraising-toolkit'),
+                'framedTitle'    => __('This donation form is being shown inside another website.', 'fundraising-toolkit'),
+                'framedAction'   => __('Open the donation page', 'fundraising-toolkit'),
                 // The same source strings the server-rendered terms field
                 // uses, so one translation covers both render paths.
                 'agreeToTerms'   => __('I agree to the terms', 'fundraising-toolkit'),

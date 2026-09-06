@@ -1385,6 +1385,44 @@ function applyThemeTokens( form, theme ) {
     }
 }
 
+/**
+ * Whether this document is inside a frame belonging to somebody else.
+ *
+ * Reading the parent's origin throws across origins, and that throw is the
+ * test. Same-origin frames have to keep working: the block editor canvas, the
+ * styling preview and the theme customiser all render the form in one.
+ */
+function framedByAnotherSite() {
+    if ( window.top === window.self ) return false;
+    try {
+        return window.top.location.origin !== window.self.location.origin;
+    } catch {
+        return true;
+    }
+}
+
+/**
+ * A form cropped inside somebody else's page is a payment screen whose address
+ * bar says something other than where the money is going, and the amount can be
+ * preset behind the crop. The donor is sent to the real page instead, where
+ * they can read the address themselves.
+ */
+function FramedElsewhere( { i18n } ) {
+    return (
+        <div class="fundkit-form__framed">
+            <p>{ i18n.framedTitle || 'This donation form is being shown inside another website.' }</p>
+            <a
+                class="fundkit-form__button fundkit-form__button--primary"
+                href={ window.location.href }
+                target="_top"
+                rel="noopener"
+            >
+                { i18n.framedAction || 'Open the donation page' }
+            </a>
+        </div>
+    );
+}
+
 function mount( form ) {
     if ( form.dataset.fundkitMounted === 'true' ) return;
 
@@ -1394,6 +1432,15 @@ function mount( form ) {
 
     const config = readConfig( form );
     if ( ! config ) { reveal(); return; }
+
+    if ( framedByAnotherSite() ) {
+        form.innerHTML = '';
+        form.dataset.fundkitMounted = 'true';
+        form.dataset.fundkitFramed  = 'true';
+        render( <FramedElsewhere i18n={ config.i18n || {} } />, form );
+        reveal();
+        return;
+    }
 
     if ( ! Array.isArray( config.steps ) || config.steps.length === 0 ) {
         // Nothing to hydrate; leave the server-rendered fallback visible.

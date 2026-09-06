@@ -1347,6 +1347,17 @@
     &__nav--align-left     { justify-content: flex-start; }
     &__nav--align-center   { justify-content: center; }
     &__nav--align-stretch  { > .fundkit-form__button { flex: 1; } }
+
+    // Shown in place of the whole form when another site has framed it.
+    &__framed {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+        padding: 24px;
+
+        p { margin: 0; color: var(--fundkit-text-muted); }
+    }
     &__progress-dot {
         width: 8px;
         height: 8px;
