@@ -60,6 +60,9 @@ final class PortalController
     /** How many donations one portal request returns. */
     private const DONATION_PAGE = 100;
 
+    /** How many receipts one portal request returns. */
+    private const RECEIPT_PAGE = 200;
+
     public const SEND_LINK_HOOK          = 'fundkit.async.send_portal_link';
     private const SEND_LINK_IP_MAX       = 4;
     private const SEND_LINK_IP_WINDOW    = 15 * MINUTE_IN_SECONDS;
@@ -1172,25 +1175,27 @@ final class PortalController
         if ($donor instanceof WP_Error) return $donor;
         $donorId = (int) $donor->id;
 
-        $rows = Receipt::query()
-            ->where('donor_id', $donorId)
-            ->where('voided', 0)
-            ->orderBy('issued_at', 'DESC')
-            ->limit(200)
-            ->getAll();
-
         // Exclude receipts tied to test-mode donations so this list agrees with
-        // the Overview totals and the Annual Statement (both live-only).
-        $testDonationIds = array_flip(array_map(
+        // the Overview totals and the Annual Statement (both live-only). In the
+        // query, not after it: filtering the page that came back takes rows out
+        // of a page that was already capped, so a donor with a long history
+        // loses live receipts to test ones they can never see.
+        $testDonationIds = array_map(
             static fn ($d) => (int) $d->id,
             Donation::query()->where('donor_id', $donorId)->where('is_test', 1)->getAll()
-        ));
+        );
+
+        $live = static function ($q) use ($donorId, $testDonationIds) {
+            $q = $q->where('donor_id', $donorId)->where('voided', 0);
+
+            return $testDonationIds === [] ? $q : $q->whereNotIn('donation_id', $testDonationIds);
+        };
+
+        $rows  = $live(Receipt::query())->orderBy('issued_at', 'DESC')->limit(self::RECEIPT_PAGE)->getAll();
+        $total = (int) $live(Receipt::query())->count();
 
         $out = [];
         foreach ($rows as $r) {
-            if ($r->donation_id !== null && isset($testDonationIds[(int) $r->donation_id])) {
-                continue;
-            }
             // No token here: the portal asks /receipts/{id}/download-url at
             // click time, so minting one per row would issue up to two hundred
             // unauthenticated receipt credentials nobody ever uses.
@@ -1202,7 +1207,7 @@ final class PortalController
                 'donation_id'    => $r->donation_id ? (int) $r->donation_id : null,
             ];
         }
-        return new WP_REST_Response($out, 200);
+        return new WP_REST_Response(['items' => $out, 'total' => $total], 200);
     }
 
     /**

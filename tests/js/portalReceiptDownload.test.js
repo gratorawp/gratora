@@ -103,9 +103,12 @@ beforeEach( () => {
     } );
 
     routes.me       = () => jsonResponse( 200, me() );
-    routes.receipts = () => jsonResponse( 200, [
-        { id: 9, receipt_number: 'RCPT-0009', renderer_id: 'generic', issued_at: '2026-02-03 10:00:00', donation_id: 5 },
-    ] );
+    routes.receipts = () => jsonResponse( 200, {
+        items: [
+            { id: 9, receipt_number: 'RCPT-0009', renderer_id: 'generic', issued_at: '2026-02-03 10:00:00', donation_id: 5 },
+        ],
+        total: 1,
+    } );
 
     global.fetch = jest.fn( ( url ) => {
         const raw = String( url );

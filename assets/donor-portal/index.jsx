@@ -1339,7 +1339,7 @@ function saveBlob( blob, filename ) {
 }
 
 function Receipts() {
-    const [ list, setList ]   = useState( null );
+    const [ page, setPage ]   = useState( null );
     const [ error, setError ] = useState( null );
     const [ year, setYear ]   = useState( new Date().getFullYear() );
     const [ years, setYears ] = useState( [ new Date().getFullYear() ] );
@@ -1350,7 +1350,7 @@ function Receipts() {
     const [ rowError, setRowError ] = useState( { id: 0, message: '' } );
 
     useEffect( () => {
-        api( 'receipts' ).then( setList ).catch( ( e ) => setError( e.message ) );
+        api( 'receipts' ).then( setPage ).catch( ( e ) => setError( e.message ) );
         // Clamp year picker to the donor's actual donation history so they
         // can't pick a year that returns an empty PDF.
         api( 'me' )
@@ -1400,6 +1400,12 @@ function Receipts() {
         }
     };
 
+    // The route caps what it returns, so the count is what the donor has and
+    // the length is what they are looking at. Derived rather than stored, so a
+    // request still in flight cannot read as an empty history.
+    const list  = Array.isArray( page?.items ) ? page.items : [];
+    const total = Number( page?.total ?? list.length );
+
     return (
         <>
             <div class="dp-card">
@@ -1420,9 +1426,20 @@ function Receipts() {
 
             <h3>{ __( 'Individual receipts', 'fundraising-toolkit' ) }</h3>
             { error    && <p class="dp-error">{ error }</p> }
-            { ! list   && <p>{ __( 'Loading…', 'fundraising-toolkit' ) }</p> }
-            { list && list.length === 0 && <p>{ __( 'No receipts yet.', 'fundraising-toolkit' ) }</p> }
-            { list && list.length > 0 && (
+            { ! page   && <p>{ __( 'Loading…', 'fundraising-toolkit' ) }</p> }
+            { page && list.length === 0 && <p>{ __( 'No receipts yet.', 'fundraising-toolkit' ) }</p> }
+            { page && list.length > 0 && (
+                <>
+                { total > list.length && (
+                    <p class="dp-list__note">
+                        { sprintf(
+                            /* translators: 1: how many receipts are listed, 2: how many the donor has in total. */
+                            __( 'Showing your %1$s most recent receipts of %2$s. The annual statement covers a whole year.', 'fundraising-toolkit' ),
+                            list.length.toLocaleString(),
+                            total.toLocaleString()
+                        ) }
+                    </p>
+                ) }
                 <ul class="dp-list">
                     { list.map( ( r ) => (
                         <li key={ r.id } class="dp-list__row">
@@ -1437,6 +1454,7 @@ function Receipts() {
                         </li>
                     ) ) }
                 </ul>
+                </>
             ) }
         </>
     );
