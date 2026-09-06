@@ -2,11 +2,10 @@ import { __ } from '@wordpress/i18n';
 
 import Card from '../../_shared/components/Card';
 import FormRow from '../../_shared/components/FormRow';
-import { isEuCountry, localizedCountries } from '../../../_shared/countries';
+import { localizedCountries } from '../../../_shared/countries';
 
 export default function OrganizationPanel( { s } ) {
     const country = s.value( 'country', '' );
-    const showVat = isEuCountry( country );
 
     // Onboarding persists structured siblings (address_line1, city, ...)
     // alongside address_lines. If the user edits in onboarding then later
@@ -123,14 +122,15 @@ export default function OrganizationPanel( { s } ) {
                             placeholder={ __( 'Tax number', 'fundraising-toolkit' ) }
                             { ...s.bind( 'tax_id' ) }
                         />
-                        { showVat && (
-                            <input
-                                type="text"
-                                className="fundkit-input fundkit-input--mono"
-                                placeholder={ __( 'EU VAT ID', 'fundraising-toolkit' ) }
-                                { ...s.bind( 'vat_id' ) }
-                            />
-                        ) }
+                        { /* Always offered, whatever the country reads today:
+                             hiding it leaves a number printing on every receipt
+                             with no field on screen to clear it. */ }
+                        <input
+                            type="text"
+                            className="fundkit-input fundkit-input--mono"
+                            placeholder={ __( 'EU VAT ID', 'fundraising-toolkit' ) }
+                            { ...s.bind( 'vat_id' ) }
+                        />
                     </div>
                 </FormRow>
             </Card>

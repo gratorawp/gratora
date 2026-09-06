@@ -6,6 +6,7 @@ import FormRow from '../../_shared/components/FormRow';
 import Btn from '../../_shared/components/Btn';
 import { ToggleRow } from '../../_shared/components/Switch';
 import { CURRENCIES, currencyByCode, previewAmount } from '../../_shared/currency';
+import { CURRENCY_SYMBOLS } from '../../../_shared/money';
 
 function fmtRate( n ) {
     const v = Number( n );
@@ -18,6 +19,15 @@ function fmtRate( n ) {
  * is normalised first and anything still unreadable is refused outright rather
  * than half-read.
  */
+// The symbol every renderer actually prints. The picker table is label data
+// and disagrees with the server's own map on CHF and MXN, so a preview drawn
+// from it shows money written a way no receipt will ever write it.
+export function previewSymbol( code ) {
+    const c = String( code || '' ).toUpperCase();
+
+    return CURRENCY_SYMBOLS[ c ] || c;
+}
+
 export function parseRate( text ) {
     const raw = String( text ).trim().replace( ',', '.' );
     if ( raw === '' || ! /^\d*\.?\d*$/.test( raw ) ) return null;
@@ -226,7 +236,7 @@ export default function CurrencyPanel( { s, fx } ) {
     const thousandSep    = String( s.value( 'format.thousand_sep', ',' ) );
     const symbolPosition = String( s.value( 'format.symbol_position', 'before' ) );
 
-    const symbol = currencyByCode( defaultCurrency )?.symbol || defaultCurrency;
+    const symbol = previewSymbol( defaultCurrency );
     const preview = previewAmount( 1234.56, { decimalPlaces, decimalSep, thousandSep, symbol, symbolPosition } );
 
     // Presets come from the server so PHP stays the one place a currency's
@@ -333,7 +343,7 @@ export default function CurrencyPanel( { s, fx } ) {
                  single-currency site still gets no card, since rows is the base
                  alone. */ }
             { fx && ( ( fx.rows || [] ).length > 1 || ( fx.loading && supported.length > 1 ) ) && (
-                <ExchangeRatesCard fx={ fx } base={ defaultCurrency } />
+                <ExchangeRatesCard fx={ fx } base={ fx.base || defaultCurrency } />
             ) }
 
             <Card

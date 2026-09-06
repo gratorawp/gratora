@@ -33,6 +33,13 @@ final class OrgProfile
         $stored = get_option('fundkit_org_profile', []);
         $org    = is_array($stored) ? array_merge($defaults, $stored) : $defaults;
 
+        // A line the operator skipped is a gap in a form, not a blank line on a
+        // receipt, and the shape above promises strings.
+        $org['address_lines'] = array_values(array_filter(
+            array_map(static fn ($l): string => trim((string) $l), (array) $org['address_lines']),
+            static fn (string $l): bool => $l !== ''
+        ));
+
         $org['name'] = self::displayName($org);
 
         return $org;

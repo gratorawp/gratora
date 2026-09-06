@@ -79,4 +79,30 @@ final class ReceiptOrgVatIdTest extends IntegrationTestCase
 
         return $reference;
     }
+
+    /**
+     * The panel writes one array index per input, so skipping the middle one
+     * stores a hole. A hole prints as an empty line between the street and the
+     * city on every receipt and statement the org sends.
+     */
+    public function test_a_skipped_address_line_is_not_printed_as_a_blank_line(): void
+    {
+        update_option('fundkit_org_profile', [
+            'legal_name'    => 'Helping Hands',
+            'address_lines' => ['Kirchweg 3', null, 'Berlin'],
+            'email'         => 'hello@example.org',
+        ], false);
+
+        $this->assertSame(['Kirchweg 3', 'Berlin'], $this->orgOnTheReceipt()['address_lines']);
+    }
+
+    public function test_an_org_with_no_address_still_gets_a_list(): void
+    {
+        update_option('fundkit_org_profile', [
+            'legal_name' => 'Helping Hands',
+            'email'      => 'hello@example.org',
+        ], false);
+
+        $this->assertSame([], $this->orgOnTheReceipt()['address_lines']);
+    }
 }
