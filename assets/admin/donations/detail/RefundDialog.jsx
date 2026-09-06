@@ -14,7 +14,7 @@ export default function RefundDialog( { donation, onClose, onSuccess, plan = nul
     const planLive = !! plan && ! PLAN_ENDED.includes( plan.status );
     const maxCents = donation.refundable_cents;
     const pendingCents = donation.refund_pending_cents || 0;
-    const { step } = amountEntry( donation.currency );
+    const { dp } = amountEntry( donation.currency );
     const [ amount, setAmount ] = useState( maxCents / 100 );
     const [ reason, setReason ] = useState( '' );
     const [ saving, setSaving ] = useState( false );
@@ -71,9 +71,11 @@ export default function RefundDialog( { donation, onClose, onSuccess, plan = nul
                     { __( 'Amount', 'fundraising-toolkit' ) }
                     <AmountInput
                         value={ amount }
-                        onChange={ setAmount }
+                        // Storage is major x 100 in every currency, so the box
+                        // may not hold a value the request cannot send.
+                        onChange={ ( v ) => setAmount( Math.round( v * 100 ) / 100 ) }
                         currency={ donation.currency }
-                        min={ step }
+                        decimalPlaces={ dp }
                         max={ maxCents / 100 }
                         autoFocus
                     />

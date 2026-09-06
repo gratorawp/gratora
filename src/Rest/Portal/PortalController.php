@@ -1307,7 +1307,14 @@ final class PortalController
         // editProfile, not refreshProfile: donors own their record and can
         // overwrite populated values. refreshProfile's lock-on-first-write is
         // the donation-flow back-fill, not a portal edit.
-        $this->donorService->editProfile($donor, $patch);
+        // The route declares no args, so a refused patch would escape as a
+        // fatal rather than an answer the client can read.
+        try {
+            $this->donorService->editProfile($donor, $patch);
+        } catch (\InvalidArgumentException $e) {
+            return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
+        }
+
         return $this->profileShow();
     }
 

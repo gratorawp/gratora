@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Tests\Integration;
 
+use FundKit\Funds\Fund;
 use WP_REST_Request;
 
 final class AdminFundsTest extends IntegrationTestCase
@@ -425,6 +426,35 @@ final class AdminFundsTest extends IntegrationTestCase
         $req = new WP_REST_Request('GET', $path);
         if (! empty($params)) $req->set_query_params($params);
         return rest_do_request($req);
+    }
+
+    /**
+     * DATETIME takes an unparseable value as the zero date, which resolves to a
+     * window that closed long ago: the fund leaves every donor picker while the
+     * admin list still reports it Active with a nonsense end date.
+     */
+    public function test_an_unparseable_end_date_is_refused_rather_than_closing_the_fund(): void
+    {
+        $fund = $this->post('/fundkit/v1/admin/funds', ['code' => 'baddate', 'name' => 'Bad Date'])->get_data();
+
+        $res = $this->put("/fundkit/v1/admin/funds/{$fund['id']}", ['ends_at' => '31/12/2026']);
+        $this->assertSame(422, $res->get_status());
+
+        $reloaded = Fund::query()->where('id', (int) $fund['id'])->get();
+        $this->assertNull($reloaded->ends_at);
+        $this->assertTrue($reloaded->isOpen());
+    }
+
+    /** So the guard cannot be satisfied by refusing every date. */
+    public function test_a_real_end_date_is_still_accepted(): void
+    {
+        $fund = $this->post('/fundkit/v1/admin/funds', ['code' => 'gooddate', 'name' => 'Good Date'])->get_data();
+
+        $this->assertSame(200, $this->put("/fundkit/v1/admin/funds/{$fund['id']}", ['ends_at' => '2027-01-31'])->get_status());
+        $this->assertSame(
+            '2027-01-31 00:00:00',
+            (string) Fund::query()->where('id', (int) $fund['id'])->get()->ends_at
+        );
     }
 
     private function post(string $path, array $body): \WP_REST_Response

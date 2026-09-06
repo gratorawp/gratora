@@ -146,6 +146,19 @@ final class DonorService
         if ($donor->redacted_at !== null) {
             throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'fundraising-toolkit'));
         }
+        // A value of the wrong type is not an edit to that field, and coercing
+        // one overwrites what the site holds. For phone and address the
+        // encrypted column is the only copy, so the coercion destroys it.
+        foreach (['first_name', 'last_name', 'company', 'locale', 'country', 'phone'] as $f) {
+            if (array_key_exists($f, $patch) && $patch[$f] !== null && ! is_string($patch[$f])) {
+                throw new InvalidArgumentException(esc_html__('Give every profile field as text.', 'fundraising-toolkit'));
+            }
+        }
+
+        if (array_key_exists('address', $patch) && $patch['address'] !== null && ! is_array($patch['address'])) {
+            throw new InvalidArgumentException(esc_html__('Give the address as a set of fields.', 'fundraising-toolkit'));
+        }
+
         $dirty = [];
         $textFields = ['first_name' => 100, 'last_name' => 100, 'company' => 150, 'locale' => 10];
 
@@ -168,7 +181,7 @@ final class DonorService
         }
 
         if (array_key_exists('phone', $patch)) {
-            $raw     = is_string($patch['phone']) ? trim($patch['phone']) : '';
+            $raw     = trim((string) $patch['phone']);
             $current = $this->decryptPhone($donor) ?? '';
             if ($raw !== $current) {
                 $dirty['phone_encrypted'] = $raw === '' ? null : $this->crypto->encrypt($raw);
@@ -176,7 +189,7 @@ final class DonorService
         }
 
         if (array_key_exists('address', $patch)) {
-            $addr       = is_array($patch['address']) ? $patch['address'] : null;
+            $addr       = $patch['address'];
             $newPayload = $this->addressPayload($addr);
             $current    = $donor->address_encrypted ? $this->crypto->decrypt($donor->address_encrypted) : null;
             if ($newPayload !== $current) {

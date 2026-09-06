@@ -68,8 +68,8 @@ final class FundService
         $fund->sort_order      = (int) ($input['sort_order'] ?? 0);
         $fund->parent_fund_id  = $this->resolveParent($input['parent_fund_id'] ?? null, null);
         $fund->goal_cents      = $this->nullableInt($input['goal_cents'] ?? null);
-        $fund->starts_at       = $this->nullableString($input['starts_at'] ?? null);
-        $fund->ends_at         = $this->nullableString($input['ends_at'] ?? null);
+        $fund->starts_at       = self::scheduleDate($input['starts_at'] ?? null, __('start date', 'fundraising-toolkit'));
+        $fund->ends_at         = self::scheduleDate($input['ends_at'] ?? null, __('end date', 'fundraising-toolkit'));
         $fund->accounting_code = $this->nullableString($input['accounting_code'] ?? null);
         $fund->raised_cents    = 0;
         $fund->created_at      = $now;
@@ -116,9 +116,19 @@ final class FundService
             }
         }
 
-        foreach (['description', 'starts_at', 'ends_at', 'accounting_code'] as $field) {
+        foreach (['description', 'accounting_code'] as $field) {
             if (array_key_exists($field, $input)) {
                 $fund->$field = $this->nullableString($input[$field]);
+            }
+        }
+
+        $dates = [
+            'starts_at' => __('start date', 'fundraising-toolkit'),
+            'ends_at'   => __('end date', 'fundraising-toolkit'),
+        ];
+        foreach ($dates as $field => $label) {
+            if (array_key_exists($field, $input)) {
+                $fund->$field = self::scheduleDate($input[$field], $label);
             }
         }
 
@@ -487,6 +497,31 @@ final class FundService
     }
 
     /** @since 1.0.0 */
+    /**
+     * A DATETIME column takes an unparseable value as the zero date, which
+     * resolves to a window that ended long ago: the fund is offered to nobody
+     * while the list still reports it Active.
+     *
+     * @since 1.0.0
+     */
+    private static function scheduleDate(mixed $value, string $label): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $at = strtotime((string) $value);
+        if ($at === false) {
+            throw new InvalidArgumentException(esc_html(sprintf(
+                /* translators: %s: the name of the date field, e.g. "start date". */
+                __('That is not a date the fund %s can be set to.', 'fundraising-toolkit'),
+                $label
+            )));
+        }
+
+        return gmdate('Y-m-d H:i:s', $at);
+    }
+
     private function nullableString(mixed $value): ?string
     {
         if ($value === null) {

@@ -35,6 +35,12 @@ final class DonorsController
 {
     private const NAMESPACE = 'fundkit/v1';
 
+    // TEXT holds 65,535 bytes and a note body is stored as AES-GCM ciphertext,
+    // base64 of iv + tag + ciphertext. An overflow truncates silently and the
+    // tag never verifies again, so the note reads back empty forever. maxLength
+    // counts characters, so this is the four-byte worst case with room over.
+    private const NOTE_MAX_LENGTH = 12000;
+
     /** @since 1.0.0 */
     public function __construct(
         private DonorRepository $donors,
@@ -169,7 +175,7 @@ final class DonorsController
             'permission_callback' => static fn () => Capabilities::userCan('fundkit_edit_donors'),
             'args'                => [
                 'id'   => ['type' => 'integer', 'required' => true],
-                'body' => ['type' => 'string',  'required' => true],
+                'body' => ['type' => 'string',  'required' => true, 'maxLength' => self::NOTE_MAX_LENGTH],
             ],
         ]);
 

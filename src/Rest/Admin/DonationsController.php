@@ -49,6 +49,9 @@ final class DonationsController
 {
     private const NAMESPACE = 'fundkit/v1';
 
+    // See DonorsController::NOTE_MAX_LENGTH: the note column is the same shape.
+    private const NOTE_MAX_LENGTH = 12000;
+
     private const EXPORT_PAGE     = 1000;
     private const EXPORT_MAX_ROWS = 50000;
 
@@ -226,7 +229,7 @@ final class DonationsController
             'callback'            => [$this, 'createNote'],
             'permission_callback' => static fn () => Capabilities::userCan('fundkit_edit_donations'),
             'args'                => [
-                'body' => ['type' => 'string', 'required' => true],
+                'body' => ['type' => 'string', 'required' => true, 'maxLength' => self::NOTE_MAX_LENGTH],
             ],
         ]);
 

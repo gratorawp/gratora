@@ -509,6 +509,42 @@ final class SettingsService
      *
      * @throws InvalidArgumentException
      */
+    /**
+     * The key is what every reader keys on and what the audit row records, so
+     * a blank one is dropped everywhere the purpose should appear and a
+     * duplicate collapses two purposes into whichever was typed first.
+     *
+     * @since 1.0.0
+     */
+    private static function assertPurposeKeys(mixed $purposes): void
+    {
+        $seen = [];
+        foreach (is_array($purposes) ? $purposes : [] as $purpose) {
+            if (! is_array($purpose)) {
+                continue;
+            }
+
+            $key = (string) ($purpose['key'] ?? '');
+            if ($key === '') {
+                throw new InvalidArgumentException(esc_html(sprintf(
+                    /* translators: %s: the purpose's name as typed. */
+                    __('The consent purpose "%s" needs a key. It is the identifier the audit log records, so a purpose without one is never shown to a donor.', 'fundraising-toolkit'),
+                    (string) ($purpose['label'] ?? '')
+                )));
+            }
+
+            if (isset($seen[$key])) {
+                throw new InvalidArgumentException(esc_html(sprintf(
+                    /* translators: %s: the duplicated key. */
+                    __('Two consent purposes share the key "%s". Only the first would ever be read.', 'fundraising-toolkit'),
+                    $key
+                )));
+            }
+
+            $seen[$key] = true;
+        }
+    }
+
     private static function assertCurrencyCodes(array $input): void
     {
         // Only strings: a value of the wrong shape entirely is accept()'s to
@@ -631,6 +667,10 @@ final class SettingsService
 
         if ($group === 'numbering') {
             ReferenceGenerator::assertTokens($input);
+        }
+
+        if ($group === 'consents' && array_key_exists('purposes', $input)) {
+            self::assertPurposeKeys($input['purposes']);
         }
 
         if ($group === 'org-brand' && is_array($input['presets'] ?? null)) {
