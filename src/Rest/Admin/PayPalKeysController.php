@@ -202,15 +202,16 @@ final class PayPalKeysController
             );
         }
 
-        if ($webhookId === '') {
-            // A webhook belongs to the PayPal app that created it, so keeping
-            // the old id against a new client id leaves every delivery refused
-            // while readiness reports the webhook as registered. Dropping it
-            // says what is true: this app has no webhook yet.
-            if ($wasClientId !== '' && $wasClientId !== $clientId) {
-                $this->account->saveWebhookId($test, '');
-            }
+        // A webhook belongs to the PayPal app that created it, so keeping the
+        // old id against a new client id leaves every delivery refused while
+        // readiness reports the webhook as registered. Dropped whatever the
+        // submitted id turns out to be: blank, good, or one PayPal turns away.
+        // Saying "this app has no webhook yet" is the only true answer.
+        if ($wasClientId !== '' && $wasClientId !== $clientId) {
+            $this->account->saveWebhookId($test, '');
+        }
 
+        if ($webhookId === '') {
             return $this->status();
         }
 
@@ -225,9 +226,9 @@ final class PayPalKeysController
 
         // Credentials PayPal has just accepted stay saved: a problem with an
         // optional field must not cost an org the pair it proved. The id itself
-        // is not written, and any id already on file is left where it is, since
-        // one PayPal refuses (or cannot be asked about) rejects every delivery
-        // exactly like a missing one.
+        // is not written, and an id already on file for the same app is left
+        // where it is, since one PayPal refuses (or cannot be asked about)
+        // rejects every delivery exactly like a missing one.
         return $this->unsavedWebhookResponse($test, $webhookId, $check);
     }
 

@@ -84,6 +84,70 @@ final class PayPalWebhookIdTest extends IntegrationTestCase
         return rest_do_request($req);
     }
 
+    /**
+     * A webhook belongs to the PayPal app that issued it, so an id kept against
+     * a replaced app names a webhook that cannot exist: every delivery is
+     * refused while readiness and the settings card report it as registered.
+     * The recurring donor is charged the moment they approve, and the opening
+     * sale webhook is the only thing that banks it.
+     */
+    public function test_replacing_the_app_drops_a_webhook_id_the_new_one_never_had(): void
+    {
+        $this->account()->saveKeys(true, 'client-old', 'secret-old');
+        $this->account()->saveWebhookId(true, self::HOOK_OK);
+
+        // The realistic paste: the WH- event id sitting beside the webhook in
+        // PayPal's dashboard, which the lookup refuses.
+        $this->webhookStatus = 404;
+
+        $res = $this->post([
+            'mode'          => 'test',
+            'client_id'     => 'client-new',
+            'client_secret' => 'secret-new',
+            'webhook_id'    => self::HOOK_UNKNOWN,
+        ]);
+
+        $this->assertTrue($this->account()->hasKeysFor(true), 'the new credentials PayPal accepted are saved');
+        $this->assertSame('', $this->account()->webhookId(true), 'and the replaced app id is gone');
+        $this->assertFalse(
+            (bool) ($res->get_data()['account']['webhook_test'] ?? true),
+            'the card reads "no webhook id saved" rather than reporting one'
+        );
+    }
+
+    /** The same when the field is left blank, which is the other way to save. */
+    public function test_replacing_the_app_with_a_blank_field_drops_it_too(): void
+    {
+        $this->account()->saveKeys(true, 'client-old', 'secret-old');
+        $this->account()->saveWebhookId(true, self::HOOK_OK);
+
+        $this->post([
+            'mode'          => 'test',
+            'client_id'     => 'client-new',
+            'client_secret' => 'secret-new',
+        ]);
+
+        $this->assertSame('', $this->account()->webhookId(true));
+    }
+
+    /** Rotating a secret on the same app keeps the webhook it belongs to. */
+    public function test_rotating_a_secret_on_the_same_app_keeps_its_webhook(): void
+    {
+        $this->account()->saveKeys(true, 'client-same', 'secret-old');
+        $this->account()->saveWebhookId(true, self::HOOK_OK);
+
+        $this->webhookStatus = 404;
+
+        $this->post([
+            'mode'          => 'test',
+            'client_id'     => 'client-same',
+            'client_secret' => 'secret-rotated',
+            'webhook_id'    => self::HOOK_UNKNOWN,
+        ]);
+
+        $this->assertSame(self::HOOK_OK, $this->account()->webhookId(true));
+    }
+
     public function test_a_rejected_webhook_id_does_not_discard_the_credentials_it_came_with(): void
     {
         $this->webhookStatus = 404;

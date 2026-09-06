@@ -168,7 +168,8 @@ final class StripeKeysController
         // Stripe that is simply unreachable, must not cost an org the working
         // keys it was rotating away from. Blanking the mode instead would take
         // live payments down until someone re-entered them by hand.
-        $previous = $this->account->snapshot();
+        $previous     = $this->account->snapshot();
+        $wasAccountId = (string) ($this->account->accountId() ?? '');
 
         $this->account->saveKeys($test, $secret, $publishable);
         $this->account->useTestMode($test);
@@ -212,6 +213,18 @@ final class StripeKeysController
         }
 
         $this->account->refresh($account);
+
+        // A signing secret belongs to the Stripe account that issued it. Kept
+        // against a replaced account it verifies nothing, while readiness, the
+        // admin notice and the settings card all report webhooks as signed.
+        // Dropped before provisioning, so a provision that fails (a restricted
+        // key without webhook scope, or a Stripe this site cannot reach) reads
+        // as "no secret" rather than as the previous account's.
+        $isNewAccount = $wasAccountId !== '' && $wasAccountId !== (string) ($account['id'] ?? '');
+        if ($isNewAccount) {
+            (new StripeWebhookProvisioner($this->api, $this->account))->forgetSecret($test);
+        }
+
         $this->provisionWebhook($test);
 
         return $this->status();

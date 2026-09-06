@@ -254,6 +254,29 @@ final class StripeWebhookProvisioner
         return true;
     }
 
+    /**
+     * Drop the signing secret this mode holds.
+     *
+     * A signing secret belongs to the Stripe account that issued it, so one
+     * kept against a replaced account verifies nothing while every screen
+     * reports webhooks as signed. Called when the keys move to another account,
+     * so a provisioning failure afterwards reads honestly as "no secret" rather
+     * than as the previous account's.
+     *
+     * @since 1.0.0
+     */
+    public function forgetSecret(bool $isTest): void
+    {
+        $opt = get_option('fundkit_gateway_config', []);
+        if (! is_array($opt) || ! is_array($opt['stripe'] ?? null)) {
+            return;
+        }
+
+        $opt['stripe'][self::secretKey($isTest)]   = '';
+        $opt['stripe'][self::endpointKey($isTest)] = '';
+        update_option('fundkit_gateway_config', $opt);
+    }
+
     /** @since 1.0.0 */
     private function storeSecret(bool $isTest, string $secret, string $endpointId): void
     {
