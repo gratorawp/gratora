@@ -524,12 +524,24 @@ export default function Editor( { formId } ) {
     const notices = ( error || missingRequired.length > 0 ) && (
         <div className="fundkit-form-editor__notices">
             { missingRequired.length > 0 && (
-                <Notice status="warning" isDismissible={ false }>
-                    { sprintf(
-                        /* translators: %s: comma-separated list of missing block labels (Name, Email). */
-                        __( 'Add these blocks before publishing: %s.', 'fundraising-toolkit' ),
-                        missingRequired.map( ( r ) => r.label ).join( ', ' )
-                    ) }
+                <Notice
+                    status={ c.value( 'status', 'draft' ) === 'published' ? 'error' : 'warning' }
+                    isDismissible={ false }
+                >
+                    { c.value( 'status', 'draft' ) === 'published'
+                        // A live form refuses every save until this is put
+                        // right, so the banner says what to do rather than talk
+                        // about publishing.
+                        ? sprintf(
+                            /* translators: %s: comma-separated list of missing block labels (Name, Email). */
+                            __( 'This form is live and cannot be saved without these blocks: %s. Add them back, or move it to draft to keep editing.', 'fundraising-toolkit' ),
+                            missingRequired.map( ( r ) => r.label ).join( ', ' )
+                        )
+                        : sprintf(
+                            /* translators: %s: comma-separated list of missing block labels (Name, Email). */
+                            __( 'Add these blocks before publishing: %s.', 'fundraising-toolkit' ),
+                            missingRequired.map( ( r ) => r.label ).join( ', ' )
+                        ) }
                 </Notice>
             ) }
             { error && (

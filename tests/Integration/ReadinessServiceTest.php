@@ -43,7 +43,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
         return new ReadinessService(
             $settings,
-            new FormReadinessService($settings, new GatewayManager(), $stripe, new TestMode(new FormRepository())),
+            new FormReadinessService($settings, new GatewayManager(), $stripe, new TestMode(new FormRepository()), \FundKit\Foundation\Plugin::instance()->container->get(\FundKit\Donors\ConsentService::class)),
             $stripe,
             $api,
             new ApplePayDomain($api, $stripe),

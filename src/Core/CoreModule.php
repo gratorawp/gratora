@@ -833,6 +833,7 @@ final class CoreModule implements FundKitModule
             $c->get( GatewayManager::class),
             $c->get(StripeAccount::class),
             $c->get( TestMode::class),
+            $c->get(ConsentService::class),
         ));
 
         $c->bind(AdminFormsController::class, fn (Container $c) => new AdminFormsController(

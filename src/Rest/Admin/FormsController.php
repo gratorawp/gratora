@@ -295,6 +295,13 @@ final class FormsController
             $form->settings = $body['settings'];
         }
 
+        // The block is the single writer of the allowed list, and these checks
+        // read the blocks in the editor rather than the ones last saved.
+        $form->settings = $this->formService->settingsWithGatewayAllowed(
+            (string) $form->blocks,
+            is_array($form->settings) ? $form->settings : null
+        );
+
         return new WP_REST_Response([
             'checks' => $this->readiness->check($form),
         ], 200);
@@ -311,6 +318,8 @@ final class FormsController
         // $blocks was block-aware sanitized above (kses'd for authors lacking
         // unfiltered_html), so renderPreview's do_blocks() output is safe to
         // inline in the standalone preview document.
+        $settings = $this->formService->settingsWithGatewayAllowed($blocks, $settings);
+
         $shortcode = new DonationFormShortcode($this->forms, $this->styles, $this->campaigns, null, $this->gateways);
         $preview   = $shortcode->renderPreview($blocks, $settings, $campaignId);
         $doc       = $shortcode->buildPreviewDocument($preview);

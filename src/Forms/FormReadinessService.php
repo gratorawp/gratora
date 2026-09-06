@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FundKit\Forms;
 
+use FundKit\Donors\ConsentService;
+use FundKit\Forms\Blocks\ConsentBlock;
 use FundKit\Gateways\GatewayManager;
 use FundKit\Gateways\Stripe\StripeAccount;
 use FundKit\Gateways\TestMode;
@@ -18,6 +20,7 @@ final class FormReadinessService
         private GatewayManager $gateways,
         private StripeAccount $stripeAccount,
         private TestMode $testMode,
+        private ConsentService $consents,
     ) {
     }
 
@@ -44,7 +47,87 @@ final class FormReadinessService
             $this->httpsCheck($form),
             $this->recurringSupportCheck($form),
             $this->recurringToggleFrequenciesCheck($form),
+            $this->consentPurposesCheck($form),
         ];
+    }
+
+    /**
+     * A purpose that has been renamed or deleted is dropped from every form
+     * that asks for it, and the submit validator stops enforcing it, so
+     * donations complete with no consent recorded and nothing says so.
+     *
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
+    private function consentPurposesCheck(Form $form): array
+    {
+        $pass = [
+            'id'     => 'consent-purposes',
+            'status' => 'pass',
+            'label'  => __('Every consent this form asks for still exists', 'fundraising-toolkit'),
+        ];
+
+        $asked = $this->consentKeys(parse_blocks((string) $form->blocks));
+        if ($asked === []) {
+            return $pass;
+        }
+
+        // Indexed once: findPurpose re-reads the option through a fresh
+        // SettingsService on every call.
+        $known = [];
+        foreach ($this->consents->purposes() as $purpose) {
+            $key = (string) ($purpose['key'] ?? '');
+            if ($key !== '') $known[$key] = true;
+        }
+
+        $gone = array_values(array_filter($asked, static fn (string $k): bool => ! isset($known[$k])));
+        if ($gone === []) {
+            return $pass;
+        }
+
+        return [
+            'id'           => 'consent-purposes',
+            'status'       => 'fail',
+            'label'        => __('This form asks for consent that no longer exists', 'fundraising-toolkit'),
+            'detail'       => sprintf(
+                /* translators: %s: comma-separated consent purpose keys. */
+                __('%s is not in the consent registry any more, so donors are never asked and nothing is recorded, including where the consent was required. Put the purpose back under the same key, or take the block off this form.', 'fundraising-toolkit'),
+                implode(', ', $gone)
+            ),
+            'action_url'   => admin_url('admin.php?page=fundkit-settings#privacy'),
+            'action_label' => __('Open consent settings', 'fundraising-toolkit'),
+        ];
+    }
+
+    /**
+     * Every purpose key the form's consent blocks name.
+     *
+     * @param  array<int,array<string,mixed>> $blocks
+     * @return list<string>
+     */
+    private function consentKeys(array $blocks): array
+    {
+        $keys = [];
+
+        foreach ($blocks as $b) {
+            if (! is_array($b)) continue;
+
+            if (($b['blockName'] ?? null) === 'fundkit/consent') {
+                foreach (ConsentBlock::purposeKeys(is_array($b['attrs'] ?? null) ? $b['attrs'] : []) as $key) {
+                    $keys[$key] = true;
+                }
+            }
+
+            $inner = $b['innerBlocks'] ?? null;
+            if (is_array($inner)) {
+                foreach ($this->consentKeys($inner) as $key) {
+                    $keys[$key] = true;
+                }
+            }
+        }
+
+        return array_keys($keys);
     }
 
     /**

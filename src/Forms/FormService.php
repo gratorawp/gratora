@@ -167,17 +167,36 @@ final class FormService
      */
     private function syncGatewayAllowed(Form $form): void
     {
-        $allowed = $this->findGatewayAllowed(parse_blocks((string) $form->blocks));
+        $form->settings = $this->settingsWithGatewayAllowed(
+            (string) $form->blocks,
+            is_array($form->settings) ? $form->settings : null
+        );
+    }
+
+    /**
+     * The same rule, applied to unsaved markup: the preview and the readiness
+     * checks read blocks the author has not saved yet, and judging their
+     * gateways from the last-saved setting describes a different form.
+     *
+     * @param  array<string,mixed>|null $settings
+     * @return array<string,mixed>|null
+     *
+     * @since 1.0.0
+     */
+    public function settingsWithGatewayAllowed(string $blocksMarkup, ?array $settings): ?array
+    {
+        $allowed = $this->findGatewayAllowed(parse_blocks($blocksMarkup));
         if ($allowed === null) {
-            return;
+            return $settings;
         }
 
-        $settings = is_array($form->settings) ? $form->settings : [];
-        $gateways = is_array($settings['gateways'] ?? null) ? $settings['gateways'] : [];
+        $out      = is_array($settings) ? $settings : [];
+        $gateways = is_array($out['gateways'] ?? null) ? $out['gateways'] : [];
 
-        $gateways['allowed']  = $allowed;
-        $settings['gateways'] = $gateways;
-        $form->settings = $settings;
+        $gateways['allowed'] = $allowed;
+        $out['gateways']     = $gateways;
+
+        return $out;
     }
 
     /**
@@ -278,7 +297,7 @@ final class FormService
                 $form->archived_at = $now;
             }
         } elseif ($form->status === 'published') {
-            $this->assertPublishable($form);
+            $this->assertStaysPublishable($form);
         }
 
         $form->updated_at = $now;
@@ -387,6 +406,27 @@ final class FormService
     {
         $status = strtolower(trim($status));
         return in_array($status, ['draft', 'published', 'archived'], true) ? $status : 'draft';
+    }
+
+    /**
+     * The same rule for a form that is already live, where the way out is not
+     * to add the block: it is to take the form off the page first.
+     *
+     * @since 1.0.0
+     */
+    private function assertStaysPublishable(Form $form): void
+    {
+        $missing = self::missingRequiredBlocks((string) $form->blocks);
+        if (! $missing) return;
+
+        $labels = array_map(fn (array $m): string => $m['label'], $missing);
+        throw new InvalidArgumentException(
+            esc_html(sprintf(
+                /* translators: %s: comma-separated list of missing block labels (Amount, Name, Email). */
+                __('This form is published and cannot be saved without these blocks: %s. Add them back, or move the form to draft to keep editing.', 'fundraising-toolkit'),
+                implode(', ', $labels)
+            ))
+        );
     }
 
     /**
