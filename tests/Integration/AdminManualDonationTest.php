@@ -155,6 +155,25 @@ final class AdminManualDonationTest extends IntegrationTestCase
     }
 
     /**
+     * There is no foreign key, so a transposed id commits a paid donation that
+     * no campaign total ever picks up and every screen reads as uncategorised.
+     */
+    public function test_money_cannot_be_filed_against_a_campaign_that_does_not_exist(): void
+    {
+        $before = (int) Donation::query()->count();
+
+        $res = $this->record(['campaign_id' => 987654]);
+
+        $this->assertSame(422, $res->get_status());
+        $this->assertSame($before, (int) Donation::query()->count(), 'nothing may be committed');
+
+        // The pair: a real id still records, so the check cannot be tightened
+        // into refusing everything.
+        $ok = $this->record(['campaign_id' => $this->aCampaign()]);
+        $this->assertSame(201, $ok->get_status(), (string) wp_json_encode($ok->get_data()));
+    }
+
+    /**
      * Not 'direct'. A hand-recorded donation never had a web session, so
      * letting it fall through to the same bucket as an untagged visit
      * overstates how much the website itself brought in.

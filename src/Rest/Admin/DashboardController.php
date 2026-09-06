@@ -17,6 +17,8 @@ use WP_REST_Server;
  */
 final class DashboardController
 {
+    private const RANGES = ['today', 'last-7', 'last-30', 'last-90', 'all-time'];
+
     private const NAMESPACE = 'fundkit/v1';
 
     /** @since 1.0.0 */
@@ -32,7 +34,7 @@ final class DashboardController
             'callback'            => [$this, 'show'],
             'permission_callback' => [$this, 'canAccess'],
             'args'                => [
-                'range'   => ['type' => 'string', 'default' => 'last-30'],
+                'range'   => ['type' => 'string', 'enum' => self::RANGES, 'default' => 'last-30'],
                 'compare' => [
                     'type'    => 'string',
                     'enum'    => ['none', 'period', 'year'],

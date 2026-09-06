@@ -529,14 +529,25 @@ final class DonationsController
             }
         }
 
+        // Money filed against a campaign nobody can open is money nothing
+        // counts: there is no foreign key, the syncer finds no row to update,
+        // and every screen reads the donation as uncategorised.
+        $campaignId = $request['campaign_id'] !== null ? (int) $request['campaign_id'] : null;
+        if ($campaignId !== null && Campaign::query()->find('id', $campaignId) === null) {
+            return new WP_Error(
+                'fundkit_invalid_campaign',
+                __('That campaign does not exist. Pick one from the list.', 'fundraising-toolkit'),
+                ['status' => 422]
+            );
+        }
+
         // Only what was offered. Checking against the same list the picker was
         // built from is what stops a fundraiser on another campaign being
         // credited here, without core having to know what a fundraiser is.
         $extra        = [];
         $attributedTo = (string) ($request['attributed_to'] ?? '');
         if ($attributedTo !== '') {
-            $campaignId = $request['campaign_id'] !== null ? (int) $request['campaign_id'] : 0;
-            foreach ($this->attributionFor($campaignId) as $option) {
+            foreach ($this->attributionFor((int) ($campaignId ?? 0)) as $option) {
                 if ((string) $option['id'] === $attributedTo) {
                     $extra = (array) $option['extra'];
                     break;
@@ -572,7 +583,7 @@ final class DonationsController
             amount_cents: (int) $request['amount_cents'],
             currency: $currency,
             gateway: 'offline',
-            campaign_id: $request['campaign_id'] !== null ? (int) $request['campaign_id'] : null,
+            campaign_id: $campaignId,
             fund_id: $fundId,
             profile: array_filter([
                 'first_name' => (string) $request['first_name'],

@@ -187,4 +187,21 @@ final class DashboardTestScopeTest extends IntegrationTestCase
         $this->assertContains('failed-test-donations', $keys);
         $this->assertNotContains('failed-donations', $keys, 'and it stays a separate, dismissable item');
     }
+
+    /**
+     * With no enum the value falls through to the default window while the
+     * comparison falls through to a different one, so the two overlap and every
+     * change on the strip reads as flat. Refusing is the honest answer.
+     */
+    public function test_an_unknown_range_is_refused_rather_than_silently_defaulted(): void
+    {
+        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/dashboard');
+        $req->set_param('range', '30d');
+        $req->set_param('compare', 'period');
+
+        $res = rest_do_request($req);
+
+        $this->assertSame(400, $res->get_status());
+        $this->assertSame('rest_invalid_param', (string) ($res->get_data()['code'] ?? ''));
+    }
 }

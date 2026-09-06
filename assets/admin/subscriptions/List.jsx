@@ -111,25 +111,40 @@ function donationHref( reference ) {
     } );
 }
 
-// The card counts plans, and the failing filter below returns exactly those
-// rows. A donation charged on a schedule that was never created has no plan
-// row for any filter here to return, so it is named in the sub line and left
-// out of the number, with the notice above as its surface.
+// The card counts plans still running. The Health filter below is deliberately
+// wider and reaches plans that have since ended, so when the two numbers differ
+// the card says the wider one rather than leaving the filter to surprise
+// whoever clicks it. A donation charged on a schedule that was never created
+// has no plan row for any filter here to return, so it is named in the sub line
+// and left out of the number, with the notice above as its surface.
 //
 // That second line counts test donations whichever way the test toggle is set,
 // which is why the card's note is worded about subscriptions: it is the number
 // and the first line that the toggle moves.
-function attentionSub( failing, unlinked ) {
+function attentionSub( failing, unlinked, failingEver = 0 ) {
     const declined = sprintf(
-        /* translators: %d: number of plans carrying a failed renewal. */
+        /* translators: %d: number of plans still running that carry a failed renewal. */
         _n(
-            '%d plan the gateway could not collect from',
-            '%d plans the gateway could not collect from',
+            '%d plan still running that the gateway could not collect from',
+            '%d plans still running that the gateway could not collect from',
             failing,
             'fundraising-toolkit'
         ),
         failing
     );
+
+    const everLine = failingEver > failing
+        ? sprintf(
+            /* translators: %d: number of plans that have ever failed a renewal, including ended ones. */
+            _n(
+                '%d plan has ever failed a renewal, including ended ones',
+                '%d plans have ever failed a renewal, including ended ones',
+                failingEver,
+                'fundraising-toolkit'
+            ),
+            failingEver
+        )
+        : null;
 
     const noPlan = sprintf(
         /* translators: %d: number of paid recurring donations with no plan. */
@@ -151,16 +166,16 @@ function attentionSub( failing, unlinked ) {
         second = noPlan;
     }
 
-    if ( second === null ) {
-        return failing > 0 ? declined : __( 'Nothing to chase', 'fundraising-toolkit' );
-    }
+    const lines = [
+        failing > 0 ? declined : null,
+        everLine,
+        second,
+    ].filter( Boolean );
 
-    return failing === 0 ? second : (
-        <>
-            <div>{ declined }</div>
-            <div>{ second }</div>
-        </>
-    );
+    if ( lines.length === 0 ) return __( 'Nothing to chase', 'fundraising-toolkit' );
+    if ( lines.length === 1 ) return lines[ 0 ];
+
+    return <>{ lines.map( ( line, i ) => <div key={ i }>{ line }</div> ) }</>;
 }
 
 // Said on the card itself rather than once over the strip, so a figure read on
@@ -179,7 +194,7 @@ function withTestNote( sub, includeTest ) {
     );
 }
 
-function subscriptionKpis( stats, unlinked, includeTest ) {
+export function subscriptionKpis( stats, unlinked, includeTest ) {
     if ( ! stats ) return [];
     const failing = Number( stats.failing_count ) || 0;
     return [
@@ -213,7 +228,7 @@ function subscriptionKpis( stats, unlinked, includeTest ) {
             id:    'failing',
             label: __( 'Needs attention', 'fundraising-toolkit' ),
             value: String( failing ),
-            sub:   withTestNote( attentionSub( failing, unlinked ), includeTest ),
+            sub:   withTestNote( attentionSub( failing, unlinked, Number( stats.failing_ever_count ) || 0 ), includeTest ),
         },
         {
             id:    'churn',
@@ -716,7 +731,7 @@ export default function List() {
             id:       'failing',
             label:    __( 'Health', 'fundraising-toolkit' ),
             elements: [
-                { value: 'yes', label: __( 'Has failed renewals', 'fundraising-toolkit' ) },
+                { value: 'yes', label: __( 'Has ever failed a renewal', 'fundraising-toolkit' ) },
             ],
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => renderHealth( item ),

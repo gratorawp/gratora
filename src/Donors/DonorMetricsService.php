@@ -866,8 +866,12 @@ final class DonorMetricsService
             return ['items' => [], 'total' => 0];
         }
 
+        // occurred_at is second-precision and one donation writes several
+        // events inside the same second, so the page boundary needs a unique
+        // key to fall on or a row is shown twice and another is never shown.
         $events = $this->donorEvents($donorId)
             ->orderBy('occurred_at', $order)
+            ->orderBy('id', $order)
             ->limit($perPage)
             ->offset(($page - 1) * $perPage)
             ->getAll();

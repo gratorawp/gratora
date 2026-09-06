@@ -1276,7 +1276,7 @@ final class CoreCommandProvider
             'Campaign reporting summary for a date range.',
             $this->schema([
                 'campaign_id' => ['type' => 'integer', 'minimum' => 1],
-                'range'       => ['type' => 'string', 'minLength' => 1],
+                'range'       => ['type' => 'string', 'enum' => self::REPORT_RANGES],
             ], ['campaign_id']),
             [],
             'fundkit_view_reports',

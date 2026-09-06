@@ -542,6 +542,7 @@ final class RecurringPlanRepository
      * @return array{
      *   active_count:int,
      *   failing_count:int,
+     *   failing_ever_count:int,
      *   mrr_cents:int,
      *   new_this_month:int,
      *   churned_this_month:int,
@@ -587,6 +588,13 @@ final class RecurringPlanRepository
             ->whereIn('status', self::LIVE_STATUSES)
             ->count();
 
+        // The Health filter on the list is deliberately wider: a plan that has
+        // since ended can still be the one an admin is looking for. Published
+        // so the screen can say so rather than leaving the two to disagree.
+        $failingEverCount = (int) self::statsQuery($includeTest)
+            ->where('failed_renewals_count', 0, '>')
+            ->count();
+
         $activeCount = (int) ($active['cnt'] ?? 0);
         $churnBase   = $activeCount + $churnedCount;
         $churnPct    = $churnBase > 0 ? round(($churnedCount / $churnBase) * 100, 1) : 0.0;
@@ -594,6 +602,7 @@ final class RecurringPlanRepository
         return [
             'active_count'             => $activeCount,
             'failing_count'            => $failingCount,
+            'failing_ever_count'       => $failingEverCount,
             'mrr_cents'                => (int) round((float) ($active['mrr'] ?? 0)),
             'new_this_month'           => $newCount,
             'churned_this_month'       => $churnedCount,

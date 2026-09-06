@@ -858,7 +858,10 @@ final class DashboardMetricsService
             'last-7'  => [$this->daysAgo(13),  $this->daysAgo(7)],
             'last-30' => [$this->daysAgo(59),  $this->daysAgo(30)],
             'last-90' => [$this->daysAgo(179), $this->daysAgo(90)],
-            default   => [$this->daysAgo(30),  $this->daysAgo(1)],
+            // The 'last-30' pair, because that is what rangeBounds falls
+            // through to: any other and the two windows overlap by all but one
+            // day, so every change reads as flat.
+            default   => [$this->daysAgo(59),  $this->daysAgo(30)],
         };
     }
 

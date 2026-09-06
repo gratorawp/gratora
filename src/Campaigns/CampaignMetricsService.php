@@ -640,7 +640,11 @@ final class CampaignMetricsService
             'last-7'  => [$this->daysAgo(13), $this->daysAgo(7)],
             'last-30' => [$this->daysAgo(59), $this->daysAgo(30)],
             'last-90' => [$this->daysAgo(179), $this->daysAgo(90)],
-            default   => [$this->daysAgo(30), $this->daysAgo(1)],
+            // The 'last-30' pair, matching what rangeBounds falls through to:
+            // any other and the two windows overlap by all but one day, so
+            // every change reads as flat. 'all-time' never reaches here,
+            // because summaryWithComparison returns before asking.
+            default   => [$this->daysAgo(59), $this->daysAgo(30)],
         };
     }
 
@@ -657,7 +661,8 @@ final class CampaignMetricsService
             'last-7'   => [$this->daysAgo(6),  $today],
             'last-30'  => [$this->daysAgo(29), $today],
             'last-90'  => [$this->daysAgo(89), $today],
-            default    => [$this->campaignStartDate($campaignId), $today],
+            'all-time' => [$this->campaignStartDate($campaignId), $today],
+            default    => [$this->daysAgo(29), $today],
         };
     }
 

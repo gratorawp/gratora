@@ -35,6 +35,8 @@ use WP_REST_Server;
  */
 final class CampaignsController
 {
+    private const RANGES = ['today', 'last-7', 'last-30', 'last-90', 'all-time'];
+
     private const NAMESPACE = 'fundkit/v1';
 
     /** @since 1.0.0 */
@@ -108,7 +110,7 @@ final class CampaignsController
                 'callback'            => [$this, 'show'],
                 'permission_callback' => [$this, 'canAccess'],
                 'args'                => [
-                    'range' => ['type' => 'string', 'default' => 'all-time'],
+                    'range' => ['type' => 'string', 'enum' => self::RANGES, 'default' => 'all-time'],
                 ],
             ],
             [
@@ -138,7 +140,7 @@ final class CampaignsController
             'callback'            => [$this, 'metrics'],
             'permission_callback' => [$this, 'canAccess'],
             'args'                => [
-                'range'   => ['type' => 'string', 'default' => 'all-time'],
+                'range'   => ['type' => 'string', 'enum' => self::RANGES, 'default' => 'all-time'],
                 'compare' => [
                     'type'    => 'string',
                     'enum'    => ['none', 'period', 'year'],
