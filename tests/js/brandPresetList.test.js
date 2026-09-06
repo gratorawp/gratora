@@ -64,3 +64,39 @@ it( 'shows the shipped list on a site that has saved nothing', () => {
 it( 'survives a page that lost its globals', () => {
     expect( mergePresets( [ { id: 'house' } ], undefined ) ).toEqual( [ { id: 'house' } ] );
 } );
+
+/**
+ * The server drops a built-in's name from the option when the admin has not
+ * renamed it, so it is not pinned to the locale of whoever saved. It restores
+ * it on read; a panel that does not restore it shows the row with no label at
+ * all, hands the editor a blank name field, and clones it as " (copy)".
+ */
+it( 'keeps an edited built-in labelled', () => {
+    const stored = [ { id: 'classic', tokens: { 'fundkit-accent': '#f00' } } ];
+
+    const classic = mergePresets( stored, BUILTINS )[ 0 ];
+
+    expect( classic.name ).toBe( 'Classic' );
+} );
+
+it( 'still prefers a name the admin typed', () => {
+    const stored = [ { id: 'classic', name: 'House', tokens: {} } ];
+
+    expect( mergePresets( stored, BUILTINS )[ 0 ].name ).toBe( 'House' );
+} );
+
+/**
+ * The shipped tokens are the baseline the admin's edit sits on, the way
+ * StylePresets::all() merges them. Replacing the record wholesale drops the
+ * built-in's own values for every key the admin did not touch.
+ */
+it( 'keeps the shipped tokens an edit did not touch', () => {
+    const ships = [ { id: 'quiet', name: 'Quiet', tokens: { 'fundkit-accent': '#000', 'fundkit-button-border': '1px' }, builtin: true } ];
+    const stored = [ { id: 'quiet', tokens: { 'fundkit-accent': '#f00' } } ];
+
+    const quiet = mergePresets( stored, ships )[ 0 ];
+
+    expect( quiet.tokens[ 'fundkit-accent' ] ).toBe( '#f00' );
+    expect( quiet.tokens[ 'fundkit-button-border' ] ).toBe( '1px' );
+} );
+

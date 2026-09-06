@@ -19,9 +19,24 @@ export function mergePresets( stored, builtins ) {
     const ships = Array.isArray( builtins ) ? builtins : [];
     const byId  = new Map( saved.map( ( p ) => [ String( p?.id || '' ), p ] ) );
 
-    // Built-ins first, in the order they ship, each replaced by the admin's
-    // edit where there is one.
-    const out = ships.map( ( b ) => byId.get( String( b.id ) ) || b );
+    // Built-ins first, in the order they ship, each carrying the admin's edit
+    // where there is one. Laid over the shipped record rather than replacing
+    // it: a built-in's name and description are __() calls the server drops
+    // from the option rather than pin every later reader to the locale of
+    // whoever saved, so an edited built-in arrives here without them. The
+    // server restores them on read and this is the same merge.
+    const out = ships.map( ( b ) => {
+        const edit = byId.get( String( b.id ) );
+        if ( ! edit ) return b;
+
+        return {
+            ...b,
+            ...edit,
+            name:        edit.name || b.name,
+            description: edit.description || b.description,
+            tokens:      { ...( b.tokens || {} ), ...( edit.tokens || {} ) },
+        };
+    } );
     const seen = new Set( ships.map( ( b ) => String( b.id ) ) );
 
     for ( const p of saved ) {
