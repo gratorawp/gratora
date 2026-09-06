@@ -17,9 +17,9 @@ function Edit( { attributes, setAttributes } ) {
     // org = { base, currencies: [codes] } enabled under Settings → Currency.
     const [ org, setOrg ] = useState( null );
 
-    // A failure used to be stored as an empty list, which reads back as "no
-    // currencies are enabled" - a statement about the org, not about the
-    // request. The route always answers with at least the base currency.
+    // Tracked apart from the list: an empty list reads back as "no currencies
+    // are enabled", a statement about the org rather than about the request,
+    // and the route always answers with at least the base currency.
     const [ failed, setFailed ] = useState( false );
     const alive = useRef( true );
     useEffect( () => () => { alive.current = false; }, [] );

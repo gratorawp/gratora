@@ -356,28 +356,13 @@ final class RecurringController
     }
 
     /**
-     * The renewal that failed, so the reason is readable without hunting for
-     * the donation it belongs to. Queried only for a plan that has one.
-     *
-     * @return array{reference:string, reason:string, at:?string}|null
-     *
-     * @since 1.0.0
-     */
-
-
-
-    /**
-     * @return array<string,mixed>
-     *
-     * @since 1.0.0
-     */
-    /**
-     * A whole page in a fixed number of queries. Shaping row by row cost a
-     * donor, a campaign, a declined renewal and an error lookup each, so a
-     * hundred-row page ran four hundred queries.
+     * A whole page in a fixed number of queries: the donor, campaign and
+     * gateway lookups are batched, so page size does not multiply them.
      *
      * @param list<RecurringPlan> $plans
      * @return list<array<string,mixed>>
+     *
+     * @since 1.0.0
      */
     private function shapeMany(array $plans): array
     {

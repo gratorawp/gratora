@@ -82,8 +82,8 @@ final class DonorRepository
      * Who may leave the site in a list. The donor CSV is an admin export that
      * goes to a fulfillment house, and the test badge cannot travel with it:
      * the columns are opt-in and none of them says "not a real person". So the
-     * file keeps the narrower population the screen used to have, and the
-     * screen's own definition no longer decides it.
+     * file uses this predicate rather than whatever the screen is currently
+     * filtering by.
      *
      * @since 1.0.0
      */

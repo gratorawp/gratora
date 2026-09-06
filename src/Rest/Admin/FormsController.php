@@ -283,10 +283,9 @@ final class FormsController
         // A POST carries the live editor blocks and settings so the checks
         // reflect unsaved edits; applied in-memory only, never persisted.
         //
-        // Settings used to stay as saved while the preview iframe beside the
-        // panel rendered the posted ones, so the two read different forms: an
-        // author who ticked test mode was told the form was ready to publish
-        // while looking at a preview that took no real payment.
+        // Settings are applied as well as blocks: the preview iframe beside the
+        // panel renders the posted ones, so leaving settings as saved would have
+        // the two read different forms.
         $body = (array) ($request->get_json_params() ?? []);
         if (array_key_exists('blocks', $body)) {
             $form->blocks = $this->formService->sanitizeBlocks((string) $body['blocks']);

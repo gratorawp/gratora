@@ -14,12 +14,9 @@ namespace FundKit\Gateways;
  * GoCardless is a Direct Debit mandate, and stopping it means cancelling and
  * asking the donor to sign a new one, which is not what they asked for.
  *
- * Core read SubscriptionAware as "this plan can be paused", so the portal
- * offered Pause and Skip next charge on every plan and a Direct Debit donor
- * who pressed either got a raw 422. The sharpest version is the cancel
- * deflection sheet, which offers exactly those two as the alternatives to
- * cancelling: a donor trying not to cancel was handed two buttons that both
- * failed, and then cancelled.
+ * The cancel deflection sheet offers Pause and Skip next charge as the two
+ * alternatives to cancelling, so a gateway that can do neither must not be
+ * asked: the donor trying not to cancel would be handed two buttons that fail.
  *
  * A marker, like its siblings: the methods themselves live on SubscriptionAware
  * because a gateway that cannot pause still has to answer the call, and does so

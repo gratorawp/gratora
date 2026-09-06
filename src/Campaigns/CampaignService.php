@@ -140,10 +140,10 @@ final class CampaignService
             }
         }
 
-        // null and '' both mean "clear it". Testing only against '' let a null
-        // through to (string) null, which is '', and a DATETIME column stores
-        // that as 0000-00-00: a campaign whose dates could be set once and
-        // never removed.
+        // null and '' both mean "clear it", and both have to be matched here:
+        // (string) null is '', which a DATETIME column stores as 0000-00-00
+        // rather than refusing, so a date would be settable once and never
+        // removable.
         foreach (['description', 'starts_at', 'ends_at'] as $field) {
             if (! array_key_exists($field, $input)) continue;
 
@@ -735,10 +735,9 @@ final class CampaignService
     /**
      * The form the chosen page template asks for.
      *
-     * Every campaign used to arrive with the same six fields whichever template
-     * built its page, which made the choice of template a choice of decoration.
      * A page that leads with the ask wants the shortest form there is, and a
-     * page built to be read can carry one split across steps.
+     * page built to be read can carry one split across steps, so the template
+     * decides the form.
      *
      * @return array{blocks: string, settings: array<string, mixed>|null}
      *

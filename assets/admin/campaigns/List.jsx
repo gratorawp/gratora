@@ -309,10 +309,9 @@ export default function List() {
                     confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
                     destructive:  true,
                     onConfirm: async () => {
-                        // allSettled, not all: one refusal used to reject the
-                        // whole batch, so campaigns that really had been deleted
-                        // stayed on screen with a single error above them and no
-                        // refetch. Each campaign now reports its own outcome.
+                        // allSettled, not all: one refusal must not reject the
+                        // whole batch, or campaigns that really were deleted
+                        // stay on screen under a single error with no refetch.
                         const results = await Promise.allSettled( items.map( ( i ) => apiFetch( {
                             path:   `/fundkit/v1/admin/campaigns/${ i.id }`,
                             method: 'DELETE',

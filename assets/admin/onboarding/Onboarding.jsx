@@ -43,17 +43,12 @@ const STATES_BY_COUNTRY = {
     ],
 };
 
-// Derives digit separators from country (US: 1,234.56; EU: 1.234,56).
 /**
  * How the chosen currency is conventionally written, from the presets the
  * server publishes (CurrencyFormats).
  *
- * This used to be derived from the country instead, on a list of which nations
- * write money the American way. That conflates where an organisation is with
- * what it counts in: a Croatian charity raising in USD picked USD and got
- * 1.234,56 $ anyway, because its country was not on the list. Deriving from the
- * currency keeps every case the country list existed to protect, since a German
- * org raising euros still gets euro separators.
+ * Currency, not country: where an organisation is and what it counts in are
+ * different questions, and a Croatian charity raising in USD writes 1,234.56.
  */
 export function formatForCurrency( code ) {
     const preset = ( typeof window !== 'undefined' ? window.fundkit?.currency_formats : null )
@@ -221,21 +216,10 @@ export default function Onboarding() {
                     format: {
                         decimal_places:  chosenFormat( currency, 'decimal_places', fmt.places ),
                         // Keep separators the operator already chose; derive
-                        // the rest from the country they just picked.
-                        //
-                        // This used to test for an EMPTY value, and there is no
-                        // such thing: the server merges its defaults into every
-                        // settings read, so decimal_sep always arrived as '.'
-                        // and the derivation right above could never fire. Every
-                        // German, French, Dutch, Spanish, Italian and Nordic
-                        // install finished the wizard with en-US separators and
-                        // printed 1,234.56 on its donation form, its receipts,
-                        // its tax statements and every admin screen, with
-                        // nothing saying so and four fields to hand-fix.
-                        //
-                        // A value counts as chosen when it differs from what
-                        // ships. The wizard has no separator field of its own,
-                        // so anything else here came from Settings > Currency.
+                        // the rest from the currency they just picked. A value
+                        // counts as chosen when it differs from what ships:
+                        // the wizard has no separator field of its own, so
+                        // anything else here came from Settings > Currency.
                         decimal_sep:     chosenFormat( currency, 'decimal_sep', fmt.decimal ),
                         thousand_sep:    chosenFormat( currency, 'thousand_sep', fmt.thousand ),
                         symbol_position: chosenFormat( currency, 'symbol_position', fmt.symbolPosition ),

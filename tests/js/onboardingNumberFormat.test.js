@@ -1,14 +1,11 @@
 /**
- * The wizard derives digit separators from the country the operator picks, and
- * that code could never fire.
+ * The wizard derives digit separators from the currency the operator picks.
  *
- * It tested for an EMPTY stored value, and there is no such thing: the server
- * merges its currency-locale defaults into every settings read, so decimal_sep
- * always arrived as '.'. Every German, French, Dutch, Spanish, Italian and
- * Nordic install therefore finished onboarding with en-US separators and
- * printed 1,234.56 on its donation form, its receipts, its tax statements and
- * every admin screen, with nothing saying so and four fields to hand-fix under
- * Settings > Currency. It lands at N=0, before the first donation.
+ * The server merges its currency-locale defaults into every settings read, so a
+ * stored value is never empty: chosen means different from what ships. Get that
+ * wrong and a German install finishes onboarding with en-US separators, and
+ * prints 1,234.56 on its donation form, its receipts, its tax statements and
+ * every admin screen with nothing saying so.
  */
 
 const { chosenFormat, formatForCurrency } = require( '../../assets/admin/onboarding/Onboarding' );

@@ -44,9 +44,9 @@ function clampPad( v ) {
 
 /**
  * The alphabet ReferenceGenerator accepts. A reference outside it cannot be
- * matched by the admin or donor routes, so the generator strips it, and the
- * settings route now refuses it rather than letting the screen promise a
- * numbering scheme nobody would ever be given.
+ * matched by the admin or donor routes, so the generator strips it and the
+ * settings route refuses it, rather than letting the screen promise a
+ * numbering scheme nobody would be given.
  *
  * @since 1.0.0
  */
@@ -141,7 +141,7 @@ export default function NumberingPanel( { s , active } ) {
     // The counter a scope reads from depends on the numbering settings above
     // it: reset-each-year and include-year together decide whether the counter
     // is year-scoped. Saving those on this very panel moves which counter is
-    // live, so a mount-once fetch showed the previous namespace's number.
+    // live, so the counters are re-read every time the tab becomes active.
     useEffect( () => { if ( active ) loadCounters(); }, [ active ] );
 
     const setDraft = ( key, v ) => setDrafts( ( prev ) => ( { ...prev, [ key ]: v } ) );

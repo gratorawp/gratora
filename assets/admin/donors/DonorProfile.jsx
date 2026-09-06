@@ -53,8 +53,8 @@ function EditPanel( { donor, onCancel, onSaved } ) {
         address: { ...s.address, [ k ]: e.target.value },
     } ) );
     // The reader's own language, the way the identity card beside this form
-    // already reads it. Two names for one country on one screen is what this
-    // form used to give them.
+    // already reads it: two names for one country on one screen is worse than
+    // either.
     const countries = useMemo( () => localizedCountries(), [] );
     const [ countryQuery, setCountryQuery ] = useState( () => countryName( donor.country ) );
     const [ countryOpen, setCountryOpen ] = useState( false );
@@ -313,8 +313,8 @@ export default function DonorProfile( { id, onBack } ) {
 
     if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'fundraising-toolkit' ) }</p>;
 
-    // Only when there is nothing to fall back to. A refresh that fails after a
-    // note or a plan change used to replace the whole profile with one line,
+    // Only when there is nothing to fall back to: a refresh that fails after a
+    // note or a plan change must not replace the whole profile with one line,
     // leaving nothing on screen that could ask again.
     if ( error && ! data ) {
         return (

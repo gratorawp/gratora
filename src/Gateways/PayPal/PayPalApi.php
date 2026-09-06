@@ -163,9 +163,9 @@ final class PayPalApi
         ];
         if ($body !== null) {
             // An empty PHP array encodes as [], and every PayPal endpoint wants
-            // an object. Capture takes no fields at all, so it sent [] and
-            // PayPal refused the whole call as malformed JSON: the donor's card
-            // had already been accepted and the money was never collected.
+            // an object. Capture takes no fields at all, so without this it
+            // posts [] and PayPal refuses the call as malformed JSON, after the
+            // donor's card has been accepted and before the money is collected.
             $encoded = $body === [] ? '{}' : wp_json_encode($body);
             // Casting a false straight to string posts an empty body, and PayPal
             // answers that with "the request JSON is not well formed", which

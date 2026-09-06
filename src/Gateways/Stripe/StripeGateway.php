@@ -2179,12 +2179,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $this->api->post('/invoices/' . rawurlencode($invoiceId) . '/pay', []);
     }
 
-    /** @since 1.0.0 */
     /**
      * Whether Stripe could have issued this id.
      *
-     * The empty-string guard this replaces was a check for a state the column
-     * cannot hold: gateway_subscription_id is NOT NULL under
+     * gateway_subscription_id is NOT NULL under
      * unique(gateway, gateway_subscription_id), so a plan that never reached
      * Stripe cannot record that absence as ''. The Give importer mints
      * 'give-import-<id>' and DemoSeeder 'demo-subNNN' for exactly that reason,

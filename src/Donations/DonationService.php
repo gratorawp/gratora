@@ -671,19 +671,10 @@ final class DonationService
         // The renewal's own creation seam, fired before confirm() so an add-on
         // row exists by the time the donation counts.
         //
-        // create() fires fundkit.donation.creating, which is where every add-on
-        // writes the rows that belong to a donation, and createRenewal() fired
-        // nothing at all. Gift Aid is the one that costs money: its stamper is
-        // the only writer of claim rows, so month one of a monthly donation was
-        // claimable and every renewal after it silently was not, with no screen
-        // or log saying so. On a 20 GBP monthly donor that is 55 GBP of
-        // unclaimed relief in the first year, across the whole regular-giving
-        // base, which is the segment Gift Aid is worth most on.
-        //
-        // A separate hook rather than fundkit.donation.creating: a renewal has no
+        // Separate from fundkit.donation.creating: a renewal has no
         // DonationIntent and no form submission behind it, so the listeners
-        // that read those would be handed a lie. What carries over is the
-        // plan and the donor's standing record.
+        // that read those would be handed a lie. What carries over is the plan
+        // and the donor's standing record.
         do_action(
             'fundkit.donation.renewal_creating',
             $donation,

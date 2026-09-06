@@ -824,21 +824,11 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * A renewal payment on an existing subscription. The first payment is
-     * already recorded by the checkout flow, so a sale whose amount matches an
-     * existing donation for this billing period must not double-count.
-     *
-     * @param array<string,mixed> $sale
-     *
-     * @since 1.0.0
-     */
-    /**
      * A renewal PayPal could not collect.
      *
      * Without this a donor whose card dies is invisible: PayPal retries on its
      * own schedule and gives up, while the plan still reads active, still
-     * counts toward MRR, and nobody is emailed. Stripe has recorded these since
-     * the beginning; PayPal simply had no route for the events.
+     * counts toward MRR, and nobody is emailed.
      *
      * @param array<string,mixed> $resource
      *
@@ -965,9 +955,9 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      * PayPal suspended the subscription itself, which is where its dunning ends.
      *
      * Not a cancellation: PayPal can suspend and the donor can still fix their
-     * card, so the plan is marked past_due rather than closed. Left unhandled
-     * this was the quietest of the three, because nothing about the row changed
-     * while the money had already stopped.
+     * card, so the plan is marked past_due rather than closed. Unhandled it is
+     * the quietest of the three: nothing about the row changes while the money
+     * has already stopped.
      *
      * @param array<string,mixed> $sub
      *
@@ -1007,6 +997,15 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
+    /**
+     * A renewal payment on an existing subscription. The first payment is
+     * already recorded by the checkout flow, so a sale whose amount matches an
+     * existing donation for this billing period must not double-count.
+     *
+     * @param array<string,mixed> $sale
+     *
+     * @since 1.0.0
+     */
     private function handleRenewalPaid(string $eventId, string $type, array $sale): WebhookOutcome
     {
         $subId = (string) ($sale['billing_agreement_id'] ?? '');

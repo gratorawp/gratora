@@ -92,12 +92,6 @@ final class DashboardMetricsService
     }
 
     /**
-     * Last-24-hour activity summary for the live ribbon at the top.
-     *
-     * @return array{donations_count:int,amount_raised_cents:int,refunds_count:int,notes_count:int,currency:string}
-     * @since 1.0.0
-     */
-    /**
      * How many campaign-derived rows one attention source may contribute.
      *
      * Dismissals are stored capped at fifty, so an unbounded queue is one the
@@ -106,6 +100,12 @@ final class DashboardMetricsService
      */
     private const ATTENTION_MAX = 20;
 
+    /**
+     * Last-24-hour activity summary for the live ribbon at the top.
+     *
+     * @return array{donations_count:int,amount_raised_cents:int,refunds_count:int,notes_count:int,currency:string}
+     * @since 1.0.0
+     */
     public function today(bool $includeTest = false): array
     {
         $since = $this->clock->now()->modify('-24 hours')->format('Y-m-d H:i:s');
@@ -457,9 +457,8 @@ final class DashboardMetricsService
         }
         if ($noteCount > 0) {
             // The note is written on a donation and is only ever shown on that
-            // donation's own screen, so that is where Read goes. It used to open
-            // the donor's profile, which does not carry the note at all: the
-            // reader arrived at a page with no sign of the thing they came for.
+            // donation's own screen, so that is where Read goes. The donor's
+            // profile does not carry the note at all.
             $href = $onlyNote !== ''
                 ? admin_url('admin.php?page=fundkit-donations&view=detail&reference=' . rawurlencode($onlyNote))
                 : admin_url('admin.php?page=fundkit-donations');

@@ -12,10 +12,10 @@ export default function GatewaySelect( { state, dispatch, config } ) {
     const current  = state.gateway;
     const style    = ( config && config.gateways && config.gateways.style ) === 'list' ? 'list' : 'cards';
 
-    // Nothing to offer. The section used to render nothing at all, which read
-    // as "no payment step", and the stale gateway stayed selected because the
-    // effect above only runs when there is something to select -- the donor
-    // found out on submit. Which of the three reasons it is matters: blaming
+    // Nothing to offer. Rendering nothing at all would read as "no payment
+    // step", and the stale gateway would stay selected because the effect above
+    // only runs when there is something to select, so the donor would find out
+    // on submit. Which of the three reasons it is matters: blaming
     // the currency when every gateway is switched off sends the donor looking
     // for a fix that was never theirs to make.
     if ( ! opts.length ) {

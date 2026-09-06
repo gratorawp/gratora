@@ -220,18 +220,13 @@ final class TaxStatementBuilder
     }
 
     /**
-     * Optional org receipt disclaimer to append. Read from the raw stored option
-     * (not the merged default) so only a footer the org actually configured is
-     * appended to the statement.
-     *
-     * @since 1.0.0
-     */
-    /**
      * The footer the org wrote, if it wrote one.
      *
      * Only what is stored, never the default: the built-in receipt footer says
      * the document is a non-fiscal acknowledgement, which is the opposite of
      * what an annual statement is for.
+     *
+     * @since 1.0.0
      */
     private function orgDisclaimer(string $orgName, string $donorName): string
     {

@@ -84,10 +84,9 @@ export function emptyMessage( config, state ) {
  * Keep the selected gateway one the donor can actually be charged through.
  *
  * The visible set narrows when the currency or the frequency changes, and the
- * selector that used to own this correction only renders where the author put
- * its block. On a form whose gateway block sits on an earlier page, or was
- * removed, the stale choice survived to submit and the server refused it with
- * no control on screen to change it.
+ * selector renders only where the author put its block. On a form whose gateway
+ * block sits on an earlier page, or was removed, a stale choice would survive to
+ * submit and be refused by the server with no control on screen to change it.
  *
  * @param {Object}   config   form config
  * @param {Object}   state    form state

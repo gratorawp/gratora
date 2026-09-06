@@ -26,19 +26,12 @@ final class Mailer
     }
 
     /**
-     * @param array<string,string|int> $tokens
-     * @param list<string> $attachments
-     * @return bool false when the template is disabled or absent; otherwise wp_mail's result.
-     * @since 1.0.0
-     */
-    /**
      * Whether the org has this template switched on in Settings -> Email.
      *
      * Public because sendTemplate() returning false is ambiguous: it means both
      * "the org asked us not to send this" and "the send failed". A caller that
-     * has to tell those apart, because it releases a claim or queues a retry on
-     * failure, has to ask this first, and three copies of the same lookup had
-     * already been written by hand.
+     * releases a claim or queues a retry on failure has to tell those apart, so
+     * it asks this first.
      *
      * @since 1.0.0
      */
@@ -49,6 +42,12 @@ final class Mailer
         return is_array($template) && ! empty($template['enabled']);
     }
 
+    /**
+     * @param array<string,string|int> $tokens
+     * @param list<string> $attachments
+     * @return bool false when the template is disabled or absent; otherwise wp_mail's result.
+     * @since 1.0.0
+     */
     public function sendTemplate(string $key, string $to, array $tokens, array $attachments = []): bool
     {
         if (! $this->templateEnabled($key)) {

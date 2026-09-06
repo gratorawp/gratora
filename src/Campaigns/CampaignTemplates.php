@@ -1135,8 +1135,7 @@ BLOCKS;
      *
      * A template is a whole page and the form is the largest thing on it, so a
      * page built to lead with the ask and a page built to be read should not
-     * arrive with the same six fields. Falls back to the campaign-page form,
-     * which is what every campaign used to get.
+     * arrive with the same six fields. Falls back to the campaign-page form.
      *
      * @since 1.0.0
      */

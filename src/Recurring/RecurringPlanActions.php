@@ -377,9 +377,6 @@ final class RecurringPlanActions
      * "this plan has no processor". Writing the row on that reading tells the
      * donor their donation is paused while the card keeps being charged.
      *
-     * RecurringCanceller has guarded cancel this way from the start; these
-     * three moved money the same way and did not.
-     *
      * @throws GatewayUnreachable
      *
      * @since 1.0.0

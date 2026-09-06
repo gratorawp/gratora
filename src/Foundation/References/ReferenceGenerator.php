@@ -155,9 +155,9 @@ final class ReferenceGenerator
     }
 
     /**
-     * Refuse a numbering payload that would be coerced on the way out. The
-     * generator has always stripped these, silently, so the screen showed a
-     * scheme that was never minted.
+     * Refuse a numbering payload that would be coerced on the way out.
+     * format() strips anything outside the alphabet before minting, so a value
+     * accepted here would promise a scheme the site never issues.
      *
      * @param array<string,mixed> $input
      *
