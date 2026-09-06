@@ -1266,7 +1266,7 @@ function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
                 { activeTab === 'goal'      && <GoalSection      settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'gateways'  && <GatewaysSection  gateways={ gateways } settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'after'     && <AfterSection     settings={ settings } setSettings={ setSettings } /> }
-                { activeTab === 'embed'     && <EmbedSection     slug={ c.savedRecord?.slug || '' } pending={ c.isEdited?.( 'slug' ) } /> }
+                { activeTab === 'embed'     && <EmbedSection     c={ c } /> }
             </main>
         </div>
     );
@@ -1602,10 +1602,13 @@ function AfterSection( { settings, setSettings } ) {
     );
 }
 
-function EmbedSection( { slug, pending } ) {
+export function EmbedSection( { c } ) {
     // The saved slug, not the edited one: the server normalises it through
     // sanitize_title, so a shortcode built from raw input names a form that
-    // will never exist.
+    // will never exist. Read here rather than passed in, because which slug is
+    // authoritative is the whole question this section answers.
+    const slug      = c.savedRecord?.slug || '';
+    const pending   = !! c.isEdited?.( 'slug' );
     const shortcode = `[fundkit_donation_form slug="${ slug }"]`;
     return (
         <SettingsRow
