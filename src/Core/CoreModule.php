@@ -763,6 +763,7 @@ final class CoreModule implements FundKitModule
             $c->get(GatewayManager::class),
             $c->get( AntiSpamGuard::class),
             $c->get(ConsentService::class),
+            $c->get(TestMode::class),
         ));
 
         $c->bind(WebhookController::class, fn (Container $c) => new WebhookController(

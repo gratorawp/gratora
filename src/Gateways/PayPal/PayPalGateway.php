@@ -12,6 +12,7 @@ use FundKit\Foundation\Time\Clock;
 use FundKit\Gateways\GatewayConfirmResult;
 use FundKit\Gateways\GatewayTransportException;
 use FundKit\Gateways\GatewayIntentResult;
+use FundKit\Gateways\ModeCredentialed;
 use FundKit\Gateways\PaymentGateway;
 use FundKit\Gateways\PaymentMethodUpdate;
 use FundKit\Gateways\RefundResult;
@@ -44,7 +45,7 @@ use WP_REST_Request;
  *
  * @since 1.0.0
  */
-final class PayPalGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentMethodUpdate, SupportsSubscriptionPause, SupportsScheduleChange
+final class PayPalGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentMethodUpdate, SupportsSubscriptionPause, SupportsScheduleChange, ModeCredentialed
 {
     /**
      * Mode of the credentials that verified the current webhook. Set once per
@@ -86,26 +87,29 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function frequencies(): array
     {
-        // PayPal takes the first payment the moment the donor approves, and the
-        // opening sale webhook is the only thing that records it: createPlan
-        // leaves the signup donation pending on purpose. With no webhook id the
-        // signature has nothing to verify against and every delivery is
-        // refused, so a recurring donation would be charged and banked nowhere.
-        // One-time survives that, because the browser confirms its capture.
-        if ($this->account->webhookId(TestMode::siteWide()) === '') {
-            return ['one_time'];
-        }
-
-        return ['one_time', 'recurring'];
+        return $this->frequenciesInMode(TestMode::siteWide());
     }
 
     /**
-     * The mode a donation started right now would run in. frequencies() is
-     * asked before any donation exists, so it cannot use the per-donation
-     * override the credential-bearing calls set.
+     * PayPal takes the first payment the moment the donor approves, and the
+     * opening sale webhook is the only thing that records it: createPlan leaves
+     * the signup donation pending on purpose. With no webhook id for the mode
+     * the donation will run in, the signature has nothing to verify against and
+     * every delivery is refused, so a recurring donation would be charged and
+     * banked nowhere. One-time survives that, because the browser confirms its
+     * capture.
+     *
+     * @return list<string>
      *
      * @since 1.0.0
      */
+    public function frequenciesInMode(bool $test): array
+    {
+        return $this->account->webhookId($test) === ''
+            ? ['one_time']
+            : ['one_time', 'recurring'];
+    }
+
     /** @since 1.0.0 */
     public function paymentMethods(): array
     {
@@ -144,8 +148,15 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function canCharge(): bool
     {
-        // See StripeGateway::canCharge: the site's mode picks the credentials.
-        return $this->account->canCharge() && $this->account->hasKeysFor(TestMode::siteWide());
+        // See StripeGateway::canCharge: a caller with no form in hand is asking
+        // about the site's mode.
+        return $this->chargesInMode(TestMode::siteWide());
+    }
+
+    /** @since 1.0.0 */
+    public function chargesInMode(bool $test): bool
+    {
+        return $this->account->canCharge() && $this->account->hasKeysFor($test);
     }
 
     /**

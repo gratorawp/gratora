@@ -18,6 +18,7 @@ use FundKit\Foundation\Time\Clock;
 use FundKit\Gateways\AccountFingerprint;
 use FundKit\Gateways\GatewayConfirmResult;
 use FundKit\Gateways\GatewayIntentResult;
+use FundKit\Gateways\ModeCredentialed;
 use FundKit\Gateways\PaymentGateway;
 use FundKit\Gateways\PaymentMethodUpdate;
 use FundKit\Gateways\PaymentRetryUnavailable;
@@ -44,7 +45,7 @@ use WP_REST_Request;
  *
  * @since 1.0.0
  */
-final class StripeGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentRetry, SupportsPaymentMethodUpdate, SupportsSubscriptionPause, SupportsScheduleChange
+final class StripeGateway implements PaymentGateway, SubscriptionAware, SupportsPaymentRetry, SupportsPaymentMethodUpdate, SupportsSubscriptionPause, SupportsScheduleChange, ModeCredentialed
 {
     /**
      * Dispute statuses for which the money is on the org's balance: settled in
@@ -149,10 +150,28 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     public function canCharge(): bool
     {
         // A mid-onboarding account cannot charge yet, and gating here keeps the
-        // donor options and the admin readiness check on one signal. The mode
-        // the site is in picks the key pair, so keys for the other mode are no
-        // help: offering it would only fail at createIntent.
-        return $this->account->canCharge() && $this->account->hasKeysFor(TestMode::siteWide());
+        // donor options and the admin readiness check on one signal. Answers
+        // for the site's mode, which is what a caller with no form in hand is
+        // asking about; the picker asks chargesInMode for the form's.
+        return $this->chargesInMode(TestMode::siteWide());
+    }
+
+    /** @since 1.0.0 */
+    public function chargesInMode(bool $test): bool
+    {
+        // Keys for the other mode are no help: offering it would only fail at
+        // createIntent, with the donor watching.
+        return $this->account->canCharge() && $this->account->hasKeysFor($test);
+    }
+
+    /**
+     * @return list<string>
+     *
+     * @since 1.0.0
+     */
+    public function frequenciesInMode(bool $test): array
+    {
+        return $this->frequencies();
     }
 
     /** @since 1.0.0 */

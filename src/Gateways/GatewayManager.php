@@ -63,13 +63,13 @@ final class GatewayManager
      *
      * @since 1.0.0
      */
-    public function optionsFor(array $allowed, ?string $country, string $currency, string $frequency = 'one_time'): array
+    public function optionsFor(array $allowed, ?string $country, string $currency, string $frequency = 'one_time', ?bool $test = null): array
     {
         $cfg = get_option('fundkit_gateway_config', []);
         $cfg = is_array($cfg) ? $cfg : [];
 
         $enabled = [];
-        foreach ($this->availableFor($country, $currency, $frequency) as $id => $_g) {
+        foreach ($this->availableFor($country, $currency, $frequency, $test) as $id => $_g) {
             if (($cfg[$id]['enabled'] ?? true)) {
                 $enabled[] = $id;
             }
@@ -120,7 +120,7 @@ final class GatewayManager
      *
      * @since 1.0.0
      */
-    public function isOn(string $id): bool
+    public function isOn(string $id, ?bool $test = null): bool
     {
         $g = $this->gateways[$id] ?? null;
         if (! $g) {
@@ -130,7 +130,11 @@ final class GatewayManager
         $cfg = get_option('fundkit_gateway_config', []);
         $cfg = is_array($cfg) ? $cfg : [];
 
-        return ($cfg[$id]['enabled'] ?? true) && $g->canCharge();
+        $charges = $g instanceof ModeCredentialed
+            ? $g->chargesInMode($test ?? TestMode::siteWide())
+            : $g->canCharge();
+
+        return ($cfg[$id]['enabled'] ?? true) && $charges;
     }
 
     /**
@@ -143,11 +147,11 @@ final class GatewayManager
      *
      * @since 1.0.0
      */
-    public function optionsMetaFor(array $allowed): array
+    public function optionsMetaFor(array $allowed, ?bool $test = null): array
     {
         $enabledIds = [];
         foreach ($this->gateways as $id => $_g) {
-            if ($this->isOn($id)) {
+            if ($this->isOn($id, $test)) {
                 $enabledIds[] = $id;
             }
         }
@@ -198,8 +202,13 @@ final class GatewayManager
      *
      * @since 1.0.0
      */
-    public function availableFor(?string $country, string $currency, string $frequency = 'one_time'): array
+    public function availableFor(?string $country, string $currency, string $frequency = 'one_time', ?bool $test = null): array
     {
+        // The mode the donation will run in, which is the form's and not the
+        // site's. A gateway holding keys for the other mode is offered, taken,
+        // and then fails at createIntent with the donor watching.
+        $test ??= TestMode::siteWide();
+
         $currency = strtoupper($currency);
         $country  = $country !== null ? strtoupper(substr($country, 0, 2)) : null;
 
@@ -210,7 +219,7 @@ final class GatewayManager
         foreach ($this->gateways as $id => $g) {
             // A connected-but-not-yet-chargeable gateway (Stripe mid-onboarding)
             // must not be offered; the donor would only fail at createIntent.
-            if (! $g->canCharge()) {
+            if (! ($g instanceof ModeCredentialed ? $g->chargesInMode($test) : $g->canCharge())) {
                 continue;
             }
 
@@ -226,7 +235,11 @@ final class GatewayManager
                 }
             }
 
-            if (! in_array($bucket, $g->frequencies(), true)) {
+            $frequencies = $g instanceof ModeCredentialed
+                ? $g->frequenciesInMode($test)
+                : $g->frequencies();
+
+            if (! in_array($bucket, $frequencies, true)) {
                 continue;
             }
 

@@ -19,6 +19,7 @@ use FundKit\Forms\Blocks\DonationAmountBlock;
 use FundKit\Forms\Blocks\DropdownBlock;
 use FundKit\Forms\Blocks\MultiSelectBlock;
 use FundKit\Forms\Blocks\FundPickerBlock;
+use FundKit\Forms\Blocks\PaymentGatewaysBlock;
 use FundKit\Forms\Blocks\HtmlBlock;
 use FundKit\Forms\Blocks\RecurringToggleBlock;
 use FundKit\Forms\Blocks\SectionBlock;
@@ -229,7 +230,12 @@ final class DonationFormShortcode extends HookProvider
             }
         }
         FundPickerBlock::$renderCampaignDefaultFundId = $campDefaultFund;
+        // The gateway block is rendered in here and has no form to resolve, so
+        // it would answer for the site's mode while the config beside it
+        // answers for the form's, and the two lists would disagree.
+        PaymentGatewaysBlock::$renderTestMode = ($this->testMode ?? new TestMode($this->forms))->forForm($form);
         $inner = do_blocks((string) $form->blocks);
+        PaymentGatewaysBlock::$renderTestMode = null;
         FundPickerBlock::$renderCampaignDefaultFundId = 0;
 
         $variant = apply_filters('fundkit.form.variant', null, $form, $this->visitorContext());
@@ -484,7 +490,8 @@ final class DonationFormShortcode extends HookProvider
                 $allowed,
                 $this->visitorContext()['country'] ?? null,
                 $this->detectCurrency($form),
-                'one_time'
+                'one_time',
+                ($this->testMode ?? new TestMode($this->forms))->forForm($form)
             );
             if ($opts !== []) {
                 return $opts[0];
@@ -554,17 +561,23 @@ final class DonationFormShortcode extends HookProvider
         $honeypotPool = ['form_ref', 'aux_code', 'extra_note', 'alt_ref', 'note_two', 'field_ref', 'checksum'];
         $honeypotName = $honeypotPool[random_int(0, count($honeypotPool) - 1)];
 
+        // Resolved before the picker rather than after it: a form can be in
+        // test mode while the org switch is off, and a gateway holding only the
+        // other mode's keys must not be offered.
+        $testModeOn = ($this->testMode ?? new TestMode($this->forms))->forForm($form);
+
         $gatewaysCfg = null;
         if ($this->gateways !== null) {
             $allowedIds = is_array($form->settings['gateways']['allowed'] ?? null)
                 ? $form->settings['gateways']['allowed']
                 : [];
-            $opts   = $this->gateways->optionsMetaFor($allowedIds);
+            $opts   = $this->gateways->optionsMetaFor($allowedIds, $testModeOn);
             $ctxIds = $this->gateways->optionsFor(
                 $allowedIds,
                 $this->visitorContext()['country'] ?? null,
                 $currency,
-                'one_time'
+                'one_time',
+                $testModeOn
             );
 
             $blockAttrs   = $this->findPaymentGatewaysBlockAttrs($form) ?? [];
@@ -593,8 +606,6 @@ final class DonationFormShortcode extends HookProvider
                 'style'   => in_array($blockStyle, ['cards', 'list'], true) ? $blockStyle : 'cards',
             ];
         }
-
-        $testModeOn = ( $this->testMode ?? new TestMode($this->forms) )->forForm($form);
 
         $config = [
             'slug'        => $form->slug,

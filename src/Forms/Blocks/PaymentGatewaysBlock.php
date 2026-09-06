@@ -42,6 +42,18 @@ final class PaymentGatewaysBlock implements Block
         ];
     }
 
+    /**
+     * The mode the form being rendered runs in.
+     *
+     * Set by DonationFormShortcode around do_blocks, the way the fund picker
+     * takes its campaign default: the block is rendered inside that call and
+     * has no form of its own to resolve. Left null, the site's mode answers,
+     * which is right for a preview with no form in the request.
+     *
+     * @since 1.0.0
+     */
+    public static ?bool $renderTestMode = null;
+
     /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
@@ -49,7 +61,7 @@ final class PaymentGatewaysBlock implements Block
             ? array_values(array_filter(array_map('strval', $attrs['allowed']), static fn ($s) => $s !== ''))
             : [];
 
-        $options = $this->gateways->optionsMetaFor($allowed);
+        $options = $this->gateways->optionsMetaFor($allowed, self::$renderTestMode);
 
         // Hide-on-single mirrors the runtime: one option is auto-selected on
         // the form, no selector shown.

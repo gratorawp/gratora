@@ -7,6 +7,7 @@ namespace FundKit\Forms;
 use FundKit\Donors\ConsentService;
 use FundKit\Forms\Blocks\ConsentBlock;
 use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\ModeCredentialed;
 use FundKit\Gateways\Stripe\StripeAccount;
 use FundKit\Gateways\TestMode;
 use FundKit\Settings\SettingsService;
@@ -301,6 +302,46 @@ final class FormReadinessService
         // cleared the warning.
         $settings = is_array($form->settings ?? null) ? $form->settings : [];
         $ownSwitch = ! empty($settings['test_mode']);
+
+        // Test mode is only a warning while something can actually take a test
+        // donation. A gateway this form offers that holds no test keys fails
+        // every donation on it, and until now nothing said so: the org-wide
+        // check never runs when the switch is the form's own.
+        $noTestKeys = [];
+        $allowed    = $this->formAllowedGateways($form);
+        foreach ($this->gateways->all() as $id => $gateway) {
+            if ($allowed !== [] && ! in_array($id, $allowed, true)) {
+                continue;
+            }
+            // Only one this form would otherwise offer: a gateway that is not
+            // connected at all is not missing its test keys, it is missing
+            // everything, and the gateway check beside this one says so.
+            if (! $this->gateways->isOn($id, false)) {
+                continue;
+            }
+            if ($gateway instanceof ModeCredentialed && ! $gateway->chargesInMode(true)) {
+                $noTestKeys[] = $gateway->label();
+            }
+        }
+
+        if ($noTestKeys !== []) {
+            return [
+                'id'     => 'test-mode',
+                'status' => 'fail',
+                'label'  => sprintf(
+                    /* translators: %s: gateway names, comma separated */
+                    __('This form is in test mode, but %s has no test credentials', 'fundraising-toolkit'),
+                    implode(', ', $noTestKeys)
+                ),
+                'detail' => __('Every donation on this form will fail at the payment step. Add the test credentials, or turn test mode off.', 'fundraising-toolkit'),
+                'action_url'   => $ownSwitch
+                    ? admin_url('admin.php?page=fundkit-forms&form=' . (int) $form->id)
+                    : admin_url('admin.php?page=fundkit-settings#gateways'),
+                'action_label' => $ownSwitch
+                    ? __('Open this form', 'fundraising-toolkit')
+                    : __('Open settings', 'fundraising-toolkit'),
+            ];
+        }
 
         return [
             'id'           => 'test-mode',

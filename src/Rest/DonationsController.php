@@ -23,6 +23,7 @@ use FundKit\Forms\FormSubmissionValidator;
 use FundKit\Gateways\BrowserAware;
 use FundKit\Gateways\GatewayIntentResult;
 use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\TestMode;
 use FundKit\Gateways\PaymentGateway;
 use FundKit\Gateways\SubscriptionCreator;
 use FundKit\Recurring\FrequencyMap;
@@ -50,6 +51,7 @@ final class DonationsController
         private GatewayManager $gateways,
         private AntiSpamGuard $spam,
         private ConsentService $consents,
+        private TestMode $testMode,
     ) {
     }
 
@@ -225,11 +227,15 @@ final class DonationsController
         $formAllowed = ($form && is_array($form->settings['gateways']['allowed'] ?? null))
             ? $form->settings['gateways']['allowed']
             : [];
+        // In the mode the donation will run in: a form in test mode on a site
+        // with live keys only offers no gateway that can take it, and accepting
+        // one here writes a pending row nothing can ever pay.
         $allowedGateways = $this->gateways->optionsFor(
             $formAllowed,
             $country !== null ? (string) $country : null,
             $currency,
-            (string) ($body['frequency'] ?? 'one_time')
+            (string) ($body['frequency'] ?? 'one_time'),
+            $this->testMode->forForm($form)
         );
         if (! in_array($gatewayId, $allowedGateways, true)) {
             return new WP_Error(
