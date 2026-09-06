@@ -29,7 +29,7 @@ import ServerSideRender from '@wordpress/server-side-render';
 import { __ } from '@wordpress/i18n';
 
 import { registerFundKitEntities } from '../_shared/entities';
-import { CampaignPicker, useBoundCampaign } from './campaign-field';
+import { CampaignPicker, canManageCampaigns, useBoundCampaign } from './campaign-field';
 import './LayoutSwitcher';
 import { registerCampaignBindingSource } from './bindings.js';
 import { defaultCurrency, amountEntry } from '../_shared/format';

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Tests\Integration;
 
 use FundKit\Analytics\Event;
+use FundKit\Donations\Donation;
 use FundKit\Donors\DonorService;
 use FundKit\Donors\Erasure\ErasureRequest;
 use FundKit\Foundation\Plugin;
@@ -62,6 +63,84 @@ final class ErasureNeedleBlastRadiusTest extends IntegrationTestCase
         $this->assertContains('FUNDKIT-2026-00700', $request->needles);
         $this->assertContains('pi_3abc', $request->needles);
         $this->assertContains('sub_9xy', $request->needles);
+    }
+
+    /**
+     * The gateway ids were kept or dropped by whether the donation's reference
+     * was prefix-unique. A gateway's own id is opaque and has no such
+     * neighbour, so a donor whose reference happened to sit inside another's
+     * lost their gateway ids from the search and kept the rows carrying them.
+     */
+    public function test_an_opaque_gateway_id_is_erased_even_when_the_reference_is_not_unique(): void
+    {
+        $service = Plugin::instance()->container->get(DonorService::class);
+
+        $target = $service->findOrCreate('prefix.target@example.com', ['first_name' => 'Target']);
+        $this->donation((int) $target->id, 'DON-1', 'pi_opaquetarget');
+
+        $other = $service->findOrCreate('prefix.other@example.com', ['first_name' => 'Other']);
+        $this->donation((int) $other->id, 'DON-10', 'pi_somethingelse');
+
+        $event = $this->event(['note' => 'charged pi_opaquetarget']);
+
+        $service->redact($target);
+
+        $this->assertNull(
+            Event::query()->where('id', (int) $event->id)->get()->payload,
+            'the row carrying the erased donor gateway id was reached'
+        );
+    }
+
+    /** And a gateway id that IS extended by another donation's is still left alone. */
+    public function test_a_gateway_id_another_donation_extends_is_not_searched_for(): void
+    {
+        $service = Plugin::instance()->container->get(DonorService::class);
+
+        $target = $service->findOrCreate('short.id@example.com', ['first_name' => 'Shorty']);
+        $this->donation((int) $target->id, 'REF-UNIQUE-A', 'pi_777');
+
+        $other = $service->findOrCreate('longer.id@example.com', ['first_name' => 'Longy']);
+        $this->donation((int) $other->id, 'REF-UNIQUE-B', 'pi_7777');
+
+        $event = $this->event(['note' => 'charged pi_7777']);
+
+        $service->redact($target);
+
+        $this->assertNotNull(
+            Event::query()->where('id', (int) $event->id)->get()->payload,
+            'the bystander row was left alone'
+        );
+    }
+
+    private function donation(int $donorId, string $reference, string $intentId): void
+    {
+        $now = gmdate('Y-m-d H:i:s');
+
+        $d = Donation::make();
+        $d->donor_id          = $donorId;
+        $d->reference         = $reference;
+        $d->gateway_intent_id = $intentId;
+        $d->amount_cents      = 5000;
+        $d->currency          = 'USD';
+        $d->status            = 'paid';
+        $d->gateway           = 'offline';
+        $d->is_test           = false;
+        $d->paid_at           = $now;
+        $d->created_at        = $now;
+        $d->updated_at        = $now;
+        $d->save();
+    }
+
+    /** @param array<string,mixed> $payload */
+    private function event(array $payload): Event
+    {
+        $event = Event::make();
+        $event->type        = 'form.viewed';
+        $event->payload     = $payload;
+        $event->occurred_at = gmdate('Y-m-d H:i:s');
+        $event->save();
+
+        return $event;
     }
 
     public function test_erasing_one_donor_leaves_another_donors_events_intact(): void

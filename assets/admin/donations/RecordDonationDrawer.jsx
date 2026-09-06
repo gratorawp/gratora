@@ -3,7 +3,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, sprintf } from '@wordpress/i18n';
 
-import Dialog from '@fundkit/ui/components/Dialog';
+import Dialog from '../_shared/components/Dialog';
 import Notice from '../_shared/components/Notice';
 import Field from '../_shared/components/Field';
 import AmountInput from '../_shared/components/AmountInput';

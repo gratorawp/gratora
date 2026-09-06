@@ -68,12 +68,17 @@ final class OnboardingController
     {
         $body = (array) ($request->get_json_params() ?? []);
 
+        $firstRun = (string) get_option(Onboarding::OPTION, '') !== 'completed';
+
         update_option(Onboarding::OPTION, 'completed', false);
 
         // "Just exploring" starts the org in test mode: nothing takes real
         // money and a test/sandbox gateway is available until they switch
         // test mode off in Settings, Payment gateways.
-        if (trim((string) ($body['user_type'] ?? '')) === 'exploring') {
+        //
+        // Only on the first completion. The wizard can be reopened from Tools,
+        // and a re-run on a live site would silently stop it taking money.
+        if ($firstRun && trim((string) ($body['user_type'] ?? '')) === 'exploring') {
             $this->settings->update('gateways', ['test_mode' => true]);
         }
 

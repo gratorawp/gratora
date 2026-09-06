@@ -6,6 +6,7 @@ import { formatAmount } from '../../_shared/format';
 import Card from '../../_shared/components/Card';
 import Notice from '../../_shared/components/Notice';
 import Btn from '../../_shared/components/Btn';
+import { userCan } from '../../_shared/caps';
 
 const COUNT_LABELS = {
     donors:              __( 'Donors', 'fundraising-toolkit' ),
@@ -143,7 +144,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                 </Card>
             ) }
 
-            { info?.pending_upgrades?.length > 0 && (
+            { userCan( 'manage_options' ) && info?.pending_upgrades?.length > 0 && (
                 <Card
                     title={ __( 'Data updates are outstanding', 'fundraising-toolkit' ) }
                     sub={ __( 'These run by themselves in the background. If they are still here after a few minutes, this site\'s scheduled tasks are not running and you can finish them here.', 'fundraising-toolkit' ) }
@@ -266,7 +267,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                 ) }
             </Card>
 
-            { testTotal > 0 && (
+            { userCan( 'manage_options' ) && testTotal > 0 && (
                 <Card
                     title={ __( 'Test data', 'fundraising-toolkit' ) }
                     sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are left out of your reported totals unless you ask to see them, so this changes nothing you have quoted: it clears the ledger you read by eye before going live. There is no undo.', 'fundraising-toolkit' ) }

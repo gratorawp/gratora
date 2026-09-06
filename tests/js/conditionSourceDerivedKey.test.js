@@ -75,6 +75,34 @@ it( 'prefers an explicit key over the label, as the server does', () => {
     expect( sourceValues() ).not.toContain( 'custom.t_shirt_size' );
 } );
 
+/**
+ * The hidden field is the one custom field the server does not derive: its
+ * runtime key is the raw attribute, so a key derived from its label is one
+ * nothing on the live form ever answers to.
+ */
+it( 'offers the hidden field under the key it actually answers to', () => {
+    editorBlocks.list = [
+        { clientId: 'a', name: 'fundkit/hidden', attributes: { field: 'utm_source', label: 'Where from' } },
+        { clientId: 'self', name: 'fundkit/text-input', attributes: {} },
+    ];
+
+    mount();
+
+    expect( sourceValues() ).toContain( 'custom.utm_source' );
+    expect( sourceValues() ).not.toContain( 'custom.where_from' );
+} );
+
+it( 'leaves out a hidden field with no key, because a label gives it none', () => {
+    editorBlocks.list = [
+        { clientId: 'a', name: 'fundkit/hidden', attributes: { label: 'Where from' } },
+        { clientId: 'self', name: 'fundkit/text-input', attributes: {} },
+    ];
+
+    mount();
+
+    expect( sourceValues().filter( ( v ) => v.startsWith( 'custom.' ) ) ).toEqual( [] );
+} );
+
 it( 'leaves out a block with neither a key nor a label', () => {
     editorBlocks.list = [
         { clientId: 'a', name: 'fundkit/dropdown', attributes: {} },

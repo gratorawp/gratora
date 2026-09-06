@@ -679,19 +679,21 @@ final class DonorService
         ];
 
         $donationIds = [];
-        $byReference = [];
+        $columns     = ['reference' => [], 'gateway_intent_id' => [], 'gateway_txn_id' => []];
         foreach ($donations as $d) {
             $donationIds[] = (int) $d->id;
-            $byReference[(string) $d->reference] = [$d->gateway_intent_id, $d->gateway_txn_id];
+            foreach (array_keys($columns) as $column) {
+                $columns[$column][] = (string) ($d->{$column} ?? '');
+            }
         }
 
         // A reference is unique, not substring-unique: DON-1 is inside DON-10,
-        // and these are searched for as loose text. The gateway ids are derived
-        // from the reference, so they carry the same prefix either way.
-        foreach ($this->prefixUniqueReferences(array_keys($byReference), $donationIds) as $reference) {
-            $identifiers[] = $reference;
-            foreach ($byReference[$reference] as $derived) {
-                $identifiers[] = $derived;
+        // and these are searched for as loose text. Asked per column, because a
+        // gateway's own id is opaque and has no such neighbour, while one a
+        // sandbox derived from the reference has the same one.
+        foreach ($columns as $column => $values) {
+            foreach ($this->prefixUnique($column, $values, $donationIds) as $value) {
+                $identifiers[] = $value;
             }
         }
         foreach ($plans as $p) {
@@ -710,42 +712,42 @@ final class DonorService
     }
 
     /**
-     * The references no other donation extends.
+     * The values in one column that no other donation's value extends.
      *
-     * @param list<string> $references
+     * @param list<string> $values
      * @param list<int>    $donationIds
      * @return list<string>
      */
-    private function prefixUniqueReferences(array $references, array $donationIds): array
+    private function prefixUnique(string $column, array $values, array $donationIds): array
     {
-        $references = array_values(array_filter($references, static fn ($r): bool => (string) $r !== ''));
-        if ($references === []) {
+        $values = array_values(array_unique(array_filter($values, static fn ($v): bool => (string) $v !== '')));
+        if ($values === []) {
             return [];
         }
 
         $patterns = array_map(
-            static fn (string $r): string => str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $r) . '%',
-            $references
+            static fn (string $v): string => str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $v) . '%',
+            $values
         );
 
         $rows = Donation::query()
             ->whereNotIn('id', $donationIds ?: [0])
-            ->where(static function ($q) use ($patterns): void {
+            ->where(static function ($q) use ($column, $patterns): void {
                 $first = array_shift($patterns);
-                $q->whereLike('reference', $first);
+                $q->whereLike($column, $first);
                 foreach ($patterns as $pattern) {
-                    $q->orWhereLike('reference', $pattern);
+                    $q->orWhereLike($column, $pattern);
                 }
             })
-            ->pluck('reference');
+            ->pluck($column);
 
         $extended = array_map('strval', (array) $rows);
 
         return array_values(array_filter(
-            $references,
-            static function (string $r) use ($extended): bool {
+            $values,
+            static function (string $v) use ($extended): bool {
                 foreach ($extended as $other) {
-                    if ($other !== $r && str_starts_with($other, $r)) {
+                    if ($other !== $v && str_starts_with($other, $v)) {
                         return false;
                     }
                 }

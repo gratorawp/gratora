@@ -45,6 +45,13 @@ final class WebhookController
      * the gateway to back off and redeliver rather than to keep hammering.
      */
     private const FAIL_MAX    = 10;
+
+    /**
+     * A delivery this site could not verify is the gateway's own retry, not an
+     * attacker, so it gets a much larger budget: enough to ride out an outage,
+     * still bounded so a flood of them cannot run for ever.
+     */
+    private const UNVERIFIABLE_MAX = 500;
     private const FAIL_WINDOW = 900;
 
     /** One recorded refusal per gateway per window. */
@@ -104,7 +111,8 @@ final class WebhookController
 
         // Asked before the handler, because the handler is the expensive part.
         $failKey = $this->spam->subjectKey(self::FAIL_KEY . $gatewayId);
-        if ($this->spam->peek($failKey, self::FAIL_WINDOW) >= self::FAIL_MAX) {
+        if ($this->spam->peek($failKey, self::FAIL_WINDOW) >= self::FAIL_MAX
+            || $this->spam->peek($failKey . ':unverifiable', self::FAIL_WINDOW) >= self::UNVERIFIABLE_MAX) {
             return new WP_Error(
                 'fundkit_webhook_rejected',
                 __('Too many rejected deliveries. Please try again shortly.', 'fundraising-toolkit'),
@@ -126,11 +134,16 @@ final class WebhookController
             );
         }
 
-        // Counted after the fact and only for a refusal, so a verifying
-        // gateway never spends one. A 5xx is this site failing to check, not
-        // a caller to throttle, and the gateway will redeliver.
-        if (! $outcome->signature_ok && $outcome->http_status < 500) {
-            $this->spam->hit($failKey, self::FAIL_WINDOW);
+        // Counted after the fact and only for a refusal, so a verifying gateway
+        // never spends one. A 5xx is this site failing to check rather than a
+        // caller to throttle, so it spends a separate and much larger budget:
+        // the gateway keeps redelivering through an outage, while a flood of
+        // unverifiable posts still hits a ceiling.
+        if (! $outcome->signature_ok) {
+            $this->spam->hit(
+                $outcome->http_status >= 500 ? $failKey . ':unverifiable' : $failKey,
+                self::FAIL_WINDOW
+            );
         }
 
         $this->logDelivery($gatewayId, $outcome);

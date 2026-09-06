@@ -25,6 +25,17 @@ module.exports = {
         path: path.resolve( __dirname, 'build' ),
         filename: '[name]/index.js',
     },
+    module: {
+        ...defaultConfig.module,
+        rules: [
+            {
+                enforce: 'pre',
+                test: /node_modules[\\/]@fundkit[\\/]ui[\\/]dist[\\/].+\.js$/,
+                loader: path.resolve( __dirname, 'build-tools/fundkitUiDomain.cjs' ),
+            },
+            ...( ( defaultConfig.module && defaultConfig.module.rules ) || [] ),
+        ],
+    },
     resolve: {
         ...( defaultConfig.resolve || {} ),
         alias: {

@@ -78,7 +78,9 @@ final class FxBackfill
                 $rate = $currency === $base ? 1.0 : $this->fx->rate($currency, $base);
 
                 if ($rate === null) {
-                    $unconvertible[$currency] = true;
+                    // Counted per row, not per currency: the number a screen
+                    // reports is how much money is missing from the totals.
+                    $unconvertible[$currency] = ($unconvertible[$currency] ?? 0) + 1;
                     continue;
                 }
 
@@ -97,13 +99,13 @@ final class FxBackfill
         return [
             'converted'     => $converted,
             'plans'         => $plans,
-            'unconvertible' => count($unconvertible),
+            'unconvertible' => array_sum($unconvertible),
             'currencies'    => array_keys($unconvertible),
         ];
     }
 
     /**
-     * @param array<string,bool> $unconvertible collected across both passes
+     * @param array<string,int> $unconvertible collected across both passes
      *
      * @since 1.0.0
      */
@@ -134,7 +136,7 @@ final class FxBackfill
 
                 $rate = $currency === $base ? 1.0 : $this->fx->rate($currency, $base);
                 if ($rate === null) {
-                    $unconvertible[$currency] = true;
+                    $unconvertible[$currency] = ($unconvertible[$currency] ?? 0) + 1;
                     continue;
                 }
 

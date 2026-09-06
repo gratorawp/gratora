@@ -693,7 +693,6 @@ function OverviewTab( { campaign, nav, onError } ) {
         const include = fresh
             ? wanted
             : [ ...new Set( [ ...fetched.current.keys, ...wanted ] ) ];
-        fetched.current = { signature, keys: new Set( include ) };
 
         let aborted = false;
         setLoading( true );
@@ -701,13 +700,19 @@ function OverviewTab( { campaign, nav, onError } ) {
         const url = `/fundkit/v1/admin/campaigns/${ campaign.id }/metrics`
             + `?range=${ range }&compare=${ compareMode }&include=${ encodeURIComponent( include.join( ',' ) ) }`;
         apiFetch( { path: url } )
-            .then( ( m ) => { if ( ! aborted ) setMetrics( ( prev ) => ( { ...( prev || {} ), ...m } ) ); } )
+            .then( ( m ) => {
+                if ( aborted ) return;
+                // Recorded on arrival, not on request: a layout tweak mid-load
+                // aborts this one, and keys recorded up front would make the
+                // re-run think it already had them.
+                fetched.current = { signature, keys: new Set( include ) };
+                setMetrics( ( prev ) => ( { ...( prev || {} ), ...m } ) );
+            } )
             // Zero-filled defaults next to a goal card reading the campaign's
             // real lifetime total is a screen that measured nothing and says it
             // measured zero, so a load that never landed shows as itself.
             .catch( ( e ) => {
                 if ( aborted ) return;
-                fetched.current = { signature: '', keys: new Set() };
                 setFetchError( true );
                 if ( metrics ) {
                     onError?.( e?.message || __( 'Could not load campaign metrics.', 'fundraising-toolkit' ) );

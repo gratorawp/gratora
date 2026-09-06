@@ -3,7 +3,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 
 import { detailHref } from '../_shared/format';
-import Dialog from '@fundkit/ui/components/Dialog';
+import Dialog from '../_shared/components/Dialog';
 import Notice from '../_shared/components/Notice';
 import Field from '../_shared/components/Field';
 import Segmented from '../_shared/components/Segmented';

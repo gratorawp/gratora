@@ -62,6 +62,26 @@ final class OnboardingTest extends IntegrationTestCase
         $this->assertFalse($this->testModeOn(), 'non-exploring left test mode off');
     }
 
+    /**
+     * The wizard can be reopened from Tools long after the site went live.
+     * Re-running it stopped a live site taking money, silently, on the strength
+     * of an answer given about a site that no longer exists.
+     */
+    public function test_running_the_wizard_again_does_not_stop_a_live_site(): void
+    {
+        $this->finalize(['user_type' => 'exploring']);
+        $this->assertTrue($this->testModeOn());
+
+        Plugin::instance()->container->get(SettingsService::class)
+            ->update('gateways', ['test_mode' => false]);
+        $this->assertFalse($this->testModeOn(), 'the org went live');
+
+        $res = $this->finalize(['user_type' => 'exploring']);
+
+        $this->assertSame(200, $res->get_status());
+        $this->assertFalse($this->testModeOn(), 'a second run left the live site alone');
+    }
+
     public function test_finishing_marks_onboarding_complete(): void
     {
         $this->finalize(['user_type' => 'nonprofit']);

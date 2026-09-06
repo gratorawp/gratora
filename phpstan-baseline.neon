@@ -307,18 +307,6 @@ parameters:
 			path: src/Rest/PayPalController.php
 
 		-
-			message: '#^Property FundKit\\Donations\\Donation\:\:\$fee_covered_cents \(int\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 2
-			path: src/Rest/Portal/PortalController.php
-
-		-
-			message: '#^Property FundKit\\Donations\\Donation\:\:\$refunded_cents \(int\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: src/Rest/Portal/PortalController.php
-
-		-
 			message: '#^Property FundKit\\Donors\\Consent\:\:\$purpose_version \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1

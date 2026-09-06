@@ -8,8 +8,11 @@ use FundKit\Analytics\Event;
 use FundKit\Donations\Donation;
 use FundKit\Donors\DonorRetention;
 use FundKit\Donors\DonorService;
+use FundKit\Donors\Erasure\ErasureHandler;
+use FundKit\Donors\Erasure\ErasureRequest;
 use FundKit\Foundation\Plugin;
 use FundKit\Recurring\RecurringPlan;
+use RuntimeException;
 use WP_REST_Request;
 
 /**
@@ -188,5 +191,49 @@ final class ErasureAndPrivacyTest extends IntegrationTestCase
             \FundKit\Donors\Donor::query()->find('id', (int) $donor->id)->redacted_at,
             'nothing was erased'
         );
+    }
+
+    /**
+     * A donor with no recurring plan at all cannot have one that could not be
+     * stopped. Blaming the gateway sent an admin to cancel a subscription
+     * nobody has, and left the real reason unread in the log.
+     */
+    public function test_a_failure_with_no_plans_does_not_blame_the_gateway(): void
+    {
+        $donor = $this->donors()->findOrCreate('no-plans@example.test');
+
+        $exploder = new class implements ErasureHandler {
+            public function key(): string
+            {
+                return 'test.explodes';
+            }
+
+            public function erase(ErasureRequest $request): void
+            {
+                throw new RuntimeException('the storage this add-on writes to is offline');
+            }
+        };
+        $add = static function (array $handlers) use ($exploder): array {
+            $handlers[] = $exploder;
+
+            return $handlers;
+        };
+        add_filter('fundkit.donor.erasure_handlers', $add);
+
+        try {
+            $req = new WP_REST_Request('POST', '/fundkit/v1/admin/donors/' . (int) $donor->id . '/redact');
+            $req->set_header('content-type', 'application/json');
+            $req->set_body((string) wp_json_encode(['confirmation' => 'no-plans@example.test']));
+
+            $res = rest_do_request($req);
+        } finally {
+            remove_filter('fundkit.donor.erasure_handlers', $add);
+        }
+
+        $this->assertSame(500, $res->get_status(), 'this site failed, the gateway did not refuse');
+
+        $message = $res->as_error()->get_error_message();
+        $this->assertStringNotContainsString('recurring plan', $message);
+        $this->assertStringContainsString('log', $message, 'and it says where the reason is');
     }
 }

@@ -97,6 +97,23 @@ final class ErasureSettingGateTest extends IntegrationTestCase
     }
 
     /**
+     * Zero is the off switch, not the shortest window there is. Reading it as
+     * one made turning the sweep off cost the redact capability, which is the
+     * opposite of what the gate is protecting.
+     */
+    public function test_a_window_of_zero_switches_the_sweep_off_rather_than_widening_it(): void
+    {
+        $this->asSettingsManager(['fundkit_redact_donors']);
+        $this->assertSame(200, $this->savePrivacy(['erase_inactive_donors' => true])->get_status());
+
+        $this->asSettingsManager();
+        $res = $this->savePrivacy(['donor_retention_years' => 0]);
+
+        $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
+        $this->assertSame(0, (int) $this->privacy()['donor_retention_years']);
+    }
+
+    /**
      * Its only caller is the Receipts tab on Settings, which a donations
      * capability does not open, and it renders a made-up donor.
      */

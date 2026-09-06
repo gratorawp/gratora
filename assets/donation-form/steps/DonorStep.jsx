@@ -743,7 +743,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     { f.label && (
                         <legend>
                             { decodeEntities( f.label ) }
-                            { ( f.required || f.minSelections > 0 ) && <span class="fundkit-form__required" aria-hidden="true">*</span> }
+                            { f.required && <span class="fundkit-form__required" aria-hidden="true">*</span> }
                         </legend>
                     ) }
                     <div class="fundkit-form__multi-select-options">

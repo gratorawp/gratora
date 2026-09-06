@@ -18,9 +18,9 @@ export default function ActionsCard( {
     const mayNote   = userCan( 'edit_donations' );
     const mayReadPii = userCan( 'view_donors' );
 
-    const canRefund     = mayChange && canRefundDonation( donation );
+    const canRefund     = canRefundDonation( donation );
     const isRedacted    = isDonorRedacted( donation, donor );
-    const canResend     = mayResendReceipt && canResendReceipt( donation, donor );
+    const canResend     = canResendReceipt( donation, donor );
     // `processing` is a bank debit on its way: it can still land, and it can
     // still bounce, so both actions stay open until it resolves.
     const canMarkPaid   = mayChange && [ 'pending', 'processing', 'failed' ].includes( donation.status );

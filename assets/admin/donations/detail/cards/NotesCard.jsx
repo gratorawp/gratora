@@ -7,6 +7,7 @@ import EmptyState from '../../../_shared/components/EmptyState';
 import ConfirmDialog from '../../../_shared/components/ConfirmDialog';
 import { formatDateTime, timeAgo, initials } from '../helpers';
 import { IconTrash } from '../icons';
+import { userCan } from '../../../_shared/caps';
 
 export default function NotesCard( { donationRef, notes: initial, onChanged } ) {
     const [ notes, setNotes ] = useState( initial || [] );
@@ -86,6 +87,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                                             </div>
                                             <div className="dd-note__text">{ n.body }</div>
                                         </div>
+                                        { userCan( 'edit_donations' ) && (
                                         <button
                                             type="button"
                                             className="dd-note__delete"
@@ -94,12 +96,14 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                                         >
                                             <IconTrash width="14" height="14" />
                                         </button>
+                                        ) }
                                     </div>
                                 );
                             } ) }
                         </div>
                     ) }
 
+                { userCan( 'edit_donations' ) && (
                 <form className="dd-note-form" onSubmit={ submit }>
                     <textarea
                         value={ body }
@@ -118,6 +122,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                         </button>
                     </div>
                 </form>
+                ) }
             </div>
 
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />

@@ -71,6 +71,10 @@ final class DonationQueries
      * Single owner of that rule: reach for it wherever "donations" is meant,
      * rather than repeating the where().
      *
+     * @template T
+     * @param  T $q
+     * @return T
+     *
      * @since 1.0.0
      */
     public static function donationsOnly($q)

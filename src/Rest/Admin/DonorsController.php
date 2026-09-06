@@ -657,6 +657,14 @@ final class DonorsController
             $stillLive = $this->cancellablePlanIds($donor);
             $stopped   = count($liveBefore) - count($stillLive);
 
+            if ($liveBefore === []) {
+                return new WP_Error(
+                    'fundkit_redact_failed',
+                    __('The donor was not erased. The reason is in the log under Tools.', 'fundraising-toolkit'),
+                    ['status' => 500],
+                );
+            }
+
             return new WP_Error(
                 'fundkit_redact_failed',
                 $stopped > 0

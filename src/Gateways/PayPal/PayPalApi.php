@@ -86,6 +86,14 @@ final class PayPalApi
             $msg = is_array($body)
                 ? (string) ($body['error_description'] ?? $body['message'] ?? "HTTP {$code}")
                 : "HTTP {$code}";
+
+            // A 5xx here is PayPal being down, not PayPal refusing the keys,
+            // and telling an org their credentials are wrong sends them to
+            // change something that was never the problem.
+            if ($code >= 500) {
+                throw new GatewayTransportException(esc_html('PayPal is unavailable: ' . $msg));
+            }
+
             throw new RuntimeException(esc_html('PayPal rejected the credentials: ' . $msg));
         }
 
@@ -190,6 +198,17 @@ final class PayPalApi
             // A 5xx HTML page from an edge is an outage, not PayPal's answer.
             $body = esc_html("PayPal returned a non-JSON response (HTTP {$code}): " . substr($raw, 0, 200));
             throw $code >= 500 ? new GatewayTransportException($body) : new RuntimeException($body);
+        }
+
+        if ($code >= 500) {
+            // PayPal failing is not PayPal answering, whether or not it managed
+            // to shape the failure as JSON.
+            throw new GatewayTransportException(esc_html(sprintf(
+                'PayPal API (%s %s) is unavailable: %s',
+                $method,
+                $path,
+                $this->errorMessage($decoded, $code)
+            )));
         }
 
         if ($code >= 400) {

@@ -80,6 +80,8 @@ const CAMPAIGN = {
 
 let metricsCalls = [];
 let metricsFails = false;
+let metricsHeld  = false;
+let releaseHeld  = [];
 let savedLayout = { order: [], hidden: [] };
 
 function serve() {
@@ -87,9 +89,14 @@ function serve() {
     apiFetch.mockImplementation( ( { path } ) => {
         if ( path.includes( '/metrics' ) ) {
             metricsCalls.push( path );
-            return metricsFails
-                ? Promise.reject( new Error( 'gateway timeout' ) )
-                : Promise.resolve( { amount_raised_cents: 4200, donations_count: 3 } );
+            if ( metricsFails ) {
+                return Promise.reject( new Error( 'gateway timeout' ) );
+            }
+            const answer = { amount_raised_cents: 4200, donations_count: 3 };
+            if ( ! metricsHeld ) {
+                return Promise.resolve( answer );
+            }
+            return new Promise( ( resolve ) => releaseHeld.push( () => resolve( answer ) ) );
         }
         if ( path.includes( '/admin/me/layout' ) ) {
             return Promise.resolve( savedLayout );
@@ -121,6 +128,8 @@ beforeEach( () => {
     captured.hide    = null;
     global.__campaign = CAMPAIGN;
     metricsFails = false;
+    metricsHeld  = false;
+    releaseHeld  = [];
     savedLayout = { order: [], hidden: [] };
     apiFetch.mockReset();
     document.body.innerHTML = '';
@@ -190,6 +199,30 @@ it( 'does not re-run it because a widget moved or went away', async () => {
     captured.hide( captured.order[ 0 ] );
     await settle();
     expect( metricsCalls.length ).toBe( before );
+} );
+
+/**
+ * Hiding a widget while the first request is still out abandons that request.
+ * Booking its widgets as held before it landed left the re-run believing it
+ * already had them, so the tab kept its loading state and never measured
+ * anything at all.
+ */
+it( 'still measures the campaign when a widget is hidden mid-load', async () => {
+    metricsHeld = true;
+
+    mount();
+    await waitFor( () => metricsCalls.length > 0 );
+    await settle();
+
+    captured.hide( captured.order[ 0 ] );
+    await settle();
+
+    metricsHeld = false;
+    releaseHeld.forEach( ( release ) => release() );
+    await settle();
+
+    expect( metricsCalls.length ).toBeGreaterThan( 1 );
+    expect( document.querySelector( '[data-loading="true"]' ) ).toBeNull();
 } );
 
 /**

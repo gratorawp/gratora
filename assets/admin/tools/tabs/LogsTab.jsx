@@ -8,6 +8,7 @@ import Btn from '../../_shared/components/Btn';
 import { formatDate } from '../../donations/format';
 import ConfirmDialog from '../../_shared/components/ConfirmDialog';
 import Dialog from '../../_shared/components/Dialog';
+import { userCan } from '../../_shared/caps';
 
 const PER_PAGE = 25;
 
@@ -256,14 +257,16 @@ export default function LogsTab( { active, setNotice } ) {
                 <Btn variant="secondary" onClick={ load } disabled={ loading }>
                     { __( 'Refresh', 'fundraising-toolkit' ) }
                 </Btn>
-                <Btn
-                    variant="secondary"
-                    onClick={ askClear }
-                    disabled={ clearing || total === 0 }
-                    isBusy={ clearing }
-                >
-                    { __( 'Clear log', 'fundraising-toolkit' ) }
-                </Btn>
+                { userCan( 'manage_options' ) && (
+                    <Btn
+                        variant="secondary"
+                        onClick={ askClear }
+                        disabled={ clearing || total === 0 }
+                        isBusy={ clearing }
+                    >
+                        { __( 'Clear log', 'fundraising-toolkit' ) }
+                    </Btn>
+                ) }
             </div>
 
             { error ? (

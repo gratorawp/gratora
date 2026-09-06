@@ -28,6 +28,10 @@ final class GatewayEdgeTruthTest extends IntegrationTestCase
 
     private bool $verifyRefuses = false;
 
+    private bool $tokenIsDown = false;
+
+    private bool $verifyIsDown = false;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -43,6 +47,9 @@ final class GatewayEdgeTruthTest extends IntegrationTestCase
             if (! is_string($url) || ! str_contains($url, 'paypal.com')) return $pre;
 
             if (str_contains($url, '/v1/oauth2/token')) {
+                if ($this->tokenIsDown) {
+                    return $this->reply(['error_description' => 'Internal Server Error'], 500);
+                }
                 return $this->reply(['access_token' => 'A21AAF_test', 'expires_in' => 32400]);
             }
             if (str_contains($url, '/v1/catalogs/products')) {
@@ -54,6 +61,9 @@ final class GatewayEdgeTruthTest extends IntegrationTestCase
             if (str_contains($url, '/verify-webhook-signature')) {
                 if ($this->verifyTransportFails) {
                     return new \WP_Error('http_request_failed', 'Operation timed out after 10000 milliseconds');
+                }
+                if ($this->verifyIsDown) {
+                    return $this->reply(['message' => 'Internal Server Error'], 500);
                 }
                 return $this->reply([
                     'verification_status' => $this->verifyRefuses ? 'FAILURE' : 'SUCCESS',
@@ -177,6 +187,84 @@ final class GatewayEdgeTruthTest extends IntegrationTestCase
             $res->get_status(),
             'a 5xx tells PayPal to redeliver; a 400 tells it the signature was wrong'
         );
+    }
+
+    /**
+     * PayPal answering 500 to the token call is PayPal being down. Reading it
+     * as a refusal told the org their keys were wrong and sent them to change
+     * credentials that were never the problem, and answered the delivery 400,
+     * which is PayPal's cue to stop redelivering.
+     */
+    public function test_paypal_failing_on_the_token_call_is_not_a_refused_key(): void
+    {
+        $this->plan('I-TOKENDOWN');
+        $this->tokenIsDown = true;
+
+        $res = $this->postWebhook('BILLING.SUBSCRIPTION.PAYMENT.FAILED', ['id' => 'I-TOKENDOWN']);
+
+        $this->assertSame(503, $res->get_status());
+    }
+
+    /** And a 500 from the verify call itself is the same outage. */
+    public function test_paypal_failing_on_the_verify_call_is_not_a_refused_signature(): void
+    {
+        $this->plan('I-VERIFYDOWN');
+        $this->verifyIsDown = true;
+
+        $res = $this->postWebhook('BILLING.SUBSCRIPTION.PAYMENT.FAILED', ['id' => 'I-VERIFYDOWN']);
+
+        $this->assertSame(503, $res->get_status());
+    }
+
+    /**
+     * An outage lasts longer than ten deliveries. Spending the signature budget
+     * on them locked the gateway out of the site for the rest of the window, so
+     * the events that arrived after PayPal came back were refused too.
+     */
+    public function test_an_outage_does_not_lock_the_gateway_out(): void
+    {
+        $this->plan('I-LONGOUTAGE');
+        $this->verifyIsDown = true;
+
+        for ($i = 0; $i < 12; $i++) {
+            $res = $this->postWebhook('BILLING.SUBSCRIPTION.PAYMENT.FAILED', ['id' => 'I-LONGOUTAGE']);
+            $this->assertSame(503, $res->get_status(), "delivery {$i} was turned away");
+        }
+
+        $this->verifyIsDown = false;
+        $this->assertNotSame(
+            429,
+            $this->postWebhook('BILLING.SUBSCRIPTION.PAYMENT.FAILED', ['id' => 'I-LONGOUTAGE'])->get_status(),
+            'and the event that arrived once PayPal came back was still taken'
+        );
+    }
+
+    /** Bounded all the same: a flood of unverifiable posts still hits a ceiling. */
+    public function test_an_unverifiable_flood_is_still_bounded(): void
+    {
+        $this->plan('I-FLOOD');
+        $this->verifyIsDown = true;
+
+        $spam = Plugin::instance()->container->get(\FundKit\Donations\AntiSpamGuard::class);
+        $key  = $spam->subjectKey('fundkit_wh_fail_paypal') . ':unverifiable';
+        for ($i = 0; $i < 500; $i++) {
+            $spam->hit($key, 900);
+        }
+
+        $res = $this->postWebhook('BILLING.SUBSCRIPTION.PAYMENT.FAILED', ['id' => 'I-FLOOD']);
+
+        $this->assertSame(429, $res->get_status());
+    }
+
+    /** A signature PayPal actually refuses is still a 400. */
+    public function test_a_refused_signature_is_still_refused(): void
+    {
+        $this->plan('I-REFUSED');
+        $this->verifyRefuses = true;
+
+        $res = $this->postWebhook('BILLING.SUBSCRIPTION.PAYMENT.FAILED', ['id' => 'I-REFUSED']);
+
+        $this->assertSame(400, $res->get_status());
     }
 
     /**

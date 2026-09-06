@@ -8,7 +8,7 @@ import Notice from '../_shared/components/Notice';
 
 // Read per render, not once at module scope: the payload is inlined before the
 // bundle, but a stale global must not decide this for a whole session.
-const canManageCampaigns = () => !! ( window.fundkitCampaignBlocks || {} ).canManageCampaigns;
+export const canManageCampaigns = () => !! ( window.fundkitCampaignBlocks || {} ).canManageCampaigns;
 
 export function useBoundCampaign( campaignId ) {
     const postMetaId = useSelect( ( select ) => {

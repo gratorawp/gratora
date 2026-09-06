@@ -176,8 +176,13 @@ final class SettingsController
             ? ! empty($body['erase_inactive_donors'])
             : ! empty($current['erase_inactive_donors']);
 
+        $window = (int) $body['donor_retention_years'];
+
+        // A window of zero switches the sweep off, which is the opposite of a
+        // widening and must not need the redact capability.
         return $armed
-            && (int) $body['donor_retention_years'] < (int) ($current['donor_retention_years'] ?? 7);
+            && $window > 0
+            && $window < (int) ($current['donor_retention_years'] ?? 7);
     }
 
     /**

@@ -4,6 +4,7 @@ import { formatDateTime } from '../helpers';
 import { IconReceipt, IconDownload } from '../icons';
 import { downloadFile } from '../../../_shared/download';
 import notify from '../../../_shared/notify';
+import { userCan } from '../../../_shared/caps';
 
 export default function ReceiptCard( { donation, receipts, onResend } ) {
     if ( ! receipts || receipts.length === 0 ) {
@@ -50,11 +51,12 @@ export default function ReceiptCard( { donation, receipts, onResend } ) {
                             </div>
                         </div>
                         <div className="dd-receipt-row__actions">
-                            { ! r.voided && (
+                            { ! r.voided && userCan( 'resend_receipt' ) && (
                                 <button type="button" className="btn btn--sm" onClick={ onResend }>
                                     { __( 'Resend', 'fundraising-toolkit' ) }
                                 </button>
                             ) }
+                            { userCan( 'view_donors' ) && (
                             <button
                                 type="button"
                                 className="btn btn--sm"
@@ -63,6 +65,7 @@ export default function ReceiptCard( { donation, receipts, onResend } ) {
                                 <IconDownload className="ic" />
                                 { __( 'PDF', 'fundraising-toolkit' ) }
                             </button>
+                            ) }
                         </div>
                     </div>
                     );

@@ -78,6 +78,23 @@ final class RecalculateUnconvertibleTest extends IntegrationTestCase
         $this->assertSame(['JPY'], $res['unconvertible_currencies']);
     }
 
+    /**
+     * The number a screen reports is how much money is missing from the totals,
+     * so it counts rows. Counting currencies read "1 donation" back to an org
+     * with a hundred of them stranded.
+     */
+    public function test_every_stranded_donation_is_counted_not_every_currency(): void
+    {
+        $this->strandedDonation();
+        $this->strandedDonation();
+        $this->strandedDonation();
+
+        $res = $this->recalculate();
+
+        $this->assertSame(3, $res['still_unconvertible']);
+        $this->assertSame(['JPY'], $res['unconvertible_currencies'], 'and the currencies are still named once each');
+    }
+
     public function test_a_site_with_nothing_stranded_says_so(): void
     {
         $res = $this->recalculate();

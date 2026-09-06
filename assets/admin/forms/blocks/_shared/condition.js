@@ -80,7 +80,13 @@ export function ConditionPanel( { condition, onChange, title } ) {
             }
 
             if ( ! CUSTOM_FIELD_BLOCKS.has( b.name ) ) continue;
-            const slug = deriveFieldKey( b.attributes?.field, b.attributes?.label );
+            // The hidden block's runtime key is its raw field attribute; every
+            // other custom field goes through DropdownBlock::deriveField, which
+            // falls back to the label. Deriving for both would offer a key the
+            // hidden field never answers to.
+            const slug = b.name === 'fundkit/hidden'
+                ? String( b.attributes?.field || '' ).trim()
+                : deriveFieldKey( b.attributes?.field, b.attributes?.label );
             if ( ! slug ) continue;
             const value = `custom.${ slug }`;
             if ( seen.has( value ) ) continue;

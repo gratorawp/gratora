@@ -35,7 +35,7 @@ export function useFundKitRecord( name, id ) {
     // Why the resolution ended, not just that it ended: a 500 or a dropped
     // connection resolves the same way a missing record does, and telling a
     // reader their form does not exist is a different sentence.
-    const loadError = useSelect(
+    const thrown = useSelect(
         ( select ) =>
             select( coreDataStore ).getResolutionError( 'getEntityRecord', [ KIND, name, id ] ),
         [ name, id ]
@@ -53,6 +53,14 @@ export function useFundKitRecord( name, id ) {
             editEntityRecord( KIND, name, id, reverted );
         }
     };
+
+    // apiFetch rejects with the parsed REST error, so a deleted record arrives
+    // as a 404 and still means "not found". Anything else is a failure to ask.
+    const status    = Number( thrown?.data?.status || thrown?.status || 0 );
+    const missing   = status === 404 || thrown?.code === 'fundkit_not_found';
+    const loadError = thrown && ! missing
+        ? { status, message: thrown.message || '' }
+        : null;
 
     const merged = editedRecord && Object.keys( editedRecord ).length > 0
         ? editedRecord

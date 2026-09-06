@@ -2,6 +2,7 @@
 // marker, which a browser reads as local time. parseTimestamp marks them.
 import { __ } from '@wordpress/i18n';
 import { parseTimestamp } from '@fundkit/ui/utils/format';
+import { userCan } from '../../_shared/caps';
 
 export { formatAmount, formatAmountCompact, currencyDecimals, amountEntry, timeAgo } from '../../_shared/format';
 
@@ -73,12 +74,15 @@ export const CHANNEL_LABEL = {
 export const isSettled = ( donation ) =>
     donation?.status === 'paid' || donation?.status === 'partial_refund';
 
+// The capability lives in the predicate, not in each card: the header, the
+// rail, the receipt card and the refunds card all ask these, and gating only
+// one of them leaves the same action offered three other ways.
 export const canRefundDonation = ( donation ) =>
-    ( donation?.refundable_cents ?? 0 ) > 0 && isSettled( donation );
+    userCan( 'refund_donations' ) && ( donation?.refundable_cents ?? 0 ) > 0 && isSettled( donation );
 
 /** An erased donor has no address left, so there is nowhere to send. */
 export const isDonorRedacted = ( donation, donor ) =>
     !! ( donor?.redacted ?? donation?.donor?.redacted );
 
 export const canResendReceipt = ( donation, donor ) =>
-    isSettled( donation ) && ! isDonorRedacted( donation, donor );
+    userCan( 'resend_receipt' ) && isSettled( donation ) && ! isDonorRedacted( donation, donor );

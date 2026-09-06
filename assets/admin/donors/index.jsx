@@ -11,6 +11,7 @@ import { UserX as RedactIcon, Users as UsersIcon, Trash2 as DeleteIcon, SearchX 
 import Notice from '../_shared/components/Notice';
 import { useTableView } from '../_shared/useTableView';
 import Toaster from '../_shared/components/Toaster';
+import notify from '../_shared/notify';
 
 import Btn from '../_shared/components/Btn';
 import EmptyState from '../_shared/components/EmptyState';
@@ -56,6 +57,18 @@ export function donorKpis( stats ) {
                 : '-',
         },
     ];
+}
+
+/**
+ * What a bulk action did, all of it. Reporting only the first failure left an
+ * admin unable to tell which donors had been processed.
+ */
+function report( results, done, failed ) {
+    const ok = results.filter( ( r ) => r.status === 'fulfilled' ).length;
+    const no = results.length - ok;
+
+    if ( ok > 0 ) notify.success( done( ok ) );
+    if ( no > 0 ) notify.error( failed( no ) );
 }
 
 export function DonorsApp( { toggleSlot } ) {
@@ -316,16 +329,28 @@ export function DonorsApp( { toggleSlot } ) {
                     confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
                     destructive:  true,
                     onConfirm: async () => {
-                        try {
-                            await Promise.all( items.map( ( i ) => apiFetch( {
-                                path:   `/fundkit/v1/admin/donors/${ i.id }`,
-                                method: 'DELETE',
-                            } ) ) );
-                        } catch ( err ) {
-                            setError( err?.message || __( 'Could not delete one or more donors.', 'fundraising-toolkit' ) );
-                        } finally {
-                            load();
-                        }
+                        // allSettled, not all: the first rejection abandoned
+                        // the rest of the reporting, so a part-done batch
+                        // showed nothing at all.
+                        const results = await Promise.allSettled( items.map( ( i ) => apiFetch( {
+                            path:   `/fundkit/v1/admin/donors/${ i.id }`,
+                            method: 'DELETE',
+                        } ) ) );
+
+                        report(
+                            results,
+                            ( count ) => sprintf(
+                                /* translators: %d: how many donors were deleted. */
+                                _n( '%d donor deleted.', '%d donors deleted.', count, 'fundraising-toolkit' ),
+                                count
+                            ),
+                            ( count ) => sprintf(
+                                /* translators: %d: how many donors could not be deleted. */
+                                _n( '%d donor could not be deleted.', '%d donors could not be deleted.', count, 'fundraising-toolkit' ),
+                                count
+                            )
+                        );
+                        load();
                     },
                 } );
             },
@@ -363,17 +388,26 @@ export function DonorsApp( { toggleSlot } ) {
                     // PII here.
                     requireText:  __( 'REDACT', 'fundraising-toolkit' ),
                     onConfirm: async () => {
-                        try {
-                            await Promise.all( items.map( ( i ) => apiFetch( {
-                                path:   `/fundkit/v1/admin/donors/${ i.id }/redact`,
-                                method: 'POST',
-                                data:   { confirmation: i.email || `DONOR_${ i.id }` },
-                            } ) ) );
-                        } catch ( err ) {
-                            setError( err?.message || __( 'Could not redact one or more donors.', 'fundraising-toolkit' ) );
-                        } finally {
-                            load();
-                        }
+                        const results = await Promise.allSettled( items.map( ( i ) => apiFetch( {
+                            path:   `/fundkit/v1/admin/donors/${ i.id }/redact`,
+                            method: 'POST',
+                            data:   { confirmation: i.email || `DONOR_${ i.id }` },
+                        } ) ) );
+
+                        report(
+                            results,
+                            ( count ) => sprintf(
+                                /* translators: %d: how many donors were redacted. */
+                                _n( '%d donor redacted.', '%d donors redacted.', count, 'fundraising-toolkit' ),
+                                count
+                            ),
+                            ( count ) => sprintf(
+                                /* translators: %d: how many donors could not be redacted. */
+                                _n( '%d donor could not be redacted.', '%d donors could not be redacted.', count, 'fundraising-toolkit' ),
+                                count
+                            )
+                        );
+                        load();
                     },
                 } );
             },

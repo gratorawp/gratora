@@ -22,6 +22,7 @@ use FundKit\Donors\MagicLinkService;
 use FundKit\Donors\PendingSignupRepository;
 use FundKit\Donors\SignupRedemption;
 use FundKit\Donors\Portal\AnnualStatementBuilder;
+use FundKit\Donors\Portal\MagicLinkJob;
 use FundKit\Donors\Portal\PortalSession;
 use FundKit\Foundation\Identity\IdentityHasher;
 use FundKit\Gateways\GatewayManager;
@@ -461,7 +462,7 @@ final class PortalController
         // lookup happens in the job. Doing it here would make the donor branch
         // do visibly more work than the unknown one, which is exactly what the
         // identical 200 exists to hide.
-        $this->async->enqueue(self::SEND_LINK_HOOK, $this->linkJob($email));
+        $this->async->enqueue(self::SEND_LINK_HOOK, MagicLinkJob::seal($this->crypto, $email));
 
         return $ok;
     }
@@ -513,28 +514,10 @@ final class PortalController
 
         $this->async->enqueue(
             self::SEND_LINK_HOOK,
-            $this->linkJob($email, $names['first_name'], $names['last_name'])
+            MagicLinkJob::seal($this->crypto, $email, $names['first_name'], $names['last_name'])
         );
 
         return $ok;
-    }
-
-    /**
-     * Action Scheduler stores its args as JSON in a table nothing erases and
-     * keeps them for a month after the job runs, so the address travels
-     * encrypted rather than in the clear.
-     *
-     * @return array{payload:string}
-     */
-    private function linkJob(string $email, ?string $first = null, ?string $last = null): array
-    {
-        return [
-            'payload' => $this->crypto->encrypt((string) wp_json_encode([
-                'email'      => $email,
-                'first_name' => $first,
-                'last_name'  => $last,
-            ])),
-        ];
     }
 
     /**
@@ -551,20 +534,8 @@ final class PortalController
      */
     public function handleSendLinkAsync(mixed $args = '', ?string $firstName = null, ?string $lastName = null): void
     {
-        $sealed  = is_array($args) ? (string) ($args['payload'] ?? '') : (string) $args;
-        $decoded = $sealed !== '' ? json_decode((string) $this->crypto->decrypt($sealed), true) : null;
-
-        if (is_array($decoded)) {
-            $firstName = $decoded['first_name'] ?? null;
-            $lastName  = $decoded['last_name'] ?? null;
-            $email     = (string) ($decoded['email'] ?? '');
-        } elseif (is_array($args)) {
-            $firstName = $args['first_name'] ?? null;
-            $lastName  = $args['last_name'] ?? null;
-            $email     = (string) ($args['email'] ?? '');
-        } else {
-            $email = (string) $args;
-        }
+        ['email' => $email, 'first_name' => $firstName, 'last_name' => $lastName]
+            = MagicLinkJob::open($this->crypto, $args);
 
         if ($email === '' || ! is_email($email)) return;
 
@@ -805,10 +776,10 @@ final class PortalController
                 'id'                => (int) $d->id,
                 'reference'         => (string) $d->reference,
                 'amount_cents'      => (int) $d->amount_cents,
-                'fee_covered_cents' => (int) ($d->fee_covered_cents ?? 0),
+                'fee_covered_cents' => (int) $d->fee_covered_cents,
                 // What came back, so a row can say why it counts for less than
                 // it reads towards the lifetime total above it, which is net.
-                'refunded_cents'    => (int) ($d->refunded_cents ?? 0),
+                'refunded_cents'    => (int) $d->refunded_cents,
                 'currency'          => (string) $d->currency,
                 'frequency'         => (string) $d->frequency,
                 'campaign_id'       => $d->campaign_id ? (int) $d->campaign_id : null,
@@ -843,7 +814,7 @@ final class PortalController
                     // Net, not gross: amount_cents folds the covered fee in and
                     // the form re-adds the fee on top of the prefill, so gross
                     // would double-count last time's fee.
-                    $net = (int) $d->amount_cents - min((int) $d->amount_cents, max(0, (int) ($d->fee_covered_cents ?? 0)));
+                    $net = (int) $d->amount_cents - min((int) $d->amount_cents, max(0, (int) $d->fee_covered_cents));
                     // The currency travels with the figure. Minor units are not
                     // comparable across currencies, so a bare 500000 read as the
                     // form's own currency turns 5,000 yen into 5,000 dollars.
@@ -875,8 +846,8 @@ final class PortalController
             'id'                => (int) $d->id,
             'reference'         => (string) $d->reference,
             'amount_cents'      => (int) $d->amount_cents,
-            'fee_covered_cents' => (int) ($d->fee_covered_cents ?? 0),
-            'refunded_cents'    => (int) ($d->refunded_cents ?? 0),
+            'fee_covered_cents' => (int) $d->fee_covered_cents,
+            'refunded_cents'    => (int) $d->refunded_cents,
             'currency'          => (string) $d->currency,
             'frequency'         => (string) $d->frequency,
             'gateway'           => (string) $d->gateway,
