@@ -6,6 +6,7 @@ import Btn from '../../_shared/components/Btn';
 import DateField from '../../_shared/components/DateField';
 import MonthField from '../../_shared/components/MonthField';
 import { userCan } from '../../_shared/caps';
+import { saveBlob } from '../../_shared/download';
 
 /** Fetch rather than a bare link: the REST route needs the nonce header. */
 async function download( path, setNotice, setBusy, fallbackName ) {
@@ -35,14 +36,7 @@ async function download( path, setNotice, setBusy, fallbackName ) {
         }
 
         const match = ( res.headers.get( 'content-disposition' ) || '' ).match( /filename="([^"]+)"/ );
-        const url   = URL.createObjectURL( blob );
-        const a     = document.createElement( 'a' );
-        a.href      = url;
-        a.download  = match ? match[ 1 ] : fallbackName;
-        document.body.appendChild( a );
-        a.click();
-        a.remove();
-        URL.revokeObjectURL( url );
+        saveBlob( blob, match ? match[ 1 ] : fallbackName );
     } catch ( err ) {
         setNotice( { type: 'error', text: err?.message || __( 'That export could not be generated.', 'fundraising-toolkit' ) } );
     } finally {
@@ -151,14 +145,7 @@ export default function ExportTab( { setNotice } ) {
         try {
             const data = await apiFetch( { path: '/fundkit/v1/admin/tools/export' } );
             const blob = new Blob( [ JSON.stringify( data, null, 2 ) ], { type: 'application/json' } );
-            const url  = URL.createObjectURL( blob );
-            const a    = document.createElement( 'a' );
-            a.href     = url;
-            a.download = `fundkit-settings-${ new Date().toISOString().slice( 0, 10 ) }.json`;
-            document.body.appendChild( a );
-            a.click();
-            a.remove();
-            URL.revokeObjectURL( url );
+            saveBlob( blob, `fundkit-settings-${ new Date().toISOString().slice( 0, 10 ) }.json` );
         } catch ( err ) {
             setNotice( { type: 'error', text: err?.message || __( 'Export failed.', 'fundraising-toolkit' ) } );
         } finally {

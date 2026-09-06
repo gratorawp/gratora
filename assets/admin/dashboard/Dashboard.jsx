@@ -230,6 +230,13 @@ export default function Dashboard() {
             { metrics !== null && fetchError && (
                 <Notice status="error" onRemove={ () => setFetchError( false ) }>
                     { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'fundraising-toolkit' ) }
+                    { ' ' }
+                    { /* Every other way back into the fetch is a setter called
+                         with the value the state already holds, so nothing is
+                         asked again unless the reader changes the question. */ }
+                    <Btn variant="link" onClick={ () => setReloadKey( ( k ) => k + 1 ) }>
+                        { __( 'Try again', 'fundraising-toolkit' ) }
+                    </Btn>
                 </Notice>
             ) }
 

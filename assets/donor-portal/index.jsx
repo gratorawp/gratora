@@ -720,12 +720,30 @@ function freqLabel( f ) {
     return map[ f ] || String( f || '' ).replace( '_', ' ' );
 }
 
+/**
+ * A tab that could not load is a dead end otherwise: the donor has one red
+ * sentence, no control, and the only way back is knowing to reload the page.
+ */
+function LoadFailure( { message, onRetry } ) {
+    return (
+        <p class="dp-error">
+            { message }{ ' ' }
+            <button type="button" class="dp-link" onClick={ onRetry }>{ __( 'Try again', 'fundraising-toolkit' ) }</button>
+        </p>
+    );
+}
+
 function Donations( { onOpen } ) {
     const [ page, setPage ]   = useState( null );
     const [ error, setError ] = useState( null );
-    useEffect( () => { api( 'donations' ).then( setPage ).catch( ( e ) => setError( e.message ) ); }, [] );
+    const load = useCallback( () => {
+        setError( null );
+        api( 'donations' ).then( setPage ).catch( ( e ) => setError( e.message ) );
+    }, [] );
 
-    if ( error )   return <p class="dp-error">{ error }</p>;
+    useEffect( () => { load(); }, [ load ] );
+
+    if ( error )   return <LoadFailure message={ error } onRetry={ load } />;
     if ( ! page )  return <p>{ __( 'Loading donations…', 'fundraising-toolkit' ) }</p>;
 
     const list  = Array.isArray( page.items ) ? page.items : [];
@@ -872,12 +890,13 @@ function Recurring() {
     const [ action, setAction ] = useState( null );
 
     const load = useCallback( () => {
+        setError( null );
         api( 'recurring' ).then( setList ).catch( ( e ) => setError( e.message ) );
     }, [] );
 
     useEffect( () => { load(); }, [ load ] );
 
-    if ( error )    return <p class="dp-error">{ error }</p>;
+    if ( error )    return <LoadFailure message={ error } onRetry={ load } />;
     if ( ! list )   return <p>{ __( 'Loading…', 'fundraising-toolkit' ) }</p>;
     if ( ! list.length ) return <p>{ __( 'No recurring donations.', 'fundraising-toolkit' ) }</p>;
 
@@ -1646,15 +1665,7 @@ function PrivacyActions( { me } ) {
             if ( ! r.ok ) {
                 throw await refusal( r, __( 'Export failed.', 'fundraising-toolkit' ) );
             }
-            const blob = await r.blob();
-            const url  = URL.createObjectURL( blob );
-            const a    = document.createElement( 'a' );
-            a.href     = url;
-            a.download = 'my-data.json';
-            document.body.appendChild( a );
-            a.click();
-            a.remove();
-            URL.revokeObjectURL( url );
+            saveBlob( await r.blob(), 'my-data.json' );
         } catch ( e ) {
             setError( e.message || __( 'Export failed.', 'fundraising-toolkit' ) );
         } finally {
@@ -1877,7 +1888,11 @@ function Consents( { onResolved } ) {
     const [ savedAt, setSavedAt ] = useState( null );
     const [ err, setErr ] = useState( '' );
 
-    const load = useCallback( () => api( 'consents' ).then( setList ).catch( ( e ) => setErr( e.message || __( 'Could not load your consents.', 'fundraising-toolkit' ) ) ), [] );
+    const load = useCallback( () => {
+        setErr( '' );
+
+        return api( 'consents' ).then( setList ).catch( ( e ) => setErr( e.message || __( 'Could not load your consents.', 'fundraising-toolkit' ) ) );
+    }, [] );
     useEffect( () => { load(); }, [ load ] );
     useEffect( () => {
         if ( ! savedAt ) return undefined;
@@ -1891,7 +1906,9 @@ function Consents( { onResolved } ) {
         <ExtensionSection key={ panel.id } panel={ panel } context={ { api } } className="dp-ext-section" />
     ) );
 
-    if ( ! list ) return <p>{ err || __( 'Loading…', 'fundraising-toolkit' ) }</p>;
+    if ( ! list ) return err
+        ? <LoadFailure message={ err } onRetry={ load } />
+        : <p>{ __( 'Loading…', 'fundraising-toolkit' ) }</p>;
     if ( ! list.length ) return (
         <div class="dp-consents">
             <div class="dp-empty">
@@ -1996,14 +2013,21 @@ function Preferences() {
     const [ saved, setSaved ] = useState( false );
     const [ err, setErr ] = useState( '' );
 
-    useEffect( () => { api( 'preferences' ).then( setP ).catch( ( e ) => setErr( e.message || __( 'Could not load your preferences.', 'fundraising-toolkit' ) ) ); }, [] );
+    const load = useCallback( () => {
+        setErr( '' );
+        api( 'preferences' ).then( setP ).catch( ( e ) => setErr( e.message || __( 'Could not load your preferences.', 'fundraising-toolkit' ) ) );
+    }, [] );
+
+    useEffect( () => { load(); }, [ load ] );
     useEffect( () => {
         if ( ! saved ) return undefined;
         const t = setTimeout( () => setSaved( false ), 2500 );
         return () => clearTimeout( t );
     }, [ saved ] );
 
-    if ( ! p ) return <p>{ err || __( 'Loading…', 'fundraising-toolkit' ) }</p>;
+    if ( ! p ) return err
+        ? <LoadFailure message={ err } onRetry={ load } />
+        : <p>{ __( 'Loading…', 'fundraising-toolkit' ) }</p>;
 
     const save = () => {
         setSaving( true );

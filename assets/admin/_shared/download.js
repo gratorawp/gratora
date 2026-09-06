@@ -20,6 +20,16 @@ export async function downloadFile( path, fallbackFilename = 'download' ) {
     const m  = cd.match( /filename="?([^";]+)"?/i );
     const filename = m ? m[ 1 ] : fallbackFilename;
 
+    saveBlob( blob, filename );
+}
+
+/**
+ * Hand the browser a file it has to fetch back out of the blob URL.
+ *
+ * Revoking straight after the click races the fetch: Safari and iOS have not
+ * read it yet, and the download dies with nothing on screen to say why.
+ */
+export function saveBlob( blob, filename ) {
     const url = URL.createObjectURL( blob );
     const a = document.createElement( 'a' );
     a.href = url;
@@ -27,6 +37,5 @@ export async function downloadFile( path, fallbackFilename = 'download' ) {
     document.body.appendChild( a );
     a.click();
     a.remove();
-    // Defer revoke so Safari/iOS pick the blob up before we free it.
     setTimeout( () => URL.revokeObjectURL( url ), 1500 );
 }

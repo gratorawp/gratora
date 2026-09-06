@@ -61,6 +61,7 @@ export default function Detail( { reference } ) {
 
     const load = useCallback( () => {
         setLoading( true );
+        setError( null );
         return apiFetch( { path: `/fundkit/v1/admin/donations/${ reference }` } )
             .then( ( d ) => { setPayload( d ); setError( null ); } )
             .catch( ( e ) => setError( e?.message || __( 'Could not load donation.', 'fundraising-toolkit' ) ) )
@@ -69,12 +70,28 @@ export default function Detail( { reference } ) {
 
     useEffect( () => { load(); }, [ load ] );
 
+    const back = () => { window.location.href = listHref(); };
+
     if ( loading && ! payload ) return <p className="dd-loading">{ __( 'Loading donation…', 'fundraising-toolkit' ) }</p>;
-    if ( error )                return <Notice status="error">{ error }</Notice>;
+
+    // Only when there is nothing to fall back to: a reload that fails after a
+    // refund must not replace the screen the refund is on with one sentence.
+    if ( error && ! payload ) {
+        return (
+            <div className="dd-shell">
+                <Notice status="error" isDismissible={ false }>{ error }</Notice>
+                <p>
+                    <Btn variant="secondary" onClick={ load }>{ __( 'Try again', 'fundraising-toolkit' ) }</Btn>
+                    { ' ' }
+                    <Btn onClick={ back }>{ __( 'Back to donations', 'fundraising-toolkit' ) }</Btn>
+                </p>
+            </div>
+        );
+    }
+
     if ( ! payload )            return null;
 
     const { donation, donor, receipts, refunds, related, notes } = payload;
-    const back = () => { window.location.href = listHref(); };
 
     const resendReceipt = async () => {
         try {
@@ -230,6 +247,11 @@ export default function Detail( { reference } ) {
 
     return (
         <div className="dd-shell">
+            { /* A reload that failed while the screen still has data: said
+                 above the cards rather than instead of them. */ }
+            { error && (
+                <Notice status="error" onRemove={ () => setError( null ) }>{ error }</Notice>
+            ) }
             <Header
                 donation={ donation }
                 donor={ donor }
