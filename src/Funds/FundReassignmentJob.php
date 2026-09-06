@@ -76,6 +76,22 @@ final class FundReassignmentJob
             return;
         }
 
+        // delete() refused all three of these when it queued the work, and
+        // update() can undo any of them while the job waits. Finishing anyway
+        // leaves the site worse off than never reassigning: no default fund at
+        // all, a sub-fund pointing at a row that no longer exists, or every
+        // moved donation filed against a fund the org has switched off.
+        if ($source->is_default
+            || Fund::query()->where('parent_fund_id', $fundId)->get() !== null
+            || ! $target->is_active
+        ) {
+            self::clearPending($fundId);
+            $this->aggregates->syncFund($fundId);
+            $this->aggregates->syncFund($targetId);
+            do_action('fundkit.fund.reassign_failed', $source, $targetId);
+            return;
+        }
+
         $donationsLeft = BatchProcessor::step(
             fn (int $n) => Donation::query()->where('fund_id', $fundId)->limit($n)->pluck('id'),
             fn (array $ids) => Donation::query()->whereIn('id', $ids)->update(['fund_id' => $targetId]),

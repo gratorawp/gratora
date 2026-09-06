@@ -130,6 +130,12 @@ final class FundService
 
         if (array_key_exists('is_active', $input)) {
             $next = (bool) $input['is_active'];
+            if ($next) {
+                $this->assertNotReassigning(
+                    (int) $fund->id,
+                    esc_html__('This fund is being reassigned and will be removed when that finishes, so it cannot be reactivated.', 'fundraising-toolkit')
+                );
+            }
             if (! $next && $fund->is_default) {
                 throw new InvalidArgumentException(
                     esc_html__('The default fund cannot be deactivated. Set another fund as default first.', 'fundraising-toolkit')
@@ -158,6 +164,12 @@ final class FundService
             if (! $next && $fund->is_default) {
                 throw new InvalidArgumentException(
                     esc_html__('Set another fund as the default rather than clearing this one.', 'fundraising-toolkit')
+                );
+            }
+            if ($next) {
+                $this->assertNotReassigning(
+                    (int) $fund->id,
+                    esc_html__('This fund is being reassigned and will be removed when that finishes, so it cannot be made the default.', 'fundraising-toolkit')
                 );
             }
             $becomesDefault = $next && ! $fund->is_default;
@@ -443,7 +455,29 @@ final class FundService
                 esc_html__('This fund has sub-funds, so it cannot also become a sub-fund.', 'fundraising-toolkit')
             );
         }
+        $this->assertNotReassigning(
+            $parentId,
+            esc_html__('That fund is being reassigned and will be removed when that finishes, so it cannot take sub-funds.', 'fundraising-toolkit')
+        );
         return $parentId;
+    }
+
+    /**
+     * A queued reassignment ends in the source row being hard-deleted, so
+     * anything that revives it or hangs a fund off it leaves the site holding
+     * a pointer to a row that is about to go. Refused rather than worked
+     * around: nothing offers a way to cancel a reassignment, so silently
+     * letting the write through would only move the damage.
+     *
+     * @since 1.0.0
+     */
+    private function assertNotReassigning(int $fundId, string $message): void
+    {
+        if (! array_key_exists($fundId, FundReassignmentJob::pending())) {
+            return;
+        }
+
+        throw new InvalidArgumentException($message);
     }
 
     /** @since 1.0.0 */

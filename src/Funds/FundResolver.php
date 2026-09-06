@@ -55,16 +55,20 @@ final class FundResolver
             return null;
         }
 
-        // Only reachable from a row FundService could not have written: it
-        // refuses a default that is inactive or scheduled. A restore can still
-        // land one, and this is where that shows up, as untagged money filed
-        // against a fund the org never nominated. Recorded rather than
-        // silently rerouted, because the donation still has to go somewhere.
+        // Untagged money filed against a fund the org never nominated. Recorded
+        // rather than silently rerouted, because the donation still has to go
+        // somewhere and nothing else would ever say where.
         if ($default) {
             ErrorLog::record(
                 'funds.default_closed',
                 'The default fund is not taking donations, so untagged donations are being filed against another fund.',
                 ['fund_id' => (int) $default->id, 'filed_against' => (int) $open[0]->id]
+            );
+        } else {
+            ErrorLog::record(
+                'funds.default_missing',
+                'No fund is marked as the default, so untagged donations are being filed against whichever fund sorts first.',
+                ['filed_against' => (int) $open[0]->id]
             );
         }
 

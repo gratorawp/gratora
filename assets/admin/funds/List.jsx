@@ -608,7 +608,10 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
         }
     };
 
-    const parents = ( allFunds || [] ).filter( ( f ) => f.id !== fund.id );
+    // A fund queued for reassignment is deleted when the job finishes, and it
+    // never carries parent_fund_id along, so offering it here would hand the
+    // sub-fund a parent that is about to disappear. The server refuses it too.
+    const parents = ( allFunds || [] ).filter( ( f ) => f.id !== fund.id && ! f.reassign_pending );
 
     return (
         <Dialog
