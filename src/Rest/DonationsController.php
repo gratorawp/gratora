@@ -375,6 +375,7 @@ final class DonationsController
             // registry, so the row still answers "what did they agree to" after
             // the terms are edited.
             $termsRevision = $form ? FormSubmissionValidator::termsRevision((string) $form->blocks) : null;
+            $termsWording  = $form ? FormSubmissionValidator::termsWording((string) $form->blocks) : null;
             $held          = $this->consents->latestByPurpose((int) $donation->donor_id);
             foreach ($consents as $key => $granted) {
                 $key     = (string) $key;
@@ -406,6 +407,10 @@ final class DonationsController
                         'ip'          => $ip,
                         'ua'          => $ua,
                         'version'     => $isTerms ? $termsRevision : null,
+                        // The terms live on the form, not in the consent
+                        // registry, so the row carries its own wording.
+                        'label'       => $isTerms ? ($termsWording['label'] ?? null) : null,
+                        'description' => $isTerms ? ($termsWording['description'] ?? null) : null,
                     ], static fn ($v): bool => $v !== null));
                 } catch (Throwable $e) {
                     ErrorLog::record('donation.consent', $e->getMessage(), [

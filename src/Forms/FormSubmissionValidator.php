@@ -88,6 +88,44 @@ final class FormSubmissionValidator
         return self::findTermsRevision(parse_blocks($blocks));
     }
 
+    /**
+     * The words the terms box actually showed, so the consent row can keep a
+     * copy the form cannot edit afterwards.
+     *
+     * @return array{label:string,description:string}|null
+     *
+     * @since 1.0.0
+     */
+    public static function termsWording(string $blocks): ?array
+    {
+        return self::findTermsWording(parse_blocks($blocks));
+    }
+
+    /**
+     * @param  array<int,array<string,mixed>> $blocks
+     * @return array{label:string,description:string}|null
+     */
+    private static function findTermsWording(array $blocks): ?array
+    {
+        foreach ($blocks as $block) {
+            if (($block['blockName'] ?? '') === 'fundkit/terms') {
+                $attrs = is_array($block['attrs'] ?? null) ? $block['attrs'] : [];
+                if (TermsBlock::isConfigured($attrs)) {
+                    return [
+                        'label'       => (string) ($attrs['label'] ?? ''),
+                        'description' => (string) ($attrs['terms'] ?? ''),
+                    ];
+                }
+            }
+            if (! empty($block['innerBlocks']) && is_array($block['innerBlocks'])) {
+                $found = self::findTermsWording($block['innerBlocks']);
+                if ($found !== null) return $found;
+            }
+        }
+
+        return null;
+    }
+
     /** @since 1.0.0 */
     private static function findTermsRevision(array $blocks): ?int
     {

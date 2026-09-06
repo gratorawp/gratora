@@ -992,6 +992,11 @@ final class DonorMetricsService
         return [
             'id'          => (int) $c->id,
             'purpose'     => (string) $c->purpose,
+            // The wording as it stood, not as it stands: the registry entry is
+            // editable and this row is the only copy that is not.
+            'purpose_label'       => $c->purpose_label,
+            'purpose_description' => $c->purpose_description,
+            'purpose_version'     => (int) $c->purpose_version,
             'granted'     => (bool) $c->granted,
             'source'      => (string) $c->source,
             'occurred_at' => (string) $c->occurred_at,

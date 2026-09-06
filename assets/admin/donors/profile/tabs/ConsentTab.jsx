@@ -220,7 +220,11 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                                     <span className={ `dp-pill ${ h.granted ? 'is-ok' : 'is-muted' }` }>
                                         { h.granted ? __( 'Granted', 'fundraising-toolkit' ) : __( 'Revoked', 'fundraising-toolkit' ) }
                                     </span>
-                                    <span style={ { fontWeight: 500 } }>{ h.purpose }</span>
+                                    { /* The wording as it stood then, where the row kept it: the
+                                         registry entry can have been edited since. */ }
+                                    <span style={ { fontWeight: 500 } } title={ h.purpose_description || undefined }>
+                                        { h.purpose_label || h.purpose }
+                                    </span>
                                     <span className="dp-consent-log__src">{ h.source }</span>
                                     <span className="dp-consent-log__when">{ formatDateTime( h.occurred_at ) }</span>
                                 </li>

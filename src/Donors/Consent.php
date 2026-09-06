@@ -23,7 +23,7 @@ use FundKit\Vendor\Queryable\Schema\Table;
 final class Consent extends Model
 {
     protected string $table = 'fundkit_consents';
-    protected string $version = '1.0.0';
+    protected string $version = '1.0.1';
 
     public int $id;
     public int $donor_id;
@@ -33,6 +33,8 @@ final class Consent extends Model
     public string $source;
     public ?int $source_form_id = null;
     public ?int $source_donation_id = null;
+    public ?string $purpose_label = null;
+    public ?string $purpose_description = null;
     public ?string $ip_hash = null;
     public ?string $user_agent_hash = null;
     public string $occurred_at;
@@ -47,6 +49,10 @@ Consent::schema(function (Table $t): void {
     $t->string('source', 64);
     $t->bigInteger('source_form_id')->unsigned()->nullable();
     $t->bigInteger('source_donation_id')->unsigned()->nullable();
+    // The wording as the donor read it. The registry entry is editable, so it
+    // is not evidence of what anyone agreed to; this row is append-only.
+    $t->string('purpose_label', 191)->nullable();
+    $t->text('purpose_description')->nullable();
     $t->string('ip_hash', 64)->nullable();
     $t->string('user_agent_hash', 64)->nullable();
     $t->datetime('occurred_at');
