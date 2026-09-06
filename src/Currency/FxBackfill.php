@@ -38,12 +38,24 @@ final class FxBackfill
     }
 
     /**
-     * @return array{converted:int, plans:int, unconvertible:int, currencies:array<int,string>}
+     * One pass of the backlog, resuming after $after and stopping at $until.
+     *
+     * The backlog is unbounded by definition: every donation in a currency
+     * nobody had a rate for, which on an imported history is the whole history.
+     * Run to completion inside one REST request it outlives the time limit, and
+     * because it recorded no cursor the next press started the same walk again,
+     * for ever. So it is paged by id and it stops on the clock, like every
+     * other pass the recalculate loop runs.
+     *
+     * @param int   $after last donation id already handled, 0 to start
+     * @param float $until microtime to stop at, INF for no budget
+     *
+     * @return array{converted:int, plans:int, unconvertible:int, currencies:array<int,string>, after:int, done:bool}
      *   currencies lists what is still missing a rate, so the caller can name it.
      *
      * @since 1.0.0
      */
-    public function run(): array
+    public function run(int $after = 0, float $until = INF): array
     {
         $base = strtoupper(Money::defaultCurrency());
 
@@ -54,7 +66,8 @@ final class FxBackfill
         // definition -- it is every donation in a currency nobody had a rate
         // for, which on an imported history can be the whole history -- and
         // this runs inside a REST request.
-        $afterId = 0;
+        $afterId = $after;
+        $done    = true;
         while (true) {
             $rows = Donation::query()
                 ->whereNull('base_amount_cents')
@@ -90,17 +103,27 @@ final class FxBackfill
                 $donation->save();
                 $converted++;
             }
+
+            // After the rows, never before: a pass that returned having done
+            // nothing would hand the caller the same work for ever.
+            if (microtime(true) >= $until) {
+                $done = false;
+                break;
+            }
         }
 
         // Recurring plans carry their own base amount, copied from the first
-        // donation, and MRR scores a foreign plan with no base as zero.
-        $plans = $this->runForPlans($base, $unconvertible);
+        // donation, and MRR scores a foreign plan with no base as zero. Only
+        // once the donations are through, so one cursor covers the pass.
+        $plans = $done ? $this->runForPlans($base, $unconvertible) : 0;
 
         return [
             'converted'     => $converted,
             'plans'         => $plans,
             'unconvertible' => array_sum($unconvertible),
             'currencies'    => array_keys($unconvertible),
+            'after'         => $afterId,
+            'done'          => $done,
         ];
     }
 

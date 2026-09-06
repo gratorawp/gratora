@@ -614,10 +614,19 @@ final class ToolsController
             $pass = (string) $state['pass'];
 
             if ($pass === 'currency') {
-                if ($scope === 'all' || $scope === 'currency') {
-                    $this->recalcCurrencyPass($state);
+                if ($scope !== 'all' && $scope !== 'currency') {
+                    $state = self::recalcAdvance($state);
+                    continue;
                 }
-                $state = self::recalcAdvance($state);
+
+                // On its own cursor and the same clock as the aggregate passes.
+                // Run to completion it outlived the time limit on any real
+                // backlog, and since it recorded nothing the next press began
+                // the identical walk: the forever loop the paging was added to
+                // end, in the one pass the paging never reached.
+                if ($this->recalcCurrencyPass($state, $until)) {
+                    $state = self::recalcAdvance($state);
+                }
                 continue;
             }
 
@@ -739,12 +748,15 @@ final class ToolsController
      *
      * @param array<string,mixed> $state
      */
-    private function recalcCurrencyPass(array &$state): void
+    /** @return bool whether the backlog is through, so the pass can advance. */
+    private function recalcCurrencyPass(array &$state, float $until): bool
     {
-        $fx        = $this->fxBackfill->run();
+        $fx        = $this->fxBackfill->run((int) ($state['after'] ?? 0), $until);
         $converted = (int) $fx['converted'];
 
-        $state['counts']['converted_donations'] = $converted;
+        $state['after'] = (int) $fx['after'];
+        $state['counts']['converted_donations'] =
+            (int) ($state['counts']['converted_donations'] ?? 0) + $converted;
         if (($fx['plans'] ?? 0) > 0) {
             $state['counts']['converted_plans'] = (int) $fx['plans'];
         }
@@ -764,6 +776,8 @@ final class ToolsController
         if ($converted > 0) {
             $state['rebuild_all'] = true;
         }
+
+        return (bool) $fx['done'];
     }
 
     private function recalcOne(string $pass, int $id): void
