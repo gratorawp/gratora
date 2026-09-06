@@ -67,7 +67,15 @@ export default function CountrySelect( {
     };
 
     const onKeyDown = ( e ) => {
-        if ( ! open ) return;
+        if ( ! open ) {
+            // Tab lands here without asking for the list, so an arrow is the
+            // keyboard donor's way in.
+            if ( e.key === 'ArrowDown' || e.key === 'ArrowUp' ) {
+                e.preventDefault();
+                setOpen( true );
+            }
+            return;
+        }
         if ( e.key === 'ArrowDown' ) {
             e.preventDefault();
             setActive( ( i ) => Math.min( matches.length - 1, i + 1 ) );
@@ -108,7 +116,12 @@ export default function CountrySelect( {
                 aria-controls={ open ? listId : undefined }
                 aria-activedescendant={ open && matches[ active ] ? optId( matches[ active ] ) : undefined }
                 role="combobox"
-                onFocus={ () => { setOpen( true ); setQuery( '' ); } }
+                onFocus={ () => setQuery( '' ) }
+                // The list opens on the donor's own action, never on focus
+                // alone: the form focuses whichever field failed validation,
+                // and a 240px panel opening there covers the very message that
+                // says what went wrong, then eats the next click.
+                onClick={ () => { inputRef.current?.focus(); setOpen( true ); } }
                 // Leaving the field has to close the list. Without this it stays
                 // over the next fields and swallows a click meant for them,
                 // while the input keeps showing the half-typed search as though
@@ -135,7 +148,10 @@ export default function CountrySelect( {
                             aria-selected={ i === active }
                             class={ `fundkit-form__country-select-option${ i === active ? ' is-active' : '' }${ c.code === code ? ' is-current' : '' }` }
                             onMouseEnter={ () => setActive( i ) }
-                            onClick={ () => pick( c ) }
+                            // The picker sits inside a bare label, which forwards
+                            // an uncancelled click on to the input, where it
+                            // would reopen the list on top of the pick.
+                            onClick={ ( e ) => { e.preventDefault(); pick( c ); } }
                         >
                             <span class="fundkit-form__country-select-label">{ c.label }</span>
                             <span class="fundkit-form__country-select-hint">{ c.code }</span>

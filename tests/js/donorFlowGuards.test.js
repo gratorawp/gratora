@@ -63,6 +63,59 @@ describe( 'the country picker gets out of the way', () => {
 		expect( input().value ).toBe( '' );
 	} );
 
+	/**
+	 * The form focuses whichever field failed validation, and the panel that
+	 * opened there covered the message saying what was wrong.
+	 */
+	test( 'a focus the form moved does not open the list', async () => {
+		mount( <CountrySelect value="" onChange={ () => {} } id="c" /> );
+
+		input().focus();
+		input().dispatchEvent( new Event( 'focus', { bubbles: true } ) );
+		await tick();
+
+		expect( list() ).toBeNull();
+		expect( input().getAttribute( 'aria-expanded' ) ).toBe( 'false' );
+	} );
+
+	test( 'clicking the field opens it', async () => {
+		mount( <CountrySelect value="" onChange={ () => {} } id="c" /> );
+
+		input().dispatchEvent( new MouseEvent( 'click', { bubbles: true } ) );
+		await tick();
+
+		expect( list() ).toBeTruthy();
+	} );
+
+	test( 'and an arrow opens it from the keyboard', async () => {
+		mount( <CountrySelect value="" onChange={ () => {} } id="c" /> );
+
+		input().dispatchEvent( new Event( 'focus', { bubbles: true } ) );
+		await tick();
+		input().dispatchEvent( new KeyboardEvent( 'keydown', { key: 'ArrowDown', bubbles: true } ) );
+		await tick();
+
+		expect( list() ).toBeTruthy();
+	} );
+
+	/**
+	 * The donor form wraps this in a bare label, which forwards a click on any
+	 * non-interactive descendant, an option included, on to the input.
+	 */
+	test( 'picking a country inside a label does not reopen the list', async () => {
+		const picked = [];
+		mount( <label><CountrySelect value="" onChange={ ( c ) => picked.push( c ) } id="c" /></label> );
+
+		await type( 'Germ' );
+		expect( list() ).toBeTruthy();
+
+		document.querySelector( '.fundkit-form__country-select-option' ).click();
+		await tick();
+
+		expect( picked ).toEqual( [ 'DE' ] );
+		expect( list() ).toBeNull();
+	} );
+
 	test( 'a chosen country still shows after the field is left', async () => {
 		mount( <CountrySelect value="DE" onChange={ () => {} } id="c" /> );
 		await leave();
