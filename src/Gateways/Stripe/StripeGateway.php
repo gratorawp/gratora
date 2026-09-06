@@ -2116,7 +2116,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         }
 
         $subId = (string) $plan->gateway_subscription_id;
-        if ($subId === '') {
+        if (! self::couldBeStripeSubscription($subId)) {
             throw new RuntimeException(esc_html__('This plan has no Stripe subscription.', 'fundraising-toolkit'));
         }
 
@@ -2148,7 +2148,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     {
         $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
-        if ($subId === '') {
+        if (! self::couldBeStripeSubscription($subId)) {
             throw new PaymentRetryUnavailable(esc_html__('This plan never reached Stripe, so there is nothing to collect.', 'fundraising-toolkit'));
         }
 
@@ -2234,7 +2234,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     {
         $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
-        if ($subId === '') return;
+        if (! self::couldBeStripeSubscription($subId)) return;
 
         $pauseCollection = [ 'behavior' => 'mark_uncollectible' ];
         if ($resumesAt !== null) {
@@ -2256,7 +2256,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     {
         $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
-        if ($subId === '') return;
+        if (! self::couldBeStripeSubscription($subId)) return;
 
         // Stripe convention: passing an empty string clears pause_collection.
         $this->api->post('/subscriptions/' . rawurlencode($subId), [
@@ -2291,7 +2291,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     ): SubscriptionSchedule {
         $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
-        if ($subId === '') return SubscriptionSchedule::unknown();
+        if (! self::couldBeStripeSubscription($subId)) return SubscriptionSchedule::unknown();
         if ($amountCents <= 0) throw new RuntimeException(esc_html('Amount must be positive.'));
 
         $changingCadence = $intervalUnit !== '';

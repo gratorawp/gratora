@@ -152,9 +152,25 @@ final class RecurringPlanActions
             throw new InvalidArgumentException(esc_html__('This donation has no scheduled payment to skip.', 'fundraising-toolkit'));
         }
 
+        // The stored date is the base of the arithmetic and the result goes
+        // straight into resume_at, which is the one column the resumer reads. A
+        // row whose next_payment_at will not parse gives strtotime false, and
+        // "+1 month" from false is a month from the epoch: a resume date fifty
+        // years in the past, which the resumer acts on immediately, so a skip
+        // silently becomes no skip at all.
+        $from = strtotime((string) $plan->next_payment_at);
+        if ($from === false) {
+            throw new InvalidArgumentException(
+                esc_html__('This donation has no scheduled payment to skip.', 'fundraising-toolkit')
+            );
+        }
+
         $unit   = in_array($plan->interval_unit, ['year', 'week'], true) ? $plan->interval_unit : 'month';
         $count  = max(1, (int) $plan->interval_count);
-        $nextAt = gmdate('Y-m-d H:i:s', strtotime("+{$count} {$unit}", strtotime($plan->next_payment_at)));
+
+        // Through the same guard pause() uses, so one cycle forward can never
+        // land in the past or beyond the ceiling the UI offers.
+        $nextAt = self::resumeDate(gmdate('Y-m-d H:i:s', strtotime("+{$count} {$unit}", $from)));
 
         $this->subscription($plan)?->pauseSubscription($plan, $nextAt);
 
