@@ -480,6 +480,102 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $this->assertSame(1, (int) $fresh->failed_renewals_count, 'dunning is not silent either');
     }
 
+    /**
+     * The invoice shape that forces the re-read: neither the flat subscription
+     * field nor the Basil one, so the handler has to ask Stripe which
+     * subscription this is.
+     *
+     * @return array<string,mixed>
+     */
+    private function invoiceNeedingLookup(int $amountCents): array
+    {
+        return [
+            'id'             => 'in_' . bin2hex(random_bytes(6)),
+            'object'         => 'invoice',
+            'billing_reason' => 'subscription_cycle',
+            'currency'       => 'usd',
+            'amount_paid'    => $amountCents,
+        ];
+    }
+
+    /** Stripe unreachable for the duration of $run. */
+    private function whileStripeIsDown(callable $run): void
+    {
+        $filter = static function ($pre, $args, $url) {
+            return is_string($url) && str_contains($url, 'api.stripe.com')
+                ? new \WP_Error('http_request_failed', 'Operation timed out')
+                : $pre;
+        };
+
+        add_filter('pre_http_request', $filter, 10, 3);
+        try {
+            $run();
+        } finally {
+            remove_filter('pre_http_request', $filter);
+        }
+    }
+
+    /**
+     * A decline this site never hears about is a plan that never enters dunning
+     * and a donor never told their card was refused. Answering 200 retires the
+     * delivery, so Stripe never sends it again.
+     */
+    public function test_a_failed_renewal_stripe_could_not_be_asked_about_is_redelivered(): void
+    {
+        $plan = $this->seedPlan();
+
+        $status = null;
+        $this->whileStripeIsDown(function () use ($plan, &$status) {
+            $status = $this->postWebhookStatus('invoice.payment_failed', $this->invoiceNeedingLookup(2500));
+        });
+
+        $this->assertSame(503, $status, 'a 5xx is what asks Stripe to send it again');
+
+        $fresh = RecurringPlan::query()->find('id', (int) $plan->id);
+        $this->assertSame(0, (int) $fresh->failed_renewals_count, 'and nothing was counted from a delivery nobody could read');
+    }
+
+    /**
+     * A complete invoice for a subscription this site has no plan for needs no
+     * lookup and will never name one, so it is retired rather than redelivered
+     * for ever.
+     */
+    public function test_a_failure_for_a_subscription_we_do_not_hold_is_still_retired(): void
+    {
+        $this->seedPlan();
+
+        $status = $this->postWebhookStatus('invoice.payment_failed', [
+            'id'             => 'in_' . bin2hex(random_bytes(6)),
+            'object'         => 'invoice',
+            'billing_reason' => 'subscription_cycle',
+            'currency'       => 'usd',
+            'amount_paid'    => 2500,
+            'subscription'   => 'sub_nobody_here',
+            'payment_intent' => 'pi_nobody_here',
+        ]);
+
+        $this->assertSame(200, $status);
+    }
+
+    private function postWebhookStatus(string $type, array $object, ?string $eventId = null): int
+    {
+        $event = [
+            'id'   => $eventId ?? 'evt_' . bin2hex(random_bytes(6)),
+            'type' => $type,
+            'data' => ['object' => $object],
+        ];
+        $payload   = (string) wp_json_encode($event);
+        $timestamp = (string) time();
+        $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $this->secret);
+
+        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/stripe');
+        $req->set_header('content-type', 'application/json');
+        $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
+        $req->set_body($payload);
+
+        return rest_do_request($req)->get_status();
+    }
+
     private function postWebhook(string $type, array $object, ?string $eventId = null): void
     {
         $event = [

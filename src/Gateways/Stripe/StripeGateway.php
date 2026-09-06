@@ -1609,9 +1609,24 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     private function handleInvoicePaymentFailed(string $eventId, string $type, array $invoice): WebhookOutcome
     {
-        [$subscriptionId] = $this->invoiceRefs($invoice);
+        [$subscriptionId, , $lookupFailed] = $this->invoiceRefs($invoice);
         $plan = $this->plans->findBySubscriptionId($this->id(), $subscriptionId);
         if (! $plan) {
+            // A decline this site never hears about is a plan that never enters
+            // dunning and a donor never told their card was refused. Where the
+            // subscription is missing only because Stripe could not be reached,
+            // ask to be told again rather than retiring the delivery.
+            if ($lookupFailed) {
+                return new WebhookOutcome(
+                    signature_ok: true,
+                    external_id:  $eventId,
+                    event_type:   $type,
+                    handled:      false,
+                    error:        'invoice could not be re-read; asking Stripe to redeliver',
+                    http_status:  503,
+                );
+            }
+
             return $this->unknownSubscription($eventId, $type, $subscriptionId);
         }
 
