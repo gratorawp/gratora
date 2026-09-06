@@ -19,12 +19,6 @@ parameters:
 			path: src/Campaigns/CampaignService.php
 
 		-
-			message: '#^Method FundKit\\Campaigns\\Styling\\Tokens\:\:catalogue\(\) should return array\<string, array\{group\: string, label\: string, default\: string, control\: string, min\?\: float\|int, max\?\: float\|int, step\?\: float\|int, options\?\: array\<string, string\>, \.\.\.\}\> but returns array\{fundkit\-accent\: array\{group\: ''brand'', label\: string, default\: ''\#211d3f'', control\: ''color''\}, fundkit\-accent\-soft\: array\{group\: ''brand'', label\: string, default\: ''\#efedf8'', control\: ''color'', help\: string\}, fundkit\-text\: array\{group\: ''brand'', label\: string, default\: ''\#111827'', control\: ''color''\}, fundkit\-text\-muted\: array\{group\: ''brand'', label\: string, default\: ''\#6b7280'', control\: ''color'', help\: string\}, fundkit\-bg\: array\{group\: ''surface'', label\: string, default\: ''\#ffffff'', control\: ''color''\}, fundkit\-bg\-soft\: array\{group\: ''surface'', label\: string, default\: ''\#f8fafb'', control\: ''color'', help\: string\}, fundkit\-border\: array\{group\: ''surface'', label\: string, default\: ''\#e5e7eb'', control\: ''color''\}, fundkit\-typeface\: array\{group\: ''typography'', label\: string, default\: ''system\-ui, \-apple…'', control\: ''font''\}, \.\.\.\}\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Campaigns/Styling/Tokens.php
-
-		-
 			message: '#^Anonymous function has an unused use \$c\.$#'
 			identifier: closure.unusedUse
 			count: 1

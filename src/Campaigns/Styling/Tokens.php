@@ -20,7 +20,7 @@ final class Tokens
      *   min?: int|float,
      *   max?: int|float,
      *   step?: int|float,
-     *   options?: array<string,string>,
+     *   options?: array<array-key,string>,
      *   help?: string
      * }>
      *
@@ -61,13 +61,21 @@ final class Tokens
                 'label'   => __('Background', 'fundraising-toolkit'),
                 'default' => '#ffffff',
                 'control' => 'color',
+                'help'    => __('The card behind the form, and the panels on the campaign page.', 'fundraising-toolkit'),
+            ],
+            'fundkit-field-bg' => [
+                'group'   => 'surface',
+                'label'   => __('Field background', 'fundraising-toolkit'),
+                'default' => '#ffffff',
+                'control' => 'color',
+                'help'    => __('Inside the boxes a donor types in or picks from.', 'fundraising-toolkit'),
             ],
             'fundkit-bg-soft' => [
                 'group'   => 'surface',
                 'label'   => __('Soft background', 'fundraising-toolkit'),
                 'default' => '#f8fafb',
                 'control' => 'color',
-                'help'    => __('Input and tile resting fill.', 'fundraising-toolkit'),
+                'help'    => __('Amount tile resting fill.', 'fundraising-toolkit'),
             ],
             'fundkit-border' => [
                 'group'   => 'surface',
