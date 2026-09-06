@@ -1,11 +1,11 @@
 /** @jsxImportSource preact */
 
 import { render } from 'preact';
-import { useEffect, useState, useCallback, useRef } from 'preact/hooks';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'preact/hooks';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { parseTimestamp } from '@fundkit/ui/utils/format';
 import { formatAmount } from '../_shared/money';
-import { COUNTRIES } from '../_shared/countries';
+import { localizedCountries } from '../_shared/countries';
 import AmountInput from '../donation-form/components/AmountInput';
 import { loadStripeJs } from '../donation-form/util/stripe';
 import { recurringStatusLabel, isTerminalPlan } from './statusLabels';
@@ -1714,28 +1714,36 @@ function withDefaults( v ) {
 let countryPickerSeq = 0;
 
 function CountryPicker( { value, onChange } ) {
-    const current = COUNTRIES.find( ( c ) => c.code === ( value || '' ).toUpperCase() );
-    const [ query, setQuery ] = useState( current ? current.name : '' );
+    // The donor's own language, sorted their way, with the English name kept so
+    // a search matches either. A picker that only reads English is one a donor
+    // cannot find their own country in, on a field the account form requires.
+    const countries = useMemo( () => localizedCountries(), [] );
+    const byCode    = ( code ) => countries.find( ( c ) => c.code === String( code || '' ).toUpperCase() );
+
+    const [ query, setQuery ] = useState( () => byCode( value )?.label || '' );
     const [ open, setOpen ]   = useState( false );
     const [ active, setActive ] = useState( 0 );
     const [ id ] = useState( () => `dp-country-${ ++countryPickerSeq }` );
 
     useEffect( () => {
-        const c = COUNTRIES.find( ( cur ) => cur.code === ( value || '' ).toUpperCase() );
-        setQuery( c ? c.name : ( value || '' ) );
+        const c = byCode( value );
+        setQuery( c ? c.label : ( value || '' ) );
     }, [ value ] );
 
     const q       = query.trim().toLowerCase();
     const matches = q === ''
-        ? COUNTRIES
-        : COUNTRIES.filter( ( c ) => c.name.toLowerCase().includes( q ) || c.code.toLowerCase().startsWith( q ) );
+        ? countries
+        : countries.filter( ( c ) =>
+            c.label.toLowerCase().includes( q )
+            || c.name.toLowerCase().includes( q )
+            || c.code.toLowerCase().startsWith( q ) );
     const visible = matches.slice( 0, 50 );
 
     useEffect( () => { setActive( 0 ); }, [ query ] );
 
     const pick = ( c ) => {
         onChange( c.code );
-        setQuery( c.name );
+        setQuery( c.label );
         setOpen( false );
     };
 
@@ -1778,8 +1786,8 @@ function CountryPicker( { value, onChange } ) {
                         // Free text nobody picked is not a country. Left as
                         // typed it sat next to "Saved." showing one the donor
                         // never chose and the account never stored.
-                        const chosen = COUNTRIES.find( ( c ) => c.code === ( value || '' ).toUpperCase() );
-                        setQuery( chosen ? chosen.name : '' );
+                        const chosen = byCode( value );
+                        setQuery( chosen ? chosen.label : '' );
                     }, 150 ) }
                     onInput={ ( e ) => { setQuery( e.target.value ); setOpen( true ); } }
                     onKeyDown={ onKeyDown }
@@ -1795,7 +1803,7 @@ function CountryPicker( { value, onChange } ) {
                                 class={ i === active ? 'is-active' : undefined }
                             >
                                 <button type="button" tabIndex={ -1 } onMouseEnter={ () => setActive( i ) } onMouseDown={ ( e ) => { e.preventDefault(); pick( c ); } }>
-                                    <span>{ c.name }</span>
+                                    <span>{ c.label }</span>
                                     <span class="dp-country__code">{ c.code }</span>
                                 </button>
                             </li>
