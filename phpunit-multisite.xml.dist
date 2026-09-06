@@ -9,8 +9,8 @@
          bootstrap="tests/integration-bootstrap.php"
          colors="true"
          cacheResultFile=".phpunit.cache/test-results-multisite"
-         failOnWarning="false"
-         failOnRisky="false"
+         failOnWarning="true"
+         failOnRisky="true"
          processIsolation="false"
          convertDeprecationsToExceptions="false">
 

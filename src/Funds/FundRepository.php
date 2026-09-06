@@ -213,6 +213,10 @@ final class FundRepository
         $total = (int) $applyFilters(Fund::query())->count();
         $items = $applyFilters(Fund::query())
             ->orderBy($orderBy, $order)
+            // sort_order is 0 on every row until someone reorders, and MySQL
+            // may break that tie differently per LIMIT: a fund then lands on two
+            // pages and another on none.
+            ->orderBy('id', $order)
             ->limit($perPage)
             ->offset($offset)
             ->getAll();

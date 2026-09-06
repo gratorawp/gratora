@@ -4,8 +4,8 @@
          bootstrap="tests/integration-bootstrap.php"
          colors="true"
          cacheResultFile=".phpunit.cache/test-results-integration"
-         failOnWarning="false"
-         failOnRisky="false"
+         failOnWarning="true"
+         failOnRisky="true"
          beStrictAboutOutputDuringTests="false"
          processIsolation="false"
          convertDeprecationsToExceptions="false">

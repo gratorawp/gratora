@@ -6,10 +6,17 @@ namespace FundKit\Foundation\Upgrade;
 
 use FundKit\Analytics\ErrorLog;
 use FundKit\Foundation\Plugin;
+use FundKit\Vendor\Queryable\Model;
+use FundKit\Vendor\Queryable\Schema\Table;
 use ReflectionClass;
+use ReflectionProperty;
 
 /**
  * Confirms every fundkit_* table is really there before the schema version is stamped.
+ *
+ * The same is true of an ALTER: a release that adds a column to a table that
+ * already exists stamps itself as migrated whether or not the column arrived,
+ * and every query touching it is dead from then on.
  *
  * dbDelta reports nothing at all when a CREATE is refused, and plenty of
  * managed and shared hosts refuse one: restricted grants, a table-count quota,
@@ -39,7 +46,7 @@ final class SchemaGuard
 
         $missing = [];
 
-        foreach (self::expectedTables() as $table) {
+        foreach (array_keys(self::expected()) as $table) {
             $full  = $wpdb->prefix . $table;
             $found = $wpdb->get_var(
                 $wpdb->prepare('SHOW TABLES LIKE %s', $wpdb->esc_like($full))
@@ -47,6 +54,45 @@ final class SchemaGuard
 
             if ((string) $found !== $full) {
                 $missing[] = $table;
+            }
+        }
+
+        return $missing;
+    }
+
+    /**
+     * Columns a migration should have added and did not, keyed by unprefixed
+     * table. Asked of the database for the same reason the tables are: dbDelta
+     * reports success for an ALTER it never ran.
+     *
+     * @return array<string, list<string>>
+     * @since 1.0.0
+     */
+    public static function missingColumns(): array
+    {
+        global $wpdb;
+
+        $missing = [];
+
+        foreach (self::expected() as $table => $columns) {
+            if ($columns === []) {
+                continue;
+            }
+
+            $full = $wpdb->prefix . $table;
+            $rows = $wpdb->get_col('SHOW COLUMNS FROM `' . esc_sql($full) . '`');
+            if (! is_array($rows) || $rows === []) {
+                continue;
+            }
+
+            $have = array_map('strtolower', $rows);
+            $gone = array_values(array_filter(
+                $columns,
+                static fn (string $c): bool => ! in_array(strtolower($c), $have, true)
+            ));
+
+            if ($gone !== []) {
+                $missing[$table] = $gone;
             }
         }
 
@@ -69,6 +115,21 @@ final class SchemaGuard
         if ($missing !== []) {
             ErrorLog::toDebugLog(
                 'schema incomplete, version not stamped. Missing tables: ' . implode(', ', $missing)
+            );
+
+            return false;
+        }
+
+        $columns = self::missingColumns();
+
+        if ($columns !== []) {
+            $named = [];
+            foreach ($columns as $table => $cols) {
+                $named[] = $table . '.' . implode(', ' . $table . '.', $cols);
+            }
+
+            ErrorLog::toDebugLog(
+                'schema incomplete, version not stamped. Missing columns: ' . implode(', ', $named)
             );
 
             return false;
@@ -120,12 +181,15 @@ final class SchemaGuard
     }
 
     /**
-     * Every table the registered modules migrate, unprefixed.
+     * Every table the registered modules migrate, unprefixed, mapped to the
+     * columns their schema declares. An empty list means existence is all this
+     * can check: a model with no registered closure, or a meta table, whose
+     * shape the builder compiles separately.
      *
-     * @return string[]
+     * @return array<string, list<string>>
      * @since 1.0.0
      */
-    private static function expectedTables(): array
+    private static function expected(): array
     {
         $tables = [];
 
@@ -151,7 +215,7 @@ final class SchemaGuard
                     continue;
                 }
 
-                $tables[] = $name;
+                $tables[$name] = self::declaredColumns($model, $instance, $reflection);
 
                 // A model that declares meta gets a second table from the same
                 // migration, named the way Table::compileMetaTable names it.
@@ -160,15 +224,62 @@ final class SchemaGuard
                 $config = (array) $meta->invoke($instance);
 
                 if ($config !== []) {
-                    $tables[] = empty($config['table'])
-                        ? $name . '_meta'
-                        : (string) $config['table'];
+                    $metaName = empty($config['table']) ? $name . '_meta' : (string) $config['table'];
+                    $tables[$metaName] = [];
                 }
             } catch (\Throwable $e) {
                 ErrorLog::toDebugLog('schema guard skipped ' . $model . ': ' . $e->getMessage());
             }
         }
 
-        return array_values(array_unique($tables));
+        return $tables;
+    }
+
+    /**
+     * The columns a model's schema closure declares.
+     *
+     * Reached by reflection because the closure registry is private static on
+     * the vendored Model. A queryable release that renames it drops this back
+     * to the existence-only check rather than breaking the gate.
+     *
+     * @return list<string>
+     */
+    private static function declaredColumns(string $model, object $instance, ReflectionClass $reflection): array
+    {
+        global $wpdb;
+
+        try {
+            $schemas = new ReflectionProperty(Model::class, 'schemas');
+            $schemas->setAccessible(true);
+            $callback = ($schemas->getValue()[$model] ?? null);
+
+            if (! $callback instanceof \Closure) {
+                return [];
+            }
+
+            $meta = $reflection->getMethod('meta');
+            $meta->setAccessible(true);
+
+            $table = new Table(
+                $wpdb->charset ?: 'utf8mb4',
+                $wpdb->collate ?: 'utf8mb4_unicode_ci',
+                (array) $meta->invoke($instance)
+            );
+            $callback($table);
+
+            $names = [];
+            foreach ($table->getColumns() as $column) {
+                $name = (string) ($column->getDefinition()['name'] ?? '');
+                if ($name !== '') {
+                    $names[] = $name;
+                }
+            }
+
+            return $names;
+        } catch (\Throwable $e) {
+            ErrorLog::toDebugLog('schema guard could not read columns for ' . $model . ': ' . $e->getMessage());
+
+            return [];
+        }
     }
 }

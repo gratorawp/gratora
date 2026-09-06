@@ -19,6 +19,7 @@ const SKIP_LABELS = {
     invalid_email:     __( 'the email address is not one', 'fundraising-toolkit' ),
     invalid_amount:    __( 'the amount is missing, zero or unreadable', 'fundraising-toolkit' ),
     invalid_date:      __( 'the date is missing or unreadable', 'fundraising-toolkit' ),
+    unknown_status:    __( 'the status is not one this site knows', 'fundraising-toolkit' ),
     duplicate_in_file: __( 'the same row appears earlier in this file', 'fundraising-toolkit' ),
     already_imported:  __( 'already imported by an earlier run', 'fundraising-toolkit' ),
     donor_erased:      __( 'the donor was erased on this site', 'fundraising-toolkit' ),

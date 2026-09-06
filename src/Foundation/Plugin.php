@@ -17,6 +17,7 @@ use FundKit\Foundation\Container\Container;
 use FundKit\Foundation\Modules\ModuleManager;
 use FundKit\Foundation\Uninstall\DataEraser;
 use FundKit\Async\AsyncDispatcher;
+use FundKit\Foundation\Upgrade\MigrationLock;
 use FundKit\Foundation\Upgrade\SchemaGuard;
 use FundKit\Foundation\Upgrade\UpgradeJob;
 use FundKit\Foundation\Upgrade\UpgradeRunner;
@@ -124,39 +125,11 @@ final class Plugin
         // "unknown column" errors until a reactivation. Run the schema
         // migration once per FUNDKIT_DB_VERSION bump (cheap on steady state: one
         // option read). Priority 99 so tables exist before the portal heal.
+        // A closure declared here, not an array callable: a test that fires
+        // wp_loaded with only this file's callbacks standing identifies them by
+        // the file the closure was defined in.
         add_action('wp_loaded', static function (): void {
-            // Anything thrown here reaches no handler and takes the front end
-            // with it, on every request, including the admin screen somebody
-            // would use to switch the plugin off.
-            try {
-                $fresh = get_option(SchemaGuard::OPTION, null) === null;
-
-                if (get_option(SchemaGuard::OPTION) !== FUNDKIT_DB_VERSION) {
-                    self::migrateSchema();
-
-                    // Nothing below is safe against tables that are not there,
-                    // and the stamp is what brings this gate back next request.
-                    if (! SchemaGuard::stampWhenComplete()) {
-                        return;
-                    }
-
-                    self::finishActivation($fresh);
-
-                    // Schema first, then data. A routine that backfills a
-                    // column the same release added would otherwise run
-                    // against a table without it. Queued rather than run here:
-                    // a backfill over a few hundred thousand donations does
-                    // not belong in the request that noticed the plugin had
-                    // been updated.
-                    self::instance()->container->get(UpgradeJob::class)->start();
-
-                    return;
-                }
-
-                self::finishActivation($fresh);
-            } catch (\Throwable $e) {
-                ErrorLog::record('schema_guard', $e->getMessage());
-            }
+            self::runSchemaGate();
         }, 99);
 
         SchemaGuard::registerNotice();
@@ -179,6 +152,57 @@ final class Plugin
         }, 100);
 
         do_action('fundkit.booted', $self);
+    }
+
+    /**
+     * The once-per-version schema pass.
+     *
+     * @since 1.0.0
+     */
+    public static function runSchemaGate(): void
+    {
+        // Anything thrown here reaches no handler and takes the front end
+        // with it, on every request, including the admin screen somebody
+        // would use to switch the plugin off.
+        try {
+            $fresh = get_option(SchemaGuard::OPTION, null) === null;
+
+            if (get_option(SchemaGuard::OPTION) !== FUNDKIT_DB_VERSION) {
+                // One request migrates. The rest of a burst would otherwise run
+                // the whole pass concurrently against the same tables.
+                if (! MigrationLock::claim()) {
+                    return;
+                }
+
+                try {
+                    self::migrateSchema();
+
+                    // Nothing below is safe against tables that are not there,
+                    // and the stamp is what brings this gate back next request.
+                    if (! SchemaGuard::stampWhenComplete()) {
+                        return;
+                    }
+
+                    self::finishActivation($fresh);
+
+                    // Schema first, then data. A routine that backfills a
+                    // column the same release added would otherwise run
+                    // against a table without it. Queued rather than run here:
+                    // a backfill over a few hundred thousand donations does
+                    // not belong in the request that noticed the plugin had
+                    // been updated.
+                    self::instance()->container->get(UpgradeJob::class)->start();
+                } finally {
+                    MigrationLock::release();
+                }
+
+                return;
+            }
+
+            self::finishActivation($fresh);
+        } catch (\Throwable $e) {
+            ErrorLog::record('schema_guard', $e->getMessage());
+        }
     }
 
     /**

@@ -102,8 +102,46 @@ final class CsvImporter
         'reference'     => ['transaction id', 'reference', 'id', 'donation id', 'charge id', 'payment id'],
     ];
 
-    /** Statuses a row may claim. Anything else is imported as paid. */
-    private const STATUSES = ['paid', 'pending', 'failed', 'refunded', 'cancelled'];
+    /**
+     * The donation status vocabulary, so a file this plugin exported imports
+     * back as itself. Anything outside it, and outside SYNONYMS, is refused:
+     * defaulting to paid turned a disputed row into money.
+     */
+    private const STATUSES = ['paid', 'pending', 'processing', 'failed', 'refunded', 'partial_refund', 'disputed'];
+
+    /** What other systems call the same states. */
+    private const SYNONYMS = [
+        'completed'          => 'paid',
+        'complete'           => 'paid',
+        'succeeded'          => 'paid',
+        'success'            => 'paid',
+        'settled'            => 'paid',
+        'captured'           => 'paid',
+        'canceled'           => 'failed',
+        'cancelled'          => 'failed',
+        'void'               => 'failed',
+        'voided'             => 'failed',
+        'chargeback'         => 'disputed',
+        'charged_back'       => 'disputed',
+        'dispute'            => 'disputed',
+        'partially_refunded' => 'partial_refund',
+    ];
+
+    /**
+     * The status a row claims, or null when it claims one this product has no
+     * meaning for. An empty cell is an ordinary donor-history import.
+     */
+    private function status(string $raw): ?string
+    {
+        $value = strtolower(trim($raw));
+        if ($value === '') {
+            return 'paid';
+        }
+
+        $value = self::SYNONYMS[$value] ?? $value;
+
+        return in_array($value, self::STATUSES, true) ? $value : null;
+    }
 
     /** @since 1.0.0 */
     public function __construct(
@@ -244,6 +282,7 @@ final class CsvImporter
 
         $amountCents = null;
         $paidAt      = null;
+        $status      = 'paid';
         if ($mode === 'donations') {
             $amountCents = $this->cents($get('amount'), $get('currency'));
             if ($amountCents === null) {
@@ -257,6 +296,13 @@ final class CsvImporter
             $paidAt = $this->date($get('date'));
             if ($paidAt === null) {
                 return $skip('invalid_date');
+            }
+
+            // Resolved here rather than at write time: the dry run returns
+            // below, and would otherwise count a row the real run refuses.
+            $status = $this->status($get('status'));
+            if ($status === null) {
+                return $skip('unknown_status');
             }
         }
 
@@ -340,8 +386,6 @@ final class CsvImporter
         }
 
         $currency = strtoupper($get('currency')) ?: strtoupper(Money::defaultCurrency());
-        $status   = strtolower($get('status'));
-        if (! in_array($status, self::STATUSES, true)) $status = 'paid';
 
         $donation = Donation::make();
         $donation->reference    = $key;
@@ -352,7 +396,9 @@ final class CsvImporter
         $donation->status       = $status;
         $donation->gateway      = 'imported';
         $donation->frequency    = 'one_time';
-        $donation->paid_at      = $status === 'paid' ? $paidAt : null;
+        // Every status whose money moved, not just paid: the aggregates filter
+        // on status, so a NULL date would count the row and date it nowhere.
+        $donation->paid_at      = in_array($status, DonationQueries::MONEY_MOVED, true) ? $paidAt : null;
         $donation->created_at   = $paidAt;
         $donation->updated_at   = $paidAt;
         // So a row can be traced back to the file it came from, and told apart
