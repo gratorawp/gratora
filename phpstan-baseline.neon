@@ -241,12 +241,6 @@ parameters:
 			path: src/Rest/Admin/FormsController.php
 
 		-
-			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$currency \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: src/Rest/Admin/FormsController.php
-
-		-
 			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$donations_count \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Rest\Admin;
 
 use FundKit\Donations\DonationQueries;use FundKit\Rest\Paging;
+use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Auth\Capabilities;
 
 use FundKit\Campaigns\CampaignTemplates;
@@ -176,7 +177,7 @@ final class CampaignsController
         return new WP_REST_Response([
             'count'     => $summary['count'],
             'mrr_cents' => $summary['mrr_cents'],
-            'currency'  => $campaign->currency,
+            'currency'  => Money::defaultCurrency(),
         ], 200);
     }
 
@@ -315,7 +316,7 @@ final class CampaignsController
             'historical_avg_cents'  => $avg,
             'historical_max_cents'  => $max,
             'current_target_cents'  => $current_target,
-            'currency'              => $current->currency ?: 'USD',
+            'currency'              => Money::defaultCurrency(),
             'verdict'               => $verdict,
         ], 200);
     }
@@ -479,7 +480,11 @@ final class CampaignsController
                 ((array) apply_filters('fundkit.campaign.types', ['standard' => '']))[$c->campaign_type]
                     ?? ucfirst(str_replace('_', ' ', $c->campaign_type))
             ),
-            'currency'            => $c->currency,
+            // Every money figure on this row is base currency: goal_cents is
+            // entered in it and raised_cents is summed in it. The campaign's
+            // own currency is what its form offers donors, and the row does not
+            // carry a figure denominated in it.
+            'currency'            => Money::defaultCurrency(),
             'goal_type'           => $c->goal_type,
             'goal_cents'          => $c->goal_cents,
             'goal_count'          => $c->goal_count,

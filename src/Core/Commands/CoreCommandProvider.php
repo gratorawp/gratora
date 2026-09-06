@@ -1327,7 +1327,9 @@ final class CoreCommandProvider
                     'goal_type'       => (string) $m->goal_type,
                     'goal_cents'      => $m->goal_cents,
                     'goal_count'      => $m->goal_count,
-                    'currency'        => (string) $m->currency,
+                    // raised_cents and goal_cents are both base currency;
+                    // $m->currency is what the campaign's form offers donors.
+                    'currency'        => Money::defaultCurrency(),
                     'raised_cents'    => (int) $m->raised_cents,
                     'donations_count' => (int) $m->donations_count,
                     'donors_count'    => (int) $m->donors_count,

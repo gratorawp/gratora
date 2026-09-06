@@ -5,6 +5,10 @@ import { formatAmount } from '../format';
  * Renders the goal cell from a row that carries goal_type/goal_cents/goal_count
  * plus its own totals. Campaigns and forms both keep their goal this shape, and
  * a row with no goal reads "No goal" rather than 0%.
+ *
+ * Amounts take no currency argument. A goal is entered in the org's base
+ * currency and compared against raised_cents, which is summed in it; the row's
+ * own `currency` is what its donation form offers, which is a different thing.
  */
 export function GoalCell( { item } ) {
     const type     = item.goal_type || 'amount';
@@ -23,7 +27,7 @@ export function GoalCell( { item } ) {
     const label = ! hasGoal
         ? __( 'No goal', 'fundraising-toolkit' )
         : isAmount
-            ? formatAmount( target, item.currency )
+            ? formatAmount( target )
             : sprintf( template, target.toLocaleString() );
 
     return (

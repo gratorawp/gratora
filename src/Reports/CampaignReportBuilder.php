@@ -31,7 +31,7 @@ final class CampaignReportBuilder
     {
         $campaignId = (int) $campaign->id;
         $summary    = $this->metrics->summary($campaignId, $range);
-        $currency   = (string) $campaign->currency;
+        $currency   = Money::defaultCurrency();
 
         $raisedCents = (int) $summary['amount_raised_cents'];
         [$hasGoal, $goalDisplay, $percent, $barWidth] = $this->goal($campaign, $summary, $currency);

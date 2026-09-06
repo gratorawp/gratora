@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace FundKit\Tests\Integration;
 
 use FundKit\Campaigns\Campaign;
+use FundKit\Analytics\EventRecorder;
 use FundKit\Campaigns\CampaignRepository;
+use FundKit\Core\Commands\CoreCommandProvider;
+use FundKit\Foundation\Commands\CommandContext;
+use FundKit\Foundation\Commands\CommandRegistry;
 use FundKit\Foundation\Plugin;
 use WP_REST_Request;
 
@@ -41,14 +45,43 @@ final class CampaignKpiCurrencyTest extends IntegrationTestCase
         $this->assertSame('EUR', $stats['currency'], 'the base currency the sum is actually in');
     }
 
-    public function test_the_screen_reads_it_the_same_way(): void
+    /**
+     * The strip and the rows it sits above are one screen and one request pair,
+     * so they cannot report the same numbers in different units.
+     */
+    public function test_the_strip_and_the_rows_under_it_agree(): void
     {
         $this->campaign('us-only', 'USD', 100000);
 
-        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/campaigns/stats'));
-        $this->assertSame(200, $res->get_status());
+        $strip = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/campaigns/stats'));
+        $this->assertSame(200, $strip->get_status());
+        $this->assertSame('EUR', (string) ($strip->get_data()['currency'] ?? ''));
 
-        $this->assertSame('EUR', (string) ($res->get_data()['currency'] ?? ''));
+        $rows = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/campaigns'));
+        $this->assertSame(200, $rows->get_status());
+
+        foreach ((array) $rows->get_data() as $row) {
+            $this->assertSame('EUR', (string) ($row['currency'] ?? ''), 'a row disagreeing with the strip above it');
+        }
+    }
+
+    /** The same figure reaches the command registry, so it carries the same unit. */
+    public function test_the_command_registry_reads_it_the_same_way(): void
+    {
+        $this->campaign('us-only', 'USD', 100000);
+
+        $c        = Plugin::instance()->container;
+        $registry = new CommandRegistry($c->get(EventRecorder::class));
+        (new CoreCommandProvider())->register($registry, $c);
+
+        $ctx = new CommandContext(get_current_user_id(), 'rest', 'req-' . uniqid());
+        $res = $registry->dispatch('campaign.list', ['per_page' => 50], $ctx);
+
+        $this->assertTrue($res->ok, $res->error ?? '');
+        $this->assertNotSame([], $res->data['items'], 'the command returned a campaign');
+        foreach ($res->data['items'] as $row) {
+            $this->assertSame('EUR', (string) ($row['currency'] ?? ''));
+        }
     }
 
     /**

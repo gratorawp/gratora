@@ -82,7 +82,7 @@ final class GoalBlock implements Block
             goalType:    $type,
             current:     $current,
             target:      $target,
-            currency:    (string) $campaign->currency,
+            currency:    Money::defaultCurrency(),
             donorsCount: (int) ($campaign->donors_count ?? 0),
             endsAt:      $campaign->ends_at,
             attrs:       $attrs,
@@ -123,10 +123,10 @@ final class GoalBlock implements Block
             default     => $raisedCents,
         };
 
-        $campaign = $form->campaign_id ? $this->campaigns->findById((int) $form->campaign_id) : null;
-        $currency = $campaign
-            ? (string) $campaign->currency
-            : Money::defaultCurrency();
+        // Both figures are base currency: the goal is entered in it and the
+        // raised total is summed in it. A campaign's own currency is what its
+        // form offers donors, which is a different thing.
+        $currency = Money::defaultCurrency();
 
         return $this->view(
             goalType:    $type,

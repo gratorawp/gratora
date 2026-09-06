@@ -192,7 +192,7 @@ export default function List() {
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums' } }>
-                    { formatAmount( item.raised_cents, item.currency ) }
+                    { formatAmount( item.raised_cents ) }
                 </span>
             ),
         },
