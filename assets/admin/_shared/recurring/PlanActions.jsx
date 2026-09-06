@@ -111,14 +111,22 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
     const [ months, setMonths ] = useState( 1 );
     const [ amount, setAmount ] = useState( ( plan.amount_cents || 0 ) / 100 );
     const [ reason, setReason ] = useState( '' );
-    const [ frequency, setFrequency ] = useState( plan.frequency || 'monthly' );
+    // Not defaulted to monthly: a plan on a cadence this product cannot name
+    // would show "Every month" as its current schedule, and one click on Apply
+    // would retime the donor to it.
+    const currentFrequency = plan.frequency || '';
+    const [ frequency, setFrequency ] = useState( currentFrequency );
 
     const submit = () => {
         const body = { action, notify_donor: notify };
         if ( action === 'pause' ) body.months = Number( months ) || 1;
         if ( action === 'cancel' && reason.trim() ) body.reason = reason.trim();
         if ( action === 'change_interval' ) {
-            if ( frequency === plan.frequency ) {
+            if ( frequency === '' ) {
+                setError( __( 'Choose a schedule.', 'fundraising-toolkit' ) );
+                return;
+            }
+            if ( frequency === currentFrequency ) {
                 setError( __( 'That is the schedule it is on already.', 'fundraising-toolkit' ) );
                 return;
             }
@@ -203,6 +211,9 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                             onChange={ ( e ) => setFrequency( e.target.value ) }
                             autoFocus
                         >
+                            { currentFrequency === '' && (
+                                <option value="">{ __( 'Choose a schedule', 'fundraising-toolkit' ) }</option>
+                            ) }
                             { ( plan.frequency_options || [] ).map( ( f ) => (
                                 <option key={ f } value={ f }>{ FREQUENCY_LABELS[ f ] || f }</option>
                             ) ) }

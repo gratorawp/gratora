@@ -664,10 +664,12 @@ final class ToolsController
         }
 
         return new WP_REST_Response([
-            'ok'     => true,
-            'scope'  => $scope,
-            'counts' => $state['counts'],
-            'done'   => $done,
+            'ok'                      => true,
+            'scope'                   => $scope,
+            'counts'                  => $state['counts'],
+            'still_unconvertible'     => (int) ($state['still_unconvertible'] ?? 0),
+            'unconvertible_currencies' => array_values((array) ($state['unconvertible_currencies'] ?? [])),
+            'done'                    => $done,
         ], 200);
     }
 
@@ -710,6 +712,10 @@ final class ToolsController
             'after'       => 0,
             'rebuild_all' => $scope === 'all',
             'counts'      => ['donors' => 0, 'funds' => 0, 'campaigns' => 0, 'forms' => 0],
+            // The currency pass runs in the first round only, so a resumed
+            // run has to carry its answer forward.
+            'still_unconvertible'      => 0,
+            'unconvertible_currencies' => [],
         ];
     }
 
@@ -745,9 +751,11 @@ final class ToolsController
         // A plan carries its own base amount, so converting one changes
         // recurring revenue even when no donation moved.
         $converted += (int) ($fx['plans'] ?? 0);
-        if ($fx['unconvertible'] > 0) {
-            $state['counts']['still_unconvertible'] = (int) $fx['unconvertible'];
-        }
+        // Not in counts: those are things that were synced, and this is the
+        // opposite. Reported as a success line it read "2 synced" about rows
+        // that are still missing from every total.
+        $state['still_unconvertible']    = (int) $fx['unconvertible'];
+        $state['unconvertible_currencies'] = array_values((array) ($fx['currencies'] ?? []));
 
         // Converting a donation changes every total it belongs to, so the
         // aggregate passes have to run whatever the scope was. Without it, a

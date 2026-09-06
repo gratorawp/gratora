@@ -7,6 +7,20 @@ import Card from '../../_shared/components/Card';
 import Notice from '../../_shared/components/Notice';
 import Btn from '../../_shared/components/Btn';
 
+const COUNT_LABELS = {
+    donors:              __( 'Donors', 'fundraising-toolkit' ),
+    funds:               __( 'Funds', 'fundraising-toolkit' ),
+    campaigns:           __( 'Campaigns', 'fundraising-toolkit' ),
+    forms:               __( 'Forms', 'fundraising-toolkit' ),
+    converted_donations: __( 'Donations given a value in your base currency', 'fundraising-toolkit' ),
+    converted_plans:     __( 'Recurring plans given a value in your base currency', 'fundraising-toolkit' ),
+};
+
+// An add-on can contribute a count through fundkit.recalculate.counts, and a
+// raw key is not a sentence.
+const countLabel = ( key ) => COUNT_LABELS[ key ]
+    || ( key.charAt( 0 ).toUpperCase() + key.slice( 1 ) ).replace( /_/g, ' ' );
+
 export default function MaintenanceTab( { info, infoError, active, loadInfo, setNotice } ) {
     const [ recalcScope, setRecalcScope ]     = useState( 'all' );
     const [ recalcRunning, setRecalcRunning ] = useState( false );
@@ -63,7 +77,11 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
 
                 counts = res?.counts || counts;
                 done   = res?.done !== false;
-                setRecalcResult( counts );
+                setRecalcResult( {
+                    counts,
+                    stillUnconvertible: Number( res?.still_unconvertible ) || 0,
+                    currencies:         Array.isArray( res?.unconvertible_currencies ) ? res.unconvertible_currencies : [],
+                } );
 
                 if ( ! done ) {
                     setNotice( { type: 'info', text: __( 'Still recomputing. Leave this open.', 'fundraising-toolkit' ) } );
@@ -216,19 +234,35 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                 </div>
                 { recalcResult && (
                     <ul className="fundkit-advanced-cron" style={ { marginTop: 12 } }>
-                        { Object.entries( recalcResult )
+                        { Object.entries( recalcResult.counts || {} )
                             .filter( ( [ , n ] ) => n > 0 )
                             .map( ( [ k, n ] ) => (
                                 <li key={ k }>
                                     { sprintf(
-                                        /* translators: 1: scope label (Donors, Funds, ...), 2: count */
+                                        /* translators: 1: what was recomputed (Donors, Funds, ...), 2: how many */
                                         __( '%1$s: %2$d synced', 'fundraising-toolkit' ),
-                                        k.charAt( 0 ).toUpperCase() + k.slice( 1 ),
+                                        countLabel( k ),
                                         n
                                     ) }
                                 </li>
                             ) ) }
                     </ul>
+                ) }
+
+                { recalcResult?.stillUnconvertible > 0 && (
+                    <Notice status="warning" isDismissible={ false }>
+                        { sprintf(
+                            /* translators: 1: how many donations, 2: comma-separated currency codes */
+                            _n(
+                                '%1$d donation is still missing from your totals: there is no exchange rate for %2$s.',
+                                '%1$d donations are still missing from your totals: there is no exchange rate for %2$s.',
+                                recalcResult.stillUnconvertible,
+                                'fundraising-toolkit'
+                            ),
+                            recalcResult.stillUnconvertible,
+                            ( recalcResult.currencies || [] ).join( ', ' )
+                        ) }
+                    </Notice>
                 ) }
             </Card>
 

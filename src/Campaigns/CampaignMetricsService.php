@@ -372,7 +372,10 @@ final class CampaignMetricsService
             }
         }
 
-        $conversion = $firstTime > 0 ? round(($returning / $firstTime) * 100, 1) : null;
+        // Out of everyone counted: the two groups are disjoint, so dividing by
+        // the first-timers alone has no upper bound.
+        $donors     = $firstTime + $returning;
+        $conversion = $donors > 0 ? round(($returning / $donors) * 100, 1) : null;
         $totalRev   = $recurringRevenue + $oneTimeRevenue;
         $recShare   = $totalRev > 0 ? (int) round(($recurringRevenue / $totalRev) * 100) : 0;
 
