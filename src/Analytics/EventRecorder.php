@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Analytics;
 
+use FundKit\Foundation\Http\ClientIp;
 use FundKit\Foundation\Identity\IdentityHasher;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Settings\SettingsService;
@@ -69,9 +70,7 @@ final class EventRecorder
         $event->payload           = $ctx['payload'] ?? null;
         $privacy = $this->settings->get('privacy');
         $event->ip_hash           = ! $audit && ! empty($privacy['anonymize_ips'])
-            ? $this->hasher->ipHash(
-                filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: null
-            )
+            ? $this->hasher->ipHash(ClientIp::resolve() ?: null)
             : null;
         $event->user_agent_hash   = $audit ? null : $this->hasher->userAgentHash(
             wp_strip_all_tags(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? ''))

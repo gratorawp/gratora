@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Rest;
 
+use FundKit\Foundation\Http\ClientIp;
 use FundKit\Analytics\ErrorLog;
 use FundKit\Campaigns\Campaign;
 use FundKit\Currency\Currency;
@@ -365,7 +366,10 @@ final class DonationsController
         // recorded, and a consent write must never break the donation.
         $consents = is_array($body['consents'] ?? null) ? $body['consents'] : [];
         if ($consents && $donation->donor_id) {
-            $ip = (string) (filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: '');
+            // Through ClientIp, which honours the proxies the site declared:
+            // behind a CDN, REMOTE_ADDR is the edge, so every donor's consent
+            // record would name the same address and evidence nothing.
+            $ip = ClientIp::resolve();
             $ua = wp_strip_all_tags(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? ''));
             // The form's own consent-block purposes as well as the org settings
             // registry, or form-defined consents drop.

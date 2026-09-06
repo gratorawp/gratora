@@ -24,6 +24,7 @@ use FundKit\Donors\SignupRedemption;
 use FundKit\Donors\Portal\AnnualStatementBuilder;
 use FundKit\Donors\Portal\MagicLinkJob;
 use FundKit\Donors\Portal\PortalSession;
+use FundKit\Foundation\Http\ClientIp;
 use FundKit\Foundation\Identity\IdentityHasher;
 use FundKit\Gateways\GatewayManager;
 use FundKit\Gateways\GatewayTransportException;
@@ -1481,7 +1482,7 @@ final class PortalController
 
         $body  = (array) ($request->get_json_params() ?? []);
         $items = is_array($body['items'] ?? null) ? $body['items'] : [];
-        $ip    = (string) (filter_var(wp_unslash($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: '');
+        $ip    = ClientIp::resolve();
         $ua    = wp_strip_all_tags(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? ''));
 
         $byKey   = [];
