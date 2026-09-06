@@ -24,6 +24,7 @@ const RAMP = '138, 123, 255';
 
 export default function DowHourHeatmap( { data } ) {
     const [ hovered, setHovered ] = useState( null ); // { day, hour, count } | null
+    const days = useMemo( dayLabels, [] );
 
     if ( ! data || ( data.total ?? 0 ) === 0 ) {
         return (
@@ -34,7 +35,6 @@ export default function DowHourHeatmap( { data } ) {
     }
 
     const { grid, max } = data;
-    const days = useMemo( dayLabels, [] );
 
     let peak = { day: -1, hour: -1, count: 0 };
     grid.forEach( ( row, day ) => {
