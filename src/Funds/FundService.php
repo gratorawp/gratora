@@ -116,17 +116,6 @@ final class FundService
             }
         }
 
-        // Asked for separately from what lands on the model: the default-fund
-        // rule below clears a window rather than refusing one, and it has to
-        // tell "the admin just picked these dates" from "this fund already had
-        // them".
-        $windowRequested = false;
-        foreach (['starts_at', 'ends_at'] as $field) {
-            if (array_key_exists($field, $input) && $this->nullableString($input[$field]) !== null) {
-                $windowRequested = true;
-            }
-        }
-
         foreach (['description', 'starts_at', 'ends_at', 'accounting_code'] as $field) {
             if (array_key_exists($field, $input)) {
                 $fund->$field = $this->nullableString($input[$field]);
@@ -178,18 +167,10 @@ final class FundService
             }
         }
 
-        // Promotion drops the window the way it forces is_active: the default
-        // takes every donation with nowhere else to go, so a default that
-        // closes hands those donations to whichever fund happens to sort first.
-        // Asking for both in one save is a contradiction rather than something
-        // to repair, so that is refused instead.
-        if ($fund->is_default) {
-            if ($windowRequested) {
-                $this->assertDefaultHasNoWindow($fund);
-            }
-            $fund->starts_at = null;
-            $fund->ends_at   = null;
-        }
+        // Refused, never repaired: dropping the window here would discard dates
+        // the caller never mentioned, and an API client would have no way to
+        // see it happen. Clearing them is the caller's to ask for.
+        $this->assertDefaultHasNoWindow($fund);
 
         $fund->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
 
@@ -415,6 +396,10 @@ final class FundService
      * it, so it has to be open whenever the site can take money. Outside its
      * window it is closed, FundResolver skips it, and those donations are filed
      * against whichever other fund happens to sort first.
+     *
+     * Held on both halves of the pairing: adding a window to the default and
+     * promoting a fund that already has one are the same contradiction, and a
+     * caller that wants the second has to clear the dates in the same request.
      *
      * @since 1.0.0
      */

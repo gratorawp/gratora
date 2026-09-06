@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from '@wordpress/element';
 import { DataViews } from '@wordpress/dataviews';
+import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import Notice from '../_shared/components/Notice';
 import { useTableView } from '../_shared/useTableView';
 import { notify } from '../_shared/notify';
@@ -113,6 +114,7 @@ export default function List() {
     const [ error, setError ]       = useState( null );
     const [ editing, setEditing ]   = useState( null );
     const [ deleteTarget, setDeleteTarget ] = useState( null );
+    const [ confirm, setConfirm ]   = useState( null );
     const [ allFunds, setAllFunds ] = useState( [] );
     const [ stats, setStats ]       = useState( null );
     const [ statsLoading, setStatsLoading ] = useState( true );
@@ -353,20 +355,32 @@ export default function List() {
             label:      __( 'Set as default', 'fundraising-toolkit' ),
             icon:       () => <Star size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => ! item.is_default && item.is_active && ! item.reassign_pending,
-            // Promoting a scheduled fund drops its window, because the default
-            // cannot carry one. Said out loud: the pill just changes in the
-            // list otherwise, and the dates are gone.
-            callback:   ( [ item ] ) => mutate(
-                item.id,
-                { is_default: true },
-                ( item.starts_at || item.ends_at )
-                    ? sprintf(
+            // The default cannot carry a window, and the server refuses the
+            // pairing rather than quietly dropping the dates, so asking for the
+            // clear is this action's job and it asks first.
+            callback:   ( [ item ] ) => {
+                if ( ! item.starts_at && ! item.ends_at ) {
+                    return mutate( item.id, { is_default: true } );
+                }
+                setConfirm( {
+                    title:   __( 'Clear the schedule?', 'fundraising-toolkit' ),
+                    message: sprintf(
                         /* translators: %s: fund name */
-                        __( '%s is now the default fund. Its schedule was cleared, because the default has to stay open.', 'fundraising-toolkit' ),
+                        __( '%s has a schedule. The default fund takes every donation with no fund chosen, so it has to stay open: making this one the default clears its start and end dates.', 'fundraising-toolkit' ),
                         item.name
-                    )
-                    : ''
-            ),
+                    ),
+                    confirmLabel: __( 'Clear and set as default', 'fundraising-toolkit' ),
+                    onConfirm: () => mutate(
+                        item.id,
+                        { is_default: true, starts_at: null, ends_at: null },
+                        sprintf(
+                            /* translators: %s: fund name */
+                            __( '%s is now the default fund, and its schedule was cleared.', 'fundraising-toolkit' ),
+                            item.name
+                        )
+                    ),
+                } );
+            },
         },
         {
             id:         'deactivate',
@@ -501,6 +515,8 @@ export default function List() {
                     onDone={ ( msg ) => { setDeleteTarget( null ); notify.success( msg ); afterChange(); } }
                 />
             ) }
+
+            <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </div>
     );
 }
@@ -553,8 +569,12 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                     parent_fund_id:  form.parent_fund_id === '' ? null : Number( form.parent_fund_id ),
                     sort_order:      Number( form.sort_order ) || 0,
                     goal_cents:      form.goal === '' ? null : Math.round( parseFloat( form.goal ) * 100 ),
-                    starts_at:       form.starts_at || null,
-                    ends_at:         form.ends_at || null,
+                    // Always null on the default: the server refuses a default
+                    // carrying a window, and a fund promoted before that rule
+                    // existed still has one on the row this form was seeded
+                    // from.
+                    starts_at:       form.is_default ? null : ( form.starts_at || null ),
+                    ends_at:         form.is_default ? null : ( form.ends_at || null ),
                     accounting_code: form.accounting_code || null,
                 },
             } );

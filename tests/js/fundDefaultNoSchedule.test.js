@@ -167,7 +167,7 @@ it( 'gives the schedule back when the fund stops being the default', async () =>
     expect( scheduleSwitch( dialog ).disabled ).toBe( false );
 } );
 
-it( 'says the schedule went when the row action promotes a scheduled fund', async () => {
+it( 'asks before the row action clears a schedule, and sends the clear itself', async () => {
     mount();
     await waitFor( () => !! captured.actions );
     await settle();
@@ -175,11 +175,37 @@ it( 'says the schedule went when the row action promotes a scheduled fund', asyn
     await captured.actions.find( ( a ) => a.id === 'set-default' ).callback( [ SCHEDULED ] );
     await settle();
 
-    expect( posted[ 0 ].data ).toEqual( { is_default: true } );
+    // The server refuses the pairing, so nothing goes out until the reader
+    // agrees to lose the dates.
+    expect( posted ).toHaveLength( 0 );
+
+    const dialog = document.querySelector( '.fundkit-dialog' );
+    expect( dialog ).not.toBeNull();
+    expect( dialog.textContent ).toContain( 'clears its start and end dates' );
+
+    [ ...dialog.querySelectorAll( '.fundkit-dialog__foot button' ) ].pop().click();
+    await settle();
+
+    expect( posted[ 0 ].data ).toEqual( { is_default: true, starts_at: null, ends_at: null } );
     expect( notified.success.join( ' ' ) ).toContain( 'schedule was cleared' );
 } );
 
-it( 'says nothing extra when the promoted fund had no schedule', async () => {
+it( 'leaves the dates alone when the reader cancels', async () => {
+    mount();
+    await waitFor( () => !! captured.actions );
+    await settle();
+
+    await captured.actions.find( ( a ) => a.id === 'set-default' ).callback( [ SCHEDULED ] );
+    await settle();
+
+    const dialog = document.querySelector( '.fundkit-dialog' );
+    [ ...dialog.querySelectorAll( '.fundkit-dialog__foot button' ) ].shift().click();
+    await settle();
+
+    expect( posted ).toHaveLength( 0 );
+} );
+
+it( 'asks nothing when the promoted fund has no schedule', async () => {
     mount();
     await waitFor( () => !! captured.actions );
     await settle();
@@ -187,6 +213,23 @@ it( 'says nothing extra when the promoted fund had no schedule', async () => {
     await captured.actions.find( ( a ) => a.id === 'set-default' ).callback( [ PLAIN ] );
     await settle();
 
+    expect( document.querySelector( '.fundkit-dialog' ) ).toBeNull();
     expect( posted[ 0 ].data ).toEqual( { is_default: true } );
-    expect( notified.success ).toHaveLength( 0 );
+} );
+
+/**
+ * A fund promoted before the rule existed still carries its window on the row
+ * the form is seeded from, so the save has to drop it or every later edit of
+ * the default fund is refused.
+ */
+it( 'never saves a window for the default fund', async () => {
+    const dialog = await openEditor( { ...SCHEDULED, is_default: true } );
+
+    const save = [ ...dialog.querySelectorAll( 'button' ) ]
+        .find( ( b ) => /save|create/i.test( b.textContent.trim() ) );
+    save.click();
+    await settle();
+
+    expect( posted[ 0 ].data.starts_at ).toBeNull();
+    expect( posted[ 0 ].data.ends_at ).toBeNull();
 } );
