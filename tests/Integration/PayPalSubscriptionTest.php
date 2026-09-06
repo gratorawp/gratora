@@ -138,13 +138,19 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
                 // is what fixes the amount.
                 'plan_id'    => $this->subscriptionPlanId,
                 'subscriber' => ['payer_id' => 'PAYER-1'],
-                'billing_info' => ['next_billing_time' => gmdate('Y-m-d H:i:s', time() + 2592000)],
+                'billing_info' => ['next_billing_time' => $this->nextBillingTime],
             ];
         }
         return ['id' => 'OBJ-1'];
     }
 
     private string $currentReference = '';
+
+    /**
+     * What PayPal says the next charge is. Pinned rather than derived from now,
+     * so a test cannot pass by coinciding with a date this code computes.
+     */
+    private string $nextBillingTime = '2026-11-17 08:30:00';
 
     /** What PayPal reports the subscription bills on; the browser picks this. */
     private string $subscriptionPlanId = 'P-PLAN-1';
@@ -863,6 +869,63 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->assertNotNull(
             Donation::query()->where('gateway_intent_id', 'SALE-APRIL')->get(),
             'and April is a collection of its own, not a relabelling of March'
+        );
+    }
+
+    /**
+     * PayPal redelivers a sale for days. Deriving the next charge date from
+     * when the event was processed moves the date further out on every replay,
+     * and on the opening sale it overwrites the date PayPal itself stated.
+     */
+    public function test_a_redelivered_opening_sale_keeps_the_date_paypal_stated(): void
+    {
+        $reference = $this->createRecurringDonation();
+        $this->recordSubscription($reference);
+
+        $plan = $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1');
+        $this->assertNotNull($plan);
+        $this->assertSame($this->nextBillingTime, (string) $plan->next_payment_at, 'precondition');
+
+        // Deliberately not one interval before the stated date: if it were,
+        // the derived value would coincide and the test would pass either way.
+        $this->postWebhook('PAYMENT.SALE.COMPLETED', [
+            'id'                    => 'SALE-OPENING',
+            'billing_agreement_id'  => 'I-SUB-1',
+            'amount'                => ['total' => '25.00', 'currency' => 'USD'],
+            'create_time'           => '2026-10-02T09:15:00Z',
+        ]);
+
+        $this->assertSame(
+            $this->nextBillingTime,
+            (string) $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1')->next_payment_at,
+            'the opening sale overwrote the date PayPal stated'
+        );
+    }
+
+    public function test_a_renewal_dates_the_next_charge_from_when_the_money_moved(): void
+    {
+        $reference = $this->createRecurringDonation();
+        $this->recordSubscription($reference);
+
+        // The opening sale, so the plan is past its first payment.
+        $this->postWebhook('PAYMENT.SALE.COMPLETED', [
+            'id'                   => 'SALE-1',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'USD'],
+            'create_time'          => '2026-10-17T08:30:00Z',
+        ]);
+
+        $this->postWebhook('PAYMENT.SALE.COMPLETED', [
+            'id'                   => 'SALE-2',
+            'billing_agreement_id' => 'I-SUB-1',
+            'amount'               => ['total' => '25.00', 'currency' => 'USD'],
+            'create_time'          => '2026-11-17T08:30:00Z',
+        ]);
+
+        $this->assertSame(
+            '2026-12-17 08:30:00',
+            (string) $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1')->next_payment_at,
+            'the interval runs from the sale, not from when the event was handled'
         );
     }
 }

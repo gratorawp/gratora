@@ -77,4 +77,30 @@ final class ReferenceCounterSeedingTest extends IntegrationTestCase
 
         $this->assertSame(1, $this->gen()->peekNext('refund'), 'seeding must not invent a history that is not there');
     }
+
+    /**
+     * Scopes are free-form strings and one can be a prefix of another:
+     * fundkit-events mints both 'ticket' and 'ticket_order'. Treating any
+     * longer name as a year suffix drags the shorter sequence up to whatever
+     * the longer one has reached.
+     */
+    public function test_a_sibling_scope_does_not_floor_this_one(): void
+    {
+        $this->settings(['reset_yearly' => false]);
+        update_option('fundkit_reference_counter_ticket_order', '500', false);
+        update_option('fundkit_reference_counter_ticket', '20', false);
+
+        $this->assertSame(21, $this->gen()->peekNext('ticket'), 'a longer scope name is not a year suffix');
+        $this->assertStringEndsWith('00021', $this->gen()->next('ticket'));
+    }
+
+    /** And a real year suffix still floors it, so the fix cannot overshoot. */
+    public function test_a_year_suffix_still_floors_the_continuous_counter(): void
+    {
+        $this->settings(['reset_yearly' => false]);
+        update_option('fundkit_reference_counter_ticket_2025', '900', false);
+        update_option('fundkit_reference_counter_ticket', '20', false);
+
+        $this->assertSame(901, $this->gen()->peekNext('ticket'));
+    }
 }

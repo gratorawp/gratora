@@ -110,7 +110,7 @@ final class PlanRow
             // has to say so: a weekly plan whose next payment is five minutes
             // away otherwise reads as a bug rather than as a rehearsal.
             'simulated'               => $simulated,
-            'simulated_cycle_minutes' => $simulated ? SandboxGateway::CYCLE_MINUTES : null,
+            'simulated_cycle_minutes' => $simulated ? SandboxGateway::cycleMinutes((int) $p->interval_count) : null,
         ];
     }
 

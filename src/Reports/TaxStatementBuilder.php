@@ -206,7 +206,16 @@ final class TaxStatementBuilder
                 $out[] = $v;
             }
         }
-        $city     = trim((string) ($org['city'] ?? ''));
+        $city = trim((string) ($org['city'] ?? ''));
+
+        // A state and a country code are not an address. Onboarding writes both
+        // and asks for neither street nor city, so composing from them alone
+        // puts "CA" and "US" on the masthead of a tax document while the
+        // readiness check, which reads address_lines, says there is none.
+        if ($out === [] && $city === '') {
+            return [];
+        }
+
         $region   = trim(trim((string) ($org['state'] ?? '')) . ' ' . trim((string) ($org['postal_code'] ?? '')));
         $cityLine = $city !== '' && $region !== '' ? $city . ', ' . $region : trim($city . $region);
         if ($cityLine !== '') {

@@ -379,7 +379,11 @@ final class ReferenceGenerator
             // Exactly this scope, or this scope plus a year suffix. Filtered
             // here rather than in the LIKE, where every underscore in the
             // option name is a single-character wildcard.
-            if ($name !== $continuous && ! str_starts_with($name, $continuous . '_')) {
+            // Shaped as a year and not as any suffix: one scope's name can be
+            // a prefix of another's (ticket and ticket_order), and those are
+            // separate sequences.
+            if ($name !== $continuous
+                && preg_match('/^' . preg_quote($continuous, '/') . '_\\d{4}$/', $name) !== 1) {
                 continue;
             }
             $high = max($high, (int) $row->option_value);

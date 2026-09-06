@@ -50,9 +50,15 @@ final class SandboxGateway implements PaymentGateway, SubscriptionAware, Subscri
     }
 
     /** @since 1.0.0 */
+    public static function cycleMinutes(int $intervalCount): int
+    {
+        return max(1, $intervalCount) * self::CYCLE_MINUTES;
+    }
+
+    /** @since 1.0.0 */
     public static function nextCycleAt(DateTimeImmutable $from, int $intervalCount): string
     {
-        return $from->modify('+' . (max(1, $intervalCount) * self::CYCLE_MINUTES) . ' minutes')
+        return $from->modify('+' . self::cycleMinutes($intervalCount) . ' minutes')
             ->format('Y-m-d H:i:s');
     }
 

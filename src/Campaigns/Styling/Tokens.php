@@ -287,6 +287,30 @@ final class Tokens
      *
      * @since 1.0.0
      */
+    /**
+     * The same colour in a notation the PDF renderer parses.
+     *
+     * Dompdf reads 3-, 4-, 6- and 8-digit hex and the rgb()/rgba() functions;
+     * it has no hsl(), and a page has no ink for transparent or for a keyword
+     * that inherits from a box a PDF does not have. sanitize() accepts all of
+     * those for the screen, so the receipt has to make its own decision rather
+     * than dropping every accent that is not plain hex.
+     *
+     * @since 1.0.0
+     */
+    public static function printColor(string $value, string $fallback): string
+    {
+        $v = trim($value);
+
+        // As tight as sanitiseValue's own classes: themePreset bypasses
+        // sanitize entirely and the value lands inside a <style> block, so
+        // neither pattern may carry ';', '{' or '}'.
+        if (preg_match('/^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $v) === 1) return $v;
+        if (preg_match('/^rgba?\(\s*[0-9.,\s%\/-]+\s*\)$/i', $v) === 1) return $v;
+
+        return $fallback;
+    }
+
     public static function sanitize(array $tokens): array
     {
         $out = [];

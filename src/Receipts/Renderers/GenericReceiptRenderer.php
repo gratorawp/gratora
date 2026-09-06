@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Receipts\Renderers;
 
 use FundKit\Campaigns\Styling\StylePresets;
+use FundKit\Campaigns\Styling\Tokens;
 use FundKit\Donations\Refund;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Helpers\View;
@@ -163,7 +164,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
             'show_tax_id'        => array_key_exists('show_tax_id', $stored)        ? (bool) $stored['show_tax_id']        : $defaults['show_tax_id'],
             'show_donor_address' => array_key_exists('show_donor_address', $stored) ? (bool) $stored['show_donor_address'] : $defaults['show_donor_address'],
             'logo_url'           => $logoUrl,
-            'accent_color'       => preg_match('/^#[0-9a-fA-F]{3,8}$/', $accent) ? $accent : '#211d3f',
+            'accent_color'       => Tokens::printColor($accent, '#211d3f'),
         ];
     }
 

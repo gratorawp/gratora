@@ -769,11 +769,16 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
      *
      * @since 1.0.0
      */
-    private function nextPaymentAfter(RecurringPlan $plan): ?string
+    private function nextPaymentAfter(RecurringPlan $plan, string $saleCreatedAt = ''): ?string
     {
+        // The interval runs from when the money moved, not from when the event
+        // arrived: PayPal redelivers a sale for days, and each redelivery would
+        // otherwise push the next charge date further out.
+        $anchor = $saleCreatedAt !== '' ? strtotime($saleCreatedAt) : false;
+
         try {
             $next = FrequencyMap::nextRenewalAfter(
-                (int) $this->clock->now()->format('U'),
+                $anchor !== false ? $anchor : (int) $this->clock->now()->format('U'),
                 (string) $plan->interval_unit,
                 max(1, (int) $plan->interval_count)
             );
@@ -1155,7 +1160,12 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             if ($won) {
                 $fresh = $this->planRepo->findBySubscriptionId($this->id(), $subId);
                 if ($fresh) {
-                    $this->planRepo->recordPayment($fresh, $amount, $this->now(), $this->nextPaymentAfter($fresh));
+                    // PayPal's own next_billing_time when the recorder captured
+                    // one at approval; only derive when it did not.
+                    $next = (string) ($fresh->next_payment_at ?? '') !== ''
+                        ? (string) $fresh->next_payment_at
+                        : $this->nextPaymentAfter($fresh, (string) ($sale['create_time'] ?? ''));
+                    $this->planRepo->recordPayment($fresh, $amount, $this->now(), $next);
                 }
             }
 
@@ -1182,7 +1192,12 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         if ($renewal['created']) {
             $fresh = $this->planRepo->findBySubscriptionId($this->id(), $subId);
             if ($fresh) {
-                $this->planRepo->recordPayment($fresh, $amount, $this->now(), $this->nextPaymentAfter($fresh));
+                $this->planRepo->recordPayment(
+                    $fresh,
+                    $amount,
+                    $this->now(),
+                    $this->nextPaymentAfter($fresh, (string) ($sale['create_time'] ?? ''))
+                );
             }
         }
 

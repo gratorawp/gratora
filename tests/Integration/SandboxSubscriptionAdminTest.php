@@ -53,7 +53,7 @@ final class SandboxSubscriptionAdminTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
     }
 
-    private function plan(): RecurringPlan
+    private function plan(string $unit = 'week', int $count = 1): RecurringPlan
     {
         $now = gmdate('Y-m-d H:i:s');
         $p = RecurringPlan::make();
@@ -62,8 +62,8 @@ final class SandboxSubscriptionAdminTest extends IntegrationTestCase
         $p->gateway_subscription_id = 'sandbox_sub_' . uniqid();
         $p->amount_cents   = 2500;
         $p->currency       = 'EUR';
-        $p->interval_unit  = 'week';
-        $p->interval_count = 1;
+        $p->interval_unit  = $unit;
+        $p->interval_count = $count;
         $p->status         = 'active';
         $p->is_test        = true;
         $p->started_at     = $now;
@@ -126,7 +126,11 @@ final class SandboxSubscriptionAdminTest extends IntegrationTestCase
 
         $this->assertNotNull($row, 'including test plans shows it');
         $this->assertTrue($row['simulated'], 'the row admits its cycle is not the donor cadence');
-        $this->assertSame(SandboxGateway::CYCLE_MINUTES, $row['simulated_cycle_minutes']);
+        $this->assertSame(
+            SandboxGateway::cycleMinutes(1),
+            $row['simulated_cycle_minutes'],
+            'the row reports the cycle the gateway will actually use'
+        );
     }
 
     public function test_an_admin_can_pause_and_resume_a_sandbox_plan(): void
@@ -187,5 +191,36 @@ final class SandboxSubscriptionAdminTest extends IntegrationTestCase
         $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
 
         $this->assertSame(5000, (int) $this->reload($plan)->amount_cents);
+    }
+
+    /**
+     * The sandbox multiplies its cycle by the donor's interval count, so a
+     * quarterly rehearsal renews in 15 minutes, not 5. A tooltip that says 5
+     * has the operator watching a screen that will not move for three times
+     * as long as they were told.
+     */
+    public function test_a_simulated_row_reports_the_cycle_the_gateway_will_actually_use(): void
+    {
+        $plan = $this->plan('month', 3);
+
+        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/recurring');
+        $req->set_param('include_test', true);
+
+        $row = null;
+        foreach ((array) rest_do_request($req)->get_data() as $item) {
+            if ((int) $item['id'] === (int) $plan->id) {
+                $row = $item;
+            }
+        }
+
+        $this->assertNotNull($row);
+        $this->assertSame(3 * SandboxGateway::CYCLE_MINUTES, $row['simulated_cycle_minutes']);
+        $this->assertSame(
+            SandboxGateway::nextCycleAt(new \DateTimeImmutable('2026-01-01 00:00:00'), 3),
+            (new \DateTimeImmutable('2026-01-01 00:00:00'))
+                ->modify('+' . $row['simulated_cycle_minutes'] . ' minutes')
+                ->format('Y-m-d H:i:s'),
+            'the number on the row is the one the schedule uses'
+        );
     }
 }
