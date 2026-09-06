@@ -7,7 +7,7 @@ namespace FundKit\Foundation\Upgrade;
 use FundKit\Funds\Fund;
 
 /**
- * Clears the schedule off the default fund.
+ * Makes the default fund open again.
  *
  * The default is where a donation lands when nothing else claims it, so a
  * window on it is a date after which those donations stop arriving: the fund
@@ -15,6 +15,9 @@ use FundKit\Funds\Fund;
  * whichever other fund happens to sort first, silently. Earlier builds let an
  * admin set one, and a site carrying one cannot fix it by upgrading, because
  * the columns only change when something writes them.
+ *
+ * Inactive is the other half of closed, and a restore could leave two rows
+ * flagged, so this settles all three: one default, active, no window.
  *
  * @since 1.0.0
  */
@@ -29,20 +32,34 @@ final class OpenTheDefaultFund implements UpgradeRoutine
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Clearing the schedule from the default fund.', 'fundraising-toolkit');
+        return __('Reopening the default fund. Donations already filed against another fund stay where they are.', 'fundraising-toolkit');
     }
 
     /**
-     * One statement over a table with a handful of rows, so there is nothing
-     * to page: it runs once and reports itself done.
+     * A handful of rows, so there is nothing to page: it runs once and reports
+     * itself done.
      *
      * @since 1.0.0
      */
     public function step(): bool
     {
+        $flagged = Fund::query()->where('is_default', 1)->orderBy('id', 'ASC')->getAll();
+        if ($flagged === []) {
+            return true;
+        }
+
+        // The oldest wins, because it is the one the site has been filing
+        // against; a second flag can only have arrived from a restore.
+        $keep = (int) $flagged[0]->id;
+
+        Fund::query()
+            ->where('id', $keep)
+            ->update(['is_active' => 1, 'starts_at' => null, 'ends_at' => null]);
+
         Fund::query()
             ->where('is_default', 1)
-            ->update(['starts_at' => null, 'ends_at' => null]);
+            ->where('id', $keep, '!=')
+            ->update(['is_default' => 0]);
 
         return true;
     }

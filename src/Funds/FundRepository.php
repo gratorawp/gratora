@@ -28,7 +28,10 @@ final class FundRepository
     /** @since 1.0.0 */
     public function default(): ?Fund
     {
-        return Fund::query()->where('is_default', 1)->get();
+        // Ordered, because nothing in the schema stops a second row carrying
+        // the flag: a restore can bring one in beside this site's own. The
+        // oldest is the one the site has been filing against.
+        return Fund::query()->where('is_default', 1)->orderBy('id', 'ASC')->get();
     }
 
     /**

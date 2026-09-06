@@ -10,6 +10,7 @@ use FundKit\Foundation\Crypto\Crypto;
 use FundKit\Foundation\Identity\IdentityHasher;
 use FundKit\Foundation\References\ReferenceGenerator;
 use FundKit\Foundation\Time\SystemClock;
+use FundKit\Funds\Fund;
 use FundKit\Vendor\Queryable\DB;
 use Throwable;
 
@@ -391,6 +392,10 @@ final class DataImporter
             $row['blocks'] = $this->remapFundIdsInBlocks((string) $row['blocks']);
         }
 
+        if ($table === 'fundkit_funds') {
+            $row = $this->prepareFund($row);
+        }
+
         if ($table === 'fundkit_donors') {
             return $this->prepareDonor($row);
         }
@@ -484,6 +489,40 @@ final class DataImporter
         if ($mapped === [] && $sourceIds !== []) return [self::NO_FUND];
 
         return array_keys($mapped);
+    }
+
+    /**
+     * Rows land here column for column, so a file taken off a site that
+     * predates the rule can bring back a default fund carrying a schedule, and
+     * a default whose code differs from this site's lands beside the existing
+     * one rather than replacing it. Neither is something the file is wrong
+     * about: this site simply already has a default, and a default cannot
+     * carry a window.
+     *
+     * @param array<string,mixed> $row
+     * @return array<string,mixed>
+     *
+     * @since 1.0.0
+     */
+    private function prepareFund(array $row): array
+    {
+        if (empty($row['is_default'])) {
+            return $row;
+        }
+
+        // Whichever fund this site nominated keeps the flag; an imported one
+        // arrives as an ordinary fund, and the operator can promote it.
+        if (Fund::query()->where('is_default', 1)->count() > 0) {
+            $row['is_default'] = 0;
+
+            return $row;
+        }
+
+        $row['is_active'] = 1;
+        $row['starts_at'] = null;
+        $row['ends_at']   = null;
+
+        return $row;
     }
 
     /**

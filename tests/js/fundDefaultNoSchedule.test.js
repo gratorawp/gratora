@@ -158,12 +158,47 @@ it( 'drops the window when a scheduled fund is made the default in the editor', 
     expect( posted[ 0 ].data.ends_at ).toBeNull();
 } );
 
-it( 'gives the schedule back when the fund stops being the default', async () => {
+it( 'names the dates it is about to clear', async () => {
+    mount();
+    await waitFor( () => !! captured.actions );
+    await settle();
+
+    await captured.actions.find( ( a ) => a.id === 'set-default' ).callback( [ SCHEDULED ] );
+    await settle();
+
+    const dialog = document.querySelector( '.fundkit-dialog' );
+    expect( dialog.textContent ).toContain( '2026-11-01' );
+    expect( dialog.textContent ).toContain( '2026-12-31' );
+} );
+
+/**
+ * A site always has a default and the server refuses to clear the flag, so the
+ * control that asks is a round trip the reader cannot win.
+ */
+it( 'does not offer to un-default the fund that is already the default', async () => {
     const dialog = await openEditor( { ...PLAIN, is_default: true } );
+
+    expect( defaultSwitch( dialog ).disabled ).toBe( true );
+    expect( dialog.textContent ).toContain( 'Promote another fund to move it' );
+} );
+
+it( 'still offers the toggle on a fund that is not the default', async () => {
+    const dialog = await openEditor( PLAIN );
+
+    expect( defaultSwitch( dialog ).disabled ).toBe( false );
+} );
+
+it( 'gives the schedule back when the default is turned off mid-edit', async () => {
+    // A fund being promoted in this session, not one that arrived as the
+    // default: that one's toggle is locked.
+    const dialog = await openEditor( PLAIN );
 
     defaultSwitch( dialog ).click();
     await settle();
+    expect( scheduleSwitch( dialog ).disabled ).toBe( true );
 
+    defaultSwitch( dialog ).click();
+    await settle();
     expect( scheduleSwitch( dialog ).disabled ).toBe( false );
 } );
 
@@ -181,7 +216,7 @@ it( 'asks before the row action clears a schedule, and sends the clear itself', 
 
     const dialog = document.querySelector( '.fundkit-dialog' );
     expect( dialog ).not.toBeNull();
-    expect( dialog.textContent ).toContain( 'clears its start and end dates' );
+    expect( dialog.textContent ).toContain( 'clears those dates' );
 
     [ ...dialog.querySelectorAll( '.fundkit-dialog__foot button' ) ].pop().click();
     await settle();

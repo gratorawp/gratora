@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Funds;
 
+use FundKit\Analytics\ErrorLog;
 use FundKit\Campaigns\Campaign;
 use FundKit\Forms\Form;
 
@@ -50,7 +51,24 @@ final class FundResolver
         }
 
         $open = $this->funds->listOpen();
-        return $open === [] ? null : (int) $open[0]->id;
+        if ($open === []) {
+            return null;
+        }
+
+        // Only reachable from a row FundService could not have written: it
+        // refuses a default that is inactive or scheduled. A restore can still
+        // land one, and this is where that shows up, as untagged money filed
+        // against a fund the org never nominated. Recorded rather than
+        // silently rerouted, because the donation still has to go somewhere.
+        if ($default) {
+            ErrorLog::record(
+                'funds.default_closed',
+                'The default fund is not taking donations, so untagged donations are being filed against another fund.',
+                ['fund_id' => (int) $default->id, 'filed_against' => (int) $open[0]->id]
+            );
+        }
+
+        return (int) $open[0]->id;
     }
 
     /** @since 1.0.0 */

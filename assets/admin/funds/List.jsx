@@ -64,6 +64,28 @@ function arrangeTree( items ) {
 // which of the two it is rather than calling it Active.
 export const fundIsOpen = ( item ) => !! item.is_active && ! item.schedule_state;
 
+/**
+ * The window as the admin picked it. The stored value rather than a formatted
+ * one: these are calendar dates with no time, and rendering them through a
+ * timezone is how a date lands a day out.
+ */
+export function fundWindowLabel( item ) {
+    const from = ( item.starts_at || '' ).slice( 0, 10 );
+    const to   = ( item.ends_at || '' ).slice( 0, 10 );
+
+    if ( from && to ) {
+        /* translators: 1: start date, 2: end date */
+        return sprintf( __( 'from %1$s to %2$s', 'fundraising-toolkit' ), from, to );
+    }
+    if ( to ) {
+        /* translators: %s: end date */
+        return sprintf( __( 'until %s', 'fundraising-toolkit' ), to );
+    }
+
+    /* translators: %s: start date */
+    return sprintf( __( 'from %s', 'fundraising-toolkit' ), from );
+}
+
 /** @since 1.0.0 */
 export function fundStatusLabel( item ) {
     if ( ! item.is_active ) return __( 'Inactive', 'fundraising-toolkit' );
@@ -365,9 +387,10 @@ export default function List() {
                 setConfirm( {
                     title:   __( 'Clear the schedule?', 'fundraising-toolkit' ),
                     message: sprintf(
-                        /* translators: %s: fund name */
-                        __( '%s has a schedule. The default fund takes every donation with no fund chosen, so it has to stay open: making this one the default clears its start and end dates.', 'fundraising-toolkit' ),
-                        item.name
+                        /* translators: 1: fund name, 2: the dates that will be cleared */
+                        __( '%1$s runs %2$s. The default fund takes every donation with no fund chosen, so it has to stay open: making this one the default clears those dates.', 'fundraising-toolkit' ),
+                        item.name,
+                        fundWindowLabel( item )
                     ),
                     confirmLabel: __( 'Clear and set as default', 'fundraising-toolkit' ),
                     onConfirm: () => mutate(
@@ -686,9 +709,15 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
                         <legend>{ __( 'Behaviour', 'fundraising-toolkit' ) }</legend>
                         <ToggleRow
                             title={ __( 'Default fund', 'fundraising-toolkit' ) }
-                            sub={ __( 'Donations with no chosen fund (and campaigns with no default) are allocated here. The default has no schedule.', 'fundraising-toolkit' ) }
+                            // Off is not a move the server accepts: a site always
+                            // has a default, and it changes by promoting another
+                            // fund rather than by clearing this one.
+                            sub={ fund.is_default
+                                ? __( 'Donations with no chosen fund (and campaigns with no default) are allocated here. Promote another fund to move it.', 'fundraising-toolkit' )
+                                : __( 'Donations with no chosen fund (and campaigns with no default) are allocated here. The default has no schedule.', 'fundraising-toolkit' ) }
                             checked={ form.is_default }
                             onChange={ setIsDefault }
+                            disabled={ !! fund.is_default }
                         />
                         <ToggleRow
                             title={ __( 'Active', 'fundraising-toolkit' ) }
