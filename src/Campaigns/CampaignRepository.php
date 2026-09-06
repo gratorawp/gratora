@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Campaigns;
 
 use FundKit\Foundation\Auth\Capabilities;
+use FundKit\Foundation\Helpers\Money;
 use FundKit\Vendor\Queryable\DB;
 
 /**
@@ -231,7 +232,7 @@ final class CampaignRepository
     /**
      * KPI-strip aggregates for the campaigns admin list; honors the same status + search
      * filters as listAdmin(). Sums the denormalized per-campaign counters (lifetime totals,
-     * not a live donations aggregate); currency is the most common among raising rows, else null.
+     * not a live donations aggregate).
      *
      * @param array{status?:?string,search?:?string} $args
      * @return array{total_count:int,active_count:int,raised_cents:int,currency:?string,donations_count:int}
@@ -265,20 +266,16 @@ final class CampaignRepository
             ->selectRaw('COALESCE(SUM(raised_cents),0) AS raised, COALESCE(SUM(donations_count),0) AS donations')
             ->get();
 
-        $currencyRow = $applyFilters($base())
-            ->where('raised_cents', 0, '>')
-            ->selectRaw('currency, COUNT(*) AS cnt')
-            ->groupBy('currency')
-            ->orderByRaw('cnt DESC')
-            ->limit(1)
-            ->get();
-
         return [
             'total_count'     => $totalCount,
             'active_count'    => $activeCount,
             'raised_cents'    => (int) ($sumsRow['raised']    ?? 0),
             'donations_count' => (int) ($sumsRow['donations'] ?? 0),
-            'currency'        => is_array($currencyRow) ? ((string) ($currencyRow['currency'] ?? '')) ?: null : null,
+            // campaigns.raised_cents is written in the base currency, so the
+            // sum is one figure in one currency. Labelling it with the most
+            // common per-campaign currency printed a euro total with a dollar
+            // sign on any site whose campaigns are mostly denominated abroad.
+            'currency'        => Money::defaultCurrency(),
         ];
     }
 }

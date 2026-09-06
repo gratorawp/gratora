@@ -161,16 +161,21 @@ final class Money
         return $major < 0 ? '-' . $out : $out;
     }
 
-    /** @since 1.0.0 */
+    /**
+     * Read every time, not memoised: get_option is already served from the
+     * object cache, and a static held the currency as it stood when the process
+     * started. A base-currency change inside one long-running process (WP-CLI,
+     * an importer, a queue drain) then labelled every figure after it with the
+     * currency it had before.
+     *
+     * @since 1.0.0
+     */
     public static function defaultCurrency(): string
     {
-        static $cached = null;
-        if ($cached !== null) return $cached;
-
         $opt = get_option('fundkit_currency_locale');
-        if (is_array($opt) && ! empty($opt['default_currency'])) {
-            return $cached = strtoupper((string) $opt['default_currency']);
-        }
-        return $cached = 'USD';
+
+        return is_array($opt) && ! empty($opt['default_currency'])
+            ? strtoupper((string) $opt['default_currency'])
+            : 'USD';
     }
 }
