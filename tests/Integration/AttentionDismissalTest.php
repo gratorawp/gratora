@@ -202,4 +202,56 @@ final class AttentionDismissalTest extends IntegrationTestCase
         $this->assertNotNull($back, 'five is a worse situation than three');
         $this->assertSame(5, (int) $back['count']);
     }
+
+    private function publishedCampaign(int $n): void
+    {
+        $now = gmdate('Y-m-d H:i:s');
+        $c   = \FundKit\Campaigns\Campaign::make();
+        $c->title      = 'Queue ' . $n;
+        $c->slug       = 'queue-' . $n . '-' . bin2hex(random_bytes(3));
+        $c->status     = 'published';
+        $c->currency   = 'USD';
+        $c->created_at = $now;
+        $c->updated_at = $now;
+        $c->save();
+    }
+
+    /** @return list<string> */
+    private function offeredKeys(string $prefix): array
+    {
+        $out = [];
+        foreach ($this->metrics()->attention() as $item) {
+            $key = (string) ($item['key'] ?? '');
+            if (str_starts_with($key, $prefix)) $out[] = $key;
+        }
+
+        return $out;
+    }
+
+    /**
+     * The per-campaign queues are cut to twenty in SQL and filtered for
+     * dismissals afterwards, so waving off a full page took the page with it:
+     * the campaigns behind it were never selected, so they were never offered
+     * and the queue could not be worked through.
+     */
+    public function test_dismissing_the_first_page_does_not_hide_the_campaigns_behind_it(): void
+    {
+        $userId = $this->beAdmin();
+        for ($i = 1; $i <= 25; $i++) {
+            $this->publishedCampaign($i);
+        }
+
+        $first = $this->offeredKeys('no-form-');
+        $this->assertCount(20, $first, 'the queue is a page at a time');
+
+        $dismissals = new AttentionDismissals();
+        foreach ($first as $key) {
+            $dismissals->dismiss($userId, $key, 'x');
+        }
+
+        $second = $this->offeredKeys('no-form-');
+
+        $this->assertNotSame([], $second, 'the rest of the queue is unreachable');
+        $this->assertSame([], array_intersect($first, $second), 'and it is the rest, not the same page again');
+    }
 }

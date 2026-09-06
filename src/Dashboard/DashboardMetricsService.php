@@ -367,15 +367,25 @@ final class DashboardMetricsService
         // below: no offset is more than a day, so a two-day margin cannot miss
         // one.
         $now     = $this->clock->now()->format('Y-m-d H:i:s');
-        $soonEnd = $this->clock->now()->modify('+7 days')->format('Y-m-d H:i:s');
+        $soonEnd    = $this->clock->now()->modify('+7 days')->format('Y-m-d H:i:s');
+        $dismissals = new AttentionDismissals();
+        $userId     = get_current_user_id();
+
+        // Excluded in the query, not after it: the limit below is applied first,
+        // so a page of dismissed rows would take the whole page with it and the
+        // campaigns behind them would never be offered at all.
+        $endingSeen = $dismissals->dismissedIds($userId, 'ending-');
+
         $ending  = Campaign::query()
             ->where('status', 'published')
             ->whereIsNotNull('ends_at')
             ->where('ends_at', $this->clock->now()->modify('-2 days')->format('Y-m-d H:i:s'), '>=')
             ->where('ends_at', $this->clock->now()->modify('+9 days')->format('Y-m-d H:i:s'), '<=')
-            ->orderBy('ends_at')
-            ->limit(self::ATTENTION_MAX)
-            ->getAll();
+            ->orderBy('ends_at');
+        if ($endingSeen !== []) {
+            $ending = $ending->whereNotIn('id', $endingSeen);
+        }
+        $ending = $ending->limit(self::ATTENTION_MAX)->getAll();
         foreach ($ending as $c) {
             $endsUtc = ScheduleWindow::endsAtUtc((string) $c->ends_at);
             if ($endsUtc === null || $endsUtc < $now || $endsUtc > $soonEnd) {
@@ -404,14 +414,17 @@ final class DashboardMetricsService
         // Capped: one row per campaign with no rollup, on a screen whose
         // dismissals are themselves capped at fifty, meant an org past that
         // could never clear the queue.
+        $formSeen    = $dismissals->dismissedIds($userId, 'no-form-');
         $missingForm = Campaign::query()
             ->where('status', 'published')
             ->where(function ($q) {
                 $q->whereIsNull('default_form_id')->orWhere('default_form_id', 0, '<=');
             })
-            ->orderBy('id')
-            ->limit(self::ATTENTION_MAX)
-            ->getAll();
+            ->orderBy('id');
+        if ($formSeen !== []) {
+            $missingForm = $missingForm->whereNotIn('id', $formSeen);
+        }
+        $missingForm = $missingForm->limit(self::ATTENTION_MAX)->getAll();
         foreach ($missingForm as $c) {
             $items[] = [
                 'key'   => 'no-form-' . $c->id,

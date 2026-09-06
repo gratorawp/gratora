@@ -118,6 +118,29 @@ final class AttentionDismissals
      * @return array<string,string>
      * @since 1.0.0
      */
+    /**
+     * The campaign ids this user has already waved off under a key prefix.
+     *
+     * The per-campaign queues are limited in SQL and filtered afterwards, so a
+     * page of dismissed rows would otherwise cost the queue its whole page: the
+     * campaigns behind them are never selected and never offered.
+     *
+     * @return list<int>
+     * @since 1.0.0
+     */
+    public function dismissedIds(int $userId, string $prefix): array
+    {
+        $out = [];
+        foreach (array_keys($this->all($userId)) as $key) {
+            if (! str_starts_with((string) $key, $prefix)) continue;
+
+            $id = (int) substr((string) $key, strlen($prefix));
+            if ($id > 0) $out[] = $id;
+        }
+
+        return $out;
+    }
+
     public function all(int $userId): array
     {
         if ($userId <= 0) {

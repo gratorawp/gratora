@@ -11,16 +11,15 @@ import EmptyState from '../../_shared/components/EmptyState';
 import Icon from '../../_shared/components/Icon';
 import TokenEditor from '../../_shared/styling/TokenEditor';
 import StylePreview from '../../_shared/styling/StylePreview';
+import { presetsForPanel } from './brandPresets';
 
 const PlusIcon  = () => <Icon name="plus"  size={ 16 } />;
 const CloneIcon = () => <Icon name="copy"  size={ 14 } />;
 const TrashIcon = () => <Icon name="trash" size={ 14 } />;
 
 export default function BrandPanel( { s } ) {
-    // Seed from window.fundkit.styling.presets when the option hasn't been saved yet.
-    const saved      = Array.isArray( s.value( 'presets' ) ) ? s.value( 'presets' ) : [];
-    const globalList = Array.isArray( window.fundkit?.styling?.presets ) ? window.fundkit.styling.presets : [];
-    const presets    = saved.length > 0 ? saved : globalList;
+    const saved   = Array.isArray( s.value( 'presets' ) ) ? s.value( 'presets' ) : [];
+    const presets = presetsForPanel( saved );
     const defaultId  = String( s.value( 'default_id', '' ) || window.fundkit?.styling?.default_id || '' );
 
     const [ confirm, setConfirm ] = useState( null );
