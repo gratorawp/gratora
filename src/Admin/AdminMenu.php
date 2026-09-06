@@ -146,8 +146,21 @@ final class AdminMenu extends HookProvider
             true
         );
         wp_set_script_translations('fundkit-admin-command-palette', 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
+        // The palette is enqueued on the umbrella cap, which any single area
+        // cap grants, so every destination has to be asked for separately.
+        $can = [self::SLUG => true];
+        foreach ($this->pages() as $page) {
+            $id = (string) ($page['id'] ?? '');
+            if ($id === '') {
+                continue;
+            }
+
+            $can[$id] = current_user_can((string) ($page['capability'] ?? self::CAPABILITY));
+        }
+
         wp_localize_script('fundkit-admin-command-palette', 'fundkitCommandPalette', [
             'adminUrl' => admin_url(),
+            'can'      => $can,
         ]);
     }
 
