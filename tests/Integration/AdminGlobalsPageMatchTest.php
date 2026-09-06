@@ -86,9 +86,14 @@ final class AdminGlobalsPageMatchTest extends IntegrationTestCase
         $payload = $this->payloadOn('fundkit-subscriptions');
         $this->assertStringContainsString('"refund_donations":true', $payload);
 
-        wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
+        // A reader who reaches the screen at all but may not change what is
+        // charged. A subscriber is a different case: they get no payload.
+        $role = 'fundkit_viewer_' . uniqid();
+        add_role($role, 'Viewer', ['read' => true, 'fundkit_view_donations' => true]);
+        wp_set_current_user(self::factory()->user->create(['role' => $role]));
         $payload = $this->payloadOn('fundkit-subscriptions');
         $this->assertStringContainsString('"refund_donations":false', $payload);
+        remove_role($role);
     }
 
     /**

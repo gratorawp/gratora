@@ -4,6 +4,7 @@ import apiFetch from '@wordpress/api-fetch';
 
 import { initials, formatMonth, formatDate, formatDateTime, SEGMENT_LABELS } from './helpers';
 import { countryName } from '../../../_shared/countries';
+import { userCan } from '../../_shared/caps';
 import { IconMail, IconMapPin, IconCalendar, IconCopy, IconPhone } from './icons';
 
 function CopyButton( { value, label } ) {
@@ -169,7 +170,7 @@ export default function IdentityCard( { donor } ) {
                     ) }
                 </div>
 
-                { ! isRedacted && ! magicLinkUrl && (
+                { ! isRedacted && ! magicLinkUrl && userCan( 'edit_donors' ) && (
                     <div className="dp-id-magic">
                         <button
                             type="button"

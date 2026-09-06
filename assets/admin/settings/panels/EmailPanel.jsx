@@ -78,8 +78,8 @@ export default function EmailPanel( { s } ) {
                     <input type="email" className="fundkit-input" { ...s.bind( 'reply_to' ) } />
                 </FormRow>
                 <ToggleRow
-                    title={ __( 'BCC me on every donation receipt', 'fundraising-toolkit' ) }
-                    sub={ __( 'Sends a copy to the admin email.', 'fundraising-toolkit' ) }
+                    title={ __( 'BCC me on every donor email', 'fundraising-toolkit' ) }
+                    sub={ __( 'Sends the site admin address a copy of every message FundKit sends: receipts, refunds, payment instructions, recurring notices and the test email. Sign-in links are never copied.', 'fundraising-toolkit' ) }
                     checked={ !! s.value( 'bcc_admin', false ) }
                     onChange={ s.setValue( 'bcc_admin' ) }
                 />

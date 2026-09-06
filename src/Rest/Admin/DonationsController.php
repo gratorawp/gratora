@@ -272,6 +272,34 @@ final class DonationsController
         return new WP_REST_Response(['deleted' => true], 200);
     }
 
+    /**
+     * The outcome of the write, plus the detail payload only for a caller who
+     * holds what the read route asks for.
+     *
+     * Changing what is charged and reading a donor's file are separately
+     * assignable capabilities, so a refunder without fundkit_view_donations is
+     * not handed the whole donation record by pressing a button.
+     *
+     * @since 1.0.0
+     */
+    private function actionResult(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        if ($this->canAccess()) {
+            return new WP_REST_Response($this->show($request)->get_data(), 200);
+        }
+
+        $donation = $this->donations->findByReference((string) $request['reference']);
+        if (! $donation) {
+            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
+        }
+
+        return new WP_REST_Response([
+            'reference' => (string) $donation->reference,
+            'status'    => (string) $donation->status,
+            'paid_at'   => $donation->paid_at,
+        ], 200);
+    }
+
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
@@ -1132,7 +1160,7 @@ final class DonationsController
             );
         }
 
-        return new WP_REST_Response($this->show($request)->get_data(), 200);
+        return $this->actionResult($request);
     }
 
     public function markPaid(WP_REST_Request $request): WP_REST_Response|WP_Error
@@ -1143,7 +1171,7 @@ final class DonationsController
             return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         if ($donation->status === 'paid') {
-            return new WP_REST_Response($this->show($request)->get_data(), 200);
+            return $this->actionResult($request);
         }
         // `processing` is here because a bank debit settles days after it was
         // authorised, and an admin reconciling a bank statement is often the
@@ -1184,7 +1212,7 @@ final class DonationsController
         } catch (RuntimeException $e) {
             return new WP_Error('fundkit_confirm_failed', $e->getMessage(), ['status' => 500]);
         }
-        return $this->show($request);
+        return $this->actionResult($request);
     }
 
     /** @since 1.0.0 */
@@ -1196,7 +1224,7 @@ final class DonationsController
             return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
         }
         if ($donation->status === 'failed') {
-            return new WP_REST_Response($this->show($request)->get_data(), 200);
+            return $this->actionResult($request);
         }
         if ($donation->status === 'paid') {
             return new WP_Error(
@@ -1221,7 +1249,7 @@ final class DonationsController
         $body   = (array) ($request->get_json_params() ?? []);
         $reason = isset($body['reason']) && $body['reason'] !== '' ? (string) $body['reason'] : null;
         $this->donationService->markFailed($donation, $reason);
-        return $this->show($request);
+        return $this->actionResult($request);
     }
 
     /**

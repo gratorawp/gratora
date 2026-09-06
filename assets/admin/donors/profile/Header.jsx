@@ -1,6 +1,7 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 
 import { formatMonth } from './helpers';
+import { userCan } from '../../_shared/caps';
 import { IconRotate, IconAlert } from './icons';
 
 function HeadChip( { children, tone = 'ok', mono = false } ) {
@@ -82,7 +83,7 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
                     { /* Erasure took the email with it, so the panel opens empty
                          and Save blames the field for a record that cannot be
                          edited at all. */ }
-                    { ! isRedacted && (
+                    { ! isRedacted && userCan( 'edit_donors' ) && (
                         <button type="button" className="btn" onClick={ onEdit }>
                             { __( 'Edit details', 'fundraising-toolkit' ) }
                         </button>

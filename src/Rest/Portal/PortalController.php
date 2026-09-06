@@ -1645,7 +1645,7 @@ final class PortalController
             'consents'  => $consentRows,
             'recurring' => $planRows,
         ];
-        $bundle = self::withoutStaffNotes($bundle);
+        $bundle = self::forDonor($bundle);
         $bundle['exported_at'] = gmdate('c');
 
         $json     = wp_json_encode($bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -1672,21 +1672,33 @@ final class PortalController
     }
 
     /**
-     * Staff notes are for staff.
+     * The organization's own working record is not part of the donor's file.
      *
-     * The org-side export carries them, decrypted, with the name and role of
-     * whoever wrote each one. That is the organization's own working record of
-     * a donor, kept so its people can talk to each other, and it is not handed
-     * to the person it discusses.
+     * Staff notes are decrypted in the org-side export, carrying the name and
+     * role of whoever wrote each one. The error log is the same thing in a
+     * different table: ErrorLog stores raw exception text, which is upstream
+     * response bodies, SQL errors and prefixed table names, and it is exactly
+     * what the portal's own failure responses are worded to keep back.
      *
      * @param  array<string,mixed> $bundle
      * @return array<string,mixed>
      *
      * @since 1.0.0
      */
-    private static function withoutStaffNotes(array $bundle): array
+    private static function forDonor(array $bundle): array
     {
         unset($bundle['notes']);
+
+        foreach (array_keys($bundle['recurring']['plans'] ?? []) as $i) {
+            unset($bundle['recurring']['plans'][$i]['errors']);
+            unset($bundle['recurring']['plans'][$i]['last_failure']['reason']);
+        }
+
+        foreach ($bundle['events'] ?? [] as $i => $event) {
+            if (str_starts_with((string) ($event['type'] ?? ''), ErrorLog::PREFIX)) {
+                unset($bundle['events'][$i]['payload']);
+            }
+        }
 
         return $bundle;
     }

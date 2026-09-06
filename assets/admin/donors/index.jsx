@@ -25,6 +25,7 @@ import { formatAmount, formatDate, timeAgo } from '../_shared/format';
 import { localizedCountries } from '../../_shared/countries';
 import Insights from './Insights';
 import DonorProfile from './DonorProfile';
+import { userCan } from '../_shared/caps';
 import './donors.scss';
 import '../campaigns/campaigns.scss';
 
@@ -303,7 +304,7 @@ export function DonorsApp( { toggleSlot } ) {
             // answer: the counters here are live and paid only, so they say yes
             // to a donor whose only donation is a rehearsal, a refund or an
             // attempt that never completed, and the server would 409.
-            isEligible:    ( item ) => !! item.deletable,
+            isEligible:    ( item ) => userCan( 'redact_donors' ) && !! item.deletable,
             // DataViews hands a bulk callback the whole selection, not the
             // eligible subset, so isEligible only decides whether the button is
             // drawn. Without re-filtering, the count in the sentence is wrong
@@ -361,7 +362,7 @@ export function DonorsApp( { toggleSlot } ) {
             icon:          () => <RedactIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
-            isEligible:    ( item ) => ! item.redacted,
+            isEligible:    ( item ) => userCan( 'redact_donors' ) && ! item.redacted,
             callback: ( selection ) => {
                 const items = selection.filter( ( i ) => ! i.redacted );
                 if ( ! items.length ) return;

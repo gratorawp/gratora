@@ -15,6 +15,10 @@ import ReceiptCard from '../../assets/admin/donations/detail/cards/ReceiptCard';
 import ExportTab from '../../assets/admin/tools/tabs/ExportTab';
 import MaintenanceTab from '../../assets/admin/tools/tabs/MaintenanceTab';
 import LogsTab from '../../assets/admin/tools/tabs/LogsTab';
+import DonorHeader from '../../assets/admin/donors/profile/Header';
+import IdentityCard from '../../assets/admin/donors/profile/IdentityCard';
+import ConsentTab from '../../assets/admin/donors/profile/tabs/ConsentTab';
+import NotesTab from '../../assets/admin/donors/profile/tabs/NotesTab';
 
 const { waitFor } = require( './support/waitFor' );
 
@@ -67,6 +71,57 @@ beforeEach( () => {
     apiFetch.mockReset();
     document.body.innerHTML = '';
     delete window.fundkit;
+} );
+
+describe( 'the donor profile', () => {
+    const DONOR = {
+        id: 9,
+        name: 'Nadia Rahman',
+        email: 'nadia@example.test',
+        is_anonymous: false,
+        redacted_at: null,
+        first_donation_at: null,
+        country: '',
+        public_hidden_at: null,
+    };
+
+    const screens = () => (
+        <>
+            <DonorHeader
+                donor={ DONOR }
+                recurring={ { plans: [] } }
+                banners={ [] }
+                onBack={ () => {} }
+                onEdit={ () => {} }
+                onTabSwitch={ () => {} }
+            />
+            <IdentityCard donor={ DONOR } />
+            <ConsentTab donor={ DONOR } consents={ [] } onChanged={ () => {} } />
+            <NotesTab donor={ DONOR } notes={ [] } onChanged={ () => {} } />
+        </>
+    );
+
+    const CONTROLS = [ 'Edit details', 'Create a sign-in link', 'Add note', 'Export personal data', 'Redact donor' ];
+
+    it( 'offers nothing a view-only reader cannot do', () => {
+        window.fundkit = { can: { view_donors: true } };
+        mount( screens() );
+
+        for ( const control of CONTROLS ) {
+            expect( labels() ).not.toContain( control );
+        }
+    } );
+
+    it( 'offers each control to whoever holds its capability', () => {
+        window.fundkit = { can: {
+            view_donors: true, edit_donors: true, export_donors: true, redact_donors: true,
+        } };
+        mount( screens() );
+
+        for ( const control of CONTROLS ) {
+            expect( labels() ).toContain( control );
+        }
+    } );
 } );
 
 describe( 'the donation detail rail', () => {

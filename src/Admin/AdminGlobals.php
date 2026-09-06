@@ -36,7 +36,10 @@ final class AdminGlobals extends HookProvider
     /** @since 1.0.0 */
     public function inject(): void
     {
-        if (! $this->isFundKitAdminPage()) return;
+        // The slug is the reader's to type. Without the capability check,
+        // ?page=fundkit on any screen they may already open hands them the
+        // org's configuration and the site administrator's address.
+        if (! $this->isFundKitAdminPage() || ! Capabilities::canAccessAdmin()) return;
 
         $currencyLocale = get_option('fundkit_currency_locale', []);
         $defaultCurrency = Money::defaultCurrency();

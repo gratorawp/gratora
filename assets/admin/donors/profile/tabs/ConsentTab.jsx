@@ -9,6 +9,7 @@ import { formatDateTime } from '../helpers';
 import { IconAlert, IconDownload, IconTrash } from '../icons';
 import { downloadFile } from '../../../_shared/download';
 import notify from '../../../_shared/notify';
+import { userCan } from '../../../_shared/caps';
 
 function RedactDialog( { donor, onClose, onDone } ) {
     const expected = donor.email || `DONOR_${ donor.id }`;
@@ -149,7 +150,7 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                                     : __( 'Visible. This donor can appear by name in supporter walls, recent donations and top donor lists, with their picture and any public message.', 'fundraising-toolkit' ) }
                             </div>
                         </div>
-                        { donor && ! donor.redacted_at && (
+                        { donor && ! donor.redacted_at && userCan( 'edit_donors' ) && (
                             <button
                                 type="button"
                                 className="btn"
@@ -168,7 +169,7 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                                 { __( 'Bundles donor record, donations, receipts, consents, and event log into a single JSON file.', 'fundraising-toolkit' ) }
                             </div>
                         </div>
-                        { donor && (
+                        { donor && userCan( 'export_donors' ) && (
                             <button
                                 type="button"
                                 className="btn"
@@ -180,6 +181,7 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                         ) }
                     </div>
                 </div>
+                { userCan( 'redact_donors' ) && (
                 <div className="dp-danger-foot">
                     <div className="dp-danger-foot__body">
                         <div className="dp-danger-foot__title">
@@ -202,6 +204,7 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                         </button>
                     </div>
                 </div>
+                ) }
                 { showRedact && donor && (
                     <RedactDialog
                         donor={ donor }

@@ -1046,6 +1046,7 @@ final class DonorMetricsService
             if (! isset($consentCurrent[$c->purpose])) {
                 $consentCurrent[$c->purpose] = [
                     'purpose'            => (string) $c->purpose,
+                    'label'              => (string) ($c->purpose_label ?? $c->purpose),
                     'granted'            => (bool) $c->granted,
                     'source'             => (string) $c->source,
                     'occurred_at'        => (string) $c->occurred_at,

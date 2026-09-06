@@ -502,7 +502,7 @@ function App() {
                 { tab === 'recurring'   && <Recurring /> }
                 { tab === 'receipts'    && <Receipts /> }
                 { tab === 'preferences' && <Preferences /> }
-                { tab === 'profile'     && <Profile  onSaved={ loadMe } /> }
+                { tab === 'profile'     && <Profile  me={ me } onSaved={ loadMe } /> }
                 { tab === 'consents'    && <Consents onResolved={ ( pending ) => setMe( ( cur ) => cur ? { ...cur, consents_pending: pending } : cur ) } /> }
                 { visibleExtTabs.map( ( t ) => (
                     tab === t.id ? <ExtensionPanel key={ t.id } tab={ t } context={ extContext } /> : null
@@ -1442,7 +1442,7 @@ function Receipts() {
     );
 }
 
-function Profile( { onSaved } ) {
+function Profile( { me, onSaved } ) {
     const [ form, setForm ]   = useState( null );
     const [ saving, setSaving ] = useState( false );
     const [ saved,  setSaved  ] = useState( false );
@@ -1575,28 +1575,25 @@ function Profile( { onSaved } ) {
                 { saved && <span class="dp-form__saved">{ __( 'Saved.', 'fundraising-toolkit' ) }</span> }
                 { err && <span class="dp-error">{ err }</span> }
             </div>
-            <PrivacyActions />
+            <PrivacyActions me={ me } />
         </div>
     );
 }
 
-function PrivacyActions() {
+function PrivacyActions( { me } ) {
     const [ exporting, setExporting ] = useState( false );
     const [ deleting, setDeleting ]   = useState( false );
     const [ confirmOpen, setConfirmOpen ] = useState( false );
     const [ error, setError ]         = useState( null );
     // Both routes refuse when the org has turned them off, so this only decides
-    // whether the donor is offered something that would be refused.
-    const [ allowed, setAllowed ]     = useState( null );
-
-    useEffect( () => {
-        api( 'me' )
-            .then( ( me ) => setAllowed( {
-                export: me.allow_data_export !== false,
-                remove: me.allow_account_delete !== false,
-            } ) )
-            .catch( () => setAllowed( { export: false, remove: false } ) );
-    }, [] );
+    // whether the donor is offered something that would be refused. Read off
+    // the donor the app already holds: a second fetch of the same thing turns a
+    // transient failure into a screen with no right-of-access controls on it
+    // and nothing saying why.
+    const allowed = {
+        export: me?.allow_data_export !== false,
+        remove: me?.allow_account_delete !== false,
+    };
 
     const downloadData = async () => {
         setExporting( true );
@@ -1659,7 +1656,7 @@ function PrivacyActions() {
         }
     };
 
-    if ( ! allowed || ( ! allowed.export && ! allowed.remove ) ) return null;
+    if ( ! allowed.export && ! allowed.remove ) return null;
 
     const note = allowed.export && allowed.remove
         ? __( "Download returns a JSON copy of everything we hold on you. Deletion anonymizes your record; donation totals stay for the organization's tax records.", 'fundraising-toolkit' )

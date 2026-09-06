@@ -7,6 +7,7 @@ import EmptyState from '../../../_shared/components/EmptyState';
 import ConfirmDialog from '../../../_shared/components/ConfirmDialog';
 import { formatDateTime, timeAgo, initials } from '../helpers';
 import { IconTrash } from '../icons';
+import { userCan } from '../../../_shared/caps';
 
 export default function NotesTab( { donorId, notes: initialNotes, total, onChanged } ) {
     const [ notes, setNotes ] = useState( initialNotes || [] );
@@ -117,6 +118,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                             </div>
                         ) }
 
+                    { userCan( 'edit_donors' ) && (
                     <form className="dp-note-form" onSubmit={ submit }>
                         <textarea className="fundkit-textarea"
                             value={ body }
@@ -135,6 +137,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                             </button>
                         </div>
                     </form>
+                    ) }
                 </div>
             </div>
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
