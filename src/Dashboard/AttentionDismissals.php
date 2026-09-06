@@ -40,6 +40,28 @@ final class AttentionDismissals
     }
 
     /**
+     * Whether an item is news again since it was waved off.
+     *
+     * A counted item is, when the count rises. A rolling window's count also
+     * falls on its own as old rows age out, and the same payments counted one
+     * fewer time are not a new state to wave off a second time.
+     *
+     * @param array<string,mixed> $item
+     * @since 1.0.0
+     */
+    private static function hasWorsened(string $dismissed, array $item): bool
+    {
+        // is_numeric, so a client that lost the signature (NeedsAttention sends
+        // 'x' when it has none) keeps the strict comparison rather than being
+        // hidden for good.
+        if (isset($item['count']) && is_numeric($dismissed)) {
+            return (int) $item['count'] > (int) $dismissed;
+        }
+
+        return $dismissed !== self::signatureFor($item);
+    }
+
+    /**
      * Drop the items this user has waved off at their current signature.
      *
      * @param  array<int,array<string,mixed>> $items
@@ -56,7 +78,7 @@ final class AttentionDismissals
         return array_values(array_filter($items, static function (array $item) use ($dismissed): bool {
             $key = (string) ($item['key'] ?? '');
             return ! isset($dismissed[$key])
-                || $dismissed[$key] !== self::signatureFor($item);
+                || self::hasWorsened($dismissed[$key], $item);
         }));
     }
 

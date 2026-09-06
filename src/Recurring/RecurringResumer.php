@@ -147,7 +147,7 @@ final class RecurringResumer
         // Not "still paused": a plan that reads active with a stale resume_at
         // is a skipped cycle, and clearing its marker is the point of the sweep.
         $written = $this->writeColumns($plan, [
-            'status'     => 'active',
+            'status'     => RecurringPlanActions::resumedStatus($plan),
             'resume_at'  => null,
             'updated_at' => $this->clock->now()->format('Y-m-d H:i:s'),
         ], true);

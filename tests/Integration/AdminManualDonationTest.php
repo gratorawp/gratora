@@ -498,4 +498,53 @@ final class AdminManualDonationTest extends IntegrationTestCase
 
         $this->assertSame(201, $res->get_status());
     }
+
+    /** Swap the first statement matching $needle for one the database refuses. */
+    private function breakFirstQueryMatching(string $needle): callable
+    {
+        $fired  = false;
+        $filter = function (string $sql) use ($needle, &$fired): string {
+            if (! $fired && str_contains($sql, $needle)) {
+                $fired = true;
+
+                return 'UPDATE ' . self::$prefix . 'fundkit_donations SET fundkit_no_such_column = 1 WHERE id = 0';
+            }
+
+            return $sql;
+        };
+
+        add_filter('query', $filter);
+        self::$wpdb->suppress_errors(true);
+
+        return function () use ($filter, &$fired): bool {
+            remove_filter('query', $filter);
+            self::$wpdb->suppress_errors(false);
+
+            return $fired;
+        };
+    }
+
+    /**
+     * The note is the only record of how the money arrived, and it was written
+     * outside the guard that exists for exactly this: the catch reads the row
+     * back and answers 201 for money already on the books, so a note that will
+     * not write reported the whole entry as a failure and invited the admin to
+     * type the same check again.
+     */
+    public function test_a_note_that_will_not_write_does_not_report_recorded_money_as_a_failure(): void
+    {
+        $restore = $this->breakFirstQueryMatching('fundkit_donation_notes');
+
+        try {
+            $res = $this->record();
+        } finally {
+            $this->assertTrue($restore(), 'the note write was the statement broken');
+        }
+
+        $this->assertSame(201, $res->get_status(), (string) wp_json_encode($res->get_data()));
+
+        $donation = $this->donation((string) $res->get_data()['reference']);
+        $this->assertNotNull($donation);
+        $this->assertSame('paid', (string) $donation->status, 'the money is on the books either way');
+    }
 }

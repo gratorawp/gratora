@@ -121,14 +121,20 @@ final class RecurringPlanActions
     public function resume(RecurringPlan $plan, RecurringPlanChange $change): void
     {
         $this->assertChangeable($plan);
+        // After the reachability check, not before: an active plan on an absent
+        // gateway must still answer GatewayUnreachable.
         $this->assertGatewayReachable($plan, 'resume');
+
+        if ((string) $plan->status !== 'paused') {
+            throw new PlanChangeRefused(esc_html__('This donation is not paused.', 'fundraising-toolkit'));
+        }
 
         $this->subscription($plan)?->resumeSubscription($plan);
 
         // Clearing resume_at is the point: left set, the resumer lifts a pause
         // that is no longer in effect and the plan charges early.
         $this->write($plan, [
-            'status'    => 'active',
+            'status'    => self::resumedStatus($plan),
             'resume_at' => null,
         ]);
 
@@ -346,6 +352,21 @@ final class RecurringPlanActions
         ];
         $this->finish($plan, $change, 'recurring.interval_changed');
         do_action('fundkit.recurring.plan_interval_changed', $plan);
+    }
+
+    /**
+     * The status a lifted pause returns to.
+     *
+     * A pause does not collect the renewal a gateway declined, so a plan still
+     * carrying one is not active again: the donor screen's banner, the Past due
+     * filter and the profile's own count all key on the status, and
+     * recordPayment clears the counter on the next success.
+     *
+     * @since 1.0.0
+     */
+    public static function resumedStatus(RecurringPlan $plan): string
+    {
+        return (int) $plan->failed_renewals_count > 0 ? 'past_due' : 'active';
     }
 
     private function assertChangeable(RecurringPlan $plan): void

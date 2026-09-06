@@ -635,6 +635,19 @@ final class DonationsController
             } finally {
                 remove_filter('fundkit.receipt.should_issue', $filter, 10);
             }
+
+            // Inside the try, because the catch reads the row back and answers
+            // 201 for money already on the books: a note that will not write
+            // must not be reported as an entry that did not happen.
+            $this->notes->create(
+                (int) $donation->id,
+                sprintf(
+                    /* translators: %s: how the money arrived, e.g. check. */
+                    __('Recorded by hand. Received as %s.', 'fundraising-toolkit'),
+                    $method
+                ),
+                get_current_user_id() ?: null
+            );
         } catch (\Throwable $e) {
             // Throwable, not RuntimeException: anything else escapes as a PHP
             // fatal, leaving the admin a blank 500 with no JSON and no way to
@@ -647,7 +660,7 @@ final class DonationsController
                 : Donation::query()->find('id', (int) $donation->id);
 
             // The money is on the books and something after it failed: a
-            // listener on the completed event, or the note below. Reporting
+            // listener on the completed event, or the note. Reporting
             // failure here is a lie that invites the admin to enter the same
             // check a second time.
             if ($recorded !== null && (string) $recorded->status === 'paid') {
@@ -673,16 +686,6 @@ final class DonationsController
 
             return new WP_Error('fundkit_record_failed', $e->getMessage(), ['status' => 500]);
         }
-
-        $this->notes->create(
-            (int) $donation->id,
-            sprintf(
-                /* translators: %s: how the money arrived, e.g. check. */
-                __('Recorded by hand. Received as %s.', 'fundraising-toolkit'),
-                $method
-            ),
-            get_current_user_id() ?: null
-        );
 
         return new WP_REST_Response([
             'reference' => $donation->reference,

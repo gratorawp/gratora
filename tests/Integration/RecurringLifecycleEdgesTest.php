@@ -117,4 +117,75 @@ final class RecurringLifecycleEdgesTest extends IntegrationTestCase
             'the number the admin authorises a cancellation from counts it, because the sweep will cancel it'
         );
     }
+
+    private function act(RecurringPlan $plan, array $body): \WP_REST_Response
+    {
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+
+        $req = new \WP_REST_Request('POST', '/fundkit/v1/admin/recurring/' . (int) $plan->id . '/action');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode($body + ['notify_donor' => false]));
+
+        return rest_do_request($req);
+    }
+
+    private function reload(RecurringPlan $plan): RecurringPlan
+    {
+        return RecurringPlan::query()->find('id', (int) $plan->id);
+    }
+
+    /**
+     * Resume is the word for lifting a pause. Pointed at a plan the gateway
+     * declined it writes 'active', and the donor screen's declined banner, the
+     * Past due filter and the profile count all key on the status: the plan
+     * reads healthy while the card keeps failing.
+     */
+    public function test_a_declined_plan_cannot_be_resumed_into_looking_healthy(): void
+    {
+        $plan = $this->plan(['status' => 'past_due', 'gateway' => 'offline', 'failed_renewals_count' => 1]);
+
+        $res = $this->act($plan, ['action' => 'resume']);
+
+        $this->assertSame(422, $res->get_status(), (string) wp_json_encode($res->get_data()));
+        $this->assertSame('past_due', (string) $this->reload($plan)->status);
+    }
+
+    /** A pause does not collect the renewal, so lifting it cannot clear one. */
+    public function test_a_pause_does_not_collect_the_declined_renewal(): void
+    {
+        $plan = $this->plan(['status' => 'past_due', 'gateway' => 'offline', 'failed_renewals_count' => 1]);
+
+        $this->assertSame(200, $this->act($plan, ['action' => 'pause', 'months' => 1])->get_status());
+        $this->assertSame('paused', (string) $this->reload($plan)->status);
+
+        $this->assertSame(200, $this->act($plan, ['action' => 'resume'])->get_status());
+        $this->assertSame('past_due', (string) $this->reload($plan)->status);
+    }
+
+    /** The daily sweep lifts the same pause and has to reach the same answer. */
+    public function test_the_sweep_lifts_a_pause_without_clearing_the_decline(): void
+    {
+        $plan = $this->plan([
+            'status'                => 'paused',
+            'gateway'               => 'offline',
+            'failed_renewals_count' => 1,
+            'resume_at'             => gmdate('Y-m-d H:i:s', time() - 3600),
+        ]);
+
+        Plugin::instance()->container->get(\FundKit\Recurring\RecurringResumer::class)->run();
+
+        $fresh = $this->reload($plan);
+        $this->assertSame('past_due', (string) $fresh->status);
+        $this->assertNull($fresh->resume_at);
+    }
+
+    /** The control: a plain pause still resumes to active. */
+    public function test_a_pause_with_nothing_outstanding_still_resumes_to_active(): void
+    {
+        $plan = $this->plan(['status' => 'active', 'gateway' => 'offline']);
+
+        $this->assertSame(200, $this->act($plan, ['action' => 'pause', 'months' => 1])->get_status());
+        $this->assertSame(200, $this->act($plan, ['action' => 'resume'])->get_status());
+        $this->assertSame('active', (string) $this->reload($plan)->status);
+    }
 }

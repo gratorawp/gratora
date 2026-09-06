@@ -2067,10 +2067,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $customerId = (string) $plan->gateway_customer_id;
         if ($customerId === '') {
-            // An imported plan may carry no customer, so it is read back off
-            // the subscription rather than refusing the donor outright.
+            // A plan whose customer was not imported can still be read off the
+            // subscription, when Stripe issued the id. An id Stripe never
+            // issued only ever answers resource_missing, which is
+            // indistinguishable from a key rotated to another account.
             $subId = (string) $plan->gateway_subscription_id;
-            if ($subId !== '') {
+            if (self::couldBeStripeSubscription($subId)) {
                 $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
                 $customerId = is_array($sub['customer'] ?? null)
                     ? (string) ($sub['customer']['id'] ?? '')

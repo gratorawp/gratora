@@ -148,4 +148,37 @@ final class ImportedPlanIdsAreNotSentTest extends IntegrationTestCase
 
         $this->assertNotSame([], $this->calls);
     }
+
+    /**
+     * The card-update flow reads the customer off the subscription when the
+     * import did not carry one. Against an id Stripe never issued that read can
+     * only answer resource_missing, which is indistinguishable from a key
+     * rotated to another account: the donor is told to try again forever.
+     */
+    public function test_starting_a_card_update_sends_nothing_to_stripe(): void
+    {
+        $this->expectException(\RuntimeException::class);
+
+        try {
+            $this->gateway()->startPaymentMethodUpdate($this->importedPlan());
+        } finally {
+            $this->assertSame([], $this->calls, 'an id Stripe never issued is not a subscription to read a customer off');
+        }
+    }
+
+    /** A real subscription still gets its customer read back off Stripe. */
+    public function test_a_real_subscription_still_reads_its_customer(): void
+    {
+        $plan = $this->importedPlan();
+        $plan->gateway_subscription_id = 'sub_real_two';
+        $plan->save();
+
+        try {
+            $this->gateway()->startPaymentMethodUpdate($plan);
+        } catch (\Throwable $e) {
+            // The stub answers no customer, which is not what is under test.
+        }
+
+        $this->assertNotSame([], $this->calls);
+    }
 }

@@ -141,4 +141,65 @@ final class AttentionDismissalTest extends IntegrationTestCase
         $this->assertSame(200, rest_do_request($req)->get_status());
         $this->assertNotNull($this->itemFor('failed-donations'));
     }
+
+    /**
+     * "3 donations failed in the last 24 hours" is a rolling window, so its
+     * count falls on its own as the oldest failure ages out. Comparing the
+     * stored signature for inequality reopens the item at 2 and again at 1: the
+     * admin waves off the same three failures three times.
+     */
+    public function test_a_dismissed_failure_does_not_return_as_the_window_drains(): void
+    {
+        $userId = $this->beAdmin();
+        $this->failDonations(3);
+
+        $item = $this->itemFor('failed-donations');
+        $this->assertNotNull($item);
+        $this->assertSame(3, (int) $item['count']);
+
+        (new AttentionDismissals())->dismiss($userId, 'failed-donations', AttentionDismissals::signatureFor($item));
+        $this->assertNull($this->itemFor('failed-donations'), 'precondition: it is waved off at three');
+
+        // The oldest failure leaves the window. By id, because the builder's
+        // limit does not carry into an update.
+        $ids = array_map(
+            static fn (Donation $d): int => (int) $d->id,
+            Donation::query()->where('status', 'failed')->orderBy('id', 'ASC')->getAll()
+        );
+        Donation::query()
+            ->where('id', $ids[0])
+            ->update(['updated_at' => gmdate('Y-m-d H:i:s', time() - 3 * DAY_IN_SECONDS)]);
+
+        $this->assertNull(
+            $this->itemFor('failed-donations'),
+            'the same failures came back as news because one of them aged out'
+        );
+
+        // A colleague who waved off nothing proves the count really fell,
+        // rather than the item having gone away for everyone.
+        $this->beAdmin();
+        $theirs = $this->itemFor('failed-donations');
+        $this->assertNotNull($theirs);
+        $this->assertSame(2, (int) $theirs['count']);
+    }
+
+    /** A genuinely worse state is news, and comes back. */
+    public function test_a_rising_count_reopens_the_item(): void
+    {
+        $userId = $this->beAdmin();
+        $this->failDonations(3);
+
+        (new AttentionDismissals())->dismiss(
+            $userId,
+            'failed-donations',
+            AttentionDismissals::signatureFor($this->itemFor('failed-donations'))
+        );
+        $this->assertNull($this->itemFor('failed-donations'), 'precondition');
+
+        $this->failDonations(2);
+
+        $back = $this->itemFor('failed-donations');
+        $this->assertNotNull($back, 'five is a worse situation than three');
+        $this->assertSame(5, (int) $back['count']);
+    }
 }
