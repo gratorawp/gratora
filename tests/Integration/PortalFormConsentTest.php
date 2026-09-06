@@ -69,11 +69,13 @@ final class PortalFormConsentTest extends IntegrationTestCase
     {
         $this->grantFromForm();
 
-        foreach ($this->listed() as $row) {
-            if ($row['key'] === self::FORM_PURPOSE) {
-                $this->assertFalse($row['required'], 'nothing off the registry can be unwithdrawable');
-            }
-        }
+        $rows = array_values(array_filter(
+            $this->listed(),
+            static fn (array $row): bool => $row['key'] === self::FORM_PURPOSE
+        ));
+
+        $this->assertNotSame([], $rows, 'the purpose the donor agreed to is on their list');
+        $this->assertFalse($rows[0]['required'], 'nothing off the registry can be unwithdrawable');
     }
 
     public function test_the_donor_can_withdraw_it(): void

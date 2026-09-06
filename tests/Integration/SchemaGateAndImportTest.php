@@ -121,6 +121,37 @@ final class SchemaGateAndImportTest extends IntegrationTestCase
         $this->assertSame($descending, $seen, 'the pages are one ordered list, not four guesses');
     }
 
+    /**
+     * With every sort_order equal, insertion order is not an order anyone
+     * chose. The donor-facing picker breaks that tie by name, so the admin
+     * table has to read the same way or the two lists disagree.
+     */
+    public function test_the_funds_list_reads_the_way_the_donor_picker_does(): void
+    {
+        $now = gmdate('Y-m-d H:i:s');
+        foreach (['Zebra fund', 'Apple fund', 'Mango fund'] as $name) {
+            $f = Fund::make();
+            $f->code       = 'tie-' . uniqid();
+            $f->name       = $name;
+            $f->is_active  = true;
+            $f->sort_order = 0;
+            $f->created_at = $now;
+            $f->updated_at = $now;
+            $f->save();
+        }
+
+        $repo = Plugin::instance()->container->get(FundRepository::class);
+
+        $names = array_map(
+            static fn ($fund): string => (string) $fund->name,
+            $repo->listAdmin(['per_page' => 100])['items']
+        );
+
+        $alphabetical = $names;
+        sort($alphabetical);
+        $this->assertSame($alphabetical, $names);
+    }
+
     /** @param array<string,string> $row @return array<string,mixed> */
     private function importRow(array $row): array
     {

@@ -130,6 +130,7 @@ final class AbilitiesBridgeTest extends IntegrationTestCase
         $abilities = $this->abilities();
         $registry  = Plugin::instance()->container->get(CommandRegistry::class);
 
+        $checked = [];
         foreach ($registry->manifest() as $command) {
             if ((bool) $command['mutating']) {
                 continue;
@@ -140,7 +141,9 @@ final class AbilitiesBridgeTest extends IntegrationTestCase
                 (bool) ($ability->get_meta()['annotations']['readOnlyHint'] ?? false),
                 (string) $command['id'] . ' is a read but is not annotated as one'
             );
-            return;
+            $checked[] = (string) $command['id'];
         }
+
+        $this->assertNotSame([], $checked, 'the manifest offered no read command to check');
     }
 }

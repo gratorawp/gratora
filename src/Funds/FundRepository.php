@@ -211,11 +211,19 @@ final class FundRepository
         };
 
         $total = (int) $applyFilters(Fund::query())->count();
-        $items = $applyFilters(Fund::query())
-            ->orderBy($orderBy, $order)
-            // sort_order is 0 on every row until someone reorders, and MySQL
-            // may break that tie differently per LIMIT: a fund then lands on two
-            // pages and another on none.
+        $sorted = $applyFilters(Fund::query())->orderBy($orderBy, $order);
+
+        // sort_order is 0 on every row until someone reorders it, so the whole
+        // list ties on the default key. Name is what the donor-facing picker
+        // breaks that tie with, so the table reads the same way.
+        if ($orderBy === 'sort_order') {
+            $sorted = $sorted->orderBy('name', $order);
+        }
+
+        // Unique, so a LIMIT window is settled whatever the sort key: without
+        // it MySQL may break a tie differently per page, and a fund lands on
+        // two pages while another lands on none.
+        $items = $sorted
             ->orderBy('id', $order)
             ->limit($perPage)
             ->offset($offset)
