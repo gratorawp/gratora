@@ -81,38 +81,65 @@ async function refusal( r, fallback ) {
     return Object.assign( new Error( data.message || fallback ), { status: r.status, data } );
 }
 
+// The portal's authority is the donor session cookie plus X-FundKit-Csrf; no
+// portal route reads the WP nonce. WordPress still refuses a present-and-stale
+// one at the authentication layer, ahead of every permission callback, so one
+// dead nonce takes down the portal and the sign-in that would recover from it.
+// It is minted at render and cannot be refreshed here, so the request goes
+// unauthenticated rather than not at all.
+function nonceWasRefused( r, err ) {
+    return !! cfg.nonce && r.status === 403 && err.data?.code === 'rest_cookie_invalid_nonce';
+}
+
 function api( path, init = {} ) {
     // FormData sets its own content type, boundary and all. Declaring JSON over
     // it makes the body unparseable at the other end.
     const isForm = typeof FormData !== 'undefined' && init.body instanceof FormData;
-    const headers = {
-        ...( isForm ? {} : { 'Content-Type': 'application/json' } ),
-        // Nonce only when the page minted one (logged-in WP user): a cached
-        // page's stale nonce would make core's cookie check 403 every request,
-        // including magic-link sign-in.
-        ...( cfg.nonce ? { 'X-WP-Nonce': cfg.nonce } : {} ),
-        ...( init.headers || {} ),
-    };
-    if ( csrfToken ) headers[ 'X-FundKit-Csrf' ] = csrfToken;
 
-    return fetch( `${ cfg.rest }${ path }`, {
-        credentials: 'same-origin',
-        headers,
-        ...init,
-    } ).then( async ( r ) => {
+    const send = ( nonce ) => {
+        const headers = {
+            ...( isForm ? {} : { 'Content-Type': 'application/json' } ),
+            ...( nonce ? { 'X-WP-Nonce': nonce } : {} ),
+            ...( init.headers || {} ),
+        };
+        if ( csrfToken ) headers[ 'X-FundKit-Csrf' ] = csrfToken;
+
+        return fetch( `${ cfg.rest }${ path }`, {
+            credentials: 'same-origin',
+            headers,
+            ...init,
+        } );
+    };
+
+    return ( async () => {
+        let r = await send( cfg.nonce );
+
         if ( ! r.ok ) {
-            const err = await refusal( r, __( 'Request failed', 'fundraising-toolkit' ) );
-            if ( ( r.status === 401 || r.status === 403 ) && typeof onSessionExpired === 'function' ) {
-                onSessionExpired();
+            let err = await refusal( r, __( 'Request failed', 'fundraising-toolkit' ) );
+
+            if ( nonceWasRefused( r, err ) ) {
+                r = await send( '' );
+                // Proven dead. Clearing it spares every later request the same
+                // wasted round trip, and stops the add-on tabs being handed it
+                // through extContext.
+                if ( r.ok ) cfg.nonce = '';
+                else err = await refusal( r, __( 'Request failed', 'fundraising-toolkit' ) );
             }
-            throw err;
+
+            if ( ! r.ok ) {
+                if ( ( r.status === 401 || r.status === 403 ) && typeof onSessionExpired === 'function' ) {
+                    onSessionExpired();
+                }
+                throw err;
+            }
         }
+
         const ct = r.headers.get( 'content-type' ) || '';
         if ( ct.includes( 'application/pdf' ) ) return r.blob();
         const json = await r.json();
         setCsrfFromResponse( json );
         return json;
-    } );
+    } )();
 }
 
 // A document link carries its own single-purpose token, so a refusal here says
@@ -1577,19 +1604,32 @@ function PrivacyActions() {
         try {
             // Direct fetch (not the api() helper) so the attachment streams as
             // a binary download instead of being JSON.parsed in the helper.
-            const headers = {
-                'Content-Type': 'application/json',
-                ...( cfg.nonce ? { 'X-WP-Nonce': cfg.nonce } : {} ),
+            const send = ( nonce ) => {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...( nonce ? { 'X-WP-Nonce': nonce } : {} ),
+                };
+                if ( csrfToken ) headers[ 'X-FundKit-Csrf' ] = csrfToken;
+
+                return fetch( `${ cfg.rest }data-export`, {
+                    method:      'POST',
+                    credentials: 'same-origin',
+                    headers,
+                } );
             };
-            if ( csrfToken ) headers[ 'X-FundKit-Csrf' ] = csrfToken;
-            const r = await fetch( `${ cfg.rest }data-export`, {
-                method:      'POST',
-                credentials: 'same-origin',
-                headers,
-            } );
+
+            let r = await send( cfg.nonce );
             if ( ! r.ok ) {
-                const data = await r.json().catch( () => ({}) );
-                throw new Error( data.message || __( 'Export failed.', 'fundraising-toolkit' ) );
+                const why = await refusal( r, __( 'Export failed.', 'fundraising-toolkit' ) );
+                if ( nonceWasRefused( r, why ) ) {
+                    r = await send( '' );
+                    if ( r.ok ) cfg.nonce = '';
+                } else {
+                    throw why;
+                }
+            }
+            if ( ! r.ok ) {
+                throw await refusal( r, __( 'Export failed.', 'fundraising-toolkit' ) );
             }
             const blob = await r.blob();
             const url  = URL.createObjectURL( blob );

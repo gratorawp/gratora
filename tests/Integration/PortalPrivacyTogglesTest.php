@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Tests\Integration;
 
+use FundKit\Analytics\Event;
 use FundKit\Donors\Donor;
 use FundKit\Donors\DonorService;
 use FundKit\Foundation\Plugin;
@@ -49,6 +50,29 @@ final class PortalPrivacyTogglesTest extends IntegrationTestCase
     private function forget(): int
     {
         return $this->write('/fundkit/v1/portal/forget', ['confirm' => 'DELETE']);
+    }
+
+    /**
+     * The audit row is the only account of who erased an account, and the WP
+     * user in the same browser has nothing to do with it: a donor signed in to
+     * both would be filed as staff erasing someone else.
+     */
+    public function test_the_portal_erasure_is_recorded_as_the_donor_even_for_a_logged_in_user(): void
+    {
+        $donor = $this->signedInDonor();
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+
+        $this->assertSame(200, $this->forget());
+
+        $row = Event::query()
+            ->where('type', 'donor.redacted')
+            ->where('donor_id', (int) $donor->id)
+            ->get();
+
+        $this->assertNotNull($row);
+        $payload = is_array($row->payload) ? $row->payload : (array) json_decode((string) $row->payload, true);
+        $this->assertSame('donor', $payload['by'] ?? '');
+        $this->assertSame('', $payload['actor_name'] ?? 'x');
     }
 
     public function test_deletion_is_refused_when_the_org_turned_it_off(): void

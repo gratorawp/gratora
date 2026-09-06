@@ -1718,7 +1718,9 @@ final class PortalController
         }
 
         try {
-            $this->donorService->redact($donor);
+            // Named, not inferred: the portal acts as the donor whether or
+            // not a WP user happens to be signed in in the same browser.
+            $this->donorService->redact($donor, 'donor');
         } catch (\Throwable $e) {
             // Erasure cancels the donor's live recurring plans first, on
             // purpose: wiping the donor while a subscription keeps billing is
