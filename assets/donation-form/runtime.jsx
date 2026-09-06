@@ -932,7 +932,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
         return (
             <div class={ formRootClass( state, 'fundkit-form--paged-bar' ) }>
                 <header class="fundkit-form__bar-header">
-                    { current > 0 ? (
+                    { current > 0 && state.status !== 'payment' ? (
                         <button
                             type="button"
                             class="fundkit-form__bar-back"

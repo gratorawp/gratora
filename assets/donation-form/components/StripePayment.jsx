@@ -76,11 +76,23 @@ export default function StripePayment( { config, payment, dispatch } ) {
         setPaying( true );
         setError( '' );
 
-        const { error: confirmErr, paymentIntent } = await stripe.confirmPayment( {
-            elements,
-            confirmParams: { return_url: buildReturnUrl( payment ) },
-            redirect: 'if_required',
-        } );
+        let confirmErr;
+        let paymentIntent;
+
+        try {
+            ( { error: confirmErr, paymentIntent } = await stripe.confirmPayment( {
+                elements,
+                confirmParams: { return_url: buildReturnUrl( payment ) },
+                redirect: 'if_required',
+            } ) );
+        } catch ( e ) {
+            // A throw rather than a returned error: Stripe.js does that on a
+            // client_secret and elements mismatch. Leaving `paying` set
+            // disables Pay and Cancel both, on a donation nothing has charged.
+            setError( i18n.error );
+            setPaying( false );
+            return;
+        }
 
         if ( confirmErr ) {
             // card_error / validation_error are shown to the donor; the intent

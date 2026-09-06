@@ -94,7 +94,10 @@ export function copySubscriptionIdAction() {
         isEligible: ( item ) => !! item.gateway_subscription_id,
         callback:   async ( [ item ] ) => {
             try {
-                await window.navigator?.clipboard?.writeText( item.gateway_subscription_id );
+                // Optional chaining resolves to undefined on an insecure
+                // origin, which awaits clean and reports a copy nobody made.
+                if ( ! window.navigator?.clipboard ) throw new Error( 'no clipboard' );
+                await window.navigator.clipboard.writeText( item.gateway_subscription_id );
                 notify.success( __( 'Subscription id copied.', 'fundraising-toolkit' ) );
             } catch ( e ) {
                 // No clipboard permission, so show it instead of failing

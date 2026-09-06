@@ -1266,7 +1266,7 @@ function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
                 { activeTab === 'goal'      && <GoalSection      settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'gateways'  && <GatewaysSection  gateways={ gateways } settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'after'     && <AfterSection     settings={ settings } setSettings={ setSettings } /> }
-                { activeTab === 'embed'     && <EmbedSection     slug={ c.value( 'slug' ) } /> }
+                { activeTab === 'embed'     && <EmbedSection     slug={ c.savedRecord?.slug || '' } pending={ c.isEdited?.( 'slug' ) } /> }
             </main>
         </div>
     );
@@ -1602,7 +1602,10 @@ function AfterSection( { settings, setSettings } ) {
     );
 }
 
-function EmbedSection( { slug } ) {
+function EmbedSection( { slug, pending } ) {
+    // The saved slug, not the edited one: the server normalises it through
+    // sanitize_title, so a shortcode built from raw input names a form that
+    // will never exist.
     const shortcode = `[fundkit_donation_form slug="${ slug }"]`;
     return (
         <SettingsRow
@@ -1610,6 +1613,11 @@ function EmbedSection( { slug } ) {
             description={ __( 'Paste this shortcode into any post or page to render the form.', 'fundraising-toolkit' ) }
         >
             <ShortcodeField value={ shortcode } />
+            { pending && (
+                <p className="fundkit-field__help">
+                    { __( 'Save the form to update this shortcode: the slug you typed is not the one the server will store.', 'fundraising-toolkit' ) }
+                </p>
+            ) }
         </SettingsRow>
     );
 }
@@ -1648,10 +1656,13 @@ function ShortcodeField( { value } ) {
 
     const onCopy = async () => {
         try {
-            await navigator.clipboard?.writeText( value );
+            // Optional chaining resolves to undefined on an insecure origin,
+            // which awaits clean and reports a copy nobody made.
+            if ( ! navigator.clipboard ) throw new Error( 'no clipboard' );
+            await navigator.clipboard.writeText( value );
             setCopied( true );
         } catch ( e ) {
-            // No clipboard access; the value stays visible to copy by hand.
+            notify.error( __( 'Could not copy. Select the shortcode above and copy it by hand.', 'fundraising-toolkit' ) );
         }
     };
 

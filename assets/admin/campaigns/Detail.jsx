@@ -225,6 +225,10 @@ export default function Detail( { id, tab } ) {
             // know a failure count yet.
             const queued = res?.recurring_cancel?.queued || 0;
             if ( queued > 0 ) {
+                // Refresh the record, not the document: the confirmation is a
+                // toast in an in-memory store, and a reload throws it away
+                // before it paints. The count of cancelled subscriptions is the
+                // only place that number is ever said.
                 notify.success( sprintf(
                     /* translators: %d: number of subscriptions */
                     _n(
@@ -235,13 +239,13 @@ export default function Detail( { id, tab } ) {
                     ),
                     queued
                 ) );
-                window.location.reload();
+                c.reload();
                 return;
             }
             notify.success( nextStatus === 'archived'
                 ? __( 'Campaign archived.', 'fundraising-toolkit' )
                 : __( 'Campaign restored to draft.', 'fundraising-toolkit' ) );
-            window.location.reload();
+            c.reload();
         } catch ( err ) {
             setError( err?.message || __( 'Update failed.', 'fundraising-toolkit' ) );
         }
@@ -296,7 +300,7 @@ export default function Detail( { id, tab } ) {
                 notify.success( name === 'publish'
                     ? __( 'Campaign published.', 'fundraising-toolkit' )
                     : __( 'Campaign moved to draft.', 'fundraising-toolkit' ) );
-                window.location.reload();
+                c.reload();
             } catch ( err ) {
                 setError( err?.message || __( 'Update failed.', 'fundraising-toolkit' ) );
             }
