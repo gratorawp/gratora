@@ -13,7 +13,8 @@ use FundKit\Gateways\GatewayManager;
 
 /**
  * The editor preview is an iframe srcdoc, so it has no wp_scripts queue: every
- * script it needs has to be written into the document by hand.
+ * script it needs has to be written into the document by hand, and it is
+ * sandboxed without allow-same-origin, so it has to introduce itself.
  *
  * That loop emitted the runtime's DECLARED dependencies only. The runtime
  * declares wp-i18n, wp-i18n depends on wp-hooks, and @wordpress/i18n reads
@@ -91,6 +92,28 @@ final class FormPreviewDocumentTest extends IntegrationTestCase
             'build/donation-form/runtime.css',
             $this->document(),
             'the iframe cannot inherit the admin page styles'
+        );
+    }
+
+    /**
+     * The frame is sandboxed without allow-same-origin, so the document has an
+     * opaque origin and the runtime's frame guard cannot tell it from a site
+     * embedding the real form. Nothing but a document this server built can
+     * carry the flag, because a framing site cannot script into it.
+     */
+    public function test_the_preview_document_says_that_it_is_one(): void
+    {
+        $this->assertStringContainsString('window.fundkitFormPreview = true', $this->document());
+    }
+
+    /** And the page a donor is actually served does not. */
+    public function test_a_real_donation_page_carries_no_such_flag(): void
+    {
+        $blocks = '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/submit-button /-->';
+
+        $this->assertStringNotContainsString(
+            'fundkitFormPreview',
+            (string) $this->shortcode()->renderPreview($blocks)['html']
         );
     }
 }

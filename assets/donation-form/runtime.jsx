@@ -1392,8 +1392,12 @@ function applyThemeTokens( form, theme ) {
  * Reading the parent's origin throws across origins, and that throw is the
  * test. Same-origin frames have to keep working: the block editor canvas, the
  * styling preview and the theme customiser all render the form in one.
+ *
+ * A sandboxed admin preview throws the same way, because an opaque origin is
+ * not this one either, so it says so in the document itself.
  */
 function framedByAnotherSite() {
+    if ( window.fundkitFormPreview ) return false;
     if ( window.top === window.self ) return false;
     try {
         return window.top.location.origin !== window.self.location.origin;

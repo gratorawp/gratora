@@ -77,6 +77,7 @@ beforeEach( () => {
 
 afterEach( () => {
     delete window.top;
+    delete window.fundkitFormPreview;
 } );
 
 it( 'renders normally when the page is not framed', async () => {
@@ -90,6 +91,22 @@ it( 'renders normally when the page is not framed', async () => {
 
 it( 'renders normally inside a same-origin frame, which is the editor canvas', async () => {
     frameAs( 'same-origin' );
+    const form = addForm();
+    await boot();
+
+    expect( form.dataset.fundkitFramed ).toBeUndefined();
+    expect( form.textContent ).not.toContain( 'inside another website' );
+} );
+
+/**
+ * The form editor, the onboarding preview and the block editor canvas all show
+ * the form in a frame sandboxed without allow-same-origin. That is an opaque
+ * origin, which reads exactly like a hostile embed, so the document this server
+ * builds says what it is.
+ */
+it( 'renders inside the admin preview, which is sandboxed and so has no origin', async () => {
+    frameAs( 'cross-origin' );
+    window.fundkitFormPreview = true;
     const form = addForm();
     await boot();
 

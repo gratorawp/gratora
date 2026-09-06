@@ -406,6 +406,12 @@ final class DonationFormShortcode extends HookProvider
             '<head>',
             '    <meta charset="utf-8">',
             '    <meta name="viewport" content="width=device-width, initial-scale=1">',
+            // The admin previews are sandboxed without allow-same-origin, so
+            // this document has an opaque origin and the runtime's frame guard
+            // cannot tell it from a hostile embed. Only a document this server
+            // built carries the flag: a site framing the real form cannot
+            // script into it to set one.
+            '    <script>window.fundkitFormPreview = true;</script>',
             '    <link rel="stylesheet" href="' . $cssUrl . '">',
             '    <style>',
             '        html, body { margin: 0; padding: 0; background: ' . $background . '; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif; }',
