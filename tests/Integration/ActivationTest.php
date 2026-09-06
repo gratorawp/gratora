@@ -9,6 +9,7 @@ use FundKit\Core\CoreModule;
 use FundKit\Donors\Portal\PortalPage;
 use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Upgrade\UpgradeRoutine;
+use FundKit\Receipts\OrgProfile;
 
 final class ActivationTest extends IntegrationTestCase
 {
@@ -16,7 +17,7 @@ final class ActivationTest extends IntegrationTestCase
     {
         parent::setUp();
         delete_option(Activator::OPT_ACTIVATED_AT);
-        delete_option(Activator::OPT_ORG_PROFILE);
+        delete_option('fundkit_org_profile');
 
         $admin = get_role('administrator');
         if ($admin && $admin->has_cap(Activator::CAP_MANAGE)) {
@@ -69,21 +70,34 @@ final class ActivationTest extends IntegrationTestCase
         $this->assertTrue($admin->has_cap(Activator::CAP_MANAGE));
     }
 
-    public function test_org_profile_is_seeded_with_site_defaults(): void
+    public function test_activation_stores_no_org_identity_of_its_own(): void
     {
         Plugin::onActivation();
 
-        $profile = get_option(Activator::OPT_ORG_PROFILE);
-        $this->assertIsArray($profile);
-        $this->assertSame(get_bloginfo('name'),     $profile['name']);
-        $this->assertSame(get_option('admin_email'), $profile['email']);
-        $this->assertIsArray($profile['address_lines']);
+        $this->assertFalse(
+            get_option('fundkit_org_profile', false),
+            'a name copied out of the site at activation is a name the org never gave'
+        );
+    }
+
+    public function test_the_receipt_name_follows_the_site_after_a_rename(): void
+    {
+        $before = (string) get_bloginfo('name');
+        Plugin::onActivation();
+
+        update_option('blogname', 'Renamed Foundation');
+
+        try {
+            $this->assertSame('Renamed Foundation', OrgProfile::load()['name']);
+        } finally {
+            update_option('blogname', $before);
+        }
     }
 
     public function test_re_activation_does_not_overwrite_a_customised_org_profile(): void
     {
         Plugin::onActivation();
-        update_option(Activator::OPT_ORG_PROFILE, [
+        update_option('fundkit_org_profile', [
             'name'          => 'Custom Org Name',
             'address_lines' => ['Line 1', 'Line 2'],
             'tax_id'        => 'TAX-123',
@@ -92,7 +106,7 @@ final class ActivationTest extends IntegrationTestCase
 
         Plugin::onActivation();
 
-        $profile = get_option(Activator::OPT_ORG_PROFILE);
+        $profile = get_option('fundkit_org_profile');
         $this->assertSame('Custom Org Name', $profile['name'],  'Activator must not overwrite an already-customized profile');
         $this->assertSame(['Line 1', 'Line 2'], $profile['address_lines']);
         $this->assertSame('TAX-123', $profile['tax_id']);

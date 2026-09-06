@@ -7,6 +7,8 @@ namespace FundKit\Tests\Integration;
 use FundKit\Donations\Donation;
 use FundKit\Donors\DonorService;
 use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Upgrade\UnpinSiteIdentity;
+use FundKit\Receipts\OrgProfile;
 use FundKit\Reports\TaxStatementBuilder;
 use FundKit\Settings\SettingsService;
 
@@ -16,6 +18,9 @@ use FundKit\Settings\SettingsService;
  */
 final class OrgIdentityAndLocaleTest extends IntegrationTestCase
 {
+    private const ADDON_TEMPLATE = 'fundkit_h08_addon_note';
+    private const ADDON_DOMAIN   = 'fundkit-addon-h08';
+
     private function settings(): SettingsService
     {
         return Plugin::instance()->container->get(SettingsService::class);
@@ -101,7 +106,132 @@ final class OrgIdentityAndLocaleTest extends IntegrationTestCase
         $this->assertNotSame('', $subject, 'dropping the stored copy must not leave the template empty');
     }
 
+    public function test_saving_the_emails_tab_does_not_pin_the_sender_name_to_the_site_title(): void
+    {
+        $current = (array) $this->settings()->get('email');
+        $this->assertSame(
+            (string) get_bloginfo('name'),
+            (string) $current['from_name'],
+            'precondition: the sender name is still the resolved default'
+        );
+
+        $this->settings()->update('email', [
+            'bcc_admin'  => true,
+            'from_name'  => $current['from_name'],
+            'from_email' => $current['from_email'],
+            'templates'  => $current['templates'],
+        ]);
+
+        update_option('blogname', 'Renamed Foundation');
+
+        $this->assertTrue((bool) get_option('fundkit_email_settings')['bcc_admin'], 'the setting the admin moved is saved');
+        $this->assertSame(
+            'Renamed Foundation',
+            (string) ($this->settings()->get('email')['from_name'] ?? ''),
+            'the sender name is pinned to the site title as it read on the day of the save'
+        );
+    }
+
+    public function test_saving_the_emails_tab_does_not_pin_the_sender_address_to_the_admin_email(): void
+    {
+        $host = (string) wp_parse_url((string) home_url(), PHP_URL_HOST);
+        update_option('admin_email', 'admin@' . $host);
+
+        $current = (array) $this->settings()->get('email');
+        $this->assertSame('admin@' . $host, (string) $current['from_email'], 'precondition: the sender address is still the resolved default');
+
+        $this->settings()->update('email', [
+            'from_name'  => $current['from_name'],
+            'from_email' => $current['from_email'],
+            'templates'  => $current['templates'],
+        ]);
+
+        update_option('admin_email', 'finance@' . $host);
+
+        $this->assertSame(
+            'finance@' . $host,
+            (string) ($this->settings()->get('email')['from_email'] ?? ''),
+            'the sender address is pinned to the admin email as it read on the day of the save'
+        );
+    }
+
+    public function test_an_addon_template_is_not_frozen_into_the_option(): void
+    {
+        $this->registerAddonTemplate($translated);
+
+        $service = new SettingsService();
+        $service->update('email', ['templates' => $service->get('email')['templates']]);
+
+        $translated = 'Addon body FR';
+
+        $this->assertSame(
+            'Addon body FR',
+            (string) ((new SettingsService())->get('email')['templates'][self::ADDON_TEMPLATE]['body'] ?? ''),
+            'an add-on template the admin never edited is pinned to the locale of the save'
+        );
+        $this->assertArrayNotHasKey(
+            'body',
+            get_option('fundkit_email_settings')['templates'][self::ADDON_TEMPLATE] ?? []
+        );
+    }
+
+    public function test_an_addon_template_the_admin_edited_is_kept(): void
+    {
+        $this->registerAddonTemplate($translated);
+
+        $service = new SettingsService();
+        $service->update('email', ['templates' => [self::ADDON_TEMPLATE => ['body' => 'Our own wording.']]]);
+
+        $this->assertSame(
+            'Our own wording.',
+            (string) ((new SettingsService())->get('email')['templates'][self::ADDON_TEMPLATE]['body'] ?? ''),
+            'an edited add-on template has to survive the save'
+        );
+    }
+
+    public function test_a_site_already_frozen_is_unpinned_by_the_upgrade(): void
+    {
+        update_option('fundkit_email_settings', [
+            'from_name'  => (string) get_bloginfo('name'),
+            'from_email' => (string) get_option('admin_email'),
+            'bcc_admin'  => true,
+        ], false);
+        update_option('fundkit_org_profile', [
+            'name'   => (string) get_bloginfo('name'),
+            'tax_id' => 'TAX-9',
+        ], false);
+
+        (new UnpinSiteIdentity())->step();
+
+        update_option('blogname', 'Renamed Foundation');
+
+        $this->assertSame('Renamed Foundation', (string) ($this->settings()->get('email')['from_name'] ?? ''));
+        $this->assertSame('Renamed Foundation', OrgProfile::load()['name']);
+        $this->assertTrue((bool) get_option('fundkit_email_settings')['bcc_admin'], 'the scrub only drops what a read resolves anyway');
+        $this->assertSame('TAX-9', (string) (get_option('fundkit_org_profile')['tax_id'] ?? ''));
+    }
+
     // --- helpers ---------------------------------------------------------
+
+    /** A template contributed the way an add-on contributes one, translated in its own domain. */
+    private function registerAddonTemplate(?string &$translated): void
+    {
+        $translated = 'Addon body DE';
+
+        add_filter('gettext', static function ($t, $text, $domain) use (&$translated) {
+            return $domain === self::ADDON_DOMAIN && $text === 'Addon body' ? $translated : $t;
+        }, 10, 3);
+
+        add_filter('fundkit.settings.groups', static function (array $g): array {
+            $g['email']['defaults']['templates'][self::ADDON_TEMPLATE] = [
+                'enabled' => true,
+                'subject' => 'Addon subject',
+                'body'    => __('Addon body', self::ADDON_DOMAIN),
+            ];
+
+            return $g;
+        });
+    }
 
     /** The org name as it reaches the document, read back out of the PDF's Info dictionary. */
     private function authorOf(string $pdf): string

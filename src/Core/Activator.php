@@ -18,7 +18,6 @@ use FundKit\Funds\FundRepository;
 final class Activator
 {
     public const OPT_ACTIVATED_AT = 'fundkit_activated_at';
-    public const OPT_ORG_PROFILE  = 'fundkit_org_profile';
     public const CAP_MANAGE       = 'manage_fundkit';
 
     /** @since 1.0.0 */
@@ -33,7 +32,6 @@ final class Activator
     {
         $this->seedDefaultFund();
         $this->grantCapabilities();
-        $this->seedOrgProfile();
         $this->seedReferenceSettings();
         $this->markActivated();
         // Switching FundKit back on withdraws a standing instruction to wipe. It
@@ -80,19 +78,6 @@ final class Activator
         if ($admin && ! $admin->has_cap(self::CAP_MANAGE)) {
             $admin->add_cap(self::CAP_MANAGE);
         }
-    }
-
-    /** @since 1.0.0 */
-    private function seedOrgProfile(): void
-    {
-        if (get_option(self::OPT_ORG_PROFILE, false) !== false) return;
-
-        add_option(self::OPT_ORG_PROFILE, [
-            'name'          => (string) get_bloginfo('name'),
-            'address_lines' => [],
-            'tax_id'        => '',
-            'email'         => (string) get_option('admin_email'),
-        ], '', false);
     }
 
     /** @since 1.0.0 */

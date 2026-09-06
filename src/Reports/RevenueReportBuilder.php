@@ -52,7 +52,6 @@ final class RevenueReportBuilder
             ];
         }
 
-        $org     = get_option('fundkit_org_profile', []);
         $orgName = OrgProfile::load()['name'];
 
         $html = View::load('Receipts.revenue-report', [

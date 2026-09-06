@@ -528,17 +528,19 @@ final class SettingsService
     }
 
     /**
-     * Drops template text identical to the default built for this read.
+     * Drops values identical to the default this read resolved.
      *
-     * Those defaults pass through __(), so a stored copy pins every donor's
-     * email to the locale of the admin who saved.
+     * Template text passes through __(), so a stored copy pins every donor's
+     * email to the locale of the admin who saved. The sender identity is
+     * resolved from the site title and the admin address, so a stored copy
+     * pins who the mail comes from to the day of the save.
      *
      * @param array<string,mixed> $values
      * @return array<string,mixed>
      *
      * @since 1.0.0
      */
-    private function withoutDefaultTemplates(string $group, array $values): array
+    public function withoutResolvedDefaults(string $group, array $values): array
     {
         // The receipts panel round-trips its whole form, so a default the admin
         // never touched came back and was stored verbatim. Two things read the
@@ -556,10 +558,29 @@ final class SettingsService
             return $values;
         }
 
-        if ($group !== 'email' || ! is_array($values['templates'] ?? null)) return $values;
+        if ($group !== 'email') return $values;
 
-        foreach ($this->emailTemplateDefaults() as $key => $default) {
+        $cfg      = $this->groups()['email'] ?? ['defaults' => []];
+        $defaults = $this->resolveDynamicDefaults(
+            'email',
+            is_array($cfg['defaults'] ?? null) ? $cfg['defaults'] : []
+        );
+
+        foreach (['from_name', 'from_email'] as $key) {
+            if (array_key_exists($key, $values) && $values[$key] === ($defaults[$key] ?? null)) {
+                unset($values[$key]);
+            }
+        }
+
+        if (! is_array($values['templates'] ?? null)) return $values;
+
+        // Every template the group declares, not core's alone: an add-on
+        // contributes its own through the groups filter and translates them in
+        // its own domain.
+        foreach ((array) ($defaults['templates'] ?? []) as $key => $default) {
+            if (! is_array($default)) continue;
             foreach (['subject', 'body'] as $field) {
+                if (! array_key_exists($field, $default)) continue;
                 if (($values['templates'][$key][$field] ?? null) === $default[$field]) {
                     unset($values['templates'][$key][$field]);
                 }
@@ -614,7 +635,7 @@ final class SettingsService
             $next['mapping'] = is_array($input['mapping']) ? $input['mapping'] : [];
         }
 
-        update_option($cfg['option'], $this->withoutDefaultTemplates($group, $next), false);
+        update_option($cfg['option'], $this->withoutResolvedDefaults($group, $next), false);
 
         // The values as they were are handed along too: a listener that has to
         // act on a setting being switched on, rather than on every save of the

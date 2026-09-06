@@ -36,7 +36,6 @@ final class CampaignReportBuilder
         $raisedCents = (int) $summary['amount_raised_cents'];
         [$hasGoal, $goalDisplay, $percent, $barWidth] = $this->goal($campaign, $summary, $currency);
 
-        $org     = get_option('fundkit_org_profile', []);
         $orgName = OrgProfile::load()['name'];
 
         $html = View::load('Receipts.campaign-report', [

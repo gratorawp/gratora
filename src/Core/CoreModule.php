@@ -66,6 +66,7 @@ use FundKit\Foundation\Transfer\CsvImporter;
 use FundKit\Foundation\Transfer\DataExporter;
 use FundKit\Foundation\Transfer\DataImporter;
 use FundKit\Foundation\Upgrade\OpenTheDefaultFund;
+use FundKit\Foundation\Upgrade\UnpinSiteIdentity;
 use FundKit\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
 use FundKit\Foundation\Upgrade\UpgradeRunner;
 use FundKit\Foundation\Upgrade\UpgradeJob;
@@ -287,6 +288,7 @@ final class CoreModule implements FundKitModule
         return [
             new RestoreReceiptsRetainingMoney(),
             new OpenTheDefaultFund(),
+            new UnpinSiteIdentity(),
         ];
     }
 

@@ -220,6 +220,8 @@ final class UninstallDataEraserTest extends IntegrationTestCase
 
     public function test_planning_reads_nothing_destructive(): void
     {
+        update_option('fundkit_org_profile', ['name' => 'Acme Foundation'], false);
+
         (new DataEraser())->plan();
         (new DataEraser())->plan();
 
