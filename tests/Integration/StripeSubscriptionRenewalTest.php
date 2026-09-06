@@ -536,6 +536,44 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
     }
 
     /**
+     * The invoice names its subscription and Stripe could not be asked about
+     * the charge. Nothing here can ever be handled, so retiring it is right:
+     * redelivering would buy three days of retries for every subscription on
+     * the account this site does not hold.
+     */
+    public function test_a_named_subscription_we_do_not_hold_is_retired_even_when_stripe_is_down(): void
+    {
+        $this->seedPlan();
+
+        $status = null;
+        $this->whileStripeIsDown(function () use (&$status) {
+            $status = $this->postWebhookStatus('invoice.payment_failed', [
+                'id'             => 'in_' . bin2hex(random_bytes(6)),
+                'object'         => 'invoice',
+                'billing_reason' => 'subscription_cycle',
+                'currency'       => 'usd',
+                'amount_paid'    => 2500,
+                'subscription'   => 'sub_nobody_here',
+            ]);
+        });
+
+        $this->assertSame(200, $status);
+    }
+
+    /** And the same on the renewal that succeeded. */
+    public function test_a_renewal_whose_subscription_could_not_be_read_is_redelivered(): void
+    {
+        $this->seedPlan();
+
+        $status = null;
+        $this->whileStripeIsDown(function () use (&$status) {
+            $status = $this->postWebhookStatus('invoice.payment_succeeded', $this->invoiceNeedingLookup(2500));
+        });
+
+        $this->assertSame(503, $status, 'a charged renewal nobody could read must not be retired');
+    }
+
+    /**
      * A complete invoice for a subscription this site has no plan for needs no
      * lookup and will never name one, so it is retired rather than redelivered
      * for ever.

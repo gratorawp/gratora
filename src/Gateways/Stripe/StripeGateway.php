@@ -1333,6 +1333,30 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      *
      * @since 1.0.0
      */
+    /**
+     * The invoice named no subscription and Stripe could not be asked which one
+     * it is, so this delivery is unreadable rather than unwanted.
+     *
+     * A donor was charged and this is the only notice of it: 200 retires the
+     * delivery and the renewal is never recorded, never receipted, in no total,
+     * and a decline never enters dunning. Gated on the id being absent, because
+     * an invoice that names a subscription this site does not hold never will,
+     * and asking for that one again buys three days of retries for nothing.
+     *
+     * @since 1.0.0
+     */
+    private function askForRedelivery(string $eventId, string $type): WebhookOutcome
+    {
+        return new WebhookOutcome(
+            signature_ok: true,
+            external_id:  $eventId,
+            event_type:   $type,
+            handled:      false,
+            error:        'invoice could not be re-read; asking Stripe to redeliver',
+            http_status:  503,
+        );
+    }
+
     private function unknownSubscription(string $eventId, string $type, string $subscriptionId): WebhookOutcome
     {
         ErrorLog::record(
@@ -1474,6 +1498,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         [$subscriptionId, $piId, $lookupFailed] = $this->invoiceRefs($invoice);
 
+        if ($lookupFailed && $subscriptionId === '') {
+            return $this->askForRedelivery($eventId, $type);
+        }
+
         $plan = $this->plans->findBySubscriptionId($this->id(), $subscriptionId);
         if (! $plan) {
             return $this->unknownSubscription($eventId, $type, $subscriptionId);
@@ -1498,14 +1526,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             // genuinely names no charge will never name one, so that answers
             // 200 and is recorded for an admin instead.
             if ($lookupFailed) {
-                return new WebhookOutcome(
-                    signature_ok: true,
-                    external_id:  $eventId,
-                    event_type:   $type,
-                    handled:      false,
-                    error:        'invoice could not be re-read; asking Stripe to redeliver',
-                    http_status:  503,
-                );
+                return $this->askForRedelivery($eventId, $type);
             }
 
             ErrorLog::record('stripe.webhook', sprintf(
@@ -1610,23 +1631,13 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     private function handleInvoicePaymentFailed(string $eventId, string $type, array $invoice): WebhookOutcome
     {
         [$subscriptionId, , $lookupFailed] = $this->invoiceRefs($invoice);
+
+        if ($lookupFailed && $subscriptionId === '') {
+            return $this->askForRedelivery($eventId, $type);
+        }
+
         $plan = $this->plans->findBySubscriptionId($this->id(), $subscriptionId);
         if (! $plan) {
-            // A decline this site never hears about is a plan that never enters
-            // dunning and a donor never told their card was refused. Where the
-            // subscription is missing only because Stripe could not be reached,
-            // ask to be told again rather than retiring the delivery.
-            if ($lookupFailed) {
-                return new WebhookOutcome(
-                    signature_ok: true,
-                    external_id:  $eventId,
-                    event_type:   $type,
-                    handled:      false,
-                    error:        'invoice could not be re-read; asking Stripe to redeliver',
-                    http_status:  503,
-                );
-            }
-
             return $this->unknownSubscription($eventId, $type, $subscriptionId);
         }
 
