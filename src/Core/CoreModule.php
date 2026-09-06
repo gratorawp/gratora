@@ -627,6 +627,7 @@ final class CoreModule implements FundKitModule
             $c->get(PendingSignupRepository::class),
             $c->get(DonorAvatarUploader::class),
             $c->get(DonorAvatars::class),
+            $c->get(\FundKit\Foundation\Crypto\Crypto::class),
         ));
 
         $c->bind(AggregateSyncer::class, fn () => new AggregateSyncer());

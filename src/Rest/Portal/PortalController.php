@@ -98,6 +98,7 @@ final class PortalController
         private PendingSignupRepository $pending,
         private \FundKit\Donors\DonorAvatarUploader $avatarUploader,
         private \FundKit\Donors\DonorAvatars $avatars,
+        private \FundKit\Foundation\Crypto\Crypto $crypto,
     ) {
     }
 
@@ -460,7 +461,7 @@ final class PortalController
         // lookup happens in the job. Doing it here would make the donor branch
         // do visibly more work than the unknown one, which is exactly what the
         // identical 200 exists to hide.
-        $this->async->enqueue(self::SEND_LINK_HOOK, ['email' => $email]);
+        $this->async->enqueue(self::SEND_LINK_HOOK, $this->linkJob($email));
 
         return $ok;
     }
@@ -510,33 +511,61 @@ final class PortalController
 
         $this->pending->put($email);
 
-        $this->async->enqueue(self::SEND_LINK_HOOK, [
-            'email'      => $email,
-            'first_name' => $names['first_name'],
-            'last_name'  => $names['last_name'],
-        ]);
+        $this->async->enqueue(
+            self::SEND_LINK_HOOK,
+            $this->linkJob($email, $names['first_name'], $names['last_name'])
+        );
 
         return $ok;
     }
 
     /**
-     * Action Scheduler executes do_action_ref_array($hook, array_values($args)),
-     * so the enqueued ['email'=>.., 'first_name'=>.., 'last_name'=>..] arrives
-     * as three positional params, not one array. Accept both shapes.
+     * Action Scheduler stores its args as JSON in a table nothing erases and
+     * keeps them for a month after the job runs, so the address travels
+     * encrypted rather than in the clear.
      *
-     * @param array{email?:string, first_name?:?string, last_name?:?string}|string $args
+     * @return array{payload:string}
+     */
+    private function linkJob(string $email, ?string $first = null, ?string $last = null): array
+    {
+        return [
+            'payload' => $this->crypto->encrypt((string) wp_json_encode([
+                'email'      => $email,
+                'first_name' => $first,
+                'last_name'  => $last,
+            ])),
+        ];
+    }
+
+    /**
+     * Action Scheduler executes do_action_ref_array($hook, array_values($args)),
+     * so one named value arrives as one positional string.
+     *
+     * The cleartext shape is still read: jobs queued before an upgrade are
+     * already in the table, and dropping them would lose sign-in mails nobody
+     * could see had gone missing.
+     *
+     * @param array{payload?:string, email?:string, first_name?:?string, last_name?:?string}|string $args
      *
      * @since 1.0.0
      */
     public function handleSendLinkAsync(mixed $args = '', ?string $firstName = null, ?string $lastName = null): void
     {
-        if (is_array($args)) {
+        $sealed  = is_array($args) ? (string) ($args['payload'] ?? '') : (string) $args;
+        $decoded = $sealed !== '' ? json_decode((string) $this->crypto->decrypt($sealed), true) : null;
+
+        if (is_array($decoded)) {
+            $firstName = $decoded['first_name'] ?? null;
+            $lastName  = $decoded['last_name'] ?? null;
+            $email     = (string) ($decoded['email'] ?? '');
+        } elseif (is_array($args)) {
             $firstName = $args['first_name'] ?? null;
             $lastName  = $args['last_name'] ?? null;
             $email     = (string) ($args['email'] ?? '');
         } else {
             $email = (string) $args;
         }
+
         if ($email === '' || ! is_email($email)) return;
 
         // Resolved here rather than in the request, so the request does the

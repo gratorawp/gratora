@@ -18,6 +18,24 @@ use FundKit\Foundation\Plugin;
  */
 final class PortalSignInLinkTest extends IntegrationTestCase
 {
+    /** Proof the caller loaded the portal page, which send-link is gated on. */
+    private function portalToken(): string
+    {
+        return Plugin::instance()->container
+            ->get(\FundKit\Donations\AntiSpamGuard::class)
+            ->mintPortalToken();
+    }
+
+    private function requestLink(string $email): void
+    {
+        $req = new \WP_REST_Request('POST', '/fundkit/v1/portal/send-link');
+        $req->set_header('content-type', 'application/json');
+        $req->set_body((string) wp_json_encode(['email' => $email, 'token' => $this->portalToken()]));
+
+        $res = rest_do_request($req);
+        $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
+    }
+
     /** @param array<int,array<string,string>> $sent */
     private function captureMail(array &$sent): void
     {
@@ -87,6 +105,46 @@ final class PortalSignInLinkTest extends IntegrationTestCase
         $this->runPendingAsyncJobs();
 
         $this->assertCount(1, $sent, 'the address in the first positional param is the one resolved');
+        $this->assertStringContainsString('token=', (string) $sent[0]['body']);
+    }
+
+    /**
+     * Action Scheduler keeps its args in a table nothing erases, for a month
+     * after the job has run, so a readable address there outlives the erasure
+     * that was supposed to remove it.
+     */
+    public function test_the_queued_job_does_not_carry_the_address_in_the_clear(): void
+    {
+        global $wpdb;
+
+        $email = 'sealed-' . uniqid() . '@example.test';
+
+        $this->requestLink($email);
+
+        $args = $wpdb->get_col(
+            "SELECT COALESCE(extended_args, args) FROM {$wpdb->prefix}actionscheduler_actions
+             WHERE hook = 'fundkit.async.send_portal_link'"
+        );
+
+        $this->assertNotSame([], $args, 'the job was queued');
+        foreach ($args as $row) {
+            $this->assertStringNotContainsString($email, (string) $row);
+        }
+    }
+
+    public function test_a_sealed_job_still_sends_the_link(): void
+    {
+        $sent = [];
+        $this->captureMail($sent);
+
+        $email = 'sealed-send-' . uniqid() . '@example.test';
+        Plugin::instance()->container->get(DonorService::class)->findOrCreate($email);
+
+        $this->requestLink($email);
+
+        $this->runPendingAsyncJobs();
+
+        $this->assertCount(1, $sent);
         $this->assertStringContainsString('token=', (string) $sent[0]['body']);
     }
 

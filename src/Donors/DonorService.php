@@ -483,7 +483,7 @@ final class DonorService
     }
 
     /** @since 1.0.0 */
-    public function redact(Donor $donor): Donor
+    public function redact(Donor $donor, string $actor = ''): Donor
     {
         if ($donor->redacted_at !== null) {
             return $donor;
@@ -492,6 +492,8 @@ final class DonorService
         // Before anything is destroyed: erasing first strands the mandate, so
         // the plan keeps billing and every renewal writes the donor's name and
         // email back into the webhook log.
+        $who = self::actor($actor);
+
         $this->stopRecurringBefore($donor);
 
         $request = $this->erasureRequest($donor);
@@ -514,7 +516,7 @@ final class DonorService
         $donor->redacted_at        = $this->clock->now()->format('Y-m-d H:i:s');
         $donor->updated_at         = $donor->redacted_at;
 
-        DB::transaction(function () use ($donor, $request) {
+        DB::transaction(function () use ($donor, $request, $who) {
             $donor->save();
 
             // Inside this transaction: a handler that cannot finish its part
@@ -532,8 +534,8 @@ final class DonorService
             $this->events()->record('donor.redacted', [
                 'donor_id' => (int) $donor->id,
                 'payload'  => [
-                    'by'                  => self::actorKind(),
-                    'actor_name'          => self::actorName(),
+                    'by'                  => $who['by'],
+                    'actor_name'          => $who['actor_name'],
                     'donations_retained'  => count($request->donationIds),
                 ],
             ]);
@@ -618,10 +620,25 @@ final class DonorService
     }
 
     /**
+     * Who acted, named by the caller where it knows.
+     *
+     * The sweep runs on whatever request happens to trip cron, so inferring it
+     * put a staff member's name on an erasure nobody performed.
+     *
+     * @return array{by:string,actor_name:string}
+     */
+    private static function actor(string $forced = ''): array
+    {
+        return $forced !== ''
+            ? ['by' => $forced, 'actor_name' => '']
+            : ['by' => self::actorKind(), 'actor_name' => self::actorName()];
+    }
+
+    /**
      * Who acted, in a form that survives the user row being deleted later.
      *
-     * Two of these callers have no user id: the nightly sweep runs unattended
-     * and the portal's forget route acts as the donor.
+     * The fallback for a caller that does not name itself: the portal's forget
+     * route acts as the donor, and WP-CLI as itself.
      *
      * @since 1.0.0
      */
@@ -662,11 +679,20 @@ final class DonorService
         ];
 
         $donationIds = [];
+        $byReference = [];
         foreach ($donations as $d) {
-            $donationIds[]  = (int) $d->id;
-            $identifiers[]  = $d->reference;
-            $identifiers[]  = $d->gateway_intent_id;
-            $identifiers[]  = $d->gateway_txn_id;
+            $donationIds[] = (int) $d->id;
+            $byReference[(string) $d->reference] = [$d->gateway_intent_id, $d->gateway_txn_id];
+        }
+
+        // A reference is unique, not substring-unique: DON-1 is inside DON-10,
+        // and these are searched for as loose text. The gateway ids are derived
+        // from the reference, so they carry the same prefix either way.
+        foreach ($this->prefixUniqueReferences(array_keys($byReference), $donationIds) as $reference) {
+            $identifiers[] = $reference;
+            foreach ($byReference[$reference] as $derived) {
+                $identifiers[] = $derived;
+            }
         }
         foreach ($plans as $p) {
             $identifiers[] = $p->gateway_subscription_id;
@@ -681,6 +707,51 @@ final class DonorService
             $this->clock->now()->format('Y-m-d H:i:s'),
             (string) $donor->email_hash,
         );
+    }
+
+    /**
+     * The references no other donation extends.
+     *
+     * @param list<string> $references
+     * @param list<int>    $donationIds
+     * @return list<string>
+     */
+    private function prefixUniqueReferences(array $references, array $donationIds): array
+    {
+        $references = array_values(array_filter($references, static fn ($r): bool => (string) $r !== ''));
+        if ($references === []) {
+            return [];
+        }
+
+        $patterns = array_map(
+            static fn (string $r): string => str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $r) . '%',
+            $references
+        );
+
+        $rows = Donation::query()
+            ->whereNotIn('id', $donationIds ?: [0])
+            ->where(static function ($q) use ($patterns): void {
+                $first = array_shift($patterns);
+                $q->whereLike('reference', $first);
+                foreach ($patterns as $pattern) {
+                    $q->orWhereLike('reference', $pattern);
+                }
+            })
+            ->pluck('reference');
+
+        $extended = array_map('strval', (array) $rows);
+
+        return array_values(array_filter(
+            $references,
+            static function (string $r) use ($extended): bool {
+                foreach ($extended as $other) {
+                    if ($other !== $r && str_starts_with($other, $r)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        ));
     }
 
     /** @since 1.0.0 */

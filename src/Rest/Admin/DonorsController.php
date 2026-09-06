@@ -6,6 +6,7 @@ namespace FundKit\Rest\Admin;
 use FundKit\Rest\Paging;
 use FundKit\Foundation\Auth\Capabilities;
 
+use FundKit\Analytics\ErrorLog;
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationService;
 use FundKit\Donors\Donor;
@@ -14,7 +15,10 @@ use FundKit\Donors\DonorNoteRepository;
 use FundKit\Donors\DonorRepository;
 use FundKit\Donors\DonorService;
 use FundKit\Donors\EmailAlreadyAssignedException;
+use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\RecurringPlanRepository;
 use InvalidArgumentException;
+use Throwable;
 use FundKit\Vendor\Queryable\DB;
 use WP_Error;
 use WP_REST_Request;
@@ -641,7 +645,40 @@ final class DonorsController
             );
         }
 
-        $this->donorService->redact($donor);
+        // The cancellations run before the erasure's transaction, so a gateway
+        // that refuses half way leaves the earlier plans genuinely stopped.
+        $liveBefore = $this->cancellablePlanIds($donor);
+
+        try {
+            $this->donorService->redact($donor);
+        } catch (Throwable $e) {
+            ErrorLog::record('admin.donor.redact', $e->getMessage(), ['donor_id' => (int) $donor->id]);
+
+            $stillLive = $this->cancellablePlanIds($donor);
+            $stopped   = count($liveBefore) - count($stillLive);
+
+            return new WP_Error(
+                'fundkit_redact_failed',
+                $stopped > 0
+                    ? sprintf(
+                        /* translators: 1: how many recurring plans were stopped, 2: how many are still billing. */
+                        _n(
+                            'The donor was not erased. %1$d recurring plan was stopped first, and %2$d is still billing: cancel it at the gateway, then try again.',
+                            'The donor was not erased. %1$d recurring plans were stopped first, and %2$d are still billing: cancel them at the gateway, then try again.',
+                            $stopped,
+                            'fundraising-toolkit'
+                        ),
+                        $stopped,
+                        count($stillLive)
+                    )
+                    : __('The donor was not erased: their recurring plans could not be stopped. Cancel them at the gateway, then try again.', 'fundraising-toolkit'),
+                [
+                    'status'           => 502,
+                    'stopped'          => $stopped,
+                    'still_billing'    => $stillLive,
+                ],
+            );
+        }
 
         return new WP_REST_Response([
             'redacted'    => true,
@@ -649,6 +686,20 @@ final class DonorsController
             'public_hidden' => $donor->public_hidden_at !== null,
             'avatar_url'    => $this->avatars->adminUrl($donor),
         ], 200);
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function cancellablePlanIds(Donor $donor): array
+    {
+        return array_map(
+            static fn ($p): int => (int) $p->id,
+            RecurringPlan::query()
+                ->where('donor_id', (int) $donor->id)
+                ->whereIn('status', RecurringPlanRepository::CANCELLABLE_STATUSES)
+                ->getAll()
+        );
     }
 
     /** @since 1.0.0 */

@@ -113,7 +113,7 @@ final class DonorRetention
                     if (! $donor) continue;
 
                     try {
-                        $this->donorService->redact($donor);
+                        $this->donorService->redact($donor, 'retention');
                     } catch (Throwable $e) {
                         // The donor is left whole and the pass carries on, but
                         // somebody has to know the erasure they asked for did
