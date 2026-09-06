@@ -1,4 +1,4 @@
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 
@@ -7,7 +7,7 @@ import ConfirmDialog from '../_shared/components/ConfirmDialog';
 import Dialog from '../_shared/components/Dialog';
 import Btn from '../_shared/components/Btn';
 import Notice from '../_shared/components/Notice';
-import { COUNTRIES } from '../../_shared/countries';
+import { countryName, localizedCountries } from '../../_shared/countries';
 import LifetimeMetrics from './profile/LifetimeMetrics';
 import Tabs from './profile/Tabs';
 import IdentityCard from './profile/IdentityCard';
@@ -52,10 +52,11 @@ function EditPanel( { donor, onCancel, onSaved } ) {
         ...s,
         address: { ...s.address, [ k ]: e.target.value },
     } ) );
-    const [ countryQuery, setCountryQuery ] = useState( () => {
-        const c = COUNTRIES.find( ( cur ) => cur.code === ( donor.country || '' ).toUpperCase() );
-        return c ? c.name : '';
-    } );
+    // The reader's own language, the way the identity card beside this form
+    // already reads it. Two names for one country on one screen is what this
+    // form used to give them.
+    const countries = useMemo( () => localizedCountries(), [] );
+    const [ countryQuery, setCountryQuery ] = useState( () => countryName( donor.country ) );
     const [ countryOpen, setCountryOpen ] = useState( false );
     const [ saving, setSaving ] = useState( false );
     const [ error, setError ]   = useState( null );
@@ -109,12 +110,15 @@ function EditPanel( { donor, onCancel, onSaved } ) {
 
     const q = countryQuery.trim().toLowerCase();
     const countryMatches = q === ''
-        ? COUNTRIES
-        : COUNTRIES.filter( ( c ) => c.name.toLowerCase().includes( q ) || c.code.toLowerCase().startsWith( q ) );
+        ? countries
+        : countries.filter( ( c ) =>
+            c.label.toLowerCase().includes( q )
+            || c.name.toLowerCase().includes( q )
+            || c.code.toLowerCase().startsWith( q ) );
 
     const pickCountry = ( c ) => {
         setForm( ( s ) => ( { ...s, country: c ? c.code : '' } ) );
-        setCountryQuery( c ? c.name : '' );
+        setCountryQuery( c ? c.label : '' );
         setCountryOpen( false );
     };
 
@@ -181,7 +185,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                                     { countryMatches.slice( 0, 50 ).map( ( c ) => (
                                         <li key={ c.code }>
                                             <button type="button" onMouseDown={ ( e ) => { e.preventDefault(); pickCountry( c ); } }>
-                                                <span>{ c.name }</span>
+                                                <span>{ c.label }</span>
                                                 <span className="dp-edit-form__country-code">{ c.code }</span>
                                             </button>
                                         </li>

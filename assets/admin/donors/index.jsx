@@ -22,7 +22,7 @@ import { dashboardHref } from '../_shared/adminPages';
 import { tablistKeyDown } from '../_shared/tablistKeys';
 import KpiStrip from '../_shared/components/KpiStrip';
 import { formatAmount, formatDate, timeAgo } from '../_shared/format';
-import { COUNTRIES } from '../../_shared/countries';
+import { localizedCountries } from '../../_shared/countries';
 import Insights from './Insights';
 import DonorProfile from './DonorProfile';
 import './donors.scss';
@@ -220,7 +220,7 @@ export function DonorsApp( { toggleSlot } ) {
         {
             id:    'country',
             label: __( 'Country', 'fundraising-toolkit' ),
-            elements: COUNTRIES.map( ( c ) => ( { value: c.code, label: `${ c.code } - ${ c.name }` } ) ),
+            elements: localizedCountries().map( ( c ) => ( { value: c.code, label: `${ c.code } - ${ c.label }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
                 item.country

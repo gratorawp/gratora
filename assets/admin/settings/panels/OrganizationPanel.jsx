@@ -2,7 +2,7 @@ import { __ } from '@wordpress/i18n';
 
 import Card from '../../_shared/components/Card';
 import FormRow from '../../_shared/components/FormRow';
-import { COUNTRIES, isEuCountry } from '../../../_shared/countries';
+import { isEuCountry, localizedCountries } from '../../../_shared/countries';
 
 export default function OrganizationPanel( { s } ) {
     const country = s.value( 'country', '' );
@@ -106,8 +106,8 @@ export default function OrganizationPanel( { s } ) {
                         onChange={ ( e ) => s.setValue( 'country' )( e.target.value ) }
                     >
                         <option value="">{ __( 'Select a country', 'fundraising-toolkit' ) }</option>
-                        { COUNTRIES.map( ( c ) => (
-                            <option key={ c.code } value={ c.code }>{ c.name }</option>
+                        { localizedCountries().map( ( c ) => (
+                            <option key={ c.code } value={ c.code }>{ c.label }</option>
                         ) ) }
                     </select>
                 </FormRow>
