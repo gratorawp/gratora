@@ -4,6 +4,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
 import { CURRENCIES } from '../_shared/currency';
+import { backGlyph, forwardGlyph } from '../_shared/arrow';
 import CountrySelect from '../_shared/components/CountrySelect';
 import FundKitMark from '../_shared/components/FundKitMark';
 import LocalIcon from '../_shared/components/Icon';
@@ -323,7 +324,7 @@ export default function Onboarding() {
                                 onClick={ back }
                                 disabled={ busy }
                             >
-                                ← { __( 'Back', 'fundraising-toolkit' ) }
+                                { backGlyph() } { __( 'Back', 'fundraising-toolkit' ) }
                             </button>
                         ) }
 
@@ -345,8 +346,8 @@ export default function Onboarding() {
 function ctaLabel( step, busy ) {
     if ( busy ) return __( 'Saving…', 'fundraising-toolkit' );
     if ( step === 0 ) return __( 'Get started', 'fundraising-toolkit' );
-    if ( step === 2 ) return __( 'Finish setup', 'fundraising-toolkit' ) + ' →';
-    return __( 'Next', 'fundraising-toolkit' ) + ' →';
+    if ( step === 2 ) return __( 'Finish setup', 'fundraising-toolkit' ) + ' ' + forwardGlyph();
+    return __( 'Next', 'fundraising-toolkit' ) + ' ' + forwardGlyph();
 }
 
 // Step 1: who is fundraising

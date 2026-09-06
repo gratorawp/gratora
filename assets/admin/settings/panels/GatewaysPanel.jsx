@@ -135,7 +135,10 @@ export default function GatewaysPanel( { s } ) {
                         ref={ bankRef }
                         className="fundkit-textarea fundkit-textarea--mono"
                         rows={ 5 }
-                        placeholder={ 'Account holder: …\nIBAN: …\nBIC:  …\nReference: {reference}\nAmount:    {amount}' }
+                        placeholder={
+                            /* translators: sample bank transfer details. Keep {reference} and {amount} exactly as written: they are expanded when the donor is shown their transfer details. */
+                            __( 'Account holder: …\nIBAN: …\nBIC: …\nReference: {reference}\nAmount: {amount}', 'fundraising-toolkit' )
+                        }
                         { ...s.bind( 'offline.bank_details' ) }
                     />
                 </FormRow>

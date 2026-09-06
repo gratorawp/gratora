@@ -3,16 +3,14 @@ import { __ } from '@wordpress/i18n';
 
 import DateField from '../_shared/components/DateField';
 
-const MONTHS = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-];
-
 const PAD = 22; // .fundkit-schedule__lane horizontal padding
 
 // Jan-Dec lane with draggable start/today/end markers synced to date inputs below.
 export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdited, endEdited } ) {
     const now      = useMemo( () => new Date(), [] );
+    // The same formatter the marker labels use, so one widget speaks one
+    // language rather than an English axis under a translated marker.
+    const months   = useMemo( monthLabels, [] );
     const laneRef  = useRef( null );
 
     const start = parseDate( startsAt );
@@ -152,7 +150,7 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
             </div>
 
             <div className="fundkit-schedule__axis">
-                { MONTHS.map( ( m ) => <span key={ m }>{ m }</span> ) }
+                { months.map( ( m, i ) => <span key={ i }>{ m }</span> ) }
             </div>
 
             <div className="fundkit-schedule__dates">
@@ -187,6 +185,12 @@ function parseDate( v ) {
     if ( ! v ) return null;
     const d = new Date( v );
     return Number.isFinite( d.getTime() ) ? d : null;
+}
+
+function monthLabels() {
+    return Array.from( { length: 12 }, ( _, m ) =>
+        new Date( Date.UTC( 2001, m, 1 ) )
+            .toLocaleDateString( undefined, { month: 'short', timeZone: 'UTC' } ) );
 }
 
 function shortDate( d ) {

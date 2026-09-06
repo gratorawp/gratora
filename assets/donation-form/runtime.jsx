@@ -5,6 +5,7 @@ import { useCallback, useMemo, useReducer, useRef, useState, useEffect } from 'p
 
 import { reducer, initialState, validateStep, buildPayload, fieldSteps } from './state/store';
 import { visibleGateways, emptyMessage, keepGatewayValid } from './util/gateways';
+import { backGlyph } from './util/direction';
 import AmountStep   from './steps/AmountStep';
 import DonorStep    from './steps/DonorStep';
 import ConfirmStep  from './steps/ConfirmStep';
@@ -942,7 +943,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
                             disabled={ state.status === 'submitting' }
                             onClick={ onPrev }
                         >
-                            <span aria-hidden="true">←</span>
+                            <span aria-hidden="true">{ backGlyph() }</span>
                         </button>
                     ) : (
                         <span class="fundkit-form__bar-back" aria-hidden="true" />

@@ -250,6 +250,39 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $this->assertSame(ReadinessService::WARN, $this->checks()['org-identity']['status']);
     }
 
+    /**
+     * A translator gets whole sentences, so nothing about the order or the
+     * punctuation between them is decided by the code.
+     */
+    public function test_the_missing_details_are_whole_sentences(): void
+    {
+        update_option('fundkit_org_profile', [
+            'name'          => '',
+            'legal_name'    => '',
+            'address_lines' => ['1 Example Street'],
+            'tax_id'        => '',
+        ]);
+
+        add_filter('gettext', static function ($translated, $text, $domain) {
+            if ($domain !== 'fundraising-toolkit') return $translated;
+
+            return match ($text) {
+                'Receipts do not carry your organization name.' => 'S1',
+                'Receipts do not carry a tax number.'           => 'S3',
+                default                                         => $translated,
+            };
+        }, 10, 3);
+
+        try {
+            $check = $this->checks()['org-identity'];
+
+            $this->assertStringStartsWith('S1 S3 ', (string) $check['detail']);
+            $this->assertStringNotContainsString('%s', (string) $check['label']);
+        } finally {
+            remove_all_filters('gettext');
+        }
+    }
+
     public function test_a_complete_org_passes(): void
     {
         update_option('fundkit_org_profile', [

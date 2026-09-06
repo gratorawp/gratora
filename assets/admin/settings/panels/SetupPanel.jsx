@@ -4,6 +4,7 @@ import apiFetch from '@wordpress/api-fetch';
 
 import Card from '../../_shared/components/Card';
 import Btn from '../../_shared/components/Btn';
+import { forwardGlyph } from '../../_shared/arrow';
 import useCardOpen from '../../_shared/useCardOpen';
 
 // Order: money first, then whether a donor can reach you, then whether they
@@ -167,7 +168,7 @@ function Row( { row, onJumpTo } ) {
             </div>
             { row.action_url && (
                 <a className="fundkit-readiness-row__action" href={ row.action_url } onClick={ jump }>
-                    { row.action_label || __( 'Fix', 'fundraising-toolkit' ) } →
+                    { row.action_label || __( 'Fix', 'fundraising-toolkit' ) } { forwardGlyph() }
                 </a>
             ) }
         </li>

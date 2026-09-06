@@ -1,4 +1,4 @@
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 
 import { formatMonth } from './helpers';
 import { IconRotate, IconAlert } from './icons';
@@ -63,9 +63,11 @@ export default function Header( { donor, banners, recurring, onBack, onEdit, onT
                         { activeCount > 0 && (
                             <HeadChip tone="violet">
                                 <IconRotate className="ic" width="11" height="11" />
-                                { activeCount === 1
-                                    ? __( '1 active plan', 'fundraising-toolkit' )
-                                    : sprintf( /* translators: %d: count */ __( '%d active plans', 'fundraising-toolkit' ), activeCount ) }
+                                { sprintf(
+                                    /* translators: %d: count */
+                                    _n( '%d active plan', '%d active plans', activeCount, 'fundraising-toolkit' ),
+                                    activeCount
+                                ) }
                             </HeadChip>
                         ) }
                         { donor.id > 0 && (

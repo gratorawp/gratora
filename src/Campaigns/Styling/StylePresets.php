@@ -132,6 +132,9 @@ final class StylePresets
                 $merged = $saved;
                 // Built-in flag is authoritative; preserve user-edited name + tokens.
                 $merged['builtin'] = true;
+                // A built-in's label is a __() call, so it is never stored: an
+                // empty one here means "whatever this reader's locale calls it".
+                $merged['name'] = $merged['name'] !== '' ? $merged['name'] : $b['name'];
                 // Built-in tokens form the baseline; user-saved tokens override
                 // individual keys. Stops Tokens::sanitize() from silently
                 // erasing built-in tokens that aren't in the catalogue (e.g.
@@ -152,6 +155,9 @@ final class StylePresets
         // Append remaining customs in their saved order.
         foreach ($savedById as $p) {
             $p['builtin'] = false;
+            // A custom has no shipped label to fall back on, so its id is the
+            // one thing that identifies it in a picker.
+            if ($p['name'] === '') $p['name'] = $p['id'];
             $out[] = $p;
         }
         return $out;
@@ -271,7 +277,7 @@ final class StylePresets
     {
         return [
             'id'          => (string) ($p['id'] ?? ''),
-            'name'        => (string) ($p['name'] ?? $p['id'] ?? ''),
+            'name'        => is_string($p['name'] ?? null) ? trim($p['name']) : '',
             'description' => is_string($p['description'] ?? null) ? (string) $p['description'] : '',
             'tokens'      => Tokens::sanitize(is_array($p['tokens'] ?? null) ? $p['tokens'] : []),
         ];

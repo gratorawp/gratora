@@ -1,7 +1,7 @@
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl, ExternalLink } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { formatAmount } from '../../../_shared/format';
 import Segmented from '../../../_shared/components/Segmented';
 import { BlockIcons } from '../_shared/block-icons';
@@ -173,18 +173,22 @@ function Edit( { attributes, setAttributes } ) {
                             <span>{ percent }%</span>
                             { showDonors && ! isFormSource && (
                                 <span>
-                                    { donors === 1
-                                        ? __( '1 donor', 'fundraising-toolkit' )
-                                        : `${ donors.toLocaleString() } ${ __( 'donors', 'fundraising-toolkit' ) }` }
+                                    { sprintf(
+                                        /* translators: %d: number of donors */
+                                        _n( '%d donor', '%d donors', donors, 'fundraising-toolkit' ),
+                                        donors
+                                    ) }
                                 </span>
                             ) }
                             { showDeadline && ! isFormSource && days !== null && (
                                 <span>
                                     { days === 0
                                         ? __( 'Last day', 'fundraising-toolkit' )
-                                        : days === 1
-                                            ? __( '1 day left', 'fundraising-toolkit' )
-                                            : `${ days } ${ __( 'days left', 'fundraising-toolkit' ) }` }
+                                        : sprintf(
+                                            /* translators: %d: days remaining */
+                                            _n( '%d day left', '%d days left', days, 'fundraising-toolkit' ),
+                                            days
+                                        ) }
                                 </span>
                             ) }
                         </div>

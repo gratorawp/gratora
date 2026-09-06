@@ -70,6 +70,18 @@ final class AdminDonorEditSaveTest extends IntegrationTestCase
      * @param array<string,mixed> $edits
      * @param array<string,mixed> $addressEdits
      */
+    /** The column counts characters, so clamping by bytes cuts a CJK name a third short and splits the last one. */
+    public function test_a_multibyte_name_is_stored_at_its_full_length(): void
+    {
+        $donor = $this->seedDonor('kanji@example.test', 'Ken', 'Tanaka');
+        $name  = str_repeat('東', 40);
+
+        $res = $this->save($donor, ['last_name' => $name]);
+
+        $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
+        $this->assertSame($name, (string) $this->reload($donor)->last_name);
+    }
+
     private function save(Donor $donor, array $edits, array $addressEdits = []): \WP_REST_Response
     {
         $profile = (array) rest_do_request(

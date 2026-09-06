@@ -9,16 +9,27 @@ use FundKit\Donors\DonorService;
 use FundKit\Foundation\Plugin;
 
 /**
- * editProfile() must write (and fire fundkit.donor.updated) only on a real change.
- * The phone/address branches used to force $changed = true and also issue their
- * own direct UPDATE, so any request merely including a phone/address key wrote
- * twice and re-ran every donor.updated listener on a no-op edit.
+ * editProfile() must write (and fire fundkit.donor.updated) only on a real
+ * change: a request that merely includes a phone or address key is not an edit,
+ * and treating it as one re-runs every donor.updated listener on a no-op.
  */
 final class DonorProfileEditTest extends IntegrationTestCase
 {
     private function svc(): DonorService
     {
         return Plugin::instance()->container->get(DonorService::class);
+    }
+
+    /** The column counts characters, so clamping by bytes cuts a CJK name a third short. */
+    public function test_a_multibyte_name_survives_the_length_clamp(): void
+    {
+        $svc   = $this->svc();
+        $donor = $svc->findOrCreate('kanji-portal@example.test', ['first_name' => 'Ken']);
+        $name  = str_repeat('東', 40);
+
+        $svc->editProfile($donor, ['last_name' => $name]);
+
+        $this->assertSame($name, (string) Donor::query()->find('id', (int) $donor->id)->last_name);
     }
 
     public function test_unchanged_phone_does_not_fire_donor_updated(): void

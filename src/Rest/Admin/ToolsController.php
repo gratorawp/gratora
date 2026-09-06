@@ -1145,7 +1145,11 @@ final class ToolsController
         if (strtoupper(trim((string) $request->get_param('confirmation'))) !== 'DELETE') {
             return new \WP_Error(
                 'fundkit_confirmation_required',
-                __('Type DELETE to confirm.', 'fundraising-toolkit'),
+                sprintf(
+                    /* translators: %s: the literal confirmation keyword to type (DELETE) */
+                    __('Type %s to confirm.', 'fundraising-toolkit'),
+                    'DELETE'
+                ),
                 ['status' => 400]
             );
         }

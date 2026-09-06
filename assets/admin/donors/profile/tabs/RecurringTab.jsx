@@ -14,7 +14,7 @@ import {
 } from '../../../_shared/recurring/planColumns';
 import { formatAmount, formatDateTime, planStatusPill } from '../helpers';
 
-const STATUS_OPTIONS = [
+export const STATUS_OPTIONS = [
     { value: 'active',    label: __( 'Active', 'fundraising-toolkit' ) },
     { value: 'past_due',  label: __( 'Past due', 'fundraising-toolkit' ) },
     { value: 'paused',    label: __( 'Paused', 'fundraising-toolkit' ) },

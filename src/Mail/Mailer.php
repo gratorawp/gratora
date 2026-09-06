@@ -45,25 +45,45 @@ final class Mailer
     /**
      * @param array<string,string|int> $tokens
      * @param list<string> $attachments
+     * @param ?string $locale the recipient's own locale, when one was recorded
      * @return bool false when the template is disabled or absent; otherwise wp_mail's result.
      * @since 1.0.0
      */
-    public function sendTemplate(string $key, string $to, array $tokens, array $attachments = []): bool
+    public function sendTemplate(string $key, string $to, array $tokens, array $attachments = [], ?string $locale = null): bool
     {
-        if (! $this->templateEnabled($key)) {
+        // The whole read, not just the render: the template defaults come from
+        // __() calls resolved by SettingsService on every get(), so a switch
+        // that starts after them sends a French donor an English body.
+        $switched = $this->switchLocale((string) $locale);
+
+        try {
+            if (! $this->templateEnabled($key)) {
+                return false;
+            }
+
+            $cfg = $this->settings->get('email');
+            $template = $cfg['templates'][$key] ?? null;
+
+            $subject = $this->interpolate((string) ($template['subject'] ?? ''), $tokens);
+            $body    = $this->interpolate((string) ($template['body']    ?? ''), $tokens);
+
+            return $this->sendRaw($to, $subject, $body, [
+                'attachments'  => $attachments,
+                'no_admin_bcc' => in_array($key, self::NO_ADMIN_BCC, true),
+            ]);
+        } finally {
+            if ($switched) restore_previous_locale();
+        }
+    }
+
+    /** @since 1.0.0 */
+    private function switchLocale(string $locale): bool
+    {
+        if ($locale === '' || $locale === get_locale()) {
             return false;
         }
 
-        $cfg = $this->settings->get('email');
-        $template = $cfg['templates'][$key] ?? null;
-
-        $subject = $this->interpolate((string) ($template['subject'] ?? ''), $tokens);
-        $body    = $this->interpolate((string) ($template['body']    ?? ''), $tokens);
-
-        return $this->sendRaw($to, $subject, $body, [
-            'attachments'  => $attachments,
-            'no_admin_bcc' => in_array($key, self::NO_ADMIN_BCC, true),
-        ]);
+        return (bool) switch_to_locale($locale);
     }
 
     /**

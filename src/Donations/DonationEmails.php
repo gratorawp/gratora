@@ -53,6 +53,27 @@ final class DonationEmails extends HookProvider
         ];
     }
 
+    /**
+     * Runs a send in the locale the donor was recorded in.
+     *
+     * Wraps the token building, not just the send: a frequency label and a
+     * formatted date are __() and wp_date() calls made while the array is
+     * built, so a switch that starts later mails a French donor a French
+     * sentence containing "every month".
+     *
+     * @since 1.0.0
+     */
+    private function inDonorLocale(string $locale, callable $send): void
+    {
+        $switched = $locale !== '' && $locale !== get_locale() && switch_to_locale($locale);
+
+        try {
+            $send();
+        } finally {
+            if ($switched) restore_previous_locale();
+        }
+    }
+
     /** @since 1.0.0 */
     public function onIntentCreated(Donation $donation): void
     {
@@ -82,7 +103,7 @@ final class DonationEmails extends HookProvider
             '{donor_name}' => $donorName,
         ]);
 
-        $this->mailer->sendTemplate($this->templateFor('offline_instructions', $donation), $email, [
+        $this->inDonorLocale((string) ($donation->locale ?? ''), fn (): bool => $this->mailer->sendTemplate($this->templateFor('offline_instructions', $donation), $email, [
             'donor_name'        => $donorName,
             // Advertised on this template by templateTags, and interpolate
             // replaces only what it is handed: unfilled it reached the donor as
@@ -94,7 +115,7 @@ final class DonationEmails extends HookProvider
             'reference'         => $reference,
             'instructions'      => $fill((string) ($offline['instructions'] ?? '')),
             'bank_details'      => $fill((string) ($offline['bank_details'] ?? '')),
-        ]);
+        ]));
     }
 
     /** @since 1.0.0 */
@@ -103,14 +124,14 @@ final class DonationEmails extends HookProvider
         $email = $this->resolveDonorEmail($donation);
         if ($email === null) return;
 
-        $this->mailer->sendTemplate($this->templateFor('donation_pending', $donation), $email, [
+        $this->inDonorLocale((string) ($donation->locale ?? ''), fn (): bool => $this->mailer->sendTemplate($this->templateFor('donation_pending', $donation), $email, [
             'donor_first_name'  => $this->donorFirstName($donation),
             'donor_name'        => $this->donorName($donation),
             'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $donation->amount_cents, (string) $donation->currency),
             'campaign_title'    => $this->campaignTitle($donation),
             'reference'         => (string) $donation->reference,
-        ]);
+        ]));
     }
 
     /** @since 1.0.0 */
@@ -122,14 +143,14 @@ final class DonationEmails extends HookProvider
         // No receipt number here: the receipt row is issued asynchronously and
         // does not exist yet. The receipt email carries it, and a notice that
         // needs it can be sent from fundkit.async.receipt_issued instead.
-        $this->mailer->sendTemplate('recurring_renewal', $email, [
+        $this->inDonorLocale((string) ($donation->locale ?? ''), fn (): bool => $this->mailer->sendTemplate('recurring_renewal', $email, [
             'donor_first_name'  => $this->donorFirstName($donation),
             'donor_name'        => $this->donorName($donation),
             'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $donation->amount_cents, (string) $donation->currency),
             'campaign_title'    => $this->campaignTitle($donation),
             'reference'         => (string) $donation->reference,
-        ]);
+        ]));
     }
 
     /** @since 1.0.0 */
@@ -143,7 +164,7 @@ final class DonationEmails extends HookProvider
         $name = trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''));
         $first = trim((string) ($donor->first_name ?? ''));
 
-        $this->mailer->sendTemplate('subscription_cancelled', $email, [
+        $this->inDonorLocale((string) ($donor->locale ?? ''), fn (): bool => $this->mailer->sendTemplate('subscription_cancelled', $email, [
             'donor_first_name'  => $first,
             'donor_name'        => $name,
             'organisation_name' => OrgProfile::load()['name'],
@@ -151,7 +172,7 @@ final class DonationEmails extends HookProvider
             'campaign_title'    => $plan->campaign_id
                 ? (($c = $this->campaigns->findById((int) $plan->campaign_id)) ? (string) $c->title : '')
                 : '',
-        ]);
+        ]));
     }
 
     /**
@@ -187,7 +208,7 @@ final class DonationEmails extends HookProvider
         $currency = (string) $plan->currency;
         $oldCents = isset($change->detail['from_cents']) ? (int) $change->detail['from_cents'] : null;
 
-        $this->mailer->sendTemplate($template, $email, [
+        $this->inDonorLocale((string) ($donor->locale ?? ''), fn (): bool => $this->mailer->sendTemplate($template, $email, [
             'donor_first_name'  => trim((string) ($donor->first_name ?? '')),
             'donor_name'        => trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
             'organisation_name' => OrgProfile::load()['name'],
@@ -204,7 +225,7 @@ final class DonationEmails extends HookProvider
             'campaign_title'    => $plan->campaign_id
                 ? (($c = $this->campaigns->findById((int) $plan->campaign_id)) ? (string) $c->title : '')
                 : '',
-        ]);
+        ]));
     }
 
     /**
@@ -244,7 +265,7 @@ final class DonationEmails extends HookProvider
         $email = $this->donorService->decryptEmail($donor);
         if ($email === null || $email === '') return;
 
-        $this->mailer->sendTemplate('subscription_payment_failed', $email, [
+        $this->inDonorLocale((string) ($donor->locale ?? ''), fn (): bool => $this->mailer->sendTemplate('subscription_payment_failed', $email, [
             'donor_first_name'  => trim((string) ($donor->first_name ?? '')),
             'donor_name'        => trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
             'organisation_name' => OrgProfile::load()['name'],
@@ -256,7 +277,7 @@ final class DonationEmails extends HookProvider
             // request to sign in, and mailing a working session key on an event
             // the donor did not trigger is a worse trade than one extra click.
             'portal_url'        => (new PortalPage())->url(),
-        ]);
+        ]));
     }
 
     /** @since 1.0.0 */
@@ -265,14 +286,14 @@ final class DonationEmails extends HookProvider
         $email = $this->resolveDonorEmail($donation);
         if ($email === null) return;
 
-        $this->mailer->sendTemplate($this->templateFor('donation_refunded', $donation), $email, [
+        $this->inDonorLocale((string) ($donation->locale ?? ''), fn (): bool => $this->mailer->sendTemplate($this->templateFor('donation_refunded', $donation), $email, [
             'donor_first_name'  => $this->donorFirstName($donation),
             'donor_name'        => $this->donorName($donation),
             'organisation_name' => OrgProfile::load()['name'],
             'amount'            => Money::format((int) $refund->amount_cents, (string) $donation->currency),
             'campaign_title'    => $this->campaignTitle($donation),
             'reference'         => (string) $donation->reference,
-        ]);
+        ]));
     }
 
     /**
@@ -304,11 +325,11 @@ final class DonationEmails extends HookProvider
         $email = $this->donorService->decryptEmail($donor);
         if ($email === null || $email === '') return;
 
-        $this->mailer->sendTemplate('donation_first', $email, [
+        $this->inDonorLocale((string) ($donor->locale ?? ''), fn (): bool => $this->mailer->sendTemplate('donation_first', $email, [
             'donor_first_name'  => trim((string) ($donor->first_name ?? '')),
             'donor_name'        => trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
             'organisation_name' => OrgProfile::load()['name'],
-        ]);
+        ]));
     }
 
     /**

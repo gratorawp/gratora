@@ -462,8 +462,17 @@ final class SettingsService
         $kept = [];
         foreach ($presets as $preset) {
             $id = is_array($preset) ? (string) ($preset['id'] ?? '') : '';
-            if ($id !== '' && isset($shipped[$id]) && self::samePreset($preset, $shipped[$id])) {
+            if ($id === '' || ! isset($shipped[$id])) {
+                $kept[] = $preset;
                 continue;
+            }
+            if (self::samePreset($preset, $shipped[$id])) continue;
+
+            // A built-in's label is a __() call rendered in whoever is saving.
+            // Storing it pins every later reader to that admin's locale, so an
+            // edited built-in keeps its own tokens and borrows its own name.
+            foreach (['name', 'description'] as $key) {
+                if (($preset[$key] ?? null) === ($shipped[$id][$key] ?? null)) unset($preset[$key]);
             }
             $kept[] = $preset;
         }

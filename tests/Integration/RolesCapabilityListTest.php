@@ -9,15 +9,66 @@ use WP_REST_Request;
 
 /**
  * The roles screen is the one place capabilities are granted, so it has to know
- * about all of them.
+ * about all of them, including the ones add-ons register through the
+ * `fundkit.capabilities` filter: `applyMapping()` honours those, and a screen
+ * that does not show them gates real routes nobody can be granted.
  *
- * It used to render from a list hardcoded in its own JSX while add-ons register
- * theirs through the `fundkit.capabilities` filter. `applyMapping()` honoured
- * those; the screen never showed them. fundkit-p2p's `fundkit_manage_fundraisers`
- * gated real routes and could not be granted to anyone through the UI.
+ * Everything it renders is wording, so it also has to be translatable.
  */
 final class RolesCapabilityListTest extends IntegrationTestCase
 {
+    protected function tearDown(): void
+    {
+        remove_all_filters('gettext');
+        remove_all_filters('gettext_with_context');
+        parent::tearDown();
+    }
+
+    public function test_a_capability_label_is_translated(): void
+    {
+        add_filter('gettext', static fn ($translated, $text, $domain) => $domain === 'fundraising-toolkit' && $text === 'View donors'
+            ? 'Voir les donateurs'
+            : $translated, 10, 3);
+
+        $labels = [];
+        foreach ((array) ($this->fetch()['capabilities'] ?? []) as $group) {
+            foreach ((array) ($group['caps'] ?? []) as $row) {
+                $labels[(string) $row['cap']] = (string) $row['label'];
+            }
+        }
+
+        $this->assertSame('Voir les donateurs', $labels['fundkit_view_donors'] ?? '');
+    }
+
+    public function test_a_group_heading_is_translated(): void
+    {
+        add_filter('gettext', static fn ($translated, $text, $domain) => $domain === 'fundraising-toolkit' && $text === 'Donors'
+            ? 'Donateurs'
+            : $translated, 10, 3);
+
+        $headings = array_map(
+            static fn (array $g): string => (string) ($g['label'] ?? ''),
+            (array) ($this->fetch()['capabilities'] ?? [])
+        );
+
+        $this->assertContains('Donateurs', $headings);
+    }
+
+    /** translate_user_role() reads the default domain with a User role context. */
+    public function test_a_role_name_is_translated(): void
+    {
+        add_filter('gettext_with_context', static fn ($translated, $text, $context) => $context === 'User role' && $text === 'Administrator'
+            ? 'Administrateur'
+            : $translated, 10, 4);
+
+        $names = [];
+        foreach ((array) ($this->fetch()['roles'] ?? []) as $role) {
+            $names[(string) ($role['slug'] ?? '')] = (string) ($role['name'] ?? '');
+        }
+
+        $this->assertSame('Administrateur', $names['administrator'] ?? '');
+    }
+
     /** @return array<string,mixed> */
     private function fetch(): array
     {

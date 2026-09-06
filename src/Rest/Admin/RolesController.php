@@ -64,10 +64,29 @@ final class RolesController
             if (! $role) continue;
             $out[] = [
                 'slug' => $slug,
-                'name' => (string) ($role['name'] ?? $slug),
+                'name' => translate_user_role((string) ($role['name'] ?? $slug)),
             ];
         }
         return $out;
+    }
+
+    /**
+     * A group key is an identifier add-ons merge on, so it cannot be
+     * translated where it is declared. Core's four are translated here, at the
+     * display boundary; an add-on's own heading is the add-on's to translate.
+     *
+     * @since 1.0.0
+     */
+    private static function groupLabel(string $key): string
+    {
+        $labels = [
+            'Donors'    => __('Donors', 'fundraising-toolkit'),
+            'Donations' => __('Donations', 'fundraising-toolkit'),
+            'Reports'   => __('Reports', 'fundraising-toolkit'),
+            'Setup'     => __('Setup', 'fundraising-toolkit'),
+        ];
+
+        return $labels[$key] ?? $key;
     }
 
     /**
@@ -92,7 +111,7 @@ final class RolesController
                 $rows[] = ['cap' => $cap, 'label' => (string) ($labels[$cap] ?? $cap)];
             }
             if ($rows !== []) {
-                $out[] = ['label' => (string) $label, 'caps' => $rows];
+                $out[] = ['label' => self::groupLabel((string) $label), 'caps' => $rows];
             }
         }
 

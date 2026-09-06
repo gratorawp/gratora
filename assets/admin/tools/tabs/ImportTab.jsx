@@ -57,6 +57,9 @@ export default function ImportTab( { setNotice } ) {
         } );
     };
 
+    // Each part is a whole sentence, terminator included: which punctuation
+    // separates two clauses is the translator's to decide, not the code's.
+    //
     // What landed, read off a payload. The refusal path is not all-or-nothing:
     // the groups accepted before the refused one keep their new values, so the
     // same reckoning has to run on a failure or the admin retries blind.
@@ -71,7 +74,7 @@ export default function ImportTab( { setNotice } ) {
 
             parts.push( sprintf(
                 /* translators: %d: number of records. */
-                _n( '%d record restored', '%d records restored', created, 'fundraising-toolkit' ),
+                _n( '%d record restored.', '%d records restored.', created, 'fundraising-toolkit' ),
                 created
             ) );
             // Said plainly, because "already here" is the expected answer on
@@ -79,14 +82,14 @@ export default function ImportTab( { setNotice } ) {
             if ( existing ) {
                 parts.push( sprintf(
                     /* translators: %d: number of records. */
-                    _n( '%d was already here', '%d were already here', existing, 'fundraising-toolkit' ),
+                    _n( '%d was already here.', '%d were already here.', existing, 'fundraising-toolkit' ),
                     existing
                 ) );
             }
             if ( skipped ) {
                 parts.push( sprintf(
                     /* translators: %d: number of records. */
-                    _n( '%d skipped', '%d skipped', skipped, 'fundraising-toolkit' ),
+                    _n( '%d skipped.', '%d skipped.', skipped, 'fundraising-toolkit' ),
                     skipped
                 ) );
             }
@@ -96,7 +99,7 @@ export default function ImportTab( { setNotice } ) {
         if ( applied > 0 ) {
             parts.push( sprintf(
                 /* translators: %d: number of settings groups. */
-                _n( '%d settings group restored', '%d settings groups restored', applied, 'fundraising-toolkit' ),
+                _n( '%d settings group restored.', '%d settings groups restored.', applied, 'fundraising-toolkit' ),
                 applied
             ) );
         }
@@ -118,7 +121,7 @@ export default function ImportTab( { setNotice } ) {
             const parts = landedParts( res );
 
             setNotice( parts.length
-                ? { type: 'success', text: parts.join( ', ' ) + '. ' + __( 'Reload the page to see it.', 'fundraising-toolkit' ) }
+                ? { type: 'success', text: [ ...parts, __( 'Reload the page to see it.', 'fundraising-toolkit' ) ].join( ' ' ) }
                 : { type: 'error', text: __( 'Nothing in that file matched a Fundraising Toolkit setting or record.', 'fundraising-toolkit' ) }
             );
         } catch ( err ) {
@@ -128,11 +131,12 @@ export default function ImportTab( { setNotice } ) {
             setNotice( {
                 type: 'error',
                 text: landed.length
-                    ? reason + ' ' + sprintf(
-                        /* translators: %s: a comma-separated list of what the refused import did restore. */
-                        __( 'What did land: %s. Running the file again is safe.', 'fundraising-toolkit' ),
-                        landed.join( ', ' )
-                    )
+                    ? [
+                        reason,
+                        __( 'Some of it landed.', 'fundraising-toolkit' ),
+                        ...landed,
+                        __( 'Running the file again is safe.', 'fundraising-toolkit' ),
+                    ].join( ' ' )
                     : reason,
             } );
         } finally {

@@ -61,6 +61,7 @@ export function planStatusPill( status ) {
         case 'past_due':  return { cls: 'is-warn',  label: __( 'Past due',  'fundraising-toolkit' ) };
         case 'paused':    return { cls: 'is-muted', label: __( 'Paused',    'fundraising-toolkit' ) };
         case 'cancelled': return { cls: 'is-muted', label: __( 'Cancelled', 'fundraising-toolkit' ) };
+        case 'expired':   return { cls: 'is-muted', label: __( 'Expired',   'fundraising-toolkit' ) };
         default:          return { cls: 'is-muted', label: status };
     }
 }

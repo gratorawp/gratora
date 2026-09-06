@@ -399,7 +399,10 @@ final class DonationFormShortcode extends HookProvider
         // phpcs:disable WordPress.WP.EnqueuedResources -- same reason as the dependency tags above: this is the whole document the iframe gets, head included, and nothing in it is enqueueable.
         return implode("\n", [
             '<!DOCTYPE html>',
-            '<html lang="en">',
+            // The iframe is a document of its own, so it inherits nothing from
+            // the admin around it: without these an Arabic author previews their
+            // form left to right and in the wrong language.
+            '<html lang="' . esc_attr(str_replace('_', '-', determine_locale())) . '"' . (is_rtl() ? ' dir="rtl"' : '') . '>',
             '<head>',
             '    <meta charset="utf-8">',
             '    <meta name="viewport" content="width=device-width, initial-scale=1">',

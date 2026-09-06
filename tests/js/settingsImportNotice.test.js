@@ -159,7 +159,9 @@ test( 'a full restore reports its records and its settings groups', async () => 
 
     const notice = lastNotice();
     expect( notice.type ).toBe( 'success' );
-    expect( notice.text ).toContain( '7 records restored' );
-    expect( notice.text ).toContain( '1 was already here' );
-    expect( notice.text ).toContain( '2 settings groups restored' );
+    // Exact, not substrings: what separates two sentences is inside the
+    // translation, so the code must contribute nothing but a space.
+    expect( notice.text ).toBe(
+        '7 records restored. 1 was already here. 2 settings groups restored. Reload the page to see it.'
+    );
 } );

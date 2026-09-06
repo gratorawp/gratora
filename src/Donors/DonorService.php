@@ -154,7 +154,7 @@ final class DonorService
             $value = $patch[$f];
             $value = $value === null ? null : trim((string) $value);
             if ($value === '') $value = null;
-            if ($value !== null && $maxLen) $value = substr($value, 0, $maxLen);
+            if ($value !== null && $maxLen) $value = mb_substr($value, 0, $maxLen);
             if (($donor->$f ?? null) === $value) continue;
             $dirty[$f] = $value;
         }

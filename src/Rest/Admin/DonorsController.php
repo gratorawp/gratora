@@ -278,7 +278,7 @@ final class DonorsController
             $value = $value === null ? null : trim((string) $value);
             if ($value === '') $value = null;
             if ($value !== null && $maxLen !== null) {
-                $value = substr($value, 0, $maxLen);
+                $value = mb_substr($value, 0, $maxLen);
             }
             $update[$field] = $value;
         };

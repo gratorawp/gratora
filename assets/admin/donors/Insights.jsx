@@ -4,6 +4,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Users as UsersIcon, History } from 'lucide-react';
 
 import EmptyState from '../_shared/components/EmptyState';
+import { backGlyph, forwardGlyph } from '../_shared/arrow';
 import Notice from '../_shared/components/Notice';
 import MetricCard from '../_shared/widgets/MetricCard';
 import { WidgetCard } from '../_shared/widgets/Widget';
@@ -366,9 +367,11 @@ function AtRiskTable() {
             { total > 0 && (
                 <div className="fundkit-at-risk__head">
                     <span className="fundkit-at-risk__count">
-                        { total === 1
-                            ? __( '1 at-risk donor', 'fundraising-toolkit' )
-                            : sprintf( /* translators: %s: count */ __( '%s at-risk donors', 'fundraising-toolkit' ), total.toLocaleString() ) }
+                        { sprintf(
+                            /* translators: %s: count */
+                            _n( '%s at-risk donor', '%s at-risk donors', total, 'fundraising-toolkit' ),
+                            total.toLocaleString()
+                        ) }
                     </span>
                 </div>
             ) }
@@ -390,11 +393,11 @@ function AtRiskTable() {
                     { pageCount > 1 && (
                         <div className="fundkit-pagination">
                             <button type="button" disabled={ page <= 1 } onClick={ () => setPage( ( p ) => p - 1 ) }>
-                                ← { __( 'Prev', 'fundraising-toolkit' ) }
+                                { backGlyph() } { __( 'Prev', 'fundraising-toolkit' ) }
                             </button>
                             <span>{ sprintf( /* translators: 1: current page, 2: total pages */ __( 'Page %1$d of %2$d', 'fundraising-toolkit' ), page, pageCount ) }</span>
                             <button type="button" disabled={ page >= pageCount } onClick={ () => setPage( ( p ) => p + 1 ) }>
-                                { __( 'Next', 'fundraising-toolkit' ) } →
+                                { __( 'Next', 'fundraising-toolkit' ) } { forwardGlyph() }
                             </button>
                         </div>
                     ) }

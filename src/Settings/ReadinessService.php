@@ -479,12 +479,15 @@ final class ReadinessService
             ? trim((string) $org['legal_name'])
             : trim((string) ($org['name'] ?? ''));
 
+        // Whole sentences, not fragments joined here: which words a language
+        // puts between two clauses, and in what order, is the translator's to
+        // decide and cannot be expressed as ', ' plus an isolated "and".
         $missing = [];
-        if ($name === '')  $missing[] = __('a name', 'fundraising-toolkit');
-        if ($lines === []) $missing[] = __('a postal address', 'fundraising-toolkit');
+        if ($name === '')  $missing[] = __('Receipts do not carry your organization name.', 'fundraising-toolkit');
+        if ($lines === []) $missing[] = __('Receipts do not carry a postal address.', 'fundraising-toolkit');
 
         if ($this->showTaxId() && trim((string) ($org['tax_id'] ?? '')) === '') {
-            $missing[] = __('a tax number', 'fundraising-toolkit');
+            $missing[] = __('Receipts do not carry a tax number.', 'fundraising-toolkit');
         }
 
         if ($missing === []) {
@@ -494,12 +497,9 @@ final class ReadinessService
         return $this->warn(
             'org-identity',
             'receipts',
-            sprintf(
-                /* translators: %s: comma-separated list of missing organization details. */
-                __('Receipts are missing %s', 'fundraising-toolkit'),
-                $this->join($missing)
-            ),
-            __('Receipts print your organization details at the top. Donors claiming tax relief usually need them.', 'fundraising-toolkit'),
+            __('Receipts are missing details donors may need', 'fundraising-toolkit'),
+            implode(' ', $missing) . ' '
+                . __('Receipts print your organization details at the top. Donors claiming tax relief usually need them.', 'fundraising-toolkit'),
             'organization',
             __('Add the details', 'fundraising-toolkit')
         );
@@ -773,21 +773,6 @@ final class ReadinessService
     private function names(array $addons): string
     {
         return implode(', ', array_map(static fn (array $a): string => (string) $a['name'], $addons));
-    }
-
-    /**
-     * @param list<string> $items
-     *
-     * @since 1.0.0
-     */
-    private function join(array $items): string
-    {
-        if (count($items) < 2) {
-            return (string) ($items[0] ?? '');
-        }
-        $last = array_pop($items);
-
-        return implode(', ', $items) . ' ' . __('and', 'fundraising-toolkit') . ' ' . $last;
     }
 
     /**

@@ -17,6 +17,10 @@ const COUNT_LABELS = {
     converted_plans:     __( 'Recurring plans given a value in your base currency', 'fundraising-toolkit' ),
 };
 
+// Typed verbatim, so it is a placeholder rather than a word a translator can
+// change out from under the check that reads it back.
+const CONFIRM_WORD = 'DELETE';
+
 // An add-on can contribute a count through fundkit.recalculate.addons, and a
 // raw key is not a sentence.
 const countLabel = ( key ) => COUNT_LABELS[ key ]
@@ -308,7 +312,11 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                     </ul>
                     <div className="fundkit-advanced-actions" style={ { marginTop: 12 } }>
                         <label className="fundkit-tools-field">
-                            { __( 'Type DELETE to confirm', 'fundraising-toolkit' ) }
+                            { sprintf(
+                                /* translators: %s: the literal confirmation keyword to type (DELETE) */
+                                __( 'Type %s to confirm.', 'fundraising-toolkit' ),
+                                CONFIRM_WORD
+                            ) }
                             <input
                                 type="text"
                                 className="fundkit-input"
@@ -320,7 +328,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                         <Btn
                             variant="danger"
                             onClick={ doPurgeTestData }
-                            disabled={ purging || purgeText.trim().toUpperCase() !== 'DELETE' }
+                            disabled={ purging || purgeText.trim().toUpperCase() !== CONFIRM_WORD }
                             isBusy={ purging }
                         >
                             { purging ? __( 'Removing…', 'fundraising-toolkit' ) : __( 'Delete test data', 'fundraising-toolkit' ) }

@@ -36,20 +36,32 @@ final class Capabilities
         'Setup'     => ['fundkit_manage_campaigns', 'fundkit_manage_forms', 'fundkit_manage_settings'],
     ];
 
-    public const LABELS = [
-        'fundkit_view_donors'      => 'View donors',
-        'fundkit_edit_donors'      => 'Edit donor records',
-        'fundkit_export_donors'    => 'Export donor list (CSV)',
-        'fundkit_redact_donors'    => 'Redact donors (GDPR)',
-        'fundkit_view_donations'   => 'View donations',
-        'fundkit_edit_donations'   => 'Edit donations (notes)',
-        'fundkit_refund_donations' => 'Change what is charged (refund, mark paid, record by hand, change a recurring plan)',
-        'fundkit_resend_receipt'   => 'Resend receipts',
-        'fundkit_view_reports'     => 'View dashboards & reports',
-        'fundkit_manage_campaigns' => 'Manage campaigns',
-        'fundkit_manage_forms'     => 'Manage donation forms',
-        'fundkit_manage_settings'  => 'Manage settings',
-    ];
+    /**
+     * Display wording for each capability, so it cannot live in a const: a
+     * const cannot call __(), and the Roles grid is the one settings tab a
+     * translated site would otherwise read in English.
+     *
+     * @return array<string,string>
+     *
+     * @since 1.0.0
+     */
+    private static function coreLabels(): array
+    {
+        return [
+            'fundkit_view_donors'      => __('View donors', 'fundraising-toolkit'),
+            'fundkit_edit_donors'      => __('Edit donor records', 'fundraising-toolkit'),
+            'fundkit_export_donors'    => __('Export donor list (CSV)', 'fundraising-toolkit'),
+            'fundkit_redact_donors'    => __('Redact donors (GDPR)', 'fundraising-toolkit'),
+            'fundkit_view_donations'   => __('View donations', 'fundraising-toolkit'),
+            'fundkit_edit_donations'   => __('Edit donations (notes)', 'fundraising-toolkit'),
+            'fundkit_refund_donations' => __('Change what is charged (refund, mark paid, record by hand, change a recurring plan)', 'fundraising-toolkit'),
+            'fundkit_resend_receipt'   => __('Resend receipts', 'fundraising-toolkit'),
+            'fundkit_view_reports'     => __('View dashboards & reports', 'fundraising-toolkit'),
+            'fundkit_manage_campaigns' => __('Manage campaigns', 'fundraising-toolkit'),
+            'fundkit_manage_forms'     => __('Manage donation forms', 'fundraising-toolkit'),
+            'fundkit_manage_settings'  => __('Manage settings', 'fundraising-toolkit'),
+        ];
+    }
 
     /**
      * The capability maps with add-on registrations applied.
@@ -62,7 +74,7 @@ final class Capabilities
         $maps = apply_filters('fundkit.capabilities', [
             'all'    => self::ALL,
             'groups' => self::GROUPS,
-            'labels' => self::LABELS,
+            'labels' => self::coreLabels(),
         ]);
         if (! is_array($maps)) {
             $maps = [];
@@ -70,7 +82,7 @@ final class Capabilities
         return [
             'all'    => array_values(array_unique((array) ($maps['all'] ?? self::ALL))),
             'groups' => (array) ($maps['groups'] ?? self::GROUPS),
-            'labels' => (array) ($maps['labels'] ?? self::LABELS),
+            'labels' => (array) ($maps['labels'] ?? self::coreLabels()),
         ];
     }
 

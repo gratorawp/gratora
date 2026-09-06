@@ -1,16 +1,20 @@
-import { useState } from '@wordpress/element';
+import { useMemo, useState } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
 
 // 7x24 day-of-week / hour-of-day donation-count heatmap. CSS Grid, no chart lib.
-const DAYS = [
-    { short: 'Mon', long: 'Monday' },
-    { short: 'Tue', long: 'Tuesday' },
-    { short: 'Wed', long: 'Wednesday' },
-    { short: 'Thu', long: 'Thursday' },
-    { short: 'Fri', long: 'Friday' },
-    { short: 'Sat', long: 'Saturday' },
-    { short: 'Sun', long: 'Sunday' },
-];
+// 2001-01-01 was a Monday, which is the order the grid arrives in. Built with
+// the same formatter the rest of the admin dates use, so the row labels, the
+// tooltip and every cell's accessible name read in one language.
+function dayLabels() {
+    return Array.from( { length: 7 }, ( _, i ) => {
+        const d = new Date( Date.UTC( 2001, 0, 1 + i ) );
+
+        return {
+            short: d.toLocaleDateString( undefined, { weekday: 'short', timeZone: 'UTC' } ),
+            long:  d.toLocaleDateString( undefined, { weekday: 'long',  timeZone: 'UTC' } ),
+        };
+    } );
+}
 
 const HOUR_LABELS = [ 0, 6, 12, 18 ];
 
@@ -30,6 +34,7 @@ export default function DowHourHeatmap( { data } ) {
     }
 
     const { grid, max } = data;
+    const days = useMemo( dayLabels, [] );
 
     let peak = { day: -1, hour: -1, count: 0 };
     grid.forEach( ( row, day ) => {
@@ -55,7 +60,7 @@ export default function DowHourHeatmap( { data } ) {
 
             { grid.map( ( row, day ) => (
                 <div key={ day } className="fundkit-heatmap__row">
-                    <span className="fundkit-heatmap__row-label">{ DAYS[ day ].short }</span>
+                    <span className="fundkit-heatmap__row-label">{ days[ day ].short }</span>
                     { row.map( ( count, hour ) => {
                         const intensity = max > 0 ? count / max : 0;
                         const isPeak = peak.day === day && peak.hour === hour && count > 0;
@@ -81,7 +86,7 @@ export default function DowHourHeatmap( { data } ) {
                                         count,
                                         'fundraising-toolkit'
                                     ),
-                                    DAYS[ day ].long,
+                                    days[ day ].long,
                                     hour,
                                     count
                                 ) }
@@ -106,7 +111,7 @@ export default function DowHourHeatmap( { data } ) {
             { hovered && (
                 <div className="fundkit-heatmap__tip" aria-live="polite">
                     <strong>
-                        { DAYS[ hovered.day ].long } · { hovered.hour.toString().padStart( 2, '0' ) }:00
+                        { days[ hovered.day ].long } · { hovered.hour.toString().padStart( 2, '0' ) }:00
                     </strong>
                     { ' - ' }
                     { sprintf(

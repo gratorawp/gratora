@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 
-import { formatAmount, formatDateTime, timeAgo } from '../helpers';
+import { formatAmount, formatDateTime, refundStatusPill, timeAgo } from '../helpers';
 
 export default function RefundsCard( { donation, refunds, onIssue, onRelease } ) {
     if ( ! refunds || refunds.length === 0 ) {
@@ -49,8 +49,8 @@ export default function RefundsCard( { donation, refunds, onIssue, onRelease } )
                                     <td>{ r.reason || <span className="muted">-</span> }</td>
                                     <td className="mono">{ r.gateway_refund_id || <span className="muted">-</span> }</td>
                                     <td>
-                                        <span className={ `dd-pill ${ r.status === 'succeeded' ? 'is-ok' : 'is-warn' }` }>
-                                            { r.status }
+                                        <span className={ `dd-pill ${ refundStatusPill( r.status ).cls }` }>
+                                            { refundStatusPill( r.status ).label }
                                         </span>
                                         { r.status === 'pending' && onRelease && r.gateway_refund_id && (
                                             <button

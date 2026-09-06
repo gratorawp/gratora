@@ -51,6 +51,16 @@ export function donationStatusPill( status ) {
     }
 }
 
+export function refundStatusPill( status ) {
+    switch ( status ) {
+        case 'succeeded': return { cls: 'is-ok',    label: __( 'Issued',          'fundraising-toolkit' ) };
+        case 'pending':   return { cls: 'is-warn',  label: __( 'Not settled yet', 'fundraising-toolkit' ) };
+        case 'failed':    return { cls: 'is-error', label: __( 'Failed',          'fundraising-toolkit' ) };
+        case 'reversed':  return { cls: 'is-muted', label: __( 'Reversed',        'fundraising-toolkit' ) };
+        default:          return { cls: 'is-muted', label: status };
+    }
+}
+
 export const CHANNEL_LABEL = {
     direct:        __( 'Direct',         'fundraising-toolkit' ),
     email:         __( 'Email',          'fundraising-toolkit' ),

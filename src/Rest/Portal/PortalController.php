@@ -568,7 +568,8 @@ final class PortalController
                 $email,
                 $this->magicLinks->issue((int) $donor->id, PortalSession::PORTAL_PURPOSE, null, self::PORTAL_LINK_TTL),
                 trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? '')),
-                self::PORTAL_LINK_TTL
+                self::PORTAL_LINK_TTL,
+                (string) ($donor->locale ?? '')
             );
             return;
         }
@@ -604,14 +605,14 @@ final class PortalController
      *
      * @since 1.0.0
      */
-    private function mailLink(string $email, string $rawToken, string $name, int $ttlSeconds): void
+    private function mailLink(string $email, string $rawToken, string $name, int $ttlSeconds, string $locale = ''): void
     {
         $this->mailer->sendTemplate('magic_link', $email, [
             'donor_name'        => $name !== '' ? $name : $email,
             'organisation_name' => OrgProfile::load()['name'],
             'portal_url'        => add_query_arg('token', $rawToken, $this->portalUrl()),
             'link_expiry'       => human_time_diff(0, $ttlSeconds),
-        ]);
+        ], [], $locale);
     }
 
     /**
