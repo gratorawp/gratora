@@ -114,7 +114,9 @@ final class ReferenceGeneratorTest extends IntegrationTestCase
         $gen->next('donation'); // counter is now 2
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Cannot set counter for donation to 2');
+        // The admin has to be able to tell which number they typed from the one
+        // the counter already reached; the wording itself is free to change.
+        $this->expectExceptionMessageMatches('/\b2\b.*\b2\b/');
         $gen->nextNumber('donation', 2);
     }
 

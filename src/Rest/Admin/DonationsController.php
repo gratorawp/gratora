@@ -1515,7 +1515,7 @@ final class DonationsController
         if ($pdf === null || $pdf === '') {
             return new WP_Error(
                 'fundkit_render_failed',
-                __('Could not regenerate the receipt PDF. The original renderer may have been removed.', 'fundraising-toolkit'),
+                __('Could not regenerate the receipt PDF. The reason is recorded under Tools > Logs.', 'fundraising-toolkit'),
                 ['status' => 500],
             );
         }

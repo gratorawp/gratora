@@ -408,7 +408,7 @@ final class FundService
         // enough.
         if ($fund->starts_at && $fund->ends_at && $fund->starts_at > $fund->ends_at) {
             throw new InvalidArgumentException(
-                esc_html__('Fund "Active from" date must be before "Active until".', 'fundraising-toolkit')
+                esc_html__('The fund start date must be before its end date.', 'fundraising-toolkit')
             );
         }
     }

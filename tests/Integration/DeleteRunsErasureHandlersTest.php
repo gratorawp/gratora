@@ -10,7 +10,9 @@ use FundKit\Donors\DonorService;
 use FundKit\Donors\Erasure\ErasureHandler;
 use FundKit\Donors\Erasure\ErasureRequest;
 use FundKit\Foundation\Plugin;
+use InvalidArgumentException;
 use RuntimeException;
+use WP_REST_Request;
 
 /**
  * Redaction runs every handler registered on fundkit.donor.erasure_handlers,
@@ -187,6 +189,50 @@ final class DeleteRunsErasureHandlersTest extends IntegrationTestCase
                 $calls,
                 'a delete that erases less than a redaction is not a delete'
             );
+        } finally {
+            $off();
+        }
+    }
+
+    /**
+     * An add-on handler that cannot finish is a refusal the operator has to be
+     * able to read. Unwrapped it escaped the route as a critical-error page,
+     * which the screen cannot show and which says nothing about why.
+     */
+    public function test_a_handler_that_cannot_finish_answers_the_route_instead_of_fataling(): void
+    {
+        $off = $this->register(static function (): void {
+            throw new RuntimeException('the add-on could not reach its own store');
+        });
+
+        try {
+            $id = (int) $this->donor()->id;
+            $this->deadDonation($id);
+
+            $res = rest_do_request(new WP_REST_Request('DELETE', '/fundkit/v1/admin/donors/' . $id));
+
+            $this->assertSame(500, $res->get_status());
+            $this->assertSame(1, Donor::query()->where('id', $id)->count());
+        } finally {
+            $off();
+        }
+    }
+
+    /** A refusal the guards raise is the operator's to act on, not a failure. */
+    public function test_a_refusing_handler_is_reported_as_a_refusal(): void
+    {
+        $off = $this->register(static function (): void {
+            throw new InvalidArgumentException('this donor is on a legal hold');
+        });
+
+        try {
+            $id = (int) $this->donor()->id;
+            $this->deadDonation($id);
+
+            $res = rest_do_request(new WP_REST_Request('DELETE', '/fundkit/v1/admin/donors/' . $id));
+
+            $this->assertSame(409, $res->get_status());
+            $this->assertSame('this donor is on a legal hold', (string) $res->as_error()->get_error_message());
         } finally {
             $off();
         }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FundKit\Tests\Integration;
 
+use FundKit\Analytics\ErrorLog;
+use FundKit\Analytics\Event;
 use FundKit\Foundation\Plugin;
 use FundKit\Gateways\PayPal\PayPalAccount;
 use WP_REST_Request;
@@ -20,17 +22,48 @@ final class PayPalWebhookIdTest extends IntegrationTestCase
     private const HOOK_OK      = '5ML12345AB678901C';
     private const HOOK_UNKNOWN = '9XX99999ZZ999999Z';
 
+    /** Every event the controller needs a webhook subscribed to. */
+    private const WEBHOOK_EVENTS = [
+        'PAYMENT.CAPTURE.COMPLETED',
+        'PAYMENT.CAPTURE.DENIED',
+        'PAYMENT.CAPTURE.PENDING',
+        'PAYMENT.CAPTURE.REFUNDED',
+        'PAYMENT.SALE.COMPLETED',
+        'PAYMENT.SALE.DENIED',
+        'BILLING.SUBSCRIPTION.ACTIVATED',
+        'BILLING.SUBSCRIPTION.CANCELLED',
+        'BILLING.SUBSCRIPTION.EXPIRED',
+        'BILLING.SUBSCRIPTION.SUSPENDED',
+        'BILLING.SUBSCRIPTION.PAYMENT.FAILED',
+        'BILLING.SUBSCRIPTION.UPDATED',
+    ];
+
     /** @var array<int,string> */
     private array $calls = [];
 
     private int $webhookStatus = 200;
     private bool $webhookTransportFails = false;
 
+    /** @var array<string,mixed> */
+    private array $webhookBody = [];
+
+    /** Set to answer the lookup with this verbatim, whatever shape it is. */
+    private ?string $webhookBodyRaw = null;
+
     protected function setUp(): void
     {
         parent::setUp();
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
         $this->account()->forget();
+
+        $this->webhookBody = [
+            'id'          => self::HOOK_OK,
+            'url'         => 'https://example.test/hook',
+            'event_types' => array_map(
+                static fn (string $name): array => ['name' => $name],
+                self::WEBHOOK_EVENTS
+            ),
+        ];
 
         add_filter('pre_http_request', function ($pre, $args, $url) {
             if (! is_string($url) || ! str_contains($url, 'paypal.com')) return $pre;
@@ -51,7 +84,16 @@ final class PayPalWebhookIdTest extends IntegrationTestCase
                         $this->webhookStatus
                     );
                 }
-                return $this->reply(['id' => self::HOOK_OK, 'url' => 'https://example.test/hook']);
+                if ($this->webhookBodyRaw !== null) {
+                    return [
+                        'headers'  => [],
+                        'body'     => $this->webhookBodyRaw,
+                        'response' => ['code' => 200, 'message' => 'OK'],
+                        'cookies'  => [], 'filename' => null,
+                    ];
+                }
+
+                return $this->reply($this->webhookBody);
             }
 
             return $this->reply([]);
@@ -277,5 +319,43 @@ final class PayPalWebhookIdTest extends IntegrationTestCase
         $this->assertSame(self::HOOK_OK, $this->account()->webhookId(false));
         $this->assertSame(self::HOOK_OK, $this->account()->webhookId(true));
         $this->assertTrue($this->account()->hasKeysFor(false));
+    }
+
+    /**
+     * A proxy, WAF or captive portal answers the lookup 200 with something that
+     * is not a webhook. Graded as found, the id was written on the strength of
+     * an answer PayPal never gave, and every later delivery failed its
+     * signature check while the card said the id was confirmed.
+     */
+    public function test_a_2xx_that_is_not_a_webhook_never_stores_the_id(): void
+    {
+        $this->post(['mode' => 'test', 'client_id' => 'client-a', 'client_secret' => 'secret-a']);
+
+        $this->webhookBodyRaw = '<html><body>Sign in to continue</body></html>';
+
+        $this->post(['mode' => 'test', 'webhook_id' => self::HOOK_UNKNOWN]);
+
+        $this->assertSame('', $this->account()->webhookId(true));
+    }
+
+    /**
+     * An empty event list is not a subscription to everything: it is the gap
+     * the incomplete arm was written to report.
+     */
+    public function test_a_webhook_subscribed_to_nothing_is_reported_as_incomplete(): void
+    {
+        $this->webhookBody = ['id' => self::HOOK_OK, 'url' => 'https://example.test/hook', 'event_types' => []];
+
+        $this->post([
+            'mode'          => 'test',
+            'client_id'     => 'c',
+            'client_secret' => 's',
+            'webhook_id'    => self::HOOK_OK,
+        ]);
+
+        $errors = Event::query()->where('type', ErrorLog::PREFIX . 'gateway.paypal')->orderBy('id', 'DESC')->getAll();
+
+        $this->assertNotSame([], $errors);
+        $this->assertStringContainsString('PAYMENT.CAPTURE.COMPLETED', (string) ($errors[0]->payload['message'] ?? ''));
     }
 }

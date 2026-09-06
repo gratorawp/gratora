@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Tests\Integration;
 
+use FundKit\Analytics\Event;
 use FundKit\Campaigns\Campaign;
 use FundKit\Donations\Donation;
 use FundKit\Donors\Donor;
@@ -144,5 +145,21 @@ final class DonorDeleteCascadeTest extends IntegrationTestCase
 
         $this->expectException(InvalidArgumentException::class);
         $this->service()->delete($donor);
+    }
+
+    /**
+     * The sweep clears every non-donor.* event and the donor row goes with it,
+     * so this record is the whole surviving account of the deletion. Without
+     * the id it names nobody, and cannot be told from another the same day.
+     */
+    public function test_the_deletion_record_names_the_donor_it_destroyed(): void
+    {
+        $donor = $this->donor();
+        $id    = (int) $donor->id;
+
+        $this->service()->delete($donor);
+
+        $this->assertCount(1, Event::query()->where('type', 'donor.deleted')->where('donor_id', $id)->getAll());
+        $this->assertSame(0, Donor::query()->where('id', $id)->count());
     }
 }

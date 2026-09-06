@@ -1046,7 +1046,7 @@ final class CoreCommandProvider
 
                 $path = $c->get(ReceiptIssuer::class)->renderReceiptPdf((int) $in['receipt_id']);
                 if ($path === null) {
-                    throw new CommandError(esc_html('Receipt or renderer not found.'));
+                    throw new CommandError(esc_html('Could not produce the receipt PDF. The reason is recorded under Tools > Logs.'));
                 }
                 return ['path' => $path];
             },

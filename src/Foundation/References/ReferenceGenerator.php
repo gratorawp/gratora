@@ -64,7 +64,7 @@ final class ReferenceGenerator
     public function nextNumber(string $scope, int $nextValue): void
     {
         if ($nextValue < 1) {
-            throw new \InvalidArgumentException(esc_html('Next number must be >= 1.'));
+            throw new \InvalidArgumentException(esc_html__('The next number must be 1 or more.', 'fundraising-toolkit'));
         }
 
         $scope = $this->normaliseScope($scope);
@@ -73,10 +73,13 @@ final class ReferenceGenerator
 
         $current = $this->currentCounter($scope, $key);
         if ($nextValue <= $current) {
-            throw new \RuntimeException(
-                esc_html("Cannot set counter for {$scope} to {$nextValue}; current counter is already {$current}. " .
-                'Choose a value > current to avoid duplicate references.')
-            );
+            throw new \RuntimeException(esc_html(sprintf(
+                /* translators: 1: reference scope, e.g. donation, 2: the number submitted, 3: the counter's current value. */
+                __('The %1$s counter is already at %3$d, so it cannot be set to %2$d. Choose a higher number, or references would repeat.', 'fundraising-toolkit'),
+                $scope,
+                $nextValue,
+                $current
+            )));
         }
 
         // Counter stores the last used value; seed at nextValue-1 so next() returns nextValue.

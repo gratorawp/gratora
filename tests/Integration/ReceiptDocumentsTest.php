@@ -97,12 +97,19 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
 
     // --- the copy fetched from the emailed link -----------------------------
 
-    /** A renderer that reports the context it was handed and stops the stream. */
-    private function captureAndStop(string $rendererId): void
+    /**
+     * A renderer that reports the context it was handed and stops the stream.
+     * The report is written to the returned box rather than carried on the
+     * throw: the controller answers a failed render now, so the exception no
+     * longer reaches the caller.
+     */
+    private function captureAndStop(string $rendererId): \ArrayObject
     {
-        add_filter('fundkit.receipt.renderers', static function () use ($rendererId): array {
-            return [ new class ($rendererId) implements ReceiptRenderer {
-                public function __construct(private string $rid)
+        $seen = new \ArrayObject();
+
+        add_filter('fundkit.receipt.renderers', static function () use ($rendererId, $seen): array {
+            return [ new class ($rendererId, $seen) implements ReceiptRenderer {
+                public function __construct(private string $rid, private \ArrayObject $seen)
                 {
                 }
 
@@ -113,12 +120,16 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
 
                 public function render(ReceiptContext $ctx): string
                 {
+                    $this->seen->exchangeArray((array) ($ctx->extras['custom_data'] ?? []));
+
                     // Thrown rather than returned: stream() exits, which would
                     // take the test process with it.
-                    throw new \RuntimeException((string) wp_json_encode($ctx->extras['custom_data'] ?? []));
+                    throw new \RuntimeException('captured');
                 }
             } ];
         }, 99);
+
+        return $seen;
     }
 
     public function test_the_re_download_carries_the_answers_the_attached_copy_had(): void
@@ -130,22 +141,17 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
         $token = Plugin::instance()->container->get(\FundKit\Donors\MagicLinkService::class)
             ->issue((int) $receipt->donor_id, 'download_receipt', (int) $receipt->id);
 
-        $this->captureAndStop((string) $receipt->renderer_id);
+        $seen = $this->captureAndStop((string) $receipt->renderer_id);
 
         $req = new WP_REST_Request('GET', '/fundkit/v1/receipts/' . (int) $receipt->id . '/download');
         $req->set_param('receipt_id', (int) $receipt->id);
         $req->set_param('token', $token);
 
-        $seen = null;
-        try {
-            Plugin::instance()->container->get(\FundKit\Rest\ReceiptsController::class)->download($req);
-        } catch (\RuntimeException $e) {
-            $seen = (array) json_decode($e->getMessage(), true);
-        }
+        Plugin::instance()->container->get(\FundKit\Rest\ReceiptsController::class)->download($req);
 
         $this->assertSame(
             [ 'dietary' => 'Vegetarian' ],
-            $seen,
+            $seen->getArrayCopy(),
             'the emailed link handed the donor a document missing what the attached copy showed'
         );
     }

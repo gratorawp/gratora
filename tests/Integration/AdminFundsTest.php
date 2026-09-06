@@ -457,6 +457,27 @@ final class AdminFundsTest extends IntegrationTestCase
         );
     }
 
+    /**
+     * esc_html runs at throw time, so ASCII quotes inside the message arrive as
+     * entities and the React notice, which escapes its text child, prints them.
+     * The one screen whose job is to say what to fix was unreadable.
+     */
+    public function test_a_backwards_schedule_is_refused_in_words_the_dialog_can_render(): void
+    {
+        $fund = $this->post('/fundkit/v1/admin/funds', ['code' => 'window', 'name' => 'Window'])->get_data();
+
+        $res = $this->put("/fundkit/v1/admin/funds/{$fund['id']}", [
+            'starts_at' => '2026-12-01',
+            'ends_at'   => '2026-01-01',
+        ]);
+
+        $this->assertSame(422, $res->get_status());
+
+        $message = (string) $res->as_error()->get_error_message();
+        $this->assertStringNotContainsString('&quot;', $message);
+        $this->assertStringNotContainsString('&#', $message);
+    }
+
     private function post(string $path, array $body): \WP_REST_Response
     {
         $req = new WP_REST_Request('POST', $path);

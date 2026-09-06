@@ -473,7 +473,8 @@ final class DonorService
             }
 
             $this->events()->record('donor.deleted', [
-                'payload' => [
+                'donor_id' => $id,
+                'payload'  => [
                     'by'                => self::actorKind(),
                     'actor_name'        => self::actorName(),
                     'was_redacted'      => $donor->redacted_at !== null,

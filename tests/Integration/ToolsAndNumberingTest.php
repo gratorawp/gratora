@@ -143,4 +143,44 @@ final class ToolsAndNumberingTest extends IntegrationTestCase
         $this->assertSame(0, (int) ($stored['logo_attachment_id'] ?? 0));
         $this->assertSame('Their receipt', (string) ($stored['header_title'] ?? ''), 'the rest of the group still lands');
     }
+
+    /**
+     * The counter refusal is the message a French site's admin reads when they
+     * type today's last reference rather than the next one. It arrived in
+     * English with its comparison operator escaped into an entity.
+     */
+    public function test_a_counter_refusal_reaches_the_admin_translated_and_renderable(): void
+    {
+        $set = static function (int $next): \WP_REST_Response {
+            $req = new WP_REST_Request('POST', '/fundkit/v1/admin/numbering/counter');
+            $req->set_header('content-type', 'application/json');
+            $req->set_body((string) wp_json_encode(['scope' => 'donation', 'next' => $next]));
+
+            return rest_do_request($req);
+        };
+
+        // The probe for translation: it fires only if the string passes through
+        // __(), and it needs no language pack.
+        $filter = static function ($translated, $text, $domain) {
+            return $domain === 'fundraising-toolkit' && str_contains($text, 'counter is already at')
+                ? 'COUNTER REFUSED'
+                : $translated;
+        };
+        add_filter('gettext', $filter, 10, 3);
+
+        try {
+            // The counter holds the last value used, so setting the next
+            // number to 50 leaves it at 49: 49 is the number that repeats.
+            $set(50);
+            $res = $set(49);
+
+            $this->assertSame(400, $res->get_status());
+
+            $message = (string) $res->as_error()->get_error_message();
+            $this->assertSame('COUNTER REFUSED', $message);
+            $this->assertStringNotContainsString('&gt;', $message);
+        } finally {
+            remove_filter('gettext', $filter, 10);
+        }
+    }
 }

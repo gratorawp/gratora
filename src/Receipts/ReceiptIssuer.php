@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Receipts;
 
+use FundKit\Analytics\ErrorLog;
 use FundKit\Analytics\EventRecorder;
 use FundKit\Async\AsyncDispatcher;
 use FundKit\Campaigns\Campaign;
@@ -550,7 +551,14 @@ final class ReceiptIssuer
         foreach ($this->collectRenderers() as $r) {
             if ($r->id() === $receipt->renderer_id) { $renderer = $r; break; }
         }
-        if (! $renderer) return null;
+        if (! $renderer) {
+            ErrorLog::record('receipt.render', 'no renderer answers to ' . (string) $receipt->renderer_id, [
+                'donation_id' => (int) $receipt->donation_id,
+                'donor_id'    => (int) $donation->donor_id,
+            ]);
+
+            return null;
+        }
 
         $ctx = new ReceiptContext(
             donation:      $donation,
@@ -577,6 +585,13 @@ final class ReceiptIssuer
         try {
             return $renderer->render($ctx);
         } catch (\Throwable $e) {
+            // The caller can only answer "no PDF". Without this the reason
+            // exists nowhere the org can read it.
+            ErrorLog::record('receipt.render', $e->getMessage(), [
+                'donation_id' => (int) $receipt->donation_id,
+                'donor_id'    => (int) $donation->donor_id,
+            ]);
+
             return null;
         } finally {
             if ($switched) {

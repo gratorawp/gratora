@@ -618,7 +618,22 @@ final class DonorsController
             return new WP_Error('fundkit_donor_not_deletable', $reason, ['status' => 409]);
         }
 
-        $this->donorService->delete($donor);
+        try {
+            $this->donorService->delete($donor);
+        } catch (InvalidArgumentException $e) {
+            // The receipt and refund guards run inside the transaction, where
+            // the pre-check cannot see them, and they mean the same thing to
+            // the operator as the pre-check's own refusal.
+            return new WP_Error('fundkit_donor_not_deletable', $e->getMessage(), ['status' => 409]);
+        } catch (Throwable $e) {
+            ErrorLog::record('admin.donor.delete', $e->getMessage(), ['donor_id' => (int) $donor->id]);
+
+            return new WP_Error(
+                'fundkit_delete_failed',
+                __('The donor was not deleted. The reason is in the log under Tools.', 'fundraising-toolkit'),
+                ['status' => 500]
+            );
+        }
 
         return new WP_REST_Response(['deleted' => true, 'id' => (int) $request['id']], 200);
     }

@@ -37,6 +37,22 @@ final class PayPalKeysControllerTest extends IntegrationTestCase
         return Plugin::instance()->container->get(PayPalAccount::class);
     }
 
+    /** Every event the controller needs a webhook subscribed to. */
+    private const WEBHOOK_EVENTS = [
+        'PAYMENT.CAPTURE.COMPLETED',
+        'PAYMENT.CAPTURE.DENIED',
+        'PAYMENT.CAPTURE.PENDING',
+        'PAYMENT.CAPTURE.REFUNDED',
+        'PAYMENT.SALE.COMPLETED',
+        'PAYMENT.SALE.DENIED',
+        'BILLING.SUBSCRIPTION.ACTIVATED',
+        'BILLING.SUBSCRIPTION.CANCELLED',
+        'BILLING.SUBSCRIPTION.EXPIRED',
+        'BILLING.SUBSCRIPTION.SUSPENDED',
+        'BILLING.SUBSCRIPTION.PAYMENT.FAILED',
+        'BILLING.SUBSCRIPTION.UPDATED',
+    ];
+
     /** Intercept the OAuth token exchange; $ok=false makes PayPal reject it. */
     private function mockPayPal(bool $ok = true): void
     {
@@ -59,13 +75,27 @@ final class PayPalKeysControllerTest extends IntegrationTestCase
                     'cookies'  => [], 'filename' => null,
                 ];
             }
-            return [
-                'headers'  => [],
-                'body'     => (string) wp_json_encode([
+            // The lookup is a different resource from the token exchange, and
+            // answering it with the token body is what let an id nobody
+            // confirmed grade as found.
+            $body = str_contains($url, '/notifications/webhooks/')
+                ? [
+                    'id'          => 'WH-TEST-1',
+                    'url'         => 'https://example.test/webhook',
+                    'event_types' => array_map(
+                        static fn (string $name): array => ['name' => $name],
+                        self::WEBHOOK_EVENTS
+                    ),
+                ]
+                : [
                     'access_token' => 'A21AAF_test_token',
                     'expires_in'   => 32400,
                     'token_type'   => 'Bearer',
-                ]),
+                ];
+
+            return [
+                'headers'  => [],
+                'body'     => (string) wp_json_encode($body),
                 'response' => ['code' => 200, 'message' => 'OK'],
                 'cookies'  => [], 'filename' => null,
             ];

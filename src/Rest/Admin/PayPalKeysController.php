@@ -355,7 +355,7 @@ final class PayPalKeysController
             }
         }
 
-        if ($names === [] || in_array('*', $names, true)) {
+        if (in_array('*', $names, true)) {
             return [];
         }
 
@@ -388,7 +388,18 @@ final class PayPalKeysController
         $code = (int) wp_remote_retrieve_response_code($response);
         if ($code >= 200 && $code < 300) {
             $found = json_decode((string) wp_remote_retrieve_body($response), true);
-            $missing = $this->eventsNotSubscribed(is_array($found) ? $found : []);
+
+            // A proxy, WAF or captive portal answers 200 with something that is
+            // not a webhook. Graded as found, the id is saved on the strength
+            // of an answer PayPal never gave.
+            if (! is_array($found) || ! isset($found['id'])) {
+                return [
+                    'status'  => self::HOOK_UNKNOWN,
+                    'message' => __('PayPal did not return that webhook.', 'fundraising-toolkit'),
+                ];
+            }
+
+            $missing = $this->eventsNotSubscribed($found);
 
             // A webhook that exists is not a webhook that delivers anything
             // this reads. Reported as checked, an org can save an id subscribed

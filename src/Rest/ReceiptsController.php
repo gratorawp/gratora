@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Rest;
 
+use FundKit\Analytics\ErrorLog;
 use FundKit\Receipts\ReceiptIssuer;
 use FundKit\Receipts\OrgProfile;
 
@@ -159,6 +160,19 @@ final class ReceiptsController
             : false;
         try {
             $pdfBytes = $renderer->render($ctx);
+        } catch (\Throwable $e) {
+            // The donor is following a link from their own email. A fatal-error
+            // page tells them nothing, and tells the org nothing either.
+            ErrorLog::record('receipt.download', $e->getMessage(), [
+                'donation_id' => (int) $receipt->donation_id,
+                'donor_id'    => (int) $receipt->donor_id,
+            ]);
+
+            return new WP_Error(
+                'fundkit_receipt_render_failed',
+                __('We could not produce this receipt right now. Please try again shortly, or contact the organization.', 'fundraising-toolkit'),
+                ['status' => 500]
+            );
         } finally {
             if ($switched) restore_previous_locale();
         }
