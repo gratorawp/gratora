@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-08T11:38:06+00:00\n"
+"POT-Creation-Date: 2026-09-08T12:29:21+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: fundraising-toolkit\n"
@@ -24,6 +24,20 @@ msgstr[1] ""
 
 #: components/Card.js:60
 msgid "Edited"
+msgstr ""
+
+#: components/ColorInput.js:31
+msgid "Pick a color"
+msgstr ""
+
+#. translators: %s: what the colour is for, e.g. Button background
+#: components/ColorInput.js:47
+#, js-format
+msgid "Clear %s"
+msgstr ""
+
+#: components/ColorInput.js:47
+msgid "Clear color"
 msgstr ""
 
 #: components/CountrySelect.js:30
@@ -196,59 +210,77 @@ msgstr ""
 msgid "Notifications"
 msgstr ""
 
-#: styling/StylePreview.js:94
+#: styling/StylePreview.js:95
 #: src/Campaigns/Blocks/views/campaign-progress.php:37
 msgid "raised"
 msgstr ""
 
-#: styling/StylePreview.js:96
+#: styling/StylePreview.js:97
 #: assets/admin/forms/blocks/goal/index.js:163
 #: assets/admin/funds/List.jsx:107
 #: assets/admin/funds/List.jsx:335
 msgid "of"
 msgstr ""
 
-#: styling/StylePreview.js:96
+#: styling/StylePreview.js:97
 msgid "goal"
 msgstr ""
 
-#: styling/StylePreview.js:106
+#: styling/StylePreview.js:111
+msgid "Other amount"
+msgstr ""
+
+#: styling/StylePreview.js:120
+msgid "Full name"
+msgstr ""
+
+#: styling/StylePreview.js:123
+msgid "Alex Morgan"
+msgstr ""
+
+#: styling/StylePreview.js:128
 #: src/Campaigns/Blocks/views/campaign-grid.php:74
 #: src/Campaigns/CampaignService.php:659
 #: assets/admin/onboarding/Onboarding.jsx:626
 msgid "Donate"
 msgstr ""
 
-#: styling/StylePreview.js:109
+#: styling/StylePreview.js:131
 #: src/Forms/Blocks/views/goal.php:23
 msgid "donor"
 msgid_plural "donors"
 msgstr[0] ""
 msgstr[1] ""
 
-#: styling/StylePreview.js:109
+#: styling/StylePreview.js:131
 #: src/Campaigns/Blocks/views/campaign-progress.php:36
 #: assets/admin/donors/Insights.jsx:133
 msgid "donors"
 msgstr ""
 
-#: styling/StylePreview.js:109
+#: styling/StylePreview.js:131
 #: assets/admin/campaigns/Detail.jsx:1090
 #: assets/admin/donors/index.jsx:446
 #: assets/admin/donors/Insights.jsx:231
 msgid "No donors yet"
 msgstr ""
 
-#: styling/StylePreview.js:109
+#: styling/StylePreview.js:131
 msgid "ends"
 msgstr ""
 
-#: styling/TokenEditor.js:90
+#: styling/TokenEditor.js:103
 #: assets/admin/settings/panels/CurrencyPanel.jsx:196
 msgid "Reset"
 msgstr ""
 
-#: styling/TokenEditor.js:146
+#. translators: 1: smallest pixel size the slider offers, 2: the largest
+#: styling/TokenEditor.js:138
+#, js-format
+msgid "The slider reads whole pixels from %1$spx to %2$spx. Type a size in that range to use it."
+msgstr ""
+
+#: styling/TokenEditor.js:172
 msgid "CSS font-family stack. e.g. Inter, system-ui, sans-serif."
 msgstr ""
 
@@ -692,7 +724,7 @@ msgstr ""
 #: src/Campaigns/Styling/Tokens.php:278
 #: assets/admin/donations/detail/rail/QuickStatsCard.jsx:28
 #: assets/admin/forms/blocks/section/index.js:28
-#: assets/admin/forms/blocks/section/index.js:141
+#: assets/admin/forms/blocks/section/index.js:153
 #: assets/admin/forms/blocks/steps/index.js:26
 #: assets/admin/funds/List.jsx:116
 #: assets/admin/settings/panels/RolesPanel.jsx:88
@@ -1631,7 +1663,7 @@ msgid "Picks up accent, background, and button styles from the active WordPress 
 msgstr ""
 
 #: src/Campaigns/Styling/Tokens.php:53
-#: assets/admin/settings/panels/BrandPanel.jsx:279
+#: assets/admin/settings/panels/BrandPanel.jsx:282
 msgid "Accent"
 msgstr ""
 
@@ -1656,7 +1688,7 @@ msgid "Helper text, placeholders, captions."
 msgstr ""
 
 #: src/Campaigns/Styling/Tokens.php:80
-#: assets/admin/settings/panels/BrandPanel.jsx:276
+#: assets/admin/settings/panels/BrandPanel.jsx:279
 msgid "Background"
 msgstr ""
 
@@ -1665,7 +1697,7 @@ msgid "The card behind the form, and the panels on the campaign page."
 msgstr ""
 
 #: src/Campaigns/Styling/Tokens.php:87
-#: assets/admin/settings/panels/BrandPanel.jsx:278
+#: assets/admin/settings/panels/BrandPanel.jsx:281
 msgid "Field background"
 msgstr ""
 
@@ -1674,7 +1706,7 @@ msgid "Inside the boxes a donor types in or picks from."
 msgstr ""
 
 #: src/Campaigns/Styling/Tokens.php:94
-#: assets/admin/settings/panels/BrandPanel.jsx:277
+#: assets/admin/settings/panels/BrandPanel.jsx:280
 msgid "Soft background"
 msgstr ""
 
@@ -1737,7 +1769,7 @@ msgid "Buttons, inputs, chips and other controls."
 msgstr ""
 
 #: src/Campaigns/Styling/Tokens.php:173
-#: assets/admin/forms/blocks/section/index.js:104
+#: assets/admin/forms/blocks/section/index.js:116
 msgid "Border width"
 msgstr ""
 
@@ -6852,7 +6884,7 @@ msgstr[1] ""
 #: assets/admin/donors/index.jsx:330
 #: assets/admin/donors/profile/tabs/NotesTab.jsx:44
 #: assets/admin/funds/List.jsx:432
-#: assets/admin/settings/panels/BrandPanel.jsx:242
+#: assets/admin/settings/panels/BrandPanel.jsx:244
 #: assets/admin/settings/panels/ConsentsPanel.jsx:55
 #: assets/admin/settings/panels/ConsentsPanel.jsx:109
 msgid "Delete"
@@ -11176,59 +11208,62 @@ msgid "Pronounced"
 msgstr ""
 
 #: assets/admin/forms/blocks/section/index.js:91
-#: assets/admin/forms/blocks/section/index.js:217
+#: assets/admin/forms/blocks/section/index.js:229
 msgid "Section"
 msgstr ""
 
 #: assets/admin/forms/blocks/section/index.js:92
+#: assets/admin/forms/blocks/section/index.js:94
 msgid "Background color"
 msgstr ""
 
-#: assets/admin/forms/blocks/section/index.js:96
+#: assets/admin/forms/blocks/section/index.js:100
+#: assets/admin/forms/blocks/section/index.js:102
 msgid "Text color"
 msgstr ""
 
-#: assets/admin/forms/blocks/section/index.js:100
+#: assets/admin/forms/blocks/section/index.js:108
+#: assets/admin/forms/blocks/section/index.js:110
 msgid "Border color"
 msgstr ""
 
-#: assets/admin/forms/blocks/section/index.js:110
+#: assets/admin/forms/blocks/section/index.js:122
 msgid "Border style"
 msgstr ""
 
-#: assets/admin/forms/blocks/section/index.js:116
+#: assets/admin/forms/blocks/section/index.js:128
 msgid "Border radius"
 msgstr ""
 
-#: assets/admin/forms/blocks/section/index.js:122
+#: assets/admin/forms/blocks/section/index.js:134
 msgid "Shadow"
 msgstr ""
 
-#: assets/admin/forms/blocks/section/index.js:161
+#: assets/admin/forms/blocks/section/index.js:173
 msgid "Use custom shadow value"
 msgstr ""
 
-#: assets/admin/forms/blocks/section/index.js:165
+#: assets/admin/forms/blocks/section/index.js:177
 msgid "Custom shadow CSS"
 msgstr ""
 
-#: assets/admin/forms/blocks/section/index.js:165
+#: assets/admin/forms/blocks/section/index.js:177
 msgid "Any valid box-shadow value."
 msgstr ""
 
-#: assets/admin/forms/blocks/section/index.js:177
+#: assets/admin/forms/blocks/section/index.js:189
 msgid "Padding"
 msgstr ""
 
-#: assets/admin/forms/blocks/section/index.js:185
+#: assets/admin/forms/blocks/section/index.js:197
 msgid "Margin"
 msgstr ""
 
-#: assets/admin/forms/blocks/section/index.js:193
+#: assets/admin/forms/blocks/section/index.js:205
 msgid "Minimum height"
 msgstr ""
 
-#: assets/admin/forms/blocks/section/index.js:218
+#: assets/admin/forms/blocks/section/index.js:230
 msgid "A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs."
 msgstr ""
 
@@ -12344,7 +12379,7 @@ msgid "No theme palette detected."
 msgstr ""
 
 #: assets/admin/onboarding/Onboarding.jsx:636
-#: assets/admin/settings/panels/BrandPanel.jsx:193
+#: assets/admin/settings/panels/BrandPanel.jsx:194
 msgid "Live preview"
 msgstr ""
 
@@ -12417,32 +12452,32 @@ msgid "Named style presets. Campaigns and forms pick one as their look."
 msgstr ""
 
 #: assets/admin/settings/panels/BrandPanel.jsx:158
-#: assets/admin/settings/panels/BrandPanel.jsx:182
+#: assets/admin/settings/panels/BrandPanel.jsx:183
 msgid "Add preset"
 msgstr ""
 
-#: assets/admin/settings/panels/BrandPanel.jsx:178
+#: assets/admin/settings/panels/BrandPanel.jsx:179
 msgid "No presets yet"
 msgstr ""
 
-#: assets/admin/settings/panels/BrandPanel.jsx:179
+#: assets/admin/settings/panels/BrandPanel.jsx:180
 msgid "Brand presets give every campaign a consistent look. Create one to get started."
 msgstr ""
 
-#: assets/admin/settings/panels/BrandPanel.jsx:223
+#: assets/admin/settings/panels/BrandPanel.jsx:225
 msgid "Preset name"
 msgstr ""
 
-#: assets/admin/settings/panels/BrandPanel.jsx:228
+#: assets/admin/settings/panels/BrandPanel.jsx:230
 msgid "Make default"
 msgstr ""
 
-#: assets/admin/settings/panels/BrandPanel.jsx:232
+#: assets/admin/settings/panels/BrandPanel.jsx:234
 msgid "Clone"
 msgstr ""
 
 #. translators: 1: colour name, e.g. Background, 2: the hex the admin picked, 3: the contrast it reaches, e.g. 4.0
-#: assets/admin/settings/panels/BrandPanel.jsx:295
+#: assets/admin/settings/panels/BrandPanel.jsx:298
 #, js-format
 msgid "%1$s (%2$s) reaches %3$s:1, under the 4.5:1 that text needs. Take it lighter or darker."
 msgstr ""
@@ -15373,9 +15408,9 @@ msgid "Subscription id copied."
 msgstr ""
 
 #. translators: 1: token name, e.g. Small corner radius, 2: the value it holds, e.g. 1rem
-#: assets/admin/_shared/styling/UnshownNotice.jsx:32
+#: assets/admin/_shared/styling/UnshownNotice.jsx:23
 #, js-format
-msgid "%1$s is %2$s, which the slider below cannot show. Moving that slider replaces the value with a pixel size."
+msgid "%1$s is %2$s, which is outside what its slider offers. Its row takes the value as text."
 msgstr ""
 
 #: assets/admin/_shared/useFundKitSettings.js:32
