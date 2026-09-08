@@ -391,7 +391,7 @@ function FundraiserTypeStep( { value, onChange } ) {
     );
 }
 
-function LocationStep( { value, onChange, currency, onCurrencyChange, userType } ) {
+export function LocationStep( { value, onChange, currency, onCurrencyChange, userType } ) {
     const set = ( patch ) => onChange( { ...value, ...patch } );
     const isIndividual = userType === 'individual';
 
@@ -430,10 +430,11 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
                 </div>
                 <div className="fundkit-onboarding__address">
                     <div className="span-2">
-                        <label className="fundkit-onboarding__field-label">
+                        <label className="fundkit-onboarding__field-label" htmlFor="fundkit-onboarding-name">
                             { isIndividual ? __( 'Your name', 'fundraising-toolkit' ) : __( 'Organization name', 'fundraising-toolkit' ) }
                         </label>
                         <input
+                            id="fundkit-onboarding-name"
                             type="text"
                             className="fundkit-onboarding__input"
                             value={ value.name }
@@ -442,8 +443,9 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
                         />
                     </div>
                     <div className="span-2">
-                        <label className="fundkit-onboarding__field-label">{ __( 'Contact email', 'fundraising-toolkit' ) }</label>
+                        <label className="fundkit-onboarding__field-label" htmlFor="fundkit-onboarding-email">{ __( 'Contact email', 'fundraising-toolkit' ) }</label>
                         <input
+                            id="fundkit-onboarding-email"
                             type="email"
                             className="fundkit-onboarding__input"
                             value={ value.email }
@@ -455,35 +457,41 @@ function LocationStep( { value, onChange, currency, onCurrencyChange, userType }
             </div>
 
             <div className="fundkit-onboarding__section">
-                <div className="fundkit-onboarding__section-label">{ __( 'Country', 'fundraising-toolkit' ) }</div>
                 <div className="fundkit-onboarding__country-row">
-                    <CountrySelect
-                        value={ value.country }
-                        onChange={ onCountryChange }
-                    />
+                    { /* The pickers take no id or aria-label prop, so the name
+                         only exists if the label contains the control. */ }
+                    <label className="fundkit-onboarding__control-label">
+                        <span className="fundkit-onboarding__section-label">{ __( 'Country', 'fundraising-toolkit' ) }</span>
+                        <CountrySelect
+                            value={ value.country }
+                            onChange={ onCountryChange }
+                        />
+                    </label>
                     { states && (
-                        <div>
-                            <label className="fundkit-onboarding__field-label">{ __( 'State', 'fundraising-toolkit' ) }</label>
+                        <label className="fundkit-onboarding__control-label">
+                            <span className="fundkit-onboarding__field-label">{ __( 'State', 'fundraising-toolkit' ) }</span>
                             <SearchableSelect
                                 value={ value.state }
                                 onChange={ ( v ) => set( { state: v } ) }
                                 options={ states.map( ( s ) => ( { value: s, label: s } ) ) }
                                 placeholder={ __( 'Select state', 'fundraising-toolkit' ) }
                             />
-                        </div>
+                        </label>
                     ) }
                 </div>
             </div>
 
 
             <div className="fundkit-onboarding__section">
-                <div className="fundkit-onboarding__section-label">{ __( 'Currency', 'fundraising-toolkit' ) }</div>
-                <SearchableSelect
+                <label className="fundkit-onboarding__control-label">
+                    <span className="fundkit-onboarding__section-label">{ __( 'Currency', 'fundraising-toolkit' ) }</span>
+                    <SearchableSelect
                     value={ currency.default_currency }
                     onChange={ ( code ) => onCurrencyChange( ( prev ) => ( { ...prev, default_currency: code } ) ) }
                     options={ currencyOptions }
                     placeholder={ __( 'Pick a currency', 'fundraising-toolkit' ) }
-                />
+                    />
+                </label>
             </div>
         </div>
     );

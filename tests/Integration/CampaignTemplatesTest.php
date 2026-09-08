@@ -356,6 +356,30 @@ final class CampaignTemplatesTest extends IntegrationTestCase
         unset($_GET['post']);
     }
 
+    /**
+     * The button opens a modal whose list route and whose apply route both want
+     * fundkit_manage_campaigns. An editor with edit_posts and no FundKit caps
+     * was offered it, got a load failure with a Try again that can never
+     * succeed, and would have been refused again after choosing.
+     */
+    public function test_templates_are_not_offered_to_someone_every_route_refuses(): void
+    {
+        $campaign = $this->createCampaign(['title' => 'Refused']);
+
+        $GLOBALS['post'] = null;
+        $_GET['post']    = (int) $campaign['page_id'];
+
+        $editor = self::factory()->user->create(['role' => 'editor']);
+        wp_set_current_user($editor);
+
+        try {
+            $this->assertFalse(BlockEditorIntegration::pageTemplatesAvailable());
+        } finally {
+            wp_set_current_user(1);
+            unset($_GET['post']);
+        }
+    }
+
     public function test_reading_an_unknown_layout_is_refused(): void
     {
         $campaign = $this->createCampaign(['title' => 'Bad layout']);

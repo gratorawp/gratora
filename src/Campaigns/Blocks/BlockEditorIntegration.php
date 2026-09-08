@@ -116,6 +116,13 @@ final class BlockEditorIntegration
      */
     public static function pageTemplatesAvailable(): bool
     {
+        // Both routes behind the button want this cap, so offering it to anyone
+        // else offers a modal that can only fail, with a Try again that never
+        // succeeds and a template choice that 403s after it is made.
+        if (! Capabilities::userCan('fundkit_manage_campaigns')) {
+            return false;
+        }
+
         $campaign = self::editedCampaign();
         if ($campaign === null) {
             return false;

@@ -64,19 +64,27 @@ final class CampaignGridBlock extends CampaignBlock
         if (empty($campaigns)) {
             $current = $this->resolveCampaign($attrs);
 
+            // "The only one" names a campaign on the page. A browse page has
+            // none, so there is nothing for the sentence to point at.
+            $only = $current !== null;
+
             return View::loadRelative(__DIR__, 'views/campaign-grid', [
                 'heading'   => '',
                 'cards'     => [],
                 'emptyText' => (string) ($attrs['emptyText'] ?? '')
-                    ?: __('This is the only campaign running right now.', 'fundraising-toolkit'),
+                    ?: ($only
+                        ? __('This is the only campaign running right now.', 'fundraising-toolkit')
+                        : __('No campaigns are running right now.', 'fundraising-toolkit')),
                 // Unlike the donation and donor blocks, nothing a visitor does
                 // makes another campaign appear. So the invitation points at
                 // the one they are already reading, which is the only way to
                 // give that exists today.
-                'emptySubText' => __('Which makes it an easy choice.', 'fundraising-toolkit'),
+                'emptySubText' => $only ? __('Which makes it an easy choice.', 'fundraising-toolkit') : '',
                 'emptyIcon'    => 'campaigns',
                 'notice'    => (is_user_logged_in() && current_user_can('edit_posts'))
-                    ? __('Only this campaign is published, so there is nothing to list. Visitors see the message above; this line is editor-only.', 'fundraising-toolkit')
+                    ? ($only
+                        ? __('Only this campaign is published, so there is nothing to list. Visitors see the message above; this line is editor-only.', 'fundraising-toolkit')
+                        : __('No campaigns are published, so there is nothing to list. Visitors see the message above; this line is editor-only.', 'fundraising-toolkit'))
                     : '',
                 'styleVars' => $this->styleVars($current),
             ]);

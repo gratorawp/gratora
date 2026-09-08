@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Tests\Integration;
 
 use FundKit\Campaigns\Blocks\CampaignGridBlock;
+use FundKit\Campaigns\Campaign;
 use FundKit\Campaigns\Blocks\SupporterWallBlock;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Campaigns\CampaignService;
@@ -180,5 +181,36 @@ final class CampaignBlockCoverageTest extends IntegrationTestCase
         $this->assertStringContainsString('of 4', $html, 'the card names the target it is measured against');
         $this->assertStringContainsString('donations', $html);
         $this->assertStringContainsString('50', $html, 'two of four is half way');
+    }
+
+    /**
+     * A "Browse our campaigns" page with the grid on it and nothing published
+     * told visitors "This is the only campaign running right now", naming
+     * something the page does not contain, and invited them to give to it.
+     */
+    public function test_a_browse_page_with_nothing_to_list_does_not_claim_a_campaign(): void
+    {
+        $html = $this->grid()->render(['count' => 3], '');
+
+        $this->assertStringNotContainsString('only campaign', $html);
+        $this->assertStringNotContainsString('easy choice', $html);
+        $this->assertStringContainsString('No campaigns are running right now.', $html);
+    }
+
+    /** On a campaign's own page the sentence has something to point at. */
+    public function test_a_campaign_page_still_says_it_is_the_only_one(): void
+    {
+        $now = gmdate('Y-m-d H:i:s');
+        $c = Campaign::make();
+        $c->title      = 'Only one';
+        $c->slug       = 'only-' . uniqid();
+        $c->status     = 'published';
+        $c->created_at = $now;
+        $c->updated_at = $now;
+        $c->save();
+
+        $html = $this->grid()->render(['campaignId' => (int) $c->id, 'count' => 3], '');
+
+        $this->assertStringContainsString('only campaign', $html);
     }
 }

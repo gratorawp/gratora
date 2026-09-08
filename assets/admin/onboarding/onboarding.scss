@@ -426,6 +426,7 @@ body.fundkit-onboarding-fullscreen {
     }
 
     &__section-label {
+        display: block;
         font-size: 13px;
         font-weight: 500;
         color: $text;
@@ -529,6 +530,8 @@ body.fundkit-onboarding-fullscreen {
         color: $text-muted;
         line-height: 1.4;
     }
+
+    &__control-label { display: block; }
 
     &__field-optional {
         color: $text-soft;

@@ -918,8 +918,7 @@ registerBlockType( 'fundkit/campaign-grid', {
                         label={ __( 'Empty state text', 'fundraising-toolkit' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'This is the only campaign running right now.', 'fundraising-toolkit' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'fundraising-toolkit' ) }
+                        help={ __( 'Shown when there is nothing to list. Left empty, the block says whether this is the only campaign running or that none are, whichever fits the page.', 'fundraising-toolkit' ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
