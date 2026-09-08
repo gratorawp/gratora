@@ -122,17 +122,36 @@ final class PendingSignupRepository
     }
 
     /** @since 1.0.0 */
-    public function purgeExpired(): int
+    public function purgeExpired(int $limit = 500): int
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
-        // Delete associated tokens with expired claims; the token sweep runs first.
-        foreach (PendingSignup::query()->where('expires_at', $now, '<')->getAll() as $claim) {
-            self::deleteSignupTokensFor((int) $claim->id);
+        // Capped and set-based. The volume is decided by unauthenticated
+        // callers, and a sweep that hydrated the whole expired set and issued
+        // one DELETE per claim died mid-pass on a busy week, leaving a larger
+        // set for the next night and a redeemable token on every survivor.
+        $ids = array_values(array_filter(array_map(
+            'intval',
+            PendingSignup::query()
+                ->where('expires_at', $now, '<')
+                ->orderBy('id', 'ASC')
+                ->limit(max(1, $limit))
+                ->pluck('id')
+        )));
+
+        if ($ids === []) {
+            return 0;
         }
 
+        // The same rule the single deletes follow: a token outlives its claim
+        // otherwise, still carrying the name its registration typed.
+        MagicLinkToken::query()
+            ->where('purpose', SignupRedemption::PURPOSE)
+            ->whereIn('target_id', $ids)
+            ->delete();
+
         return PendingSignup::query()
-            ->where('expires_at', $now, '<')
+            ->whereIn('id', $ids)
             ->delete()
             ->affectedRows;
     }

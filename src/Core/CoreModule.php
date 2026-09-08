@@ -377,11 +377,18 @@ final class CoreModule implements FundKitModule
 
         // Purge expired magic-link tokens daily to prevent unbounded table growth.
         $async = $c->get(AsyncDispatcher::class);
-        add_action('fundkit.cron.magic_link_gc', function () use ($c): void {
+        add_action('fundkit.cron.magic_link_gc', function () use ($c, $async): void {
             $c->get(MagicLinkService::class)->purgeExpired();
             // An address nobody proved is not kept past its window. Same job,
             // because a pending row and its link expire together.
-            $c->get(PendingSignupRepository::class)->purgeExpired();
+            $limit = 500;
+            $done  = $c->get(PendingSignupRepository::class)->purgeExpired($limit);
+
+            // A full pass means there is more behind it. Draining it here would
+            // die on the time limit and leave a larger set for tomorrow.
+            if ($done >= $limit) {
+                $async->enqueue('fundkit.cron.magic_link_gc');
+            }
         });
         add_action('init', fn () => $async->scheduleRecurring('fundkit.cron.magic_link_gc', 86400));
 

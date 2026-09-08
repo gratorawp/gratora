@@ -157,10 +157,23 @@ final class UserPrefsController
         $key  = $this->scopeKey($request);
         $body = (array) $request->get_json_params();
 
-        $all[$key] = [
+        $layout = [
             'order'  => array_values(array_filter((array) ($body['order']  ?? []), 'is_string')),
             'hidden' => array_values(array_filter((array) ($body['hidden'] ?? []), 'is_string')),
         ];
+
+        // Same bounds as a saved view, for the same reason: one screen's
+        // arrangement, not a store. Cheaper to drop an oversized layout than to
+        // keep it, since the client rebuilds it from the screen's defaults.
+        $current = $all[$key] ?? ['order' => [], 'hidden' => []];
+        if (strlen((string) wp_json_encode($layout)) > self::MAX_VIEW_BYTES) {
+            return new WP_REST_Response($current, 200);
+        }
+        if (! isset($all[$key]) && count($all) >= self::MAX_SCOPES) {
+            return new WP_REST_Response($current, 200);
+        }
+
+        $all[$key] = $layout;
 
         update_user_meta(get_current_user_id(), self::META_KEY, wp_json_encode($all));
 
@@ -314,7 +327,8 @@ final class UserPrefsController
     private function scopeKey(WP_REST_Request $request): string
     {
         $scope = (string) ($request->get_param('scope') ?? '');
-        $scope = preg_replace('/[^a-zA-Z0-9_\-]/', '', $scope);
+        // MAX_SCOPES bounds how many there are; this bounds how big one is.
+        $scope = substr((string) preg_replace('/[^a-zA-Z0-9_\-]/', '', $scope), 0, 64);
         return $scope !== '' ? $scope : 'default';
     }
 }
