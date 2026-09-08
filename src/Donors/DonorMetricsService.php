@@ -28,6 +28,9 @@ use Throwable;
 /** @since 1.0.0 */
 final class DonorMetricsService
 {
+    /** Rows of consent history one profile serves, matching the events slice. */
+    private const CONSENT_HISTORY_LIMIT = 100;
+
     /**
      * How long a staff-issued sign-in link stays usable. Wider than the hour a
      * link the donor requested gets, because this one is read out or pasted into
@@ -249,6 +252,7 @@ final class DonorMetricsService
         $consents = Consent::query()
             ->where('donor_id', $donorId)
             ->orderBy('occurred_at', 'DESC')
+            ->orderBy('id', 'DESC')
             ->getAll();
 
         $notes      = $this->notes->listForDonor($donorId);
@@ -502,9 +506,16 @@ final class DonorMetricsService
             'events_total' => (int) $eventsTotal,
             'donations_total' => (int) $donationsTotal,
             'receipts_total' => (int) $receiptsTotal,
+            // Read whole, served capped: the same rows decide the current state
+            // per purpose, and a purpose dropped from the registry would
+            // disappear from `current` if the query itself were limited.
             'consents' => [
                 'current' => array_values($consentCurrent),
-                'history' => array_map(fn (Consent $c) => $this->mapConsentRow($c), $consents),
+                'history' => array_map(
+                    fn (Consent $c) => $this->mapConsentRow($c),
+                    array_slice($consents, 0, self::CONSENT_HISTORY_LIMIT)
+                ),
+                'history_total' => count($consents),
             ],
             'notes'           => $notes,
             'notes_total'     => $this->notes->countForDonor($donorId),
@@ -1038,6 +1049,7 @@ final class DonorMetricsService
         $consents = Consent::query()
             ->where('donor_id', $donorId)
             ->orderBy('occurred_at', 'DESC')
+            ->orderBy('id', 'DESC')
             ->getAll();
 
         $consentCurrent = [];

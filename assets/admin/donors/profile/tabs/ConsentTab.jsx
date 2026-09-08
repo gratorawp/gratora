@@ -78,6 +78,7 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
     const [ hiding, setHiding ] = useState( false );
     const current = consents?.current || [];
     const history = consents?.history || [];
+    const historyTotal = Number( consents?.history_total ?? history.length );
 
     const setPublicHidden = async ( hidden ) => {
         setHiding( true );
@@ -233,6 +234,16 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                                 </li>
                             ) ) }
                         </ul>
+                        { historyTotal > history.length && (
+                            <p className="dp-muted" style={ { margin: '10px 0 0', fontSize: 13 } }>
+                                { sprintf(
+                                    /* translators: 1: rows shown, 2: rows this donor has in total */
+                                    __( 'Showing the %1$s most recent of %2$s entries.', 'fundraising-toolkit' ),
+                                    history.length.toLocaleString(),
+                                    historyTotal.toLocaleString()
+                                ) }
+                            </p>
+                        ) }
                     </div>
                 </div>
             ) }

@@ -72,6 +72,15 @@ final class PortalController
     private const SEND_LINK_MAILBOX_WINDOW = 15 * MINUTE_IN_SECONDS;
 
     /**
+     * Statement renders per IP per window. A full Dompdf parse and layout on a
+     * route a signed-in donor can loop is the amplifier the receipt download
+     * next door is already bounded against, and well clear of a donor pulling
+     * a few years of statements.
+     */
+    private const STATEMENT_MAX    = 20;
+    private const STATEMENT_WINDOW = 15 * MINUTE_IN_SECONDS;
+
+    /**
      * An emailed sign-in link is a bearer credential: whoever reads the mailbox
      * later reads the portal. Long enough for a donor to open their mail, not
      * long enough to sit in an archive as a live key.
@@ -1227,6 +1236,13 @@ final class PortalController
         if ($year < 2000 || $year > 2100) {
             return new WP_Error('fundkit_invalid_year', '', ['status' => 422]);
         }
+
+        // After requireDonor on purpose, so an unauthenticated caller cannot
+        // spend a shared office address's budget.
+        if ($err = $this->spam->consumeIpBudget('fundkit_annual_statement', self::STATEMENT_MAX, self::STATEMENT_WINDOW)) {
+            return $err;
+        }
+
         $pdf = $this->annualStatements->build($donor, $year);
         if ($pdf === '') {
             return new WP_Error('fundkit_no_donations', __('No donations found for that year.', 'fundraising-toolkit'), ['status' => 404]);
