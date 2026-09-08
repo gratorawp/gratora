@@ -61,7 +61,7 @@
     --fundkit-accent:         #211d3f;
     // Place literal fallback before color-mix for unsupported browsers.
     --fundkit-accent-soft:    #efedf8;
-    --fundkit-accent-soft:    color-mix(in srgb, var(--fundkit-accent) 12%, #fff);
+    --fundkit-accent-soft:    color-mix(in srgb, var(--fundkit-accent) 12%, var(--fundkit-bg, #fff));
     --fundkit-text:           #111827;
     --fundkit-text-muted:     #6b7280;
     --fundkit-border:         #e5e7eb;
@@ -531,7 +531,10 @@
     &__field-error {
         margin: 4px 0 0;
         font-size: 12px;
-        color: var(--fundkit-error-fg);
+        // Drawn straight on the form's ground rather than in a panel of its
+        // own, so it is carried toward the page ink far enough to stay red and
+        // stay readable on a ground the org chose.
+        color: color-mix(in srgb, var(--fundkit-error-fg, #9b1c1c) 72%, var(--fundkit-text));
     }
 
     &__summary {
