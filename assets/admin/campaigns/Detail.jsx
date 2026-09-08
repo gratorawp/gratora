@@ -17,6 +17,7 @@ import { ToggleRow } from '../_shared/components/Switch';
 import Btn from '../_shared/components/Btn';
 import { downloadFile } from '../_shared/download';
 import TokenEditor from '../_shared/styling/TokenEditor';
+import UnshownNotice from '../_shared/styling/UnshownNotice';
 import { Copy as CopyIcon, Trash2 as TrashIcon, Coins, HandHeart, Users as UsersIcon, ListChecks, Plus, Download as DownloadIcon, AlertTriangle } from 'lucide-react';
 import EmptyState from '../_shared/components/EmptyState';
 import FormTemplatePicker from '../_shared/components/FormTemplatePicker';
@@ -2072,7 +2073,7 @@ export function GoalPanel( { c } ) {
     );
 }
 
-function AppearancePanel( { c } ) {
+export function AppearancePanel( { c } ) {
     // style: null = org default; { preset_id } = named preset; { preset_id, tokens } = preset + inline overrides.
     const rawStyle = c.record?.style ?? null;
     const style    = rawStyle && typeof rawStyle === 'object' ? rawStyle : {};
@@ -2089,6 +2090,8 @@ function AppearancePanel( { c } ) {
     // control shows the chosen theme's value with inline overrides on top.
     const presetBase = resolveEffectiveTokens( { tokens: {}, presetId, layer: 'campaign', styling: window.fundkit?.styling || {} } );
 
+    const [ confirm, setConfirm ] = useState( null );
+
     const writeStyle = ( next ) => c.edit( { style: next } );
 
     const selectPreset = ( id ) => {
@@ -2101,15 +2104,37 @@ function AppearancePanel( { c } ) {
         writeStyle( next );
     };
 
+    // No preset either, so drop the field and let the brand default win.
+    const dropInline = () => writeStyle( presetId === '' ? null : { preset_id: presetId } );
+
     const toggleCustomizing = ( on ) => {
         if ( on ) {
             writeStyle( { ...style, tokens: { ...inline } } );
-        } else if ( presetId === '' ) {
-            // No preset either, so drop the field and let the brand default win.
-            writeStyle( null );
-        } else {
-            writeStyle( { preset_id: presetId } );
+            return;
         }
+        const count = Object.keys( inline ).length;
+        if ( count === 0 ) {
+            dropInline();
+            return;
+        }
+        // Discard is shared with the whole settings tab, so taking these back
+        // any other way costs every other unsaved change on it.
+        setConfirm( {
+            title:   __( 'Discard token overrides', 'fundraising-toolkit' ),
+            message: sprintf(
+                /* translators: %d: number of tokens this campaign overrides */
+                _n(
+                    'Turning this off drops the %d token this campaign overrides. Saving makes that permanent.',
+                    'Turning this off drops the %d tokens this campaign overrides. Saving makes that permanent.',
+                    count,
+                    'fundraising-toolkit'
+                ),
+                count
+            ),
+            confirmLabel: __( 'Discard overrides', 'fundraising-toolkit' ),
+            destructive:  true,
+            onConfirm:    dropInline,
+        } );
     };
 
     const setInline = ( next ) => {
@@ -2159,6 +2184,10 @@ function AppearancePanel( { c } ) {
 
                 { isCustomizing && (
                     <div className="fundkit-custom-style-body">
+                        <UnshownNotice
+                            tokens={ { ...presetBase, ...inline } }
+                            catalogue={ window.fundkit?.styling?.catalogue || {} }
+                        />
                         <TokenEditor
                             value={ inline }
                             defaults={ presetBase }
@@ -2188,6 +2217,8 @@ function AppearancePanel( { c } ) {
                     />
                 </div>
             </Card>
+
+            <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </div>
     );
 }

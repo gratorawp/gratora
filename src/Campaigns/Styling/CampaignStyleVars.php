@@ -20,6 +20,37 @@ final class CampaignStyleVars
     /** @var array<int,string> resolved declarations, keyed by campaign id */
     private static array $cache = [];
 
+    /** @since 1.0.0 */
+    public static function register(): void
+    {
+        add_filter('safecss_filter_attr_allow_css', [self::class, 'allowColorFunctions'], 10, 2);
+    }
+
+    /**
+     * safecss_filter_attr() removes the CSS functions it knows before testing a
+     * declaration for a stray '(', and the colour functions are not among them,
+     * so every rgba() in a style attribute is dropped: both shadows and all the
+     * measured ink on a block wrapper, and the panel colours a form section
+     * carries. This removes them the same way and then applies core's own test
+     * to what is left, so a colour function is treated exactly as var() and
+     * calc() already are and nothing else loosens.
+     *
+     * The body is digits and separators only, so rgb(url(x)) is not a colour
+     * function, is not removed, and core still rejects it.
+     *
+     * @since 1.0.0
+     */
+    public static function allowColorFunctions(mixed $allow, string $declaration): bool
+    {
+        if ($allow) {
+            return true;
+        }
+
+        $bare = preg_replace('/\b(?:rgba?|hsla?)\([0-9.,%\/\s-]*\)/i', '', $declaration);
+
+        return is_string($bare) && preg_match('%[\\\\(&=}]|/\*%', $bare) === 0;
+    }
+
     /**
      * Inline custom properties for a campaign, ready for a style attribute.
      * Escape at the point of output, as any attribute value must be.
@@ -57,6 +88,15 @@ final class CampaignStyleVars
         $css .= Ink::softDeclarations($tokens);
         $css .= Ink::fieldDeclarations($tokens);
         $css .= self::coverImage($campaign);
+
+        // A pass-through token is unset so it inherits, which is right until this
+        // map is written on a block nested in a page that already declared it for
+        // another campaign. Stating the fall-through keeps it reading this map.
+        foreach (Tokens::inherited() as $key => $value) {
+            if (! isset($tokens[$key])) {
+                $css .= '--' . $key . ':' . $value . ';';
+            }
+        }
 
         return self::$cache[$id] = $css;
     }

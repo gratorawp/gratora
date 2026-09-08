@@ -6,7 +6,7 @@
  * every other screen still offers them.
  */
 
-import { mergePresets, presetsForPanel } from '../../assets/admin/settings/panels/brandPresets';
+import { mergePresets, presetsForPanel, presetLabel } from '../../assets/admin/settings/panels/brandPresets';
 
 const BUILTINS = [
     { id: 'classic', name: 'Classic',    tokens: {}, builtin: true },
@@ -100,3 +100,22 @@ it( 'keeps the shipped tokens an edit did not touch', () => {
     expect( quiet.tokens[ 'fundkit-button-border' ] ).toBe( '1px' );
 } );
 
+/**
+ * StylePresets::all() substitutes the id for a custom whose name is blank, so
+ * every picker outside this panel already calls it 'house'. Falling back only
+ * on screen keeps the field clearable and keeps a locale's label out of the
+ * record the panel saves.
+ */
+it( 'calls a nameless custom what every other picker calls it', () => {
+    expect( presetLabel( { id: 'house', name: '   ' } ) ).toBe( 'house' );
+    expect( presetLabel( { id: 'house' } ) ).toBe( 'house' );
+} );
+
+it( 'keeps a built-in renamed to spaces under its shipped label', () => {
+    expect( presetLabel( { id: 'classic', name: '  ' }, 'Classic' ) ).toBe( 'Classic' );
+    expect( mergePresets( [ { id: 'classic', name: '  ' } ], BUILTINS )[ 0 ].name ).toBe( 'Classic' );
+} );
+
+it( 'still prefers what the admin typed', () => {
+    expect( presetLabel( { id: 'house', name: 'House' } ) ).toBe( 'House' );
+} );

@@ -44,6 +44,7 @@ import AmountInput from '../_shared/components/AmountInput';
 import FormTemplatePicker from '../_shared/components/FormTemplatePicker';
 import { STATUS_LABEL, formsBackHref } from './format';
 import { defaultCurrency } from '../_shared/format';
+import { derivedInk } from '../../_shared/ink';
 import blockRegistry, { runBlockRegistration } from './registry';
 import './blocks';
 import './editor.scss';
@@ -110,6 +111,80 @@ export function templateApplication( currentSettings, template ) {
         : null;
 
     return { markup, settings };
+}
+
+/**
+ * The custom properties the canvas renders a form under.
+ *
+ * Mirrors CampaignStyleResolver, minus inkFollowsGround: that rewrites the body
+ * ink from --fundkit-bg, and the canvas sheet is white whatever that token says.
+ *
+ * @since 1.0.0
+ */
+export function canvasStyle( settings = {}, campaign = null, styling = window.fundkit?.styling || {} ) {
+    const presets   = Array.isArray( styling.presets ) ? styling.presets : [];
+    const defaults  = styling.defaults || {};
+    const defaultId = String( styling.default_id || '' );
+
+    // An id nothing answers to is not a choice, and CampaignStyleResolver lets
+    // the campaign's own overrides through again.
+    const namedPreset      = String( settings.style?.preset_id || '' );
+    const formPresetId     = presets.some( ( p ) => p.id === namedPreset ) ? namedPreset : '';
+    const formInlineTokens = settings.style?.tokens && typeof settings.style.tokens === 'object'
+        ? settings.style.tokens : {};
+
+    const campaignStyle        = campaign?.style && typeof campaign.style === 'object'
+        ? campaign.style : {};
+    const campaignPresetId     = String( campaignStyle.preset_id || '' );
+    const campaignInlineTokens = campaignStyle.tokens && typeof campaignStyle.tokens === 'object'
+        ? campaignStyle.tokens : {};
+
+    const chosenPresetId = formPresetId || campaignPresetId || defaultId;
+    const chosenPreset   = presets.find( ( p ) => p.id === chosenPresetId );
+
+    const tokens = {
+        ...defaults,
+        ...( chosenPreset?.tokens || {} ),
+        ...( formPresetId ? {} : campaignInlineTokens ),
+        ...formInlineTokens,
+    };
+
+    const layers = [
+        chosenPreset?.tokens || {},
+        formPresetId ? {} : campaignInlineTokens,
+        formInlineTokens,
+    ];
+    const resolvedAccent = String( tokens[ 'fundkit-accent' ] || '' );
+    for ( const key of [ 'fundkit-accent-soft', 'fundkit-focus-ring' ] ) {
+        let accent     = defaults[ 'fundkit-accent' ] || '';
+        let pairedWith = null;
+        for ( const layer of layers ) {
+            if ( layer[ 'fundkit-accent' ] ) accent = layer[ 'fundkit-accent' ];
+            if ( layer[ key ] ) pairedWith = accent;
+        }
+
+        const stale = pairedWith !== null
+            ? String( pairedWith ).toLowerCase() !== resolvedAccent.toLowerCase()
+            : tokens[ key ] === defaults[ key ];
+
+        if ( stale ) delete tokens[ key ];
+    }
+
+    const sx = {};
+    for ( const k in tokens ) {
+        if ( typeof tokens[ k ] === 'string' && tokens[ k ] !== '' ) {
+            sx[ `--${ k }` ] = tokens[ k ];
+        }
+    }
+
+    Object.assign( sx, derivedInk( tokens ) );
+
+    const cw = Number( settings.container?.width );
+    if ( cw >= 320 && cw <= 1600 ) {
+        sx[ '--fundkit-editor-sheet-width' ] = `${ cw }px`;
+    }
+
+    return sx;
 }
 
 let blocksReady = false;
@@ -556,67 +631,11 @@ export default function Editor( { formId } ) {
         );
     }
 
-    const themeVars = ( () => {
-        const merged    = mergeFormSettings( c.record.settings );
-        const presets   = Array.isArray( window.fundkit?.styling?.presets ) ? window.fundkit.styling.presets : [];
-        const defaults  = window.fundkit?.styling?.defaults || {};
-        const defaultId = String( window.fundkit?.styling?.default_id || '' );
-
-        // Cascade mirrors CampaignStyleResolver: form preset, else campaign
-        // preset, else org default. Campaign inline overrides apply only when
-        // the form has not picked its own preset; form inline overrides always
-        // layer on top (form wins).
-        const formPresetId     = String( merged.style?.preset_id || '' );
-        const formInlineTokens = merged.style?.tokens && typeof merged.style.tokens === 'object'
-            ? merged.style.tokens : {};
-
-        const currentCampaignId  = Number( c.value( 'campaign_id', 0 ) ) || 0;
-        const currentCampaign    = currentCampaignId
-            ? campaigns.find( ( cmp ) => Number( cmp.id ) === currentCampaignId )
-            : null;
-        const campaignStyle      = currentCampaign?.style && typeof currentCampaign.style === 'object'
-            ? currentCampaign.style : {};
-        const campaignPresetId   = String( campaignStyle.preset_id || '' );
-        const campaignInlineTokens = campaignStyle.tokens && typeof campaignStyle.tokens === 'object'
-            ? campaignStyle.tokens : {};
-
-        const chosenPresetId = formPresetId || campaignPresetId || defaultId;
-        const chosenPreset   = presets.find( ( p ) => p.id === chosenPresetId );
-
-        const tokens = {
-            ...defaults,
-            ...( chosenPreset?.tokens || {} ),
-            ...( formPresetId ? {} : campaignInlineTokens ),
-            ...formInlineTokens,
-        };
-
-        // Mirrors CampaignStyleResolver: an accent-soft that is only the
-        // catalogue default is dropped, so the stylesheet's color-mix derives it
-        // from --fundkit-accent as the published form does. An explicit one stays.
-        const explicitSoft =
-            ( chosenPreset?.tokens && 'fundkit-accent-soft' in chosenPreset.tokens ) ||
-            ( ! formPresetId && 'fundkit-accent-soft' in campaignInlineTokens ) ||
-            ( 'fundkit-accent-soft' in formInlineTokens );
-        if ( ! explicitSoft && tokens[ 'fundkit-accent-soft' ] === defaults[ 'fundkit-accent-soft' ] ) {
-            delete tokens[ 'fundkit-accent-soft' ];
-        }
-
-        const sx = {};
-        for ( const k in tokens ) {
-            if ( typeof tokens[ k ] === 'string' && tokens[ k ] !== '' ) {
-                sx[ `--${ k }` ] = tokens[ k ];
-            }
-        }
-
-        // Matches the published form's container width; the clamp mirrors the
-        // runtime in PHP.
-        const cw = Number( merged.container?.width );
-        if ( cw >= 320 && cw <= 1600 ) {
-            sx[ '--fundkit-editor-sheet-width' ] = `${ cw }px`;
-        }
-
-        return sx;
-    } )();
+    const campaignId = Number( c.value( 'campaign_id', 0 ) ) || 0;
+    const themeVars  = canvasStyle(
+        mergeFormSettings( c.record.settings ),
+        campaignId ? campaigns.find( ( cmp ) => Number( cmp.id ) === campaignId ) : null
+    );
 
     return (
         <div className="fundkit-form-editor" style={ themeVars }>
@@ -1394,6 +1413,7 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                 <StylePresetField
                     value={ settings.style?.preset_id || '' }
                     onChange={ ( v ) => setSettings( { style: { ...settings.style, preset_id: v } } ) }
+                    campaign={ campaigns.find( ( cmp ) => Number( cmp.id ) === Number( c.value( 'campaign_id', 0 ) ) ) || null }
                 />
                 <Slider
                     label={ __( 'Maximum width', 'fundraising-toolkit' ) }
@@ -1612,10 +1632,62 @@ export function EmbedSection( { c } ) {
     );
 }
 
-function StylePresetField( { value, onChange } ) {
-    const presets   = Array.isArray( window.fundkit?.styling?.presets ) ? window.fundkit.styling.presets : [];
-    const defaultId = String( window.fundkit?.styling?.default_id || '' );
+/**
+ * The style settings a campaign overrides inline, by catalogue label. Capped so
+ * a campaign that customises everything does not print a wall of names.
+ */
+function campaignOverrideList( campaign, catalogue ) {
+    const style  = campaign?.style && typeof campaign.style === 'object' ? campaign.style : {};
+    const tokens = style.tokens && typeof style.tokens === 'object' ? style.tokens : {};
+    const labels = [];
+    for ( const key in tokens ) {
+        if ( tokens[ key ] === '' || tokens[ key ] == null ) continue;
+        labels.push( catalogue[ key ]?.label || key );
+    }
+    if ( labels.length <= 3 ) return labels.join( ', ' );
+    return sprintf(
+        /* translators: 1: first three style setting names, 2: count of the remaining ones. */
+        __( '%1$s, and %2$d more', 'fundraising-toolkit' ),
+        labels.slice( 0, 3 ).join( ', ' ),
+        labels.length - 3
+    );
+}
+
+function overrideNotice( campaign, overrides, gating ) {
+    if ( overrides === '' ) return '';
+    const name = campaign?.title || __( 'The campaign', 'fundraising-toolkit' );
+    if ( gating ) {
+        return sprintf(
+            /* translators: 1: campaign title, 2: comma-separated list of style setting names. */
+            __( '%1$s overrides %2$s. This form is on a preset of its own, so those overrides do not reach it.', 'fundraising-toolkit' ),
+            name,
+            overrides
+        );
+    }
+    return sprintf(
+        /* translators: 1: campaign title, 2: comma-separated list of style setting names. */
+        __( '%1$s overrides %2$s. Picking a preset here stops those overrides reaching this form.', 'fundraising-toolkit' ),
+        name,
+        overrides
+    );
+}
+
+/**
+ * A campaign's inline overrides reach a form only while the form inherits:
+ * CampaignStyleResolver drops them the moment the form names a preset of its
+ * own. Choosing here is a decision about the campaign's colours too, so the
+ * picker names the ones that stop applying.
+ */
+export function StylePresetField( { value, onChange, campaign = null } ) {
+    const styling   = window.fundkit?.styling || {};
+    const presets   = Array.isArray( styling.presets ) ? styling.presets : [];
+    const defaultId = String( styling.default_id || '' );
     const defaultName = presets.find( ( p ) => p.id === defaultId )?.name || defaultId;
+    // An id nothing answers to is not a choice the form made, and the resolver
+    // lets the campaign through, so the notice must not claim otherwise.
+    const gating = value !== '' && presets.some( ( p ) => p.id === value );
+    const lost   = overrideNotice( campaign, campaignOverrideList( campaign, styling.catalogue || {} ), gating );
+    const help   = __( 'Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign\'s preset and the overrides it carries.', 'fundraising-toolkit' );
     return (
         <SelectControl
             label={ __( 'Style preset', 'fundraising-toolkit' ) }
@@ -1629,7 +1701,7 @@ function StylePresetField( { value, onChange } ) {
                 ...presets.map( ( p ) => ( { value: p.id, label: p.name } ) ),
             ] }
             onChange={ onChange }
-            help={ __( 'Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign\'s choice.', 'fundraising-toolkit' ) }
+            help={ lost === '' ? help : `${ help } ${ lost }` }
             __nextHasNoMarginBottom
             __next40pxDefaultSize
         />

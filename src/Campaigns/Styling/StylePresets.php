@@ -239,6 +239,35 @@ final class StylePresets
     }
 
     /**
+     * The preset's tokens as the layers that produced them: what ships, then
+     * what the org changed. A pairing is a statement one layer made, and the
+     * flat map cannot say which layer made it.
+     *
+     * @return array<int, array<string,string>>
+     *
+     * @since 1.0.0
+     */
+    public static function tokenLayers(string $id): array
+    {
+        $p = self::find($id);
+        if (! is_array($p['tokens'] ?? null)) {
+            return [self::tokensFor($id)];
+        }
+
+        foreach (self::builtinsWithTheme() as $b) {
+            if (($b['id'] ?? null) !== $id) {
+                continue;
+            }
+            $shipped = is_array($b['tokens'] ?? null) ? $b['tokens'] : [];
+            $edits   = array_diff_assoc($p['tokens'], $shipped);
+
+            return $edits === [] ? [$p['tokens']] : [$shipped, $edits];
+        }
+
+        return [$p['tokens']];
+    }
+
+    /**
      * Tokens for a preset id, or empty if unknown.
      *
      * @since 1.0.0

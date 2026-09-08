@@ -90,7 +90,8 @@
     --fundkit-button-size:  48px;
     --fundkit-button-weight:  600;
     --fundkit-button-shadow:  0 1px 2px rgba(0, 0, 0, .08);
-    --fundkit-focus-ring:     #211d3f;
+    // Derived, so a dropped ring tracks the accent instead of this literal.
+    --fundkit-focus-ring:     var(--fundkit-accent, #211d3f);
     --fundkit-card-shadow:    0 12px 32px rgba(15, 23, 42, .06);
 
     &--framed {

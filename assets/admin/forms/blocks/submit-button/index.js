@@ -58,8 +58,8 @@ function Edit( { attributes, setAttributes } ) {
                     style={ {
                         display:       'inline-block',
                         padding:       '10px 20px',
-                        background:    'var(--fundkit-accent, #211d3f)',
-                        color:         '#fff',
+                        background:    'var(--fundkit-button-bg, var(--fundkit-accent, #211d3f))',
+                        color:         'var(--fundkit-button-fg, var(--fundkit-on-accent, #fff))',
                         borderRadius:  'var(--fundkit-radius-sm, 4px)',
                         fontWeight:    500,
                         fontSize:      '14px',

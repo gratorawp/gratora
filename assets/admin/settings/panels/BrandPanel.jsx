@@ -11,7 +11,8 @@ import EmptyState from '../../_shared/components/EmptyState';
 import Icon from '../../_shared/components/Icon';
 import TokenEditor from '../../_shared/styling/TokenEditor';
 import StylePreview from '../../_shared/styling/StylePreview';
-import { presetsForPanel } from './brandPresets';
+import UnshownNotice from '../../_shared/styling/UnshownNotice';
+import { presetsForPanel, presetLabel } from './brandPresets';
 import { bestOn } from './contrast';
 
 const PlusIcon  = () => <Icon name="plus"  size={ 16 } />;
@@ -63,8 +64,9 @@ export default function BrandPanel( { s } ) {
     const clonePreset = ( id ) => {
         const source = presets.find( ( p ) => p.id === id );
         if ( ! source ) return;
-        const newId   = generateId( source.name, presets );
-        const newName = `${ source.name } ${ __( '(copy)', 'fundraising-toolkit' ) }`;
+        const label   = presetLabel( source );
+        const newId   = generateId( label, presets );
+        const newName = `${ label } ${ __( '(copy)', 'fundraising-toolkit' ) }`;
         const next    = [ ...presets, {
             id:      newId,
             name:    newName,
@@ -136,7 +138,7 @@ export default function BrandPanel( { s } ) {
                                                 aria-hidden="true"
                                             />
                                             <span className="fundkit-preset-mgr__meta">
-                                                <strong className="fundkit-preset-mgr__name">{ p.name }</strong>
+                                                <strong className="fundkit-preset-mgr__name">{ presetLabel( p ) }</strong>
                                                 { isDefault && (
                                                     <span className="fundkit-preset-mgr__default">
                                                         <Icon name="check" size={ 12 } />
@@ -248,6 +250,11 @@ export function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTo
             ) }
 
             <ContrastNotice tokens={ { ...( resetDefaults || {} ), ...( preset.tokens || {} ) } } />
+
+            <UnshownNotice
+                tokens={ { ...( resetDefaults || {} ), ...( preset.tokens || {} ) } }
+                catalogue={ window.fundkit?.styling?.catalogue || {} }
+            />
 
             <TokenEditor
                 value={ preset.tokens || {} }

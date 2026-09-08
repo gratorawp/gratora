@@ -1,0 +1,15 @@
+// What a token editor cannot show about the value it is editing. Shared by the
+// brand panel and a campaign's own appearance card.
+.fundkit-preset-editor__contrast,
+.fundkit-preset-editor__unshown {
+    margin: 0 0 16px;
+    padding: 10px 14px 10px 30px;
+    list-style: disc;
+    border-radius: 6px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 13px;
+    line-height: 1.5;
+
+    li + li { margin-top: 4px; }
+}

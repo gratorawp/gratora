@@ -8,6 +8,7 @@ use FundKit\Campaigns\Campaign;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Campaigns\Styling\CampaignStyleResolver;
 use FundKit\Campaigns\Styling\Ink;
+use FundKit\Campaigns\Styling\Tokens;
 use FundKit\Donations\AntiSpamGuard;
 use FundKit\Donors\ConsentService;
 use FundKit\Forms\Blocks\ColumnsBlock;
@@ -326,6 +327,15 @@ final class DonationFormShortcode extends HookProvider
         $out .= Ink::declarationsFor((string) ($tokens['fundkit-accent'] ?? ''));
         $out .= Ink::softDeclarations($tokens);
         $out .= Ink::fieldDeclarations($tokens);
+
+        // A pass-through token is unset so it inherits, which is right until the
+        // form sits on a campaign page that has already declared it for its own
+        // preset. Stating the fall-through keeps the form reading its own map.
+        foreach (Tokens::inherited() as $key => $value) {
+            if (! isset($tokens[$key])) {
+                $out .= '--' . $key . ':' . $value . ';';
+            }
+        }
 
         return $out;
     }

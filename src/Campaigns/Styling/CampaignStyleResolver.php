@@ -48,6 +48,7 @@ final class CampaignStyleResolver
             ? $formPresetId
             : ($campaignPreset !== '' ? $campaignPreset : StylePresets::defaultId());
 
+        $presetLayers = StylePresets::tokenLayers($presetId);
         $presetTokens = StylePresets::tokensFor($presetId);
         $tokens = array_merge($tokens, $presetTokens);
 
@@ -57,12 +58,9 @@ final class CampaignStyleResolver
 
         $tokens = (array) apply_filters('fundkit.form_style.tokens', $tokens, $form, $campaign);
 
-        $explicitSoft = isset($presetTokens['fundkit-accent-soft'])
-            || ($formPresetId === '' && isset($campaignInline['fundkit-accent-soft']));
-        $tokens = $this->dropUnpairedSoft($tokens, $explicitSoft);
-
-        $inline  = $formPresetId === '' ? $campaignInline : [];
-        $tokens  = $this->inkFollowsGround($tokens, $presetTokens, $inline);
+        $inline = $formPresetId === '' ? $campaignInline : [];
+        $tokens = $this->dropStalePairs($tokens, array_merge($presetLayers, [$inline]));
+        $tokens = $this->inkFollowsGround($tokens, $presetTokens, $inline);
 
         return [
             'tokens'        => $tokens,
@@ -99,6 +97,7 @@ final class CampaignStyleResolver
         $campaignInline = $this->inlineTokens($style);
 
         $presetId     = $campaignPreset !== '' ? $campaignPreset : StylePresets::defaultId();
+        $presetLayers = StylePresets::tokenLayers($presetId);
         $presetTokens = StylePresets::tokensFor($presetId);
         $tokens       = array_merge($tokens, $presetTokens);
 
@@ -108,43 +107,54 @@ final class CampaignStyleResolver
 
         $tokens = (array) apply_filters('fundkit.campaign_style.tokens', $tokens, $campaign);
 
-        $explicitSoft = isset($presetTokens['fundkit-accent-soft'])
-            || isset($campaignInline['fundkit-accent-soft']);
-
         return $this->inkFollowsGround(
-            $this->dropUnpairedSoft($tokens, $explicitSoft),
+            $this->dropStalePairs($tokens, array_merge($presetLayers, [$campaignInline])),
             $presetTokens,
             $campaignInline
         );
     }
 
     /**
-     * Accent-soft (selected/hover tint) must track the accent. When nothing
-     * deliberately pairs one with the accent and it is still the catalogue
-     * default, drop it so the stylesheet derives it from the resolved
-     * --fundkit-accent via color-mix. Otherwise a campaign that picks a purple
-     * accent keeps the green default soft and washes its own page in green.
-     * Presets that pair their own soft (Bold, Quiet) keep theirs.
+     * The selected/hover tint and the focus ring belong to the accent they were
+     * chosen beside. A later layer that repaints the accent and says nothing
+     * about them leaves them to the stylesheet, which derives both from the
+     * resolved --fundkit-accent: otherwise a campaign on Bold that picks a red
+     * accent keeps Bold's navy tint on its selected tiles and a navy ring
+     * around a red halo. One nothing chose goes the same way; one only a filter
+     * left stands.
      *
      * @param array<string,string> $tokens
+     * @param array<int,array<string,string>> $layers preset first, later wins
      * @return array<string,string>
      *
      * @since 1.0.0
      */
-    private function dropUnpairedSoft(array $tokens, bool $explicitSoft): array
+    private function dropStalePairs(array $tokens, array $layers): array
     {
         $defaults = Tokens::defaults();
-        if (! $explicitSoft
-            && ($tokens['fundkit-accent-soft'] ?? null) === ($defaults['fundkit-accent-soft'] ?? null)
-        ) {
-            unset($tokens['fundkit-accent-soft']);
-        }
+        $resolved = (string) ($tokens['fundkit-accent'] ?? '');
 
-        // The focus ring is the same shape of pairing. Left at the shipped
-        // accent it never tracks the brand, and on the shipped navy background
-        // it is drawn in the ground's own colour: no visible focus at all.
-        if (($tokens['fundkit-focus-ring'] ?? null) === ($defaults['fundkit-focus-ring'] ?? null)) {
-            unset($tokens['fundkit-focus-ring']);
+        foreach (['fundkit-accent-soft', 'fundkit-focus-ring'] as $key) {
+            $accent     = (string) ($defaults['fundkit-accent'] ?? '');
+            $pairedWith = null;
+            foreach ($layers as $layer) {
+                if (isset($layer['fundkit-accent'])) {
+                    $accent = (string) $layer['fundkit-accent'];
+                }
+                if (isset($layer[$key])) {
+                    $pairedWith = $accent;
+                }
+            }
+
+            // Case-insensitive: the built-ins carry uppercase hex and the colour
+            // control writes lowercase, so one colour arrives spelled two ways.
+            $stale = $pairedWith !== null
+                ? strcasecmp($pairedWith, $resolved) !== 0
+                : ($tokens[$key] ?? null) === ($defaults[$key] ?? null);
+
+            if ($stale) {
+                unset($tokens[$key]);
+            }
         }
 
         return $tokens;

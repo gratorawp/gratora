@@ -35,11 +35,14 @@ final class Tokens
      * sanitize() has to keep the key or Classic loses its pill on the first
      * save of the brand panel.
      *
-     * @var array<string, array{control: string}>
+     * 'inherits' writes that fall-through out, for a surface nested inside one
+     * that has already declared the property and would otherwise lend it.
+     *
+     * @var array<string, array{control: string, inherits: string}>
      */
     private const PASS_THROUGH = [
-        'fundkit-button-radius'   => ['control' => 'range'],
-        'fundkit-switcher-radius' => ['control' => 'range'],
+        'fundkit-button-radius'   => ['control' => 'range', 'inherits' => 'var(--fundkit-radius-sm, 8px)'],
+        'fundkit-switcher-radius' => ['control' => 'range', 'inherits' => 'var(--fundkit-radius-sm, 8px)'],
     ];
 
     public static function catalogue(): array
@@ -301,6 +304,23 @@ final class Tokens
         $out = [];
         foreach (self::catalogue() as $key => $def) {
             $out[$key] = (string) $def['default'];
+        }
+        return $out;
+    }
+
+    /**
+     * What each pass-through token means when no layer set it. Kept out of
+     * defaults() so the catalogue still carries none.
+     *
+     * @return array<string,string>
+     *
+     * @since 1.0.0
+     */
+    public static function inherited(): array
+    {
+        $out = [];
+        foreach (self::PASS_THROUGH as $key => $def) {
+            $out[$key] = $def['inherits'];
         }
         return $out;
     }

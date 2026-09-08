@@ -48,6 +48,7 @@ use FundKit\Campaigns\CampaignTypeRegistry;
 use FundKit\Campaigns\DefaultCampaignTypeHandler;
 use FundKit\Campaigns\SocialMeta;
 use FundKit\Campaigns\Styling\CampaignStyleResolver;
+use FundKit\Campaigns\Styling\CampaignStyleVars;
 use FundKit\Campaigns\Styling\PageStyle;
 use FundKit\Core\Commands\CoreCommandProvider;
 use FundKit\Currency\FxBackfill;
@@ -449,6 +450,7 @@ final class CoreModule implements FundKitModule
 
         (new CampaignPageTemplate())->register();
         (new PageStyle())->register();
+        CampaignStyleVars::register();
 
         (new SocialMeta($c->get(CampaignRepository::class)))->register();
 

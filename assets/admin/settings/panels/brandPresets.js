@@ -1,3 +1,20 @@
+// StylePresets::normalise trims before it decides a name is missing, and
+// StylePresets::all() then substitutes the id, so a name of spaces has to fall
+// back the same way here or the panel and every picker disagree.
+const named = ( value ) => String( value ?? '' ).trim() !== '';
+
+/**
+ * What to call a preset on screen. Not what to store: a fallback written back
+ * would pin a locale's label into the record.
+ *
+ * @param {Object} p       the stored record
+ * @param {string} shipped the built-in's own name, if it is one
+ */
+export const presetLabel = ( p, shipped ) =>
+    ( named( p?.name ) ? String( p.name ).trim() : '' ) ||
+    String( shipped ?? '' ) ||
+    String( p?.id ?? '' );
+
 /**
  * Merge stored edits over shipped built-ins, not the published list, which may contain deleted
  * custom presets.
@@ -18,7 +35,7 @@ export function mergePresets( stored, builtins ) {
         return {
             ...b,
             ...edit,
-            name:        edit.name || b.name,
+            name:        named( edit.name ) ? edit.name : b.name,
             description: edit.description || b.description,
             tokens:      { ...( b.tokens || {} ), ...( edit.tokens || {} ) },
         };

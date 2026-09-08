@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace FundKit\Tests\Integration;
 
 use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\Styling\CampaignStyleVars;
+use FundKit\Forms\Blocks\SectionBlock;
 
 /**
  * A campaign page is an ordinary page, so its blocks answer to the editor's own
@@ -100,5 +102,41 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
 
         $this->assertStringContainsString('fundkit-block--progress', $html);
         $this->assertStringContainsString('data-block="fundkit/campaign-progress"', $html);
+    }
+
+    public function test_a_chosen_shadow_reaches_a_block_for_another_campaign(): void
+    {
+        $c = $this->campaign();
+        $c->style = ['tokens' => [
+            'fundkit-accent'      => '#7c3aed',
+            'fundkit-card-shadow' => '0 1px 2px rgba(15, 23, 42, .04)',
+        ]];
+        $c->save();
+        CampaignStyleVars::flush();
+
+        $html = do_blocks('<!-- wp:fundkit/campaign-progress {"campaignId":' . (int) $c->id . '} /-->');
+
+        $this->assertStringContainsString('--fundkit-accent:#7c3aed', $html);
+        $this->assertStringContainsString('--fundkit-card-shadow:0 1px 2px rgba(15, 23, 42, .04)', $html);
+    }
+
+    public function test_a_section_keeps_the_shadow_and_the_panel_colour_its_author_picked(): void
+    {
+        $style = SectionBlock::sectionStyle([
+            'shadow'     => '0 4px 14px rgba(15,23,42,.10)',
+            'background' => 'rgba(255,255,255,.6)',
+        ]);
+
+        $this->assertStringContainsString('box-shadow:0 4px 14px rgba(15,23,42,.10)', $style);
+        $this->assertStringContainsString('background-color:rgba(255,255,255,.6)', $style);
+    }
+
+    public function test_a_declaration_core_rejects_is_still_rejected(): void
+    {
+        $style = SectionBlock::sectionStyle([
+            'shadow' => '0 0 0 rgb(url(javascript:alert(1)))',
+        ]);
+
+        $this->assertSame('', $style);
     }
 }
