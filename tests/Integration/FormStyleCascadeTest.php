@@ -74,4 +74,32 @@ final class FormStyleCascadeTest extends IntegrationTestCase
 
         $this->assertSame('#dde6ed', $resolved['tokens']['fundkit-accent-soft']);
     }
+
+    /**
+     * A preset deleted while a form still named it is not a choice the form
+     * made. Treating it as one kept gating out the campaign's overrides, so the
+     * page rendered the campaign's colour and the form beside it the default.
+     */
+    public function test_a_form_pinned_to_a_deleted_preset_lets_the_campaign_through(): void
+    {
+        $campaign = $this->campaignWithInlineAccent('#c62828');
+        $form = Form::make();
+        $form->settings = ['style' => ['preset_id' => 'gone-forever']];
+
+        $resolved = (new CampaignStyleResolver())->resolve($form, $campaign);
+
+        $this->assertSame('#c62828', $resolved['tokens']['fundkit-accent']);
+    }
+
+    /** A preset that does exist still gates them out, which is the contract. */
+    public function test_a_form_pinned_to_a_real_preset_still_gates_them_out(): void
+    {
+        $campaign = $this->campaignWithInlineAccent('#c62828');
+        $form = Form::make();
+        $form->settings = ['style' => ['preset_id' => 'bold']];
+
+        $resolved = (new CampaignStyleResolver())->resolve($form, $campaign);
+
+        $this->assertNotSame('#c62828', $resolved['tokens']['fundkit-accent']);
+    }
 }

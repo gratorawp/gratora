@@ -473,6 +473,14 @@ final class SettingsService
             foreach (['name', 'description'] as $key) {
                 if (($preset[$key] ?? null) === ($shipped[$id][$key] ?? null)) unset($preset[$key]);
             }
+
+            // Per key, for the same reason. "Site theme" is derived from
+            // theme.json on every read, so storing a key whose value already
+            // matches froze it: the org edited one colour and the preset
+            // stopped following their theme for good, while the panel went on
+            // saying it tracks it.
+            $preset['tokens'] = self::changedTokens($preset, $shipped[$id]);
+
             $kept[] = $preset;
         }
 
@@ -483,6 +491,26 @@ final class SettingsService
      * @param array<string,mixed> $a
      * @param array<string,mixed> $b
      */
+    /**
+     * @param array<string,mixed> $preset
+     * @param array<string,mixed> $shipped
+     * @return array<string,string>
+     */
+    private static function changedTokens(array $preset, array $shipped): array
+    {
+        $saved = is_array($preset['tokens'] ?? null) ? $preset['tokens'] : [];
+        $ships = is_array($shipped['tokens'] ?? null) ? $shipped['tokens'] : [];
+
+        $out = [];
+        foreach ($saved as $key => $value) {
+            if (! array_key_exists($key, $ships) || $ships[$key] !== $value) {
+                $out[(string) $key] = (string) $value;
+            }
+        }
+
+        return $out;
+    }
+
     private static function samePreset(array $a, array $b): bool
     {
         $normalise = static function (array $p): array {

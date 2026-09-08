@@ -80,4 +80,25 @@ final class ThemePresetIsSanitisedTest extends IntegrationTestCase
 
         $this->assertSame($tokens, Tokens::sanitize($tokens));
     }
+
+    /**
+     * The preset is meant to be the theme's or absent. Reading the merged data
+     * folded WordPress's own defaults in, so a theme that declares nothing
+     * still offered a "Site theme" preset painted in the editor's slate.
+     */
+    public function test_a_theme_that_declares_nothing_offers_no_preset(): void
+    {
+        $this->filter = static function ($theme) {
+            return $theme->update_with(['version' => 3]);
+        };
+        add_filter('wp_theme_json_data_theme', static fn () => new \WP_Theme_JSON_Data(['version' => 3], 'theme'), 99);
+        WP_Theme_JSON_Resolver::clean_cached_data();
+
+        $preset = StylePresets::themePreset();
+
+        remove_all_filters('wp_theme_json_data_theme');
+        WP_Theme_JSON_Resolver::clean_cached_data();
+
+        $this->assertNull($preset);
+    }
 }

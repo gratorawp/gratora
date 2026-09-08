@@ -32,7 +32,14 @@ final class CampaignStyleResolver
         $defaults = Tokens::defaults();
         $tokens   = $defaults;
 
+        // An id nothing answers to is a preset deleted while the form still
+        // named it. Treated as a choice it kept gating out the campaign's own
+        // overrides, so the page rendered the campaign's colour and the form
+        // beside it the org default.
         $formPresetId    = $this->formPresetId($form);
+        if ($formPresetId !== '' && StylePresets::find($formPresetId) === null) {
+            $formPresetId = '';
+        }
         $campaignStyle   = $campaign && is_array($campaign->style) ? $campaign->style : [];
         $campaignPreset  = (string) ($campaignStyle['preset_id'] ?? '');
         $campaignInline  = $this->inlineTokens($campaignStyle);

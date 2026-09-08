@@ -11,6 +11,8 @@ namespace FundKit\Campaigns\Styling;
  *
  * @since 1.0.0
  */
+use WP_Theme_JSON_Resolver;
+
 final class StylePresets
 {
     private const OPTION = 'fundkit_org_brand';
@@ -170,7 +172,13 @@ final class StylePresets
     {
         $tokens = [];
 
-        $palette = (array) (wp_get_global_settings(['color', 'palette']) ?? []);
+        // The theme's own layer, not the merged one: wp_get_global_settings and
+        // wp_get_global_styles fold WordPress's defaults in, so a classic theme
+        // that declares nothing still "derives" core's editor slate and a font
+        // weight of 'inherit'. The preset is meant to be the theme's or absent.
+        $raw = WP_Theme_JSON_Resolver::get_theme_data()->get_raw_data();
+
+        $palette = (array) ($raw['settings']['color']['palette'] ?? []);
         $colors  = isset($palette[0]) ? $palette : ($palette['theme'] ?? []);
         $bySlug  = [];
         foreach ((array) $colors as $entry) {
@@ -189,21 +197,19 @@ final class StylePresets
         if (isset($bySlug['background'])) $tokens['fundkit-bg']   = $bySlug['background'];
         if (isset($bySlug['foreground'])) $tokens['fundkit-text'] = $bySlug['foreground'];
 
-        $button = wp_get_global_styles(['elements', 'button']) ?? [];
-        if (is_array($button)) {
-            $radius = $button['border']['radius'] ?? null;
-            if (is_string($radius) && $radius !== '') {
-                $tokens['fundkit-radius-sm'] = $radius;
-            }
-            $weight = $button['typography']['fontWeight'] ?? null;
-            if ($weight !== null && $weight !== '') {
-                $tokens['fundkit-button-weight'] = (string) $weight;
-            }
-            $btnBg = $button['color']['background'] ?? null;
-            if (is_string($btnBg) && $btnBg !== '' && ! isset($tokens['fundkit-accent'])) {
-                $tokens['fundkit-accent']     = $btnBg;
-                $tokens['fundkit-focus-ring'] = $btnBg;
-            }
+        $button = (array) ($raw['styles']['elements']['button'] ?? []);
+        $radius = $button['border']['radius'] ?? null;
+        if (is_string($radius) && $radius !== '') {
+            $tokens['fundkit-radius-sm'] = $radius;
+        }
+        $weight = $button['typography']['fontWeight'] ?? null;
+        if ($weight !== null && $weight !== '') {
+            $tokens['fundkit-button-weight'] = (string) $weight;
+        }
+        $btnBg = $button['color']['background'] ?? null;
+        if (is_string($btnBg) && $btnBg !== '' && ! isset($tokens['fundkit-accent'])) {
+            $tokens['fundkit-accent']     = $btnBg;
+            $tokens['fundkit-focus-ring'] = $btnBg;
         }
 
         // theme.json is not the token catalogue: it yields values like the
