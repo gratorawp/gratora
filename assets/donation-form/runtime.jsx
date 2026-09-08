@@ -1,5 +1,6 @@
 /** @jsxImportSource preact */
 
+import { derivedInk } from '../_shared/ink';
 import { render } from 'preact';
 import { useCallback, useMemo, useReducer, useRef, useState, useEffect } from 'preact/hooks';
 
@@ -1330,6 +1331,34 @@ function applyThemeTokens( form, theme ) {
 }
 
 /**
+ * The styling editor posts the authored token map. The server's derived inks are
+ * not in it and the strip below takes the previous ones with it, so they are
+ * recomputed here: without them a pale accent previews as a white label on a
+ * white button, which is not what the published form renders.
+ *
+ * @param {HTMLElement} form
+ * @param {Record<string,string>} tokens
+ */
+export function applyPreviewTokens( form, tokens ) {
+    // Existing --fundkit-* inline vars go first, so a preset that omits a token
+    // reverts to the stylesheet default, not a stale value.
+    const st = form.style;
+    const drop = [];
+    for ( let i = 0; i < st.length; i++ ) {
+        const n = st[ i ];
+        if ( n && n.indexOf( '--fundkit-' ) === 0 ) drop.push( n );
+    }
+    drop.forEach( ( n ) => st.removeProperty( n ) );
+
+    applyThemeTokens( form, { tokens } );
+
+    const derived = derivedInk( tokens );
+    for ( const name in derived ) {
+        st.setProperty( name, derived[ name ] );
+    }
+}
+
+/**
  * Detect foreign frames through the parent-origin access check. Exempt marked opaque-origin
  * admin previews.
  */
@@ -1444,16 +1473,7 @@ function bootAll() {
             if ( ! data || typeof data !== 'object' ) return;
             if ( data.type !== 'fundkit:apply-tokens' || ! data.tokens ) return;
             document.querySelectorAll( '.fundkit-donation-form' ).forEach( ( form ) => {
-                // Existing --fundkit-* inline vars go first, so a preset that omits
-                // a token reverts to the stylesheet default, not a stale value.
-                const st = form.style;
-                const drop = [];
-                for ( let i = 0; i < st.length; i++ ) {
-                    const n = st[ i ];
-                    if ( n && n.indexOf( '--fundkit-' ) === 0 ) drop.push( n );
-                }
-                drop.forEach( ( n ) => st.removeProperty( n ) );
-                applyThemeTokens( form, { tokens: data.tokens } );
+                applyPreviewTokens( form, data.tokens );
             } );
         } );
 

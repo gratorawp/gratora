@@ -4,7 +4,7 @@
  * promises a contrast the page does not have.
  */
 
-import { inkOn, ratio, bestOn } from '../../assets/admin/settings/panels/contrast';
+import { inkOn, ratio, bestOn, derivedInk } from '../../assets/_shared/ink';
 
 /** The cases InkTest pins on the PHP side, with the ink it chooses. */
 const cases = [
@@ -49,4 +49,40 @@ test( 'a mid red carries no body text either way', () => {
 
 test( 'the shipped page ground carries it comfortably', () => {
     expect( bestOn( '#ffffff' ) ).toBeGreaterThan( 4.5 );
+} );
+
+/**
+ * The preview iframe is handed the authored map with the server's derived inks
+ * stripped out, so it has to produce the same three families Ink.php emits.
+ * These are the values InkTest pins on the PHP side.
+ */
+describe( 'the inks the server would have emitted', () => {
+    it( 'measures a pale accent the way the published form does', () => {
+        const out = derivedInk( { 'fundkit-accent': '#ffd400' } );
+
+        expect( out[ '--fundkit-on-accent' ] ).toBe( '#10162a' );
+        expect( out[ '--fundkit-on-accent-muted' ] ).toBe( 'rgba(16,22,42,.62)' );
+        expect( out[ '--fundkit-on-accent-line' ] ).toBe( 'rgba(16,22,42,.16)' );
+    } );
+
+    it( 'measures a dark accent the same way', () => {
+        expect( derivedInk( { 'fundkit-accent': '#211d3f' } )[ '--fundkit-on-accent' ] ).toBe( '#ffffff' );
+    } );
+
+    it( 'keeps the accent on the total where it reads and stands it down where it does not', () => {
+        expect( derivedInk( { 'fundkit-bg-soft': '#f8fafb', 'fundkit-accent': '#211d3f' } )[ '--fundkit-on-soft-accent' ] )
+            .toBe( '#211d3f' );
+        expect( derivedInk( { 'fundkit-bg-soft': '#05a2f0', 'fundkit-accent': '#452ef5' } )[ '--fundkit-on-soft-accent' ] )
+            .toBe( '#10162a' );
+    } );
+
+    it( 'gives the fields ink of their own', () => {
+        expect( derivedInk( { 'fundkit-field-bg': '#ffffff' } )[ '--fundkit-on-field' ] ).toBe( '#10162a' );
+        expect( derivedInk( { 'fundkit-field-bg': '#101828' } )[ '--fundkit-on-field' ] ).toBe( '#ffffff' );
+    } );
+
+    it( 'contributes nothing for a ground it cannot read', () => {
+        expect( derivedInk( { 'fundkit-accent': 'inherit' } ) ).toEqual( {} );
+        expect( derivedInk( {} ) ).toEqual( {} );
+    } );
 } );
