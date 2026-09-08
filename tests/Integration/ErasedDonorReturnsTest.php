@@ -122,7 +122,6 @@ final class ErasedDonorReturnsTest extends IntegrationTestCase
         );
     }
 
-    /** Spent once, so a replayed settlement cannot mean anything twice. */
     public function test_the_carried_address_is_cleared_once_used(): void
     {
         $email = 'erased-' . uniqid() . '@example.test';

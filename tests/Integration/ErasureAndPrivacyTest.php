@@ -65,10 +65,6 @@ final class ErasureAndPrivacyTest extends IntegrationTestCase
         return $e;
     }
 
-    /**
-     * A reference is unique but not substring-unique: DON-1 is inside DON-10,
-     * and the scan searches loose text.
-     */
     public function test_erasing_one_donor_leaves_another_donors_log_rows_alone(): void
     {
         $mine   = $this->donors()->findOrCreate('short-ref@example.test');

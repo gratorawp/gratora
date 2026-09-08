@@ -55,7 +55,6 @@ final class AdminDonorEditSaveTest extends IntegrationTestCase
         );
     }
 
-    /** A country that is not a country is still refused, and nothing is written. */
     public function test_a_malformed_address_country_is_still_refused(): void
     {
         $donor = $this->seedDonor('badcountry@example.test', 'Ann', 'Keele');
@@ -70,7 +69,6 @@ final class AdminDonorEditSaveTest extends IntegrationTestCase
      * @param array<string,mixed> $edits
      * @param array<string,mixed> $addressEdits
      */
-    /** The column counts characters, so clamping by bytes cuts a CJK name a third short and splits the last one. */
     public function test_a_multibyte_name_is_stored_at_its_full_length(): void
     {
         $donor = $this->seedDonor('kanji@example.test', 'Ken', 'Tanaka');

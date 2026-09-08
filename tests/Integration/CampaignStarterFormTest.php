@@ -9,12 +9,6 @@ use FundKit\Forms\Form;
 use FundKit\Forms\FormTemplates;
 use WP_REST_Request;
 
-/**
- * A template is a whole page, and the donation form is the largest thing on
- * it. Every campaign used to arrive with the same six fields whichever
- * template built its page, which made the choice of template a choice of
- * decoration.
- */
 final class CampaignStarterFormTest extends IntegrationTestCase
 {
     /** @param array<string,mixed> $input @return array<string,mixed> */
@@ -69,7 +63,6 @@ final class CampaignStarterFormTest extends IntegrationTestCase
         $this->assertGreaterThan(2, count(array_unique($forms)), 'the templates barely differ in what they ask for');
     }
 
-    /** At least one of them puts the donor through a form split across steps. */
     public function test_some_templates_ask_across_steps_rather_than_all_at_once(): void
     {
         $stepped = [];
@@ -101,7 +94,6 @@ final class CampaignStarterFormTest extends IntegrationTestCase
         $this->assertStringContainsString('wp:fundkit/submit-button', $blocks);
     }
 
-    /** An add-on gets to name a form of its own for a template of its own. */
     public function test_an_add_on_can_name_the_form_for_its_own_template(): void
     {
         add_filter('fundkit.campaign.starter_form_template', static fn (): string => 'guided');

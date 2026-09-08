@@ -82,7 +82,6 @@ async function donate( form ) {
     await settle();
 }
 
-// What the server answers for a donation it has recorded but not been paid.
 function awaitingTransfer( reference ) {
     return {
         reference,

@@ -75,11 +75,6 @@ final class RoleDefaultsAppliedTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * Add-ons create fundkit_roles for their own capability self-heal, and the
-     * seed used to skip on the option merely existing: the administrator was
-     * then left holding nothing the Roles screen said they held.
-     */
     public function test_an_option_another_plugin_created_does_not_count_as_seeded(): void
     {
         update_option('fundkit_roles', ['mapping' => ['bookkeeper' => ['fundkit_view_donations']]]);

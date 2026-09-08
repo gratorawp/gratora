@@ -87,8 +87,6 @@ final class DonorMrrBaseCurrencyTest extends IntegrationTestCase
 
     public function test_an_unconvertible_plan_counts_as_nothing_and_says_so(): void
     {
-        // No rate, so no known base value. Folding in its raw foreign cents is
-        // exactly the bug; the total is short, and the card has to admit it.
         $donorId = $this->donorWithPlan($this->foreign(), 50000, null);
 
         $lifetime = $this->lifetime($donorId);

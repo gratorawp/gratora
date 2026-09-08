@@ -149,7 +149,6 @@ final class ReceiptRenderFailureTest extends IntegrationTestCase
         $this->assertStringContainsString('font cache is not writable', (string) ($row->payload['message'] ?? ''));
     }
 
-    /** The two nulls the caller cannot tell apart are told apart in the log. */
     public function test_a_missing_renderer_says_so_rather_than_looking_like_a_crash(): void
     {
         [$receiptId] = $this->issueReceipt();

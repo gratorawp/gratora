@@ -103,7 +103,6 @@ final class PortalPrivacyTogglesTest extends IntegrationTestCase
         $this->assertNotNull(Donor::query()->find('id', (int) $donor->id)->redacted_at);
     }
 
-    /** So the portal can hide what would be refused instead of offering it. */
     public function test_the_session_response_carries_both_toggles(): void
     {
         $this->signedInDonor();

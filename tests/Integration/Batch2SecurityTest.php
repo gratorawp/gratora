@@ -9,9 +9,6 @@ use FundKit\Donors\DonorService;
 use FundKit\Mail\Mailer;
 use FundKit\Settings\SettingsService;
 
-/**
- * Full-codebase QA Batch 2 (security/privacy) regressions.
- */
 final class Batch2SecurityTest extends IntegrationTestCase
 {
     public function test_magic_link_email_is_never_bcc_to_admin(): void

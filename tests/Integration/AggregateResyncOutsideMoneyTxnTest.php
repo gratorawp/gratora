@@ -13,10 +13,8 @@ use FundKit\Foundation\Plugin;
 use RuntimeException;
 
 /**
- * Confirming a donation used to recompute the campaign, form and fund totals
- * inside the transaction that flips the row to paid. Each is a whole aggregate
- * over that scope, so it is slowest and likeliest to time out on a busy
- * campaign, and a lock wait there rolled back money the gateway had taken.
+ * Keep aggregate recalculation outside the payment transaction so lock waits cannot roll back
+ * recorded money.
  */
 final class AggregateResyncOutsideMoneyTxnTest extends IntegrationTestCase
 {

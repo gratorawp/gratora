@@ -55,7 +55,6 @@ final class TrustedProxyTest extends IntegrationTestCase
         );
     }
 
-    /** The attack the whole design exists to refuse. */
     public function test_a_stranger_cannot_mint_an_address_by_sending_a_header(): void
     {
         $this->trust(['10.0.0.0/8']);
@@ -102,7 +101,6 @@ final class TrustedProxyTest extends IntegrationTestCase
         $this->assertSame('203.0.113.5', ClientIp::resolve());
     }
 
-    /** Every hop ours, so the chain says nothing about who called. */
     public function test_an_all_trusted_chain_falls_back_to_the_proxy(): void
     {
         $this->trust(['10.0.0.0/8']);
@@ -170,7 +168,6 @@ final class TrustedProxyTest extends IntegrationTestCase
         $this->assertSame('203.0.113.5', ClientIp::resolve());
     }
 
-    /** For a host that already normalises, or puts the client somewhere else. */
     public function test_a_site_can_override_the_answer_outright(): void
     {
         $this->request('10.0.0.7', '203.0.113.5');
@@ -201,10 +198,6 @@ final class TrustedProxyTest extends IntegrationTestCase
         $this->assertFalse(ClientIp::looksProxied(), 'declared is not a problem to report');
     }
 
-    /**
-     * Cloudflare's edge is public, so the private-address test alone misses the
-     * commonest proxied site there is. CF-Ray is on every request it proxies.
-     */
     public function test_cloudflare_is_detected_and_names_its_own_fix(): void
     {
         $_SERVER['REMOTE_ADDR'] = '162.158.1.1';

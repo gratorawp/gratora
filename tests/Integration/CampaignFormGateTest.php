@@ -10,14 +10,8 @@ use WP_REST_Request;
 use WP_REST_Response;
 
 /**
- * Render gate: `[fundkit_donation_form slug="..."]` renders no form unless the
- * form is published and its campaign is open. Regression coverage for the
- * "form must live under an active campaign" rule, which covers both the
- * campaign's status and the schedule the admin set on it.
- *
- * A visitor sees nothing at all. Somebody who can manage FundKit sees why, since
- * otherwise a page quietly loses its form and only says so on a different
- * screen they would have to think to visit. assertNoForm covers both.
+ * Closed or unpublished forms stay hidden; managers receive the reason. assertNoForm checks
+ * both views.
  */
 final class CampaignFormGateTest extends IntegrationTestCase
 {
@@ -132,10 +126,6 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $this->assertNoForm($html);
     }
 
-    /**
-     * The diagnostic is for whoever can fix it. A visitor gets the same empty
-     * output they always did, and is told nothing about the campaign's state.
-     */
     public function test_a_visitor_is_told_nothing_when_the_campaign_is_closed(): void
     {
         $campaign = Campaign::query()->find('id', $this->campaignId);

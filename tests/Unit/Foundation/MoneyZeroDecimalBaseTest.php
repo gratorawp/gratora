@@ -56,7 +56,6 @@ final class MoneyZeroDecimalBaseTest extends TestCase
         $this->assertSame('1,000', Money::major(100000));
     }
 
-    /** A two-decimal currency this org merely accepts keeps its own places. */
     public function test_a_foreign_currency_keeps_its_own_precision(): void
     {
         $this->assertSame('$26.54', Money::format(2654, 'USD'));

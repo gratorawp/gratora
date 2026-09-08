@@ -10,20 +10,8 @@ use FundKit\Foundation\Upgrade\SchemaGuard;
 use FundKit\Foundation\Upgrade\UpgradeRunner;
 
 /**
- * WordPress calls an activation hook with $network_wide, and the hook pointed
- * straight at onActivation(?bool $fresh), so that flag landed in $fresh.
- *
- * Because it is always a bool, the `$fresh ??= <read the schema stamp>`
- * auto-detect in activate() never ran, and the answer was wrong both ways:
- *
- *   single-site activation -> $fresh = false -> a genuinely fresh install never
- *       stamped its upgrade routines done, leaving backfills to run later
- *       against tables no earlier release ever wrote;
- *   network activation     -> $fresh = true  -> an install that was NOT fresh
- *       stamped migrations it still needed as already applied.
- *
- * No suite could see it: all ten bootstraps call onActivation() with no
- * argument, which is the auto-detect path the hook never reaches.
+ * Activation hooks pass $network_wide, not $fresh. Test the hook path so that flag cannot
+ * override schema-based freshness detection.
  */
 final class ActivationHookSignatureTest extends IntegrationTestCase
 {

@@ -27,7 +27,5 @@ test.each( cases )( 'the preview of %p is what the generator mints', ( raw, fall
 } );
 
 test( 'a prefix stored before the boundary refused it still previews truthfully', () => {
-    // The exact case: the panel used to draw DONATION here while the generator
-    // minted ACDC, so the operator read a reference that never existed.
     expect( asRefToken( 'AC/DC', 'DONATION' ) ).toBe( 'ACDC' );
 } );

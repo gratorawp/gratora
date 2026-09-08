@@ -82,7 +82,6 @@ final class BaseCurrencyLockTest extends IntegrationTestCase
         $this->assertSame('GBP', $this->stored());
     }
 
-    /** Money still settling becomes money, so it counts. */
     public function test_a_bank_debit_still_settling_does_pin_it(): void
     {
         $this->donation(false, 'processing');
@@ -91,7 +90,6 @@ final class BaseCurrencyLockTest extends IntegrationTestCase
         $this->assertSame('EUR', $this->stored());
     }
 
-    /** Money that moved and was taken back is still history. */
     public function test_a_refunded_donation_still_pins_it(): void
     {
         $this->donation(false, 'refunded');

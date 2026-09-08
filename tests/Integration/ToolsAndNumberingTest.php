@@ -35,7 +35,6 @@ final class ToolsAndNumberingTest extends IntegrationTestCase
         return new ReferenceGenerator(new FrozenClock(new DateTimeImmutable($utc, new DateTimeZone('UTC'))));
     }
 
-    // --- a reference the column cannot hold ---------------------------------
 
     public function test_a_numbering_format_too_long_for_the_column_is_refused(): void
     {
@@ -71,7 +70,6 @@ final class ToolsAndNumberingTest extends IntegrationTestCase
         $this->assertSame('fundkit_invalid_setting', (string) $res->get_data()['code']);
     }
 
-    // --- a year that actually resets ----------------------------------------
 
     private function numbering(bool $resetYearly): void
     {
@@ -108,7 +106,6 @@ final class ToolsAndNumberingTest extends IntegrationTestCase
         $this->assertSame('DON-2026-00003', $next);
     }
 
-    // --- a restore that reports rather than fatals ---------------------------
 
     private function import(array $settings): \WP_REST_Response|\WP_Error
     {
@@ -129,7 +126,6 @@ final class ToolsAndNumberingTest extends IntegrationTestCase
         $this->assertGreaterThanOrEqual(400, $res->get_status(), 'the restore has to say what it refused');
     }
 
-    /** The logo id means nothing on another site: the export carries no media. */
     public function test_a_restore_does_not_carry_a_logo_id_across_sites(): void
     {
         update_option('fundkit_receipt_settings', ['logo_attachment_id' => 0]);

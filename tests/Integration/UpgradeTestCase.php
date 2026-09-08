@@ -7,25 +7,8 @@ namespace FundKit\Tests\Integration;
 use FundKit\Foundation\Plugin;
 
 /**
- * Base for tests that exercise an upgrade rather than a fresh install.
- *
- * Every other integration test builds the current schema from scratch, which is
- * why nothing here was ever visible: the question these ask is not "is the
- * schema right" but "does a site that already has data and an older shape end
- * up right after an update". Those are different questions and only the second
- * one is what a released plugin does.
- *
- * Two things make this awkward and both are handled here.
- *
- * DDL implicitly commits in MySQL, so a CREATE or ALTER inside WP_UnitTestCase's
- * per-test transaction ends it and the rollback discards nothing. These tests
- * therefore run against their own table prefix and clean up by hand. The real
- * wptests_fundkit_* tables are never touched, so leaking is impossible rather than
- * merely unlikely.
- *
- * Model::migrate() and DB::getPrefix() both read $wpdb->prefix at call time, so
- * swapping it is enough to point the real models at scratch tables. Nothing is
- * mocked: this is the production migration path, on production model classes.
+ * Run real migrations under a scratch table prefix and clean up explicitly: MySQL DDL commits
+ * WordPress’s test transaction. Models resolve the prefix at call time.
  */
 abstract class UpgradeTestCase extends IntegrationTestCase
 {

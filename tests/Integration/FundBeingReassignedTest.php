@@ -141,7 +141,6 @@ final class FundBeingReassignedTest extends IntegrationTestCase
         $this->assertArrayNotHasKey((int) $source->id, FundReassignmentJob::pending());
     }
 
-    // --- helpers ---------------------------------------------------------
 
     /** Queues a childless, non-default fund for reassignment onto $target. */
     private function queued(Fund $target): Fund

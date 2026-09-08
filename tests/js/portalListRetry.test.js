@@ -79,7 +79,6 @@ beforeEach( () => {
     } );
 } );
 
-/** A route that fails once, then answers. */
 function failsOnce( body ) {
     let calls = 0;
 

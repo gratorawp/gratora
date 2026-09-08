@@ -30,7 +30,6 @@ final class OfflineRetryParentTest extends IntegrationTestCase
         $_SERVER['REMOTE_ADDR'] = '203.0.113.44';
     }
 
-    // ---------------------------------------------------------------- helpers
 
     /** @param array<string,mixed> $body */
     private function post(array $body): \WP_REST_Response
@@ -141,7 +140,6 @@ final class OfflineRetryParentTest extends IntegrationTestCase
         return $f;
     }
 
-    // ------------------------------------------------------- the reported bug
 
     /**
      * The donor submits $250 by bank transfer, reloads the page and submits
@@ -196,7 +194,6 @@ final class OfflineRetryParentTest extends IntegrationTestCase
         $this->assertContains($second['reference'], $this->adminList(), 'the later attempt is listed too');
     }
 
-    // ------------------------------------------------------- the other side
 
     /**
      * The relief itself is intact. A parent on a gateway that had a checkout to

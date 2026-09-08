@@ -80,7 +80,6 @@ final class PortalLostUpdateTest extends IntegrationTestCase
         }
     }
 
-    // --- the donation row -------------------------------------------------
 
     public function test_toggling_anonymity_does_not_un_refund_a_donation_refunded_mid_request(): void
     {
@@ -119,7 +118,6 @@ final class PortalLostUpdateTest extends IntegrationTestCase
         $this->assertTrue((bool) Donation::query()->find('reference', $reference)->is_anonymous);
     }
 
-    // --- the donor row ----------------------------------------------------
 
     private function donorWithTotals(): Donor
     {
@@ -185,7 +183,6 @@ final class PortalLostUpdateTest extends IntegrationTestCase
         $this->assertSame('Renamed', (string) Donor::query()->find('id', (int) $donor->id)->first_name);
     }
 
-    /** An edit that changes nothing writes nothing, as it always did. */
     public function test_a_profile_edit_that_changes_nothing_writes_nothing(): void
     {
         $donor = $this->donorWithTotals();

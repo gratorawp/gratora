@@ -90,7 +90,6 @@ final class PauseResumeDateTest extends IntegrationTestCase
         $this->assertSame('paused', (string) $this->stored($plan)->status, 'the pause was lifted on the next daily run');
     }
 
-    /** A date with no time is what an admin types, and it has to keep working. */
     public function test_a_date_only_string_is_accepted(): void
     {
         $plan = $this->plan();
@@ -109,7 +108,6 @@ final class PauseResumeDateTest extends IntegrationTestCase
         $this->pause($this->plan(), gmdate('Y-m-d H:i:s', strtotime('-1 day')));
     }
 
-    /** A pause nothing would ever lift is capped at what the pause UI offers. */
     public function test_a_date_years_out_is_capped_at_a_year(): void
     {
         $plan = $this->plan();

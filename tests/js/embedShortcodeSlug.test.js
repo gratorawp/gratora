@@ -55,7 +55,6 @@ const shortcodeValue = () => {
     return field ? ( field.value ?? field.textContent ) : document.body.textContent;
 };
 
-/** A record whose saved slug and edited slug disagree, which is the defect. */
 function record( { saved = 'spring-gala-2026', edited = null } = {} ) {
     return {
         savedRecord: { id: 12, slug: saved, title: 'Gala', blocks: '' },

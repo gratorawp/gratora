@@ -110,7 +110,6 @@ final class DemoSeederPurgeTest extends IntegrationTestCase
         $this->assertNull(Donation::query()->where('id', (int) $demo->id)->get());
     }
 
-    /** The whole reason to key on the marker rather than anything else. */
     public function test_a_donation_the_org_recorded_itself_survives(): void
     {
         $real = $this->donation('real.donor@example.test', null);
@@ -125,7 +124,6 @@ final class DemoSeederPurgeTest extends IntegrationTestCase
         );
     }
 
-    /** A gateway key that is not the seeder's is somebody else's donation. */
     public function test_a_donation_with_a_real_gateway_key_survives(): void
     {
         $real = $this->donation('stripe.donor@example.test', 'pi_3PabcdefghIJKL');
@@ -150,7 +148,6 @@ final class DemoSeederPurgeTest extends IntegrationTestCase
         $this->assertNotNull(RecurringPlan::query()->where('id', (int) $realPlan->id)->get());
     }
 
-    /** A donor invented for the demo has nothing left to belong to. */
     public function test_a_donor_who_only_ever_gave_demo_money_goes(): void
     {
         $demo = $this->donation('only.demo@example.org', DemoSeeder::KEY_PREFIX . 'd0002');
@@ -161,10 +158,6 @@ final class DemoSeederPurgeTest extends IntegrationTestCase
         $this->assertNull(Donor::query()->where('id', (int) $demo->donor_id)->get());
     }
 
-    /**
-     * The demo roster reuses invented addresses, so a real donor can end up
-     * sharing one. Their row is theirs whatever else is attached to it.
-     */
     public function test_a_donor_who_also_gave_for_real_keeps_their_row(): void
     {
         $real = $this->donation('shared@example.org', null);
@@ -176,7 +169,6 @@ final class DemoSeederPurgeTest extends IntegrationTestCase
         $this->assertNotNull(Donor::query()->where('id', (int) $real->donor_id)->get());
     }
 
-    /** A live recurring plan is as good a reason to keep a donor as a donation. */
     public function test_a_donor_with_a_plan_of_their_own_keeps_their_row(): void
     {
         $demo = $this->donation('planholder@example.org', DemoSeeder::KEY_PREFIX . 'd0004');

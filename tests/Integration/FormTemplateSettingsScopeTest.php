@@ -16,10 +16,6 @@ use FundKit\Forms\FormTemplates;
  */
 final class FormTemplateSettingsScopeTest extends IntegrationTestCase
 {
-    /**
-     * Where a particular organisation sends its donors afterwards is not
-     * something a starter template can know.
-     */
     public function test_no_template_has_an_opinion_about_the_thank_you_redirect(): void
     {
         foreach (FormTemplates::all() as $template) {
@@ -31,7 +27,6 @@ final class FormTemplateSettingsScopeTest extends IntegrationTestCase
         }
     }
 
-    /** The same holds for anything else a template cannot know about a site. */
     public function test_no_template_declares_a_setting_it_cannot_know(): void
     {
         $cannotKnow = ['goal', 'container', 'test_mode', 'campaign_id'];

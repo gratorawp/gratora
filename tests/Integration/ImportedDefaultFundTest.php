@@ -71,7 +71,6 @@ final class ImportedDefaultFundTest extends IntegrationTestCase
         $this->assertTrue($landed->isOpen());
     }
 
-    /** An ordinary fund is imported exactly as the file has it. */
     public function test_a_scheduled_fund_that_is_not_the_default_is_untouched(): void
     {
         $this->import([
@@ -113,11 +112,6 @@ final class ImportedDefaultFundTest extends IntegrationTestCase
         $this->assertSame(1, $this->defaultCount());
     }
 
-    /**
-     * Nothing in the schema stops a second flagged row, so the answer has to be
-     * the same one twice: an unordered read hands the resolver one fund and the
-     * admin screen another.
-     */
     public function test_the_default_lookup_answers_the_same_row_every_time(): void
     {
         $first = $this->fund('general', 'General', ['is_default' => 1]);

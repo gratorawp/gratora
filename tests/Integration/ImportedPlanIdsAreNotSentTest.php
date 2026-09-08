@@ -137,7 +137,6 @@ final class ImportedPlanIdsAreNotSentTest extends IntegrationTestCase
         }
     }
 
-    /** A real Stripe id still reaches Stripe. */
     public function test_a_real_subscription_is_still_paused_at_stripe(): void
     {
         $plan = $this->importedPlan();
@@ -166,7 +165,6 @@ final class ImportedPlanIdsAreNotSentTest extends IntegrationTestCase
         }
     }
 
-    /** A real subscription still gets its customer read back off Stripe. */
     public function test_a_real_subscription_still_reads_its_customer(): void
     {
         $plan = $this->importedPlan();

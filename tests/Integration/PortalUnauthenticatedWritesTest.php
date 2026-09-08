@@ -141,11 +141,6 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         $this->assertSame($email, (string) $sent[0]['to']);
     }
 
-    /**
-     * The limit that matters is the one on the inbox, and it is spent where the
-     * mail is: five links to one mailbox in the window, however many addresses
-     * they were asked for under.
-     */
     public function test_the_mailbox_limit_still_bounds_what_reaches_one_inbox(): void
     {
         $mailbox = 'flood-' . uniqid() . '@example.test';
@@ -190,10 +185,6 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         $this->assertSame(4, $stored, 'the counter is atomic and counts every attempt');
     }
 
-    /**
-     * A suppressed sign-in link is silent to the donor waiting for it, so the
-     * org has to be able to see that it happened.
-     */
     public function test_hitting_the_mailbox_limit_is_recorded_where_the_org_can_see_it(): void
     {
         $mailbox = 'logged-' . uniqid() . '@example.test';
@@ -258,12 +249,7 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The mail has to name the lifetime the token actually has. One template
-     * serves the portal link and the signup claim, so a fixed sentence is
-     * wrong for at least one of them, and a donor told to take their time is a
-     * donor whose key dies before they use it.
-     */
+    /** Use the token’s actual TTL in the shared login/signup template. */
     public function test_the_mail_names_the_lifetime_the_link_actually_has(): void
     {
         $sent = $this->captureLinkMails();
@@ -647,11 +633,6 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * WordPress answers on site_url too, and it is a different host from
-     * home_url on more installs than the docs suggest. A portal page reached
-     * through it posts with that Origin.
-     */
     public function test_the_host_wordpress_itself_runs_on_is_this_site(): void
     {
         $siteUrl = get_option('siteurl');
@@ -703,10 +684,6 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * The port is the browser's to vary and not part of the site's identity, so
-     * a request that arrives on one is still the host it names.
-     */
     public function test_a_port_on_the_arriving_host_is_not_a_different_site(): void
     {
         $mapped = 'portal.mapped.test';
@@ -728,10 +705,6 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * The pairing is that one label and nothing else. A sibling subdomain is a
-     * different site, and on shared hosting somebody else's.
-     */
     public function test_a_sibling_subdomain_is_not_this_site(): void
     {
         $host = strtolower((string) wp_parse_url(home_url(), PHP_URL_HOST));

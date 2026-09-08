@@ -80,7 +80,6 @@ final class RecurringCancelForCampaignCommandCountTest extends IntegrationTestCa
         return $plan;
     }
 
-    /** The receipt counts the set the sweep takes, not a subset of it. */
     public function test_queued_counts_every_live_plan_the_sweep_will_cancel(): void
     {
         $campaign = $this->campaign();
@@ -130,10 +129,6 @@ final class RecurringCancelForCampaignCommandCountTest extends IntegrationTestCa
         $this->assertSame(3, (int) $res->data['queued']);
     }
 
-    /**
-     * A campaign whose live plans are all paused still has donors who will be
-     * billed again, and the sweep cancels them, so zero is the wrong receipt.
-     */
     public function test_a_campaign_whose_live_plans_are_all_paused_does_not_report_zero(): void
     {
         $campaign = $this->campaign();

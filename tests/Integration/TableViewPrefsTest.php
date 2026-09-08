@@ -81,10 +81,6 @@ final class TableViewPrefsTest extends IntegrationTestCase
         $this->assertSame(['name', 'email'], $this->read('donors')['fields']);
     }
 
-    /**
-     * The arrangement covers hidden columns too, which is what lets one come
-     * back to its own place rather than the end of the row.
-     */
     public function test_the_arrangement_keeps_columns_that_are_not_showing(): void
     {
         $this->admin();
@@ -108,10 +104,6 @@ final class TableViewPrefsTest extends IntegrationTestCase
         $this->assertSame(1, $this->save('small', ['perPage' => 0])['perPage']);
     }
 
-    /**
-     * search and page are how someone finds one record and where they happened
-     * to be standing, neither of which is a preference.
-     */
     public function test_the_search_and_the_page_number_are_not_remembered(): void
     {
         $this->admin();
@@ -149,10 +141,6 @@ final class TableViewPrefsTest extends IntegrationTestCase
         $this->assertSame(['paid', 'pending'], $view['filters'][0]['value']);
     }
 
-    /**
-     * A view is a convenience, not a document; an oversized one is dropped
-     * rather than stored, and the screen falls back to its own defaults.
-     */
     public function test_an_oversized_view_is_refused_rather_than_stored(): void
     {
         $this->admin();
@@ -162,10 +150,6 @@ final class TableViewPrefsTest extends IntegrationTestCase
         $this->assertSame([], $this->read('donations'));
     }
 
-    /**
-     * A bare (string) cast on an array raises a PHP warning and stores the word
-     * "Array" as the field name.
-     */
     public function test_a_filter_whose_field_is_not_a_string_is_dropped(): void
     {
         $this->admin();
@@ -191,10 +175,6 @@ final class TableViewPrefsTest extends IntegrationTestCase
         $this->assertArrayNotHasKey('sort', $view);
     }
 
-    /**
-     * The per-scope cap bounds one view; this bounds the row a client could
-     * grow by inventing scopes.
-     */
     public function test_scopes_cannot_be_invented_without_bound(): void
     {
         $this->admin();

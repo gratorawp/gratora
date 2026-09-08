@@ -95,9 +95,6 @@ final class DonationFormInvalidFieldFocusTest extends TestCase
         );
     }
 
-    /**
-     * Both kinds are genuinely validated, so the attribute is not decorative.
-     */
     public function test_both_kinds_are_validated_client_side(): void
     {
         $store = $this->source('state/store.js');

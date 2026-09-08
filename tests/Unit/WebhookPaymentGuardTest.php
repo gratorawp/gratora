@@ -38,7 +38,6 @@ final class WebhookPaymentGuardTest extends TestCase
         ));
     }
 
-    /** A $0.01 capture confirmed a $10,000 donation. */
     public function test_an_underpayment_is_refused(): void
     {
         $reason = WebhookPaymentGuard::refuse($this->donation(), 'paypal', false, 1, 'USD');
@@ -52,7 +51,6 @@ final class WebhookPaymentGuardTest extends TestCase
         $this->assertNotNull(WebhookPaymentGuard::refuse($this->donation(), 'paypal', false, 2000000, 'USD'));
     }
 
-    /** A USD 2,000 donation was confirmed by an MXN 1.00 capture. */
     public function test_a_different_currency_is_refused(): void
     {
         $reason = WebhookPaymentGuard::refuse($this->donation(), 'paypal', false, 1000000, 'MXN');
@@ -61,7 +59,6 @@ final class WebhookPaymentGuardTest extends TestCase
         $this->assertStringContainsString('MXN', $reason);
     }
 
-    /** A PayPal event confirmed a Stripe donation. */
     public function test_an_event_from_another_gateway_is_refused(): void
     {
         $reason = WebhookPaymentGuard::refuse(
@@ -76,7 +73,6 @@ final class WebhookPaymentGuardTest extends TestCase
         $this->assertStringContainsString('stripe', $reason);
     }
 
-    /** A test-mode secret marked a live donation paid on two gateways. */
     public function test_a_test_secret_cannot_confirm_a_live_donation(): void
     {
         $reason = WebhookPaymentGuard::refuse(
@@ -91,7 +87,6 @@ final class WebhookPaymentGuardTest extends TestCase
         $this->assertStringContainsString('test-mode secret', $reason);
     }
 
-    /** And the reverse, so live traffic cannot pollute test bookkeeping. */
     public function test_a_live_secret_cannot_confirm_a_test_donation(): void
     {
         $this->assertNotNull(WebhookPaymentGuard::refuse(
@@ -114,7 +109,6 @@ final class WebhookPaymentGuardTest extends TestCase
         ));
     }
 
-    /** Unknown is not the same as fine: fail closed. */
     public function test_an_unknown_verifying_mode_is_refused(): void
     {
         $this->assertNotNull(WebhookPaymentGuard::refuse($this->donation(), 'paypal', null, 1000000, 'USD'));
@@ -128,7 +122,6 @@ final class WebhookPaymentGuardTest extends TestCase
         $this->assertStringContainsString('does not state an amount', $reason);
     }
 
-    /** Currency is optional for gateways that omit it; the amount is not. */
     public function test_currency_may_be_skipped(): void
     {
         $this->assertNull(WebhookPaymentGuard::refuse($this->donation(), 'paypal', false, 1000000, null));
@@ -148,13 +141,8 @@ final class WebhookPaymentGuardTest extends TestCase
     // -- events that reverse rather than confirm ------------------------------
 
     /**
-     * The sweep fixed the handlers that take money. The ones that give it back,
-     * fail it or cancel it were left checking nothing, and they need the same
-     * two answers: is this event from this gateway, and in this mode.
-     *
-     * They cannot use refuse(): a refund states its own amount, and a
-     * cancellation states none at all, so the amount check that is right for a
-     * confirmation would refuse every one of them.
+     * Refund, failure, and cancellation events require gateway/mode checks without
+     * confirmation-specific amount validation.
      */
     public function test_a_test_secret_cannot_refund_a_live_donation(): void
     {
@@ -184,16 +172,11 @@ final class WebhookPaymentGuardTest extends TestCase
         $this->assertNotNull(WebhookPaymentGuard::refuseToTouch($this->donation(), 'paypal', null));
     }
 
-    /** No amount is stated, and for these events that is not a problem. */
     public function test_a_matching_gateway_and_mode_may_touch_the_donation(): void
     {
         $this->assertNull(WebhookPaymentGuard::refuseToTouch($this->donation(), 'paypal', false));
     }
 
-    /**
-     * Plans carry the same two facts and reach the same handlers, so a
-     * cancellation event gets the same answer a refund does.
-     */
     public function test_a_test_secret_cannot_cancel_a_live_plan(): void
     {
         $plan          = RecurringPlan::make();

@@ -77,7 +77,6 @@ final class RecurringRetryTest extends IntegrationTestCase
         $this->actions()->retryPayment($plan, RecurringPlanChange::byAdmin('retry', false));
     }
 
-    /** Nothing outstanding is not a failure to try again; it is a different answer. */
     public function test_nothing_to_collect_is_reported_as_such(): void
     {
         $gateway = new RetryableGateway('retryable_empty');

@@ -64,7 +64,6 @@ final class DataExporterTest extends IntegrationTestCase
         }
     }
 
-    /** Salted with this install's pepper, so it means nothing anywhere else. */
     public function test_the_email_hash_does_not_travel(): void
     {
         $this->seedDonor();
@@ -87,7 +86,6 @@ final class DataExporterTest extends IntegrationTestCase
         $this->assertNotContains('fundkit_system_settings', DataExporter::tables());
     }
 
-    /** Live credentials: the file would let anyone sign in as any donor. */
     public function test_magic_link_tokens_are_never_exported(): void
     {
         $this->assertArrayNotHasKey('fundkit_magic_link_tokens', $this->export()['tables'] ?? []);
@@ -121,7 +119,6 @@ final class DataExporterTest extends IntegrationTestCase
         delete_option('fundkit_gateway_config');
     }
 
-    /** An add-on may add its own tables, but not reopen what SKIP closed. */
     public function test_an_add_on_cannot_add_back_a_skipped_table(): void
     {
         $sneak = static fn (array $t): array => array_merge($t, ['fundkit_system_settings', 'fundkit_tributes']);

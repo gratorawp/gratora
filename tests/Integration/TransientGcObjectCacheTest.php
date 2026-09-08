@@ -9,14 +9,8 @@ use FundKit\Foundation\Maintenance\TransientGc;
 use FundKit\Foundation\Plugin;
 
 /**
- * Reclaiming the rate-limit counters on a site with a persistent object cache.
- *
- * AntiSpamGuard::hit writes its counters straight to wp_options, because that
- * is the only way to increment one atomically. delete_transient does not reach
- * a row it did not write once an object cache is in front of it, and the GC
- * used to decline to run at all on those sites. So every address that ever hit
- * a limit left a pair of rows behind permanently, on exactly the sites big
- * enough to be running Redis.
+ * Counters live in wp_options for atomic increments; object-cache transient APIs cannot delete
+ * them.
  */
 final class TransientGcObjectCacheTest extends IntegrationTestCase
 {
@@ -98,7 +92,6 @@ final class TransientGcObjectCacheTest extends IntegrationTestCase
         $this->assertSame(0, $this->rowsFor($key));
     }
 
-    /** A counter still inside its window is someone's live allowance. */
     public function test_a_live_counter_is_left_alone(): void
     {
         $this->wasExternal = wp_using_ext_object_cache(true);

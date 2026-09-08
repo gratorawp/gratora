@@ -7,12 +7,7 @@ namespace FundKit\Tests\Unit\Currency;
 use FundKit\Currency\Currency;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Pins the minor-unit exponent table and the storage <-> processor-amount
- * rescale. The bug these guard against: storing every currency as major*100
- * and handing that straight to Stripe, which 100x-overcharges zero-decimal
- * currencies (JPY) and 10x-undercharges three-decimal ones (BHD).
- */
+/** Verify conversion between major-times-100 storage and processor minor units. */
 final class CurrencyTest extends TestCase
 {
     /**
@@ -111,7 +106,6 @@ final class CurrencyTest extends TestCase
         ];
     }
 
-    /** Stripe rejects three-decimal amounts whose last digit isn't 0; the *100 storage guarantees it. */
     public function test_three_decimal_amounts_are_multiples_of_ten(): void
     {
         foreach ([100, 250, 999, 12345] as $stored) {
@@ -119,7 +113,6 @@ final class CurrencyTest extends TestCase
         }
     }
 
-    /** Regression guard: UGX/ISK/HUF/TWD must not be divided like true zero-decimal currencies. */
     public function test_special_case_currencies_pass_through_unchanged(): void
     {
         foreach (['ISK', 'HUF', 'TWD', 'UGX'] as $code) {

@@ -18,7 +18,6 @@ jest.mock( 'react/jsx-dev-runtime', () => require( 'preact/compat/jsx-dev-runtim
 import { campaignDeleteMessage } from '../../assets/admin/campaigns/Detail';
 import { campaignsDeleteMessage } from '../../assets/admin/campaigns/List';
 
-/** Answers the forms probe with a total, the one call the message makes. */
 function seedFormsTotal( total ) {
     apiFetch.mockImplementation( () => Promise.resolve( {
         headers: { get: () => String( total ) },

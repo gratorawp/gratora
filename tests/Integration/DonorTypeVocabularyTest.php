@@ -46,10 +46,6 @@ final class DonorTypeVocabularyTest extends IntegrationTestCase
         $this->assertSame([], $offered, 'a route accepts a donor type nothing can be saved as');
     }
 
-    /**
-     * The other direction: a type the product supports that a door refuses is
-     * just as broken, and is how the CLI ended up unable to set household.
-     */
     public function test_every_route_that_filters_by_type_offers_all_of_them(): void
     {
         do_action('rest_api_init');
@@ -128,10 +124,6 @@ final class DonorTypeVocabularyTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * The writer is the authority, so every word the doors offer has to
-     * survive a round trip through it.
-     */
     public function test_the_writer_stores_every_type_it_offers(): void
     {
         $service = Plugin::instance()->container->get(DonorService::class);

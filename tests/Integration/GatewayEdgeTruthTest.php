@@ -205,7 +205,6 @@ final class GatewayEdgeTruthTest extends IntegrationTestCase
         $this->assertSame(503, $res->get_status());
     }
 
-    /** And a 500 from the verify call itself is the same outage. */
     public function test_paypal_failing_on_the_verify_call_is_not_a_refused_signature(): void
     {
         $this->plan('I-VERIFYDOWN');
@@ -239,7 +238,6 @@ final class GatewayEdgeTruthTest extends IntegrationTestCase
         );
     }
 
-    /** Bounded all the same: a flood of unverifiable posts still hits a ceiling. */
     public function test_an_unverifiable_flood_is_still_bounded(): void
     {
         $this->plan('I-FLOOD');
@@ -256,7 +254,6 @@ final class GatewayEdgeTruthTest extends IntegrationTestCase
         $this->assertSame(429, $res->get_status());
     }
 
-    /** A signature PayPal actually refuses is still a 400. */
     public function test_a_refused_signature_is_still_refused(): void
     {
         $this->plan('I-REFUSED');

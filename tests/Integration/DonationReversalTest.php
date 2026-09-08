@@ -14,23 +14,8 @@ use FundKit\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
- * Money that landed and then went back.
- *
- * A card either authorises or it does not, so `paid` on a card is close to
- * final. Bank debit is not like that. A Direct Debit can confirm, be counted,
- * and then fail days later when the bank bounces it, or be charged back months
- * later under the Direct Debit Guarantee, which the payer can invoke on demand
- * and with no time limit worth relying on.
- *
- * Core had `disputed` written into the status walk on Donation and nothing that
- * ever wrote it, so the only honest options a gateway had were to leave the row
- * saying `paid` for money the charity no longer has, or to abuse `refunded` and
- * claim the charity gave it back. Both put a number in the books that is not
- * true.
- *
- * A reversal is not a refund: nobody chose it, no Refund row is written, and it
- * can happen to a donation that was already partly refunded. What it shares
- * with a refund is that the money must come back out of every total.
+ * Reversals remove money from aggregates without creating a Refund row, including after partial
+ * refunds.
  */
 final class DonationReversalTest extends IntegrationTestCase
 {
@@ -119,7 +104,6 @@ final class DonationReversalTest extends IntegrationTestCase
         $this->assertSame(0, (int) Campaign::query()->find('id', (int) $campaign->id)->raised_cents);
     }
 
-    /** A reversal is a fact about the donation, and the log is where facts go. */
     public function test_the_reversal_is_recorded_as_an_event(): void
     {
         $donation = $this->paidDonation();
@@ -142,10 +126,6 @@ final class DonationReversalTest extends IntegrationTestCase
         $this->assertSame([[(int) $donation->id, 'chargeback']], $seen);
     }
 
-    /**
-     * GoCardless redelivers webhooks, and one delivery carries many events, so
-     * the same reversal arrives more than once as a matter of course.
-     */
     public function test_reversing_twice_neither_double_counts_nor_double_fires(): void
     {
         $donation = $this->paidDonation();
@@ -178,11 +158,6 @@ final class DonationReversalTest extends IntegrationTestCase
         $this->assertSame('pending', $this->reload((string) $donation->reference)->status);
     }
 
-    /**
-     * The awkward one: a donation refunded in part, then charged back for the
-     * rest. Refusing it would leave the books claiming the charity still holds
-     * money it does not.
-     */
     public function test_a_partly_refunded_donation_can_still_be_reversed(): void
     {
         $donation = $this->paidDonation();
@@ -193,7 +168,6 @@ final class DonationReversalTest extends IntegrationTestCase
         $this->assertSame('disputed', $this->reload((string) $donation->reference)->status);
     }
 
-    /** Fully refunded is settled: the charity already gave it back. */
     public function test_a_fully_refunded_donation_is_left_alone(): void
     {
         $donation = $this->paidDonation();
@@ -238,7 +212,6 @@ final class DonationReversalTest extends IntegrationTestCase
         $this->assertSame(1, (int) Donor::query()->find('id', $donorId)->donations_count);
     }
 
-    /** Sometimes the charity wins, and the money is theirs again. */
     public function test_a_reversal_can_be_reinstated_when_the_charity_wins(): void
     {
         $campaign = Campaign::query()->find('id', (int) $this->seedCampaign());

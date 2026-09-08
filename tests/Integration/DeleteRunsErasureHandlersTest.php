@@ -218,7 +218,6 @@ final class DeleteRunsErasureHandlersTest extends IntegrationTestCase
         }
     }
 
-    /** A refusal the guards raise is the operator's to act on, not a failure. */
     public function test_a_refusing_handler_is_reported_as_a_refusal(): void
     {
         $off = $this->register(static function (): void {

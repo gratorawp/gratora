@@ -84,7 +84,6 @@ final class FormReadinessUnsavedSettingsTest extends IntegrationTestCase
         $this->assertSame('pass', $this->check($form, 'test-mode', ['test_mode' => false])['status']);
     }
 
-    /** Posting no settings still grades the saved ones, as it always did. */
     public function test_the_saved_settings_are_used_when_none_are_posted(): void
     {
         $form = $this->form(['test_mode' => true]);
@@ -92,7 +91,6 @@ final class FormReadinessUnsavedSettingsTest extends IntegrationTestCase
         $this->assertSame('warn', $this->check($form, 'test-mode')['status']);
     }
 
-    /** Nothing the panel is shown is written back to the form. */
     public function test_grading_unsaved_settings_does_not_save_them(): void
     {
         $form = $this->form(['test_mode' => false]);

@@ -104,7 +104,6 @@ final class StripeAccountSwapSecretTest extends IntegrationTestCase
         );
     }
 
-    /** Rotating a key on the same account keeps the secret that still works. */
     public function test_rotating_a_key_on_the_same_account_keeps_its_secret(): void
     {
         $this->stripeAnswersAs('acct_previous_org');
@@ -114,7 +113,6 @@ final class StripeAccountSwapSecretTest extends IntegrationTestCase
         $this->assertSame('whsec_previous_org', $this->storedSecret());
     }
 
-    /** A key Stripe refuses changes nothing at all. */
     public function test_a_refused_key_leaves_the_secret_where_it_is(): void
     {
         add_filter('pre_http_request', function ($pre, $args, $url) {

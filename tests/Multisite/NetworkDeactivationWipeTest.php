@@ -9,18 +9,8 @@ use FundKit\Foundation\Uninstall\DataEraser;
 use FundKit\Tests\Integration\IntegrationTestCase;
 
 /**
- * register_deactivation_hook fires exactly once for a network-wide
- * deactivation, in the main site's context, and the consent used to be spent
- * as its first act. So a network administrator who ticked "Delete all
- * Fundraising Toolkit data as well" and network-deactivated erased site 1 and
- * spent the flag; the later plugin delete found requested() false and
- * uninstall.php erased nothing. Sites 2 through 12 kept every encrypted donor
- * row, consent history, donation and receipt, with the screen saying the data
- * was gone and not recoverable.
- *
- * The drop itself is not observable here: WordPress's harness rewrites DROP
- * TABLE to DROP TEMPORARY TABLE. What the wipe reaching a site does observably
- * is announce itself and delete that site's options, and both are per-site.
+ * Network deactivation fires once in the main-site context. Observe per-site announcements and
+ * option deletion because the harness rewrites DROP TABLE.
  */
 final class NetworkDeactivationWipeTest extends IntegrationTestCase
 {
@@ -107,7 +97,6 @@ final class NetworkDeactivationWipeTest extends IntegrationTestCase
         );
     }
 
-    /** Nobody asked, so nothing goes, on any site. */
     public function test_a_network_deactivation_without_the_opt_in_erases_nothing(): void
     {
         Plugin::onDeactivation(true);
@@ -156,7 +145,6 @@ final class NetworkDeactivationWipeTest extends IntegrationTestCase
         );
     }
 
-    /** A wipe that reached every site spends it, so nothing acts on it twice. */
     public function test_a_finished_wipe_spends_the_answer(): void
     {
         $this->askForTheWipe();

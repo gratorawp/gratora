@@ -122,11 +122,6 @@ final class DashboardRangeTimezoneTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * A campaign page answers the same range names from its own service, so the
-     * two have to cut the day in the same place or one screen contradicts the
-     * other about the same donation.
-     */
     public function test_a_campaign_reads_the_same_today_as_the_dashboard(): void
     {
         update_option('timezone_string', 'Pacific/Auckland');

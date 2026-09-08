@@ -147,7 +147,6 @@ final class FormTestModeCredentialsTest extends IntegrationTestCase
         $this->assertStringContainsString('no test credentials', (string) ($check['label'] ?? ''));
     }
 
-    /** With sandbox keys on file it is the ordinary reminder again. */
     public function test_with_test_keys_it_is_only_a_reminder(): void
     {
         Plugin::instance()->container->get(StripeAccount::class)
@@ -156,7 +155,6 @@ final class FormTestModeCredentialsTest extends IntegrationTestCase
         $this->assertSame('warn', $this->readiness()['status'] ?? '');
     }
 
-    /** And the endpoint refuses the gateway the form no longer offers. */
     public function test_the_endpoint_refuses_a_gateway_the_form_cannot_run(): void
     {
         $req = new WP_REST_Request('POST', '/fundkit/v1/donations');

@@ -58,8 +58,6 @@ test( 'a separator the generator would strip is not previewed as one', () => {
 
     expect( previews( root ) ).toContain( 'DON-2026-00001'.replace( '2026', String( new Date().getFullYear() ) ) );
     expect( previews( root ).join( ' ' ) ).not.toContain( 'DON.' );
-    // A separator of '.' strips to nothing, so both sides agree on the
-    // fallback here. The prefix case above is where they used to diverge.
     expect( root.textContent ).toContain( 'Letters, numbers, hyphens and underscores only.' );
 } );
 

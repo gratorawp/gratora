@@ -9,18 +9,6 @@ use FundKit\Campaigns\CampaignService;
 use FundKit\Foundation\Plugin;
 use WP_REST_Request;
 
-/**
- * Regression for QA bug #1: a fresh draft campaign had no obvious way to be
- * published from the admin UI. The fix added Publish / Move to draft items
- * to the HeaderMenu wired through the existing PUT /admin/campaigns/{id}
- * endpoint. This locks the server-side contract those items rely on:
- *
- *   draft -> published   (Publish campaign)
- *   published -> draft   (Move to draft)
- *
- * Both directions land the persisted status correctly and don't bleed into
- * the archived/trashed transitions (which have their own menu items).
- */
 final class CampaignStatusTransitionTest extends IntegrationTestCase
 {
     public function test_put_status_published_publishes_a_draft(): void

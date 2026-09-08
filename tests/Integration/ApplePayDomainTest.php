@@ -164,7 +164,6 @@ final class ApplePayDomainTest extends IntegrationTestCase
         $this->assertNull($this->applePay()->bodyForRequest('/.well-known/other'));
     }
 
-    /** With nothing stored, stay out of the way of a file placed on disk. */
     public function test_nothing_is_served_when_no_file_is_stored(): void
     {
         $this->assertNull($this->applePay()->bodyForRequest(ApplePayDomain::WELL_KNOWN_PATH));

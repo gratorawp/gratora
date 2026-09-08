@@ -84,7 +84,6 @@ final class FormTemplateFieldsTest extends IntegrationTestCase
         }
     }
 
-    /** The appeal is the designation; choosing a fund contradicts the ask. */
     public function test_the_emergency_appeal_offers_no_fund_choice(): void
     {
         $this->assertNotContains('fundkit/fund-picker', $this->blocksIn('emergency-appeal'));
@@ -96,10 +95,6 @@ final class FormTemplateFieldsTest extends IntegrationTestCase
         $this->assertContains('fundkit/fund-picker', $this->blocksIn('designated'));
     }
 
-    /**
-     * A sustainer form that defaults to one-time is an everyday form. The
-     * frequency is the template, so it is asserted rather than left to copy.
-     */
     public function test_the_sustainer_preselects_a_recurring_frequency(): void
     {
         $t = FormTemplates::find('monthly-sustainer');
@@ -109,10 +104,6 @@ final class FormTemplateFieldsTest extends IntegrationTestCase
         $this->assertNotContains('one_time', $t['settings']['recurring']['frequencies'] ?? []);
     }
 
-    /**
-     * Both fields promise a public supporter list. On a form with no such list a
-     * message goes nowhere and hiding a name hides it from nobody.
-     */
     public function test_supporter_wall_fields_only_appear_beside_a_goal(): void
     {
         foreach ($this->templateIds() as $id) {
@@ -132,7 +123,6 @@ final class FormTemplateFieldsTest extends IntegrationTestCase
         }
     }
 
-    /** Speed is the whole template; every field on it has to earn its place. */
     public function test_quick_give_stays_quick(): void
     {
         $blocks = $this->blocksIn('quick-give');

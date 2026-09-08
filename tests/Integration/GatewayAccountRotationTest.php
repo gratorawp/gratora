@@ -65,10 +65,6 @@ final class GatewayAccountRotationTest extends IntegrationTestCase
         $this->assertNotSame($first, $second);
     }
 
-    /**
-     * The product is the worse half: a plan hangs off it, so a stale product id
-     * fails plan creation for the new account too.
-     */
     public function test_paypal_products_are_scoped_to_the_account(): void
     {
         $account = Plugin::instance()->container->get(PayPalAccount::class);

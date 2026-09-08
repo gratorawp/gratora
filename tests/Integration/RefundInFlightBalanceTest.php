@@ -66,10 +66,6 @@ final class RefundInFlightBalanceTest extends IntegrationTestCase
         $this->assertSame(4000, (int) $shown['refundable_cents'], 'and it is not offered a second time');
     }
 
-    /**
-     * The screen's own cap is derived from the server, so the refusal is what
-     * stands between a redrawn dialog and a second real refund.
-     */
     public function test_the_server_refuses_to_send_money_that_is_already_on_its_way(): void
     {
         $donation = $this->paidDonation('echeckprobe', 10000);
@@ -92,7 +88,6 @@ final class RefundInFlightBalanceTest extends IntegrationTestCase
         $this->assertStringContainsString('$40.00', $message, 'and what is left');
     }
 
-    /** The remainder is still refundable, so a partial in-flight refund blocks nothing else. */
     public function test_what_is_left_over_can_still_be_refunded(): void
     {
         $donation = $this->paidDonation('echeckprobe', 10000);

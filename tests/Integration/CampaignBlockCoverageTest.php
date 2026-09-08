@@ -156,10 +156,6 @@ final class CampaignBlockCoverageTest extends IntegrationTestCase
         $this->assertSame(1, substr_count($html, 'Repeat'));
     }
 
-    /**
-     * A campaign can measure its goal in donations or donors. The card read
-     * raised_cents alone, so those rendered as nothing raised against nothing.
-     */
     public function test_a_count_goal_campaign_shows_its_progress_on_a_card(): void
     {
         $campaign = $this->campaigns()->create([

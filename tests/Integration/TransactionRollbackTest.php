@@ -21,20 +21,8 @@ use RuntimeException;
 use Throwable;
 
 /**
- * The one property DB::transaction exists to provide: a block that cannot
- * finish leaves nothing of itself behind.
- *
- * Every case here goes through a product path that already promises this in
- * its own comments - the donation sequence never spending a number on a
- * donation that was not written, an erasure that half-happened rolling back
- * rather than reporting a compliance action as done, the nightly sweep leaving
- * a donor it could not erase whole. The promise is what is asserted, on the
- * rows and counters an org would be looking at.
- *
- * The harness pins Queryable's nesting depth to 1 (see IntegrationTestCase),
- * so every product transaction below is a nested one riding WP_UnitTestCase's
- * wrapping transaction. That is the shape production runs in whenever a
- * transaction encloses another, and it is the only shape a test can observe.
+ * The harness tests nested transactions via savepoints inside WordPress’s wrapping transaction;
+ * see IntegrationTestCase.
  */
 final class TransactionRollbackTest extends IntegrationTestCase
 {
@@ -78,7 +66,6 @@ final class TransactionRollbackTest extends IntegrationTestCase
         );
     }
 
-    /** The rows themselves, on the same path: neither the donation nor the donor it made. */
     public function test_a_failed_creation_leaves_neither_the_donation_nor_the_donor_it_made(): void
     {
         $email = 'rollback-nobody@example.test';

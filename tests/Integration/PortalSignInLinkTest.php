@@ -10,11 +10,8 @@ use FundKit\Donors\Portal\PortalPage;
 use FundKit\Foundation\Plugin;
 
 /**
- * The donor-portal sign-in link is emailed via an async job. Action Scheduler
- * runs do_action_ref_array($hook, array_values($args)), so an enqueued array
- * arrives spread into positional params, not as one array. It previously
- * no-oped under real AS (the email never sent), so this drives the job exactly
- * as AS would, in both shapes the controller enqueues.
+ * Invoke the email job with positional arguments, matching Action Scheduler’s array_values
+ * dispatch.
  */
 final class PortalSignInLinkTest extends IntegrationTestCase
 {

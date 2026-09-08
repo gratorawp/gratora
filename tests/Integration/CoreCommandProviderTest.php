@@ -129,12 +129,6 @@ final class CoreCommandProviderTest extends IntegrationTestCase
         $this->assertSame('published', $statusRow['to']);
     }
 
-    /**
-     * The inverse has to put back everything the approval card previewed. It
-     * used to carry only `status`, so approving a rename plus a publish and
-     * clicking Undo restored the status, left the rename applied, and reported
-     * "Reverted."
-     */
     public function test_reverse_for_campaign_update_covers_every_changed_field(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
@@ -179,10 +173,6 @@ final class CoreCommandProviderTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * Promotion off 'standard' is one way, so a change carrying it is offered
-     * no Undo at all. Half an undo reported as "Reverted" is the bug.
-     */
     public function test_a_change_with_an_irreversible_field_offers_no_undo(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);

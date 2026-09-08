@@ -72,10 +72,6 @@ final class DonorLocaleDrivesDonationEmailsTest extends IntegrationTestCase
         $this->assertSame('en_US', get_locale(), 'the switch has to be unwound');
     }
 
-    /**
-     * The frequency word is an __() call made while the token array is built,
-     * so a switch around the send alone leaves it in the site locale.
-     */
     public function test_the_words_built_into_the_tokens_are_translated_too(): void
     {
         $donor = Plugin::instance()->container->get(DonorService::class)
@@ -109,10 +105,6 @@ final class DonorLocaleDrivesDonationEmailsTest extends IntegrationTestCase
         $this->assertSame('en_US', get_locale(), 'the switch has to be unwound');
     }
 
-    /**
-     * The sign-in link builds no translated tokens of its own, so it is the
-     * Mailer's own locale argument that has to carry it.
-     */
     public function test_a_sign_in_link_is_written_in_the_donors_language(): void
     {
         $email = 'signin-fr@example.test';

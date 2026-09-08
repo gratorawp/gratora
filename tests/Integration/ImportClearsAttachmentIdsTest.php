@@ -77,7 +77,6 @@ final class ImportClearsAttachmentIdsTest extends IntegrationTestCase
         );
     }
 
-    /** The list is the contract, so state it. */
     public function test_every_attachment_column_is_cleared_on_import(): void
     {
         $source = (string) file_get_contents(

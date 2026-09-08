@@ -201,7 +201,6 @@ final class AdminDonationActionsTest extends IntegrationTestCase
         $this->seedPaidDonation(['email' => 'live@example.com',  'gateway' => 'offline', 'is_test' => false]);
         $this->seedPaidDonation(['email' => 'test@example.com',  'gateway' => 'stripe',  'is_test' => true]);
 
-        // gateway filter (was silently dropped by the export before this fix).
         $csv = $this->captureCsv('/fundkit/v1/admin/donations/export.csv', ['gateway' => 'offline']);
         $this->assertStringContainsString('live@example.com', $csv);
         $this->assertStringNotContainsString('test@example.com', $csv, 'gateway filter must scope the export');

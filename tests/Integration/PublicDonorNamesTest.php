@@ -9,15 +9,6 @@ use FundKit\Donors\DonorService;
 use FundKit\Donors\PublicDonorNames;
 use FundKit\Foundation\Plugin;
 
-/**
- * The rule every donor-facing surface shares: what a public page may print.
- *
- * It used to live in each block's render method - four of them across two
- * plugins - and two forgot it, so hiding a donor took their name off one page
- * and left it on another. Here it is one function, and it withholds by
- * returning the empty string every block already renders as "Anonymous", so a
- * caller is correct without knowing the rule exists.
- */
 final class PublicDonorNamesTest extends IntegrationTestCase
 {
     private function donor(string $email, string $first = 'Nadia', string $last = 'Petrova'): Donor
@@ -45,12 +36,6 @@ final class PublicDonorNamesTest extends IntegrationTestCase
         $this->assertSame('', PublicDonorNames::of($this->hide($this->donor('b@example.com'))));
     }
 
-    /**
-     * The load-bearing choice: withholding returns the same value an unnamed
-     * donor gives, which every caller already turns into "Anonymous". A
-     * sentinel they had to recognise would just be the old bug with an extra
-     * step.
-     */
     public function test_withholding_looks_the_same_as_having_no_name(): void
     {
         $unnamed = PublicDonorNames::of($this->donor('c@example.com', '', ''));

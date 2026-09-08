@@ -58,7 +58,6 @@ final class ReceiptSeamsTest extends IntegrationTestCase
         $this->assertSame(['donor_id' => (int) $donor->id, 'year' => 2024], $got);
     }
 
-    /** Returning anything that is not a non-empty string falls through. */
     public function test_a_filter_that_declines_leaves_core_in_charge(): void
     {
         $donor = $this->makeDonor();
@@ -82,11 +81,6 @@ final class ReceiptSeamsTest extends IntegrationTestCase
 
     // -- fundkit.receipt.should_issue -------------------------------------------
 
-    /**
-     * The default is unchanged: a donation is receipted, a ticket order is not.
-     * "No receipt" is the safe answer rather than the right one, which is why
-     * the filter exists.
-     */
     public function test_the_issuance_default_is_unchanged(): void
     {
         $this->assertTrue($this->wouldIssue($this->makeDonation('donation')));

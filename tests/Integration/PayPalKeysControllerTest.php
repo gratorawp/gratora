@@ -197,12 +197,6 @@ final class PayPalKeysControllerTest extends IntegrationTestCase
         $this->assertFalse($this->account()->hasKeysFor(false));
     }
 
-    /**
-     * Regression: canCharge answers "may the form offer PayPal", which is asked
-     * before any donation has fixed a mode. It once keyed off the per-operation
-     * mode override on the shared account instance, so a live-mode call earlier
-     * in the request hid PayPal from a sandbox-only site entirely.
-     */
     public function test_can_charge_ignores_the_transient_mode_override(): void
     {
         $this->mockPayPal();

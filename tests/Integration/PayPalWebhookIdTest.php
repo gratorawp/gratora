@@ -172,7 +172,6 @@ final class PayPalWebhookIdTest extends IntegrationTestCase
         $this->assertSame('', $this->account()->webhookId(true));
     }
 
-    /** Rotating a secret on the same app keeps the webhook it belongs to. */
     public function test_rotating_a_secret_on_the_same_app_keeps_its_webhook(): void
     {
         $this->account()->saveKeys(true, 'client-same', 'secret-old');
@@ -338,10 +337,6 @@ final class PayPalWebhookIdTest extends IntegrationTestCase
         $this->assertSame('', $this->account()->webhookId(true));
     }
 
-    /**
-     * An empty event list is not a subscription to everything: it is the gap
-     * the incomplete arm was written to report.
-     */
     public function test_a_webhook_subscribed_to_nothing_is_reported_as_incomplete(): void
     {
         $this->webhookBody = ['id' => self::HOOK_OK, 'url' => 'https://example.test/hook', 'event_types' => []];

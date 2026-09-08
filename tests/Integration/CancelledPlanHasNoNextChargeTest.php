@@ -72,7 +72,6 @@ final class CancelledPlanHasNoNextChargeTest extends IntegrationTestCase
         $this->assertNull($this->reload($plan)->resume_at);
     }
 
-    /** The caller reads the model it handed in, so that has to agree with the row. */
     public function test_the_model_the_caller_holds_agrees_with_the_row(): void
     {
         $plan = $this->plan();
@@ -83,7 +82,6 @@ final class CancelledPlanHasNoNextChargeTest extends IntegrationTestCase
         $this->assertSame('cancelled', (string) $plan->status);
     }
 
-    /** An active plan keeps its date, which is the whole point of the column. */
     public function test_an_active_plan_keeps_its_next_charge(): void
     {
         $plan = $this->plan();

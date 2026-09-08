@@ -76,7 +76,6 @@ final class RefundReversalRecoveryTest extends IntegrationTestCase
         $this->assertNull($after->voided_at);
     }
 
-    /** A refund still standing leaves money with the org, and a document for it. */
     public function test_a_partial_refund_still_standing_leaves_the_receipt_usable(): void
     {
         $donation = $this->paidDonation('still-refunded@example.test');
@@ -94,7 +93,6 @@ final class RefundReversalRecoveryTest extends IntegrationTestCase
         );
     }
 
-    /** A full refund voids it; giving any of it back is what puts it right. */
     public function test_reversing_part_of_a_full_refund_puts_the_receipt_back(): void
     {
         $donation = $this->paidDonation('part-reversed@example.test');

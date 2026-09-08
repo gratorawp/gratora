@@ -73,7 +73,6 @@ final class PastDueBannerTest extends IntegrationTestCase
         );
     }
 
-    /** A gateway that is not connected keeps its own, different message. */
     public function test_a_disconnected_gateway_is_still_reported_as_disconnected(): void
     {
         $banner = $this->bannersFor('a-gateway-that-is-not-installed');

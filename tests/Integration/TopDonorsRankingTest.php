@@ -47,7 +47,6 @@ final class TopDonorsRankingTest extends IntegrationTestCase
         $this->assertNotContains('Nothing', $names);
     }
 
-    /** The query has to actually run: two whereRaw fragments do not parse. */
     public function test_the_ranking_query_runs(): void
     {
         $this->donor('Runs', 100);

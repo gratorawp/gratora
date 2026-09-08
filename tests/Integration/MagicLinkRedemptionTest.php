@@ -10,21 +10,6 @@ use FundKit\Donors\MagicLinkToken;
 use FundKit\Donors\Portal\PortalSession;
 use FundKit\Foundation\Plugin;
 
-/**
- * Magic-link tokens are the donor portal's only auth path - a regression in
- * the redeem side silently locks every donor out of receipts, recurring,
- * and (with p2p) their fundraising pages.
- *
- * PortalSignInLinkTest already covers the "send" side (async job emails a
- * link). This locks the "redeem" side:
- *
- *  - issue + consume roundtrip works
- *  - consume is SINGLE-USE (the security-critical property)
- *  - tokens minted for one purpose don't unlock another
- *  - expired tokens don't redeem
- *  - PortalSession::startFromToken inherits the single-use guarantee
- *    end-to-end (a reused link can never start a second session)
- */
 final class MagicLinkRedemptionTest extends IntegrationTestCase
 {
     public function test_issued_token_can_be_consumed_exactly_once(): void

@@ -201,11 +201,6 @@ final class PayPalDonorErrorCopyTest extends IntegrationTestCase
         $this->assertSame($reference, (string) ($payload['reference'] ?? ''));
     }
 
-    /**
-     * PayPal has taken the first payment by the time the browser calls this
-     * route, so copy that reads as a failed donation sends the donor round to
-     * approve a second subscription.
-     */
     public function test_a_failed_subscription_lookup_does_not_read_as_a_failed_donation(): void
     {
         $reference = $this->newDonation('monthly');

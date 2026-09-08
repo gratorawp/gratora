@@ -68,11 +68,6 @@ final class DonorProfileScreenAgreementTest extends IntegrationTestCase
         $this->assertTrue($mineSeen['Written by a colleague'], 'and manage_options can delete any');
     }
 
-    /**
-     * The badge came from the capped array's length, so it agreed with the list
-     * and with nothing else. It counts the donor's notes now, and the tab says
-     * how many of them are on screen.
-     */
     public function test_the_notes_badge_counts_notes_the_list_does_not_hold(): void
     {
         $donor = $this->donors()->findOrCreate('many-' . uniqid() . '@example.test', ['first_name' => 'Grace']);

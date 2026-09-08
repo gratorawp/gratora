@@ -9,14 +9,6 @@ use FundKit\Donors\DonorRepository;
 use FundKit\Donors\DonorService;
 use FundKit\Foundation\Plugin;
 
-/**
- * The cohort-retention matrix used to anchor cohorts on the denormalized
- * first_donation_at while counting only status='paid'. A donor whose first
- * donation wasn't a plain paid row missed offset 0, so the cohort size
- * undercounted and later offsets could exceed 100%. Cohorts now anchor on each
- * donor's own MIN(paid_at) over the same status set, so everyone lands at
- * offset 0.
- */
 final class DonorCohortRetentionTest extends IntegrationTestCase
 {
     public function test_cohort_size_includes_partial_refund_first_gifts(): void

@@ -91,7 +91,6 @@ final class ErasureNeedleBlastRadiusTest extends IntegrationTestCase
         );
     }
 
-    /** And a gateway id that IS extended by another donation's is still left alone. */
     public function test_a_gateway_id_another_donation_extends_is_not_searched_for(): void
     {
         $service = Plugin::instance()->container->get(DonorService::class);

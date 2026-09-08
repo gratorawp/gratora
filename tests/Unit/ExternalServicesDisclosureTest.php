@@ -235,10 +235,6 @@ final class ExternalServicesDisclosureTest extends TestCase
         );
     }
 
-    /**
-     * The section promises a fresh install contacts nobody, so an entry that is
-     * on by default would make the whole section wrong.
-     */
     public function test_the_gravatar_setting_is_off_until_an_admin_turns_it_on(): void
     {
         $settings = (string) file_get_contents($this->root() . '/src/Settings/SettingsService.php');
@@ -250,7 +246,6 @@ final class ExternalServicesDisclosureTest extends TestCase
         );
     }
 
-    /** An org's DPA needs the other party's own terms, so every entry carries them. */
     public function test_every_service_links_its_terms_or_privacy_policy(): void
     {
         $offenders = [];

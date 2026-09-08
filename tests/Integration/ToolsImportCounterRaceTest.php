@@ -221,11 +221,6 @@ final class ToolsImportCounterRaceTest extends IntegrationTestCase
         $this->assertSame([], $this->counterErrors(), 'a counter already past the file is nothing to report');
     }
 
-    /**
-     * A raise that fails for any other reason leaves the next reference able to
-     * collide, which the operator has to hear about, but still not by way of
-     * losing the restore.
-     */
     public function test_a_raise_that_fails_outright_is_reported_and_the_restore_stands(): void
     {
         $body = $this->fileWithDonationAt(5);

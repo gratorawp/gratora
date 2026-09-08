@@ -22,10 +22,8 @@ use FundKit\Funds\FundResolver;
 use FundKit\Gateways\GatewayManager;
 
 /**
- * The byte-identical Free path is also regression-covered by the existing
- * DonationFlowTest; this isolates the type-dispatch seam itself. The service
- * is built with an explicit registry to avoid the process-global container
- * singleton (its register hook fires once per run).
+ * Use an explicit registry to avoid the process-global container’s once-per-run registration
+ * hook.
  */
 final class TypeDispatchTest extends IntegrationTestCase
 {

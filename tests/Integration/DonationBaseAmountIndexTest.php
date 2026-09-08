@@ -47,7 +47,6 @@ final class DonationBaseAmountIndexTest extends IntegrationTestCase
         );
     }
 
-    /** And that the migration this suite ran actually put it on the table. */
     public function test_the_migrated_table_carries_it(): void
     {
         $table   = self::$prefix . 'fundkit_donations';

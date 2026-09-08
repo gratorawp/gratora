@@ -97,7 +97,6 @@ final class ErasureClearsAttributionTest extends IntegrationTestCase
         $this->assertStringNotContainsString(self::NEEDLE, $stored);
     }
 
-    /** Raw gateway error text quotes back what was submitted. */
     public function test_the_failure_reason_is_cleared(): void
     {
         $this->erase();
@@ -105,7 +104,6 @@ final class ErasureClearsAttributionTest extends IntegrationTestCase
         $this->assertNull($this->donation()->failure_reason);
     }
 
-    /** The donation still counts under the channel that brought it in. */
     public function test_the_channel_the_donation_is_reported_under_survives(): void
     {
         $this->erase();
@@ -117,7 +115,6 @@ final class ErasureClearsAttributionTest extends IntegrationTestCase
         $this->assertSame('email', ChannelClassifier::classify($attribution));
     }
 
-    /** Erasure is not deletion: the money is still on the books. */
     public function test_the_financial_record_survives(): void
     {
         $this->erase();
@@ -127,7 +124,6 @@ final class ErasureClearsAttributionTest extends IntegrationTestCase
         $this->assertSame('paid', $donation->status);
     }
 
-    /** A donation with nothing but utm keys is left exactly as it was. */
     public function test_attribution_holding_no_personal_data_is_untouched(): void
     {
         $now = gmdate('Y-m-d H:i:s');

@@ -186,10 +186,6 @@ final class DataRoundTripTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The property that makes a half-finished import safe to start again, and
-     * an export safe to apply to a site that already has some of it.
-     */
     public function test_importing_the_same_file_twice_creates_nothing_the_second_time(): void
     {
         $this->seedDonor('twice@example.test');
@@ -298,7 +294,6 @@ final class DataRoundTripTest extends IntegrationTestCase
         $this->assertSame([], $result['dropped'], 'and nothing was dropped on the way');
     }
 
-    /** Erasure is not undone by travelling: the shell arrives as a shell. */
     public function test_a_restored_erased_donor_brings_back_no_address_and_no_name(): void
     {
         $donor = $this->seedDonorWithHistory('noaddress@example.test', 'RT-NOPII-' . uniqid());
@@ -342,10 +337,6 @@ final class DataRoundTripTest extends IntegrationTestCase
         $this->assertDoesNotMatchRegularExpression('/^' . (int) $shell->id . '\b/m', $csv, 'the erased one is not');
     }
 
-    /**
-     * Ids are rewritten per import, so a shell has to be recognised by
-     * something else or a second run leaves a second anonymous donor behind.
-     */
     public function test_restoring_an_erased_donor_twice_leaves_one_of_them(): void
     {
         $donor = $this->seedDonorWithHistory('twiceerased@example.test', 'RT-TWICE-' . uniqid());
@@ -467,11 +458,7 @@ final class DataRoundTripTest extends IntegrationTestCase
             'address and all'
         );
 
-        // That separate decision has since been taken. A reference identifies
-        // a donation within one site only, so the stranger's number matching
-        // Jane's is not the same donation: it is reported to the operator
-        // rather than folded into hers, which is what used to make her row
-        // absorb their refunds, receipts and staff notes.
+        // Report cross-donor reference collisions instead of merging their dependent records.
         $this->assertSame(0, $result['existing']['fundkit_donations'] ?? 0, 'not read as the donation already here');
         $this->assertSame(
             1,

@@ -20,7 +20,6 @@ final class ExportAndFxLossTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
     }
 
-    // --- the export that stops -------------------------------------------
 
     private function seedDonations(int $count): void
     {
@@ -84,7 +83,6 @@ final class ExportAndFxLossTest extends IntegrationTestCase
         $this->assertFalse($this->truncationLogged());
     }
 
-    /** The file still holds the rows it could fit. */
     public function test_the_capped_export_still_carries_its_rows(): void
     {
         $this->seedDonations(3);
@@ -99,7 +97,6 @@ final class ExportAndFxLossTest extends IntegrationTestCase
         $this->assertSame(3, substr_count(trim($body), "\n") + 1, 'a header row and the two rows the cap allows');
     }
 
-    // --- the rate that disappears ------------------------------------------
 
     private function fxState(): array
     {
@@ -163,7 +160,6 @@ final class ExportAndFxLossTest extends IntegrationTestCase
         $this->assertSame(1.35, (float) ($stored['manual']['CAD'] ?? 0), 'the CAD override was deleted by an edit to the EUR rate');
     }
 
-    /** Clearing a rate the operator can see still clears it. */
     public function test_blanking_a_rate_still_clears_it(): void
     {
         update_option('fundkit_currency_locale', [

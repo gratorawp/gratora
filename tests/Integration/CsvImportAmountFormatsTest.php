@@ -38,7 +38,6 @@ final class CsvImportAmountFormatsTest extends IntegrationTestCase
     public function amounts(): array
     {
         return [
-            // The reported defect, and the shapes around it.
             'grouped thousand'        => ['$1,000', 'USD', 100000],
             'grouped ten thousand'    => ['10,000', 'USD', 1000000],
             'grouped million'         => ['1,000,000', 'USD', 100000000],

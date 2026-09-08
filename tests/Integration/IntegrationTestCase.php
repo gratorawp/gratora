@@ -12,26 +12,9 @@ use WP_UnitTestCase;
 use wpdb;
 
 /**
- * Base for tests that exercise the full WP + DB + plugin stack.
- *
- * Inherits from WP's `WP_UnitTestCase`, which wraps each test in a database
- * transaction that's rolled back on tearDown. That keeps the test DB empty
- * between tests without truncation - provided every write rides that one
- * transaction.
- *
- * Queryable's `DB::transaction()` runs raw `START TRANSACTION`/`COMMIT` on the
- * same `global $wpdb` handle WP_UnitTestCase uses. The first product
- * transaction in a test therefore implicitly commits WP's wrapping
- * transaction and then commits its own writes, so the tearDown ROLLBACK
- * discards nothing: fundkit_* rows AND WP transients (the AntiSpamGuard rate-limit
- * counters) leak across the whole suite. Pinning Queryable's nesting depth to
- * 1 for the duration of each test makes every `DB::transaction()` run as a
- * nested call: it takes a SAVEPOINT rather than starting a transaction, so all
- * writes stay inside WP's transaction and roll back per test, while a throw
- * still undoes that block's own writes and can be asserted on.
- *
- * Plugin migrations run once at bootstrap (`tests/integration-bootstrap.php`),
- * so the fundkit_* tables exist for every test.
+ * Pin Queryable transaction depth to 1 so product transactions use savepoints inside
+ * WordPress’s per-test transaction. Otherwise START TRANSACTION commits the wrapper and leaks
+ * rows and transients between tests. Migrations run once at bootstrap.
  */
 abstract class IntegrationTestCase extends WP_UnitTestCase
 {
@@ -198,10 +181,7 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
             );
             if (! $pending) return;
             foreach ($pending as $p) {
-                // Mirror ActionScheduler_Action::execute() exactly: it calls
-                // do_action_ref_array($hook, array_values($args)). Passing the
-                // whole assoc array as one param (the old behaviour here) hid a
-                // real bug where a multi-arg job no-oped under real AS.
+                // Match Action Scheduler’s positional dispatch via array_values($args).
                 do_action_ref_array($p->hook, array_values((array) json_decode($p->args, true)));
                 $wpdb->update($as, ['status' => 'complete'], ['action_id' => $p->action_id]);
             }

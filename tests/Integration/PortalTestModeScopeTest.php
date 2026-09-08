@@ -92,7 +92,6 @@ final class PortalTestModeScopeTest extends IntegrationTestCase
         $this->assertTrue((bool) $profile['recurring']['plans'][0]['is_test'], 'flagged so the table can label it');
     }
 
-    /** Not listed has to mean not actionable, or the gap just moves. */
     public function test_a_test_plan_cannot_be_acted_on_from_the_portal(): void
     {
         $donorId = $this->donorId();

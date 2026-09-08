@@ -95,7 +95,6 @@ final class PortalRecurringCancelTest extends IntegrationTestCase
         }
     }
 
-    /** A donor is not shown an internal plan id, a gateway name, or the word gateway. */
     public function test_an_unreachable_gateway_is_not_explained_to_the_donor(): void
     {
         $donor = Plugin::instance()->container

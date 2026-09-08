@@ -108,7 +108,6 @@ final class DonorErasureRegistryTest extends IntegrationTestCase
         $this->assertNull(Event::query()->find('id', $id)->payload);
     }
 
-    /** The case donor_id and donation_id both miss: an abandoned checkout. */
     public function test_an_orphan_event_is_found_by_the_captured_identifiers(): void
     {
         $id = $this->event(['type' => 'checkout.abandoned', 'payload' => ['email' => self::NEEDLE]]);

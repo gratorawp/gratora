@@ -9,14 +9,6 @@ use FundKit\Foundation\Plugin;
 use FundKit\Settings\SettingsService;
 use WP_REST_Request;
 
-/**
- * Finishing the wizard settles the organization and nothing else.
- *
- * It used to publish a campaign, which left every install with one whether or
- * not it was wanted. The last screen now links to the campaigns page with its
- * create drawer open, so the first campaign is built with the same form as
- * every other one.
- */
 final class OnboardingTest extends IntegrationTestCase
 {
     /** @param array<string,mixed> $body */

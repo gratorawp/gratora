@@ -8,11 +8,7 @@ use FundKit\Donations\Donation;
 use FundKit\Donations\DonationRepository;
 use FundKit\Foundation\Plugin;
 
-/**
- * The export used to build the whole CSV as one string: 313MB of memory for
- * 8.8MB of output at 50,000 rows, which exhausted a 256MB limit. It streams in
- * pages now, and the ordering has to survive that.
- */
+/** Verify ordering across streamed export pages. */
 final class DonationExportStreamingTest extends IntegrationTestCase
 {
     private function repo(): DonationRepository
@@ -69,11 +65,7 @@ final class DonationExportStreamingTest extends IntegrationTestCase
         $this->assertCount(6, $lines, 'header plus every donation');
     }
 
-    /**
-     * Order is fixed once, before any paging, so the pages cannot disagree
-     * about it. Every seeded row shares a created_at, which is the case that
-     * would have shifted rows between pages under OFFSET.
-     */
+    /** Seed equal timestamps to exercise stable ordering across export pages. */
     public function test_the_order_is_settled_once_and_repeats(): void
     {
         $this->seed(6);

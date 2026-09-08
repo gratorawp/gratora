@@ -57,7 +57,6 @@ final class StatementOrgAddressTest extends IntegrationTestCase
         $this->assertSame([], $this->addressLines());
     }
 
-    /** A real address still prints, region line and all. */
     public function test_an_address_the_org_actually_gave_is_kept(): void
     {
         update_option('fundkit_org_profile', [
@@ -75,7 +74,6 @@ final class StatementOrgAddressTest extends IntegrationTestCase
         $this->assertContains('San Francisco, CA 94110', $lines);
     }
 
-    /** And so does a city with no street, which is an address a reader can use. */
     public function test_a_city_alone_still_counts(): void
     {
         update_option('fundkit_org_profile', [

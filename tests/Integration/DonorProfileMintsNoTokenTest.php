@@ -11,15 +11,6 @@ use FundKit\Foundation\Plugin;
 use FundKit\Vendor\Queryable\DB;
 use WP_REST_Request;
 
-/**
- * Reading a donor's record must not create a way to sign in as them, and the
- * link the admin does ask for must be the one the screen describes.
- *
- * The profile payload used to carry a freshly minted portal link, so the number
- * of live logins matched the number of times anyone had opened a donor. A rep
- * working through forty donors left forty credentials, each in a response body
- * and on a screen, none of them asked for.
- */
 final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
 {
     private function admin(): void
@@ -103,10 +94,6 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         $this->assertSame(PortalSession::PORTAL_PURPOSE, (string) $rows[0]['purpose']);
     }
 
-    /**
-     * The screen prints this value, so a response that disagreed with the token
-     * would tell the admin a deadline the link does not have.
-     */
     public function test_the_response_states_the_expiry_the_token_carries(): void
     {
         $this->admin();

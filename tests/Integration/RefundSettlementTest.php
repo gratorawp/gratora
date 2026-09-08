@@ -62,10 +62,6 @@ final class RefundSettlementTest extends IntegrationTestCase
         return Donation::query()->find('id', (int) $d->id);
     }
 
-    /**
-     * The gateway has taken the instruction and nothing more, so the books do
-     * not move and the donor is told nothing.
-     */
     public function test_a_refund_the_gateway_has_not_paid_leaves_the_donation_alone(): void
     {
         $donation = $this->paidDonation('awaited@example.test');
@@ -84,7 +80,6 @@ final class RefundSettlementTest extends IntegrationTestCase
         $this->assertCount(0, $mails, 'the donor is not told they have been repaid');
     }
 
-    /** And the gateway confirming it is what takes the money off the books. */
     public function test_the_gateway_confirming_it_settles_the_awaited_refund(): void
     {
         $donation = $this->paidDonation('settles@example.test');
@@ -105,7 +100,6 @@ final class RefundSettlementTest extends IntegrationTestCase
         );
     }
 
-    /** A redelivery of the awaited event does not stack up rows. */
     public function test_an_awaited_refund_is_idempotent(): void
     {
         $donation = $this->paidDonation('twice@example.test');
@@ -117,7 +111,6 @@ final class RefundSettlementTest extends IntegrationTestCase
         $this->assertSame('paid', (string) $this->reload($donation)->status);
     }
 
-    /** The ordinary case is untouched: a settled refund still banks at once. */
     public function test_a_settled_refund_still_banks_immediately(): void
     {
         $donation = $this->paidDonation('settled@example.test');
@@ -147,7 +140,6 @@ final class RefundSettlementTest extends IntegrationTestCase
         $this->assertSame('paid', (string) $this->reload($donation)->status, 'still refundable');
     }
 
-    /** Nothing is voided while the money is still with the org. */
     public function test_an_awaited_refund_does_not_void_the_receipt(): void
     {
         $donation = $this->paidDonation('receipt@example.test');
@@ -162,7 +154,6 @@ final class RefundSettlementTest extends IntegrationTestCase
         $this->assertFalse((bool) $after->voided, 'the donation is still receipted, because it still stands');
     }
 
-    /** The flag a gateway sets is what decides it. */
     public function test_the_result_carries_whether_the_gateway_settled_it(): void
     {
         $this->assertTrue((new RefundResult(success: true))->settled, 'a gateway that cannot tell keeps its behaviour');

@@ -175,7 +175,6 @@ final class DonorErasureCompletenessTest extends IntegrationTestCase
         $this->assertNull($plan->gateway_customer_id);
     }
 
-    /** The point of all of it: the needle is gone from every table above. */
     public function test_no_donor_scoped_table_still_holds_the_needle(): void
     {
         $this->erase();

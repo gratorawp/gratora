@@ -121,7 +121,6 @@ final class ReviewW6SchemaApplyTest extends IntegrationTestCase
         }
     }
 
-    /** The columns the migration builds are the columns the model writes. */
     public function test_the_migrated_table_takes_a_token_carrying_a_name(): void
     {
         $token             = new MagicLinkToken();

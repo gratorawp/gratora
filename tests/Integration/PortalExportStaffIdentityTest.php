@@ -77,7 +77,6 @@ final class PortalExportStaffIdentityTest extends IntegrationTestCase
         $this->assertArrayNotHasKey('notes', $this->download($donorId));
     }
 
-    /** The author is not reachable through the note text either. */
     public function test_no_staff_name_or_role_appears_anywhere_in_the_notes_section(): void
     {
         [$donorId] = $this->donorWithStaffNote();
@@ -88,7 +87,6 @@ final class PortalExportStaffIdentityTest extends IntegrationTestCase
         $this->assertStringNotContainsString('editor', $notes);
     }
 
-    /** Not through the note text, and not through the rest of the bundle either. */
     public function test_the_note_body_appears_nowhere_in_the_bundle(): void
     {
         [$donorId] = $this->donorWithStaffNote();
@@ -98,7 +96,6 @@ final class PortalExportStaffIdentityTest extends IntegrationTestCase
         $this->assertStringNotContainsString('escalate to Jane', $bundle);
     }
 
-    /** An admin reading the org-side export still sees who wrote it. */
     public function test_the_org_side_export_still_names_the_author(): void
     {
         [$donorId, $authorId] = $this->donorWithStaffNote();

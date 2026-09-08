@@ -12,15 +12,6 @@ use FundKit\Donations\AggregateSyncer;
 use FundKit\Donations\DonationRepository;
 use FundKit\Receipts\Receipt;
 
-/**
- * Event ticket orders ride the donations table with kind='order'. They are a
- * purchase, not a donation.
- *
- * The QA sweep found kind filtered in exactly one place in all of core, so a
- * ticket inflated the buyer's donor lifetime total, was issued a donation
- * receipt, and appeared on the year-end tax-deductible statement. The last two
- * are a compliance exposure, not a display bug.
- */
 final class TicketOrdersAreNotDonationsTest extends IntegrationTestCase
 {
     private int $donorId;
@@ -131,10 +122,6 @@ final class TicketOrdersAreNotDonationsTest extends IntegrationTestCase
         $this->assertSame(1, (int) $donor->donations_count);
     }
 
-    /**
-     * The live hook and the recompute path used to be two implementations with
-     * different rules, so a resync silently reversed the live figure.
-     */
     public function test_the_live_path_and_the_resync_path_agree(): void
     {
         $this->row('donation', 1000, 'FUNDKIT-GAVE-2');
@@ -150,7 +137,6 @@ final class TicketOrdersAreNotDonationsTest extends IntegrationTestCase
         $this->assertSame([1000, 1], $live);
     }
 
-    /** A ticket is goods received; it cannot sit on a tax-deductible statement. */
     public function test_a_ticket_order_is_excluded_from_the_year_end_statement(): void
     {
         $this->row('donation', 1000, 'FUNDKIT-GAVE-3');
@@ -165,7 +151,6 @@ final class TicketOrdersAreNotDonationsTest extends IntegrationTestCase
         $this->assertSame(1000, array_sum(array_column($rows, 'amount_cents')));
     }
 
-    /** No donation receipt is issued for a purchase. */
     public function test_no_donation_receipt_is_issued_for_a_ticket_order(): void
     {
         $order = $this->row('order', 7000, 'FUNDKIT-TICKET-4');
@@ -179,7 +164,6 @@ final class TicketOrdersAreNotDonationsTest extends IntegrationTestCase
         );
     }
 
-    /** But a real donation still gets one. */
     public function test_a_real_donation_still_gets_its_receipt(): void
     {
         $given = $this->row('donation', 1000, 'FUNDKIT-GAVE-4');

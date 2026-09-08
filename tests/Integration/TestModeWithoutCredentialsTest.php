@@ -54,7 +54,6 @@ final class TestModeWithoutCredentialsTest extends IntegrationTestCase
         update_option('fundkit_gateway_config', ['test_mode' => true]);
     }
 
-    // --- what the donor is offered ---------------------------------------
 
     private function stripeIn(StripeAccount $account): GatewayManager
     {
@@ -97,7 +96,6 @@ final class TestModeWithoutCredentialsTest extends IntegrationTestCase
         $this->assertArrayHasKey('stripe', $this->stripeIn($account)->availableFor('US', 'USD'));
     }
 
-    // --- what the admin is told -------------------------------------------
 
     private function checks(): array
     {
@@ -147,10 +145,6 @@ final class TestModeWithoutCredentialsTest extends IntegrationTestCase
         $this->assertSame(ReadinessService::WARN, $this->checks()['mode']['status']);
     }
 
-    /**
-     * The two directions are separate filters: a listener written to report a
-     * missing live pair would otherwise be read out as a missing sandbox.
-     */
     public function test_an_addon_reports_its_own_missing_sandbox(): void
     {
         $this->liveOnlyStripe();

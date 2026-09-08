@@ -55,7 +55,6 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $_SERVER['REMOTE_ADDR'] = '203.0.113.10';
     }
 
-    // ---------------------------------------------------------------- helpers
 
     /** @param array<string,mixed> $body */
     private function post(array $body): \WP_REST_Response
@@ -86,18 +85,8 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
     }
 
     /**
-     * The claim the browser holds, on a row wearing a gateway with a checkout.
-     *
-     * These tests are about a checkout the donor could back out of, and offline
-     * is the only gateway registered with the org-wide test switch off, which
-     * every quota here needs. So the rows are posted through offline and then
-     * wear a card gateway, the way the scenarios read. A pending offline row is
-     * a transfer the org is waiting for and is never claimable, which
-     * OfflineRetryParentTest covers.
-     *
-     * The rewrite is unconditional, so a caller naming a gateway of its own
-     * would be describing a row this leaves behind on a different one. A test
-     * that means the gateway it posted to calls claimAsPosted.
+     * Create through offline with test mode disabled, then assign a checkout gateway. Use
+     * claimAsPosted when the test needs the original gateway.
      *
      * @return array{reference:string,status_token:string}
      */
@@ -211,12 +200,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $this->assertSame('fundkit_rate_limited', $res->get_data()['code'] ?? null, $because);
     }
 
-    // ------------------------------------------------------- the reported bug
 
-    /**
-     * PayPal, cancel, Stripe, cancel, PayPal. Three submissions of one
-     * donation, and the address is charged once.
-     */
     public function test_a_donor_who_backs_out_and_tries_another_gateway_is_not_locked_out(): void
     {
         $email = 'switcher@example.test';
@@ -236,7 +220,6 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $this->assertSame(1, $this->emailCounter(), 'the address is charged once for the whole tree');
     }
 
-    // ------------------------------------------------------------ the bounds
 
     /**
      * Each hop names the one before it, which is the shape design 3 was written
@@ -290,10 +273,6 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * Three retries naming the same root directly. A budget kept per row, or
-     * per hop depth, passes the chain test and fails this one.
-     */
     public function test_the_tree_budget_bounds_a_branch(): void
     {
         $email = 'branch@example.test';
@@ -362,7 +341,6 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $this->assertRateLimited($this->submit($email, $root), 'the spent budget survives the boundary');
     }
 
-    // ------------------------------------------------------------ the refusals
 
     /**
      * A wrong, empty or absent token buys nothing, and says nothing about which
@@ -404,7 +382,6 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $this->assertRateLimited($this->submit($yours, $root), 'the new address pays its own quota');
     }
 
-    /** Mirrors the form scoping already folded into the signed form token. */
     public function test_a_retry_naming_a_different_form_is_refused(): void
     {
         $form  = $this->publishedForm();
@@ -464,10 +441,6 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         ];
     }
 
-    /**
-     * A row with no tree descriptor is unclaimable, which covers admin-recorded
-     * donations, every non-form path, and anything already in the table.
-     */
     public function test_a_parent_carrying_no_tree_descriptor_is_refused(): void
     {
         $email = 'nodescriptor@example.test';
@@ -511,10 +484,6 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $this->assertSame(2, $this->emailCounter(), 'the second submission pays the ordinary email quota');
     }
 
-    /**
-     * The cap that actually bounds a single-source attacker is untouched: every
-     * submission is charged, retries included.
-     */
     public function test_the_ip_quota_is_still_charged_on_every_retry(): void
     {
         $sent = 0;
@@ -534,7 +503,6 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $this->assertRateLimited($this->submit('ipcap-e@example.test'), 'the eleventh is over the per-IP cap');
     }
 
-    // ---------------------------------------------------------- the breadcrumbs
 
     /**
      * Every row names the root, and the abandoned parent names its replacement
@@ -624,10 +592,6 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * Why no status is moved: the parent stays in the sweep that exists to find
-     * money PayPal took with no local record of it.
-     */
     public function test_a_retried_parent_is_still_settled_by_the_sweep(): void
     {
         $this->withPayPal();
@@ -647,7 +611,6 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $this->assertSame('FUNDKIT-2026-99999', (string) ($after->flags['retried_by'] ?? ''));
     }
 
-    // ------------------------------------------------------------- fixtures
 
     /** A gateway of the shape an add-on registers: cheques, banked by hand. */
     private function registerOutOfBandGateway(): void

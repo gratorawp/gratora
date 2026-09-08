@@ -8,13 +8,6 @@ use FundKit\Donations\Donation;
 use FundKit\Donations\DonationRepository;
 use FundKit\Foundation\Plugin;
 
-/**
- * Two campaign-detail metrics that used to count the wrong set:
- *  - "Recurring donors" counted donation rows, so one donor's monthly renewals
- *    inflated it; it must count distinct donors.
- *  - the amount median ordered over paid-only rows while its offset came from a
- *    paid+partial_refund histogram total, so it overshot the middle.
- */
 final class CampaignRecurringMedianTest extends IntegrationTestCase
 {
     private const CAMPAIGN = 4242;

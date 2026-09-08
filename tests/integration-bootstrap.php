@@ -85,12 +85,7 @@ tests_add_filter('wp_loaded', static function (): void {
     \FundKit\Foundation\Plugin::onActivation();
 }, 1);
 
-// Per-test isolation rides WP_UnitTestCase's transaction (see
-// IntegrationTestCase), so no test commits. This one-shot truncate only
-// guards the suite against rows a previous, pre-isolation run may have
-// committed into the persistent test DB; it keeps count-based assertions
-// deterministic regardless of DB history. No test depends on bootstrap seed
-// data (ActivationTest re-runs activation itself).
+// Clear leftover test data once at bootstrap; per-test transactions provide ongoing isolation.
 tests_add_filter('wp_loaded', static function (): void {
     global $wpdb;
     $like   = $wpdb->esc_like($wpdb->prefix . 'fundkit_') . '%';

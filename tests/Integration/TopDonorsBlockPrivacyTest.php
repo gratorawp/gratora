@@ -30,7 +30,6 @@ final class TopDonorsBlockPrivacyTest extends IntegrationTestCase
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
     }
 
-    /** Baseline, so the suppression assertions below mean something. */
     public function test_a_visible_donor_is_named(): void
     {
         $this->seedDonation($this->donor('visible@example.com'));
@@ -63,10 +62,6 @@ final class TopDonorsBlockPrivacyTest extends IntegrationTestCase
         $this->assertStringContainsString('5,000', $this->renderBlock());
     }
 
-    /**
-     * The avatar is built from the name, so a suppressed picture that still
-     * carries the donor's initial has not suppressed much.
-     */
     public function test_a_hidden_donor_does_not_leak_an_initial(): void
     {
         $donorId = (int) Plugin::instance()->container

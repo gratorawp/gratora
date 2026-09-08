@@ -32,7 +32,6 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
         $this->donorId = $this->makeDonor();
     }
 
-    // ---------------------------------------------------------------- fixtures
 
     private function makeDonor(): int
     {
@@ -107,7 +106,6 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
             ->findByReference((string) $d->reference);
     }
 
-    // ------------------------------------------------------------- admin list
 
     private function listRequest(array $params = []): \WP_REST_Response
     {
@@ -287,7 +285,6 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
         $this->assertStringNotContainsString((string) $second->reference, $csv);
     }
 
-    // ---------------------------------------------------------- donor profile
 
     private function profile(): array
     {
@@ -344,11 +341,6 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
         $this->assertCount(1, (array) $res->get_data());
     }
 
-    /**
-     * fundkit_events.donation_id is nullable, and most of a donor's timeline is
-     * these: magic links, consents, portal sign-ins. They point at no donation
-     * and cannot be a replaced attempt.
-     */
     public function test_the_timeline_keeps_events_that_are_about_no_donation(): void
     {
         $this->tree();
@@ -378,7 +370,6 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
         );
     }
 
-    // --------------------------------------------------------- donation detail
 
     private function detail(Donation $d): array
     {
@@ -427,7 +418,6 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
         $this->assertSame((string) $first->reference, (string) $self[0]['reference']);
     }
 
-    // ------------------------------------------------------- untouchable paths
 
     /**
      * Four paths claim a row by status = 'pending': DonationService::confirm,
@@ -442,10 +432,6 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
         $this->assertSame(3, (int) Donation::query()->where('status', 'pending')->count());
     }
 
-    /**
-     * The subject access request is a record of what the site holds about the
-     * person, not a curated ledger, so nothing is filtered out of it.
-     */
     public function test_the_donor_data_export_still_carries_every_attempt(): void
     {
         [$first, $second, $third] = $this->tree();

@@ -63,7 +63,6 @@ final class ConsentPurposeKeysTest extends IntegrationTestCase
         }
     }
 
-    /** So the guard cannot be satisfied by refusing every save. */
     public function test_two_distinct_purposes_still_save(): void
     {
         $this->settings()->update('consents', ['purposes' => [

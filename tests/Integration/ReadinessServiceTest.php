@@ -82,7 +82,6 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $this->assertTrue($check['blocker']);
     }
 
-    /** Offline alone is a real answer: checks and transfers are donations. */
     public function test_offline_with_instructions_counts_as_a_way_to_charge(): void
     {
         $this->enableOffline();
@@ -90,7 +89,6 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $this->assertSame(ReadinessService::PASS, $this->checks()['gateway']['status']);
     }
 
-    /** Enabled but blank instructions leaves the donor a page telling them nothing. */
     public function test_offline_without_instructions_does_not_count(): void
     {
         $this->enableOffline('');
@@ -129,7 +127,6 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $this->assertStringNotContainsString('live keys on file', (string) $check['label']);
     }
 
-    /** And the stronger sentence is still earned once a live key is stored. */
     public function test_live_mode_says_keys_are_on_file_once_they_are(): void
     {
         update_option('fundkit_gateway_config', ['stripe' => ['enabled' => true]]);
@@ -138,10 +135,6 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $this->assertStringContainsString('live keys on file', (string) $this->checks()['mode']['label']);
     }
 
-    /**
-     * The failure the old screen could not see: live mode reading a test key
-     * charges nobody while the donor sees a success page.
-     */
     public function test_live_mode_with_only_test_keys_is_a_blocker(): void
     {
         (new StripeAccount(new Crypto()))->saveKeys(true, 'sk_test_x', 'pk_test_x');
@@ -227,7 +220,6 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $this->assertSame(ReadinessService::PASS, $this->checks()['donation-page']['status']);
     }
 
-    /** Receipt and sign-in emails already link here, so a missing page is a 404 generator. */
     public function test_a_missing_donor_portal_page_is_a_blocker(): void
     {
         $check = $this->checks()['donor-portal'];
@@ -250,10 +242,6 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $this->assertSame(ReadinessService::WARN, $this->checks()['org-identity']['status']);
     }
 
-    /**
-     * A translator gets whole sentences, so nothing about the order or the
-     * punctuation between them is decided by the code.
-     */
     public function test_the_missing_details_are_whole_sentences(): void
     {
         update_option('fundkit_org_profile', [
@@ -295,7 +283,6 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $this->assertSame(ReadinessService::PASS, $this->checks()['org-identity']['status']);
     }
 
-    /** With no paid add-on installed there is nothing to license, so no row. */
     public function test_licenses_are_absent_when_no_addon_is_installed(): void
     {
         $this->assertArrayNotHasKey('licenses', $this->checks());

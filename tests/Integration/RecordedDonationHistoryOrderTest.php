@@ -56,10 +56,6 @@ final class RecordedDonationHistoryOrderTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The whole point of asking for the date: a cheque banked last month
-     * belongs to last month, and the totals for that month depend on it.
-     */
     public function test_a_donation_received_earlier_still_lands_on_that_day(): void
     {
         $when     = gmdate('Y-m-d', strtotime('-9 days'));

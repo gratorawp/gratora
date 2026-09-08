@@ -51,7 +51,6 @@ final class RecurringAttentionScopeTest extends IntegrationTestCase
         $this->assertSame(12, (int) ($stats['failing_ever_count'] ?? -1), 'plans that ever failed');
     }
 
-    /** The wider number is the one the filter answers with. */
     public function test_the_filter_returns_what_the_wider_count_promised(): void
     {
         $req = new WP_REST_Request('GET', '/fundkit/v1/admin/recurring');

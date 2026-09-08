@@ -82,7 +82,6 @@ final class DistributionLadderFollowsTheMoneyTest extends IntegrationTestCase
         );
     }
 
-    /** And a dollar-scale campaign keeps the ladder it has always had. */
     public function test_a_dollar_scale_campaign_reads_the_same_as_before(): void
     {
         foreach ([2500, 5000, 7500] as $cents) {

@@ -75,7 +75,6 @@ final class NumberingTokenRefusalTest extends IntegrationTestCase
         $this->assertSame('APPEAL_2026_2026_00001', $minted, 'what was saved is what is minted');
     }
 
-    /** Every writer inherits the refusal, not just the REST route. */
     public function test_the_service_itself_refuses(): void
     {
         $this->expectException(InvalidReferenceToken::class);

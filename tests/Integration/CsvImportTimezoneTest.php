@@ -209,7 +209,6 @@ final class CsvImportTimezoneTest extends IntegrationTestCase
         ];
     }
 
-    /** And a date with no time is still anchored at noon, away from either edge. */
     public function test_a_date_only_cell_in_any_form_is_still_noon(): void
     {
         update_option('timezone_string', 'America/New_York');

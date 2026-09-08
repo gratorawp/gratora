@@ -8,19 +8,6 @@ use FundKit\Donations\AntiSpamGuard;
 use FundKit\Foundation\Plugin;
 use WP_Error;
 
-/**
- * What the org-wide test-mode switch does to the rate limits.
- *
- * It used to remove them. The same switch registers a gateway that confirms in
- * the request, and a confirmed donation mails a rendered receipt to whatever
- * address the caller typed, so removing the caps made the public endpoint an
- * unmetered mail cannon aimed at strangers from the org's own sending domain.
- * A site left in test mode by accident is the ordinary way to arrive there, and
- * sending reputation is the one thing the test-data purge cannot undo.
- *
- * They give way instead. Automation still bursts through the production caps;
- * it no longer runs without one.
- */
 final class TestModeQuotaReliefTest extends IntegrationTestCase
 {
     protected function tearDown(): void

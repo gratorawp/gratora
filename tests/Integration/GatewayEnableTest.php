@@ -35,12 +35,7 @@ final class GatewayEnableTest extends IntegrationTestCase
         parent::tearDown();
     }
 
-    /**
-     * The schema is resolved once per request. Everything registers during boot
-     * in production, but a suite is one process and an earlier test can add a
-     * gateway after that, so re-resolve rather than assert against a snapshot
-     * taken before this gateway existed.
-     */
+    /** Re-resolve the schema because tests can register gateways after bootstrap. */
     private function forgetGroupSchema(): void
     {
         $prop = new ReflectionProperty(SettingsService::class, 'groupsCache');
@@ -97,7 +92,6 @@ final class GatewayEnableTest extends IntegrationTestCase
         $this->assertTrue($groups['gateways']['defaults'][$id]['enabled']);
     }
 
-    /** Off means not offered, whatever the credentials say. */
     public function test_a_disabled_gateway_is_not_offered(): void
     {
         $this->forgetGroupSchema();

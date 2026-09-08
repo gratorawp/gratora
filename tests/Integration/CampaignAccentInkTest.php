@@ -55,7 +55,6 @@ final class CampaignAccentInkTest extends IntegrationTestCase
         $this->assertMatchesRegularExpression('/--fundkit-cover-image:url\(https?:[^)]+\.jpg\);/', $css);
     }
 
-    /** No image is not an error: the cover falls back to the accent underneath. */
     public function test_a_campaign_with_no_image_emits_no_cover_token(): void
     {
         $css = CampaignStyleVars::forCampaign($this->campaignWithAccent('#14425f'));

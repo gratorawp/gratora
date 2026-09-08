@@ -248,8 +248,6 @@ test( 'clearing the amount box does not leave a saveable amount behind', async (
     box.dispatchEvent( new Event( 'focusout', { bubbles: true } ) );
     await new Promise( ( r ) => setTimeout( r, 20 ) );
 
-    // The clamp used to emit the minimum here, so an empty-looking box sat
-    // behind a live Save that would have set the plan to 50 cents.
     expect( button( 'Save new amount' ).disabled ).toBe( true );
     expect( posted ).toEqual( [] );
 } );

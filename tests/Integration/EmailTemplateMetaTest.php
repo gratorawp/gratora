@@ -32,7 +32,6 @@ final class EmailTemplateMetaTest extends IntegrationTestCase
         $this->assertContains('addon_thing', $ids);
     }
 
-    /** Core describes its own templates in the editor bundle, so this starts empty. */
     public function test_it_is_empty_without_an_addon(): void
     {
         $this->assertSame([], SettingsService::templateMeta());

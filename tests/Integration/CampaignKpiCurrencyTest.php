@@ -45,10 +45,6 @@ final class CampaignKpiCurrencyTest extends IntegrationTestCase
         $this->assertSame('EUR', $stats['currency'], 'the base currency the sum is actually in');
     }
 
-    /**
-     * The strip and the rows it sits above are one screen and one request pair,
-     * so they cannot report the same numbers in different units.
-     */
     public function test_the_strip_and_the_rows_under_it_agree(): void
     {
         $this->campaign('us-only', 'USD', 100000);
@@ -65,7 +61,6 @@ final class CampaignKpiCurrencyTest extends IntegrationTestCase
         }
     }
 
-    /** The same figure reaches the command registry, so it carries the same unit. */
     public function test_the_command_registry_reads_it_the_same_way(): void
     {
         $this->campaign('us-only', 'USD', 100000);
@@ -84,11 +79,6 @@ final class CampaignKpiCurrencyTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * The figure follows a base-currency change in the same process. It used to
-     * be memoised on first read, so a CLI run that spanned the change kept
-     * labelling every total with the currency the site had before it.
-     */
     public function test_it_follows_a_base_currency_change_without_a_restart(): void
     {
         $this->campaign('one', 'USD', 100000);
@@ -104,7 +94,6 @@ final class CampaignKpiCurrencyTest extends IntegrationTestCase
         $this->assertSame('GBP', $repo->aggregateAdmin()['currency']);
     }
 
-    /** A site with nothing raised still names a currency rather than none. */
     public function test_an_empty_site_still_names_the_base_currency(): void
     {
         $stats = Plugin::instance()->container->get(CampaignRepository::class)->aggregateAdmin();

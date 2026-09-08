@@ -46,10 +46,6 @@ final class PortalMeasureSurvivesThemeTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The portal is meant to sit at the same measure as the campaign pages;
-     * that is why the fallback is written out rather than left to the theme.
-     */
     public function test_the_fallback_matches_the_campaign_page_measure(): void
     {
         preg_match_all('/var\(--dp-measure,\s*([0-9]+px)\)/', $this->stylesheet(), $m);

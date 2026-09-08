@@ -70,11 +70,6 @@ final class AllTimeChartBoundTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The helper both bounds go through. strtotime is willing to read an empty
-     * string as now, which is the one input where "not an instant" would
-     * otherwise come back as a date.
-     */
     public function test_a_stamp_that_is_not_an_instant_is_not_a_date(): void
     {
         $this->assertNull(DonationRepository::localDateOf(''), 'nothing is not today');

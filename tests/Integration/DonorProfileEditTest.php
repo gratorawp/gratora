@@ -20,7 +20,6 @@ final class DonorProfileEditTest extends IntegrationTestCase
         return Plugin::instance()->container->get(DonorService::class);
     }
 
-    /** The column counts characters, so clamping by bytes cuts a CJK name a third short. */
     public function test_a_multibyte_name_survives_the_length_clamp(): void
     {
         $svc   = $this->svc();

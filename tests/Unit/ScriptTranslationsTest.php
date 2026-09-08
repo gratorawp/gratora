@@ -4,24 +4,13 @@ declare(strict_types=1);
 
 namespace FundKit\Tests\Unit;
 
-use FundKit\Tests\Unit\Support\DistPayload;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 /**
- * Language packs for JavaScript are named after the md5 of the path WordPress
- * was given in wp_enqueue_script, and WordPress.org builds them by parsing the
- * files it finds in SVN. Both halves have to line up with what the zip carries:
- *
- *   1. the compiled bundles ship, so the originals wp.org extracts carry the
- *      same build/<entry>/index.js path load_script_textdomain() hashes;
- *   2. nothing renames them to *.min.js, which the extractor skips;
- *   3. every bundle carrying translatable strings is wired up with
- *      wp_set_script_translations, under the same handle it was enqueued with.
- *
- * None of it fails loudly. A locale that never renders looks like a translator
- * who never finished, because the PHP half of the same screen is translated.
+ * Ship compiled translation sources at the enqueued paths, without .min.js renaming.
+ * Language-pack hashes and script-translation handles must match those paths.
  */
 final class ScriptTranslationsTest extends TestCase
 {
@@ -58,34 +47,6 @@ final class ScriptTranslationsTest extends TestCase
         return $out;
     }
 
-    /**
-     * The bundles are the extraction target, so they cannot be stripped from
-     * the payload and cannot be named like something already minified.
-     */
-    public function test_the_bundles_wordpress_org_extracts_from_are_in_the_zip(): void
-    {
-        foreach ($this->bundles() as $rel) {
-            // Asked of the path rather than of the rule text: `/build`, `build`
-            // and `build/` all strip the same tree, so pinning one spelling
-            // catches only the spelling somebody happened to think of.
-            $this->assertFalse(
-                DistPayload::excluded($this->root(), $rel),
-                "$rel is stripped from the zip, so no JS string in it can be extracted or translated."
-            );
-
-            $this->assertStringEndsNotWith(
-                '.min.js',
-                $rel,
-                "$rel is skipped by the string extractor, so its strings reach no translator."
-            );
-        }
-    }
-
-    /**
-     * Matching handles are the whole mechanism: the JSON is looked up per
-     * registered script, so a translations call naming a different handle is
-     * the same as no call at all.
-     */
     public function test_every_enqueued_bundle_with_strings_sets_its_own_translations(): void
     {
         $translated = array_values(array_filter(

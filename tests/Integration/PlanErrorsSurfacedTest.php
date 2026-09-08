@@ -65,10 +65,6 @@ final class PlanErrorsSurfacedTest extends IntegrationTestCase
         $this->assertSame('recurring', $row['errors'][0]['source']);
     }
 
-    /**
-     * The stored source is a routing key. On a subscription the useful
-     * question is which surface the action came from.
-     */
     public function test_the_row_says_where_it_happened_in_words(): void
     {
         $cases = [
@@ -105,7 +101,6 @@ final class PlanErrorsSurfacedTest extends IntegrationTestCase
         $this->assertSame([], $this->detail((int) $this->plan()->id)['errors'] ?? null);
     }
 
-    /** The key ErrorLog promotes to a column, which is what makes this filterable. */
     public function test_the_resumer_records_against_the_plan_column(): void
     {
         $plan = $this->plan();

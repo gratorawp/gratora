@@ -89,7 +89,6 @@ final class ChangeIntervalRoutesTest extends IntegrationTestCase
         ]));
     }
 
-    /** The row tells each screen whether to offer it at all. */
     public function test_the_plan_payload_carries_the_capability_and_the_options(): void
     {
         $plan = $this->plan();

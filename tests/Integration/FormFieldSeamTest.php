@@ -62,7 +62,6 @@ final class FormFieldSeamTest extends IntegrationTestCase
         );
     }
 
-    /** A block nobody claims is left out rather than emitted as a broken field. */
     public function test_an_unclaimed_block_is_dropped(): void
     {
         $config = json_decode($this->configFor(
@@ -169,7 +168,6 @@ final class FormFieldSeamTest extends IntegrationTestCase
         );
 
         $this->assertStringNotContainsString('"kind":"summary"', $config);
-        // And the submit step no longer carries the switch that used to decide.
         $this->assertStringNotContainsString('showSummary', $config);
     }
 }

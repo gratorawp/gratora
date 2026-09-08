@@ -79,7 +79,6 @@ final class RecurringArchiveLiveCountTest extends IntegrationTestCase
         $this->plan('active', ['campaign_id' => $this->campaignId + 1]);
     }
 
-    /** The number shown and the number cancelled are one set. */
     public function test_the_count_covers_every_status_the_sweep_cancels(): void
     {
         $this->seedMixedStatuses();
@@ -111,7 +110,6 @@ final class RecurringArchiveLiveCountTest extends IntegrationTestCase
         $this->assertSame($data['count'], $this->sweepWouldCancel());
     }
 
-    /** The gate on the prompt appearing is count > 0. */
     public function test_a_campaign_whose_live_plans_are_all_paused_is_not_reported_as_empty(): void
     {
         $this->plan('paused');
@@ -133,10 +131,6 @@ final class RecurringArchiveLiveCountTest extends IntegrationTestCase
         $this->assertSame(0, $this->sweepWouldCancel());
     }
 
-    /**
-     * A malformed cadence is still cancelled and the donor is still emailed, so
-     * it is still counted; it just cannot contribute a monthly figure.
-     */
     public function test_a_plan_with_a_zero_interval_is_counted_because_the_sweep_cancels_it(): void
     {
         $this->plan('active', ['interval_count' => 0]);

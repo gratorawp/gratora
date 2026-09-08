@@ -10,18 +10,8 @@ use FundKit\Vendor\Queryable\Schema\Table;
 use ReflectionProperty;
 
 /**
- * A migration that runs is not the same as a migration that finishes.
- *
- * dbDelta compares the column type we emit against the type the server reports
- * back. When they differ it issues ALTER TABLE ... CHANGE COLUMN, and because
- * the comparison is textual it will differ again next time and issue it again.
- * The schema never converges, and every one of those ALTERs copies the table.
- *
- * The engines disagree about what they report back, so this has to run on both.
- * MariaDB has no JSON type and reports a json column as longtext; MySQL 8.0.17
- * dropped integer display widths while MariaDB kept them. A column declared
- * json converged on MySQL and rebuilt eleven tables per migration on MariaDB,
- * which is most WordPress hosting.
+ * Check schema convergence on both engines: dbDelta compares type text, while MySQL and MariaDB
+ * report JSON and integer widths differently.
  */
 final class SchemaConvergenceTest extends IntegrationTestCase
 {

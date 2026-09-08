@@ -90,7 +90,6 @@ final class AbandonedPendingReaperTest extends IntegrationTestCase
         $this->assertSame('pending', $this->statusOf($offline), 'a bank transfer is not an abandonment');
     }
 
-    /** A row carrying evidence that money moved is a reconciliation question. */
     public function test_a_row_that_saw_money_is_left_alone(): void
     {
         $withTxn = $this->seed('stripe', 90, ['gateway_txn_id' => 'ch_real_money']);

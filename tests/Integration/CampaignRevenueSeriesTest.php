@@ -10,13 +10,6 @@ use FundKit\Donations\Donation;
 use FundKit\Donors\DonorService;
 use FundKit\Foundation\Plugin;
 
-/**
- * The all-time revenue series must reach back to the earliest paid donation,
- * even when it predates the campaign's start/created date (imports, backfills,
- * a start set after early donations). Regression: the range started at
- * created_at, so the series query excluded every earlier donation and the
- * chart read a flat $0 line while the KPI showed the real total.
- */
 final class CampaignRevenueSeriesTest extends IntegrationTestCase
 {
     public function test_all_time_series_includes_donations_before_the_campaign_start(): void

@@ -9,19 +9,8 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
 /**
- * A capability declared by an empty marker is invisible when it is wrong: no
- * error, no failing test, and core silently takes the wrong branch.
- *
- * Core read SubscriptionAware as "this plan can be paused". Two shipped
- * gateways declare it and refuse both pause and skip, so the portal offered
- * both buttons on every plan and a Direct Debit donor got a raw 422 from
- * either. The cancel deflection sheet offers exactly those two as the
- * alternatives to cancelling, so a donor trying not to cancel was handed two
- * dead ends and then cancelled.
- *
- * Asserted over the classes rather than the registry: a gateway registers only
- * once it is configured, so a registry walk would pass on a bare install by
- * finding nothing to check.
+ * Inspect gateway classes directly; an unconfigured registry can be empty and hide incorrect
+ * capability markers.
  */
 final class PauseCapabilityTest extends TestCase
 {

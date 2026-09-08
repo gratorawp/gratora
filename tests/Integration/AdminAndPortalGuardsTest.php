@@ -24,12 +24,8 @@ use FundKit\Gateways\GatewayTransportException;
 use FundKit\Recurring\RecurringPlan;
 use WP_REST_Request;
 
-/**
- * Three ways an action reached further than the screen that offers it.
- */
 final class AdminAndPortalGuardsTest extends IntegrationTestCase
 {
-    // --- what the portal tells a donor when the gateway fails --------------
 
     /** A processor the site cannot reach: the request never leaves this server. */
     private function registerTimingOutGateway(): string
@@ -141,7 +137,6 @@ final class AdminAndPortalGuardsTest extends IntegrationTestCase
         );
     }
 
-    /** A refusal written for a donor still reaches them unchanged. */
     public function test_a_plan_that_is_already_cancelled_still_says_so_plainly(): void
     {
         $plan = $this->planFor((int) $this->donor()->id);
@@ -154,7 +149,6 @@ final class AdminAndPortalGuardsTest extends IntegrationTestCase
         $this->assertStringContainsString('no longer active', $res['message']);
     }
 
-    // --- who may destroy a fund -------------------------------------------
 
     private function fund(): Fund
     {
@@ -206,7 +200,6 @@ final class AdminAndPortalGuardsTest extends IntegrationTestCase
         $this->assertSame('Renamed fund', (string) Fund::query()->where('id', (int) $fund->id)->get()->name);
     }
 
-    // --- who signed in as this donor ---------------------------------------
 
     public function test_minting_a_staff_sign_in_link_leaves_a_record_of_who_did_it(): void
     {
@@ -229,7 +222,6 @@ final class AdminAndPortalGuardsTest extends IntegrationTestCase
         $this->assertSame('Sam Staff', (string) ($row->payload['actor_name'] ?? ''));
     }
 
-    /** The record is an audit row, so erasure keeps it and it carries no handles. */
     public function test_that_record_carries_no_handle_back_to_the_donor(): void
     {
         $_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (staff browser)';

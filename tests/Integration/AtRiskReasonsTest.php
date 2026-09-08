@@ -128,10 +128,6 @@ final class AtRiskReasonsTest extends IntegrationTestCase
         $this->assertSame(AtRiskReason::PAST_GAP, $row['risk_reason']);
     }
 
-    /**
-     * The screen was tuned from 42ms to 8ms by removing per-row work. A reason
-     * looked up per row would put it straight back.
-     */
     public function test_the_reason_costs_one_query_for_the_whole_page(): void
     {
         for ($i = 0; $i < 12; $i++) {

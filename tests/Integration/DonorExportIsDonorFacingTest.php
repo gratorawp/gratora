@@ -78,7 +78,6 @@ final class DonorExportIsDonorFacingTest extends IntegrationTestCase
         $this->assertStringNotContainsString('wptests_', $json);
     }
 
-    /** The row itself stays: the donor is entitled to know something happened. */
     public function test_the_event_is_still_listed(): void
     {
         $donor = $this->signedInDonor();

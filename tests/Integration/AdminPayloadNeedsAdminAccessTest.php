@@ -57,10 +57,6 @@ final class AdminPayloadNeedsAdminAccessTest extends IntegrationTestCase
         $this->assertTrue(str_contains($this->injected(), 'window.fundkit'), 'the payload never reached an administrator');
     }
 
-    /**
-     * Changing what is charged and reading a donor's file are separate
-     * capabilities on the Roles screen, so one is not a way to the other.
-     */
     public function test_marking_paid_answers_without_the_read_payload(): void
     {
         $donation = $this->pendingDonation();

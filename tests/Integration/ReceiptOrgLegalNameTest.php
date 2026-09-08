@@ -84,7 +84,6 @@ final class ReceiptOrgLegalNameTest extends IntegrationTestCase
         $this->assertSame('Helping Hands Foundation e.V.', $org['name'], 'the downloaded receipt is headed by nobody');
     }
 
-    /** The yearly summary a donor keeps for tax is the same promise. */
     public function test_the_annual_statement_carries_the_legal_name(): void
     {
         update_option('fundkit_org_profile', [

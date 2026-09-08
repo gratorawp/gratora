@@ -85,8 +85,6 @@ final class RecurringUpdateAmountTest extends IntegrationTestCase
 
     public function test_a_plan_with_no_rate_keeps_no_snapshot(): void
     {
-        // No rate means no known base value; inventing one from the raw foreign
-        // cents is the bug this guards against.
         $plan = $this->plan('INR', 50000, null, null);
 
         $this->registry()->dispatch('recurring.update_amount', [

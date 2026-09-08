@@ -8,15 +8,6 @@ use FundKit\Donations\Donation;
 use WP_REST_Request;
 use WP_REST_Response;
 
-/**
- * The public create path takes an amount straight from an unauthenticated
- * request. It has a floor in AntiSpamGuard and a ceiling in the REST schema
- * (`DonationSchemas::create()`), and only the floor was covered by a test.
- *
- * Worth pinning: the sibling path in fundkit-events had no ceiling at all and the
- * QA sweep used it to write a real ten-billion-euro pending order. Nothing
- * would have caught the same regression here.
- */
 final class DonationAmountCeilingTest extends IntegrationTestCase
 {
     private function post(int $cents): WP_REST_Response

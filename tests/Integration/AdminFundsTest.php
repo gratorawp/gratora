@@ -240,9 +240,7 @@ final class AdminFundsTest extends IntegrationTestCase
         $campaign = $this->post('/fundkit/v1/admin/campaigns', ['title' => 'Appeal'])->get_data();
         $this->put("/fundkit/v1/admin/campaigns/{$campaign['id']}", ['default_fund_id' => $fund['id']]);
 
-        // Simulate the pre-fix state: pending marker set, but the background
-        // job was lost (it completed as a no-op under the args bug, nothing
-        // re-queued it).
+        // Simulate a pending reassignment whose job was lost.
         \FundKit\Funds\FundReassignmentJob::markPending((int) $fund['id'], (int) $target['id']);
 
         $pendingActions = static fn (): int => (int) self::$wpdb->get_var(
@@ -445,7 +443,6 @@ final class AdminFundsTest extends IntegrationTestCase
         $this->assertTrue($reloaded->isOpen());
     }
 
-    /** So the guard cannot be satisfied by refusing every date. */
     public function test_a_real_end_date_is_still_accepted(): void
     {
         $fund = $this->post('/fundkit/v1/admin/funds', ['code' => 'gooddate', 'name' => 'Good Date'])->get_data();

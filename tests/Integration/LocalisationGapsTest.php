@@ -15,7 +15,6 @@ use WP_REST_Request;
  */
 final class LocalisationGapsTest extends IntegrationTestCase
 {
-    // --- the receipt an admin re-downloads ---------------------------------
 
     private function receiptedDonation(string $locale): Receipt
     {
@@ -94,7 +93,6 @@ final class LocalisationGapsTest extends IntegrationTestCase
         $this->assertSame($before, get_locale(), 'the request carries on in whatever language it started in');
     }
 
-    // --- the donation form's terms field -----------------------------------
 
     /** @return array<string,mixed> */
     private function formConfig(): array
@@ -128,7 +126,6 @@ final class LocalisationGapsTest extends IntegrationTestCase
         );
     }
 
-    // --- right-to-left admin styling ---------------------------------------
 
     /**
      * The build emits an -rtl.css beside each admin stylesheet and nothing

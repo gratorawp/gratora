@@ -77,10 +77,6 @@ final class MultiSelectLimitsTest extends IntegrationTestCase
         $this->assertNotNull($this->validate($attrs, ['extras' => ['a', 'b', 'c']]));
     }
 
-    /**
-     * The rendered markup carries the limits to the browser, so it has to say
-     * the same thing the validator will.
-     */
     public function test_the_rendered_field_carries_the_clamped_limits(): void
     {
         $html = (new \FundKit\Forms\Blocks\MultiSelectBlock())->render([

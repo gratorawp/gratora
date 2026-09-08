@@ -207,7 +207,6 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $this->assertSame([1], $notified, 'and the donor is told once, as the first attempt');
     }
 
-    /** A second genuine attempt is a different delivery, and still counts. */
     public function test_a_second_decline_still_counts(): void
     {
         $plan    = $this->seedPlan();
@@ -560,7 +559,6 @@ final class StripeSubscriptionRenewalTest extends IntegrationTestCase
         $this->assertSame(200, $status);
     }
 
-    /** And the same on the renewal that succeeded. */
     public function test_a_renewal_whose_subscription_could_not_be_read_is_redelivered(): void
     {
         $this->seedPlan();

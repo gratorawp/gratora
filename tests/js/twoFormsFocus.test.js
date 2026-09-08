@@ -82,8 +82,7 @@ test( 'a failed submit moves focus inside the form that was submitted', async ()
     const first  = document.getElementById( 'fundkit-form-7' );
     const second = document.getElementById( 'fundkit-form-9' );
 
-    // The first form is left holding an invalid field, which is what the
-    // page-global lookup used to find whichever form the donor was using.
+    // Leave the first form invalid to detect page-global field lookups.
     submitOf( first ).click();
     await frame();
     expect( first.querySelectorAll( '[aria-invalid="true"]' ).length ).toBe( 1 );

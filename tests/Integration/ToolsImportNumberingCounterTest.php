@@ -194,11 +194,6 @@ final class ToolsImportNumberingCounterTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * Receipt numbers come off the same counters under
-     * UNIQUE(renderer_id, receipt_number), and carry the file's receipt prefix
-     * for the same reason.
-     */
     public function test_the_receipt_counter_clears_numbers_printed_in_the_file_own_numbering(): void
     {
         $this->numbering(['prefixes' => ['donation' => 'GIVE', 'receipt' => 'RCPT'], 'padding' => 6]);
@@ -227,10 +222,6 @@ final class ToolsImportNumberingCounterTest extends IntegrationTestCase
         $this->assertSame(8, $references->peekNext('receipt'), 'the receipt counter is past the restored number');
     }
 
-    /**
-     * A file that carries no numbering group leaves the site on its own, so the
-     * counter is raised against the numbering already installed.
-     */
     public function test_a_file_without_a_numbering_group_is_read_in_the_site_own_numbering(): void
     {
         $references = $this->references();

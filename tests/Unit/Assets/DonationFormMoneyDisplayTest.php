@@ -44,10 +44,6 @@ final class DonationFormMoneyDisplayTest extends TestCase
         $this->assertSame('$100.00', $out['own']);
     }
 
-    /**
-     * The dangerous direction: a weak base currency whose symbol IS in the
-     * table lends it to a strong one, so 500 RON reads as 500 forint.
-     */
     public function test_a_form_in_another_currency_does_not_lend_its_symbol_either(): void
     {
         $out = $this->runModule('util/format.js', <<<'JS'

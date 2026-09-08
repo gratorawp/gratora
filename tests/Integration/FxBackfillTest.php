@@ -83,11 +83,6 @@ final class FxBackfillTest extends IntegrationTestCase
         $this->assertSame([], FxBackfill::pending());
     }
 
-    /**
-     * Converting a donation changes every total it belongs to. Scope
-     * "currency" used to convert and then rebuild nothing, so the money stayed
-     * outside the totals while the screen reported success.
-     */
     public function test_a_conversion_forces_the_aggregate_rebuild(): void
     {
         // Something for the rebuild to actually count: with no campaigns the
@@ -121,10 +116,6 @@ final class FxBackfillTest extends IntegrationTestCase
         $this->assertSame(0, $counts['campaigns'] ?? -1, 'no conversion means no needless full rebuild');
     }
 
-    /**
-     * A foreign plan with no base counts as zero in recurring revenue, so a
-     * rate added later has to reach plans as well as donations.
-     */
     public function test_recurring_plans_are_converted_too(): void
     {
         $plan = \FundKit\Recurring\RecurringPlan::make();

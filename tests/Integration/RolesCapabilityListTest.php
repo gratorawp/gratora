@@ -54,7 +54,6 @@ final class RolesCapabilityListTest extends IntegrationTestCase
         $this->assertContains('Donateurs', $headings);
     }
 
-    /** translate_user_role() reads the default domain with a User role context. */
     public function test_a_role_name_is_translated(): void
     {
         add_filter('gettext_with_context', static fn ($translated, $text, $context) => $context === 'User role' && $text === 'Administrator'
@@ -114,7 +113,6 @@ final class RolesCapabilityListTest extends IntegrationTestCase
         }
     }
 
-    /** The whole point: a capability an add-on registers has to show up. */
     public function test_an_add_on_capability_reaches_the_screen(): void
     {
         $register = static function (array $maps): array {

@@ -81,11 +81,6 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * update_footer is core's, and it carries the WordPress version. Taking it
-     * for a plugin version is the kind of thing that gets a footer filter
-     * removed by the site owner.
-     */
     public function test_it_does_not_touch_the_wordpress_version_slot(): void
     {
         // has_filter() is the wrong probe here: core registers its own

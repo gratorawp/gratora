@@ -69,10 +69,6 @@ final class SeparatorWhitespaceSurvivesSaveTest extends IntegrationTestCase
         $this->assertSame("'", $saved['thousand_sep']);
     }
 
-    /**
-     * The trim went, not the sanitising. A separator is rendered into every
-     * amount on the site, so it is not a place to start allowing markup.
-     */
     public function test_markup_is_still_stripped(): void
     {
         $saved = $this->saveFormat(['thousand_sep' => '<script>x</script>']);

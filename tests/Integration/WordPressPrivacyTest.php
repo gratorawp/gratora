@@ -69,7 +69,6 @@ final class WordPressPrivacyTest extends IntegrationTestCase
         $this->assertContains('Lovelace', $values);
     }
 
-    /** An address nobody donated with is not an error, it is an empty answer. */
     public function test_an_unknown_email_exports_nothing(): void
     {
         $export = $this->privacy()->export('nobody-' . uniqid() . '@example.test');
@@ -78,10 +77,6 @@ final class WordPressPrivacyTest extends IntegrationTestCase
         $this->assertTrue($export['done']);
     }
 
-    /**
-     * The whole point: WordPress's eraser has to reach the same erasure the
-     * admin button runs, not a second implementation of it.
-     */
     public function test_erasing_through_wordpress_redacts_the_donor(): void
     {
         $email = 'erase-' . uniqid() . '@example.test';
@@ -125,11 +120,6 @@ final class WordPressPrivacyTest extends IntegrationTestCase
         $this->assertFalse($second['items_removed']);
     }
 
-    /**
-     * The screen a DPO is told to use is the answer to a subject access
-     * request, so what it leaves out is what the organisation failed to
-     * disclose.
-     */
     public function test_the_export_discloses_the_contact_details_the_site_holds(): void
     {
         $email = 'contact-' . uniqid() . '@example.test';
@@ -187,7 +177,6 @@ final class WordPressPrivacyTest extends IntegrationTestCase
         $this->assertContains('fundkit-recurring', $groups, 'an active mandate against the donor was not disclosed');
     }
 
-    /** Staff notes are the organisation's words about a donor, not the donor's data. */
     public function test_the_export_does_not_hand_over_staff_notes(): void
     {
         $email = 'notes-' . uniqid() . '@example.test';

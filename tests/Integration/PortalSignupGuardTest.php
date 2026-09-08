@@ -85,10 +85,6 @@ final class PortalSignupGuardTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The donation form mints tokens too. Letting one stand in for the other
-     * would mean any public form on the site opened this endpoint.
-     */
     public function test_a_donation_form_token_does_not_open_the_portal(): void
     {
         $email = 'cross-' . uniqid() . '@example.test';
@@ -102,7 +98,6 @@ final class PortalSignupGuardTest extends IntegrationTestCase
         $this->assertFalse($this->donorExists($email));
     }
 
-    /** Asking for a sign-in link mails somebody, so it is gated the same way. */
     public function test_send_link_is_gated_too(): void
     {
         $this->assertSame(400, $this->post('send-link', ['email' => 'x@example.test'])->get_status());

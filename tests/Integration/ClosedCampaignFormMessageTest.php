@@ -6,11 +6,6 @@ namespace FundKit\Tests\Integration;
 
 use FundKit\Forms\Shortcode\DonationFormShortcode;
 
-/**
- * A visitor who follows a link to a campaign that has closed sees whatever this
- * renders. It used to be the reason code itself, so the page said "ended", and
- * only to an administrator: everyone else got an empty div.
- */
 final class ClosedCampaignFormMessageTest extends IntegrationTestCase
 {
     private function render(?string $reason): string
@@ -41,10 +36,6 @@ final class ClosedCampaignFormMessageTest extends IntegrationTestCase
         $this->assertStringContainsString('not open for donations yet', $this->render('scheduled'));
     }
 
-    /**
-     * These three never print a bare reason code, which is the bug: the reason
-     * was passed straight through as the message.
-     */
     public function test_no_reason_code_reaches_the_page(): void
     {
         foreach (['ended', 'goal_met', 'scheduled'] as $reason) {

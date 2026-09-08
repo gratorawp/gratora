@@ -97,7 +97,6 @@ final class RecalculateResumeTest extends IntegrationTestCase
         $this->assertFalse(get_option('fundkit_recalculate_cursor'), 'the next run would resume a finished one');
     }
 
-    /** Asking for something else abandons the half-finished walk rather than resuming it. */
     public function test_changing_the_scope_starts_over(): void
     {
         $this->post('donors');

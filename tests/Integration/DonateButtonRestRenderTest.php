@@ -11,18 +11,8 @@ use ReflectionMethod;
 use WP_REST_Request;
 
 /**
- * The donate button skips its form, and with it the whole closed-campaign
- * check, whenever it decides it is drawing the block editor's preview.
- *
- * REST_REQUEST cannot make that decision: WP defines it for every /wp-json
- * call, and core serves content.rendered from the same the_content ->
- * do_blocks run it serves a browser. An anonymous read of a campaign page
- * would otherwise come back with a button and no modal behind it, and a
- * finished campaign with a live-looking button instead of its explanation.
- *
- * REST_REQUEST is deliberately never defined here. It is process-wide and true
- * for every /wp-json call, so a test that defined it would silently flip other
- * blocks into their editor branch for the rest of the run.
+ * Select previews by route and edit permission. Leave REST_REQUEST undefined because public
+ * REST renders share that process-wide flag.
  */
 final class DonateButtonRestRenderTest extends IntegrationTestCase
 {
@@ -177,14 +167,7 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
         $this->assertStringContainsString('fundkit-donate-button', $html, 'the editor still sees its button');
     }
 
-    /**
-     * Read off the source because nothing else in this class can say it. The
-     * constant is process-wide and true for every /wp-json call, so defining it
-     * to prove the point would flip other blocks into their editor branch for
-     * the rest of the run; leaving it undefined lets a
-     * `REST_REQUEST || $this->isBlockRendererRequest()` restore the entire
-     * defect with every other test here still green.
-     */
+    /** Inspect source to check REST_REQUEST handling without defining a process-wide constant. */
     public function test_the_render_decision_never_reads_rest_request(): void
     {
         foreach (['render', 'isBlockRendererRequest'] as $method) {

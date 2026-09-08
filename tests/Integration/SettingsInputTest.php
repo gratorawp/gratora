@@ -6,12 +6,6 @@ namespace FundKit\Tests\Integration;
 
 use FundKit\Settings\SettingsService;
 
-/**
- * update() used to merge whatever arrived straight into the option: no
- * whitelist, no types. A mistyped key persisted forever as a setting nothing
- * reads, and a string landed where an int was expected, so a retention window
- * could be stored as "" and every comparison against it quietly became zero.
- */
 final class SettingsInputTest extends IntegrationTestCase
 {
     private function service(): SettingsService

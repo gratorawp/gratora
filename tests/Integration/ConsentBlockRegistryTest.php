@@ -69,10 +69,6 @@ final class ConsentBlockRegistryTest extends IntegrationTestCase
         $this->assertStringContainsString('consents[newsletter]', $html);
     }
 
-    /**
-     * Editing the wording in Settings has to reach every form at once. That is
-     * the whole reason the label is not stored on the block.
-     */
     public function test_editing_the_registry_changes_what_the_form_says(): void
     {
         $this->register();
@@ -89,7 +85,6 @@ final class ConsentBlockRegistryTest extends IntegrationTestCase
         $this->assertStringNotContainsString('Our newsletter', $html);
     }
 
-    /** A purpose the org deleted stops being asked about rather than lingering. */
     public function test_a_key_missing_from_the_registry_renders_nothing_for_donors(): void
     {
         $this->register();
@@ -107,10 +102,6 @@ final class ConsentBlockRegistryTest extends IntegrationTestCase
         $this->assertStringNotContainsString('<fieldset', $this->block()->render(['purposeKeys' => []], ''));
     }
 
-    /**
-     * A form cannot make something mandatory that the registry does not, so the
-     * required rule is answerable in one place rather than per form.
-     */
     public function test_required_is_enforced_from_the_registry(): void
     {
         $this->register(true);
@@ -131,7 +122,6 @@ final class ConsentBlockRegistryTest extends IntegrationTestCase
         $this->assertNotNull($reject, 'a required registry purpose must block the submission');
     }
 
-    /** The submission path accepts the keys the block picked. */
     public function test_the_validator_reads_the_picked_keys(): void
     {
         $ids = FormSubmissionValidator::consentPurposeIds(

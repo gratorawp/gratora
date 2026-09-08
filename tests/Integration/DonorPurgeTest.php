@@ -58,7 +58,6 @@ final class DonorPurgeTest extends IntegrationTestCase
         parent::tearDown();
     }
 
-    /** The behaviour the window exists to protect. */
     public function test_inside_the_window_a_returning_donor_is_reunited(): void
     {
         $this->window(90);

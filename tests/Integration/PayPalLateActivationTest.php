@@ -225,10 +225,6 @@ final class PayPalLateActivationTest extends IntegrationTestCase
         $this->assertSame($cancelled->cancelled_at, $after->cancelled_at);
     }
 
-    /**
-     * The money-visible half: liveForCampaign feeds the dashboard's MRR and
-     * the archive dialog, and both read status alone.
-     */
     public function test_a_reopened_plan_does_not_come_back_into_the_active_recurring_figures(): void
     {
         // Those figures count live plans only, so this one case runs live end
@@ -294,10 +290,6 @@ final class PayPalLateActivationTest extends IntegrationTestCase
         $this->assertSame(1, $announced, 'and a redelivered pair does not announce it a second time');
     }
 
-    /**
-     * An activation is still an activation on a plan PayPal has only suspended:
-     * the donor fixed their card and the money resumes.
-     */
     public function test_an_activation_still_revives_a_past_due_plan(): void
     {
         $reference = $this->createRecurringDonation();
@@ -343,10 +335,6 @@ final class PayPalLateActivationTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The mode of the secret that verified the delivery, not the mode the event
-     * claims. A test-mode webhook may not move a live plan in either direction.
-     */
     public function test_a_test_mode_secret_cannot_move_a_live_plan(): void
     {
         $reference = $this->createRecurringDonation();

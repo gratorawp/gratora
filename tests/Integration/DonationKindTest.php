@@ -97,10 +97,6 @@ final class DonationKindTest extends IntegrationTestCase
 
         Plugin::instance()->container->get(AggregateSyncer::class)->syncCampaign((int) $c->id);
 
-        // Raised means donations, at every level. A campaign used to count orders
-        // while its funds did not, so a campaign disagreed with the sum of its
-        // own funds, and a ticket buyer who received something of value was
-        // counted as having given.
         $fresh = Campaign::query()->where('id', $c->id)->get();
         $this->assertSame(2000, (int) $fresh->raised_cents, 'the donation, not the ticket');
     }

@@ -75,7 +75,6 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
 
     public function test_an_unrelated_plugin_is_left_alone(): void
     {
-        // Switching off plugins the site owner did not ask about is its own bug.
         $other = $this->givenActivePlugin('fundkit-test-addon', 'some-other-plugin');
 
         $this->deactivateCore();
@@ -92,10 +91,6 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
         $this->assertContains($other, $this->activePlugins());
     }
 
-    /**
-     * A plugin naming several dependencies, core among them, still goes: the
-     * header is a comma separated list.
-     */
     public function test_core_is_found_among_several_declared_dependencies(): void
     {
         $addon = $this->givenActivePlugin('fundkit-test-addon', 'woocommerce, fundraising-toolkit');
@@ -116,9 +111,6 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
         $this->assertContains(plugin_basename(FUNDKIT_FILE), $this->activePlugins());
     }
 
-    /**
-     * For an add-on that cannot carry the header, and for anyone extending this.
-     */
     public function test_the_filter_can_name_a_plugin_the_header_missed(): void
     {
         $other = $this->givenActivePlugin('fundkit-test-addon');

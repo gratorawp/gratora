@@ -138,11 +138,7 @@ final class RateLimitAtomicityTest extends IntegrationTestCase
         $this->assertSame(6, $stored, 'every attempt counts, not just the allowed ones');
     }
 
-    /**
-     * The window is a fixed bucket, not an expiry pushed forward on every
-     * attempt. A sliding expiry means someone hammering the endpoint holds
-     * their own lockout open indefinitely, stranding the real donor behind it.
-     */
+    /** Use fixed buckets so repeated attempts cannot extend lockouts. */
     public function test_attempts_do_not_extend_their_own_window(): void
     {
         global $wpdb;

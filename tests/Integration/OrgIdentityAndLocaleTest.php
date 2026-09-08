@@ -211,7 +211,6 @@ final class OrgIdentityAndLocaleTest extends IntegrationTestCase
         $this->assertSame('TAX-9', (string) (get_option('fundkit_org_profile')['tax_id'] ?? ''));
     }
 
-    // --- helpers ---------------------------------------------------------
 
     /** A template contributed the way an add-on contributes one, translated in its own domain. */
     private function registerAddonTemplate(?string &$translated): void

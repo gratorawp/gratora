@@ -147,11 +147,6 @@ final class ReceiptRecurringTransactionRollbackTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The control for the case above: with nothing in the way the same call
-     * writes the row and moves the counter, so what the rollback undoes is a
-     * write that really does happen.
-     */
     public function test_an_issue_that_succeeds_writes_the_row_and_moves_the_counter(): void
     {
         $donation = $this->paidDonation('lands@example.test');
@@ -254,7 +249,6 @@ final class ReceiptRecurringTransactionRollbackTest extends IntegrationTestCase
         $this->assertNull($plan->last_payment_at);
     }
 
-    /** The control: nothing in the way, and all three writes land. */
     public function test_a_renewal_that_is_accepted_lands_all_three_writes(): void
     {
         $plan = $this->plan('sub_accepted', 500);

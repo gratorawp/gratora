@@ -105,11 +105,6 @@ final class CampaignDerivedStatusFilterTest extends IntegrationTestCase
         $this->assertNotContains('Past target, stays open', $this->titlesFor('goal_met'));
     }
 
-    /**
-     * notAcceptingReason() reports the end date ahead of the goal, so this row
-     * is badged Ended. Answering to both filters would put a row badged Ended
-     * inside the Goal met list.
-     */
     public function test_a_campaign_that_ended_and_met_its_goal_belongs_only_to_ended(): void
     {
         $this->make('Both', [

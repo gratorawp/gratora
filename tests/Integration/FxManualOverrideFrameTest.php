@@ -15,21 +15,8 @@ use FundKit\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
- * A manual exchange rate is typed against the org's base currency: the settings
- * screen labels the column "1 <org base> =" and the card says the amounts below
- * are what one org-base unit is worth. The stored snapshot is denominated in
- * whatever base the last fetch ran against, and the two part company whenever
- * the org base moves while auto-refresh is off.
- *
- * Read in the snapshot's frame, an override books every donation in that
- * currency at the wrong value and writes the wrong rate into fx_rate for good.
- * Reconciled on the way out of the option instead, it is worse: the settings
- * screen posts back the number it was shown, so the correction lands on its own
- * output at the next save and the override decays by the bridge on every save
- * of the panel, whether or not anyone touched that row.
- *
- * So the frames are made to agree at the base change, where nothing has to be
- * guessed, and the read path is left an identity.
+ * Manual overrides and snapshots must share the org base. Rebase when settings change;
+ * converting on read would compound the adjustment on each save.
  */
 final class FxManualOverrideFrameTest extends IntegrationTestCase
 {

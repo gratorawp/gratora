@@ -8,18 +8,6 @@ use FundKit\Donations\Donation;
 use FundKit\Gateways\Sandbox\SandboxGateway;
 use WP_REST_Request;
 
-/**
- * Regression for QA bug #3: the donation form runtime only calls
- * POST /donations (createIntent) and never POST /donations/{ref}/confirm.
- * For Stripe that's correct - the webhook confirms async. For the sandbox
- * gateway it left every test donation at status=pending forever, with the
- * donor seeing a misleading "Thank you!" screen.
- *
- * Fix: GatewayIntentResult::auto_confirm; sandbox returns true; the donations
- * controller calls gateway->confirm() + donations->confirm() in the same
- * request when set. This test posts a sandbox donation via REST and asserts
- * the response (and DB) show status=paid before the response returns.
- */
 final class SandboxAutoConfirmTest extends IntegrationTestCase
 {
     public function test_sandbox_gateway_advertises_auto_confirm(): void
@@ -45,9 +33,7 @@ final class SandboxAutoConfirmTest extends IntegrationTestCase
             'sandbox'   => ['enabled' => true],
         ]);
 
-        // Boot ran (and read test_mode) before this option was set, so the
-        // sandbox gateway isn't registered yet; register it now so the REST
-        // create can resolve gateway=sandbox.
+        // Register sandbox explicitly because bootstrap ran before test_mode was enabled.
         $container = \FundKit\Foundation\Plugin::instance()->container;
         $manager   = $container->get(\FundKit\Gateways\GatewayManager::class);
         if (! $manager->get('sandbox')) {

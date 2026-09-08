@@ -65,7 +65,6 @@ final class SettingsSecretExposureTest extends IntegrationTestCase
         $this->assertSame('***', $data['stripe']['webhook_secret_test'] ?? null);
     }
 
-    /** The admin still needs to see whether one is configured. */
     public function test_an_unset_secret_stays_distinguishable_from_a_hidden_one(): void
     {
         $data = $this->read();

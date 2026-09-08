@@ -117,7 +117,6 @@ final class ActivationSchemaGuardTest extends IntegrationTestCase
         );
     }
 
-    /** Costs one option read on a healthy site and does nothing else. */
     public function test_a_finished_activation_is_not_run_again(): void
     {
         update_option(SchemaGuard::OPTION, FUNDKIT_DB_VERSION, false);

@@ -73,7 +73,6 @@ final class PortalSessionLifetimeTest extends IntegrationTestCase
         $this->assertSame($id, $this->session()->currentDonorId());
     }
 
-    /** A donor with several devices can end them all at once. */
     public function test_signing_out_everywhere_ends_every_session(): void
     {
         $id = $this->donorId('everywhere');
@@ -89,7 +88,6 @@ final class PortalSessionLifetimeTest extends IntegrationTestCase
         $this->assertNull($this->session()->currentDonorId());
     }
 
-    /** Otherwise every sign-in leaves another live key behind for its full life. */
     public function test_sessions_beyond_the_cap_per_donor_are_revoked_oldest_first(): void
     {
         $id = $this->donorId('cap-per-donor');

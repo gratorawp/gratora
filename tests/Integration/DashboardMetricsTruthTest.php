@@ -51,7 +51,6 @@ final class DashboardMetricsTruthTest extends IntegrationTestCase
         return $d;
     }
 
-    // --- today ------------------------------------------------------------
 
     public function test_todays_total_is_net_of_a_refund(): void
     {
@@ -89,7 +88,6 @@ final class DashboardMetricsTruthTest extends IntegrationTestCase
         $this->assertSame(1_000, $this->service()->today()['amount_raised_cents']);
     }
 
-    // --- needs attention ---------------------------------------------------
 
     private function campaign(array $overrides): Campaign
     {
@@ -138,7 +136,6 @@ final class DashboardMetricsTruthTest extends IntegrationTestCase
         $this->assertNotContains('ending-' . (int) $c->id, $this->attentionKeys());
     }
 
-    /** The queue is dismissible and dismissals are capped, so it cannot be unbounded. */
     public function test_the_queue_does_not_grow_without_limit(): void
     {
         for ($i = 0; $i < 30; $i++) {
@@ -150,7 +147,6 @@ final class DashboardMetricsTruthTest extends IntegrationTestCase
         $this->assertLessThanOrEqual(20, count($noForm));
     }
 
-    // --- active campaigns --------------------------------------------------
 
     public function test_an_ended_campaign_is_not_badged_active(): void
     {

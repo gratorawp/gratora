@@ -68,7 +68,6 @@ final class StripeProcessingWebhookTest extends IntegrationTestCase
         $this->assertSame('processing', $this->reload($donation)->status);
     }
 
-    /** The money has not arrived. Whatever else changes, it is not income yet. */
     public function test_processing_does_not_record_the_money_as_received(): void
     {
         $donation = $this->pendingStripeDonation();
@@ -83,7 +82,6 @@ final class StripeProcessingWebhookTest extends IntegrationTestCase
         $this->assertNull($this->reload($donation)->paid_at);
     }
 
-    /** Settlement, days later, is what makes it paid. */
     public function test_the_later_success_still_settles_the_donation(): void
     {
         $donation = $this->pendingStripeDonation();
@@ -125,10 +123,6 @@ final class StripeProcessingWebhookTest extends IntegrationTestCase
         $this->assertSame('failed', $this->reload($donation)->status);
     }
 
-    /**
-     * A verified signature proves Stripe sent the event, not that it is about
-     * this donation for this amount. The same guard the other handlers use.
-     */
     public function test_an_event_for_a_different_amount_is_refused(): void
     {
         $donation = $this->pendingStripeDonation();

@@ -76,11 +76,6 @@ final class CurrencyMoveTest extends IntegrationTestCase
         $this->assertSame(10000, (int) $after->base_amount_cents, 'GBP 100 is GBP 100');
     }
 
-    /**
-     * A currency the snapshot has no rate for cannot be restated, so it keeps
-     * the figure it has and the operator is told rather than left with a wrong
-     * one that looks right.
-     */
     public function test_a_currency_with_no_rate_is_left_alone_and_reported(): void
     {
         $donation = $this->pending('JPY', 100000, 90000);
@@ -114,10 +109,6 @@ final class CurrencyMoveTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * An org that stops accepting a currency for new donations, while its existing
-     * donors in it keep giving, stopped refreshing rates for good.
-     */
     public function test_a_live_foreign_plan_keeps_the_rates_coming(): void
     {
         $this->settings()->update('currency-locale', [

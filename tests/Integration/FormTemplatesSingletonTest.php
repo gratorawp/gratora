@@ -9,14 +9,6 @@ use FundKit\Forms\Form;
 use FundKit\Forms\FormTemplates;
 use FundKit\Foundation\Plugin;
 
-/**
- * Several FundKit blocks register `supports.multiple = false` in their editor
- * registration (one amount picker, one submit, one consent block, etc.).
- * The Gutenberg editor silently drops the second instance, which produced a
- * confusing "missing block" symptom in earlier templates. This regression
- * guard scans every shipped template's block markup against the canonical
- * single-instance list and fails fast on any duplicate.
- */
 final class FormTemplatesSingletonTest extends IntegrationTestCase
 {
     /** Block names whose JS registration sets `supports.multiple = false`. */
@@ -64,13 +56,6 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * A template that can be submitted has to say where the donor picks how to
-     * pay. The runtime used to draw the selector on the last page when no block
-     * was placed, so a template could omit it and still work; that fallback is
-     * gone, and a template without the block now ships a form that chooses a
-     * gateway for the donor without asking.
-     */
     public function test_every_submittable_template_places_the_payment_gateways_block(): void
     {
         $missing = [];
@@ -114,12 +99,6 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The recap used to be drawn by the submit step, so it always sat directly
-     * above the button whatever the author wanted. It is a block now, which
-     * means a template that forgot it ships a form that never shows the donor
-     * what they are about to give.
-     */
     public function test_every_template_that_submits_also_recaps(): void
     {
         foreach (FormTemplates::all() as $id => $template) {

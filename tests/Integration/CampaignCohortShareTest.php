@@ -10,10 +10,6 @@ use FundKit\Donations\Donation;
 use FundKit\Foundation\Plugin;
 use WP_REST_Request;
 
-/**
- * The two cohorts are disjoint, so a share of one measured against the other
- * has no ceiling: two returning donors and one first-timer printed 200%.
- */
 final class CampaignCohortShareTest extends IntegrationTestCase
 {
     private function metrics(): CampaignMetricsService

@@ -218,7 +218,6 @@ final class DeferredSignupTest extends IntegrationTestCase
         $this->assertSame($firstId, (int) $this->claim($email)->id, 'the same row is updated');
     }
 
-    /** An address nobody proved is not kept past its window. */
     public function test_the_daily_sweep_drops_expired_claims(): void
     {
         $email = 'swept-' . uniqid() . '@example.test';
@@ -232,10 +231,6 @@ final class DeferredSignupTest extends IntegrationTestCase
         $this->assertNull($this->claim($email));
     }
 
-    /**
-     * A claim has no donor id, so erasure reaches it by address or not at all.
-     * Left behind, its link would still be live and would rebuild the donor.
-     */
     public function test_erasing_a_donor_takes_the_claim_on_their_address_with_it(): void
     {
         $email = 'erased-' . uniqid() . '@example.test';
@@ -348,7 +343,6 @@ final class DeferredSignupTest extends IntegrationTestCase
         );
     }
 
-    /** And a signup mails a link that carries the claim rather than a donor. */
     public function test_signing_up_mails_a_link_that_carries_the_claim(): void
     {
         $email = 'mailed-' . uniqid() . '@example.test';
@@ -393,7 +387,6 @@ final class DeferredSignupTest extends IntegrationTestCase
         );
     }
 
-    /** An address that is already a donor gets signed in, not claimed. */
     public function test_signing_up_with_a_known_address_sends_a_sign_in_link(): void
     {
         $email = 'already-' . uniqid() . '@example.test';

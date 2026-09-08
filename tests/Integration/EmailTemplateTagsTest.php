@@ -33,10 +33,6 @@ final class EmailTemplateTagsTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * The failure this exists for: a default body using a tag its sender does
-     * not pass. That reaches the donor verbatim.
-     */
     public function test_no_default_body_uses_a_tag_its_template_does_not_offer(): void
     {
         $email    = (new SettingsService())->get('email');

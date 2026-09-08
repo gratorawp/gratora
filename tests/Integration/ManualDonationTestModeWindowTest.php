@@ -8,23 +8,8 @@ use FundKit\Donations\Donation;
 use WP_REST_Request;
 
 /**
- * H3 from the manual-donations review.
- *
- * record() used to clear is_test after createPending() returned, but createPending()
- * fires fundkit.donation.creating inside its own transaction, so every listener on
- * that hook saw the flag still set. Gift Aid listens there and skips a claim
- * snapshot for a test donation. The row then persists is_test = 0, so it counts
- * as real money in every total while sitting permanently outside the Gift Aid
- * claim: 25% of the donation, gone, discovered at claim time.
- *
- * The existing test_real_money_is_recorded_even_while_the_site_is_in_test_mode
- * asserts the persisted column and passes, because by the time it looks the
- * flag has been corrected. The damage happened earlier, which is why this test
- * watches the hook rather than the row.
- *
- * FIXED: is_test is now resolved before the insert, via a
- * DonationIntent field record() sets to false, so no listener ever sees a
- * hand-recorded check as a test donation.
+ * Assert is_test inside fundkit.donation.creating, before listeners create donation-dependent
+ * records.
  */
 final class ManualDonationTestModeWindowTest extends IntegrationTestCase
 {

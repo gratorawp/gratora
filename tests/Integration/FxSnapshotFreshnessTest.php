@@ -159,7 +159,6 @@ final class FxSnapshotFreshnessTest extends IntegrationTestCase
         $this->assertTrue((bool) ((array) $res->get_data())['stale']);
     }
 
-    /** And a refresh that really has stopped is still reported. */
     public function test_a_refresh_that_stopped_is_reported(): void
     {
         update_option(FxRates::OPTION, [

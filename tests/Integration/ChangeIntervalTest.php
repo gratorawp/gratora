@@ -126,7 +126,6 @@ final class ChangeIntervalTest extends IntegrationTestCase
         $this->actions()->changeInterval($plan, 'yearly', $this->change());
     }
 
-    /** The same cadence is not a gateway call and not an event. */
     public function test_no_change_is_a_no_op(): void
     {
         $plan = $this->plan();
@@ -137,10 +136,6 @@ final class ChangeIntervalTest extends IntegrationTestCase
         $this->assertSame($before, (string) $this->reload($plan)->updated_at);
     }
 
-    /**
-     * A paused plan's next payment is paired with resume_at. Writing the
-     * processor's date over it would restart a donor the org agreed to pause.
-     */
     public function test_a_paused_plan_keeps_its_resume_pairing(): void
     {
         $resume = gmdate('Y-m-d H:i:s', time() + 60 * DAY_IN_SECONDS);

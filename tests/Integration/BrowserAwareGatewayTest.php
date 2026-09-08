@@ -156,7 +156,6 @@ final class BrowserAwareGatewayTest extends IntegrationTestCase
     }
 }
 
-/** Minimal third-party gateway: enough surface to be registered and chosen. */
 final class FakeBrowserGateway implements PaymentGateway, BrowserAware
 {
     public function id(): string { return 'fakepay'; }

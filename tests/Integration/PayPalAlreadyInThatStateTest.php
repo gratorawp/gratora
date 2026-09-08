@@ -18,19 +18,8 @@ use FundKit\Recurring\RecurringPlanRepository;
 use RuntimeException;
 
 /**
- * Pausing a subscription PayPal has already suspended, and resuming one it has
- * already made active, are both no-ops rather than failures: the donor asked
- * for a state the subscription is in, so there is nothing to report.
- *
- * PayPal refuses those calls, and the refusal is what has to be recognised.
- * Its shared error model requires `name` and leaves `details` optional, so the
- * refusal can arrive naming itself and carrying nothing else. Recognised only
- * by the detail issues, that shape carries nothing to match: the refusal is
- * passed on, and a donor who pressed pause twice is shown an error for a
- * subscription that is already paused.
- *
- * The state is confirmed by re-reading the subscription before anything is
- * swallowed, so recognising the refusal only decides whether to ask.
+ * Recognize PayPal state refusals by name even without details, then re-read the subscription
+ * before treating pause or resume as an idempotent success.
  */
 final class PayPalAlreadyInThatStateTest extends IntegrationTestCase
 {
@@ -152,7 +141,6 @@ final class PayPalAlreadyInThatStateTest extends IntegrationTestCase
         $this->addToAssertionCount(1);
     }
 
-    /** The shape the shared error model permits, and the one that used to escape. */
     public function test_a_refusal_carrying_only_a_name_is_recognised(): void
     {
         $this->refusal = self::NAME_ONLY;

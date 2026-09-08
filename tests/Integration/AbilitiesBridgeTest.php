@@ -40,10 +40,6 @@ final class AbilitiesBridgeTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * Dots are legal in a command id and illegal in an ability name, so the
-     * mapping is not optional.
-     */
     public function test_names_are_legal_ability_names(): void
     {
         foreach (array_keys($this->abilities()) as $name) {

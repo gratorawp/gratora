@@ -111,7 +111,6 @@ final class ConditionalBlockGateTest extends IntegrationTestCase
         $this->assertSame($this->listed, (int) $out['donation']->fund_id);
     }
 
-    /** The allow-list still refuses a fund the shown picker does not list. */
     public function test_a_shown_picker_still_refuses_a_fund_it_does_not_list(): void
     {
         $out = $this->donate($this->form(), [
@@ -123,7 +122,6 @@ final class ConditionalBlockGateTest extends IntegrationTestCase
         $this->assertNull($out['donation']);
     }
 
-    /** The same rule on the message block, which publishes to the supporter wall. */
     public function test_a_hidden_comment_block_does_not_accept_a_public_message(): void
     {
         $comment = wp_json_encode([ 'condition' => [ 'field' => 'custom.designate', 'op' => '=', 'value' => 'yes' ] ]);
@@ -147,7 +145,6 @@ final class ConditionalBlockGateTest extends IntegrationTestCase
         $this->assertSame('', (string) $out['donation']->note_to_org);
     }
 
-    /** An unconditional block is unchanged, which is every shipped form. */
     public function test_an_unconditional_picker_is_untouched(): void
     {
         $picker = wp_json_encode([ 'fundIds' => [ $this->listed ] ]);

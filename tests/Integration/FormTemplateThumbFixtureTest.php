@@ -7,12 +7,8 @@ namespace FundKit\Tests\Integration;
 use FundKit\Forms\FormTemplates;
 
 /**
- * The template picker derives each thumbnail from the template's own block
- * markup, in JavaScript. The JS suite cannot read FormTemplates.php, so it
- * works from a fixture, and a fixture that drifts from the templates would let
- * a thumbnail regression pass unnoticed.
- *
- * Run with FUNDKIT_WRITE_THUMB_FIXTURE=1 to regenerate after changing a template.
+ * Keep the JS thumbnail fixture in sync with FormTemplates.php. Regenerate with
+ * FUNDKIT_WRITE_THUMB_FIXTURE=1.
  */
 final class FormTemplateThumbFixtureTest extends IntegrationTestCase
 {

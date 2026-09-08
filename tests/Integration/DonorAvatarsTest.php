@@ -66,10 +66,6 @@ final class DonorAvatarsTest extends IntegrationTestCase
         $this->assertStringContainsString('gravatar.com', $urls[7]);
     }
 
-    /**
-     * The donation is already hidden; a picture would put a face on it, and
-     * request itself would leak the address hash of someone who opted out.
-     */
     public function test_an_anonymous_donor_never_gets_one(): void
     {
         $this->enable(true);
@@ -90,7 +86,6 @@ final class DonorAvatarsTest extends IntegrationTestCase
         $this->assertArrayNotHasKey(9, $this->avatars()->urlsFor([9 => $blank]));
     }
 
-    /** Two donors, one anonymous: the other is unaffected. */
     public function test_one_anonymous_donor_does_not_suppress_the_rest(): void
     {
         $this->enable(true);

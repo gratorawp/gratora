@@ -58,7 +58,6 @@ final class UpgradeNoticeDestinationTest extends IntegrationTestCase
         $this->assertStringNotContainsString('tab=advanced', $html, 'Settings has no advanced tab');
     }
 
-    /** The destination has to be a tab the Tools screen actually defines. */
     public function test_the_tab_it_links_to_exists(): void
     {
         $tools = (string) file_get_contents(dirname(__DIR__, 2) . '/assets/admin/tools/Tools.jsx');

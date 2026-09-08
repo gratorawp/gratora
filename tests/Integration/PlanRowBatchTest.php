@@ -144,7 +144,6 @@ final class PlanRowBatchTest extends IntegrationTestCase
         $this->assertNull($shaped[(int) $plan->id]['last_failure']);
     }
 
-    /** The one-plan path and the page path have to agree, or a tab loses a field. */
     public function test_the_single_plan_shape_matches_the_batched_one(): void
     {
         $plan = $this->seedPlans(1, 'agree')[0];

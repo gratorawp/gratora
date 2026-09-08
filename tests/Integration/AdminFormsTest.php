@@ -208,7 +208,6 @@ final class AdminFormsTest extends IntegrationTestCase
         $this->assertStringContainsString('fundkit-donation-form--blocks', $res->get_data()['html']);
     }
 
-    // helpers
 
     private function createCampaign(): int
     {

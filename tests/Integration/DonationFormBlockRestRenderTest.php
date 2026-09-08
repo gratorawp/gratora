@@ -8,21 +8,8 @@ use FundKit\Forms\Form;
 use WP_REST_Request;
 
 /**
- * The donation-form block answers the block editor with an iframe preview and
- * everyone else with the live form. Which one it draws is decided from the
- * route being served, never from REST_REQUEST: WP defines that for every
- * /wp-json call, and core serves content.rendered from the same the_content ->
- * do_blocks run it serves a browser.
- *
- * The route's own permission check accepts whoever can edit the post being
- * previewed, and ServerSideRender always names one. A stricter test here fails
- * for someone core already let through, an editor of pages but not of posts,
- * and answers them with the front-end form: a live form token in a canvas that
- * never runs the scripts that would make it work.
- *
- * REST_REQUEST is deliberately never defined here. It is process-wide and true
- * for every /wp-json call, so a test that defined it would silently flip other
- * blocks into their editor branch for the rest of the run.
+ * Use the block-renderer route and post edit permission to select previews. Leave REST_REQUEST
+ * undefined: it also covers public REST renders and affects the entire test process.
  */
 final class DonationFormBlockRestRenderTest extends IntegrationTestCase
 {

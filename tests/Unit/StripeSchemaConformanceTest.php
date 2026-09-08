@@ -7,25 +7,9 @@ namespace FundKit\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The Stripe gateway read against Stripe's own schema.
- *
- * Every suite that exercises this gateway answers Stripe from a fixture, so a
- * field the API does not have reads back exactly as well as one it does, and a
- * request the API would refuse gets a 200. That has already cost this codebase
- * twice: a charge fetched with `expand[]=dispute`, which Stripe refuses on the
- * whole request, and two branches keyed on `charge.dispute`, which does not
- * exist and so could never fire. Both passed every test.
- *
- * The fixture beside this test is an extract of Stripe's published OpenAPI
- * specification at the exact version StripeApi::API_VERSION pins, taken from
- * the commit whose info.version reports it. It is the one source here that does
- * not agree with the code by construction.
- *
- * This is a static read of the source, not a run of it: it cannot see a field
- * read through a variable, and it is not a substitute for a donation put
- * through a real test account. What it does catch is the whole class of
- * mistake where the code and its fixtures agree with each other about a shape
- * Stripe never returns.
+ * Compare literal Stripe field reads with the published OpenAPI schema pinned by
+ * StripeApi::API_VERSION. Static checks cannot follow variable field names or replace real API
+ * tests.
  */
 final class StripeSchemaConformanceTest extends TestCase
 {

@@ -68,10 +68,6 @@ final class FormEditingTruthTest extends IntegrationTestCase
         return null;
     }
 
-    /**
-     * The block is the single writer of the allowed list, so a check that reads
-     * the last-saved setting describes a form the author is not looking at.
-     */
     public function test_readiness_reads_the_gateways_block_in_the_editor(): void
     {
         $form = $this->form(self::REQUIRED_BLOCKS);
@@ -98,10 +94,6 @@ final class FormEditingTruthTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * A purpose renamed or deleted vanishes from every form asking for it and
-     * stops being enforced, and nothing said so.
-     */
     public function test_a_consent_purpose_that_no_longer_exists_is_reported(): void
     {
         Plugin::instance()->container->get(SettingsService::class)->update('consents', [

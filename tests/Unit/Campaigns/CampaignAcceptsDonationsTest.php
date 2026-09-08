@@ -40,10 +40,6 @@ final class CampaignAcceptsDonationsTest extends TestCase
         }
     }
 
-    /**
-     * The admin picked a date; the datetime column stored it as midnight. Read
-     * literally that closes the campaign 24 hours early.
-     */
     public function test_an_end_date_is_inclusive_of_that_whole_day(): void
     {
         $c = $this->campaign(null, '2026-07-28 00:00:00');

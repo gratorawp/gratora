@@ -55,10 +55,6 @@ final class FormEditorAdminBarTest extends IntegrationTestCase
         $this->assertTrue($this->page()->hideAdminBar(true));
     }
 
-    /**
-     * Someone else may already have hidden it. Refusing to hide is not the
-     * same as forcing it back on.
-     */
     public function test_an_existing_refusal_is_not_overturned(): void
     {
         $_GET['page'] = 'fundkit-campaigns';
@@ -66,10 +62,6 @@ final class FormEditorAdminBarTest extends IntegrationTestCase
         $this->assertFalse($this->page()->hideAdminBar(false));
     }
 
-    /**
-     * The filter used to be added at plugin load. It now rides FormsPage, so
-     * registering the provider has to be what attaches it.
-     */
     public function test_registering_the_page_attaches_the_filter(): void
     {
         $page = $this->page();
@@ -82,10 +74,6 @@ final class FormEditorAdminBarTest extends IntegrationTestCase
         remove_filter('show_admin_bar', [$page, 'hideAdminBar']);
     }
 
-    /**
-     * The whole point of the move: what WordPress asks is what the editor
-     * answers.
-     */
     public function test_wordpress_gets_the_refusal_through_the_filter(): void
     {
         $_GET['page'] = 'fundkit-forms';

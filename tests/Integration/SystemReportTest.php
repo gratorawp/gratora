@@ -50,10 +50,6 @@ final class SystemReportTest extends IntegrationTestCase
         $this->assertStringContainsString('Encryption key', $text);
     }
 
-    /**
-     * A key that has gone missing makes every encrypted column unreadable, so
-     * the report has to say so rather than leave support guessing.
-     */
     public function test_a_lost_encryption_key_is_called_out(): void
     {
         SystemSetting::write('encryption_key_lost_at', '2026-08-29 10:00:00');
@@ -99,10 +95,6 @@ final class SystemReportTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * The plugin list is the first thing a conflict report turns on, and a row
-     * count is how "the donations are gone" gets answered in one look.
-     */
     public function test_it_lists_active_plugins_and_counts_the_tables(): void
     {
         global $wpdb;

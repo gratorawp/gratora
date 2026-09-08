@@ -82,7 +82,6 @@ final class DonationCreatingHookTest extends IntegrationTestCase
         $this->assertSame($donorsBefore, (int) Donor::query()->count(), 'the donor outlived the failure');
     }
 
-    /** Ordering matters: the row exists by the time observers of the committed donation run. */
     public function test_it_fires_before_the_committed_intent_created_broadcast(): void
     {
         $order = [];

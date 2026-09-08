@@ -295,7 +295,6 @@ final class StripeReversedConfirmSeamTest extends IntegrationTestCase
         $this->assertSame('3000', (string) $fresh->payment_method_last4);
     }
 
-    /** A card donation still reports its brand and last4 from the same place. */
     public function test_a_card_donation_carries_its_brand_and_last_four(): void
     {
         $donation = $this->stripeDonation('pending');

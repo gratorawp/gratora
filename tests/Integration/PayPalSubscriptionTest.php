@@ -126,9 +126,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         if (str_contains($path, '/v1/catalogs/products'))     return ['id' => 'PROD-1'];
         if (str_contains($path, '/v1/billing/plans'))         return ['id' => 'P-PLAN-1'];
         if (str_contains($path, '/v1/billing/subscriptions/')) {
-            // Echo the subscription actually asked for: PayPal answers about
-            // the id in the URL, and a fake that always names the same one
-            // hides every bug about which subscription is which.
+            // Return the requested subscription ID so the fake preserves identity checks.
             $asked = rawurldecode(basename($path));
             return [
                 'id'         => $asked !== '' ? $asked : 'I-SUB-1',
@@ -342,11 +340,6 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The heart of it: PayPal charges on approval, so the opening sale belongs
-     * to the signup donation. Treating it as a renewal would record the same
-     * money twice.
-     */
     public function test_the_opening_sale_confirms_the_signup_donation_instead_of_duplicating_it(): void
     {
         $reference = $this->createRecurringDonation();
@@ -462,7 +455,6 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         );
     }
 
-    /** A later billing cycle is a genuine new donation. */
     public function test_a_later_sale_creates_a_renewal_donation(): void
     {
         $reference = $this->createRecurringDonation();
@@ -528,7 +520,6 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->assertNotNull($plan->cancelled_at);
     }
 
-    /** Cancelling from FundKit is idempotent: PayPal errors on an ended sub. */
     public function test_cancel_is_idempotent(): void
     {
         $reference = $this->createRecurringDonation();
@@ -740,13 +731,6 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->assertSame('paid', $donation->status, 'the guard must not break the happy path');
     }
 
-    /**
-     * The plan row is what records the money, shows the donor their plan, and
-     * lets anyone cancel it: every cancel path reads gateway_subscription_id
-     * off it. It used to be written only by one un-retried POST from the
-     * donor's browser, so a closed tab left PayPal billing forever against
-     * nothing.
-     */
     public function test_the_activation_webhook_records_a_plan_the_browser_never_did(): void
     {
         $reference = $this->createRecurringDonation(2500);
@@ -815,10 +799,6 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->assertSame('paid', $donation->status);
     }
 
-    /**
-     * Two subscriptions for one donation means the donor is being billed twice.
-     * Binding the second would hide the first, which keeps billing unrecorded.
-     */
     public function test_a_second_different_subscription_is_refused(): void
     {
         $reference = $this->createRecurringDonation(2500);

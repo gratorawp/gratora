@@ -160,10 +160,6 @@ final class DonorRetentionPoisonRowTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * Erasure is a compliance action an org believes has happened. One that did
-     * not has to be readable on the Tools screen, which is what ErrorLog feeds.
-     */
     public function test_the_donor_the_sweep_could_not_erase_is_reported(): void
     {
         $this->erasureIsRunning();
@@ -184,11 +180,6 @@ final class DonorRetentionPoisonRowTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * Stepping past is for one pass only: whatever broke may be fixed by
-     * tomorrow, and a donor skipped forever is the same failure in slower
-     * motion.
-     */
     public function test_the_next_pass_starts_at_the_top_and_tries_again(): void
     {
         $this->erasureIsRunning();

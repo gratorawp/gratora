@@ -83,10 +83,6 @@ final class DonationFormMinimumTileTest extends TestCase
         $this->assertSame(374900, $out['jpyBar']);
     }
 
-    /**
-     * The symptom as a donor meets it: pick the smallest tile on the form,
-     * press the button, and be told to give more than the form offers.
-     */
     public function test_the_amount_step_accepts_the_tile_the_donor_tapped(): void
     {
         $out = $this->runModule('state/store.js', <<<'JS'

@@ -102,7 +102,6 @@ final class CampaignStatMetricsTest extends IntegrationTestCase
         $this->assertSame('40%', $this->metrics()->value($c, 'percent'));
     }
 
-    /** A count goal with no count set states nothing, whatever else is on the row. */
     public function test_a_donations_goal_with_no_count_stays_silent(): void
     {
         $c = $this->campaign(['goal_cents' => 1000000]);
@@ -139,7 +138,6 @@ final class CampaignStatMetricsTest extends IntegrationTestCase
         $this->assertNull($this->metrics()->value($this->campaign(), 'days_left'));
     }
 
-    /** Zero donations means no average to state, not an average of nothing. */
     public function test_average_and_top_stay_silent_before_the_first_donation(): void
     {
         $c = $this->campaign();
@@ -168,7 +166,6 @@ final class CampaignStatMetricsTest extends IntegrationTestCase
         $this->assertFalse(CampaignStatMetrics::isKey('not_a_metric'));
     }
 
-    /** The author's own wording wins; an empty one falls back rather than blanking. */
     public function test_a_custom_label_replaces_the_default(): void
     {
         $this->assertSame('So far', $this->metrics()->label('raised', 'So far'));

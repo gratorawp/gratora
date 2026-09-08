@@ -108,7 +108,6 @@ final class ReceiptResendKeepsRecordTest extends IntegrationTestCase
         $this->assertNotSame('', $first);
     }
 
-    /** Two runners on the same job still send one email. */
     public function test_running_the_issuer_twice_does_not_send_twice(): void
     {
         $donation = $this->paidDonation();

@@ -34,8 +34,7 @@ final class SandboxRecurringPlanTest extends IntegrationTestCase
             'sandbox'   => ['enabled' => true],
         ]);
 
-        // Boot read test_mode before this option was set, so the sandbox is not
-        // registered yet.
+        // Register sandbox explicitly because bootstrap ran before test_mode was enabled.
         $container = Plugin::instance()->container;
         $manager   = $container->get(GatewayManager::class);
         if (! $manager->get('sandbox')) {

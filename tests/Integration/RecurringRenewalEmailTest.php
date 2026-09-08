@@ -80,8 +80,6 @@ final class RecurringRenewalEmailTest extends IntegrationTestCase
 
     public function test_the_editor_is_not_offered_a_receipt_number_tag(): void
     {
-        // The tag list is what the settings editor offers an author as safe to
-        // insert, so advertising one nothing fills is the same defect.
         $this->assertNotContains('receipt_number', SettingsService::templateTags()['recurring_renewal']);
     }
 }

@@ -94,7 +94,6 @@ final class DonorRehashCollisionTest extends IntegrationTestCase
         $this->assertSame('stale-' . $suffix, $this->hashOf($original));
     }
 
-    /** The pair is one person with two giving histories, so somebody has to be told. */
     public function test_the_collision_is_written_to_the_log(): void
     {
         $suffix = uniqid();
@@ -120,7 +119,6 @@ final class DonorRehashCollisionTest extends IntegrationTestCase
         );
     }
 
-    /** A walk that ends on a collision has still ended: nothing is owed. */
     public function test_the_walk_finishes_rather_than_retrying_forever(): void
     {
         $suffix = uniqid();

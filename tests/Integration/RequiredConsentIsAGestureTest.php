@@ -112,10 +112,6 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
         $this->assertFalse($purpose['checked'], 'the donor is shown a granted consent they never gave');
     }
 
-    /**
-     * An org that marks a purpose both required and pre-ticked is still asking
-     * for a gesture, so the pre-tick loses.
-     */
     public function test_required_beats_a_default_of_ticked(): void
     {
         $this->registerPurpose(true, true);
@@ -123,7 +119,6 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
         $this->assertFalse($this->runtimePurpose()['checked']);
     }
 
-    /** An optional purpose the org wants ticked is a suggestion the donor can undo. */
     public function test_an_optional_purpose_keeps_its_default(): void
     {
         $this->registerPurpose(false, true);

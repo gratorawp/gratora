@@ -7,11 +7,6 @@ namespace FundKit\Tests\Integration;
 use FundKit\Gateways\SubscriptionSchedule;
 use FundKit\Gateways\SupportsScheduleChange;
 
-/**
- * Changing how often a donor is charged is a capability, not something every
- * processor has: a mandate is often created against a fixed cadence and only
- * the amount is revisable. Gateways that cannot are simply not offered it.
- */
 final class ScheduleChangeSeamTest extends IntegrationTestCase
 {
     /**
@@ -63,7 +58,6 @@ final class ScheduleChangeSeamTest extends IntegrationTestCase
         $this->assertSame($schedule->nextPaymentAt, $schedule->currentPeriodEnd);
     }
 
-    /** Newer API versions moved the field onto the item; both are read. */
     public function test_a_period_end_on_the_item_is_still_found(): void
     {
         $schedule = SubscriptionSchedule::fromStripe([

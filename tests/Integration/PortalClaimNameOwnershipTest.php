@@ -117,10 +117,6 @@ final class PortalClaimNameOwnershipTest extends IntegrationTestCase
         $this->assertSame('Okafor', (string) $donor->last_name);
     }
 
-    /**
-     * The first cost the shared row charged: a stranger could contest a name
-     * into nothing, and the owner was created nameless off their own link.
-     */
     public function test_a_stranger_cannot_blank_the_name_the_donor_typed(): void
     {
         $email = 'no-wipe-' . uniqid() . '@example.test';

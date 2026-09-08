@@ -152,7 +152,6 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
         );
     }
 
-    /** The same confirmation, unbroken, so the guard above cannot pass on a no-op. */
     public function test_the_same_confirmation_lands_whole_when_nothing_fails(): void
     {
         $donation = $this->seedDonation(5000, 'pending');
@@ -213,7 +212,6 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
         );
     }
 
-    /** The settlement this call is for, so the guard above is not satisfied by a no-op. */
     public function test_the_same_settlement_replaces_the_awaited_row_when_nothing_fails(): void
     {
         $donation = $this->seedPaidDonation(10000);
@@ -275,7 +273,6 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
         );
     }
 
-    /** The reinstatement itself, so the guard above is not satisfied by a no-op. */
     public function test_the_same_reinstatement_lands_whole_when_nothing_fails(): void
     {
         $donation = $this->seedPaidDonation(10000);
@@ -297,14 +294,8 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
     }
 
     /**
-     * A bank refund the gateway reports before this call returns. Its event
-     * writes the awaited row first, under the same id, and refund() then has to
-     * settle that row rather than insert beside it.
-     *
-     * The id is unique, so the insert would collide and the admin would be told
-     * the refund failed while the gateway had already paid it. Reading that as a
-     * failure and clicking refund again passes the over-refund guard, which
-     * counts only recorded refunds, and pays the donor a second time.
+     * Simulate the webhook creating an awaited refund before the gateway call returns; settle
+     * that row using its unique gateway ID.
      */
     public function test_a_settled_refund_settles_the_awaited_row_its_own_gateway_event_wrote(): void
     {

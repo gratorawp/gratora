@@ -414,15 +414,8 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
     }
 
     /**
-     * Erasure stops the donor's mandates first, on purpose: erasing while a
-     * plan still bills leaves it renewing and writing their name and email back
-     * into the webhook log every month. Cancelling reaches the processor, so it
-     * is outside the transaction and outside what a rollback can undo, and an
-     * erasure that then fails leaves exactly this: a donor with all their data,
-     * whose recurring donation has stopped for good.
-     *
-     * Pinned rather than fixed. It is the deliberate half of the trade, and the
-     * org has to be able to see which half they are holding.
+     * Gateway cancellation cannot roll back with local erasure. A failed erasure retains donor
+     * data but leaves mandates cancelled.
      */
     public function test_an_erasure_that_fails_has_already_stopped_the_recurring_donation(): void
     {

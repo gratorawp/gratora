@@ -109,10 +109,6 @@ final class PayPalCallbackCostTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The donor whose double submit or retry lands here has paid. Telling them
-     * it failed sends them to give a second time.
-     */
     public function test_a_replay_on_a_paid_donation_answers_as_success(): void
     {
         [$reference, $token] = $this->donation();

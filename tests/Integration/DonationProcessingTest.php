@@ -61,7 +61,6 @@ final class DonationProcessingTest extends IntegrationTestCase
         $this->assertSame('processing', $this->reload((string) $donation->reference)->status);
     }
 
-    /** The reason is what an admin reads to know why it is sitting there. */
     public function test_the_reason_is_kept_where_an_admin_can_read_it(): void
     {
         $donation = $this->driveOfflineDonation();
@@ -88,7 +87,6 @@ final class DonationProcessingTest extends IntegrationTestCase
         $this->assertNotSame('paid', $row->status);
     }
 
-    /** Settlement is the whole point: the money lands, days later. */
     public function test_a_processing_donation_can_still_be_confirmed(): void
     {
         $donation = $this->driveOfflineDonation();
@@ -170,10 +168,6 @@ final class DonationProcessingTest extends IntegrationTestCase
         $this->assertSame('bank_debit_submitted', $seen);
     }
 
-    /**
-     * Refunds move money back out of the merchant's account. There is nothing
-     * to move back until it has arrived.
-     */
     public function test_a_processing_donation_cannot_be_refunded(): void
     {
         $donation = $this->driveOfflineDonation();

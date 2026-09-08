@@ -89,19 +89,9 @@ final class StripeCancelConfirmationTest extends IntegrationTestCase
     }
 
     /**
-     * A plan that never reached Stripe at all.
-     *
-     * gateway_subscription_id is NOT NULL under unique(gateway,
-     * gateway_subscription_id), so a plan Stripe never issued an id for cannot
-     * record that absence as an empty string: the Give importer mints
-     * 'give-import-<id>' and DemoSeeder 'demo-subNNN' for exactly that reason.
-     * The only escape hatch here was a check for '', which that column cannot
-     * hold, so the placeholder went to Stripe as though it were real.
-     *
-     * Stripe answers resource_missing, which confirmedTerminal() cannot tell
-     * apart from a key rotated to a different account, so the throw stood: the
-     * donor's cancel failed, the plan stayed active, and every retry failed the
-     * same way. Donor erasure cancels plans first, so it took that with it.
+     * Imported and demo plans use placeholder subscription IDs to satisfy uniqueness. Do not
+     * send them to Stripe: resource_missing cannot distinguish placeholders from account
+     * changes.
      */
     public function test_an_id_stripe_never_issued_cancels_locally(): void
     {
@@ -117,7 +107,6 @@ final class StripeCancelConfirmationTest extends IntegrationTestCase
         $this->assertSame([], $this->calls, 'and Stripe was never asked about an id it never issued');
     }
 
-    /** The demo seeder's placeholder is the same shape and the same answer. */
     public function test_a_seeded_placeholder_cancels_locally_too(): void
     {
         $plan = $this->seedPlan('demo-sub001');

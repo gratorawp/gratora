@@ -9,22 +9,8 @@ use FundKit\Gateways\GatewayManager;
 use FundKit\Gateways\Sandbox\SandboxGateway;
 
 /**
- * An add-on contributes gateways by attaching to fundkit.gateways.register in
- * its own module boot(). ModuleManager::bootAll() runs core first, so a
- * broadcast fired inside CoreModule::boot() happens before any add-on listener
- * exists and reaches nobody.
- *
- * That is not hypothetical: the five gateways in fundkit-payment-gateways were
- * never registered. Their settings tabs still rendered and still saved keys,
- * because those ride request-time hooks, so an org saw a connected processor
- * that could never be offered to a donor and whose webhooks threw.
- *
- * The commands seam learned this already; see CommandRegisterHookTest.
- *
- * What is below is the behaviour the ordering enables: a handler is given the
- * shared manager, and what it registers is reachable. The ordering itself has
- * no test, because by the time any test runs, boot is long past and a late
- * broadcast is indistinguishable from an early one.
+ * Gateway registration must fire after add-on modules boot. These tests verify the shared
+ * manager; bootstrap ordering must be checked separately.
  */
 final class GatewayRegisterHookTest extends IntegrationTestCase
 {

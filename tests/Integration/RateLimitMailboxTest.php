@@ -7,14 +7,7 @@ namespace FundKit\Tests\Integration;
 use FundKit\Foundation\Identity\IdentityHasher;
 use FundKit\Foundation\Plugin;
 
-/**
- * The mailbox an address reaches, used to rate-limit outbound mail.
- *
- * Anything that mails on demand can be pointed at somebody else's inbox, and a
- * per-address limit does not stop that: one inbox answers to unlimited
- * addresses, because every plus tag is a distinct address and on some providers
- * so is every placement of a dot.
- */
+/** Normalize mailbox aliases so plus tags and provider-specific dots cannot bypass mail quotas. */
 final class RateLimitMailboxTest extends IntegrationTestCase
 {
     private function hasher(): IdentityHasher
@@ -39,7 +32,6 @@ final class RateLimitMailboxTest extends IntegrationTestCase
         $this->assertSame($this->mailbox('firstlast@gmail.com'), $this->mailbox('first.last+charity@googlemail.com'));
     }
 
-    /** Dots are significant almost everywhere else. */
     public function test_dots_are_kept_outside_gmail(): void
     {
         $this->assertNotSame($this->mailbox('first.last@example.com'), $this->mailbox('firstlast@example.com'));

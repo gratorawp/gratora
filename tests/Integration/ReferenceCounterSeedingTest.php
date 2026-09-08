@@ -94,7 +94,6 @@ final class ReferenceCounterSeedingTest extends IntegrationTestCase
         $this->assertStringEndsWith('00021', $this->gen()->next('ticket'));
     }
 
-    /** And a real year suffix still floors it, so the fix cannot overshoot. */
     public function test_a_year_suffix_still_floors_the_continuous_counter(): void
     {
         $this->settings(['reset_yearly' => false]);

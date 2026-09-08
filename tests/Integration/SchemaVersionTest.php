@@ -10,21 +10,8 @@ use FundKit\Vendor\Queryable\Schema\Table;
 use ReflectionProperty;
 
 /**
- * A schema change that nobody declares never reaches an existing install.
- *
- * Activation hooks do not fire on a plugin update, so the only thing that
- * migrates an already-installed site is the boot-time gate, and that gate only
- * fires when FUNDKIT_DB_VERSION changes. Add a column and forget the bump and the
- * table is silently missing it: every query touching that column dies with
- * "unknown column", and it looks fine on any machine that reactivated.
- *
- * That has happened, so the rule is pinned here rather than left to memory.
- * When this fails, you changed a schema: bump FUNDKIT_DB_VERSION in fundkit.php and
- * put the new fingerprint below.
- *
- * The bump is semver, and it tracks the schema rather than the release: patch
- * for an additive change a plain migration handles, minor when the change needs
- * an UpgradeRoutine to move data.
+ * Schema changes require FUNDKIT_DB_VERSION and fingerprint updates. Use a patch bump for plain
+ * migrations, minor for data-moving UpgradeRoutines.
  */
 final class SchemaVersionTest extends IntegrationTestCase
 {

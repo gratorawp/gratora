@@ -9,14 +9,8 @@ use FundKit\Forms\FormSubmissionValidator;
 use FundKit\Foundation\Plugin;
 
 /**
- * A form with "allow custom amount" off is a fixed-amount form. The server has
- * to enforce that, because the client is the only other thing checking it.
- *
- * The presets are authored in the org's currency, so a donor who converted
- * through a currency switcher pays a value this side cannot reproduce and the
- * membership check has to yield. That exemption was keyed on the currency
- * posted rather than on the form offering the choice, so naming another
- * currency in the JSON skipped the allow-list on a form with no switcher.
+ * Enforce presets server-side. Currency conversion is allowed only when the form offers a
+ * switcher.
  */
 final class PresetAmountBypassTest extends IntegrationTestCase
 {

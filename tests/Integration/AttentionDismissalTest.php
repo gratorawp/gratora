@@ -77,10 +77,6 @@ final class AttentionDismissalTest extends IntegrationTestCase
         $this->assertNull($this->itemFor('failed-donations'));
     }
 
-    /**
-     * The whole point. Dismissing "3 donations failed" cannot also hide the
-     * fifty that fail tomorrow.
-     */
     public function test_a_dismissal_lapses_when_the_situation_gets_worse(): void
     {
         $this->beAdmin();
@@ -183,7 +179,6 @@ final class AttentionDismissalTest extends IntegrationTestCase
         $this->assertSame(2, (int) $theirs['count']);
     }
 
-    /** A genuinely worse state is news, and comes back. */
     public function test_a_rising_count_reopens_the_item(): void
     {
         $userId = $this->beAdmin();

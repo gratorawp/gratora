@@ -11,16 +11,6 @@ use FundKit\Gateways\GatewayManager;
 use FundKit\Gateways\Stripe\StripeAccount;
 use FundKit\Settings\SettingsService;
 
-/**
- * The payment-gateways block decides where the selector goes, and whether there
- * is one at all.
- *
- * The runtime used to draw it on the last page when the block was absent, so
- * deleting it in the editor did not delete it from the form. Blocks render
- * where they are dropped, so that fallback is gone -- and the cost of removing
- * it is that a form offering two gateways with no block picks one for the donor
- * silently. Readiness is where the author finds that out.
- */
 final class FormGatewayBlockCheckTest extends IntegrationTestCase
 {
     private function readiness(): FormReadinessService
@@ -104,7 +94,6 @@ final class FormGatewayBlockCheckTest extends IntegrationTestCase
         $this->assertSame('pass', $check['status'] ?? null);
     }
 
-    /** Nested inside a step or row still counts as placed. */
     public function test_the_block_is_found_inside_inner_blocks(): void
     {
         $this->enableTwoGateways();

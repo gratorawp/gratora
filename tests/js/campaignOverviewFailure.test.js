@@ -1,11 +1,3 @@
-/**
- * The Overview tab measures a campaign. A request that never landed used to
- * render as a measured zero: $0.00 raised and "No donations yet", beside a goal
- * card reading the campaign row's real lifetime total.
- *
- * The aggregate behind it is the one the controller itself calls multi-second,
- * so what triggers it matters as much as what it shows.
- */
 
 import { render } from 'preact';
 import apiFetch from '@wordpress/api-fetch';

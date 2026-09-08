@@ -214,8 +214,7 @@ describe( 'column position', () => {
 		await act( () => result.current[ 1 ]( { ...v, fields: v.fields.filter( ( f ) => f !== id ) } ) );
 	};
 
-	// dataviews appends a re-shown column to the end of view.fields; it keeps no
-	// record of where the column used to be.
+	// dataviews appends restored columns without preserving their prior order.
 	const show = async ( result, id ) => {
 		const v = result.current[ 0 ];
 		await act( () => result.current[ 1 ]( { ...v, fields: [ ...v.fields, id ] } ) );

@@ -1,14 +1,4 @@
-/**
- * The picker exists to show what each template is. Every form template used to
- * draw the same sheet, varying only by accent, radius and a steps strip, so
- * choosing between a one-field Quick Give and an eight-block Campaign page was
- * choosing between two identical pictures.
- *
- * The shape is derived from the template's own block markup rather than from a
- * table keyed by id, so it stays right when a template is edited and an add-on
- * template draws itself. The fixture is generated from FormTemplates.php and
- * pinned by FormTemplateThumbFixtureTest, which fails if the two drift.
- */
+/** Use the generated FormTemplates.php fixture; FormTemplateThumbFixtureTest checks for drift. */
 
 import fs from 'fs';
 import path from 'path';

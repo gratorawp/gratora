@@ -11,14 +11,8 @@ use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Uninstall\DataEraser;
 
 /**
- * The one feature whose bug costs a charity its donation history.
- *
- * Nothing here calls erase(). It would drop the tables of the shared test
- * database and every later test in the run would fail against the wreckage, so
- * what is asserted is the plan: the opt-in that gates it, and the exact set of
- * tables and options it would take. The add-ons share the fundkit_ prefix, so a
- * wipe that matched on it would destroy the tickets, gift aid and
- * peer-to-peer data of plugins that are still installed.
+ * Inspect the wipe plan without calling erase(), which would destroy the shared test database.
+ * Preserve installed add-ons’ tables.
  */
 final class UninstallDataEraserTest extends IntegrationTestCase
 {
@@ -46,10 +40,6 @@ final class UninstallDataEraserTest extends IntegrationTestCase
         $this->assertTrue(DataEraser::requested());
     }
 
-    /**
-     * The wipe runs on deactivation, so a flag that outlived it is a wipe
-     * waiting to fire on a site that has since changed its mind.
-     */
     public function test_reactivating_withdraws_a_pending_wipe(): void
     {
         update_option(DataEraser::OPT_IN, true, false);
@@ -107,7 +97,6 @@ final class UninstallDataEraserTest extends IntegrationTestCase
         }
     }
 
-    /** The list tracks the module rather than a hand-maintained copy of it. */
     public function test_the_table_plan_is_derived_from_the_module(): void
     {
         $tables = (new DataEraser())->plan()['tables'];
@@ -187,7 +176,6 @@ final class UninstallDataEraserTest extends IntegrationTestCase
         $this->assertContains('fundkit_licensing_status', $options);
     }
 
-    /** Reference counters carry the year, so they are matched rather than listed. */
     public function test_reference_counters_are_planned_whatever_year_they_name(): void
     {
         update_option('fundkit_reference_counter_donation_2031', 7, false);
@@ -197,17 +185,11 @@ final class UninstallDataEraserTest extends IntegrationTestCase
         delete_option('fundkit_reference_counter_donation_2031');
     }
 
-    /** The opt-in itself goes, so a reinstall does not inherit a standing wipe. */
     public function test_the_opt_in_erases_itself(): void
     {
         $this->assertContains(DataEraser::OPT_IN, (new DataEraser())->plan()['options']);
     }
 
-    /**
-     * An add-on's capabilities are its own to remove. fundkit_manage_fundraisers
-     * is registered by the peer-to-peer plugin, and taking it here would break
-     * a site that keeps that plugin.
-     */
     public function test_only_core_capabilities_are_named(): void
     {
         $caps = [...Capabilities::ALL, Capabilities::MANAGE];

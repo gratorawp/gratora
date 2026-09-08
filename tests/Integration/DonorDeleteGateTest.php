@@ -80,10 +80,6 @@ final class DonorDeleteGateTest extends IntegrationTestCase
         $this->assertNotNull($this->reason($donor));
     }
 
-    /**
-     * The failure this guards: a cheque sits pending for months by design, and
-     * age alone would read it as an abandoned checkout.
-     */
     public function test_a_cheque_still_in_the_post_blocks(): void
     {
         $donor = $this->donor();

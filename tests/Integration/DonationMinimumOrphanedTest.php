@@ -45,7 +45,6 @@ final class DonationMinimumOrphanedTest extends IntegrationTestCase
         return (int) $m->invoke(null, $form);
     }
 
-    /** A tile the author listed is an amount the author chose to accept. */
     public function test_a_presets_only_form_accepts_the_amount_it_lists(): void
     {
         $form = $this->form('{"allowCustom":false,"currency":"USD","minCents":5000,"presets":[{"cents":1000},{"cents":2500}]}');
@@ -63,7 +62,6 @@ final class DonationMinimumOrphanedTest extends IntegrationTestCase
         $this->assertSame(0, $this->minShownToTheDonor($form), 'nothing on the form can be typed, so nothing has a floor');
     }
 
-    /** An open-amount block is all typing, which is exactly what a minimum is for. */
     public function test_an_open_amount_form_still_enforces_its_minimum(): void
     {
         $form = $this->form('{"donationType":"fixed","currency":"USD","minCents":5000}');

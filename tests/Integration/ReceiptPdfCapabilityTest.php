@@ -138,10 +138,6 @@ final class ReceiptPdfCapabilityTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The same PDF is reachable as a command, which the assistant dispatches.
-     * A second door into the same bytes has to ask for the same thing.
-     */
     public function test_the_render_pdf_command_refuses_without_view_donors(): void
     {
         $receiptId = $this->issuedReceiptId();

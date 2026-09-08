@@ -103,10 +103,6 @@ final class NoteLengthCapTest extends IntegrationTestCase
         $this->assertSame($body, (string) $notes[0]['body']);
     }
 
-    /**
-     * The cap counts characters and the column counts bytes, so the four-byte
-     * worst case is what the arithmetic behind the number is chosen for.
-     */
     public function test_a_multibyte_note_at_the_cap_reads_back_as_it_was_typed(): void
     {
         $this->admin();

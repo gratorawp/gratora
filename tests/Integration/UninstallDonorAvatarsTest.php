@@ -64,7 +64,6 @@ final class UninstallDonorAvatarsTest extends IntegrationTestCase
         $this->assertContains($second, $planned);
     }
 
-    /** Media the org uploaded itself is not core's to take. */
     public function test_an_attachment_no_donor_points_at_is_left_alone(): void
     {
         $orgMedia = $this->attachment('annual-report-cover');

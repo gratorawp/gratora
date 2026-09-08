@@ -145,8 +145,6 @@ final class RevenueExportTest extends IntegrationTestCase
         $req = new \WP_REST_Request('GET', '/fundkit/v1/admin/exports/options');
         $opts = rest_do_request($req)->get_data();
 
-        // Offering a fixed span of past years invites an export of months that
-        // never had a donation, whose zero rows read as a fault.
         $this->assertSame('2026-03', $opts['first_month']);
         $this->assertSame([2026], array_values($opts['years']));
     }

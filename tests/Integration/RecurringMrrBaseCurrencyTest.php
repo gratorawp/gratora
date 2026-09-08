@@ -9,14 +9,6 @@ use FundKit\Foundation\Plugin;
 use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\RecurringPlanRepository;
 
-/**
- * MRR must be summed in the base currency only.
- *
- * The repository used to COALESCE base_amount_cents to amount_cents, which is
- * exactly what DonationQueries documents as "would corrupt every base-currency
- * total". A JPY 10,000/mo plan reported MRR as if 10,000 were euros: 186x too
- * high. It is reachable because the Give importer never sets a plan's base.
- */
 final class RecurringMrrBaseCurrencyTest extends IntegrationTestCase
 {
     private int $campaignId = 4242;
@@ -75,7 +67,6 @@ final class RecurringMrrBaseCurrencyTest extends IntegrationTestCase
         $this->assertSame(0, $result['mrr_cents'], 'an unknown base value counts as zero, not as raw yen');
     }
 
-    /** A plan already in the base currency needs no snapshot and no FX rate. */
     public function test_a_base_currency_plan_converts_without_a_snapshot(): void
     {
         $this->plan(['amount_cents' => 2000, 'currency' => $this->baseCurrency(), 'base_amount_cents' => null]);
@@ -111,7 +102,6 @@ final class RecurringMrrBaseCurrencyTest extends IntegrationTestCase
         $this->assertSame(0, $result['unconverted']);
     }
 
-    /** A yearly plan is a twelfth of its amount per month, still in base. */
     public function test_interval_normalisation_uses_the_base_value(): void
     {
         $this->plan(['amount_cents' => 120000, 'base_amount_cents' => 120000, 'interval_unit' => 'year']);

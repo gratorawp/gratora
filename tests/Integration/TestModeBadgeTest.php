@@ -138,7 +138,6 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->assertSame('Fundraising Toolkit Test Mode Active', $this->title());
     }
 
-    /** The badge is the shortest route to the switch, so it has to land on it. */
     public function test_the_badge_links_to_the_tab_that_holds_the_switch(): void
     {
         $this->orgWide(true);

@@ -58,7 +58,6 @@ final class StripeWebhookMetadataFallbackTest extends IntegrationTestCase
         }
     }
 
-    /** A donation whose intent id was never persisted, as the bug produces. */
     private function orphanedDonation(): Donation
     {
         $donor = Plugin::instance()->container
@@ -135,7 +134,6 @@ final class StripeWebhookMetadataFallbackTest extends IntegrationTestCase
         $this->assertSame('paid', $this->reload($donation)->status, 'the money is on the donation it paid for');
     }
 
-    /** And the row is healed, so every later event resolves the direct way. */
     public function test_the_intent_id_is_written_back(): void
     {
         $donation = $this->orphanedDonation();
@@ -185,7 +183,6 @@ final class StripeWebhookMetadataFallbackTest extends IntegrationTestCase
         $this->assertSame('pending', $this->reload($donation)->status);
     }
 
-    /** A reference naming somebody else's donation matches nothing of ours. */
     public function test_an_unknown_reference_matches_nothing(): void
     {
         $donation = $this->orphanedDonation();

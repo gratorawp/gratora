@@ -56,7 +56,6 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         parent::tearDown();
     }
 
-    /** Nothing is swept out of the box, and seven years is the window offered. */
     public function test_a_fresh_site_erases_nobody_and_offers_a_seven_year_window(): void
     {
         delete_option('fundkit_privacy');
@@ -133,10 +132,6 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The panel warns in red that N donors will go on the next nightly run, and
-     * it takes that number from here. Nothing is pending while erasure is off.
-     */
     public function test_the_preview_route_has_nothing_pending_while_erasure_is_off(): void
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
@@ -240,10 +235,6 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         $this->assertLessThan(time(), DonorRetention::startsAt());
     }
 
-    /**
-     * The count is worth something to whoever is choosing the window while they
-     * are choosing it, so it answers for one that has not been saved.
-     */
     public function test_the_preview_answers_for_a_window_that_is_not_saved_yet(): void
     {
         $this->erasure(false, 7);
@@ -292,7 +283,6 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         $this->assertSame(0, $preview['eligible_now'], 'and two decades back is inside it');
     }
 
-    /** The panel asks about the window it is showing, not the one on record. */
     public function test_the_preview_route_takes_the_window_being_chosen(): void
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
@@ -377,10 +367,6 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The panel cannot express a zero window, but an import or a REST client
-     * can. A window of nothing takes nobody, rather than everybody.
-     */
     public function test_a_zero_window_previews_nothing(): void
     {
         $this->erasure(true, 0);

@@ -62,11 +62,6 @@ final class UninstallCapabilityRemovalTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * fundkit_manage_fundraisers is registered by the peer-to-peer plugin. Taking
-     * it here breaks a site that keeps that plugin, which is worse than any
-     * capability left behind.
-     */
     public function test_an_add_on_capability_survives(): void
     {
         get_role('editor')->add_cap('fundkit_manage_fundraisers');
@@ -78,10 +73,6 @@ final class UninstallCapabilityRemovalTest extends IntegrationTestCase
         get_role('editor')->remove_cap('fundkit_manage_fundraisers');
     }
 
-    /**
-     * Core adds no role, so there is no role of ours to remove, and every role
-     * on the site is somebody else's.
-     */
     public function test_no_role_is_removed(): void
     {
         $before = array_keys(wp_roles()->role_objects);
@@ -93,7 +84,6 @@ final class UninstallCapabilityRemovalTest extends IntegrationTestCase
         $this->assertNotNull(get_role('subscriber'));
     }
 
-    /** WordPress's own capabilities are not the plugin's to take. */
     public function test_core_wordpress_capabilities_are_left_alone(): void
     {
         (new DataEraser())->removeCapabilities();

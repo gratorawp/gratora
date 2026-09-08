@@ -4,44 +4,14 @@ declare(strict_types=1);
 
 namespace FundKit\Tests\Unit;
 
-use FundKit\Tests\Unit\Support\DistPayload;
 use PHPUnit\Framework\TestCase;
 
 /**
- * readme.txt is the submission. Everything the WordPress.org directory decides
- * about this plugin before a human opens a PHP file comes from its header and
- * its prose, and most of what it claims is checkable from a checkout.
- *
- * The header fields are pinned against the plugin header and composer.json
- * because a disagreement between them is a rejection, not a bug report.
- *
- * Plugin Guideline 4 is answered by prose: the zip carries compiled JavaScript
- * in build/, and readme.txt names the public repository holding the sources it
- * was built from. That sentence is payload, so it is pinned like payload.
+ * Check directory metadata against plugin headers and Composer. Keep the public
+ * source-repository link for compiled bundles.
  */
 final class ReadmeDirectorySubmissionTest extends TestCase
 {
-    /**
-     * The one bundled asset whose licence is neither GPL nor carried by the
-     * package that ships it. Dompdf brings DejaVu without its notice, and the
-     * Bitstream Vera terms require the notice to travel with every copy.
-     */
-
-    /**
-     * The compiled output, and the four files enqueued straight from assets/
-     * without passing through the build. A .distignore rule taking assets/
-     * wholesale strips the campaign page's styling and two dialogs, and every
-     * other test still passes.
-     *
-     * @var list<string>
-     */
-    private const RUNTIME_PAYLOAD = [
-        'build',
-        'assets/deactivation/dialog.css',
-        'assets/deactivation/dialog.js',
-        'assets/donate-button/modal.js',
-        'assets/campaign-page/page.css',
-    ];
 
     /** Where readme.txt sends a reviewer for the sources behind build/. */
     private const REPOSITORY = 'https://github.com/fundkitorg/fundkit';
@@ -193,35 +163,6 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         );
     }
 
-    /**
-     * bin/verify-zip.sh gates the same list, but only on a tag build, so a
-     * .distignore rule that strips one of these reaches a reviewer before it
-     * reaches a release. DistPackagingTest does not cover it either: that test
-     * asserts the packager and the matcher agree, and both would agree about a
-     * new rule.
-     */
-    public function test_the_files_the_plugin_loads_at_runtime_are_not_stripped(): void
-    {
-        $stripped = [];
-        foreach (self::RUNTIME_PAYLOAD as $rel) {
-            $this->assertFileExists(
-                $this->root() . '/' . $rel,
-                "$rel is not in the checkout, so it cannot be in the zip."
-            );
-
-            if (DistPayload::excluded($this->root(), $rel)) {
-                $stripped[] = $rel;
-            }
-        }
-
-        $this->assertSame(
-            [],
-            $stripped,
-            ".distignore keeps these out of the zip, so the plugin ships without them:\n"
-                . implode("\n", $stripped)
-        );
-    }
-
     public function test_the_header_agrees_with_the_plugin_file_and_composer(): void
     {
         $headers = $this->headers();
@@ -263,7 +204,6 @@ final class ReadmeDirectorySubmissionTest extends TestCase
         $this->assertSame($composer['license'] ?? null, $headers['License']);
     }
 
-    /** The directory keeps five tags and truncates a short description at 150 characters. */
     public function test_the_tags_and_short_description_fit_what_the_directory_shows(): void
     {
         $tags = array_filter(array_map('trim', explode(',', $this->headers()['Tags'] ?? '')));

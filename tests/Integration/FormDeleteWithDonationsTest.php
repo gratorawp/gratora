@@ -108,7 +108,6 @@ final class FormDeleteWithDonationsTest extends IntegrationTestCase
         );
     }
 
-    /** A test-mode donation is still a record that would be orphaned. */
     public function test_even_a_test_donation_holds_the_form(): void
     {
         $form = $this->form();
@@ -134,7 +133,6 @@ final class FormDeleteWithDonationsTest extends IntegrationTestCase
         $this->service()->delete($form);
     }
 
-    /** A form nobody gave through is still deletable. */
     public function test_an_unused_form_is_still_deleted(): void
     {
         $form = $this->form();
@@ -144,7 +142,6 @@ final class FormDeleteWithDonationsTest extends IntegrationTestCase
         $this->assertNull(Form::query()->where('id', (int) $form->id)->get());
     }
 
-    /** The route explains it rather than answering 500. */
     public function test_the_route_says_why(): void
     {
         $form = $this->form();

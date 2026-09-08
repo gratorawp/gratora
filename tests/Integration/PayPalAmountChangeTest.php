@@ -235,7 +235,6 @@ final class PayPalAmountChangeTest extends IntegrationTestCase
         $this->assertNotNull($fresh->resume_at, 'and the date that brings it back is intact');
     }
 
-    /** A suspension nobody here asked for is the gateway's own dunning. */
     public function test_a_suspension_of_an_active_plan_still_marks_it_past_due(): void
     {
         $plan = $this->plan();

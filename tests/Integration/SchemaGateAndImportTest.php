@@ -63,7 +63,6 @@ final class SchemaGateAndImportTest extends IntegrationTestCase
         $this->assertTrue(SchemaGuard::stampWhenComplete());
     }
 
-    /** One request migrates; the rest of a burst carry on serving. */
     public function test_only_one_request_holds_the_migration_lock(): void
     {
         $this->assertTrue(MigrationLock::claim(), 'the first request takes it');
@@ -171,10 +170,6 @@ final class SchemaGateAndImportTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * Export from FundKit and import the file back. Anything the allow-list did
-     * not know became paid, so a disputed row arrived as money.
-     */
     public function test_a_status_this_site_does_not_know_is_refused_not_called_paid(): void
     {
         $email = 'unknown-status-' . uniqid() . '@example.test';
@@ -218,10 +213,6 @@ final class SchemaGateAndImportTest extends IntegrationTestCase
         $this->assertSame('paid', Donation::query()->where('gateway', 'imported')->orderBy('id', 'desc')->get()['status']);
     }
 
-    /**
-     * The aggregates filter on status, so an imported disputed row with no
-     * paid_at would count toward totals and belong to no date.
-     */
     public function test_an_imported_row_whose_money_moved_carries_its_date(): void
     {
         $this->importRow([

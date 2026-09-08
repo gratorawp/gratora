@@ -54,7 +54,6 @@ final class DonorPublicSuppressionTest extends IntegrationTestCase
         $this->assertTrue($this->avatars()->hidden($this->donor(1, true)));
     }
 
-    /** Gravatar on, donor hidden: still no picture. */
     public function test_a_hidden_donor_gets_no_gravatar(): void
     {
         Plugin::instance()->container->get(SettingsService::class)
@@ -69,10 +68,6 @@ final class DonorPublicSuppressionTest extends IntegrationTestCase
         $this->assertArrayHasKey(2, $urls);
     }
 
-    /**
-     * Hiding has to beat their own upload too. A picture they chose is still a
-     * picture an admin has decided the public should not see.
-     */
     public function test_hiding_beats_a_donor_uploaded_picture(): void
     {
         $attachmentId = $this->attachment();
@@ -86,7 +81,6 @@ final class DonorPublicSuppressionTest extends IntegrationTestCase
         wp_delete_attachment($attachmentId, true);
     }
 
-    /** Their own upload wins over Gravatar: they chose this one, here. */
     public function test_an_upload_beats_gravatar(): void
     {
         Plugin::instance()->container->get(SettingsService::class)
@@ -102,7 +96,6 @@ final class DonorPublicSuppressionTest extends IntegrationTestCase
         wp_delete_attachment($attachmentId, true);
     }
 
-    /** With no upload and Gravatar off, nothing resolves and the initial shows. */
     public function test_nothing_resolves_without_an_upload_or_gravatar(): void
     {
         $this->assertSame([], $this->avatars()->urlsFor([1 => $this->donor(1)]));

@@ -66,10 +66,6 @@ final class ConsentWordingTest extends IntegrationTestCase
         $this->assertStringNotContainsString('partners', (string) $reread->purpose_description);
     }
 
-    /**
-     * The donation form's terms box has no registry entry: its wording lives on
-     * the form, and the caller passes it in.
-     */
     public function test_a_caller_can_name_the_wording_itself(): void
     {
         $row = $this->consents()->record($this->donorId(), 'terms', true, [
@@ -89,7 +85,6 @@ final class ConsentWordingTest extends IntegrationTestCase
         $this->assertNull($row->purpose_description);
     }
 
-    /** The donor's own history, and the DSAR export, both read this. */
     public function test_the_wording_travels_into_the_donor_history(): void
     {
         $this->registerPurpose('Email me updates', 'About once a month.');

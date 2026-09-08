@@ -58,7 +58,6 @@ final class DonorDeleteAvatarTest extends IntegrationTestCase
         );
     }
 
-    /** Erasure has the same obligation, and the donor row survives it. */
     public function test_erasing_a_donor_takes_the_picture_and_the_pointer(): void
     {
         $attachmentId = $this->attachment('donor-avatar-redacted');
@@ -73,7 +72,6 @@ final class DonorDeleteAvatarTest extends IntegrationTestCase
         );
     }
 
-    /** Media the org uploaded itself is not the donor path's to take. */
     public function test_deleting_a_donor_without_a_picture_touches_no_media(): void
     {
         $orgMedia = $this->attachment('annual-report-cover');

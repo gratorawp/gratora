@@ -101,10 +101,6 @@ final class ReadinessSeesAddonGatewaysTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * The scenario: a Canadian charity on Moneris, or a UK one on GoCardless.
-     * Their gateway works. Readiness said they had none.
-     */
     public function test_a_site_whose_only_gateway_is_an_add_on_reads_as_ready(): void
     {
         $this->registerAddonGateway();
@@ -116,7 +112,6 @@ final class ReadinessSeesAddonGatewaysTest extends IntegrationTestCase
         );
     }
 
-    /** And it should be named, so the admin can see what is answering. */
     public function test_the_add_on_gateway_is_named_in_the_readiness_row(): void
     {
         $this->registerAddonGateway();

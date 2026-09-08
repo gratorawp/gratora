@@ -7,13 +7,7 @@ namespace FundKit\Tests\Integration;
 use FundKit\Foundation\Commands\CommandRegistry;
 use FundKit\Foundation\Plugin;
 
-/**
- * The fundkit.commands.register broadcast fires once, from Plugin::boot after all
- * modules have booted, and hands handlers the shared container registry
- * already carrying the core command pack. This is what lets an add-on's
- * boot-time add_action handler contribute a command pack; firing during core's
- * own boot (the prior bug) would run before add-on modules existed.
- */
+/** Broadcast command registration after all modules boot, using the shared registry. */
 final class CommandRegisterHookTest extends IntegrationTestCase
 {
     public function test_broadcast_fired_exactly_once_after_boot(): void

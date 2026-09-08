@@ -8,12 +8,6 @@ use FundKit\Donors\Donor;
 use FundKit\Foundation\Plugin;
 use WP_REST_Request;
 
-/**
- * Recalculate walks whole tables. It used to hydrate each one into model
- * objects before the first sync ran, so the memory it needed grew with the org
- * and a real donor list exhausted it inside the request, leaving some totals
- * rebuilt and the rest as wrong as they were.
- */
 final class RecalculateScaleTest extends IntegrationTestCase
 {
     protected function setUp(): void

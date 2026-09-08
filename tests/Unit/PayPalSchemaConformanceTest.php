@@ -7,25 +7,8 @@ namespace FundKit\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The PayPal gateway read against PayPal's own schemas.
- *
- * Same reasoning as the Stripe conformance test beside it: every suite that
- * exercises this gateway answers PayPal from a canned array, so a field the API
- * does not return reads back exactly as well as one it does, and a status PayPal
- * never sets makes a branch that can never fire. The Stripe integration had both
- * and passed every test.
- *
- * The fixture is an extract of PayPal's published OpenAPI specifications, with
- * the $refs resolved, so it is the one source here that does not agree with the
- * code by construction. Where the read paths are nested, the nesting is checked
- * too, since that is what a canned fixture most easily gets wrong.
- *
- * A capture arriving on a webhook carries more than the Orders API returns for
- * one, so supplementary_data is folded in from the Payments specification.
- *
- * This is a static read of the source and no substitute for a donation put
- * through a real sandbox account. What it closes is the case where the code and
- * its fixtures agree with each other about a shape PayPal never returns.
+ * Compare PayPal field reads with resolved published OpenAPI schemas. Include Payments
+ * supplementary_data for webhook captures. Static checks complement real sandbox tests.
  */
 final class PayPalSchemaConformanceTest extends TestCase
 {

@@ -72,7 +72,6 @@ final class DonorDeleteCascadeTest extends IntegrationTestCase
         $this->assertNull(Donor::query()->find('id', $id));
     }
 
-    /** The guardrail: this fails the day someone widens the gate to a paid status. */
     public function test_no_aggregate_moves(): void
     {
         $now = gmdate('Y-m-d H:i:s');

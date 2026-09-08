@@ -92,10 +92,8 @@ final class CampaignDeleteGuardTest extends IntegrationTestCase
     }
 
     /**
-     * campaign->donations_count is synced over paid, live, non-ticket rows, so
-     * a campaign whose only donation is pending reads zero there while the
-     * delete still refuses. Answering the screen from that counter would offer
-     * a delete that can only fail, which is what it used to do.
+     * Cached totals omit pending, failed, test, and ticket rows; deletion must inspect all
+     * references.
      *
      * @dataProvider invisibleDonations
      */

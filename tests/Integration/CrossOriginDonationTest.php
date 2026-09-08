@@ -7,16 +7,8 @@ namespace FundKit\Tests\Integration;
 use WP_REST_Request;
 
 /**
- * Who is allowed to post a donation.
- *
- * WordPress answers REST with Access-Control-Allow-Origin reflecting whoever
- * asked and Access-Control-Allow-Credentials: true, so before this any page
- * anywhere could post here and read the reply, and the reply carries the
- * gateway's client secret. Every cap in AntiSpamGuard is written on the
- * assumption that an attacker spends addresses they had to obtain, and its own
- * comment says the per-IP cap is what bounds volume. A script on one busy page
- * spends its visitors' addresses instead: residential, unblocklisted, and
- * indistinguishable from donors. The cap measures nothing against that.
+ * Reject foreign browser origins despite WordPress’s permissive REST CORS, which would expose
+ * gateway replies and let attackers spend visitors’ IP quotas.
  */
 final class CrossOriginDonationTest extends IntegrationTestCase
 {
@@ -42,7 +34,6 @@ final class CrossOriginDonationTest extends IntegrationTestCase
         return rest_do_request($req)->get_status();
     }
 
-    /** The ordinary donor: a form this site served, posting back to it. */
     public function test_the_sites_own_page_is_allowed(): void
     {
         $_SERVER['HTTP_ORIGIN'] = home_url();
@@ -75,11 +66,6 @@ final class CrossOriginDonationTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * Server-side callers send no Origin at all, and a browser cannot suppress
-     * one. Refusing on absence would break every non-browser integration while
-     * stopping nothing.
-     */
     public function test_a_request_with_no_origin_is_allowed(): void
     {
         unset($_SERVER['HTTP_ORIGIN']);

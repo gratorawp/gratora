@@ -178,7 +178,6 @@ final class CoreReportPdfCommandsTest extends IntegrationTestCase
         $this->assertContains($status, [401, 403]);
     }
 
-    // --- helpers ---------------------------------------------------------
 
     private function registry(): CommandRegistry
     {

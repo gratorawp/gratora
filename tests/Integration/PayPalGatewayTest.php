@@ -477,10 +477,6 @@ final class PayPalGatewayTest extends IntegrationTestCase
         return Plugin::instance()->container->get(GatewayManager::class)->get('paypal');
     }
 
-    /**
-     * The approve link comes from PayPal's response and is handed to the donor
-     * and the admin as `approve_url`, so it is not ours to trust.
-     */
     public function test_the_approve_link_a_revise_returns_is_sanitised_before_it_travels(): void
     {
         $this->reviseApproveHref = 'javascript:alert(document.cookie)';

@@ -8,17 +8,8 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 /**
- * PHP object injection is the highest-severity bug a donation plugin keeps
- * being handed: GiveWP shipped an unauthenticated CVSS 10.0 one in 2026
- * (CVE-2026-82222, CWE-502). It needs one thing - attacker bytes reaching
- * unserialize() - and WordPress makes that easy, because get_option() and
- * get_post_meta() run maybe_unserialize() on whatever is stored.
- *
- * Nothing here deserializes PHP: donor input is JSON, and the free-form part
- * of it is encrypted before storage. That is a property of the code rather
- * than a rule anyone wrote down, so this writes it down. If a sink is ever
- * genuinely needed, the value has to be one this plugin wrote itself, and the
- * call needs allowed_classes: false.
+ * Keep untrusted input out of PHP deserialization. Any required sink must accept only
+ * plugin-written values with allowed_classes=false.
  */
 final class NoPhpDeserializationTest extends IntegrationTestCase
 {
@@ -57,7 +48,6 @@ final class NoPhpDeserializationTest extends IntegrationTestCase
         );
     }
 
-    /** The detector has to actually detect, or the assertion above is theatre. */
     public function test_the_detector_finds_a_sink(): void
     {
         $dir = get_temp_dir() . 'fundkit-deser-' . wp_generate_password(8, false);

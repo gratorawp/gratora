@@ -77,11 +77,6 @@ final class StripeWebhookNoticeTest extends IntegrationTestCase
         $this->assertFalse($this->noticeShown(), 'nothing is arriving to be rejected');
     }
 
-    /**
-     * The case that stops this being a one-line check: an org that stopped
-     * offering Stripe still has people on Stripe subscriptions, and every
-     * renewal of those arrives by webhook.
-     */
     public function test_it_keeps_warning_when_a_subscription_is_still_billing(): void
     {
         $this->enableStripe(false);

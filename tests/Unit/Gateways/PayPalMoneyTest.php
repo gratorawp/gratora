@@ -82,7 +82,6 @@ final class PayPalMoneyTest extends TestCase
         $this->assertStringNotContainsString('.', PayPalMoney::toValue(100000, 'JPY'));
     }
 
-    /** Thousands separators would be rejected by PayPal. */
     public function test_value_never_carries_a_thousands_separator(): void
     {
         $this->assertStringNotContainsString(',', PayPalMoney::toValue(123456789, 'USD'));

@@ -57,7 +57,6 @@ final class MoneyDisplayPrecisionTest extends TestCase
         $this->assertSame('25', Money::major(2500));
     }
 
-    /** The setting is the org's own currency's; every other currency is ISO. */
     public function test_foreign_currencies_keep_their_own_precision(): void
     {
         $this->assertSame('€25.50', Money::format(2550, 'EUR'));

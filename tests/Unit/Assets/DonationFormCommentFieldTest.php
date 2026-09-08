@@ -95,11 +95,7 @@ final class DonationFormCommentFieldTest extends TestCase
         );
     }
 
-    /**
-     * A caption that is a <label> only reaches its control through `for`, so a
-     * Field given htmlFor must stop being a label itself: two labels around one
-     * textarea is the same defect in the other direction.
-     */
+    /** Avoid nested labels when htmlFor associates a caption with its control. */
     public function test_a_field_that_names_its_control_by_id_is_not_a_label_itself(): void
     {
         $matched = preg_match('/function Field\(.*?\n\}/s', $this->source(), $m);

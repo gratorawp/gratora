@@ -26,8 +26,6 @@ test( 'the portal reads a timestamp exactly as the admin does', () => {
 } );
 
 test( 'it no longer pushes a date-only value to UTC midnight', () => {
-	// The old implementation appended Z unconditionally, which could move a
-	// bare date across a day boundary depending on the reader's zone.
 	expect( portalDate( '2026-09-02' ) ).toBe( adminDate( '2026-09-02' ) );
 } );
 

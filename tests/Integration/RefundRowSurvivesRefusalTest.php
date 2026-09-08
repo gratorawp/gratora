@@ -126,10 +126,6 @@ final class RefundRowSurvivesRefusalTest extends IntegrationTestCase
         $this->assertSame(5000, (int) $row->amount_cents);
     }
 
-    /**
-     * The same refusal reached through the reversed status, which the dedup
-     * treats as spent in the same way.
-     */
     public function test_a_reversed_row_also_survives_a_refused_settlement(): void
     {
         $donation = $this->paidDonation('refusal-reversed@example.test');

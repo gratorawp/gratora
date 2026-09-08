@@ -8,14 +8,7 @@ use FundKit\Foundation\Plugin;
 use ReflectionClass;
 use ReflectionProperty;
 
-/**
- * Guards the "model property with no backing column" class of bug: the
- * fundkit_funds.donations_count drift that made AggregateSyncer::syncFund() throw
- * "Unknown column" on every paid donation (silently swallowed by Queryable, so
- * fund aggregates never updated). Every registered model's public instance
- * properties must map to a real column after migration; this fails loudly if a
- * new property ever ships without a matching column in its migration closure.
- */
+/** Verify every model property has a migrated database column. */
 final class SchemaIntegrityTest extends IntegrationTestCase
 {
     public function test_every_model_property_has_a_backing_column(): void

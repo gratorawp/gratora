@@ -83,9 +83,7 @@ final class StripeWebhookSecretModeTest extends IntegrationTestCase
     {
         $this->config(false, ['webhook_secret_test' => 'whsec_test']);
 
-        // Which mode a secret belongs to is what stops a test secret verifying
-        // live money, so a flattened list would be a different bug wearing the
-        // same fix.
+        // Keep secrets associated with their verification mode.
         $this->assertSame(['test' => 'whsec_test'], $this->api->webhookSecrets());
     }
 }

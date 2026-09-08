@@ -37,7 +37,6 @@ final class SettingsGroupsFilterTest extends IntegrationTestCase
         $this->assertNotEmpty($fired);
         $this->assertSame('p2p', $fired[count($fired) - 1][0]);
 
-        // Built-in group still reads/writes identically (regression).
         $this->assertTrue($s->knows('email'));
         $this->assertNotEmpty($s->get('email'));
 
@@ -45,13 +44,6 @@ final class SettingsGroupsFilterTest extends IntegrationTestCase
         remove_all_actions('fundkit.settings.updated');
     }
 
-    /**
-     * An add-on registering its own email template via the filter must not
-     * displace the core template set. resolveDynamicDefaults used to inject
-     * core templates only when the group's templates were empty, so any add-on
-     * that pre-populated them silently dropped every core transactional email
-     * (receipts, magic link). Merge, do not skip.
-     */
     public function test_addon_email_template_does_not_displace_core_templates(): void
     {
         add_filter('fundkit.settings.groups', static function (array $g): array {

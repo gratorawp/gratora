@@ -75,10 +75,6 @@ final class CommandPaletteCapabilitiesTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * The dashboard forwards a reader who cannot hold its data to the first
-     * page they can open, so it is a redirect rather than a refusal.
-     */
     public function test_the_dashboard_stays_offered(): void
     {
         $user = self::factory()->user->create_and_get(['role' => 'subscriber']);

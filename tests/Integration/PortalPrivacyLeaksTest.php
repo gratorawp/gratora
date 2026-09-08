@@ -60,7 +60,6 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
         return Plugin::instance()->container->get(DonorService::class)->findByEmail($email);
     }
 
-    // --- a cache in front of the site -------------------------------------
 
     /** @return array<string,string> */
     private function portalHeaders(int $donorId, string $route): array
@@ -102,7 +101,6 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
         $this->assertStringContainsString('no-store', (string) ($headers['Cache-Control'] ?? ''));
     }
 
-    /** A public route is not a donor's private data and keeps its cacheability. */
     public function test_a_non_portal_route_is_left_alone(): void
     {
         $res = apply_filters(
@@ -115,7 +113,6 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
         $this->assertArrayNotHasKey('Cache-Control', $res->get_headers());
     }
 
-    // --- consent a donation never withdrew ---------------------------------
 
     private function setPurposes(array $purposes): void
     {
@@ -149,7 +146,6 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
         );
     }
 
-    /** A box the form renders ticked is different: unticking it is deliberate. */
     public function test_unticking_a_box_that_renders_ticked_does_withdraw(): void
     {
         $this->setPurposes([
@@ -190,7 +186,6 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
         $this->assertTrue($this->grantedNow((int) $this->donorFor($email)->id, 'newsletter'));
     }
 
-    // --- the audit row that outlives the donor ------------------------------
 
     public function test_the_erasure_audit_row_keeps_no_handle_back_to_the_person(): void
     {
@@ -215,7 +210,6 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
         $this->assertNull($row->session_hash);
     }
 
-    /** The audit still answers who did it. */
     public function test_the_erasure_audit_row_still_names_the_actor(): void
     {
         $email = 'erased-actor-' . uniqid() . '@example.test';
@@ -229,7 +223,6 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
         $this->assertNotSame('', (string) ($row->payload['by'] ?? ''));
     }
 
-    /** An ordinary analytics row is unaffected. */
     public function test_a_donation_event_still_carries_its_handles(): void
     {
         $_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (an ordinary visitor)';

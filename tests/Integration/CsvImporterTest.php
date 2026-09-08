@@ -97,7 +97,6 @@ final class CsvImporterTest extends IntegrationTestCase
         $this->assertArrayNotHasKey('status', $map, 'an address is not a payment status');
     }
 
-    /** The whole point of a preview. */
     public function test_a_dry_run_writes_nothing(): void
     {
         $before = Donation::query()->count();
@@ -270,7 +269,6 @@ final class CsvImporterTest extends IntegrationTestCase
         $this->assertSame(1, $result['skipped']['donor_erased'] ?? 0);
     }
 
-    /** Exports write money in more than one shape. */
     public function test_it_reads_the_amount_formats_exports_actually_produce(): void
     {
         $csv = "Email,First Name,Last Name,Amount,Date\n"
@@ -301,11 +299,6 @@ final class CsvImporterTest extends IntegrationTestCase
         $this->assertNotSame([], $result['errors']);
     }
 
-    /**
-     * The mailing list and the donation history are usually separate exports
-     * and the list arrives first, so a file with no amounts has to import the
-     * people rather than be refused.
-     */
     public function test_a_file_with_no_amount_column_imports_the_donors_alone(): void
     {
         $before = Donation::query()->count();
@@ -387,10 +380,6 @@ final class CsvImporterTest extends IntegrationTestCase
         $this->assertSame('62701', $address['postal'] ?? null);
     }
 
-    /**
-     * There is no country list on the PHP side, so "United States" cannot be
-     * resolved. Storing its first two letters would file the donor under UN.
-     */
     public function test_a_country_written_out_in_full_is_left_unset(): void
     {
         $this->importer()->import(
@@ -421,10 +410,6 @@ final class CsvImporterTest extends IntegrationTestCase
         $this->assertSame('Original Ltd', (string) $donor->company);
     }
 
-    /**
-     * The headline. An org arrives by importing its history, and the first
-     * screen it looks at is the one that adds the history up.
-     */
     public function test_an_imported_history_is_worth_its_own_money_in_the_totals(): void
     {
         $result = $this->importer()->import(
@@ -444,7 +429,6 @@ final class CsvImporterTest extends IntegrationTestCase
         $this->assertSame(35000, $agg['amount_cents'], 'the dashboard has to see the 350.00 it was handed');
     }
 
-    /** The org's own currency needs no rate, and converts at one. */
     public function test_a_row_in_the_base_currency_is_snapshotted_at_a_rate_of_one(): void
     {
         $this->importer()->import(
@@ -531,7 +515,6 @@ final class CsvImporterTest extends IntegrationTestCase
         $this->assertSame('2026-03-01 12:00:00', (string) $donor->last_donation_at);
     }
 
-    /** A donor who was already here keeps what they gave here. */
     public function test_importing_history_for_a_known_donor_adds_to_what_they_already_gave(): void
     {
         $donor = Plugin::instance()->container->get(DonorService::class)

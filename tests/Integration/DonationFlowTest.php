@@ -360,7 +360,6 @@ final class DonationFlowTest extends IntegrationTestCase
         $this->assertSame('offline',  $data['gateway']);
     }
 
-    /** Form sometimes omits optional profile fields - they come through as undefined → JSON skip. */
     public function test_runtime_payload_works_with_only_email_and_amount(): void
     {
         $res = $this->postDonation([

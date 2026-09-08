@@ -46,10 +46,6 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
         $this->assertStringContainsString('This campaign has finished accepting donations.', $html);
     }
 
-    /**
-     * The sharper case: a pre-launch landing page whose button would be dead
-     * for every visitor through the whole anticipation window.
-     */
     public function test_a_scheduled_campaign_explains_itself_instead_of_rendering_a_dead_button(): void
     {
         $this->schedule(gmdate('Y-m-d', strtotime('+2 days')), null);

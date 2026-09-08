@@ -11,11 +11,6 @@ use FundKit\Foundation\Commands\CommandContext;
 use FundKit\Foundation\Commands\CommandRegistry;
 use FundKit\Foundation\Plugin;
 
-/**
- * The assistant used to create every campaign on the default layout, because
- * campaign.create had no way to name one. Since the layout also decides the
- * donation form the page carries, that was the assistant quietly choosing both.
- */
 final class CampaignTemplateCommandsTest extends IntegrationTestCase
 {
     private function registry(): CommandRegistry
@@ -141,13 +136,7 @@ final class CampaignTemplateCommandsTest extends IntegrationTestCase
         $this->assertSame($before, \FundKit\Campaigns\Campaign::query()->count(), 'a campaign was created anyway');
     }
 
-    /**
-     * A schema is fixed when the command is registered and cannot branch on
-     * another field, so the enum has to carry every registered type's ids and
-     * the description has to say which belong where. Which types exist depends
-     * on which add-ons are active, so this asks the registry rather than naming
-     * them: core's own suite runs with none of them.
-     */
+    /** Build layout enums from all registered types; validate type/layout pairs in the handler. */
     public function test_the_schema_offers_every_registered_type_s_layouts(): void
     {
         $schema = $this->definition('campaign.create')['inputSchema']['properties']['page_template'];

@@ -80,7 +80,6 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
         return Donation::query()->find('reference', $reference);
     }
 
-    // --- the organisation on the document ----------------------------------
 
     public function test_a_thank_you_email_names_the_organisation_not_the_website(): void
     {
@@ -95,7 +94,6 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
         $this->assertStringNotContainsString('Some WordPress Site', $all);
     }
 
-    // --- the copy fetched from the emailed link -----------------------------
 
     /**
      * A renderer that reports the context it was handed and stops the stream.
@@ -156,7 +154,6 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
         );
     }
 
-    // --- the footer the org wrote, and only that ----------------------------
 
     private function statementFooter(): string
     {
@@ -220,7 +217,6 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
         $this->assertSame('Issued by Acme Foundation.', $this->statementFooter());
     }
 
-    /** A receipt-scoped tag has no answer for a year, and braces on a tax document are worse than nothing. */
     public function test_a_tag_the_statement_cannot_answer_is_not_printed_raw(): void
     {
         $this->settings()->update('receipts', ['footer_note' => 'Receipt {receipt_number} issued.']);
@@ -230,7 +226,6 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
         $this->assertStringNotContainsString('}', $footer);
     }
 
-    // --- clearing a field on the receipt ------------------------------------
 
     private function receiptTemplate(): array
     {

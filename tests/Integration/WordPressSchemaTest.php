@@ -45,10 +45,6 @@ final class WordPressSchemaTest extends IntegrationTestCase
         $this->assertSame('team', $rows[0]['_fundkit_layout']);
     }
 
-    /**
-     * The join condition used to be built from the real table name while the
-     * FROM clause named the alias, which MySQL rejects as an unknown column.
-     */
     public function test_with_meta_works_on_an_aliased_table(): void
     {
         $this->page('aliased', 'start');

@@ -26,7 +26,6 @@ final class SettingsPanelTruthTest extends IntegrationTestCase
         return Plugin::instance()->container->get(SettingsService::class);
     }
 
-    // --- a currency that is not one ----------------------------------------
 
     public function test_a_base_currency_that_is_not_a_code_is_refused(): void
     {
@@ -50,7 +49,6 @@ final class SettingsPanelTruthTest extends IntegrationTestCase
         $this->assertSame('EUR', (string) $saved['default_currency']);
     }
 
-    // --- the lock the screen reads -----------------------------------------
 
     private function saveCurrency(): array
     {
@@ -76,7 +74,6 @@ final class SettingsPanelTruthTest extends IntegrationTestCase
         );
     }
 
-    // --- a preset that was deleted ------------------------------------------
 
     public function test_a_form_pointing_at_a_deleted_preset_falls_back_to_the_org_default(): void
     {
@@ -109,7 +106,6 @@ final class SettingsPanelTruthTest extends IntegrationTestCase
         $this->assertSame('#abcdef', (string) (StylePresets::tokensFor('other')['fundkit-accent'] ?? ''));
     }
 
-    // --- the theme preset the panel used to freeze ---------------------------
 
     public function test_saving_the_brand_panel_does_not_store_the_builtins_it_was_shown(): void
     {

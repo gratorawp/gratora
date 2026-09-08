@@ -8,13 +8,8 @@ use FundKit\Campaigns\Blocks\BlockEditorIntegration;
 use FundKit\Campaigns\CampaignTemplates;
 use WP_REST_Request;
 
-/**
- * A campaign page is built from a chosen starter layout rather than the one
- * hardcoded layout there used to be.
- */
 final class CampaignTemplatesTest extends IntegrationTestCase
 {
-    /** Every registered template has to produce a page, not just the default. */
     public function test_each_template_seeds_a_page_with_a_donation_form(): void
     {
         foreach (CampaignTemplates::all() as $template) {
@@ -195,7 +190,6 @@ final class CampaignTemplatesTest extends IntegrationTestCase
         $this->assertStringContainsString('"metric":"days_left"', $content);
     }
 
-    /** Just the form means nothing on the page needs data to look right. */
     public function test_the_minimal_layout_carries_no_figures_or_donor_lists(): void
     {
         $campaign = $this->createCampaign(['title' => 'Minimal', 'page_template' => 'minimal']);
@@ -253,7 +247,6 @@ final class CampaignTemplatesTest extends IntegrationTestCase
         $this->assertSame($this->blocksOf($standard), $this->blocksOf($omitted));
     }
 
-    /** The picker is fed over REST, so the route has to answer. */
     public function test_the_templates_are_listed_over_rest(): void
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
@@ -363,7 +356,6 @@ final class CampaignTemplatesTest extends IntegrationTestCase
         unset($_GET['post']);
     }
 
-    /** An unknown layout is refused rather than quietly serving the standard one. */
     public function test_reading_an_unknown_layout_is_refused(): void
     {
         $campaign = $this->createCampaign(['title' => 'Bad layout']);

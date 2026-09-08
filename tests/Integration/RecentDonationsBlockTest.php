@@ -31,7 +31,6 @@ final class RecentDonationsBlockTest extends IntegrationTestCase
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
     }
 
-    /** Baseline: a donor who opted in is quoted, so the suppression test means something. */
     public function test_an_opted_in_message_is_published(): void
     {
         $donorId = $this->donor('visible@example.com');
@@ -43,11 +42,6 @@ final class RecentDonationsBlockTest extends IntegrationTestCase
         $this->assertStringContainsString('Proud to support this', $html);
     }
 
-    /**
-     * Hiding a donor is the moderation lever an admin is pointed at for an
-     * address or an attack left in a public message. It has to take the words
-     * down, not just the name above them.
-     */
     public function test_hiding_a_donor_takes_their_public_message_down(): void
     {
         $donorId = $this->donor('hidden@example.com');
@@ -64,10 +58,6 @@ final class RecentDonationsBlockTest extends IntegrationTestCase
         $this->assertStringContainsString('Anonymous', $html);
     }
 
-    /**
-     * Gross would overstate the donation and disagree with the campaign
-     * counter and the other donor blocks on the same page, which all net.
-     */
     public function test_a_partly_refunded_donation_is_listed_net_of_the_refund(): void
     {
         $donorId = $this->donor('refunded@example.com');

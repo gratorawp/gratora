@@ -151,7 +151,6 @@ final class DonorEmailRehasherQueueTest extends IntegrationTestCase
         );
     }
 
-    /** A table smaller than one batch finishes on the first tick. */
     public function test_a_short_table_finishes_without_a_continuation(): void
     {
         $this->seedDonors(3);
@@ -163,7 +162,6 @@ final class DonorEmailRehasherQueueTest extends IntegrationTestCase
         $this->assertFalse(get_option(DonorEmailRehasher::PENDING_OPTION));
     }
 
-    /** Nothing owed, nothing queued, on every request of a healthy site. */
     public function test_nothing_owed_queues_nothing(): void
     {
         delete_option(DonorEmailRehasher::PENDING_OPTION);

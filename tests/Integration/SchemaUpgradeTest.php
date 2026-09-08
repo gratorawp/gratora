@@ -106,10 +106,6 @@ final class SchemaUpgradeTest extends UpgradeTestCase
         $this->assertContains('reference', $this->columns(self::TABLE), 'a table added in a later release is created');
     }
 
-    /**
-     * The harness has to be able to fail, or every assertion above is
-     * decoration. Degrades the table and does NOT run the update.
-     */
     public function test_the_harness_sees_a_broken_schema_when_no_update_runs(): void
     {
         $this->installCurrentSchema();

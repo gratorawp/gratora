@@ -43,7 +43,6 @@ final class PortalRestBaseTest extends IntegrationTestCase
         }
     }
 
-    /** The install the www/apex pairing exists for, in both directions. */
     public function test_the_client_talks_to_the_host_the_page_was_served_from(): void
     {
         $this->assertSame(
@@ -81,7 +80,6 @@ final class PortalRestBaseTest extends IntegrationTestCase
         }
     }
 
-    /** And the page hands the client that base rather than rest_url's. */
     public function test_the_page_hands_the_client_that_base(): void
     {
         if (! file_exists(FUNDKIT_DIR . 'build/donor-portal/index/index.asset.php')) {

@@ -49,7 +49,6 @@ final class TaxStatementCurrencyTest extends IntegrationTestCase
         $this->assertSame(10_000, $summary['totals_by_currency']['EUR'] ?? null);
     }
 
-    // --- helpers ---------------------------------------------------------
 
     private function builder(): TaxStatementBuilder
     {

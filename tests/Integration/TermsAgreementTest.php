@@ -131,7 +131,6 @@ final class TermsAgreementTest extends IntegrationTestCase
         );
     }
 
-    /** Reflowing a paragraph is not a new policy. */
     public function test_whitespace_alone_is_not_a_new_revision(): void
     {
         $this->assertSame(
@@ -140,7 +139,6 @@ final class TermsAgreementTest extends IntegrationTestCase
         );
     }
 
-    /** Linking to a policy page counts as having terms, and versions with them. */
     public function test_a_link_is_terms_too(): void
     {
         $form = $this->formWith('', 'https://example.test/terms');
@@ -165,7 +163,6 @@ final class TermsAgreementTest extends IntegrationTestCase
         $this->assertLessThan(400, $this->donate($form, [])->get_status());
     }
 
-    /** A form with no terms block is unaffected. */
     public function test_a_form_without_the_block_is_untouched(): void
     {
         $form = Form::make();

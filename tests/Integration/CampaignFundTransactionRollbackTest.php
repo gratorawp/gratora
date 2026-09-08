@@ -225,7 +225,6 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         );
     }
 
-    /** The same duplicate, unobstructed, lands a copy with its own form and page. */
     public function test_a_campaign_duplicate_that_does_not_throw_lands_copy_form_and_page(): void
     {
         $source = $this->campaigns()->create(['title' => 'Reef Drive']);
@@ -286,7 +285,6 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         );
     }
 
-    /** The same delete, unobstructed, takes campaign, forms and page. */
     public function test_a_campaign_delete_that_does_not_throw_removes_campaign_form_and_page(): void
     {
         $campaign = $this->campaigns()->create(['title' => 'Delete Reef', 'status' => 'published']);
@@ -340,7 +338,6 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         );
     }
 
-    /** The same promotion, unobstructed, moves the default across. */
     public function test_a_promotion_that_does_not_throw_moves_the_default(): void
     {
         $this->funds()->create(['code' => 'general', 'name' => 'General', 'is_default' => true]);
@@ -385,7 +382,6 @@ final class CampaignFundTransactionRollbackTest extends IntegrationTestCase
         );
     }
 
-    /** The same block, unobstructed, lands all three. */
     public function test_a_campaign_create_that_does_not_throw_lands_campaign_form_and_page(): void
     {
         $campaign = $this->campaigns()->create(['title' => 'Rollback Reef']);

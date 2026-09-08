@@ -81,7 +81,6 @@ final class RecurringLifecycleEdgesTest extends IntegrationTestCase
         $this->assertSame(2, (int) RecurringPlan::query()->find('id', (int) $plan->id)->failed_renewals_count);
     }
 
-    /** Genuinely separate declines still each count. */
     public function test_separate_declines_still_count_separately(): void
     {
         $plan = $this->plan();
@@ -94,11 +93,6 @@ final class RecurringLifecycleEdgesTest extends IntegrationTestCase
         $this->assertSame(3, (int) RecurringPlan::query()->find('id', (int) $plan->id)->failed_renewals_count);
     }
 
-    /**
-     * A plan PayPal has approved is already billing, so an archive that skips
-     * it leaves a donor charged for a campaign the org has closed, and nothing
-     * later brings it back into scope.
-     */
     public function test_a_pending_plan_is_reachable_by_a_cancellation(): void
     {
         $this->assertContains('pending', RecurringPlanRepository::CANCELLABLE_STATUSES);
@@ -150,7 +144,6 @@ final class RecurringLifecycleEdgesTest extends IntegrationTestCase
         $this->assertSame('past_due', (string) $this->reload($plan)->status);
     }
 
-    /** A pause does not collect the renewal, so lifting it cannot clear one. */
     public function test_a_pause_does_not_collect_the_declined_renewal(): void
     {
         $plan = $this->plan(['status' => 'past_due', 'gateway' => 'offline', 'failed_renewals_count' => 1]);
@@ -162,7 +155,6 @@ final class RecurringLifecycleEdgesTest extends IntegrationTestCase
         $this->assertSame('past_due', (string) $this->reload($plan)->status);
     }
 
-    /** The daily sweep lifts the same pause and has to reach the same answer. */
     public function test_the_sweep_lifts_a_pause_without_clearing_the_decline(): void
     {
         $plan = $this->plan([
@@ -179,7 +171,6 @@ final class RecurringLifecycleEdgesTest extends IntegrationTestCase
         $this->assertNull($fresh->resume_at);
     }
 
-    /** The control: a plain pause still resumes to active. */
     public function test_a_pause_with_nothing_outstanding_still_resumes_to_active(): void
     {
         $plan = $this->plan(['status' => 'active', 'gateway' => 'offline']);

@@ -140,10 +140,6 @@ final class ErasureGatewayErrorTest extends IntegrationTestCase
         $this->assertNotSame('', (string) $fresh->email_encrypted, 'the donor is still reachable about the plan');
     }
 
-    /**
-     * The donor is told to contact the organization, so the organization has to
-     * be able to find out what happened.
-     */
     public function test_the_admin_is_left_a_record_of_why_it_stopped(): void
     {
         $this->registerFailingGateway();
@@ -157,7 +153,6 @@ final class ErasureGatewayErrorTest extends IntegrationTestCase
         $this->assertContains('error.portal.forget', $types);
     }
 
-    /** Which plans are already stopped decides what the org has to finish by hand. */
     public function test_the_record_names_the_plan_that_refused(): void
     {
         $this->registerFailingGateway();
@@ -179,7 +174,6 @@ final class ErasureGatewayErrorTest extends IntegrationTestCase
         $this->assertArrayHasKey('cancelled_first', (array) $recorded->payload);
     }
 
-    /** An erasure with nothing to stop is unaffected. */
     public function test_a_donor_with_no_plan_is_still_erased(): void
     {
         $donor = Plugin::instance()->container->get(DonorService::class)

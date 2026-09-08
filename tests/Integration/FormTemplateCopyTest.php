@@ -35,10 +35,6 @@ final class FormTemplateCopyTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * The sustainer offers yearly too, and the shortcode prepends a one-time
-     * pill, so the sentence beside the button cannot assert a monthly charge.
-     */
     public function test_the_sustainer_does_not_promise_a_cadence_the_donor_did_not_pick(): void
     {
         $template = FormTemplates::find('monthly-sustainer');

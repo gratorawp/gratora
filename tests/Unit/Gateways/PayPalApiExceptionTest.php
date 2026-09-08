@@ -7,16 +7,8 @@ namespace FundKit\Tests\Unit\Gateways;
 use FundKit\Gateways\PayPal\PayPalApiException;
 use PHPUnit\Framework\TestCase;
 
-/**
- * The issue codes used to be reachable only by grepping the formatted message,
- * and the formatter prefers `description` over `issue`, so they were gone
- * before any caller looked. `ORDER_ALREADY_CAPTURED` therefore never matched on
- * PayPal's real response shape and a re-capture failed the donor on money
- * PayPal had already taken.
- */
 final class PayPalApiExceptionTest extends TestCase
 {
-    /** PayPal's actual body: the issue code always arrives with a description. */
     public function test_the_issue_code_survives_alongside_its_description(): void
     {
         $body = [
@@ -53,11 +45,6 @@ final class PayPalApiExceptionTest extends TestCase
         $this->assertFalse($e->hasIssue('ORDER_ALREADY_CAPTURED'));
     }
 
-    /**
-     * The mirror of the original bug: the old `already` needle matched the
-     * *description* of unrelated errors, so a genuine failure could be
-     * swallowed as "already in that state".
-     */
     public function test_a_description_mentioning_a_code_does_not_count_as_that_code(): void
     {
         $e = new PayPalApiException('x', PayPalApiException::issuesFrom([
@@ -97,7 +84,6 @@ final class PayPalApiExceptionTest extends TestCase
         $this->assertTrue($e->hasIssue('INVALID_STATE', 'INVALID_RESOURCE_STATE'));
     }
 
-    /** The name is read as well as the details, not instead of them. */
     public function test_the_name_does_not_hide_the_detail_issues(): void
     {
         $issues = PayPalApiException::issuesFrom([

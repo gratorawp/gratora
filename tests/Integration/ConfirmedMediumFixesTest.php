@@ -14,9 +14,6 @@ use FundKit\Foundation\Plugin;
 use InvalidArgumentException;
 use WP_REST_Request;
 
-/**
- * Five findings that survived an adversarial second reading.
- */
 final class ConfirmedMediumFixesTest extends IntegrationTestCase
 {
     protected function setUp(): void
@@ -30,7 +27,6 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
         return Plugin::instance()->container->get(CampaignService::class);
     }
 
-    // --- a campaign window nothing parsed ---------------------------------
 
     public function test_a_campaign_cannot_be_created_ending_before_it_starts(): void
     {
@@ -56,7 +52,6 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
         $this->campaigns()->update($campaign, ['ends_at' => 'whenever']);
     }
 
-    /** A date that is stored has to be one the database can compare. */
     public function test_a_created_window_is_stored_as_a_real_datetime(): void
     {
         $campaign = $this->campaigns()->create([
@@ -78,7 +73,6 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
         $this->assertNull($campaign->ends_at);
     }
 
-    // --- a note on someone who has been erased -----------------------------
 
     private function erasedDonor(): Donor
     {
@@ -120,7 +114,6 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
         $this->assertSame(201, rest_do_request($req)->get_status());
     }
 
-    // --- one decision per purpose ------------------------------------------
 
     public function test_a_repeated_consent_key_writes_one_row_not_many(): void
     {
@@ -151,7 +144,6 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
         );
     }
 
-    // --- what a failed erasure tells the donor ------------------------------
 
     /** A handler that fails after the plans have already been cancelled. */
     private function breakTheErasure(): void
@@ -230,7 +222,6 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
         $this->assertStringNotContainsString('could not stop your recurring donation', $out['message']);
     }
 
-    /** And a plan that really is still billing still says so. */
     public function test_a_plan_that_could_not_be_stopped_still_says_so(): void
     {
         $donor = Plugin::instance()->container->get(DonorService::class)
@@ -257,7 +248,6 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
         $this->assertSame(409, $out['status']);
     }
 
-    // --- who appears on the supporter wall ----------------------------------
 
     private function wall(): \FundKit\Campaigns\Blocks\SupporterWallBlock
     {

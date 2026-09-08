@@ -219,10 +219,6 @@ final class DonorVisibilityTest extends IntegrationTestCase
         $this->assertContains($id, $this->listedIds());
     }
 
-    /**
-     * The strip sits directly above the list, so a total that disagrees with the
-     * rows under it reads as a broken screen.
-     */
     public function test_the_kpi_strip_counts_the_same_people_the_list_shows(): void
     {
         $signedUp = $this->donor('strip-signed-up@example.com');
@@ -242,10 +238,6 @@ final class DonorVisibilityTest extends IntegrationTestCase
         $this->assertSame(1, (int) $stats['with_donations']);
     }
 
-    /**
-     * The CSV is narrower than the screen on purpose: its columns are opt-in
-     * and none of them can say "not a real person".
-     */
     public function test_the_export_leaves_out_test_only_donors(): void
     {
         $signedUp = $this->donor('export-signed-up@example.com');

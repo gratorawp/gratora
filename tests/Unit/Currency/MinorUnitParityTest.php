@@ -79,10 +79,6 @@ final class MinorUnitParityTest extends TestCase
         $this->assertSame($php, $js);
     }
 
-    /**
-     * The four the shared UI package disagrees on, named so a future change back
-     * to its table is a decision rather than an accident.
-     */
     public function test_the_currencies_the_ui_package_disagrees_on_follow_php(): void
     {
         $zero = $this->jsTables()['ZERO_DECIMAL'];

@@ -107,7 +107,6 @@ final class ImportReferenceCollisionTest extends IntegrationTestCase
         );
     }
 
-    /** The same donation really being present still counts as present. */
     public function test_a_genuine_re_run_still_recognises_its_own_rows(): void
     {
         $this->seedDonation('rerun-' . uniqid() . '@example.test', 'FUNDKIT-2026-08' . random_int(100, 999), 1500);

@@ -122,11 +122,6 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $this->assertGreaterThan(0, count($mails), 'send_receipt was ignored');
     }
 
-    /**
-     * Test mode excludes a donation from every report. A site left in test
-     * mode while an admin enters real checks would void them all, silently,
-     * and the admin would find out at year end.
-     */
     public function test_real_money_is_recorded_even_while_the_site_is_in_test_mode(): void
     {
         update_option('fundkit_gateway_config', array_merge(
@@ -142,7 +137,6 @@ final class AdminManualDonationTest extends IntegrationTestCase
         );
     }
 
-    /** It is the same kind of row as a donated one, so the same totals move. */
     public function test_it_moves_the_campaign_total(): void
     {
         $campaignId = $this->aCampaign();
@@ -154,10 +148,6 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $this->assertSame($before + 25000, $after);
     }
 
-    /**
-     * There is no foreign key, so a transposed id commits a paid donation that
-     * no campaign total ever picks up and every screen reads as uncategorised.
-     */
     public function test_money_cannot_be_filed_against_a_campaign_that_does_not_exist(): void
     {
         $before = (int) Donation::query()->count();
@@ -211,7 +201,6 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $this->assertSame(400, $this->record(['payment_method' => 'bitcoin'])->get_status());
     }
 
-    /** A future-dated check is a typo, and it would sit in a period that has not happened. */
     public function test_it_rejects_a_date_in_the_future(): void
     {
         $this->assertSame(400, $this->record(['received_at' => '2099-01-01'])->get_status());
@@ -229,13 +218,11 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $this->assertSame(201, $this->record(['received_at' => $tomorrow])->get_status());
     }
 
-    /** createFromFormat rolls a nonexistent date forward rather than refusing it. */
     public function test_it_rejects_a_day_that_does_not_exist(): void
     {
         $this->assertSame(400, $this->record(['received_at' => '2026-02-30'])->get_status());
     }
 
-    /** A mistyped year lands in the earliest bucket of every time series, unseen. */
     public function test_it_rejects_a_year_from_before_the_product_existed(): void
     {
         $this->assertSame(400, $this->record(['received_at' => '1900-01-01'])->get_status());
@@ -258,7 +245,6 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $this->assertSame($first, $res->get_data()['data']['reference'], 'the warning must name what it matched');
     }
 
-    /** The admin looked, and they really did give twice. */
     public function test_the_admin_can_record_it_anyway(): void
     {
         $this->record();
@@ -335,7 +321,6 @@ final class AdminManualDonationTest extends IntegrationTestCase
         }
     }
 
-    /** A real backdated date still survives it: the guard is a range, not a veto. */
     public function test_a_plausible_backdated_paid_at_is_kept(): void
     {
         $reference = (string) $this->record(['received_at' => '2026-06-14'])->get_data()['reference'];
@@ -377,7 +362,6 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $this->assertSame(25000, (int) $donation->amount_cents);
     }
 
-    /** And nothing is left looking like money the org is still waiting for. */
     public function test_no_donation_is_left_pending_after_a_failure(): void
     {
         $boom = static function (): void {
@@ -414,7 +398,6 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $this->assertSame(0, (int) $missing['total'], 'a hand-recorded check is not a receipt that went missing');
     }
 
-    /** An online donation with no receipt still is one. */
     public function test_an_online_donation_with_no_receipt_is_still_reported(): void
     {
         $service = \FundKit\Foundation\Plugin::instance()->container->get(\FundKit\Donations\DonationService::class);

@@ -12,17 +12,8 @@ use FundKit\Foundation\Plugin;
 use FundKit\Gateways\GatewayManager;
 
 /**
- * The editor preview is an iframe srcdoc, so it has no wp_scripts queue: every
- * script it needs has to be written into the document by hand, and it is
- * sandboxed without allow-same-origin, so it has to introduce itself.
- *
- * That loop emitted the runtime's DECLARED dependencies only. The runtime
- * declares wp-i18n, wp-i18n depends on wp-hooks, and @wordpress/i18n reads
- * wp.hooks at module scope, so i18n threw, wp.i18n was never defined, the
- * runtime threw on top of it and the preview never hydrated. What was left on
- * screen was the server-rendered fallback markup, which carries almost none of
- * the classes runtime.css is scoped to, so the form looked completely unstyled
- * while the stylesheet was loading perfectly well.
+ * srcdoc has no script queue; include transitive dependencies and initialize the sandboxed
+ * document explicitly.
  */
 final class FormPreviewDocumentTest extends IntegrationTestCase
 {
@@ -106,7 +97,6 @@ final class FormPreviewDocumentTest extends IntegrationTestCase
         $this->assertStringContainsString('window.fundkitFormPreview = true', $this->document());
     }
 
-    /** And the page a donor is actually served does not. */
     public function test_a_real_donation_page_carries_no_such_flag(): void
     {
         $blocks = '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/submit-button /-->';

@@ -10,25 +10,9 @@ use FundKit\Funds\Fund;
 use WP_REST_Request;
 
 /**
- * The donation-form block's editor preview must never reach a reader, and the
- * form-less submission path must never be the permissive one.
- *
- * The preview stub has no form row, so anything it mints is scoped to form id
- * 0, which is the very scope the donations endpoint verifies when a submission
- * carries no form_id. Serving that preview to anyone who is not editing the
- * post therefore hands out a token for the one submission path where none of
- * the form gates run: fund allow-list, block-level validation, and the
- * note_to_org/note_public strip that keeps unmoderated text off the campaign's
- * supporter wall.
- *
- * Three independent things hold that shut, and each is pinned below: only the
- * block-renderer route reaches the preview branch, only a user who can edit
- * does, the preview carries no token at all, and a form-less submission is
- * granted nothing a form would have had to offer.
- *
- * REST_REQUEST is deliberately never defined here. It is process-wide and true
- * for every /wp-json call, so a test that defined it would silently flip other
- * blocks into their editor branch for the rest of the run.
+ * Editor previews require the block-renderer route and edit permission, and must issue no form
+ * token. Form-less submissions must not bypass form restrictions. Leave REST_REQUEST undefined
+ * because it affects the whole test process.
  */
 final class PublicRestFormTokenLeakTest extends IntegrationTestCase
 {
@@ -178,10 +162,7 @@ final class PublicRestFormTokenLeakTest extends IntegrationTestCase
         return $f;
     }
 
-    /**
-     * No form_id, so the harness signs the body with a form token scoped to 0,
-     * which is exactly the token the preview used to publish.
-     */
+    /** The harness signs form-less requests with form ID 0. */
     private function donateWithoutForm(array $extra): ?Donation
     {
         $req = new WP_REST_Request('POST', '/fundkit/v1/donations');

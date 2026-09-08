@@ -103,10 +103,6 @@ final class DonorAuditTrailTest extends IntegrationTestCase
         $this->assertNotNull($rows[0]->payload, 'and did not then clear its own payload');
     }
 
-    /**
-     * The sequence the exclusion exists for: the delete's erasure pass runs
-     * over events that already include the record of the earlier redaction.
-     */
     public function test_a_later_delete_does_not_blank_the_earlier_redaction_record(): void
     {
         $donor = $this->donor();

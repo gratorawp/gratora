@@ -50,7 +50,6 @@ final class AdminMarkPaidIdentityTest extends IntegrationTestCase
         ));
     }
 
-    /** A check really did arrive outside any gateway, so it is marked as such. */
     public function test_an_offline_donation_still_gets_an_offline_marker(): void
     {
         $donation = $this->createDonation('offline');
@@ -63,10 +62,6 @@ final class AdminMarkPaidIdentityTest extends IntegrationTestCase
         $this->assertStringStartsWith('offline-', (string) $row->gateway_txn_id);
     }
 
-    /**
-     * The money moved through Stripe whether or not the webhook told us. The
-     * record has to keep saying so.
-     */
     public function test_a_gateway_donation_is_not_relabelled_offline(): void
     {
         $donation = $this->createDonation('offline');
@@ -83,7 +78,6 @@ final class AdminMarkPaidIdentityTest extends IntegrationTestCase
         $this->assertStringStartsNotWith('offline-', (string) $row->gateway_txn_id);
     }
 
-    /** With no settlement id of its own, the intent is what identifies it. */
     public function test_the_intent_identifies_a_hand_confirmed_gateway_donation(): void
     {
         $donation = $this->createDonation('offline');

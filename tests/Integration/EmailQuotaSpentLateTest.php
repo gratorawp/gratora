@@ -97,10 +97,6 @@ final class EmailQuotaSpentLateTest extends IntegrationTestCase
         $this->assertSame(3, $this->remaining($victim));
     }
 
-    /**
-     * The quota still has to bite, or moving it would have traded one hole for
-     * a larger one.
-     */
     public function test_the_quota_still_bounds_a_donor_who_reaches_the_gateway(): void
     {
         $email = 'real-' . uniqid() . '@example.test';

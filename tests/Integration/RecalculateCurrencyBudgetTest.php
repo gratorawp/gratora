@@ -114,7 +114,6 @@ final class RecalculateCurrencyBudgetTest extends IntegrationTestCase
         $this->assertSame(0, (int) $resumed['unconvertible'], 'the pass moved past what it can never convert');
     }
 
-    /** And the route records the cursor rather than starting over. */
     public function test_the_route_records_where_the_currency_pass_got_to(): void
     {
         $this->unconverted(3);

@@ -6,12 +6,7 @@ namespace FundKit\Tests\Integration;
 
 use WP_REST_Request;
 
-/**
- * Regression net for the class of bug the audit found (a block that is
- * inserterable but silently dropped by buildSteps, e.g. the old file-upload
- * stub / row gap). Every data/content block carries a unique marker; each
- * must survive into the runtime config the donor app reads.
- */
+/** Every insertable data/content block must survive into runtime config with its marker. */
 final class BlockPipelineCoverageTest extends IntegrationTestCase
 {
     private int $campaignId;

@@ -41,8 +41,6 @@ function config( steps ) {
 
 const gatewayBlock = { kind: 'payment-gateways' };
 
-// The block on page 0, the submit two pages later. Legal, and the shape that
-// used to render no payment UI at all.
 const BLOCK_ON_AN_EARLIER_PAGE = [
     { id: 'amount', type: 'amount', page: 0, presets: [ 2500 ], items: [ gatewayBlock ] },
     { id: 'donor',  type: 'donor',  page: 1 },

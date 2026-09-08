@@ -88,7 +88,6 @@ final class RestRouteGuardMatrixTest extends IntegrationTestCase
         );
     }
 
-    /** A stale entry means the list stopped describing the plugin. */
     public function test_the_public_list_has_no_routes_that_no_longer_exist(): void
     {
         $this->assertSame(

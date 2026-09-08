@@ -46,12 +46,7 @@ final class CliSeedGuardsTest extends IntegrationTestCase
         return Plugin::instance()->container->get(DonationService::class);
     }
 
-    // ------------------------------------------------------------ e2e-seed
 
-    /**
-     * WordPress answers production for every install that has not said
-     * otherwise, so this is the answer on the site that would be hurt.
-     */
     public function test_e2e_seed_refuses_on_an_install_that_reports_production(): void
     {
         $before = get_option('fundkit_currency_locale');
@@ -102,7 +97,6 @@ final class CliSeedGuardsTest extends IntegrationTestCase
         }
     }
 
-    // ----------------------------------------------------------- demo-seed
 
     /**
      * A bank-transfer donation sits pending until an admin reconciles it. An
@@ -132,7 +126,6 @@ final class CliSeedGuardsTest extends IntegrationTestCase
         $this->assertSame(0, DemoSeeder::foreignLiveDonations());
     }
 
-    /** A test-mode donation is nobody's book of record. */
     public function test_a_test_donation_does_not_count_against_it(): void
     {
         $this->liveDonation(isTest: true);

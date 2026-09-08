@@ -15,16 +15,6 @@ use FundKit\Foundation\Plugin;
 use FundKit\Recurring\RecurringPlan;
 use WP_REST_Request;
 
-/**
- * Removing a donor who should never have been a record.
- *
- * Erasure and deletion answer different questions. A donor who gave keeps their
- * row: the donation is a financial record that has to survive, and a donation
- * whose donor is missing is a broken one, so erasure wipes the person and
- * deliberately leaves the row behind. Deletion is for the other case, the one
- * the admin could previously do nothing about: an address that never became a
- * donation, sitting in the list with no way to get rid of it.
- */
 final class DonorDeleteTest extends IntegrationTestCase
 {
     private function service(): DonorService
@@ -73,10 +63,6 @@ final class DonorDeleteTest extends IntegrationTestCase
         $this->assertFalse($this->exists((int) $donor->id));
     }
 
-    /**
-     * The refusal that matters. Money has to survive, and a donation pointing at
-     * a donor who is gone is a record nobody can reconcile.
-     */
     public function test_a_donor_who_gave_cannot_be_removed(): void
     {
         $donor = $this->donor('gave-' . uniqid() . '@example.test');
@@ -100,7 +86,6 @@ final class DonorDeleteTest extends IntegrationTestCase
         );
     }
 
-    /** A live mandate is money in motion, whether or not it has charged yet. */
     public function test_a_donor_on_a_recurring_plan_cannot_be_removed(): void
     {
         $donor = $this->donor('planned-' . uniqid() . '@example.test');
@@ -123,10 +108,6 @@ final class DonorDeleteTest extends IntegrationTestCase
         $this->assertTrue($this->exists((int) $donor->id));
     }
 
-    /**
-     * Core cannot see what an add-on hangs off a donor, so the add-on says so.
-     * fundkit-p2p uses this to keep a donor whose fundraiser page is still public.
-     */
     public function test_an_add_on_can_refuse(): void
     {
         $donor = $this->donor('vetoed-' . uniqid() . '@example.test');
@@ -142,7 +123,6 @@ final class DonorDeleteTest extends IntegrationTestCase
         $this->assertTrue($this->exists((int) $donor->id));
     }
 
-    /** Nothing describing them is left pointing at a donor who is gone. */
     public function test_what_only_described_them_goes_too(): void
     {
         $email = 'tidy-' . uniqid() . '@example.test';
@@ -165,7 +145,6 @@ final class DonorDeleteTest extends IntegrationTestCase
         $this->assertSame(0, PendingSignup::query()->where('email_hash', $hash)->count(), 'a live link is not left behind');
     }
 
-    /** An erased donor with nothing to keep can still be tidied away. */
     public function test_an_erased_donor_with_no_donations_can_be_removed(): void
     {
         $donor = $this->donor('erased-' . uniqid() . '@example.test');

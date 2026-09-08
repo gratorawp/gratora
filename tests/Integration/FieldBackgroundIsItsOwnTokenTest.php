@@ -34,7 +34,6 @@ final class FieldBackgroundIsItsOwnTokenTest extends IntegrationTestCase
         $this->assertArrayNotHasKey('fundkit-field-bg', $saved);
     }
 
-    /** And an org that wants coloured boxes can still have them. */
     public function test_a_field_fill_the_org_chose_is_kept(): void
     {
         $this->assertSame(

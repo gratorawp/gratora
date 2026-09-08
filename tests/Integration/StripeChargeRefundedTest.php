@@ -12,12 +12,6 @@ use FundKit\Foundation\Plugin;
 use FundKit\Gateways\Stripe\StripeAccount;
 use WP_REST_Request;
 
-/**
- * A refund issued from the Stripe dashboard arrives as a `charge.refunded`
- * webhook and must sync back locally: mark the donation refunded and email the
- * donor. This branch was previously untested (only admin-initiated refunds were
- * covered by RefundFlowTest).
- */
 final class StripeChargeRefundedTest extends IntegrationTestCase
 {
     private string $secret;

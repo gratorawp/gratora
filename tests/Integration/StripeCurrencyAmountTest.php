@@ -110,10 +110,6 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
         ];
     }
 
-    /**
-     * The gateway scales the refund out to Stripe's unit and rescales the
-     * echoed amount back to internal storage, so both directions stay correct.
-     */
     public function test_refund_scales_outbound_and_inbound(): void
     {
         $reference = $this->createDonation('JPY', 100000, 'refund-jpy@example.com');
@@ -136,7 +132,6 @@ final class StripeCurrencyAmountTest extends IntegrationTestCase
         $this->assertSame(100000, $result->amount_cents, 'refund result is rescaled to internal storage');
     }
 
-    /** A `charge.refunded` webhook carrying whole-yen amounts records internal *100 cents. */
     public function test_charge_refunded_webhook_records_internal_amount(): void
     {
         $reference = $this->createDonation('JPY', 100000, 'wh-refund-jpy@example.com');

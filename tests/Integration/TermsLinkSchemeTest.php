@@ -78,7 +78,6 @@ final class TermsLinkSchemeTest extends IntegrationTestCase
         $this->fail('the terms block never reached the config');
     }
 
-    /** Baseline, so the refusals below mean something. */
     public function test_an_ordinary_link_reaches_the_form(): void
     {
         $this->assertSame('https://example.org/terms', $this->linkInConfig('https://example.org/terms'));

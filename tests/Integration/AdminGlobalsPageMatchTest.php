@@ -75,11 +75,6 @@ final class AdminGlobalsPageMatchTest extends IntegrationTestCase
         $this->assertStringContainsString('number_format', $this->payloadOn('fundkit'));
     }
 
-    /**
-     * The plan menus on Subscriptions and the donor profile are gated on this,
-     * so a reader who cannot change what is charged is not offered the actions
-     * the route will refuse.
-     */
     public function test_the_payload_says_whether_this_reader_may_change_a_plan(): void
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
@@ -96,10 +91,6 @@ final class AdminGlobalsPageMatchTest extends IntegrationTestCase
         remove_role($role);
     }
 
-    /**
-     * The admin screens decide what to offer from this map, so a capability
-     * missing from it reads as permission rather than as silence.
-     */
     public function test_the_payload_carries_every_capability_the_screens_ask_about(): void
     {
         $payload = $this->payloadOn('fundkit-donations');
@@ -110,11 +101,6 @@ final class AdminGlobalsPageMatchTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * The settings panel fills the format from window.fundkit.currency_formats
-     * when a base currency is picked. Without it the pick still saves and the
-     * format silently stays whatever it was, which is the bug this replaced.
-     */
     public function test_the_payload_carries_the_currency_format_presets(): void
     {
         $payload = $this->payloadOn('fundkit-settings');

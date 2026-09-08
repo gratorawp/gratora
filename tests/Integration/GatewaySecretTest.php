@@ -33,12 +33,6 @@ final class GatewaySecretTest extends IntegrationTestCase
         return (string) ($stored['stripe']['webhook_secret_test'] ?? '');
     }
 
-    /**
-     * This used to assert the opposite, so the field could reveal the secret.
-     * That traded the confidentiality of the ONLY authentication on
-     * /fundkit/v1/webhooks/stripe for a UI convenience: reading it was enough to
-     * forge a paid donation with no donations capability at all.
-     */
     public function test_a_settings_manager_never_reads_back_the_real_secret(): void
     {
         $this->put('gateways', ['stripe' => ['webhook_secret_test' => 'whsec_realsecret']]);

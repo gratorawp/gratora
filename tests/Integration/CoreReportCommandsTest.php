@@ -172,11 +172,6 @@ final class CoreReportCommandsTest extends IntegrationTestCase
         }
     }
 
-    /**
-     * The note is written on a donation and is shown on that donation's screen
-     * and nowhere else. This used to open the donor's profile, which does not
-     * carry it: Read led to a page with no sign of the thing it named.
-     */
     public function test_a_single_note_opens_the_donation_that_carries_it(): void
     {
         $ctx = $this->adminCtx();
@@ -192,7 +187,6 @@ final class CoreReportCommandsTest extends IntegrationTestCase
         $this->assertStringNotContainsString('fundkit-donors', $note['action_href']);
     }
 
-    /** Several notes have no single donation to open, so the ledger it is. */
     public function test_several_notes_fall_back_to_the_donations_list(): void
     {
         $ctx = $this->adminCtx();
