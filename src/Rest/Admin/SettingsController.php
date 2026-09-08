@@ -211,9 +211,8 @@ final class SettingsController
     {
         foreach ($data as $key => $value) {
             if (is_string($value)) {
-                $data[$key] = in_array($key, self::WHITESPACE_IS_THE_VALUE, true)
-                    ? $this->sanitizeSeparator($value)
-                    : sanitize_textarea_field($value);
+                $clean = $this->stripUnsafe($value);
+                $data[$key] = in_array($key, self::WHITESPACE_IS_THE_VALUE, true) ? $clean : trim($clean);
             } elseif (is_array($value)) {
                 $data[$key] = $this->sanitize($value);
             }
@@ -221,30 +220,39 @@ final class SettingsController
         return $data;
     }
 
+
     /**
-     * Settings whose value can legitimately be a space.
+     * Settings whose value can legitimately be a space, so the trim below is
+     * not applied to them.
      *
-     * sanitize_textarea_field() trims, so a thousands separator of " " arrived
-     * as "" and the screen came back saying none. Swedish, Norwegian, Polish,
-     * Czech and South African money is written that way, so the format they
-     * need is the one that could not be saved.
+     * A thousands separator of " " arrived as "" and the screen came back
+     * saying none. Swedish, Norwegian, Polish, Czech and South African money is
+     * written that way, so the format they need was the one that could not be
+     * saved.
      */
     private const WHITESPACE_IS_THE_VALUE = ['decimal_sep', 'thousand_sep'];
 
     /**
-     * Strip what sanitize_textarea_field() strips, without the trim: tags,
-     * invalid UTF-8 and control characters, leaving ordinary and non-breaking
-     * spaces intact.
+     * Tags, invalid UTF-8 and control characters removed, and nothing else.
+     *
+     * A settings string can carry a percent-encoded URL, and WordPress's text
+     * sanitizers delete every %XX run they find, which turns a tracked link in
+     * a template into a dead one. Ordinary and non-breaking spaces are left
+     * alone; the caller decides which keys are trimmed.
      *
      * @since 1.0.0
      */
-    private function sanitizeSeparator(string $value): string
+    private function stripUnsafe(string $value): string
     {
         $clean = wp_check_invalid_utf8($value);
 
-        // Strip tags without trimming either ordinary or non-breaking spaces.
-        $clean = (string) preg_replace('@<(script|style)[^>]*?>.*?</\1>@si', '', $clean);
-        $clean = strip_tags($clean);
+        if (str_contains($clean, '<')) {
+            // Escaped before stripping: strip_tags reads "<3" as an unclosed
+            // tag and takes the rest of the body with it.
+            $clean = wp_pre_kses_less_than($clean);
+            $clean = (string) preg_replace('@<(script|style)[^>]*?>.*?</\1>@si', '', $clean);
+            $clean = strip_tags($clean);
+        }
 
         return (string) preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $clean);
     }

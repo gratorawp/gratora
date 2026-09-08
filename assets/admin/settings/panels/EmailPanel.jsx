@@ -169,13 +169,11 @@ export default function EmailPanel( { s } ) {
 const SAMPLE_VALUES = {
     '{donor_first_name}':  'Jane',
     '{donor_name}':        'Jane Doe',
-    '{donor_email}':       'jane@example.com',
     '{organisation_name}': 'Your Organization',
     '{amount}':            formatAmount( 2500 ),
     '{campaign_title}':    'Spring fundraiser',
     '{receipt_number}':    'R-2026-00042',
     '{reference}':         'DN-XYZ123',
-    '{date}':              new Date().toLocaleDateString(),
     '{download_url}':      'https://example.org/receipt/download',
     '{bank_details}':      'IBAN: DE89 3704 0044 0532 0130 00\nBIC: COBADEFFXXX',
 };
@@ -185,7 +183,7 @@ const SAMPLE_VALUES = {
  * tags read as prose and half as braces looks broken rather than unfinished.
  * Anything without a sample is shown as a tag, so the preview stays coherent.
  */
-function expandTags( text ) {
+export function expandTags( text ) {
     return ( text || '' ).split( /(\{[a-z_]+\})/ ).map( ( part, i ) =>
         /^\{[a-z_]+\}$/.test( part ) && SAMPLE_VALUES[ part ] === undefined
             ? <span key={ i } className="fundkit-email-preview__tag">{ part }</span>
