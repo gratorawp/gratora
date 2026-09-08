@@ -26,6 +26,13 @@ if (! isset($GLOBALS['_fundkit_test_options'])) {
     $GLOBALS['_fundkit_test_options'] = [];
 }
 
+if (! function_exists('wp_json_encode')) {
+    function wp_json_encode(mixed $data, int $options = 0, int $depth = 512): string|false
+    {
+        return json_encode($data, $options, $depth);
+    }
+}
+
 if (! function_exists('get_option')) {
     function get_option(string $name, mixed $default = false): mixed
     {

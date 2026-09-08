@@ -63,6 +63,7 @@ final class DataEraser
         // vendored into each paid add-on, which has no uninstall of its own.
         'fundkit_pro_license_key',
         'fundkit_receipt_settings',
+        'fundkit_recurring_installed',
         'fundkit_reference_settings',
         'fundkit_retention_cursor',
         'fundkit_retention_starts_at',

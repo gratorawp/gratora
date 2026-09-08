@@ -13,6 +13,8 @@ final class AsyncDispatcherTest extends TestCase
     {
         $GLOBALS['_fundkit_as_calls'] = [];
         $GLOBALS['_fundkit_as_has_scheduled'] = false;
+        // The installed map is an option now, so it outlives a test that wrote it.
+        unset($GLOBALS['_fundkit_test_options'][AsyncDispatcher::INSTALLED_OPTION]);
     }
 
     private function calls(string $func = ''): array

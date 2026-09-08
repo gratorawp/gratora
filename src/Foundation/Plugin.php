@@ -422,6 +422,11 @@ final class Plugin
 
         do_action('fundkit.deactivated');
 
+        // init reinstalls these on reactivation, and a run with no callback
+        // still schedules its successor, so a deactivated plugin's sweeps
+        // regenerate for as long as the site lives.
+        AsyncDispatcher::forgetRecurring();
+
         // The answer is spent by finishing, not by starting. An erase that dies
         // on its third site of twelve has to leave the plugin delete something
         // to act on, or the owner keeps donors they were told were gone.
