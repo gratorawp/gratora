@@ -42,6 +42,14 @@ final class DonorExporter
 
     private const CHUNK = 500;
 
+    /**
+     * How many rows one export may hold. Memory and wall clock, not policy:
+     * every row decrypts three PII columns.
+     *
+     * @since 1.0.0
+     */
+    public const MAX_ROWS = 50000;
+
     /** @since 1.0.0 */
     public function __construct(private DonorService $donors)
     {
@@ -100,6 +108,10 @@ final class DonorExporter
         // UTC, so the window is converted rather than compared as written.
         [$fromUtc, $toUtc] = DonationQueries::dayBoundsUtc($from, $to);
 
+        // A distinct filter from the donations export: a site that raised that
+        // cap should not silently raise one that decrypts three columns a row.
+        $cap     = max(1, (int) apply_filters('fundkit.export.donors_max_rows', self::MAX_ROWS));
+        $written = 0;
         $afterId = 0;
         while (true) {
             $q = Donor::query()
@@ -121,7 +133,13 @@ final class DonorExporter
 
             foreach ($batch as $donor) {
                 $afterId = (int) $donor->id;
+
+                if ($written >= $cap) {
+                    break 2;
+                }
+
                 Csv::writeRow($out, $this->row($donor, $columns));
+                $written++;
             }
         }
 
