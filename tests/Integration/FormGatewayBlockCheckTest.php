@@ -48,7 +48,13 @@ final class FormGatewayBlockCheckTest extends IntegrationTestCase
     private function enableTwoGateways(): void
     {
         $c = Plugin::instance()->container;
-        $c->get(SettingsService::class)->update('gateways', ['offline' => ['enabled' => true]]);
+        // Instructions, not just the flag: OfflineGateway::canCharge wants a way
+        // to pay, and isOn asks it. Test mode because the Stripe keys below are
+        // test keys, and isOn asks chargesInMode for the mode the site is in.
+        $c->get(SettingsService::class)->update('gateways', [
+            'test_mode' => true,
+            'offline'   => ['enabled' => true, 'instructions' => 'Transfer quoting your reference.'],
+        ]);
 
         $account = $c->get(StripeAccount::class);
         $account->saveKeys(true, 'sk_test_block_check', 'pk_test_block_check');
@@ -68,11 +74,15 @@ final class FormGatewayBlockCheckTest extends IntegrationTestCase
             ));
         }
 
-        $on = 0;
+        $on = [];
         foreach (array_keys($manager->all()) as $id) {
-            if ($manager->isOn($id)) $on++;
+            if ($manager->isOn($id)) $on[] = $id;
         }
-        $this->assertGreaterThanOrEqual(2, $on, 'the check is only meaningful with a real choice');
+        $this->assertGreaterThanOrEqual(
+            2,
+            count($on),
+            'the check is only meaningful with a real choice; on: ' . implode(', ', $on)
+        );
     }
 
     public function test_a_form_with_two_gateways_and_no_block_is_flagged(): void

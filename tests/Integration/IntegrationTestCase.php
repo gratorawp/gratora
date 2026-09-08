@@ -32,6 +32,10 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // The registry is process-wide and the container memoises it, so a test
+        // that registers a double leaves every later test in the run measuring
+        // a site that has it. Snapshotted here, restored in tearDown.
+        $this->gatewaysBefore = $this->registeredGateways();
         $this->setQueryableTransactionDepth(1);
         wp_set_current_user(1);
         // A realistic multi-currency org: base USD, accepting USD/EUR/GBP. Keeps
@@ -79,7 +83,7 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
         ]);
     }
 
-    /** @var array<string,object>|null The registry as it stood before a test took a gateway out. */
+    /** @var array<string,object>|null The registry as it stood when this test started. */
     private ?array $gatewaysBefore = null;
 
     /**
@@ -92,14 +96,28 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
      */
     protected function deregisterGateway(string $id): void
     {
+        $all = $this->registeredGateways();
+        unset($all[$id]);
+        $this->writeGateways($all);
+    }
+
+    /** @return array<string,object> */
+    private function registeredGateways(): array
+    {
         $manager = Plugin::instance()->container->get(GatewayManager::class);
         $prop    = new ReflectionProperty($manager, 'gateways');
         $prop->setAccessible(true);
 
-        $all = (array) $prop->getValue($manager);
-        $this->gatewaysBefore ??= $all;
-        unset($all[$id]);
-        $prop->setValue($manager, $all);
+        return (array) $prop->getValue($manager);
+    }
+
+    /** @param array<string,object> $gateways */
+    private function writeGateways(array $gateways): void
+    {
+        $manager = Plugin::instance()->container->get(GatewayManager::class);
+        $prop    = new ReflectionProperty($manager, 'gateways');
+        $prop->setAccessible(true);
+        $prop->setValue($manager, $gateways);
     }
 
     private function restoreGateways(): void
@@ -108,10 +126,7 @@ abstract class IntegrationTestCase extends WP_UnitTestCase
             return;
         }
 
-        $manager = Plugin::instance()->container->get(GatewayManager::class);
-        $prop    = new ReflectionProperty($manager, 'gateways');
-        $prop->setAccessible(true);
-        $prop->setValue($manager, $this->gatewaysBefore);
+        $this->writeGateways($this->gatewaysBefore);
 
         $this->gatewaysBefore = null;
     }
