@@ -49,7 +49,11 @@ export function CampaignPicker( { value, onChange, noneLabel } ) {
     // destructuring default only replaces `undefined`, so this guard is what
     // keeps the inspector from throwing on selection.
     const campaigns = Array.isArray( records ) ? records : [];
-    const empty = Array.isArray( records ) && records.length === 0 && ! search;
+    // A refused list resolves to null, never [], so the count alone cannot tell
+    // "nothing to show" from "not allowed to look", and the sentence written
+    // for this reader was unreachable.
+    const empty = ! canManageCampaigns()
+        || ( Array.isArray( records ) && records.length === 0 && ! search );
 
     // Resolved on its own so a block bound to a campaign outside the current
     // page still reads as bound rather than as unset.

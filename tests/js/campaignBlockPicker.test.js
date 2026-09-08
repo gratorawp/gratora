@@ -96,11 +96,24 @@ describe( 'the campaign picker', () => {
 
     it( 'tells a reader who cannot list campaigns why the list is empty', () => {
         window.fundkitCampaignBlocks = { canManageCampaigns: false };
-        store.records = [];
+        // What a 403 actually leaves: the resolver fails and the store holds
+        // null, never an empty array, which is why this sentence was
+        // unreachable for the one reader it was written for.
+        store.records = null;
 
         renderPicker();
 
         expect( document.body.textContent ).toContain( 'do not have permission' );
+    } );
+
+    /** And a reader who can list them, with none to show, still gets the other branch. */
+    it( 'tells a reader who can list them that there are none yet', () => {
+        window.fundkitCampaignBlocks = { canManageCampaigns: true };
+        store.records = [];
+
+        renderPicker();
+
+        expect( document.body.textContent ).not.toContain( 'do not have permission' );
     } );
 } );
 
