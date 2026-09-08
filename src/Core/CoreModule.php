@@ -1182,19 +1182,23 @@ final class CoreModule implements FundKitModule
         // register outside any is_admin() gate.
         $c->get(ApplePayDomain::class)->register();
 
-        add_action('fundkit.settings.updated', static function (string $group, array $next): void {
+        add_action('fundkit.settings.updated', static function (string $group, array $next, array $prev = []): void {
             if ($group === 'roles') {
                 Capabilities::applyMapping(is_array($next['mapping'] ?? null) ? $next['mapping'] : []);
             }
             if ($group === 'currency-locale') {
                 // Campaigns report in the single org currency; keep their stored
                 // currency in lockstep when the org default currency changes.
+                // On the change, not on every save of the group: the panel PUTs
+                // the whole group, so a thousands separator was relabelling
+                // rows a restore had just landed in their own currency.
                 $cur = strtoupper((string) ($next['default_currency'] ?? ''));
-                if ($cur !== '') {
+                $was = strtoupper((string) ($prev['default_currency'] ?? ''));
+                if ($cur !== '' && $cur !== $was) {
                     Campaign::query()->where('currency', $cur, '!=')->update(['currency' => $cur]);
                 }
             }
-        }, 10, 2);
+        }, 10, 3);
 
         // Seed actual role capabilities to match displayed defaults, even if an add-on already
         // created the option.

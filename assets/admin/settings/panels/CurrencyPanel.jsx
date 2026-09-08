@@ -277,10 +277,10 @@ export default function CurrencyPanel( { s, fx } ) {
                     help={ baseLocked
                         ? sprintf(
                             /* translators: %s: base currency code */
-                            __( 'Locked to %s: donations are already recorded against it, and their stored totals would be reread as the new currency. Existing campaigns keep their own currency.', 'fundraising-toolkit' ),
+                            __( 'Locked to %s: donations are already recorded against it, and their stored totals would be reread as the new currency.', 'fundraising-toolkit' ),
                             defaultCurrency
                         )
-                        : __( 'All reporting and totals roll up to this, and it cannot be changed once donations come in. Existing campaigns keep their own currency.', 'fundraising-toolkit' ) }
+                        : __( 'All reporting and totals roll up to this, and it cannot be changed once donations come in. Every campaign reports in it, so changing it relabels their goals and totals without restating the figures.', 'fundraising-toolkit' ) }
                 >
                     <select
                         className="fundkit-select"

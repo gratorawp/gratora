@@ -136,7 +136,6 @@ final class ReadinessService
                 $ready[] = $gateway->label();
             }
         }
-        if ($this->offlineReady()) $ready[] = __('offline donations', 'fundraising-toolkit');
 
         $ready = array_values(array_unique($ready));
 
@@ -722,13 +721,6 @@ final class ReadinessService
         return is_array($cfg) && ! empty($cfg['test_mode']);
     }
 
-    /** @since 1.0.0 */
-    private function offlineReady(): bool
-    {
-        $gw = $this->settings->get('gateways');
-
-        return ! empty($gw['offline']['enabled']) && trim((string) ($gw['offline']['instructions'] ?? '')) !== '';
-    }
 
     /**
      * Whether the org has this gateway switched on, which is a different

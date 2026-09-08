@@ -10,7 +10,9 @@ use FundKit\Forms\Form;
 use FundKit\Forms\FormReadinessService;
 use FundKit\Foundation\Crypto\Crypto;
 use FundKit\Foundation\License\LicenseService;
+use FundKit\Foundation\Time\SystemClock;
 use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\Offline\OfflineGateway;
 use FundKit\Gateways\PayPal\PayPalAccount;
 use FundKit\Gateways\Stripe\ApplePayDomain;
 use FundKit\Gateways\Stripe\StripeAccount;
@@ -34,6 +36,14 @@ final class ReadinessServiceTest extends IntegrationTestCase
         delete_option(PortalPage::OPTION_PAGE_ID);
     }
 
+    private function registry(): GatewayManager
+    {
+        $gateways = new GatewayManager();
+        $gateways->register(new OfflineGateway(new SystemClock()));
+
+        return $gateways;
+    }
+
     private function service(): ReadinessService
     {
         $settings = new SettingsService();
@@ -49,8 +59,10 @@ final class ReadinessServiceTest extends IntegrationTestCase
             new ApplePayDomain($api, $stripe),
             new PayPalAccount($crypto),
             // A fresh registry: these assert what an unconfigured site is told,
-            // and the shared one may hold whatever a sibling registered.
-            new GatewayManager(),
+            // and the shared one may hold whatever a sibling registered. Offline
+            // is put back because CoreModule always registers it, and the check
+            // reads the registry to decide whether money can arrive.
+            $this->registry(),
             new PortalPage(),
             new LicenseService(),
         );
@@ -336,5 +348,37 @@ final class ReadinessServiceTest extends IntegrationTestCase
         $campaign = Campaign::query()->find('id', $campaignId);
         $campaign->default_form_id = $formId;
         $campaign->save();
+    }
+
+    /**
+     * The check named offline twice, once from the gateway's own label and once
+     * from a literal beside it, in two different cases, so array_unique could
+     * not collapse them: "Donations can be taken through Offline donations,
+     * offline donations".
+     */
+    public function test_the_offline_gateway_is_named_once(): void
+    {
+        $this->enableOffline();
+
+        $label = strtolower((string) $this->checks()['gateway']['label']);
+
+        $this->assertSame(1, substr_count($label, 'offline donations'));
+    }
+
+    /**
+     * Bank details are a way to pay, which the gateway's own canCharge accepts
+     * and the deleted predicate refused. Here so the removal cannot narrow the
+     * check rather than widen it.
+     */
+    public function test_bank_details_alone_are_a_way_to_charge(): void
+    {
+        update_option('fundkit_gateway_config', [
+            'offline' => ['enabled' => true, 'instructions' => '', 'bank_details' => 'IBAN NL00 BANK 0123 4567 89'],
+        ]);
+
+        $check = $this->checks()['gateway'];
+
+        $this->assertSame(ReadinessService::PASS, $check['status']);
+        $this->assertStringContainsString('Offline donations', (string) $check['label']);
     }
 }
