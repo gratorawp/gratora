@@ -407,6 +407,9 @@ export default function List() {
     const [ total, setTotal ]       = useState( 0 );
     const [ loading, setLoading ]   = useState( true );
     const [ stats, setStats ]       = useState( null );
+    // A total nobody could take is not a zero, and the toast that said so
+    // dismissed itself after seven seconds.
+    const [ statsFailed, setStatsFailed ] = useState( null );
     const [ fetchError, setError ]  = useState( null );
     const [ gateways, setGateways ] = useState( [] );
     const [ campaigns, setCampaigns ] = useState( [] );
@@ -527,9 +530,14 @@ export default function List() {
         path: addQueryArgs( '/fundkit/v1/admin/recurring/stats', { include_test: test || undefined } ),
     } );
 
-    const statsError = () => notify.error( __( 'The recurring totals could not be loaded.', 'fundraising-toolkit' ) );
+    const statsMessage = ( e ) => e?.message || __( 'The recurring totals could not be loaded.', 'fundraising-toolkit' );
 
-    const loadStats = () => fetchStats( includeTest ).then( setStats ).catch( statsError );
+    const loadStats = () => fetchStats( includeTest )
+        .then( ( r ) => {
+            setStats( r );
+            setStatsFailed( null );
+        } )
+        .catch( ( e ) => setStatsFailed( statsMessage( e ) ) );
 
     // These donations have no plan row, so no filter on this list can reach
     // them; they are fetched on their own and read out above the table. A
@@ -557,8 +565,8 @@ export default function List() {
     useEffect( () => {
         let aborted = false;
         fetchStats( includeTest )
-            .then( ( r ) => { if ( ! aborted ) setStats( r ); } )
-            .catch( () => { if ( ! aborted ) statsError(); } );
+            .then( ( r ) => { if ( ! aborted ) { setStats( r ); setStatsFailed( null ); } } )
+            .catch( ( e ) => { if ( ! aborted ) setStatsFailed( statsMessage( e ) ); } );
         return () => { aborted = true; };
     }, [ includeTest ] );
 
@@ -869,7 +877,22 @@ export default function List() {
                 onReload={ loadUnlinked }
             />
 
-            <KpiStrip items={ subscriptionKpis( stats, unlinked, includeTest ) } loading={ ! stats } />
+            { statsFailed && ! stats ? (
+                <Notice status="error" isDismissible={ false }>
+                    <div>{ __( 'The recurring totals could not be loaded, so nothing on this screen totals the book.', 'fundraising-toolkit' ) }</div>
+                    <div className="fundkit-row__sub">{ statsFailed }</div>
+                    <Btn variant="ghost" size="sm" onClick={ loadStats }>{ __( 'Try again', 'fundraising-toolkit' ) }</Btn>
+                </Notice>
+            ) : (
+                <>
+                    { statsFailed && (
+                        <Notice status="error" onRemove={ () => setStatsFailed( null ) }>
+                            { __( 'These totals are from before your last change. They could not be refreshed.', 'fundraising-toolkit' ) }
+                        </Notice>
+                    ) }
+                    <KpiStrip items={ subscriptionKpis( stats, unlinked, includeTest ) } loading={ ! stats && ! statsFailed } />
+                </>
+            ) }
 
             { fetchError && (
                 <Notice status="error" isDismissible={ false }>{ fetchError }</Notice>
