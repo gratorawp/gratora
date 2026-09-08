@@ -106,9 +106,10 @@ describe( 'the refund dialog, as an admin drives it', () => {
 	}
 
 	// Preact renders on a later tick, so the dialog holds the old amount until
-	// this has run.
+	// this has run. Ten rather than the usual five: rAF is wall-clock, and this
+	// suite runs straight after the PHP one, where five was not always enough.
 	async function settle() {
-		for ( let i = 0; i < 5; i++ ) {
+		for ( let i = 0; i < 10; i++ ) {
 			await new Promise( ( r ) => requestAnimationFrame( () => r() ) );
 			await new Promise( ( r ) => setTimeout( r, 0 ) );
 		}

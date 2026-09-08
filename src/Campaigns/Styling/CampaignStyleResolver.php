@@ -75,7 +75,11 @@ final class CampaignStyleResolver
     /** @since 1.0.0 */
     public function accentFor(?Campaign $campaign): string
     {
-        $tokens = $this->resolveForCampaign($campaign);
+        // Sanitised, as CampaignStyleVars does for the whole map: the filter
+        // runs after the allowlist, and this value is printed into style
+        // attributes that safecss_filter_attr never sees.
+        $tokens = Tokens::sanitize($this->resolveForCampaign($campaign));
+
         return (string) ($tokens['fundkit-accent'] ?? '#211d3f');
     }
 
@@ -135,6 +139,14 @@ final class CampaignStyleResolver
         ) {
             unset($tokens['fundkit-accent-soft']);
         }
+
+        // The focus ring is the same shape of pairing. Left at the shipped
+        // accent it never tracks the brand, and on the shipped navy background
+        // it is drawn in the ground's own colour: no visible focus at all.
+        if (($tokens['fundkit-focus-ring'] ?? null) === ($defaults['fundkit-focus-ring'] ?? null)) {
+            unset($tokens['fundkit-focus-ring']);
+        }
+
         return $tokens;
     }
 

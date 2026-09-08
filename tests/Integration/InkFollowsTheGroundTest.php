@@ -143,4 +143,23 @@ final class InkFollowsTheGroundTest extends IntegrationTestCase
             $this->css(['fundkit-field-bg' => '#101828'])
         );
     }
+
+    /**
+     * The focus ring is paired with the accent the way accent-soft is. Left at
+     * the shipped value it never tracked the brand, and on the shipped navy
+     * background it was drawn in the ground's own colour: no visible focus.
+     */
+    public function test_an_unpaired_focus_ring_falls_through_to_the_accent(): void
+    {
+        $this->assertStringNotContainsString('--fundkit-focus-ring:', $this->css(['fundkit-accent' => '#c62828']));
+    }
+
+    /** A ring the org paired with something is still theirs. */
+    public function test_a_focus_ring_the_org_chose_is_emitted(): void
+    {
+        $this->assertStringContainsString(
+            '--fundkit-focus-ring:#00ff00;',
+            $this->css(['fundkit-focus-ring' => '#00ff00'])
+        );
+    }
 }
