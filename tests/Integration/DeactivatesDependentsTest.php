@@ -124,4 +124,45 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
 
         $this->assertNotContains($other, $this->activePlugins());
     }
+
+    /**
+     * A silent deactivation skips deactivate_{$plugin}, which is the action
+     * register_deactivation_hook installs, so an add-on's own cleanup never
+     * ran: its cron jobs stayed in the option with no callback and its rewrite
+     * rules outlived it.
+     */
+    public function test_the_addons_own_deactivation_hook_runs(): void
+    {
+        $addon = $this->givenActivePlugin('fundkit-test-addon', 'fundraising-toolkit');
+
+        $ran = false;
+        add_action('deactivate_' . $addon, static function () use (&$ran): void {
+            $ran = true;
+        });
+
+        $this->deactivateCore();
+
+        remove_all_actions('deactivate_' . $addon);
+
+        $this->assertTrue($ran, 'the add-on never got to clean up after itself');
+    }
+
+    /**
+     * The removal runs inside WordPress's own deactivate_plugins() for core,
+     * which writes active_plugins from a copy it read before this hook ran. The
+     * nested write was overwritten and the add-on came back on: core off, the
+     * add-on still active, the exact state this exists to prevent.
+     */
+    public function test_the_removal_survives_the_write_that_follows_it(): void
+    {
+        $addon = $this->givenActivePlugin('fundkit-test-addon', 'fundraising-toolkit');
+
+        $this->deactivateCore();
+
+        // What the outer call is about to write: its own pre-hook copy, with
+        // core taken out and the add-on still in it.
+        update_option('active_plugins', [$addon]);
+
+        $this->assertNotContains($addon, $this->activePlugins());
+    }
 }

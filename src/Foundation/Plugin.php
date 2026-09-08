@@ -397,12 +397,27 @@ final class Plugin
          */
         $dependents = (array) apply_filters('fundkit.dependent_plugins', $dependents);
 
-        if ($dependents !== []) {
-            // Silent: each add-on's own deactivation hook still runs, but
-            // "deactivated" notices from a deactivation nobody triggered read
-            // as errors on the plugins screen.
-            deactivate_plugins(array_values(array_unique($dependents)), true);
+        if ($dependents === []) {
+            return;
         }
+
+        $dependents = array_values(array_unique($dependents));
+
+        // Not silent: silent is what skips deactivate_{$plugin}, which is the
+        // action register_deactivation_hook installs, so each add-on's own
+        // cleanup never ran and its cron jobs and rewrite rules outlived it.
+        deactivate_plugins($dependents);
+
+        // WordPress is inside its own deactivate_plugins() for core and writes
+        // active_plugins from a copy it read before this hook ran, so the write
+        // just made is about to be overwritten and the add-ons would come back
+        // on. Strip them from that write too, once.
+        $strip = static function ($value) use (&$strip, $dependents) {
+            remove_filter('pre_update_option_active_plugins', $strip);
+
+            return array_values(array_diff((array) $value, $dependents));
+        };
+        add_filter('pre_update_option_active_plugins', $strip);
     }
 
     /**
