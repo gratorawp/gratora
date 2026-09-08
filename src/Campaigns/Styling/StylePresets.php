@@ -206,6 +206,11 @@ final class StylePresets
             }
         }
 
+        // theme.json is not the token catalogue: it yields values like the
+        // keyword 'inherit' for a font weight, which one surface honours and
+        // another drops, so one preset renders two different buttons.
+        $tokens = Tokens::sanitize($tokens);
+
         if ($tokens === []) return null;
 
         return [
