@@ -1,7 +1,9 @@
 /**
  * theme.json writes a button radius in whatever unit it likes. The slider that
  * edits it reads whole pixels and clamps to its own range, so a theme that set
- * 1rem is shown as 1 and a pill as the maximum, with nothing saying so.
+ * 1rem is shown as 1 and a pill as the maximum. The row now takes such a value
+ * as text; this names it above the panel, where every group but the first is
+ * collapsed.
  */
 
 import { render } from 'preact';

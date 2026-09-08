@@ -164,6 +164,7 @@ export default function BrandPanel( { s } ) {
                                     <PresetEditor
                                         preset={ active }
                                         resetDefaults={ resetDefaults }
+                                        base={ builtinTokens( active.id ) }
                                         isDefault={ active.id === defaultId }
                                         onRename={ ( v ) => setName( active.id, v ) }
                                         onTokens={ ( v ) => writeTokens( active.id, v ) }
@@ -199,6 +200,7 @@ export default function BrandPanel( { s } ) {
                                 // On save the same fallback returns through
                                 // StylePresets::all()'s built-in merge.
                                 tokens={ { ...builtinTokens( active.id ), ...( active.tokens || {} ) } }
+                                presetId={ active.id }
                                 layer="brand"
                                 styling={ window.fundkit?.styling || {} }
                             />
@@ -211,7 +213,7 @@ export default function BrandPanel( { s } ) {
     );
 }
 
-export function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, onMakeDefault, onClone, onDelete } ) {
+export function PresetEditor( { preset, resetDefaults, base, isDefault, onRename, onTokens, onMakeDefault, onClone, onDelete } ) {
     return (
         <div className="fundkit-preset-editor">
             <div className="fundkit-preset-editor__head">
@@ -258,6 +260,7 @@ export function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTo
 
             <TokenEditor
                 value={ preset.tokens || {} }
+                base={ base || {} }
                 onChange={ onTokens }
                 catalogue={ window.fundkit?.styling?.catalogue || {} }
                 groups={ window.fundkit?.styling?.groups || {} }

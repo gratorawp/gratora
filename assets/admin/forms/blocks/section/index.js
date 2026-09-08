@@ -90,15 +90,27 @@ function Edit( { attributes, setAttributes } ) {
             <InspectorControls>
                 <PanelBody title={ __( 'Section', 'fundraising-toolkit' ) } initialOpen>
                     <Field label={ __( 'Background color', 'fundraising-toolkit' ) }>
-                        <ColorInput value={ background } onChange={ ( v ) => setAttributes( { background: v } ) } />
+                        <ColorInput
+                            label={ __( 'Background color', 'fundraising-toolkit' ) }
+                            value={ background }
+                            onChange={ ( v ) => setAttributes( { background: v } ) }
+                        />
                     </Field>
 
                     <Field label={ __( 'Text color', 'fundraising-toolkit' ) }>
-                        <ColorInput value={ textColor } onChange={ ( v ) => setAttributes( { textColor: v } ) } />
+                        <ColorInput
+                            label={ __( 'Text color', 'fundraising-toolkit' ) }
+                            value={ textColor }
+                            onChange={ ( v ) => setAttributes( { textColor: v } ) }
+                        />
                     </Field>
 
                     <Field label={ __( 'Border color', 'fundraising-toolkit' ) }>
-                        <ColorInput value={ border.color } onChange={ ( v ) => setBorder( { color: v } ) } />
+                        <ColorInput
+                            label={ __( 'Border color', 'fundraising-toolkit' ) }
+                            value={ border.color }
+                            onChange={ ( v ) => setBorder( { color: v } ) }
+                        />
                     </Field>
                     <Slider
                         label={ __( 'Border width', 'fundraising-toolkit' ) }

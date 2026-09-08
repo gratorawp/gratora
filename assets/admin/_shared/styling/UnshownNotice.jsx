@@ -1,25 +1,16 @@
 import { __, sprintf } from '@wordpress/i18n';
-
-// px is the unit the slider writes back, and it clamps to the same min/max.
-function slidable( value, def ) {
-    const m = /^(-?\d+(?:\.\d+)?)(px)?$/.exec( String( value ).trim() );
-    if ( ! m ) return false;
-    const n = parseFloat( m[ 1 ] );
-    if ( ! m[ 2 ] && n !== 0 ) return false;
-
-    return n >= ( def.min ?? 0 ) && n <= ( def.max ?? 32 );
-}
+import { slidable } from '@fundkit/ui/styling/TokenEditor';
 
 /**
- * A slider reads whole pixels and clamps to its own range. theme.json does not:
- * a button radius of 1rem or 9999px reaches the control as 1 or as its maximum,
- * so the panel states a size the site does not use.
+ * The row shows a value no slider can hold as the literal it is, which is
+ * honest but only once the group holding it is expanded. Every group but the
+ * first is collapsed, so this names them where the admin is already looking.
  */
 export default function UnshownNotice( { tokens = {}, catalogue = {} } ) {
     const unshown = Object.entries( catalogue )
         .filter( ( [ , def ] ) => def.control === 'range' )
         .map( ( [ key, def ] ) => ( { key, def, label: def.label || key, value: String( tokens[ key ] ?? '' ) } ) )
-        .filter( ( t ) => t.value !== '' && ! slidable( t.value, t.def ) );
+        .filter( ( t ) => t.value !== '' && ! slidable( t.value, t.def.min ?? 0, t.def.max ?? 32 ) );
 
     if ( ! unshown.length ) return null;
 
@@ -29,7 +20,7 @@ export default function UnshownNotice( { tokens = {}, catalogue = {} } ) {
                 <li key={ t.key }>
                     { sprintf(
                         /* translators: 1: token name, e.g. Small corner radius, 2: the value it holds, e.g. 1rem */
-                        __( '%1$s is %2$s, which the slider below cannot show. Moving that slider replaces the value with a pixel size.', 'fundraising-toolkit' ),
+                        __( '%1$s is %2$s, which is outside what its slider offers. Its row takes the value as text.', 'fundraising-toolkit' ),
                         t.label,
                         t.value
                     ) }
