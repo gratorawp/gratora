@@ -138,6 +138,9 @@ export default function List() {
     const [ deleteTarget, setDeleteTarget ] = useState( null );
     const [ confirm, setConfirm ]   = useState( null );
     const [ allFunds, setAllFunds ] = useState( [] );
+    // loading | ready | failed. An empty picker is a statement about the org's
+    // funds, so the dialog has to know which of the three it is looking at.
+    const [ allFundsState, setAllFundsState ] = useState( 'loading' );
     const [ stats, setStats ]       = useState( null );
     const [ statsLoading, setStatsLoading ] = useState( true );
     const [ reload, setReload ]     = useState( 0 );
@@ -206,11 +209,16 @@ export default function List() {
             return out;
         };
 
+        setAllFundsState( 'loading' );
         collect()
-            .then( setAllFunds )
-            // The table itself already surfaced any load failure; leaving the
-            // pickers empty is better than blocking the dialog on a retry.
-            .catch( ( err ) => window.console?.error( '[fundkit] fund picker list failed to load', err ) );
+            .then( ( items ) => {
+                setAllFunds( items );
+                setAllFundsState( 'ready' );
+            } )
+            .catch( ( err ) => {
+                setAllFundsState( 'failed' );
+                window.console?.error( '[fundkit] fund picker list failed to load', err );
+            } );
     }, [] );
 
     const loadStats = useCallback( () => {
@@ -534,6 +542,8 @@ export default function List() {
                 <FundDeleteModal
                     fund={ deleteTarget }
                     funds={ allFunds }
+                    fundsState={ allFundsState }
+                    onRetryFunds={ loadAll }
                     onClose={ () => setDeleteTarget( null ) }
                     onDone={ ( msg ) => { setDeleteTarget( null ); notify.success( msg ); afterChange(); } }
                 />
@@ -733,7 +743,7 @@ function FundEditor( { fund, allFunds, onClose, onSaved } ) {
     );
 }
 
-function FundDeleteModal( { fund, funds, onClose, onDone } ) {
+function FundDeleteModal( { fund, funds, fundsState = 'ready', onRetryFunds, onClose, onDone } ) {
     const [ choice, setChoice ]   = useState( 'deactivate' );
     const [ targetId, setTargetId ] = useState( '' );
     const [ busy, setBusy ]       = useState( false );
@@ -852,7 +862,16 @@ function FundDeleteModal( { fund, funds, onClose, onDone } ) {
                         <p className="fundkit-dialog__help">
                             { hasChildren
                                 ? __( 'This fund has sub-funds under it, so it cannot be removed. Deactivating keeps them; they move up to the top level. To remove it outright, move or delete the sub-funds first.', 'fundraising-toolkit' )
-                                : __( 'There is no other active fund to reassign to, so deactivating is the only option here. Create another fund first if you want to move these donations.', 'fundraising-toolkit' ) }
+                                : fundsState === 'loading'
+                                    ? __( 'Still loading the other funds, so reassigning is not offered yet.', 'fundraising-toolkit' )
+                                    : fundsState === 'failed'
+                                        ? __( 'The list of other funds could not be loaded, so reassigning is not offered. Deactivating is safe either way.', 'fundraising-toolkit' )
+                                        : __( 'There is no other active fund to reassign to, so deactivating is the only option here. Create another fund first if you want to move these donations.', 'fundraising-toolkit' ) }
+                            { fundsState === 'failed' && typeof onRetryFunds === 'function' && (
+                                <button type="button" className="fundkit-linkbtn" onClick={ onRetryFunds }>
+                                    { __( 'Try again', 'fundraising-toolkit' ) }
+                                </button>
+                            ) }
                         </p>
                     ) }
 

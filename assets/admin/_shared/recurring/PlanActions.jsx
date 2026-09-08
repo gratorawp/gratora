@@ -102,6 +102,12 @@ const TITLES = {
     cancel:        __( 'Cancel this donation', 'fundraising-toolkit' ),
 };
 
+/** The confirm button names the act, not the dialog. */
+const CONFIRM_LABELS = {
+    retry:  __( 'Retry now', 'fundraising-toolkit' ),
+    cancel: __( 'Cancel subscription', 'fundraising-toolkit' ),
+};
+
 export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
     const [ busy, setBusy ]     = useState( false );
     const [ error, setError ]   = useState( null );
@@ -168,15 +174,14 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                         { __( 'Close', 'fundraising-toolkit' ) }
                     </Btn>
                     <Btn
-                        variant="primary"
-                        isDestructive={ action === 'cancel' }
+                        variant={ action === 'cancel' ? 'danger' : 'primary' }
                         onClick={ submit }
                         isBusy={ busy }
                         disabled={ busy }
                     >
                         { busy
                             ? __( 'Working…', 'fundraising-toolkit' )
-                            : ( action === 'retry' ? __( 'Retry now', 'fundraising-toolkit' ) : __( 'Apply change', 'fundraising-toolkit' ) ) }
+                            : ( CONFIRM_LABELS[ action ] ?? __( 'Apply change', 'fundraising-toolkit' ) ) }
                     </Btn>
                 </>
             }
