@@ -1,7 +1,5 @@
-// Forwarded to @fundkit/ui - the single source of truth for the shared admin chrome.
 @import '@fundkit/ui/scss/admin-base';
 
-// A switch and its label in a page head, beside the count it changes.
 .fundkit-inline-toggle {
     display: inline-flex;
     align-items: center;
@@ -12,21 +10,14 @@
     white-space: nowrap;
 }
 
-// Test badge and the reference cell that carries it. Shared: the donations
-// list, the donors list and the donor profile all mark a rehearsal the same
-// way, and a screen that renders the class without the rule shows a bare word.
-//
-// Doubled class on purpose: a later .fundkit-pill rule (the pill-group button)
-// sets a transparent background, and the extra class outranks it wherever the
-// two land in source order.
+// Double the class to outrank the later pill-group background rule.
 .fundkit-pill.fundkit-pill--test {
     background: $amber-soft;
     color: $amber;
     font-weight: 600;
 }
 
-// Reference plus its test badge. Inline-flex so the badge sits on the
-// reference's baseline rather than wrapping under it in a narrow column.
+// Keep the badge on the reference baseline in narrow columns.
 .fundkit-ref-cell {
     display: inline-flex;
     align-items: center;
@@ -40,10 +31,7 @@
     }
 }
 
-// Links inside admin copy. WordPress paints every unstyled anchor its own blue,
-// which reads as WordPress chrome sitting in a FundKit sentence. accent-dark
-// rather than accent: this is body-weight text, and the lighter green does not
-// carry enough contrast against a white card.
+// Use accent-dark for body-text contrast.
 .fundkit-muted a {
     color: $accent-dark;
 

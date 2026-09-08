@@ -8,8 +8,8 @@ use FundKit\Campaigns\Campaign;
 use FundKit\Donations\DonationRepository;
 use FundKit\Donors\Donor;
 use FundKit\Exports\DonorExporter;
-use FundKit\Foundation\Auth\Capabilities;
 use FundKit\Exports\RevenueExporter;
+use FundKit\Foundation\Auth\Capabilities;
 use FundKit\Reports\RevenueReportBuilder;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -84,11 +84,7 @@ final class ExportsController
         ]);
     }
 
-    /**
-     * What the Export screen needs to build its controls.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function options(): WP_REST_Response
     {
         $thisYear = (int) wp_date('Y');
@@ -180,8 +176,7 @@ final class ExportsController
     }
 
     /**
-     * The REST server would JSON-encode a binary or CSV body, so the bytes are
-     * echoed from a rest_pre_serve_request closure bound to this route.
+     * Stream through rest_pre_serve_request to bypass REST JSON encoding.
      *
      * @since 1.0.0
      */

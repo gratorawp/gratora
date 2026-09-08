@@ -34,13 +34,7 @@ final class AbandonedPendingReaper
     private const DAILY = 86400;
     private const BATCH = 500;
 
-    /**
-     * Long enough that it can only be an abandonment.
-     *
-     * A donor who leaves a checkout open, or a gateway holding an answer, has
-     * resolved either way long before this. The point is to close a set that
-     * grows without bound, not to hurry a decision.
-     */
+    /** Allow ample time for open checkouts and delayed gateway responses. */
     private const AFTER_DAYS = 30;
 
     /** @since 1.0.0 */
@@ -82,10 +76,7 @@ final class AbandonedPendingReaper
     }
 
     /**
-     * How long a pending checkout is still allowed to settle.
-     *
-     * Read by the delete gate too, which releases a donor once every donation
-     * of theirs is one this sweep has already retired.
+     * Share the abandonment threshold with the donor delete gate.
      *
      * @since 1.0.0
      */

@@ -4,15 +4,8 @@ import { Switch } from './Switch';
 import DateField from './DateField';
 
 /**
- * Optional start/end dates behind a toggle.
- *
- * Campaigns and funds both schedule the same way, and both default to "always
- * on" -- so the dates stay out of sight until someone asks for them, rather
- * than sitting empty in every form.
- *
- * `disabled` is for a record that cannot carry a window at all. The control is
- * shown rather than removed, with `disabledNote` saying why, so the reader can
- * see the setting exists and what would make it available.
+ * Show optional schedule fields behind a toggle. Use disabledNote to explain records that
+ * cannot have schedules.
  */
 export default function ScheduleFields( {
     enabled,

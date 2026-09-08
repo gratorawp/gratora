@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace FundKit\Admin;
 
-use FundKit\Foundation\Http\ClientIp;
 use FundKit\Foundation\Config\SystemSetting;
+use FundKit\Foundation\Http\ClientIp;
 use FundKit\Foundation\Modules\ModuleManager;
 use FundKit\Gateways\GatewayManager;
 
@@ -20,7 +20,6 @@ use FundKit\Gateways\GatewayManager;
  */
 final class SystemReport
 {
-    /** Tables worth counting: the ones a support answer usually turns on. */
     private const COUNTED = [
         'fundkit_donations',
         'fundkit_donors',
@@ -64,8 +63,7 @@ final class SystemReport
     /** @return list<array{label:string, value:string}> */
     private function fundkit(): array
     {
-        // Presence, never the value. The key decrypts every donor record on the
-        // site, and this screen is written to be pasted into a ticket.
+        // Report key presence only; this output is shared with support.
         $keyHeld = SystemSetting::exists('encryption_key_v1');
         $keyLost = SystemSetting::read('encryption_key_lost_at');
 
@@ -74,8 +72,6 @@ final class SystemReport
             self::row(__('Encryption key', 'fundraising-toolkit'), self::yesNo($keyHeld)),
         ];
 
-        // Loud on purpose: without the key the encrypted columns cannot be read
-        // back, so a support answer starts here rather than anywhere else.
         if (is_string($keyLost) && $keyLost !== '') {
             $rows[] = self::row(__('Encryption key lost at', 'fundraising-toolkit'), $keyLost);
         }
@@ -97,8 +93,6 @@ final class SystemReport
             );
         }
 
-        // An add-on the site has installed but core refused to boot explains a
-        // missing feature better than anything else on this screen.
         foreach ($this->modules->incompatible() as $id => $pair) {
             $rows[] = self::row(
                 (string) $id,
@@ -119,9 +113,7 @@ final class SystemReport
     {
         $rows = [];
         foreach ($this->gateways->all() as $gateway) {
-            // canCharge(), not the credentials: whether this gateway could take
-            // a donation right now is the whole question, and the keys are not
-            // ours to print.
+            // Report charge readiness without exposing credentials.
             $rows[] = self::row(
                 (string) $gateway->label(),
                 $gateway->canCharge()
@@ -157,8 +149,7 @@ final class SystemReport
             self::row(__('Block theme', 'fundraising-toolkit'), self::yesNo(wp_is_block_theme())),
             self::row(__('Memory limit', 'fundraising-toolkit'), self::constantValue('WP_MEMORY_LIMIT')),
             self::row(__('Debug mode', 'fundraising-toolkit'), self::yesNo(defined('WP_DEBUG') && WP_DEBUG)),
-            // Action Scheduler rides WP-cron, so a site with this on has a
-            // backlog that never drains and a screen that has to say so.
+            // Action Scheduler depends on WP-cron.
             self::row(__('WP-Cron disabled', 'fundraising-toolkit'), self::yesNo(defined('DISABLE_WP_CRON') && DISABLE_WP_CRON)),
         ];
     }

@@ -23,37 +23,32 @@ use FundKit\Donors\DonorMetricsService;
 use FundKit\Donors\DonorRepository;
 use FundKit\Donors\DonorService;
 use FundKit\Donors\MagicLinkService;
+use FundKit\Forms\FormRepository;
+use FundKit\Forms\FormService;
+use FundKit\Forms\FormTemplates;
 use FundKit\Foundation\Commands\Command;
 use FundKit\Foundation\Commands\CommandContext;
 use FundKit\Foundation\Commands\CommandError;
 use FundKit\Foundation\Commands\CommandRegistry;
 use FundKit\Foundation\Container\Container;
 use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Forms\FormRepository;
-use FundKit\Forms\FormService;
-use FundKit\Forms\FormTemplates;
 use FundKit\Foundation\Identity\IdentityHasher;
+use FundKit\Foundation\Time\Clock;
 use FundKit\Funds\FundRepository;
 use FundKit\Funds\FundService;
-use FundKit\Gateways\GatewayManager;
 use FundKit\Mail\Mailer;
 use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Reports\CampaignReportBuilder;
-use FundKit\Reports\TaxStatementBuilder;
 use FundKit\Recurring\CampaignCancelRecurringJob;
 use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\RecurringPlanActions;
 use FundKit\Recurring\RecurringPlanChange;
 use FundKit\Recurring\RecurringPlanRepository;
-use FundKit\Settings\SettingsService;
+use FundKit\Reports\CampaignReportBuilder;
+use FundKit\Reports\TaxStatementBuilder;
 use FundKit\Settings\SecretRedactor;
+use FundKit\Settings\SettingsService;
 
-/**
- * Registers core domain operations as Command objects.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CoreCommandProvider
 {
     private const META = ['add_on' => 'core', 'add_on_label' => 'Fundraising Toolkit'];
@@ -545,12 +540,8 @@ final class CoreCommandProvider
         // downgraded to standard with a misleading success.
         $campaignTypes = array_keys((array) apply_filters('fundkit.campaign.types', ['standard' => '']));
 
-        // Which page layouts exist depends on the campaign type: a type whose
-        // add-on replaces the list wholesale carries ids core has never heard
-        // of. A command schema is fixed when it is registered and cannot branch
-        // on another field, so the enum is the union of every type's list and
-        // the description says which belong where. The handler is what actually
-        // holds the pairing.
+        // Schemas cannot branch on campaign type; list all registered layouts and validate the
+        // pairing in the handler.
         $templatesFor = [];
         foreach ($campaignTypes as $type) {
             $templatesFor[$type] = array_values(array_filter(array_map(

@@ -46,11 +46,7 @@ final class ApplePayDomain extends HookProvider
         return ['init' => 'maybeServeAssociationFile'];
     }
 
-    /**
-     * The domain Apple and Stripe will verify, taken from the site address.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function domain(): string
     {
         return (string) (wp_parse_url(home_url(), PHP_URL_HOST) ?: '');
@@ -87,8 +83,7 @@ final class ApplePayDomain extends HookProvider
     }
 
     /**
-     * Serve the association file. Plain text, no theme, no trailing newline
-     * games: Apple compares the body byte for byte.
+     * Serve exact association-file bytes for Apple verification.
      *
      * @since 1.0.0
      */

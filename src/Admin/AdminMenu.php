@@ -6,11 +6,7 @@ namespace FundKit\Admin;
 
 use FundKit\Foundation\Hooks\HookProvider;
 
-/**
- * Registers the FundKit top-level admin menu and its dynamic subpages.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class AdminMenu extends HookProvider
 {
     private const CAPABILITY = 'fundkit_access';
@@ -32,8 +28,6 @@ final class AdminMenu extends HookProvider
     {
         $hook = add_menu_page(
             __('Fundraising Toolkit', 'fundraising-toolkit'),
-            // The sidebar label is the one word that has to survive a narrow
-            // menu; the full name still titles the page it opens.
             __('Fundraising', 'fundraising-toolkit'),
             self::CAPABILITY,
             self::SLUG,
@@ -42,14 +36,12 @@ final class AdminMenu extends HookProvider
             30
         );
 
-        // load- fires before the admin header, so headers are still open; the
-        // render callback would be too late to forward.
+        // Redirect on load- while headers are still open.
         if ($hook) {
             add_action("load-{$hook}", [$this, 'redirectToFirstReachablePage']);
         }
 
-        // add_menu_page mints a first submenu carrying the parent's title, so the
-        // list opens with "Fundraising" under "Fundraising". Naming it here replaces it.
+        // Replace WordPress’s duplicate parent submenu label.
         add_submenu_page(
             self::SLUG,
             __('Dashboard', 'fundraising-toolkit'),
@@ -71,12 +63,8 @@ final class AdminMenu extends HookProvider
             );
         }
 
-        // Registered and then withdrawn, rather than declared on the reports
-        // cap: a parent with no submenu of its own has core mint one under the
-        // parent's capability the moment the next page is added, which puts the
-        // dashboard back for a reader who cannot hold its data. WP then links
-        // the top-level item at the first surviving submenu, so a role scoped
-        // to one area lands on that area.
+        // Remove the default submenu after registration so WordPress cannot recreate it under
+        // the parent capability.
         if (! current_user_can('fundkit_access_reports')) {
             remove_submenu_page(self::SLUG, self::SLUG);
         }
@@ -98,9 +86,7 @@ final class AdminMenu extends HookProvider
     }
 
     /**
-     * A bookmark or a typed URL reaches the dashboard past the menu, so a
-     * reader who cannot hold its data is forwarded to the first page they can
-     * open rather than left on an empty screen retrying a refused request.
+     * Redirect unauthorized dashboard URLs to the first accessible page.
      *
      * @since 1.0.0
      */
@@ -146,8 +132,7 @@ final class AdminMenu extends HookProvider
             true
         );
         wp_set_script_translations('fundkit-admin-command-palette', 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
-        // The palette is enqueued on the umbrella cap, which any single area
-        // cap grants, so every destination has to be asked for separately.
+        // Check each destination separately; the umbrella capability grants only menu access.
         $can = [self::SLUG => true];
         foreach ($this->pages() as $page) {
             $id = (string) ($page['id'] ?? '');
@@ -170,8 +155,7 @@ final class AdminMenu extends HookProvider
         $this->enqueueAssets();
         ?>
         <div class="wrap">
-            <?php // WP moves admin notices to just after this marker. Without it they
-                  // land beside the React header instead of above it. ?>
+            <?php // Keep WordPress notices above the React header.?>
             <hr class="wp-header-end" />
             <div id="fundkit-admin-dashboard"></div>
         </div>

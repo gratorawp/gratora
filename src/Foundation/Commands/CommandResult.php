@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Foundation\Commands;
 
-/**
- * Value object returned from every CommandRegistry::dispatch() call.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CommandResult
 {
     /**

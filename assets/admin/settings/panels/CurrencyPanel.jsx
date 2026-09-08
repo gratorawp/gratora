@@ -244,14 +244,8 @@ export default function CurrencyPanel( { s, fx } ) {
     const presetFor = ( code ) => window.fundkit?.currency_formats?.[ code ] || null;
 
     const applyCurrency = ( code ) => {
-        // Base is always accepted, so persist it into the supported list too -
-        // otherwise the UI shows it on while the saved set silently excludes it.
-        //
-        // A lone USD is what ships rather than a choice, and every settings read
-        // merges it back in, so a length test can never see "unset". Kept beside
-        // a EUR base it makes a single-currency charity look multi-currency to
-        // the rate fetcher and leaves USD unremovable on this very screen. Same
-        // rule as the wizard's chosenCurrencies.
+        // Always persist the base currency. Treat the default lone USD as unconfigured,
+        // matching onboarding.
         const onlyShipped = supported.length === 1 && supported[ 0 ] === SHIPPED_CURRENCY;
         const base        = onlyShipped ? [] : supported;
         const nextSupported = base.includes( code ) ? base : [ ...base, code ];

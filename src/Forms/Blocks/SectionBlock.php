@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Forms\Blocks;
 
-/**
- * Styled content container block.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class SectionBlock implements Block
 {
     /** @since 1.0.0 */

@@ -1,9 +1,6 @@
 /**
- * fundkit/hidden: invisible value capture (UTM, referrer, appeal code).
- *
- * Renders nothing to the donor. The editor preview shows a thin badge so
- * authors can spot and edit it. Values are resolved from the URL, referrer,
- * or a fixed default and submitted with the donation payload as a custom field.
+ * Resolve hidden custom fields from URL, referrer, or defaults; show an editable badge in the
+ * editor.
  */
 
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';

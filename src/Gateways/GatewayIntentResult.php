@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Gateways;
 
 /**
- * Result of `PaymentGateway::createIntent()`. `intent_id` is stored on
- * donation.gateway_intent_id for webhook matching.
+ * Store intent_id on the donation for webhook matching.
  *
  * @since 1.0.0
  */

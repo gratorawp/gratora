@@ -4,17 +4,13 @@ declare(strict_types=1);
 
 namespace FundKit\Campaigns\Blocks;
 
-use FundKit\Foundation\Auth\Capabilities;
 use FundKit\Campaigns\Campaign;
 use FundKit\Campaigns\CampaignPageTemplate;
 use FundKit\Campaigns\CampaignRepository;
+use FundKit\Foundation\Auth\Capabilities;
 use WP_Theme_JSON_Data;
 
-/**
- * Registers the campaign block category, editor assets and front-end enqueues.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class BlockEditorIntegration
 {
     private const HANDLE_EDITOR    = 'fundkit-campaign-blocks-editor';
@@ -48,12 +44,10 @@ final class BlockEditorIntegration
     }
 
     /**
-     * Exposed through REST so editor-side block UIs can hide their campaign
-     * picker on a post already tied to a campaign.
+     * Expose campaign binding to editor controls through REST.
      *
      * @since 1.0.0
      */
-    /** The template a campaign page's blocks came from. */
     public const META_TEMPLATE = '_fundkit_campaign_page_template';
 
     public function registerPageMeta(): void
@@ -91,7 +85,7 @@ final class BlockEditorIntegration
         return self::editedCampaignId() > 0;
     }
 
-    /** The campaign the open editor belongs to, or 0. @since 1.0.0 */
+    /** Returns 0 when no campaign is bound. */
     private static function editedCampaignId(): int
     {
         $postId = self::editedPostId();
@@ -99,7 +93,7 @@ final class BlockEditorIntegration
         return $postId > 0 ? (int) get_post_meta($postId, '_fundkit_campaign_id', true) : 0;
     }
 
-    /** The post the editor is open on, or 0. @since 1.0.0 */
+    /** Returns 0 when no post is open. */
     private static function editedPostId(): int
     {
         $postId = (int) get_the_ID();
@@ -258,8 +252,7 @@ final class BlockEditorIntegration
     }
 
     /**
-     * enqueue_block_assets is the only hook that reaches the iframed editor
-     * canvas, so ServerSideRender previews are styled like the front end.
+     * enqueue_block_assets reaches the iframed editor canvas.
      *
      * @since 1.0.0
      */
@@ -274,8 +267,7 @@ final class BlockEditorIntegration
                 self::HANDLE_FRONTEND,
                 FUNDKIT_URL . 'build/admin/campaign-blocks.css',
                 [],
-                // mtime, not FUNDKIT_VERSION: the built css changes without a
-                // plugin release and a stale cache means invisible restyles.
+                // Use mtime to invalidate unreleased CSS changes.
                 (string) (@filemtime($cssPath) ?: FUNDKIT_VERSION)
             );
             wp_style_add_data(self::HANDLE_FRONTEND, 'rtl', 'replace');

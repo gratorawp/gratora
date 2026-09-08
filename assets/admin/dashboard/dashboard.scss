@@ -1,4 +1,4 @@
-// Inherit shared widget chrome (grid, cards, metric, section bar, etc.).
+// Import shared widget layout and styling.
 @import '../campaigns/campaigns.scss';
 
 .fundkit-dashboard {
@@ -257,8 +257,7 @@
         vertical-align: middle;
     }
 
-    // The cell centers its contents, but a block-level SVG ignores text-align,
-    // so it sat flush-left. margin-inline auto centers the fixed-width chart.
+    // Block SVGs need auto margins; text-align does not center them.
     .fundkit-spark { display: block; margin: 0 auto; }
 }
 .fundkit-recurring {
@@ -387,8 +386,6 @@
         .is-info  & { color: $accent-dark; }
     }
 
-    // Quiet until the row is hovered or it takes focus: dismissing is the least
-    // important thing you can do to an item that says something needs doing.
     &__dismiss {
         flex-shrink: 0;
         display: inline-flex;
@@ -417,14 +414,12 @@
     }
 }
 
-// Coarse pointers have no hover, so the control would never appear.
+// Show the control without hover on coarse pointers.
 @media (hover: none) {
     .fundkit-attention__dismiss { opacity: 1; }
 }
 
-// A widget with nothing to draw yet. Without it every widget rendered its own
-// "no donations" empty state over a first fetch that was still in flight, so a
-// working site looked like an empty one for as long as the request took.
+// Distinguish loading from an empty result.
 .fundkit-widget-skeleton {
     min-height: 120px;
     border-radius: 8px;

@@ -58,8 +58,7 @@ final class CampaignCancelRecurringJob
     }
 
     /**
-     * Action Scheduler passes args positionally, so ['campaign_id' => N]
-     * arrives as the first scalar; direct callers may pass the array.
+     * Action Scheduler passes positional scalars; direct callers may pass an array.
      *
      * @since 1.0.0
      */
@@ -226,8 +225,7 @@ final class CampaignCancelRecurringJob
     }
 
     /**
-     * The cancellation reason reaches the donor's notice, so it has to survive
-     * between ticks rather than ride in the job args.
+     * Persist the cancellation reason across job ticks.
      *
      * @since 1.0.0
      */
@@ -258,8 +256,7 @@ final class CampaignCancelRecurringJob
     }
 
     /**
-     * Re-enqueues any run whose job was dropped. Safe to call on every admin
-     * campaigns load.
+     * Re-enqueue dropped jobs; safe on every admin load.
      *
      * @since 1.0.0
      */

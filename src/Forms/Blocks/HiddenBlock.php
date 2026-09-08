@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Forms\Blocks;
 
-/**
- * fundkit/hidden: invisible value captured with the donation.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class HiddenBlock implements Block
 {
     /** @since 1.0.0 */
@@ -28,11 +24,7 @@ final class HiddenBlock implements Block
         ];
     }
 
-    /**
-     * Hidden block renders no visible markup.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function render(array $attrs, string $content): string
     {
         return '';

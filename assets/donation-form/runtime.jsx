@@ -46,12 +46,8 @@ export const COMPLETED_EVENT = 'fundkit:donation:completed';
 // form.
 export const COMPLETED_HOLD_MS = 2000;
 
-// Fired on window by the one form that claims a redirect return, carrying the
-// element it is rendering the outcome into. The donate-button block keeps its
-// form inside a modal that has to be opened for that outcome to be visible at
-// all, and its script cannot see the claim: deciding it a second time over
-// there is how the two came to disagree. So the claim is announced, and the
-// modal script follows it rather than reasoning about references itself.
+// Announce the runtime’s return claim so modal code reveals its outcome without repeating
+// ownership checks.
 export const RETURN_CLAIMED_EVENT = 'fundkit:donation:return-claimed';
 
 // The token lands in a different place on each payment path: the submit
@@ -210,16 +206,8 @@ function DonationReceipt( { receipt, config } ) {
     );
 }
 
-// Instructions for a donation that will be settled away from the browser, by
-// bank transfer or cheque.
-//
-// The stash exists so a gateway that navigated the donor away can pick the
-// donation up when they come back, and it outlives a reload. Nothing is coming
-// back here, so it goes now: kept, a donor who reloads this screen and submits
-// again sends the reference and status token of a transfer the org is still
-// waiting for, and asks the server to treat that awaited row as an abandoned
-// attempt. The receipt is read before the stash goes, because a donor who
-// landed here from a redirect has no other source for it.
+// Read transfer details before clearing the stash. Offline transfers await payment and must not
+// become retry parents after reload.
 function PendingScreen( { state, dispatch, config } ) {
     const [ receipt ] = useState( () => receiptOf( state ) );
 
@@ -413,17 +401,8 @@ function FormBody( { state, dispatch, config } ) {
                 }
             }
             dispatch( { type: 'SUBMIT_START' } );
-            // Backing out of one gateway and picking another is one donation,
-            // so this submission names the attempt it continues and the server
-            // charges that attempt's own budget instead of a fresh slot of the
-            // per-email quota. The stash is the fallback for a donor returning
-            // from a redirect, where the closure holding `submission` is gone.
-            // Gated the same way the redirect return is. The stash is one key
-            // for the whole page and survives a reload, so ungated it lets a
-            // second form on the page claim the first form's live checkout,
-            // and lets a reloaded tab claim an offline donation that is
-            // pending because it is awaiting a transfer, not because anyone
-            // abandoned it.
+            // Retries spend the original attempt’s budget. Recover redirect state from the
+            // stash only when this form owns it; exclude pending offline transfers.
             const prior  = state.submission
                 || ( ownsPendingReturn( config.hostId ) ? readPending() : {} );
             const priorT = prior?.status_token || prior?.statusToken || '';
@@ -451,15 +430,8 @@ function FormBody( { state, dispatch, config } ) {
 
             let res = await post( config.nonce );
 
-            // Donating needs no nonce: the route is public, and the nonce only
-            // rides along so a logged-in donor is recognised. But WordPress
-            // rejects a PRESENT-and-stale one at the authentication layer,
-            // before any permission callback, so a member who left the form
-            // open overnight got a bare "Cookie check failed" 403 under an
-            // intact form, and every retry sent the same dead nonce. The nonce
-            // is baked into the config at render and cannot be refreshed here,
-            // so the donation goes through unauthenticated rather than not at
-            // all.
+            // Omit stale WordPress nonces on this public route; authentication rejects them
+            // before donation handling.
             if ( res.status === 403 ) {
                 const why = await res.clone().json().catch( () => null );
                 if ( why?.code === 'rest_cookie_invalid_nonce' ) {
@@ -628,17 +600,8 @@ function FormBody( { state, dispatch, config } ) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ state.status, state.submission, state.payment, config.thanks?.redirect ] );
 
-    // The payment UI belongs where the author put the gateway block, so the form
-    // stays on screen behind it. Replacing the whole body is the fallback for
-    // when that block is not on screen to host it.
-    //
-    // Asking only whether the form HAS a block was not the same question. On a
-    // multi-page form the block lives on one page, and a donor who moved to
-    // another page while the submit was in flight arrived in `payment` status
-    // with the block rendered nowhere: PagedView draws only the current page's
-    // steps, and this fallback stood down because the block existed somewhere.
-    // The form went blank and the donation, already created, could never be
-    // paid.
+    // Mount payment at the gateway block only if it is on the current page; otherwise use the
+    // fallback.
     const gatewayOnScreen = gatewaysIn(
         ( state.steps || [] ).filter( ( step ) => ( step.page || 0 ) === state.step )
     );
@@ -1089,13 +1052,8 @@ function ModalShell( { children, openLabel, config, initiallyOpen = false } ) {
 }
 
 /**
- * Ask Stripe how the intent the donor was redirected back with ended, and put
- * the answer on screen.
- *
- * The markers are cleared only once the answer is terminal. On anything else
- * they are the sole record the page holds of the payment, and dropping them
- * leaves a donor whose bank has taken the money with no way to run the check
- * again, on a screen inviting them to pay a second time.
+ * Keep redirect markers until Stripe returns a terminal result so donors can retry status
+ * checks.
  */
 function resolveReturn( config, ret, dispatch ) {
     const unresolved = () => dispatch( {
@@ -1136,31 +1094,16 @@ function resolveReturn( config, ret, dispatch ) {
 function App( { config, host } ) {
     const [ state, dispatch ] = useReducer( reducer, config, initialState );
 
-    // Scoped to the submission this form made: two forms on a page both read
-    // the same URL, and the first to run strips the params from under the
-    // other. readPending() is what the page stashed when it submitted, and the
-    // ownership check is what says whether that was this form.
-    //
-    // String on both sides: a reference is a string everywhere it is generated,
-    // and comparing one against a URL param with !== would abstain on a stashed
-    // number that spells the same thing.
+    // Resolve only this form’s stashed return before stripping shared URL markers. Compare
+    // references as strings.
     const claimReturn = () => (
         ownsPendingReturn( config.hostId )
             ? detectStripeReturn( String( readPending().reference || '' ) || null )
             : null
     );
 
-    // Which form on the page owns this return, decided once during the first
-    // render so a modal form can open itself on one that is its own.
-    //
-    // The claim is the marker, not the return: ownsPendingReturn falls through
-    // to every form when the stash names none that is on the page, so two forms
-    // would otherwise both resolve the same intent, one of them announcing a
-    // donation to a donor who never submitted it and a modal springing open
-    // beside the form that did.
-    //
-    // It is the one decision: the effect below follows it, and the marker and
-    // the announcement carry it to the donate-button script whole.
+    // Claim each redirect once and share that claim with the resolver and modal; multiple forms
+    // must not resolve the same payment.
     const returningHere = useMemo( () => {
         const ret = claimReturn();
         if ( ! ret || ! config.stripe?.publishableKey ) return false;
@@ -1387,14 +1330,8 @@ function applyThemeTokens( form, theme ) {
 }
 
 /**
- * Whether this document is inside a frame belonging to somebody else.
- *
- * Reading the parent's origin throws across origins, and that throw is the
- * test. Same-origin frames have to keep working: the block editor canvas, the
- * styling preview and the theme customiser all render the form in one.
- *
- * A sandboxed admin preview throws the same way, because an opaque origin is
- * not this one either, so it says so in the document itself.
+ * Detect foreign frames through the parent-origin access check. Exempt marked opaque-origin
+ * admin previews.
  */
 function framedByAnotherSite() {
     if ( window.fundkitFormPreview ) return false;
@@ -1495,16 +1432,8 @@ function bootAll() {
     // Inside a preview iframe, a postMessage channel lets the styling editor
     // push token updates without re-fetching the whole document.
     if ( inIframe ) {
-        // A srcdoc preview has an opaque origin: its document URL is
-        // about:srcdoc, location.origin is the string "null", and every
-        // postMessage from the parent carries the parent's real origin, so a
-        // strict origin check rejects every token push.
-        //
-        // The guard still matters for the public form, which a hostile page
-        // could frame by URL and push --fundkit-* vars into, UI-redress on a
-        // payment form. That form loads from a real URL and keeps the strict
-        // check; only a srcdoc document, whose HTML is entirely ours, trusts
-        // its parent.
+        // Trust the parent window for our opaque-origin srcdoc preview; keep strict origin
+        // checks on public forms.
         const isSrcdocPreview = window.location.origin === 'null'
             || document.URL === 'about:srcdoc';
 

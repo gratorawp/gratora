@@ -35,8 +35,7 @@ final class FrequencyMap
     }
 
     /**
-     * Used as the `billing_cycle_anchor` so Stripe doesn't double-charge a donor
-     * who just paid their first installment through the one-off PaymentIntent.
+     * Anchor renewal after the first installment to prevent a second immediate charge.
      *
      * @since 1.0.0
      */
@@ -87,12 +86,7 @@ final class FrequencyMap
         return null;
     }
 
-    /**
-     * What a donor is told a cadence is called. An unnamed pair reads as
-     * itself.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public static function label(string $frequency): string
     {
         return match ($frequency) {

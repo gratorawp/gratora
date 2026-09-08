@@ -113,7 +113,6 @@ final class CampaignBindings extends HookProvider
             return $this->campaigns->findRenderable($explicit);
         }
 
-        // Fallback: the page's bound campaign via _fundkit_campaign_id post meta.
         $postId = 0;
         if (is_object($block) && property_exists($block, 'context') && is_array($block->context)) {
             $postId = (int) ($block->context['postId'] ?? 0);
@@ -130,8 +129,7 @@ final class CampaignBindings extends HookProvider
     /** @since 1.0.0 */
     private function valueFor(Campaign $campaign, string $key): ?string
     {
-        // The model casts each column to its declared property type on hydration,
-        // so only the nullable ones need coercing here.
+        // Hydration already casts non-nullable columns.
         $type    = $campaign->goal_type ?: 'amount';
         $current = match ($type) {
             'donations' => $campaign->donations_count,
@@ -165,8 +163,7 @@ final class CampaignBindings extends HookProvider
 
             'currency'          => $campaign->currency,
             'ends_at'           => $campaign->ends_at ?? '',
-            // '' rather than '0' when the campaign never ends: bound into
-            // "%s days left", a zero reads as "this closed today".
+            // Use an empty value for no end date; zero means no days left.
             'days_left'         => (string) ($this->daysLeft($campaign) ?? ''),
 
             'image'             => $this->imageUrl($campaign),

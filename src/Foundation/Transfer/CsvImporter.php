@@ -6,6 +6,7 @@ namespace FundKit\Foundation\Transfer;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use Exception;
 use FundKit\Currency\Currency;
 use FundKit\Currency\FxRates;
 use FundKit\Donations\AggregateSyncer;
@@ -15,31 +16,12 @@ use FundKit\Donors\Donor;
 use FundKit\Donors\DonorService;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Identity\IdentityHasher;
-use Exception;
 use Throwable;
 
 /**
- * Brings donors, and their donations when the file has any, in from anyone
- * else's CSV.
- *
- * The Give importer reads a database it understands. This reads a file it has
- * never seen, so the admin says which column means what, and nothing is written
- * until they have seen what that mapping would do.
- *
- * A file without amounts is a donor list, and importing one is the normal way
- * an org arrives: the mailing list and the donation history are usually separate
- * exports, and the list comes first. So the amount column is optional, and
- * leaving it unmapped imports people rather than refusing the file.
- *
- * Donations carry no external id column, and reference is the unique one, so
- * that is what makes a row identifiable. A file with its own transaction ids
- * uses those; a file without gets one derived from the address, the amount and
- * the date, which is stable enough that importing the same file twice matches
- * rather than duplicates.
- *
- * Deliberately no recurring plans. A plan imported without its gateway
- * subscription looks live in the admin and never bills, which is worse than
- * not having it.
+ * Import CSVs after column mapping and preview. Without amounts, import donors only.
+ * Deduplicate donations by supplied reference or a stable address/amount/date reference.
+ * Exclude recurring plans without gateway subscriptions.
  *
  * @since 1.0.0
  */
@@ -411,17 +393,8 @@ final class CsvImporter
     }
 
     /**
-     * The base-currency snapshot every total is summed from. Without it the
-     * aggregates score the row as zero, so an imported history reads as the
-     * right number of donations raising nothing.
-     *
-     * Same three cases as the live path in DonationService, so import and till
-     * cannot disagree: the base currency converts at 1, a foreign currency
-     * converts at today's rate, and a currency the site has no rate for keeps
-     * its face value with no base amount. That last one is not a reason to
-     * refuse the row - the donation happened, and FX is a reporting concern -
-     * and Tools > Maintenance already lists exactly those rows, names the
-     * currency and converts them once a rate exists.
+     * Match live FX rules: base at unity, foreign amounts at today’s rate, unknown rates left
+     * null for later backfill.
      *
      * @since 1.0.0
      */
@@ -527,19 +500,8 @@ final class CsvImporter
     }
 
     /**
-     * Which of `.` and `,` is the decimal point in a written amount, if either.
-     *
-     * "The last separator is the decimal" is right for 1,234.56 and 1.234,56
-     * and wrong for every grouped whole amount: it reads 1,000 as one, losing
-     * three orders of magnitude silently, and a spreadsheet inserts those
-     * separators from a thousand upward, so the small rows of a file import
-     * correctly and the large ones do not.
-     *
-     * A separator is grouping when it appears more than once, and when it is
-     * followed by exactly three digits that the currency has no room for. What
-     * the currency does have room for decides the rest, which is the only way
-     * 1.234 can be read as one and a bit in Kuwaiti dinar and as one thousand
-     * two hundred and thirty four in dollars.
+     * Distinguish decimal and grouping separators using currency precision. Repeated separators
+     * or an unsupported three-digit fraction indicate grouping.
      *
      * @since 1.0.0
      */
@@ -619,11 +581,7 @@ final class CsvImporter
         return $parsed->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
     }
 
-    /**
-     * The calendar day a stored stamp falls on for this site.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private function localDay(?string $utc): ?string
     {
         if ($utc === null || $utc === '') {

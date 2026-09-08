@@ -16,10 +16,9 @@ use FundKit\Foundation\References\ReferenceGenerator;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Funds\FundResolver;
 use FundKit\Gateways\GatewayManager;
-use FundKit\Recurring\FrequencyMap;
-use FundKit\Gateways\RefundResult;
 use FundKit\Gateways\TestMode;
 use FundKit\Receipts\Receipt;
+use FundKit\Recurring\FrequencyMap;
 use FundKit\Vendor\Queryable\DB;
 use RuntimeException;
 use Throwable;
@@ -108,9 +107,7 @@ final class DonationService
         $statusTokenHash = hash('sha256', $rawStatusToken);
 
         DB::transaction(function () use ($intent, $retry, $now, $statusTokenHash, &$donation) {
-            // A genuine paid donation re-engages a previously-erased donor, so
-            // this is the one path allowed to reactivate a redacted row. The
-            // intent can decline it: see DonationIntent::$reactivate_redacted_donor.
+            // Allow donor reactivation only when the intent permits it.
             $donor = $this->donors->findOrCreate(
                 $intent->email,
                 $intent->profile,
@@ -335,20 +332,9 @@ final class DonationService
     }
 
     /**
-     * The donor is done and the money is on its way, but it has not arrived.
-     *
-     * Card money moves in seconds, so a card donation is either paid or it is
-     * not. Bank debit does not work that way: SEPA through Stripe and Direct
-     * Debit through GoCardless both authorise now and settle days later, and
-     * can still bounce in between. Leaving those in `pending` puts them in the
-     * same bucket as a donor who closed the tab, so an admin cannot tell
-     * expected income from abandoned checkouts and the donor is told their
-     * donation is "still processing" for a week when nothing is wrong.
-     *
-     * Distinct from markPending, which is an observability hook that leaves the
-     * status alone. This is a real transition, and only out of `pending`: money
-     * that has already settled or failed is not walked backwards by a late
-     * webhook.
+     * Move pending donations to processing while bank settlement is outstanding. Unlike
+     * markPending, this changes status; late events cannot move settled or failed donations
+     * backwards.
      *
      * @param array<string,mixed> $metadata
      *
@@ -403,19 +389,8 @@ final class DonationService
     }
 
     /**
-     * When a caller says the money arrived, or the clock when it cannot be
-     * believed.
-     *
-     * `$result` is whatever a gateway handed back, and one caller
-     * (`donation.confirm`, reachable from the AI assistant) forwards a
-     * free-form object straight through. An unreadable or absurd value written
-     * to this column moves real money into a month that has not happened or one
-     * that closed years ago, and nothing downstream ever questions it.
-     *
-     * Money is never rejected over it: a donation that really was paid must
-     * confirm even if the timestamp attached to it is nonsense. So a value that
-     * cannot be believed is replaced by the clock and said out loud, the same
-     * trade refund() makes when a gateway over-reports.
+     * Use the clock and log invalid or implausible gateway timestamps; bad metadata must not
+     * prevent a paid donation from confirming.
      *
      * @since 1.0.0
      */
@@ -606,8 +581,6 @@ final class DonationService
         $donation->net_cents         = $amountCents;
         $donation->currency          = strtoupper($currency);
 
-        // Load the plan's first donation once: an FX-rate fallback below plus
-        // the demographic fields carried into every renewal.
         $initial = Donation::query()
             ->where('recurring_plan_id', $plan->id)
             ->orderBy('id', 'asc')
@@ -646,8 +619,7 @@ final class DonationService
         $donation->status         = 'pending';
         $donation->gateway        = $gateway;
         $donation->gateway_intent_id = $gatewayIntentId;
-        // Inherit the plan's fixed mode, not the current setting: a live plan
-        // renewing while test mode is on must stay live (and vice versa).
+        // Renew in the plan’s stored mode, independent of current settings.
         $donation->is_test        = (bool) $plan->is_test;
         $donation->created_at     = $now;
         $donation->updated_at     = $now;
@@ -1149,10 +1121,7 @@ final class DonationService
             $isFullRefund = $newTotal >= $donation->amount_cents;
             $donation->refunded_cents = $newTotal;
 
-            // The row being replaced goes only once the refund that replaces it
-            // is certain to be written. Every refusal above stands before this
-            // point, so a delivery this donation can no longer take cannot erase
-            // the record of money the gateway says it moved.
+            // Delete the replaced refund only after all refusal checks pass.
             if ($replacing !== null) {
                 Refund::query()->where('id', $replacing)->delete();
             }
@@ -1196,17 +1165,8 @@ final class DonationService
 
         });
         } catch (\FundKit\Vendor\Queryable\QueryException $e) {
-            // Lost the UNIQUE(gateway_refund_id) race: a concurrent or
-            // redelivered webhook already recorded this exact refund. Return it
-            // idempotently - the winner fired the side effects (status flip,
-            // receipt void, refund email, aggregate resync).
-            //
-            // Only a row that stands as a recorded refund answers for this
-            // call. A row still awaiting settlement, or one a reversal spent,
-            // is what this call was replacing: the same reason the dedup above
-            // refuses to treat it as already handled. Returning it would report
-            // a settlement that did not happen, the webhook would be
-            // acknowledged, and the money would never come off the books.
+            // Reuse only the recorded winner of the refund-ID race. Awaited or reversal-spent
+            // rows still need settlement.
             $dup = Refund::query()->where('gateway_refund_id', $gatewayRefundId)->get();
             if ($dup && ! in_array((string) $dup->status, ['pending', 'reversed'], true)) {
                 return $dup;
@@ -1465,21 +1425,8 @@ final class DonationService
 
         $recordedCents = (int) ($result->amount_cents ?? $amountCents);
 
-        // The gateway's own event for this refund can beat this call to the
-        // record, and the id is unique, so a row already standing for it is
-        // this refund and not another. What to do with it is what the row
-        // says:
-        //
-        // Unsettled, with a row already standing: that row says exactly what
-        // this call knows, so it is the answer.
-        //
-        // Settled: the row goes through the same door the webhook uses, which
-        // answers with an already recorded refund and replaces one that is
-        // still awaiting settlement or was spent by a reversal. Left to the
-        // insert below instead, an awaited row collides on the unique id and
-        // the admin is told the refund failed while the gateway has already
-        // paid it. Read as a failure and clicked again, that passes the guard,
-        // which counts only recorded refunds, and pays the donor twice.
+        // The webhook may record this unique refund first. Reuse an unsettled row or reconcile
+        // a settled result through the webhook path to avoid duplicate refunds.
         if ($result->gateway_refund_id) {
             $existing = Refund::query()
                 ->where('gateway_refund_id', $result->gateway_refund_id)

@@ -6,11 +6,7 @@ namespace FundKit\Forms\Blocks;
 
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Toggle that lets a donor make the donation anonymous.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class AnonymousToggleBlock implements Block
 {
     /** @since 1.0.0 */

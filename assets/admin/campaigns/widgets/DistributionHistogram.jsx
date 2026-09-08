@@ -31,7 +31,6 @@ export default function DistributionHistogram( { distribution, currency } ) {
     const { median_cents, total_count } = distribution;
     const buckets = distribution.buckets;
 
-    // Find the bucket the median falls into so we can draw a reference line.
     const medianBucketIndex = buckets.findIndex( ( b ) => {
         return median_cents >= b.min_cents && (b.max_cents === null || median_cents <= b.max_cents);
     } );

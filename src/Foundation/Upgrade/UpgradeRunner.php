@@ -5,16 +5,10 @@ declare(strict_types=1);
 namespace FundKit\Foundation\Upgrade;
 
 use FundKit\Analytics\ErrorLog;
+
 /**
- * Runs the outstanding data migrations, one bounded step at a time.
- *
- * Ordering matters and is fixed: schema first, then routines. A routine that
- * backfills a column added in the same release would otherwise run against a
- * table that does not have it yet.
- *
- * Completion is recorded per routine id rather than as a version number,
- * because a site can be several releases behind and needs every routine it
- * missed, in order, not just the newest one.
+ * Run schema changes before bounded data migrations. Track completion per routine so skipped
+ * releases still apply every migration.
  *
  * @since 1.0.0
  */

@@ -6,11 +6,7 @@ namespace FundKit\Forms\Blocks;
 
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Toggle for the donor to cover the transaction fee.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CoverFeesBlock implements Block
 {
     /** @since 1.0.0 */

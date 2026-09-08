@@ -1,14 +1,4 @@
-/**
- * Brand chip: gradient square carrying the same heart the admin menu shows, so
- * the small square contexts and the sidebar wear one glyph.
- *
- * Stroked rather than filled, which the sidebar icon cannot be: WordPress
- * recolours that one by rewriting every fill in its markup, so it has to be
- * solid shapes. This one is inline SVG in the page and keeps lucide's stroke.
- *
- * Inline-styled so any bundle can render it without a stylesheet. `size` is in
- * pixels; the radius and the glyph scale with it.
- */
+/** Inline-styled brand mark with size-scaled geometry; no stylesheet required. */
 
 import { Heart } from 'lucide-react';
 

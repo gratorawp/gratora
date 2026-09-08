@@ -1,25 +1,7 @@
 /**
- * Swap a campaign page's layout from inside the editor.
- *
- * The list offered is the campaign type's own. A type that lays out its own
- * page has templates built for it, and one of the general ones would replace
- * every block that type exists for.
- *
- * The layout is only chosen once, when the campaign is created, and until now
- * that choice was permanent. Doing the swap here rather than in the admin
- * screens is what makes it safe to offer: the editor already has undo, so
- * replacing the blocks is a mistake somebody can take back, and they are
- * looking at the page while they do it.
- *
- * The button goes into the editor header by portal rather than through a slot.
- * Two slot routes were tried first and both fail quietly or loudly depending on
- * where the component is imported from, because the pinned-items slot is not
- * dependable to fill from outside core. A portal asks one question with a
- * visible answer: is the header there. If it is not, no button, no error.
- *
- * Only mounts on a page tied to a campaign, which is the _fundkit_campaign_id
- * meta a campaign's page carries, and only when that campaign's type is one
- * templates can reshape. Every other page opens the same editor.
+ * Offer campaign-type layouts in the editor, where block replacement supports undo. Mount
+ * through a header portal because external pinned-item slots are unreliable; omit the control
+ * when the header or compatible campaign is absent.
  */
 
 import { useState, useEffect, createPortal } from '@wordpress/element';
@@ -82,7 +64,6 @@ function useHeaderSlot( enabled ) {
     return node;
 }
 
-/** The brand mark: three stacked rules, so the button reads as ours. */
 function BrandMark() {
     return (
         <span className="fundkit-layout-btn__mark" aria-hidden="true">

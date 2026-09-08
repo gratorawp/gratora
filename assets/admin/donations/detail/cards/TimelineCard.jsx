@@ -20,8 +20,6 @@ function Row( { time, dotCls, title, sub } ) {
     );
 }
 
-// Build timeline events client-side from the payload: donation lifecycle,
-// receipts, refunds, notes. Sorted newest-first.
 function buildEvents( { donation, receipts, refunds, notes } ) {
     const events = [];
 

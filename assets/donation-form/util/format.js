@@ -64,13 +64,8 @@ export function formatAmount( cents, currency = '', opts = {} ) {
     const own   = code === ( formCurrency || defaultCurrency() );
     const whole = ( n % 100 ) === 0;
 
-    // "Decimal places" is a display preference, and it may only drop minor
-    // units an amount does not have: rendering $26 for the $26.54 about to be
-    // charged asks the donor to agree to a figure nobody takes. Nor may it add
-    // places the currency lacks, or a yen form prints hundredths of a yen. It
-    // describes the currency this form was authored in, the one fmt was
-    // resolved for, where Money::decimalsFor scopes the same rule to the org
-    // base currency.
+    // Display precision may hide only zero minor units and must not exceed currency precision.
+    // Apply the preference to the authored currency only.
     const places = ( own && whole )
         ? Math.min( minorUnitsFor( code ), Math.max( 0, Number( fmt.decimalPlaces ) || 0 ) )
         : minorUnitsFor( code );

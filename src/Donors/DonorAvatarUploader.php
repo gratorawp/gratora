@@ -145,11 +145,7 @@ final class DonorAvatarUploader
         );
     }
 
-    /**
-     * Clears the picture and takes the file with it.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function remove(Donor $donor): void
     {
         $previous = (int) ($donor->avatar_attachment_id ?? 0);

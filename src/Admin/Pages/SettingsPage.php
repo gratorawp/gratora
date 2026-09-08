@@ -7,11 +7,7 @@ namespace FundKit\Admin\Pages;
 use FundKit\Admin\ExtensionAssets;
 use FundKit\Foundation\Hooks\HookProvider;
 
-/**
- * Registers and renders the Settings admin page.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class SettingsPage extends HookProvider
 {
     private const PAGE_ID   = 'fundkit-settings';
@@ -43,9 +39,7 @@ final class SettingsPage extends HookProvider
         $this->enqueueAssets();
         ?>
         <div class="wrap">
-            <?php // Anchor for WP's admin-notice mover: without a server-rendered
-                  // heading (the "Settings" h1 is React-rendered), notices land
-                  // inside the React header row. This pins them above it. ?>
+            <?php // Keep WordPress notices above the React header.?>
             <hr class="wp-header-end" />
             <div id="fundkit-admin-settings"></div>
         </div>
@@ -61,8 +55,7 @@ final class SettingsPage extends HookProvider
 
         wp_enqueue_media();
 
-        // Add-ons register their settings tab into this registry, so it has to
-        // be defined before the settings app reads it.
+        // Initialize the extension registry before the settings app.
         ExtensionAssets::enqueue('settings');
 
         wp_enqueue_script(

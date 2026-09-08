@@ -95,14 +95,10 @@ export function intervalLabel( unit, count ) {
     }
 }
 
-// The donor profile owns a plan's full history; this list links there rather
-// than building a second detail view of the same thing.
 function donorHref( donorId ) {
     return addQueryArgs( window.location.pathname, { page: 'fundkit-donors' } ) + `#donor/${ donorId }`;
 }
 
-// The donation screen is where the retry lives, so each unlinked donation links
-// straight to its own record rather than to a list the org has to search.
 function donationHref( reference ) {
     return addQueryArgs( window.location.pathname, {
         page: 'fundkit-donations',
@@ -111,16 +107,9 @@ function donationHref( reference ) {
     } );
 }
 
-// The card counts plans still running. The Health filter below is deliberately
-// wider and reaches plans that have since ended, so when the two numbers differ
-// the card says the wider one rather than leaving the filter to surprise
-// whoever clicks it. A donation charged on a schedule that was never created
-// has no plan row for any filter here to return, so it is named in the sub line
-// and left out of the number, with the notice above as its surface.
-//
-// That second line counts test donations whichever way the test toggle is set,
-// which is why the card's note is worded about subscriptions: it is the number
-// and the first line that the toggle moves.
+// Count running plans on the card and disclose the broader health-filter count separately.
+// Unlinked donations appear in the note, including test donations regardless of the plan
+// toggle.
 function attentionSub( failing, unlinked, failingEver = 0 ) {
     const declined = sprintf(
         /* translators: %d: number of plans still running that carry a failed renewal. */

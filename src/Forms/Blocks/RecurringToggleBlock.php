@@ -6,11 +6,7 @@ namespace FundKit\Forms\Blocks;
 
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Recurring frequency selector block.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class RecurringToggleBlock implements Block
 {
     public const ALLOWED_FREQUENCIES = ['one-time', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'];

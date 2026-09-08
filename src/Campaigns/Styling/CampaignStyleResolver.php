@@ -54,6 +54,9 @@ final class CampaignStyleResolver
             || ($formPresetId === '' && isset($campaignInline['fundkit-accent-soft']));
         $tokens = $this->dropUnpairedSoft($tokens, $explicitSoft);
 
+        $inline  = $formPresetId === '' ? $campaignInline : [];
+        $tokens  = $this->inkFollowsGround($tokens, $presetTokens, $inline);
+
         return [
             'tokens'        => $tokens,
             'accent'        => (string) ($tokens['fundkit-accent'] ?? '#211d3f'),
@@ -62,11 +65,7 @@ final class CampaignStyleResolver
         ];
     }
 
-    /**
-     * Accent color for a campaign, used by block renderers.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function accentFor(?Campaign $campaign): string
     {
         $tokens = $this->resolveForCampaign($campaign);
@@ -101,7 +100,11 @@ final class CampaignStyleResolver
         $explicitSoft = isset($presetTokens['fundkit-accent-soft'])
             || isset($campaignInline['fundkit-accent-soft']);
 
-        return $this->dropUnpairedSoft($tokens, $explicitSoft);
+        return $this->inkFollowsGround(
+            $this->dropUnpairedSoft($tokens, $explicitSoft),
+            $presetTokens,
+            $campaignInline
+        );
     }
 
     /**
@@ -125,6 +128,44 @@ final class CampaignStyleResolver
         ) {
             unset($tokens['fundkit-accent-soft']);
         }
+        return $tokens;
+    }
+
+    /**
+     * Body and muted ink track the background the same way accent-soft tracks
+     * the accent: the shipped values are chosen against a white page, so an org
+     * that colours the ground and says nothing about the ink gets #111827 on
+     * whatever it picked. Measured here rather than in CSS, which cannot read
+     * a colour's luminance, and only when no layer chose ink of its own.
+     *
+     * @param array<string,string> $tokens
+     * @param array<string,string> $presetTokens
+     * @param array<string,string> $inline
+     * @return array<string,string>
+     *
+     * @since 1.0.0
+     */
+    private function inkFollowsGround(array $tokens, array $presetTokens, array $inline): array
+    {
+        $defaults = Tokens::defaults();
+        $ground   = (string) ($tokens['fundkit-bg'] ?? '');
+
+        if ($ground === '' || $ground === ($defaults['fundkit-bg'] ?? null)) {
+            return $tokens;
+        }
+
+        $on = Ink::on($ground);
+        if ($on === null) {
+            return $tokens;
+        }
+
+        foreach (['fundkit-text' => 0, 'fundkit-text-muted' => 1] as $key => $slot) {
+            $chosen = isset($presetTokens[$key]) || isset($inline[$key]);
+            if (! $chosen && ($tokens[$key] ?? null) === ($defaults[$key] ?? null)) {
+                $tokens[$key] = $on[$slot];
+            }
+        }
+
         return $tokens;
     }
 

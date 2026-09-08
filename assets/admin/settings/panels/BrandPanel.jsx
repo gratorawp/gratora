@@ -30,11 +30,7 @@ export default function BrandPanel( { s } ) {
 
     const active = presets.find( ( p ) => p.id === activeId ) || presets[ 0 ] || null;
 
-    // What Reset restores a token to. For a built-in, that is the preset's own
-    // shipped value (Bold's navy, the Site theme's theme.json accent), which
-    // lives in styling.builtins before any user edit was merged in. Falling
-    // straight through to the catalogue default, as this used to, reset every
-    // preset's colours to the same green.
+    // Reset to the selected preset’s shipped value from styling.builtins.
     const catalogueDefaults = window.fundkit?.styling?.defaults || {};
     const builtinTokens = ( id ) => {
         const list = Array.isArray( window.fundkit?.styling?.builtins ) ? window.fundkit.styling.builtins : [];
@@ -261,7 +257,6 @@ function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, o
     );
 }
 
-/** Unique slug id, no collision with existing presets. */
 function generateId( base, existing ) {
     const slug = String( base || 'preset' )
         .toLowerCase()

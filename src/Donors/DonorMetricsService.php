@@ -11,12 +11,11 @@ use FundKit\Campaigns\Campaign;
 use FundKit\Donations\ChannelClassifier;
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationQueries;
-use FundKit\Donors\DonorNoteRepository;
 use FundKit\Donors\Portal\PortalPage;
 use FundKit\Donors\Portal\PortalSession;
 use FundKit\Foundation\Helpers\Csv;
-use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Receipts\Receipt;
 use FundKit\Recurring\PlanRow;
@@ -26,11 +25,7 @@ use FundKit\Settings\SettingsService;
 use FundKit\Vendor\Queryable\DB;
 use Throwable;
 
-/**
- * Builds donor-insights and donor-profile payloads for the admin UI.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DonorMetricsService
 {
     /**

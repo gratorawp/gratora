@@ -1147,7 +1147,6 @@ BLOCKS;
         return $form !== '' ? $form : 'campaign-page';
     }
 
-    /** Whether an id names a template that exists. @since 1.0.0 */
     public static function exists(string $id, string $campaignType = ''): bool
     {
         return self::find($id, $campaignType) !== null;

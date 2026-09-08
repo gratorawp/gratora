@@ -6,11 +6,7 @@ namespace FundKit\Foundation\Time;
 
 use DateTimeImmutable;
 
-/**
- * Production clock backed by the system wall time.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class SystemClock implements Clock
 {
     /** @since 1.0.0 */

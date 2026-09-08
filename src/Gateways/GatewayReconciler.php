@@ -16,22 +16,9 @@ use FundKit\Vendor\Queryable\ModelQueryBuilder;
 use Throwable;
 
 /**
- * Asks PayPal what became of donations whose money it may already have.
- *
- * A single verified webhook is the only automatic way out of `processing`, so a
- * delivery that is refused or lost strands real money there with no retry, no
- * poll and nothing on any screen saying so. This is the second path to the same
- * answer, and it reaches one status further back: the request that captures an
- * order can die between PayPal taking the money and the donation being marked
- * paid, which leaves no local trace of the capture at all.
- *
- * It reads the order and never re-POSTs the capture. The capture carries a
- * stable PayPal-Request-Id per donation, so a second POST replays the original
- * response and would report the hold forever regardless of what PayPal has done
- * with the money since.
- *
- * PayPal only for now, because it is the only gateway whose money can be held
- * server-side with no local record of the release.
+ * Reconcile PayPal pending and processing donations after interrupted captures or missing
+ * webhooks. Read the order; re-posting an idempotent capture would replay its original held
+ * response.
  *
  * @since 1.0.0
  */

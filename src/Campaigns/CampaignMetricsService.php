@@ -9,17 +9,11 @@ use FundKit\Donations\ChannelClassifier;
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationQueries;
 use FundKit\Donations\DonationRepository;
-use FundKit\Donors\Donor;
 use FundKit\Donors\DonorRepository;
 use FundKit\Forms\Form;
 use FundKit\Foundation\Time\Clock;
 
-/**
- * Computes aggregate metrics and lists for campaign analytics.
- * Date range matches the UI selector (today / 7d / 30d / 90d / all-time).
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CampaignMetricsService
 {
     /** @since 1.0.0 */
@@ -342,7 +336,7 @@ final class CampaignMetricsService
         // west of it.
         $rangeStart = $unbounded ? null : DonationQueries::dayBoundsUtc($bounds[0], null)[0];
 
-        // One SQL aggregate per donor: scales by donor count, not donation count.
+        // Aggregate by donor to avoid scanning individual donations.
         $rows = $this->donations->donorCohortRowsForCampaign(
             $campaignId,
             $unbounded ? null : $bounds[0],
@@ -372,8 +366,7 @@ final class CampaignMetricsService
             }
         }
 
-        // Out of everyone counted: the two groups are disjoint, so dividing by
-        // the first-timers alone has no upper bound.
+        // Use both disjoint groups as the denominator.
         $donors     = $firstTime + $returning;
         $conversion = $donors > 0 ? round(($returning / $donors) * 100, 1) : null;
         $totalRev   = $recurringRevenue + $oneTimeRevenue;
@@ -460,8 +453,6 @@ final class CampaignMetricsService
      */
     private static function ladderUnit(int $averageCents): int
     {
-        // No donations yet: the dollar ladder, so an empty campaign looks the
-        // way it always has.
         if ($averageCents <= 0) return 1000;
 
         $target = max(1, (int) round($averageCents / 5));
@@ -652,7 +643,6 @@ final class CampaignMetricsService
         $today = $this->localNow();
 
         if ($mode === 'year') {
-            // Shift both ends of the current range back by one year.
             [$from, $to] = $this->rangeBounds($range, $campaignId);
             $fromDt = new DateTimeImmutable($from);
             $toDt   = new DateTimeImmutable($to);

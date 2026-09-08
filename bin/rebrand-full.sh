@@ -1,25 +1,14 @@
 #!/usr/bin/env bash
-# FULL core rebrand: text domain, display name, namespace, constants, main file,
-# REST namespaces, db/option prefixes, page slug, Strauss prefixes.
-#
-# PROTECTED (external, live in other repos - must survive verbatim):
-#   @fundkit/ui        npm dep on fundkitorg/ui
-#   fundkit/queryable  composer dep on fundkitorg/queryable
-#   fundkitorg         the GitHub org
-#
-# Does NOT touch the nine add-on plugins. They call fundkit/v1 and import
-# FundKit\ classes, so they break until renamed too.
-#
-#   bin/rebrand-full.sh onelo Onelo "Onelo Donation Platform"
-#   bin/rebrand-full.sh onelo Onelo "Onelo Donation Platform" --apply
+# Rename core identifiers, preserving external @fundkit/ui, fundkit/queryable, and fundkitorg
+# references.
+# Add-ons require separate matching renames.
+# Usage: bin/rebrand-full.sh slug Namespace "Display Name" [--apply]
 set -uo pipefail
 SLUG="${1:-}"; BRAND="${2:-}"; TITLE="${3:-}"; APPLY="${4:-}"
 [ -z "$SLUG" ] || [ -z "$BRAND" ] || [ -z "$TITLE" ] && { sed -n '2,16p' "$0" | sed 's/^#\{1,\} \{0,1\}//'; exit 1; }
 printf '%s' "$SLUG" | grep -Eq '^[a-z0-9-]+$' || { echo "slug must be lowercase a-z0-9-"; exit 1; }
 [ ${#SLUG} -ge 5 ] || { echo "slug must be >= 5 chars"; exit 1; }
-# SLUG is the directory and text-domain form; it may contain hyphens.
-# TOKEN is the bare lowercase form used for PHP constants, REST namespaces,
-# option/hook prefixes and the admin page slug, so it must stay alphanumeric.
+# SLUG permits hyphens; TOKEN must stay alphanumeric for internal identifiers.
 TOKEN=$(printf '%s' "$BRAND" | tr '[:upper:]' '[:lower:]')
 printf '%s' "$TOKEN" | grep -Eq '^[a-z0-9]+$' || { echo "brand must be alphanumeric (it becomes a PHP constant prefix)"; exit 1; }
 UPPER=$(printf '%s' "$TOKEN" | tr '[:lower:]' '[:upper:]')
@@ -53,26 +42,26 @@ sub() { # sub <find> <replace> - values pass via env so nothing is
       perl -pi -e 's/\Q$ENV{REBRAND_FIND}\E/$ENV{REBRAND_REPL}/g'
 }
 
-# 1. protect the external refs
+# Protect external references before replacement.
 sub '@fundkit/ui'       '@@KEEP_UIPKG@@'
 sub 'fundkit/queryable' '@@KEEP_QBPKG@@'
 sub 'fundkitorg'        '@@KEEP_ORG@@'
 
-# 2. brand + domain
+
 sub 'fundraising-toolkit' "$SLUG"
 sub 'Fundraising Toolkit' "$BRAND"
 
-# 3. everything remaining, three cases
+
 sub 'FundKit' "$BRAND"
 sub 'FUNDKIT' "$UPPER"
 sub 'fundkit' "$TOKEN"
 
-# 4. restore
+# Restore external references.
 sub '@@KEEP_UIPKG@@' '@fundkit/ui'
 sub '@@KEEP_QBPKG@@' 'fundkit/queryable'
 sub '@@KEEP_ORG@@'   'fundkitorg'
 
-# 5. main file + headers + readme + pot
+
 [ -f "${SLUG}.php" ] || { git mv fundkit.php "${SLUG}.php" 2>/dev/null || mv fundkit.php "${SLUG}.php"; }
 perl -pi -e "s|^ \* Plugin Name: .*| * Plugin Name: ${TITLE}|" "${SLUG}.php"
 perl -pi -e "s|^ \* Text Domain: .*| * Text Domain: ${SLUG}|"  "${SLUG}.php"

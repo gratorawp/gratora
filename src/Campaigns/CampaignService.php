@@ -11,15 +11,11 @@ use FundKit\Forms\FormTemplates;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Recurring\RecurringPlan;
-use InvalidArgumentException;
 use FundKit\Vendor\Queryable\DB;
+use InvalidArgumentException;
 use RuntimeException;
 
-/**
- * Creates, updates, duplicates, and deletes campaigns and their linked WP pages.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CampaignService
 {
     /**
@@ -116,7 +112,7 @@ final class CampaignService
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
-        // Snapshot fields that drive the linked WP page to detect changes.
+        // Snapshot fields used by the linked WP page.
         $prevTitle  = (string) $campaign->title;
         $prevSlug   = (string) $campaign->slug;
         $prevStatus = (string) $campaign->status;
@@ -163,7 +159,6 @@ final class CampaignService
 
         self::assertWindowOrder($campaign->starts_at, $campaign->ends_at);
 
-        // Currency is not editable: campaigns always report in the org currency.
 
         if (array_key_exists('goal_type', $input)) {
             $campaign->goal_type = $this->coerceGoalType((string) $input['goal_type']);
@@ -308,19 +303,9 @@ final class CampaignService
     }
 
     /**
-     * Why this campaign cannot be hard-deleted, or null when it can be.
-     *
-     * A campaign with donations (or recurring plans) is never hard-deleted: its
-     * donation rows would be orphaned against a missing campaign_id, losing that
-     * campaign's reporting. Archive keeps the records instead. Mirrors
-     * FundService::delete's reference guard.
-     *
-     * Public because the screen has to ask before it offers the action. Every
-     * row counts, whatever its status, kind or mode, so this cannot be answered
-     * from campaign->donations_count: that counter is synced over paid, live,
-     * non-ticket donations only, and a campaign whose single donation is
-     * pending, failed, test-mode or a ticket order reads zero there while this
-     * still refuses.
+     * Refuse deletion if any donation or recurring plan references the campaign. Check rows
+     * directly: cached totals omit pending, failed, test, and ticket records. Expose the reason
+     * before offering deletion.
      *
      * @since 1.0.0
      */
@@ -410,8 +395,7 @@ final class CampaignService
             $out['preset_id'] = $style['preset_id'];
         }
         if (array_key_exists('tokens', $style) && is_array($style['tokens'])) {
-            // Preserve empty tokens key so the editor's "Customize tokens" toggle
-            // round-trips correctly and stays expanded.
+            // Preserve empty tokens so Customize stays expanded.
             $out['tokens'] = \FundKit\Campaigns\Styling\Tokens::sanitize($style['tokens']);
         }
         return $out === [] ? null : $out;
@@ -436,8 +420,6 @@ final class CampaignService
         $copy->status      = 'draft';
         $copy->campaign_type = $source->campaign_type;
         $copy->description = $source->description;
-        // Campaigns always report in the org currency; never copy a source's
-        // (possibly stale) currency forward.
         $copy->currency    = Money::defaultCurrency();
         $copy->goal_type   = $source->goal_type;
         $copy->goal_cents  = $source->goal_cents;
@@ -483,8 +465,7 @@ final class CampaignService
     {
         if ($postId <= 0) return;
 
-        // The owning campaign is being deleted wholesale; fundkit.campaign.deleted
-        // already covers it, so don't fire page_lost ("page gone, recreate it").
+        // The campaign deletion event already covers this page.
         if (isset($this->deletingPageIds[$postId])) return;
 
         $campaignId = (int) get_post_meta($postId, '_fundkit_campaign_id', true);
@@ -492,7 +473,6 @@ final class CampaignService
 
         $campaign = $this->campaigns->findById($campaignId);
         if (! $campaign) return;
-        // Idempotent: if page_id was already cleared the follow-up before_delete_post no-ops.
         if ((int) $campaign->page_id !== $postId) return;
 
         $campaign->status   = 'draft';
@@ -520,8 +500,6 @@ final class CampaignService
 
         $campaign = $this->campaigns->findById($campaignId);
         if (! $campaign) return;
-        // Only re-link when the campaign actually lost its page (avoid hijacking a
-        // campaign that already points at a different, live page).
         if ((int) $campaign->page_id !== 0) return;
 
         $campaign->page_id = $postId;
@@ -552,8 +530,7 @@ final class CampaignService
 
         $campaign = $this->campaigns->findById($campaignId);
         if (! $campaign) return;
-        // Only the campaign's canonical page, and only when it isn't already live
-        // (the latter also breaks the update()->syncPage->transition loop).
+        // Skip live pages to break the update/syncPage/transition loop.
         if ((int) $campaign->page_id !== $post->ID) return;
         if ((string) $campaign->status === 'published') return;
 
@@ -614,7 +591,6 @@ final class CampaignService
     /** @since 1.0.0 */
     private function createPageFor(Campaign $campaign, bool $formIsDraft = false, string $template = CampaignTemplates::DEFAULT_ID): int
     {
-        // Page is public only when both the campaign and default form are published.
         $postStatus = ( $campaign->status === 'published' && ! $formIsDraft ) ? 'publish' : 'draft';
 
         $pageId = wp_insert_post([
@@ -722,8 +698,7 @@ final class CampaignService
         $form = $this->forms->create([
             /* translators: %s: campaign title */
             'title'       => sprintf(__('%s donation form', 'fundraising-toolkit'), $campaign->title),
-            // Without a template the form lacks Name + Email and fails publish
-            // readiness checks; keep it as draft until the user picks a template.
+            // Keep forms without a template in draft; required donor fields are missing.
             'status'      => $skipTemplate ? 'draft' : 'published',
             'campaign_id' => $campaign->id,
             'blocks'      => $starter['blocks'],
@@ -747,8 +722,7 @@ final class CampaignService
     {
         $id = CampaignTemplates::formTemplate($pageTemplate, (string) $campaign->campaign_type);
 
-        // An add-on that replaces the page templates wholesale names forms for
-        // its own, and core has never heard of either id.
+        // Add-on page templates can name add-on form templates.
         $id = (string) apply_filters('fundkit.campaign.starter_form_template', $id, $campaign, $pageTemplate);
 
         $template = FormTemplates::find($id);
@@ -807,9 +781,6 @@ BLOCKS;
             $patch['post_name'] = $campaign->slug;
         }
         if (! empty($changed['status'])) {
-            // Respect the default form's status too: publishing a campaign whose
-            // form is still draft must not expose a public page with a form that
-            // rejects donations.
             $patch['post_status'] = $this->desiredPageStatus($campaign);
         }
 

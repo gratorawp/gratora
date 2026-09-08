@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Rest\Schemas;
 
 /**
- * JSON-Schema arg specs for the public donation endpoint. WP validates args
- * automatically (failures: rest_invalid_param, 400); DonationService guards
- * remain as defense-in-depth.
+ * WordPress validates REST args; retain service-level guards.
  *
  * @since 1.0.0
  */

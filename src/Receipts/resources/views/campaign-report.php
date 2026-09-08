@@ -1,10 +1,7 @@
 <?php
 defined('ABSPATH') || exit;
 /**
- * Campaign performance one-pager, rendered to HTML then handed to the PDF
- * builder. Standalone document with a scoped <style> block (no theme/token
- * context), so the literal colors below are intentional and self-contained.
- * Aggregate figures only: no donor names or PII appear on this document.
+ * Standalone campaign PDF with local styles and aggregate figures only.
  *
  * @var string $org_name       organization name
  * @var string $campaign_title campaign title

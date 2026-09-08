@@ -6,13 +6,13 @@ namespace FundKit\Donors\Erasure;
 
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationNote;
+use FundKit\Donations\Refund;
 use FundKit\Donors\Consent;
 use FundKit\Donors\DonorNote;
 use FundKit\Donors\MagicLinkToken;
 use FundKit\Donors\PendingSignup;
 use FundKit\Donors\PendingSignupRepository;
 use FundKit\Recurring\RecurringPlan;
-use FundKit\Donations\Refund;
 
 /**
  * Core's own share of an erasure: everything hanging off the donor by foreign
@@ -85,8 +85,7 @@ final class CoreDonorDataHandler implements ErasureHandler
             ->where('donor_id', $request->donorId)
             ->update(['gateway_customer_id' => null]);
 
-        // Revoke outstanding magic-link tokens so a previously-emailed
-        // portal link can no longer open a session for the redacted donor.
+        // Revoke outstanding portal login tokens on erasure.
         MagicLinkToken::query()->where('donor_id', $request->donorId)->delete();
 
         // An unproven signup has no donor id to be found by, so it is reached

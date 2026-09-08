@@ -1,11 +1,4 @@
-/**
- * Visual regression: the layout + content form (FUNDKIT_E2E_LAYOUT_FORM_PATH).
- * Covers heading/paragraph/html/divider/columns/row/section plus the styled
- * interactive blocks (recurring-toggle, fund-picker, privacy-notice, goal).
- *
- * The goal block reads live campaign totals which drift as the functional
- * suite submits donations, so it is masked out of the comparison.
- */
+/** Mask the goal block because functional tests change campaign totals. */
 
 import { test, expect } from '../../fixtures/donor-form';
 import { settle } from '../../helpers/visual';

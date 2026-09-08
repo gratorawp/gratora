@@ -8,11 +8,7 @@ use FundKit\Foundation\Auth\Capabilities;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Vendor\Queryable\DB;
 
-/**
- * Query helpers for the Campaign model.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CampaignRepository
 {
     /** @since 1.0.0 */
@@ -80,8 +76,7 @@ final class CampaignRepository
                 $q = $q->orderBy('raised_cents', 'DESC');
                 break;
             case 'ending-soon':
-                // Only campaigns that have not already ended; an ends_at in the
-                // past would otherwise sort first and surface dead campaigns.
+                // Exclude ended campaigns before sorting.
                 $q = $q->whereIsNotNull('ends_at')
                     ->where('ends_at', gmdate('Y-m-d H:i:s'), '>=')
                     ->orderBy('ends_at', 'ASC');
@@ -167,7 +162,6 @@ final class CampaignRepository
                     $g->whereIsNull('starts_at')->orWhere('starts_at', $now, '<=');
                 })
                 ->where(function ($g): void {
-                    // A goal of zero or null is not a goal, so it is never met.
                     $g->where(function ($a): void {
                         $a->where('goal_type', 'amount')
                           ->where('goal_cents', 0, '>')
@@ -255,8 +249,6 @@ final class CampaignRepository
             return $q;
         };
 
-        // DB::table (raw query builder) returns plain arrays from selectRaw,
-        // which is what we need for the SUM/COUNT aggregates here.
         $base = fn () => DB::table('fundkit_campaigns');
 
         $totalCount  = (int) $applyFilters($base())->count();

@@ -8,20 +8,18 @@ defined('ABSPATH') || exit;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use FundKit\Donations\DonationQueries;
 use Exception;
+use FundKit\Donations\DonationQueries;
 
 /**
- * An optional start and end date, as the admin picks them, resolved to the
- * instants they mean. Campaigns and funds both schedule this way.
+ * Resolve campaign and fund date windows.
  *
  * @since 1.0.0
  */
 final class ScheduleWindow
 {
     /**
-     * The first instant the window is open, as UTC, or null when it has no
-     * start date.
+     * UTC opening instant, or null without a start date.
      *
      * @since 1.0.0
      */
@@ -31,9 +29,8 @@ final class ScheduleWindow
     }
 
     /**
-     * The last instant the window is open, as UTC, or null when it has no end
-     * date. Anything measuring "days left" against the clock belongs here too,
-     * or it counts the remaining days of a different timezone's calendar.
+     * UTC closing instant, or null without an end date. Use this calendar for days-left
+     * calculations too.
      *
      * @since 1.0.0
      */
@@ -43,8 +40,6 @@ final class ScheduleWindow
     }
 
     /**
-     * 'scheduled' before it opens, 'ended' after it closes, null while it runs.
-     *
      * @return null|'scheduled'|'ended'
      *
      * @since 1.0.0
@@ -75,10 +70,7 @@ final class ScheduleWindow
     }
 
     /**
-     * An end date is inclusive of the whole of that day: "ends 28 July" still
-     * takes a donation at 10am on the 28th. The column is a datetime and the
-     * schedule UI only emits dates, so a stored midnight means end-of-day;
-     * reading it literally costs every window its final day.
+     * Treat stored midnight as the end of that local day; schedule inputs are date-only.
      *
      * @since 1.0.0
      */
@@ -93,14 +85,8 @@ final class ScheduleWindow
     }
 
     /**
-     * The schedule is a local calendar: the admin picks dates in the org's
-     * timezone and the screen reads them back the same way, so a boundary
-     * compared as a UTC instant closes a window ending 31 December at 19:00 in
-     * New York, losing the heaviest giving window of the year, and keeps a
-     * Sydney one open into 1 January.
-     *
-     * A stamp too malformed to resolve is compared as written, which is the
-     * database's problem to reject rather than a reason to shut the form.
+     * Resolve schedule dates in the org timezone. Preserve malformed values for database
+     * validation.
      *
      * @since 1.0.0
      */

@@ -8,14 +8,7 @@ import FormRow from '../../_shared/components/FormRow';
 import { ToggleRow } from '../../_shared/components/Switch';
 import Notice from '../../_shared/components/Notice';
 
-/**
- * What the sweep would take at the window on screen. Erasure reaches donors who
- * never asked for it and cannot be undone, so the number belongs in front of
- * whoever is choosing the window, while they are still choosing it.
- *
- * inForce says whether that window is the saved one, because a count of donors
- * nothing is going to touch yet must not be worded as a sentence already passed.
- */
+/** Preview the affected donor count; inForce distinguishes saved settings from drafts. */
 function RetentionPreview( { years, inForce } ) {
     const [ data, setData ] = useState( null );
 
@@ -123,16 +116,8 @@ function RetentionPreview( { years, inForce } ) {
 }
 
 /**
- * What sits in front of the site, said in a sentence and fixed with a button.
- *
- * Behind a CDN or reverse proxy every visitor arrives as the same address, so
- * limits meant for one visitor apply to everyone at once: donors are refused
- * because of somebody else, and one caller can close the form for all of them.
- * It fails quietly, by turning a donor away, so nothing surfaces it unless this
- * does.
- *
- * The ranges are ours to know. Telling an org to go and find their proxy's CIDR
- * blocks is telling them to leave it broken.
+ * Offer detected proxy configuration so IP quotas distinguish visitors behind shared
+ * infrastructure.
  */
 function ProxyFix( { s } ) {
     const detected = window.fundkit?.detectedProxy || null;

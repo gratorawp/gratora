@@ -833,12 +833,7 @@ function FundDeleteModal( { fund, funds, onClose, onDone } ) {
                         </span>
                     </label>
 
-                    { /* Offering this with nothing to reassign to left the
-                         author on an empty picker and a permanently disabled
-                         button, with nothing saying Deactivate was the only
-                         route. A site with one fund is the common shape here,
-                         since a fund only reaches this dialog once it has
-                         donations. */ }
+                    { /* Offer reassignment only when another fund is available. */ }
                     { candidates.length > 0 ? (
                         <label className="fundkit-choice" htmlFor="fundkit-fund-delete-reassign">
                             <input

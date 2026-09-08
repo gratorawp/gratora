@@ -1,11 +1,8 @@
-// Theme-sensitive surfaces read CSS custom properties so a wrapper carrying
-// `style="--fundkit-accent: ..."` recolours a block without recompiling.
+// Read custom properties so inline campaign styles recolor blocks.
 
 $accent-fallback:     #211d3f;
 $accent-soft-fallback: rgba(33, 29, 63, .12);
-// The resolver emits --fundkit-accent-soft only when a preset or the campaign
-// pairs one with the accent; deriving it otherwise keeps a purple campaign from
-// washing its own pages in green.
+// Derive accent-soft unless explicitly paired by the preset.
 $accent-soft: var(--fundkit-accent-soft, color-mix(in srgb, var(--fundkit-accent, #{$accent-fallback}) 12%, #fff));
 $text-fallback:       #1e1e1e;
 $text-muted-fallback: #6b7280;
@@ -20,11 +17,7 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
     margin: 0 0 24px;
     color: var(--fundkit-text, #{$text-fallback});
 
-    // Twenty Twenty-Five ships `html :where([style*="border-width"]) {
-    // border-style: solid }`, which matches on the substring, and our blocks
-    // emit a --fundkit-stroke custom property. Declaring a border here keeps the
-    // theme from drawing a 3px currentColor one; blocks that want a border set
-    // it themselves.
+    // Reset borders to override theme selectors matching inline style substrings.
     border: 0;
 }
 
@@ -62,8 +55,6 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
     }
 }
 
-// Deliberately not a card: one stat per block means several sit side by side,
-// and a border each would draw a grid nobody asked for.
 .fundkit-block--stat {
     .fundkit-stat__label {
         font-size: 12px;
@@ -86,9 +77,6 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
     &.is-lg .fundkit-stat__value { font-size: 42px; letter-spacing: -.028em; }
 }
 
-// Editor only: a stat whose figure this campaign cannot answer. Dashed and
-// muted rather than red, because nothing is wrong; the number does not exist
-// yet, and on the page the block simply renders nothing.
 .fundkit-stat-empty {
     padding: 14px 16px;
     border: 1px dashed var(--fundkit-border, #{$border-fallback});
@@ -111,8 +99,6 @@ $shadow-fallback:     0 20px 50px rgba(0, 0, 0, .25);
     }
 }
 
-// aspect-ratio with object-fit so a portrait upload and a landscape one crop to
-// the same shape rather than shoving the page around.
 .fundkit-block--image {
     margin: 0;
 
@@ -309,8 +295,7 @@ body.fundkit-modal-open { overflow: hidden; }
     color: var(--fundkit-text-muted, #{$text-muted-fallback});
 }
 
-// ServerSideRender suppresses its own <h3> (REST_REQUEST) so the editor's
-// inline RichText title is the one shown; style it to match the frontend.
+// Match the editor’s RichText title to frontend headings.
 .fundkit-campaign-block-edit {
     &__title {
         margin: 0 0 16px;
@@ -337,14 +322,9 @@ body.fundkit-modal-open { overflow: hidden; }
 
     .fundkit-top-donors__row {
         display: flex;
-        // Wrap is the narrow-container fallback only: the row is avatar, name
-        // and amount, and they fit on one line at any sane width.
         flex-wrap: wrap;
         align-items: center;
         gap: 12px;
-        // Flush left, matching the recent-donations rows it sits under: both
-        // are avatar-led lists and a shared left edge is what makes them read
-        // as one column.
         padding: 12px 0;
         border-bottom: 1px solid var(--fundkit-border, #{$border-fallback});
 
@@ -617,8 +597,6 @@ body.fundkit-modal-open { overflow: hidden; }
     }
 }
 
-// Left alignment, "md" size and "auto" columns are the base styles above, so
-// only the non-default cases need rules.
 
 .fundkit-block--stat.is-align-center { text-align: center; }
 .fundkit-block--stat.is-align-right  { text-align: right; }
@@ -779,8 +757,7 @@ body.fundkit-modal-open { overflow: hidden; }
     &:hover &__link svg { transform: translateX(2px); }
 }
 
-// The form centres itself with its own `margin: 0 auto` and max-width, so no
-// alignment handling belongs here.
+// The form owns its width and alignment.
 .fundkit-block--donation-form {
     margin: 0 0 24px;
 }
@@ -819,8 +796,7 @@ body.fundkit-modal-open { overflow: hidden; }
         color: var(--fundkit-text-muted, #{$text-muted-fallback});
     }
 
-    // Sits over the initial, so a donor with no picture on file keeps their
-    // letter showing through the transparent pixel Gravatar returns.
+    // Overlay photos so missing Gravatars leave initials visible.
     &__photo {
         position: absolute;
         inset: 0;
@@ -831,9 +807,7 @@ body.fundkit-modal-open { overflow: hidden; }
     }
 }
 
-// One shared rail: campaign blocks align to the same 1080px container as the
-// P2P sections and the start page. Last in the file so the centering wins over
-// the per-block margin shorthands above.
+// Keep this last so shared centering overrides block margin shorthands.
 .fundkit-block--image,
 .fundkit-block--stat,
 .fundkit-block--progress,
@@ -849,7 +823,6 @@ body.fundkit-modal-open { overflow: hidden; }
     margin-right: auto;
 }
 
-/* The campaign's cover photo, edited from the block that shows it. */
 .fundkit-block-image-picker {
     margin: 0 0 16px;
 
@@ -879,14 +852,7 @@ body.fundkit-modal-open { overflow: hidden; }
 }
 
 
-// A colour set on the block has to reach the parts that set their own.
-//
-// get_block_wrapper_attributes puts the author's colour on the wrapper, and
-// every piece inside carrying a colour of its own overrides it, so the control
-// looks broken. Last in this file on purpose: the rules it has to beat are the
-// ones above, at the same specificity, where source order decides.
-//
-// Only where a colour was actually set, so a block left alone keeps its own.
+// Keep explicit wrapper colors last to override equally specific child rules.
 .fundkit-block.has-text-color,
 .fundkit-block.has-text-color :where(*) {
     color: inherit;

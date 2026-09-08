@@ -9,12 +9,7 @@ use FundKit\Forms\FormRepository;
 use FundKit\Forms\Shortcode\DonationFormShortcode;
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Renders a campaign's donation form inline on the page (the in-page
- * counterpart to the donate-button modal).
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DonationFormBlock extends CampaignBlock
 {
     /** @since 1.0.0 */
@@ -51,8 +46,7 @@ final class DonationFormBlock extends CampaignBlock
             $campaign->default_form_id ? (int) $campaign->default_form_id : null
         );
 
-        // Renders something even with no form. A heading seeded above this
-        // block would otherwise caption whatever came next.
+        // Keep the seeded heading from captioning unrelated content.
         if (! $form) {
             return View::loadRelative(__DIR__, 'views/donation-form', [
                 'mode'      => 'empty',
@@ -113,20 +107,8 @@ final class DonationFormBlock extends CampaignBlock
     }
 
     /**
-     * Whether this render is the block editor asking for its own preview.
-     *
-     * REST_REQUEST alone cannot answer that: WP defines it for every /wp-json
-     * call, and a public read of a published page runs the_content ->
-     * do_blocks, so an anonymous reader would be served the editor preview
-     * document instead of the form. ServerSideRender always calls
-     * /wp/v2/block-renderer/, whose core permission check requires edit access;
-     * the capability is re-checked here so nothing but an editor can reach it.
-     *
-     * Re-checked the way the route itself checks, against the post being
-     * edited when ServerSideRender names one. A stricter test would fail for
-     * someone core already let through, an editor of pages but not of posts,
-     * and drop the live front-end form, form token and all, into their editor
-     * canvas with none of its scripts.
+     * Require the block-renderer route and permission to edit its post. REST_REQUEST also
+     * covers public content renders and cannot identify editor previews.
      *
      * @since 1.0.0
      */

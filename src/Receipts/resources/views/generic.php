@@ -2,9 +2,6 @@
 
 defined('ABSPATH') || exit;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-
 /**
  * @var \FundKit\Donations\Donation $donation
  * @var \FundKit\Donors\Donor    $donor

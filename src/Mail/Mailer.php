@@ -7,8 +7,7 @@ namespace FundKit\Mail;
 use FundKit\Settings\SettingsService;
 
 /**
- * Wraps wp_mail with configured From, Reply-To, and BCC, and per-template
- * subject/body from fundkit_email_settings.
+ * Apply configured mail headers and per-template text.
  *
  * @since 1.0.0
  */
@@ -158,11 +157,7 @@ final class Mailer
         }
     }
 
-    /**
-     * Strip CR / LF / control chars so a value is safe in an email header.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private function stripHeaderValue(string $value): string
     {
         // A subject is not HTML, and names reach it already HTML-encoded. On a

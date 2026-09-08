@@ -6,11 +6,7 @@ namespace FundKit\Gateways;
 
 use RuntimeException;
 
-/**
- * Registry of PaymentGateway implementations.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class GatewayManager
 {
     /** @var array<string, PaymentGateway> */

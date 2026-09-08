@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FundKit\Donations;
 
-use FundKit\Receipts\OrgProfile;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Donors\DonorRepository;
 use FundKit\Donors\DonorService;
@@ -12,6 +11,7 @@ use FundKit\Donors\Portal\PortalPage;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Hooks\HookProvider;
 use FundKit\Mail\Mailer;
+use FundKit\Receipts\OrgProfile;
 use FundKit\Recurring\FrequencyMap;
 use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\RecurringPlanChange;
@@ -297,17 +297,8 @@ final class DonationEmails extends HookProvider
     }
 
     /**
-     * The donor's first donation they made themselves: a one-off welcome,
-     * separate from the transactional receipt.
-     *
-     * Not fundkit.donor.first_donation_completed, which is the aggregate's 0 -> 1
-     * crossing. Nobody typed their address into this site when an admin entered
-     * a check, so no welcome goes out for one - but that check still crosses
-     * 0 -> 1, and when the donor later gives online the count moves 1 -> 2, the
-     * crossing never happens again, and they are never welcomed at all.
-     * Counting what this donor has actually given themselves, rather than
-     * watching a counter move, welcomes them the day they donate and never
-     * twice: an existing repeat donor is already past one and stays silent.
+     * Welcome the donor on their first self-submitted donation. Manual entries affect
+     * aggregates but must neither trigger nor consume the welcome.
      *
      * @since 1.0.0
      */

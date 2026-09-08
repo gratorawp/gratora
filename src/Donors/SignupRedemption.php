@@ -48,18 +48,9 @@ final class SignupRedemption
             $email = (string) ($this->pending->decryptEmail($claim) ?? '');
             if ($email === '' || ! is_email($email)) return 0;
 
-            // The name comes from the token, which carries what the one
-            // registration that minted it typed. The claim is a single row per
-            // address that every registration for that address shares, so a
-            // name read from there is a name anyone who knows the address can
-            // steer, whatever order they submit in.
-            //
-            // It has to reach a donor this call is creating and no other, and
-            // the check for that belongs inside the lookup rather than out
-            // here: anyone can type anyone's address, so a claim can be
-            // standing when its owner becomes a donor by donating, and a donor
-            // that appears between reading and creating would be back-filled
-            // with a stranger's name on their receipts and year-end statement.
+            // Take the name from the signed token, not the shared claim. Apply it only within
+            // donor creation so another registration cannot rename an existing or concurrently
+            // created donor.
             $profile = [];
             foreach (['first_name', 'last_name'] as $field) {
                 if (($token->$field ?? null) !== null && $token->$field !== '') {

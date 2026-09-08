@@ -53,7 +53,8 @@ final class CampaignStyleVars
         // Derived, not authored: nothing in the catalogue knows what the accent
         // is dark enough to need. Appended last so a filter cannot leave a
         // filled panel reversing white out of a pale accent.
-        $css .= AccentInk::declarationsFor((string) ($tokens['fundkit-accent'] ?? ''));
+        $css .= Ink::declarationsFor((string) ($tokens['fundkit-accent'] ?? ''));
+        $css .= Ink::softDeclarations($tokens);
         $css .= self::coverImage($campaign);
 
         return self::$cache[$id] = $css;
@@ -87,7 +88,7 @@ final class CampaignStyleVars
     }
 
     /**
-     * Tests seed campaigns per case, so the per-request cache has to be clearable.
+     * Clear the per-request cache between test fixtures.
      *
      * @since 1.0.0
      */

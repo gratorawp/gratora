@@ -3,16 +3,8 @@ import { useState } from '@wordpress/element';
 let seq = 0;
 
 /**
- * Form field wrapper: label, optional help text, optional footer.
- *
- * Local rather than the package's, which renders the label as a plain div: a
- * control inside it had no accessible name at all, so a screen reader read
- * every field in the drawers as an unlabelled box.
- *
- * A single control is wrapped in the label, which associates the two without
- * needing an id on either. Pass htmlFor for a control that renders its own
- * input, or group for several controls that share one caption, where an outer
- * label would nest inside theirs and swallow their clicks.
+ * Wrap single controls in a label. Use htmlFor for nested inputs or group for multiple controls
+ * to avoid nested labels.
  */
 export default function Field( { label, help, footer, htmlFor, group, children } ) {
     const [ id ] = useState( () => `fundkit-field-${ ++seq }` );

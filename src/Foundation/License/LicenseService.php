@@ -38,11 +38,7 @@ final class LicenseService
         return $this->proFeatures();
     }
 
-    /**
-     * Whether a specific module (by id) is active.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function can(string $feature): bool
     {
         return in_array($feature, $this->proFeatures(), true);
@@ -93,7 +89,7 @@ final class LicenseService
     }
 
     /**
-     * Add-ons a licensing client actively refused, ignoring unchecked ones.
+     * Ignore modules whose licensing has not been checked.
      *
      * @since 1.0.0
      */

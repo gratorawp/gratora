@@ -4,21 +4,20 @@ declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
 
-use FundKit\Donations\DonationQueries;use FundKit\Rest\Paging;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Auth\Capabilities;
-
-use FundKit\Campaigns\CampaignTemplates;
 use FundKit\Campaigns\Campaign;
 use FundKit\Campaigns\CampaignMetricsService;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Campaigns\CampaignService;
+use FundKit\Campaigns\CampaignTemplates;
+use FundKit\Donations\DonationQueries;
 use FundKit\Forms\Form;
+use FundKit\Foundation\Auth\Capabilities;
+use FundKit\Foundation\Helpers\Money;
 use FundKit\Funds\Fund;
 use FundKit\Recurring\CampaignCancelRecurringJob;
-use FundKit\Recurring\RecurringCanceller;
 use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\RecurringPlanRepository;
+use FundKit\Rest\Paging;
 use FundKit\Rest\Schemas\CampaignSchemas;
 use InvalidArgumentException;
 use RuntimeException;
@@ -27,12 +26,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
-/**
- * Admin campaign endpoints: list, show, create, update, delete, duplicate,
- * metrics, and the funds picker.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CampaignsController
 {
     private const RANGES = ['today', 'last-7', 'last-30', 'last-90', 'all-time'];
@@ -426,7 +420,6 @@ final class CampaignsController
         ], 200);
     }
 
-    /** The starter layouts a new campaign page can be built from. @since 1.0.0 */
     public function templates(WP_REST_Request $request): WP_REST_Response
     {
         return new WP_REST_Response(

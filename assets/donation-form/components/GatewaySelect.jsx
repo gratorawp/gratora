@@ -12,12 +12,8 @@ export default function GatewaySelect( { state, dispatch, config } ) {
     const current  = state.gateway;
     const style    = ( config && config.gateways && config.gateways.style ) === 'list' ? 'list' : 'cards';
 
-    // Nothing to offer. Rendering nothing at all would read as "no payment
-    // step", and the stale gateway would stay selected because the effect above
-    // only runs when there is something to select, so the donor would find out
-    // on submit. Which of the three reasons it is matters: blaming
-    // the currency when every gateway is switched off sends the donor looking
-    // for a fix that was never theirs to make.
+    // Explain why no gateways are available before submission; the selector cannot repair an
+    // empty set.
     if ( ! opts.length ) {
         return (
             <div class="fundkit-form__payment">

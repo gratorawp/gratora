@@ -14,22 +14,8 @@ import {
 export { currencyDecimals, groupDigits, formatDate };
 
 /**
- * How long ago something happened, or the date when it has not happened yet.
- *
- * The shared helper clamps a negative age to zero, so anything dated in the
- * future comes back as "just now". A donation an admin recorded for later
- * today then sat at the top of the dashboard claiming to have arrived this
- * second, which is the most reassuring reading of the data and the wrong one.
- * There is no honest relative phrase for something that has not happened, so
- * it falls back to the date, which is what the helper already does for
- * anything older than a week.
- *
- * A minute of slack, because a server clock and a browser clock disagree by
- * seconds and a donation made this instant must not read as a date.
- *
- * Past a week the shared helper returns the date, and these columns already
- * print the date underneath: the row then said "Aug 25, 2026" twice and the
- * relative line stopped telling anyone anything. It keeps counting instead.
+ * Show dates for future timestamps with one minute of clock-skew tolerance. Keep older
+ * timestamps relative because the row already displays their date.
  */
 export function timeAgo( iso ) {
     if ( ! iso ) {

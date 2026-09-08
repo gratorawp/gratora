@@ -1,10 +1,6 @@
-// Forwarded to @fundkit/ui - the single source of truth for the shared admin chrome.
 @import '@fundkit/ui/scss/dataviews';
 
-// A filtered list with no matches gets a slate of its own, rendered under the
-// table so the filter controls stay on screen and there is a way back. The
-// table's built-in row says only "No results", which explains nothing and
-// offers nothing, so it stands down when ours is there.
+// Keep filter controls visible with the custom empty state.
 .fundkit-dataviews.is-no-results {
     .dataviews-no-results {
         display: none;

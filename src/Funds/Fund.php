@@ -10,11 +10,7 @@ use FundKit\Foundation\Time\ScheduleWindow;
 use FundKit\Vendor\Queryable\Model;
 use FundKit\Vendor\Queryable\Schema\Table;
 
-/**
- * Fund / designation model.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class Fund extends Model
 {
     protected string $table = 'fundkit_funds';

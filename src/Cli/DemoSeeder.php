@@ -45,7 +45,7 @@ final class DemoSeeder
 
     private const SEED = 0x0D0A0;
 
-    /** Bounds each statement in the undo; a re-run leaves thousands of rows. */
+    /** Bound purge statements for large reruns. */
     private const CHUNK = 500;
 
     private const DONORS       = 140;
@@ -163,7 +163,6 @@ final class DemoSeeder
         return $this->counts;
     }
 
-    // ----------------------------------------------------------------- undo
 
     /**
      * What purge() would remove, without removing it.
@@ -211,8 +210,7 @@ final class DemoSeeder
         $removed = ['donations' => 0, 'recurring_plans' => 0, 'donors' => 0];
 
         foreach (array_chunk($donationIds, self::CHUNK) as $chunk) {
-            // Add-ons hang their own rows off a donation. Core cannot know
-            // them, and orphaning them would be worse than leaving them.
+            // Let add-ons delete their dependent donation rows.
             do_action('fundkit.test_data.purge_donations', $chunk);
 
             DB::table('fundkit_receipts')->whereIn('donation_id', $chunk)->delete();
@@ -242,8 +240,7 @@ final class DemoSeeder
                 $this->donorService->delete($donor);
                 $removed['donors']++;
             } catch (\Throwable $e) {
-                // Something still refers to them, an add-on veto most likely.
-                // Their row is harmless; losing the rest of the purge is not.
+                // Continue purging when an add-on vetoes one deletion.
                 continue;
             }
         }
@@ -348,7 +345,6 @@ final class DemoSeeder
         return $out;
     }
 
-    // ---------------------------------------------------------------- funds
 
     /** @since 1.0.0 */
     private function seedFunds(): void
@@ -379,7 +375,6 @@ final class DemoSeeder
         return $fund ? (int) $fund->id : null;
     }
 
-    // ------------------------------------------------------------ campaigns
 
     /**
      * Windows are days-ago pairs so a campaign's dates and the donations
@@ -493,12 +488,7 @@ final class DemoSeeder
         return $out;
     }
 
-    /**
-     * A goal is a number somebody chose, so derive it from the money the
-     * campaign will hold and round it to something a person would pick.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private function roundGoal(int $raisedCents, float $progress): int
     {
         if ($raisedCents <= 0 || $progress <= 0) {
@@ -511,7 +501,6 @@ final class DemoSeeder
         return max($step, (int) round($goal / $step) * $step);
     }
 
-    // --------------------------------------------------------------- donors
 
     /**
      * @return array<int,Donor>
@@ -616,7 +605,6 @@ final class DemoSeeder
         return $roster;
     }
 
-    // ------------------------------------------------- planning (all random)
 
     /**
      * Every one-time donation, decided before anything is written: campaign
@@ -688,8 +676,7 @@ final class DemoSeeder
      */
     private function planRecurring(): array
     {
-        // The recurring-heavy campaign plus the two evergreen ones. A monthly
-        // plan against a closed appeal would have nothing left to renew into.
+        // Use open campaigns for renewing plans.
         $hosts    = [4, 0, 1];
         $amounts  = [500, 1000, 1500, 2000, 2500, 3000, 5000, 10000];
         $gateways = ['stripe', 'stripe', 'stripe', 'paypal'];
@@ -704,8 +691,6 @@ final class DemoSeeder
             $status         = $this->pickPlanStatus();
             $stepDays       = $this->intervalDays($unit, $count);
 
-            // A cancelled plan stopped collecting somewhere in its life; the
-            // rest keep paying up to the present.
             $stopAfter = $status === 'cancelled'
                 ? (int) round($startedDaysAgo * (0.30 + ($this->next(45) / 100)))
                 : 0;
@@ -750,7 +735,6 @@ final class DemoSeeder
         return $out;
     }
 
-    // -------------------------------------------------- writing (no random)
 
     /**
      * @param array<int,array<string,mixed>> $specs
@@ -792,8 +776,7 @@ final class DemoSeeder
                 is_anonymous:       (bool) $spec['anonymous'],
                 country:            $donor->country,
                 fee_covered_cents:  $spec['cover_fees'] ? $this->coveredFee((int) $spec['amount']) : 0,
-                // Live, not test: test rows are excluded from every money
-                // figure, which is the whole point of seeding for screenshots.
+                // Use live rows so demo data appears in reporting.
                 is_test:            false,
             );
 
@@ -995,12 +978,9 @@ final class DemoSeeder
         DB::table('fundkit_recurring_plans')->where('id', $plan->id)->update($patch);
     }
 
-    // ----------------------------------------------------------- after-care
 
     /**
-     * Every donation event was recorded at the moment the seeder ran, which
-     * stacks a year of history onto one day in the donor timelines that read
-     * the firehose.
+     * Backdate events to match donation timestamps.
      *
      * @since 1.0.0
      */
@@ -1020,9 +1000,7 @@ final class DemoSeeder
     }
 
     /**
-     * Backdated rows land behind the listeners that keep the derived columns
-     * current, so the rollups are rebuilt from the donations once everything
-     * is in place.
+     * Rebuild aggregates after backdated inserts.
      *
      * @since 1.0.0
      */
@@ -1044,7 +1022,6 @@ final class DemoSeeder
         $this->say('aggregates recomputed');
     }
 
-    // ---------------------------------------------------------------- utils
 
     /** @since 1.0.0 */
     private function alreadySeeded(string $key): bool
@@ -1061,8 +1038,7 @@ final class DemoSeeder
     }
 
     /**
-     * Time of day is derived from the donation key rather than drawn, so the
-     * write pass stays free of the PRNG.
+     * Derive time from the key to avoid advancing the PRNG.
      *
      * @since 1.0.0
      */
@@ -1110,9 +1086,7 @@ final class DemoSeeder
     }
 
     /**
-     * Day weights: a growing org, quiet summers, a December peak, a lighter
-     * weekend. Sampling from this is what gives the revenue chart a shape
-     * instead of noise.
+     * Weight dates for seasonality, growth, and weekends.
      *
      * @since 1.0.0
      */
@@ -1121,8 +1095,7 @@ final class DemoSeeder
         $key = $fromDaysAgo . ':' . $toDaysAgo;
 
         if (! isset($this->dayWeights[$key])) {
-            // No month is dead, because the seeder is run in an arbitrary one
-            // and the last-30 view is the first screen anyone screenshots.
+            // Ensure data in every month for recent-period screenshots.
             $monthly = [1 => 0.85, 0.80, 0.90, 0.95, 0.90, 0.80, 0.72, 0.72, 0.95, 1.05, 1.30, 2.10];
             $days    = [];
             $weights = [];
@@ -1133,8 +1106,6 @@ final class DemoSeeder
                 $factor *= in_array($date->format('N'), ['6', '7'], true) ? 0.65 : 1.0;
                 $factor *= 0.75 + (0.5 * (1 - ($d / max(1, self::DAYS_OF_DATA))));
 
-                // The first Tuesday of December is the sector's biggest giving
-                // day, and a year chart without it looks synthetic.
                 if ((int) $date->format('n') === 12 && (int) $date->format('j') <= 7 && $date->format('N') === '2') {
                     $factor *= 5.0;
                 }
@@ -1161,12 +1132,7 @@ final class DemoSeeder
         return (int) array_keys($table)[$this->pick($this->cumulative(array_values($table)))];
     }
 
-    /**
-     * A donation that never settled sits in pending for hours, not months, so
-     * only the newest days carry any.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private function pickStatus(int $daysAgo): string
     {
         $roll = $this->next(1000);
@@ -1282,8 +1248,7 @@ final class DemoSeeder
     }
 
     /**
-     * Front-loaded pick over the roster, so a small group gives often and the
-     * long tail gives once. Retention and repeat-donor views need both.
+     * Weight repeat donors to populate retention metrics.
      *
      * @since 1.0.0
      */
@@ -1341,9 +1306,7 @@ final class DemoSeeder
     }
 
     /**
-     * Seeded LCG rather than mt_rand: the same seed has to produce the same
-     * site on every machine, and mt_srand would reseed global state the rest
-     * of the request shares.
+     * Use a local seeded LCG for reproducibility without changing global randomness.
      *
      * @since 1.0.0
      */

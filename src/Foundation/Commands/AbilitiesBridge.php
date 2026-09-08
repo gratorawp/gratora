@@ -107,7 +107,7 @@ final class AbilitiesBridge
         return $result->data;
     }
 
-    /** `donation.list` is not a legal ability name; `fundkit/donation-list` is. */
+    /** Map dotted command IDs to legal slash-prefixed ability names. */
     public static function abilityName(string $commandId): string
     {
         return self::CATEGORY . '/' . str_replace(['.', '_'], '-', $commandId);

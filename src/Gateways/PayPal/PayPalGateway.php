@@ -10,8 +10,8 @@ use FundKit\Donations\DonationRepository;
 use FundKit\Donations\DonationService;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayTransportException;
 use FundKit\Gateways\GatewayIntentResult;
+use FundKit\Gateways\GatewayTransportException;
 use FundKit\Gateways\ModeCredentialed;
 use FundKit\Gateways\PaymentGateway;
 use FundKit\Gateways\PaymentMethodUpdate;
@@ -1036,19 +1036,8 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         }
 
         if (! $plan) {
-            // Not unmatched(): that returns 200 on the reasoning that a valid
-            // event which is not ours should not be retried for days. A sale
-            // carrying a billing_agreement_id arrived on our own account's
-            // webhook, so it is ours - the plan row simply does not exist yet.
-            //
-            // PayPal bills the moment the donor approves, and the plan is
-            // written by the browser's POST to /gateways/paypal/subscription.
-            // A 200 here would tell PayPal the opening payment had been
-            // accepted, and it would never redeliver, so that first payment
-            // would never be booked.
-            //
-            // 503 so PayPal redelivers while the browser call catches up. Its
-            // retry schedule ends on its own, so this cannot retry forever.
+            // Return 503 until the browser creates the plan. PayPal can bill before that
+            // request completes; acknowledging now would lose the opening payment.
             return new WebhookOutcome(
                 signature_ok: true,
                 external_id: $eventId,
@@ -1128,19 +1117,9 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 return $this->refused($eventId, $type, $refusal);
             }
 
-            // Claiming the sale id on the still-pending row is the single-winner
-            // transition for the opening payment, the same shape the renewal
-            // branch below gets from $renewal['created']. recordPayment
-            // increments unconditionally, so without it two deliveries of one
-            // sale both bump payments_count - and PayPal redelivers by design,
-            // which the 503 early-sale path makes more likely.
-            //
-            // A targeted UPDATE rather than save(): a whole-row write from the
-            // loser's stale copy would push status back to pending over the
-            // winner's paid row. <=> is null-safe, so a row with no intent id
-            // yet still claims.
-            // whereRaw first: it emits no AND connector, so anywhere else in
-            // the chain it fuses onto the preceding condition.
+            // Claim the opening sale atomically before recordPayment. A targeted update avoids
+            // stale status writes; <=> permits null intent IDs. Put whereRaw first because it
+            // adds no AND connector.
             $won = Donation::query()
                 ->whereRaw('NOT (gateway_intent_id <=> %s)', $saleId)
                 ->where('id', (int) $signup->id)
@@ -1209,11 +1188,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         );
     }
 
-    /**
-     * Clock returns a DateTimeImmutable; the models store MySQL datetimes.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private function now(): string
     {
         return $this->clock->now()->format('Y-m-d H:i:s');
@@ -1327,8 +1302,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * Whether this id could have come from PayPal. A seeded or imported plan
-     * carries one it could not.
+     * Exclude seeded and imported placeholder IDs.
      *
      * @since 1.0.0
      */
@@ -1607,8 +1581,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 '/v1/billing/subscriptions/' . rawurlencode((string) $plan->gateway_subscription_id)
             );
         } catch (RuntimeException) {
-            // Cannot confirm, so do not swallow: reporting success for a change
-            // that may not have happened is the failure being fixed.
+            // Propagate failures when the resulting state cannot be confirmed.
             return false;
         }
 

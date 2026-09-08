@@ -8,41 +8,17 @@ use FundKit\Donations\Donation;
 use FundKit\Donations\DonationQueries;
 
 /**
- * The base currency is the unit every stored base_amount_cents is already
- * denominated in, and nothing restates them. Changing it after money has come
- * in silently reinterprets every historical total and every report at the new
- * currency's face value, and every donation taken afterwards is stamped
- * against the new base, so the ledger mixes two units with no column saying
- * which is which.
- *
- * Refused rather than rebased: rebasing needs a rate per donation as of the day
- * it was taken, which an install that has not been reporting in the new
- * currency does not have.
- *
- * Lives beside the settings write rather than in one controller, so every
- * writer inherits it: the settings REST route, the settings.update command, the
- * CLI, and anything an add-on registers.
+ * Lock the base currency after money is recorded: stored base amounts cannot be reinterpreted
+ * safely without historical conversion rates. Enforce at the settings write so all callers
+ * share the guard.
  *
  * @since 1.0.0
  */
 final class BaseCurrencyLock
 {
     /**
-     * Live rows already denominated in the base. Test-mode rows are not money
-     * and never lock anything.
-     *
-     * live() rather than donationsOnly(): a ticket order is a purchase and
-     * stays out of donation reporting, but it carries a base_amount_cents in
-     * this currency like anything else, and rereading it as a different one is
-     * the harm being refused.
-     *
-     * moneyMoved() because the harm needs money to exist. This counted every
-     * live row whatever its status, so one abandoned checkout, or a single
-     * refused card, pinned the base currency for good: the select was disabled
-     * from then on, every report was denominated in a currency the charity does
-     * not use, and the remedy the error names, clearing live donations, has no
-     * route, admin action or CLI command behind it. On day one, before a penny
-     * had been taken.
+     * Lock on live rows where money moved, including ticket orders. Pending and failed attempts
+     * do not lock the base currency.
      *
      * @since 1.0.0
      */

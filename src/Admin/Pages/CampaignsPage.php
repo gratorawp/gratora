@@ -7,11 +7,7 @@ namespace FundKit\Admin\Pages;
 use FundKit\Admin\ExtensionAssets;
 use FundKit\Foundation\Hooks\HookProvider;
 
-/**
- * Registers and renders the Campaigns admin page.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CampaignsPage extends HookProvider
 {
     private const PAGE_ID   = 'fundkit-campaigns';
@@ -43,8 +39,7 @@ final class CampaignsPage extends HookProvider
         $this->enqueueAssets();
         ?>
         <div class="wrap">
-            <?php // WP moves admin notices to just after this marker. Without it they
-                  // land beside the React header instead of above it. ?>
+            <?php // Keep WordPress notices above the React header.?>
             <hr class="wp-header-end" />
             <div id="fundkit-admin-campaigns"></div>
         </div>
@@ -58,8 +53,7 @@ final class CampaignsPage extends HookProvider
 
         wp_enqueue_media();
 
-        // The registry must be defined before the app reads it, hence the
-        // dependency on its handle below.
+        // Initialize the extension registry before the app.
         ExtensionAssets::enqueue('campaign');
         ExtensionAssets::enqueue('campaign-settings');
 

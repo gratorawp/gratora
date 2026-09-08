@@ -1,20 +1,6 @@
 /**
- * Conditional logic on form blocks: a block with a `condition` attribute is
- * hidden until its trigger field matches.
- *
- * Renderer behaviour (assets/donation-form/state/conditions.jsx): when the
- * condition does not match, the block is FILTERED OUT of the rendered array
- * entirely - it has no DOM node, not just `display:none`. Locators assert
- * `count() === 0` for hidden, normal visibility checks for shown.
- *
- * Seeded form (`wp fundkit e2e-seed`):
- *   - dropdown `cond_trigger` with values friend / social / event
- *   - `fundkit/heading` with text CONDITIONAL_HEADING_SOCIAL, shown when
- *     `custom.cond_trigger = social` (covers the `=` operator)
- *   - `fundkit/text-input` REQUIRED, shown when `cond_trigger = friend`
- *     (covers the hidden-required-must-not-block-submit regression)
- *   - `fundkit/comment` with label CONDITIONAL_COMMENT_ANY, shown when
- *     `cond_trigger != ''` (covers the `!=` operator)
+ * Nonmatching conditional blocks have no DOM node; assert count() === 0. Hidden required fields
+ * must not block submission.
  */
 
 import { test, expect } from '../fixtures/donor-form';

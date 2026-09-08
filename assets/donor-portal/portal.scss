@@ -3,15 +3,11 @@
     --dp-text:     var(--fundkit-text, #111827);
     --dp-muted:    var(--fundkit-text-muted, #6b7280);
     --dp-border:   var(--fundkit-border, #e5e7eb);
-    // Hairline between rows, lighter than a card boundary. Matches @fundkit/ui's
-    // $border-soft.
     --dp-rule:     var(--fundkit-border-soft, #eef0f2);
     --dp-bg:       var(--fundkit-bg, #fff);
     --dp-bg-soft:  var(--fundkit-bg-soft, #f8fafb);
     --dp-radius:   var(--fundkit-radius, 10px);
 
-    // The same measure the campaign pages read at, so the portal is not the one
-    // screen in the product that sits 300px narrower than everything around it.
     max-width: var(--dp-measure, 1200px);
     margin: 0 auto;
     padding: 32px 24px;
@@ -23,13 +19,7 @@
     * { box-sizing: border-box; }
 }
 
-// A block theme's constrained layout caps its children at the theme's content
-// size with `.is-layout-constrained > :where(...)`. The :where() contributes no
-// specificity, so that rule and the one above are both 0,1,0 and the winner is
-// whichever is printed last: the theme's global styles are, so the portal
-// rendered at the theme's measure, 645px on Twenty Twenty-Five, while the rule
-// above asked for 1200. One class deeper is enough to settle it, and
-// --dp-measure still lets a site say otherwise.
+// Outrank the theme’s constrained layout; retain --dp-measure overrides.
 .is-layout-constrained > .fundkit-donor-portal {
     max-width: var(--dp-measure, 1200px);
 }
@@ -55,8 +45,6 @@
         justify-content: flex-end;
         gap: 8px;
 
-        // The confirmation sits on its own line above the two buttons, and is
-        // bounded so a sentence cannot squeeze the greeting next to it.
         .dp-hint { flex-basis: 100%; max-width: 320px; text-align: right; }
     }
 
@@ -73,10 +61,6 @@
         &:hover { color: var(--dp-text); border-color: var(--dp-muted); }
     }
 
-    // Nav beside the content rather than above it. A donor's sections are a
-    // place they move between and come back to, and add-ons add more of them:
-    // a row that scrolls sideways hides the ones it cannot fit, while a column
-    // grows down the page where there is room for it.
     &__body {
         display: grid;
         grid-template-columns: 220px minmax(0, 1fr);
@@ -88,7 +72,6 @@
         display: flex;
         flex-direction: column;
         gap: 2px;
-        // Stays with the reader down a long receipts list.
         position: sticky;
         top: 24px;
     }
@@ -116,8 +99,6 @@
     &__main { min-width: 0; }
 }
 
-// One column, and the nav goes back to the scrolling row it was: a 220px
-// sidebar beside a phone-width column leaves neither of them usable.
 @media (max-width: 782px) {
     .dp__body {
         display: block;
@@ -129,8 +110,7 @@
         gap: 4px;
         margin-bottom: 20px;
         border-bottom: 1px solid var(--dp-border);
-        // Add-ons register their own tabs, so the row can outgrow the width.
-        // It scrolls rather than wrapping labels to a second line.
+        // Allow horizontal scrolling for add-on tabs on narrow layouts.
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
@@ -236,16 +216,12 @@
     &--active   { background: #ecfdf5; color: #047857; }
     &--paused   { background: #fef3c7; color: #92400e; }
     &--cancelled { background: #fee2e2; color: #991b1b; }
-    // A renewal the bank refused. Louder than paused, which the donor chose,
-    // because this one waits on them.
     &--past_due { background: #ffedd5; color: #9a3412; }
     &--expired  { background: #f1f5f9; color: #475569; }
 }
 
 .dp-error { color: #b91c1c; }
 
-// The link that completes a change PayPal is waiting on. Sits under the error
-// that explains why nothing happened yet, so it reads as the way out of it.
 .dp-approve {
     margin-top: 8px;
 
@@ -278,7 +254,6 @@
     }
 }
 
-// Registration has three fields, so it stacks; sign-in is one field on a line.
 .dp-signin form.is-stacked {
     flex-direction: column;
     align-items: stretch;
@@ -356,8 +331,6 @@
     &__head { margin-bottom: 12px; }
     &__amount { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
     &__meta { color: var(--dp-muted); font-size: 13px; }
-    // The heading states what was given; this states what came back, so the
-    // donor can reconcile the row against a lifetime total that is net.
     &__refund {
         display: flex;
         justify-content: space-between;
@@ -377,15 +350,13 @@
     &__toggle {
         display: flex;
         gap: 8px;
-        // The label wraps to two lines, so the box sits with the first of them
-        // rather than centred against both.
+        // Align the checkbox with the label’s first line.
         align-items: flex-start;
         font-size: 14px;
         cursor: pointer;
 
         input { margin-top: 2px; }
 
-        // Its own line: small is inline, so it ran on from the label.
         .dp-hint { display: block; margin-top: 2px; }
     }
     &__msg { color: var(--dp-muted); font-size: 13px; margin: 4px 0; }
@@ -489,9 +460,6 @@
         gap: 12px;
         margin-top: 4px;
 
-        // Their own row rather than beside the button. A message says
-        // something specific ("the most this site takes is 3 MB"), and beside
-        // a button it is squeezed into a column and wraps into a paragraph.
         .dp-form__saved,
         .dp-error {
             flex: 1 0 100%;
@@ -685,13 +653,11 @@
         h4 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--dp-muted); }
         label {
             display: flex; gap: 8px; padding: 4px 0; font-size: 14px;
-            // Top-aligned because the label carries a hint under it, so the box
-            // belongs beside the first line rather than centred on both.
+            // Align the checkbox with the label’s first line.
             align-items: flex-start;
 
             input { margin-top: 2px; }
 
-            // Its own line: small is inline, so it ran on from the label.
             .dp-hint { display: block; margin-top: 2px; }
         }
     }
@@ -769,8 +735,6 @@
     .dp-prefs { grid-template-columns: 1fr; }
 }
 
-// Profile picture field. The preview is the same circle the campaign pages
-// draw, so a donor sees what supporters will see rather than a form control.
 .dp-avatar-field {
     display: flex;
     align-items: center;
@@ -797,8 +761,6 @@
         transition: opacity 120ms ease;
     }
 
-    // Over the picture rather than beside it, so the thing being replaced is
-    // visibly the thing that is busy.
     &__spinner {
         position: absolute;
         inset: 50% auto auto 50%;
@@ -832,8 +794,7 @@
         margin-top: 4px;
     }
 
-    // The upload control is a label wrapping a hidden input, so it needs the
-    // button's own affordances rather than inheriting a label's.
+    // The upload label acts as a button and needs matching affordances.
     label.dp-btn {
         cursor: pointer;
     }
@@ -843,7 +804,7 @@
     to { transform: rotate(360deg); }
 }
 
-// A label cannot be disabled the way a button can, so the state is drawn.
+// Labels do not support native disabled styling.
 .dp-btn.is-disabled {
     opacity: 0.6;
     pointer-events: none;

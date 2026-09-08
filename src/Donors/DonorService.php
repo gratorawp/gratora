@@ -7,25 +7,21 @@ namespace FundKit\Donors;
 use FundKit\Analytics\ErrorLog;
 use FundKit\Analytics\EventRecorder;
 use FundKit\Donations\Donation;
-use FundKit\Foundation\Maintenance\AbandonedPendingReaper;
 use FundKit\Donors\Erasure\ErasureRegistry;
 use FundKit\Donors\Erasure\ErasureRequest;
+use FundKit\Foundation\Crypto\Crypto;
+use FundKit\Foundation\Identity\IdentityHasher;
+use FundKit\Foundation\Maintenance\AbandonedPendingReaper;
+use FundKit\Foundation\Plugin;
+use FundKit\Foundation\Time\Clock;
 use FundKit\Recurring\RecurringCanceller;
 use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\RecurringPlanRepository;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
+use FundKit\Vendor\Queryable\DB;
 use InvalidArgumentException;
 use Throwable;
-use FundKit\Vendor\Queryable\DB;
 
-/**
- * Donor writes: creation, profile edits, email changes, deletion and erasure.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DonorService
 {
     /** @since 1.0.0 */
@@ -423,17 +419,8 @@ final class DonorService
                 do_action('fundkit.test_data.purge_donations', $dids);
             }
 
-            // The whole registry, not core's analytics handler alone. Deleting
-            // a donor destroys the rows that name them here and leaves every
-            // add-on holding what it copied: a Connect payload with the
-            // decrypted address, a delivery snapshot, a contact id in the org's
-            // CRM, an assistant transcript. Redaction runs the registry, and a
-            // delete that erases less than a redaction is not a delete.
-            //
-            // Before the rows go, so a handler can still resolve the donor and
-            // their donations, and inside the transaction, so one that cannot
-            // finish rolls the destruction back rather than reporting a
-            // compliance action that only partly happened.
+            // Run every erasure handler before deleting rows, within the transaction, so
+            // add-ons can resolve and remove dependent data.
             $this->erasure->run($request);
 
             // Everything the donor left behind except the record of the

@@ -15,31 +15,9 @@ use FundKit\Vendor\Queryable\DB;
 use Throwable;
 
 /**
- * Restores a FundKit export onto this site.
- *
- * Five things make this harder than inserting rows.
- *
- * Ids do not survive. Donor 12 on the source is not donor 12 here, so every row
- * is matched on something real (a slug, a reference, an address) and the source
- * id is remembered only long enough to rewrite what pointed at it.
- *
- * Some of those pointers run backwards. A campaign names its default form while
- * a form names its campaign; a fund can name a parent fund it has not reached
- * yet. Those columns are left null on the way in and filled once every id is
- * known. See DEFERRED.
- *
- * It has to be safe to run twice. Anything already here is left exactly as it
- * is rather than duplicated or overwritten, which is also what makes a
- * half-finished import safe to resume.
- *
- * Some of what it has to get right is not in the file. Reference counters are
- * per install, and the money totals are columns on rows a restore matches
- * rather than writes, so both are rebuilt once every row has landed. See
- * raiseReferenceCounters() and syncAggregates().
- *
- * And a row it cannot place has to be said out loud. Money records hang off
- * donors and off each other, so one row that does not land takes everything
- * behind it; an operator reading "restored" has to be told what did not.
+ * Restore exports idempotently using natural keys and remapped IDs. Defer cyclic references
+ * until all IDs are known, then rebuild counters and aggregates. Report skipped rows and their
+ * dependent records.
  *
  * @since 1.0.0
  */
@@ -89,18 +67,8 @@ final class DataImporter
     ];
 
     /**
-     * A second lookup, for a table whose natural key cannot settle it alone.
-     *
-     * Receipt numbers are per site and the two counters drift, so a receipt can
-     * be new by number and still be the second one for a donation this site
-     * already holds. The import runs in no transaction and catches nothing, so
-     * that refused insert would end the restore half done.
-     *
-     * A refund taken by hand or through a gateway that does not name its
-     * refunds carries no gateway id at all, and the unique index that stops one
-     * being recorded twice is nullable for exactly that reason. Nothing else
-     * recognises it on a second run, and refunds are subtracted from the org's
-     * totals as they stand. That is the only case it may answer: see
+     * Match secondary receipt keys to avoid duplicate-number insert failures. Match refunds
+     * without gateway IDs separately to keep repeated imports from subtracting them twice; see
      * ALSO_UNIQUE_WHEN_EMPTY.
      */
     private const ALSO_UNIQUE = [
@@ -301,24 +269,9 @@ final class DataImporter
 
         $existingId = $this->findExisting($table, $row);
 
-        // A reference only identifies a donation within one site. The counter
-        // behind it starts at one on every install and the default prefix is
-        // the same everywhere, so DON-2026-00007 exists on most of them and
-        // belongs to a different person on each. hashOfDonorBehind() already
-        // refuses to trust one on its own, for exactly this reason, and says so
-        // at length; findExisting() matched on it alone.
-        //
-        // So any target that had taken donations of its own counted the file's
-        // donation as already present and never inserted it, reporting it under
-        // `existing` as though it were already there. Then it mapped the source
-        // id onto the stranger's row, and every child resolved through that: a
-        // private staff note about one donor filed under another, refunds and
-        // receipts reattached to a donation that never had them.
-        //
-        // Reported rather than merged. Renumbering the incoming donation would
-        // keep it, but its reference is printed on the donor's receipt and
-        // quoted in their email, so that is a decision for the operator rather
-        // than a silent repair.
+        // References are unique only within a site. Reject cross-donor collisions instead of
+        // mapping private records to another donor. Renumbering requires an operator decision
+        // because references appear on receipts and emails.
         if ($existingId > 0
             && $table === 'fundkit_donations'
             && ! self::sameDonation($row, DB::table($table)->where('id', $existingId)->get())
@@ -404,19 +357,8 @@ final class DataImporter
     }
 
     /**
-     * Fund ids the editor stored inside the block markup rather than in a column.
-     *
-     * REFERENCES rewrites columns and these are not columns: fundkit/fund-picker
-     * keeps its allowlist and its preselection in the block's attributes, so
-     * the loop above cannot reach them. Left alone they name whichever funds
-     * hold those numbers here, and activation seeds 'general' on every install,
-     * so the ids are shifted rather than absent: the picker offers real funds
-     * that are the wrong ones, and FormSubmissionValidator checks a posted fund
-     * against the same wrong list. The form's own default_fund_id is corrected
-     * beside it.
-     *
-     * ORDER puts fundkit_funds before fundkit_forms, so the map is complete by the
-     * time a form is prepared.
+     * Remap fund-picker allowlists and defaults stored in block attributes. Column remapping
+     * cannot reach them; funds are imported first so their ID map is complete.
      *
      * @since 1.0.0
      */
@@ -611,18 +553,8 @@ final class DataImporter
     }
 
     /**
-     * What a shell is matched on here.
-     *
-     * A donation of theirs is the strongest handle available: it survives
-     * erasure, and finding it means the file is being restored onto a site that
-     * already holds part of it, so the shell belongs to a row that is already
-     * here rather than beside it. That is what makes a resumed or repeated run
-     * leave one anonymous donor instead of one per run.
-     *
-     * Failing that, a value derived from the file's origin and the row it held
-     * there: unique per source row, identical on every run of the same file,
-     * and derived from nothing about a person. It cannot be the address hash,
-     * which is peppered per install and deliberately does not travel.
+     * Match erased donors through verified donations when possible; otherwise derive a stable
+     * ID from export origin and source row. Site-peppered email hashes cannot travel.
      *
      * @since 1.0.0
      */
@@ -638,17 +570,8 @@ final class DataImporter
     }
 
     /**
-     * The address hash of whoever owns this donation here, or an empty string
-     * when this site does not have it.
-     *
-     * A reference only identifies a donation within one site. The counter
-     * behind it starts at one on every install and the default prefix is the
-     * same everywhere, so DON-2026-00001 exists on most of them and belongs to
-     * a different person on each. Matching on the reference alone would resolve
-     * a nameless erased donor onto whichever live supporter happens to hold
-     * that number here, and hand them the erased person's consents, receipts
-     * and recurring plans. So the donation itself has to be the same donation,
-     * not merely the same number.
+     * Match donation identity as well as reference before using its donor hash; references can
+     * belong to different donors on different sites.
      *
      * @param  array<string,mixed> $anchor the donation as the file holds it
      * @since 1.0.0
@@ -852,22 +775,8 @@ final class DataImporter
     }
 
     /**
-     * Rebuilds every total the restored donations belong to.
-     *
-     * Nothing else will. Rows are inserted straight, firing none of the
-     * donation hooks that keep these current, and each total is read from a
-     * stored column rather than summed on demand: the funds screen, the
-     * campaign progress bar on the public page and a donor's lifetime giving
-     * all show what the column says.
-     *
-     * A fund, campaign or donor already on this site is matched rather than
-     * written, and keeps the figure it held before the restore, so matching one
-     * is precisely the case that has to be rebuilt rather than trusted. The
-     * default fund makes that the ordinary case, not the exotic one: activation
-     * creates 'general' on every install and it is where donations land when no
-     * fund is chosen.
-     *
-     * Bounded by what the file carried, and each call is one aggregate query.
+     * Rebuild aggregates for imported records, including matched existing owners. Direct
+     * inserts bypass donation hooks and leave cached totals stale.
      *
      * @since 1.0.0
      */
@@ -896,31 +805,9 @@ final class DataImporter
     }
 
     /**
-     * Raises each reference counter past the numbers the file brought in.
-     *
-     * The counters are per install and no export carries them, so a restore
-     * onto a fresh site leaves them at zero while the donations that just
-     * landed already hold DON-2026-00001. next() then mints a reference
-     * UNIQUE(reference) refuses, and because it runs inside the donation's own
-     * transaction the increment rolls back with the failed insert, so every
-     * later donor mints the same colliding number and no donation can be taken
-     * again. Receipts are numbered from the same counters under
-     * UNIQUE(renderer_id, receipt_number) and stop issuing the same way.
-     *
-     * A candidate is accepted only when the generator's own format() reproduces
-     * the stored string exactly, which is the only way one can collide.
-     * format() is injective, so the trailing digits are the only counter value
-     * that can produce a given reference, and a reference from another year,
-     * another prefix or another org's numbering settings is left alone instead
-     * of dragging the counter up behind it. Reading the printed form is
-     * otherwise not something to reverse-engineer: prefix, separator, padding
-     * and whether the year appears at all are configurable.
-     *
-     * Which numbering is in force therefore decides which references count, and
-     * a file carries its org's numbering with it, so a restore writes the
-     * settings before the rows and this reads the file's references in the
-     * numbering the next one will be minted under. A counter already past the
-     * file's high-water mark is left where it is.
+     * Raise reference counters after importing numbering settings to avoid repeated unique-key
+     * collisions. Accept only references reproduced exactly by format(), and never lower an
+     * existing counter.
      *
      * @param array<string,mixed> $export
      * @since 1.0.0

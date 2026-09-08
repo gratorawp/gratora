@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Rest\Schemas;
 
 /**
- * JSON-Schema arg specs for the admin campaigns endpoints. update() reuses
- * properties() with everything optional for partial PATCH updates.
+ * Reuse properties with optional fields for partial updates.
  *
  * @since 1.0.0
  */

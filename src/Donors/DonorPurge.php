@@ -9,33 +9,9 @@ use FundKit\Foundation\Batch\BatchProcessor;
 use FundKit\Foundation\Time\Clock;
 
 /**
- * Severs the last handle on an already-redacted donor, `retention_days_after_
- * redaction` days later.
- *
- * Redaction clears the PII but deliberately keeps `email_hash`, and that hash
- * is not leftover debris: `DonorService::findOrCreate($email, ...,
- * reactivateIfRedacted: true)` matches on it, so a donor who gives again is
- * un-redacted and reunited with their giving history. That is the whole point
- * of the setting being a *window* rather than a switch. Inside it, someone who
- * comes back is the same supporter again. Once it closes, the hash is replaced
- * and they are a new person, while their old donations stay counted against the
- * anonymous shell.
- *
- * The hash is replaced rather than emptied because `email_hash` is UNIQUE:
- * blanking it would collide on the second donor purged. The replacement is
- * derived from the row id alone, so it stays unique and says nothing about
- * anyone.
- *
- * The window applies to every redaction, not only to the ones the nightly
- * retention sweep makes: a donor deleting their own account from the portal and
- * an admin redacting by hand both land here too, and both happen on a site that
- * never switched automatic erasure on. So it is not gated by that setting.
- *
- * Note the setting reads differently from its neighbors on the privacy panel:
- * `donor_retention_years` and `event_retention_days` treat 0 as "disabled",
- * whereas here 0 means "sever at redaction time". There is deliberately no
- * "never": leaving a re-identification handle on an erased donor indefinitely
- * would undo the erasure it belongs to.
+ * Replace email_hash after the redaction retention window, ending donor re-identification. Use
+ * a unique row-derived hash because the column is UNIQUE. Applies to all redactions regardless
+ * of automatic-erasure settings; zero means immediate purge.
  *
  * @since 1.0.0
  */

@@ -1,21 +1,4 @@
-/**
- * Starter layout for a new campaign page.
- *
- * Wears the shared template-picker chrome, the same as the form picker, so the
- * two read as one feature and this one has room for a lot more layouts than it
- * holds today. Only the wireframe thumb is its own.
- * Category tabs appear once there is more than one category to filter by;
- * with five templates in two groups they would be furniture.
- *
- * Each thumb is a wireframe rather than a rendered preview. What separates
- * these templates is where things sit on the page, and a real preview at this
- * size is a grey rectangle whichever layout it is.
- *
- * A template can carry its own shape in a `thumb` key. Add-ons register
- * layouts core has never heard of, and without that they all fall back to the
- * standard wireframe, so a picker offering two of them draws the same page
- * twice.
- */
+/** Render template wireframes from each template’s thumb metadata, including add-on layouts. */
 
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { Modal, Spinner } from '@wordpress/components';
@@ -69,7 +52,6 @@ export function thumbFor( template ) {
 
 const line = ( i ) => <i key={ i } />;
 
-/** One part of the page, drawn small. */
 function Part( { kind } ) {
     switch ( kind ) {
         case 'title':
@@ -131,7 +113,6 @@ function Part( { kind } ) {
                 </span>
             );
 
-        // The row of links to the rest of the page.
         case 'nav':
             return (
                 <span className="gctp-nav">
@@ -196,7 +177,6 @@ function Part( { kind } ) {
     }
 }
 
-/** The donation form, the one part that looks the same on every layout. */
 function FormPart() {
     return (
         <span className="gctp-form">
@@ -341,7 +321,6 @@ export default function CampaignTemplatePicker( { value, campaignType, onPick, o
     );
 }
 
-/** The layout drawn small: main column, form beside it, any full-width footer. */
 function Wireframe( { shape } ) {
     const { main, form, footer, stacked, tone } = shape;
 

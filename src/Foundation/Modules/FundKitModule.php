@@ -6,12 +6,7 @@ namespace FundKit\Foundation\Modules;
 
 use FundKit\Foundation\Container\Container;
 
-/**
- * Implemented by every gateway, integration, add-on, and core.
- * All modules plug into the same boot pipeline, schema migrations, and admin/REST.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 interface FundKitModule
 {
     /** Distribution tier returned by tier(). */
@@ -20,7 +15,7 @@ interface FundKitModule
     public const TIER_PRO  = 'pro';
 
     /**
-     * Globally-unique identifier, e.g. 'core', 'fundkit-p2p'.
+     * Globally unique module ID.
      *
      * @since 1.0.0
      */
@@ -51,17 +46,13 @@ interface FundKitModule
     public function isLicensed(): bool;
 
     /**
-     * Distribution tier, one of the TIER_* constants.
+     * One of TIER_*.
      *
      * @since 1.0.0
      */
     public function tier(): string;
 
-    /**
-     * Bind services, register routes/blocks/hooks/admin pages.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function boot(Container $container): void;
 
     /**

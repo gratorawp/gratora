@@ -22,14 +22,12 @@ final class BlockAvatar
         }
 
 
-        // Names are stored HTML-encoded, so decode before picking the
-        // initial. Letter-first, matching FundKitP2P\Blocks\Initials.
+        // Decode stored HTML entities before selecting the initial.
         $decoded = html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $initial = preg_match('/\p{L}|\p{N}/u', $decoded, $m) === 1
             ? mb_strtoupper($m[0])
             : mb_strtoupper(mb_substr($decoded, 0, 1));
-        // Hue comes from the same character the avatar draws. mb_ord, not
-        // ord: ord reads the UTF-8 lead byte, which a whole range shares.
+        // Use mb_ord so multibyte initials have distinct hues.
         $hue = ((mb_ord($initial, 'UTF-8') ?: 0) * 47) % 360;
 
         // The picture layers over the initial rather than replacing it:

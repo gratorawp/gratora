@@ -6,11 +6,7 @@ namespace FundKit\Forms\Blocks;
 
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Single-select dropdown field block.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DropdownBlock implements Block
 {
     /** @since 1.0.0 */

@@ -103,11 +103,7 @@ final class TaxStatementBuilder
         ];
     }
 
-    /**
-     * Stable download filename shared by the command link and the streaming route.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public static function filename(int $donorId, int $year): string
     {
         return sprintf('fundkit-tax-statement-%d-donor-%d.pdf', $year, $donorId);

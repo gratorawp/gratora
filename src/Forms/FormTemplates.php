@@ -200,8 +200,7 @@ final class FormTemplates
     }
 
     /**
-     * Standard fee-cover block. The rate matches the common card cost; an org
-     * on different pricing edits the numbers rather than the wording.
+     * Default fee estimates are editable per organization.
      *
      * @since 1.0.0
      */
@@ -215,11 +214,7 @@ final class FormTemplates
         ]);
     }
 
-    /**
-     * Gateways, running total, button. Every template ends this way.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private static function checkout(string $submitLabel, string $feeLabel): string
     {
         return self::coverFees($feeLabel)

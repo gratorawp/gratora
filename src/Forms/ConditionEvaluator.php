@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Forms;
 
 /**
- * Server mirror of assets/donation-form/state/conditions.js so validation and
- * the client agree on which conditional blocks are shown for a given payload.
+ * Mirror client conditions for server validation; see assets/donation-form/state/conditions.js.
  *
  * @since 1.0.0
  */

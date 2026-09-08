@@ -6,12 +6,7 @@ namespace FundKit\Admin\Pages;
 
 use FundKit\Foundation\Hooks\HookProvider;
 
-/**
- * Registers and renders the Subscriptions admin page: recurring plans across
- * the whole book, not just the donor who owns one.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class SubscriptionsPage extends HookProvider
 {
     private const PAGE_ID   = 'fundkit-subscriptions';
@@ -30,8 +25,7 @@ final class SubscriptionsPage extends HookProvider
         $pages[] = [
             'id'    => self::PAGE_ID,
             'title' => __('Subscriptions', 'fundraising-toolkit'),
-            // Reading the list is a donations-level view; changing a plan is
-            // gated separately on the REST route that does it.
+            // Listing needs donations access; mutations check their own permissions.
             'capability' => 'fundkit_access_donations',
             'position'   => 15,
             'render'     => [$this, 'render'],
@@ -45,8 +39,7 @@ final class SubscriptionsPage extends HookProvider
         $this->enqueueAssets();
         ?>
         <div class="wrap">
-            <?php // WP moves admin notices to just after this marker. Without it they
-                  // land beside the React header instead of above it. ?>
+            <?php // Keep WordPress notices above the React header.?>
             <hr class="wp-header-end" />
             <div id="fundkit-admin-subscriptions"></div>
         </div>

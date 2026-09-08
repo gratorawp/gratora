@@ -8,11 +8,7 @@ use FundKit\Foundation\Identity\IdentityHasher;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Settings\SettingsService;
 
-/**
- * Reads, records, and retrieves donor consent rows.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class ConsentService
 {
     /** @since 1.0.0 */

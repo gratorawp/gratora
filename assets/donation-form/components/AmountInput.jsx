@@ -5,18 +5,8 @@ import { getActiveNumberFormat, groupDigits } from '../util/format';
 import { isZeroDecimal } from '../util/fx';
 
 /**
- * A typed amount, read the way the donor meant it.
- *
- * The box accepts both separators because donors type whichever one they are
- * used to, so the separator alone cannot say which one is the decimal point.
- * Stripping whichever the org configured for grouping reads "25,50" as 2550 on
- * an en-US site, and "25.50" the same way on a de-DE one: a hundred times the
- * intended donation, charged without anything looking wrong.
- *
- * Read positionally instead, which holds in both conventions: the last
- * separator is a decimal point when one or two digits follow it, and grouping
- * otherwise. Nobody groups thousands two digits at a time, and no currency
- * here has more than two decimal places.
+ * Accept either decimal separator: one or two trailing digits indicate decimals, otherwise
+ * grouping.
  */
 export function typedAmountToNumber( raw, dp ) {
     const cleaned = String( raw ?? '' ).replace( /[^\d.,]/g, '' );

@@ -102,11 +102,7 @@ final class WebhookPaymentGuard
         );
     }
 
-    /**
-     * The same question for a recurring plan, which carries the same two facts.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public static function refuseToTouchPlan(
         RecurringPlan $plan,
         string $gateway,

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace FundKit\Foundation\References;
 
-use InvalidArgumentException;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Vendor\Queryable\DB;
+use InvalidArgumentException;
 use RuntimeException;
 
 /**
@@ -123,7 +123,7 @@ final class ReferenceGenerator
     }
 
     /**
-     * Build the formatted reference string. Pure, no DB.
+     * Pure formatting; no database access.
      *
      * @since 1.0.0
      */
@@ -147,8 +147,7 @@ final class ReferenceGenerator
     }
 
     /**
-     * The alphabet a reference may carry: the admin and donor routes match on
-     * it, so a '.', '/' or '#' would mint references those routes cannot find.
+     * Limit tokens to characters supported by reference routes.
      *
      * @since 1.0.0
      */
@@ -304,20 +303,8 @@ final class ReferenceGenerator
     }
 
     /**
-     * The counter is namespaced by whatever the printed reference is namespaced
-     * by, and nothing else.
-     *
-     * reset_yearly and include_year are independent toggles, so keying the
-     * counter off reset_yearly alone would change which counter is read without
-     * changing what the reference looks like, re-issuing numbers already in use.
-     * UNIQUE(reference) rejects the insert, and because next() runs inside the
-     * donation's own transaction the increment rolls back with it, so the
-     * counter never advances and every later donation fails the same way.
-     *
-     * A year-scoped counter is only sound when the year is in the reference to
-     * tell the two sequences apart. reset_yearly without include_year is
-     * therefore continuous numbering, the only reading that does not mint
-     * DON-00001 twice.
+     * Use yearly counters only when the printed reference includes the year; otherwise resets
+     * would reissue existing references.
      *
      * @since 1.0.0
      */
@@ -331,25 +318,9 @@ final class ReferenceGenerator
     }
 
     /**
-     * What a counter must clear before it issues its first number.
-     *
-     * Starting a fresh counter at zero is right on a new site and wrong when a
-     * numbering setting has moved the generator onto a key it has never used:
-     * zero walks back over references already on donations.
-     *
-     * Which counters it has to clear depends on which key it is, because that
-     * decides which of them could have printed the same string:
-     *
-     *  - A year-scoped counter must be free to start at 1; that is the point of
-     *    the yearly reset, and it is safe because the year is in the reference.
-     *    The one counter that can already have issued a number inside *this*
-     *    year is the continuous one, so that is all it clears.
-     *  - The continuous counter can print any year's format, so it clears every
-     *    counter this scope has ever kept.
-     *
-     * Counter values rather than parsed references on purpose: prefix,
-     * separator and padding are all configurable, so the printed form is not
-     * something to reverse-engineer.
+     * Seed new counter keys above potentially colliding counters. Yearly counters clear the
+     * continuous counter; continuous counters clear every year. Read counter values because
+     * reference formatting is configurable.
      *
      * @since 1.0.0
      */

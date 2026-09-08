@@ -23,8 +23,7 @@ namespace FundKit\Gateways;
 final class AccountFingerprint
 {
     /**
-     * Short and non-reversible: this ends up inside an option key, which is not
-     * a place to put a credential.
+     * Use a short irreversible fingerprint in option keys.
      *
      * @since 1.0.0
      */

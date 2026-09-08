@@ -179,15 +179,8 @@ final class FxRatesUpdater
     }
 
     /**
-     * Persist the auto toggle + manual overrides without refetching.
-     *
-     * $frame is the base the overrides were composed against - the currency the
-     * screen posting them was showing rates in. An override is units per 1 of
-     * that currency and nothing on the way in says so, so a write composed
-     * before a base change and landing after one reprices every row it carries
-     * by the whole bridge, silently and for good. Declared, it can be refused
-     * instead. Empty skips the check: with no overrides in the payload there is
-     * no number whose frame could be wrong.
+     * Save overrides only if $frame still matches the snapshot base. Empty overrides need no
+     * frame check.
      *
      * @param array<string,mixed> $manual
      * @return bool false when the write was refused because $frame is not the
@@ -231,23 +224,9 @@ final class FxRatesUpdater
     }
 
     /**
-     * Restate the whole snapshot in $to, so the base it is denominated in is
-     * the org's own again.
-     *
-     * A manual override is typed against the org base, on a screen labelled
-     * with it, while the snapshot is denominated in whatever base the last
-     * fetch ran against. Those are the same currency until the org base moves
-     * with auto-refresh off, and from then on every override is entered in one
-     * frame and read in another. The moment of the change is the only moment
-     * the answer is not a guess: everything stored is still in the base being
-     * left, so dividing the table through by one number restates all of it at
-     * once. Reconciling later, on the way out of the option, cannot work at
-     * all - the settings screen posts back the number it was shown, so the
-     * correction is reapplied to its own output on every save and compounds.
-     *
-     * Cross rates are unchanged by construction: dividing every entry by the
-     * same figure leaves each ratio where it was, which is why this is safe to
-     * run over rates already stamped onto donations.
+     * Rebase the entire snapshot when the org base changes, including manual overrides.
+     * Dividing all rates by the same bridge preserves cross rates. Converting on read would
+     * compound the adjustment on every settings save.
      *
      * @since 1.0.0
      */

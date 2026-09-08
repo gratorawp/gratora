@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Forms\Blocks;
 
-/**
- * Multi-column grid layout block.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class RowBlock implements Block
 {
     /** @since 1.0.0 */

@@ -13,19 +13,8 @@ use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Identity\IdentityHasher;
 
 /**
- * FundKit answering WordPress's own privacy tools.
- *
- * Tools, Export Personal Data and Erase Personal Data are what a site owner is
- * told to use when a request arrives, and what a data protection officer looks
- * at. Until this, both returned nothing for donors, donations, tickets or
- * anything else in the fleet: the plugin had its own erasure and WordPress
- * could not reach it.
- *
- * Neither half re-implements anything. The eraser finds the donor and calls the
- * same DonorService::redact() the admin button calls, which runs the erasure
- * registry, which is where the add-ons already hook. So a ticket buyer's
- * attendee rows and a tribute's notify address go with the donor here for the
- * same reason they go there.
+ * Connect WordPress privacy tools to the existing export and erasure services, including add-on
+ * handlers.
  *
  * @since 1.0.0
  */

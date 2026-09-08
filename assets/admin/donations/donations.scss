@@ -4,17 +4,13 @@
 @import '@fundkit/ui/scss/components/form';
 @import '@fundkit/ui/scss/components/date-field';
 @import '@fundkit/ui/scss/components/switch';
-// The record-a-donation surface is a modal now; this screen did not pull in the
-// dialog chrome before, so without it the modal rendered unstyled.
+// The record-donation modal needs shared dialog CSS.
 @import '@fundkit/ui/scss/components/dialog';
 
 @import '../_shared/kpi-strip';
 
 .dd-shell {
-    // Token-sourced custom props consumed by inline styles in the detail
-    // cards (OverviewCard/ReceiptCard/RefundDialog). Previously these read
-    // undefined vars and silently fell back to hardcoded hex; defining them
-    // here keeps the cards token-driven and themeable.
+    // Expose theme tokens to detail-card inline styles.
     --dd-text-muted:  #{$text-muted};
     --dd-accent-dark: #{$accent-dark};
     --dd-red:         #{$red};
@@ -94,8 +90,7 @@
     }
 }
 
-// Scoped to both .dd-shell (page) and .dd-modal (portal'd modal content)
-// because @wordpress/components Modal renders into document.body.
+// Include modal scope because WordPress portals into document.body.
 .dd-shell, .dd-modal {
     .btn {
         display: inline-flex; align-items: center; gap: 6px;
@@ -110,7 +105,7 @@
         cursor: pointer;
         transition: border-color .12s, background .12s, color .12s;
         font-family: inherit;
-        // Normalise <a> vs <button> width math under .btn--block.
+        // Normalize block-link and button box sizing.
         box-sizing: border-box;
 
         &:hover { border-color: #cbd0d5; background: $bg-page; }
@@ -483,7 +478,7 @@
     display: grid;
     grid-template-columns: 110px 24px 1fr;
     gap: 12px;
-    align-items: stretch; // dot column fills the row height so the connector spans it
+    align-items: stretch;
     padding: 10px 0;
 
     &__time {
@@ -499,9 +494,7 @@
         display: flex; justify-content: center; align-items: flex-start;
         padding-top: 5px;
     }
-    // Connector extends into adjacent rows' padding so the line doesn't break
-    // between dots; the white halo on .dd-tl-row__dot-inner sits above via
-    // z-index and masks the line where each dot is.
+    // Extend connectors across row padding; dot halos mask intersections.
     &__dot::before {
         content: "";
         position: absolute;
@@ -513,8 +506,8 @@
         transform: translateX(-50%);
         z-index: 0;
     }
-    &:first-child &__dot::before { top: 9px; }            // start at dot center
-    &:last-child  &__dot::before { bottom: auto; height: 19px; } // end at dot center
+    &:first-child &__dot::before { top: 9px; }
+    &:last-child  &__dot::before { bottom: auto; height: 19px; }
 
     &__dot-inner {
         width: 9px; height: 9px;
@@ -638,7 +631,6 @@
     strong { color: $text; font-weight: 600; }
 }
 
-// Edit form (reused by RefundDialog Modal)
 .dd-edit-form {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -685,7 +677,6 @@
     font-weight: 400;
 }
 
-// Record a donation drawer.
 .fundkit-rd {
 	display: flex;
 	flex-direction: column;
@@ -727,22 +718,10 @@
     color: var(--fundkit-color-text-muted, #6b7280);
 }
 
-// The amber that means test mode, from the shared token rather than a second
-// copy of the hex, so the admin bar strip and this badge cannot drift apart.
-// Tinted rather than solid: every other pill on this row is a tint, and a block
-// of colour beside them read as an error instead of a label.
-//
-// fundkit-pill--warning was never defined for pills, only for notices and toasts,
-// so this badge was rendering in the default grey.
-//
-// Doubled class on purpose: a later .fundkit-pill rule (the pill-group button)
-// sets a transparent background at the same specificity and would win on
-// source order alone.
+// Double the class to outrank the later pill-group background rule.
 
 
-// A checkbox keeps its own focus ring: the shadow the text-input rule
-// substitutes is not painted on a native control, and this is the one box in
-// the dialog that ends a donor's schedule.
+// Keep the native checkbox focus ring; input shadows do not replace it.
 .dd-edit-form input[type='checkbox']:focus-visible {
     outline: 2px solid #211d3f;
     outline-offset: 2px;

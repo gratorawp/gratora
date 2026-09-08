@@ -66,12 +66,7 @@ export default function LogsTab( { active, setNotice } ) {
         sort:    { field: 'occurred_at', direction: 'desc' },
         filters: [],
         fields:  [ 'occurred_at', 'source', 'message', 'outcome' ],
-        // Keyed by field id rather than by position, so hiding or reordering a
-        // column cannot hand the width to a different one. Every cell is sized
-        // to its content by the shared table styles, which leaves no column to
-        // absorb the row when the view carries neither a selection column nor a
-        // primary one. Message is asked for explicitly: it is the column
-        // somebody came to read.
+        // Key widths by field ID and let Message absorb spare table width.
         layout:  {
             styles: {
                 occurred_at: { width: '160px' },

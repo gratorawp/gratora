@@ -77,11 +77,7 @@ final class NumberingController
         return new WP_REST_Response($out, 200);
     }
 
-    /**
-     * Override a scope's counter so the next reference uses $next.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function setCounter(WP_REST_Request $request)
     {
         $scope = (string) $request->get_param('scope');

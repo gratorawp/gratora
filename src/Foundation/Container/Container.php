@@ -24,7 +24,7 @@ final class Container
     private array $instances = [];
 
     /**
-     * Factory receives the container so it can resolve collaborators.
+     * Factories receive the container for dependency resolution.
      *
      * @since 1.0.0
      */

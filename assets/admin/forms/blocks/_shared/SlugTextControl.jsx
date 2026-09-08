@@ -2,13 +2,8 @@ import { TextControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 
 /**
- * A slug input that keeps the separator you just typed.
- *
- * Slugifying on every keystroke strips a trailing separator, and feeding that
- * straight back into a controlled input deletes it under the caret: "first_"
- * became "first", so a snake_case key could only ever be pasted. The committed
- * value stays strictly slugified, because the editor's key has to equal
- * DropdownBlock::deriveField or conditions built on it stop matching.
+ * Preserve trailing separators while typing; commit the strict slug matching PHP field
+ * derivation.
  */
 export function SlugTextControl( { value, onChange, separator = '_', fallback = '', ...rest } ) {
     const [ draft, setDraft ] = useState( null );

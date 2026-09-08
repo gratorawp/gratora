@@ -15,13 +15,7 @@ type Options = {
     formPath: string;
 };
 
-/**
- * Console + page errors that signal a broken render. The runtime wraps every
- * step + field renderer in an ErrorBoundary that logs this exact message on
- * componentDidCatch; that catch is invisible to the donor but silently turns
- * fields into empty wrappers (e.g. the setField scope bug fixed in 7d6c64b).
- * Treat its presence in any spec as a hard regression.
- */
+/** Treat ErrorBoundary render errors as failures even when the page stays usable. */
 const RENDER_HEALTH_PATTERN = /render error contained by boundary|ReferenceError/i;
 
 export const test = base.extend<Fixtures & Options>({

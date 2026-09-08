@@ -4,37 +4,27 @@ declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
 
-use FundKit\Campaigns\Campaign;
 use FundKit\Analytics\ErrorLog;
-use FundKit\Async\AsyncDispatcher;
 use FundKit\Analytics\Event;
+use FundKit\Async\AsyncDispatcher;
 use FundKit\Currency\BaseCurrencyLocked;
 use FundKit\Currency\FxBackfill;
-use FundKit\Settings\SecretRedactor;
-use FundKit\Settings\SettingsService;
+use FundKit\Donations\AggregateSyncer;
+use FundKit\Donors\DonorRetention;
+use FundKit\Foundation\Auth\Capabilities;
 use FundKit\Foundation\Maintenance\TestDataPurger;
 use FundKit\Foundation\Transfer\CsvImporter;
 use FundKit\Foundation\Transfer\DataExporter;
 use FundKit\Foundation\Transfer\DataImporter;
 use FundKit\Foundation\Upgrade\UpgradeRunner;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorRetention;
-use FundKit\Forms\Form;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Funds\Fund;
-use WP_REST_Response;
-use WP_REST_Server;
+use FundKit\Settings\SecretRedactor;
+use FundKit\Settings\SettingsService;
 use FundKit\Vendor\Queryable\DB;
 use FundKit\Vendor\Queryable\ModelQueryBuilder;
+use WP_REST_Response;
+use WP_REST_Server;
 
-/**
- * Admin endpoints for system info, settings export, settings import, and
- * recomputing denormalized aggregates (admin UI wrapper over the
- * `wp fundkit recompute-aggregates` CLI).
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class ToolsController
 {
     private const NAMESPACE = 'fundkit/v1';
@@ -635,18 +625,9 @@ final class ToolsController
             // rebuilt from a campaign total that is already correct.
             if ($pass === 'addons') {
                 /**
-                 * One page of an add-on's own rebuild.
-                 *
-                 * The old contract passed counts alone, so a subscriber had no
-                 * way to stop and nowhere to record where it got to: it walked
-                 * its whole table inside this request, and a big one took the
-                 * request down with it.
-                 *
-                 * Store your resume point under your own key in `cursor` and
-                 * return `done => false` while rows remain. Read the clock
-                 * AFTER a row, never before, or you return having done nothing
-                 * and spin the caller. An add-on with nothing to do returns the
-                 * bag untouched.
+                 * Process one add-on rebuild page. Store progress under your cursor key and
+                 * return done=false while rows remain. Check the clock after processing a row
+                 * to guarantee progress; return the bag unchanged when idle.
                  *
                  * @param array{counts:array<string,int>,cursor:array<string,mixed>,done:bool} $bag
                  * @param string $scope  'all' or the one scope asked for
@@ -1124,12 +1105,7 @@ final class ToolsController
         return null;
     }
 
-    /**
-     * Read the way the sweep itself reads it, straight off the option, so the
-     * two cannot disagree about whether erasure is armed.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private static function erasureIsOn(): bool
     {
         $privacy = get_option('fundkit_privacy', []);

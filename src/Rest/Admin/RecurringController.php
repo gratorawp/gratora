@@ -16,8 +16,6 @@ use FundKit\Gateways\GatewayTransportException;
 use FundKit\Gateways\PaymentRetryUnavailable;
 use FundKit\Gateways\SubscriptionAware;
 use FundKit\Gateways\SubscriptionChangeNeedsApproval;
-use FundKit\Gateways\Sandbox\SandboxGateway;
-use FundKit\Gateways\SupportsPaymentRetry;
 use FundKit\Recurring\FrequencyMap;
 use FundKit\Recurring\GatewayUnreachable;
 use FundKit\Recurring\PlanRow;
@@ -146,11 +144,7 @@ final class RecurringController
         ]);
     }
 
-    /**
-     * The org-wide plan list, not scoped to a single donor.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function index(WP_REST_Request $request): WP_REST_Response
     {
         $args = [
@@ -200,9 +194,7 @@ final class RecurringController
     }
 
     /**
-     * The figures above the list. include_test carries the same meaning it has
-     * on index(): the caller is looking at test plans, so the totals over that
-     * list have to count them too.
+     * Use the list’s include_test scope for every figure.
      *
      * @since 1.0.0
      */
@@ -255,22 +247,9 @@ final class RecurringController
     }
 
     /**
-     * Money collected on a repeating schedule with nothing scheduled to collect
-     * it again: the first charge landed and no plan was ever linked to it.
-     *
-     * Two ways in, because the failure flag is written only where the handler
-     * survives long enough to catch its own error. A recorded failure is one. A
-     * paid recurring donation on a gateway that runs subscriptions of its own is
-     * the other, and it is the one that catches a worker killed mid-flight or a
-     * delivery that never arrived. A gateway that schedules nothing is left out:
-     * a plan-less donation of its own proves nothing about a schedule.
-     *
-     * Bounded at both ends: inside SETTLE_MINUTES the donation's own flow may
-     * still be running, and past WINDOW_DAYS it is history rather than
-     * something a retry recovers.
-     *
-     * A partial refund did not end the schedule, so it stays in scope; a full
-     * refund gave the money back and is not a renewal anyone is waiting on.
+     * Find recent paid recurring donations without plans, including recorded failures and
+     * interrupted subscription creation. Exclude unsettled attempts, old history, fully
+     * refunded payments, and gateways without subscription schedules.
      *
      * @since 1.0.0
      */

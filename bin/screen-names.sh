@@ -1,19 +1,7 @@
 #!/usr/bin/env bash
-# Screen candidate plugin names against the checks that actually matter.
-#
-#   bin/screen-names.sh Onelo Tavaro Kindio
-#   printf '%s\n' Onelo Tavaro Kindio | bin/screen-names.sh
-#
-# Checks, in the order that has caught real collisions:
-#   1. wp.org slug free + directory matches
-#   2. live site on <name>.com / get<name>.com / try<name>.com /
-#      <name>app.com / <name>.org / <name>.io / <name>.co
-#      (this caught CauseKit, Tarvo, Causara, Grantify, Givvi)
-#
-# It does NOT catch country domains (.ch .fi .org.au) or companies with no
-# reachable site. For anything that survives, still web-search:
-#     "<name>" nonprofit        "<name>" charity donation
-# That search caught GIVIT, Blackbaud Altru, Dorea and FundQuest.
+# Check candidate names against WordPress.org and common live-site domains.
+# Usage: bin/screen-names.sh Name1 Name2
+# Also web-search survivors; country domains and unreachable sites are not covered.
 set -uo pipefail
 [ $# -gt 0 ] && NAMES="$*" || NAMES="$(cat)"
 

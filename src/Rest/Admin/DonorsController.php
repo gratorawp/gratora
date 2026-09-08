@@ -3,34 +3,29 @@
 declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
-use FundKit\Rest\Paging;
-use FundKit\Foundation\Auth\Capabilities;
-
 use FundKit\Analytics\ErrorLog;
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationService;
 use FundKit\Donors\Donor;
+use FundKit\Donors\DonorAvatars;
 use FundKit\Donors\DonorMetricsService;
 use FundKit\Donors\DonorNoteRepository;
 use FundKit\Donors\DonorRepository;
 use FundKit\Donors\DonorService;
 use FundKit\Donors\EmailAlreadyAssignedException;
+use FundKit\Foundation\Auth\Capabilities;
 use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\RecurringPlanRepository;
+use FundKit\Rest\Paging;
+use FundKit\Vendor\Queryable\DB;
 use InvalidArgumentException;
 use Throwable;
-use FundKit\Vendor\Queryable\DB;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
-/**
- * Admin donor endpoints: list, stats, insights, profile, timeline, notes,
- * profile edits, and the DSAR export / erasure pair.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DonorsController
 {
     private const NAMESPACE = 'fundkit/v1';
@@ -48,7 +43,7 @@ final class DonorsController
         private DonorMetricsService $metrics,
         private DonorNoteRepository $notes,
         private DonationService $donationService,
-        private \FundKit\Donors\DonorAvatars $avatars,
+        private DonorAvatars $avatars,
     ) {
     }
 
@@ -515,11 +510,7 @@ final class DonorsController
         return new WP_REST_Response(['deleted' => true], 200);
     }
 
-    /**
-     * GDPR/DSAR export, decrypting PII on the way out.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function exportPersonalData(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $donor = $this->donors->findById((int) $request['id']);
@@ -600,9 +591,7 @@ final class DonorsController
     }
 
     /**
-     * No confirmation string, unlike redact: a donor who reaches here has
-     * nothing to lose, and one with donations is refused with the path to take
-     * instead.
+     * Deletion refuses donors with donations; no erasure confirmation is needed.
      *
      * @since 1.0.0
      */

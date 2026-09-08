@@ -8,11 +8,7 @@ use DateTimeImmutable;
 use FundKit\Donations\DonationQueries;
 use FundKit\Vendor\Queryable\DB;
 
-/**
- * Donor reads for the admin list, insights and portal.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DonorRepository
 {
     // Days since last donation: active <ACTIVE, at_risk ACTIVE..AT_RISK,

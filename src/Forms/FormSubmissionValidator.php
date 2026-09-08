@@ -9,12 +9,12 @@ use FundKit\Currency\Currency;
 use FundKit\Currency\FxRates;
 use FundKit\Donors\ConsentService;
 use FundKit\Forms\Blocks\ConsentBlock;
-use FundKit\Forms\Blocks\TermsBlock;
 use FundKit\Forms\Blocks\DateBlock;
 use FundKit\Forms\Blocks\DonationAmountBlock;
 use FundKit\Forms\Blocks\DropdownBlock;
 use FundKit\Forms\Blocks\MultiSelectBlock;
 use FundKit\Forms\Blocks\RecurringToggleBlock;
+use FundKit\Forms\Blocks\TermsBlock;
 use FundKit\Foundation\Helpers\Money;
 use WP_Error;
 
@@ -353,15 +353,8 @@ final class FormSubmissionValidator
                         break;
                     }
 
-                    // Converted, the exact figure is not reproducible: the rate
-                    // moves between render and submit. Near one of them is, and
-                    // the alternative was accepting any amount at all, which let
-                    // a crafted payload name a currency and pay what it liked on
-                    // a form whose whole point is a fixed menu.
-                    //
-                    // Wide on purpose. A day of rate movement is a fraction of
-                    // this, so no donor is refused the figure they were shown,
-                    // and it still holds the amount to the menu.
+                    // Allow FX drift between render and submission, but require proximity to an
+                    // authored preset.
                     if (! self::nearAnyPreset($net, $allowedCents, $presetCurrency, $submittedCurrency)) {
                         return $this->reject(__('Choose one of the listed donation amounts.', 'fundraising-toolkit'));
                     }
@@ -524,8 +517,7 @@ final class FormSubmissionValidator
     }
 
     /**
-     * The currency the block's amounts are written in: its own attribute, or
-     * the org default. Presets, and the minimum beside them, are authored here.
+     * Use the block currency, falling back to the org default.
      *
      * @since 1.0.0
      */

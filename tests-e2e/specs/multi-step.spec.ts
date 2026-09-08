@@ -23,9 +23,6 @@ test.describe('multi-step wizard', () => {
     test.use({ formPath: MULTI_STEP_FORM_PATH });
 
     test('donor step renders fields after continuing from amount', async ({ donor }) => {
-        // Regression for the setField-out-of-scope bug (commit 7d6c64b): the
-        // donor step's wrapper existed but its field subtree was swallowed by
-        // ErrorBoundary, leaving zero controls inside.
         await donor.selectPresetAt(0);
         await donor.form.locator('.fundkit-form__button--primary').click();
 
@@ -135,9 +132,6 @@ test.describe('multi-step wizard health', () => {
     test.use({ formPath: MULTI_STEP_FORM_PATH });
 
     test('no render-error console output on the donor step', async ({ donor }) => {
-        // Render-health offences are checked by the fixture teardown; this
-        // test exercises the same regression path (continue from amount ->
-        // donor step) for explicit redundancy with the original 7d6c64b case.
         await donor.selectPresetAt(0);
         await donor.form.locator('.fundkit-form__button--primary').click();
         await donor.form.locator('[data-step="donor"]').waitFor({ state: 'visible' });

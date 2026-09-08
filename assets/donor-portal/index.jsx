@@ -81,12 +81,8 @@ async function refusal( r, fallback ) {
     return Object.assign( new Error( data.message || fallback ), { status: r.status, data } );
 }
 
-// The portal's authority is the donor session cookie plus X-FundKit-Csrf; no
-// portal route reads the WP nonce. WordPress still refuses a present-and-stale
-// one at the authentication layer, ahead of every permission callback, so one
-// dead nonce takes down the portal and the sign-in that would recover from it.
-// It is minted at render and cannot be refreshed here, so the request goes
-// unauthenticated rather than not at all.
+// Portal routes use session cookies and X-FundKit-Csrf. Omit WP nonces so stale ones cannot
+// block authentication.
 function nonceWasRefused( r, err ) {
     return !! cfg.nonce && r.status === 403 && err.data?.code === 'rest_cookie_invalid_nonce';
 }
@@ -530,15 +526,7 @@ const TABS = [
     { id: 'consents',    label: __( 'Consents', 'fundraising-toolkit' ) },
 ];
 
-/**
- * One way out, and it takes everything: every signed-in device, and every
- * sign-in link nobody has opened. Two buttons a few pixels apart asked the
- * donor to choose a session scope they had no information to choose between.
- *
- * The scope is said out loud rather than confirmed in a dialog. It is what the
- * donor profile promises staff when it hands out a link that lasts a month, so
- * the wording has to reach the person who would use it.
- */
+/** Sign out all devices and invalidate unused links; state that scope in the control. */
 function SignOutControls() {
     return (
         <div class="dp__signout-group">

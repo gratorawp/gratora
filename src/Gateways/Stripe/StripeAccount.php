@@ -89,11 +89,7 @@ final class StripeAccount
         ];
     }
 
-    /**
-     * Stripe account id, learned from the key verification retrieve.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function accountId(): ?string
     {
         $data = $this->raw();
@@ -151,21 +147,13 @@ final class StripeAccount
         return $this->testOverride ?? true;
     }
 
-    /**
-     * Decrypted secret key for the active mode.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function activeSecretKey(): string
     {
         return $this->secretKeyFor($this->isTestMode());
     }
 
-    /**
-     * Decrypted secret key for an explicit mode.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function secretKeyFor(bool $test): string
     {
         $data = $this->raw();
@@ -190,11 +178,7 @@ final class StripeAccount
         return (string) ($data[$test ? 'publishable_test' : 'publishable_live'] ?? '');
     }
 
-    /**
-     * Merge capability flags from an account retrieve / account.updated webhook.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function refresh(array $accountObject): void
     {
         $data = $this->raw();
@@ -242,11 +226,7 @@ final class StripeAccount
         SystemSetting::write(self::KEY, (string) wp_json_encode($data));
     }
 
-    /**
-     * Remove one mode's keys, leaving the other mode intact.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function forgetMode(bool $test): void
     {
         $data = $this->raw();

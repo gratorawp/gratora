@@ -1,11 +1,4 @@
-/*
- * The dialog sits on wp-admin's own Plugins screen, so it reads as WordPress
- * rather than as FundKit: core's button classes, core's type stack, core's red.
- *
- * It is calm until someone asks for the destructive option. Deactivating on its
- * own changes nothing, and a warning shown before there is anything to warn
- * about is a warning nobody reads by the time it matters.
- */
+/* Use WordPress styling on the Plugins screen; show destructive emphasis only when selected. */
 
 body.fundkit-deact-open { overflow: hidden; }
 
@@ -33,7 +26,6 @@ body.fundkit-deact-open { overflow: hidden; }
     background: #fff;
     border-radius: 6px;
     box-shadow: 0 10px 36px rgba(15, 23, 42, .22);
-    /* The top edge is the state indicator: neutral until the box is ticked. */
     border-top: 3px solid #dcdcde;
     transition: border-color .15s ease;
 }
@@ -53,7 +45,6 @@ body.fundkit-deact-open { overflow: hidden; }
     color: #50575e;
 }
 
-/* The choice, not a warning: quiet frame, normal weight, no colour shouting. */
 .fundkit-deact__choice {
     padding: 12px 14px;
     border: 1px solid #dcdcde;
@@ -102,7 +93,6 @@ body.fundkit-deact-open { overflow: hidden; }
     list-style: disc;
 }
 
-/* Asked for. Now the dialog can shout. */
 .fundkit-deact.is-danger .fundkit-deact__panel { border-top-color: #b32d2e; }
 
 .fundkit-deact.is-danger .fundkit-deact__choice {

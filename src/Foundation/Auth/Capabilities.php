@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Foundation\Auth;
 
-/**
- * All plugin capability constants and role-mapping helpers.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class Capabilities
 {
     /** Umbrella cap: "can reach the FundKit admin area at all" (menu + base gate). */
@@ -171,7 +167,7 @@ final class Capabilities
     ];
 
     /**
-     * `user_has_cap` filter granting the virtual menu meta-caps (see MENU_AREAS).
+     * Grant virtual menu capabilities; see MENU_AREAS.
      *
      * @since 1.0.0
      */

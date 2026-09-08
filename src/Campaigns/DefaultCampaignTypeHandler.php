@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Campaigns;
 
-/**
- * Built-in handler for the 'standard' campaign type.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DefaultCampaignTypeHandler implements CampaignTypeHandler
 {
     /** @since 1.0.0 */

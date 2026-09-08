@@ -6,11 +6,7 @@ namespace FundKit\Forms\Blocks;
 
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Free-text message field block.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CommentBlock implements Block
 {
     /** @since 1.0.0 */

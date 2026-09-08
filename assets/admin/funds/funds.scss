@@ -53,7 +53,6 @@
 }
 
 
-// ---- Table cell chrome ----
 .fundkit-fund-name {
     position: relative;
 
@@ -145,12 +144,8 @@
     &__opt  { color: $text-soft; font-weight: 500; }
 }
 
-// Fund drawer fields use the shared .fundkit-input / .fundkit-textarea / .fundkit-input--mono
-// classes (form partial imported above); no local input chrome.
 
-// Row layout for the @fundkit/ui ToggleRow (body left, switch right). Currently
-// duplicated in settings.scss + campaigns.scss too; belongs in @fundkit/ui
-// _switch.scss next to .fundkit-switch (follow-up consolidation).
+// Shared ToggleRow layout; also used in settings and campaigns.
 .fundkit-toggle-row {
     display: flex;
     align-items: center;
@@ -230,7 +225,6 @@
     input { margin-top: 3px; accent-color: $accent; width: 16px; height: 16px; }
 }
 
-// ---- Delete-dialog choice rows ----
 .fundkit-choice {
     display: flex;
     align-items: flex-start;

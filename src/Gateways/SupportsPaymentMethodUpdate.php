@@ -23,8 +23,7 @@ use FundKit\Recurring\RecurringPlan;
 interface SupportsPaymentMethodUpdate
 {
     /**
-     * Begin the change. The returned shape tells the portal whether to collect
-     * the card in place or to send the donor to the processor.
+     * Return whether the portal should collect details or redirect.
      *
      * @since 1.0.0
      */

@@ -105,7 +105,7 @@ final class ModuleManager
     }
 
     /**
-     * Boot every registered module in dependency order, skipping unlicensed ones.
+     * Boot in dependency order, skipping unlicensed modules.
      *
      * @since 1.0.0
      */

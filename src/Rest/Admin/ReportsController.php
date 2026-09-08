@@ -118,9 +118,7 @@ final class ReportsController
     }
 
     /**
-     * Stream PDF bytes as a download. The REST server would JSON-encode a binary
-     * body, so the bytes are echoed from a rest_pre_serve_request closure bound
-     * to this route.
+     * Stream through rest_pre_serve_request to bypass REST JSON encoding.
      *
      * @since 1.0.0
      */

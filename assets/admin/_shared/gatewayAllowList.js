@@ -1,13 +1,4 @@
-/**
- * "Allowed gateways" is an allow-list where EMPTY means "offer every gateway",
- * which is how the donor-facing resolver and FormService::syncGatewayAllowed
- * both read it.
- *
- * Rendered as a plain includes() an empty list looks like nothing is enabled,
- * so an author on a form built from any shipped template sees every gateway
- * unchecked and ticks one, which quietly turns the rest off. The two screens
- * that edit this value have to agree, so they share these.
- */
+/** An empty gateway allowlist means all gateways; both editors must preserve that convention. */
 export const gatewayIsOn = ( allowed, id ) =>
     ( allowed || [] ).length === 0 || ( allowed || [] ).includes( id );
 

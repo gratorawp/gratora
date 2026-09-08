@@ -14,13 +14,13 @@ use FundKit\Donors\Donor;
 use FundKit\Donors\DonorRepository;
 use FundKit\Donors\DonorService;
 use FundKit\Donors\MagicLinkService;
+use FundKit\Forms\Blocks\CustomFieldLabels;
+use FundKit\Forms\Form;
 use FundKit\Foundation\Crypto\Crypto;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Helpers\View;
 use FundKit\Foundation\References\ReferenceGenerator;
 use FundKit\Foundation\Time\Clock;
-use FundKit\Forms\Blocks\CustomFieldLabels;
-use FundKit\Forms\Form;
 use FundKit\Mail\Mailer;
 use FundKit\Settings\SettingsService;
 use FundKit\Vendor\Queryable\DB;
@@ -84,12 +84,7 @@ final class ReceiptIssuer
         $this->async->enqueue(self::HOOK, ['donation_id' => $donation->id]);
     }
 
-    /**
-     * Whether this site issues a receipt for this donation. Every path that
-     * can produce one asks here.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public static function shouldIssueFor(Donation $donation): bool
     {
         $shouldIssue = (string) ($donation->kind ?? 'donation') === 'donation';
@@ -504,8 +499,7 @@ final class ReceiptIssuer
     }
 
     /**
-     * Name for this receipt: the per-donation snapshot, falling back to the
-     * donor record.
+     * Prefer the donation’s name snapshot over the current donor record.
      *
      * @since 1.0.0
      */

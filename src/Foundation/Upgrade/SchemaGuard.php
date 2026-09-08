@@ -12,18 +12,8 @@ use ReflectionClass;
 use ReflectionProperty;
 
 /**
- * Confirms every fundkit_* table is really there before the schema version is stamped.
- *
- * The same is true of an ALTER: a release that adds a column to a table that
- * already exists stamps itself as migrated whether or not the column arrived,
- * and every query touching it is dead from then on.
- *
- * dbDelta reports nothing at all when a CREATE is refused, and plenty of
- * managed and shared hosts refuse one: restricted grants, a table-count quota,
- * a row-size or collation limit. The stamped version is the only thing the
- * wp_loaded gate reads to decide whether to migrate again, so writing it on a
- * migration that created nothing is what turns a recoverable install into a
- * site that is broken for good.
+ * Verify tables and columns before stamping the schema version; dbDelta may silently fail and
+ * the stamp suppresses retries.
  *
  * @since 1.0.0
  */

@@ -26,6 +26,22 @@ final class Tokens
      *
      * @since 1.0.0
      */
+    /**
+     * Tokens a preset may set that are not admin controls. Each is deliberately
+     * left out of catalogue(), and so out of defaults(), because unset is what
+     * makes it inherit: --fundkit-button-radius falls through to
+     * --fundkit-radius-sm, so an org that rounds its controls rounds its button
+     * with them. A default here would pin the button and break that, but
+     * sanitize() has to keep the key or Classic loses its pill on the first
+     * save of the brand panel.
+     *
+     * @var array<string, array{control: string}>
+     */
+    private const PASS_THROUGH = [
+        'fundkit-button-radius'   => ['control' => 'range'],
+        'fundkit-switcher-radius' => ['control' => 'range'],
+    ];
+
     public static function catalogue(): array
     {
         return [
@@ -290,8 +306,7 @@ final class Tokens
     }
 
     /**
-     * Values land verbatim in CSS, where `;` or `}` breaks out of the
-     * declaration, so each is validated against its control's expected shape.
+     * Validate CSS values to prevent declaration breakout.
      *
      * @since 1.0.0
      */
@@ -322,7 +337,7 @@ final class Tokens
     public static function sanitize(array $tokens): array
     {
         $out = [];
-        $catalogue = self::catalogue();
+        $catalogue = self::catalogue() + self::PASS_THROUGH;
         foreach ($tokens as $key => $value) {
             if (! isset($catalogue[$key])) continue;
             $val = is_scalar($value) ? trim((string) $value) : '';
@@ -334,11 +349,7 @@ final class Tokens
         return $out;
     }
 
-    /**
-     * Null drops the value.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private static function sanitiseValue(array $def, string $value): ?string
     {
         if (preg_match('/[;{}<>\\\\]/', $value)) return null;
@@ -349,11 +360,9 @@ final class Tokens
             case 'color':
                 $hex = sanitize_hex_color($value);
                 if (is_string($hex) && $hex !== '') return $hex;
-                // sanitize_hex_color rejects 4/8-digit hex; accept the alpha
-                // variants explicitly.
+                // Accept alpha hex variants rejected by sanitize_hex_color.
                 if (preg_match('/^#(?:[0-9a-fA-F]{4}|[0-9a-fA-F]{8})$/', $value)) return strtolower($value);
                 if (preg_match('/^(rgb|rgba|hsl|hsla)\(\s*[0-9.,\s%\/-]+\s*\)$/i', $value)) return $value;
-                // Keywords used by outlined / inherited button presets.
                 if (in_array(strtolower($value), ['transparent', 'currentcolor', 'inherit'], true)) {
                     return strtolower($value) === 'currentcolor' ? 'currentColor' : strtolower($value);
                 }

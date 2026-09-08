@@ -1,14 +1,8 @@
 <?php
 defined('ABSPATH') || exit;
 /**
- * Donor year-end tax statement (US 501(c)(3) style contribution acknowledgement),
- * rendered to HTML then handed to the PDF builder. Standalone document with a
- * scoped <style> block (no theme/token context), so the literal colors below are
- * intentional and self-contained.
- *
- * LEGALLY SENSITIVE: this is a draft acknowledgement for a human to review
- * before it is issued. The acknowledgement sentence is printed verbatim and is
- * intentionally NOT passed through translation so it stays exact.
+ * Standalone tax-statement PDF with local styles. Keep the acknowledgement untranslated and
+ * require human review before issue.
  *
  * @var int    $year                statement year
  * @var string $org_name            organization name

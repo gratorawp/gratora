@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace FundKit\Rest\Admin;
 use FundKit\Dashboard\AttentionDismissals;
 use FundKit\Foundation\Auth\Capabilities;
-
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -168,11 +167,7 @@ final class UserPrefsController
         return new WP_REST_Response($all[$key], 200);
     }
 
-    /**
-     * The table view this user last left a list screen in.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function showView(WP_REST_Request $request): WP_REST_Response
     {
         $all = $this->readViews();
@@ -202,18 +197,8 @@ final class UserPrefsController
     }
 
     /**
-     * Keeps only what a view is allowed to remember, in the shape it is allowed
-     * to be.
-     *
-     * search and page are deliberately absent: a search is how someone finds one
-     * record, not how they like to look at the list, and coming back to page 7 of
-     * a list that has moved on since is disorienting.
-     *
-     * `order` is every column that existed when the view was saved, in the
-     * arrangement the reader had them in, whether or not each one was showing.
-     * Holding the hidden ones is what lets a column come back to its own place
-     * instead of the end, and knowing which columns were on offer is what lets
-     * one added in a later release appear without un-hiding the rest.
+     * Persist view preferences without search or page. Keep hidden columns in order so they
+     * regain their position and new columns can be detected.
      *
      * @param array<string, mixed> $body
      * @return array<string, mixed>

@@ -5,7 +5,6 @@ import { Coins, History } from 'lucide-react';
 import EmptyState from '../../../_shared/components/EmptyState';
 import { intervalLabel } from '../../../_shared/recurring/planColumns';
 
-// Deep-link to a donation's detail view (same target the Donations tab uses).
 function donationHref( reference ) {
     return addQueryArgs( window.location.pathname, { page: 'fundkit-donations', view: 'detail', reference } );
 }
@@ -31,16 +30,8 @@ export function TimelineDot( { variant } ) {
 }
 
 /**
- * What an event says, in a sentence.
- *
- * Shared by the overview timeline and the paged log so the two cannot drift.
- * The cases are the event types the recorder actually writes: they were keyed
- * off names nothing emitted (donation.paid, recurring_plan.renewed,
- * consent.granted), so every row fell through to a bare label and the amount
- * these branches exist to show was never rendered.
- *
- * `campaignTitle` is passed in because the two callers hold it differently:
- * the overview has a map keyed by id, the log has it on the row.
+ * Share event descriptions across overview and log. Callers supply campaignTitle from their own
+ * data shape.
  */
 export function eventTitle( event, campaignTitle ) {
     const meta = eventMeta( event );
@@ -110,7 +101,6 @@ export function eventTitle( event, campaignTitle ) {
     return title;
 }
 
-/** One line of the donor's history on the overview. */
 function TimelineRow( { event, campaigns } ) {
     const meta = eventMeta( event );
     const camp = event.campaign_id ? campaigns?.[ event.campaign_id ] : null;

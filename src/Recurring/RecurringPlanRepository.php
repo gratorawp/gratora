@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace FundKit\Recurring;
 
+use FundKit\Foundation\Helpers\Money;
 use FundKit\Vendor\Queryable\DB;
 use FundKit\Vendor\Queryable\QueryBuilder;
-use FundKit\Foundation\Helpers\Money;
 
-/**
- * Aggregate queries over RecurringPlan rows. List views use the model directly.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class RecurringPlanRepository
 {
     /**
@@ -59,8 +55,7 @@ final class RecurringPlanRepository
     }
 
     /**
-     * Plans whose base value is genuinely unknown, so callers can say the total
-     * is partial.
+     * Track missing conversions so callers can label partial totals.
      *
      * @since 1.0.0
      */
@@ -71,8 +66,7 @@ final class RecurringPlanRepository
     }
 
     /**
-     * Monthly-equivalent of a plan's base amount. interval_count=0 would divide
-     * by zero.
+     * Guard zero intervals when calculating monthly equivalents.
      *
      * @since 1.0.0
      */
@@ -103,8 +97,7 @@ final class RecurringPlanRepository
     }
 
     /**
-     * Apply a successful renewal: bump counters and timestamps. Idempotency on
-     * (plan, donation_id) is enforced by the caller; this method just persists.
+     * The caller must enforce idempotency on (plan, donation_id).
      *
      * @since 1.0.0
      */
@@ -282,19 +275,8 @@ final class RecurringPlanRepository
     }
 
     /**
-     * Live recurring plans attributed to a campaign, plus their base-currency
-     * monthly-equivalent total. This is the number the archive dialog shows next
-     * to "also cancel these subscriptions", so it counts exactly the rows the
-     * archive sweep cancels: every CANCELLABLE_STATUSES plan, test plans
-     * excluded. A
-     * count narrowed to status = active would have an admin authorise one
-     * cancellation and get every paused and past_due donor cancelled and emailed
-     * too, and a campaign whose live plans are all paused would report zero and
-     * never offer the choice at all.
-     *
-     * A malformed interval_count of 0 still counts, because the sweep still
-     * cancels it. It contributes nothing to mrr_cents, which is why that figure
-     * is presented as approximate.
+     * Match the archive sweep’s cancellable statuses and exclude test plans. Invalid intervals
+     * still count but contribute no MRR.
      *
      * @return array{count:int, mrr_cents:int, unconverted:int}
      *
@@ -517,9 +499,7 @@ final class RecurringPlanRepository
     }
 
     /**
-     * The row scope every figure in recurringStats() starts from, so a caller
-     * looking at test plans cannot be handed a mix of figures that count them
-     * and figures that do not.
+     * Use one test-plan scope across all statistics.
      *
      * @since 1.0.0
      */
@@ -531,13 +511,8 @@ final class RecurringPlanRepository
     }
 
     /**
-     * Recurring revenue health roll-up. Normalizes each active plan to its
-     * monthly equivalent so MRR is comparable across cadences.
-     *
-     * $includeTest is the caller saying it is showing test plans. Every figure
-     * then counts them, because a total that left them out while the list under
-     * it names them reads as broken, and an org setting recurring up in test
-     * mode has no other way to see that these figures compute at all.
+     * Normalize active plans to monthly amounts. When showing test plans, include them in every
+     * corresponding total.
      *
      * @return array{
      *   active_count:int,

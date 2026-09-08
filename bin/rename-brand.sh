@@ -1,13 +1,6 @@
 #!/usr/bin/env bash
-# Rename the public brand: text domain, display name, readme heading, pot file.
-#
-# Does NOT touch: the FundKit\ namespace, class names, the `fundkit` admin page
-# slug, @fundkit/ui, vendor/fundkit, table names, REST namespaces, or the repo
-# name. None are visible to the wp.org reviewer, and moving them breaks
-# installed sites.
-#
-#   bin/rename-brand.sh onelo "Onelo Donation Platform" Onelo           # dry run
-#   bin/rename-brand.sh onelo "Onelo Donation Platform" Onelo --apply
+# Rename public branding while preserving internal identifiers and external dependencies.
+# Usage: bin/rename-brand.sh slug "Display Name" Author [--apply]
 set -uo pipefail
 
 NEW_SLUG="${1:-}"; NEW_TITLE="${2:-}"; NEW_BRAND="${3:-}"; APPLY="${4:-}"

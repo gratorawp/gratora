@@ -86,8 +86,6 @@ final class CampaignStatMetrics
                 : null,
             'donations' => number_format_i18n($donations),
             'donors'    => number_format_i18n((int) $campaign->donors_count),
-            // Integer division on purpose. An average is a summary, and cents
-            // of one put a false precision on it.
             'average'   => $donations > 0
                 ? Money::format((int) round($raised / $donations), $currency)
                 : null,
@@ -118,11 +116,7 @@ final class CampaignStatMetrics
         return $this->topCache[$id] > 0 ? Money::format($this->topCache[$id], $currency) : null;
     }
 
-    /**
-     * An ended campaign reads zero rather than a negative count.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private function daysLeftOrNull(Campaign $campaign): ?string
     {
         if (empty($campaign->ends_at)) {

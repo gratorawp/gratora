@@ -1,14 +1,4 @@
-/**
- * A URL that is safe to put in an href.
- *
- * Preact does not filter URL schemes the way React 19 does, so a
- * `javascript:` value bound to an href runs on click. The server escapes what
- * it sends, and this is the second half of that: anything reaching a link in
- * this form passes here first, so a new caller cannot reintroduce the hole by
- * binding a value the server did not clean.
- *
- * Relative URLs are kept - they carry no scheme and cannot execute.
- */
+/** Allow safe schemes and relative URLs; Preact does not reject javascript: hrefs. */
 const SAFE_SCHEMES = [ 'http:', 'https:', 'mailto:', 'tel:' ];
 
 export function safeUrl( value ) {

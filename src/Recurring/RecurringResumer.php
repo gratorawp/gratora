@@ -13,27 +13,9 @@ use FundKit\Gateways\SubscriptionAware;
 use Throwable;
 
 /**
- * Restarts paused plans when their pause window closes.
- *
- * `SubscriptionAware::pauseSubscription()` documents `$resumesAt` as honored,
- * but only Stripe can honor it. PayPal's suspend is indefinite, so without this
- * sweep a donor who clicks "skip this month" has in fact cancelled, behind a
- * next payment date the portal still shows them.
- *
- * Rather than teach each gateway to schedule its own resume, the schedule
- * lives here once and applies to all of them. Stripe will already have
- * restarted on its side by the time this runs; resuming twice is a no-op there
- * and still corrects the local status, so the sweep does not need to know
- * which gateways can do it themselves.
- *
- * Keyed on `resume_at` rather than on status, because the two portal actions
- * differ: "pause for N months" marks the plan paused, while "skip next payment"
- * leaves it active (one missed cycle is not a pause) and still needs the
- * gateway un-paused afterwards.
- *
- * Daily and self-healing: a missed run resumes on the next one rather than
- * leaving the plan stopped forever, which a one-shot scheduled action months
- * out would not survive.
+ * Resume plans daily by resume_at, including active plans that skipped a payment. PayPal cannot
+ * resume automatically; Stripe’s repeated resume is harmless. A missed sweep is retried the
+ * next day.
  *
  * @since 1.0.0
  */

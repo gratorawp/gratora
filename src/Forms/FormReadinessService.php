@@ -132,8 +132,7 @@ final class FormReadinessService
     }
 
     /**
-     * The recurring-toggle block silently vanishes at render time with fewer
-     * than 2 effective frequencies, so warn instead of publishing a phantom block.
+     * Warn when fewer than two effective frequencies hide the toggle.
      *
      * @since 1.0.0
      */

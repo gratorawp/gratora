@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Tests\Unit\Campaigns\Styling;
 
-use FundKit\Campaigns\Styling\AccentInk;
+use FundKit\Campaigns\Styling\Ink;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
  * the campaign chooses. Assuming the accent is dark is what puts white on
  * yellow, so the decision is measured rather than assumed.
  */
-final class AccentInkTest extends TestCase
+final class InkTest extends TestCase
 {
     /** @return array<string,array{0:string,1:bool}> accent, expects light ink */
     public function accents(): array
@@ -35,7 +35,7 @@ final class AccentInkTest extends TestCase
     /** @dataProvider accents */
     public function test_ink_is_chosen_against_the_accent(string $accent, bool $expectsLight): void
     {
-        $css = AccentInk::declarationsFor($accent);
+        $css = Ink::declarationsFor($accent);
 
         $this->assertStringContainsString(
             $expectsLight ? '--fundkit-on-accent:#ffffff' : '--fundkit-on-accent:#10162a',
@@ -46,7 +46,7 @@ final class AccentInkTest extends TestCase
 
     public function test_every_declaration_is_emitted_together(): void
     {
-        $css = AccentInk::declarationsFor('#211d3f');
+        $css = Ink::declarationsFor('#211d3f');
 
         $this->assertStringContainsString('--fundkit-on-accent:', $css);
         $this->assertStringContainsString('--fundkit-on-accent-muted:', $css);
@@ -61,7 +61,7 @@ final class AccentInkTest extends TestCase
      */
     public function test_an_unreadable_accent_yields_nothing(string $accent): void
     {
-        $this->assertSame('', AccentInk::declarationsFor($accent));
+        $this->assertSame('', Ink::declarationsFor($accent));
     }
 
     /** @return array<string,array{0:string}> */
@@ -75,5 +75,53 @@ final class AccentInkTest extends TestCase
             'nonsense'    => ['not-a-colour'],
             'short rgb'   => ['rgb(10, 20)'],
         ];
+    }
+
+    /**
+     * The amount tiles, the order summary and the secondary buttons sit on the
+     * soft ground, not on the page. The page ink is chosen against
+     * --fundkit-bg and knows nothing about this one.
+     */
+    public function test_the_soft_ground_gets_ink_of_its_own(): void
+    {
+        $css = Ink::softDeclarations(['fundkit-bg-soft' => '#101828', 'fundkit-accent' => '#452ef5']);
+
+        $this->assertStringContainsString('--fundkit-on-soft:#ffffff;', $css);
+        $this->assertStringContainsString('--fundkit-on-soft-muted:rgba(255,255,255,.72);', $css);
+    }
+
+    public function test_a_pale_soft_ground_gets_dark_ink(): void
+    {
+        $this->assertStringContainsString(
+            '--fundkit-on-soft:#10162a;',
+            Ink::softDeclarations(['fundkit-bg-soft' => '#f8fafb', 'fundkit-accent' => '#211d3f'])
+        );
+    }
+
+    /**
+     * The total is drawn in the accent. It reads on the shipped near-white
+     * ground and can vanish on a chosen one, so it stands down where it does
+     * not carry and is left alone where it does.
+     */
+    public function test_the_accent_keeps_the_total_where_it_reads(): void
+    {
+        $this->assertStringContainsString(
+            '--fundkit-on-soft-accent:#211d3f;',
+            Ink::softDeclarations(['fundkit-bg-soft' => '#f8fafb', 'fundkit-accent' => '#211d3f'])
+        );
+    }
+
+    public function test_the_accent_stands_down_where_it_does_not(): void
+    {
+        // Violet on this blue measures 2.5:1, so the total would be a smudge.
+        $this->assertStringContainsString(
+            '--fundkit-on-soft-accent:#10162a;',
+            Ink::softDeclarations(['fundkit-bg-soft' => '#05a2f0', 'fundkit-accent' => '#452ef5'])
+        );
+    }
+
+    public function test_an_unreadable_soft_ground_leaves_the_stylesheet_its_fallback(): void
+    {
+        $this->assertSame('', Ink::softDeclarations(['fundkit-bg-soft' => 'var(--wp--preset--color--x)']));
     }
 }

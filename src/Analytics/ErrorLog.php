@@ -27,7 +27,7 @@ final class ErrorLog
      */
     public const KEEP = 500;
 
-    /** Overhang tolerated before pruning, so the delete runs once per SLACK errors. */
+    /** Prune once per SLACK errors. */
     private const SLACK = 100;
 
     /**
@@ -69,8 +69,7 @@ final class ErrorLog
         $scoped = ['donor_id', 'donation_id', 'recurring_plan_id', 'campaign_id', 'form_id'];
 
         $recorder->record(self::PREFIX . $source, array_merge(
-            // Ids EventRecorder promotes to columns stay top level, so an error
-            // filters like any other event.
+            // Keep promoted event IDs at the top level for filtering.
             array_intersect_key($context, array_flip($scoped)),
             ['payload' => ['message' => mb_substr($message, 0, 1000)]
                 + array_diff_key($context, array_flip($scoped))]
@@ -93,8 +92,7 @@ final class ErrorLog
             return;
         }
 
-        // The id of the oldest error worth keeping. Deleting by id beats an
-        // OFFSET delete, which MySQL does not allow.
+        // Delete by ID; MySQL does not support OFFSET in DELETE.
         $oldestKept = Event::query()
             ->whereLike('type', self::PREFIX . '%')
             ->orderBy('id', 'DESC')
@@ -113,7 +111,7 @@ final class ErrorLog
     }
 
     /**
-     * Null before the container is up; the error_log line above still lands.
+     * Fall back to error_log before the container is ready.
      *
      * @since 1.0.0
      */

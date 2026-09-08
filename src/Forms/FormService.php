@@ -5,18 +5,14 @@ declare(strict_types=1);
 namespace FundKit\Forms;
 
 use FundKit\Campaigns\Campaign;
-use FundKit\Donations\Donation;
 use FundKit\Campaigns\CampaignRepository;
+use FundKit\Donations\Donation;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Recurring\RecurringPlan;
 use InvalidArgumentException;
 use RuntimeException;
 
-/**
- * Form CRUD. Lifecycle: draft, published, archived.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class FormService
 {
     /**
@@ -55,11 +51,7 @@ final class FormService
         );
     }
 
-    /**
-     * Translate the fixed required-block labels at read time (not const-time).
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private static function requiredLabel(string $label): string
     {
         return match ($label) {
@@ -160,8 +152,7 @@ final class FormService
     }
 
     /**
-     * The payment-gateways block is the single writer of
-     * settings.gateways.allowed. No block leaves the existing value alone.
+     * Only the gateway block writes settings.gateways.allowed; absence preserves it.
      *
      * @since 1.0.0
      */
@@ -365,11 +356,7 @@ final class FormService
         return null;
     }
 
-    /**
-     * Copy a form as a new draft.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function duplicate(Form $source): Form
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');
@@ -397,11 +384,7 @@ final class FormService
         return $copy;
     }
 
-    /**
-     * Clamp an arbitrary status string to a known lifecycle state.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private function coerceStatus(string $status): string
     {
         $status = strtolower(trim($status));
@@ -409,8 +392,7 @@ final class FormService
     }
 
     /**
-     * The same rule for a form that is already live, where the way out is not
-     * to add the block: it is to take the form off the page first.
+     * Reject edits that make a published form unpublishable.
      *
      * @since 1.0.0
      */
@@ -449,11 +431,7 @@ final class FormService
         );
     }
 
-    /**
-     * Resolve a required campaign id to a Campaign, or throw.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private function resolveCampaign(mixed $idOrNull): Campaign
     {
         $id = (int) ($idOrNull ?? 0);

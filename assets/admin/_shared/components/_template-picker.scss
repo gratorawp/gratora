@@ -1,7 +1,4 @@
-// Shared template-picker modal styles, worn by both the form picker and the
-// campaign page-layout picker so the two read as one feature. Imported by
-// campaigns.scss and forms/editor.scss, since those pages load separate CSS
-// bundles and the components live in _shared/components/.
+// Import in both campaign and form-editor bundles.
 
 .fundkit-template-picker {
     .components-modal__content { padding-top: 12px; }
@@ -101,8 +98,7 @@
     padding: 14px;
     overflow: hidden;
 
-    // Bands are sized in flat pixels and never shrink: a fuller form is a
-    // taller sheet, which is half of what tells two templates apart.
+    // Fixed-height bands preserve differences in template length.
     &__sheet {
         background: #fff;
         width: 100%;
@@ -114,8 +110,7 @@
         flex-direction: column;
         gap: 4px;
 
-        // No display here: a descendant selector outranks the single class on
-        // each band, and every one of them would lose its own layout.
+        // Do not set display here; it would override each band’s layout.
         > span {
             flex: none;
             min-height: 0;
@@ -184,8 +179,6 @@
 
         i.is-active { background: color-mix(in srgb, var(--thumb-accent) 14%, #fff); border-color: var(--thumb-accent); }
 
-        // A preset carrying impact copy is a two-register cell, and that taller
-        // silhouette is what separates a tiered form from a plain one.
         &.has-labels i {
             height: 15px;
             display: flex;
@@ -330,8 +323,7 @@
         i.is-on .box { background: var(--thumb-accent); border-color: var(--thumb-accent); }
     }
 
-    // The pages a wizard is hiding. Without them a stepped template is the
-    // shortest card in the grid, which reads as the emptiest.
+    // Show stacked pages so wizard thumbnails convey hidden content.
     &__ghost {
         display: flex;
         flex-direction: column;
@@ -400,24 +392,11 @@
     }
 }
 
-// Campaign page-layout thumbs.
-//
-// Drawn as miniatures of the page rather than as grey bars. The form picker
-// shows a small form because a form is one object; a campaign page is a
-// composition, so this shows the composition: an image, figures with a number
-// and a caption, a part-filled progress bar, donor rows with an avatar and an
-// amount, and the donation form with its amount tiles and button.
-//
-// One accent, the admin's, not the campaign's: on the real page every band
-// takes that campaign's colour, and picking one here to stand for all of them
-// would be a promise the page does not keep.
+// Use the admin accent for layout previews; campaign colors vary.
 $gctp-ink:  rgba(0, 0, 0, 0.13);
 $gctp-ink2: rgba(0, 0, 0, 0.09);
 $gctp-ink3: rgba(0, 0, 0, 0.06);
 
-// A photograph reads as a photograph. Drawn as a grey box these cards were
-// eight pictures of nothing, and half the templates differ only in where the
-// picture goes.
 $gctp-photo: linear-gradient( 152deg, #7c8593 0%, #3f4753 54%, #232932 100% );
 $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100% );
 
@@ -454,7 +433,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     &__side { flex: 0 0 36%; display: flex; }
 }
 
-// A heading.
 .gctp-title {
     display: block;
     height: 6px;
@@ -463,7 +441,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     background: $gctp-ink;
 }
 
-// Body copy.
 .gctp-text {
     display: flex;
     flex-direction: column;
@@ -477,7 +454,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     i:nth-child( 3 ) { width: 68%; }
 }
 
-// The campaign image.
 .gctp-media {
     flex: 0 0 30%;
     border-radius: 3px;
@@ -497,7 +473,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     }
 }
 
-// Progress: a track with the raised portion filled.
 .gctp-bar {
     display: block;
     flex: none;
@@ -509,7 +484,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     i { display: block; width: 62%; height: 100%; border-radius: 999px; background: $accent; }
 }
 
-// Figures: a number over its caption.
 .gctp-figures,
 .gctp-soft,
 .gctp-cards {
@@ -528,21 +502,18 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     .l { display: block; height: 3px; width: 54%; border-radius: 2px; background: $gctp-ink3; }
 }
 
-// The same figures, on a tinted panel.
 .gctp-soft {
     padding: 7px;
     border-radius: 4px;
     background: $accent-soft;
 }
 
-// Impact cards: each figure in its own tinted card.
 .gctp-cards > span {
     padding: 6px;
     border-radius: 4px;
     background: $accent-soft;
 }
 
-// A band in the campaign's colour, carrying figures and the progress bar.
 .gctp-accent {
     flex: 0 0 40%;
     display: flex;
@@ -562,7 +533,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     .bar i { display: block; width: 64%; height: 100%; border-radius: 999px; background: #fff; }
 }
 
-// The photo cover: the accent band's contents, reversed out over the picture.
 .gctp-cover {
     position: relative;
     flex: 0 0 44%;
@@ -581,8 +551,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
         color: rgba(255, 255, 255, .55);
     }
 
-    // The scrim the real cover carries, so the thumbnail explains why the text
-    // stays readable on a photograph.
     &::after {
         content: '';
         position: absolute;
@@ -607,7 +575,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     .bar i { display: block; width: 64%; height: 100%; border-radius: 999px; background: #fff; }
 }
 
-// Donor rows: avatar, name, amount.
 .gctp-list {
     display: flex;
     flex-direction: column;
@@ -620,7 +587,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     .amt  { width: 14px; height: 3px; border-radius: 2px; background: $gctp-ink; flex: none; }
 }
 
-// The donation form, the one part that is the same on every layout.
 .gctp-form {
     display: flex;
     flex-direction: column;
@@ -645,7 +611,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     .btn { display: block; height: 9px; border-radius: 2px; background: $accent; margin-top: auto; }
 }
 
-// Full-width footers.
 .gctp-wall {
     display: grid;
     grid-template-columns: repeat( 4, 1fr );
@@ -663,25 +628,19 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     i { flex: 1; border-radius: 3px; background: $gctp-ink3; }
 }
 
-// Rows across the whole thumb, for a layout whose lists sit under the columns
-// rather than inside one. Sized like the other footers so the main column
-// above it keeps the same proportions from card to card.
 .gctp-list.is-wide {
     flex: 0 0 20%;
     justify-content: space-between;
 }
 
 .fundkit-ctp {
-    // The form picker clamps its descriptions to two lines. Here the
-    // description IS the difference between one layout and the next, so a
-    // sentence cut in half costs the reader the thing they came to compare.
+    // Keep full descriptions so layout differences remain readable.
     .fundkit-template-picker__desc {
         display: block;
         -webkit-line-clamp: none;
         overflow: visible;
     }
 
-    // Sits under the description, so it needs to read as secondary to it.
     &__best {
         display: block;
         margin-top: 4px;
@@ -697,7 +656,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
 }
 
 
-// The split hero: the picture on one side, the readout on the other.
 .gctp-split {
     display: flex;
     gap: 4px;
@@ -708,7 +666,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     .gctp-accent { flex: .85 1 0; justify-content: center; }
 }
 
-// The row of links to the rest of the page.
 .gctp-nav {
     display: flex;
     gap: 4px;
@@ -725,8 +682,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     }
 }
 
-// The centred cover puts its headline in the middle rather than at the foot,
-// which is the whole of what separates that template from the poster.
 .gctp-cover.is-centred {
     .over {
         justify-content: center;
@@ -737,8 +692,6 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     .over .figs { justify-content: center; }
 }
 
-// A template whose whole page is dark says so here, because that is the thing
-// about it somebody is choosing.
 .fundkit-ctp__thumb.is-dark {
     background: #12161d;
     border-color: rgba(255, 255, 255, .12);

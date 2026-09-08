@@ -5,18 +5,8 @@ declare(strict_types=1);
 namespace FundKit\Foundation\Http;
 
 /**
- * Who is calling, for the purpose of counting them.
- *
- * REMOTE_ADDR is the only address the network guarantees, and it is what this
- * answers unless the site says otherwise. Behind a CDN or a reverse proxy it is
- * the proxy for every visitor, so a per-address cap becomes one bucket the
- * whole site shares: an attacker takes the donation form offline for everyone,
- * and on a busy day donors lock each other out with no attacker at all.
- *
- * The fix cannot be to read X-Forwarded-For, because anyone can send one. That
- * turns a cap that is too small into no cap at all, which is worse. A forwarded
- * header is read only when the hop that wrote it is an address the site has
- * declared as its own infrastructure.
+ * Trust REMOTE_ADDR unless it belongs to configured proxy infrastructure. Only then inspect
+ * forwarded headers to separate visitor quotas safely.
  *
  * @since 1.0.0
  */
@@ -52,11 +42,7 @@ final class ClientIp
         'private_ranges' => self::PRIVATE_RANGES,
     ];
 
-    /**
-     * The address to attribute this request to.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public static function resolve(): string
     {
         $remote = self::remote();
@@ -184,19 +170,8 @@ final class ClientIp
     }
 
     /**
-     * The first hop the chain does not attribute to our own infrastructure.
-     *
-     * X-Forwarded-For is appended left to right, so the leftmost entry is
-     * whatever the original caller sent and the rightmost are the ones our
-     * own hops wrote. Reading it from the left is the classic mistake, and it
-     * is exactly as exploitable as believing the header outright: a caller
-     * pre-populates it and the proxy appends beneath.
-     *
-     * Cloudflare sets this header like any other proxy, so it needs no case of
-     * its own. CF-Connecting-IP is deliberately not read: it would be believed
-     * on any trusted proxy, including one that does not set or strip it, and
-     * an nginx that forwards headers untouched would pass an attacker's
-     * straight through.
+     * Walk X-Forwarded-For from the trusted right end to the first untrusted hop. Ignore
+     * CF-Connecting-IP because other trusted proxies may forward it unfiltered.
      *
      * @param list<string> $trusted
      *
@@ -232,7 +207,7 @@ final class ClientIp
     }
 
     /**
-     * One hop, as an address. Entries arrive carrying ports and brackets.
+     * Strip ports and brackets from proxy hops.
      *
      * @since 1.0.0
      */

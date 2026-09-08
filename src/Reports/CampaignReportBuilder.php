@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace FundKit\Reports;
 
-use FundKit\Receipts\OrgProfile;
 use FundKit\Campaigns\Campaign;
 use FundKit\Campaigns\CampaignMetricsService;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Helpers\View;
+use FundKit\Receipts\OrgProfile;
 use FundKit\Receipts\PdfBuilder;
 
 /**
@@ -63,11 +63,7 @@ final class CampaignReportBuilder
         ]);
     }
 
-    /**
-     * Stable download filename shared by the command link and the streaming route.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public static function filename(int $campaignId, string $range): string
     {
         return sprintf('fundkit-campaign-%d-%s.pdf', $campaignId, $range);

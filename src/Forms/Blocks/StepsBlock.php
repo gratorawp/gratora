@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Forms\Blocks;
 
-/**
- * Multi-step wizard container block.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class StepsBlock implements Block
 {
     /** @since 1.0.0 */
@@ -28,10 +24,8 @@ final class StepsBlock implements Block
     }
 
     /**
-     * $content is the inner blocks' markup, rendered by WordPress before this
-     * callback runs, exactly as core's own container blocks receive it.
-     * Escaping it here would double-escape every child; each child escapes its
-     * own values at their interpolation points.
+     * WordPress renders and escapes child blocks before this callback; escaping $content would
+     * double-escape them.
      *
      * @since 1.0.0
      */

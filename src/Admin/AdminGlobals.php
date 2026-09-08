@@ -4,22 +4,18 @@ declare(strict_types=1);
 
 namespace FundKit\Admin;
 
-use FundKit\Settings\SettingsService;
 use FundKit\Campaigns\Styling\StylePresets;
-use FundKit\Currency\CurrencyFormats;
 use FundKit\Campaigns\Styling\Tokens;
+use FundKit\Currency\CurrencyFormats;
 use FundKit\Forms\FormService;
 use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Http\ClientIp;
-use FundKit\Foundation\Hooks\HookProvider;
 use FundKit\Foundation\Helpers\Money;
+use FundKit\Foundation\Hooks\HookProvider;
+use FundKit\Foundation\Http\ClientIp;
 use FundKit\Foundation\License\LicenseService;
+use FundKit\Settings\SettingsService;
 
-/**
- * Injects global FundKit JS config into admin pages.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class AdminGlobals extends HookProvider
 {
     /** @since 1.0.0 */
@@ -36,9 +32,7 @@ final class AdminGlobals extends HookProvider
     /** @since 1.0.0 */
     public function inject(): void
     {
-        // The slug is the reader's to type. Without the capability check,
-        // ?page=fundkit on any screen they may already open hands them the
-        // org's configuration and the site administrator's address.
+        // Check capabilities before exposing configuration through a user-controlled page slug.
         if (! $this->isFundKitAdminPage() || ! Capabilities::canAccessAdmin()) return;
 
         $currencyLocale = get_option('fundkit_currency_locale', []);
@@ -56,7 +50,6 @@ final class AdminGlobals extends HookProvider
                 : ['USD'],
             // Org-wide number format: admin JS reads from here; donor runtime gets it via shortcode config.
             'number_format' => Money::jsNumberFormat(),
-            // Presets the currency settings panel fills the format from.
             'currency_formats' => CurrencyFormats::all(),
             'wp' => [
                 'site_name'    => (string) get_bloginfo('name'),
@@ -76,10 +69,7 @@ final class AdminGlobals extends HookProvider
                 'groups'     => Tokens::groups(),
                 'defaults'   => Tokens::defaults(),
                 'presets'    => StylePresets::all(),
-                // The built-ins as they ship, before any user edit is merged in.
-                // Resetting a token in the brand editor restores the preset's
-                // own value from here (Bold's navy, the Site theme's theme.json
-                // accent), not the catalogue default that all presets share.
+                // Keep unmodified preset values so token resets restore the selected preset.
                 'builtins'   => array_values(array_filter(array_merge(
                     StylePresets::builtins(),
                     [StylePresets::themePreset()]
@@ -89,32 +79,19 @@ final class AdminGlobals extends HookProvider
             'forms' => [
                 'required_blocks' => FormService::requiredBlocks(),
             ],
-            // Which merge tags each email template may safely offer. Sent from
-            // PHP because the sender decides them, so the editor cannot drift
-            // into advertising a tag nobody fills.
+            // Use the sender’s merge-tag registry to keep editor suggestions valid.
             'email_template_tags' => SettingsService::templateTags(),
-            // Templates that ship outside core: the editor has no other way to
-            // learn they exist.
+            // Expose add-on email templates to the editor.
             'email_template_meta' => SettingsService::templateMeta(),
-            // What this reader may do, so a screen offers what its routes will
-            // accept rather than what its data happens to allow. Read through
-            // Capabilities::userCan, not current_user_can, so the answer here
-            // is the same one the REST gate gives, manage_options bypass and
-            // all. Keys drop the fundkit_ prefix; see assets/admin/_shared/caps.
+            // Match REST permissions, including the manage_options bypass. JS keys omit
+            // fundkit_.
             'can' => self::capabilities(),
-            // What is in front of this site, if the site has not said. The
-            // Spam protection screen turns this into one button, because the
-            // people who need the setting are not the people who know what a
-            // CIDR range is, and the ranges are ours to know rather than
-            // theirs to look up.
+            // Detect proxy defaults for the spam-protection settings.
             'detectedProxy' => ClientIp::undeclaredProxy(),
         ];
 
-        // A src-less handle in the head, so every screen bundle that reads
-        // window.fundkit finds it populated before it runs. All four HEX flags:
-        // TAG and AMP escape < > & so a value holding a closing script tag
-        // (the site name, say) cannot break out of the inline tag, and APOS
-        // and QUOT leave nothing quote-shaped for a reader to reason about.
+        // Populate window.fundkit before screen bundles run. HEX flags prevent inline-script
+        // breakout.
         $json = wp_json_encode(
             $payload,
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
@@ -136,9 +113,7 @@ final class AdminGlobals extends HookProvider
      */
     private static function capabilities(): array
     {
-        // Roles assigns capabilities, so only a full administrator may save it.
-        // Without this the tab renders for a settings manager, who can edit the
-        // grid and only learns it is refused on save.
+        // Only full administrators may assign roles, matching the save route.
         $can = ['manage_options' => current_user_can('manage_options')];
 
         foreach (Capabilities::all() as $cap) {
@@ -154,8 +129,7 @@ final class AdminGlobals extends HookProvider
     {
         $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
 
-        // The dashboard's slug is the bare "fundkit"; every other screen is
-        // "fundkit-something", so a prefix match alone would miss the dashboard.
+        // The dashboard uses the bare fundkit slug.
         return $page === 'fundkit' || strpos($page, 'fundkit-') === 0;
     }
 }

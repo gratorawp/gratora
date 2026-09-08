@@ -129,12 +129,7 @@ final class ReadinessService
      */
     private function gatewayCheck(): array
     {
-        // Asked of the registry, not a fixed list of names: an organization
-        // whose only payment method ships in an add-on can still take money.
-        //
-        // isOn() rather than canCharge(): a gateway the org switched off is
-        // never offered to a donor, so naming it here says money can arrive by
-        // a route that is closed.
+        // Check enabled registered gateways, including add-ons.
         $ready = [];
         foreach ($this->gateways->all() as $gateway) {
             if ($this->gateways->isOn($gateway->id())) {

@@ -1,17 +1,6 @@
 /**
- * Remembers how someone likes to look at a list: which columns, in what order,
- * sorted how, how many rows, and which filters they are working under. Saved
- * per user on the server rather than per browser, so it follows them between
- * machines the way the widget layout does.
- *
- * Not remembered: the search box and the page number. A search is how someone
- * finds one record, not how they like to look at the list.
- *
- * Column order is kept as an arrangement of EVERY column the screen has, with
- * visibility recorded separately. dataviews keeps only the visible list, so
- * hiding a column forgets where it sat and showing it again appends it to the
- * end; holding the full arrangement is what lets a column come back to its own
- * place, whether that place is the screen's or one the reader chose.
+ * Persist per-user list preferences across browsers, excluding search and page. Keep full
+ * column order separately from visibility so hidden columns retain their positions.
  */
 
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
@@ -30,13 +19,8 @@ const same = ( a, b ) => JSON.stringify( a ) === JSON.stringify( b );
 const sameMembers = ( a, b ) => a.length === b.length && a.every( ( id ) => b.includes( id ) );
 
 /**
- * The order the screen would show its columns in if they were all visible: the
- * default view first, since that is the arrangement the screen was designed
- * around, then anything defined but not shown by default.
- *
- * Deliberately NOT the field-definition order on its own. The donations screen
- * defines frequency second and status fifth while its default view shows them
- * the other way round, so definition order would move columns nobody touched.
+ * Order default-visible columns first, then hidden definitions; definition order alone can
+ * rearrange untouched columns.
  */
 function canonicalOrder( defaultFields, known ) {
 	const base = ( Array.isArray( defaultFields ) ? defaultFields : [] ).filter( ( id ) => known.includes( id ) );

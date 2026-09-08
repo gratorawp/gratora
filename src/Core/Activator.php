@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace FundKit\Core;
 
 use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Foundation\Uninstall\DataEraser;
 use FundKit\Foundation\Time\Clock;
+use FundKit\Foundation\Uninstall\DataEraser;
 use FundKit\Funds\Fund;
 use FundKit\Funds\FundRepository;
 

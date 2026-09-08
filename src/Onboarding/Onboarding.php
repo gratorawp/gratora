@@ -40,8 +40,7 @@ final class Onboarding extends HookProvider
     ];
 
     /**
-     * Kept separate from the redirect itself so the decision can be tested. The
-     * sending cannot: wp_safe_redirect is followed by exit.
+     * Separate the decision from wp_safe_redirect/exit for testing.
      *
      * @since 1.0.0
      */

@@ -9,8 +9,8 @@ use FundKit\Campaigns\Campaign;
 use FundKit\Donations\AggregateSyncer;
 use FundKit\Donations\Donation;
 use FundKit\Forms\Form;
-use FundKit\Recurring\RecurringPlan;
 use FundKit\Foundation\Batch\BatchProcessor;
+use FundKit\Recurring\RecurringPlan;
 
 /**
  * Moves donations, campaign + form default-fund pointers, and recurring-plan
@@ -185,8 +185,7 @@ final class FundReassignmentJob
     }
 
     /**
-     * Ensures every pending reassignment has a live Action Scheduler job.
-     * Re-enqueues any that were dropped. Safe to call on every admin funds load.
+     * Re-enqueue missing reassignment jobs; safe on every admin load.
      *
      * @since 1.0.0
      */

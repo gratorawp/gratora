@@ -130,10 +130,9 @@ final class StylePresets
             if (isset($savedById[$b['id']])) {
                 $saved  = $savedById[$b['id']];
                 $merged = $saved;
-                // Built-in flag is authoritative; preserve user-edited name + tokens.
+                // Preserve user edits to built-ins.
                 $merged['builtin'] = true;
-                // A built-in's label is a __() call, so it is never stored: an
-                // empty one here means "whatever this reader's locale calls it".
+                // Resolve built-in labels through translation on each read.
                 $merged['name'] = $merged['name'] !== '' ? $merged['name'] : $b['name'];
                 // Built-in tokens form the baseline; user-saved tokens override
                 // individual keys. Stops Tokens::sanitize() from silently
@@ -152,11 +151,9 @@ final class StylePresets
                 $out[] = $b;
             }
         }
-        // Append remaining customs in their saved order.
         foreach ($savedById as $p) {
             $p['builtin'] = false;
-            // A custom has no shipped label to fall back on, so its id is the
-            // one thing that identifies it in a picker.
+            // Fall back to the custom preset ID when unnamed.
             if ($p['name'] === '') $p['name'] = $p['id'];
             $out[] = $p;
         }
@@ -174,7 +171,6 @@ final class StylePresets
         $tokens = [];
 
         $palette = (array) (wp_get_global_settings(['color', 'palette']) ?? []);
-        // Flat list in modern WP; older WP returned ['theme' => [...]].
         $colors  = isset($palette[0]) ? $palette : ($palette['theme'] ?? []);
         $bySlug  = [];
         foreach ((array) $colors as $entry) {
@@ -268,11 +264,7 @@ final class StylePresets
         return $first ? (string) $first['id'] : 'classic';
     }
 
-    /**
-     * Coerce one preset record into a normalized shape.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private static function normalise(array $p): array
     {
         return [

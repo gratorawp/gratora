@@ -23,13 +23,8 @@ export function useBoundCampaign( campaignId ) {
         enabled: resolvedId > 0,
     } );
 
-    // A page keeps _fundkit_campaign_id after the campaign it names is deleted.
-    // Treating the meta alone as context hid the picker on a page that could no
-    // longer resolve a campaign at all, so the canvas said to pick one in a
-    // sidebar that was not offering the control.
-    // A reader who cannot fetch a campaign is not a reader whose campaign is
-    // gone: without this the page's own campaign was taken away from them and
-    // every block collapsed to "choose a campaign".
+    // Hide the picker only when the bound campaign exists. Distinguish missing campaigns from
+    // permission failures.
     const orphaned = canManageCampaigns() && postMetaId > 0 && hasResolved && ! record;
 
     // Blocks on a campaign landing page inherit its campaign, so there is

@@ -5,33 +5,29 @@ declare(strict_types=1);
 namespace FundKit\Rest;
 
 use FundKit\Foundation\Hooks\HookProvider;
-use FundKit\Rest\Admin\ExportsController as AdminExportsController;
-use FundKit\Rest\Admin\ToolsController as AdminToolsController;
 use FundKit\Rest\Admin\CampaignsController as AdminCampaignsController;
 use FundKit\Rest\Admin\CommandsController as AdminCommandsController;
 use FundKit\Rest\Admin\DashboardController as AdminDashboardController;
 use FundKit\Rest\Admin\DonationsController as AdminDonationsController;
 use FundKit\Rest\Admin\DonorsController as AdminDonorsController;
+use FundKit\Rest\Admin\ExportsController as AdminExportsController;
 use FundKit\Rest\Admin\FormsController as AdminFormsController;
 use FundKit\Rest\Admin\FundsController as AdminFundsController;
 use FundKit\Rest\Admin\FxController;
 use FundKit\Rest\Admin\NumberingController as AdminNumberingController;
 use FundKit\Rest\Admin\OnboardingController as AdminOnboardingController;
+use FundKit\Rest\Admin\PayPalKeysController;
+use FundKit\Rest\Admin\ReadinessController as AdminReadinessController;
 use FundKit\Rest\Admin\RecurringController as AdminRecurringController;
 use FundKit\Rest\Admin\ReportsController as AdminReportsController;
 use FundKit\Rest\Admin\RolesController as AdminRolesController;
 use FundKit\Rest\Admin\SettingsController as AdminSettingsController;
-use FundKit\Rest\Admin\PayPalKeysController;
-use FundKit\Rest\Admin\ReadinessController as AdminReadinessController;
 use FundKit\Rest\Admin\StripeKeysController;
+use FundKit\Rest\Admin\ToolsController as AdminToolsController;
 use FundKit\Rest\Admin\UserPrefsController as AdminUserPrefsController;
 use FundKit\Rest\Portal\PortalController;
 
-/**
- * Registers all REST route groups on rest_api_init.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class RestProvider extends HookProvider
 {
     /** @since 1.0.0 */

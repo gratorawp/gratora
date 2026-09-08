@@ -5,31 +5,27 @@ declare(strict_types=1);
 namespace FundKit\Foundation;
 
 use FundKit\Analytics\ErrorLog;
+use FundKit\Async\AsyncDispatcher;
 use FundKit\Campaigns\CampaignPermalinks;
 use FundKit\Core\Activator;
 use FundKit\Core\CoreModule;
 use FundKit\Donors\DonorRetention;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Foundation\Commands\CommandRegistry;
 use FundKit\Donors\Portal\PortalPage;
 use FundKit\Foundation\Auth\Capabilities;
+use FundKit\Foundation\Commands\CommandRegistry;
 use FundKit\Foundation\Container\Container;
 use FundKit\Foundation\Modules\ModuleManager;
+use FundKit\Foundation\Time\SystemClock;
 use FundKit\Foundation\Uninstall\DataEraser;
-use FundKit\Async\AsyncDispatcher;
 use FundKit\Foundation\Upgrade\MigrationLock;
 use FundKit\Foundation\Upgrade\SchemaGuard;
 use FundKit\Foundation\Upgrade\UpgradeJob;
 use FundKit\Foundation\Upgrade\UpgradeRunner;
-use FundKit\Foundation\Time\SystemClock;
 use FundKit\Funds\FundRepository;
+use FundKit\Gateways\GatewayManager;
 use FundKit\Onboarding\Onboarding;
 
-/**
- * Plugin singleton. Owns the Container and ModuleManager and runs the boot pipeline.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class Plugin
 {
     private static ?self $instance = null;
@@ -55,7 +51,7 @@ final class Plugin
     }
 
     /**
-     * Register and boot all modules. Idempotent.
+     * Idempotent.
      *
      * @since 1.0.0
      */
@@ -154,11 +150,7 @@ final class Plugin
         do_action('fundkit.booted', $self);
     }
 
-    /**
-     * The once-per-version schema pass.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public static function runSchemaGate(): void
     {
         // Anything thrown here reaches no handler and takes the front end
@@ -259,19 +251,8 @@ final class Plugin
     }
 
     /**
-     * The entry point WordPress calls, whose signature is not ours to choose.
-     *
-     * register_activation_hook passes $network_wide as the first argument, and
-     * pointing it straight at onActivation() read that as $fresh. Since it is
-     * always a bool, the `$fresh ??= ...` auto-detect in activate() never ran,
-     * and the answer was wrong in both directions: an ordinary single-site
-     * activation arrived as false, so a genuinely fresh install never stamped
-     * its upgrade routines done and left them to run later against tables no
-     * earlier release ever wrote; a network activation arrived as true, so an
-     * existing install stamped migrations it still needed as already applied.
-     *
-     * Every test bootstrap calls onActivation() with no arguments, which is the
-     * auto-detect path, so no suite could observe either.
+     * Accept WordPress’s $network_wide argument separately so activation can auto-detect
+     * $fresh.
      *
      * @since 1.0.0
      */
@@ -347,7 +328,6 @@ final class Plugin
         (new PortalPage())->ensure();
         update_option(PortalPage::OPTION_VERSION, FUNDKIT_VERSION, false);
 
-        // Register campaign rewrite and flush so permalinks resolve immediately.
         (new CampaignPermalinks())->addRule();
         flush_rewrite_rules();
 

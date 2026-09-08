@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Donors\Portal;
 
 use FundKit\Admin\ExtensionAssets;
+use FundKit\Campaigns\Styling\Ink;
 use FundKit\Campaigns\Styling\StylePresets;
 use FundKit\Campaigns\Styling\Tokens;
 use FundKit\Donations\AntiSpamGuard;
@@ -161,6 +162,10 @@ final class PortalShortcode extends HookProvider
             $vars[] = '--' . $name . ': ' . $v . ';';
         }
         if (empty($vars)) return '';
-        return '.fundkit-donor-portal{' . implode(' ', $vars) . '}';
+
+        $derived = Ink::declarationsFor((string) ($tokens['fundkit-accent'] ?? ''))
+            . Ink::softDeclarations($tokens);
+
+        return '.fundkit-donor-portal{' . implode(' ', $vars) . $derived . '}';
     }
 }

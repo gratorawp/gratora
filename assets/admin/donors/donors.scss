@@ -3,13 +3,11 @@
 @import '@fundkit/ui/scss/components/empty-state';
 @import '../_shared/plan-dialog';
 
-// Donor-profile-specific accent palette not in the shared tokens.
 $violet:        #7c5cff;
 $violet-soft:   #ede7fe;
 $rose:          #db2777;
 $rose-soft:     #fce7f3;
 
-// Insights tab bar-chart radius (used by the analytics widgets).
 $bar-radius:    6px;
 
 .fundkit-view-toggle {
@@ -84,8 +82,7 @@ $bar-radius:    6px;
 
 .fundkit-ltv-hist {
     display: grid;
-    // One row whatever the bucket count: auto-fit wraps the last bucket onto
-    // its own line, which reads as a broken chart rather than a distribution.
+    // Keep all histogram buckets in one row.
     grid-auto-flow: column;
     grid-auto-columns: minmax(0, 1fr);
     gap: 8px;
@@ -165,8 +162,7 @@ $bar-radius:    6px;
 }
 
 .fundkit-at-risk {
-    // Seven columns crowd a narrow admin. Why is last, so it is the first to
-    // sit off-edge; Donor and Email never move.
+    // Allow overflow while keeping Donor and Email first.
     &__scroll { overflow-x: auto; }
     .fundkit-table { min-width: 780px; }
 
@@ -182,8 +178,6 @@ $bar-radius:    6px;
     }
 }
 
-// One rule for both donor tables. They were separate and near-identical, and
-// had already drifted: only one of them coloured its donor links.
 .fundkit-table {
     width: 100%;
     font-size: 13px;
@@ -196,12 +190,10 @@ $bar-radius:    6px;
     }
     th:first-child, td:first-child { padding-left: 0; }
     th:last-child,  td:last-child  { padding-right: 0; }
-    // A right-aligned column ends hard against a left-aligned neighbour: the
-    // date and the reason pill met with nothing between them.
+    // Separate right-aligned dates from left-aligned reason labels.
     .fundkit-why { padding-left: 24px; }
     th { font-weight: 600; color: $text-muted; }
-    // A right-aligned amount sitting against a left-aligned date read as one
-    // value, so the trailing pair is right-aligned together.
+    // Align adjacent amounts and dates consistently.
     .fundkit-num, .fundkit-date { text-align: right; font-variant-numeric: tabular-nums; }
     a { color: $accent; text-decoration: none; }
     a:hover { text-decoration: underline; }
@@ -239,15 +231,10 @@ $bar-radius:    6px;
 
 
 .dp-shell {
-    // Token-sourced custom props consumed by inline styles in the profile
-    // tabs (RecurringTab/ActivityTab). Previously read undefined vars and fell
-    // back to hardcoded hex; defining them here keeps the tabs token-driven.
+    // Expose theme tokens to profile-tab inline styles.
     --text-muted: #{$text-muted};
     --amber:      #{$amber};
 
-    // No max-width or centring: every other admin screen runs the full width
-    // of the content area, and a profile floating in the middle reads as a
-    // different product from the list that opened it.
     color: $text;
     font-variant-numeric: tabular-nums;
 }
@@ -317,9 +304,7 @@ $bar-radius:    6px;
     }
 }
 
-// Buttons (re-scoped inside .dp-shell so we don't clash with WP)
-// .dp-shell for in-page buttons; .dp-modal because @wordpress/components Modal
-// portals its content to document.body, escaping the shell scope.
+// Include modal scope because WordPress portals into document.body.
 .dp-shell, .dp-modal {
     .btn {
         display: inline-flex; align-items: center; gap: 6px;
@@ -528,7 +513,6 @@ $bar-radius:    6px;
 .dp-sidebar > .dp-card { position: sticky; top: 16px; }
 .dp-main    { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
 
-// Card chrome (re-themed; .dp-card not .fundkit-widget)
 .dp-card {
     background: #fff;
     border: 1px solid $border-soft;
@@ -581,9 +565,7 @@ $bar-radius:    6px;
 .dp-id-top {
     display: flex; align-items: flex-start; gap: 12px;
 }
-// The picture lies over the initials rather than replacing them, so a donor
-// with no photo keeps their letters and a Gravatar that resolves to nothing
-// leaves them showing through. Same arrangement the campaign blocks use.
+// Overlay photos so missing Gravatars leave initials visible.
 .dp-avatar,
 .fundkit-row__avatar {
     position: relative;
@@ -631,9 +613,6 @@ $bar-radius:    6px;
     font-size: 12px;
     color: $text-muted;
     margin-top: 2px;
-    // Block-level, so the segment pill below starts its own line. Inline-flex
-    // let the pill sit against the type - "Individual  Champion" - and made
-    // the margin-top it already carries do nothing.
     display: flex; gap: 5px; align-items: center; flex-wrap: wrap;
 }
 .dp-id-status {
@@ -938,7 +917,6 @@ $bar-radius:    6px;
     line-height: 1.45;
 }
 
-// "See all activity" under the capped overview timeline.
 .dp-activity__see-all {
     display: inline-flex;
     align-items: center;
@@ -955,7 +933,6 @@ $bar-radius:    6px;
     &:hover { text-decoration: underline; }
 }
 
-// Event column in the full activity-log table: icon dot + label, note beneath.
 .dp-actlog__event {
     display: inline-flex;
     align-items: flex-start;
@@ -990,9 +967,7 @@ $bar-radius:    6px;
         display: flex; flex-direction: column; gap: 4px;
         font-size: 13px; color: $text-muted;
     }
-    // Input chrome comes from the shared .fundkit-input / .fundkit-select /
-    // .fundkit-textarea classes on the elements; only the invalid-state border is
-    // kept here, since those classes have no built-in error state.
+    // Shared inputs lack invalid-state borders.
     .fundkit-input[aria-invalid="true"] { border-color: $red; }
 
     &__country-wrap { position: relative; }
@@ -1097,7 +1072,6 @@ $bar-radius:    6px;
     border-top: 1px solid $border-soft;
     padding-top: 14px;
 
-    // textarea chrome comes from the shared .fundkit-textarea class on the element.
     &__error  { color: $red; font-size: 12.5px; margin-top: 6px; }
     &__actions{ display: flex; justify-content: flex-end; margin-top: 10px; }
 }
@@ -1179,7 +1153,7 @@ $bar-radius:    6px;
 }
 .dp-error { color: $red; }
 
-// Legacy scope (kept while we still mount older variants)
+// Retained for older mounted variants.
 .fundkit-donor-profile {
     display: flex;
     flex-direction: column;
@@ -1339,9 +1313,7 @@ $bar-radius:    6px;
         span { color: $text-muted; font-size: 13px; }
     }
 
-    // select. rather than a bare class: .fundkit-input sets width:100% and is
-    // ordered after this, so it fills the row and stops at wp-core-ui's
-    // select max-width of 25rem. One element outranks it.
+    // Use element specificity to outrank the later width:100% input rule.
     select#{&}__year {
         flex: 0 0 auto;
         width: auto;
@@ -1354,7 +1326,6 @@ $bar-radius:    6px;
     }
 }
 
-// Said above a list that holds fewer rows than the tab badge counts.
 .dp-tab-note {
     margin: 0 0 12px;
     color: var(--fundkit-text-muted, #6b7280);

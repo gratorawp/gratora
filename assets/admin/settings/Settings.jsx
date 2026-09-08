@@ -107,17 +107,7 @@ export function SettingsGroup( { of, children } ) {
     return children;
 }
 
-/**
- * The panel's own shape while its settings arrive.
- *
- * A line of text sets nothing aside, so the screen jumped once the real card
- * landed, and on a slow request an almost-empty page reads as a broken one
- * rather than as work still happening. This holds the space the card is about
- * to take.
- *
- * The shapes carry no meaning, so they are hidden from assistive technology and
- * the status message is what it announces instead.
- */
+/** Reserve panel space while loading; hide decorative skeletons from assistive technology. */
 function PanelSkeleton() {
     return (
         <>
@@ -189,13 +179,7 @@ export default function Settings() {
         // Also correct the tab chosen at mount, before add-on tabs existed.
         onHash();
 
-        // And the same correction for ?tab=, which initialTab() accepts but can
-        // only validate against the core tabs. Without this, ?tab=receipts
-        // works and ?tab=gift-aid silently lands on Setup: the query form is
-        // honoured for core tabs and ignored for every add-on one. Nothing in
-        // the UI writes these URLs (jumpTo writes the hash), so the ones that
-        // exist are hand-written, which is exactly where a silent
-        // near-miss costs the most. Hash still wins when both are present.
+        // Resolve ?tab= against add-on tabs too; the hash takes precedence.
         if ( ! read() ) {
             const q = new URLSearchParams( window.location.search ).get( 'tab' );
             if ( q && known( q ) ) setTab( q );

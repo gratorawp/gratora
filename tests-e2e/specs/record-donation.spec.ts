@@ -97,10 +97,7 @@ test.describe('record a donation', () => {
     });
 
     test('a campaign list that cannot be read says so', async ({ page }) => {
-        // What a bookkeeper role without fundkit_manage_campaigns used to get was a
-        // blank picker, so every donation they recorded went uncategorised. The
-        // route is faked rather than the role, because the failure to surface is
-        // the fetch failing, whatever the reason.
+        // Mock the picker request failure directly; reproducing the role is unnecessary.
         await page.route('**/fundkit/v1/admin/donations/campaign-options*', (route) =>
             route.fulfill({ status: 403, contentType: 'application/json', body: '{"code":"forbidden"}' })
         );

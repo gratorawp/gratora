@@ -1,5 +1,3 @@
-// FundKit first-run onboarding. Full-page chrome stripped via the
-// `fundkit-onboarding-fullscreen` body class (added by OnboardingPage).
 
 @import '@fundkit/ui/scss/tokens';
 @import '../_shared/admin-base';
@@ -7,7 +5,7 @@
 @import '@fundkit/ui/scss/components/searchable-select';
 @import '@fundkit/ui/scss/components/skeleton';
 
-// Aliases for legacy local names still used inside this file.
+// Aliases for shared token names still used locally.
 $shadow-card:   $shadow-md;
 $shadow-lifted: $shadow-lg;
 
@@ -29,16 +27,12 @@ body.fundkit-onboarding-fullscreen {
     }
     html.wp-toolbar { padding-top: 0 !important; }
 
-    // Strip update notices, error banners, etc. that try to inject into the
-    // top of the admin area.
     .update-nag,
     .notice,
     .updated,
     .error { display: none !important; }
 
-    // WP admin's forms.css applies a global box-shadow + grey border to every
-    // <input>/<select>/<textarea>. Override at body-class specificity so our
-    // onboarding inputs render with our own chrome.
+    // Outrank wp-admin’s global input styles.
     .fundkit-onboarding__input,
     .fundkit-searchable__input {
         border: 1px solid $border-mid;
@@ -70,9 +64,6 @@ body.fundkit-onboarding-fullscreen {
     display: flex;
     flex-direction: column;
     align-items: center;
-    // Center the whole stack (top bar + frame) vertically as a unit so the
-    // brand mark + Skip link sit right above the card instead of flying off
-    // to the top of the viewport on tall screens.
     justify-content: center;
     gap: 16px;
 
@@ -88,8 +79,6 @@ body.fundkit-onboarding-fullscreen {
         flex-shrink: 0;
         transition: max-width .2s ease;
 
-        // Track the frame's width on wide steps (Brand + Gateway) so the
-        // brand mark + Skip link sit flush with the card edges.
         &.is-wide { max-width: 720px; }
     }
 
@@ -100,9 +89,6 @@ body.fundkit-onboarding-fullscreen {
         font-weight: 600;
         color: $text;
     }
-    // .fundkit-onboarding__brand-mark is rendered by the shared <FundKitMark/>
-    // component with inline styles, so no chip rules live here. We only
-    // own the wordmark next to it.
     &__brand-name { font-size: 15px; }
 
     &__skip {
@@ -180,10 +166,7 @@ body.fundkit-onboarding-fullscreen {
         margin: 0 0 28px;
     }
 
-    // Form inputs. The selectors are scoped tightly so WP admin's global
-    // `input[type="text"]` reset (margin, box-shadow, border-color) doesn't
-    // override the onboarding styling; `body.fundkit-onboarding-fullscreen`
-    // wins on specificity.
+    // Body-class specificity overrides wp-admin’s input reset.
     &__input {
         width: 100%;
         padding: 10px 12px;
@@ -280,7 +263,7 @@ body.fundkit-onboarding-fullscreen {
         &.is-selected {
             border-color: $accent;
             border-width: 2px;
-            // 2px border + 9px pad == 1px + 10px: content box fixed, no reflow.
+            // Offset border width with padding to prevent reflow.
             padding: 9px;
         }
         &.is-disabled {
@@ -382,8 +365,6 @@ body.fundkit-onboarding-fullscreen {
         line-height: 1.45;
     }
 
-    // Preview section under the preset grid (renders a sample donation card
-    // styled with the chosen preset's tokens applied as CSS variables).
     &__preview {
         margin-top: 24px;
         padding-top: 20px;
@@ -398,8 +379,7 @@ body.fundkit-onboarding-fullscreen {
         margin-bottom: 12px;
     }
 
-    // The real donation-form runtime, iframed for true WYSIWYG. The form
-    // themes itself; this is just the framed viewport.
+    // The iframe runtime owns form styling.
     &__preview-frame {
         display: block;
         width: 100%;
@@ -412,7 +392,6 @@ body.fundkit-onboarding-fullscreen {
 
     &__preview-stage { position: relative; }
 
-    // Covers the blank iframe until the preview HTML has loaded.
     &__preview-skeleton {
         position: absolute;
         inset: 0;
@@ -424,7 +403,6 @@ body.fundkit-onboarding-fullscreen {
         animation: fundkit-skeleton-pulse 1.4s ease-in-out infinite;
     }
 
-    // Shown when the preview request fails; the brand choice is still saved.
     &__preview-fallback {
         display: flex;
         flex-direction: column;
@@ -440,8 +418,7 @@ body.fundkit-onboarding-fullscreen {
         font-size: 14px;
     }
 
-    // Full-width so CauseStep's user-type tiles and cause select span the
-    // frame instead of being squeezed into the FormRow 35%/1fr layout.
+    // Override FormRow’s split layout for full-width cause controls.
     &__section {
         padding: 14px 0;
 
@@ -715,8 +692,6 @@ body.fundkit-onboarding-fullscreen {
         padding-top: 20px;
         border-top: 1px solid $border-soft;
 
-        // Welcome + Finish have no Back button, so center the single CTA
-        // and drop the divider rule entirely.
         &--centered {
             justify-content: center;
             margin-top: 24px;
@@ -736,11 +711,7 @@ body.fundkit-onboarding-fullscreen {
 
 }
 
-// @fundkit/ui's admin base restates border-radius on :focus, to win back the shape
-// wp-admin's a:focus steals when .fundkit-btn renders as an anchor. It restates one
-// radius, so a pill flattens to 8px the moment it is clicked. Its selector ties
-// with a plain .fundkit-onboarding .fundkit-btn:focus and wins on order, so this needs
-// the extra element to outrank it.
+// Add element specificity to outrank the shared anchor-focus radius.
 body .fundkit-onboarding .fundkit-btn:focus,
 body .fundkit-onboarding .fundkit-btn:active { border-radius: 999px; }
 

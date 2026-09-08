@@ -6,17 +6,11 @@ namespace FundKit\Admin;
 
 use FundKit\Foundation\Hooks\HookProvider;
 
-/**
- * Replaces the admin footer text on FundKit screens with a review prompt.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class AdminFooter extends HookProvider
 {
     /**
-     * The directory permalink, which is also the text domain and the folder
-     * the packaged zip installs to. Change all four together or the review
-     * link points at a plugin page that does not exist.
+     * Keep this slug in sync with the text domain, package folder, and directory permalink.
      *
      * @since 1.0.0
      */

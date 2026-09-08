@@ -7,12 +7,7 @@ namespace FundKit\Campaigns\Blocks;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Responsive card grid of other published campaigns ("more ways to give" section
- * or a standalone browse page).
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CampaignGridBlock extends CampaignBlock
 {
     /** @since 1.0.0 */
@@ -24,7 +19,7 @@ final class CampaignGridBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function attributes(): array
     {
-        // campaignId here means "the campaign to exclude" (the current one).
+        // campaignId excludes the current campaign.
         return $this->campaignIdAttr() + [
             'count'   => ['type' => 'integer', 'default' => 3],
             'orderBy' => ['type' => 'string',  'default' => 'recent'],
@@ -33,7 +28,6 @@ final class CampaignGridBlock extends CampaignBlock
         ];
     }
 
-    /** What a card shows where an amount-goal card shows the amount raised. */
     private static function cardValue(string $type, int $current, string $currency): string
     {
         return match ($type) {
@@ -129,8 +123,7 @@ final class CampaignGridBlock extends CampaignBlock
         return View::loadRelative(__DIR__, 'views/campaign-grid', [
             'heading' => $heading,
             'cards'   => $cards,
-            // The grid's own chrome follows the campaign the page is about.
-            // Each card keeps its own accent, since a card is another campaign.
+            // Use page styling for the grid and each campaign’s accent for its card.
             'styleVars' => $this->styleVars($this->resolveCampaign($attrs)),
         ]);
     }

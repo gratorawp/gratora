@@ -6,9 +6,9 @@ namespace FundKit\Rest\Admin;
 
 use FundKit\Analytics\ErrorLog;
 use FundKit\Foundation\Auth\Capabilities;
+use FundKit\Gateways\GatewayTransportException;
 use FundKit\Gateways\PayPal\PayPalAccount;
 use FundKit\Gateways\PayPal\PayPalApi;
-use FundKit\Gateways\GatewayTransportException;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -282,11 +282,7 @@ final class PayPalKeysController
         );
     }
 
-    /**
-     * Drop the webhook id for one mode, leaving the credentials on file.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function removeWebhookId(WP_REST_Request $request): WP_REST_Response
     {
         $test = $request->get_param('mode') === 'test';

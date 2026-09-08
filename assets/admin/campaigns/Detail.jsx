@@ -2216,10 +2216,8 @@ function DefaultsPanel( { c, forms, funds } ) {
                                  A draft here reads as set and does nothing. */ }
                             { forms
                                 .filter( ( f ) => f.status === 'published'
-                                    // A default set before this rule, kept
-                                    // visible and labelled, so the select does
-                                    // not quietly show a different form as this
-                                    // campaign's default.
+                                    // Keep an ineligible saved default visible rather than
+                                    // silently selecting another form.
                                     || Number( f.id ) === Number( c.value( 'default_form_id', 0 ) ) )
                                 .map( ( f ) => (
                                     <option key={ f.id } value={ f.id }>

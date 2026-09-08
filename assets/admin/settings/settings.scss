@@ -1,11 +1,9 @@
-// Settings page styles.
 
 @import '../campaigns/campaigns.scss';
-// ConfirmDialog (Numbering counters, Receipts preview, Stripe disconnect) needs
-// the @fundkit/ui dialog chrome; the JS import alone ships no CSS.
+// ConfirmDialog requires CSS in addition to its JS import.
 @import '@fundkit/ui/scss/components/dialog';
 
-// Aliases for legacy local names still referenced inside this file.
+// Aliases for shared token names still used locally.
 $border: $border-mid;
 
 .fundkit-settings-page {
@@ -130,8 +128,7 @@ $border: $border-mid;
     gap: 0;
     overflow: visible;
 
-    // Wraps rather than scrolls: a hidden horizontal scroller meant the last
-    // tabs simply were not there once add-ons started registering their own.
+    // Wrap add-on tabs so none disappear offscreen.
     &__scroll {
         display: flex;
         flex: 1;
@@ -160,7 +157,6 @@ $border: $border-mid;
 
         &:hover { color: $text; }
 
-        // Override WP admin's global a:focus box-shadow/outline.
         &:focus { outline: none; box-shadow: none; }
         &:focus-visible {
             outline: 2px solid $accent;
@@ -254,9 +250,7 @@ $border: $border-mid;
     font-size: 11.5px;
     font-weight: 500;
 
-    // This screen keeps its own base rule (roomier padding, no leading dot)
-    // and does not import admin-base, so it carries its own copy of the
-    // colour modifiers. Every other screen gets them from @fundkit/ui.
+    // This screen does not import admin-base, so it needs local pill modifiers.
     &--green { background: $accent-soft; color: $accent-dark; }
     &--amber { background: $amber-soft;  color: $amber; }
     &--red   { background: $red-soft;    color: $red; }
@@ -337,9 +331,6 @@ $border: $border-mid;
     &--paypal { background: linear-gradient(135deg, #009cde 0%, #003087 100%); }
     &--offline { background: linear-gradient(135deg, #475569 0%, #334155 100%); }
 
-    // Gateways that ship in the payments add-on. The gradients live here
-    // because the mark itself does: an add-on should not have to restate the
-    // shape of a badge to use one.
     &--authorize-net { background: linear-gradient(135deg, #0f8ddb 0%, #0a5f96 100%); }
     &--square        { background: linear-gradient(135deg, #3e4348 0%, #1a1d20 100%); }
     &--gocardless    { background: linear-gradient(135deg, #f45d48 0%, #d13c27 100%); }
@@ -468,7 +459,6 @@ $border: $border-mid;
     &__saved &__actions { margin-top: 0; }
 }
 
-// Setup screen: one status strip over grouped readiness rows.
 .fundkit-readiness {
     &__head {
         display: flex;
@@ -946,8 +936,6 @@ $border: $border-mid;
     display: flex;
     align-items: center;
     gap: 14px;
-    // Bleeds to the card's edges (its body padding is 16px 20px 20px) so the
-    // hover band reads as a row of the list rather than a slab floating in it.
     padding: 14px 20px;
     margin-inline: -20px;
     width: auto;
@@ -1023,9 +1011,6 @@ $border: $border-mid;
     &:hover &__recipient { background: #fff; }
 }
 
-// What a reference will look like, on the Numbering tab. The prefix and year
-// are the operator's own and stay quiet; the counter is the only part that
-// moves, and the controls for it sit directly below, so it carries the weight.
 .fundkit-ref-previews {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1187,11 +1172,7 @@ $border: $border-mid;
     }
 }
 
-// Settings pages contain their own Cards inside `.fundkit-panel`, so the
-// outer panel chrome inherited from campaigns.scss (white bg, border,
-// shadow, padding) would make those Cards look nested. Strip it for any
-// `.fundkit-panel` that sits inside the settings page; dashboard/campaign
-// widget panels still get the card treatment unchanged.
+// Settings cards provide their own frame; remove the inherited panel frame.
 .fundkit-settings-page {
     .fundkit-panel {
         background: transparent;
@@ -1200,18 +1181,13 @@ $border: $border-mid;
         padding: 0;
     }
 
-    // Re-skin WP components (ToggleControl, primary buttons, focus rings,
-    // etc.) from the default WP admin blue to the FundKit accent. WP reads
-    // `--wp-admin-theme-color` for all of these.
+    // WordPress components read --wp-admin-theme-color.
     --wp-admin-theme-color:           #{$accent};
     --wp-admin-theme-color--rgb:      33, 29, 63;
     --wp-admin-theme-color-darker-10: #{$accent-dark};
     --wp-admin-theme-color-darker-20: #{$accent-dark};
 
-    // Suppress the browser-default focus outline on mouse clicks. It's
-    // rectangular and doesn't follow border-radius on anchors / many buttons,
-    // which is why a click on a rounded tab or pill looks like it grows a
-    // square border. Keyboard nav (:focus-visible) is left untouched.
+    // Suppress pointer outlines while retaining :focus-visible.
     *:focus:not(:focus-visible) { outline: none; box-shadow: none; }
 }
 

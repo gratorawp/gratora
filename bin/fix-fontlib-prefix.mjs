@@ -1,15 +1,6 @@
 /**
- * Finish the prefixing Strauss cannot do for php-font-lib.
- *
- * The library builds two class names by concatenation, `"FontLib\\$class"` and
- * `"FontLib\\$type\\TableDirectoryEntry"`. Only a fragment of the namespace is
- * a literal, so a rewriter matching whole names leaves them alone, and the
- * prefixed copy then asks the autoloader for a class that no longer exists.
- * Nothing shows this until a PDF is rendered, where it surfaces as
- * `Class "FontLib\TrueType\File" not found`.
- *
- * Exits non-zero when it finds nothing to do, because a silent success here
- * means the next release quietly ships a receipt path that fatals.
+ * Prefix php-font-lib’s dynamically constructed class names that Strauss cannot rewrite. Fail
+ * if no targets match so dependency changes require review.
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';

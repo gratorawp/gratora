@@ -7,11 +7,7 @@ namespace FundKit\Forms;
 use FundKit\Donations\DonationIntent;
 use RuntimeException;
 
-/**
- * Registry of form type handlers keyed by type identifier.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class FormTypeRegistry
 {
     /** @var array<string,FormTypeHandler> */

@@ -127,7 +127,6 @@ export function useFundKitSettings( group ) {
     };
 }
 
-// helpers
 
 function deepMerge( a, b ) {
     if ( ! isPlainObject( a ) ) a = {};

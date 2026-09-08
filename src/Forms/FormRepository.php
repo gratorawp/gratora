@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Forms;
 
-/**
- * Thin repository over the Form model.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class FormRepository
 {
     /** @since 1.0.0 */
@@ -49,11 +45,7 @@ final class FormRepository
             ->get();
     }
 
-    /**
-     * Whether a slug is taken, optionally ignoring one form id.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function slugExists(string $slug, ?int $exceptId = null): bool
     {
         $q = Form::query()->where('slug', $slug);

@@ -20,9 +20,7 @@ import ReceiptsTab from './profile/tabs/ReceiptsTab';
 import NotesTab from './profile/tabs/NotesTab';
 import ConsentTab from './profile/tabs/ConsentTab';
 
-// Permissive phone shape: digits, +, spaces, dashes, parentheses. We don't
-// enforce E.164 here because donors paste freeform numbers from many regions;
-// strict validation belongs at integration boundaries (Stripe, SMS gateways).
+// Accept freeform international phone numbers; integrations enforce stricter formats.
 const PHONE_RE = /^[+\d][\d\s().\-]{4,30}$/;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -52,9 +50,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
         ...s,
         address: { ...s.address, [ k ]: e.target.value },
     } ) );
-    // The reader's own language, the way the identity card beside this form
-    // already reads it: two names for one country on one screen is worse than
-    // either.
+    // Match the profile card’s localized country names.
     const countries = useMemo( () => localizedCountries(), [] );
     const [ countryQuery, setCountryQuery ] = useState( () => countryName( donor.country ) );
     const [ countryOpen, setCountryOpen ] = useState( false );
@@ -86,7 +82,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
     };
 
     const submit = async ( e ) => {
-        // The footer lives outside the form element, so it calls this directly.
+        // The footer sits outside the form.
         if ( e ) e.preventDefault();
         if ( phoneInvalid ) {
             setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'fundraising-toolkit' ) );
@@ -270,14 +266,12 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     { error && <div className="dp-edit-form__error">{ error }</div> }
-                    { /* Submit stays in the form so Enter still saves, but it is
-                         not shown: the dialog footer carries the real buttons. */ }
+                    { /* Keep a hidden submit button for Enter-key submission. */ }
                     <button type="submit" style={ { display: 'none' } } aria-hidden="true" tabIndex={ -1 } />
                 </form>
             </Dialog>
 
-            { /* Outside the dialog, so the email-change confirmation stacks on
-                 top of it rather than inside its scrolling body. */ }
+            { /* Mount outside the dialog so confirmation overlays its scrolling body. */ }
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </>
     );
@@ -313,9 +307,7 @@ export default function DonorProfile( { id, onBack } ) {
 
     if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'fundraising-toolkit' ) }</p>;
 
-    // Only when there is nothing to fall back to: a refresh that fails after a
-    // note or a plan change must not replace the whole profile with one line,
-    // leaving nothing on screen that could ask again.
+    // Keep loaded data and retry controls after refresh failures.
     if ( error && ! data ) {
         return (
             <div className="dp-shell">
@@ -342,9 +334,7 @@ export default function DonorProfile( { id, onBack } ) {
 
     const tabCounts = {
         activity:  null,
-        // Counts what the tab lists, which includes test donations.
-        // donations_count is live-only, so it read zero for a donor who has
-        // only rehearsed while the tab under it showed their rows.
+        // Match the tab’s count, including test donations.
         donations: donationsTotal || null,
         recurring: recurring.plans.length || null,
         receipts:  receiptsTotal || null,

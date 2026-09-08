@@ -51,23 +51,8 @@ final class DataExporter
     ];
 
     /**
-     * Deliberately absent, and each for its own reason.
-     *
-     * fundkit_system_settings holds encryption_key_v1, email_pepper_v1,
-     * form_signing_secret_v1, ip_salt_v1 and gateway credentials. An export is
-     * a file people email to support and commit to repositories; the keys to
-     * every encrypted column in the database cannot travel that way.
-     *
-     * fundkit_magic_link_tokens are live credentials. Anyone holding the file
-     * could sign in as any donor until they expired.
-     *
-     * fundkit_pending_signups are addresses somebody typed that nobody has
-     * proven, and they expire in a week. Carrying them to another site would
-     * import strangers' claims as if the organization had collected them.
-     *
-     * fundkit_form_donation_stats and fundkit_events are derived or observational.
-     * The stats are recomputed on import; the log describes what happened on
-     * one site, not what the organization owns.
+     * Exclude secrets, live login tokens, and unverified signups. Recompute donation stats on
+     * import; event logs remain site-local.
      */
     private const SKIP = [
         'fundkit_system_settings',

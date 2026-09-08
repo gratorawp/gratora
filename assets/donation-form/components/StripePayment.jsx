@@ -167,7 +167,6 @@ export default function StripePayment( { config, payment, dispatch } ) {
     );
 }
 
-/** Map the form's themed CSS vars onto the Payment Element where they exist. */
 function stripeVars( el ) {
     try {
         // --fundkit-accent is set on the .fundkit-donation-form element and inherits

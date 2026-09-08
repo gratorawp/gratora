@@ -35,12 +35,7 @@ final class OpenTheDefaultFund implements UpgradeRoutine
         return __('Reopening the default fund. Donations already filed against another fund stay where they are.', 'fundraising-toolkit');
     }
 
-    /**
-     * A handful of rows, so there is nothing to page: it runs once and reports
-     * itself done.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function step(): bool
     {
         $flagged = Fund::query()->where('is_default', 1)->orderBy('id', 'ASC')->getAll();

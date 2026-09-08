@@ -7,11 +7,7 @@ namespace FundKit\Forms\Blocks;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Donation amount block with preset tiers and optional custom input.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DonationAmountBlock implements Block
 {
     /** @since 1.0.0 */

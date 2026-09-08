@@ -20,21 +20,8 @@ final class FxRates
     public const OPTION = 'fundkit_fx_rates';
 
     /**
-     * Past this age a snapshot is unfit to be stamped onto money.
-     *
-     * The rate a donation converts at is written into fx_rate and
-     * base_amount_cents and never revisited, so an old rate is not a stale
-     * screen, it is a wrong figure in the books for good. The donation is still
-     * never refused for it: money is not gated on reporting being configured,
-     * and declining to convert would leave base_amount_cents null, which every
-     * rollup scores as zero and so understates by the whole donation rather
-     * than by the drift. What the bound buys is that the site says so, in the
-     * log an owner can actually reach, every day it keeps happening.
-     *
-     * Seven days: the ECB publishes on TARGET business days, so a snapshot
-     * legitimately sits out a weekend, and a weekend either side of a holiday
-     * closure reaches four. Seven clears every ordinary gap and still catches a
-     * fetch that has genuinely stopped within a week of it stopping.
+     * Warn after seven days without a current rate, allowing normal ECB holiday gaps. Keep
+     * accepting and converting donations; report stale rates in the log.
      */
     public const STAMP_MAX_AGE_DAYS = 7;
 
@@ -123,22 +110,9 @@ final class FxRates
     }
 
     /**
-     * Of the currencies given, the ones with no usable rate to the org's base.
-     *
-     * A donation in such a currency is still accepted (money is never gated on
-     * reporting being configured), but it stores no base_amount_cents and so
-     * contributes nothing to any base-currency total. That is invisible unless
-     * something says so, which is what this is for: the settings screen warns
-     * before an admin offers the currency, and the reports say how many rows
-     * are missing.
-     *
-     * Asked the way the money path asks it - rate(code, org base), the same
-     * call DonationService converts with - rather than whether the snapshot
-     * carries a row for the code. The two answers only part when the snapshot
-     * is denominated in some other base, which is where the warning matters
-     * most: every rate in it is then unreachable from the org's own currency,
-     * so every foreign donation records nothing, and reading the snapshot's own
-     * table would report the whole set as healthy.
+     * Check rates against the org base, as DonationService does. Snapshot membership alone
+     * misses base mismatches; unavailable conversions leave donations outside base-currency
+     * totals.
      *
      * @param list<string> $codes
      * @return list<string> upper-cased, in the order given
@@ -213,19 +187,9 @@ final class FxRates
     }
 
     /**
-     * Fetched rates + manual overrides (manual wins) + base at unity.
-     *
-     * Every value here is denominated in the snapshot's base, an override
-     * included. An override is typed against the org's base, on a screen
-     * labelled with it, so the two have to be the same currency, and that is
-     * kept true at each of the three points the base can move rather than
-     * assumed: FxRatesUpdater::rebase() restates the whole snapshot in one
-     * step, fetchAndStore() refuses to carry overrides into a base they were
-     * not typed against, and saveSettings() refuses a write that declares an
-     * older frame. Restating an override here instead would not survive the
-     * round trip: the settings screen posts back the number it was shown, so
-     * the correction lands again on the value it produced at the next save, and
-     * each step is stamped into the fx_rate of every donation taken in between.
+     * Merge rates in the snapshot base, with manual overrides taking precedence. Rebase and
+     * validate overrides on writes; converting on reads would compound adjustments on settings
+     * saves.
      *
      * @param array<string,mixed> $d
      * @return array<string,float>
@@ -333,19 +297,8 @@ final class FxRates
     }
 
     /**
-     * True when the daily refresh has stopped, which is the thing an admin can
-     * actually act on.
-     *
-     * Measured on fetched_at, not date. `date` is the ECB publication day
-     * copied out of the response, and the ECB publishes only on TARGET
-     * business days, so a perfectly healthy snapshot carries Friday's date
-     * until Monday's publication, three days, every single week, and five over
-     * a holiday closure. Reporting that as stale meant the only in-admin FX
-     * health signal cried wolf every weekend, so nobody could use it to notice
-     * a refresh that had genuinely stopped.
-     *
-     * fetched_at moves every day the cron succeeds, weekend included, so it
-     * separates "our fetch has stopped" from "the ECB has not published".
+     * Measure refresh health by fetched_at; the ECB publication date legitimately lags over
+     * weekends and holidays.
      *
      * @since 1.0.0
      */

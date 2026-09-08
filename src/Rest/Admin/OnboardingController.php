@@ -6,14 +6,13 @@ namespace FundKit\Rest\Admin;
 
 use FundKit\Onboarding\Onboarding;
 use FundKit\Settings\SettingsService;
+use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
-use WP_Error;
 
 /**
- * First-run onboarding lifecycle transitions (finalize, dismiss). Per-step settings
- * are persisted by /admin/settings/{group}, not here.
+ * Persist per-step settings through /admin/settings/{group}.
  *
  * @since 1.0.0
  */

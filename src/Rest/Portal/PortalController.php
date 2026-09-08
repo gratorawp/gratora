@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace FundKit\Rest\Portal;
 
-use FundKit\Receipts\OrgProfile;
 use FundKit\Analytics\ErrorLog;
 use FundKit\Async\AsyncDispatcher;
 use FundKit\Campaigns\Campaign;
-use FundKit\Funds\Fund;
-use FundKit\Forms\Form;
 use FundKit\Donations\AntiSpamGuard;
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationQueries;
@@ -20,39 +17,36 @@ use FundKit\Donors\DonorRepository;
 use FundKit\Donors\DonorService;
 use FundKit\Donors\MagicLinkService;
 use FundKit\Donors\PendingSignupRepository;
-use FundKit\Donors\SignupRedemption;
 use FundKit\Donors\Portal\AnnualStatementBuilder;
 use FundKit\Donors\Portal\MagicLinkJob;
 use FundKit\Donors\Portal\PortalSession;
+use FundKit\Donors\SignupRedemption;
+use FundKit\Forms\Form;
 use FundKit\Foundation\Http\ClientIp;
 use FundKit\Foundation\Identity\IdentityHasher;
+use FundKit\Funds\Fund;
 use FundKit\Gateways\GatewayManager;
 use FundKit\Gateways\GatewayTransportException;
 use FundKit\Gateways\SubscriptionChangeNeedsApproval;
 use FundKit\Gateways\SupportsPaymentMethodUpdate;
-use FundKit\Recurring\FrequencyMap;
 use FundKit\Gateways\SupportsScheduleChange;
 use FundKit\Gateways\SupportsSubscriptionPause;
 use FundKit\Mail\Mailer;
+use FundKit\Receipts\OrgProfile;
 use FundKit\Receipts\Receipt;
-use FundKit\Recurring\RecurringPlan;
+use FundKit\Recurring\FrequencyMap;
 use FundKit\Recurring\GatewayUnreachable;
 use FundKit\Recurring\PlanChangeRefused;
+use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\RecurringPlanActions;
 use FundKit\Recurring\RecurringPlanChange;
-use RuntimeException;
+use FundKit\Vendor\Queryable\DB;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
-use FundKit\Vendor\Queryable\DB;
 
-/**
- * The donor portal API: magic-link sign-in, self-registration, and the signed-in
- * donor's own donations, recurring plans, receipts, profile and privacy actions.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class PortalController
 {
     private const NAMESPACE = 'fundkit/v1';
@@ -347,17 +341,8 @@ final class PortalController
     }
 
     /**
-     * Redeeming a link sets the session cookie, so a forged cross-site POST
-     * would sign a visitor into whichever account the attacker's token names,
-     * and every write endpoint then works inside it: /portal/me hands the
-     * caller the CSRF token that guards the rest.
-     *
-     * A nonce cannot be the guard here. The portal page is served from a page
-     * cache, so its markup carries no per-visitor value (PortalShortcode mints
-     * an empty nonce for logged-out visitors for exactly that reason). What the
-     * browser labels the request with survives caching, so that is what is
-     * read. A request with neither header is not a browser and is left alone,
-     * because internal dispatch has no cross-site meaning.
+     * Check browser origin headers to prevent login CSRF. Cached portal markup cannot carry a
+     * visitor nonce; allow headerless internal dispatch.
      *
      * @since 1.0.0
      */
@@ -734,11 +719,7 @@ final class PortalController
         ], 200);
     }
 
-    /**
-     * Donations of this donor's that no lifetime total can include.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private function unconvertedDonationCount(int $donorId): int
     {
         $row = DonationQueries::donationsOnly(DB::table('fundkit_donations'))
@@ -1077,8 +1058,7 @@ final class PortalController
     }
 
     /**
-     * The dunning email points the donor here, and a declined renewal is
-     * usually an expired card, which retrying cannot fix.
+     * Offer payment-method updates for failed renewals.
      *
      * @since 1.0.0
      */
@@ -1327,10 +1307,7 @@ final class PortalController
         $files = $request->get_file_params();
         $file  = $files['file'] ?? null;
         if (! is_array($file)) {
-            // Over post_max_size, PHP throws the whole body away before this
-            // runs: no file, no fields, no error code. The only trace is a
-            // content length larger than the server would accept, so without
-            // this the donor is told nothing was sent when in fact too much was.
+            // PHP discards oversized POST bodies; detect them from Content-Length.
             $sent = isset($_SERVER['CONTENT_LENGTH']) ? (int) $_SERVER['CONTENT_LENGTH'] : 0;
             $max  = wp_convert_hr_to_bytes((string) ini_get('post_max_size'));
             if ($max > 0 && $sent > $max) {
@@ -1579,11 +1556,7 @@ final class PortalController
         ];
     }
 
-    /**
-     * GDPR right of access.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function dataExport(): WP_REST_Response|WP_Error
     {
         if (! $this->privacySetting('allow_data_export', true)) {
@@ -1717,8 +1690,7 @@ final class PortalController
 
 
     /**
-     * GDPR right to erasure. Soft-redact: zeroes PII but keeps donation totals
-     * for tax and audit.
+     * Erase PII while retaining donation totals.
      *
      * @since 1.0.0
      */

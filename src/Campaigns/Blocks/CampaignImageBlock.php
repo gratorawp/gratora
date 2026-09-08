@@ -7,8 +7,7 @@ namespace FundKit\Campaigns\Blocks;
 use FundKit\Foundation\Helpers\View;
 
 /**
- * Core's featured-image block reads the post, which is only the page a campaign
- * happens to be rendered on. This reads the campaign, so it works on any page.
+ * Read the campaign image independently of the containing WP page.
  *
  * @since 1.0.0
  */
@@ -26,8 +25,7 @@ final class CampaignImageBlock extends CampaignBlock
         return $this->campaignIdAttr() + [
             'aspectRatio' => ['type' => 'string',  'default' => '16-9'],
             'rounded'     => ['type' => 'boolean', 'default' => true],
-            // The cover is usually the element LCP is measured on. An author who
-            // places it further down can hand the priority back.
+            // Prioritize the cover for LCP unless the author opts out.
             'priority'    => ['type' => 'boolean', 'default' => true],
         ];
     }
@@ -55,11 +53,7 @@ final class CampaignImageBlock extends CampaignBlock
         ]);
     }
 
-    /**
-     * Shown only to whoever can act on it; a visitor gets nothing.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private function noImageNotice(): string
     {
         if (! is_user_logged_in() || ! current_user_can('edit_posts')) {

@@ -9,11 +9,7 @@ use FundKit\Foundation\Http\ClientIp;
 use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Time\Clock;
 
-/**
- * Issues and validates magic-link tokens for donor self-service.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class MagicLinkService
 {
     /** Guesses one address may spend on one purpose before it is shut out. */
@@ -196,11 +192,7 @@ final class MagicLinkService
         return 'fundkit_ml_val_' . hash('sha256', $purpose . '|' . $ip);
     }
 
-    /**
-     * Delete tokens that have expired or been consumed.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function purgeExpired(): int
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');

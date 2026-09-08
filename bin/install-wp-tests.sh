@@ -1,17 +1,7 @@
 #!/usr/bin/env bash
-#
-# Provision the WordPress integration-test environment for the `integration`
-# PHPUnit suite. The test framework itself ships in vendor/wp-phpunit/wp-phpunit
-# (a composer dependency), so this only needs to: download WP core, create the
-# test database, and write a wp-tests-config.php that points at both.
-#
-# Usage:
-#   bin/install-wp-tests.sh [db-name] [db-user] [db-pass] [db-host] [wp-version]
-# Example (Homebrew MySQL, root/no-password):
-#   bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1 latest
-#
-# Override locations with WP_CORE_DIR / WP_TESTS_DIR env vars (defaults under
-# the system temp dir, matching tests/integration-bootstrap.php).
+# Provision WP core, the test database, and wp-tests-config.php; wp-phpunit comes from Composer.
+# Usage: bin/install-wp-tests.sh [db-name] [db-user] [db-pass] [db-host] [wp-version]
+# WP_CORE_DIR and WP_TESTS_DIR override temporary paths.
 set -euo pipefail
 
 DB_NAME=${1:-wordpress_test}
@@ -23,7 +13,7 @@ WP_VERSION=${5:-latest}
 WP_CORE_DIR=${WP_CORE_DIR:-$HOME/.fundkit-wp-tests/wordpress}
 WP_TESTS_DIR=${WP_TESTS_DIR:-$HOME/.fundkit-wp-tests/wordpress-tests-lib}
 
-# 1. WordPress core
+
 if [ ! -f "${WP_CORE_DIR}/wp-load.php" ]; then
     echo "Downloading WordPress core (${WP_VERSION}) -> ${WP_CORE_DIR}"
     mkdir -p "${WP_CORE_DIR}"
@@ -37,7 +27,7 @@ else
     echo "WordPress core already present at ${WP_CORE_DIR}"
 fi
 
-# 2. Test database (drop + recreate for a clean slate)
+# Drop and recreate the test database.
 MYSQL=(mysql --protocol=tcp "-h${DB_HOST}" "-u${DB_USER}")
 if [ -n "${DB_PASS}" ]; then
     MYSQL+=("-p${DB_PASS}")
@@ -45,7 +35,7 @@ fi
 echo "Recreating database ${DB_NAME} on ${DB_HOST}"
 "${MYSQL[@]}" -e "DROP DATABASE IF EXISTS \`${DB_NAME}\`; CREATE DATABASE \`${DB_NAME}\`;"
 
-# 3. wp-tests-config.php (wp-phpunit supplies the includes; this wires DB + ABSPATH)
+
 mkdir -p "${WP_TESTS_DIR}"
 cat > "${WP_TESTS_DIR}/wp-tests-config.php" <<PHP
 <?php

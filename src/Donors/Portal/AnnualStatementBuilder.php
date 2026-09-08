@@ -4,21 +4,16 @@ declare(strict_types=1);
 
 namespace FundKit\Donors\Portal;
 
-use FundKit\Receipts\OrgProfile;
-
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationQueries;
 use FundKit\Donations\Refund;
 use FundKit\Donors\Donor;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Helpers\View;
+use FundKit\Receipts\OrgProfile;
 use FundKit\Receipts\PdfBuilder;
 
-/**
- * Builds a PDF annual donation statement for a donor.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class AnnualStatementBuilder
 {
     /** Names this builder to the fundkit.statement.pdf filter. */

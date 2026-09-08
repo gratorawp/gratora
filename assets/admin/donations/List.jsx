@@ -103,12 +103,8 @@ export default function List() {
         sort:    { field: 'created_at', direction: 'desc' },
         filters: initialFilters(),
         search:  '',
-        // Test and replaced attempts are badged on the reference rather than
-        // carrying columns: on a list that hides them the column reads the same
-        // on every row. The test scope toggle above the table is how they are
-        // asked for.
-        // 'form' is defined but not shown: most orgs run one form per campaign,
-        // so the column repeats the campaign next to it. Still in the picker.
+        // Badge test/replaced attempts on references. Keep the usually redundant form column
+        // available but hidden by default.
         fields:  [ 'reference', 'status', 'donor', 'amount', 'frequency', 'gateway', 'campaign', 'created_at' ],
         // Widths are read from here, not from the field. The donor is what a
         // row is about, and the reference is a fixed short string that would
@@ -154,14 +150,8 @@ export default function List() {
     const [ confirm, setConfirm ] = useState( null );
     const [ gatewayOptions, setGatewayOptions ] = useState( [] );
 
-    // Campaign list for the campaign filter dropdown. Forms could follow the
-    // same pattern, but they typically run into the hundreds per org and
-    // aren't worth front-loading here; the donor portal scopes by donor_id.
-    //
-    // Not /admin/campaigns, for the reason RecordDonationDrawer already gives:
-    // that route needs fundkit_manage_campaigns, which this screen does not, so a
-    // role scoped to viewing donations got a 403 and a filter with no options
-    // in it and nothing saying why.
+    // Use the donations-scoped campaign picker; this screen does not require
+    // campaign-management permission.
     useEffect( () => {
         let aborted = false;
         apiFetch( { path: '/fundkit/v1/admin/donations/campaign-options' } )

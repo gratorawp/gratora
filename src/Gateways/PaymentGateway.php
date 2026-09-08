@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace FundKit\Gateways;
 
 use FundKit\Donations\Donation;
-use FundKit\Donations\Refund;
 use WP_REST_Request;
 
 /**
@@ -80,8 +79,7 @@ interface PaymentGateway
     public function createIntent(Donation $donation): GatewayIntentResult;
 
     /**
-     * Synchronous confirmation. Most gateways confirm via webhook instead;
-     * Offline implements this for the admin "mark as paid" flow.
+     * Synchronous confirmation supports offline admin flows; most gateways use webhooks.
      *
      * @since 1.0.0
      */

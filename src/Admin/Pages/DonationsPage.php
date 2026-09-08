@@ -7,11 +7,7 @@ namespace FundKit\Admin\Pages;
 use FundKit\Admin\ExtensionAssets;
 use FundKit\Foundation\Hooks\HookProvider;
 
-/**
- * Registers and renders the Donations admin page.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DonationsPage extends HookProvider
 {
     private const PAGE_ID   = 'fundkit-donations';
@@ -43,8 +39,7 @@ final class DonationsPage extends HookProvider
         $this->enqueueAssets();
         ?>
         <div class="wrap">
-            <?php // WP moves admin notices to just after this marker. Without it they
-                  // land beside the React header instead of above it. ?>
+            <?php // Keep WordPress notices above the React header.?>
             <hr class="wp-header-end" />
             <div id="fundkit-admin-donations"></div>
         </div>
@@ -56,8 +51,7 @@ final class DonationsPage extends HookProvider
     {
         $asset = require FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
 
-        // The registry must be defined before the app reads it, hence the
-        // dependency on its handle below.
+        // Initialize the extension registry before the app.
         ExtensionAssets::enqueue('donation');
 
         wp_enqueue_script(

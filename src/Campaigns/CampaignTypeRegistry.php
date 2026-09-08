@@ -6,11 +6,7 @@ namespace FundKit\Campaigns;
 
 use RuntimeException;
 
-/**
- * Holds registered CampaignTypeHandler instances, keyed by type slug.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CampaignTypeRegistry
 {
     /** @var array<string,CampaignTypeHandler> */

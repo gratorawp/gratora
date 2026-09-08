@@ -8,11 +8,7 @@ use FundKit\Foundation\Helpers\View;
 use FundKit\Foundation\Uninstall\DataEraser;
 
 /**
- * The dialog shown when someone deactivates FundKit from the plugins screen.
- *
- * It asks one thing, because nothing else in WordPress asks it: whether the
- * site owner wants their donation records kept. By the time they reach the
- * Delete link the plugin is gone and cannot ask.
+ * Ask whether to retain data before deactivation removes the plugin’s UI.
  *
  * @since 1.0.0
  */
@@ -35,9 +31,7 @@ final class DeactivationDialog
             return;
         }
 
-        // mtime, not FUNDKIT_VERSION: these are shipped as source rather than
-        // built, so a fix lands without a release and a stale cache means the
-        // dialog silently keeps the stale behavior.
+        // Version source assets by mtime so unreleased changes invalidate caches.
         wp_enqueue_style(
             'fundkit-deactivation',
             FUNDKIT_URL . 'assets/deactivation/dialog.css',
@@ -93,8 +87,7 @@ final class DeactivationDialog
             wp_send_json_error(null, 403);
         }
 
-        // Deliberately explicit rather than a toggle: an absent checkbox in the
-        // payload has to mean "keep my data", never "no answer, leave it set".
+        // An absent checkbox must clear the wipe flag.
         $wipe = ! empty($_POST['wipe']);
         if ($wipe) {
             update_option(DataEraser::OPT_IN, time(), false);

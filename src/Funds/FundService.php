@@ -8,17 +8,13 @@ use FundKit\Async\AsyncDispatcher;
 use FundKit\Campaigns\Campaign;
 use FundKit\Donations\Donation;
 use FundKit\Forms\Form;
-use FundKit\Recurring\RecurringPlan;
 use FundKit\Foundation\Time\Clock;
-use InvalidArgumentException;
+use FundKit\Recurring\RecurringPlan;
 use FundKit\Vendor\Queryable\DB;
+use InvalidArgumentException;
 use RuntimeException;
 
-/**
- * Fund lifecycle: create, update, delete/deactivate, reassign.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class FundService
 {
     /** @since 1.0.0 */
@@ -339,11 +335,7 @@ final class FundService
         return $out;
     }
 
-    /**
-     * Re-queue any reassignment whose background job was lost. Idempotent.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function reconcilePendingReassignments(): void
     {
         FundReassignmentJob::reconcile($this->async);
@@ -437,8 +429,7 @@ final class FundService
     }
 
     /**
-     * Funds nest one level deep; every consumer assumes a shallow tree.
-     * Raising the depth requires updating all consumers.
+     * All consumers assume at most one parent level.
      *
      * @since 1.0.0
      */
@@ -498,9 +489,7 @@ final class FundService
 
     /** @since 1.0.0 */
     /**
-     * A DATETIME column takes an unparseable value as the zero date, which
-     * resolves to a window that ended long ago: the fund is offered to nobody
-     * while the list still reports it Active.
+     * Reject invalid dates before MySQL coerces them to an ended zero date.
      *
      * @since 1.0.0
      */

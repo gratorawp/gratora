@@ -102,15 +102,7 @@ export function settingsAfterTemplate( current, templateSettings ) {
     return mergeFormSettings( templateSettings, mergeFormSettings( current ) );
 }
 
-/**
- * What picking a template does to a form: the blocks it brings, and the
- * settings the form is left with.
- *
- * The settings half lives here rather than in the component so it can be
- * driven by a test. Handing the template's settings straight to the form is
- * the mistake this exists to make hard: it discards everything the author
- * configured that the template never named.
- */
+/** Merge template settings so unnamed author settings survive. */
 export function templateApplication( currentSettings, template ) {
     const markup = ( template?.blocks ?? '' ).trim();
     const settings = template?.settings && typeof template.settings === 'object'
@@ -990,13 +982,8 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
                         <iframe
                             className="fundkit-form-editor__preview-frame"
                             title={ __( 'Form preview', 'fundraising-toolkit' ) }
-                            // allow-scripts without allow-same-origin: the preview
-                            // needs to run the form's own JS, but a srcdoc frame
-                            // otherwise inherits this admin origin, so anything
-                            // scripted inside it would carry the admin's cookies
-                            // and nonce. An opaque origin costs nothing here -
-                            // both sides of the token push already identify each
-                            // other by window reference rather than by origin.
+                            // Omit allow-same-origin so preview scripts cannot use admin
+                            // credentials. Token messages validate window references.
                             sandbox="allow-scripts"
                             srcDoc={ html }
                         />

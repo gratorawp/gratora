@@ -103,33 +103,11 @@ final class DonationQueries
     }
 
     /**
-     * The ids of pending attempts that a later attempt replaced.
+     * Find replaced attempts only while pending; count them again if they settle.
      *
-     * A donor who reaches the payment step, backs out and picks another gateway
-     * leaves the first row behind, and DonationService::recordRetriedBy stamps
-     * the replacement's reference on it. Counting it shows one donor decision
-     * as several donations, and nothing the donor does can ever collect the
-     * earlier ones.
-     *
-     * The status term is what makes hiding one safe. Cancel is reachable while
-     * an approval is genuinely in flight, so a replaced row can still settle;
-     * the moment it leaves pending it stops matching here and every screen
-     * counts it again. Nothing about this changes a status.
-     *
-     * A standalone id set rather than a predicate on the outer row, because
-     * flags is unindexed LONGTEXT. Inline, it costs a clustered-index lookup
-     * per candidate row, which takes the covering (is_test) scan away from the
-     * donations-list count: at 200k rows that count is 20ms as an index scan
-     * and 205ms with the row reads. Driven from (status, paid_at), only pending
-     * rows have their flags read, so the work is the size of the problem rather
-     * than the size of the table, and the count lands at 41ms.
-     *
-     * flags is LONGTEXT, so a non-JSON value can reach it: MySQL raises on one
-     * and MariaDB returns NULL, and the JSON_VALID guard makes both answer
-     * NULL. An absent key makes JSON_EXTRACT itself SQL NULL while a JSON null
-     * makes JSON_TYPE report the string 'NULL', so COALESCE folds the two into
-     * one comparison. CAST(x AS JSON) is not available: MariaDB has no JSON
-     * type and rejects it as a syntax error.
+     * Query pending IDs separately to avoid reading unindexed flags for every donation.
+     * JSON_VALID and COALESCE handle malformed JSON, absent keys, and JSON null on both MySQL
+     * and MariaDB; MariaDB cannot CAST AS JSON.
      *
      * @since 1.0.0
      */
@@ -384,21 +362,8 @@ final class DonationQueries
     }
 
     /**
-     * SQL reading a UTC datetime column as the org's wall clock, for the window
-     * between two UTC datetimes. Day, weekday and hour bucketings all group by
-     * this, so one donation cannot land on different days on two screens.
-     *
-     * CONVERT_TZ needs the server's named-timezone tables loaded, which no
-     * install can be assumed to have, so the offset is resolved in PHP and
-     * folded in as seconds. One branch per DST transition inside the window
-     * keeps a spring-forward exact instead of shifting the days after it.
-     *
-     * Both bounds are required, and not as nullable strings: the window is what
-     * carries the offset, and a caller allowed to omit it gets the column back
-     * unconverted and reads UTC believing it is local. A caller with no window
-     * of its own resolves one (see DonationRepository::paidSpanUtc) or leaves
-     * the column alone deliberately, in its own code, where that reads as the
-     * decision it is.
+     * Convert UTC columns to local time using PHP-resolved offsets and DST branches. Both
+     * window bounds are required; this avoids relying on installed MySQL timezone tables.
      *
      * @since 1.0.0
      */

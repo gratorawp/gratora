@@ -9,11 +9,7 @@ use FundKit\Foundation\Identity\IdentityHasher;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Settings\SettingsService;
 
-/**
- * Records analytics events to the fundkit_events table.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class EventRecorder
 {
     /** @since 1.0.0 */

@@ -32,7 +32,6 @@ function toggleState(page: Page): Locator {
     return switchFor(page).locator('input');
 }
 
-/** A FormRow, so a label and its input are reached together. */
 function field(page: Page, label: string): Locator {
     return page.locator(`.fundkit-form-row:has(.fundkit-form-row__label:has-text("${ label }"))`);
 }

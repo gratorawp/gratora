@@ -8,8 +8,8 @@ use FundKit\Analytics\EventRecorder;
 use FundKit\Currency\Currency;
 use FundKit\Gateways\GatewayManager;
 use FundKit\Gateways\SubscriptionAware;
-use FundKit\Gateways\SupportsScheduleChange;
 use FundKit\Gateways\SupportsPaymentRetry;
+use FundKit\Gateways\SupportsScheduleChange;
 use InvalidArgumentException;
 
 /**
@@ -106,7 +106,7 @@ final class RecurringPlanActions
     }
 
     /**
-     * A resume date the pause UI can express, clamped to what it offers.
+     * Clamp resume dates to supported pause durations.
      *
      * @since 1.0.0
      */
@@ -288,7 +288,6 @@ final class RecurringPlanActions
         do_action('fundkit.recurring.plan_changed', $plan, $change);
     }
 
-    // ---------------------------------------------------------------- internals
 
     /** @since 1.0.0 */
     /**

@@ -10,8 +10,7 @@ use FundKit\Vendor\Queryable\DB;
 use WP_Post;
 
 /**
- * Labels campaign pages and the donor portal in wp-admin's Pages list, so the
- * two pages that break the product when edited or trashed read as load-bearing.
+ * Label managed campaign and portal pages in the Pages list.
  *
  * @since 1.0.0
  */
@@ -47,8 +46,7 @@ final class ManagedPageStates extends HookProvider
     }
 
     /**
-     * A campaign's own page, not every page carrying its id: P2P layout
-     * subpages hold _fundkit_campaign_id too, and those are not the campaign.
+     * Exclude P2P layout subpages that share _fundkit_campaign_id.
      *
      * @since 1.0.0
      */

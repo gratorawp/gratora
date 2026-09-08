@@ -10,7 +10,7 @@ use FundKit\Vendor\Queryable\Model;
 use FundKit\Vendor\Queryable\Schema\Table;
 
 /**
- * Mirror of a gateway-side subscription. One plan to many donation renewals.
+ * Mirrors a gateway subscription with many renewal donations.
  *
  * @since 1.0.0
  */

@@ -6,11 +6,7 @@ namespace FundKit\Forms\Blocks;
 
 use FundKit\Foundation\Helpers\View;
 
-/**
- * fundkit/divider: a horizontal rule with author-set spacing and line colour.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DividerBlock implements Block
 {
     /** @since 1.0.0 */

@@ -146,8 +146,7 @@ final class Money
     }
 
     /**
-     * Bare major-unit number with org grouping, no symbol. The amount is the org
-     * default currency's, so it is rendered at that currency's precision.
+     * Format in org currency precision without its symbol.
      *
      * @since 1.0.0
      */

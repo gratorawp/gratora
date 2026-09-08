@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
 
-use FundKit\Donations\DonationQueries;use FundKit\Rest\Paging;
+use FundKit\Donations\DonationQueries;
 use FundKit\Foundation\Auth\Capabilities;
-
 use FundKit\Funds\Fund;
 use FundKit\Funds\FundReassignmentJob;
 use FundKit\Funds\FundRepository;
 use FundKit\Funds\FundService;
+use FundKit\Rest\Paging;
 use FundKit\Rest\Schemas\FundSchemas;
 use InvalidArgumentException;
 use RuntimeException;
@@ -19,11 +19,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
-/**
- * Admin CRUD surface for funds (organization-wide donation designations).
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class FundsController
 {
     private const NAMESPACE = 'fundkit/v1';

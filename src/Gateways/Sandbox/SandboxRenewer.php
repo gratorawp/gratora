@@ -14,20 +14,8 @@ use FundKit\Recurring\RecurringPlanRepository;
 use Throwable;
 
 /**
- * Drives renewals for sandbox plans, on a clock compressed to minutes.
- *
- * Stripe and PayPal renew because the gateway's own scheduler charges the card
- * and posts a webhook. The sandbox has neither, so a plan it created would sit
- * at one payment forever and the thing worth rehearsing before launch, a
- * renewal arriving with its receipt and its rollups, would never happen.
- *
- * A renewal here runs the same two calls a Stripe renewal runs, so every
- * downstream effect fires unchanged rather than through a parallel path.
- *
- * Bounded on three sides, because a rehearsal that never ends is a site
- * quietly writing donations forever: twelve cycles, then the plan expires;
- * test mode off ends every sandbox plan on the next sweep; and each outcome
- * moves the plan out of the match set so a batch cannot spin.
+ * Renew sandbox plans through the normal donation flow on a compressed clock. Stop after twelve
+ * cycles or when test mode is disabled; every outcome must advance the batch.
  *
  * @since 1.0.0
  */

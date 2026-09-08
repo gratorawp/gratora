@@ -1,13 +1,8 @@
 <?php
 
 /**
- * Constants static analysis needs and cannot get any other way.
- *
- * The plugin's own are defined at the top of fundkit.php from
- * plugin_dir_path(), which cannot run outside WordPress, so the real file
- * cannot be bootstrapped here. WordPress's time constants and ABSPATH are not
- * in the stub package. Only the fact that they exist matters, except the paths,
- * which have to point at the real plugin root so `require` targets resolve.
+ * Static-analysis constants. Paths must resolve real require targets; fundkit.php needs
+ * WordPress to run.
  */
 
 declare(strict_types=1);
@@ -18,11 +13,8 @@ define('FUNDKIT_FILE', dirname(__DIR__) . '/fundkit.php');
 define('FUNDKIT_DIR', dirname(__DIR__) . '/');
 define('FUNDKIT_URL', 'https://example.test/');
 
-// Analysis resolves `require ABSPATH . 'wp-admin/...'` targets, so this has to
-// be a real WordPress. Deriving it from this file's position only holds on a
-// machine where the plugin sits inside one: on CI the checkout is standalone
-// and four levels up is the runner's home, where every require target is
-// missing. Prefer the install the test environment provisions.
+// Prefer the test WordPress install; a standalone CI checkout has no WordPress parent
+// directory.
 define('ABSPATH', (static function (): string {
     $home       = getenv('HOME') ?: '';
     $candidates = array_values(array_filter([

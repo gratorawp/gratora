@@ -7,22 +7,23 @@ namespace FundKit\Forms\Shortcode;
 use FundKit\Campaigns\Campaign;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Campaigns\Styling\CampaignStyleResolver;
+use FundKit\Campaigns\Styling\Ink;
 use FundKit\Donations\AntiSpamGuard;
-use FundKit\Forms\Blocks\ColumnsBlock;
 use FundKit\Donors\ConsentService;
+use FundKit\Forms\Blocks\ColumnsBlock;
 use FundKit\Forms\Blocks\ConsentBlock;
-use FundKit\Forms\Blocks\TermsBlock;
 use FundKit\Forms\Blocks\CurrencySwitcherBlock;
 use FundKit\Forms\Blocks\DateBlock;
 use FundKit\Forms\Blocks\DividerBlock;
 use FundKit\Forms\Blocks\DonationAmountBlock;
 use FundKit\Forms\Blocks\DropdownBlock;
-use FundKit\Forms\Blocks\MultiSelectBlock;
 use FundKit\Forms\Blocks\FundPickerBlock;
-use FundKit\Forms\Blocks\PaymentGatewaysBlock;
 use FundKit\Forms\Blocks\HtmlBlock;
+use FundKit\Forms\Blocks\MultiSelectBlock;
+use FundKit\Forms\Blocks\PaymentGatewaysBlock;
 use FundKit\Forms\Blocks\RecurringToggleBlock;
 use FundKit\Forms\Blocks\SectionBlock;
+use FundKit\Forms\Blocks\TermsBlock;
 use FundKit\Forms\Form;
 use FundKit\Forms\FormRepository;
 use FundKit\Foundation\Helpers\Money;
@@ -35,8 +36,7 @@ use FundKit\Gateways\TestMode;
 use Throwable;
 
 /**
- * `[fundkit_donation_form]` shortcode. Renders a form's blocks plus a
- * data-fundkit-form-config script the Preact runtime reads.
+ * Emit shortcode blocks and the Preact runtime config.
  *
  * @since 1.0.0
  */
@@ -320,6 +320,12 @@ final class DonationFormShortcode extends HookProvider
             $v = str_replace([';', '"', '<', '>', '{', '}'], '', $v);
             $out .= '--' . $k . ':' . $v . ';';
         }
+
+        // Derived, not authored: the accent and the soft ground are the
+        // org's to choose, so what is drawn on them cannot assume a colour.
+        $out .= Ink::declarationsFor((string) ($tokens['fundkit-accent'] ?? ''));
+        $out .= Ink::softDeclarations($tokens);
+
         return $out;
     }
 
@@ -430,16 +436,8 @@ final class DonationFormShortcode extends HookProvider
     }
 
     /**
-     * Every handle the document needs, dependencies before dependents.
-     *
-     * wp_enqueue_script resolves a handle's own dependencies; a srcdoc document
-     * has no queue to resolve them in, so this walks them itself. Emitting only
-     * the declared list shipped wp-i18n without wp-hooks, which wp-i18n depends
-     * on and reads at module scope: it threw, wp.i18n was never defined, the
-     * runtime threw on top of that, and the preview never hydrated. What was
-     * left on screen was the server-rendered fallback markup, which carries
-     * almost none of the classes runtime.css is scoped to, so the form read as
-     * completely unstyled while the stylesheet was loading perfectly well.
+     * Resolve transitive script dependencies in load order; srcdoc has no WordPress queue to do
+     * this.
      *
      * @param list<string> $handles
      * @return list<string>
@@ -562,11 +560,7 @@ final class DonationFormShortcode extends HookProvider
         $fxConfig   = $this->fxConfig($currency, $currencies);
         $swCfg      = $this->currencySwitcherConfig($form);
 
-        // Rotated per render so a generic bot cannot denylist a fixed name.
-        // Every name here is one no browser has a field type for: browsers
-        // autofill by field name and label whatever autocomplete="off" says, and
-        // a donor whose autofill writes into the trap has their donation refused
-        // with no way to see or clear the value.
+        // Rotate honeypot names per render and avoid browser-autofill field names.
         $honeypotPool = ['form_ref', 'aux_code', 'extra_note', 'alt_ref', 'note_two', 'field_ref', 'checksum'];
         $honeypotName = $honeypotPool[random_int(0, count($honeypotPool) - 1)];
 
@@ -1717,8 +1711,7 @@ final class DonationFormShortcode extends HookProvider
     }
 
     /**
-     * The client id for the mode the order will be created in. It is public by
-     * design, like a Stripe publishable key.
+     * PayPal client IDs are public and mode-specific.
      *
      * @since 1.0.0
      */

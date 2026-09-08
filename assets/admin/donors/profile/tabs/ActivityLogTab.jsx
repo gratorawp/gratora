@@ -8,7 +8,6 @@ import { __ } from '@wordpress/i18n';
 import { eventMeta, formatAmount, formatDateTime, timeAgo } from '../helpers';
 import { TimelineDot, eventTitle } from './ActivityTab';
 
-// Deep-link to a donation's detail view, the same target the timeline uses.
 function donationHref( reference ) {
     return addQueryArgs( window.location.pathname, { page: 'fundkit-donations', view: 'detail', reference } );
 }

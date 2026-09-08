@@ -9,11 +9,7 @@ defined('ABSPATH') || exit;
 use FundKit\Vendor\Queryable\Model;
 use FundKit\Vendor\Queryable\Schema\Table;
 
-/**
- * Internal note attached to a donation.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DonationNote extends Model
 {
     protected string $table = 'fundkit_donation_notes';

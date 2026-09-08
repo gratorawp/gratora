@@ -11,18 +11,8 @@ use FundKit\Vendor\Queryable\DB;
 use Throwable;
 
 /**
- * Daily GDPR retention runner. Soft-redacts donors whose last activity
- * exceeds the configured window and have no active/paused recurring plan.
- *
- * This is the only thing in FundKit that destroys data without being asked, so it
- * takes two things to reach a donor. The privacy setting `erase_inactive_donors`
- * has to be switched on: nothing is swept on a site whose admin never asked for
- * it. And the sweep does not start the day it is switched on, because an org
- * importing years of history would otherwise have part of it redacted before
- * they had seen the window.
- *
- * The grace period is therefore measured from whichever of those came last,
- * which is why switching the setting on stamps it again.
+ * Erase only when enabled and past the grace period, measured from the later enable/import
+ * date. Exclude donors with protected recurring plans.
  *
  * @since 1.0.0
  */
@@ -139,8 +129,7 @@ final class DonorRetention
             return;
         }
 
-        // Drained: the next pass starts at the top and retries whatever it
-        // stepped past, in case whatever broke has since been fixed.
+        // Restart at the top next pass to retry skipped rows.
         delete_option(self::CURSOR_OPTION);
     }
 

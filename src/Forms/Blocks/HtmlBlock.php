@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Forms\Blocks;
 
-/**
- * fundkit/html: inline HTML decoration.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class HtmlBlock implements Block
 {
     /** @since 1.0.0 */
@@ -33,11 +29,7 @@ final class HtmlBlock implements Block
         return sprintf('<div class="fundkit-block fundkit-block--html">%s</div>', self::sanitize($raw));
     }
 
-    /**
-     * Strip scripts, event handlers, and javascript: URLs via wp_kses_post.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public static function sanitize(string $raw): string
     {
         return wp_kses_post($raw);

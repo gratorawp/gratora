@@ -1,24 +1,6 @@
 /**
- * The screenshots the knowledge base embeds, captured under their own names.
- *
- * Separate from admin.spec.ts, which photographs whole screens for the wp.org
- * listing. The documentation mostly wants one widget or one panel, cropped, so
- * these are element captures addressed by the heading a reader can see. That
- * is deliberately more brittle than an id and much easier to audit: if a
- * heading changes, the capture fails loudly instead of silently photographing
- * the wrong box.
- *
- * Plain images only. No arrows, no callouts, no highlight boxes: an annotated
- * screenshot has to be redrawn every time the UI moves, and the surrounding
- * prose can say what to look at.
- *
- * Point it at the docs folder and run it:
- *
- *   FUNDKIT_E2E_SHOTS=1 \
- *   FUNDKIT_E2E_SHOTS_DIR="$HOME/Local Sites/getdono/app/public/wp-content/themes/dono/docs/screenshots" \
- *   npx playwright test --project=screenshots specs/screenshots/docs.spec.ts
- *
- * Needs a seeded site: the captures show real campaigns, donations and donors.
+ * Capture documentation widgets by visible heading on a seeded site. Set FUNDKIT_E2E_SHOTS=1
+ * and FUNDKIT_E2E_SHOTS_DIR, then run the screenshots project with this spec.
  */
 
 import { expect, test, type Locator, type Page } from '@playwright/test';

@@ -7,15 +7,11 @@ namespace FundKit\Campaigns\Blocks;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Donations\DonationRepository;
 use FundKit\Donors\Donor;
-use FundKit\Donors\PublicDonorNames;
 use FundKit\Donors\DonorAvatars;
+use FundKit\Donors\PublicDonorNames;
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Renders a ranked list or podium of top donors for a campaign.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class TopDonorsBlock extends CampaignBlock
 {
     /** @since 1.0.0 */
@@ -75,8 +71,7 @@ final class TopDonorsBlock extends CampaignBlock
             $donorId = (int) $row['donor_id'];
             $donor   = $donorsById[$donorId] ?? null;
             $name    = PublicDonorNames::of($donor);
-            // Hidden reads the same as unnamed: the amount still ranks, the
-            // person behind it does not appear.
+            // Rank hidden donations without exposing donor identity.
             $isAnonymousAggregate = ($name === '' || ($donor && $donor->public_hidden_at !== null));
 
             if ($hideAnonymous && $isAnonymousAggregate) continue;

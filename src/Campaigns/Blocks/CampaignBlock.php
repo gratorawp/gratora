@@ -25,11 +25,7 @@ abstract class CampaignBlock implements Block
     ) {
     }
 
-    /**
-     * Common attribute slot every campaign block uses.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     protected function campaignIdAttr(): array
     {
         return ['campaignId' => ['type' => 'integer', 'default' => 0]];

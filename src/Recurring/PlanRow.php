@@ -106,9 +106,7 @@ final class PlanRow
                 (int) $p->interval_count
             ),
             'frequency_options'       => FrequencyMap::recurringFrequencies(),
-            // A sandbox cycle is minutes, not the donor's cadence, so the row
-            // has to say so: a weekly plan whose next payment is five minutes
-            // away otherwise reads as a bug rather than as a rehearsal.
+            // Label sandbox cadence in minutes rather than the plan’s normal frequency.
             'simulated'               => $simulated,
             'simulated_cycle_minutes' => $simulated ? SandboxGateway::cycleMinutes((int) $p->interval_count) : null,
         ];

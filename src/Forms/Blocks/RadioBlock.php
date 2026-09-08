@@ -6,11 +6,7 @@ namespace FundKit\Forms\Blocks;
 
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Radio button group field block.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class RadioBlock implements Block
 {
     /** @since 1.0.0 */

@@ -1,18 +1,7 @@
-// Editor-chrome styles for the campaign-blocks bundle.
-//
-// Deliberately separate from blocks.scss: that one compiles to
-// campaign-blocks.css, which is enqueued into the editor canvas AND the front
-// end, so a modal's styles have no business in it. This sheet is enqueued
-// beside the editor script only.
+// Editor chrome only; blocks.scss also loads on the frontend.
 @import '@fundkit/ui/scss/tokens';
 @import '../_shared/components/template-picker';
 
-// The layout button in the editor header.
-//
-// Deliberately unlike the icons beside it. Those are WordPress's, monochrome
-// and iconographic; this one is ours, and somebody should be able to find it
-// again without hunting along a row of similar glyphs. The mark is the brand's
-// three rules, drawn here rather than pulled from an icon set.
 .fundkit-layout-slot { display: contents; }
 
 .fundkit-layout-btn.components-button {
@@ -37,7 +26,6 @@
 
     &__label { line-height: 1; }
 
-    // Three rules, coral through violet, at the size of a 20px icon.
     &__mark {
         display: flex;
         flex-direction: column;

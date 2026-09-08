@@ -29,8 +29,7 @@ final class TestModeBadge extends HookProvider
     {
         return [
             'admin_bar_menu'      => ['addNode', 90, 1],
-            // The badge lives on the admin bar, which renders on the front end
-            // too, so both enqueue hooks carry it.
+            // The admin bar appears on frontend pages too.
             'admin_enqueue_scripts' => 'styles',
             'wp_enqueue_scripts'    => 'styles',
         ];
@@ -50,8 +49,7 @@ final class TestModeBadge extends HookProvider
             return;
         }
 
-        // Both name FundKit: other plugins put their own test badge in this bar,
-        // and a bare "test mode" leaves the operator guessing whose till is open.
+        // Name FundKit to distinguish other plugins’ test badges.
         $title = $orgWide
             ? __('Fundraising Toolkit Test Mode Active', 'fundraising-toolkit')
             : sprintf(
@@ -62,9 +60,6 @@ final class TestModeBadge extends HookProvider
 
         $bar->add_node([
             'id' => 'fundkit-test-mode',
-            // top-secondary puts it on the right, beside the account menu,
-            // where the eye already goes. The default group buries it among
-            // the site and comment links.
             'parent' => 'top-secondary',
             'title'  => '<span class="fundkit-test-mode-badge">' . $this->icon() . esc_html($title) . '</span>',
             'href'   => esc_url(admin_url('admin.php?page=fundkit-settings&tab=gateways')),
@@ -77,7 +72,7 @@ final class TestModeBadge extends HookProvider
     }
 
     /**
-     * lucide flask-conical, inlined so the badge does not wait on an icon font.
+     * Lucide flask-conical.
      *
      * @since 1.0.0
      */
@@ -93,7 +88,6 @@ final class TestModeBadge extends HookProvider
             . '</svg>';
     }
 
-    /** What the admin bar badge looks like; served through its handle above. */
     private const BADGE_CSS = <<<'CSS'
     /* Sized and coloured to sit alongside the other fundraising
        plugins' test badges rather than compete with them: a chip inset
@@ -131,8 +125,7 @@ CSS;
             return;
         }
 
-        // A src-less handle, because the badge has no stylesheet of its own and
-        // a printed style tag is not enqueueable.
+        // Use a registered handle for inline CSS.
         wp_register_style('fundkit-test-mode-badge', false, [], FUNDKIT_VERSION);
         wp_enqueue_style('fundkit-test-mode-badge');
         wp_add_inline_style('fundkit-test-mode-badge', self::BADGE_CSS);
@@ -155,21 +148,9 @@ CSS;
      */
     private function formsInTestMode(): int
     {
-        // whereRaw first: it contributes no AND connector, so anything before
-        // it runs straight into the fragment and the SQL will not parse.
-        //
-        // Compared as text rather than as JSON. MariaDB has no JSON type and
-        // rejects CAST(x AS JSON) as a syntax error, and this runs on wp_head,
-        // so the whole front end dies with it. JSON_UNQUOTE gives 'true' for a
-        // JSON boolean on both engines.
-        //
-        // IF(JSON_VALID(...)) because the column is LONGTEXT, so nothing stops
-        // a non-JSON string reaching it. MySQL raises an error on one, MariaDB
-        // returns NULL; guarding makes both return NULL.
-        //
-        // test_mode is written as a JSON boolean today; matching '1' as well
-        // means a future writer storing an int or a string does not silently
-        // stop counting.
+        // Put whereRaw first; it adds no AND connector. Guard LONGTEXT with JSON_VALID and
+        // compare unquoted text for MySQL/MariaDB compatibility. Accept boolean and numeric
+        // test flags.
         return (int) DB::table('fundkit_forms')
             ->whereRaw(
                 "JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(settings), settings, NULL), "
@@ -179,11 +160,7 @@ CSS;
             ->count();
     }
 
-    /**
-     * Whoever cannot see a donation has no use for the state of the till.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private function visibleToCurrentUser(): bool
     {
         return is_user_logged_in() && Capabilities::userCan('fundkit_view_donations');

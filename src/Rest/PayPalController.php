@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace FundKit\Rest;
 
 use FundKit\Analytics\ErrorLog;
-use FundKit\Donations\Donation;
 use FundKit\Donations\AntiSpamGuard;
+use FundKit\Donations\Donation;
 use FundKit\Donations\DonationRepository;
 use FundKit\Donations\DonationService;
 use FundKit\Gateways\GatewayManager;
@@ -15,7 +15,6 @@ use FundKit\Gateways\PayPal\PayPalApi;
 use FundKit\Gateways\PayPal\PayPalGateway;
 use FundKit\Gateways\PayPal\PayPalPlanRecorder;
 use FundKit\Gateways\PayPal\PayPalPlanRefused;
-use FundKit\Gateways\PayPal\PayPalMoney;
 use FundKit\Recurring\FrequencyMap;
 use RuntimeException;
 use WP_Error;

@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Foundation\Commands;
 
-/**
- * Execution context passed to every command dispatch.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CommandContext
 {
     /** @since 1.0.0 */

@@ -1,11 +1,3 @@
-/**
- * Visual regression: the multi-step wizard (FUNDKIT_E2E_MULTI_STEP_FORM_PATH).
- * One golden per seeded step, so the step indicator, per-step layout, and
- * Back/Next button row are all covered:
- *   step 1: donation-amount
- *   step 2: name + email
- *   step 3: payment-gateways + submit-button
- */
 
 import { test, expect } from '../../fixtures/donor-form';
 import { settle } from '../../helpers/visual';

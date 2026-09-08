@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace FundKit\Rest;
 
 use FundKit\Analytics\ErrorLog;
-use FundKit\Donations\AntiSpamGuard;
 use FundKit\Analytics\Event;
 use FundKit\Analytics\EventRecorder;
+use FundKit\Donations\AntiSpamGuard;
 use FundKit\Gateways\GatewayManager;
 use FundKit\Gateways\WebhookOutcome;
 use WP_Error;
@@ -27,22 +27,9 @@ final class WebhookController
     private const NAMESPACE = 'fundkit/v1';
 
     /**
-     * Signature failures one address may spend on one gateway before this
-     * route stops doing the work of refusing it.
-     *
-     * ONLY failures are counted, which is what makes this safe: a gateway
-     * whose signatures verify never accumulates one, so a real event is never
-     * turned away. Dropping a payment_intent.succeeded would leave money that
-     * moved unrecorded, and no rate limit is worth that.
-     *
-     * It is worth counting because refusing is not free. PayPal verifies by
-     * calling PayPal, and tries live then test, so an unauthenticated POST
-     * carrying nothing but junk costs this site up to two blocking outbound
-     * requests before anything has been authenticated at all.
-     *
-     * A site with the wrong secret configured trips this, and that is the
-     * right outcome: those events were already being rejected, and 429 tells
-     * the gateway to back off and redeliver rather than to keep hammering.
+     * Rate-limit signature failures only, preserving verified payment events. PayPal
+     * verification can require two outbound requests; 429 asks rejected senders to back off and
+     * retry.
      */
     private const FAIL_MAX    = 10;
 

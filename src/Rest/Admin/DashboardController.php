@@ -3,18 +3,13 @@
 declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
-use FundKit\Foundation\Auth\Capabilities;
-
 use FundKit\Dashboard\DashboardMetricsService;
+use FundKit\Foundation\Auth\Capabilities;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
-/**
- * Admin dashboard metrics endpoint with widget-key filtering.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DashboardController
 {
     private const RANGES = ['today', 'last-7', 'last-30', 'last-90', 'all-time'];

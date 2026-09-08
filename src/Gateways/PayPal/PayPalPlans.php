@@ -8,15 +8,7 @@ use FundKit\Gateways\AccountFingerprint;
 use RuntimeException;
 
 /**
- * Provisions the Product and Billing Plans that PayPal subscriptions require.
- *
- * PayPal has no equivalent of Stripe's ad-hoc price: a subscription can only be
- * opened against a Plan, and a Plan carries a fixed amount plus interval. So a
- * plan is created on demand per (amount, currency, interval) and then reused,
- * otherwise a busy month would litter the merchant's account with duplicates.
- *
- * Both the product id and the plan ids are cached in options, keyed by mode and
- * account: sandbox and live are separate PayPal accounts.
+ * Reuse PayPal products and amount/currency/interval plans, cached per mode and account.
  *
  * @since 1.0.0
  */
@@ -91,8 +83,7 @@ final class PayPalPlans
     }
 
     /**
-     * The single "Donation" product every plan hangs off. Created once per
-     * mode and remembered.
+     * Reuse one Donation product per mode.
      *
      * @since 1.0.0
      */
@@ -124,8 +115,7 @@ final class PayPalPlans
         return $productId;
     }
 
-    // Read fresh: the caller's snapshot predates a PayPal round trip, so
-    // writing it back drops whatever a concurrent checkout minted.
+    // Read fresh to preserve concurrent checkout additions.
     private function remember(string $option, string $key, string $value): void
     {
         wp_cache_delete($option, 'options');

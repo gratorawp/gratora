@@ -6,11 +6,7 @@ namespace FundKit\Campaigns\Blocks;
 
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Renders the campaign fundraising progress bar.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CampaignProgressBlock extends CampaignBlock
 {
     /** @since 1.0.0 */

@@ -12,16 +12,8 @@ function subscribe( onChange ) {
 }
 
 /**
- * Open state for a collapsible Card that knows when it wants attention.
- *
- * Follows `needsAttention` until the operator clicks the head, after which
- * their choice sticks. Status arrives async, so a plain defaultOpen would be
- * read before the card knows whether anything is wrong.
- *
- * Pass `group` and `id` and the card joins an accordion: opening it closes
- * whichever card in that group was open, including cards an add-on renders in
- * a separate React root. Several cards can want attention at once, so the
- * first to ask claims the group and the rest stay shut until clicked.
+ * Follow needsAttention until user interaction. Group/id enables an accordion across React
+ * roots; the first attention request claims the group.
  */
 export default function useCardOpen( needsAttention, group = '', id = '' ) {
     const [ pinned, setPinned ] = useState( null );

@@ -350,7 +350,6 @@ function ctaLabel( step, busy ) {
     return __( 'Next', 'fundraising-toolkit' ) + ' ' + forwardGlyph();
 }
 
-// Step 1: who is fundraising
 function FundraiserTypeStep( { value, onChange } ) {
     const set = ( patch ) => onChange( { ...value, ...patch } );
     return (
@@ -392,7 +391,6 @@ function FundraiserTypeStep( { value, onChange } ) {
     );
 }
 
-// Step 3: Location & money
 function LocationStep( { value, onChange, currency, onCurrencyChange, userType } ) {
     const set = ( patch ) => onChange( { ...value, ...patch } );
     const isIndividual = userType === 'individual';
@@ -648,13 +646,8 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
                             ref={ frameRef }
                             className="fundkit-onboarding__preview-frame"
                             title={ __( 'Donation form preview', 'fundraising-toolkit' ) }
-                            // allow-scripts without allow-same-origin: the preview
-                            // needs to run the form's own JS, but a srcdoc frame
-                            // otherwise inherits this admin origin, so anything
-                            // scripted inside it would carry the admin's cookies
-                            // and nonce. An opaque origin costs nothing here -
-                            // both sides of the token push already identify each
-                            // other by window reference rather than by origin.
+                            // Omit allow-same-origin so preview scripts cannot use admin
+                            // credentials. Token messages validate window references.
                             sandbox="allow-scripts"
                             srcDoc={ previewHtml }
                             style={ loadState === 'loaded' ? undefined : { visibility: 'hidden' } }
@@ -666,7 +659,6 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
     );
 }
 
-// Step 5: Get-started checklist
 function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } ) {
     const campaignId = finalized?.campaign_id || 0;
     const gatewayUrl = settingsUrl ? `${ settingsUrl }#gateways` : ( dashboardUrl || '#' );
@@ -756,16 +748,7 @@ const SHIPPED_FORMAT = {
 /** What ships when nobody has chosen: the currency-locale default in SettingsService. */
 const SHIPPED_CURRENCIES = [ 'USD' ];
 
-/**
- * The currencies the operator enabled, with their base always among them.
- *
- * Same trap as the separators below: every settings read comes back with
- * [ 'USD' ] merged in, so a length test can never see "unset". A lone USD is
- * what ships rather than a choice, and keeping it beside a EUR base makes a
- * single-currency charity look multi-currency to the rate fetcher, which then
- * starts a daily third-party call it has no use for, and leaves USD
- * unremovable on Settings > Currency.
- */
+/** Include the base currency and treat the default lone USD as unconfigured. */
 export function chosenCurrencies( currency ) {
     const base = String( currency?.default_currency || 'USD' ).toUpperCase();
     const list = ( Array.isArray( currency?.supported_currencies ) ? currency.supported_currencies : [] )

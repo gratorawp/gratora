@@ -12,7 +12,7 @@ use FundKit\Vendor\Queryable\Model;
 use FundKit\Vendor\Queryable\Schema\Table;
 
 /**
- * Owns one public-facing WP page (via `page_id`) and zero or more donation forms.
+ * Owns one WP page and zero or more forms.
  *
  * @since 1.0.0
  */
@@ -27,7 +27,7 @@ final class Campaign extends Model
     public ?string $description = null;
     public ?int $image_attachment_id = null;
     public string $status = 'draft';
-    /** VARCHAR so add-ons can register new types without a schema change. */
+    /** Varchar allows add-on types without migrations. */
     public string $campaign_type = 'standard';
     public string $goal_type = 'amount';
     public ?int $goal_cents = null;
@@ -49,7 +49,6 @@ final class Campaign extends Model
      */
     public ?array $style = null;
 
-    /** Stops accepting donations the moment the goal is reached. */
     public bool $close_at_goal = false;
 
     public bool $hide_header = false;
@@ -119,8 +118,7 @@ final class Campaign extends Model
     }
 
     /**
-     * The first instant the campaign is open, as UTC, or null when it has no
-     * start date.
+     * UTC opening instant, or null without a start date.
      *
      * @since 1.0.0
      */

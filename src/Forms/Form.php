@@ -10,10 +10,7 @@ use FundKit\Vendor\Queryable\Model;
 use FundKit\Vendor\Queryable\Schema\Table;
 
 /**
- * Donation form definition.
- *
- * Every form lives under a campaign. Deleting the campaign deletes the forms;
- * there is no detached / orphan state.
+ * Every form belongs to a campaign and is deleted with it.
  *
  * @since 1.0.0
  */

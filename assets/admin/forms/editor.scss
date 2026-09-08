@@ -1,5 +1,4 @@
-// Fullscreen chrome-hiding lives server-side in
-// FormsPage::maybePrintFullscreenStyles, inlined in <head>.
+// FormsPage owns fullscreen admin-chrome styles.
 
 @import '@fundkit/ui/scss/tokens';
 @import '../_shared/admin-base';
@@ -29,9 +28,7 @@ $sidebar-width: 300px;
     background: #fff;
     color: $text;
 
-    // Mirrors runtime.scss: with no explicitly paired --fundkit-accent-soft the
-    // preview derives one from --fundkit-accent, as the published form does,
-    // rather than showing a static tint.
+    // Match runtime accent-soft derivation.
     --fundkit-accent-soft: #{$accent-soft};
     --fundkit-accent-soft: color-mix(in srgb, var(--fundkit-accent) 12%, #fff);
 
@@ -194,9 +191,7 @@ $sidebar-width: 300px;
         overflow: auto;
         display: flex;
         justify-content: center;
-        // Stretch sizes the device frame to the stage's content box, so the
-        // iframe stays the only scroller. flex-start with height:100% overlaps
-        // the stage padding and nests a second scrollbar.
+        // Stretch the frame within stage padding to keep one scrollbar.
         align-items: stretch;
         padding: 28px 20px;
     }
@@ -218,10 +213,7 @@ $sidebar-width: 300px;
                 0 16px 40px rgba(0, 0, 0, .18);
             padding: 0;
             position: relative;
-            // An explicit height opts out of the stage's align-items: stretch
-            // so the phone keeps its screen shape, capped to the stage so a
-            // short window shrinks it rather than adding an outer scrollbar.
-            // border-box counts the 10px bezel against that cap.
+            // Cap phone height within the stage, including its bezel.
             box-sizing: border-box;
             height: min(780px, 100%);
             align-self: center;
@@ -257,25 +249,19 @@ $sidebar-width: 300px;
     }
 }
 
-// WP admin chrome is hidden in FormsPage::maybePrintFullscreenStyles, so the
-// skeleton reserves no space for it.
 .fundkit-form-editor .interface-interface-skeleton {
     position: fixed;
     inset: 0;
     height: auto;
 }
 
-// Root-level scope, not .fundkit-form-editor, so it also catches popovers that
-// portal out of the editor. Safe because this stylesheet is only enqueued on
-// the form editor page.
+// Use page-level scope to reach portaled popovers.
 :root {
     --wp-admin-theme-color:           #{$accent};
     --wp-admin-theme-color-darker-10: #{$accent-dark};
     --wp-admin-theme-color-darker-20: #{$accent-dark};
     --wp-admin-border-width-focus:    2px;
-    // WP 7+ Button reads --wp-components-color-accent first and only falls back
-    // to --wp-admin-theme-color, so secondary and tertiary buttons stay
-    // admin-blue without this. Mirrors campaigns.scss.
+    // WP 7+ buttons prefer --wp-components-color-accent.
     --wp-components-color-accent:           #{$accent};
     --wp-components-color-accent-darker-10: #{$accent-dark};
     --wp-components-color-accent-darker-20: #{$accent-dark};
@@ -291,15 +277,13 @@ $sidebar-width: 300px;
         }
     }
 
-    // Overlay-based selection, Gutenberg 14+.
     .block-editor-block-popover__overlay,
     .block-editor-block-list__layout .is-selected > .block-editor-block-list__block-popover {
         outline-color: #{$accent} !important;
     }
 }
 
-// The between-blocks inserter portals outside .fundkit-form-editor, so these
-// selectors are unscoped.
+// The inserter portals outside the editor wrapper.
 .block-editor-block-list__insertion-point-indicator {
     background: #{$accent} !important;
     height: 2px !important;
@@ -346,19 +330,14 @@ $sidebar-width: 300px;
 }
 
 .fundkit-form-editor .interface-interface-skeleton__secondary-sidebar {
-    // The skeleton animates an inline width while a panel opens, then drops it,
-    // and core's base width:auto collapses around the absolutely-positioned
-    // content wrapper. This is what holds the rail open. Keep in step with
-    // .fundkit-form-editor__secondary below.
+    // Keep the rail width after animation drops its inline width; match the secondary rail.
     width: 350px;
     border-right: 1px solid $border-soft;
     background: #fff;
 }
 
 .fundkit-form-editor__secondary {
-    // The skeleton's animation wrapper is width:fit-content, so without an
-    // explicit width the panel shrink-wraps to its widest label. 350px matches
-    // the inserter's intrinsic width, so the rail does not jump when toggling.
+    // Match the inserter’s 350px width to prevent shrink-wrapping and jumps.
     width: 350px;
     height: 100%;
     display: flex;
@@ -367,9 +346,7 @@ $sidebar-width: 300px;
     background: #fff;
 
     &--inserter {
-        // The header toggle is the only close affordance. Do not add
-        // `.block-editor-inserter__panel-header` to this list: in newer WP it
-        // carries the per-category section titles, which stay.
+        // Keep block-editor-inserter__panel-header; it contains category titles in newer WP.
         .block-editor-inserter__tabs,
         .block-editor-tabbed-sidebar__tablist,
         .block-editor-tabbed-sidebar__tabs,
@@ -483,9 +460,7 @@ $sidebar-width: 300px;
         &:hover { background: $bg-soft; color: $text; }
     }
 
-    // Core's input[type="text"] rule outweighs a lone class, so without the
-    // attribute selector this renders with core's 2px radius, grey border and
-    // 40px min-height, which no amount of padding here can undercut.
+    // Match core’s attribute-selector specificity.
     &__title[type="text"] {
         flex: 1 1 auto;
         max-width: 100%;
@@ -597,8 +572,6 @@ $sidebar-width: 300px;
         }
     }
 
-    // Without this, WP's default ~2px radius reads square next to the pill tabs
-    // and the 6px primary button.
     .components-button.is-secondary {
         background: #fff;
         color: $text;
@@ -627,8 +600,7 @@ $sidebar-width: 300px;
 
         &:disabled,
         &[aria-disabled="true"] {
-            // WP's disabled rule adds an inset box-shadow "border" that doubles
-            // up with the real one and reads heavier than the enabled button.
+            // Remove the disabled inset shadow to avoid a double border.
             box-shadow: none;
             opacity: .6;
             cursor: default;
@@ -709,8 +681,7 @@ $sidebar-width: 300px;
             }
         }
 
-        // @wordpress/components v28+ defaults these to 40px, tuned for the post
-        // editor's wide sidebar and too dominant in a 300px one.
+        // Override the component’s 40px default for the narrow sidebar.
         .components-input-control__container .components-input-control__input,
         .components-number-control input,
         .components-unit-control input,
@@ -719,10 +690,7 @@ $sidebar-width: 300px;
         .components-select-control__input {
             min-height: 32px;
         }
-        // The toggle button alone owns the header row geometry, so collapsed
-        // and expanded headers are pixel-identical. WP's default
-        // ".is-opened > .components-panel__body-title { margin: -16px }" assumes
-        // 16px body padding, which this compact sidebar does not have.
+        // Core’s expanded-title margin assumes different body padding.
         .components-panel__body {
             padding: 0 16px;
         }
@@ -741,9 +709,7 @@ $sidebar-width: 300px;
         .components-panel__body-title {
             font-size: 12px;
         }
-        // A collapsed panel's toggle keeps focus after a click, leaving WP's
-        // 2px accent inset ring on the header. Dropped for pointer focus only;
-        // keyboard focus keeps a visible ring.
+        // Remove pointer-focus rings only; retain visible keyboard focus.
         .components-panel__body-toggle:focus:not(:focus-visible) {
             box-shadow: none;
             outline: none;
@@ -1280,7 +1246,6 @@ $sidebar-width: 300px;
         justify-content: center;
     }
 
-    // Dashed on purpose: it is a container the author fills.
     &--step {
         padding: 16px 18px;
         background: #fff;
@@ -1324,8 +1289,6 @@ $sidebar-width: 300px;
     }
     &__hidden-meta { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 
-    // Rows rather than a browser-default <dl>, whose indented <dd> on its own
-    // line reads as broken markup.
     &--summary {
         background: #f8fafb;
         border: 1px solid $border-mid;
@@ -1555,11 +1518,7 @@ $sidebar-width: 300px;
     }
 }
 
-// WordPress ToggleControl, wearing the FundKit switch. Scoped to this editor on
-// purpose: loading it on enqueue_block_editor_assets would re-skin the toggles
-// of core blocks and every other plugin in every block editor.
-//
-// !important because @wordpress/components ships more specific rules.
+// Scope to this editor. !important overrides WordPress component specificity.
 .fundkit-form-editor {
     .components-form-toggle__track {
         width: 34px !important;

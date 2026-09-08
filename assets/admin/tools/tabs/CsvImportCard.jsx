@@ -280,7 +280,6 @@ function hasWork( res ) {
     return res.donations_imported > 0 || res.donors_created > 0 || res.donors_matched > 0;
 }
 
-/** One sentence covering both modes, in the tense the caller needs. */
 function summarise( res ) {
     const people = res.dry_run
         ? sprintf(

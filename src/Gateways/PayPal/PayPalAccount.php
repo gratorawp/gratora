@@ -118,14 +118,8 @@ final class PayPalAccount
     }
 
     /**
-     * PayPal has no "charges enabled" flag equivalent to Stripe's: a REST app
-     * with working credentials can take payments, and credentials are verified
-     * at save time, so having them is the readiness signal.
-     *
-     * Deliberately mode-independent. This answers "may the form offer PayPal",
-     * which is asked before any donation has fixed a mode, and the mode
-     * override is per-operation state on a shared instance. A charge in a mode
-     * with no credentials still fails closed in PayPalApi.
+     * Verified credentials indicate PayPal readiness. Keep this mode-independent; PayPalApi
+     * checks the operation’s mode separately.
      *
      * @since 1.0.0
      */
@@ -180,11 +174,7 @@ final class PayPalAccount
         return is_string($plain) ? $plain : '';
     }
 
-    /**
-     * Merge merchant details learned from the credential check.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function refresh(array $identity): void
     {
         $data = $this->raw();
@@ -252,11 +242,7 @@ final class PayPalAccount
         $this->forgetToken(false);
     }
 
-    /**
-     * Remove one mode's credentials, leaving the other intact.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function forgetMode(bool $test): void
     {
         $data = $this->raw();

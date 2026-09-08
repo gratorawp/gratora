@@ -40,8 +40,7 @@ use Throwable;
 use WP_REST_Request;
 
 /**
- * Stripe gateway via PaymentIntents for one-time donations and Subscriptions
- * for recurring ones, charging on the organization's own Stripe account.
+ * Charge the org’s Stripe account using PaymentIntents and Subscriptions.
  *
  * @since 1.0.0
  */
@@ -650,8 +649,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * `charge.refunded` fires for refunds from our own `refund()` and for ones
-     * made in the Stripe Dashboard or by dispute resolution.
+     * Handle refunds from API calls, the Stripe dashboard, and disputes.
      *
      * @since 1.0.0
      */
@@ -850,9 +848,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * A lost dispute pulled funds from our balance. Recorded as a
-     * 'dispute'-sourced refund so counters drop, idempotent via the dispute id
-     * standing in as the refund id.
+     * Use the dispute ID as the idempotent refund ID.
      *
      * @since 1.0.0
      */
@@ -950,9 +946,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * The dispute was won and Stripe has returned the money, so the refund the
-     * loss recorded is undone, or the donation stays missing from every total
-     * for good.
+     * Reverse the dispute refund when Stripe returns the money.
      *
      * @since 1.0.0
      */
@@ -1133,10 +1127,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
     /** @since 1.0.0 */
     /**
-     * A Customer this donor already has at this gateway, in this mode.
-     *
-     * Test and live are separate Stripe accounts, so an id from one is not a
-     * record in the other.
+     * Keep customer IDs separate between test and live accounts.
      *
      * @since 1.0.0
      */
@@ -1871,18 +1862,9 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * A PaymentIntent whose money has gone back still reports `succeeded`, so
-     * the status alone would bank a payment the org no longer holds: counted as
-     * raised, receipted, added to the donor's total. The charge is what knows,
-     * and it is read live rather than from the event payload, because the
-     * payload is a snapshot taken before the reversal.
-     *
-     * Only a reversal covering the whole payment stops the banking. A slice
-     * going back leaves a donation the org did receive, and refusing it would
-     * lose all of it, so the rest is banked and `reversed_minor_units` tells the
-     * caller to reconcile the slice. `reversed`, not a plain failure: nothing
-     * here is a decline, and a caller that reads it as one tells a donor who was
-     * charged otherwise.
+     * Read the live charge: a reversed PaymentIntent still says succeeded. Full reversals
+     * prevent banking; partial reversals are banked with reversed_minor_units for
+     * reconciliation.
      *
      * @since 1.0.0
      */
@@ -2101,10 +2083,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * Both the subscription and the customer. The subscription alone is not
-     * enough: an invoice created before the change, which is exactly the unpaid
-     * one in a dunning cycle, bills the customer's default, so a donor who
-     * fixed their card would watch the same invoice decline again.
+     * Update both defaults: existing unpaid invoices use the customer’s, not the
+     * subscription’s.
      *
      * @since 1.0.0
      */
@@ -2182,19 +2162,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * Whether Stripe could have issued this id.
-     *
-     * gateway_subscription_id is NOT NULL under
-     * unique(gateway, gateway_subscription_id), so a plan that never reached
-     * Stripe cannot record that absence as ''. The Give importer mints
-     * 'give-import-<id>' and DemoSeeder 'demo-subNNN' for exactly that reason,
-     * and both land here on the Stripe gateway.
-     *
-     * Sending one to Stripe answers resource_missing, which confirmedTerminal()
-     * cannot tell apart from a key rotated to a different account, so the throw
-     * stands: the donor's cancel fails, the plan stays active, and every retry
-     * fails identically. Donor erasure cancels plans first, so it takes that
-     * down with it.
+     * Reject imported/demo placeholder IDs before contacting Stripe; resource_missing cannot
+     * distinguish them from account changes.
      *
      * @since 1.0.0
      */
@@ -2452,8 +2421,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * 200, not 5xx: the event is genuine, it just may not do what it asked, and
-     * a 5xx would make Stripe retry it for days.
+     * Acknowledge valid but refused events to prevent futile retries.
      *
      * @since 1.0.0
      */

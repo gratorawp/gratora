@@ -1,7 +1,4 @@
-// The plan detail dialog, opened from the subscriptions list and from the
-// donor profile's recurring tab. It moved to shared use and its styling has to
-// travel with it, or the dialog renders unstyled on whichever screen was not
-// the one it was written for.
+// Shared by subscriptions and donor-profile bundles.
 
 .sd-head {
     display: flex;
@@ -83,8 +80,6 @@
 .sd-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
 .sd-muted { color: $text-muted; }
 
-// What went wrong on a plan, newest first. Read after the money and the
-// schedule, so it sits below both.
 .sd-errors {
     list-style: none;
     margin: 0;
@@ -109,6 +104,4 @@
     &__src  { color: $text-muted; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; }
 }
 
-// Close is dismissal, not an action on the plan, so it sits apart from the
-// buttons that change one.
 .fundkit-dialog__foot > .sd-foot__close { margin-right: auto; }

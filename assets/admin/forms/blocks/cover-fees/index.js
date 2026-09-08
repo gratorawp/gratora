@@ -7,15 +7,7 @@ import { BlockIcons } from '../_shared/block-icons';
 
 const NAME = 'fundkit/cover-fees';
 
-/**
- * A decimal field that survives being typed into.
- *
- * An input[type=number] reports an empty value for anything partly typed, so a
- * controlled field recomputed from its attribute on every keystroke collapses
- * the moment a decimal point is pressed and the box is rewritten under the
- * caret. Typing 2.9 leaves 9 behind, and these two numbers decide what a donor
- * is charged.
- */
+/** Keep draft decimal text; number inputs report partial values as empty. */
 function DecimalControl( { label, help, display, onCommit } ) {
     const [ draft, setDraft ] = useState( null );
 

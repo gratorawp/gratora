@@ -7,11 +7,7 @@ namespace FundKit\Forms\Blocks;
 use FundKit\Donors\ConsentService;
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Consent / opt-in purposes block.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class ConsentBlock implements Block
 {
     /** @since 1.0.0 */

@@ -8,11 +8,7 @@ use FundKit\Analytics\ErrorLog;
 use FundKit\Analytics\EventRecorder;
 use RuntimeException;
 
-/**
- * Registers, introspects, and dispatches commands.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CommandRegistry
 {
     /** Sources whose mutating dispatches must clear the confirmation gate. */

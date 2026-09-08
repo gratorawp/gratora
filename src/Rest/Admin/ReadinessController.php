@@ -10,8 +10,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * One round trip for the Setup screen's whole verdict, rather than a fan-out
- * over every gateway, page and queue endpoint.
+ * Aggregate setup readiness in one request.
  *
  * @since 1.0.0
  */

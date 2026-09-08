@@ -17,12 +17,12 @@ use FundKit\Donors\Portal\PortalPage;
 use FundKit\Donors\Portal\PortalSession;
 use FundKit\Forms\Form;
 use FundKit\Forms\FormService;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\Stripe\StripeAccount;
 use FundKit\Foundation\Plugin;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Funds\Fund;
 use FundKit\Funds\FundService;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\Stripe\StripeAccount;
 use FundKit\Onboarding\Onboarding;
 use FundKit\Recurring\RecurringPlanRepository;
 use FundKit\Settings\SettingsService;
@@ -192,8 +192,6 @@ final class CliCommands
                 'payment_method' => 'offline',
             ]);
 
-            // Spread paid_at over the last ~90 days so time-series views
-            // have something to show.
             $when = gmdate('Y-m-d H:i:s', $stamp - random_int(0, 90 * 86400));
             $donation->created_at = $when;
             $donation->paid_at    = $when;
@@ -204,7 +202,7 @@ final class CliCommands
         }
         $bar->finish();
 
-        // Backdating bypassed the event-driven sync; recompute what we touched.
+        // Backdated inserts bypass event-driven aggregate updates.
         $agg->syncCampaign((int) $campaign->id);
         if ($formId !== null) {
             $agg->syncForm($formId);
@@ -279,8 +277,7 @@ final class CliCommands
             $assoc
         );
 
-        // Onboarding gates every FundKit admin screen while it is pending, and a
-        // screenshot run needs the screens, not the wizard.
+        // Complete onboarding so screenshot runs can reach admin screens.
         update_option(Onboarding::OPTION, 'completed', false);
 
         $t0     = microtime(true);
@@ -447,8 +444,7 @@ final class CliCommands
 
         $this->e2ePinFxRates();
 
-        // Org-wide test mode on. Required for AntiSpamGuard to relax the IP
-        // and email rate limits (automation bursts through the prod caps).
+        // Enable relaxed test quotas for automation.
         $gatewayConfig = get_option('fundkit_gateway_config', []);
         if (! is_array($gatewayConfig)) $gatewayConfig = [];
         $gatewayConfig['test_mode'] = true;
@@ -471,8 +467,6 @@ final class CliCommands
 
         $this->e2eSeedStripeFixtureKeys();
 
-        // Drop AntiSpamGuard rate-limit transients so a run isn't penalized
-        // by prior attempts from the same IP / email range.
         global $wpdb;
         $wpdb->query(
             "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_fundkit_donate_%' OR option_name LIKE '_transient_timeout_fundkit_donate_%'"
@@ -659,13 +653,7 @@ final class CliCommands
         }
     }
 
-    /**
-     * The payment-step fixture: everything the submit needs and nothing else,
-     * so the walk to the gateway block is short and the pay screen is what the
-     * specs are looking at.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private static function e2ePaymentBlocks(): string
     {
         return implode("\n", [
@@ -761,14 +749,8 @@ final class CliCommands
     }
 
     /**
-     * A fixed FX snapshot, so a currency switch converts.
-     *
-     * The rates normally arrive from a daily cron making a live call, which
-     * means a fixture that has never run it has no rates at all: the switcher
-     * still changes the symbol, conversion silently no-ops, and USD renders
-     * identical to EUR. A visual golden captured in that state stops testing
-     * conversion without ever failing. auto is off so the cron cannot replace
-     * these with live rates mid-run and move every amount.
+     * Use fixed FX rates with auto-refresh disabled so conversion screenshots remain
+     * reproducible.
      *
      * @since 1.0.0
      */
@@ -863,8 +845,7 @@ final class CliCommands
     }
 
     /**
-     * The consent block names purposes; the org defines them. Core ships none,
-     * so the fixture registers its own before seeding a form that asks for them.
+     * Register fixture consent purposes before seeding blocks.
      *
      * @since 1.0.0
      */
@@ -882,8 +863,6 @@ final class CliCommands
     /** @since 1.0.0 */
     private static function e2eCanonicalBlocks(): string
     {
-        // Keys only. The purposes themselves are registered on the org, which
-        // e2eRegisterConsentPurposes does before the form is seeded.
         $consent = wp_json_encode([
             'label'       => 'Consent',
             'purposeKeys' => ['tos', 'updates'],
@@ -919,12 +898,7 @@ final class CliCommands
         ]);
     }
 
-    /**
-     * Multi-step variant: a fundkit/steps wizard with at least an amount step
-     * and a donor step so multi-step.spec.ts can exercise the Continue flow.
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     private static function e2eMultiStepBlocks(): string
     {
         return <<<'BLOCKS'

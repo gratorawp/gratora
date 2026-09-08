@@ -142,24 +142,9 @@ final class AntiSpamGuard
     }
 
     /**
-     * Refuse a browser request made by a page this site did not serve.
-     *
-     * WordPress answers REST with Access-Control-Allow-Origin reflecting
-     * whoever asked and Access-Control-Allow-Credentials: true, so any page
-     * anywhere can post here and read the reply. The reply carries the
-     * gateway's client secret, and every cap in this class is written on the
-     * assumption that an attacker spends addresses they have to obtain. A
-     * script on one busy page spends its visitors' addresses instead:
-     * residential, unblocklisted, and indistinguishable from donors, which is
-     * cheaper than proxies and leaves the per-IP cap measuring nothing.
-     *
-     * Only a present-and-disallowed Origin is refused. A browser always sends
-     * one cross-origin and script cannot suppress it, while a server-side
-     * caller sends none and stays bounded by the per-IP cap as before.
-     *
-     * The allow list is core's own, so a decoupled front end adds its origin
-     * through the documented allowed_http_origins filter instead of losing the
-     * endpoint.
+     * Reject disallowed browser origins; WordPress’s permissive REST CORS would otherwise let
+     * third-party pages spend visitors’ IP quotas. Allow absent Origin headers for server
+     * callers and use allowed_http_origins for decoupled frontends.
      *
      * @since 1.0.0
      */
@@ -216,19 +201,8 @@ final class AntiSpamGuard
     }
 
     /**
-     * Where a site adds a check of its own: a captcha, an allow list, a
-     * reputation service. Return a WP_Error to refuse the submission; the
-     * error is passed to the donor, so word it for them.
-     *
-     * The checks here are the ones every site gets. They cannot be the ones
-     * every site needs, because what a captcha costs a donor is a judgement
-     * only the org can make, and a plugin that decides it for them is either
-     * too strict for a quiet charity or too weak for one under attack.
-     *
-     * Called after the IP quota, which is what bounds it: a check of this
-     * kind usually calls out to a third party, and running it before the
-     * quota would let a caller aim this site's outbound requests at that
-     * service as fast as they can open connections.
+     * Run site-specific checks after IP quota to bound third-party requests. Return a
+     * donor-facing WP_Error to refuse submission.
      *
      * @param array<string,mixed> $submission the raw request body
      *
@@ -380,15 +354,8 @@ final class AntiSpamGuard
     }
 
     /**
-     * Proof that this submission continues one specific never-funded donation,
-     * which spends that attempt tree's own budget instead of the email quota.
-     *
-     * The relief hangs off a server-minted per-donation secret, never off a
-     * property of the email address: an attacker cannot mint one, and a row
-     * that has seen money can never buy one.
-     *
-     * Returns null on any refusal, and the caller falls back to the email
-     * quota, so a refusal here is never itself an error the donor sees.
+     * Authorize a retry with a server-minted token for a never-funded donation. Refusals return
+     * null and fall back to email quota.
      *
      * @param array{amount_cents:int,currency:string,frequency:string} $describes
      *   what this submission is for, which has to be the parent's own donation
@@ -507,26 +474,9 @@ final class AntiSpamGuard
     }
 
     /**
-     * Count this attempt and answer how many the window has now seen.
-     *
-     * Incremented before it is judged, and incremented atomically, because
-     * read-then-write lets two requests both read the last allowed value and
-     * both write it back: the limit is walked past exactly as fast as a
-     * caller can open connections.
-     *
-     * The window is a fixed bucket in the key rather than a sliding expiry.
-     * Re-setting a transient on every attempt pushes its expiry out, so a
-     * caller who keeps trying holds their own lockout open forever, and the
-     * person it strands is the donor whose card was declined twice.
-     *
-     * Public because every unauthenticated surface needs these two properties,
-     * not only the donation endpoint. $base carries the caller's own namespace.
-     *
-     * $bucket names the bucket outright for a counter whose lifetime is a
-     * server-minted moment rather than the wall clock. A wall-clock bucket
-     * rolls underneath such a counter and hands its subject a fresh allowance
-     * part way through. The value is written by the server and never moves, so
-     * a caller still cannot push their own expiry out.
+     * Atomically count attempts before checking limits. Fixed buckets prevent retries extending
+     * lockouts; $base namespaces callers. An explicit server-minted $bucket keeps an attempt’s
+     * allowance from resetting at wall-clock boundaries.
      *
      * @since 1.0.0
      */

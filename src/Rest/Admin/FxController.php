@@ -3,21 +3,19 @@
 declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
-use FundKit\Foundation\Auth\Capabilities;
-
 use FundKit\Currency\FxBackfill;
 use FundKit\Currency\FxRates;
-use FundKit\Gateways\GatewayManager;
 use FundKit\Currency\FxRatesUpdater;
+use FundKit\Foundation\Auth\Capabilities;
 use FundKit\Foundation\Helpers\Money;
+use FundKit\Gateways\GatewayManager;
 use FundKit\Settings\SettingsService;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * Exchange-rate settings surface for the Currency panel; POST /fetch refreshes
- * immediately regardless of the auto toggle.
+ * Manual fetch ignores the automatic-refresh setting.
  *
  * @since 1.0.0
  */

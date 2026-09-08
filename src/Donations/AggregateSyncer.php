@@ -4,14 +4,10 @@ declare(strict_types=1);
 
 namespace FundKit\Donations;
 
-use FundKit\Vendor\Queryable\DB;
 use FundKit\Donors\DonorAggregateSyncer;
+use FundKit\Vendor\Queryable\DB;
 
-/**
- * Recomputes denormalised donation aggregates for a donor, campaign, or form.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class AggregateSyncer
 {
     /**

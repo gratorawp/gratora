@@ -1,7 +1,4 @@
-// Tools page styles.
 
-// Page chrome (crumbs, head, tabs, Card, fundkit-advanced-*) and the ConfirmDialog
-// used by the Logs tab.
 @import '../settings/settings.scss';
 @import '@fundkit/ui/scss/components/month-field';
 
@@ -35,8 +32,7 @@
 
     flex: 0 0 auto;
 
-    // .fundkit-select and .fundkit-input are width:100%, which against an auto-width
-    // label resolves to the whole container.
+    // Constrain controls whose width:100% would fill the container.
     .fundkit-select,
     .fundkit-input {
         width: auto;
@@ -75,8 +71,6 @@
     tbody tr:last-child th,
     tbody tr:last-child td { border-bottom: 0; }
 
-    // Zebra striping earns its keep here: each row is tall enough that the eye
-    // loses which description belongs to which set of controls.
     tbody tr:nth-child(odd) { background: $bg-page; }
 
     tbody th {
@@ -163,7 +157,6 @@
     margin-bottom: 14px;
 }
 
-// Timestamp beside a queued job on the System info tab.
 .fundkit-tools-log__when {
     font-size: 12px;
     color: $text-muted;
@@ -181,8 +174,7 @@
 
     &__message {
         color: $text;
-        // List cells are nowrap, and a gateway trace arrives as one long
-        // unbroken token that would otherwise push the table sideways.
+        // Allow long gateway traces to wrap inside nowrap tables.
         white-space: normal;
         overflow-wrap: anywhere;
         max-width: 64ch;
@@ -209,15 +201,11 @@
     }
 }
 
-// Column mapping. A table because that is what it is: one FundKit field per row,
-// the admin's column beside it, and the first value from their file so they can
-// see they picked the right one without opening the spreadsheet.
 .fundkit-csv-map {
     width: 100%;
     border-collapse: collapse;
     margin: 16px 0;
-    // Fixed, because the donor table and the donation table are two elements
-    // and their columns have to line up as though they were one.
+    // Use fixed columns to align the separate donor and donation tables.
     table-layout: fixed;
 
     th, td {
@@ -236,9 +224,7 @@
 
     tbody th { font-weight: 600; }
 
-    // By position rather than by element: only the donor table has a thead, so
-    // widths hung on th alone leave the donation table to size itself and the
-    // two sets of controls stop lining up.
+    // Size by position; the donation table has no thead.
     tr > :first-child  { width: 34%; }
     tr > :nth-child(2) { width: 40%; }
     tr > :last-child   { width: 26%; }
@@ -281,9 +267,6 @@
     &__errors { color: #b91c1c; }
 }
 
-// The log table. Without widths the message, which is the column somebody came
-// to read, is squeezed to a few characters while the timestamp takes a third of
-// the row.
 .fundkit-log {
     &__when {
         white-space: nowrap;
@@ -300,9 +283,7 @@
 
     &__message {
         white-space: normal;
-        // Only where a word genuinely cannot fit, such as a gateway id. Anywhere
-        // breaks mid-word on every line and turns a sentence into a column of
-        // letters the moment the cell is narrow.
+        // Break only unfit words, preserving normal text wrapping.
         overflow-wrap: break-word;
     }
 
@@ -330,8 +311,6 @@
     }
 }
 
-// System report groups. The rows are the settings screen's info grid; only the
-// heading that separates one group from the next is new.
 .fundkit-sysinfo__group + .fundkit-sysinfo__group {
     margin-top: 22px;
 }

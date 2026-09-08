@@ -6,11 +6,7 @@ namespace FundKit\Funds;
 
 use FundKit\Vendor\Queryable\DB;
 
-/**
- * Fund query helpers.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class FundRepository
 {
     /** @since 1.0.0 */

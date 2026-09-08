@@ -2,10 +2,7 @@ import { defineConfig, devices, type Project } from '@playwright/test';
 
 const baseURL = process.env.FUNDKIT_E2E_URL ?? 'http://localhost:10075';
 
-// Visual regression project. Opt-in (FUNDKIT_E2E_VISUAL=1) because screenshot
-// goldens are rendered on macOS; a default run on another platform would fail
-// on missing snapshots rather than catch regressions. Run via npm run
-// test:visual / test:visual:update.
+// Opt in with FUNDKIT_E2E_VISUAL=1; screenshot baselines are macOS-specific.
 const runVisual = !! process.env.FUNDKIT_E2E_VISUAL;
 
 // wp-admin screenshot capture (specs/screenshots). Writes PNGs instead of

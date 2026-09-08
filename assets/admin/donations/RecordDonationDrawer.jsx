@@ -113,8 +113,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     label: o.group ? `${ o.group }: ${ o.label }` : o.label,
                 } ) ) );
             } )
-            // Silent: an empty list means the donation is credited to the
-            // campaign alone, which is what happened before this field existed.
+            // An empty fund list credits the campaign alone.
             .catch( () => {
                 if ( ! aborted ) setAttributions( [] );
             } );

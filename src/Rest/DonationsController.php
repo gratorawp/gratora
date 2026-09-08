@@ -4,28 +4,28 @@ declare(strict_types=1);
 
 namespace FundKit\Rest;
 
-use FundKit\Foundation\Http\ClientIp;
 use FundKit\Analytics\ErrorLog;
 use FundKit\Campaigns\Campaign;
 use FundKit\Currency\Currency;
 use FundKit\Currency\SupportedCurrencies;
 use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donations\Donation;
 use FundKit\Donations\ChannelClassifier;
+use FundKit\Donations\Donation;
 use FundKit\Donations\DonationIntent;
 use FundKit\Donations\DonationRepository;
 use FundKit\Donations\DonationService;
 use FundKit\Donors\ConsentService;
 use FundKit\Donors\Donor;
-use FundKit\Forms\Form;
 use FundKit\Forms\Blocks\TermsBlock;
+use FundKit\Forms\Form;
 use FundKit\Forms\FormSubmissionValidator;
+use FundKit\Foundation\Http\ClientIp;
 use FundKit\Gateways\BrowserAware;
 use FundKit\Gateways\GatewayIntentResult;
 use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\TestMode;
 use FundKit\Gateways\PaymentGateway;
 use FundKit\Gateways\SubscriptionCreator;
+use FundKit\Gateways\TestMode;
 use FundKit\Recurring\FrequencyMap;
 use FundKit\Rest\Schemas\DonationSchemas;
 use Throwable;
@@ -34,12 +34,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
-/**
- * Public donation endpoints: create a pending donation and start its gateway
- * intent, poll status by reference, and confirm offline payments.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DonationsController
 {
     private const NAMESPACE = 'fundkit/v1';
@@ -271,18 +266,9 @@ final class DonationsController
             return new WP_Error('fundkit_custom_too_large', __('Submitted form data is too large.', 'fundraising-toolkit'), ['status' => 400]);
         }
 
-        // Spent here, below every refusal that does not depend on who the donor
-        // is. The quota is addressable by a stranger: anyone can type anyone's
-        // address, so spending a slot on a submission that was never going to
-        // succeed lets an outsider hold a named donor out of donating with
-        // requests that create nothing and leave no row to find. Everything
-        // above refuses on the form, the campaign, the gateway or the payload,
-        // and none of it needs the donor's budget to say no.
-        //
-        // A submission carrying the status token of a named, never-funded
-        // pending donation is not a new attempt against the email quota, it is
-        // the same donation being tried a second way, and it spends that
-        // attempt tree's own budget.
+        // Spend email quota only after payload and configuration checks, so invalid requests
+        // cannot exhaust another donor’s allowance. Valid retries spend their attempt tree’s
+        // budget instead.
         $retry    = null;
         $parent   = null;
         $claim    = is_array($body['_retry'] ?? null) ? $body['_retry'] : [];
@@ -591,8 +577,7 @@ final class DonationsController
     }
 
     /**
-     * An explicit whitelist rather than an echo of the gateway metadata, so a
-     * future gateway field cannot leak to the browser by accident.
+     * Whitelist metadata fields to prevent accidental disclosure.
      *
      * @since 1.0.0
      */
@@ -612,8 +597,7 @@ final class DonationsController
     }
 
     /**
-     * Requires `status_token` to prevent reference enumeration. Token mismatch
-     * returns the same 404 as not-found so existing references don't leak.
+     * Return the same 404 for missing references and invalid status tokens.
      *
      * @since 1.0.0
      */
@@ -747,8 +731,7 @@ final class DonationsController
     }
 
     /**
-     * An empty or absent accepted-currency list means unconfigured, so any
-     * valid code is accepted rather than everything rejected.
+     * An empty currency allowlist accepts any valid code.
      *
      * @since 1.0.0
      */

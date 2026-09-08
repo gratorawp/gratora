@@ -8,7 +8,6 @@ import { formatAmount, formatDate } from '../donations/format';
 import { actionsFor } from '../_shared/recurring/PlanActions';
 import { intervalLabel } from './List';
 
-// The donation screen owns the failed renewal, including its retry.
 function donationHref( reference ) {
     return addQueryArgs( window.location.pathname, {
         page: 'fundkit-donations',

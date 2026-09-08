@@ -18,50 +18,29 @@
 @import '../_shared/schedule-fields';
 @import '@fundkit/ui/scss/components/style-preview';
 
-// The shared preview hardcodes the card shadow rather than reading the token,
-// so changing Card shadow in the brand editor moved the real form but not the
-// preview beside it. Bind it here until @fundkit/ui reads it itself; the fallback
-// is the value it hardcoded, so a preset that leaves it at default is unchanged.
-//
-// Only the shadow. The preview is a scaled-down mock (13px button text, 10px
-// padding), so an absolute pixel token like Button height cannot land on it
-// without distorting the proportion, the way a literal 48px button dwarfs the
-// mini amount tiles. Those tokens (and fundkit-gap, fundkit-field-gap, hover and
-// focus, which have no field, hover or focus in a static mock) stay unshown.
+// Bind shadow until @fundkit/ui supports the token. Absolute-size tokens would distort the
+// scaled preview.
 .fundkit-style-preview__frame {
     box-shadow: var(--fundkit-card-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .06));
 }
 
-// A modal footer right-aligns its children, which is right for two buttons. The
-// New campaign footer is one full-width row instead: publish toggle on the left,
-// buttons on the right. Right-aligning it squeezed the toggle label into a
-// column about one word wide.
+// Use a full-width footer for the publish toggle and action buttons.
 .fundkit-dialog__foot > .fundkit-cc__foot {
     flex: 0 0 100%;
 }
 
-// Local aliases for legacy names still used inside this file. Both the
-// shadow + radius were renamed to `$shadow-md` and `$radius-lg` in the
-// shared tokens partial; these aliases let the existing rulesets compile
-// unchanged while new code adopts the canonical names.
+// Aliases for shared token names still used locally.
 $card-shadow:   $shadow-md;
 $card-radius:   $radius-lg;
 
 .fundkit-campaign-detail {
-    // Re-skin WP components (ToggleControl, primary buttons, focus rings) from
-    // the default admin blue to the FundKit accent across the whole campaign
-    // editor, so toggles are consistent and not just inside the cards that set
-    // this locally. WP reads --wp-admin-theme-color for all of them.
+    // WordPress components read --wp-admin-theme-color.
     --wp-admin-theme-color:           #{$accent};
     --wp-admin-theme-color--rgb:      33, 29, 63;
     --wp-admin-theme-color-darker-10: #{$accent-dark};
     --wp-admin-theme-color-darker-20: #{$accent-dark};
 
-    // Suppress the browser-default focus outline on mouse clicks. It's
-    // rectangular and doesn't follow border-radius on anchors / many buttons,
-    // which is why a click on a rounded tab or pill looks like it grows a
-    // square border. Keyboard nav (:focus-visible) is left untouched so
-    // a11y is preserved.
+    // Suppress pointer outlines while retaining :focus-visible.
     *:focus:not(:focus-visible) { outline: none; box-shadow: none; }
 
     &__header {
@@ -157,7 +136,6 @@ $card-radius:   $radius-lg;
     .fundkit-section-bar & { margin: 0; }
 }
 
-// Shared trigger button: used for both the range and comparison dropdowns.
 .fundkit-cmp-toggle {
     display: inline-flex;
     align-items: center;
@@ -179,11 +157,7 @@ $card-radius:   $radius-lg;
         color: $accent-dark;
     }
 
-    // wp-admin's common.css `a:focus { border-radius: 2px; color: #043959;
-    // box-shadow: 0 0 0 1.5px var(--wp-admin-theme-color) }` outranks the
-    // base .fundkit-cmp-toggle declaration (0,1,1 vs 0,1,0). Re-state the
-    // properties on :focus so the pill keeps its 8px radius and theme
-    // colour on click. is-active needs the green colour preserved too.
+    // Outrank wp-admin a:focus to preserve the pill radius and color.
     &:focus {
         outline: none;
         box-shadow: none;
@@ -304,7 +278,6 @@ $card-radius:   $radius-lg;
     &.is-flat { color: $text-muted; background: $bg-soft; }
 }
 
-// Standalone card, also used outside the widget grid (e.g. the form editor).
 .fundkit-panel {
     background: #fff;
     border-radius: $card-radius;
@@ -312,7 +285,6 @@ $card-radius:   $radius-lg;
     padding: 24px 26px;
 }
 
-// Type helpers: written to work inside both .fundkit-panel and .fundkit-widget__body.
 .fundkit-panel__title {
     margin: 0 0 4px;
     font-size: 15px;
@@ -728,7 +700,6 @@ $card-radius:   $radius-lg;
     background: $accent-soft;
     border-radius: 8px;
     margin-bottom: 16px;
-    // Wraps a shared @fundkit/ui ToggleRow now; no per-card WP-toggle re-skin.
 }
 
 .fundkit-custom-style-body { margin-top: 8px; }
@@ -923,7 +894,6 @@ $card-radius:   $radius-lg;
         line-height: 1.4;
     }
 
-    // Tighten the WP RangeControl + SelectControl margins inside our rows.
     .components-base-control { margin-bottom: 0; }
     .components-range-control__wrapper { padding: 0; }
 }
@@ -1047,11 +1017,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-// Outer shell is a vertical flex column. Each full-width widget renders
-// directly; consecutive half-width widgets are grouped into a "halves"
-// section with two independent flex columns. That keeps gaps consistent
-// regardless of individual card heights: a tall card in column A doesn't
-// push down items in column B.
+// Independent half-width columns prevent tall cards from shifting neighboring items.
 .fundkit-widget-grid {
     display: flex;
     flex-direction: column;
@@ -1084,9 +1050,7 @@ $card-radius:   $radius-lg;
     &--half { width: 100%; }
 
     &.is-dragging-source {
-        // Original is hidden in place: the DragOverlay portal renders the
-        // floating clone. Keeping the slot in DOM preserves the gap so other
-        // items don't collapse onto it mid-drag.
+        // Keep the hidden drag source’s slot while DragOverlay renders its clone.
     }
 }
 
@@ -1105,10 +1069,7 @@ $card-radius:   $radius-lg;
         transform: rotate(-0.4deg);
     }
 
-    // Bare layout: keep the title bar (handle + title + cog) but drop the
-    // outer card chrome and body padding so the widget's children render
-    // edge-to-edge against the page background. Used by the KPIs widget so
-    // the inner metric cards aren't nested inside another card.
+    // KPIs supply their own cards; omit the outer card frame.
     &--bare {
         background: transparent;
         box-shadow: none;
@@ -1123,8 +1084,6 @@ $card-radius:   $radius-lg;
         }
     }
 
-    // Split layout: the widget body becomes a grid of equal columns with
-    // subtle vertical dividers, hosting sub-sections side-by-side.
     &--split &__body {
         display: grid;
         grid-template-columns: repeat(var(--fundkit-split, 2), minmax(0, 1fr));
@@ -1329,7 +1288,6 @@ $card-radius:   $radius-lg;
     }
 }
 
-// Recharts overrides: keep the wrapper clean.
 .fundkit-recharts {
     .recharts-cartesian-axis-tick text { fill: $text-muted; }
 }
@@ -1492,7 +1450,7 @@ $card-radius:   $radius-lg;
         min-width: 0;
     }
 
-    // Kept for back-compat with existing markup elsewhere.
+    // Retained for existing markup.
     &__title-row { display: flex; align-items: center; gap: 10px; }
 
     &__meta-row {
@@ -1516,8 +1474,6 @@ $card-radius:   $radius-lg;
         color: $text-muted;
     }
 
-    // Inline date-range filter living next to the meta/export buttons on the
-    // donations admin. Sits inside `.fundkit-page-head__right`, before the meta.
     &__date-filters {
         display: inline-flex;
         align-items: center;
@@ -1539,10 +1495,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-// Group of .fundkit-cmp-toggle pills, used as in-header view nav (replaces
-// the underlined tabs strip on the campaign detail). Overrides are scoped
-// inside .fundkit-view-toggle so the dashboard's range/compare/customize pills
-// (which deliberately carry a shadow) are unaffected.
+// Scope view-nav overrides to preserve dashboard pill shadows.
 .fundkit-view-toggle {
     display: inline-flex;
     align-items: center;
@@ -1562,8 +1515,6 @@ $card-radius:   $radius-lg;
         svg { color: $accent-dark; }
     }
 
-    // A count an add-on sets on its own tab, e.g. pages awaiting review. Warn
-    // rather than accent: it is work outstanding, not the selected section.
     .fundkit-cmp-toggle__badge {
         display: inline-flex;
         align-items: center;
@@ -1591,8 +1542,7 @@ $card-radius:   $radius-lg;
 
     &::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
-    // A pill that renders its own .fundkit-pill__dot element would show this
-    // pseudo-dot too; suppress it there so such pills keep a single dot.
+    // Suppress the pseudo-dot when markup supplies one.
     &:has(.fundkit-pill__dot)::before { display: none; }
 
     &--lg     { padding: 4px 12px; font-size: 12.5px; }
@@ -1602,9 +1552,7 @@ $card-radius:   $radius-lg;
     &.is-error { background: $red-soft;    color: $red; }
     &.is-muted { background: $bg-soft;      color: $text-muted; }
 
-    // Campaign-type / discriminator tag. Uses FundKit brand colors (NOT the
-    // per-campaign accent) so the type reads as a stable categorical label
-    // across the list and the detail header. No status dot.
+    // Use brand colors for type tags independently of campaign accents.
     &--type {
         background: $accent-soft;
         color: $accent-dark;
@@ -2213,7 +2161,6 @@ $card-radius:   $radius-lg;
     }
 }
 
-// DateField styles live in _shared/components/_date-field.scss (imported above).
 
 .fundkit-ambition {
     background: #fff;
@@ -2381,8 +2328,6 @@ $card-radius:   $radius-lg;
 
 @import '../_shared/components/template-picker';
 
-// Trigger for the page-layout picker. Reads as a value with a way to change it
-// rather than as a button, since a layout is always already chosen.
 .fundkit-cc__layout {
     display: flex;
     align-items: center;
@@ -2500,7 +2445,6 @@ $card-radius:   $radius-lg;
     to   { transform: translate(-50%, 0);   opacity: 1; }
 }
 
-/* Create-campaign dialog (CreateCampaignDrawer.jsx) */
 .fundkit-cc {
     .fundkit-field + .fundkit-field { margin-top: 18px; }
 }
@@ -2717,7 +2661,6 @@ $card-radius:   $radius-lg;
     gap: 8px;
 }
 
-// Copyable form shortcode in the campaign Forms tab.
 .fundkit-shortcode-copy {
     display: inline-flex;
     align-items: center;

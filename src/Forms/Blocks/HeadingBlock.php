@@ -6,11 +6,7 @@ namespace FundKit\Forms\Blocks;
 
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Heading text block.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class HeadingBlock implements Block
 {
     /** @since 1.0.0 */

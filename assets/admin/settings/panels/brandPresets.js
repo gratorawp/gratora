@@ -1,15 +1,6 @@
 /**
- * The list the Brand panel shows.
- *
- * The stored option holds only the presets the admin touched: the server drops
- * any built-in still identical to what ships, so the option is never the whole
- * list. Every other screen reads StylePresets::all(), which merges the two, so
- * a panel that renders the option alone is the one place in the product where
- * Bold and Quiet stop existing the moment Classic is edited.
- *
- * Merged over the built-ins, not over the full published list: that list also
- * carries customs, and seeding from it would put a just-deleted custom back
- * from a stale page-load snapshot.
+ * Merge stored edits over shipped built-ins, not the published list, which may contain deleted
+ * custom presets.
  *
  * @param {Array} stored   the presets on the record
  * @param {Array} builtins window.fundkit.styling.builtins
@@ -19,12 +10,7 @@ export function mergePresets( stored, builtins ) {
     const ships = Array.isArray( builtins ) ? builtins : [];
     const byId  = new Map( saved.map( ( p ) => [ String( p?.id || '' ), p ] ) );
 
-    // Built-ins first, in the order they ship, each carrying the admin's edit
-    // where there is one. Laid over the shipped record rather than replacing
-    // it: a built-in's name and description are __() calls the server drops
-    // from the option rather than pin every later reader to the locale of
-    // whoever saved, so an edited built-in arrives here without them. The
-    // server restores them on read and this is the same merge.
+    // Merge built-in edits over shipped records to retain translated names and descriptions.
     const out = ships.map( ( b ) => {
         const edit = byId.get( String( b.id ) );
         if ( ! edit ) return b;

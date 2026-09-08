@@ -1,18 +1,8 @@
 import { test, expect } from '../fixtures/donor-form';
 
 /**
- * Where the payment step appears, and what the form does while it is up.
- *
- * The payment phase used to replace the whole form: the donor lost the amount,
- * the summary and everything they had just typed at the one moment they most
- * want to check it. It now mounts at the gateway block, and the rest of the
- * form is settled because the charge is already fixed on the gateway's side.
- *
- * No Stripe account is needed. The phase is entered by answering the submit
- * with the payload the server would send, which is the only thing the client
- * reads to get there. Stripe.js then fails on the invented secret, and that is
- * fine: every claim below is about our own layout and our own state, not about
- * whether a card can be charged.
+ * Mock the submit response to enter payment without Stripe credentials. Stripe.js may fail on
+ * the fake secret; assertions cover layout and state.
  */
 // Its own seeded form: the canonical one offers only gateways that settle
 // server-side, so this suite could never reach the payment phase from it.
@@ -294,10 +284,8 @@ test.describe('payment step placement', () => {
     });
 
     /**
-     * Reaching your giving without typing your address again. The donation did
-     * not prove the address, so this sends the link rather than opening a
-     * session, and it answers the same either way so it cannot be used to ask
-     * whether an address is one of the charity's donors.
+     * Email a sign-in link: donating does not verify the address. Keep responses identical to
+     * prevent donor enumeration.
      */
     test('the thank-you card offers a way into the portal', async ({ donor, page }) => {
         let sentTo: string | null = null;

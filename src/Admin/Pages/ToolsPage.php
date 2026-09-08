@@ -6,11 +6,7 @@ namespace FundKit\Admin\Pages;
 
 use FundKit\Foundation\Hooks\HookProvider;
 
-/**
- * Registers and renders the Tools admin page.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class ToolsPage extends HookProvider
 {
     private const PAGE_ID   = 'fundkit-tools';
@@ -33,8 +29,6 @@ final class ToolsPage extends HookProvider
             // is granted on exactly that (or manage_options), so what the menu shows
             // and what the screen can do agree.
             'capability' => 'fundkit_access_settings',
-            // After Settings: this is where someone goes once they already know
-            // what they are looking for.
             'position'   => 95,
             'render'     => [$this, 'render'],
         ];
@@ -74,8 +68,7 @@ final class ToolsPage extends HookProvider
         wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
-        // The list is a DataViews table, and its own layout CSS is a vendor file
-        // rather than anything the theme or wp-components provides.
+        // DataViews layout requires its vendor stylesheet.
         wp_enqueue_style(
             'fundkit-dataviews-vendor-tools',
             FUNDKIT_URL . self::BUILD_DIR . '/dataviews.css',

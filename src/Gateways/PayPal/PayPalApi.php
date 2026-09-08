@@ -228,8 +228,7 @@ final class PayPalApi
     }
 
     /**
-     * PayPal nests the useful detail in `details[]`; the top-level message is
-     * often just "The requested action could not be performed".
+     * Read details[]; PayPal’s top-level message is often generic.
      *
      * @since 1.0.0
      */

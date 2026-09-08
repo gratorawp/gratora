@@ -103,7 +103,6 @@ final class DataEraser
         return $answeredAt > 0 && (time() - $answeredAt) <= self::INTENT_TTL;
     }
 
-    /** Spent, so nothing can act on the same answer twice. @since 1.0.0 */
     public static function forgetRequest(): void
     {
         delete_option(self::OPT_IN);
@@ -311,18 +310,8 @@ final class DataEraser
     }
 
     /**
-     * Core's own capabilities by name, not everything matching fundkit_. An add-on
-     * that is still installed keeps its caps: fundkit_manage_fundraisers belongs
-     * to the peer-to-peer plugin and taking it would break a live site.
-     *
-     * Every registered role, because the roles screen grants these to editor
-     * and below as readily as to the administrator, and what is not taken back
-     * outlives the plugin in wp_user_roles. The roles themselves are left
-     * alone: core creates none, so anything this removed would be somebody
-     * else's.
-     *
-     * Public for the same reason as coreTables(): a test cannot call erase()
-     * without taking the shared test database with it.
+     * Remove core capabilities from every role, retaining add-on capabilities and the roles
+     * themselves. Exposed separately for testing without erasing data.
      *
      * @since 1.0.0
      */

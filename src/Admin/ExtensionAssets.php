@@ -20,8 +20,7 @@ final class ExtensionAssets
     public const ACTION = 'fundkit.extension_tabs';
 
     /**
-     * Ensure the registry script is enqueued, then let add-ons enqueue their
-     * tab bundles (declaring self::HANDLE as a dependency) for this surface.
+     * Add-on bundles must depend on self::HANDLE.
      *
      * @since 1.0.0
      */

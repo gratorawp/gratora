@@ -1,16 +1,6 @@
 /**
- * Donor fields that ship outside core.
- *
- * PHP puts the field in the runtime config (fundkit.form.block_field); an add-on
- * bundle registers the browser half against window.fundkit.formFields, which
- * FormFieldAssets defines. An entry may supply any of:
- *
- *   component( { field, ctx } )   the rendered input
- *   values( fields )              seed values merged into state.values
- *   validate( field, values, msg )  { path: message } for invalid input
- *   payload( values, state )      partial request body; `extra` is merged
- *
- * Read lazily so an add-on bundle may load in either order relative to this one.
+ * Resolve add-on fields lazily from window.fundkit.formFields. Entries may provide component,
+ * values, validate, and payload; payload.extra is merged.
  */
 
 function registry() {

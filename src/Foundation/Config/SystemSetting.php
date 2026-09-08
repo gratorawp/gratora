@@ -10,11 +10,7 @@ use FundKit\Vendor\Queryable\DB;
 use FundKit\Vendor\Queryable\Model;
 use FundKit\Vendor\Queryable\Schema\Table;
 
-/**
- * Persistent install-level settings stored in fundkit_system_settings.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class SystemSetting extends Model
 {
     protected string $table = 'fundkit_system_settings';

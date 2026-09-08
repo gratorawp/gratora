@@ -7,11 +7,7 @@ namespace FundKit\Forms\Blocks;
 use FundKit\Foundation\Helpers\View;
 use FundKit\Funds\FundRepository;
 
-/**
- * Fund picker block.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class FundPickerBlock implements Block
 {
     /** Campaign default fund for the current SSR render, set by the shortcode. */

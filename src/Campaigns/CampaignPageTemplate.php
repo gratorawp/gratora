@@ -77,7 +77,6 @@ final class CampaignPageTemplate extends HookProvider
         if ((int) get_post_meta($post->ID, '_fundkit_campaign_id', true) <= 0) {
             return $templates;
         }
-        // An explicitly assigned page template is the admin opting out.
         $explicit = (string) get_post_meta($post->ID, '_wp_page_template', true);
         if ($explicit !== '' && $explicit !== 'default') {
             return $templates;

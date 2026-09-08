@@ -8,11 +8,7 @@ use FundKit\Foundation\Crypto\Crypto;
 use FundKit\Foundation\Time\Clock;
 use FundKit\Vendor\Queryable\DB;
 
-/**
- * Encrypt/decrypt seam for donation-scoped admin notes.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DonationNoteRepository
 {
     /** @since 1.0.0 */

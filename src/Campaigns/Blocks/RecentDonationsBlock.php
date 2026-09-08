@@ -7,15 +7,11 @@ namespace FundKit\Campaigns\Blocks;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Donations\DonationRepository;
 use FundKit\Donors\Donor;
-use FundKit\Donors\PublicDonorNames;
 use FundKit\Donors\DonorAvatars;
+use FundKit\Donors\PublicDonorNames;
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Renders the most recent paid donations for a campaign.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class RecentDonationsBlock extends CampaignBlock
 {
     /** @since 1.0.0 */
@@ -85,9 +81,7 @@ final class RecentDonationsBlock extends CampaignBlock
             $hidden      = $donor !== null && $donor->public_hidden_at !== null;
             $name        = PublicDonorNames::of($donor);
 
-            // An admin hiding a donor has to reach the name and the message
-            // too. A suppressed picture beside their name and their words
-            // would be no answer at all.
+            // Hiding a donor also suppresses their name and message.
             if ($isAnonymous || $name === '' || $hidden) {
                 $name = __('Anonymous', 'fundraising-toolkit');
                 $isAnonymous = true;
@@ -112,8 +106,7 @@ final class RecentDonationsBlock extends CampaignBlock
                 'currency'     => (string) $donation->currency,
                 'time_ago'     => $timeAgo,
                 'paid_at_iso'  => (string) $paidAt,
-                // Private unless the donor opted in to a public message, and
-                // withheld outright once an admin hides the donor.
+                // Require public-message opt-in and a visible donor.
                 'message'      => (! $hidden && $donation->note_public)
                     ? (string) ($donation->note_to_org ?? '')
                     : '',

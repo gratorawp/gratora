@@ -7,11 +7,7 @@ namespace FundKit\Gateways\Stripe;
 use FundKit\Gateways\GatewayTransportException;
 use RuntimeException;
 
-/**
- * Thin Stripe REST API wrapper.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class StripeApi
 {
     private const API_BASE = 'https://api.stripe.com/v1';
@@ -34,11 +30,7 @@ final class StripeApi
         return $this->secretKey() !== '';
     }
 
-    /**
-     * Per-account access token for the active mode (Bearer auth).
-     *
-     * @since 1.0.0
-     */
+    /** @since 1.0.0 */
     public function secretKey(): string
     {
         return $this->account->activeSecretKey();
@@ -83,7 +75,6 @@ final class StripeApi
         return ($secrets[$this->orgTestMode() ? 'test' : 'live'] ?? '') !== '';
     }
 
-    /** The org-wide switch, which lives above the per-gateway config. */
     private function orgTestMode(): bool
     {
         $opt = get_option('fundkit_gateway_config', []);

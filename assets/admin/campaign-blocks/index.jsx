@@ -70,12 +70,8 @@ function CampaignField( { attributes, setAttributes, onCampaignPage, issues = []
 function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, resolvedId, icon = 'megaphone', className, children, isSelected = false, interactive = false, editableTitle = false } ) {
     const blockProps = useBlockProps( className ? { className } : {} );
 
-    // These previews are rendered by the server, so they only change when the
-    // request does. Block attributes are the usual trigger, but the campaign is
-    // a separate record: edit its image or its goal and the attributes are
-    // untouched, so the canvas keeps showing the answer from before the edit.
-    // Carrying the campaign's own timestamp in the query makes every campaign
-    // change refresh every block bound to it, not just the one that made it.
+    // Include the campaign timestamp so server previews refresh when campaign data changes
+    // without block edits.
     const { record: boundCampaign } = useEntityRecord( 'fundkit/v1', 'campaign', resolvedId, {
         enabled: resolvedId > 0,
     } );
@@ -119,12 +115,8 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
     );
 }
 
-// The grid draws campaigns other than the one it is bound to, so the record
-// that changes is rarely the one CampaignCanvas watches: a goal edited on any
-// published campaign changes what this block shows. The collection's own shape
-// is the key. Its length catches a campaign published or deleted, the latest
-// timestamp catches an edit to any of them, and the picker already holds this
-// query so watching it costs no extra request.
+// Invalidate grid previews on collection size or latest timestamp changes; reuse the picker
+// query.
 function useCampaignsRevision() {
     const { records } = useEntityRecords( 'fundkit/v1', 'campaign', { per_page: 100 } );
     if ( ! Array.isArray( records ) ) return undefined;
@@ -136,15 +128,7 @@ function useCampaignsRevision() {
     return `${ records.length }:${ latest }`;
 }
 
-/**
- * Picks the campaign's cover photo from inside the block.
- *
- * The image belongs to the campaign, not to this block or this page, so the
- * control edits the campaign record and says so: the change lands everywhere
- * that campaign appears, and it lands when you choose, not when the page is
- * saved. Sending people to the campaign screen for it was a dead end in an
- * inspector that had room for the control.
- */
+/** Update the campaign image immediately across all appearances, independently of page save. */
 function CampaignImagePicker( { campaign, campaignId } ) {
     const { saveEntityRecord } = useDispatch( coreStore );
     const [ busy, setBusy ] = useState( false );

@@ -4,15 +4,8 @@ import { dispatch, select as dataSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
- * Client-side half of the fundkit/campaign binding source.
- *
- * PHP registers the source, but the editor resolves bindings on the client and
- * cannot call a PHP callback. Registering only server-side leaves a bound block
- * showing the source's label, "FundKit campaign", locked and unreadable, so an
- * organiser would be composing a page they cannot see.
- *
- * The values come from the server, computed by the same code that renders the
- * page, so the preview cannot drift from the result.
+ * Resolve editor bindings from server-computed campaign values; PHP binding callbacks cannot
+ * run in the client editor.
  */
 
 const ENTITY_KIND = 'fundkit/v1';

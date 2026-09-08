@@ -1,21 +1,6 @@
 #!/usr/bin/env bash
-#
-# Install a pre-push hook in core and every add-on beside it.
-#
-# The hook runs that repo's own `composer test`, which is the analysis and the
-# suites. Five to eleven seconds for an add-on, forty for core.
-#
-# This exists because GitHub Actions is where these checks belong and cannot
-# run yet: the org's Actions billing does not allow it. A hook is a weaker
-# thing than CI, because `--no-verify` skips it and it only guards what leaves
-# this machine, but it is the difference between checks that run and checks
-# that someone has to remember.
-#
-# Re-run it any time; it overwrites its own hook and leaves any other alone.
-#
-# Repos outside this plugins directory can be added with FUNDKIT_EXTRA_REPOS,
-# a colon-separated list of paths.
-#
+# Install each repo’s composer-test pre-push hook. Re-runs replace only this hook.
+# FUNDKIT_EXTRA_REPOS adds colon-separated paths outside the plugins directory.
 set -uo pipefail
 
 CORE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -23,12 +8,7 @@ PLUGINS_DIR="$(dirname "$CORE_DIR")"
 
 read -r -d '' HOOK <<'HOOKEOF'
 #!/usr/bin/env bash
-#
-# Installed by fundkit/bin/install-hooks.sh. Runs this repo's analysis and
-# suites before anything leaves the machine.
-#
-# To push past it once:  git push --no-verify
-#
+# Installed by fundkit/bin/install-hooks.sh; runs this repo’s analysis and tests.
 set -uo pipefail
 
 if [ ! -x vendor/bin/phpunit ] && [ ! -x vendor/bin/phpstan ]; then
@@ -43,9 +23,7 @@ if out="$(composer test 2>&1)"; then
 fi
 
 echo
-# The tail whenever nothing matches, so a failure the patterns do not know
-# about still says something. A composer process timeout prints none of these,
-# and refusing in silence reads as a green suite rejected for no reason.
+# Show the log tail when no known error pattern matches.
 matched="$(printf '%s\n' "$out" | grep -E "^(FAILURES|ERRORS|Tests:|[0-9]+\)|.*Error:| *\[ERROR\])" | head -12)"
 if [ -n "$matched" ]; then
     printf '%s\n' "$matched"

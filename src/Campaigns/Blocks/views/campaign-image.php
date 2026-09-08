@@ -19,7 +19,7 @@ echo get_block_wrapper_attributes(array_filter([
 // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?> data-block="fundkit/campaign-image">
     <?php
-    // By attachment, not URL: that is what supplies srcset and sizes.
+    // Attachment IDs supply srcset and sizes.
     echo wp_get_attachment_image($imageId, 'large', false, [
         'class'         => 'fundkit-block__image',
         'alt'           => $imageAlt,

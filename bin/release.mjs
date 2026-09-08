@@ -1,20 +1,8 @@
 #!/usr/bin/env node
 /**
- * Cut a release without leaving the checkout in a state somebody has to undo.
- *
- * Packaging needs a vendor/ with no development dependencies in it, and the
- * packager refuses to guess: it stops and tells you to install --no-dev first.
- * Doing that by hand means the tree is left without a test suite until you
- * remember the second command, and a failed package leaves it that way for
- * good. That is a poor thing to stand on when the next step is a deploy.
- *
- * So the swap happens here, and the restore is in a finally: interrupt this,
- * or break the packager, and the checkout still ends up the way it started.
- *
- * strauss is itself a development dependency, and vendor/vendor-prefixed is not
- * composer's to remove, so the prefixed tree written by the full install
- * survives the --no-dev pass and rides into the payload. Running strauss with
- * dev dependencies already gone would produce nothing at all.
+ * Package with production dependencies, restoring development dependencies in finally. Run
+ * Strauss first: it is a dev dependency, and its prefixed output survives the production
+ * install.
  */
 
 import { execFileSync } from 'node:child_process';

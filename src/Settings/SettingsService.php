@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace FundKit\Settings;
 
-use FundKit\Campaigns\Styling\StylePresets;
-use InvalidArgumentException;
 use FundKit\Analytics\ErrorLog;
+use FundKit\Campaigns\Styling\StylePresets;
 use FundKit\Currency\BaseCurrencyLock;
 use FundKit\Currency\BaseCurrencyLocked;
 use FundKit\Foundation\References\InvalidReferenceToken;
 use FundKit\Foundation\References\ReferenceGenerator;
+use InvalidArgumentException;
 
 /**
- * Reads and writes plugin settings, grouped by area (org-profile, gateways, email).
- * Each group maps to its own WP option. Add a group to GROUPS and REST + UI pick it up.
+ * Each settings group maps to a WP option; GROUPS supplies REST and UI configuration.
  *
  * @since 1.0.0
  */
@@ -695,17 +694,8 @@ final class SettingsService
 
 
     /**
-     * Keep only what this group declares, at the type it declares it.
-     *
-     * A key absent from the defaults would persist as a setting nothing reads,
-     * and a string landing where an int belongs makes a retention window saved
-     * as "" compare as zero everywhere.
-     *
-     * Top level only, deliberately. roles.mapping is role => capabilities and
-     * numbering.prefixes is scope => prefix; both have keys core cannot know,
-     * so recursing would throw away exactly the data the screen is editing.
-     * Add-ons registering a group through fundkit.settings.groups are covered by
-     * the same rule, since a group has to declare its defaults to work at all.
+     * Filter and coerce declared top-level settings only. Nested maps contain dynamic keys,
+     * such as roles and numbering prefixes, that must survive.
      *
      * @param array<string,mixed> $cfg
      * @param array<string,mixed> $input
@@ -728,9 +718,7 @@ final class SettingsService
 
             $default = $defaults[$key];
 
-            // A shape mismatch is a bug in the caller, not a value to coerce:
-            // casting an array to int, or a scalar to array, produces nonsense
-            // that then looks like a saved setting.
+            // Reject scalar/array shape mismatches instead of coercing them.
             if (is_array($default) !== is_array($value)) {
                 $rejected[] = $key;
                 continue;

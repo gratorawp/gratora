@@ -5,16 +5,8 @@ import { loadPayPalSdk } from '../util/paypal';
 import { formatAmount } from '../util/format';
 
 /**
- * Renders PayPal's own buttons for a donation that is already on file as
- * pending. The donor pays in PayPal's popup and never leaves the page.
- *
- * One-time approves the Order that the server created at createIntent, then
- * asks the server to capture it. Recurring opens a Subscription against the
- * plan the server provisioned; PayPal takes the first payment on approval, and
- * the server records the plan while the webhook confirms the money.
- *
- * The server is the authority in both cases: this component never decides that
- * a donation is paid, it only reports what the donor approved.
+ * Approve orders or subscriptions through PayPal’s SDK; the server remains responsible for
+ * recording and confirming payment.
  */
 export default function PayPalPayment( { config, payment, dispatch } ) {
     const mountRef = useRef( null );
@@ -61,13 +53,8 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                 throw new Error( i18n.error );
             } );
 
-            // Neither confirm route needs the nonce: both are public and
-            // authenticated by the donation's own status token. But WordPress
-            // rejects a PRESENT-and-stale one before any permission callback,
-            // so a donor who left the tab open overnight approves at PayPal
-            // and then cannot be captured at all. PayPal has already taken the
-            // first payment of a subscription by that point, and no retry can
-            // clear a nonce that is baked into the config at render.
+            // These public routes use donation status tokens; omit stale WP nonces that
+            // authentication would reject.
             if ( res.status === 403 ) {
                 const why = await res.clone().json().catch( () => null );
                 if ( why?.code === 'rest_cookie_invalid_nonce' ) {
@@ -233,13 +220,10 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
                 <p className="fundkit-form__payment-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
             ) : null }
 
-            { /* Approving is not the end of the work: the capture or the plan
-               record still has to come back. PayPal's buttons stay mounted and
-               live through that, and on the recurring path a second press mints
-               a second subscription and takes a second first payment, which the
-               recorder then refuses as belonging to another plan. Hidden rather
-               than unmounted, because tearing the SDK down mid-round-trip loses
-               the callbacks that finish it. */ }
+            { /*
+             * Hide SDK buttons while recording approval to prevent duplicate subscriptions.
+             * Keep them mounted so pending callbacks survive.
+             */ }
             <div
                 ref={ mountRef }
                 className="fundkit-form__paypal-buttons"

@@ -181,10 +181,8 @@ function resolveHiddenValue( f ) {
     return value || fallback;
 }
 
-// Once an intent exists the charge is fixed gateway-side, so these would leave
-// the donor reading a total that is not the one leaving their account.
-// Navigation counts: a paged form renders only the current page, and stepping
-// away unmounts the payment element mid-entry.
+// Freeze amounts and navigation once the gateway intent exists; changing pages would unmount
+// payment fields.
 const SETTLED_BY_PAYMENT = [
     'SET_FIELD',
     'SET_AMOUNT',

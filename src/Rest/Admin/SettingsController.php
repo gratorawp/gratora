@@ -3,24 +3,19 @@
 declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
-use FundKit\Foundation\Auth\Capabilities;
-
 use FundKit\Currency\BaseCurrencyLock;
 use FundKit\Currency\BaseCurrencyLocked;
-use FundKit\Foundation\References\InvalidReferenceToken;
 use FundKit\Donors\DonorRetention;
+use FundKit\Foundation\Auth\Capabilities;
+use FundKit\Foundation\References\InvalidReferenceToken;
+use FundKit\Settings\SecretRedactor;
 use FundKit\Settings\SettingsService;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
-use FundKit\Settings\SecretRedactor;
 
-/**
- * Admin settings read/write by group key.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class SettingsController
 {
     private const NAMESPACE = 'fundkit/v1';
@@ -247,10 +242,7 @@ final class SettingsController
     {
         $clean = wp_check_invalid_utf8($value);
 
-        // wp_strip_all_tags() is what this wants, minus its closing trim(),
-        // which is the very thing being avoided: it took the ordinary space and
-        // left the non-breaking one, so the bug looked like it depended on
-        // which space had been typed.
+        // Strip tags without trimming either ordinary or non-breaking spaces.
         $clean = (string) preg_replace('@<(script|style)[^>]*?>.*?</\1>@si', '', $clean);
         $clean = strip_tags($clean);
 

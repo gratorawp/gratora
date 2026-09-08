@@ -6,11 +6,7 @@ namespace FundKit\Foundation\Time;
 
 use DateTimeImmutable;
 
-/**
- * Test clock that always returns a fixed instant.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class FrozenClock implements Clock
 {
     /** @since 1.0.0 */

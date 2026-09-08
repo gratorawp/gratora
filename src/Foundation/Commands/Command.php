@@ -7,11 +7,7 @@ namespace FundKit\Foundation\Commands;
 use Closure;
 use InvalidArgumentException;
 
-/**
- * Immutable descriptor for a registered command.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class Command
 {
     /**

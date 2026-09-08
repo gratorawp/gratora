@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Forms\Blocks;
 
-/**
- * Server-side render contract for a fundkit block.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 interface Block
 {
     /** @since 1.0.0 */

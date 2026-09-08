@@ -3,9 +3,6 @@
 declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
-use FundKit\Rest\Paging;
-use FundKit\Foundation\Auth\Capabilities;
-
 use FundKit\Campaigns\Campaign;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Campaigns\Styling\CampaignStyleResolver;
@@ -14,12 +11,14 @@ use FundKit\Forms\FormRepository;
 use FundKit\Forms\FormService;
 use FundKit\Forms\FormTemplates;
 use FundKit\Forms\Shortcode\DonationFormShortcode;
+use FundKit\Foundation\Auth\Capabilities;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Funds\FundRepository;
-use FundKit\Vendor\Queryable\DB;
 use FundKit\Gateways\GatewayManager;
+use FundKit\Rest\Paging;
 use FundKit\Rest\Schemas\FormSchemas;
 use FundKit\Settings\SettingsService;
+use FundKit\Vendor\Queryable\DB;
 use InvalidArgumentException;
 use RuntimeException;
 use WP_Error;
@@ -27,12 +26,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
-/**
- * Admin form endpoints: list, show, create, update, delete, campaigns picker,
- * preview render.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class FormsController
 {
     private const NAMESPACE = 'fundkit/v1';

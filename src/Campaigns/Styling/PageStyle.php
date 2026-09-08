@@ -41,13 +41,11 @@ final class PageStyle
     public function register(): void
     {
         add_action('wp', [$this, 'resolve']);
-        // Registered early and unconditionally: an add-on naming it as a
-        // dependency must be able to resolve it even where we do not enqueue.
+        // Register dependencies even on pages that do not enqueue them.
         add_action('wp_enqueue_scripts', [$this, 'registerStyle'], 1);
         add_action('wp_enqueue_scripts', [$this, 'emit'], 20);
         add_filter('body_class', [$this, 'bodyClass']);
-        // enqueue_block_assets is the hook that reaches the iframed editor
-        // canvas; enqueue_block_editor_assets does not.
+        // enqueue_block_assets reaches the iframed editor canvas.
         add_action('enqueue_block_assets', [$this, 'registerStyle'], 1);
         add_action('enqueue_block_assets', [$this, 'emitForEditor'], 20);
     }
@@ -63,15 +61,13 @@ final class PageStyle
             self::HANDLE,
             FUNDKIT_URL . 'assets/campaign-page/page.css',
             [],
-            // mtime, not FUNDKIT_VERSION: the file changes without a release and a
-            // stale cache means invisible restyles.
+            // Use mtime to invalidate unreleased CSS changes.
             (string) (@filemtime($path) ?: FUNDKIT_VERSION)
         );
     }
 
     /**
-     * The campaign whose page is being viewed. Resolved on `wp`, before the
-     * header runs, so body_class and the enqueue both see it.
+     * Resolve on wp so body classes and enqueues share the campaign.
      *
      * @since 1.0.0
      */
@@ -125,8 +121,7 @@ final class PageStyle
     }
 
     /**
-     * Scoped to the body class rather than :root so a campaign page cannot
-     * restyle the admin bar or anything else outside it.
+     * Scope styles to the campaign body, excluding the admin bar.
      *
      * @since 1.0.0
      */

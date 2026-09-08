@@ -1,14 +1,6 @@
 /**
- * Visual regression: the canonical kitchen-sink donor form
- * (FUNDKIT_E2E_FORM_PATH, seeded by `wp fundkit e2e-seed`).
- *
- * Element-scoped to form.fundkit-donation-form so theme chrome around the
- * shortcode never bleeds into the goldens. States covered: initial render
- * (desktop + mobile), currency switched, and the field-error styling after an
- * invalid submit.
- *
- * Regenerate goldens after intentional styling changes:
- *   npm run test:visual:update
+ * Capture only the seeded form to exclude theme chrome. Update baselines with npm run
+ * test:visual:update.
  */
 
 import { test, expect } from '../../fixtures/donor-form';

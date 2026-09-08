@@ -1,26 +1,6 @@
 /**
- * Coverage for layout + content blocks that previously had no dedicated
- * E2E (BlockPipelineCoverageTest verified they survive the config but
- * nothing exercised them in a browser):
- *
- *   - fundkit/heading
- *   - fundkit/paragraph
- *   - fundkit/html
- *   - fundkit/divider
- *   - fundkit/columns
- *   - fundkit/row
- *   - fundkit/section
- *   - fundkit/recurring-toggle
- *   - fundkit/fund-picker (interactivity gated on funds being present)
- *   - fundkit/privacy-notice
- *   - fundkit/goal
- *
- * Strategy: each "renders" test asserts the block survived render with its
- * unique seeded marker. Interactive blocks (recurring-toggle, fund-picker)
- * additionally exercise the control. A final test does a full submit so the
- * runtime payload builder doesn't choke on any of the included blocks.
- *
- * Seeded via `wp fundkit e2e-seed` -> FUNDKIT_E2E_LAYOUT_FORM_PATH.
+ * Use the seeded layout form from FUNDKIT_E2E_LAYOUT_FORM_PATH. Check block markers,
+ * interactive controls, and full submission.
  */
 
 import { test, expect } from '../fixtures/donor-form';

@@ -7,11 +7,7 @@ namespace FundKit\Campaigns\Blocks;
 use FundKit\Forms\FormRepository;
 use FundKit\Foundation\Helpers\View;
 
-/**
- * Renders the donate button and its inline form modal.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DonateButtonBlock extends CampaignBlock
 {
     /** @since 1.0.0 */
@@ -50,8 +46,7 @@ final class DonateButtonBlock extends CampaignBlock
             $campaign->default_form_id ? (int) $campaign->default_form_id : null
         );
 
-        // No published form: nothing for visitors (a dead disabled button reads
-        // as broken), an editor-only notice for anyone who can fix it.
+        // Show missing-form notices only to editors.
         if (! $form) {
             return (is_user_logged_in() && current_user_can('edit_posts'))
                 ? '<div class="fundkit-block-notice">'
@@ -94,8 +89,7 @@ final class DonateButtonBlock extends CampaignBlock
         }
 
         return View::loadRelative(__DIR__, 'views/donate-button', [
-            // ?: not ??: the attribute exists and is an empty string when the
-            // organizer has not renamed it, so ?? would hand the view ''.
+            // Use ?: because an unset label is an empty string.
             'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'fundraising-toolkit'),
             'align'        => (string) ($attrs['align'] ?? 'left'),
             'size'         => in_array($attrs['size'] ?? 'md', ['sm', 'md', 'lg'], true)
@@ -108,20 +102,8 @@ final class DonateButtonBlock extends CampaignBlock
     }
 
     /**
-     * Whether this render is the block editor asking for its own preview.
-     *
-     * REST_REQUEST alone cannot answer that: WP defines it for every /wp-json
-     * call, and a public read of a published page runs the_content ->
-     * do_blocks, so an anonymous reader would be served a button with no modal
-     * behind it and no closed-campaign explanation. ServerSideRender always
-     * calls /wp/v2/block-renderer/, whose core permission check requires edit
-     * access; the capability is re-checked here so nothing but an editor can
-     * reach it.
-     *
-     * Re-checked the way the route itself checks, against the post being
-     * edited when ServerSideRender names one. A stricter test would fail for
-     * someone core already let through, an editor of pages but not of posts,
-     * and drop the live front-end form into their editor canvas.
+     * Require the block-renderer route and permission to edit its post; REST_REQUEST also
+     * covers public renders.
      *
      * @since 1.0.0
      */

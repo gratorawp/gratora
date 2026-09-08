@@ -42,12 +42,8 @@ export default function LifetimeMetrics( { lifetime } ) {
         mrr_cents, mrr_unconverted, active_plan_count, plan_counts, next_payment_at, sparkline,
     } = lifetime;
 
-    // A plan in a currency the site has no rate for counts as zero, so the
-    // figure is short rather than wrong. Say which, instead of showing a total
-    // that quietly leaves a plan out.
-    // A paused or past-due plan bills nothing, so the card is right to read
-    // $0.00 -- but "No active plans" on its own says the donor has no
-    // subscription at all, which is a different thing. Name the state instead.
+    // Disclose missing FX conversions and distinguish paused/past-due plans from no
+    // subscriptions.
     const dormant = [];
     if ( plan_counts?.past_due > 0 ) {
         dormant.push( sprintf(
@@ -92,11 +88,8 @@ export default function LifetimeMetrics( { lifetime } ) {
             />
             <Card
                 icon={ <IconHeart width="16" height="16" /> }
-                // Named apart from the Donations tab on purpose. This is the
-                // money count: it divides into Lifetime given to make the
-                // average beside it, so it counts paid ones only. The tab
-                // counts every row the donor has, pending and failed included.
-                // Sharing one name made a pending donation look like a bug.
+                // Lifetime metrics count paid donations; the Donations tab includes pending and
+                // failed rows.
                 label={ __( 'Donations received', 'fundraising-toolkit' ) }
                 value={ <span className="num">{ count }</span> }
                 sub={ count > 0

@@ -6,11 +6,11 @@ namespace FundKit\Rest\Admin;
 
 use FundKit\Analytics\ErrorLog;
 use FundKit\Foundation\Auth\Capabilities;
+use FundKit\Gateways\GatewayTransportException;
 use FundKit\Gateways\Stripe\ApplePayDomain;
 use FundKit\Gateways\Stripe\StripeAccount;
 use FundKit\Gateways\Stripe\StripeApi;
 use FundKit\Gateways\Stripe\StripeWebhookProvisioner;
-use FundKit\Gateways\GatewayTransportException;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -243,8 +243,7 @@ final class StripeKeysController
     }
 
     /**
-     * Catch the two mistakes that actually happen: pasting the publishable key
-     * into the secret field, and pasting live keys into the test slot.
+     * Validate key type and test/live mode.
      *
      * @since 1.0.0
      */

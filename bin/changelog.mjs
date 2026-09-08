@@ -1,19 +1,8 @@
 #!/usr/bin/env node
 /**
- * Build the changelog from conventional commits.
- *
- *   node bin/changelog.mjs                      # preview the next entry
- *   node bin/changelog.mjs --write              # write it
- *   node bin/changelog.mjs --since v1.0.0       # explicit range
- *   node bin/changelog.mjs --all                # include chore/refactor/test
- *
- * changelog.txt is the full history and the file the plugin directory shows in
- * its Changelog tab. readme.txt keeps only the most recent entries, because a
- * readme carrying every release is mostly changelog by the third one.
- *
- * Upgrade Notice is written too: it is the only part WordPress puts in front of
- * someone on the Plugins screen when an update is waiting, and a release that
- * skips it updates silently.
+ * Generate changelog entries from conventional commits. Use --write to save, --since <tag> for
+ * a range, or --all for maintenance commits. Update changelog.txt, recent readme entries, and
+ * Upgrade Notice.
  */
 
 import { execFileSync } from 'node:child_process';
@@ -112,7 +101,6 @@ function renderEntry( version, groups ) {
     return out.join( '\n' ).trimEnd();
 }
 
-/** Split a WordPress readme/changelog body into `= x.y.z =` blocks, newest first. */
 function splitEntries( body ) {
     const parts = body.split( /^(?== \d)/m ).map( ( s ) => s.trimEnd() ).filter( Boolean );
     return parts;

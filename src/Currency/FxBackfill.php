@@ -6,24 +6,12 @@ namespace FundKit\Currency;
 
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationQueries;
-use FundKit\Recurring\RecurringPlan;
 use FundKit\Foundation\Helpers\Money;
+use FundKit\Recurring\RecurringPlan;
 
 /**
- * Convert donations that were recorded before a rate existed for their currency.
- *
- * Recording a donation never rejects it for want of an exchange rate: FX is a
- * reporting concern, not a money gate, so a currency the site has no rate for
- * is stored with base_amount_cents null (see DonationService). That is the
- * right call at the till, and it leaves a real payment outside every total,
- * because the aggregates score a null base as zero.
- *
- * The rate is captured per donation at write time, so configuring the missing
- * currency later leaves the existing rows untouched.
- *
- * Today's rate, not the rate on the day of the donation, which nobody recorded.
- * That is an approximation, and it is the same one the live path makes for
- * every donation it converts.
+ * Backfill null base amounts using today’s rate, an approximation because no historical rate
+ * was recorded. Configuring rates alone does not repair these donations or their aggregates.
  *
  * @since 1.0.0
  */
@@ -38,14 +26,7 @@ final class FxBackfill
     }
 
     /**
-     * One pass of the backlog, resuming after $after and stopping at $until.
-     *
-     * The backlog is unbounded by definition: every donation in a currency
-     * nobody had a rate for, which on an imported history is the whole history.
-     * Run to completion inside one REST request it outlives the time limit, and
-     * because it recorded no cursor the next press started the same walk again,
-     * for ever. So it is paged by id and it stops on the clock, like every
-     * other pass the recalculate loop runs.
+     * Process the FX backlog by ID within the time budget, returning a resume cursor.
      *
      * @param int   $after last donation id already handled, 0 to start
      * @param float $until microtime to stop at, INF for no budget
@@ -176,21 +157,8 @@ final class FxBackfill
     }
 
     /**
-     * What is sitting outside the totals right now, for a screen that wants to
-     * say so. Grouped by currency because that is the thing an admin fixes.
-     *
-     * Scoped to exactly what the totals count, which is what the screen claims
-     * is missing from them: donationsOnly() drops test-mode rows and ticket
-     * orders, and the status filter drops abandoned checkouts and failed
-     * attempts. Those rows have no base amount either, but no total was ever
-     * going to include them, so naming them turns a healthy site into an alarm
-     * and sends an admin looking for money that was never taken. A pending row
-     * that does complete is counted from the moment it does.
-     *
-     * needs_rate separates the two repairs. A row in the org's own base
-     * currency converts at unity and wants nothing configured, so telling its
-     * owner to add an exchange rate for their own currency is advice that
-     * cannot be followed.
+     * Report unconverted donations within the same scope as totals. Own-base rows need
+     * backfilling but no rate configuration; needs_rate distinguishes them.
      *
      * @return array<int,array{currency:string, count:int, amount_cents:int, needs_rate:bool}>
      *

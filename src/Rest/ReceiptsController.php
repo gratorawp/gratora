@@ -5,18 +5,17 @@ declare(strict_types=1);
 namespace FundKit\Rest;
 
 use FundKit\Analytics\ErrorLog;
-use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Receipts\OrgProfile;
-
 use FundKit\Campaigns\Campaign;
-use FundKit\Donations\Donation;
 use FundKit\Donations\AntiSpamGuard;
+use FundKit\Donations\Donation;
 use FundKit\Donations\DonationRepository;
 use FundKit\Donors\Donor;
 use FundKit\Donors\DonorRepository;
 use FundKit\Donors\DonorService;
 use FundKit\Donors\MagicLinkService;
+use FundKit\Receipts\OrgProfile;
 use FundKit\Receipts\ReceiptContext;
+use FundKit\Receipts\ReceiptIssuer;
 use FundKit\Receipts\ReceiptRenderer;
 use FundKit\Receipts\ReceiptRepository;
 use WP_Error;
@@ -24,8 +23,7 @@ use WP_REST_Request;
 use WP_REST_Server;
 
 /**
- * Magic-link receipt re-download. The token is multi-use within its TTL so donors
- * can re-download from any device.
+ * Receipt tokens allow repeated downloads until expiry.
  *
  * @since 1.0.0
  */

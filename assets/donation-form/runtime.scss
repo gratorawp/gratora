@@ -1,5 +1,4 @@
-// Scoped to `.fundkit-form` to avoid fighting theme CSS; CSS variables are the
-// override surface for themes and campaigns.
+// Scope to the form; themes override through custom properties.
 
 .fundkit-donation-form .fundkit-modal-host {
     display: inline-block;
@@ -23,9 +22,7 @@
     &__panel {
         position: relative;
         background: var(--fundkit-bg, #fff);
-        // The modal is always a card, so it stays legible even when the
-        // container style is "plain" and the in-page form inherits the theme's
-        // text colour.
+        // Keep modals on a card surface even when the embedded form is Plain.
         color: var(--fundkit-text, #111827);
         border-radius: var(--fundkit-radius, 12px);
         max-width: 560px;
@@ -50,35 +47,26 @@
     }
 }
 
-// Token defaults sit on the outermost wrapper so the inline
-// `style="--fundkit-accent: …"` applyThemeTokens() writes wins on the same element
-// and cascades down. On a descendant they would shadow the inherited inline
-// values, since a direct declaration beats an inherited custom property
-// whatever the specificity.
+// Declare defaults on the wrapper so inline theme tokens win instead of being shadowed by
+// descendants.
 .fundkit-donation-form {
-    // Reset host-theme defaults that some block themes apply to <form>.
     border: 0;
     padding: 0;
     margin: 0 auto;
 
-    // The admin-set max width, overridable at any level by theme CSS.
     max-width: var(--fundkit-form-max-width, 720px);
     width: 100%;
     box-sizing: border-box;
 
     --fundkit-accent:         #211d3f;
-    // Literal first, accent-derived mix second: the last valid declaration wins
-    // and an unsupported color-mix is ignored. A brand preset can still set
-    // --fundkit-accent-soft explicitly and override both.
+    // Place literal fallback before color-mix for unsupported browsers.
     --fundkit-accent-soft:    #efedf8;
     --fundkit-accent-soft:    color-mix(in srgb, var(--fundkit-accent) 12%, #fff);
     --fundkit-text:           #111827;
     --fundkit-text-muted:     #6b7280;
     --fundkit-border:         #e5e7eb;
     --fundkit-bg:             #ffffff;
-    // What the donor types into, kept off --fundkit-bg: a branded surface
-    // colour painted the inside of every field, so the form read as a block
-    // of colour with no boxes in it.
+    // Keep field backgrounds separate from the form surface.
     --fundkit-field-bg:       #ffffff;
     --fundkit-bg-soft:        #f8fafb;
     --fundkit-error-bg:       #fde8e8;
@@ -93,9 +81,7 @@
     --fundkit-body-weight:    400;
     --fundkit-radius:         10px;
     --fundkit-radius-sm:      8px;
-    // --fundkit-button-radius and --fundkit-switcher-radius are deliberately not
-    // defaulted: unset they fall back to --fundkit-radius-sm, and setting either
-    // overrides just the donate button or just the currency switcher.
+    // Leave button and switcher radii unset to inherit radius-sm unless overridden.
     --fundkit-pill-radius:    999px;
     --fundkit-preset-hover:   rgba(0, 0, 0, .04);
     --fundkit-stroke:   1px;
@@ -107,24 +93,16 @@
     --fundkit-focus-ring:     #211d3f;
     --fundkit-card-shadow:    0 12px 32px rgba(15, 23, 42, .06);
 
-    // Opt-in via the admin "Container" setting. Each piece is a CSS variable
-    // so themes can override, e.g. `.fundkit-donation-form { --fundkit-form-padding: 20px 24px; }`.
     &--framed {
         background: var(--fundkit-form-bg, #fff);
-        // --fundkit-form-radius is a theme override hook that nothing here sets,
-        // so the fallback has to be the campaign's own radius: a literal would
-        // put a rounded card around a campaign set to square corners.
+        // Default the form radius to the campaign radius.
         border-radius: var(--fundkit-form-radius, var(--fundkit-radius, 14px));
         box-shadow: var(--fundkit-form-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px rgba(15, 23, 42, .06));
         padding: var(--fundkit-form-padding, 36px 40px 44px);
     }
 }
 
-// Boundary against host-theme element styles spilling in, kept at specificity 0
-// via :where() so every fundkit component class still wins. It leaves <a>,
-// list-style and colour alone, so admin-authored rich text keeps its link and
-// list affordances. A theme rule more specific than a single class can still
-// win: this is light DOM.
+// Use zero-specificity resets; preserve authored rich-text links and lists.
 :where(.fundkit-form) {
     :where(button, input, select, textarea) {
         margin: 0;
@@ -141,10 +119,7 @@
     :where(legend)   { padding: 0; }
 }
 
-// "Plain" container: background and text colour follow the host page rather
-// than the branded card tokens, so the embed reads correctly on a light or a
-// dark section. The doubled wrapper class keeps this above the base
-// `.fundkit-donation-form .fundkit-form` rule whatever the source order.
+// Double the wrapper class so Plain overrides the base container independent of order.
 .fundkit-donation-form.fundkit-donation-form--plain .fundkit-form {
     background: var(--fundkit-form-bg, transparent);
     color: inherit;
@@ -160,8 +135,7 @@
     font-size: var(--fundkit-type-size);
     font-weight: var(--fundkit-body-weight);
     line-height: 1.5;
-    // Cuts the inheritance chain for the typography a host theme pushes in via
-    // body or .entry-content that font, color and line-height do not cover.
+    // Reset inherited typography beyond font, color, and line-height.
     text-align: start;
     text-transform: none;
     letter-spacing: normal;
@@ -169,9 +143,6 @@
 
     * { box-sizing: border-box; }
 
-    // Steps are the form's only direct children, so the gap above separates
-    // groups and nothing separates the fields inside one. Slightly tighter than
-    // the form's own gap, so a group still reads as a group.
     .fundkit-form__step {
         display: flex;
         flex-direction: column;
@@ -188,8 +159,6 @@
     }
 
     &__step {
-        // No floor: a step reserving height it does not use leaves the donor
-        // looking at a gap where the form should be.
         min-height: 0;
     }
 
@@ -207,8 +176,7 @@
         gap: 12px;
         padding-top: 4px;
 
-        // Same specificity as the rule above and declared after it, so the
-        // modifier wins the tie.
+        // Keep after the base rule to win the specificity tie.
         &--align-left   { justify-content: flex-start; }
         &--align-center { justify-content: center; }
         &--align-right  { justify-content: flex-end; }
@@ -224,8 +192,7 @@
         font-variant-numeric: tabular-nums;
     }
 
-    // Structure and default line colour only: spacing, thickness and an
-    // explicit colour are set inline by the block.
+    // Block inline styles own spacing, thickness, and explicit colors.
     &__divider {
         margin: 0;
         border: 0;
@@ -240,8 +207,6 @@
         padding: 0 22px;
         font-size: 14px;
         font-weight: var(--fundkit-button-weight, 600);
-        // Falls back to the shared --fundkit-radius-sm so the button matches the
-        // amount tiles; --fundkit-button-radius overrides the button alone.
         border-radius: var(--fundkit-button-radius, var(--fundkit-radius-sm, 8px));
         cursor: pointer;
         transition: filter .15s, background .15s, box-shadow .15s;
@@ -262,7 +227,7 @@
 
         &--secondary {
             background: var(--fundkit-bg-soft);
-            color: var(--fundkit-text);
+            color: var(--fundkit-on-soft, var(--fundkit-text));
 
             &:hover:not(:disabled) { background: var(--fundkit-border); }
         }
@@ -274,14 +239,13 @@
         gap: 8px;
         margin-bottom: 14px;
     }
-    // Mirrors the editor preview in
-    // admin/forms/blocks/donation-amount/index.js.
+    // Match the donation-amount editor preview.
     &__preset {
         position: relative;
         appearance: none;
         border: 0;
         background: var(--fundkit-bg-soft, #f8fafb);
-        color: var(--fundkit-text);
+        color: var(--fundkit-on-soft, var(--fundkit-text));
         padding: 12px 12px;
         border-radius: var(--fundkit-radius-sm);
         cursor: pointer;
@@ -320,7 +284,6 @@
         line-height: 1.3;
     }
 
-    // The block picks between two render styles: "pills" and "tabs".
     &__frequency {
         margin: 0 0 14px;
         padding: 0;
@@ -434,9 +397,7 @@
     }
 }
 
-// Honeypot field: a bot that crawls the DOM and fills every input populates it,
-// and the server then rejects the submission silently. Hidden with `position:
-// absolute` rather than `display: none` because some bots skip hidden fields.
+// Position offscreen; some bots skip display:none honeypots.
 .fundkit-donation-form .fundkit-form__hp {
     position: absolute;
     left: -10000px;
@@ -585,7 +546,7 @@
         justify-content: space-between;
         gap: 12px;
 
-        dt { color: var(--fundkit-text-muted); font-size: 13px; margin: 0; }
+        dt { color: var(--fundkit-on-soft-muted, var(--fundkit-text-muted)); font-size: 13px; margin: 0; }
         dd { margin: 0; font-weight: 500; }
     }
     &__summary-row--total {
@@ -593,12 +554,12 @@
         padding-top: 12px;
         border-top: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
 
-        dt { color: var(--fundkit-text); font-size: 15px; font-weight: 600; }
+        dt { color: var(--fundkit-on-soft, var(--fundkit-text)); font-size: 15px; font-weight: 600; }
     }
     &__summary-amount {
         font-size: 22px;
         font-weight: 700;
-        color: var(--fundkit-accent);
+        color: var(--fundkit-on-soft-accent, var(--fundkit-accent));
         font-variant-numeric: tabular-nums;
     }
 
@@ -618,8 +579,6 @@
         font-weight: 600;
     }
 
-    // Shown when nothing accepts the chosen currency. Weighted like the test
-    // banner: a condition to act on, not an error the donor caused.
     &__gateways-empty {
         padding: 10px 14px;
         border-radius: var(--fundkit-radius-sm);
@@ -652,8 +611,6 @@
         gap: 10px;
         padding: 12px 14px;
         border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
-        // A control, not a tile: it sits in the same column as the amount
-        // buttons and the inputs, which all take the small radius.
         border-radius: var(--fundkit-radius-sm);
         cursor: pointer;
 
@@ -678,9 +635,7 @@
         font-size: 13px;
     }
 
-    // Descendants written out rather than nested with &, which expands to the
-    // whole parent compound and would put .fundkit-donation-form in the selector
-    // twice, matching nothing.
+    // Write descendants explicitly; nested & repeats the compound wrapper selector.
     &__gateways--list {
         .fundkit-form__gateways-list { gap: 4px; }
 
@@ -697,10 +652,7 @@
         display: grid;
         gap: 12px;
 
-        // A name field is a two-up row of its own, so in one column of another
-        // row it nests: three inputs on a line, about 77px each in a sidebar.
-        // A row holding one therefore stops being a row. Spanning only the name
-        // would strand its neighbour at half width beside empty space.
+        // Stack rows containing a two-column name field to avoid narrow nested inputs.
         &:has(> .fundkit-form__row--two-up) > * {
             grid-column: 1 / -1;
         }
@@ -719,11 +671,7 @@
         cursor: pointer;
         margin-top: 4px;
 
-        // Themes routinely restyle checkboxes with appearance: none and their
-        // own box, at a specificity a single class cannot beat. Stripped of the
-        // native control, accent-color draws nothing and the box renders empty
-        // whatever its state. This restores the native control and pins the
-        // size, doubled on the form class to outrank a theme's element rules.
+        // Restore native checkboxes with enough specificity to beat theme appearance resets.
         input[type="checkbox"],
         .fundkit-donation-form.fundkit-donation-form & input[type="checkbox"] {
             appearance: auto;
@@ -782,10 +730,7 @@
         gap: 6px;
     }
 
-    // The group is what carries the error and what the donate button scrolls
-    // to, and a programmatic focus on a tabindex="-1" div draws nothing: no
-    // :focus-visible, no element default. Without this the donor lands on a
-    // group that looks like every valid one on the form.
+    // Show focus on programmatically focused error groups.
     &__radio-options[aria-invalid="true"] {
         outline: 2px solid var(--fundkit-error-fg);
         outline-offset: 4px;
@@ -911,7 +856,7 @@
         transition: border-color .15s, background .15s;
 
         &:hover { border-color: var(--fundkit-text-muted); }
-        // The radio is visually hidden, so surface keyboard focus on the label.
+        // Expose hidden-radio keyboard focus on its label.
         &:focus-within {
             border-color: var(--fundkit-focus-ring, var(--fundkit-accent));
             box-shadow: 0 0 0 3px var(--fundkit-accent-soft);
@@ -954,23 +899,15 @@
         }
     }
 
-    // Paying. The reducer has already stopped these controls changing anything;
-    // this is what says so. The payment mount is exempt, and so is anything
-    // Stripe draws inside it.
+    // Disable form controls while paying, excluding the gateway mount.
     &--settled {
-        // Controls that cannot move anything once paying starts are hidden
-        // rather than greyed out, which reads as something having gone wrong.
-        // The gateway owns this screen and shows the charge itself.
         .fundkit-form__donor,
         .fundkit-form__amount,
         .fundkit-form__confirm {
             display: none;
         }
 
-        // The form's own Back and Donate go away rather than dim: two sets of
-        // buttons is a donor deciding which one takes their money. Scoped back
-        // in below the mount, because the gateway draws its Pay and Cancel in a
-        // nav of the same name.
+        // Hide form navigation while retaining gateway Pay and Cancel controls.
         .fundkit-form__nav {
             display: none;
         }
@@ -988,11 +925,7 @@
         margin-top: 4px;
     }
 
-    // Gateways render their fields and buttons in an iframe, and a browser's
-    // default for one is a 2px inset border in currentColor. On a theme that
-    // resets nothing, PayPal and Stripe both arrive wearing a heavy box in the
-    // form's text color. Listed per mount rather than on the wrapper, because a
-    // form with no gateway block renders the payment component without one.
+    // Reset iframe borders per gateway mount, including forms without a gateway block.
     &__payment-mount,
     &__payment-element,
     &__paypal-buttons {
@@ -1007,15 +940,11 @@
         gap: 10px;
         justify-content: center;
     }
-    // Confirmed, not broken: the button keeps its shape so the donor can see
-    // the thing they pressed is still there.
     &__portal-link.is-sent {
         opacity: .75;
         cursor: default;
     }
 
-    // Constrained and centred because the card it sits in is centred, and a
-    // full-width list under a centred heading reads as a different section.
     &__summary--receipt {
         max-width: 320px;
         margin: 16px auto;
@@ -1038,8 +967,6 @@
         input { margin-top: 3px; flex: 0 0 auto; }
     }
     &__terms-text {
-        // Capped rather than free-growing: a long policy would push the submit
-        // button off the screen.
         max-height: 180px;
         overflow-y: auto;
         padding: 12px 14px;
@@ -1173,11 +1100,11 @@
         font: inherit;
         font-size: 13px;
         font-weight: 500;
-        color: var(--fundkit-text-muted);
+        color: var(--fundkit-on-soft-muted, var(--fundkit-text-muted));
         cursor: pointer;
         transition: background .15s, color .15s;
 
-        &:hover { color: var(--fundkit-text); }
+        &:hover { color: var(--fundkit-on-soft, var(--fundkit-text)); }
         &.is-selected {
             background: var(--fundkit-accent);
             color: var(--fundkit-on-accent, #fff);
@@ -1242,7 +1169,7 @@
     }
     .fundkit-goal--missing {
         font-size: 12px;
-        color: var(--fundkit-text-muted);
+        color: var(--fundkit-on-soft-muted, var(--fundkit-text-muted));
         padding: 8px 10px;
         background: var(--fundkit-bg-soft);
         border-radius: var(--fundkit-radius-sm);
@@ -1313,7 +1240,7 @@
 
         &:hover {
             background: var(--fundkit-bg-soft);
-            color: var(--fundkit-text);
+            color: var(--fundkit-on-soft, var(--fundkit-text));
         }
         &[aria-hidden="true"] { pointer-events: none; }
     }
@@ -1352,7 +1279,6 @@
     &__nav--align-center   { justify-content: center; }
     &__nav--align-stretch  { > .fundkit-form__button { flex: 1; } }
 
-    // Shown in place of the whole form when another site has framed it.
     &__framed {
         display: flex;
         flex-direction: column;
@@ -1382,8 +1308,7 @@
         color: var(--fundkit-text);
     }
 
-    // Author styling belongs to WP's block-supports: the wrapper renders the
-    // inline style the Style Engine produced, so only structure lives here.
+    // WordPress block supports own authored inline styles.
     .fundkit-block--section {
         > .fundkit-form__decorations { margin-bottom: 0; }
     }
@@ -1441,8 +1366,7 @@
         min-height: 44px;
         margin-bottom: 16px;
     }
-    // Sized and spaced only. PayPal's branding rules forbid restyling the
-    // buttons themselves, so nothing here reaches inside the mount.
+    // Size the PayPal mount without restyling branded buttons.
     &__paypal-buttons {
         min-height: 44px;
         margin-bottom: 16px;

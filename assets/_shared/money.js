@@ -35,15 +35,7 @@ export function numberFormat() {
     return fmt ? { ...DEFAULT_NUMBER_FORMAT, ...fmt } : DEFAULT_NUMBER_FORMAT;
 }
 
-/**
- * Currencies charged in whole units, and in thousandths.
- *
- * Copied from Currency::ZERO_DECIMAL and Currency::THREE_DECIMAL rather than
- * taken from the shared UI package, whose own list differs on ISK, UGX, XAG and
- * MGA. PHP is the authority here because the receipt is rendered there, and a
- * donor reading their portal and then their receipt must see one figure.
- * MinorUnitParityTest fails if the two lists drift.
- */
+/** Match PHP currency exponents, not the shared UI table; MinorUnitParityTest checks parity. */
 const ZERO_DECIMAL = [
     'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA',
     'PYG', 'RWF', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',

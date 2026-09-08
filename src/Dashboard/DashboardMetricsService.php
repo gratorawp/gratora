@@ -4,26 +4,21 @@ declare(strict_types=1);
 
 namespace FundKit\Dashboard;
 
-use FundKit\Foundation\Time\ScheduleWindow;
 use DateTimeImmutable;
 use FundKit\Campaigns\Campaign;
 use FundKit\Donations\ChannelClassifier;
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationQueries;
 use FundKit\Donations\DonationRepository;
-use FundKit\Donations\Refund;
 use FundKit\Donors\Donor;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Time\Clock;
+use FundKit\Foundation\Time\ScheduleWindow;
 use FundKit\Recurring\RecurringPlan;
 use FundKit\Recurring\RecurringPlanRepository;
 use FundKit\Vendor\Queryable\DB;
 
-/**
- * Aggregates metrics across all campaigns for the platform dashboard.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class DashboardMetricsService
 {
     /** @since 1.0.0 */

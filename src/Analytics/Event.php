@@ -10,7 +10,7 @@ use FundKit\Vendor\Queryable\Model;
 use FundKit\Vendor\Queryable\Schema\Table;
 
 /**
- * Universal event log that every domain emits to this single table.
+ * Shared event table for all domains.
  *
  * @since 1.0.0
  */

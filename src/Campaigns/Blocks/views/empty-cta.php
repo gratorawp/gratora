@@ -12,7 +12,6 @@ defined('ABSPATH') || exit;
  * @var string $emptyIcon    'donation' | 'donor' | 'supporters' | 'campaigns'
  */
 $icons = [
-    // Stroked at 1.5 to sit quietly: this is a prompt, not a warning.
     'donation'   => '<path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l1.7 1.7L12 21.5l7.1-7.1 1.7-1.7a5 5 0 0 0 0-7.1z"/>',
     'donor'      => '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>',
     'campaigns'  => '<rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="15" width="7" height="5" rx="1.5"/><rect x="14" y="15" width="7" height="5" rx="1.5"/>',

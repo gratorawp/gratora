@@ -1,16 +1,7 @@
 #!/usr/bin/env node
 /**
- * Build the distributable plugin zip, honouring .distignore.
- *
- * Written because .distignore on its own is a promise nothing keeps: the file
- * existed for a while with no packaging step reading it, which reads as "the
- * zip is clean" while any zip actually cut by hand shipped everything.
- *
- * Rules follow the .gitignore subset WP-CLI's dist-archive uses:
- *   /foo    anchored at the plugin root
- *   foo     matches a file or directory anywhere in the tree
- *   *.log   glob, matched against the basename
- *   #       comment
+ * Build the plugin zip using .distignore: /foo anchors at root, bare names match anywhere,
+ * globs match basenames, and # starts comments.
  */
 
 import { execFileSync } from 'node:child_process';
@@ -60,12 +51,8 @@ function toMatcher( rule ) {
 }
 
 /**
- * .distignore cannot strip development dependencies: they are scattered across
- * vendor/ under names nobody lists by hand. `require-dev` is not that list
- * either, since it names only what we asked for, and strauss and phpunit pull
- * in seventy packages between them. Composer keeps both answers: installed.json
- * records whether the tree it wrote included require-dev, and composer.lock
- * names every dev package transitively.
+ * Check installed.json and transitive lockfile dev packages; require-dev alone misses
+ * dependencies.
  */
 function devInstall() {
     const manifest = path.join( root, 'vendor', 'composer', 'installed.json' );
@@ -96,15 +83,7 @@ function devInstall() {
     };
 }
 
-/**
- * build/ ships as-is and nothing here compiles it, so a stale bundle is a
- * release that behaves like an older checkout while every test agrees with the
- * source it was never built from.
- *
- * Compared by mtime rather than by a hash of the inputs: webpack output is not
- * reproducible byte for byte, so a content check would either be wrong or would
- * mean running the build to answer the question.
- */
+/** Reject stale builds by mtime; webpack output is not byte-reproducible. */
 function newestMtime( dir ) {
     if ( ! existsSync( dir ) ) return null;
 
@@ -222,16 +201,8 @@ const payload = path.join( staging, slug );
 copyTree( root, payload );
 
 /**
- * The autoloader is generated while vendor/dompdf and its siblings are on disk,
- * and .distignore then keeps those directories out of the payload: 210 classmap
- * entries and five psr-4 roots are left pointing at paths the zip does not
- * carry. Composer registers its loader with prepend, so on a site whose other
- * plugin names an unprefixed Dompdf\ or Masterminds\ class, ours answers first
- * with two include warnings before that plugin's own loader gets to it.
- *
- * Regenerating inside the payload is what makes the map describe the tree it
- * ships in. Run here rather than before copying because only the payload has
- * had the exclusions applied.
+ * Regenerate Composer’s autoloader after payload exclusions so it cannot claim classes from
+ * omitted directories.
  */
 execFileSync( 'composer', [ 'dump-autoload', '--no-dev', '--no-interaction', '--quiet' ], { cwd: payload } );
 

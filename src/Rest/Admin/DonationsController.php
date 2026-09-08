@@ -3,45 +3,49 @@
 declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
+use DateTimeImmutable;
 use FundKit\Analytics\ErrorLog;
-use FundKit\Rest\Paging;
-use FundKit\Foundation\Auth\Capabilities;
-
 use FundKit\Campaigns\Campaign;
 use FundKit\Currency\Currency;
+use FundKit\Currency\SupportedCurrencies;
 use FundKit\Donations\ChannelClassifier;
 use FundKit\Donations\Donation;
-use FundKit\Donations\DonationQueries;
 use FundKit\Donations\DonationIntent;
 use FundKit\Donations\DonationNoteRepository;
+use FundKit\Donations\DonationQueries;
 use FundKit\Donations\DonationRepository;
 use FundKit\Donations\DonationService;
 use FundKit\Donations\Refund;
-use FundKit\Gateways\PayPal\PayPalHoldReason;
 use FundKit\Donors\Donor;
 use FundKit\Donors\DonorRepository;
 use FundKit\Donors\DonorService;
-use FundKit\Foundation\Helpers\Csv;
-use FundKit\Currency\SupportedCurrencies;
-use FundKit\Foundation\Helpers\Money;
 use FundKit\Forms\Blocks\CustomFieldLabels;
 use FundKit\Forms\Form;
+use FundKit\Foundation\Auth\Capabilities;
+use FundKit\Foundation\Helpers\Csv;
+use FundKit\Foundation\Helpers\Money;
 use FundKit\Funds\Fund;
 use FundKit\Funds\FundRepository;
+use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\PayPal\PayPalHoldReason;
+use FundKit\Receipts\OrgProfile;
 use FundKit\Receipts\Receipt;
+use FundKit\Receipts\ReceiptContext;
 use FundKit\Receipts\ReceiptIssuer;
 use FundKit\Receipts\ReceiptRepository;
+use FundKit\Receipts\Renderers\GenericReceiptRenderer;
 use FundKit\Recurring\RecurringPlan;
+use FundKit\Rest\Paging;
 use FundKit\Settings\SettingsService;
 use RuntimeException;
+use Throwable;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * Admin donation endpoints: list, detail, refund, resend-receipt, CSV export.
- * Responses include decrypted donor PII; capability-gated.
+ * Admin donation responses contain decrypted donor PII; enforce access capabilities.
  *
  * @since 1.0.0
  */
@@ -67,8 +71,8 @@ final class DonationsController
         private ReceiptRepository $receipts,
         private ReceiptIssuer $receiptIssuer,
         private DonationNoteRepository $notes,
-        private \FundKit\Receipts\Renderers\GenericReceiptRenderer $genericRenderer,
-        private \FundKit\Gateways\GatewayManager $gateways,
+        private GenericReceiptRenderer $genericRenderer,
+        private GatewayManager $gateways,
     ) {
     }
 
@@ -322,9 +326,7 @@ final class DonationsController
     }
 
     /**
-     * A receipt carries the donor's address, and their email wherever the org
-     * put the merge tag, so downloading one reads the donor record however the
-     * donations screen offers the button.
+     * Receipt downloads disclose donor details and require donor-read access.
      *
      * @since 1.0.0
      */
@@ -451,15 +453,8 @@ final class DonationsController
     }
 
     /**
-     * Record money that arrived off the site: a check, cash in a bucket, a
-     * bank transfer nobody told the site about.
-     *
-     * It runs the same createPending + confirm path a donated donation runs,
-     * so aggregates, donor counters and every downstream listener behave
-     * identically. Three things differ, and each of them is a bug if left out:
-     * the money is dated when it arrived rather than when it was typed in, the
-     * donor is not emailed instructions to pay something already paid, and the
-     * row is never flagged as a test even on a site left in test mode.
+     * Record off-site money through the normal donation flow, using its actual date,
+     * suppressing payment instructions, and forcing live mode.
      *
      * @since 1.0.0
      */
@@ -583,31 +578,31 @@ final class DonationsController
 
         $intent = new DonationIntent(
             email: (string) $request['email'],
-            amount_cents: (int) $request['amount_cents'],
-            currency: $currency,
-            gateway: 'offline',
-            campaign_id: $campaignId,
-            fund_id: $fundId,
-            profile: array_filter([
-                'first_name' => (string) $request['first_name'],
-                'last_name'  => (string) $request['last_name'],
-            ]),
-            payment_method: $method,
+	        amount_cents: (int) $request['amount_cents'],
+	        currency: $currency,
+	        gateway: 'offline',
+	        campaign_id: $campaignId,
+	        fund_id: $fundId,
+	        profile: array_filter([
+	            'first_name' => (string) $request['first_name'],
+	            'last_name'  => (string) $request['last_name'],
+	        ]),
+	        payment_method: $method,
             // The marker that keeps this out of the `direct` bucket and out of
             // the offline instructions email. ChannelClassifier maps it.
-            source_attribution: ['utm_source' => 'admin', 'utm_medium' => ChannelClassifier::MANUAL],
-            note_to_org: (string) $request['note_to_org'] ?: null,
+	        source_attribution: [ 'utm_source' => 'admin', 'utm_medium' => ChannelClassifier::MANUAL],
+	        note_to_org: (string) $request['note_to_org'] ?: null,
             // A real check is real money even on a site left rehearsing. This
             // has to be settled before the insert rather than corrected after
             // it: Gift Aid reads the flag on fundkit.donation.creating to decide
             // whether to write a claim snapshot, and it never asks again, so a
             // donation corrected a moment later still loses the 25%.
-            is_test: false,
+	        extra: $extra,
             // Someone exercised their right to erasure. An admin typing their
             // email is not them coming back, so the money is recorded against
             // the erased shell and the erasure holds.
-            reactivate_redacted_donor: false,
-            extra: $extra,
+	        is_test: false,
+	        reactivate_redacted_donor: false,
         );
 
         $donation = null;
@@ -651,7 +646,7 @@ final class DonationsController
                 ),
                 get_current_user_id() ?: null
             );
-        } catch (\Throwable $e) {
+        } catch ( Throwable $e) {
             // Throwable, not RuntimeException: anything else escapes as a PHP
             // fatal, leaving the admin a blank 500 with no JSON and no way to
             // tell whether the money was recorded.
@@ -793,7 +788,7 @@ final class DonationsController
     private function receivedAt(string $raw): ?string
     {
         $raw  = trim($raw);
-        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $raw);
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', $raw);
         // createFromFormat is lenient: it rolls 2026-02-30 forward to March
         // rather than rejecting it, so compare the parse back against what was
         // typed. A date that does not exist is a typo, not a date.
@@ -805,7 +800,7 @@ final class DonationsController
         // UTC, so an admin anywhere east of the site sees a local date the
         // server would otherwise call the future, and could not record today's
         // cash at all. One day of slack covers every offset in use.
-        $latest = (new \DateTimeImmutable(current_time('Y-m-d')))->modify('+1 day');
+        $latest = (new DateTimeImmutable(current_time('Y-m-d')))->modify('+1 day');
         if ($date > $latest) {
             return null;
         }
@@ -1559,9 +1554,9 @@ final class DonationsController
         // preview exists to show the document, and reading the option directly
         // skipped the name -> legal name -> site name chain and the email
         // default, so it showed a different organisation than the receipt.
-        $org = \FundKit\Receipts\OrgProfile::load();
+        $org = OrgProfile::load();
 
-        $donor                    = \FundKit\Donors\Donor::make();
+        $donor                    = Donor::make();
         $donor->id                = 0;
         $donor->email_hash        = 'preview';
         $donor->email_encrypted   = '';
@@ -1574,7 +1569,7 @@ final class DonationsController
         $donor->created_at        = current_time('mysql');
         $donor->updated_at        = current_time('mysql');
 
-        $donation                 = \FundKit\Donations\Donation::make();
+        $donation                 = Donation::make();
         $donation->id             = 0;
         $donation->reference      = 'PREVIEW-0000';
         $donation->donor_id       = 0;
@@ -1588,7 +1583,7 @@ final class DonationsController
         $donation->updated_at     = current_time('mysql');
         $donation->paid_at        = current_time('mysql');
 
-        $ctx = new \FundKit\Receipts\ReceiptContext(
+        $ctx = new ReceiptContext(
             donation:      $donation,
             donor:         $donor,
             locale:        $donor->locale,
@@ -1600,7 +1595,7 @@ final class DonationsController
 
         try {
             $pdf = $this->genericRenderer->render($ctx);
-        } catch (\Throwable $e) {
+        } catch ( Throwable $e) {
             return new WP_Error('fundkit_render_failed', $e->getMessage(), ['status' => 500]);
         }
 

@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace FundKit\Admin\Pages;
 
+use FundKit\Donors\ConsentService;
 use FundKit\Foundation\Hooks\HookProvider;
 use FundKit\Foundation\Plugin;
-use FundKit\Donors\ConsentService;
 use FundKit\Gateways\GatewayManager;
 
-/**
- * Registers and renders the Forms admin page, including full-screen editor mode.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class FormsPage extends HookProvider
 {
     private const PAGE_ID   = 'fundkit-forms';
@@ -30,9 +26,7 @@ final class FormsPage extends HookProvider
     }
 
     /**
-     * The editor is fullscreen, and the bar is chrome it does not have room
-     * for. FULLSCREEN_CSS hides it too, but only after it has rendered and
-     * pushed the page down; refusing it here means it never does.
+     * Hide the admin bar before rendering to avoid shifting the fullscreen editor.
      *
      * @param bool $show
      * @since 1.0.0
@@ -49,10 +43,7 @@ final class FormsPage extends HookProvider
     }
 
     /**
-     * True when the forms screen is showing an editor. The page is hidden and
-     * has no other view, so the form id is the only signal that matters, and
-     * the React root gates on the same thing, which keeps the fullscreen chrome
-     * and the editor from disagreeing about what is on screen.
+     * Use the same form-id gate as the React editor for fullscreen mode.
      *
      * @since 1.0.0
      */
@@ -63,11 +54,7 @@ final class FormsPage extends HookProvider
             && intval($_GET['form'] ?? 0) > 0;
     }
 
-    /**
-     * The chrome the editor hides. Attached to the screen's own stylesheet
-     * rather than printed, because a <style> tag in admin_head is not
-     * enqueueable and the handle below is already on this screen.
-     */
+    /** Attach fullscreen styles to the screen’s stylesheet. */
     private const FULLSCREEN_CSS =
         '#wpadminbar,#adminmenumain,#adminmenuwrap,#adminmenuback,#wpfooter,.notice,.update-nag,h1.wp-heading-inline,.wp-header-end{display:none!important}'
         . 'html.wp-toolbar{padding-top:0!important}'
@@ -108,9 +95,6 @@ final class FormsPage extends HookProvider
         // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- WP_Screen::get() reads $hook_suffix as the screen id, so blanking it gives set_current_screen() below a neutral screen instead of this page's.
         $GLOBALS['hook_suffix'] = '';
 
-        // render() is a menu page callback, so wp-admin/admin.php has already
-        // loaded screen, post and media through includes/admin.php by the time
-        // this runs. Requiring them again was redundant.
         set_current_screen();
         $screen = get_current_screen();
         if ($screen && method_exists($screen, 'is_block_editor')) {
@@ -158,10 +142,7 @@ final class FormsPage extends HookProvider
 
         wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
 
-        // Registered gateways so the payment-gateways block can list them,
-        // each carrying whether the org is currently offering it: a gateway
-        // switched off in Settings still belongs in the list, or the block
-        // silently drops a choice the author made and cannot see why.
+        // Include disabled gateways so saved block choices remain visible.
         $manager  = Plugin::instance()->container->get(GatewayManager::class);
         $gateways = [];
         foreach ($manager->all() as $g) {
@@ -171,8 +152,7 @@ final class FormsPage extends HookProvider
                 'enabled' => $manager->isOn($g->id()),
             ];
         }
-        // The consent block picks from these rather than defining purposes of
-        // its own, so the editor needs the registry the front end will resolve.
+        // Use the same consent-purpose registry as the frontend.
         $consents = array_map(
             static fn (array $p): array => [
                 'key'         => $p['key'],

@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Foundation\Hooks;
 
 /**
- * Base class for declarative WP hook attachment.
- * Subclasses override actions() and/or filters() and call register().
+ * Override actions()/filters(), then call register().
  *
  * @since 1.0.0
  */
@@ -47,7 +46,7 @@ abstract class HookProvider
     }
 
     /**
-     * Normalize a hook spec to [method, priority, accepted_args].
+     * Normalize to [method, priority, accepted_args].
      *
      * @since 1.0.0
      */

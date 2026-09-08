@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Forms\Blocks;
 
-/**
- * fundkit/columns: multi-column container for content blocks.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class ColumnsBlock implements Block
 {
     /** @since 1.0.0 */

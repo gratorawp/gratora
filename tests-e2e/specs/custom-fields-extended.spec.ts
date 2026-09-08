@@ -1,21 +1,6 @@
 /**
- * Coverage for the custom-field blocks that the original `custom-fields`
- * spec only smoke-tested at one block each (date + dropdown). This drives
- * every remaining custom-field block end-to-end:
- *
- *   - fundkit/text-input       (free-text)
- *   - fundkit/number-input     (numeric with min/max)
- *   - fundkit/radio            (single-select via radios)
- *   - fundkit/checkbox         (single boolean)
- *   - fundkit/multi-select     (multi-value via checkbox group)
- *   - fundkit/hidden           (no DOM, value lives in state)
- *
- * Each test exercises the interactive control and then submits the full
- * form. A reaching-thank-you submit proves the field's value survived state,
- * validation, and the runtime payload builder (buildPayload's custom
- * serializer in state/store.js).
- *
- * Seeded via `wp fundkit e2e-seed` -> FUNDKIT_E2E_CUSTOM_FIELDS_FORM_PATH.
+ * Use FUNDKIT_E2E_CUSTOM_FIELDS_FORM_PATH from wp fundkit e2e-seed. Exercise each control
+ * through full submission.
  */
 
 import { test, expect } from '../fixtures/donor-form';

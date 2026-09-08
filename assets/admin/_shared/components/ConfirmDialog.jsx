@@ -4,12 +4,8 @@ import Dialog from './Dialog';
 import Btn from './Btn';
 
 /**
- * Shared confirm dialog for list-table bulk/row actions; replaces window.confirm
- * with the FundKit-styled modal. Driven by a `confirm` state object, null when closed:
- * { title, message, confirmLabel, destructive, onConfirm } (onConfirm runs after close).
- *
- * `requireText` holds the confirm button until the word is typed back, for the
- * handful of actions that erase something no undo can restore.
+ * Controlled confirmation modal: null closes it; onConfirm runs after closing. requireText
+ * gates destructive actions.
  */
 export default function ConfirmDialog( { confirm, onClose } ) {
     const [ typed, setTyped ] = useState( '' );

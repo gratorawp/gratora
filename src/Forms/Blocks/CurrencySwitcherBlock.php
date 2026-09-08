@@ -7,11 +7,7 @@ namespace FundKit\Forms\Blocks;
 use FundKit\Foundation\Helpers\View;
 use FundKit\Settings\SettingsService;
 
-/**
- * Currency switcher block.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class CurrencySwitcherBlock implements Block
 {
     /** @since 1.0.0 */

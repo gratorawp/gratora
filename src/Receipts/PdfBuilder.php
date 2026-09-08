@@ -59,11 +59,7 @@ final class PdfBuilder
         return (string) $dompdf->output();
     }
 
-    /**
-     * Page margins are a stylesheet rule here rather than a constructor
-     * argument, so they are prepended as one. Values stay in millimetres, which
-     * is what the callers pass.
-     */
+    /** Apply margins through CSS, in millimetres. */
     private function prepare(string $html, array $options): string
     {
         $page = sprintf(

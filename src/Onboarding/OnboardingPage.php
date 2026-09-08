@@ -6,11 +6,7 @@ namespace FundKit\Onboarding;
 
 use FundKit\Foundation\Hooks\HookProvider;
 
-/**
- * Full-screen first-run onboarding page (hidden submenu, no WP chrome).
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class OnboardingPage extends HookProvider
 {
     public const PAGE_ID   = 'fundkit-onboarding';

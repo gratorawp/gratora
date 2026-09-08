@@ -58,29 +58,14 @@
         }
     } );
 
-    // A donor coming back from their bank never pressed the trigger, and a shut
-    // modal hides the only account of a payment they have already made.
-    //
-    // Which form that is belongs to the form runtime alone: it holds the stash,
-    // the reference and the gateway key, and only it knows which form is
-    // rendering the outcome. Reaching the same verdict a second time from here
-    // is what let the two disagree, in both directions: a modal opened over a
-    // form that abstained shows a donor a blank form and no outcome, markers
-    // still on the URL for a reload to do it again. So this reveals the claim
-    // and never makes one. No claim means no outcome is being rendered
-    // anywhere, and the page as it stands beats a modal that cannot say what
-    // happened.
+    // Open the modal only for a return claimed by the form runtime, which owns gateway and
+    // stash validation.
     function revealFor( host ) {
         const modal = host && host.closest( '.fundkit-donate-modal' );
         if ( modal ) open( modal );
     }
 
-    // The claimant marks itself and announces it. Both are read, because the
-    // claim can land either side of this script: the runtime boots on
-    // DOMContentLoaded and the announcement reaches a listener already
-    // registered here, while a script an optimizer held back to the first
-    // interaction arrives to find the mark on the page and nothing to hear.
-    // RETURN_CLAIMED_EVENT in assets/donation-form/runtime.jsx.
+    // Read both the existing claim marker and future events to support delayed script loading.
     window.addEventListener( 'fundkit:donation:return-claimed', ( e ) => {
         revealFor( e.detail && e.detail.host );
     } );

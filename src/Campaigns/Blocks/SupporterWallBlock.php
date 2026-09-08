@@ -8,18 +8,13 @@ use FundKit\Campaigns\CampaignRepository;
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationQueries;
 use FundKit\Donors\Donor;
-use FundKit\Donors\PublicDonorNames;
 use FundKit\Donors\DonorAvatars;
+use FundKit\Donors\PublicDonorNames;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Helpers\View;
 use FundKit\Vendor\Queryable\DB;
 
-/**
- * Renders a supporter wall: one card per non-anonymous donor, optionally
- * showing their total amount and message.
- *
- * @since 1.0.0
- */
+/** @since 1.0.0 */
 final class SupporterWallBlock extends CampaignBlock
 {
     /** @since 1.0.0 */
@@ -82,17 +77,14 @@ final class SupporterWallBlock extends CampaignBlock
             ->where("{$donations}.is_anonymous", false);
 
         if ($minAmountCents > 0) {
-            // Threshold is an org-currency figure, so compare against the base
-            // amount, not the donor's (possibly foreign) amount_cents.
+            // Compare the threshold in org currency.
             $query = $query->where("{$donations}.base_amount_cents", $minAmountCents, '>=');
         }
 
-        // The two rules that decide whether a donor can appear at all, pushed
-        // into SQL so the limit counts rows the wall will actually show.
+        // Filter before LIMIT so every selected donor is displayable.
         $nameExpr = "TRIM(CONCAT(COALESCE(dn.first_name, ''), ' ', COALESCE(dn.last_name, '')))";
 
-        // In the join, not in a where: whereRaw contributes no AND connector,
-        // and these belong to which donor rows are joinable anyway.
+        // Keep conditions in the join; whereRaw adds no AND connector.
         $rows = $query
             ->joinRaw(
                 "JOIN {$donors} dn ON dn.id = {$donations}.donor_id"
@@ -120,8 +112,7 @@ final class SupporterWallBlock extends CampaignBlock
             ];
         }
 
-        // The most recent public message per donor on the wall. Only donors who
-        // opted in are shown; note_to_org is otherwise a private note.
+        // Use the latest opted-in public message per donor.
         if ($byDonor && $showMessage) {
             $messages = DonationQueries::donationsOnly(Donation::query())
                 ->whereIn('status', ['paid', 'partial_refund'])
@@ -165,8 +156,6 @@ final class SupporterWallBlock extends CampaignBlock
         foreach ($byDonor as $id => $info) {
             $donor = $donorsById[$id] ?? null;
             if (! $donor) continue;
-            // The wall is names and their words, so a hidden donor has nothing
-            // left to show here. Their donation still counts toward the total.
             if ($donor->public_hidden_at !== null) continue;
             $name = PublicDonorNames::of($donor);
             if ($name === '') continue;
@@ -181,7 +170,6 @@ final class SupporterWallBlock extends CampaignBlock
             ];
         }
 
-        // The order is the query's; this only settles ties MySQL left open.
         usort($entries, static function (array $a, array $b) use ($sort): int {
             if ($sort === 'alphabetical') {
                 return strcasecmp($a['name'], $b['name']);

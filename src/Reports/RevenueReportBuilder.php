@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace FundKit\Reports;
 
-use FundKit\Receipts\OrgProfile;
 use FundKit\Exports\RevenueExporter;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Helpers\View;
+use FundKit\Receipts\OrgProfile;
 use FundKit\Receipts\PdfBuilder;
 
 /**
