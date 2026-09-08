@@ -40,10 +40,14 @@ function useFocusTrap( ref, active, onClose ) {
             if ( e.key !== 'Tab' ) return;
             const nodes = [ ...node.querySelectorAll( FOCUSABLE ) ];
             if ( ! nodes.length ) return;
-            if ( e.shiftKey && doc.activeElement === nodes[ 0 ] ) {
+            // Disabling the focused control drops focus to the body, and the
+            // dialog is aria-modal: from there Tab walks a page the reader is
+            // told is not there.
+            const outside = ! node.contains( doc.activeElement );
+            if ( e.shiftKey && ( outside || doc.activeElement === nodes[ 0 ] ) ) {
                 e.preventDefault();
                 nodes[ nodes.length - 1 ].focus();
-            } else if ( ! e.shiftKey && doc.activeElement === nodes[ nodes.length - 1 ] ) {
+            } else if ( ! e.shiftKey && ( outside || doc.activeElement === nodes[ nodes.length - 1 ] ) ) {
                 e.preventDefault();
                 nodes[ 0 ].focus();
             }

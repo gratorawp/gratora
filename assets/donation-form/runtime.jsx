@@ -978,7 +978,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
 
 const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
-function useFocusTrap( ref, active ) {
+export function useFocusTrap( ref, active ) {
     useEffect( () => {
         if ( ! active || ! ref.current ) return;
         const el = ref.current;
@@ -989,21 +989,28 @@ function useFocusTrap( ref, active ) {
 
         const onTab = ( e ) => {
             if ( e.key !== 'Tab' ) return;
-            const nodes = [ ...el.querySelectorAll( FOCUSABLE ) ];
+            const node = ref.current;
+            if ( ! node ) return;
+            const nodes = [ ...node.querySelectorAll( FOCUSABLE ) ];
             if ( ! nodes.length ) return;
             const firstNode = nodes[ 0 ];
             const last  = nodes[ nodes.length - 1 ];
-            if ( e.shiftKey && doc.activeElement === firstNode ) {
+            // Disabling the focused control drops focus to the body, and the
+            // dialog is aria-modal: from there Tab walks a page the reader is
+            // told is not there. Listening on the document is what keeps the
+            // handler reachable once focus has left the panel.
+            const outside = ! node.contains( doc.activeElement );
+            if ( e.shiftKey && ( outside || doc.activeElement === firstNode ) ) {
                 e.preventDefault();
                 last.focus();
-            } else if ( ! e.shiftKey && doc.activeElement === last ) {
+            } else if ( ! e.shiftKey && ( outside || doc.activeElement === last ) ) {
                 e.preventDefault();
                 firstNode.focus();
             }
         };
-        el.addEventListener( 'keydown', onTab );
+        doc.addEventListener( 'keydown', onTab );
         return () => {
-            el.removeEventListener( 'keydown', onTab );
+            doc.removeEventListener( 'keydown', onTab );
             if ( prev && typeof prev.focus === 'function' ) prev.focus();
         };
     }, [ active ] );
