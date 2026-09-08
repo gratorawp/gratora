@@ -1,7 +1,7 @@
 
 import { useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Palette } from 'lucide-react';
 
 import Card from '../../_shared/components/Card';
@@ -12,6 +12,7 @@ import Icon from '../../_shared/components/Icon';
 import TokenEditor from '../../_shared/styling/TokenEditor';
 import StylePreview from '../../_shared/styling/StylePreview';
 import { presetsForPanel } from './brandPresets';
+import { bestOn } from './contrast';
 
 const PlusIcon  = () => <Icon name="plus"  size={ 16 } />;
 const CloneIcon = () => <Icon name="copy"  size={ 14 } />;
@@ -208,7 +209,7 @@ export default function BrandPanel( { s } ) {
     );
 }
 
-function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, onMakeDefault, onClone, onDelete } ) {
+export function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, onMakeDefault, onClone, onDelete } ) {
     return (
         <div className="fundkit-preset-editor">
             <div className="fundkit-preset-editor__head">
@@ -246,6 +247,8 @@ function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, o
                 <p className="fundkit-preset-editor__desc">{ preset.description }</p>
             ) }
 
+            <ContrastNotice tokens={ { ...( resetDefaults || {} ), ...( preset.tokens || {} ) } } />
+
             <TokenEditor
                 value={ preset.tokens || {} }
                 onChange={ onTokens }
@@ -254,6 +257,41 @@ function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTokens, o
                 defaults={ resetDefaults || window.fundkit?.styling?.defaults || {} }
             />
         </div>
+    );
+}
+
+/**
+ * A ground between light and dark carries no body text whichever ink is drawn
+ * on it, and a colour picker cannot show that. The text colours follow the
+ * ground on their own, so this is the one choice the org has to make itself.
+ */
+const GROUNDS = [
+    [ 'fundkit-bg',      () => __( 'Background', 'fundraising-toolkit' ) ],
+    [ 'fundkit-bg-soft', () => __( 'Soft background', 'fundraising-toolkit' ) ],
+    [ 'fundkit-accent',  () => __( 'Accent', 'fundraising-toolkit' ) ],
+];
+
+function ContrastNotice( { tokens } ) {
+    const failing = GROUNDS
+        .map( ( [ key, label ] ) => ( { label: label(), value: tokens[ key ], best: bestOn( tokens[ key ] ) } ) )
+        .filter( ( g ) => g.best !== null && g.best < 4.5 );
+
+    if ( ! failing.length ) return null;
+
+    return (
+        <ul className="fundkit-preset-editor__contrast">
+            { failing.map( ( g ) => (
+                <li key={ g.label }>
+                    { sprintf(
+                        /* translators: 1: colour name, e.g. Background, 2: the hex the admin picked, 3: the contrast it reaches, e.g. 4.0 */
+                        __( '%1$s (%2$s) reaches %3$s:1, under the 4.5:1 that text needs. Take it lighter or darker.', 'fundraising-toolkit' ),
+                        g.label,
+                        String( g.value ).toUpperCase(),
+                        g.best.toFixed( 1 )
+                    ) }
+                </li>
+            ) ) }
+        </ul>
     );
 }
 
