@@ -13,8 +13,9 @@ namespace FundKit\Campaigns\Styling;
  * covers both, and what sits on a surface reads these rather than the page ink,
  * which is chosen against the page background and knows nothing about a panel.
  *
- * Hex and rgb() are what the colour control stores. Anything else (hsl, a
- * keyword) yields nothing, and the stylesheet's own fallback stands.
+ * Hex, rgb() and hsl() are what a colour reaches this in: the control stores the
+ * first two and a theme.json palette can state the third. A keyword yields
+ * nothing, and the stylesheet's own fallback stands.
  *
  * @since 1.0.0
  */

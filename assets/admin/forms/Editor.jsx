@@ -44,7 +44,7 @@ import AmountInput from '../_shared/components/AmountInput';
 import FormTemplatePicker from '../_shared/components/FormTemplatePicker';
 import { STATUS_LABEL, formsBackHref } from './format';
 import { defaultCurrency } from '../_shared/format';
-import { derivedInk } from '../../_shared/ink';
+import { resolveEffectiveStyle } from '../_shared/styling/StylePreview';
 import blockRegistry, { runBlockRegistration } from './registry';
 import './blocks';
 import './editor.scss';
@@ -116,68 +116,30 @@ export function templateApplication( currentSettings, template ) {
 /**
  * The custom properties the canvas renders a form under.
  *
- * Mirrors CampaignStyleResolver, minus inkFollowsGround: that rewrites the body
- * ink from --fundkit-bg, and the canvas sheet is white whatever that token says.
+ * A form on a resolvable preset gates the campaign's inline tokens out, which
+ * is the one rule the shared resolver does not model. The sheet paints #fff
+ * whatever --fundkit-bg says, so no ink is measured against it.
  *
  * @since 1.0.0
  */
 export function canvasStyle( settings = {}, campaign = null, styling = window.fundkit?.styling || {} ) {
-    const presets   = Array.isArray( styling.presets ) ? styling.presets : [];
-    const defaults  = styling.defaults || {};
-    const defaultId = String( styling.default_id || '' );
+    const presets = Array.isArray( styling.presets ) ? styling.presets : [];
 
-    // An id nothing answers to is not a choice, and CampaignStyleResolver lets
-    // the campaign's own overrides through again.
-    const namedPreset      = String( settings.style?.preset_id || '' );
-    const formPresetId     = presets.some( ( p ) => p.id === namedPreset ) ? namedPreset : '';
-    const formInlineTokens = settings.style?.tokens && typeof settings.style.tokens === 'object'
-        ? settings.style.tokens : {};
+    const namedPreset  = String( settings.style?.preset_id || '' );
+    const formPresetId = presets.some( ( p ) => p.id === namedPreset ) ? namedPreset : '';
 
-    const campaignStyle        = campaign?.style && typeof campaign.style === 'object'
+    const campaignStyle = campaign?.style && typeof campaign.style === 'object'
         ? campaign.style : {};
-    const campaignPresetId     = String( campaignStyle.preset_id || '' );
-    const campaignInlineTokens = campaignStyle.tokens && typeof campaignStyle.tokens === 'object'
+    const inline = formPresetId === '' && campaignStyle.tokens && typeof campaignStyle.tokens === 'object'
         ? campaignStyle.tokens : {};
 
-    const chosenPresetId = formPresetId || campaignPresetId || defaultId;
-    const chosenPreset   = presets.find( ( p ) => p.id === chosenPresetId );
-
-    const tokens = {
-        ...defaults,
-        ...( chosenPreset?.tokens || {} ),
-        ...( formPresetId ? {} : campaignInlineTokens ),
-        ...formInlineTokens,
-    };
-
-    const layers = [
-        chosenPreset?.tokens || {},
-        formPresetId ? {} : campaignInlineTokens,
-        formInlineTokens,
-    ];
-    const resolvedAccent = String( tokens[ 'fundkit-accent' ] || '' );
-    for ( const key of [ 'fundkit-accent-soft', 'fundkit-focus-ring' ] ) {
-        let accent     = defaults[ 'fundkit-accent' ] || '';
-        let pairedWith = null;
-        for ( const layer of layers ) {
-            if ( layer[ 'fundkit-accent' ] ) accent = layer[ 'fundkit-accent' ];
-            if ( layer[ key ] ) pairedWith = accent;
-        }
-
-        const stale = pairedWith !== null
-            ? String( pairedWith ).toLowerCase() !== resolvedAccent.toLowerCase()
-            : tokens[ key ] === defaults[ key ];
-
-        if ( stale ) delete tokens[ key ];
-    }
-
-    const sx = {};
-    for ( const k in tokens ) {
-        if ( typeof tokens[ k ] === 'string' && tokens[ k ] !== '' ) {
-            sx[ `--${ k }` ] = tokens[ k ];
-        }
-    }
-
-    Object.assign( sx, derivedInk( tokens ) );
+    const sx = resolveEffectiveStyle( {
+        tokens:       inline,
+        presetId:     formPresetId || String( campaignStyle.preset_id || '' ),
+        layer:        'campaign',
+        styling,
+        paintsGround: false,
+    } );
 
     const cw = Number( settings.container?.width );
     if ( cw >= 320 && cw <= 1600 ) {

@@ -73,3 +73,73 @@ it( 'lets the campaign through when the form names a preset that is gone', () =>
 
     expect( sx[ '--fundkit-accent' ] ).toBe( '#ffe066' );
 } );
+
+const BOLD = {
+    'fundkit-accent':      '#0F3D5C',
+    'fundkit-accent-soft': '#dde6ed',
+    'fundkit-focus-ring':  '#0F3D5C',
+};
+
+// Bold, with the org's own accent painted over it in Settings > Brand.
+const orgBrand = {
+    defaults: {
+        'fundkit-accent':      '#211d3f',
+        'fundkit-accent-soft': '#efedf8',
+        'fundkit-focus-ring':  '#211d3f',
+        'fundkit-bg':          '#ffffff',
+        'fundkit-text':        '#111827',
+        'fundkit-text-muted':  '#6b7280',
+    },
+    builtins:   [ { id: 'bold', tokens: BOLD } ],
+    presets:    [ { id: 'bold', tokens: { ...BOLD, 'fundkit-accent': '#7c1d1d' } } ],
+    default_id: 'bold',
+};
+
+it( 'drops a tint the org repainted the accent out from under', () => {
+    const sx = canvasStyle( { style: { preset_id: 'bold' } }, null, orgBrand );
+
+    expect( sx[ '--fundkit-accent' ] ).toBe( '#7c1d1d' );
+    expect( sx[ '--fundkit-accent-soft' ] ).toBeUndefined();
+    expect( sx[ '--fundkit-focus-ring' ] ).toBeUndefined();
+} );
+
+it( 'gives a campaign on a preset nothing answers to the org default', () => {
+    const sx = canvasStyle(
+        { style: { preset_id: '' } },
+        { id: 4, style: { preset_id: 'gone' } },
+        orgBrand
+    );
+
+    expect( sx[ '--fundkit-accent' ] ).toBe( '#7c1d1d' );
+} );
+
+it( 'measures no ink against a ground the sheet never paints', () => {
+    const sx = canvasStyle(
+        { style: { preset_id: '' } },
+        { id: 4, style: { tokens: { 'fundkit-bg': '#101828' } } },
+        orgBrand
+    );
+
+    expect( sx[ '--fundkit-text' ] ).toBe( '#111827' );
+    expect( sx[ '--fundkit-text-muted' ] ).toBe( '#6b7280' );
+} );
+
+it( 'ignores the campaign when the form is on a preset of its own', () => {
+    const sx = canvasStyle(
+        { style: { preset_id: 'bold' } },
+        { id: 4, style: { tokens: { 'fundkit-accent': '#ffe066' } } },
+        orgBrand
+    );
+
+    expect( sx[ '--fundkit-accent' ] ).toBe( '#7c1d1d' );
+} );
+
+it( 'ignores a form token map the published form does not read', () => {
+    const sx = canvasStyle(
+        { style: { preset_id: '', tokens: { 'fundkit-accent': '#00ff00' } } },
+        null,
+        orgBrand
+    );
+
+    expect( sx[ '--fundkit-accent' ] ).toBe( '#7c1d1d' );
+} );

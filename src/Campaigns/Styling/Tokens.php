@@ -345,9 +345,9 @@ final class Tokens
     {
         $v = trim($value);
 
-        // As tight as sanitiseValue's own classes: themePreset bypasses
-        // sanitize entirely and the value lands inside a <style> block, so
-        // neither pattern may carry ';', '{' or '}'.
+        // As tight as sanitiseValue's own classes: the value lands inside a
+        // <style> block, so neither pattern may carry ';', '{' or '}'. hsl is
+        // left out on purpose: print falls back rather than widen this.
         if (preg_match('/^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $v) === 1) return $v;
         if (preg_match('/^rgba?\(\s*[0-9.,\s%\/-]+\s*\)$/i', $v) === 1) return $v;
 

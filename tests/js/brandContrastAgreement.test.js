@@ -4,7 +4,7 @@
  * promises a contrast the page does not have.
  */
 
-import { inkOn, ratio, bestOn, derivedInk } from '../../assets/_shared/ink';
+import { rgb, inkOn, ratio, bestOn, derivedInk } from '../../assets/_shared/ink';
 
 /** The cases InkTest pins on the PHP side, with the ink it chooses. */
 const cases = [
@@ -85,4 +85,24 @@ describe( 'the inks the server would have emitted', () => {
         expect( derivedInk( { 'fundkit-accent': 'inherit' } ) ).toEqual( {} );
         expect( derivedInk( {} ) ).toEqual( {} );
     } );
+} );
+
+test( 'a malformed number is a colour to neither side', () => {
+    expect( rgb( 'hsl(1.2.3, 50%, 50%)' ) ).toBeNull();
+} );
+
+test( 'the channels are the channels the server reads', () => {
+    expect( rgb( 'rgb(50%, 50%, 50%)' ) ).toEqual( [ 128, 128, 128 ] );
+    expect( rgb( 'rgb(70%, 90%, 60%)' ) ).toEqual( [ 179, 230, 153 ] );
+    expect( rgb( 'hsl(0, 100%, 5%)' ) ).toEqual( [ 26, 0, 0 ] );
+    expect( rgb( 'hsl(0, 100%, 95%)' ) ).toEqual( [ 255, 230, 230 ] );
+} );
+
+// The theme preset lifts palette colours out of theme.json, which takes any CSS
+// colour, so a ground the server measures and the preview cannot read leaves the
+// admin looking at black on black while the page renders white on it.
+test( 'an hsl ground carries the same ink on both sides', () => {
+    expect( inkOn( 'hsl(249, 37%, 18%)' ) ).toBe( '#ffffff' );
+    expect( inkOn( 'hsl(210deg 40% 92%)' ) ).toBe( '#10162a' );
+    expect( derivedInk( { 'fundkit-accent': 'hsl(249, 37%, 18%)' } )[ '--fundkit-on-accent' ] ).toBe( '#ffffff' );
 } );

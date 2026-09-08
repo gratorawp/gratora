@@ -74,8 +74,8 @@ it( 'and a white one on a dark accent', () => {
 
 it( 'lets an author-set button colour win over the measured ink', () => {
     const tokens = canvasStyle(
-        { style: { preset_id: 'sunny', tokens: { 'fundkit-button-fg': '#004400' } } },
-        null,
+        { style: { preset_id: '' } },
+        { id: 4, style: { tokens: { 'fundkit-accent': '#ffd400', 'fundkit-button-fg': '#004400' } } },
         styling
     );
 
