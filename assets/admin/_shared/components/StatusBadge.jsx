@@ -28,7 +28,6 @@ const STATUS = {
     partial_refund:     { variant: 'blue',  label: __( 'Partially refunded', 'fundraising-toolkit' ) },
     partially_refunded: { variant: 'blue',  label: __( 'Partially refunded', 'fundraising-toolkit' ) },
     disputed:           { variant: 'red',   label: __( 'Disputed', 'fundraising-toolkit' ) },
-    abandoned:          { variant: 'gray',  label: __( 'Abandoned', 'fundraising-toolkit' ) },
     cancelled:          { variant: 'gray',  label: __( 'Cancelled', 'fundraising-toolkit' ) },
     // Recurring plan lifecycle. Here rather than hand-rolled on the
     // subscriptions screen, so a plan's status pill matches a donation's.

@@ -46,7 +46,6 @@ export function donationStatusPill( status ) {
         case 'refunded':       return { cls: 'is-muted',  label: __( 'Refunded', 'fundraising-toolkit' ) };
         case 'partial_refund': return { cls: 'is-warn',   label: __( 'Partial',  'fundraising-toolkit' ) };
         case 'disputed':       return { cls: 'is-error',  label: __( 'Disputed', 'fundraising-toolkit' ) };
-        case 'abandoned':      return { cls: 'is-muted',  label: __( 'Abandoned','fundraising-toolkit' ) };
         default:               return { cls: 'is-muted',  label: status };
     }
 }
@@ -71,7 +70,7 @@ export const CHANNEL_LABEL = {
     referral:      __( 'Referral',       'fundraising-toolkit' ),
     qr:            __( 'QR code',        'fundraising-toolkit' ),
     peer:          __( 'Peer-to-peer',   'fundraising-toolkit' ),
-    other:         __( 'Other',          'fundraising-toolkit' ),
+    manual:        __( 'Manual',         'fundraising-toolkit' ),
 };
 
 /**
