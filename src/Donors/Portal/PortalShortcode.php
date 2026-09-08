@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Donors\Portal;
 
 use FundKit\Admin\ExtensionAssets;
+use FundKit\Campaigns\Styling\CampaignStyleResolver;
 use FundKit\Campaigns\Styling\Ink;
 use FundKit\Campaigns\Styling\StylePresets;
 use FundKit\Campaigns\Styling\Tokens;
@@ -149,10 +150,10 @@ final class PortalShortcode extends HookProvider
      */
     private function brandCss(): string
     {
-        $tokens = array_merge(
-            Tokens::defaults(),
-            StylePresets::tokensFor(StylePresets::defaultId()),
-        );
+        // Through the resolver, not by hand: merging the default preset over the
+        // catalogue skips the derivations the form and the campaign page get,
+        // so one brand rendered a legible checkout and an illegible account.
+        $tokens = (new CampaignStyleResolver())->resolveForCampaign(null);
         $vars = [];
         foreach ($tokens as $k => $v) {
             if (! is_string($v) || $v === '') continue;

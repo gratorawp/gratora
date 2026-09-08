@@ -243,7 +243,7 @@
     }
     button {
         background: var(--dp-accent);
-        color: #fff;
+        color: var(--fundkit-on-accent, #fff);
         border: 0;
         padding: 10px 16px;
         border-radius: 8px;
@@ -376,7 +376,7 @@
 
     &:hover { border-color: var(--dp-muted); }
     &:disabled { opacity: .5; cursor: not-allowed; }
-    &.is-primary { background: var(--dp-accent); color: #fff; border-color: var(--dp-accent); text-align: center; }
+    &.is-primary { background: var(--dp-accent); color: var(--fundkit-on-accent, #fff); border-color: var(--dp-accent); text-align: center; }
     &--danger { color: #b91c1c; border-color: #fecaca; }
 }
 
