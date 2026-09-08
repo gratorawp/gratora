@@ -71,7 +71,6 @@ final class InkTest extends TestCase
             'empty'       => [''],
             'keyword'     => ['transparent'],
             'currentcolor'=> ['currentColor'],
-            'hsl'         => ['hsl(210, 60%, 20%)'],
             'nonsense'    => ['not-a-colour'],
             'short rgb'   => ['rgb(10, 20)'],
         ];
@@ -123,5 +122,39 @@ final class InkTest extends TestCase
     public function test_an_unreadable_soft_ground_leaves_the_stylesheet_its_fallback(): void
     {
         $this->assertSame('', Ink::softDeclarations(['fundkit-bg-soft' => 'var(--wp--preset--color--x)']));
+    }
+
+    /**
+     * The colour control stores hsl() as readily as hex. A ground nothing can
+     * read leaves every derived ink at its stylesheet fallback, which is the
+     * white-on-pale the measuring exists to prevent.
+     *
+     * @return array<string,array{0:string,1:bool}>
+     */
+    public function hslGrounds(): array
+    {
+        return [
+            'hsl black'       => ['hsl(0, 0%, 0%)', true],
+            'hsl white'       => ['hsl(0, 0%, 100%)', false],
+            'hsl brand navy'  => ['hsl(249, 37%, 18%)', true],
+            'hsl yellow'      => ['hsl(50, 100%, 50%)', false],
+            'hsl space units' => ['hsl(210deg 40% 20%)', true],
+            'hsla with alpha' => ['hsla(50, 100%, 50%, 0.9)', false],
+        ];
+    }
+
+    /** @dataProvider hslGrounds */
+    public function test_an_hsl_ground_is_measured_like_any_other(string $ground, bool $expectsLight): void
+    {
+        $this->assertStringContainsString(
+            $expectsLight ? '--fundkit-on-accent:#ffffff;' : '--fundkit-on-accent:#10162a;',
+            Ink::declarationsFor($ground)
+        );
+    }
+
+    public function test_an_hsl_that_is_not_a_colour_still_yields_nothing(): void
+    {
+        $this->assertSame('', Ink::declarationsFor('hsl(no, thanks)'));
+        $this->assertSame('', Ink::declarationsFor('hsl(10)'));
     }
 }

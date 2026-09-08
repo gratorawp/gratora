@@ -83,7 +83,7 @@
     --fundkit-radius-sm:      8px;
     // Leave button and switcher radii unset to inherit radius-sm unless overridden.
     --fundkit-pill-radius:    999px;
-    --fundkit-preset-hover:   rgba(0, 0, 0, .04);
+    --fundkit-preset-hover:   color-mix(in srgb, var(--fundkit-on-soft, #000) 8%, var(--fundkit-bg-soft));
     --fundkit-stroke:   1px;
     --fundkit-gap:            20px;
     --fundkit-field-gap:      6px;
@@ -229,7 +229,7 @@
             background: var(--fundkit-bg-soft);
             color: var(--fundkit-on-soft, var(--fundkit-text));
 
-            &:hover:not(:disabled) { background: var(--fundkit-border); }
+            &:hover:not(:disabled) { background: color-mix(in srgb, var(--fundkit-border) 45%, var(--fundkit-bg-soft)); }
         }
     }
 
@@ -322,8 +322,9 @@
         }
         .fundkit-form__frequency-option {
             border-radius: var(--fundkit-radius-sm, 8px);
+            color: var(--fundkit-on-soft, var(--fundkit-text));
 
-            &:hover { color: var(--fundkit-text); }
+            &:hover { color: var(--fundkit-on-soft, var(--fundkit-text)); }
             &.is-selected {
                 background: var(--fundkit-accent);
                 color: var(--fundkit-on-accent, #fff);
@@ -1161,7 +1162,7 @@
     }
     .fundkit-goal__bar {
         height: 8px;
-        background: var(--fundkit-border);
+        background: var(--fundkit-track, color-mix(in srgb, var(--fundkit-border, #e5e7eb) 55%, var(--fundkit-bg, #fff)));
         border-radius: var(--fundkit-radius-sm, 4px);
         overflow: hidden;
     }
@@ -1265,7 +1266,7 @@
 
     &__bar-track {
         height: 4px;
-        background: var(--fundkit-border, #e5e7eb);
+        background: var(--fundkit-track, color-mix(in srgb, var(--fundkit-border, #e5e7eb) 55%, var(--fundkit-bg, #fff)));
         border-radius: 0;
         overflow: hidden;
         margin: 0 0 20px;
@@ -1301,7 +1302,7 @@
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background: var(--fundkit-border, #e5e7eb);
+        background: var(--fundkit-track, color-mix(in srgb, var(--fundkit-border, #e5e7eb) 55%, var(--fundkit-bg, #fff)));
         transition: background .15s ease, transform .15s ease;
 
         &.is-done    { background: var(--fundkit-accent, #211d3f); }

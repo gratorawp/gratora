@@ -158,6 +158,10 @@ final class Ink
             ];
         }
 
+        if (preg_match('/^hsla?\(([^)]*)\)$/i', $value, $m) === 1) {
+            return self::fromHsl($m[1]);
+        }
+
         if (preg_match('/^rgba?\(([^)]*)\)$/i', $value, $m) === 1) {
             $parts = preg_split('#[\s,/]+#', trim($m[1])) ?: [];
             $parts = array_values(array_filter($parts, static fn($p): bool => $p !== ''));
@@ -177,6 +181,51 @@ final class Ink
         }
 
         return null;
+    }
+
+    /**
+     * The colour control stores hsl() as readily as hex, and a ground nothing
+     * can read leaves every derived ink at its stylesheet fallback: white on a
+     * pale accent, exactly what the measuring exists to prevent.
+     *
+     * @return array{0:int,1:int,2:int}|null
+     */
+    private static function fromHsl(string $parts): ?array
+    {
+        $bits = preg_split('#[\s,/]+#', trim($parts)) ?: [];
+        $bits = array_values(array_filter($bits, static fn ($p): bool => $p !== ''));
+        if (count($bits) < 3) {
+            return null;
+        }
+
+        foreach (array_slice($bits, 0, 3) as $bit) {
+            if (! is_numeric(rtrim($bit, '%deg'))) {
+                return null;
+            }
+        }
+
+        $h = fmod((float) rtrim($bits[0], 'deg'), 360);
+        if ($h < 0) {
+            $h += 360;
+        }
+        $s = max(0, min(100, (float) rtrim($bits[1], '%'))) / 100;
+        $l = max(0, min(100, (float) rtrim($bits[2], '%'))) / 100;
+
+        $c = (1 - abs(2 * $l - 1)) * $s;
+        $x = $c * (1 - abs(fmod($h / 60, 2) - 1));
+        $m = $l - $c / 2;
+
+        $sector = (int) floor($h / 60);
+        $rgb = [
+            [$c, $x, 0.0], [$x, $c, 0.0], [0.0, $c, $x],
+            [0.0, $x, $c], [$x, 0.0, $c], [$c, 0.0, $x],
+        ][$sector % 6];
+
+        return [
+            (int) round(($rgb[0] + $m) * 255),
+            (int) round(($rgb[1] + $m) * 255),
+            (int) round(($rgb[2] + $m) * 255),
+        ];
     }
 
     /**
