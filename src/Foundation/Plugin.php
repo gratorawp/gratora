@@ -416,11 +416,17 @@ final class Plugin
     {
         // Anything that reads FundKit's own tables runs before the wipe, because
         // the plugin is still loaded and hooked for the rest of this request.
-        flush_rewrite_rules();
-
         self::deactivateDependents();
 
         do_action('fundkit.deactivated');
+
+        // Deleted rather than flushed, and after the dependents: a flush from a
+        // plugin that is still loaded stores its own rules again, and
+        // CampaignPermalinks::addRule has already run on init. WordPress
+        // rebuilds the option on the next permalink request, by which time the
+        // rule is gone with the plugin. Left behind, it rewrote every URL under
+        // /campaigns/ on a site that had moved on to ordinary pages.
+        delete_option('rewrite_rules');
 
         // init reinstalls these on reactivation, and a run with no callback
         // still schedules its successor, so a deactivated plugin's sweeps

@@ -1430,7 +1430,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $stripe[$key]    = $productId;
         $opt['stripe']   = $stripe;
-        update_option('fundkit_gateway_config', $opt);
+        update_option('fundkit_gateway_config', $opt, false);
         return $productId;
     }
 

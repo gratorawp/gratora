@@ -157,6 +157,7 @@ use FundKit\Foundation\Transfer\DataExporter;
 use FundKit\Foundation\Transfer\DataImporter;
 use FundKit\Foundation\Upgrade\OpenTheDefaultFund;
 use FundKit\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
+use FundKit\Foundation\Upgrade\UnautoloadGatewayConfig;
 use FundKit\Foundation\Upgrade\UnpinSiteIdentity;
 use FundKit\Foundation\Upgrade\UpgradeJob;
 use FundKit\Foundation\Upgrade\UpgradeNotice;
@@ -289,6 +290,7 @@ final class CoreModule implements FundKitModule
             new RestoreReceiptsRetainingMoney(),
             new OpenTheDefaultFund(),
             new UnpinSiteIdentity(),
+            new UnautoloadGatewayConfig(),
         ];
     }
 

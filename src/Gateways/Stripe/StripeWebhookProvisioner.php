@@ -274,7 +274,7 @@ final class StripeWebhookProvisioner
 
         $opt['stripe'][self::secretKey($isTest)]   = '';
         $opt['stripe'][self::endpointKey($isTest)] = '';
-        update_option('fundkit_gateway_config', $opt);
+        update_option('fundkit_gateway_config', $opt, false);
     }
 
     /** @since 1.0.0 */
@@ -293,6 +293,6 @@ final class StripeWebhookProvisioner
         $opt['stripe'][self::endpointKey($isTest)] = $endpointId === ''
             ? ''
             : self::bond($endpointId, $secret);
-        update_option('fundkit_gateway_config', $opt);
+        update_option('fundkit_gateway_config', $opt, false);
     }
 }
