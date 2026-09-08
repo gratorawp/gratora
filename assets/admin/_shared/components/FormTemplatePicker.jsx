@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
 
 import Icon from './Icon';
 import { thumbFor } from './formThumb';
+import { resolveEffectiveTokens } from '../styling/StylePreview';
 
 // Category values are stable grouping keys; translate only for display.
 const CATEGORY_LABELS = {
@@ -251,20 +252,20 @@ function Band( { part } ) {
     }
 }
 
-function FormTemplateThumb( { template } ) {
+export function FormTemplateThumb( { template } ) {
     const settings = template.settings || {};
     const layout   = settings.layout  || 'inline';
 
-    const presets   = Array.isArray( window.fundkit?.styling?.presets ) ? window.fundkit.styling.presets : [];
-    const defaults  = window.fundkit?.styling?.defaults || {};
-    const defaultId = String( window.fundkit?.styling?.default_id || '' );
-    const templatePresetId = String( settings.style?.preset_id || '' );
-    const chosenPreset = presets.find( ( p ) => p.id === ( templatePresetId || defaultId ) );
-    const tokens = { ...defaults, ...( chosenPreset?.tokens || {} ) };
-    const accent = ( settings.theme?.accent ) || tokens[ 'fundkit-accent' ] || '#211d3f';
-    const radius = settings.theme?.radius
-        ? `${ settings.theme.radius }px`
-        : ( tokens[ 'fundkit-radius-md' ] || tokens[ 'fundkit-radius' ] || '8px' );
+    // A template is free to name a preset, and fundkit.form.templates lets a
+    // site add one that names a preset it later deleted.
+    const tokens = resolveEffectiveTokens( {
+        tokens:   {},
+        presetId: String( settings.style?.preset_id || '' ),
+        layer:    'campaign',
+        styling:  window.fundkit?.styling || {},
+    } );
+    const accent = tokens[ 'fundkit-accent' ] || '#211d3f';
+    const radius = tokens[ 'fundkit-radius' ] || '8px';
 
     // The sheet stands for a form about four times its width, so the template's
     // own radius has to come down with it: 8px on an 11px tile is a capsule,

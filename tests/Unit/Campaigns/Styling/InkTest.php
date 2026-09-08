@@ -157,4 +157,34 @@ final class InkTest extends TestCase
         $this->assertSame('', Ink::declarationsFor('hsl(no, thanks)'));
         $this->assertSame('', Ink::declarationsFor('hsl(10)'));
     }
+
+    /** @return array<string,array{0:string,1:string}> */
+    public function hexes(): array
+    {
+        return [
+            'hsl'            => ['hsl(203 60% 21%)', '#153d56'],
+            'hsla'           => ['hsla(280, 50%, 40%, .5)', '#773399'],
+            'rgb'            => ['rgb(20, 66, 95)', '#14425f'],
+            'shorthand hex'  => ['#fff', '#ffffff'],
+            'black'          => ['hsl(0 0% 0%)', '#000000'],
+        ];
+    }
+
+    /** @dataProvider hexes */
+    public function test_a_readable_colour_yields_six_digits(string $value, string $expected): void
+    {
+        $this->assertSame($expected, Ink::hex($value));
+    }
+
+    public function test_a_channel_past_the_range_still_yields_six_digits(): void
+    {
+        $this->assertSame('#ff0000', Ink::hex('rgb(300, -20, 0)'));
+    }
+
+    public function test_a_colour_it_cannot_read_yields_nothing(): void
+    {
+        $this->assertNull(Ink::hex('transparent'));
+        $this->assertNull(Ink::hex('currentColor'));
+        $this->assertNull(Ink::hex('#fff}body{display:none'));
+    }
 }

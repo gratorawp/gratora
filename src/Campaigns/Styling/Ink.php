@@ -48,6 +48,29 @@ final class Ink
     }
 
     /**
+     * The same colour as opaque #rrggbb, or null when it cannot be read.
+     *
+     * Built from the measured channels, so the return carries no character of
+     * the input and is safe wherever a colour literal is.
+     *
+     * @since 1.0.0
+     */
+    public static function hex(string $value): ?string
+    {
+        $rgb = self::rgb($value);
+        if ($rgb === null) {
+            return null;
+        }
+
+        $out = '#';
+        foreach ($rgb as $channel) {
+            $out .= sprintf('%02x', max(0, min(255, $channel)));
+        }
+
+        return $out;
+    }
+
+    /**
      * Declarations for a style attribute or rule body, or '' when the accent
      * cannot be read.
      *

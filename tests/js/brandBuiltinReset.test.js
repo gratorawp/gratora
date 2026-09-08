@@ -23,14 +23,19 @@ jest.mock( '@wordpress/components', () => {
     const Control = ( { value, onChange } ) => (
         <input value={ value ?? '' } onChange={ ( e ) => onChange( e.target.value ) } />
     );
-    const Dropdown = ( { renderToggle } ) => renderToggle( { isOpen: false, onToggle: () => {} } );
+    // Both halves, so a case can drive the picker the colour rows actually use.
+    const Dropdown = ( { renderToggle, renderContent } ) => (
+        <div>{ renderToggle( { isOpen: true, onToggle: () => {} } ) }{ renderContent( { onClose: () => {} } ) }</div>
+    );
 
     return {
         __esModule: true,
         PanelBody,
         Button,
         Dropdown,
-        ColorPicker:   () => null,
+        ColorPicker:   ( { onChange } ) => (
+            <input className="picker" onInput={ ( e ) => onChange( e.target.value ) } />
+        ),
         RangeControl:  Control,
         SelectControl: Control,
         TextControl:   Control,
@@ -212,5 +217,45 @@ describe( 'a call site whose value carries overrides only', () => {
         reset( host, 'Accent' );
 
         expect( onChange ).toHaveBeenCalledWith( {} );
+    } );
+} );
+
+/**
+ * The built-ins ship uppercase hex and the colour control writes lowercase, so
+ * dialling a token back to the value it already had read as a change: a Reset
+ * link on a row nobody touched, and a stored override that means nothing.
+ * dropStalePairs compares the same colours case-insensitively for the same
+ * reason.
+ */
+describe( 'a colour typed back in the other case', () => {
+    it( 'is not an override', () => {
+        const { host } = mountPreset( { edits: { 'fundkit-accent-soft': QUIET[ 'fundkit-accent-soft' ].toUpperCase() } } );
+
+        expect( QUIET[ 'fundkit-accent-soft' ] ).toMatch( /[a-f]/ );
+        expect( resettable( host ) ).toEqual( [] );
+    } );
+
+    it( 'is cleared back to the value the built-in ships', () => {
+        const { host, onTokens } = mountPreset();
+
+        const picker = row( host, 'Accent soft' ).querySelector( '.picker' );
+        picker.value = QUIET[ 'fundkit-accent-soft' ].toUpperCase();
+        picker.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+
+        expect( onTokens ).toHaveBeenCalled();
+        expect( onTokens.mock.calls[ 0 ][ 0 ][ 'fundkit-accent-soft' ] ).toBe( QUIET[ 'fundkit-accent-soft' ] );
+    } );
+
+    it( 'still tells two different colours apart', () => {
+        const { host } = mountPreset( { edits: { 'fundkit-accent': '#C62828' } } );
+
+        expect( resettable( host ) ).toEqual( [ 'Accent' ] );
+    } );
+
+    /** A font stack is not a colour: its case is the author's. */
+    it( 'leaves a non-colour compared as stored', () => {
+        const { host } = mountPreset( { edits: { 'fundkit-gap': '28PX' } } );
+
+        expect( resettable( host ) ).toEqual( [ 'Block spacing' ] );
     } );
 } );

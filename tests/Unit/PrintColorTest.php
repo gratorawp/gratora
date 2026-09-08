@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FundKit\Tests\Unit;
 
 use FundKit\Campaigns\Styling\Tokens;
+use FundKit\Vendor\Dompdf\Css\Color;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -40,7 +41,8 @@ final class PrintColorTest extends TestCase
     public static function unprintable(): array
     {
         return [
-            'hsl the parser has no branch for' => ['hsl(203 60% 21%)'],
+            'hsl short a channel'              => ['hsl(203 60%)'],
+            'hsl carrying a brace'             => ['hsl(203 60% 21%)}body{color:red'],
             'transparent, which is no ink'     => ['transparent'],
             'a keyword with nothing to inherit from' => ['currentColor'],
             'inherit'                          => ['inherit'],
@@ -54,5 +56,41 @@ final class PrintColorTest extends TestCase
     public function test_a_colour_the_renderer_cannot_read_falls_back(string $value): void
     {
         $this->assertSame(self::FALLBACK, Tokens::printColor($value, self::FALLBACK));
+    }
+
+    /** @return array<string,array{0:string,1:string}> */
+    public static function converted(): array
+    {
+        return [
+            'comma hsl'         => ['hsl(203, 60%, 21%)', '#153d56'],
+            'space hsl'         => ['hsl(203 60% 21%)', '#153d56'],
+            'hsl yellow'        => ['hsl(45, 90%, 60%)', '#f5c73d'],
+            'hsla loses alpha'  => ['hsla(280, 50%, 40%, .5)', '#773399'],
+            'hue below zero'    => ['hsl(-30 100% 50%)', '#ff0080'],
+        ];
+    }
+
+    /**
+     * @dataProvider converted
+     */
+    public function test_an_hsl_accent_reaches_the_page_as_the_colour_it_is(string $value, string $expected): void
+    {
+        $this->assertSame($expected, Tokens::printColor($value, self::FALLBACK));
+    }
+
+    /**
+     * @dataProvider converted
+     */
+    public function test_the_renderer_reads_everything_print_hands_it(string $value): void
+    {
+        $this->assertNotNull(Color::parse(Tokens::printColor($value, self::FALLBACK)));
+    }
+
+    /**
+     * @dataProvider converted
+     */
+    public function test_a_converted_accent_cannot_break_out_of_the_rule(string $value): void
+    {
+        $this->assertSame(0, preg_match('/[^#0-9a-f]/', Tokens::printColor($value, self::FALLBACK)));
     }
 }

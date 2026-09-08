@@ -334,10 +334,14 @@ final class Tokens
      * The same colour in a notation the PDF renderer parses.
      *
      * Dompdf reads 3-, 4-, 6- and 8-digit hex and the rgb()/rgba() functions;
-     * it has no hsl(), and a page has no ink for transparent or for a keyword
-     * that inherits from a box a PDF does not have. sanitize() accepts all of
-     * those for the screen, so the receipt has to make its own decision rather
-     * than dropping every accent that is not plain hex.
+     * hsl() it resolves to nothing, and a page has no ink for transparent or
+     * for a keyword that inherits from a box a PDF does not have. sanitize()
+     * accepts all of those for the screen, so the receipt has to make its own
+     * decision rather than dropping every accent that is not plain hex.
+     *
+     * An hsl() accent is converted rather than admitted: passing it through
+     * would hand the renderer a value it parses to null, so it is rebuilt as
+     * the hex of the same colour.
      *
      * @since 1.0.0
      */
@@ -345,11 +349,11 @@ final class Tokens
     {
         $v = trim($value);
 
-        // As tight as sanitiseValue's own classes: the value lands inside a
-        // <style> block, so neither pattern may carry ';', '{' or '}'. hsl is
-        // left out on purpose: print falls back rather than widen this.
+        // As tight as sanitiseValue's own classes: a pass-through value lands
+        // inside a <style> block, so neither pattern may carry ';', '{' or '}'.
         if (preg_match('/^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $v) === 1) return $v;
         if (preg_match('/^rgba?\(\s*[0-9.,\s%\/-]+\s*\)$/i', $v) === 1) return $v;
+        if (preg_match('/^hsla?\(\s*[0-9.,\s%\/-]+\s*\)$/i', $v) === 1) return Ink::hex($v) ?? $fallback;
 
         return $fallback;
     }
