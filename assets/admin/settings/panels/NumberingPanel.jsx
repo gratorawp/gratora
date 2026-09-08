@@ -12,7 +12,6 @@ import { notify } from '../../_shared/notify';
 const SCOPES = [
     { key: 'donation', label: __( 'Donation', 'fundraising-toolkit' ) },
     { key: 'receipt',  label: __( 'Receipt', 'fundraising-toolkit' ) },
-    { key: 'refund',   label: __( 'Refund', 'fundraising-toolkit' ) },
 ];
 
 /**
@@ -90,7 +89,6 @@ export default function NumberingPanel( { s , active } ) {
     const rawPrefix = {
         donation: String( s.value( 'prefixes.donation', 'DON' ) ),
         receipt:  String( s.value( 'prefixes.receipt', 'REC' ) ),
-        refund:   String( s.value( 'prefixes.refund', 'REF' ) ),
     };
     // The preview shows what would be minted, so a value the generator would
     // not accept falls back to the one it does rather than being drawn.
@@ -102,7 +100,6 @@ export default function NumberingPanel( { s , active } ) {
     const livePrefix = {
         donation: asRefToken( rawPrefix.donation, 'DONATION' ),
         receipt:  asRefToken( rawPrefix.receipt,  'RECEIPT' ),
-        refund:   asRefToken( rawPrefix.refund,   'REFUND' ),
     };
 
     // Saved format drives the counter card: setting a counter is an immediate
@@ -117,7 +114,6 @@ export default function NumberingPanel( { s , active } ) {
     const savedPrefix = {
         donation: String( saved.prefixes?.donation ?? 'DON' ),
         receipt:  String( saved.prefixes?.receipt ?? 'REC' ),
-        refund:   String( saved.prefixes?.refund ?? 'REF' ),
     };
 
     // Live counters (next value per scope) live outside the settings option, so
@@ -186,7 +182,7 @@ export default function NumberingPanel( { s , active } ) {
         <div className="fundkit-panel">
             <Card
                 title={ __( 'Reference numbering', 'fundraising-toolkit' ) }
-                sub={ __( 'How donations, receipts, and refunds are numbered. References are gap-free and increment automatically.', 'fundraising-toolkit' ) }
+                sub={ __( 'How donations and receipts are numbered. References are gap-free and increment automatically.', 'fundraising-toolkit' ) }
                 edited={ s.isDirty }
             >
                 <div className="fundkit-ref-previews">
@@ -225,18 +221,6 @@ export default function NumberingPanel( { s , active } ) {
                         maxLength={ 8 }
                         placeholder="REC"
                         bind={ s.bind( 'prefixes.receipt', 'REC' ) }
-                    />
-                </FormRow>
-
-                <FormRow
-                    label={ __( 'Refund prefix', 'fundraising-toolkit' ) }
-                    help={ __( 'Leads every refund reference.', 'fundraising-toolkit' ) }
-                >
-                    <TokenInput
-                        value={ rawPrefix.refund }
-                        maxLength={ 8 }
-                        placeholder="REF"
-                        bind={ s.bind( 'prefixes.refund', 'REF' ) }
                     />
                 </FormRow>
 

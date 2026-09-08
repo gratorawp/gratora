@@ -75,7 +75,7 @@ final class ReferenceCounterSeedingTest extends IntegrationTestCase
     {
         $this->settings(['reset_yearly' => true]);
 
-        $this->assertSame(1, $this->gen()->peekNext('refund'), 'seeding must not invent a history that is not there');
+        $this->assertSame(1, $this->gen()->peekNext('test_receipt'), 'seeding must not invent a history that is not there');
     }
 
     /**

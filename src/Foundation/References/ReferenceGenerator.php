@@ -12,7 +12,7 @@ use RuntimeException;
 /**
  * Generates human-readable, monotonically-increasing references like DON-2026-00001.
  *
- * Per-scope counter (donation / receipt / refund), atomically incremented via
+ * Per-scope counter (donation / receipt), atomically incremented via
  * MySQL LAST_INSERT_ID() - gap-free and race-safe. Configurable via the
  * fundkit_reference_settings option. reset_yearly (default true) starts a fresh
  * counter each Jan 1, which requires include_year to tell the two sequences
@@ -28,7 +28,6 @@ final class ReferenceGenerator
         'prefixes' => [
             'donation'     => 'DON',
             'receipt'      => 'REC',
-            'refund'       => 'REF',
         ],
         'padding'      => 5,
         'include_year' => true,
@@ -172,7 +171,6 @@ final class ReferenceGenerator
         $labels = [
             'donation'     => __('Donation prefix', 'fundraising-toolkit'),
             'receipt'      => __('Receipt prefix', 'fundraising-toolkit'),
-            'refund'       => __('Refund prefix', 'fundraising-toolkit'),
         ];
 
         if (array_key_exists('separator', $input) && ! self::isToken((string) $input['separator'])) {

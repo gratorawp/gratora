@@ -126,6 +126,20 @@ final class ClientIp
     }
 
     /**
+     * Whether the site can act on this entry as written. The panel counts what
+     * is stored; this is what the resolver keeps, and an entry only one of them
+     * recognises leaves every visitor sharing one spam bucket with nothing said.
+     *
+     * @since 1.0.0
+     */
+    public static function understands(string $entry): bool
+    {
+        $entry = strtolower(trim($entry));
+
+        return $entry !== '' && (isset(self::KEYWORDS[$entry]) || self::isValidRange($entry));
+    }
+
+    /**
      * What is sitting in front of this site, if the site has not said.
      *
      * Returns the keyword that would fix it, so the answer an admin is given

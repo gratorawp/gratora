@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Settings;
 
+use FundKit\Foundation\Http\ClientIp;
 use FundKit\Analytics\ErrorLog;
 use FundKit\Campaigns\Styling\StylePresets;
 use FundKit\Currency\BaseCurrencyLock;
@@ -543,6 +544,30 @@ final class SettingsService
      *
      * @since 1.0.0
      */
+    /**
+     * The panel counts what is stored and the resolver keeps only what it can
+     * parse, so an entry only one of them recognises turned the warning off
+     * while every visitor still shared one spam bucket.
+     *
+     * @since 1.0.0
+     */
+    private static function assertTrustedProxies(mixed $ranges): void
+    {
+        foreach (is_array($ranges) ? $ranges : [] as $range) {
+            if (! is_string($range) || trim($range) === '') {
+                continue;
+            }
+
+            if (! ClientIp::understands($range)) {
+                throw new InvalidArgumentException(esc_html(sprintf(
+                    /* translators: %s: the entry as the admin typed it. */
+                    __('"%s" is not a network this site can recognise. Give one address or range per line, or a name such as cloudflare.', 'fundraising-toolkit'),
+                    $range
+                )));
+            }
+        }
+    }
+
     private static function assertPurposeKeys(mixed $purposes): void
     {
         $seen = [];
@@ -694,6 +719,10 @@ final class SettingsService
 
         if ($group === 'numbering') {
             ReferenceGenerator::assertTokens($input);
+        }
+
+        if ($group === 'privacy' && array_key_exists('trusted_proxies', $input)) {
+            self::assertTrustedProxies($input['trusted_proxies']);
         }
 
         if ($group === 'consents' && array_key_exists('purposes', $input)) {

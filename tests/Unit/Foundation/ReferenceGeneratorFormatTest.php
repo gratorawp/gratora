@@ -29,7 +29,9 @@ final class ReferenceGeneratorFormatTest extends TestCase
         $this->assertSame('DON-2026-00001', $this->gen->format('donation', 2026, 1));
         $this->assertSame('DON-2026-00042', $this->gen->format('donation', 2026, 42));
         $this->assertSame('REC-2026-00007',  $this->gen->format('receipt', 2026, 7));
-        $this->assertSame('REF-2026-00099',  $this->gen->format('refund', 2026, 99));
+        // A scope with no configured prefix falls back to its own name, which
+        // is what the test-mode scopes rely on.
+        $this->assertSame('TEST_DONATION-2026-00099', $this->gen->format('test_donation', 2026, 99));
     }
 
     public function test_custom_prefix_per_scope(): void

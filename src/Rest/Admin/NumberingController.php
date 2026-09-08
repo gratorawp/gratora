@@ -22,7 +22,7 @@ use WP_REST_Server;
 final class NumberingController
 {
     private const NAMESPACE = 'fundkit/v1';
-    private const SCOPES = ['donation', 'receipt', 'refund'];
+    private const SCOPES = ['donation', 'receipt'];
 
     /** @since 1.0.0 */
     public function __construct(private ReferenceGenerator $references)

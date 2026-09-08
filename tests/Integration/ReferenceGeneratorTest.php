@@ -32,7 +32,7 @@ final class ReferenceGeneratorTest extends IntegrationTestCase
         $gen = $this->generatorAt('2026-05-13');
         $this->assertSame('DON-2026-00001', $gen->next('donation'));
         $this->assertSame('REC-2026-00001',  $gen->next('receipt'));
-        $this->assertSame('REF-2026-00001',  $gen->next('refund'));
+        $this->assertSame('TEST_DONATION-2026-00001', $gen->next('test_donation'));
         $this->assertSame('DON-2026-00002', $gen->next('donation'));  // donation continues from 1
         $this->assertSame('REC-2026-00002',  $gen->next('receipt'));
     }
