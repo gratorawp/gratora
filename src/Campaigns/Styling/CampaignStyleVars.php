@@ -55,6 +55,7 @@ final class CampaignStyleVars
         // filled panel reversing white out of a pale accent.
         $css .= Ink::declarationsFor((string) ($tokens['fundkit-accent'] ?? ''));
         $css .= Ink::softDeclarations($tokens);
+        $css .= Ink::fieldDeclarations($tokens);
         $css .= self::coverImage($campaign);
 
         return self::$cache[$id] = $css;

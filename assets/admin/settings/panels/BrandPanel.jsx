@@ -268,6 +268,7 @@ export function PresetEditor( { preset, resetDefaults, isDefault, onRename, onTo
 const GROUNDS = [
     [ 'fundkit-bg',      () => __( 'Background', 'fundraising-toolkit' ) ],
     [ 'fundkit-bg-soft', () => __( 'Soft background', 'fundraising-toolkit' ) ],
+    [ 'fundkit-field-bg', () => __( 'Field background', 'fundraising-toolkit' ) ],
     [ 'fundkit-accent',  () => __( 'Accent', 'fundraising-toolkit' ) ],
 ];
 

@@ -96,6 +96,27 @@ final class Ink
     }
 
     /**
+     * The fields keep a ground of their own so a coloured page does not paint
+     * the boxes a donor types in. The page ink is chosen against --fundkit-bg
+     * and knows nothing about that one, so on a dark page it is white and the
+     * fields are still white.
+     *
+     * @param array<string,string> $tokens
+     *
+     * @since 1.0.0
+     */
+    public static function fieldDeclarations(array $tokens): string
+    {
+        $on = self::on((string) ($tokens['fundkit-field-bg'] ?? ''));
+        if ($on === null) {
+            return '';
+        }
+
+        return '--fundkit-on-field:' . $on[0] . ';'
+            . '--fundkit-on-field-muted:' . $on[1] . ';';
+    }
+
+    /**
      * Whether ink clears WCAG AA body text against a ground. Unreadable colours
      * yield false, so the caller falls back to measured ink.
      *

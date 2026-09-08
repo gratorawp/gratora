@@ -372,6 +372,7 @@
         border-radius: var(--fundkit-radius-sm);
         padding: 0 12px;
         background: var(--fundkit-field-bg);
+        color: var(--fundkit-on-field, var(--fundkit-text));
 
         &:focus-within {
             border-color: var(--fundkit-focus-ring, var(--fundkit-accent));
@@ -435,6 +436,7 @@
     border-radius: var(--fundkit-radius-sm);
     padding: 0 12px;
     background: var(--fundkit-field-bg);
+    color: var(--fundkit-on-field, var(--fundkit-text));
 
     &:focus-within {
         border-color: var(--fundkit-focus-ring, var(--fundkit-accent));
@@ -510,7 +512,7 @@
         padding: 10px 12px;
         font-size: var(--fundkit-type-size, 15px);
         background: var(--fundkit-field-bg);
-        color: var(--fundkit-text);
+        color: var(--fundkit-on-field, var(--fundkit-text));
         font-family: inherit;
         line-height: 1.4;
 
@@ -852,6 +854,7 @@
         border: calc(var(--fundkit-stroke, 1px) * 2) solid var(--fundkit-border);
         border-radius: var(--fundkit-radius-sm);
         background: var(--fundkit-field-bg);
+        color: var(--fundkit-on-field, var(--fundkit-text));
         cursor: pointer;
         transition: border-color .15s, background .15s;
 
@@ -1016,6 +1019,7 @@
         border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
         border-radius: var(--fundkit-radius-sm);
         background: var(--fundkit-field-bg);
+        color: var(--fundkit-on-field, var(--fundkit-text));
         cursor: pointer;
 
         input[type="checkbox"] {
@@ -1075,6 +1079,7 @@
             border-radius: var(--fundkit-switcher-radius, var(--fundkit-radius-sm, 8px));
             font: inherit;
             background: var(--fundkit-field-bg);
+            color: var(--fundkit-on-field, var(--fundkit-text));
             cursor: pointer;
         }
 
@@ -1114,6 +1119,10 @@
     textarea {
         width: 100%;
         padding: 10px 12px;
+        // No fill of its own left it on the user agent's white while the ink
+        // followed the page, so a dark brand wrote white on white.
+        background: var(--fundkit-field-bg);
+        color: var(--fundkit-on-field, var(--fundkit-text));
         border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
         border-radius: var(--fundkit-radius-sm);
         font: inherit;
@@ -1408,7 +1417,7 @@
         border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
         border-radius: var(--fundkit-radius-sm, 8px);
         background: var(--fundkit-field-bg);
-        color: var(--fundkit-text);
+        color: var(--fundkit-on-field, var(--fundkit-text));
         font: inherit;
         line-height: 1.4;
         cursor: pointer;
@@ -1445,6 +1454,7 @@
         padding: 4px;
         list-style: none;
         background: var(--fundkit-field-bg);
+        color: var(--fundkit-on-field, var(--fundkit-text));
         border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
         border-radius: var(--fundkit-radius-sm, 8px);
         box-shadow: 0 8px 24px rgba(15, 23, 42, .08);

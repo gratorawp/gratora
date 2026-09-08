@@ -164,7 +164,8 @@ final class PortalShortcode extends HookProvider
         if (empty($vars)) return '';
 
         $derived = Ink::declarationsFor((string) ($tokens['fundkit-accent'] ?? ''))
-            . Ink::softDeclarations($tokens);
+            . Ink::softDeclarations($tokens)
+            . Ink::fieldDeclarations($tokens);
 
         return '.fundkit-donor-portal{' . implode(' ', $vars) . $derived . '}';
     }

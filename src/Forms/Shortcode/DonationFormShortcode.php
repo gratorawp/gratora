@@ -325,6 +325,7 @@ final class DonationFormShortcode extends HookProvider
         // org's to choose, so what is drawn on them cannot assume a colour.
         $out .= Ink::declarationsFor((string) ($tokens['fundkit-accent'] ?? ''));
         $out .= Ink::softDeclarations($tokens);
+        $out .= Ink::fieldDeclarations($tokens);
 
         return $out;
     }

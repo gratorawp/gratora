@@ -122,4 +122,25 @@ final class InkFollowsTheGroundTest extends IntegrationTestCase
     {
         $this->assertArrayNotHasKey('fundkit-button-radius', \FundKit\Campaigns\Styling\Tokens::defaults());
     }
+
+    /**
+     * The fields keep a ground of their own so a coloured page does not paint
+     * the boxes a donor types in. The page ink knows nothing about that ground:
+     * on a dark page it turns white, and the fields are still white.
+     */
+    public function test_a_dark_page_does_not_leave_white_ink_in_a_white_field(): void
+    {
+        $css = $this->css(['fundkit-bg' => '#0f172a']);
+
+        $this->assertStringContainsString('--fundkit-text:#ffffff;', $css);
+        $this->assertStringContainsString('--fundkit-on-field:#10162a;', $css);
+    }
+
+    public function test_a_field_ground_the_org_darkened_gets_light_ink(): void
+    {
+        $this->assertStringContainsString(
+            '--fundkit-on-field:#ffffff;',
+            $this->css(['fundkit-field-bg' => '#101828'])
+        );
+    }
 }
