@@ -145,6 +145,10 @@ final class GatewayManager
      */
     public function optionsMetaFor(array $allowed, ?bool $test = null): array
     {
+        // One mode for the whole answer: isOn defaults internally, and the rows
+        // below have to describe the same mode it admitted.
+        $test ??= TestMode::siteWide();
+
         $enabledIds = [];
         foreach ($this->gateways as $id => $_g) {
             if ($this->isOn($id, $test)) {
@@ -164,9 +168,17 @@ final class GatewayManager
                 'id'          => $id,
                 'label'       => $g->label(),
                 'description' => $g->description(),
-                'currencies'  => array_values(array_map('strtoupper', $g->currencies())),
+                'currencies'  => array_values(array_map('strtoupper', $g instanceof ModeCredentialed
+                    ? $g->currenciesInMode($test)
+                    : $g->currencies())),
                 'countries'   => array_values(array_map('strtoupper', $g->countries())),
-                'frequencies' => array_values($g->frequencies()),
+                // The donor runtime filters the visible gateways on this as the
+                // frequency changes, so a mode-blind answer offered PayPal for
+                // a monthly donation on a test-mode form and the donor was
+                // refused at submit.
+                'frequencies' => array_values($g instanceof ModeCredentialed
+                    ? $g->frequenciesInMode($test)
+                    : $g->frequencies()),
             ];
         }
         return $out;

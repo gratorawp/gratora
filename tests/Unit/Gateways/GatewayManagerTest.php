@@ -8,6 +8,7 @@ use FundKit\Donations\Donation;
 use FundKit\Gateways\GatewayConfirmResult;
 use FundKit\Gateways\GatewayIntentResult;
 use FundKit\Gateways\GatewayManager;
+use FundKit\Gateways\ModeCredentialed;
 use FundKit\Gateways\PaymentGateway;
 use FundKit\Gateways\RefundResult;
 use FundKit\Gateways\WebhookOutcome;
@@ -18,7 +19,7 @@ use WP_REST_Request;
 /**
  * Helper test double - a gateway whose support set we control inline.
  */
-final class FakeGateway implements PaymentGateway
+class FakeGateway implements PaymentGateway
 {
     public function __construct(
         private string $id,
@@ -43,6 +44,21 @@ final class FakeGateway implements PaymentGateway
     public function refund(Donation $d, int $amountCents, ?string $reason = null): RefundResult
     {
         return new RefundResult(success: true, gateway_refund_id: 'fake_' . $d->id, amount_cents: $amountCents);
+    }
+}
+
+/**
+ * A gateway holding live credentials and no sandbox ones: it can charge in both
+ * modes, but only the live one carries a subscription (a live webhook id with
+ * no sandbox counterpart is exactly PayPal's case).
+ */
+final class FakeModeGateway extends FakeGateway implements ModeCredentialed
+{
+    public function chargesInMode(bool $test): bool { return true; }
+    public function currenciesInMode(bool $test): array { return ['*']; }
+    public function frequenciesInMode(bool $test): array
+    {
+        return $test ? ['one_time'] : ['one_time', 'recurring'];
     }
 }
 
@@ -250,5 +266,36 @@ final class GatewayManagerTest extends TestCase
         $gm->register(new FakeGateway('usd_only', ['one_time'], ['card'], ['*'], ['USD']));
 
         $this->assertSame(['offline'], array_column($gm->optionsMetaFor(['usd_only', 'offline']), 'id'));
+    }
+
+    /**
+     * The donor runtime filters the visible gateways on this array as the donor
+     * changes frequency. Built mode-blind, it offered a gateway for a monthly
+     * donation that its mode cannot take, and the donor who picked it was
+     * refused at submit with "That payment method is not available for this
+     * form" on a form the author had put in test mode.
+     */
+    public function test_the_options_a_test_mode_form_offers_are_the_test_mode_ones(): void
+    {
+        $GLOBALS['_fundkit_test_options'] = [];
+
+        $gm = new GatewayManager();
+        $gm->register(new FakeModeGateway('modal', ['one_time', 'recurring'], ['card'], ['*'], ['*']));
+
+        $row = $gm->optionsMetaFor([], true)[0];
+
+        $this->assertSame(['one_time'], $row['frequencies']);
+    }
+
+    public function test_a_live_form_still_gets_the_live_ones(): void
+    {
+        $GLOBALS['_fundkit_test_options'] = [];
+
+        $gm = new GatewayManager();
+        $gm->register(new FakeModeGateway('modal', ['one_time', 'recurring'], ['card'], ['*'], ['*']));
+
+        $row = $gm->optionsMetaFor([], false)[0];
+
+        $this->assertSame(['one_time', 'recurring'], $row['frequencies']);
     }
 }
