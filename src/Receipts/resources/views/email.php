@@ -9,7 +9,9 @@ defined('ABSPATH') || exit;
  * @var \FundKit\Donations\Donation $donation
  * @var string                   $org_name
  * @var string                   $download_url
+ * @var string                   $accent       the campaign's accent, print-safe
  */
+$accent = (string) ($accent ?? '#211d3f');
 $resolvedName = trim((string) ($donor_name ?? ''));
 $donorFirst   = $resolvedName !== '' ? explode(' ', $resolvedName)[0] : '';
 $amountWithCurrency = Money::format((int) $donation->amount_cents, (string) $donation->currency);
@@ -58,7 +60,7 @@ $greeting = $donorFirst !== ''
 
 <p style="margin-top:24px; font-size:13px; color:#555">
     <?php esc_html_e('Lost the attachment?', 'fundraising-toolkit'); ?>
-    <a href="<?php echo esc_url($download_url); ?>" style="color:#2271b1"><?php esc_html_e('Re-download your receipt', 'fundraising-toolkit'); ?></a>
+    <a href="<?php echo esc_url($download_url); ?>" style="color:<?php echo esc_attr($accent); ?>"><?php esc_html_e('Re-download your receipt', 'fundraising-toolkit'); ?></a>
     <?php esc_html_e('(link expires in 30 days).', 'fundraising-toolkit'); ?>
 </p>
 

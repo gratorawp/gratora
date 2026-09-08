@@ -12,15 +12,17 @@ defined('ABSPATH') || exit;
  * @var array  $months         list of ['label','count','amount'] rows
  * @var array  $stats          list of ['label','value'] pairs (pre-formatted)
  * @var string $generated_date formatted generation date
+ * @var string $accent     the org or campaign accent, print-safe
  */
+$accent = (string) ($accent ?? '#211d3f');
 ?>
 <html><head><meta charset="utf-8"><style>
 body{font-family:'DejaVu Sans',sans-serif;color:#111;font-size:13px}
 .eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#666;margin:0 0 2px}
-h1{margin:0 0 2px;font-size:24px;line-height:1.15}
+h1{margin:0 0 2px;font-size:24px;line-height:1.15;color:<?php echo esc_attr($accent); ?>}
 .range{font-size:12px;color:#666;margin:0 0 26px}
 .raised{font-size:34px;font-weight:700;margin:0 0 24px}
-table.stats{width:100%;border-collapse:collapse;border-top:1px solid #111;margin-bottom:30px}
+table.stats{width:100%;border-collapse:collapse;border-top:2px solid <?php echo esc_attr($accent); ?>;margin-bottom:30px}
 table.stats td{padding:14px 6px;border-bottom:1px solid #eee;vertical-align:top;width:33%}
 .stat-label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#666;margin:0 0 4px}
 .stat-value{font-size:19px;font-weight:700}

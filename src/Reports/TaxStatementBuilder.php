@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FundKit\Reports;
 
+use FundKit\Campaigns\Styling\Tokens;
+use FundKit\Campaigns\Styling\CampaignStyleResolver;
 use FundKit\Donations\DonationRepository;
 use FundKit\Donors\Donor;
 use FundKit\Donors\DonorService;
@@ -58,6 +60,7 @@ final class TaxStatementBuilder
         $donorAddr  = $this->donors->decryptAddress($donor);
 
         $html = View::load('Receipts.donor-tax-statement', [
+            'accent' => Tokens::printColor((new CampaignStyleResolver())->accentFor(null), '#211d3f'),
             'year'                => $year,
             'org_name'            => $orgName,
             'org_address_lines'   => $this->orgAddressLines($org),

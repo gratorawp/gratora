@@ -10,13 +10,15 @@ defined('ABSPATH') || exit;
  * @var string $donor_name donor display name
  * @var array  $lines      list of ['date','reference','currency','amount'] (pre-formatted, raw)
  * @var array  $totals     list of ['currency','amount'] (pre-formatted), one per currency
+ * @var string $accent     the org or campaign accent, print-safe
  */
+$accent = (string) ($accent ?? '#211d3f');
 ?>
 <html><head><meta charset="utf-8"><style>
 body{font-family:'DejaVu Sans',sans-serif;color:#111;font-size:13px;padding:24px}
-h1{margin:0 0 4px;font-size:22px}h2{font-size:14px;color:#666;margin:0 0 24px;font-weight:normal}
+h1{margin:0 0 4px;font-size:22px;color:<?php echo esc_attr($accent); ?>}h2{font-size:14px;color:#666;margin:0 0 24px;font-weight:normal}
 table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px 6px;border-bottom:1px solid #eee;text-align:left}
-tfoot td{font-weight:700;border-top:2px solid #111;border-bottom:0}
+tfoot td{font-weight:700;border-top:2px solid <?php echo esc_attr($accent); ?>;border-bottom:0}
 .total{font-size:18px;margin-top:18px;text-align:right}
 </style></head><body>
 <h1><?php echo esc_html(sprintf(/* translators: %d: year */ __('Annual donation statement %d', 'fundraising-toolkit'), $year)); ?></h1>

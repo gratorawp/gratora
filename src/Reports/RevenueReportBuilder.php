@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FundKit\Reports;
 
+use FundKit\Campaigns\Styling\Tokens;
+use FundKit\Campaigns\Styling\CampaignStyleResolver;
 use FundKit\Exports\RevenueExporter;
 use FundKit\Foundation\Helpers\Money;
 use FundKit\Foundation\Helpers\View;
@@ -55,6 +57,7 @@ final class RevenueReportBuilder
         $orgName = OrgProfile::load()['name'];
 
         $html = View::load('Receipts.revenue-report', [
+            'accent' => Tokens::printColor((new CampaignStyleResolver())->accentFor(null), '#211d3f'),
             'org_name'       => $orgName,
             'year'           => (string) $year,
             'total'          => Money::format($totalCents, $currency),

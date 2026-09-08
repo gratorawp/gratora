@@ -14,11 +14,13 @@ defined('ABSPATH') || exit;
  * @var array  $totals              list of ['label','amount'] (one per currency)
  * @var string $org_disclaimer      optional org receipt disclaimer to append, '' when none
  * @var string $generated_date      formatted generation date
+ * @var string $accent     the org or campaign accent, print-safe
  */
+$accent = (string) ($accent ?? '#211d3f');
 ?>
 <html><head><meta charset="utf-8"><style>
 body{font-family:'DejaVu Serif',serif;color:#000;font-size:12.5px;line-height:1.5}
-.masthead{border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:18px}
+.masthead{border-bottom:2px solid <?php echo esc_attr($accent); ?>;padding-bottom:10px;margin-bottom:18px}
 .org-name{font-size:17px;font-weight:700;margin:0 0 3px}
 .org-meta{font-size:11.5px;color:#222;margin:0;white-space:pre-line}
 .ein{font-size:11.5px;color:#222;margin:4px 0 0}

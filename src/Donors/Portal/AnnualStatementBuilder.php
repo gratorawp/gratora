@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FundKit\Donors\Portal;
 
+use FundKit\Campaigns\Styling\Tokens;
+use FundKit\Campaigns\Styling\CampaignStyleResolver;
 use FundKit\Donations\Donation;
 use FundKit\Donations\DonationQueries;
 use FundKit\Donations\Refund;
@@ -94,6 +96,7 @@ final class AnnualStatementBuilder
         if ($donorName === '') $donorName = __('Friend', 'fundraising-toolkit');
 
         $html = View::loadRelative(__DIR__, 'views/annual-statement', [
+            'accent' => Tokens::printColor((new CampaignStyleResolver())->accentFor(null), '#211d3f'),
             'year'       => $year,
             'org_name'   => $orgName,
             'donor_name' => $donorName,

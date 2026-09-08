@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace FundKit\Receipts;
 
 use FundKit\Analytics\ErrorLog;
+use FundKit\Campaigns\Styling\Tokens;
+use FundKit\Campaigns\Styling\CampaignStyleResolver;
 use FundKit\Analytics\EventRecorder;
 use FundKit\Async\AsyncDispatcher;
 use FundKit\Campaigns\Campaign;
@@ -438,6 +440,10 @@ final class ReceiptIssuer
             $tags['{' . $k . '}'] = (string) $v;
         }
 
+        // The campaign's accent, the way the receipt PDF resolves it: a donor
+        // who gave on a branded page should not get admin blue back.
+        $accent = Tokens::printColor((new CampaignStyleResolver())->accentFor($ctx->campaign), '#211d3f');
+
         $subject = (string) ($template['subject'] ?? '');
         $subject = strtr($subject, $tags);
         if (trim($subject) === '') {
@@ -464,8 +470,9 @@ final class ReceiptIssuer
             // don't have to remember to include it. wp_kses_post would strip
             // the anchor target so build it with explicit safe markup.
             $body .= sprintf(
-                '<p><a href="%s">%s</a></p>',
+                '<p><a href="%s" style="color:%s">%s</a></p>',
                 esc_url($downloadUrl),
+                esc_attr($accent),
                 esc_html__('Download receipt', 'fundraising-toolkit')
             );
         } else {
@@ -475,6 +482,7 @@ final class ReceiptIssuer
                 'donation'     => $ctx->donation,
                 'org_name'     => $orgName,
                 'download_url' => $downloadUrl,
+                'accent'       => $accent,
             ]);
         }
 

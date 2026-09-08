@@ -13,10 +13,13 @@ defined('ABSPATH') || exit;
  * @var int    $bar_width      progress width clamped to 0..100 for the CSS bar
  * @var array  $stats          list of ['label','value'] pairs (pre-formatted)
  * @var string $generated_date formatted generation date
+ * @var string $accent     the org or campaign accent, print-safe
  */
+$accent = (string) ($accent ?? '#211d3f');
 ?>
 <html><head><meta charset="utf-8"><style>
 body{font-family:'DejaVu Sans',sans-serif;color:#111;font-size:13px}
+h1{color:<?php echo esc_attr($accent); ?>}
 .eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#666;margin:0 0 2px}
 h1{margin:0 0 2px;font-size:24px;line-height:1.15}
 .range{font-size:12px;color:#666;margin:0 0 26px}
@@ -28,7 +31,7 @@ table.stats{width:100%;border-collapse:collapse;border-top:1px solid #111}
 table.stats td{padding:14px 6px;border-bottom:1px solid #eee;vertical-align:top;width:33%}
 .stat-label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#666;margin:0 0 4px}
 .stat-value{font-size:19px;font-weight:700}
-.footer{margin-top:34px;padding-top:10px;border-top:1px solid #eee;font-size:11px;color:#888}
+.footer{margin-top:34px;padding-top:10px;border-top:2px solid <?php echo esc_attr($accent); ?>;font-size:11px;color:#888}
 </style></head><body>
 <p class="eyebrow"><?php echo esc_html($org_name); ?></p>
 <h1><?php echo esc_html($campaign_title); ?></h1>

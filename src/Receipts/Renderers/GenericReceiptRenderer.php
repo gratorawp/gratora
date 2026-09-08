@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FundKit\Receipts\Renderers;
 
+use FundKit\Campaigns\Campaign;
+use FundKit\Campaigns\Styling\CampaignStyleResolver;
 use FundKit\Campaigns\Styling\StylePresets;
 use FundKit\Campaigns\Styling\Tokens;
 use FundKit\Donations\Refund;
@@ -57,7 +59,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     /** @since 1.0.0 */
     public function render(ReceiptContext $ctx): string
     {
-        $template       = $this->loadTemplate();
+        $template       = $this->loadTemplate($ctx->campaign);
         $amountDisplay  = Money::format($ctx->donation->amount_cents, $ctx->donation->currency);
 
         // When part of the payment bought something, the prose is about the
@@ -125,7 +127,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
      *
      * @since 1.0.0
      */
-    private function loadTemplate(): array
+    private function loadTemplate(?Campaign $campaign = null): array
     {
         $stored = get_option('fundkit_receipt_settings', []);
         if (! is_array($stored)) $stored = [];
@@ -148,9 +150,10 @@ final class GenericReceiptRenderer implements ReceiptRenderer
         $logoId  = (int) ($stored['logo_attachment_id'] ?? 0);
         $logoUrl = $logoId > 0 ? (string) wp_get_attachment_image_url($logoId, 'medium') : '';
 
-        // Accent color from the org's default brand preset.
-        $brandTokens = StylePresets::tokensFor(StylePresets::defaultId());
-        $accent      = (string) ($brandTokens['fundkit-accent'] ?? '#211d3f');
+        // The campaign's own accent, so the receipt looks like the page the
+        // donation was made on. The org default stands in when there is no
+        // campaign behind the donation.
+        $accent = (new CampaignStyleResolver())->accentFor($campaign);
 
         return [
             // Absent means never set, so the default applies; an empty string

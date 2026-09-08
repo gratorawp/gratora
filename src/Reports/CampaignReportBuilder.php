@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FundKit\Reports;
 
+use FundKit\Campaigns\Styling\Tokens;
+use FundKit\Campaigns\Styling\CampaignStyleResolver;
 use FundKit\Campaigns\Campaign;
 use FundKit\Campaigns\CampaignMetricsService;
 use FundKit\Foundation\Helpers\Money;
@@ -39,6 +41,7 @@ final class CampaignReportBuilder
         $orgName = OrgProfile::load()['name'];
 
         $html = View::load('Receipts.campaign-report', [
+            'accent' => Tokens::printColor((new CampaignStyleResolver())->accentFor($campaign), '#211d3f'),
             'org_name'       => $orgName,
             'campaign_title' => (string) $campaign->title,
             'range_label'    => $this->rangeLabel($range),

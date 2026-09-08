@@ -20,6 +20,14 @@ final class PdfBuilder
     /** @since 1.0.0 */
     public function fromHtml(string $html, array $options = []): string
     {
+        /**
+         * The document as markup, before Dompdf turns it into bytes nothing can
+         * read back. The one seam an add-on has for the printed output.
+         *
+         * @since 1.0.0
+         */
+        $html = (string) apply_filters('fundkit.pdf.html', $html, $options);
+
         $opts = new Options();
         $opts->setTempDir($this->ensureTmpDir());
         $opts->setFontDir($this->ensureTmpDir() . '/fonts');
