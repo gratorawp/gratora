@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
 
+use FundKit\Rest\Paging;
 use FundKit\Analytics\ErrorLog;
 use FundKit\Analytics\Event;
 use FundKit\Async\AsyncDispatcher;
@@ -195,7 +196,7 @@ final class ToolsController
      */
     public function log(\WP_REST_Request $request): WP_REST_Response
     {
-        $page    = max(1, (int) $request['page']);
+        $page    = Paging::page($request['page'] ?? null);
         $perPage = max(1, min(100, (int) $request['per_page']));
         $source  = self::logSource((string) $request['source']);
         $failed  = (string) $request['status'] === 'failed';

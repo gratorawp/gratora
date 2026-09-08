@@ -241,7 +241,7 @@ final class DonorsController
         $perPage = (int) $request['per_page'];
         $result  = $this->metrics->eventsPage(
             (int) $donor->id,
-            (int) $request['page'],
+            Paging::page($request['page'] ?? null),
             $perPage,
             (string) $request['order'],
         );

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FundKit\Rest\Admin;
 
+use FundKit\Rest\Paging;
 use FundKit\Campaigns\Campaign;
 use FundKit\Campaigns\CampaignRepository;
 use FundKit\Donations\Donation;
@@ -162,7 +163,7 @@ final class RecurringController
         ];
 
         $perPage = (int) $request['per_page'];
-        $page    = (int) $request['page'];
+        $page    = Paging::page($request['page'] ?? null);
 
         $total = $this->plans->countAdmin($args);
         $rows  = $this->plans->listAdmin($args, [

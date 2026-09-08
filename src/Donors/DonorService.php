@@ -24,6 +24,16 @@ use Throwable;
 /** @since 1.0.0 */
 final class DonorService
 {
+    /**
+     * Ids one search may resolve to. The result goes into a single IN() list,
+     * and a two-letter term typed into a box that queries on every keystroke
+     * matches most of a large donor table, so the compiled statement runs to
+     * megabytes.
+     *
+     * @since 1.0.0
+     */
+    public const SEARCH_MATCH_CAP = 1000;
+
     /** @since 1.0.0 */
     public function __construct(
         private DonorRepository $donors,
@@ -937,6 +947,10 @@ final class DonorService
                     $q->orWhere('id', (int) $term);
                 }
             })
+            // Ordered, not just capped: the callers page over these ids, and an
+            // unordered truncation would make page 2 disagree with page 1.
+            ->orderBy('id', 'ASC')
+            ->limit(self::SEARCH_MATCH_CAP)
             ->getAll();
 
         return array_map(static fn ($r): int => (int) (is_array($r) ? $r['id'] : $r->id), $rows);
