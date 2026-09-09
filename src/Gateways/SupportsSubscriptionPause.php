@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways;
+namespace Gratora\Gateways;
 
 /**
  * Marks gateways that support pause and resume. SubscriptionAware alone does not guarantee this

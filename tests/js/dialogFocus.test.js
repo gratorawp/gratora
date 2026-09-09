@@ -1,5 +1,5 @@
 /**
- * Every FundKit modal claims the screen with aria-modal="true" but never took
+ * Every Gratora modal claims the screen with aria-modal="true" but never took
  * focus, so Tab carried on into the page behind the overlay and the list under
  * the dialog stayed operable.
  */
@@ -48,7 +48,7 @@ async function open( onClose = () => {} ) {
 }
 
 const tabbables = () => [ ...document
-    .querySelector( '.fundkit-dialog' )
+    .querySelector( '.gratora-dialog' )
     .querySelectorAll( 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])' ) ];
 
 const tab = ( shift = false ) => {
@@ -62,7 +62,7 @@ beforeEach( () => {
 it( 'moves focus into the dialog when it opens', async () => {
     await open();
 
-    expect( document.querySelector( '.fundkit-dialog' ).contains( document.activeElement ) ).toBe( true );
+    expect( document.querySelector( '.gratora-dialog' ).contains( document.activeElement ) ).toBe( true );
     expect( document.activeElement.id ).not.toBe( 'behind' );
 } );
 

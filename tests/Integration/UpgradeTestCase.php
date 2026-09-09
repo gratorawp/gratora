@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
+use Gratora\Foundation\Plugin;
 
 /**
  * Run real migrations under a scratch table prefix and clean up explicitly: MySQL DDL commits
@@ -48,7 +48,7 @@ abstract class UpgradeTestCase extends IntegrationTestCase
     }
 
     /**
-     * Build every fundkit table at its current shape, under the scratch prefix.
+     * Build every gratora table at its current shape, under the scratch prefix.
      *
      * This is the "already installed" starting point. A test then degrades it to
      * look like an older release and runs the update.
@@ -60,7 +60,7 @@ abstract class UpgradeTestCase extends IntegrationTestCase
 
     /**
      * The update path a real site takes: not a model method, the whole thing
-     * Plugin::boot() runs behind the FUNDKIT_DB_VERSION gate.
+     * Plugin::boot() runs behind the GRATORA_DB_VERSION gate.
      */
     protected function runTheRealUpdate(): void
     {

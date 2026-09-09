@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Http\ClientIp;
-use FundKit\Settings\SettingsService;
-use FundKit\Foundation\Plugin;
+use Gratora\Foundation\Http\ClientIp;
+use Gratora\Settings\SettingsService;
+use Gratora\Foundation\Plugin;
 use InvalidArgumentException;
 
 /**
@@ -40,7 +40,7 @@ final class TrustedProxyIsUnderstoodTest extends IntegrationTestCase
     {
         $this->settings()->update('privacy', ['trusted_proxies' => ['cloudflare', '10.0.0.0/8']]);
 
-        $stored = (array) (get_option('fundkit_privacy', [])['trusted_proxies'] ?? []);
+        $stored = (array) (get_option('gratora_privacy', [])['trusted_proxies'] ?? []);
 
         foreach ($stored as $entry) {
             $this->assertTrue(ClientIp::understands((string) $entry), $entry . ' was stored but is not understood');

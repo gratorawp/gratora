@@ -37,7 +37,7 @@ jest.mock( '../../assets/donation-form/util/paypal', () => ( {
 
 function config() {
     return {
-        rest:   'https://example.test/wp-json/fundkit/v1/donations',
+        rest:   'https://example.test/wp-json/gratora/v1/donations',
         nonce:  'n0nce',
         paypal: { clientId: 'CLIENT-1', currency: 'USD' },
         i18n:   {
@@ -50,7 +50,7 @@ function config() {
 
 function oneTimePayment() {
     return {
-        reference:   'FUNDKIT-1',
+        reference:   'GRATORA-1',
         statusToken: 'tok',
         amountCents: 5000,
         currency:    'USD',
@@ -60,7 +60,7 @@ function oneTimePayment() {
 
 function subscriptionPayment() {
     return {
-        reference:   'FUNDKIT-2',
+        reference:   'GRATORA-2',
         statusToken: 'tok',
         amountCents: 2500,
         currency:    'USD',
@@ -95,7 +95,7 @@ async function mount( payment ) {
     // the point at which the component is actually driveable.
     await waitFor( () => sdkButtons !== null, 'the PayPal buttons to be built' );
     await waitFor(
-        () => !! document.querySelector( '.fundkit-form__paypal-buttons' ),
+        () => !! document.querySelector( '.gratora-form__paypal-buttons' ),
         'the button mount to render'
     );
 
@@ -107,7 +107,7 @@ function screen() {
 
     return {
         text:         root.textContent,
-        buttonsShown: ! root.querySelector( '.fundkit-form__paypal-buttons' ).hidden,
+        buttonsShown: ! root.querySelector( '.gratora-form__paypal-buttons' ).hidden,
         buttons:      [ ...root.querySelectorAll( 'button' ) ]
             .map( ( b ) => `${ b.textContent.trim() }/disabled=${ b.disabled }` ),
     };
@@ -345,7 +345,7 @@ describe( 'an expired nonce cannot strand an approved payment', () => {
 			return Promise.resolve( {
 				ok:     false,
 				status: 403,
-				json:   async () => ( { code: 'fundkit_forbidden', message: 'NOT_YOURS' } ),
+				json:   async () => ( { code: 'gratora_forbidden', message: 'NOT_YOURS' } ),
 				clone() { return this; },
 			} );
 		} );

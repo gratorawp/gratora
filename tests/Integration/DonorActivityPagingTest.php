@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Analytics\Event;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -46,7 +46,7 @@ final class DonorActivityPagingTest extends IntegrationTestCase
     /** @return list<int> */
     private function page(int $page, string $order): array
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donors/' . $this->donorId . '/events');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/donors/' . $this->donorId . '/events');
         $req->set_param('per_page', 10);
         $req->set_param('page', $page);
         $req->set_param('order', $order);

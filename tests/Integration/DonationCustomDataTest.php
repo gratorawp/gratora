@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -21,7 +21,7 @@ final class DonationCustomDataTest extends IntegrationTestCase
 {
     private function postDonation(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode($body));
         return rest_do_request($req);
@@ -54,7 +54,7 @@ final class DonationCustomDataTest extends IntegrationTestCase
 
         // Stored as ciphertext, never plaintext.
         $row = self::$wpdb->get_row(self::$wpdb->prepare(
-            'SELECT custom_data_encrypted FROM ' . self::$prefix . 'fundkit_donations WHERE reference = %s',
+            'SELECT custom_data_encrypted FROM ' . self::$prefix . 'gratora_donations WHERE reference = %s',
             $reference
         ));
         $this->assertNotEmpty($row->custom_data_encrypted);
@@ -76,7 +76,7 @@ final class DonationCustomDataTest extends IntegrationTestCase
             'custom'       => $custom,
         ])->get_data()['reference'];
 
-        $res = rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/admin/donations/{$reference}"));
+        $res = rest_do_request(new WP_REST_Request('GET', "/gratora/v1/admin/donations/{$reference}"));
         $this->assertSame(200, $res->get_status());
         $this->assertSame($custom, $res->get_data()['donation']['custom_data']);
     }
@@ -91,7 +91,7 @@ final class DonationCustomDataTest extends IntegrationTestCase
         ])->get_data()['reference'];
 
         $row = self::$wpdb->get_row(self::$wpdb->prepare(
-            'SELECT custom_data_encrypted FROM ' . self::$prefix . 'fundkit_donations WHERE reference = %s',
+            'SELECT custom_data_encrypted FROM ' . self::$prefix . 'gratora_donations WHERE reference = %s',
             $reference
         ));
         $this->assertNull($row->custom_data_encrypted);
@@ -132,7 +132,7 @@ final class DonationCustomDataTest extends IntegrationTestCase
         // closure (bound to this request's route) and returns a null-body
         // response. rest_do_request runs the controller and registers that
         // closure; fire it with the same request to capture the bytes.
-        $request  = new WP_REST_Request('GET', "/fundkit/v1/admin/donors/{$donorId}/export");
+        $request  = new WP_REST_Request('GET', "/gratora/v1/admin/donors/{$donorId}/export");
         $response = rest_do_request($request);
         $this->assertSame(200, $response->get_status());
 

@@ -1,6 +1,6 @@
 /**
  * The palette is enqueued on the umbrella capability, so a reader who holds
- * one area cap sees every FundKit destination in it. Following one lands on
+ * one area cap sees every Gratora destination in it. Following one lands on
  * "Sorry, you are not allowed to access this page", losing the screen they
  * were on: the palette is the only place those pages appear for them, since
  * the sidebar already withholds them.
@@ -15,14 +15,14 @@ jest.mock( '@wordpress/commands', () => ( { store: 'commands' } ) );
 jest.mock( '@wordpress/icons', () => new Proxy( {}, { get: () => null } ) );
 
 const ALL = [
-    'fundkit/dashboard',
-    'fundkit/donations',
-    'fundkit/donors',
-    'fundkit/campaigns',
-    'fundkit/funds',
-    'fundkit/settings',
-    'fundkit/onboarding',
-    'fundkit/new-campaign',
+    'gratora/dashboard',
+    'gratora/donations',
+    'gratora/donors',
+    'gratora/campaigns',
+    'gratora/funds',
+    'gratora/settings',
+    'gratora/onboarding',
+    'gratora/new-campaign',
 ];
 
 // The module registers on import, so each case needs its own evaluation.
@@ -34,37 +34,37 @@ function registered() {
 
 beforeEach( () => {
     mockRegisterCommand.mockClear();
-    delete window.fundkitCommandPalette;
+    delete window.gratoraCommandPalette;
 } );
 
 it( 'offers a bookkeeper only the screens they can open', () => {
-    window.fundkitCommandPalette = {
+    window.gratoraCommandPalette = {
         adminUrl: '/wp-admin/',
         can:      {
-            'fundkit':            true,
-            'fundkit-donations':  true,
-            'fundkit-donors':     false,
-            'fundkit-campaigns':  false,
-            'fundkit-funds':      false,
-            'fundkit-settings':   false,
-            'fundkit-onboarding': false,
+            'gratora':            true,
+            'gratora-donations':  true,
+            'gratora-donors':     false,
+            'gratora-campaigns':  false,
+            'gratora-funds':      false,
+            'gratora-settings':   false,
+            'gratora-onboarding': false,
         },
     };
 
-    expect( registered().map( ( c ) => c.name ) ).toEqual( [ 'fundkit/dashboard', 'fundkit/donations' ] );
+    expect( registered().map( ( c ) => c.name ) ).toEqual( [ 'gratora/dashboard', 'gratora/donations' ] );
 } );
 
 it( 'offers an administrator all of them', () => {
-    window.fundkitCommandPalette = {
+    window.gratoraCommandPalette = {
         adminUrl: '/wp-admin/',
         can:      Object.fromEntries( [
-            'fundkit',
-            'fundkit-donations',
-            'fundkit-donors',
-            'fundkit-campaigns',
-            'fundkit-funds',
-            'fundkit-settings',
-            'fundkit-onboarding',
+            'gratora',
+            'gratora-donations',
+            'gratora-donors',
+            'gratora-campaigns',
+            'gratora-funds',
+            'gratora-settings',
+            'gratora-onboarding',
         ].map( ( p ) => [ p, true ] ) ),
     };
 

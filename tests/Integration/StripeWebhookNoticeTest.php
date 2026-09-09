@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\Stripe\StripeWebhookNotice;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\Stripe\StripeWebhookNotice;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * The missing-webhook-secret warning is about deliveries that will be rejected.
@@ -29,7 +29,7 @@ final class StripeWebhookNoticeTest extends IntegrationTestCase
 
     private function enableStripe(bool $on): void
     {
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'test_mode' => true,
             'stripe'    => ['enabled' => $on, 'webhook_secret_test' => '', 'webhook_secret_live' => ''],
         ]);

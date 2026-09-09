@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\Donor;
-use FundKit\Analytics\Event;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\Donor;
+use Gratora\Analytics\Event;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -50,7 +50,7 @@ final class DonationReversalTest extends IntegrationTestCase
 
     private function paidDonation(?int $campaignId = null): Donation
     {
-        $request = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $request = new WP_REST_Request('POST', '/gratora/v1/donations');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode(array_filter([
             'email'        => 'sarah@example.com',
@@ -117,7 +117,7 @@ final class DonationReversalTest extends IntegrationTestCase
     {
         $donation = $this->paidDonation();
         $seen     = [];
-        add_action('fundkit.donation.disputed', static function ($d, $kind) use (&$seen): void {
+        add_action('gratora.donation.disputed', static function ($d, $kind) use (&$seen): void {
             $seen[] = [(int) $d->id, $kind];
         }, 10, 2);
 
@@ -132,7 +132,7 @@ final class DonationReversalTest extends IntegrationTestCase
         $this->service()->markReversed($donation, 'chargeback', 'bank reversed it');
 
         $fired = 0;
-        add_action('fundkit.donation.disputed', static function () use (&$fired): void { $fired++; }, 10, 2);
+        add_action('gratora.donation.disputed', static function () use (&$fired): void { $fired++; }, 10, 2);
         $this->service()->markReversed($this->reload((string) $donation->reference), 'chargeback', 'again');
 
         $this->assertSame(0, $fired);
@@ -142,7 +142,7 @@ final class DonationReversalTest extends IntegrationTestCase
     /** A donation that never landed has nothing to take back. */
     public function test_a_pending_donation_is_not_reversed(): void
     {
-        $request = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $request = new WP_REST_Request('POST', '/gratora/v1/donations');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode([
             'email'        => 'sarah@example.com',

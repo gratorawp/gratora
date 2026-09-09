@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Foundation\Plugin;
 
 /**
  * The limiter counts every attempt, and counts it once.
@@ -83,7 +83,7 @@ final class RateLimitAtomicityTest extends IntegrationTestCase
 
         $refused = $this->guard()->consumeEmailQuota($email);
         $this->assertNotNull($refused);
-        $this->assertSame('fundkit_rate_limited', $refused->get_error_code());
+        $this->assertSame('gratora_rate_limited', $refused->get_error_code());
     }
 
     /** One mailbox running out must not spend another's allowance. */
@@ -131,7 +131,7 @@ final class RateLimitAtomicityTest extends IntegrationTestCase
 
         $stored = (int) $wpdb->get_var(
             "SELECT option_value FROM {$wpdb->options}
-             WHERE option_name LIKE '_transient_fundkit_donate_email_%'
+             WHERE option_name LIKE '_transient_gratora_donate_email_%'
              ORDER BY option_id DESC LIMIT 1"
         );
 
@@ -147,14 +147,14 @@ final class RateLimitAtomicityTest extends IntegrationTestCase
         $this->guard()->consumeEmailQuota($email);
         $first = (int) $wpdb->get_var(
             "SELECT option_value FROM {$wpdb->options}
-             WHERE option_name LIKE '_transient_timeout_fundkit_donate_email_%'
+             WHERE option_name LIKE '_transient_timeout_gratora_donate_email_%'
              ORDER BY option_id DESC LIMIT 1"
         );
 
         $this->guard()->consumeEmailQuota($email);
         $second = (int) $wpdb->get_var(
             "SELECT option_value FROM {$wpdb->options}
-             WHERE option_name LIKE '_transient_timeout_fundkit_donate_email_%'
+             WHERE option_name LIKE '_transient_timeout_gratora_donate_email_%'
              ORDER BY option_id DESC LIMIT 1"
         );
 

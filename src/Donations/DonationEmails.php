@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donations;
+namespace Gratora\Donations;
 
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\Portal\PortalPage;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Hooks\HookProvider;
-use FundKit\Mail\Mailer;
-use FundKit\Receipts\OrgProfile;
-use FundKit\Recurring\FrequencyMap;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanChange;
-use FundKit\Settings\SettingsService;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\Portal\PortalPage;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Hooks\HookProvider;
+use Gratora\Mail\Mailer;
+use Gratora\Receipts\OrgProfile;
+use Gratora\Recurring\FrequencyMap;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanChange;
+use Gratora\Settings\SettingsService;
 
 /**
  * Wires the non-receipt donation email templates (offline instructions, refund
@@ -40,16 +40,16 @@ final class DonationEmails extends HookProvider
     protected function actions(): array
     {
         return [
-            'fundkit.donation.intent_created' => 'onIntentCreated',
-            'fundkit.donation.pending'        => ['onPending', 10, 3],
-            'fundkit.donation.refunded'       => ['onRefunded', 10, 2],
-            'fundkit.recurring.renewed'       => ['onRecurringRenewed', 10, 2],
-            'fundkit.recurring.cancelled'     => ['onRecurringCancelled', 10, 2],
-            'fundkit.recurring.renewal_failed' => ['onRecurringFailed', 10, 2],
-            'fundkit.donation.completed'      => 'onDonationCompleted',
+            'gratora.donation.intent_created' => 'onIntentCreated',
+            'gratora.donation.pending'        => ['onPending', 10, 3],
+            'gratora.donation.refunded'       => ['onRefunded', 10, 2],
+            'gratora.recurring.renewed'       => ['onRecurringRenewed', 10, 2],
+            'gratora.recurring.cancelled'     => ['onRecurringCancelled', 10, 2],
+            'gratora.recurring.renewal_failed' => ['onRecurringFailed', 10, 2],
+            'gratora.donation.completed'      => 'onDonationCompleted',
             // Fires for every plan change, donor-made or admin-made; the
             // handler decides whether to send.
-            'fundkit.recurring.plan_changed'  => ['onPlanChanged', 10, 2],
+            'gratora.recurring.plan_changed'  => ['onPlanChanged', 10, 2],
         ];
     }
 
@@ -142,7 +142,7 @@ final class DonationEmails extends HookProvider
 
         // No receipt number here: the receipt row is issued asynchronously and
         // does not exist yet. The receipt email carries it, and a notice that
-        // needs it can be sent from fundkit.async.receipt_issued instead.
+        // needs it can be sent from gratora.async.receipt_issued instead.
         $this->inDonorLocale((string) ($donation->locale ?? ''), fn (): bool => $this->mailer->sendTemplate('recurring_renewal', $email, [
             'donor_first_name'  => $this->donorFirstName($donation),
             'donor_name'        => $this->donorName($donation),
@@ -378,7 +378,7 @@ final class DonationEmails extends HookProvider
             ? $donationTemplate
             : ($neutral[$donationTemplate] ?? $donationTemplate);
 
-        return (string) apply_filters('fundkit.email.donation_template', $template, $donationTemplate, $donation);
+        return (string) apply_filters('gratora.email.donation_template', $template, $donationTemplate, $donation);
     }
 
     /** @since 1.0.0 */

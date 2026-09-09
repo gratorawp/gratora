@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/widgets/ChannelBreakdown';
+export { default } from '@gratora/ui/widgets/ChannelBreakdown';

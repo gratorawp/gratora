@@ -24,7 +24,7 @@ describe( 'every settings group is wired into saving', () => {
 
     // The variable each group is held in, since the two names differ:
     // 'org-profile' lives in `org`, 'exchange-rates' in `fx`.
-    const loaded = [ ...source.matchAll( /const\s+(\w+)\s*=\s*useFundKitSettings\(\s*'([a-z-]+)'\s*\)/g ) ]
+    const loaded = [ ...source.matchAll( /const\s+(\w+)\s*=\s*useGratoraSettings\(\s*'([a-z-]+)'\s*\)/g ) ]
         .map( ( m ) => ( { variable: m[ 1 ], group: m[ 2 ] } ) );
 
     const anyDirty = ( source.match( /const anyDirty = ([^;]+);/ ) || [ '', '' ] )[ 1 ];

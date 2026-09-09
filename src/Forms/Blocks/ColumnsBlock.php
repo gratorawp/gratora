@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
 /** @since 1.0.0 */
 final class ColumnsBlock implements Block
@@ -10,7 +10,7 @@ final class ColumnsBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/columns';
+        return 'gratora/columns';
     }
 
     /** @since 1.0.0 */
@@ -27,7 +27,7 @@ final class ColumnsBlock implements Block
     public function render(array $attrs, string $content): string
     {
         return sprintf(
-            '<div class="fundkit-block fundkit-block--columns" style="%s">%s</div>',
+            '<div class="gratora-block gratora-block--columns" style="%s">%s</div>',
             esc_attr(self::columnsStyle($attrs)),
             $content
         );

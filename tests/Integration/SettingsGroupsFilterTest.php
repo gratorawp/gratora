@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Settings\SettingsService;
+use Gratora\Settings\SettingsService;
 
 /**
  * groups() memoises per instance (one resolve per request in production). The
@@ -16,13 +16,13 @@ final class SettingsGroupsFilterTest extends IntegrationTestCase
 {
     public function test_pro_group_via_filter_is_served_and_writable(): void
     {
-        delete_option('fundkit_pro_p2p_test');
-        add_filter('fundkit.settings.groups', static function (array $g): array {
-            return $g + ['p2p' => ['option' => 'fundkit_pro_p2p_test', 'defaults' => ['goal_cents' => 0]]];
+        delete_option('gratora_pro_p2p_test');
+        add_filter('gratora.settings.groups', static function (array $g): array {
+            return $g + ['p2p' => ['option' => 'gratora_pro_p2p_test', 'defaults' => ['goal_cents' => 0]]];
         });
 
         $fired = [];
-        add_action('fundkit.settings.updated', static function (string $group, array $next) use (&$fired): void {
+        add_action('gratora.settings.updated', static function (string $group, array $next) use (&$fired): void {
             $fired[] = [$group, $next];
         }, 10, 2);
 
@@ -33,21 +33,21 @@ final class SettingsGroupsFilterTest extends IntegrationTestCase
 
         $result = $s->update('p2p', ['goal_cents' => 500]);
         $this->assertSame(500, $result['goal_cents']);
-        $this->assertSame(500, get_option('fundkit_pro_p2p_test')['goal_cents']);
+        $this->assertSame(500, get_option('gratora_pro_p2p_test')['goal_cents']);
         $this->assertNotEmpty($fired);
         $this->assertSame('p2p', $fired[count($fired) - 1][0]);
 
         $this->assertTrue($s->knows('email'));
         $this->assertNotEmpty($s->get('email'));
 
-        remove_all_filters('fundkit.settings.groups');
-        remove_all_actions('fundkit.settings.updated');
+        remove_all_filters('gratora.settings.groups');
+        remove_all_actions('gratora.settings.updated');
     }
 
     public function test_addon_email_template_does_not_displace_core_templates(): void
     {
-        add_filter('fundkit.settings.groups', static function (array $g): array {
-            $g['email']['defaults']['templates']['fundkit_addon_welcome'] = [
+        add_filter('gratora.settings.groups', static function (array $g): array {
+            $g['email']['defaults']['templates']['gratora_addon_welcome'] = [
                 'enabled' => true,
                 'subject' => 'Add-on welcome',
                 'body'    => 'Hello from the add-on.',
@@ -57,11 +57,11 @@ final class SettingsGroupsFilterTest extends IntegrationTestCase
 
         $templates = (new SettingsService())->get('email')['templates'] ?? [];
 
-        $this->assertArrayHasKey('fundkit_addon_welcome', $templates, 'the add-on template is present');
+        $this->assertArrayHasKey('gratora_addon_welcome', $templates, 'the add-on template is present');
         $this->assertArrayHasKey('magic_link', $templates, 'core magic-link survives an add-on template');
         $this->assertArrayHasKey('donation_receipt', $templates, 'core receipt survives an add-on template');
         $this->assertTrue((bool) ($templates['magic_link']['enabled'] ?? false), 'core magic-link stays enabled');
 
-        remove_all_filters('fundkit.settings.groups');
+        remove_all_filters('gratora.settings.groups');
     }
 }

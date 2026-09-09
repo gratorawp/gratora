@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\FormTemplates;
+use Gratora\Forms\FormTemplates;
 
 /**
  * Keep the JS thumbnail fixture in sync with FormTemplates.php. Regenerate with
- * FUNDKIT_WRITE_THUMB_FIXTURE=1.
+ * GRATORA_WRITE_THUMB_FIXTURE=1.
  */
 final class FormTemplateThumbFixtureTest extends IntegrationTestCase
 {
@@ -30,7 +30,7 @@ final class FormTemplateThumbFixtureTest extends IntegrationTestCase
     {
         $live = $this->live();
 
-        if (getenv('FUNDKIT_WRITE_THUMB_FIXTURE')) {
+        if (getenv('GRATORA_WRITE_THUMB_FIXTURE')) {
             if (! is_dir(dirname(self::FIXTURE))) {
                 mkdir(dirname(self::FIXTURE), 0o777, true);
             }
@@ -40,19 +40,19 @@ final class FormTemplateThumbFixtureTest extends IntegrationTestCase
             );
         }
 
-        $this->assertFileExists(self::FIXTURE, 'regenerate with FUNDKIT_WRITE_THUMB_FIXTURE=1');
+        $this->assertFileExists(self::FIXTURE, 'regenerate with GRATORA_WRITE_THUMB_FIXTURE=1');
 
         $fixture = json_decode((string) file_get_contents(self::FIXTURE), true);
 
         $this->assertSame(
             array_keys($live),
             array_keys((array) $fixture),
-            'a template was added or removed; regenerate with FUNDKIT_WRITE_THUMB_FIXTURE=1'
+            'a template was added or removed; regenerate with GRATORA_WRITE_THUMB_FIXTURE=1'
         );
         $this->assertSame(
             $live,
             $fixture,
-            'a template\'s blocks changed; regenerate with FUNDKIT_WRITE_THUMB_FIXTURE=1 and check the thumbnails still read apart'
+            'a template\'s blocks changed; regenerate with GRATORA_WRITE_THUMB_FIXTURE=1 and check the thumbnails still read apart'
         );
     }
 }

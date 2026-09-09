@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Dashboard\DashboardMetricsService;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\Refund;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Dashboard\DashboardMetricsService;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\Refund;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Recurring\RecurringPlanRepository;
 
 /**
  * Locks the live "today" ribbon's money math: donations are summed in the org
@@ -28,10 +28,10 @@ final class DashboardTodayMetricsTest extends IntegrationTestCase
         $now = gmdate('Y-m-d H:i:s');
 
         // Base-currency donation: 100.00 base.
-        $this->seedPaid((int) $donor->id, 'FUNDKIT-TODAY-EUR', 10000, 'EUR', 10000, '1.00000000', $now);
+        $this->seedPaid((int) $donor->id, 'GRATORA-TODAY-EUR', 10000, 'EUR', 10000, '1.00000000', $now);
 
         // Foreign donation: 100.00 USD recorded as 50.00 base (fx 0.5).
-        $usd = $this->seedPaid((int) $donor->id, 'FUNDKIT-TODAY-USD', 10000, 'USD', 5000, '0.50000000', $now);
+        $usd = $this->seedPaid((int) $donor->id, 'GRATORA-TODAY-USD', 10000, 'USD', 5000, '0.50000000', $now);
 
         // 40.00 USD refunded == 20.00 base.
         $r = Refund::make();
@@ -73,7 +73,7 @@ final class DashboardTodayMetricsTest extends IntegrationTestCase
         $now = gmdate('Y-m-d H:i:s');
 
         // 200.00 USD at 0.5107, so 102.14 base, rounded once from the whole.
-        $usd = $this->seedPaid((int) $donor->id, 'FUNDKIT-TODAY-SPLIT', 20000, 'USD', 10214, '0.51070000', $now);
+        $usd = $this->seedPaid((int) $donor->id, 'GRATORA-TODAY-SPLIT', 20000, 'USD', 10214, '0.51070000', $now);
 
         // Refunded in two halves. 10000 * 0.5107 = 5107 exactly; each 5000 half
         // is 2553.5, which rounds up twice to 5108.

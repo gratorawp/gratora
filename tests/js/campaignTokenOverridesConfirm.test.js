@@ -18,7 +18,7 @@ jest.mock( '@wordpress/api-fetch', () => jest.fn( () => new Promise( () => {} ) 
 
 import { AppearancePanel } from '../../assets/admin/campaigns/Detail';
 
-window.fundkit = { styling: {} };
+window.gratora = { styling: {} };
 
 function mount( style ) {
     document.body.innerHTML = '<div id="root"></div>';
@@ -56,18 +56,18 @@ const buttonSaying = ( host, text ) =>
     [ ...host.querySelectorAll( 'button' ) ].find( ( b ) => b.textContent.includes( text ) );
 
 it( 'asks before dropping the overrides the toggle would discard', async () => {
-    const { host, c } = mount( { preset_id: 'bold', tokens: { 'fundkit-accent': '#ff0000' } } );
+    const { host, c } = mount( { preset_id: 'bold', tokens: { 'gratora-accent': '#ff0000' } } );
 
     toggleOff( host );
     await settle();
 
     expect( c.edit ).not.toHaveBeenCalled();
-    expect( c.record.style.tokens[ 'fundkit-accent' ] ).toBe( '#ff0000' );
+    expect( c.record.style.tokens[ 'gratora-accent' ] ).toBe( '#ff0000' );
     expect( host.textContent ).toContain( '1 token this campaign overrides' );
 } );
 
 it( 'discards them only once the admin confirms', async () => {
-    const { host, c } = mount( { preset_id: 'bold', tokens: { 'fundkit-accent': '#ff0000' } } );
+    const { host, c } = mount( { preset_id: 'bold', tokens: { 'gratora-accent': '#ff0000' } } );
 
     toggleOff( host );
     await settle();

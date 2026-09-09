@@ -2,56 +2,56 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Core\Commands;
+namespace Gratora\Core\Commands;
 
-use FundKit\Analytics\Event;
-use FundKit\Campaigns\CampaignMetricsService;
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Campaigns\CampaignService;
-use FundKit\Campaigns\CampaignTemplates;
-use FundKit\Currency\BaseCurrencyLocked;
-use FundKit\Currency\Currency;
-use FundKit\Currency\SupportedCurrencies;
-use FundKit\Dashboard\DashboardMetricsService;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\ConsentService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorMetricsService;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\MagicLinkService;
-use FundKit\Forms\FormRepository;
-use FundKit\Forms\FormService;
-use FundKit\Forms\FormTemplates;
-use FundKit\Foundation\Commands\Command;
-use FundKit\Foundation\Commands\CommandContext;
-use FundKit\Foundation\Commands\CommandError;
-use FundKit\Foundation\Commands\CommandRegistry;
-use FundKit\Foundation\Container\Container;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Funds\FundRepository;
-use FundKit\Funds\FundService;
-use FundKit\Mail\Mailer;
-use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Recurring\CampaignCancelRecurringJob;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanActions;
-use FundKit\Recurring\RecurringPlanChange;
-use FundKit\Recurring\RecurringPlanRepository;
-use FundKit\Reports\CampaignReportBuilder;
-use FundKit\Reports\TaxStatementBuilder;
-use FundKit\Settings\SecretRedactor;
-use FundKit\Settings\SettingsService;
+use Gratora\Analytics\Event;
+use Gratora\Campaigns\CampaignMetricsService;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Campaigns\CampaignService;
+use Gratora\Campaigns\CampaignTemplates;
+use Gratora\Currency\BaseCurrencyLocked;
+use Gratora\Currency\Currency;
+use Gratora\Currency\SupportedCurrencies;
+use Gratora\Dashboard\DashboardMetricsService;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\ConsentService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorMetricsService;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\MagicLinkService;
+use Gratora\Forms\FormRepository;
+use Gratora\Forms\FormService;
+use Gratora\Forms\FormTemplates;
+use Gratora\Foundation\Commands\Command;
+use Gratora\Foundation\Commands\CommandContext;
+use Gratora\Foundation\Commands\CommandError;
+use Gratora\Foundation\Commands\CommandRegistry;
+use Gratora\Foundation\Container\Container;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Funds\FundRepository;
+use Gratora\Funds\FundService;
+use Gratora\Mail\Mailer;
+use Gratora\Receipts\ReceiptIssuer;
+use Gratora\Recurring\CampaignCancelRecurringJob;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanActions;
+use Gratora\Recurring\RecurringPlanChange;
+use Gratora\Recurring\RecurringPlanRepository;
+use Gratora\Reports\CampaignReportBuilder;
+use Gratora\Reports\TaxStatementBuilder;
+use Gratora\Settings\SecretRedactor;
+use Gratora\Settings\SettingsService;
 
 /** @since 1.0.0 */
 final class CoreCommandProvider
 {
-    private const META = ['add_on' => 'core', 'add_on_label' => 'Fundraising Toolkit'];
+    private const META = ['add_on' => 'core', 'add_on_label' => 'Gratora'];
 
     /** Date-range windows the dashboard metrics service accepts. */
     private const REPORT_RANGES = ['today', 'last-7', 'last-30', 'last-90', 'all-time'];
@@ -101,7 +101,7 @@ final class CoreCommandProvider
                 'is_anonymous' => ['type' => 'boolean'],
             ], ['email', 'amount_cents', 'currency', 'gateway']),
             [],
-            'fundkit_view_donations',
+            'gratora_view_donations',
             false,
             true,
             function (array $in) use ($c): array {
@@ -113,14 +113,14 @@ final class CoreCommandProvider
                 if (! SupportedCurrencies::accepts($currency)) {
                     throw new CommandError(esc_html(sprintf(
                         /* translators: 1: currency code, 2: the accepted codes. */
-                        __('%1$s is not one of your accepted currencies (%2$s).', 'fundraising-toolkit'),
+                        __('%1$s is not one of your accepted currencies (%2$s).', 'gratora'),
                         $currency,
                         implode(', ', SupportedCurrencies::all())
                     )));
                 }
                 if (Currency::minorUnits($currency) === 0 && ((int) $in['amount_cents']) % 100 !== 0) {
                     throw new CommandError(
-                        esc_html__('This currency does not support fractional amounts.', 'fundraising-toolkit')
+                        esc_html__('This currency does not support fractional amounts.', 'gratora')
                     );
                 }
 
@@ -156,7 +156,7 @@ final class CoreCommandProvider
                 'result'             => ['type' => 'object', 'description' => 'Raw gateway confirmation payload (transaction id, etc.). Supplied by the payment gateway, not composed by hand; omit it when confirming manually.'],
             ], ['donation_reference']),
             [],
-            'fundkit_view_donations',
+            'gratora_view_donations',
             true,
             true,
             function (array $in) use ($c): array {
@@ -179,7 +179,7 @@ final class CoreCommandProvider
                 'reason'             => ['type' => ['string', 'null']],
             ], ['donation_reference']),
             [],
-            'fundkit_view_donations',
+            'gratora_view_donations',
             true,
             true,
             function (array $in) use ($c): array {
@@ -206,7 +206,7 @@ final class CoreCommandProvider
                 'refund_id'      => ['type' => 'integer'],
                 'is_full_refund' => ['type' => 'boolean'],
             ]),
-            'fundkit_refund_donations',
+            'gratora_refund_donations',
             false,
             true,
             function (array $in, CommandContext $ctx) use ($c): array {
@@ -252,7 +252,7 @@ final class CoreCommandProvider
                 'initiated_by'       => ['type' => 'string'],
             ], ['donation_reference', 'amount_cents', 'gateway_refund_id']),
             [],
-            'fundkit_refund_donations',
+            'gratora_refund_donations',
             false,
             true,
             function (array $in) use ($c): array {
@@ -285,7 +285,7 @@ final class CoreCommandProvider
                 'form_id'     => ['type' => ['integer', 'null'], 'minimum' => 1],
             ]),
             [],
-            'fundkit_view_reports',
+            'gratora_view_reports',
             true,
             true,
             function (array $in) use ($c): array {
@@ -319,7 +319,7 @@ final class CoreCommandProvider
                 'campaign_id' => ['type' => 'integer', 'minimum' => 1],
             ]),
             [],
-            'fundkit_view_donations',
+            'gratora_view_donations',
             true,
             false,
             function (array $in) use ($c): array {
@@ -348,7 +348,7 @@ final class CoreCommandProvider
                 'profile' => $this->profileSchema(),
             ], ['email']),
             [],
-            'fundkit_edit_donors',
+            'gratora_edit_donors',
             false,
             true,
             function (array $in) use ($c): array {
@@ -369,7 +369,7 @@ final class CoreCommandProvider
                 'profile'  => $this->profileSchema(),
             ], ['donor_id', 'profile']),
             [],
-            'fundkit_edit_donors',
+            'gratora_edit_donors',
             true,
             true,
             function (array $in) use ($c): array {
@@ -397,7 +397,7 @@ final class CoreCommandProvider
                 'new_email' => ['type' => 'string', 'format' => 'email'],
             ], ['donor_id', 'new_email']),
             [],
-            'fundkit_edit_donors',
+            'gratora_edit_donors',
             true,
             true,
             function (array $in) use ($c): array {
@@ -418,7 +418,7 @@ final class CoreCommandProvider
                 'donor_id' => ['type' => 'integer', 'minimum' => 1],
             ], ['donor_id']),
             [],
-            'fundkit_redact_donors',
+            'gratora_redact_donors',
             true,
             true,
             function (array $in) use ($c): array {
@@ -453,7 +453,7 @@ final class CoreCommandProvider
                 ],
             ], ['donor_id', 'purpose_key', 'granted']),
             [],
-            'fundkit_edit_donors',
+            'gratora_edit_donors',
             false,
             true,
             function (array $in) use ($c): array {
@@ -481,7 +481,7 @@ final class CoreCommandProvider
                 'ttl_seconds' => ['type' => 'integer', 'minimum' => 1],
             ], ['donor_id', 'purpose']),
             [],
-            'fundkit_edit_donors',
+            'gratora_edit_donors',
             false,
             true,
             function (array $in) use ($c): array {
@@ -507,7 +507,7 @@ final class CoreCommandProvider
                 'body'     => ['type' => 'string', 'minLength' => 1],
             ], ['donor_id', 'subject', 'body']),
             [],
-            'fundkit_edit_donors',
+            'gratora_edit_donors',
             false,
             true,
             function (array $in) use ($c): array {
@@ -535,10 +535,10 @@ final class CoreCommandProvider
     private function campaigns(CommandRegistry $r, Container $c): void
     {
         // Built from the LIVE registry so a type a Pro add-on contributes (e.g.
-        // peer_to_peer from fundkit-p2p) is offered only when that add-on is active.
+        // peer_to_peer from gratora-p2p) is offered only when that add-on is active.
         // An unavailable type is then rejected at the boundary, not silently
         // downgraded to standard with a misleading success.
-        $campaignTypes = array_keys((array) apply_filters('fundkit.campaign.types', ['standard' => '']));
+        $campaignTypes = array_keys((array) apply_filters('gratora.campaign.types', ['standard' => '']));
 
         // Schemas cannot branch on campaign type; list all registered layouts and validate the
         // pairing in the handler.
@@ -562,7 +562,7 @@ final class CoreCommandProvider
                 'campaign_type' => ['type' => 'string', 'enum' => $campaignTypes, 'description' => 'Whose layouts to list. Defaults to standard.'],
             ]),
             [],
-            'fundkit_manage_campaigns',
+            'gratora_manage_campaigns',
             true,
             false,
             static function (array $in): array {
@@ -596,7 +596,7 @@ final class CoreCommandProvider
                 'page_template' => ['type' => 'string', 'enum' => $templateIds, 'description' => 'Which starter layout builds the campaign page, and with it the donation form that page carries. Valid ids depend on campaign_type. ' . $templateList . '. Defaults to that type\'s own default.'],
             ]),
             [],
-            'fundkit_manage_campaigns',
+            'gratora_manage_campaigns',
             false,
             true,
             function (array $in) use ($c): array {
@@ -634,7 +634,7 @@ final class CoreCommandProvider
                 'image_attachment_id' => ['type' => ['integer', 'null'], 'minimum' => 1, 'description' => 'Media-library attachment ID to use as the campaign photo.'],
             ], ['campaign_id']),
             [],
-            'fundkit_manage_campaigns',
+            'gratora_manage_campaigns',
             true,
             true,
             function (array $in) use ($c): array {
@@ -670,7 +670,7 @@ final class CoreCommandProvider
                 'campaign_id' => ['type' => 'integer', 'minimum' => 1],
             ], ['campaign_id']),
             [],
-            'fundkit_manage_campaigns',
+            'gratora_manage_campaigns',
             true,
             true,
             function (array $in) use ($c): array {
@@ -701,7 +701,7 @@ final class CoreCommandProvider
                 'campaign_id' => ['type' => 'integer', 'minimum' => 1],
             ], ['campaign_id']),
             [],
-            'fundkit_manage_campaigns',
+            'gratora_manage_campaigns',
             false,
             true,
             function (array $in) use ($c): array {
@@ -742,7 +742,7 @@ final class CoreCommandProvider
                 'campaign_id' => ['type' => ['integer', 'null'], 'minimum' => 1],
             ]),
             [],
-            'fundkit_manage_forms',
+            'gratora_manage_forms',
             false,
             true,
             function (array $in) use ($c): array {
@@ -772,7 +772,7 @@ final class CoreCommandProvider
                 'settings' => $this->formSettingsSchema(),
             ], ['form_id']),
             [],
-            'fundkit_manage_forms',
+            'gratora_manage_forms',
             true,
             true,
             function (array $in) use ($c): array {
@@ -816,7 +816,7 @@ final class CoreCommandProvider
             'Read a donation form: its status, settings, and field-block structure.',
             $this->schema(['form_id' => ['type' => 'integer', 'minimum' => 1]], ['form_id']),
             [],
-            'fundkit_manage_forms',
+            'gratora_manage_forms',
             true,
             false,
             function (array $in) use ($c): array {
@@ -849,7 +849,7 @@ final class CoreCommandProvider
                 'form_id' => ['type' => 'integer', 'minimum' => 1],
             ], ['form_id']),
             [],
-            'fundkit_manage_forms',
+            'gratora_manage_forms',
             true,
             true,
             function (array $in) use ($c): array {
@@ -880,7 +880,7 @@ final class CoreCommandProvider
                 'form_id' => ['type' => 'integer', 'minimum' => 1],
             ], ['form_id']),
             [],
-            'fundkit_manage_forms',
+            'gratora_manage_forms',
             false,
             true,
             function (array $in) use ($c): array {
@@ -911,7 +911,7 @@ final class CoreCommandProvider
                 'goal_cents'    => ['type' => ['integer', 'null'], 'minimum' => 0],
             ], ['code', 'name']),
             [],
-            'fundkit_manage_campaigns',
+            'gratora_manage_campaigns',
             false,
             true,
             function (array $in) use ($c): array {
@@ -934,7 +934,7 @@ final class CoreCommandProvider
                 'goal_cents'    => ['type' => ['integer', 'null'], 'minimum' => 0],
             ], ['fund_id']),
             [],
-            'fundkit_manage_campaigns',
+            'gratora_manage_campaigns',
             true,
             true,
             function (array $in) use ($c): array {
@@ -957,7 +957,7 @@ final class CoreCommandProvider
                 'reassign_to' => ['type' => ['integer', 'null'], 'minimum' => 1],
             ], ['fund_id']),
             [],
-            'fundkit_manage_campaigns',
+            'gratora_manage_campaigns',
             true,
             true,
             function (array $in) use ($c): array {
@@ -1003,7 +1003,7 @@ final class CoreCommandProvider
                 'donation_id' => ['type' => 'integer', 'minimum' => 1],
             ], ['donation_id']),
             [],
-            'fundkit_resend_receipt',
+            'gratora_resend_receipt',
             true,
             true,
             function (array $in) use ($c): array {
@@ -1020,7 +1020,7 @@ final class CoreCommandProvider
                 'receipt_id' => ['type' => 'integer', 'minimum' => 1],
             ], ['receipt_id']),
             [],
-            'fundkit_resend_receipt',
+            'gratora_resend_receipt',
             true,
             true,
             function (array $in, CommandContext $ctx) use ($c): array {
@@ -1029,10 +1029,10 @@ final class CoreCommandProvider
                 // record. A command declares a single capability and this one
                 // has to hold two, resolved the way dispatch resolves its own.
                 $mayReadDonors = in_array($ctx->source, ['rest', 'cli'], true)
-                    ? current_user_can('fundkit_view_donors')
-                    : ($ctx->user_id !== null && user_can($ctx->user_id, 'fundkit_view_donors'));
+                    ? current_user_can('gratora_view_donors')
+                    : ($ctx->user_id !== null && user_can($ctx->user_id, 'gratora_view_donors'));
                 if (! $mayReadDonors) {
-                    throw new CommandError(esc_html('Not permitted: fundkit_view_donors.'));
+                    throw new CommandError(esc_html('Not permitted: gratora_view_donors.'));
                 }
 
                 $path = $c->get(ReceiptIssuer::class)->renderReceiptPdf((int) $in['receipt_id']);
@@ -1056,7 +1056,7 @@ final class CoreCommandProvider
                 'reason'  => ['type' => ['string', 'null']],
             ], ['plan_id']),
             [],
-            'fundkit_view_donations',
+            'gratora_view_donations',
             false,
             true,
             function (array $in) use ($c): array {
@@ -1082,7 +1082,7 @@ final class CoreCommandProvider
                 'resumes_at' => ['type' => ['string', 'null']],
             ], ['plan_id']),
             [],
-            'fundkit_view_donations',
+            'gratora_view_donations',
             true,
             true,
             function (array $in) use ($c): array {
@@ -1110,7 +1110,7 @@ final class CoreCommandProvider
                 'plan_id' => ['type' => 'integer', 'minimum' => 1],
             ], ['plan_id']),
             [],
-            'fundkit_view_donations',
+            'gratora_view_donations',
             true,
             true,
             function (array $in) use ($c): array {
@@ -1132,7 +1132,7 @@ final class CoreCommandProvider
                 'amount_cents' => ['type' => 'integer', 'minimum' => 1],
             ], ['plan_id', 'amount_cents']),
             [],
-            'fundkit_view_donations',
+            'gratora_view_donations',
             true,
             true,
             function (array $in) use ($c): array {
@@ -1159,7 +1159,7 @@ final class CoreCommandProvider
                 'reason'      => ['type' => ['string', 'null']],
             ], ['campaign_id']),
             [],
-            'fundkit_view_donations',
+            'gratora_view_donations',
             false,
             true,
             function (array $in) use ($c): array {
@@ -1212,7 +1212,7 @@ final class CoreCommandProvider
                 'donation_reference' => ['type' => 'string', 'minLength' => 1],
             ], ['donation_reference']),
             [],
-            'fundkit_view_donations',
+            'gratora_view_donations',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1242,7 +1242,7 @@ final class CoreCommandProvider
                 'donor_id' => ['type' => 'integer', 'minimum' => 1],
             ], ['donor_id']),
             [],
-            'fundkit_view_donors',
+            'gratora_view_donors',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1270,7 +1270,7 @@ final class CoreCommandProvider
                 'range'       => ['type' => 'string', 'enum' => self::REPORT_RANGES],
             ], ['campaign_id']),
             [],
-            'fundkit_view_reports',
+            'gratora_view_reports',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1288,7 +1288,7 @@ final class CoreCommandProvider
             'Donor-base lifecycle, RFM, LTV, and retention insights.',
             [],
             [],
-            'fundkit_view_reports',
+            'gratora_view_reports',
             true,
             false,
             fn (): array => ['insights' => $c->get(DonorMetricsService::class)->insights()],
@@ -1297,14 +1297,14 @@ final class CoreCommandProvider
 
         // Read/list commands: the assistant's eyes. Paged, cap-gated, and never
         // surfacing raw donor PII in a bulk listing (donor identity is its own
-        // fundkit_view_donors command). All are non-mutating + idempotent, so they
+        // gratora_view_donors command). All are non-mutating + idempotent, so they
         // skip the confirmation gate entirely.
         $r->register(new Command(
             'campaign.list',
             'List campaigns (paged, newest first); filter by status or search text.',
             $this->listSchema(['status' => ['type' => 'string', 'enum' => ['draft', 'published', 'archived']]]),
             [],
-            'fundkit_manage_campaigns',
+            'gratora_manage_campaigns',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1334,7 +1334,7 @@ final class CoreCommandProvider
             'List funds (paged); filter by search text.',
             $this->listSchema(),
             [],
-            'fundkit_manage_campaigns',
+            'gratora_manage_campaigns',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1357,7 +1357,7 @@ final class CoreCommandProvider
                 'campaign_id' => ['type' => 'integer', 'minimum' => 1],
             ]),
             [],
-            'fundkit_manage_forms',
+            'gratora_manage_forms',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1382,7 +1382,7 @@ final class CoreCommandProvider
                 'campaign_id' => ['type' => 'integer', 'minimum' => 1],
             ]),
             [],
-            'fundkit_view_donations',
+            'gratora_view_donations',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1408,10 +1408,10 @@ final class CoreCommandProvider
 
         $r->register(new Command(
             'donor.list',
-            'List donors (paged) with name, email, and lifetime totals. Returns PII; gated on fundkit_view_donors.',
+            'List donors (paged) with name, email, and lifetime totals. Returns PII; gated on gratora_view_donors.',
             $this->listSchema(),
             [],
-            'fundkit_view_donors',
+            'gratora_view_donors',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1431,12 +1431,12 @@ final class CoreCommandProvider
 
         $r->register(new Command(
             'donor.find_by_email',
-            'Look up a single donor by email address. Returns PII; gated on fundkit_view_donors.',
+            'Look up a single donor by email address. Returns PII; gated on gratora_view_donors.',
             $this->schema([
                 'email' => ['type' => 'string', 'format' => 'email', 'minLength' => 3],
             ], ['email']),
             [],
-            'fundkit_view_donors',
+            'gratora_view_donors',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1470,7 +1470,7 @@ final class CoreCommandProvider
                 'campaign_id' => ['type' => ['integer', 'null'], 'minimum' => 1],
             ]),
             [],
-            'fundkit_view_reports',
+            'gratora_view_reports',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1517,7 +1517,7 @@ final class CoreCommandProvider
                 'compare' => ['type' => 'boolean', 'description' => 'When true, also compare against the immediately preceding period of the same length. Ignored for the all-time range.'],
             ]),
             [],
-            'fundkit_view_reports',
+            'gratora_view_reports',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1535,7 +1535,7 @@ final class CoreCommandProvider
             'Recurring-revenue snapshot: active plans, monthly recurring revenue (MRR), 30-day projection, and new plans this month.',
             [],
             [],
-            'fundkit_view_reports',
+            'gratora_view_reports',
             true,
             false,
             fn (): array => $this->dashboardMetrics($c)->recurring(),
@@ -1550,7 +1550,7 @@ final class CoreCommandProvider
                 'limit' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 50, 'description' => 'How many campaigns to return (1 to 50). Defaults to 5.'],
             ]),
             [],
-            'fundkit_view_reports',
+            'gratora_view_reports',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1580,7 +1580,7 @@ final class CoreCommandProvider
                 'hours' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 168, 'description' => 'How far back to look, in hours (1 to 168). Defaults to 24.'],
             ]),
             [],
-            'fundkit_view_reports',
+            'gratora_view_reports',
             true,
             false,
             function (array $in): array {
@@ -1678,7 +1678,7 @@ final class CoreCommandProvider
             'Operations queue needing a decision: failed donations, campaigns ending soon, published campaigns with no form, and recent donor notes. Each item carries a tone and an admin link.',
             [],
             [],
-            'fundkit_view_reports',
+            'gratora_view_reports',
             true,
             false,
             function () use ($c): array {
@@ -1697,13 +1697,13 @@ final class CoreCommandProvider
 
         $r->register(new Command(
             'donor.at_risk',
-            'List at-risk donors (paged): donors who gave before but are now lapsing, highest lifetime value first. Returns PII (name, email); gated on fundkit_view_donors.',
+            'List at-risk donors (paged): donors who gave before but are now lapsing, highest lifetime value first. Returns PII (name, email); gated on gratora_view_donors.',
             $this->schema([
                 'page'     => ['type' => 'integer', 'minimum' => 1],
                 'per_page' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100],
             ]),
             [],
-            'fundkit_view_donors',
+            'gratora_view_donors',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1721,7 +1721,7 @@ final class CoreCommandProvider
      * limited download link (it does not stream or store a PDF), so both are
      * non-mutating + idempotent and skip the confirmation gate. The link points
      * at a core REST route that regenerates and streams the PDF on demand; the
-     * donor tax statement carries PII and is gated on fundkit_view_donors.
+     * donor tax statement carries PII and is gated on gratora_view_donors.
      *
      * @since 1.0.0
      */
@@ -1741,7 +1741,7 @@ final class CoreCommandProvider
                 ],
             ], ['campaign_id']),
             [],
-            'fundkit_view_reports',
+            'gratora_view_reports',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1757,7 +1757,7 @@ final class CoreCommandProvider
                 return [
                     'campaign_id'  => $campaignId,
                     'download_url' => $this->reportUrl(
-                        'fundkit/v1/reports/campaign/' . $campaignId . '/pdf',
+                        'gratora/v1/reports/campaign/' . $campaignId . '/pdf',
                         ['range' => $range],
                     ),
                     'filename'     => CampaignReportBuilder::filename($campaignId, $range),
@@ -1769,7 +1769,7 @@ final class CoreCommandProvider
 
         $r->register(new Command(
             'donor.tax_statement_pdf',
-            'Generate a secure download link for a donor year-end tax statement PDF (US 501(c)(3) style, net of refunds), and report the donation count and net total for the year. Returns a PII document link; gated on fundkit_view_donors.',
+            'Generate a secure download link for a donor year-end tax statement PDF (US 501(c)(3) style, net of refunds), and report the donation count and net total for the year. Returns a PII document link; gated on gratora_view_donors.',
             $this->schema([
                 'donor_id' => ['type' => 'integer', 'minimum' => 1],
                 'year'     => [
@@ -1780,7 +1780,7 @@ final class CoreCommandProvider
                 ],
             ], ['donor_id', 'year']),
             [],
-            'fundkit_view_donors',
+            'gratora_view_donors',
             true,
             false,
             function (array $in) use ($c, $currentYear): array {
@@ -1802,7 +1802,7 @@ final class CoreCommandProvider
                     'donor_id'       => $donorId,
                     'year'           => $year,
                     'download_url'   => $this->reportUrl(
-                        'fundkit/v1/reports/donor/' . $donorId . '/tax-statement/' . $year,
+                        'gratora/v1/reports/donor/' . $donorId . '/tax-statement/' . $year,
                         [],
                     ),
                     'filename'       => TaxStatementBuilder::filename($donorId, $year),
@@ -1841,7 +1841,7 @@ final class CoreCommandProvider
         $life = (int) apply_filters('nonce_life', DAY_IN_SECONDS);
         return sprintf(
             /* translators: %s: human-readable duration, e.g. "1 day". */
-            __('Link is time-limited to your login session (about %s); regenerate it if it stops working.', 'fundraising-toolkit'),
+            __('Link is time-limited to your login session (about %s); regenerate it if it stops working.', 'gratora'),
             human_time_diff(0, $life),
         );
     }
@@ -1868,7 +1868,7 @@ final class CoreCommandProvider
             'Read one benign org settings group (org profile, currency and locale, brand, receipts, email, numbering, or consents). Any secret-shaped value is redacted.',
             $this->schema(['group' => $groupArg], ['group']),
             [],
-            'fundkit_manage_settings',
+            'gratora_manage_settings',
             true,
             false,
             function (array $in) use ($c): array {
@@ -1890,7 +1890,7 @@ final class CoreCommandProvider
                 ],
             ], ['group', 'values']),
             [],
-            'fundkit_manage_settings',
+            'gratora_manage_settings',
             false,
             true,
             function (array $in) use ($c): array {
@@ -2205,7 +2205,7 @@ final class CoreCommandProvider
 
     /**
      * The complete set of form-settings keys the platform reads. Typed strictly
-     * so the agent cannot invent settings (there is no currency setting: FundKit
+     * so the agent cannot invent settings (there is no currency setting: Gratora
      * uses one org currency) and knows the real goal/recurring shapes. The
      * gateways list is written by the payment-gateways block, so it is not
      * settable here.
@@ -2219,7 +2219,7 @@ final class CoreCommandProvider
         return [
             'type'                 => ['object', 'null'],
             'additionalProperties' => false,
-            'description'          => 'Form settings. Only these keys exist. There is no currency setting; FundKit uses a single org currency. Send the full object (read it first with form.get): saving replaces settings wholesale.',
+            'description'          => 'Form settings. Only these keys exist. There is no currency setting; Gratora uses a single org currency. Send the full object (read it first with form.get): saving replaces settings wholesale.',
             'properties'           => [
                 'layout'            => ['type' => 'string', 'description' => 'How the form renders, e.g. "inline" or "modal".'],
                 'style'            => [

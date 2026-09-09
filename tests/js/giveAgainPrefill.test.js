@@ -9,7 +9,7 @@
  * the link, the form's own currency, and the tile the donor is shown.
  */
 
-const AMOUNT_URL = '/campaign/?fundkit_amount=500000&fundkit_currency=JPY&fundkit_frequency=one_time';
+const AMOUNT_URL = '/campaign/?gratora_amount=500000&gratora_currency=JPY&gratora_frequency=one_time';
 
 function config( overrides = {} ) {
     return {
@@ -49,12 +49,12 @@ function config( overrides = {} ) {
 
 function addForm( cfg ) {
     const form = document.createElement( 'form' );
-    form.className = 'fundkit-donation-form';
-    form.id = 'fundkit-form-1';
+    form.className = 'gratora-donation-form';
+    form.id = 'gratora-form-1';
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-fundkit-form-config', '' );
+    json.setAttribute( 'data-gratora-form-config', '' );
     json.textContent = JSON.stringify( cfg );
     form.appendChild( json );
 
@@ -71,11 +71,11 @@ async function boot() {
 }
 
 function typedAmount( form ) {
-    return form.querySelector( '.fundkit-amount__input' ).value;
+    return form.querySelector( '.gratora-amount__input' ).value;
 }
 
 function amountCurrency( form ) {
-    return form.querySelector( '.fundkit-amount__code' ).textContent;
+    return form.querySelector( '.gratora-amount__code' ).textContent;
 }
 
 beforeEach( () => {
@@ -91,7 +91,7 @@ test( 'a link written in yen opens the form in yen, at the yen amount', async ()
 
     expect( amountCurrency( form ) ).toBe( 'JPY' );
     expect( typedAmount( form ) ).toBe( '5,000' );
-    expect( form.querySelector( '.fundkit-form__currency-switcher select' ).value ).toBe( 'JPY' );
+    expect( form.querySelector( '.gratora-form__currency-switcher select' ).value ).toBe( 'JPY' );
     // The number read as this form's own currency, which is the whole defect.
     expect( form.textContent ).not.toContain( '$5,000.00' );
 } );
@@ -111,22 +111,22 @@ test( 'a link in a currency the form cannot open in preselects nothing of its ow
 } );
 
 test( 'a link in the currency the form is authored in still prefills its amount', async () => {
-    window.history.replaceState( {}, '', '/campaign/?fundkit_amount=7500&fundkit_currency=USD' );
+    window.history.replaceState( {}, '', '/campaign/?gratora_amount=7500&gratora_currency=USD' );
     const form = addForm( config() );
 
     await boot();
 
     expect( amountCurrency( form ) ).toBe( 'USD' );
-    const selected = form.querySelector( '.fundkit-form__preset.is-selected' );
+    const selected = form.querySelector( '.gratora-form__preset.is-selected' );
     expect( selected.textContent ).toContain( '$75.00' );
 } );
 
 test( 'an amount above what the schema accepts is not preselected', async () => {
-    window.history.replaceState( {}, '', '/campaign/?fundkit_amount=100000000&fundkit_currency=USD' );
+    window.history.replaceState( {}, '', '/campaign/?gratora_amount=100000000&gratora_currency=USD' );
     const form = addForm( config() );
 
     await boot();
 
     expect( typedAmount( form ) ).toBe( '' );
-    expect( form.querySelector( '.fundkit-form__preset.is-selected' ).textContent ).toContain( '$25.00' );
+    expect( form.querySelector( '.gratora-form__preset.is-selected' ).textContent ).toContain( '$25.00' );
 } );

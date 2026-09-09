@@ -48,8 +48,8 @@ const settle = async () => {
 async function openDialog( pickerList ) {
     apiFetch.mockImplementation( ( { path, method, parse } ) => {
         if ( method === 'DELETE' ) return Promise.resolve( { action: 'deactivated' } );
-        if ( path.startsWith( '/fundkit/v1/admin/me/table-view' ) ) return Promise.resolve( {} );
-        if ( path.startsWith( '/fundkit/v1/admin/funds/stats' ) ) return Promise.resolve( {} );
+        if ( path.startsWith( '/gratora/v1/admin/me/table-view' ) ) return Promise.resolve( {} );
+        if ( path.startsWith( '/gratora/v1/admin/funds/stats' ) ) return Promise.resolve( {} );
         if ( parse === false ) {
             return Promise.resolve( { json: async () => [ TARGET ], headers: { get: () => '1' } } );
         }
@@ -67,7 +67,7 @@ async function openDialog( pickerList ) {
     captured.actions.find( ( a ) => a.id === 'delete' ).callback( [ TARGET ] );
     await settle();
 
-    return document.querySelector( '.fundkit-dialog' );
+    return document.querySelector( '.gratora-dialog' );
 }
 
 beforeEach( () => {

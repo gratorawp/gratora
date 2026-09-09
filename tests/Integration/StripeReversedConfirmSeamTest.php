@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\Stripe\StripeAccount;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\Stripe\StripeAccount;
 use WP_REST_Request;
 
 /**
@@ -39,7 +39,7 @@ final class StripeReversedConfirmSeamTest extends IntegrationTestCase
         $this->intents  = [];
         $this->disputes = [];
         $this->secret  = 'whsec_live_' . bin2hex(random_bytes(8));
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'stripe' => ['webhook_secret_live' => $this->secret],
         ]);
 
@@ -50,15 +50,15 @@ final class StripeReversedConfirmSeamTest extends IntegrationTestCase
 
         $manager = $c->get(GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \FundKit\Gateways\Stripe\StripeGateway(
-                $c->get(\FundKit\Gateways\Stripe\StripeApi::class),
+            $manager->register(new \Gratora\Gateways\Stripe\StripeGateway(
+                $c->get(\Gratora\Gateways\Stripe\StripeApi::class),
                 $c->get(DonationRepository::class),
-                $c->get(\FundKit\Donations\DonationService::class),
+                $c->get(\Gratora\Donations\DonationService::class),
                 $account,
-                $c->get(\FundKit\Donors\DonorRepository::class),
+                $c->get(\Gratora\Donors\DonorRepository::class),
                 $c->get(DonorService::class),
-                $c->get(\FundKit\Foundation\Time\Clock::class),
-                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
+                $c->get(\Gratora\Foundation\Time\Clock::class),
+                $c->get(\Gratora\Recurring\RecurringPlanRepository::class),
             ));
         }
 
@@ -193,7 +193,7 @@ final class StripeReversedConfirmSeamTest extends IntegrationTestCase
         $this->assertNotContains(
             'donation.failed',
             $this->eventTypesFor($donation),
-            'and fundkit.donation.failed fired on a payment that was taken'
+            'and gratora.donation.failed fired on a payment that was taken'
         );
         $this->assertNotSame(200, $res->get_status(), 'reversed money must not be banked either');
     }
@@ -336,7 +336,7 @@ final class StripeReversedConfirmSeamTest extends IntegrationTestCase
     {
         return array_column(
             (array) self::$wpdb->get_results(self::$wpdb->prepare(
-                'SELECT type FROM ' . self::$prefix . 'fundkit_events WHERE donation_id = %d ORDER BY id',
+                'SELECT type FROM ' . self::$prefix . 'gratora_events WHERE donation_id = %d ORDER BY id',
                 (int) $donation->id
             )),
             'type'
@@ -345,7 +345,7 @@ final class StripeReversedConfirmSeamTest extends IntegrationTestCase
 
     private function adminConfirm(Donation $donation): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', "/fundkit/v1/donations/{$donation->reference}/confirm");
+        $req = new WP_REST_Request('POST', "/gratora/v1/donations/{$donation->reference}/confirm");
         $req->set_header('content-type', 'application/json');
         $req->set_body('{}');
 
@@ -416,7 +416,7 @@ final class StripeReversedConfirmSeamTest extends IntegrationTestCase
         $timestamp = (string) time();
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $this->secret);
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/gratora/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);

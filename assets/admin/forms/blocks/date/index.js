@@ -5,7 +5,7 @@ import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 import { SlugTextControl } from '../_shared/SlugTextControl';
 
-const NAME = 'fundkit/date';
+const NAME = 'gratora/date';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -18,47 +18,47 @@ function Edit( { attributes, setAttributes } ) {
         condition = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--field' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--field' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Date', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Date', 'gratora' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundraising-toolkit' ) }
+                        label={ __( 'Label', 'gratora' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundraising-toolkit' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'fundraising-toolkit' ) }
+                        label={ __( 'Help text', 'gratora' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Field name', 'fundraising-toolkit' ) }
+                        label={ __( 'Field name', 'gratora' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v } ) }
-                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'fundraising-toolkit' ) }
+                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundraising-toolkit' ) }
+                        label={ __( 'Required', 'gratora' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Minimum date', 'fundraising-toolkit' ) }
+                        label={ __( 'Minimum date', 'gratora' ) }
                         value={ minDate }
                         onChange={ ( v ) => setAttributes( { minDate: v } ) }
                         placeholder="YYYY-MM-DD"
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Maximum date', 'fundraising-toolkit' ) }
+                        label={ __( 'Maximum date', 'gratora' ) }
                         value={ maxDate }
                         onChange={ ( v ) => setAttributes( { maxDate: v } ) }
                         placeholder="YYYY-MM-DD"
@@ -73,24 +73,24 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="fundkit-block-preview__label"
+                    className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Date', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'Date', 'gratora' ) }
                     allowedFormats={ [] }
                 />
-                { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
+                { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
                 { helpText !== '' && (
                     <RichText
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Help text', 'gratora' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', display: 'block', marginTop: 2 } }
                     />
                 ) }
-                <div className="fundkit-block-preview__field">YYYY-MM-DD</div>
+                <div className="gratora-block-preview__field">YYYY-MM-DD</div>
             </div>
         </>
     );
@@ -99,9 +99,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Date', 'fundraising-toolkit' ),
-        description: __( 'Date picker for birthdays, dedication dates, event dates, etc.', 'fundraising-toolkit' ),
-        category:   'fundkit-fields',
+        title:      __( 'Date', 'gratora' ),
+        description: __( 'Date picker for birthdays, dedication dates, event dates, etc.', 'gratora' ),
+        category:   'gratora-fields',
         icon:       BlockIcons[ 'date' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

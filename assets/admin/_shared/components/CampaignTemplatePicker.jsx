@@ -8,13 +8,13 @@ import { __ } from '@wordpress/i18n';
 
 // Grouping keys are stable; only the display text is translated.
 const CATEGORY_LABELS = {
-    All:       __( 'All', 'fundraising-toolkit' ),
-    General:   __( 'General', 'fundraising-toolkit' ),
-    Appeals:   __( 'Appeals', 'fundraising-toolkit' ),
-    Community: __( 'Community', 'fundraising-toolkit' ),
-    Impact:    __( 'Impact', 'fundraising-toolkit' ),
-    Bare:      __( 'Bare', 'fundraising-toolkit' ),
-    Other:     __( 'Other', 'fundraising-toolkit' ),
+    All:       __( 'All', 'gratora' ),
+    General:   __( 'General', 'gratora' ),
+    Appeals:   __( 'Appeals', 'gratora' ),
+    Community: __( 'Community', 'gratora' ),
+    Impact:    __( 'Impact', 'gratora' ),
+    Bare:      __( 'Bare', 'gratora' ),
+    Other:     __( 'Other', 'gratora' ),
 };
 
 const CATEGORY_ORDER = [ 'General', 'Appeals', 'Community', 'Impact', 'Bare' ];
@@ -230,7 +230,7 @@ export default function CampaignTemplatePicker( { value, campaignType, onPick, o
         // The type is asked for, because what a campaign can lay out depends on
         // it: a peer-to-peer campaign has teams and a fundraiser grid to place,
         // and a single-form layout has nowhere to put either.
-        apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/campaigns/templates', {
+        apiFetch( { path: addQueryArgs( '/gratora/v1/admin/campaigns/templates', {
             campaign_type: campaignType || undefined,
         } ) } )
             .then( ( list ) => setTemplates( Array.isArray( list ) ? list : [] ) )
@@ -258,35 +258,35 @@ export default function CampaignTemplatePicker( { value, campaignType, onPick, o
 
     return (
         <Modal
-            title={ __( 'Campaign templates', 'fundraising-toolkit' ) }
+            title={ __( 'Campaign templates', 'gratora' ) }
             onRequestClose={ onClose }
-            className="fundkit-template-picker fundkit-ctp"
+            className="gratora-template-picker gratora-ctp"
             size="large"
         >
             { failed ? (
-                <div className="fundkit-template-picker__state">
-                    <p>{ __( 'The campaign templates could not be loaded.', 'fundraising-toolkit' ) }</p>
+                <div className="gratora-template-picker__state">
+                    <p>{ __( 'The campaign templates could not be loaded.', 'gratora' ) }</p>
                     <button type="button" className="btn" onClick={ load }>
-                        { __( 'Try again', 'fundraising-toolkit' ) }
+                        { __( 'Try again', 'gratora' ) }
                     </button>
                 </div>
             ) : loading ? (
-                <div className="fundkit-template-picker__state"><Spinner /></div>
+                <div className="gratora-template-picker__state"><Spinner /></div>
             ) : (
                 <>
-                    <p className="fundkit-template-picker__intro">
-                        { __( 'Where things sit on the campaign page. Everything here is blocks, so you can rearrange any of it afterwards.', 'fundraising-toolkit' ) }
+                    <p className="gratora-template-picker__intro">
+                        { __( 'Where things sit on the campaign page. Everything here is blocks, so you can rearrange any of it afterwards.', 'gratora' ) }
                     </p>
 
                     { categories.length > 2 && (
-                        <div className="fundkit-template-picker__filters" role="tablist">
+                        <div className="gratora-template-picker__filters" role="tablist">
                             { categories.map( ( c ) => (
                                 <button
                                     key={ c }
                                     type="button"
                                     role="tab"
                                     aria-selected={ category === c }
-                                    className={ `fundkit-template-picker__filter${ category === c ? ' is-active' : '' }` }
+                                    className={ `gratora-template-picker__filter${ category === c ? ' is-active' : '' }` }
                                     onClick={ () => setCategory( c ) }
                                 >
                                     { CATEGORY_LABELS[ c ] || c }
@@ -295,21 +295,21 @@ export default function CampaignTemplatePicker( { value, campaignType, onPick, o
                         </div>
                     ) }
 
-                    <div className="fundkit-template-picker__grid">
+                    <div className="gratora-template-picker__grid">
                         { visible.map( ( t ) => (
                             <button
                                 key={ t.id }
                                 type="button"
-                                className={ `fundkit-template-picker__card${ value === t.id ? ' is-active' : '' }` }
+                                className={ `gratora-template-picker__card${ value === t.id ? ' is-active' : '' }` }
                                 aria-pressed={ value === t.id }
                                 onClick={ () => onPick( t ) }
                             >
                                 <Wireframe shape={ thumbFor( t ) } />
-                                <span className="fundkit-template-picker__meta">
+                                <span className="gratora-template-picker__meta">
                                     <strong>{ t.name }</strong>
-                                    <span className="fundkit-template-picker__desc">{ t.description }</span>
+                                    <span className="gratora-template-picker__desc">{ t.description }</span>
                                     { t.best_for && (
-                                        <span className="fundkit-ctp__best">{ t.best_for }</span>
+                                        <span className="gratora-ctp__best">{ t.best_for }</span>
                                     ) }
                                 </span>
                             </button>
@@ -325,14 +325,14 @@ function Wireframe( { shape } ) {
     const { main, form, footer, stacked, tone } = shape;
 
     return (
-        <span className={ `fundkit-ctp__thumb${ tone === 'dark' ? ' is-dark' : '' }` } aria-hidden="true">
-            <span className={ `fundkit-ctp__cols${ stacked ? ' is-stacked' : '' }` }>
-                <span className="fundkit-ctp__main">
+        <span className={ `gratora-ctp__thumb${ tone === 'dark' ? ' is-dark' : '' }` } aria-hidden="true">
+            <span className={ `gratora-ctp__cols${ stacked ? ' is-stacked' : '' }` }>
+                <span className="gratora-ctp__main">
                     { main.map( ( kind, i ) => <Part key={ i } kind={ kind } /> ) }
                     { stacked && <FormPart /> }
                 </span>
                 { form && (
-                    <span className="fundkit-ctp__side">
+                    <span className="gratora-ctp__side">
                         <FormPart />
                     </span>
                 ) }

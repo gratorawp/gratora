@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Database;
+namespace Gratora\Foundation\Database;
 
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * Teaches the query builder about the WordPress tables it did not define.
@@ -13,11 +13,11 @@ use FundKit\Vendor\Queryable\DB;
  * from the registered schema, and WordPress core's tables are nobody's model.
  *
  * No aliases are registered here, because core cannot know the meta keys an
- * add-on cares about. Pass real keys - withMeta('_fundkit_p2p_layout') - or
+ * add-on cares about. Pass real keys - withMeta('_gratora_p2p_layout') - or
  * contribute your own aliases on top of what is already registered:
  *
  *     $posts = DB::getSchema('posts');
- *     $posts['meta']['aliases']['layout'] = '_fundkit_p2p_layout';
+ *     $posts['meta']['aliases']['layout'] = '_gratora_p2p_layout';
  *     DB::registerSchema('posts', $posts);
  *
  * @since 1.0.0

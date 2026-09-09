@@ -3,7 +3,7 @@ import { __ } from '@wordpress/i18n';
 
 import DateField from '../_shared/components/DateField';
 
-const PAD = 22; // .fundkit-schedule__lane horizontal padding
+const PAD = 22; // .gratora-schedule__lane horizontal padding
 
 // Jan-Dec lane with draggable start/today/end markers synced to date inputs below.
 export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdited, endEdited } ) {
@@ -89,13 +89,13 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
     const setEnd   = ( next ) => onChange?.( { ends_at:   next || null } );
 
     return (
-        <div className="fundkit-schedule">
-            <div className="fundkit-schedule__lane" ref={ laneRef }>
-                <div className="fundkit-schedule__track" />
+        <div className="gratora-schedule">
+            <div className="gratora-schedule__lane" ref={ laneRef }>
+                <div className="gratora-schedule__track" />
 
                 { hasWindow && (
                     <div
-                        className="fundkit-schedule__window"
+                        className="gratora-schedule__window"
                         style={ {
                             left:  `calc(${ PAD }px + (100% - ${ PAD * 2 }px) * ${ winLeft  / 100 })`,
                             right: `calc(${ PAD }px + (100% - ${ PAD * 2 }px) * ${ ( 100 - winRight ) / 100 })`,
@@ -105,7 +105,7 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
 
                 { todayPct !== null && (
                     <div
-                        className="fundkit-schedule__today"
+                        className="gratora-schedule__today"
                         style={ { left: markerLeft( todayPct ) } }
                     />
                 ) }
@@ -113,18 +113,18 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
                 { startPct !== null && (
                     <>
                         <div
-                            className="fundkit-schedule__marker"
+                            className="gratora-schedule__marker"
                             style={ { left: markerLeft( startPct ), cursor: 'ew-resize' } }
                             onPointerDown={ beginDrag( 'start' ) }
                             role="slider"
-                            aria-label={ __( 'Drag to change start date', 'fundraising-toolkit' ) }
+                            aria-label={ __( 'Drag to change start date', 'gratora' ) }
                             aria-valuenow={ Math.round( startPct ) }
                             aria-valuemin={ 0 }
                             aria-valuemax={ 100 }
                         />
-                        <div className="fundkit-schedule__label" style={ { left: markerLeft( startPct ) } }>
+                        <div className="gratora-schedule__label" style={ { left: markerLeft( startPct ) } }>
                             { shortDate( start ) }
-                            <small>{ __( 'Start', 'fundraising-toolkit' ) }</small>
+                            <small>{ __( 'Start', 'gratora' ) }</small>
                         </div>
                     </>
                 ) }
@@ -132,48 +132,48 @@ export default function ScheduleTimeline( { startsAt, endsAt, onChange, startEdi
                 { endPct !== null && (
                     <>
                         <div
-                            className="fundkit-schedule__marker"
+                            className="gratora-schedule__marker"
                             style={ { left: markerLeft( endPct ), cursor: 'ew-resize' } }
                             onPointerDown={ beginDrag( 'end' ) }
                             role="slider"
-                            aria-label={ __( 'Drag to change end date', 'fundraising-toolkit' ) }
+                            aria-label={ __( 'Drag to change end date', 'gratora' ) }
                             aria-valuenow={ Math.round( endPct ) }
                             aria-valuemin={ 0 }
                             aria-valuemax={ 100 }
                         />
-                        <div className="fundkit-schedule__label" style={ { left: markerLeft( endPct ) } }>
+                        <div className="gratora-schedule__label" style={ { left: markerLeft( endPct ) } }>
                             { shortDate( end ) }
-                            <small>{ __( 'End', 'fundraising-toolkit' ) }</small>
+                            <small>{ __( 'End', 'gratora' ) }</small>
                         </div>
                     </>
                 ) }
             </div>
 
-            <div className="fundkit-schedule__axis">
+            <div className="gratora-schedule__axis">
                 { months.map( ( m, i ) => <span key={ i }>{ m }</span> ) }
             </div>
 
-            <div className="fundkit-schedule__dates">
+            <div className="gratora-schedule__dates">
                 <label>
-                    <span>{ __( 'Starts at', 'fundraising-toolkit' ) }</span>
+                    <span>{ __( 'Starts at', 'gratora' ) }</span>
                     <DateField
                         withTime
                         value={ startsAt || '' }
                         onChange={ setStart }
                         edited={ startEdited }
-                        placeholder={ __( 'No start scheduled', 'fundraising-toolkit' ) }
-                        ariaLabel={ __( 'Pick a start date and time', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'No start scheduled', 'gratora' ) }
+                        ariaLabel={ __( 'Pick a start date and time', 'gratora' ) }
                     />
                 </label>
                 <label>
-                    <span>{ __( 'Ends at', 'fundraising-toolkit' ) }</span>
+                    <span>{ __( 'Ends at', 'gratora' ) }</span>
                     <DateField
                         withTime
                         value={ endsAt || '' }
                         onChange={ setEnd }
                         edited={ endEdited }
-                        placeholder={ __( 'No end scheduled', 'fundraising-toolkit' ) }
-                        ariaLabel={ __( 'Pick an end date and time', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'No end scheduled', 'gratora' ) }
+                        ariaLabel={ __( 'Pick an end date and time', 'gratora' ) }
                     />
                 </label>
             </div>

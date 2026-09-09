@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Currency;
+namespace Gratora\Currency;
 
 /**
  * How each currency is conventionally written.

@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/FormRow';
+export { default } from '@gratora/ui/components/FormRow';

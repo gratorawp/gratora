@@ -42,31 +42,31 @@ export default function QuickActions() {
         setCreating( true );
         try {
             const c = await apiFetch( {
-                path:   '/fundkit/v1/admin/campaigns',
+                path:   '/gratora/v1/admin/campaigns',
                 method: 'POST',
-                data:   { title: __( 'Untitled campaign', 'fundraising-toolkit' ) },
+                data:   { title: __( 'Untitled campaign', 'gratora' ) },
             } );
             window.location.href = detailHref( c.id, 'overview' );
         } catch ( err ) {
             setCreating( false );
-            notify.error( err?.message || __( 'Could not create the campaign. Please try again.', 'fundraising-toolkit' ) );
+            notify.error( err?.message || __( 'Could not create the campaign. Please try again.', 'gratora' ) );
         }
     };
 
     return (
-        <div className="fundkit-quick-actions">
-            <Button variant="primary" onClick={ onNewCampaign } isBusy={ creating } disabled={ creating } className="fundkit-quick-actions__primary">
-                { ICON.plus } { __( 'New campaign', 'fundraising-toolkit' ) }
+        <div className="gratora-quick-actions">
+            <Button variant="primary" onClick={ onNewCampaign } isBusy={ creating } disabled={ creating } className="gratora-quick-actions__primary">
+                { ICON.plus } { __( 'New campaign', 'gratora' ) }
             </Button>
 
-            <a className="fundkit-quick-actions__item" href={ adminUrl( { page: 'fundkit-donations' } ) }>
-                { ICON.donations } { __( 'Donations', 'fundraising-toolkit' ) }
+            <a className="gratora-quick-actions__item" href={ adminUrl( { page: 'gratora-donations' } ) }>
+                { ICON.donations } { __( 'Donations', 'gratora' ) }
             </a>
-            <a className="fundkit-quick-actions__item" href={ adminUrl( { page: 'fundkit-donors' } ) }>
-                { ICON.donors } { __( 'Donors', 'fundraising-toolkit' ) }
+            <a className="gratora-quick-actions__item" href={ adminUrl( { page: 'gratora-donors' } ) }>
+                { ICON.donors } { __( 'Donors', 'gratora' ) }
             </a>
-            <a className="fundkit-quick-actions__item" href={ adminUrl( { page: 'fundkit-settings' } ) }>
-                { ICON.settings } { __( 'Settings', 'fundraising-toolkit' ) }
+            <a className="gratora-quick-actions__item" href={ adminUrl( { page: 'gratora-settings' } ) }>
+                { ICON.settings } { __( 'Settings', 'gratora' ) }
             </a>
         </div>
     );

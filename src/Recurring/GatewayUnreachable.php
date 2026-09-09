@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Recurring;
+namespace Gratora\Recurring;
 
 use RuntimeException;
 

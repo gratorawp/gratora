@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Analytics\EventRecorder;
-use FundKit\Donations\Donation;
-use FundKit\Donors\Erasure\ErasureRegistry;
-use FundKit\Donors\Erasure\ErasureRequest;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Maintenance\AbandonedPendingReaper;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Recurring\RecurringCanceller;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Erasure\ErasureRegistry;
+use Gratora\Donors\Erasure\ErasureRequest;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Maintenance\AbandonedPendingReaper;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Recurring\RecurringCanceller;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
+use Gratora\Vendor\Queryable\DB;
 use InvalidArgumentException;
 use Throwable;
 
@@ -118,7 +118,7 @@ final class DonorService
 
         $donor->save();
 
-        do_action('fundkit.donor.created', $donor);
+        do_action('gratora.donor.created', $donor);
 
         return $donor;
     }
@@ -150,19 +150,19 @@ final class DonorService
     public function editProfile(Donor $donor, array $patch): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'gratora'));
         }
         // A value of the wrong type is not an edit to that field, and coercing
         // one overwrites what the site holds. For phone and address the
         // encrypted column is the only copy, so the coercion destroys it.
         foreach (['first_name', 'last_name', 'company', 'locale', 'country', 'phone'] as $f) {
             if (array_key_exists($f, $patch) && $patch[$f] !== null && ! is_string($patch[$f])) {
-                throw new InvalidArgumentException(esc_html__('Give every profile field as text.', 'fundraising-toolkit'));
+                throw new InvalidArgumentException(esc_html__('Give every profile field as text.', 'gratora'));
             }
         }
 
         if (array_key_exists('address', $patch) && $patch['address'] !== null && ! is_array($patch['address'])) {
-            throw new InvalidArgumentException(esc_html__('Give the address as a set of fields.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('Give the address as a set of fields.', 'gratora'));
         }
 
         $dirty = [];
@@ -210,7 +210,7 @@ final class DonorService
         if ($dirty !== []) {
             $dirty['updated_at'] = $this->clock->now()->format('Y-m-d H:i:s');
             $donor->updateColumns($dirty);
-            do_action('fundkit.donor.updated', $donor);
+            do_action('gratora.donor.updated', $donor);
         }
 
         return $donor;
@@ -228,7 +228,7 @@ final class DonorService
     public function refreshProfile(Donor $donor, array $profile): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'gratora'));
         }
 
         $changed = false;
@@ -263,7 +263,7 @@ final class DonorService
         if ($changed) {
             $donor->updated_at = $this->clock->now()->format('Y-m-d H:i:s');
             $donor->save();
-            do_action('fundkit.donor.updated', $donor);
+            do_action('gratora.donor.updated', $donor);
         }
 
         return $donor;
@@ -273,11 +273,11 @@ final class DonorService
     public function changeEmail(Donor $donor, string $newEmail): Donor
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'gratora'));
         }
         $normalized = $this->hasher->normalizeEmail($newEmail);
         if ($normalized === '') {
-            throw new InvalidArgumentException(esc_html__('Email is required.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('Email is required.', 'gratora'));
         }
 
         $newHash = $this->hasher->emailHash($normalized);
@@ -296,11 +296,11 @@ final class DonorService
         $donor->updated_at      = $this->clock->now()->format('Y-m-d H:i:s');
         $donor->save();
 
-        do_action('fundkit.donor.email_changed', $donor, [
+        do_action('gratora.donor.email_changed', $donor, [
             'old_hash' => $oldHash,
             'new_hash' => $newHash,
         ]);
-        do_action('fundkit.donor.updated', $donor);
+        do_action('gratora.donor.updated', $donor);
 
         return $donor;
     }
@@ -370,16 +370,16 @@ final class DonorService
             $id = (int) $donor->id;
 
             if (isset($withDonations[$id])) {
-                $out[$id] = __('This donor has donations that are still live or have taken money, which have to be kept. Erase them instead.', 'fundraising-toolkit');
+                $out[$id] = __('This donor has donations that are still live or have taken money, which have to be kept. Erase them instead.', 'gratora');
                 continue;
             }
 
             if (isset($withPlans[$id])) {
-                $out[$id] = __('This donor has a recurring plan. Cancel it first.', 'fundraising-toolkit');
+                $out[$id] = __('This donor has a recurring plan. Cancel it first.', 'gratora');
                 continue;
             }
 
-            $vetoed  = apply_filters('fundkit.donor.undeletable_reason', null, $donor);
+            $vetoed  = apply_filters('gratora.donor.undeletable_reason', null, $donor);
             $out[$id] = is_string($vetoed) && $vetoed !== '' ? $vetoed : null;
         }
 
@@ -417,16 +417,16 @@ final class DonorService
                 // A receipt is an issued document and a settled refund is money
                 // that moved. The gate makes both unreachable; these are the
                 // belt, and they run before anything is destroyed.
-                if (DB::table('fundkit_receipts')->whereIn('donation_id', $dids)->count() > 0) {
-                    throw new InvalidArgumentException(esc_html__('This donor has a receipt on record, which has to be kept. Erase them instead.', 'fundraising-toolkit'));
+                if (DB::table('gratora_receipts')->whereIn('donation_id', $dids)->count() > 0) {
+                    throw new InvalidArgumentException(esc_html__('This donor has a receipt on record, which has to be kept. Erase them instead.', 'gratora'));
                 }
-                if (DB::table('fundkit_refunds')->whereIn('donation_id', $dids)->where('status', 'succeeded')->count() > 0) {
-                    throw new InvalidArgumentException(esc_html__('This donor has a refund on record, which has to be kept. Erase them instead.', 'fundraising-toolkit'));
+                if (DB::table('gratora_refunds')->whereIn('donation_id', $dids)->where('status', 'succeeded')->count() > 0) {
+                    throw new InvalidArgumentException(esc_html__('This donor has a refund on record, which has to be kept. Erase them instead.', 'gratora'));
                 }
 
                 // Before anything is destroyed, so an add-on clears what it
                 // hangs off these donations. A listener that throws aborts.
-                do_action('fundkit.test_data.purge_donations', $dids);
+                do_action('gratora.test_data.purge_donations', $dids);
             }
 
             // Run every erasure handler before deleting rows, within the transaction, so
@@ -436,19 +436,19 @@ final class DonorService
             // Everything the donor left behind except the record of the
             // destructive acts themselves. The wildcard is written out because
             // the compiler wraps a bare value in its own.
-            DB::table('fundkit_events')
+            DB::table('gratora_events')
                 ->where('type', 'donor.%', 'NOT LIKE')
                 ->where('donor_id', $id)
                 ->delete();
 
             if ($dids !== []) {
-                DB::table('fundkit_events')
+                DB::table('gratora_events')
                     ->where('type', 'donor.%', 'NOT LIKE')
                     ->whereIn('donation_id', $dids)
                     ->delete();
 
-                DB::table('fundkit_donation_notes')->whereIn('donation_id', $dids)->delete();
-                DB::table('fundkit_refunds')->whereIn('donation_id', $dids)->delete();
+                DB::table('gratora_donation_notes')->whereIn('donation_id', $dids)->delete();
+                DB::table('gratora_refunds')->whereIn('donation_id', $dids)->delete();
             }
 
             Consent::query()->where('donor_id', $id)->delete();
@@ -466,7 +466,7 @@ final class DonorService
             }
 
             if ($dids !== []) {
-                DB::table('fundkit_donations')->whereIn('id', $dids)->delete();
+                DB::table('gratora_donations')->whereIn('id', $dids)->delete();
             }
 
             $this->events()->record('donor.deleted', [
@@ -483,7 +483,7 @@ final class DonorService
 
             // After the row is gone, so a listener cannot resurrect it by
             // writing something that references a donor which no longer exists.
-            do_action('fundkit.donor.deleted', $id, $hash);
+            do_action('gratora.donor.deleted', $id, $hash);
         });
 
         // After the commit: file deletion cannot be rolled back, so a delete
@@ -581,13 +581,13 @@ final class DonorService
             return;
         }
 
-        $canceller = \FundKit\Foundation\Plugin::instance()->container->get(RecurringCanceller::class);
+        $canceller = \Gratora\Foundation\Plugin::instance()->container->get(RecurringCanceller::class);
 
         $cancelled = [];
 
         foreach ($plans as $plan) {
             try {
-                $canceller->cancel($plan, __('The donor asked for their data to be erased.', 'fundraising-toolkit'));
+                $canceller->cancel($plan, __('The donor asked for their data to be erased.', 'gratora'));
                 $cancelled[] = (int) $plan->id;
             } catch (Throwable $e) {
                 // The erasure stops here, so the caller has to be told which
@@ -910,13 +910,13 @@ final class DonorService
     public function setEncryptedField(Donor $donor, string $field, ?string $value): void
     {
         if ($donor->redacted_at !== null) {
-            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('This donor has been erased and can no longer be edited.', 'gratora'));
         }
         if (! in_array($field, ['phone_encrypted', 'address_encrypted', 'notes_encrypted', 'tax_id_encrypted'], true)) {
             throw new InvalidArgumentException(esc_html("Unsupported encrypted field: {$field}"));
         }
         $encrypted = ($value === null || $value === '') ? null : $this->crypto->encrypt($value);
-        DB::table('fundkit_donors')
+        DB::table('gratora_donors')
             ->where('id', $donor->id)
             ->update([$field => $encrypted, 'updated_at' => $this->clock->now()->format('Y-m-d H:i:s')]);
         $donor->$field = $encrypted ?? '';
@@ -936,7 +936,7 @@ final class DonorService
 
         // Ids, not donors: hydrating a model per match just to read its id
         // costs far more time and memory than the id-only query.
-        $rows = DB::table('fundkit_donors')
+        $rows = DB::table('gratora_donors')
             ->selectRaw('id')
             ->where(function ($q) use ($term, $hash): void {
                 $q->whereLike('first_name', $term)

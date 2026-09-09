@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
+use Gratora\Campaigns\Campaign;
 use WP_REST_Request;
 
 /**
@@ -21,7 +21,7 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Button gate campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -31,9 +31,9 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
     {
         $html = $this->renderButton();
 
-        $this->assertStringContainsString('fundkit-donate-button', $html);
-        $this->assertStringContainsString('fundkit-donate-modal', $html);
-        $this->assertStringNotContainsString('fundkit-block__empty', $html);
+        $this->assertStringContainsString('gratora-donate-button', $html);
+        $this->assertStringContainsString('gratora-donate-modal', $html);
+        $this->assertStringNotContainsString('gratora-block__empty', $html);
     }
 
     public function test_an_ended_campaign_explains_itself_instead_of_rendering_a_dead_button(): void
@@ -42,7 +42,7 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
 
         $html = $this->renderButton();
 
-        $this->assertStringNotContainsString('fundkit-donate-button', $html);
+        $this->assertStringNotContainsString('gratora-donate-button', $html);
         $this->assertStringContainsString('This campaign has finished accepting donations.', $html);
     }
 
@@ -52,7 +52,7 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
 
         $html = $this->renderButton();
 
-        $this->assertStringNotContainsString('fundkit-donate-button', $html);
+        $this->assertStringNotContainsString('gratora-donate-button', $html);
         $this->assertStringContainsString('Donations are not open for this campaign yet.', $html);
     }
 
@@ -62,7 +62,7 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
 
         $html = $this->renderButton();
 
-        $this->assertStringContainsString('fundkit-block-notice', $html);
+        $this->assertStringContainsString('gratora-block-notice', $html);
         $this->assertStringContainsString('check its schedule', $html);
     }
 
@@ -74,7 +74,7 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
         $html = $this->renderButton();
 
         $this->assertStringContainsString('This campaign has finished accepting donations.', $html);
-        $this->assertStringNotContainsString('fundkit-block-notice', $html);
+        $this->assertStringNotContainsString('gratora-block-notice', $html);
     }
 
     private function schedule(?string $startsAt, ?string $endsAt): void
@@ -92,10 +92,10 @@ final class DonateButtonClosedCampaignTest extends IntegrationTestCase
             'post_status'  => 'publish',
             'post_type'    => 'page',
             'post_content' => sprintf(
-                '<!-- wp:fundkit/donate-button {"campaignId":%d} /-->',
+                '<!-- wp:gratora/donate-button {"campaignId":%d} /-->',
                 $this->campaignId
             ),
-            'meta_input'   => ['_fundkit_campaign_id' => $this->campaignId],
+            'meta_input'   => ['_gratora_campaign_id' => $this->campaignId],
         ]);
 
         global $post;

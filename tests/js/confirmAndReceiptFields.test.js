@@ -64,7 +64,7 @@ afterEach( () => {
 const mount = ( s ) => render( <ConfirmStep state={ s } config={ CONFIG } />, document.getElementById( 'root' ) );
 
 const rowValue = ( label ) => {
-    const row = [ ...document.querySelectorAll( '.fundkit-form__summary-row' ) ]
+    const row = [ ...document.querySelectorAll( '.gratora-form__summary-row' ) ]
         .find( ( r ) => r.querySelector( 'dt' )?.textContent.trim() === label );
 
     return row ? row.querySelector( 'dd' ).textContent.trim() : null;

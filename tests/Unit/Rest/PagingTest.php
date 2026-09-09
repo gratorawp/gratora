@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Rest;
+namespace Gratora\Tests\Unit\Rest;
 
-use FundKit\Rest\Paging;
+use Gratora\Rest\Paging;
 use PHPUnit\Framework\TestCase;
 
 /**

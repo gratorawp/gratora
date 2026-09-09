@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways\Offline;
+namespace Gratora\Gateways\Offline;
 
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\SettlesOutOfBand;
-use FundKit\Gateways\WebhookOutcome;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\SettlesOutOfBand;
+use Gratora\Gateways\WebhookOutcome;
 use WP_REST_Request;
 
 /**
@@ -37,13 +37,13 @@ final class OfflineGateway implements PaymentGateway, SettlesOutOfBand
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Offline donations', 'fundraising-toolkit');
+        return __('Offline donations', 'gratora');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Pay by bank transfer, check or cash. We confirm it manually.', 'fundraising-toolkit');
+        return __('Pay by bank transfer, check or cash. We confirm it manually.', 'gratora');
     }
 
     /** @since 1.0.0 */
@@ -82,7 +82,7 @@ final class OfflineGateway implements PaymentGateway, SettlesOutOfBand
      */
     public function canCharge(): bool
     {
-        $cfg = get_option('fundkit_gateway_config', []);
+        $cfg = get_option('gratora_gateway_config', []);
         $cfg = is_array($cfg) ? $cfg : [];
 
         return trim((string) ($cfg['offline']['instructions'] ?? '')) !== ''

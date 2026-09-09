@@ -1,15 +1,15 @@
 
-@import '@fundkit/ui/scss/tokens';
+@import '@gratora/ui/scss/tokens';
 @import '../_shared/admin-base';
-@import '@fundkit/ui/scss/components/amount-input';
-@import '@fundkit/ui/scss/components/searchable-select';
-@import '@fundkit/ui/scss/components/skeleton';
+@import '@gratora/ui/scss/components/amount-input';
+@import '@gratora/ui/scss/components/searchable-select';
+@import '@gratora/ui/scss/components/skeleton';
 
 // Aliases for shared token names still used locally.
 $shadow-card:   $shadow-md;
 $shadow-lifted: $shadow-lg;
 
-body.fundkit-onboarding-fullscreen {
+body.gratora-onboarding-fullscreen {
     background: $bg-page;
     margin-top: 0 !important;
 
@@ -33,8 +33,8 @@ body.fundkit-onboarding-fullscreen {
     .error { display: none !important; }
 
     // Outrank wp-admin’s global input styles.
-    .fundkit-onboarding__input,
-    .fundkit-searchable__input {
+    .gratora-onboarding__input,
+    .gratora-searchable__input {
         border: 1px solid $border-mid;
         background: #fff;
         box-shadow: none;
@@ -52,10 +52,10 @@ body.fundkit-onboarding-fullscreen {
             outline: 0;
         }
     }
-    select.fundkit-onboarding__input { padding-right: 32px; }
+    select.gratora-onboarding__input { padding-right: 32px; }
 }
 
-.fundkit-onboarding {
+.gratora-onboarding {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
     color: $text;
     min-height: 100vh;
@@ -192,7 +192,7 @@ body.fundkit-onboarding-fullscreen {
             box-shadow: 0 0 0 3px $accent-soft;
         }
     }
-    select.fundkit-onboarding__input {
+    select.gratora-onboarding__input {
         appearance: none;
         cursor: pointer;
         background-image:
@@ -308,7 +308,7 @@ body.fundkit-onboarding-fullscreen {
     &__preset-thumb--classic {
         background: linear-gradient(180deg, #f5f4fa, $accent-soft);
 
-        .fundkit-onboarding__preset-btn {
+        .gratora-onboarding__preset-btn {
             background: $accent;
             color: #fff;
             border-radius: 999px;
@@ -317,7 +317,7 @@ body.fundkit-onboarding-fullscreen {
     &__preset-thumb--bold {
         background: linear-gradient(180deg, #f5f5f7, #e9e9ee);
 
-        .fundkit-onboarding__preset-btn {
+        .gratora-onboarding__preset-btn {
             background: #0F3D5C;
             color: #fff;
             border-radius: 4px;
@@ -331,7 +331,7 @@ body.fundkit-onboarding-fullscreen {
         background: #fafaf9;
         border: 1px dashed $border-mid;
 
-        .fundkit-onboarding__preset-btn {
+        .gratora-onboarding__preset-btn {
             background: transparent;
             color: $text;
             border: 1px solid $text;
@@ -346,7 +346,7 @@ body.fundkit-onboarding-fullscreen {
             #ebedf0 6px 12px
         );
 
-        .fundkit-onboarding__preset-btn {
+        .gratora-onboarding__preset-btn {
             background: $text-soft;
             color: #fff;
             border-radius: 8px;
@@ -400,7 +400,7 @@ body.fundkit-onboarding-fullscreen {
         border-radius: $radius-lg;
         background: linear-gradient(90deg, $bg-soft 0%, #f3f4f6 40%, $bg-soft 80%);
         background-size: 200% 100%;
-        animation: fundkit-skeleton-pulse 1.4s ease-in-out infinite;
+        animation: gratora-skeleton-pulse 1.4s ease-in-out infinite;
     }
 
     &__preview-fallback {
@@ -715,10 +715,10 @@ body.fundkit-onboarding-fullscreen {
 }
 
 // Add element specificity to outrank the shared anchor-focus radius.
-body .fundkit-onboarding .fundkit-btn:focus,
-body .fundkit-onboarding .fundkit-btn:active { border-radius: 999px; }
+body .gratora-onboarding .gratora-btn:focus,
+body .gratora-onboarding .gratora-btn:active { border-radius: 999px; }
 
-.fundkit-onboarding .fundkit-btn {
+.gratora-onboarding .gratora-btn {
     appearance: none;
     border: 1px solid transparent;
     border-radius: 999px;
@@ -758,7 +758,7 @@ body .fundkit-onboarding .fundkit-btn:active { border-radius: 999px; }
 }
 
 @media (max-width: 640px) {
-    .fundkit-onboarding {
+    .gratora-onboarding {
         padding: 16px 12px 32px;
 
         &__top { margin-bottom: 20px; }
@@ -772,10 +772,10 @@ body .fundkit-onboarding .fundkit-btn:active { border-radius: 999px; }
         &__amounts { grid-template-columns: repeat(2, 1fr); }
         &__checklist-item {
             grid-template-columns: 28px 1fr;
-            .fundkit-btn { grid-column: 1 / -1; width: 100%; justify-content: center; }
+            .gratora-btn { grid-column: 1 / -1; width: 100%; justify-content: center; }
         }
         &__nav { flex-direction: column-reverse; gap: 8px;
-            .fundkit-btn { width: 100%; }
+            .gratora-btn { width: 100%; }
             > span { display: none; }
         }
     }

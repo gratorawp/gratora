@@ -1,22 +1,22 @@
 /* Use WordPress styling on the Plugins screen; show destructive emphasis only when selected. */
 
-body.fundkit-deact-open { overflow: hidden; }
+body.gratora-deact-open { overflow: hidden; }
 
-.fundkit-deact {
+.gratora-deact {
     position: fixed;
     inset: 0;
     z-index: 100000;
 }
 
-.fundkit-deact[hidden] { display: none; }
+.gratora-deact[hidden] { display: none; }
 
-.fundkit-deact__backdrop {
+.gratora-deact__backdrop {
     position: absolute;
     inset: 0;
     background: rgba(15, 23, 42, .5);
 }
 
-.fundkit-deact__panel {
+.gratora-deact__panel {
     position: relative;
     max-width: 480px;
     margin: 10vh auto 0;
@@ -30,7 +30,7 @@ body.fundkit-deact-open { overflow: hidden; }
     transition: border-color .15s ease;
 }
 
-.fundkit-deact__title {
+.gratora-deact__title {
     margin: 0 0 8px;
     font-size: 18px;
     font-weight: 600;
@@ -38,14 +38,14 @@ body.fundkit-deact-open { overflow: hidden; }
     color: #1d2327;
 }
 
-.fundkit-deact__lede {
+.gratora-deact__lede {
     margin: 0 0 18px;
     font-size: 13px;
     line-height: 1.6;
     color: #50575e;
 }
 
-.fundkit-deact__choice {
+.gratora-deact__choice {
     padding: 12px 14px;
     border: 1px solid #dcdcde;
     border-radius: 4px;
@@ -53,7 +53,7 @@ body.fundkit-deact-open { overflow: hidden; }
     transition: border-color .15s ease, background-color .15s ease;
 }
 
-.fundkit-deact__check {
+.gratora-deact__check {
     display: flex;
     align-items: center;
     gap: 9px;
@@ -64,27 +64,27 @@ body.fundkit-deact-open { overflow: hidden; }
     cursor: pointer;
 }
 
-.fundkit-deact__check input { margin: 0; }
+.gratora-deact__check input { margin: 0; }
 
-.fundkit-deact__consequence {
+.gratora-deact__consequence {
     margin-top: 12px;
     padding-top: 12px;
     border-top: 1px solid #f0c9c9;
 }
 
-.fundkit-deact__consequence[hidden] { display: none; }
+.gratora-deact__consequence[hidden] { display: none; }
 
-.fundkit-deact__consequence-lead,
-.fundkit-deact__consequence-foot {
+.gratora-deact__consequence-lead,
+.gratora-deact__consequence-foot {
     margin: 0;
     font-size: 12px;
     line-height: 1.55;
     color: #8a2424;
 }
 
-.fundkit-deact__consequence-foot { margin-top: 10px; }
+.gratora-deact__consequence-foot { margin-top: 10px; }
 
-.fundkit-deact__list {
+.gratora-deact__list {
     margin: 8px 0 0;
     padding-left: 18px;
     font-size: 12px;
@@ -93,18 +93,18 @@ body.fundkit-deact-open { overflow: hidden; }
     list-style: disc;
 }
 
-.fundkit-deact.is-danger .fundkit-deact__panel { border-top-color: #b32d2e; }
+.gratora-deact.is-danger .gratora-deact__panel { border-top-color: #b32d2e; }
 
-.fundkit-deact.is-danger .fundkit-deact__choice {
+.gratora-deact.is-danger .gratora-deact__choice {
     border-color: #e6a2a2;
     background: #fcf0f0;
 }
 
-.fundkit-deact.is-danger .fundkit-deact__check { color: #8a2424; }
+.gratora-deact.is-danger .gratora-deact__check { color: #8a2424; }
 
-.fundkit-deact.is-danger .button-primary,
-.fundkit-deact.is-danger .button-primary:hover,
-.fundkit-deact.is-danger .button-primary:focus {
+.gratora-deact.is-danger .button-primary,
+.gratora-deact.is-danger .button-primary:hover,
+.gratora-deact.is-danger .button-primary:focus {
     background: #b32d2e;
     border-color: #b32d2e;
     color: #fff;
@@ -112,9 +112,9 @@ body.fundkit-deact-open { overflow: hidden; }
     text-shadow: none;
 }
 
-.fundkit-deact.is-danger .button-primary:focus { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #b32d2e; }
+.gratora-deact.is-danger .button-primary:focus { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #b32d2e; }
 
-.fundkit-deact__actions {
+.gratora-deact__actions {
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -123,6 +123,6 @@ body.fundkit-deact-open { overflow: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .fundkit-deact__panel,
-    .fundkit-deact__choice { transition: none; }
+    .gratora-deact__panel,
+    .gratora-deact__choice { transition: none; }
 }

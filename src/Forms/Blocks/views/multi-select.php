@@ -10,20 +10,20 @@ defined('ABSPATH') || exit;
  */
 ?>
 <fieldset
-    class="fundkit-block fundkit-block--multi-select fundkit-multi-select"
+    class="gratora-block gratora-block--multi-select gratora-multi-select"
     data-min="<?php echo esc_attr((string) $min); ?>"
     data-max="<?php echo esc_attr((string) $max); ?>"
 >
     <?php if ($label !== ''): ?>
-        <legend class="fundkit-multi-select__legend"><?php echo esc_html($label); ?></legend>
+        <legend class="gratora-multi-select__legend"><?php echo esc_html($label); ?></legend>
     <?php endif; ?>
-    <div class="fundkit-multi-select__options">
+    <div class="gratora-multi-select__options">
         <?php foreach ($options as $i => $o):
             $optLabel = (string) $o['label'];
             $optValue = (string) $o['value'];
             $checked  = ! empty($o['isDefault']);
             ?>
-            <label class="fundkit-multi-select__option<?php echo esc_attr($checked ? ' is-selected' : ''); ?>">
+            <label class="gratora-multi-select__option<?php echo esc_attr($checked ? ' is-selected' : ''); ?>">
                 <input
                     type="checkbox"
                     name="custom[<?php echo esc_attr($field); ?>][]"
@@ -31,7 +31,7 @@ defined('ABSPATH') || exit;
                     <?php echo esc_attr($checked ? 'checked' : ''); ?>
                     <?php echo esc_attr(($required && $i === 0) ? 'required' : ''); ?>
                 >
-                <span class="fundkit-multi-select__option-label"><?php echo esc_html($optLabel !== '' ? $optLabel : $optValue); ?></span>
+                <span class="gratora-multi-select__option-label"><?php echo esc_html($optLabel !== '' ? $optLabel : $optValue); ?></span>
             </label>
         <?php endforeach; ?>
     </div>

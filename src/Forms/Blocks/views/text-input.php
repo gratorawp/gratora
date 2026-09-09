@@ -9,13 +9,13 @@ defined('ABSPATH') || exit;
  * @var string $pattern
  * @var string $field
  */
-$labelText = $label !== '' ? $label : __('Text', 'fundraising-toolkit');
+$labelText = $label !== '' ? $label : __('Text', 'gratora');
 $fieldName = $field !== '' ? $field : 'text';
 ?>
-<label class="fundkit-block fundkit-block--text-input fundkit-donor__field">
-    <span class="fundkit-donor__label"><?php echo esc_html($labelText); ?></span>
+<label class="gratora-block gratora-block--text-input gratora-donor__field">
+    <span class="gratora-donor__label"><?php echo esc_html($labelText); ?></span>
     <?php if ($helpText !== ''): ?>
-        <span class="fundkit-donor__help"><?php echo esc_html($helpText); ?></span>
+        <span class="gratora-donor__help"><?php echo esc_html($helpText); ?></span>
     <?php endif; ?>
     <input
         type="text"

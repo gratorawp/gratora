@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Settings\SettingsService;
-use FundKit\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
+use Gratora\Foundation\Plugin;
 
 /**
  * Swedish, Norwegian, Polish, Czech and South African money groups thousands
@@ -18,7 +18,7 @@ final class SeparatorWhitespaceSurvivesSaveTest extends IntegrationTestCase
 {
     private function saveFormat(array $format): array
     {
-        $request = new \WP_REST_Request('POST', '/fundkit/v1/admin/settings/currency-locale');
+        $request = new \WP_REST_Request('POST', '/gratora/v1/admin/settings/currency-locale');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode(['format' => $format]));
 
@@ -90,7 +90,7 @@ final class SeparatorWhitespaceSurvivesSaveTest extends IntegrationTestCase
      */
     public function test_other_settings_are_still_trimmed(): void
     {
-        $request = new \WP_REST_Request('POST', '/fundkit/v1/admin/settings/org-profile');
+        $request = new \WP_REST_Request('POST', '/gratora/v1/admin/settings/org-profile');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode(['name' => '  Wildwater Trust  ']));
 

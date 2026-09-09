@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Foundation\Plugin;
-use FundKit\Receipts\Receipt;
-use FundKit\Receipts\ReceiptContext;
-use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Receipts\ReceiptRenderer;
+use Gratora\Analytics\Event;
+use Gratora\Foundation\Plugin;
+use Gratora\Receipts\Receipt;
+use Gratora\Receipts\ReceiptContext;
+use Gratora\Receipts\ReceiptIssuer;
+use Gratora\Receipts\ReceiptRenderer;
 use RuntimeException;
 use WP_REST_Request;
 
@@ -56,7 +56,7 @@ final class ReceiptRenderFailureTest extends IntegrationTestCase
     protected function tearDown(): void
     {
         if ($this->throwing !== null) {
-            remove_filter('fundkit.receipt.renderers', $this->throwing, 1);
+            remove_filter('gratora.receipt.renderers', $this->throwing, 1);
             $this->throwing = null;
         }
 
@@ -67,7 +67,7 @@ final class ReceiptRenderFailureTest extends IntegrationTestCase
     private function breakTheRenderer(): void
     {
         $this->throwing = static fn (array $rs): array => array_merge([new ThrowingReceiptRenderer()], $rs);
-        add_filter('fundkit.receipt.renderers', $this->throwing, 1);
+        add_filter('gratora.receipt.renderers', $this->throwing, 1);
     }
 
     /** @return array{0:int,1:string} the receipt id and its raw download token */
@@ -75,7 +75,7 @@ final class ReceiptRenderFailureTest extends IntegrationTestCase
     {
         $mails = $this->captureMails();
 
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'sarah@example.com',
@@ -86,7 +86,7 @@ final class ReceiptRenderFailureTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($create)->get_data()['reference'];
 
-        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);
@@ -95,7 +95,7 @@ final class ReceiptRenderFailureTest extends IntegrationTestCase
 
         foreach ($mails as $m) {
             if (empty($m['attachments'])) continue;
-            if (preg_match('#/fundkit/v1/receipts/(\d+)/download\?token=([a-f0-9]+)#', (string) $m['message'], $hit)) {
+            if (preg_match('#/gratora/v1/receipts/(\d+)/download\?token=([a-f0-9]+)#', (string) $m['message'], $hit)) {
                 return [(int) $hit[1], (string) $hit[2]];
             }
         }
@@ -113,12 +113,12 @@ final class ReceiptRenderFailureTest extends IntegrationTestCase
         [$receiptId, $token] = $this->issueReceipt();
         $this->breakTheRenderer();
 
-        $req = new WP_REST_Request('GET', "/fundkit/v1/receipts/{$receiptId}/download");
+        $req = new WP_REST_Request('GET', "/gratora/v1/receipts/{$receiptId}/download");
         $req->set_query_params(['token' => $token]);
         $res = rest_do_request($req);
 
         $this->assertSame(500, $res->get_status());
-        $this->assertSame('fundkit_receipt_render_failed', $res->get_data()['code']);
+        $this->assertSame('gratora_receipt_render_failed', $res->get_data()['code']);
     }
 
     public function test_the_org_can_read_why_a_download_failed(): void
@@ -126,7 +126,7 @@ final class ReceiptRenderFailureTest extends IntegrationTestCase
         [$receiptId, $token] = $this->issueReceipt();
         $this->breakTheRenderer();
 
-        $req = new WP_REST_Request('GET', "/fundkit/v1/receipts/{$receiptId}/download");
+        $req = new WP_REST_Request('GET', "/gratora/v1/receipts/{$receiptId}/download");
         $req->set_query_params(['token' => $token]);
         rest_do_request($req);
 

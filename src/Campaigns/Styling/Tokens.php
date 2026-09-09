@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Styling;
+namespace Gratora\Campaigns\Styling;
 
 /**
  * Each token maps to a CSS custom property injected on the rendered form element.
@@ -29,8 +29,8 @@ final class Tokens
     /**
      * Tokens a preset may set that are not admin controls. Each is deliberately
      * left out of catalogue(), and so out of defaults(), because unset is what
-     * makes it inherit: --fundkit-button-radius falls through to
-     * --fundkit-radius-sm, so an org that rounds its controls rounds its button
+     * makes it inherit: --gratora-button-radius falls through to
+     * --gratora-radius-sm, so an org that rounds its controls rounds its button
      * with them. A default here would pin the button and break that, but
      * sanitize() has to keep the key or Classic loses its pill on the first
      * save of the brand panel.
@@ -41,77 +41,77 @@ final class Tokens
      * @var array<string, array{control: string, inherits: string}>
      */
     private const PASS_THROUGH = [
-        'fundkit-button-radius'   => ['control' => 'range', 'inherits' => 'var(--fundkit-radius-sm, 8px)'],
-        'fundkit-switcher-radius' => ['control' => 'range', 'inherits' => 'var(--fundkit-radius-sm, 8px)'],
+        'gratora-button-radius'   => ['control' => 'range', 'inherits' => 'var(--gratora-radius-sm, 8px)'],
+        'gratora-switcher-radius' => ['control' => 'range', 'inherits' => 'var(--gratora-radius-sm, 8px)'],
     ];
 
     public static function catalogue(): array
     {
         return [
-            'fundkit-accent' => [
+            'gratora-accent' => [
                 'group'   => 'brand',
-                'label'   => __('Accent', 'fundraising-toolkit'),
+                'label'   => __('Accent', 'gratora'),
                 'default' => '#211d3f',
                 'control' => 'color',
             ],
-            'fundkit-accent-soft' => [
+            'gratora-accent-soft' => [
                 'group'   => 'brand',
-                'label'   => __('Accent soft', 'fundraising-toolkit'),
+                'label'   => __('Accent soft', 'gratora'),
                 'default' => '#efedf8',
                 'control' => 'color',
-                'help'    => __('Translucent variant used for hover and selected tiles.', 'fundraising-toolkit'),
+                'help'    => __('Translucent variant used for hover and selected tiles.', 'gratora'),
             ],
-            'fundkit-text' => [
+            'gratora-text' => [
                 'group'   => 'brand',
-                'label'   => __('Body text', 'fundraising-toolkit'),
+                'label'   => __('Body text', 'gratora'),
                 'default' => '#111827',
                 'control' => 'color',
             ],
-            'fundkit-text-muted' => [
+            'gratora-text-muted' => [
                 'group'   => 'brand',
-                'label'   => __('Muted text', 'fundraising-toolkit'),
+                'label'   => __('Muted text', 'gratora'),
                 'default' => '#6b7280',
                 'control' => 'color',
-                'help'    => __('Helper text, placeholders, captions.', 'fundraising-toolkit'),
+                'help'    => __('Helper text, placeholders, captions.', 'gratora'),
             ],
 
-            'fundkit-bg' => [
+            'gratora-bg' => [
                 'group'   => 'surface',
-                'label'   => __('Background', 'fundraising-toolkit'),
+                'label'   => __('Background', 'gratora'),
                 'default' => '#ffffff',
                 'control' => 'color',
-                'help'    => __('The card behind the form, and the panels on the campaign page.', 'fundraising-toolkit'),
+                'help'    => __('The card behind the form, and the panels on the campaign page.', 'gratora'),
             ],
-            'fundkit-field-bg' => [
+            'gratora-field-bg' => [
                 'group'   => 'surface',
-                'label'   => __('Field background', 'fundraising-toolkit'),
+                'label'   => __('Field background', 'gratora'),
                 'default' => '#ffffff',
                 'control' => 'color',
-                'help'    => __('Inside the boxes a donor types in or picks from.', 'fundraising-toolkit'),
+                'help'    => __('Inside the boxes a donor types in or picks from.', 'gratora'),
             ],
-            'fundkit-bg-soft' => [
+            'gratora-bg-soft' => [
                 'group'   => 'surface',
-                'label'   => __('Soft background', 'fundraising-toolkit'),
+                'label'   => __('Soft background', 'gratora'),
                 'default' => '#f8fafb',
                 'control' => 'color',
-                'help'    => __('Amount tile resting fill.', 'fundraising-toolkit'),
+                'help'    => __('Amount tile resting fill.', 'gratora'),
             ],
-            'fundkit-border' => [
+            'gratora-border' => [
                 'group'   => 'surface',
-                'label'   => __('Border', 'fundraising-toolkit'),
+                'label'   => __('Border', 'gratora'),
                 'default' => '#e5e7eb',
                 'control' => 'color',
             ],
 
-            'fundkit-typeface' => [
+            'gratora-typeface' => [
                 'group'   => 'typography',
-                'label'   => __('Font family', 'fundraising-toolkit'),
+                'label'   => __('Font family', 'gratora'),
                 'default' => 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
                 'control' => 'font',
             ],
-            'fundkit-type-size' => [
+            'gratora-type-size' => [
                 'group'   => 'typography',
-                'label'   => __('Base font size', 'fundraising-toolkit'),
+                'label'   => __('Base font size', 'gratora'),
                 'default' => '15px',
                 'control' => 'select',
                 'options' => [
@@ -120,57 +120,57 @@ final class Tokens
                     '16px' => '16',
                 ],
             ],
-            'fundkit-heading-weight' => [
+            'gratora-heading-weight' => [
                 'group'   => 'typography',
-                'label'   => __('Heading weight', 'fundraising-toolkit'),
+                'label'   => __('Heading weight', 'gratora'),
                 'default' => '600',
                 'control' => 'select',
                 'options' => [
-                    '500' => __('Medium', 'fundraising-toolkit'),
-                    '600' => __('Semibold', 'fundraising-toolkit'),
-                    '700' => __('Bold', 'fundraising-toolkit'),
+                    '500' => __('Medium', 'gratora'),
+                    '600' => __('Semibold', 'gratora'),
+                    '700' => __('Bold', 'gratora'),
                 ],
             ],
-            'fundkit-body-weight' => [
+            'gratora-body-weight' => [
                 'group'   => 'typography',
-                'label'   => __('Body weight', 'fundraising-toolkit'),
+                'label'   => __('Body weight', 'gratora'),
                 'default' => '400',
                 'control' => 'select',
                 'options' => [
-                    '400' => __('Regular', 'fundraising-toolkit'),
-                    '500' => __('Medium', 'fundraising-toolkit'),
+                    '400' => __('Regular', 'gratora'),
+                    '500' => __('Medium', 'gratora'),
                 ],
             ],
 
-            'fundkit-radius' => [
+            'gratora-radius' => [
                 'group'   => 'radius',
-                'label'   => __('Corner radius', 'fundraising-toolkit'),
+                'label'   => __('Corner radius', 'gratora'),
                 'default' => '10px',
                 'control' => 'range',
                 'min'     => 0,
                 'max'     => 24,
                 'step'    => 1,
-                'help'    => __('Cards, panels and other surfaces.', 'fundraising-toolkit'),
+                'help'    => __('Cards, panels and other surfaces.', 'gratora'),
             ],
-            'fundkit-radius-sm' => [
+            'gratora-radius-sm' => [
                 'group'   => 'radius',
-                'label'   => __('Small corner radius', 'fundraising-toolkit'),
+                'label'   => __('Small corner radius', 'gratora'),
                 'default' => '8px',
                 'control' => 'range',
                 'min'     => 0,
                 'max'     => 16,
                 'step'    => 1,
-                'help'    => __('Buttons, inputs, chips and other controls.', 'fundraising-toolkit'),
+                'help'    => __('Buttons, inputs, chips and other controls.', 'gratora'),
             ],
-            // Not 'fundkit-border-width'. Token names ship inside a block's inline
+            // Not 'gratora-border-width'. Token names ship inside a block's inline
             // style attribute, and themes select on substrings of it:
             // twentytwentyfive's `html :where([style*="border-width"])` matches
             // the custom property and draws a border on every campaign block.
-            // Same for fundkit-typeface, fundkit-type-size and fundkit-button-size: no
+            // Same for gratora-typeface, gratora-type-size and gratora-button-size: no
             // token name may contain a CSS property a [style*=] selector targets.
-            'fundkit-stroke' => [
+            'gratora-stroke' => [
                 'group'   => 'radius',
-                'label'   => __('Border width', 'fundraising-toolkit'),
+                'label'   => __('Border width', 'gratora'),
                 'default' => '1px',
                 'control' => 'select',
                 'options' => [
@@ -179,19 +179,19 @@ final class Tokens
                 ],
             ],
 
-            'fundkit-gap' => [
+            'gratora-gap' => [
                 'group'   => 'spacing',
-                'label'   => __('Block spacing', 'fundraising-toolkit'),
+                'label'   => __('Block spacing', 'gratora'),
                 'default' => '20px',
                 'control' => 'range',
                 'min'     => 12,
                 'max'     => 32,
                 'step'    => 2,
-                'help'    => __('Vertical rhythm between blocks.', 'fundraising-toolkit'),
+                'help'    => __('Vertical rhythm between blocks.', 'gratora'),
             ],
-            'fundkit-field-gap' => [
+            'gratora-field-gap' => [
                 'group'   => 'spacing',
-                'label'   => __('Label gap', 'fundraising-toolkit'),
+                'label'   => __('Label gap', 'gratora'),
                 'default' => '6px',
                 'control' => 'range',
                 'min'     => 4,
@@ -199,86 +199,86 @@ final class Tokens
                 'step'    => 1,
             ],
 
-            'fundkit-button-size' => [
+            'gratora-button-size' => [
                 'group'   => 'buttons',
-                'label'   => __('Button height', 'fundraising-toolkit'),
+                'label'   => __('Button height', 'gratora'),
                 'default' => '48px',
                 'control' => 'range',
                 'min'     => 40,
                 'max'     => 60,
                 'step'    => 2,
             ],
-            'fundkit-button-weight' => [
+            'gratora-button-weight' => [
                 'group'   => 'buttons',
-                'label'   => __('Button text weight', 'fundraising-toolkit'),
+                'label'   => __('Button text weight', 'gratora'),
                 'default' => '600',
                 'control' => 'select',
                 'options' => [
-                    '500' => __('Medium', 'fundraising-toolkit'),
-                    '600' => __('Semibold', 'fundraising-toolkit'),
-                    '700' => __('Bold', 'fundraising-toolkit'),
+                    '500' => __('Medium', 'gratora'),
+                    '600' => __('Semibold', 'gratora'),
+                    '700' => __('Bold', 'gratora'),
                 ],
             ],
-            'fundkit-button-shadow' => [
+            'gratora-button-shadow' => [
                 'group'   => 'buttons',
-                'label'   => __('Button shadow', 'fundraising-toolkit'),
+                'label'   => __('Button shadow', 'gratora'),
                 'default' => '0 1px 2px rgba(0,0,0,.08)',
                 'control' => 'select',
                 'options' => [
-                    'none'                                  => __('None', 'fundraising-toolkit'),
-                    '0 1px 2px rgba(0,0,0,.08)'             => __('Soft', 'fundraising-toolkit'),
-                    '0 6px 16px rgba(0,0,0,.12)'            => __('Strong', 'fundraising-toolkit'),
+                    'none'                                  => __('None', 'gratora'),
+                    '0 1px 2px rgba(0,0,0,.08)'             => __('Soft', 'gratora'),
+                    '0 6px 16px rgba(0,0,0,.12)'            => __('Strong', 'gratora'),
                 ],
             ],
-            'fundkit-button-bg' => [
+            'gratora-button-bg' => [
                 'group'   => 'buttons',
-                'label'   => __('Button background', 'fundraising-toolkit'),
+                'label'   => __('Button background', 'gratora'),
                 'default' => '',
                 'control' => 'color',
-                'help'    => __('Leave empty to use the accent color.', 'fundraising-toolkit'),
+                'help'    => __('Leave empty to use the accent color.', 'gratora'),
             ],
-            'fundkit-button-fg' => [
+            'gratora-button-fg' => [
                 'group'   => 'buttons',
-                'label'   => __('Button text color', 'fundraising-toolkit'),
+                'label'   => __('Button text color', 'gratora'),
                 'default' => '',
                 'control' => 'color',
-                'help'    => __('Leave empty to use white on filled buttons.', 'fundraising-toolkit'),
+                'help'    => __('Leave empty to use white on filled buttons.', 'gratora'),
             ],
-            'fundkit-button-border' => [
+            'gratora-button-border' => [
                 'group'   => 'buttons',
-                'label'   => __('Button border', 'fundraising-toolkit'),
+                'label'   => __('Button border', 'gratora'),
                 'default' => '0',
                 'control' => 'select',
                 'options' => [
-                    '0'                       => __('None (filled)', 'fundraising-toolkit'),
-                    '1px solid currentColor'  => __('Outline thin', 'fundraising-toolkit'),
-                    '2px solid currentColor'  => __('Outline thick', 'fundraising-toolkit'),
+                    '0'                       => __('None (filled)', 'gratora'),
+                    '1px solid currentColor'  => __('Outline thin', 'gratora'),
+                    '2px solid currentColor'  => __('Outline thick', 'gratora'),
                 ],
             ],
-            'fundkit-button-hover-bg' => [
+            'gratora-button-hover-bg' => [
                 'group'   => 'buttons',
-                'label'   => __('Button hover background', 'fundraising-toolkit'),
+                'label'   => __('Button hover background', 'gratora'),
                 'default' => '',
                 'control' => 'color',
-                'help'    => __('Leave empty to inherit the button background.', 'fundraising-toolkit'),
+                'help'    => __('Leave empty to inherit the button background.', 'gratora'),
             ],
 
-            'fundkit-focus-ring' => [
+            'gratora-focus-ring' => [
                 'group'   => 'elevation',
-                'label'   => __('Focus ring color', 'fundraising-toolkit'),
+                'label'   => __('Focus ring color', 'gratora'),
                 'default' => '#211d3f',
                 'control' => 'color',
             ],
-            'fundkit-card-shadow' => [
+            'gratora-card-shadow' => [
                 'group'   => 'elevation',
-                'label'   => __('Card shadow', 'fundraising-toolkit'),
+                'label'   => __('Card shadow', 'gratora'),
                 'default' => '0 12px 32px rgba(15, 23, 42, .06)',
                 'control' => 'select',
                 'options' => [
-                    'none'                                       => __('None', 'fundraising-toolkit'),
-                    '0 1px 2px rgba(15, 23, 42, .04)'            => __('Soft', 'fundraising-toolkit'),
-                    '0 12px 32px rgba(15, 23, 42, .06)'          => __('Floating', 'fundraising-toolkit'),
-                    '0 30px 60px rgba(0, 0, 0, .25)'             => __('Dramatic', 'fundraising-toolkit'),
+                    'none'                                       => __('None', 'gratora'),
+                    '0 1px 2px rgba(15, 23, 42, .04)'            => __('Soft', 'gratora'),
+                    '0 12px 32px rgba(15, 23, 42, .06)'          => __('Floating', 'gratora'),
+                    '0 30px 60px rgba(0, 0, 0, .25)'             => __('Dramatic', 'gratora'),
                 ],
             ],
         ];
@@ -288,13 +288,13 @@ final class Tokens
     public static function groups(): array
     {
         return [
-            'brand'      => __('Brand colors', 'fundraising-toolkit'),
-            'surface'    => __('Surface', 'fundraising-toolkit'),
-            'typography' => __('Typography', 'fundraising-toolkit'),
-            'radius'     => __('Radius + borders', 'fundraising-toolkit'),
-            'spacing'    => __('Spacing', 'fundraising-toolkit'),
-            'buttons'    => __('Buttons', 'fundraising-toolkit'),
-            'elevation'  => __('Focus + elevation', 'fundraising-toolkit'),
+            'brand'      => __('Brand colors', 'gratora'),
+            'surface'    => __('Surface', 'gratora'),
+            'typography' => __('Typography', 'gratora'),
+            'radius'     => __('Radius + borders', 'gratora'),
+            'spacing'    => __('Spacing', 'gratora'),
+            'buttons'    => __('Buttons', 'gratora'),
+            'elevation'  => __('Focus + elevation', 'gratora'),
         ];
     }
 

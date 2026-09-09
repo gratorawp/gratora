@@ -58,31 +58,31 @@ test( 'the shipped page ground carries it comfortably', () => {
  */
 describe( 'the inks the server would have emitted', () => {
     it( 'measures a pale accent the way the published form does', () => {
-        const out = derivedInk( { 'fundkit-accent': '#ffd400' } );
+        const out = derivedInk( { 'gratora-accent': '#ffd400' } );
 
-        expect( out[ '--fundkit-on-accent' ] ).toBe( '#10162a' );
-        expect( out[ '--fundkit-on-accent-muted' ] ).toBe( 'rgba(16,22,42,.62)' );
-        expect( out[ '--fundkit-on-accent-line' ] ).toBe( 'rgba(16,22,42,.16)' );
+        expect( out[ '--gratora-on-accent' ] ).toBe( '#10162a' );
+        expect( out[ '--gratora-on-accent-muted' ] ).toBe( 'rgba(16,22,42,.62)' );
+        expect( out[ '--gratora-on-accent-line' ] ).toBe( 'rgba(16,22,42,.16)' );
     } );
 
     it( 'measures a dark accent the same way', () => {
-        expect( derivedInk( { 'fundkit-accent': '#211d3f' } )[ '--fundkit-on-accent' ] ).toBe( '#ffffff' );
+        expect( derivedInk( { 'gratora-accent': '#211d3f' } )[ '--gratora-on-accent' ] ).toBe( '#ffffff' );
     } );
 
     it( 'keeps the accent on the total where it reads and stands it down where it does not', () => {
-        expect( derivedInk( { 'fundkit-bg-soft': '#f8fafb', 'fundkit-accent': '#211d3f' } )[ '--fundkit-on-soft-accent' ] )
+        expect( derivedInk( { 'gratora-bg-soft': '#f8fafb', 'gratora-accent': '#211d3f' } )[ '--gratora-on-soft-accent' ] )
             .toBe( '#211d3f' );
-        expect( derivedInk( { 'fundkit-bg-soft': '#05a2f0', 'fundkit-accent': '#452ef5' } )[ '--fundkit-on-soft-accent' ] )
+        expect( derivedInk( { 'gratora-bg-soft': '#05a2f0', 'gratora-accent': '#452ef5' } )[ '--gratora-on-soft-accent' ] )
             .toBe( '#10162a' );
     } );
 
     it( 'gives the fields ink of their own', () => {
-        expect( derivedInk( { 'fundkit-field-bg': '#ffffff' } )[ '--fundkit-on-field' ] ).toBe( '#10162a' );
-        expect( derivedInk( { 'fundkit-field-bg': '#101828' } )[ '--fundkit-on-field' ] ).toBe( '#ffffff' );
+        expect( derivedInk( { 'gratora-field-bg': '#ffffff' } )[ '--gratora-on-field' ] ).toBe( '#10162a' );
+        expect( derivedInk( { 'gratora-field-bg': '#101828' } )[ '--gratora-on-field' ] ).toBe( '#ffffff' );
     } );
 
     it( 'contributes nothing for a ground it cannot read', () => {
-        expect( derivedInk( { 'fundkit-accent': 'inherit' } ) ).toEqual( {} );
+        expect( derivedInk( { 'gratora-accent': 'inherit' } ) ).toEqual( {} );
         expect( derivedInk( {} ) ).toEqual( {} );
     } );
 } );
@@ -104,5 +104,5 @@ test( 'the channels are the channels the server reads', () => {
 test( 'an hsl ground carries the same ink on both sides', () => {
     expect( inkOn( 'hsl(249, 37%, 18%)' ) ).toBe( '#ffffff' );
     expect( inkOn( 'hsl(210deg 40% 92%)' ) ).toBe( '#10162a' );
-    expect( derivedInk( { 'fundkit-accent': 'hsl(249, 37%, 18%)' } )[ '--fundkit-on-accent' ] ).toBe( '#ffffff' );
+    expect( derivedInk( { 'gratora-accent': 'hsl(249, 37%, 18%)' } )[ '--gratora-on-accent' ] ).toBe( '#ffffff' );
 } );

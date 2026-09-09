@@ -5,12 +5,12 @@ import { BlockIcons } from '../_shared/block-icons';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import Segmented from '../../../_shared/components/Segmented';
 
-const NAME = 'fundkit/paragraph';
+const NAME = 'gratora/paragraph';
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'fundraising-toolkit' ) },
-    { value: 'center', label: __( 'Center', 'fundraising-toolkit' ) },
-    { value: 'right',  label: __( 'Right',  'fundraising-toolkit' ) },
+    { value: 'left',   label: __( 'Left',   'gratora' ) },
+    { value: 'center', label: __( 'Center', 'gratora' ) },
+    { value: 'right',  label: __( 'Right',  'gratora' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -25,9 +25,9 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Paragraph', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Paragraph', 'gratora' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Alignment', 'fundraising-toolkit' ) }
+                        label={ __( 'Alignment', 'gratora' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
@@ -43,7 +43,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="p"
                     value={ text }
                     onChange={ ( v ) => setAttributes( { text: v } ) }
-                    placeholder={ __( 'Add a short description for donors.', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'Add a short description for donors.', 'gratora' ) }
                     allowedFormats={ [ 'core/bold', 'core/italic', 'core/link' ] }
                     style={ { margin: 0, lineHeight: 1.5 } }
                 />
@@ -55,9 +55,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Paragraph', 'fundraising-toolkit' ),
-        description: __( 'Short copy shown above the next field step.', 'fundraising-toolkit' ),
-        category:   'fundkit-content',
+        title:      __( 'Paragraph', 'gratora' ),
+        description: __( 'Short copy shown above the next field step.', 'gratora' ),
+        category:   'gratora-content',
         icon:       BlockIcons[ 'paragraph' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

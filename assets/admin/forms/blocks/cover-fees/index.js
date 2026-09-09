@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'fundkit/cover-fees';
+const NAME = 'gratora/cover-fees';
 
 /** Keep draft decimal text; number inputs report partial values as empty. */
 function DecimalControl( { label, help, display, onCommit } ) {
@@ -32,34 +32,34 @@ function Edit( { attributes, setAttributes } ) {
     const {
         percent   = 2.9,
         fixed     = 30,
-        label     = __( 'I\'d like to help cover the transaction fee', 'fundraising-toolkit' ),
+        label     = __( 'I\'d like to help cover the transaction fee', 'gratora' ),
         defaultOn = false,
         condition = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--check' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--check' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Cover the fees', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Cover the fees', 'gratora' ) } initialOpen>
                     <DecimalControl
-                        label={ __( 'Percent fee', 'fundraising-toolkit' ) }
-                        help={ __( 'e.g. 2.9 for Stripe', 'fundraising-toolkit' ) }
+                        label={ __( 'Percent fee', 'gratora' ) }
+                        help={ __( 'e.g. 2.9 for Stripe', 'gratora' ) }
                         display={ String( percent ) }
                         onCommit={ ( n ) => setAttributes( { percent: n } ) }
                     />
                     <DecimalControl
-                        label={ __( 'Fixed fee', 'fundraising-toolkit' ) }
-                        help={ __( 'e.g. 0.30 for Stripe', 'fundraising-toolkit' ) }
+                        label={ __( 'Fixed fee', 'gratora' ) }
+                        help={ __( 'e.g. 0.30 for Stripe', 'gratora' ) }
                         display={ ( fixed / 100 ).toFixed( 2 ) }
                         onCommit={ ( n ) => setAttributes( { fixed: Math.round( n * 100 ) } ) }
                     />
                     <ToggleControl
-                        label={ __( 'Default checked', 'fundraising-toolkit' ) }
+                        label={ __( 'Default checked', 'gratora' ) }
                         checked={ defaultOn }
                         onChange={ ( v ) => setAttributes( { defaultOn: v } ) }
-                        help={ __( 'Best practice: leave off so donors opt in.', 'fundraising-toolkit' ) }
+                        help={ __( 'Best practice: leave off so donors opt in.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -75,7 +75,7 @@ function Edit( { attributes, setAttributes } ) {
                         height:       16,
                         borderRadius: 3,
                         border:       '1px solid #888',
-                        background:   defaultOn ? 'var(--fundkit-accent, #211d3f)' : '#fff',
+                        background:   defaultOn ? 'var(--gratora-accent, #211d3f)' : '#fff',
                         flexShrink:   0,
                     } }
                 />
@@ -83,7 +83,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'I\'d like to help cover the transaction fee', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'I\'d like to help cover the transaction fee', 'gratora' ) }
                     allowedFormats={ [] }
                     style={ { fontSize: 13, flex: 1 } }
                 />
@@ -95,9 +95,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Cover the fees', 'fundraising-toolkit' ),
-        description: __( 'Lets the donor opt to cover the payment processing fee.', 'fundraising-toolkit' ),
-        category:   'fundkit-amount',
+        title:      __( 'Cover the fees', 'gratora' ),
+        description: __( 'Lets the donor opt to cover the payment processing fee.', 'gratora' ),
+        category:   'gratora-amount',
         icon:       BlockIcons[ 'cover-fees' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

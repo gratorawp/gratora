@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Receipts;
+namespace Gratora\Receipts;
 
 /**
  * Renders a donation receipt to a PDF byte string.

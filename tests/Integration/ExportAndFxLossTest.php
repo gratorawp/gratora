@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Currency\FxRates;
-use FundKit\Donations\Donation;
+use Gratora\Currency\FxRates;
+use Gratora\Donations\Donation;
 use WP_REST_Request;
 
 /**
@@ -26,7 +26,7 @@ final class ExportAndFxLossTest extends IntegrationTestCase
         $now = gmdate('Y-m-d H:i:s');
         for ($i = 0; $i < $count; $i++) {
             $d = Donation::make();
-            $d->reference         = 'FUNDKIT-EXP-' . $i . '-' . uniqid();
+            $d->reference         = 'GRATORA-EXP-' . $i . '-' . uniqid();
             $d->donor_id          = 1;
             $d->amount_cents      = 1000;
             $d->net_cents         = 1000;
@@ -46,7 +46,7 @@ final class ExportAndFxLossTest extends IntegrationTestCase
 
     private function exportCsv(): void
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donations/export.csv');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/donations/export.csv');
 
         ob_start();
         $server = rest_get_server();
@@ -57,13 +57,13 @@ final class ExportAndFxLossTest extends IntegrationTestCase
 
     private function truncationLogged(): bool
     {
-        return \FundKit\Analytics\Event::query()->where('type', 'error.export.donations')->get() !== null;
+        return \Gratora\Analytics\Event::query()->where('type', 'error.export.donations')->get() !== null;
     }
 
     public function test_an_export_that_stops_short_says_so(): void
     {
         $this->seedDonations(3);
-        add_filter('fundkit.export.max_rows', static fn (): int => 2);
+        add_filter('gratora.export.max_rows', static fn (): int => 2);
 
         $this->exportCsv();
 
@@ -76,7 +76,7 @@ final class ExportAndFxLossTest extends IntegrationTestCase
     public function test_an_export_that_fits_says_nothing(): void
     {
         $this->seedDonations(3);
-        add_filter('fundkit.export.max_rows', static fn (): int => 50);
+        add_filter('gratora.export.max_rows', static fn (): int => 50);
 
         $this->exportCsv();
 
@@ -86,9 +86,9 @@ final class ExportAndFxLossTest extends IntegrationTestCase
     public function test_the_capped_export_still_carries_its_rows(): void
     {
         $this->seedDonations(3);
-        add_filter('fundkit.export.max_rows', static fn (): int => 2);
+        add_filter('gratora.export.max_rows', static fn (): int => 2);
 
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donations/export.csv');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/donations/export.csv');
         ob_start();
         $server = rest_get_server();
         apply_filters('rest_pre_serve_request', false, $server->dispatch($req), $req, $server);
@@ -100,12 +100,12 @@ final class ExportAndFxLossTest extends IntegrationTestCase
 
     private function fxState(): array
     {
-        return (array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/currency/fx'))->get_data();
+        return (array) rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/currency/fx'))->get_data();
     }
 
     private function saveFx(array $manual): void
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/currency/fx');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/currency/fx');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['auto' => true, 'manual' => $manual, 'frame' => 'USD']));
 
@@ -114,7 +114,7 @@ final class ExportAndFxLossTest extends IntegrationTestCase
 
     public function test_a_hand_set_rate_for_an_unsupported_currency_stays_on_the_screen(): void
     {
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'EUR'],
         ]);
@@ -133,7 +133,7 @@ final class ExportAndFxLossTest extends IntegrationTestCase
 
     public function test_an_unrelated_save_no_longer_deletes_it(): void
     {
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'EUR'],
         ]);
@@ -162,7 +162,7 @@ final class ExportAndFxLossTest extends IntegrationTestCase
 
     public function test_blanking_a_rate_still_clears_it(): void
     {
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'EUR'],
         ]);

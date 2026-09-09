@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/MonthField';
+export { default } from '@gratora/ui/components/MonthField';

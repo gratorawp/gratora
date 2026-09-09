@@ -7,7 +7,7 @@ import { OptionsEditor, normalizeOptions, slugify } from '../_shared/OptionsEdit
 import { BlockIcons } from '../_shared/block-icons';
 import { SlugTextControl } from '../_shared/SlugTextControl';
 
-const NAME = 'fundkit/radio';
+const NAME = 'gratora/radio';
 
 const DEFAULT_OPTIONS = [
     { label: 'Option one', value: 'option-one', isDefault: false },
@@ -25,7 +25,7 @@ function Edit( { attributes, setAttributes } ) {
     const options = normalizeOptions( attributes.options, DEFAULT_OPTIONS );
 
     const blockProps = useBlockProps( {
-        className: `fundkit-block-preview fundkit-block-preview--radio fundkit-block-preview--${ layout }`,
+        className: `gratora-block-preview gratora-block-preview--radio gratora-block-preview--${ layout }`,
     } );
 
     const updateOptionLabel = ( i, v ) => {
@@ -44,32 +44,32 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Radio group', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Radio group', 'gratora' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundraising-toolkit' ) }
+                        label={ __( 'Label', 'gratora' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or any option to edit inline.', 'fundraising-toolkit' ) }
+                        help={ __( 'Click the label or any option to edit inline.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Field name', 'fundraising-toolkit' ) }
+                        label={ __( 'Field name', 'gratora' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v } ) }
-                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'fundraising-toolkit' ) }
+                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Layout', 'fundraising-toolkit' ) }
+                        label={ __( 'Layout', 'gratora' ) }
                         value={ layout }
                         onChange={ ( v ) => setAttributes( { layout: v } ) }
                         options={ [
-                            { value: 'vertical',   label: __( 'Vertical',   'fundraising-toolkit' ) },
-                            { value: 'horizontal', label: __( 'Horizontal', 'fundraising-toolkit' ) },
+                            { value: 'vertical',   label: __( 'Vertical',   'gratora' ) },
+                            { value: 'horizontal', label: __( 'Horizontal', 'gratora' ) },
                         ] }
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundraising-toolkit' ) }
+                        label={ __( 'Required', 'gratora' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -88,13 +88,13 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="fundkit-block-preview__label"
+                    className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Question', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'Question', 'gratora' ) }
                     allowedFormats={ [] }
                 />
-                { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
+                { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
                 <div
                     style={ {
                         marginTop: 8,
@@ -119,7 +119,7 @@ function Edit( { attributes, setAttributes } ) {
                                     height:       14,
                                     borderRadius: '50%',
                                     border:       '1px solid #888',
-                                    background:   o.isDefault ? 'radial-gradient(circle, var(--fundkit-accent, #211d3f) 40%, #fff 50%)' : '#fff',
+                                    background:   o.isDefault ? 'radial-gradient(circle, var(--gratora-accent, #211d3f) 40%, #fff 50%)' : '#fff',
                                     flexShrink:   0,
                                 } }
                             />
@@ -127,7 +127,7 @@ function Edit( { attributes, setAttributes } ) {
                                 tagName="span"
                                 value={ o.label }
                                 onChange={ ( v ) => updateOptionLabel( i, v ) }
-                                placeholder={ __( 'Option label', 'fundraising-toolkit' ) }
+                                placeholder={ __( 'Option label', 'gratora' ) }
                                 allowedFormats={ [] }
                                 style={ { fontSize: 13, color: '#111827' } }
                             />
@@ -142,9 +142,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Radio group', 'fundraising-toolkit' ),
-        description: __( 'Single-choice radio buttons. Donor picks one option from the list.', 'fundraising-toolkit' ),
-        category:    'fundkit-fields',
+        title:       __( 'Radio group', 'gratora' ),
+        description: __( 'Single-choice radio buttons. Donor picks one option from the list.', 'gratora' ),
+        category:    'gratora-fields',
         icon:        BlockIcons[ 'radio' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

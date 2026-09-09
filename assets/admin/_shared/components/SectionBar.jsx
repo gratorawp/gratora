@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/SectionBar';
+export { default } from '@gratora/ui/components/SectionBar';

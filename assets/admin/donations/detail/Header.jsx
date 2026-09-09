@@ -13,14 +13,14 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
 
     // Anonymity is about public displays, not about hiding a donor from the
     // org that has to receipt them.
-    const name = donor?.name || donation.donor?.name || __( 'Donor', 'fundraising-toolkit' );
+    const name = donor?.name || donation.donor?.name || __( 'Donor', 'gratora' );
 
     return (
         <header className="dd-head">
             <div className="dd-crumbs">
-                <button type="button" onClick={ onBack }>{ __( 'Fundraising', 'fundraising-toolkit' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'Fundraising', 'gratora' ) }</button>
                 <span className="sep">›</span>
-                <button type="button" onClick={ onBack }>{ __( 'Donations', 'fundraising-toolkit' ) }</button>
+                <button type="button" onClick={ onBack }>{ __( 'Donations', 'gratora' ) }</button>
                 <span className="sep">›</span>
                 <span className="mono">{ donation.reference }</span>
             </div>
@@ -33,9 +33,9 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
                             <>
                                 <span
                                     className="dd-pill is-muted"
-                                    title={ __( 'Their name is hidden from public donor lists. It still appears here and on their receipt.', 'fundraising-toolkit' ) }
+                                    title={ __( 'Their name is hidden from public donor lists. It still appears here and on their receipt.', 'gratora' ) }
                                 >
-                                    { __( 'Anonymous publicly', 'fundraising-toolkit' ) }
+                                    { __( 'Anonymous publicly', 'gratora' ) }
                                 </span>
                                 <span className="dot-sep">·</span>
                             </>
@@ -44,7 +44,7 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
                         { donation.campaign && (
                             <>
                                 <span className="dot-sep">·</span>
-                                <span>{ __( 'Donated to', 'fundraising-toolkit' ) } <a href={ campaignHref( donation.campaign.id ) }>{ donation.campaign.title }</a></span>
+                                <span>{ __( 'Donated to', 'gratora' ) } <a href={ campaignHref( donation.campaign.id ) }>{ donation.campaign.title }</a></span>
                             </>
                         ) }
                         <span className="dot-sep">·</span>
@@ -64,8 +64,8 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
                     </div>
                     { isPartialRefund && (
                         <div className="dd-page-head__amount-sub">
-                            { __( 'Refunded', 'fundraising-toolkit' ) } <strong>{ formatAmount( donation.refunded_cents, donation.currency ) }</strong>
-                            <span> · { __( 'net', 'fundraising-toolkit' ) } </span>
+                            { __( 'Refunded', 'gratora' ) } <strong>{ formatAmount( donation.refunded_cents, donation.currency ) }</strong>
+                            <span> · { __( 'net', 'gratora' ) } </span>
                             <strong className="num">{ formatAmount( donation.amount_cents - donation.refunded_cents, donation.currency ) }</strong>
                         </div>
                     ) }
@@ -75,15 +75,15 @@ export default function Header( { donation, donor, onResendReceipt, onRefund, on
                         { canResend && (
                             <button type="button" className="btn" onClick={ onResendReceipt }>
                                 <IconMail className="ic" />
-                                { __( 'Resend receipt', 'fundraising-toolkit' ) }
+                                { __( 'Resend receipt', 'gratora' ) }
                             </button>
                         ) }
                         { isRefundable && (
                             <button type="button" className="btn btn--danger" onClick={ onRefund }>
                                 <IconRefund className="ic" />
                                 { isPartialRefund
-                                    ? __( 'Refund remaining', 'fundraising-toolkit' )
-                                    : __( 'Refund', 'fundraising-toolkit' ) }
+                                    ? __( 'Refund remaining', 'gratora' )
+                                    : __( 'Refund', 'gratora' ) }
                             </button>
                         ) }
                     </div>

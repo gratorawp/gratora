@@ -1,5 +1,5 @@
 /**
- * Both drawers claim the screen the way every other FundKit modal does. They
+ * Both drawers claim the screen the way every other Gratora modal does. They
  * were reaching past the wrapper that adds focus management to the design
  * system's dialog, so Tab walked straight out into the list behind them.
  */
@@ -42,7 +42,7 @@ async function open( node ) {
     await settle();
 }
 
-const dialog = () => document.querySelector( '.fundkit-dialog' );
+const dialog = () => document.querySelector( '.gratora-dialog' );
 
 const tabbables = () => [ ...dialog().querySelectorAll(
     'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'

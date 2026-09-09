@@ -1,12 +1,12 @@
 import { createRoot } from '@wordpress/element';
 
-import { registerFundKitEntities } from '../_shared/entities';
+import { registerGratoraEntities } from '../_shared/entities';
 import List from './List';
 import Detail from './Detail';
 import Toaster from '../_shared/components/Toaster';
 import './campaigns.scss';
 
-registerFundKitEntities();
+registerGratoraEntities();
 
 function App() {
     const params = new URLSearchParams( window.location.search );
@@ -21,7 +21,7 @@ function App() {
 }
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'fundkit-admin-campaigns' );
+    const root = document.getElementById( 'gratora-admin-campaigns' );
     if ( ! root ) return;
     createRoot( root ).render( <><App /><Toaster /></> );
 } );

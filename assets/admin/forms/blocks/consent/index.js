@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'fundkit/consent';
+const NAME = 'gratora/consent';
 
 /**
  * The organization's consent purposes. The block picks from these rather than
@@ -13,12 +13,12 @@ const NAME = 'fundkit/consent';
  * agree, and the donor portal would have nothing to label it with.
  */
 function registryPurposes() {
-    const c = typeof window !== 'undefined' && window.fundkitFormsEditor && window.fundkitFormsEditor.consents;
+    const c = typeof window !== 'undefined' && window.gratoraFormsEditor && window.gratoraFormsEditor.consents;
     return Array.isArray( c ) ? c : [];
 }
 
 function settingsUrl() {
-    return ( typeof window !== 'undefined' && window.fundkitFormsEditor && window.fundkitFormsEditor.consentsSettingsUrl ) || '';
+    return ( typeof window !== 'undefined' && window.gratoraFormsEditor && window.gratoraFormsEditor.consentsSettingsUrl ) || '';
 }
 
 function Edit( { attributes, setAttributes } ) {
@@ -41,36 +41,36 @@ function Edit( { attributes, setAttributes } ) {
             : picked.filter( ( k ) => k !== key ),
     } );
 
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--consent' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--consent' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Consent', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Consent', 'gratora' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Heading', 'fundraising-toolkit' ) }
+                        label={ __( 'Heading', 'gratora' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'How can we stay in touch?', 'fundraising-toolkit' ) }
-                        help={ __( 'Click the heading on the form to edit it inline.', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'How can we stay in touch?', 'gratora' ) }
+                        help={ __( 'Click the heading on the form to edit it inline.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'fundraising-toolkit' ) }
+                        label={ __( 'Help text', 'gratora' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Optional explanation shown below the heading.', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Optional explanation shown below the heading.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
 
                     { registry.length === 0 ? (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'No consent purposes exist yet. A purpose names something your organization actually does, so you define it once and every form asks for it the same way.', 'fundraising-toolkit' ) }
+                            { __( 'No consent purposes exist yet. A purpose names something your organization actually does, so you define it once and every form asks for it the same way.', 'gratora' ) }
                             { settingsUrl() && (
                                 <>
                                     { ' ' }
                                     <ExternalLink href={ settingsUrl() }>
-                                        { __( 'Add one in Settings, Consents.', 'fundraising-toolkit' ) }
+                                        { __( 'Add one in Settings, Consents.', 'gratora' ) }
                                     </ExternalLink>
                                 </>
                             ) }
@@ -81,7 +81,7 @@ function Edit( { attributes, setAttributes } ) {
                                 <CheckboxControl
                                     key={ p.key }
                                     label={ p.required
-                                        ? `${ p.label } ${ __( '(required)', 'fundraising-toolkit' ) }`
+                                        ? `${ p.label } ${ __( '(required)', 'gratora' ) }`
                                         : p.label }
                                     help={ p.description || undefined }
                                     checked={ picked.includes( p.key ) }
@@ -92,7 +92,7 @@ function Edit( { attributes, setAttributes } ) {
                             { settingsUrl() && (
                                 <p style={ { marginTop: 12 } }>
                                     <ExternalLink href={ settingsUrl() }>
-                                        { __( 'Edit the wording in Settings, Consents.', 'fundraising-toolkit' ) }
+                                        { __( 'Edit the wording in Settings, Consents.', 'gratora' ) }
                                     </ExternalLink>
                                 </p>
                             ) }
@@ -107,24 +107,24 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="fundkit-block-preview__label"
+                    className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'How can we stay in touch?', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'How can we stay in touch?', 'gratora' ) }
                     allowedFormats={ [] }
                 />
-                { helpText && <div className="fundkit-block-preview__hint">{ helpText }</div> }
+                { helpText && <div className="gratora-block-preview__hint">{ helpText }</div> }
                 { shown.length === 0
                     ? (
-                        <div className="fundkit-block-preview__field">
+                        <div className="gratora-block-preview__field">
                             { registry.length === 0
-                                ? __( 'No consent purposes exist yet. Add one in Settings, Consents.', 'fundraising-toolkit' )
-                                : __( 'Pick which purposes this form asks for.', 'fundraising-toolkit' ) }
+                                ? __( 'No consent purposes exist yet. Add one in Settings, Consents.', 'gratora' )
+                                : __( 'Pick which purposes this form asks for.', 'gratora' ) }
                         </div>
                     )
                     : shown.map( ( p ) => (
-                        <div key={ p.key } className="fundkit-block-preview__field">
-                            { p.required ? `${ p.label } (${ __( 'required', 'fundraising-toolkit' ) })` : p.label }
+                        <div key={ p.key } className="gratora-block-preview__field">
+                            { p.required ? `${ p.label } (${ __( 'required', 'gratora' ) })` : p.label }
                         </div>
                     ) ) }
             </div>
@@ -135,9 +135,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Consent', 'fundraising-toolkit' ),
-        description: __( 'Asks the donor to opt in to purposes your organization has defined in Settings.', 'fundraising-toolkit' ),
-        category:   'fundkit-extras',
+        title:      __( 'Consent', 'gratora' ),
+        description: __( 'Asks the donor to opt in to purposes your organization has defined in Settings.', 'gratora' ),
+        category:   'gratora-extras',
         icon:       BlockIcons[ 'consent' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\DonationRepository;
-use FundKit\Foundation\Plugin;
-use FundKit\Forms\Form;
+use Gratora\Donations\DonationRepository;
+use Gratora\Foundation\Plugin;
+use Gratora\Forms\Form;
 use WP_REST_Request;
 
 /**
@@ -34,7 +34,7 @@ final class OfflineRetryParentTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function post(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -72,7 +72,7 @@ final class OfflineRetryParentTest extends IntegrationTestCase
     private function flagsOf(string $reference): array
     {
         $raw = self::$wpdb->get_var(self::$wpdb->prepare(
-            'SELECT flags FROM ' . self::$prefix . 'fundkit_donations WHERE reference = %s',
+            'SELECT flags FROM ' . self::$prefix . 'gratora_donations WHERE reference = %s',
             $reference
         ));
 
@@ -89,7 +89,7 @@ final class OfflineRetryParentTest extends IntegrationTestCase
     private function setGateway(string $reference, string $gateway): void
     {
         self::$wpdb->query(self::$wpdb->prepare(
-            'UPDATE ' . self::$prefix . 'fundkit_donations SET gateway = %s WHERE reference = %s',
+            'UPDATE ' . self::$prefix . 'gratora_donations SET gateway = %s WHERE reference = %s',
             $gateway,
             $reference
         ));
@@ -99,7 +99,7 @@ final class OfflineRetryParentTest extends IntegrationTestCase
     {
         return (int) self::$wpdb->get_var(
             'SELECT option_value FROM ' . self::$wpdb->options . "
-             WHERE option_name LIKE '_transient_fundkit_donate_email_%'
+             WHERE option_name LIKE '_transient_gratora_donate_email_%'
              ORDER BY option_id DESC LIMIT 1"
         );
     }
@@ -132,7 +132,7 @@ final class OfflineRetryParentTest extends IntegrationTestCase
         $f->title      = 'Bank transfer form';
         $f->slug       = 'offline-retry-' . uniqid();
         $f->status     = 'published';
-        $f->blocks     = '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/email /--><!-- wp:fundkit/submit-button /-->';
+        $f->blocks     = '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/email /--><!-- wp:gratora/submit-button /-->';
         $f->created_at = gmdate('Y-m-d H:i:s');
         $f->updated_at = $f->created_at;
         $f->save();

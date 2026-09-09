@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\Styling\CampaignStyleVars;
-use FundKit\Forms\Form;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\Styling\CampaignStyleVars;
+use Gratora\Forms\Form;
 
 /**
  * The two radii are deliberately absent from the catalogue so they inherit
@@ -39,7 +39,7 @@ final class PassThroughRadiiAreStatedTest extends IntegrationTestCase
         $f->slug        = 'radii-form-' . uniqid();
         $f->status      = 'published';
         $f->campaign_id = $campaignId;
-        $f->blocks      = '<!-- wp:fundkit/donation-amount {"presets":[1000]} /-->';
+        $f->blocks      = '<!-- wp:gratora/donation-amount {"presets":[1000]} /-->';
         $f->settings    = ['style' => ['preset_id' => $presetId]];
         $f->created_at  = gmdate('Y-m-d H:i:s');
         $f->updated_at  = $f->created_at;
@@ -53,11 +53,11 @@ final class PassThroughRadiiAreStatedTest extends IntegrationTestCase
         $campaign = $this->campaign('classic');
         $form     = $this->form((int) $campaign->id, 'quiet');
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $form->slug . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $form->slug . '"]');
 
-        $this->assertStringContainsString('--fundkit-button-radius:var(--fundkit-radius-sm, 8px)', $html);
-        $this->assertStringContainsString('--fundkit-switcher-radius:var(--fundkit-radius-sm, 8px)', $html);
-        $this->assertStringNotContainsString('--fundkit-button-radius:999px', $html);
+        $this->assertStringContainsString('--gratora-button-radius:var(--gratora-radius-sm, 8px)', $html);
+        $this->assertStringContainsString('--gratora-switcher-radius:var(--gratora-radius-sm, 8px)', $html);
+        $this->assertStringNotContainsString('--gratora-button-radius:999px', $html);
     }
 
     public function test_a_form_on_the_pill_preset_keeps_the_pill(): void
@@ -65,10 +65,10 @@ final class PassThroughRadiiAreStatedTest extends IntegrationTestCase
         $campaign = $this->campaign('classic');
         $form     = $this->form((int) $campaign->id, 'classic');
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $form->slug . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $form->slug . '"]');
 
-        $this->assertStringContainsString('--fundkit-button-radius:999px', $html);
-        $this->assertStringNotContainsString('--fundkit-button-radius:var(', $html);
+        $this->assertStringContainsString('--gratora-button-radius:999px', $html);
+        $this->assertStringNotContainsString('--gratora-button-radius:var(', $html);
     }
 
     public function test_a_block_for_another_campaign_states_the_fall_through(): void
@@ -78,8 +78,8 @@ final class PassThroughRadiiAreStatedTest extends IntegrationTestCase
 
         $css = CampaignStyleVars::forCampaign($other);
 
-        $this->assertStringContainsString('--fundkit-button-radius:var(--fundkit-radius-sm, 8px)', $css);
-        $this->assertStringContainsString('--fundkit-switcher-radius:var(--fundkit-radius-sm, 8px)', $css);
+        $this->assertStringContainsString('--gratora-button-radius:var(--gratora-radius-sm, 8px)', $css);
+        $this->assertStringContainsString('--gratora-switcher-radius:var(--gratora-radius-sm, 8px)', $css);
     }
 
     public function test_a_pill_campaign_still_emits_the_pill(): void
@@ -89,7 +89,7 @@ final class PassThroughRadiiAreStatedTest extends IntegrationTestCase
 
         $css = CampaignStyleVars::forCampaign($classic);
 
-        $this->assertStringContainsString('--fundkit-button-radius:999px', $css);
-        $this->assertStringNotContainsString('--fundkit-button-radius:var(', $css);
+        $this->assertStringContainsString('--gratora-button-radius:999px', $css);
+        $this->assertStringNotContainsString('--gratora-button-radius:var(', $css);
     }
 }

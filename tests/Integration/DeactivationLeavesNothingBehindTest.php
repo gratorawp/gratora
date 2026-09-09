@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Upgrade\UnautoloadGatewayConfig;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Upgrade\UnautoloadGatewayConfig;
 
 /**
  * What a deactivated plugin leaves in the options table keeps acting on the
@@ -17,7 +17,7 @@ final class DeactivationLeavesNothingBehindTest extends IntegrationTestCase
 {
     protected function tearDown(): void
     {
-        delete_option('fundkit_gateway_config');
+        delete_option('gratora_gateway_config');
         parent::tearDown();
     }
 
@@ -40,26 +40,26 @@ final class DeactivationLeavesNothingBehindTest extends IntegrationTestCase
      */
     public function test_the_gateway_config_is_taken_out_of_the_autoloaded_set(): void
     {
-        update_option('fundkit_gateway_config', ['stripe' => ['webhook_secret_live' => 'whsec_x']], true);
+        update_option('gratora_gateway_config', ['stripe' => ['webhook_secret_live' => 'whsec_x']], true);
         wp_cache_delete('alloptions', 'options');
-        $this->assertArrayHasKey('fundkit_gateway_config', wp_load_alloptions(), 'precondition: it is autoloaded');
+        $this->assertArrayHasKey('gratora_gateway_config', wp_load_alloptions(), 'precondition: it is autoloaded');
 
         (new UnautoloadGatewayConfig())->step();
 
         wp_cache_delete('alloptions', 'options');
-        $this->assertArrayNotHasKey('fundkit_gateway_config', wp_load_alloptions());
+        $this->assertArrayNotHasKey('gratora_gateway_config', wp_load_alloptions());
         $this->assertSame(
             'whsec_x',
-            get_option('fundkit_gateway_config')['stripe']['webhook_secret_live'],
+            get_option('gratora_gateway_config')['stripe']['webhook_secret_live'],
             'and the value is still there'
         );
     }
 
     public function test_the_repair_is_harmless_on_a_site_that_never_stored_one(): void
     {
-        delete_option('fundkit_gateway_config');
+        delete_option('gratora_gateway_config');
 
         $this->assertTrue((new UnautoloadGatewayConfig())->step());
-        $this->assertFalse(get_option('fundkit_gateway_config', false));
+        $this->assertFalse(get_option('gratora_gateway_config', false));
     }
 }

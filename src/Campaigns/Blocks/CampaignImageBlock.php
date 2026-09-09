@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Blocks;
+namespace Gratora\Campaigns\Blocks;
 
-use FundKit\Foundation\Helpers\View;
+use Gratora\Foundation\Helpers\View;
 
 /**
  * Read the campaign image independently of the containing WP page.
@@ -16,7 +16,7 @@ final class CampaignImageBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/campaign-image';
+        return 'gratora/campaign-image';
     }
 
     /** @since 1.0.0 */
@@ -60,8 +60,8 @@ final class CampaignImageBlock extends CampaignBlock
             return '';
         }
 
-        return '<div class="fundkit-block-notice">'
-            . esc_html__('This campaign has no cover image yet. Add one in the campaign settings.', 'fundraising-toolkit')
+        return '<div class="gratora-block-notice">'
+            . esc_html__('This campaign has no cover image yet. Add one in the campaign settings.', 'gratora')
             . '</div>';
     }
 }

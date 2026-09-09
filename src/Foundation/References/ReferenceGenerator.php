@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\References;
+namespace Gratora\Foundation\References;
 
-use FundKit\Foundation\Time\Clock;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Vendor\Queryable\DB;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -14,7 +14,7 @@ use RuntimeException;
  *
  * Per-scope counter (donation / receipt), atomically incremented via
  * MySQL LAST_INSERT_ID() - gap-free and race-safe. Configurable via the
- * fundkit_reference_settings option. reset_yearly (default true) starts a fresh
+ * gratora_reference_settings option. reset_yearly (default true) starts a fresh
  * counter each Jan 1, which requires include_year to tell the two sequences
  * apart; without it, numbering is continuous across years either way.
  *
@@ -22,7 +22,7 @@ use RuntimeException;
  */
 final class ReferenceGenerator
 {
-    public const OPTION_SETTINGS = 'fundkit_reference_settings';
+    public const OPTION_SETTINGS = 'gratora_reference_settings';
 
     public const DEFAULT_SETTINGS = [
         'prefixes' => [
@@ -63,7 +63,7 @@ final class ReferenceGenerator
     public function nextNumber(string $scope, int $nextValue): void
     {
         if ($nextValue < 1) {
-            throw new \InvalidArgumentException(esc_html__('The next number must be 1 or more.', 'fundraising-toolkit'));
+            throw new \InvalidArgumentException(esc_html__('The next number must be 1 or more.', 'gratora'));
         }
 
         $scope = $this->normaliseScope($scope);
@@ -74,7 +74,7 @@ final class ReferenceGenerator
         if ($nextValue <= $current) {
             throw new \RuntimeException(esc_html(sprintf(
                 /* translators: 1: reference scope, e.g. donation, 2: the number submitted, 3: the counter's current value. */
-                __('The %1$s counter is already at %3$d, so it cannot be set to %2$d. Choose a higher number, or references would repeat.', 'fundraising-toolkit'),
+                __('The %1$s counter is already at %3$d, so it cannot be set to %2$d. Choose a higher number, or references would repeat.', 'gratora'),
                 $scope,
                 $nextValue,
                 $current
@@ -169,13 +169,13 @@ final class ReferenceGenerator
     public static function assertTokens(array $input): void
     {
         $labels = [
-            'donation'     => __('Donation prefix', 'fundraising-toolkit'),
-            'receipt'      => __('Receipt prefix', 'fundraising-toolkit'),
+            'donation'     => __('Donation prefix', 'gratora'),
+            'receipt'      => __('Receipt prefix', 'gratora'),
         ];
 
         if (array_key_exists('separator', $input) && ! self::isToken((string) $input['separator'])) {
             throw new InvalidReferenceToken(
-                __('Separator', 'fundraising-toolkit'),
+                __('Separator', 'gratora'),
                 (string) $input['separator'],
             );
         }
@@ -230,7 +230,7 @@ final class ReferenceGenerator
         if ($longest > self::MAX_REFERENCE) {
             throw new InvalidArgumentException(esc_html(sprintf(
                 /* translators: 1: length this numbering would produce, 2: the maximum. */
-                __('This numbering would produce references of up to %1$d characters and the limit is %2$d. Shorten a prefix, the separator or the padding.', 'fundraising-toolkit'),
+                __('This numbering would produce references of up to %1$d characters and the limit is %2$d. Shorten a prefix, the separator or the padding.', 'gratora'),
                 $longest,
                 self::MAX_REFERENCE
             )));
@@ -291,10 +291,10 @@ final class ReferenceGenerator
         // one ran ahead of it this year, which is a collision, or in an earlier
         // one, which is not: the year is in the reference.
         // Deliberately not under the counter prefix: seedFor scans every
-        // fundkit_reference_counter* option for the highest number, and a year
+        // gratora_reference_counter* option for the highest number, and a year
         // sitting among them would read as a counter that had reached 2027.
-        if ($key === "fundkit_reference_counter_{$scope}") {
-            update_option("fundkit_reference_year_{$scope}", (string) $year, false);
+        if ($key === "gratora_reference_counter_{$scope}") {
+            update_option("gratora_reference_year_{$scope}", (string) $year, false);
         }
 
         return $new;
@@ -311,8 +311,8 @@ final class ReferenceGenerator
         $s = $this->settings();
 
         return ! empty($s['reset_yearly']) && ! empty($s['include_year'])
-            ? "fundkit_reference_counter_{$scope}_{$year}"
-            : "fundkit_reference_counter_{$scope}";
+            ? "gratora_reference_counter_{$scope}_{$year}"
+            : "gratora_reference_counter_{$scope}";
     }
 
     /**
@@ -324,7 +324,7 @@ final class ReferenceGenerator
      */
     private function seedFor(string $scope, string $key): int
     {
-        $continuous = "fundkit_reference_counter_{$scope}";
+        $continuous = "gratora_reference_counter_{$scope}";
 
         if ($key !== $continuous) {
             // The continuous counter prints the same string as this one while
@@ -334,7 +334,7 @@ final class ReferenceGenerator
             // collide. Flooring on it regardless meant "reset numbering each
             // year" never produced 00001 again on any site that had ever
             // numbered continuously.
-            $mintedIn = (int) get_option("fundkit_reference_year_{$scope}", 0);
+            $mintedIn = (int) get_option("gratora_reference_year_{$scope}", 0);
             $thisYear = (int) substr($key, strrpos($key, '_') + 1);
 
             return $mintedIn === $thisYear ? (int) get_option($continuous, 0) : 0;
@@ -342,7 +342,7 @@ final class ReferenceGenerator
 
         $result = DB::raw(
             'SELECT option_name, option_value FROM ' . DB::getPrefix() . "options
-             WHERE option_name LIKE 'fundkit_reference_counter%'"
+             WHERE option_name LIKE 'gratora_reference_counter%'"
         );
 
         $high = 0;

@@ -27,29 +27,29 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
             setCopied( true );
             setTimeout( () => setCopied( false ), 2000 );
         } catch ( err ) {
-            setNotice( { type: 'error', text: __( 'Could not copy. Select the values instead.', 'fundraising-toolkit' ) } );
+            setNotice( { type: 'error', text: __( 'Could not copy. Select the values instead.', 'gratora' ) } );
         }
     };
 
     return (
-        <div className="fundkit-panel">
+        <div className="gratora-panel">
             <Card
-                title={ __( 'System info', 'fundraising-toolkit' ) }
-                sub={ __( 'Everything a support request needs. No keys or credentials are included, so it is safe to paste.', 'fundraising-toolkit' ) }
+                title={ __( 'System info', 'gratora' ) }
+                sub={ __( 'Everything a support request needs. No keys or credentials are included, so it is safe to paste.', 'gratora' ) }
             >
                 { infoError ? (
-                    <div className="fundkit-advanced-actions">
-                        <p style={ { color: '#b42318', margin: 0 } }>{ __( 'Could not load system info.', 'fundraising-toolkit' ) }</p>
-                        <Btn variant="secondary" onClick={ loadInfo }>{ __( 'Retry', 'fundraising-toolkit' ) }</Btn>
+                    <div className="gratora-advanced-actions">
+                        <p style={ { color: '#b42318', margin: 0 } }>{ __( 'Could not load system info.', 'gratora' ) }</p>
+                        <Btn variant="secondary" onClick={ loadInfo }>{ __( 'Retry', 'gratora' ) }</Btn>
                     </div>
                 ) : ! info ? (
-                    <p className="fundkit-tools-empty">{ __( 'Loading…', 'fundraising-toolkit' ) }</p>
+                    <p className="gratora-tools-empty">{ __( 'Loading…', 'gratora' ) }</p>
                 ) : (
                     <>
                         { sections.map( ( section ) => (
-                            <div key={ section.title } className="fundkit-sysinfo__group">
-                                <h3 className="fundkit-sysinfo__title">{ section.title }</h3>
-                                <div className="fundkit-advanced-info">
+                            <div key={ section.title } className="gratora-sysinfo__group">
+                                <h3 className="gratora-sysinfo__title">{ section.title }</h3>
+                                <div className="gratora-advanced-info">
                                     { section.rows.map( ( r, i ) => (
                                         <div key={ `${ section.title }-${ i }` }>
                                             <dt>{ r.label }</dt>
@@ -59,9 +59,9 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
                                 </div>
                             </div>
                         ) ) }
-                        <div className="fundkit-advanced-actions" style={ { marginTop: 12 } }>
+                        <div className="gratora-advanced-actions" style={ { marginTop: 12 } }>
                             <Btn variant="secondary" onClick={ copy }>
-                                { copied ? __( 'Copied', 'fundraising-toolkit' ) : __( 'Copy to clipboard', 'fundraising-toolkit' ) }
+                                { copied ? __( 'Copied', 'gratora' ) : __( 'Copy to clipboard', 'gratora' ) }
                             </Btn>
                         </div>
                     </>
@@ -69,20 +69,20 @@ export default function SystemInfoTab( { info, infoError, loadInfo, setNotice } 
             </Card>
 
             <Card
-                title={ __( 'Scheduled tasks', 'fundraising-toolkit' ) }
-                sub={ __( 'Fundraising Toolkit jobs queued with Action Scheduler, and when each is due.', 'fundraising-toolkit' ) }
+                title={ __( 'Scheduled tasks', 'gratora' ) }
+                sub={ __( 'Gratora jobs queued with Action Scheduler, and when each is due.', 'gratora' ) }
             >
                 { info?.cron?.length ? (
-                    <ul className="fundkit-advanced-cron">
+                    <ul className="gratora-advanced-cron">
                         { info.cron.map( ( c, i ) => (
                             <li key={ i }>
                                 <code>{ c.hook }</code>
-                                <span className="fundkit-tools-log__when"> { formatWhen( c.next ) }</span>
+                                <span className="gratora-tools-log__when"> { formatWhen( c.next ) }</span>
                             </li>
                         ) ) }
                     </ul>
                 ) : (
-                    <p className="fundkit-tools-empty">{ __( 'Nothing queued right now.', 'fundraising-toolkit' ) }</p>
+                    <p className="gratora-tools-empty">{ __( 'Nothing queued right now.', 'gratora' ) }</p>
                 ) }
             </Card>
         </div>

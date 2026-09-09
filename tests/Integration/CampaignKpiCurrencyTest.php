@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Analytics\EventRecorder;
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Core\Commands\CoreCommandProvider;
-use FundKit\Foundation\Commands\CommandContext;
-use FundKit\Foundation\Commands\CommandRegistry;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Core\Commands\CoreCommandProvider;
+use Gratora\Foundation\Commands\CommandContext;
+use Gratora\Foundation\Commands\CommandRegistry;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -26,7 +26,7 @@ final class CampaignKpiCurrencyTest extends IntegrationTestCase
         parent::setUp();
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'EUR',
             'supported_currencies' => ['EUR', 'USD'],
         ]);
@@ -49,11 +49,11 @@ final class CampaignKpiCurrencyTest extends IntegrationTestCase
     {
         $this->campaign('us-only', 'USD', 100000);
 
-        $strip = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/campaigns/stats'));
+        $strip = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/campaigns/stats'));
         $this->assertSame(200, $strip->get_status());
         $this->assertSame('EUR', (string) ($strip->get_data()['currency'] ?? ''));
 
-        $rows = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/campaigns'));
+        $rows = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/campaigns'));
         $this->assertSame(200, $rows->get_status());
 
         foreach ((array) $rows->get_data() as $row) {
@@ -86,7 +86,7 @@ final class CampaignKpiCurrencyTest extends IntegrationTestCase
         $repo = Plugin::instance()->container->get(CampaignRepository::class);
         $this->assertSame('EUR', $repo->aggregateAdmin()['currency']);
 
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'GBP',
             'supported_currencies' => ['GBP', 'USD'],
         ]);

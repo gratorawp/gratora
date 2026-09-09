@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\MagicLinkToken;
-use FundKit\Donors\PendingSignup;
-use FundKit\Donors\PendingSignupRepository;
-use FundKit\Donors\SignupRedemption;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\MagicLinkToken;
+use Gratora\Donors\PendingSignup;
+use Gratora\Donors\PendingSignupRepository;
+use Gratora\Donors\SignupRedemption;
+use Gratora\Foundation\Plugin;
 
 /**
  * The volume here is decided by unauthenticated callers: one row per address

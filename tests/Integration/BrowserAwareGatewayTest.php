@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\Donation;
-use FundKit\Forms\Form;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\BrowserAware;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\WebhookOutcome;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\Donation;
+use Gratora\Forms\Form;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\BrowserAware;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\WebhookOutcome;
 use WP_REST_Request;
 
 /**
@@ -36,7 +36,7 @@ final class BrowserAwareGatewayTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('fundkit_gateway_config', ['test_mode' => true]);
+        update_option('gratora_gateway_config', ['test_mode' => true]);
 
         $manager = Plugin::instance()->container->get(GatewayManager::class);
         if (! $manager->get('fakepay')) {
@@ -49,14 +49,14 @@ final class BrowserAwareGatewayTest extends IntegrationTestCase
     /** @return array<string,mixed> the JSON the runtime reads out of the rendered form */
     private function renderedConfig(): array
     {
-        $html = do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]');
 
         $this->assertMatchesRegularExpression(
-            '/data-fundkit-form-config>(.*?)<\/script>/s',
+            '/data-gratora-form-config>(.*?)<\/script>/s',
             $html,
             'The form did not render its config script.'
         );
-        preg_match('/data-fundkit-form-config>(.*?)<\/script>/s', $html, $m);
+        preg_match('/data-gratora-form-config>(.*?)<\/script>/s', $html, $m);
         $config = json_decode(html_entity_decode($m[1]), true);
 
         return is_array($config) ? $config : [];
@@ -108,7 +108,7 @@ final class BrowserAwareGatewayTest extends IntegrationTestCase
 
     private function submit(): array
     {
-        $request = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $request = new WP_REST_Request('POST', '/gratora/v1/donations');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode([
             'form_slug'    => $this->formSlug,
@@ -130,17 +130,17 @@ final class BrowserAwareGatewayTest extends IntegrationTestCase
 
     private function publishedForm(): string
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Browser gateway', 'status' => 'published']));
         $campaignId = (int) rest_do_request($req)->get_data()['id'];
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'title'       => 'Browser gateway form',
             'campaign_id' => $campaignId,
-            'blocks'      => '<!-- wp:fundkit/donation-amount /-->',
+            'blocks'      => '<!-- wp:gratora/donation-amount /-->',
         ]));
         $created = (array) rest_do_request($req)->get_data();
 

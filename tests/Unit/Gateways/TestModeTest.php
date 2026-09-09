@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Gateways;
+namespace Gratora\Tests\Unit\Gateways;
 
-use FundKit\Forms\Form;
-use FundKit\Forms\FormRepository;
-use FundKit\Gateways\TestMode;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormRepository;
+use Gratora\Gateways\TestMode;
 use PHPUnit\Framework\TestCase;
 
 final class TestModeTest extends TestCase
@@ -15,7 +15,7 @@ final class TestModeTest extends TestCase
 
     protected function setUp(): void
     {
-        $GLOBALS['_fundkit_test_options'] = [];
+        $GLOBALS['_gratora_test_options'] = [];
         // forForm() never touches the repository; forFormId() (DB) is covered
         // end-to-end by the integration suite.
         $this->tm = new TestMode(new FormRepository());
@@ -36,7 +36,7 @@ final class TestModeTest extends TestCase
 
     public function test_global_kill_switch_wins_when_form_not_opted_in(): void
     {
-        update_option('fundkit_gateway_config', ['test_mode' => true]);
+        update_option('gratora_gateway_config', ['test_mode' => true]);
 
         $this->assertTrue($this->tm->forForm(null));
 

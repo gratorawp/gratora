@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Dashboard;
+namespace Gratora\Dashboard;
 
 /**
  * Which attention items this user has waved off, and until when.
@@ -22,7 +22,7 @@ namespace FundKit\Dashboard;
  */
 final class AttentionDismissals
 {
-    private const META_KEY = 'fundkit_attention_dismissed';
+    private const META_KEY = 'gratora_attention_dismissed';
 
     /** Bounds the meta blob: dismissals are per key, and the keys are few. */
     private const MAX_ENTRIES = 50;

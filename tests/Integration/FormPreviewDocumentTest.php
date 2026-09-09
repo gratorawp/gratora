@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Campaigns\Styling\CampaignStyleResolver;
-use FundKit\Forms\FormRepository;
-use FundKit\Forms\Shortcode\DonationFormShortcode;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Forms\FormRepository;
+use Gratora\Forms\Shortcode\DonationFormShortcode;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
 
 /**
  * srcdoc has no script queue; include transitive dependencies and initialize the sandboxed
@@ -32,8 +32,8 @@ final class FormPreviewDocumentTest extends IntegrationTestCase
 
     private function document(): string
     {
-        $blocks = '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/name /-->'
-            . '<!-- wp:fundkit/email /--><!-- wp:fundkit/submit-button /-->';
+        $blocks = '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/name /-->'
+            . '<!-- wp:gratora/email /--><!-- wp:gratora/submit-button /-->';
 
         $shortcode = $this->shortcode();
 
@@ -94,15 +94,15 @@ final class FormPreviewDocumentTest extends IntegrationTestCase
      */
     public function test_the_preview_document_says_that_it_is_one(): void
     {
-        $this->assertStringContainsString('window.fundkitFormPreview = true', $this->document());
+        $this->assertStringContainsString('window.gratoraFormPreview = true', $this->document());
     }
 
     public function test_a_real_donation_page_carries_no_such_flag(): void
     {
-        $blocks = '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/submit-button /-->';
+        $blocks = '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/submit-button /-->';
 
         $this->assertStringNotContainsString(
-            'fundkitFormPreview',
+            'gratoraFormPreview',
             (string) $this->shortcode()->renderPreview($blocks)['html']
         );
     }

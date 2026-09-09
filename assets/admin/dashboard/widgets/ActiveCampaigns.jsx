@@ -10,14 +10,14 @@ export default function ActiveCampaigns( { rows = [] } ) {
             <EmptyState
                 compact
                 icon={ <Target size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No active campaigns', 'fundraising-toolkit' ) }
-                body={ __( 'Publish a campaign to see it appear here with goal progress.', 'fundraising-toolkit' ) }
+                title={ __( 'No active campaigns', 'gratora' ) }
+                body={ __( 'Publish a campaign to see it appear here with goal progress.', 'gratora' ) }
             />
         );
     }
 
     return (
-        <div className="fundkit-active-campaigns">
+        <div className="gratora-active-campaigns">
             { rows.map( ( c ) => {
                 const target  = c.goal_type === 'amount'
                     ? ( c.goal_cents ?? 0 )
@@ -32,27 +32,27 @@ export default function ActiveCampaigns( { rows = [] } ) {
                     : String( v );
 
                 return (
-                    <a key={ c.id } href={ detailHref( c.id ) } className="fundkit-active-campaigns__row">
-                        <div className="fundkit-active-campaigns__head">
-                            <span className="fundkit-active-campaigns__title">{ c.title }</span>
+                    <a key={ c.id } href={ detailHref( c.id ) } className="gratora-active-campaigns__row">
+                        <div className="gratora-active-campaigns__head">
+                            <span className="gratora-active-campaigns__title">{ c.title }</span>
                             <StatusBadge status={ c.not_accepting || c.status } />
                         </div>
-                        <div className="fundkit-active-campaigns__bar">
-                            <div className="fundkit-active-campaigns__bar-fill" style={ { width: `${ pct }%` } } />
+                        <div className="gratora-active-campaigns__bar">
+                            <div className="gratora-active-campaigns__bar-fill" style={ { width: `${ pct }%` } } />
                         </div>
-                        <div className="fundkit-active-campaigns__meta">
+                        <div className="gratora-active-campaigns__meta">
                             <span>
                                 { target > 0 ? (
                                     sprintf(
                                         /* translators: 1: raised value, 2: target value, 3: percent */
-                                        __( '%1$s of %2$s · %3$d%%', 'fundraising-toolkit' ),
+                                        __( '%1$s of %2$s · %3$d%%', 'gratora' ),
                                         fmt( current ), fmt( target ), pct
                                     )
                                 ) : fmt( current ) }
                             </span>
                             { c.last_donation_at && (
-                                <span className="fundkit-active-campaigns__when">
-                                    { sprintf( /* translators: %s: relative time */ __( 'Last: %s', 'fundraising-toolkit' ), timeAgo( c.last_donation_at ) ) }
+                                <span className="gratora-active-campaigns__when">
+                                    { sprintf( /* translators: %s: relative time */ __( 'Last: %s', 'gratora' ), timeAgo( c.last_donation_at ) ) }
                                 </span>
                             ) }
                         </div>

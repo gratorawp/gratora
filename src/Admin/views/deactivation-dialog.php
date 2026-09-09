@@ -4,48 +4,48 @@ defined('ABSPATH') || exit;
  * @var bool $wipeOptIn
  */
 ?>
-<div class="fundkit-deact" id="fundkit-deact" hidden>
-    <div class="fundkit-deact__backdrop" data-fundkit-deact-cancel></div>
-    <div class="fundkit-deact__panel" role="dialog" aria-modal="true"
-         aria-labelledby="fundkit-deact-title" aria-describedby="fundkit-deact-lede">
-        <h2 class="fundkit-deact__title" id="fundkit-deact-title">
-            <?php esc_html_e('Deactivate Fundraising Toolkit', 'fundraising-toolkit'); ?>
+<div class="gratora-deact" id="gratora-deact" hidden>
+    <div class="gratora-deact__backdrop" data-gratora-deact-cancel></div>
+    <div class="gratora-deact__panel" role="dialog" aria-modal="true"
+         aria-labelledby="gratora-deact-title" aria-describedby="gratora-deact-lede">
+        <h2 class="gratora-deact__title" id="gratora-deact-title">
+            <?php esc_html_e('Deactivate Gratora', 'gratora'); ?>
         </h2>
 
-        <p class="fundkit-deact__lede" id="fundkit-deact-lede">
-            <?php esc_html_e('Your donations, donors, campaigns and settings stay as they are. Switching Fundraising Toolkit back on picks up where you left off.', 'fundraising-toolkit'); ?>
+        <p class="gratora-deact__lede" id="gratora-deact-lede">
+            <?php esc_html_e('Your donations, donors, campaigns and settings stay as they are. Switching Gratora back on picks up where you left off.', 'gratora'); ?>
         </p>
 
-        <div class="fundkit-deact__choice">
-            <label class="fundkit-deact__check" for="fundkit-deact-wipe">
-                <input type="checkbox" id="fundkit-deact-wipe" <?php checked($wipeOptIn); ?>>
-                <span><?php esc_html_e('Delete all Fundraising Toolkit data as well', 'fundraising-toolkit'); ?></span>
+        <div class="gratora-deact__choice">
+            <label class="gratora-deact__check" for="gratora-deact-wipe">
+                <input type="checkbox" id="gratora-deact-wipe" <?php checked($wipeOptIn); ?>>
+                <span><?php esc_html_e('Delete all Gratora data as well', 'gratora'); ?></span>
             </label>
 
-            <div class="fundkit-deact__consequence" id="fundkit-deact-consequence" hidden>
-                <p class="fundkit-deact__consequence-lead">
-                    <?php esc_html_e('Deleted the moment you deactivate, and not recoverable:', 'fundraising-toolkit'); ?>
+            <div class="gratora-deact__consequence" id="gratora-deact-consequence" hidden>
+                <p class="gratora-deact__consequence-lead">
+                    <?php esc_html_e('Deleted the moment you deactivate, and not recoverable:', 'gratora'); ?>
                 </p>
-                <ul class="fundkit-deact__list">
-                    <li><?php esc_html_e('Donations and refunds', 'fundraising-toolkit'); ?></li>
-                    <li><?php esc_html_e('Donors and their consent history', 'fundraising-toolkit'); ?></li>
-                    <li><?php esc_html_e('Campaigns, forms and funds', 'fundraising-toolkit'); ?></li>
-                    <li><?php esc_html_e('Receipts and annual statements', 'fundraising-toolkit'); ?></li>
+                <ul class="gratora-deact__list">
+                    <li><?php esc_html_e('Donations and refunds', 'gratora'); ?></li>
+                    <li><?php esc_html_e('Donors and their consent history', 'gratora'); ?></li>
+                    <li><?php esc_html_e('Campaigns, forms and funds', 'gratora'); ?></li>
+                    <li><?php esc_html_e('Receipts and annual statements', 'gratora'); ?></li>
                 </ul>
-                <p class="fundkit-deact__consequence-foot">
-                    <?php esc_html_e('Reactivating will not bring any of it back. Export anything you need first.', 'fundraising-toolkit'); ?>
+                <p class="gratora-deact__consequence-foot">
+                    <?php esc_html_e('Reactivating will not bring any of it back. Export anything you need first.', 'gratora'); ?>
                 </p>
             </div>
         </div>
 
-        <div class="fundkit-deact__actions">
-            <button type="button" class="button" data-fundkit-deact-cancel>
-                <?php esc_html_e('Cancel', 'fundraising-toolkit'); ?>
+        <div class="gratora-deact__actions">
+            <button type="button" class="button" data-gratora-deact-cancel>
+                <?php esc_html_e('Cancel', 'gratora'); ?>
             </button>
-            <button type="button" class="button button-primary" data-fundkit-deact-submit
-                    data-label-keep="<?php esc_attr_e('Deactivate', 'fundraising-toolkit'); ?>"
-                    data-label-wipe="<?php esc_attr_e('Delete everything and deactivate', 'fundraising-toolkit'); ?>">
-                <?php esc_html_e('Deactivate', 'fundraising-toolkit'); ?>
+            <button type="button" class="button button-primary" data-gratora-deact-submit
+                    data-label-keep="<?php esc_attr_e('Deactivate', 'gratora'); ?>"
+                    data-label-wipe="<?php esc_attr_e('Delete everything and deactivate', 'gratora'); ?>">
+                <?php esc_html_e('Deactivate', 'gratora'); ?>
             </button>
         </div>
     </div>

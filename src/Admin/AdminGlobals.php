@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Admin;
+namespace Gratora\Admin;
 
-use FundKit\Campaigns\Styling\StylePresets;
-use FundKit\Campaigns\Styling\Tokens;
-use FundKit\Currency\CurrencyFormats;
-use FundKit\Forms\FormService;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Hooks\HookProvider;
-use FundKit\Foundation\Http\ClientIp;
-use FundKit\Foundation\License\LicenseService;
-use FundKit\Settings\SettingsService;
+use Gratora\Campaigns\Styling\StylePresets;
+use Gratora\Campaigns\Styling\Tokens;
+use Gratora\Currency\CurrencyFormats;
+use Gratora\Forms\FormService;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Hooks\HookProvider;
+use Gratora\Foundation\Http\ClientIp;
+use Gratora\Foundation\License\LicenseService;
+use Gratora\Settings\SettingsService;
 
 /** @since 1.0.0 */
 final class AdminGlobals extends HookProvider
@@ -33,17 +33,17 @@ final class AdminGlobals extends HookProvider
     public function inject(): void
     {
         // Check capabilities before exposing configuration through a user-controlled page slug.
-        if (! $this->isFundKitAdminPage() || ! Capabilities::canAccessAdmin()) return;
+        if (! $this->isGratoraAdminPage() || ! Capabilities::canAccessAdmin()) return;
 
-        $currencyLocale = get_option('fundkit_currency_locale', []);
+        $currencyLocale = get_option('gratora_currency_locale', []);
         $defaultCurrency = Money::defaultCurrency();
 
         $payload = [
-            'rest'             => esc_url_raw(rest_url('fundkit/v1/')),
+            'rest'             => esc_url_raw(rest_url('gratora/v1/')),
             'nonce'            => wp_create_nonce('wp_rest'),
             'pro'              => $this->license->snapshot(),
-            'campaign_types'   => apply_filters('fundkit.campaign.types', ['standard' => __('Standard', 'fundraising-toolkit')]),
-            'campaign_type_notices' => apply_filters('fundkit.campaign.type_notices', []),
+            'campaign_types'   => apply_filters('gratora.campaign.types', ['standard' => __('Standard', 'gratora')]),
+            'campaign_type_notices' => apply_filters('gratora.campaign.type_notices', []),
             'default_currency' => $defaultCurrency,
             'supported_currencies' => is_array($currencyLocale['supported_currencies'] ?? null)
                 ? array_values($currencyLocale['supported_currencies'])
@@ -55,12 +55,12 @@ final class AdminGlobals extends HookProvider
                 'site_name'    => (string) get_bloginfo('name'),
                 'admin_email'  => (string) get_option('admin_email', ''),
                 'home_url'     => esc_url_raw(home_url('/')),
-                'dashboard_url' => esc_url_raw(admin_url('admin.php?page=fundkit')),
-                'settings_url' => esc_url_raw(admin_url('admin.php?page=fundkit-settings')),
-                'campaigns_url' => esc_url_raw(admin_url('admin.php?page=fundkit-campaigns')),
+                'dashboard_url' => esc_url_raw(admin_url('admin.php?page=gratora')),
+                'settings_url' => esc_url_raw(admin_url('admin.php?page=gratora-settings')),
+                'campaigns_url' => esc_url_raw(admin_url('admin.php?page=gratora-campaigns')),
             ],
             'privacy_policy_url' => (function () {
-                $opt = get_option('fundkit_privacy', []);
+                $opt = get_option('gratora_privacy', []);
                 $url = is_array($opt) ? trim((string) ($opt['privacy_policy_url'] ?? '')) : '';
                 return $url !== '' ? esc_url_raw($url) : '';
             })(),
@@ -84,13 +84,13 @@ final class AdminGlobals extends HookProvider
             // Expose add-on email templates to the editor.
             'email_template_meta' => SettingsService::templateMeta(),
             // Match REST permissions, including the manage_options bypass. JS keys omit
-            // fundkit_.
+            // gratora_.
             'can' => self::capabilities(),
             // Detect proxy defaults for the spam-protection settings.
             'detectedProxy' => ClientIp::undeclaredProxy(),
         ];
 
-        // Populate window.fundkit before screen bundles run. HEX flags prevent inline-script
+        // Populate window.gratora before screen bundles run. HEX flags prevent inline-script
         // breakout.
         $json = wp_json_encode(
             $payload,
@@ -98,11 +98,11 @@ final class AdminGlobals extends HookProvider
                 | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
         );
 
-        wp_register_script('fundkit-admin-globals', false, [], FUNDKIT_VERSION, false);
-        wp_enqueue_script('fundkit-admin-globals');
+        wp_register_script('gratora-admin-globals', false, [], GRATORA_VERSION, false);
+        wp_enqueue_script('gratora-admin-globals');
         wp_add_inline_script(
-            'fundkit-admin-globals',
-            'window.fundkit = window.fundkit || {}; Object.assign(window.fundkit, ' . $json . ');'
+            'gratora-admin-globals',
+            'window.gratora = window.gratora || {}; Object.assign(window.gratora, ' . $json . ');'
         );
     }
 
@@ -117,7 +117,7 @@ final class AdminGlobals extends HookProvider
         $can = ['manage_options' => current_user_can('manage_options')];
 
         foreach (Capabilities::all() as $cap) {
-            $key = str_starts_with($cap, 'fundkit_') ? substr($cap, strlen('fundkit_')) : $cap;
+            $key = str_starts_with($cap, 'gratora_') ? substr($cap, strlen('gratora_')) : $cap;
             $can[$key] = Capabilities::userCan($cap);
         }
 
@@ -125,11 +125,11 @@ final class AdminGlobals extends HookProvider
     }
 
     /** @since 1.0.0 */
-    private function isFundKitAdminPage(): bool
+    private function isGratoraAdminPage(): bool
     {
         $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
 
-        // The dashboard uses the bare fundkit slug.
-        return $page === 'fundkit' || strpos($page, 'fundkit-') === 0;
+        // The dashboard uses the bare gratora slug.
+        return $page === 'gratora' || strpos($page, 'gratora-') === 0;
     }
 }

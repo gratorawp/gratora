@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Consent;
-use FundKit\Donors\Donor;
-use FundKit\Foundation\Upgrade\UpgradeRoutine;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Upgrade\UpgradeJob;
-use FundKit\Foundation\Upgrade\UpgradeRunner;
+use Gratora\Donors\Consent;
+use Gratora\Donors\Donor;
+use Gratora\Foundation\Upgrade\UpgradeRoutine;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Upgrade\UpgradeJob;
+use Gratora\Foundation\Upgrade\UpgradeRunner;
 
 /**
  * The mechanism, and the first routine that uses it.
@@ -26,7 +26,7 @@ final class UpgradeRoutineTest extends IntegrationTestCase
     {
         parent::setUp();
         delete_option(UpgradeRunner::OPTION_DONE);
-        delete_option('fundkit_upgrade_clear_consent_hashes_after');
+        delete_option('gratora_upgrade_clear_consent_hashes_after');
         delete_option(UpgradeRunner::OPTION_FAILED);
 
         // Action Scheduler writes outside this suite's transaction, so a job
@@ -71,7 +71,7 @@ final class UpgradeRoutineTest extends IntegrationTestCase
 
     public function test_an_outstanding_routine_is_requeued_on_admin_load(): void
     {
-        // A drain was queued only when FUNDKIT_DB_VERSION changed, so a release
+        // A drain was queued only when GRATORA_DB_VERSION changed, so a release
         // that adds a routine and no schema change never ran it, and a queue
         // the host cleared never came back.
         $routine = new class implements UpgradeRoutine {

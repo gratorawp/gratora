@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Upgrade;
+namespace Gratora\Foundation\Upgrade;
 
-use FundKit\Settings\SettingsService;
+use Gratora\Settings\SettingsService;
 
 /**
  * Remove stored copies equal to current dynamic defaults so site identity and translated email
@@ -23,7 +23,7 @@ final class UnpinSiteIdentity implements UpgradeRoutine
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Letting the sender name and organisation name follow the site again.', 'fundraising-toolkit');
+        return __('Letting the sender name and organisation name follow the site again.', 'gratora');
     }
 
     /** @since 1.0.0 */
@@ -38,19 +38,19 @@ final class UnpinSiteIdentity implements UpgradeRoutine
     /** @since 1.0.0 */
     private function unpinEmail(): void
     {
-        $stored = get_option('fundkit_email_settings', []);
+        $stored = get_option('gratora_email_settings', []);
         if (! is_array($stored) || $stored === []) return;
 
         $next = (new SettingsService())->withoutResolvedDefaults('email', $stored);
         if ($next !== $stored) {
-            update_option('fundkit_email_settings', $next, false);
+            update_option('gratora_email_settings', $next, false);
         }
     }
 
     /** @since 1.0.0 */
     private function unpinOrgProfile(): void
     {
-        $stored = get_option('fundkit_org_profile', []);
+        $stored = get_option('gratora_org_profile', []);
         if (! is_array($stored) || $stored === []) return;
 
         $next = $stored;
@@ -59,7 +59,7 @@ final class UnpinSiteIdentity implements UpgradeRoutine
         }
 
         if ($next !== $stored) {
-            update_option('fundkit_org_profile', $next, false);
+            update_option('gratora_org_profile', $next, false);
         }
     }
 }

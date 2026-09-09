@@ -35,7 +35,7 @@ import { useDispatch, useRegistry, useSelect } from '@wordpress/data';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
-import { useFundKitRecord } from '../_shared/useFundKitRecord';
+import { useGratoraRecord } from '../_shared/useGratoraRecord';
 import Btn from '../_shared/components/Btn';
 import LocalIcon from '../_shared/components/Icon';
 import Slider    from '../_shared/components/Slider';
@@ -75,8 +75,8 @@ function defaultFormSettings() {
 // Multi-page navigation is driven by the Steps block inside the form, not a
 // form-level toggle. Layout is just the embed style.
 const LAYOUT_OPTIONS = [
-    { value: 'inline', label: __( 'Inline (in-page)', 'fundraising-toolkit' ) },
-    { value: 'modal',  label: __( 'Modal (button opens form)', 'fundraising-toolkit' ) },
+    { value: 'inline', label: __( 'Inline (in-page)', 'gratora' ) },
+    { value: 'modal',  label: __( 'Modal (button opens form)', 'gratora' ) },
 ];
 
 function mergeFormSettings( stored, base = defaultFormSettings() ) {
@@ -118,11 +118,11 @@ export function templateApplication( currentSettings, template ) {
  *
  * A form on a resolvable preset gates the campaign's inline tokens out, which
  * is the one rule the shared resolver does not model. The sheet paints #fff
- * whatever --fundkit-bg says, so no ink is measured against it.
+ * whatever --gratora-bg says, so no ink is measured against it.
  *
  * @since 1.0.0
  */
-export function canvasStyle( settings = {}, campaign = null, styling = window.fundkit?.styling || {} ) {
+export function canvasStyle( settings = {}, campaign = null, styling = window.gratora?.styling || {} ) {
     const presets = Array.isArray( styling.presets ) ? styling.presets : [];
 
     const namedPreset  = String( settings.style?.preset_id || '' );
@@ -143,7 +143,7 @@ export function canvasStyle( settings = {}, campaign = null, styling = window.fu
 
     const cw = Number( settings.container?.width );
     if ( cw >= 320 && cw <= 1600 ) {
-        sx[ '--fundkit-editor-sheet-width' ] = `${ cw }px`;
+        sx[ '--gratora-editor-sheet-width' ] = `${ cw }px`;
     }
 
     return sx;
@@ -193,7 +193,7 @@ function historyReducer( state, action ) {
 }
 
 export default function Editor( { formId } ) {
-    const c = useFundKitRecord( 'form', formId );
+    const c = useGratoraRecord( 'form', formId );
 
     const [ campaigns, setCampaigns ] = useState( [] );
     const [ gateways, setGateways ]   = useState( [] );
@@ -248,26 +248,26 @@ export default function Editor( { formId } ) {
     // Dropdown sources, not entities, so they are fetched once. A per-source
     // failure surfaces rather than leaving a select silently empty.
     useEffect( () => {
-        apiFetch( { path: '/fundkit/v1/admin/forms/campaigns' } )
+        apiFetch( { path: '/gratora/v1/admin/forms/campaigns' } )
             .then( setCampaigns )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load campaigns.', 'fundraising-toolkit' ) ) );
-        apiFetch( { path: '/fundkit/v1/admin/forms/gateways' } )
+            .catch( ( err ) => setError( err?.message || __( 'Could not load campaigns.', 'gratora' ) ) );
+        apiFetch( { path: '/gratora/v1/admin/forms/gateways' } )
             .then( setGateways )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load payment gateways.', 'fundraising-toolkit' ) ) );
-        apiFetch( { path: '/fundkit/v1/admin/forms/funds' } )
+            .catch( ( err ) => setError( err?.message || __( 'Could not load payment gateways.', 'gratora' ) ) );
+        apiFetch( { path: '/gratora/v1/admin/forms/funds' } )
             .then( setFunds )
-            .catch( ( err ) => setError( err?.message || __( 'Could not load funds.', 'fundraising-toolkit' ) ) );
+            .catch( ( err ) => setError( err?.message || __( 'Could not load funds.', 'gratora' ) ) );
     }, [] );
 
     // Expose form context to block edit components (Goal needs campaign progress).
     useEffect( () => {
-        window.fundkitFormEditor = {
+        window.gratoraFormEditor = {
             formId,
             formCampaignId: Number( c.value( 'campaign_id', 0 ) ) || 0,
             formGoal: mergeFormSettings( c.record.settings ).goal,
             campaigns,
         };
-        return () => { delete window.fundkitFormEditor; };
+        return () => { delete window.gratoraFormEditor; };
     }, [ formId, c.record.campaign_id, c.record.settings, campaigns ] );
 
     // Seeds the block-history reducer once, when the entity first resolves. A
@@ -319,7 +319,7 @@ export default function Editor( { formId } ) {
         setPreviewLoading( true );
         try {
             const res = await apiFetch( {
-                path:   '/fundkit/v1/admin/forms/preview',
+                path:   '/gratora/v1/admin/forms/preview',
                 method: 'POST',
                 data:   {
                     blocks:      serialize( blocks ),
@@ -329,7 +329,7 @@ export default function Editor( { formId } ) {
             } );
             setPreviewHtml( res.html || '' );
         } catch ( err ) {
-            setError( err?.message || __( 'Preview failed.', 'fundraising-toolkit' ) );
+            setError( err?.message || __( 'Preview failed.', 'gratora' ) );
         } finally {
             setPreviewLoading( false );
         }
@@ -354,7 +354,7 @@ export default function Editor( { formId } ) {
             setLastSavedSerialized( serialized );
             return true;
         } catch ( err ) {
-            setError( err?.message || __( 'Save failed.', 'fundraising-toolkit' ) );
+            setError( err?.message || __( 'Save failed.', 'gratora' ) );
             return false;
         }
     }, [ c, blocks ] );
@@ -366,8 +366,8 @@ export default function Editor( { formId } ) {
         if ( ok ) {
             notify.success(
                 c.record.status === 'published'
-                    ? __( 'Form saved.', 'fundraising-toolkit' )
-                    : __( 'Draft saved.', 'fundraising-toolkit' )
+                    ? __( 'Form saved.', 'gratora' )
+                    : __( 'Draft saved.', 'gratora' )
             );
         }
     }, [ persist, c.record.status ] );
@@ -430,7 +430,7 @@ export default function Editor( { formId } ) {
     } ), [] );
 
     const missingRequired = useMemo( () => {
-        const required = window.fundkit?.forms?.required_blocks || [];
+        const required = window.gratora?.forms?.required_blocks || [];
         if ( ! required.length ) return [];
         const present = new Set();
         const walk = ( list ) => {
@@ -448,14 +448,14 @@ export default function Editor( { formId } ) {
         setSavingAction( 'publish' );
         const ok = await persist( { status: 'published' } );
         setSavingAction( null );
-        if ( ok ) notify.success( __( 'Form published.', 'fundraising-toolkit' ) );
+        if ( ok ) notify.success( __( 'Form published.', 'gratora' ) );
     }, [ persist, missingRequired ] );
 
     const onUnpublish = useCallback( async () => {
         setSavingAction( 'unpublish' );
         const ok = await persist( { status: 'draft' } );
         setSavingAction( null );
-        if ( ok ) notify.success( __( 'Form moved to draft.', 'fundraising-toolkit' ) );
+        if ( ok ) notify.success( __( 'Form moved to draft.', 'gratora' ) );
     }, [ persist ] );
 
     const dirtyForUnload = c.isDirty || serialize( blocks ) !== lastSavedSerialized;
@@ -493,28 +493,28 @@ export default function Editor( { formId } ) {
     }, [ dirtyForUnload, c.isSaving, onSave, undo, redo, history.past.length, history.future.length ] );
 
     if ( c.isLoading || ( ! c.savedRecord && ! c.notFound && ! c.loadError ) ) {
-        return <div className="fundkit-form-editor__loading"><Spinner /></div>;
+        return <div className="gratora-form-editor__loading"><Spinner /></div>;
     }
     // This screen hides the admin bar and the menu, so a bare sentence here is
     // a dead end: whatever went wrong, there has to be a way onward from it.
     if ( c.notFound || c.loadError ) {
         return (
-            <div className="fundkit-form-editor__loading">
+            <div className="gratora-form-editor__loading">
                 <Notice status="error" isDismissible={ false }>
                     { c.loadError
-                        ? ( c.loadError.message || __( 'This form could not be loaded.', 'fundraising-toolkit' ) )
-                        : __( 'Form not found.', 'fundraising-toolkit' ) }
+                        ? ( c.loadError.message || __( 'This form could not be loaded.', 'gratora' ) )
+                        : __( 'Form not found.', 'gratora' ) }
                 </Notice>
                 <p>
                     { c.loadError && (
                         <>
                             <Btn variant="secondary" onClick={ c.reload }>
-                                { __( 'Try again', 'fundraising-toolkit' ) }
+                                { __( 'Try again', 'gratora' ) }
                             </Btn>
                             { ' ' }
                         </>
                     ) }
-                    <Btn href={ formsBackHref( 0 ) }>{ __( 'Back to forms', 'fundraising-toolkit' ) }</Btn>
+                    <Btn href={ formsBackHref( 0 ) }>{ __( 'Back to forms', 'gratora' ) }</Btn>
                 </p>
             </div>
         );
@@ -551,7 +551,7 @@ export default function Editor( { formId } ) {
     );
 
     const notices = ( error || missingRequired.length > 0 ) && (
-        <div className="fundkit-form-editor__notices">
+        <div className="gratora-form-editor__notices">
             { missingRequired.length > 0 && (
                 <Notice
                     status={ c.value( 'status', 'draft' ) === 'published' ? 'error' : 'warning' }
@@ -563,12 +563,12 @@ export default function Editor( { formId } ) {
                         // about publishing.
                         ? sprintf(
                             /* translators: %s: comma-separated list of missing block labels (Name, Email). */
-                            __( 'This form is live and cannot be saved without these blocks: %s. Add them back, or move it to draft to keep editing.', 'fundraising-toolkit' ),
+                            __( 'This form is live and cannot be saved without these blocks: %s. Add them back, or move it to draft to keep editing.', 'gratora' ),
                             missingRequired.map( ( r ) => r.label ).join( ', ' )
                         )
                         : sprintf(
                             /* translators: %s: comma-separated list of missing block labels (Name, Email). */
-                            __( 'Add these blocks before publishing: %s.', 'fundraising-toolkit' ),
+                            __( 'Add these blocks before publishing: %s.', 'gratora' ),
                             missingRequired.map( ( r ) => r.label ).join( ', ' )
                         ) }
                 </Notice>
@@ -600,7 +600,7 @@ export default function Editor( { formId } ) {
     );
 
     return (
-        <div className="fundkit-form-editor" style={ themeVars }>
+        <div className="gratora-form-editor" style={ themeVars }>
             <ShortcutProvider>
                 <SlotFillProvider>
                     <BlockEditorProvider
@@ -631,8 +631,8 @@ export default function Editor( { formId } ) {
                                         funds={ funds }
                                     />
                                 ) : (
-                                    <div className="fundkit-form-editor__canvas">
-                                        <div className="fundkit-form-editor__sheet">
+                                    <div className="gratora-form-editor__canvas">
+                                        <div className="gratora-form-editor__sheet">
                                             <BlockTools>
                                                 <WritingFlow>
                                                     <ObserveTyping>
@@ -650,7 +650,7 @@ export default function Editor( { formId } ) {
                             sidebar={ sidebar }
                             secondarySidebar={
                                 secondaryView === 'inserter' ? (
-                                    <div className="fundkit-form-editor__secondary fundkit-form-editor__secondary--inserter">
+                                    <div className="gratora-form-editor__secondary gratora-form-editor__secondary--inserter">
                                         <BlockLibrary
                                             showInserterHelpPanel={ false }
                                             rootClientId=""
@@ -658,9 +658,9 @@ export default function Editor( { formId } ) {
                                         />
                                     </div>
                                 ) : secondaryView === 'listview' ? (
-                                    <div className="fundkit-form-editor__secondary fundkit-form-editor__secondary--listview">
-                                        <div className="fundkit-form-editor__secondary-title">
-                                            { __( 'Form structure', 'fundraising-toolkit' ) }
+                                    <div className="gratora-form-editor__secondary gratora-form-editor__secondary--listview">
+                                        <div className="gratora-form-editor__secondary-title">
+                                            { __( 'Form structure', 'gratora' ) }
                                         </div>
                                         <BlockListView />
                                     </div>
@@ -674,7 +674,7 @@ export default function Editor( { formId } ) {
 
             { templatePickerOpen && (
                 <FormTemplatePicker
-                    intro={ __( "We didn't pre-build this form so you can pick a shape that fits. You can change it later.", 'fundraising-toolkit' ) }
+                    intro={ __( "We didn't pre-build this form so you can pick a shape that fits. You can change it later.", 'gratora' ) }
                     onPick={ applyTemplate }
                     onClose={ () => setTemplatePickerOpen( false ) }
                 />
@@ -682,17 +682,17 @@ export default function Editor( { formId } ) {
 
             { pendingTemplate && (
                 <Modal
-                    title={ __( 'Apply template', 'fundraising-toolkit' ) }
+                    title={ __( 'Apply template', 'gratora' ) }
                     onRequestClose={ () => setPendingTemplate( null ) }
                     size="small"
                 >
                     <p style={ { marginTop: 0 } }>
-                        { __( 'Replace the current form with this template? Its blocks take over, and so do the settings it carries: layout, style, gateways, recurring and the thank-you message. Undo brings the blocks back, but not the settings.', 'fundraising-toolkit' ) }
+                        { __( 'Replace the current form with this template? Its blocks take over, and so do the settings it carries: layout, style, gateways, recurring and the thank-you message. Undo brings the blocks back, but not the settings.', 'gratora' ) }
                     </p>
                     <div style={ { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 } }>
-                        <Btn onClick={ () => setPendingTemplate( null ) }>{ __( 'Cancel', 'fundraising-toolkit' ) }</Btn>
+                        <Btn onClick={ () => setPendingTemplate( null ) }>{ __( 'Cancel', 'gratora' ) }</Btn>
                         <Btn variant="primary" onClick={ () => performApplyTemplate( pendingTemplate, true ) }>
-                            { __( 'Replace form', 'fundraising-toolkit' ) }
+                            { __( 'Replace form', 'gratora' ) }
                         </Btn>
                     </div>
                 </Modal>
@@ -723,8 +723,8 @@ function DeselectOnOutsideClick() {
             '.block-editor-block-toolbar, .block-editor-block-popover, ' +
             '.block-editor-block-contextual-toolbar, ' +
             '.components-popover, .components-dropdown, ' +
-            '.fundkit-form-editor__sidebar, ' +
-            '.fundkit-form-editor__secondary, ' +
+            '.gratora-form-editor__sidebar, ' +
+            '.gratora-form-editor__secondary, ' +
             '.interface-interface-skeleton__sidebar';
         const onDocMouseDown = ( e ) => {
             const t = e.target;
@@ -747,7 +747,7 @@ function AssistantBridge() {
     useEffect( () => {
         const store = () => registry.select( 'core/block-editor' );
         const act   = () => registry.dispatch( 'core/block-editor' );
-        window.fundkitFormBlocks = {
+        window.gratoraFormBlocks = {
             getBlocks: () =>
                 store().getBlocks().map( ( b ) => ( {
                     clientId: b.clientId,
@@ -767,22 +767,22 @@ function AssistantBridge() {
             moveBlock: ( clientId, toIndex ) =>
                 act().moveBlocksToPosition( [ clientId ], '', '', toIndex ),
         };
-        return () => { delete window.fundkitFormBlocks; };
+        return () => { delete window.gratoraFormBlocks; };
     }, [ registry ] );
     return null;
 }
 
 function CanvasEmpty() {
     return (
-        <div className="fundkit-form-editor__empty">
-            <h3>{ __( 'Start building your donation form', 'fundraising-toolkit' ) }</h3>
-            <p>{ __( 'Add a heading, an amount block, and a submit button to take your first donation.', 'fundraising-toolkit' ) }</p>
+        <div className="gratora-form-editor__empty">
+            <h3>{ __( 'Start building your donation form', 'gratora' ) }</h3>
+            <p>{ __( 'Add a heading, an amount block, and a submit button to take your first donation.', 'gratora' ) }</p>
             <Inserter
                 position="bottom center"
                 rootClientId=""
                 renderToggle={ ( { onToggle, isOpen } ) => (
                     <button type="button" onClick={ onToggle } aria-expanded={ isOpen }>
-                        + { __( 'Add your first block', 'fundraising-toolkit' ) }
+                        + { __( 'Add your first block', 'gratora' ) }
                     </button>
                 ) }
             />
@@ -791,12 +791,12 @@ function CanvasEmpty() {
 }
 
 const VIEW_TABS = [
-    { id: 'develop',  label: __( 'Build', 'fundraising-toolkit' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
-    { id: 'preview',  label: __( 'Preview', 'fundraising-toolkit' ),  icon: <LocalIcon name="eye"      size={ 15 } /> },
+    { id: 'develop',  label: __( 'Build', 'gratora' ),    icon: <LocalIcon name="edit"     size={ 15 } /> },
+    { id: 'preview',  label: __( 'Preview', 'gratora' ),  icon: <LocalIcon name="eye"      size={ 15 } /> },
     // Settings is a third view of the same form, so it sits with the other two
     // rather than behind a cog, which reads as a tool acting on the current
     // view.
-    { id: 'settings', label: __( 'Settings', 'fundraising-toolkit' ), icon: <LocalIcon name="settings" size={ 15 } /> },
+    { id: 'settings', label: __( 'Settings', 'gratora' ), icon: <LocalIcon name="settings" size={ 15 } /> },
 ];
 
 function EditorHeader( {
@@ -815,7 +815,7 @@ function EditorHeader( {
     const publishDisabledReason = missing.length > 0
         ? sprintf(
             /* translators: %s: comma-separated list of missing block labels. */
-            __( 'Add these blocks first: %s.', 'fundraising-toolkit' ),
+            __( 'Add these blocks first: %s.', 'gratora' ),
             missing.join( ', ' )
         )
         : '';
@@ -824,34 +824,34 @@ function EditorHeader( {
     const showAuthoringTools = view === 'develop';
 
     return (
-        <div className="fundkit-editor-header">
-            <div className="fundkit-editor-header__left">
-                <a className="fundkit-editor-header__back" href={ backHref }>
+        <div className="gratora-editor-header">
+            <div className="gratora-editor-header__left">
+                <a className="gratora-editor-header__back" href={ backHref }>
                     <LocalIcon name="chevron-left" size={ 20 } />
-                    <span>{ __( 'Forms', 'fundraising-toolkit' ) }</span>
+                    <span>{ __( 'Forms', 'gratora' ) }</span>
                 </a>
                 { showAuthoringTools && (
                     <>
-                        <span className="fundkit-editor-header__divider" aria-hidden="true" />
+                        <span className="gratora-editor-header__divider" aria-hidden="true" />
                         <Button
                             icon={ inserterOpen ? CloseIcon : PlusIcon }
-                            label={ inserterOpen ? __( 'Close block inserter', 'fundraising-toolkit' ) : __( 'Toggle block inserter', 'fundraising-toolkit' ) }
+                            label={ inserterOpen ? __( 'Close block inserter', 'gratora' ) : __( 'Toggle block inserter', 'gratora' ) }
                             onClick={ () => onToggleSecondaryView( 'inserter' ) }
                             isPressed={ inserterOpen }
                             showTooltip
                         />
                         <Button
                             icon={ ListViewIcon }
-                            label={ __( 'Toggle block outline', 'fundraising-toolkit' ) }
+                            label={ __( 'Toggle block outline', 'gratora' ) }
                             onClick={ () => onToggleSecondaryView( 'listview' ) }
                             isPressed={ listViewOpen }
                             showTooltip
                         />
-                        <Button icon={ UndoIcon } label={ __( 'Undo', 'fundraising-toolkit' ) } onClick={ onUndo } disabled={ ! canUndo } />
-                        <Button icon={ RedoIcon } label={ __( 'Redo', 'fundraising-toolkit' ) } onClick={ onRedo } disabled={ ! canRedo } />
+                        <Button icon={ UndoIcon } label={ __( 'Undo', 'gratora' ) } onClick={ onUndo } disabled={ ! canUndo } />
+                        <Button icon={ RedoIcon } label={ __( 'Redo', 'gratora' ) } onClick={ onRedo } disabled={ ! canRedo } />
                         <Button
                             icon={ <LocalIcon name="layout-grid" size={ 20 } /> }
-                            label={ __( 'Start from a template', 'fundraising-toolkit' ) }
+                            label={ __( 'Start from a template', 'gratora' ) }
                             onClick={ onOpenTemplates }
                             showTooltip
                         />
@@ -859,25 +859,25 @@ function EditorHeader( {
                 ) }
             </div>
 
-            <div className="fundkit-editor-header__center">
+            <div className="gratora-editor-header__center">
                 <input
-                    className="fundkit-editor-header__title"
+                    className="gratora-editor-header__title"
                     type="text"
                     value={ title }
                     onChange={ ( e ) => onTitleChange( e.target.value ) }
-                    placeholder={ __( 'Untitled donation form', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'Untitled donation form', 'gratora' ) }
                 />
             </div>
 
-            <div className="fundkit-editor-header__right">
-                <div className="fundkit-editor-header__tabs" role="tablist">
+            <div className="gratora-editor-header__right">
+                <div className="gratora-editor-header__tabs" role="tablist">
                     { VIEW_TABS.map( ( t ) => (
                         <button
                             key={ t.id }
                             type="button"
                             role="tab"
                             aria-selected={ view === t.id }
-                            className={ `fundkit-editor-header__tab${ view === t.id ? ' is-active' : '' }` }
+                            className={ `gratora-editor-header__tab${ view === t.id ? ' is-active' : '' }` }
                             onClick={ () => onViewChange( t.id ) }
                         >
                             { t.icon }
@@ -891,7 +891,7 @@ function EditorHeader( {
                     disabled={ saving || ! isDirty }
                     isBusy={ saving && savingAction === 'save' }
                 >
-                    { isDirty ? __( 'Save', 'fundraising-toolkit' ) : __( 'Saved', 'fundraising-toolkit' ) }
+                    { isDirty ? __( 'Save', 'gratora' ) : __( 'Saved', 'gratora' ) }
                 </Button>
                 { isPublished ? (
                     <Button
@@ -900,7 +900,7 @@ function EditorHeader( {
                         disabled={ saving }
                         isBusy={ saving && savingAction === 'unpublish' }
                     >
-                        { __( 'Unpublish', 'fundraising-toolkit' ) }
+                        { __( 'Unpublish', 'gratora' ) }
                     </Button>
                 ) : (
                     <Button
@@ -911,12 +911,12 @@ function EditorHeader( {
                         label={ publishDisabledReason || undefined }
                         showTooltip={ !! publishDisabledReason }
                     >
-                        { __( 'Publish', 'fundraising-toolkit' ) }
+                        { __( 'Publish', 'gratora' ) }
                     </Button>
                 ) }
                 <Button
                     icon={ PanelRightIcon }
-                    label={ __( 'Toggle side panel', 'fundraising-toolkit' ) }
+                    label={ __( 'Toggle side panel', 'gratora' ) }
                     onClick={ onToggleSidebar }
                     isPressed={ sidebarOpen }
                     showTooltip
@@ -927,9 +927,9 @@ function EditorHeader( {
 }
 
 const DEVICES = [
-    { id: 'desktop', label: __( 'Desktop', 'fundraising-toolkit' ), icon: DesktopIcon, width: '100%'  },
-    { id: 'tablet',  label: __( 'Tablet', 'fundraising-toolkit' ),  icon: TabletIcon,  width: '768px' },
-    { id: 'phone',   label: __( 'Phone', 'fundraising-toolkit' ),   icon: MobileIcon,  width: '390px' },
+    { id: 'desktop', label: __( 'Desktop', 'gratora' ), icon: DesktopIcon, width: '100%'  },
+    { id: 'tablet',  label: __( 'Tablet', 'gratora' ),  icon: TabletIcon,  width: '768px' },
+    { id: 'phone',   label: __( 'Phone', 'gratora' ),   icon: MobileIcon,  width: '390px' },
 ];
 
 function PreviewPane( { loading, html, device, onDeviceChange } ) {
@@ -937,8 +937,8 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
     const isPhone = active.id === 'phone';
 
     return (
-        <div className="fundkit-form-editor__preview">
-            <div className="fundkit-form-editor__preview-toolbar" role="tablist">
+        <div className="gratora-form-editor__preview">
+            <div className="gratora-form-editor__preview-toolbar" role="tablist">
                 { DEVICES.map( ( d ) => (
                     <Button
                         key={ d.id }
@@ -947,22 +947,22 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
                         aria-selected={ device === d.id }
                         label={ d.label }
                         showTooltip
-                        className={ `fundkit-form-editor__device${ device === d.id ? ' is-active' : '' }` }
+                        className={ `gratora-form-editor__device${ device === d.id ? ' is-active' : '' }` }
                         onClick={ () => onDeviceChange( d.id ) }
                     />
                 ) ) }
             </div>
             { loading && html === '' ? (
-                <div className="fundkit-form-editor__preview-spinner"><Spinner /></div>
+                <div className="gratora-form-editor__preview-spinner"><Spinner /></div>
             ) : (
-                <div className="fundkit-form-editor__preview-stage">
+                <div className="gratora-form-editor__preview-stage">
                     <div
-                        className={ `fundkit-form-editor__device-frame is-${ active.id }${ isPhone ? ' has-bezel' : '' }` }
+                        className={ `gratora-form-editor__device-frame is-${ active.id }${ isPhone ? ' has-bezel' : '' }` }
                         style={ { width: active.width, position: 'relative' } }
                     >
                         <iframe
-                            className="fundkit-form-editor__preview-frame"
-                            title={ __( 'Form preview', 'fundraising-toolkit' ) }
+                            className="gratora-form-editor__preview-frame"
+                            title={ __( 'Form preview', 'gratora' ) }
                             // Omit allow-same-origin so preview scripts cannot use admin
                             // credentials. Token messages validate window references.
                             sandbox="allow-scripts"
@@ -970,7 +970,7 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
                         />
                         { loading && (
                             <div
-                                className="fundkit-form-editor__preview-spinner"
+                                className="gratora-form-editor__preview-spinner"
                                 style={ { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.6)' } }
                             >
                                 <Spinner />
@@ -985,7 +985,7 @@ function PreviewPane( { loading, html, device, onDeviceChange } ) {
 
 function SettingsView( { c, campaigns, gateways, funds } ) {
     return (
-        <div className="fundkit-form-editor__settings">
+        <div className="gratora-form-editor__settings">
             <FormSettingsPanel
                 c={ c }
                 campaigns={ campaigns }
@@ -998,18 +998,18 @@ function SettingsView( { c, campaigns, gateways, funds } ) {
 
 function FormSidebar( { hasSelection } ) {
     return (
-        <div className="fundkit-form-sidebar">
-            <div className="fundkit-form-sidebar__header">
-                <h2 className="fundkit-form-sidebar__title">{ __( 'Block', 'fundraising-toolkit' ) }</h2>
+        <div className="gratora-form-sidebar">
+            <div className="gratora-form-sidebar__header">
+                <h2 className="gratora-form-sidebar__title">{ __( 'Block', 'gratora' ) }</h2>
             </div>
-            <div className="fundkit-form-sidebar__body">
+            <div className="gratora-form-sidebar__body">
                 { hasSelection ? (
                     <BlockInspector />
                 ) : (
                     <SidebarIntro
                         iconName="edit"
-                        title={ __( 'Block settings', 'fundraising-toolkit' ) }
-                        description={ __( 'Select a block on the canvas to see its settings here. Form-wide settings live in the Settings tab.', 'fundraising-toolkit' ) }
+                        title={ __( 'Block settings', 'gratora' ) }
+                        description={ __( 'Select a block on the canvas to see its settings here. Form-wide settings live in the Settings tab.', 'gratora' ) }
                     />
                 ) }
             </div>
@@ -1039,12 +1039,12 @@ function PreviewSidebar( { formId, blocks, settings, missingRequired } ) {
         // the preview iframe beside this panel already renders them, so
         // grading the saved ones had the two disagree about the same form.
         apiFetch( {
-            path:   `/fundkit/v1/admin/forms/${ formId }/readiness`,
+            path:   `/gratora/v1/admin/forms/${ formId }/readiness`,
             method: 'POST',
             data:   { blocks: serialize( blocks ), settings: JSON.parse( settingsJson ) },
         } )
             .then( ( res ) => { if ( ! cancelled ) setServerChecks( res.checks || [] ); } )
-            .catch( ( err ) => { if ( ! cancelled ) setError( err?.message || __( 'Could not load readiness checks.', 'fundraising-toolkit' ) ); } );
+            .catch( ( err ) => { if ( ! cancelled ) setError( err?.message || __( 'Could not load readiness checks.', 'gratora' ) ); } );
         return () => { cancelled = true; };
     }, [ formId, blocks, settingsJson ] );
 
@@ -1056,16 +1056,16 @@ function PreviewSidebar( { formId, blocks, settings, missingRequired } ) {
                 status: 'fail',
                 label:  sprintf(
                     /* translators: %s: comma-separated list of missing block labels. */
-                    __( 'Missing required fields: %s', 'fundraising-toolkit' ),
+                    __( 'Missing required fields: %s', 'gratora' ),
                     missingRequired.map( ( r ) => r.label ).join( ', ' )
                 ),
-                detail: __( 'Donors need these to complete a donation.', 'fundraising-toolkit' ),
+                detail: __( 'Donors need these to complete a donation.', 'gratora' ),
             } );
         } else {
             out.push( {
                 id:     'required-blocks',
                 status: 'pass',
-                label:  __( 'Required fields present', 'fundraising-toolkit' ),
+                label:  __( 'Required fields present', 'gratora' ),
             } );
         }
         return out;
@@ -1100,49 +1100,49 @@ function PreviewSidebar( { formId, blocks, settings, missingRequired } ) {
     const serverFail = useMemo( () => ( serverChecks || [] ).filter( ( c ) => c.status === 'fail' ).length, [ serverChecks ] );
 
     const summaryText = ( () => {
-        if ( ! serverChecks && ! error ) return __( 'Running checks…', 'fundraising-toolkit' );
+        if ( ! serverChecks && ! error ) return __( 'Running checks…', 'gratora' );
         if ( blockFail > 0 ) return sprintf(
             /* translators: %d: number of failing required-field checks that block publishing. */
-            _n( '%d issue blocks publishing', '%d issues block publishing', blockFail, 'fundraising-toolkit' ),
+            _n( '%d issue blocks publishing', '%d issues block publishing', blockFail, 'gratora' ),
             blockFail
         );
         if ( serverFail > 0 ) return sprintf(
             /* translators: %d: number of readiness issues to fix before the form can take donations. */
-            _n( '%d issue to fix before donors can give', '%d issues to fix before donors can give', serverFail, 'fundraising-toolkit' ),
+            _n( '%d issue to fix before donors can give', '%d issues to fix before donors can give', serverFail, 'gratora' ),
             serverFail
         );
         if ( counts.warn > 0 ) return sprintf(
             /* translators: %d: number of warning readiness checks. */
-            _n( '%d thing to review', '%d things to review', counts.warn, 'fundraising-toolkit' ),
+            _n( '%d thing to review', '%d things to review', counts.warn, 'gratora' ),
             counts.warn
         );
-        return __( 'Form is ready to publish', 'fundraising-toolkit' );
+        return __( 'Form is ready to publish', 'gratora' );
     } )();
 
     const summaryStatus = counts.fail > 0 ? 'fail' : counts.warn > 0 ? 'warn' : 'pass';
 
     return (
-        <div className="fundkit-form-sidebar">
-            <div className="fundkit-form-sidebar__header">
-                <h2 className="fundkit-form-sidebar__title">{ __( 'Pre-launch checks', 'fundraising-toolkit' ) }</h2>
-                <p className={ `fundkit-readiness__summary is-${ summaryStatus }` }>
+        <div className="gratora-form-sidebar">
+            <div className="gratora-form-sidebar__header">
+                <h2 className="gratora-form-sidebar__title">{ __( 'Pre-launch checks', 'gratora' ) }</h2>
+                <p className={ `gratora-readiness__summary is-${ summaryStatus }` }>
                     <ReadinessStatusIcon status={ summaryStatus } />
                     <span>{ summaryText }</span>
                 </p>
             </div>
-            <div className="fundkit-form-sidebar__body">
+            <div className="gratora-form-sidebar__body">
                 { error && (
                     <Notice status="error" isDismissible={ false }>{ error }</Notice>
                 ) }
                 { visibleChecks.length > 0 ? (
-                    <ul className="fundkit-readiness__list">
+                    <ul className="gratora-readiness__list">
                         { visibleChecks.map( ( c ) => (
                             <ReadinessRow key={ c.id } check={ c } />
                         ) ) }
                     </ul>
                 ) : ( serverChecks && ! error && (
-                    <p className="fundkit-readiness__empty">
-                        { __( 'Everything looks good. This form is safe to publish.', 'fundraising-toolkit' ) }
+                    <p className="gratora-readiness__empty">
+                        { __( 'Everything looks good. This form is safe to publish.', 'gratora' ) }
                     </p>
                 ) ) }
             </div>
@@ -1152,16 +1152,16 @@ function PreviewSidebar( { formId, blocks, settings, missingRequired } ) {
 
 function ReadinessRow( { check } ) {
     return (
-        <li className={ `fundkit-readiness__row is-${ check.status }` }>
+        <li className={ `gratora-readiness__row is-${ check.status }` }>
             <ReadinessStatusIcon status={ check.status } />
-            <div className="fundkit-readiness__body">
-                <div className="fundkit-readiness__label">{ check.label }</div>
+            <div className="gratora-readiness__body">
+                <div className="gratora-readiness__label">{ check.label }</div>
                 { check.detail && (
-                    <div className="fundkit-readiness__detail">{ check.detail }</div>
+                    <div className="gratora-readiness__detail">{ check.detail }</div>
                 ) }
                 { check.action_url && check.action_label && (
                     <a
-                        className="fundkit-readiness__action"
+                        className="gratora-readiness__action"
                         href={ check.action_url }
                         target="_blank"
                         rel="noreferrer"
@@ -1175,31 +1175,31 @@ function ReadinessRow( { check } ) {
 }
 
 function ReadinessStatusIcon( { status } ) {
-    if ( status === 'pass' ) return <LocalIcon name="check" size={ 16 } className="fundkit-readiness__icon" aria-hidden="true" />;
-    if ( status === 'warn' ) return <LocalIcon name="alert" size={ 16 } className="fundkit-readiness__icon" aria-hidden="true" />;
-    return <LocalIcon name="close" size={ 16 } className="fundkit-readiness__icon" aria-hidden="true" />;
+    if ( status === 'pass' ) return <LocalIcon name="check" size={ 16 } className="gratora-readiness__icon" aria-hidden="true" />;
+    if ( status === 'warn' ) return <LocalIcon name="alert" size={ 16 } className="gratora-readiness__icon" aria-hidden="true" />;
+    return <LocalIcon name="close" size={ 16 } className="gratora-readiness__icon" aria-hidden="true" />;
 }
 
 function SidebarIntro( { iconName, title, description } ) {
     return (
-        <div className="fundkit-sidebar-intro">
-            <span className="fundkit-sidebar-intro__icon" aria-hidden="true">
+        <div className="gratora-sidebar-intro">
+            <span className="gratora-sidebar-intro__icon" aria-hidden="true">
                 <LocalIcon name={ iconName } size={ 18 } />
             </span>
-            <div className="fundkit-sidebar-intro__text">
-                <h3 className="fundkit-sidebar-intro__title">{ title }</h3>
-                <p className="fundkit-sidebar-intro__desc">{ description }</p>
+            <div className="gratora-sidebar-intro__text">
+                <h3 className="gratora-sidebar-intro__title">{ title }</h3>
+                <p className="gratora-sidebar-intro__desc">{ description }</p>
             </div>
         </div>
     );
 }
 
 const SETTINGS_TABS = [
-    { id: 'general',   label: __( 'General', 'fundraising-toolkit' ) },
-    { id: 'goal',      label: __( 'Goal', 'fundraising-toolkit' ) },
-    { id: 'gateways',  label: __( 'Gateways', 'fundraising-toolkit' ) },
-    { id: 'after',     label: __( 'After donation', 'fundraising-toolkit' ) },
-    { id: 'embed',     label: __( 'Embed', 'fundraising-toolkit' ) },
+    { id: 'general',   label: __( 'General', 'gratora' ) },
+    { id: 'goal',      label: __( 'Goal', 'gratora' ) },
+    { id: 'gateways',  label: __( 'Gateways', 'gratora' ) },
+    { id: 'after',     label: __( 'After donation', 'gratora' ) },
+    { id: 'embed',     label: __( 'Embed', 'gratora' ) },
 ];
 
 function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
@@ -1214,22 +1214,22 @@ function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
     const [ activeTab, setActiveTab ] = useState( 'general' );
 
     return (
-        <div className="fundkit-form-settings">
-            <div className="fundkit-form-settings__nav" role="tablist" aria-label={ __( 'Settings sections', 'fundraising-toolkit' ) }>
+        <div className="gratora-form-settings">
+            <div className="gratora-form-settings__nav" role="tablist" aria-label={ __( 'Settings sections', 'gratora' ) }>
                 { SETTINGS_TABS.map( ( t ) => (
                     <button
                         key={ t.id }
                         type="button"
                         role="tab"
                         aria-selected={ activeTab === t.id }
-                        className={ `fundkit-form-settings__nav-item ${ activeTab === t.id ? 'is-active' : '' }` }
+                        className={ `gratora-form-settings__nav-item ${ activeTab === t.id ? 'is-active' : '' }` }
                         onClick={ () => setActiveTab( t.id ) }
                     >
                         { t.label }
                     </button>
                 ) ) }
             </div>
-            <main className="fundkit-form-settings__main">
+            <main className="gratora-form-settings__main">
                 { activeTab === 'general'   && <GeneralSection   c={ c } campaigns={ campaigns } funds={ funds } settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'goal'      && <GoalSection      settings={ settings } setSettings={ setSettings } /> }
                 { activeTab === 'gateways'  && <GatewaysSection  gateways={ gateways } settings={ settings } setSettings={ setSettings } /> }
@@ -1242,18 +1242,18 @@ function FormSettingsPanel( { c, campaigns, gateways, funds } ) {
 
 function SettingsRow( { title, description, children } ) {
     return (
-        <section className="fundkit-form-settings__row">
-            <header className="fundkit-form-settings__row-head">
-                <h3 className="fundkit-form-settings__row-title">{ title }</h3>
-                { description && <p className="fundkit-form-settings__row-desc">{ description }</p> }
+        <section className="gratora-form-settings__row">
+            <header className="gratora-form-settings__row-head">
+                <h3 className="gratora-form-settings__row-title">{ title }</h3>
+                { description && <p className="gratora-form-settings__row-desc">{ description }</p> }
             </header>
-            <div className="fundkit-form-settings__row-body">{ children }</div>
+            <div className="gratora-form-settings__row-body">{ children }</div>
         </section>
     );
 }
 
 function fundSelectOptions( funds ) {
-    const out = [ { value: '0', label: __( '(Use campaign or org default)', 'fundraising-toolkit' ) } ];
+    const out = [ { value: '0', label: __( '(Use campaign or org default)', 'gratora' ) } ];
     for ( const f of Array.isArray( funds ) ? funds : [] ) {
         if ( ! f.selectable ) {
             out.push( { value: `g:${ f.id }`, label: f.label, disabled: true } );
@@ -1271,27 +1271,27 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
     return (
         <>
             <SettingsRow
-                title={ __( 'Identity', 'fundraising-toolkit' ) }
-                description={ __( 'The form name and the slug used in the URL and shortcode.', 'fundraising-toolkit' ) }
+                title={ __( 'Identity', 'gratora' ) }
+                description={ __( 'The form name and the slug used in the URL and shortcode.', 'gratora' ) }
             >
                 <TextControl
-                    label={ __( 'Title', 'fundraising-toolkit' ) }
+                    label={ __( 'Title', 'gratora' ) }
                     value={ c.value( 'title' ) }
                     onChange={ c.setValue( 'title' ) }
                     __nextHasNoMarginBottom
                 />
                 <TextControl
-                    label={ __( 'Slug', 'fundraising-toolkit' ) }
+                    label={ __( 'Slug', 'gratora' ) }
                     value={ c.value( 'slug' ) }
                     onChange={ c.setValue( 'slug' ) }
-                    help={ __( 'Used in the shortcode and the form URL.', 'fundraising-toolkit' ) }
+                    help={ __( 'Used in the shortcode and the form URL.', 'gratora' ) }
                     __nextHasNoMarginBottom
                 />
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Status', 'fundraising-toolkit' ) }
-                description={ __( 'Use the Publish button in the header to go live. Archived forms stay in the system but stop accepting donations.', 'fundraising-toolkit' ) }
+                title={ __( 'Status', 'gratora' ) }
+                description={ __( 'Use the Publish button in the header to go live. Archived forms stay in the system but stop accepting donations.', 'gratora' ) }
             >
                 <SelectControl
                     value={ c.value( 'status', 'draft' ) }
@@ -1316,8 +1316,8 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Campaign', 'fundraising-toolkit' ) }
-                description={ __( 'Every form lives under a campaign. Move this form to a different one here.', 'fundraising-toolkit' ) }
+                title={ __( 'Campaign', 'gratora' ) }
+                description={ __( 'Every form lives under a campaign. Move this form to a different one here.', 'gratora' ) }
             >
                 <SelectControl
                     value={ String( c.value( 'campaign_id', 0 ) || 0 ) }
@@ -1335,7 +1335,7 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                             opts.unshift( {
                                 value: current,
                                 label: c.value( 'campaign', null )?.title
-                                    || __( 'Current campaign', 'fundraising-toolkit' ),
+                                    || __( 'Current campaign', 'gratora' ),
                             } );
                         }
                         return opts;
@@ -1349,24 +1349,24 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Default fund', 'fundraising-toolkit' ) }
-                description={ __( 'Where donations land when this form has no fund picker, or the donor does not choose one.', 'fundraising-toolkit' ) }
+                title={ __( 'Default fund', 'gratora' ) }
+                description={ __( 'Where donations land when this form has no fund picker, or the donor does not choose one.', 'gratora' ) }
             >
                 <SelectControl
                     value={ String( c.value( 'default_fund_id', 0 ) || 0 ) }
                     options={ fundSelectOptions( funds ) }
                     onChange={ ( v ) => c.edit( { default_fund_id: Number( v ) || null } ) }
-                    help={ __( 'Leave on the default to fall back to the campaign fund, then the organization default.', 'fundraising-toolkit' ) }
+                    help={ __( 'Leave on the default to fall back to the campaign fund, then the organization default.', 'gratora' ) }
                     __nextHasNoMarginBottom
                 />
             </SettingsRow>
 
             <SettingsRow
-                title={ __( 'Layout & style', 'fundraising-toolkit' ) }
-                description={ __( 'How the form is presented: its layout, style preset, width, and whether it sits in a card.', 'fundraising-toolkit' ) }
+                title={ __( 'Layout & style', 'gratora' ) }
+                description={ __( 'How the form is presented: its layout, style preset, width, and whether it sits in a card.', 'gratora' ) }
             >
                 <SelectControl
-                    label={ __( 'Layout', 'fundraising-toolkit' ) }
+                    label={ __( 'Layout', 'gratora' ) }
                     value={ settings.layout }
                     options={ LAYOUT_OPTIONS }
                     onChange={ ( v ) => setSettings( { layout: v } ) }
@@ -1378,7 +1378,7 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                     campaign={ campaigns.find( ( cmp ) => Number( cmp.id ) === Number( c.value( 'campaign_id', 0 ) ) ) || null }
                 />
                 <Slider
-                    label={ __( 'Maximum width', 'fundraising-toolkit' ) }
+                    label={ __( 'Maximum width', 'gratora' ) }
                     value={ settings.container?.width ?? 540 }
                     onChange={ ( v ) => setSettings( { container: { ...settings.container, width: v } } ) }
                     min={ 320 }
@@ -1386,14 +1386,14 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
                     unit="px"
                 />
                 <Segmented
-                    label={ __( 'Container', 'fundraising-toolkit' ) }
+                    label={ __( 'Container', 'gratora' ) }
                     value={ settings.container?.style ?? 'plain' }
                     onChange={ ( v ) => setSettings( { container: { ...settings.container, style: v } } ) }
                     options={ [
-                        { value: 'frame', label: __( 'Frame', 'fundraising-toolkit' ) },
-                        { value: 'plain', label: __( 'Plain', 'fundraising-toolkit' ) },
+                        { value: 'frame', label: __( 'Frame', 'gratora' ) },
+                        { value: 'plain', label: __( 'Plain', 'gratora' ) },
                     ] }
-                    help={ __( '"Frame" wraps the form in a card with a shadow; "Plain" renders it flush with the page.', 'fundraising-toolkit' ) }
+                    help={ __( '"Frame" wraps the form in a card with a shadow; "Plain" renders it flush with the page.', 'gratora' ) }
                 />
             </SettingsRow>
         </>
@@ -1401,17 +1401,17 @@ function GeneralSection( { c, campaigns, funds, settings, setSettings } ) {
 }
 
 const GOAL_TYPE_OPTIONS = [
-    { value: 'none',      label: __( 'No goal', 'fundraising-toolkit' ) },
-    { value: 'amount',    label: __( 'Amount', 'fundraising-toolkit' ) },
-    { value: 'donations', label: __( 'Donations', 'fundraising-toolkit' ) },
-    { value: 'donors',    label: __( 'Donors', 'fundraising-toolkit' ) },
+    { value: 'none',      label: __( 'No goal', 'gratora' ) },
+    { value: 'amount',    label: __( 'Amount', 'gratora' ) },
+    { value: 'donations', label: __( 'Donations', 'gratora' ) },
+    { value: 'donors',    label: __( 'Donors', 'gratora' ) },
 ];
 
 const GOAL_TYPE_DESC = {
-    none:      __( 'No progress bar or target on this form.', 'fundraising-toolkit' ),
-    amount:    __( 'Track progress toward a fundraising total.', 'fundraising-toolkit' ),
-    donations: __( 'Track the number of completed donations to this form.', 'fundraising-toolkit' ),
-    donors:    __( 'Track the number of unique donors who give through this form.', 'fundraising-toolkit' ),
+    none:      __( 'No progress bar or target on this form.', 'gratora' ),
+    amount:    __( 'Track progress toward a fundraising total.', 'gratora' ),
+    donations: __( 'Track the number of completed donations to this form.', 'gratora' ),
+    donors:    __( 'Track the number of unique donors who give through this form.', 'gratora' ),
 };
 
 function GoalSection( { settings, setSettings } ) {
@@ -1419,11 +1419,11 @@ function GoalSection( { settings, setSettings } ) {
 
     return (
         <SettingsRow
-            title={ __( 'Form goal', 'fundraising-toolkit' ) }
-            description={ __( 'An optional goal tracked for this form alone. The Goal block can show this or the parent campaign goal.', 'fundraising-toolkit' ) }
+            title={ __( 'Form goal', 'gratora' ) }
+            description={ __( 'An optional goal tracked for this form alone. The Goal block can show this or the parent campaign goal.', 'gratora' ) }
         >
             <SelectControl
-                label={ __( 'Goal type', 'fundraising-toolkit' ) }
+                label={ __( 'Goal type', 'gratora' ) }
                 value={ goal.type }
                 options={ GOAL_TYPE_OPTIONS }
                 onChange={ ( type ) => setSettings( { goal: { type, amount_cents: 0, count: 0 } } ) }
@@ -1432,9 +1432,9 @@ function GoalSection( { settings, setSettings } ) {
             />
             { goal.type === 'amount' && (
                 <BaseControl
-                    id="fundkit-form-goal-amount"
-                    label={ __( 'Target amount', 'fundraising-toolkit' ) }
-                    help={ __( 'In the currency this form uses.', 'fundraising-toolkit' ) }
+                    id="gratora-form-goal-amount"
+                    label={ __( 'Target amount', 'gratora' ) }
+                    help={ __( 'In the currency this form uses.', 'gratora' ) }
                     __nextHasNoMarginBottom
                 >
                     <AmountInput
@@ -1448,13 +1448,13 @@ function GoalSection( { settings, setSettings } ) {
                         currency={ defaultCurrency() }
                         min={ 0 }
                         placeholder="0"
-                        inputProps={ { id: 'fundkit-form-goal-amount' } }
+                        inputProps={ { id: 'gratora-form-goal-amount' } }
                     />
                 </BaseControl>
             ) }
             { ( goal.type === 'donations' || goal.type === 'donors' ) && (
                 <TextControl
-                    label={ __( 'Target count', 'fundraising-toolkit' ) }
+                    label={ __( 'Target count', 'gratora' ) }
                     type="number"
                     min={ 0 }
                     step="1"
@@ -1476,7 +1476,7 @@ function gatewayLabel( g ) {
     if ( g.enabled !== false ) return g.label;
 
     /* translators: %s: payment gateway name. */
-    return sprintf( __( '%s (off in Settings)', 'fundraising-toolkit' ), g.label );
+    return sprintf( __( '%s (off in Settings)', 'gratora' ), g.label );
 }
 
 function GatewaysSection( { gateways, settings, setSettings } ) {
@@ -1488,7 +1488,7 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
         const store = s( 'core/block-editor' );
         const id = store
             .getClientIdsWithDescendants()
-            .find( ( cid ) => store.getBlockName( cid ) === 'fundkit/payment-gateways' );
+            .find( ( cid ) => store.getBlockName( cid ) === 'gratora/payment-gateways' );
 
         return id ? { clientId: id, allowed: store.getBlockAttributes( id )?.allowed || [] } : null;
     }, [] );
@@ -1508,12 +1508,12 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
     };
     return (
         <SettingsRow
-            title={ __( 'Allowed gateways', 'fundraising-toolkit' ) }
-            description={ __( 'Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings. A form needs at least one.', 'fundraising-toolkit' ) }
+            title={ __( 'Allowed gateways', 'gratora' ) }
+            description={ __( 'Pick which payment gateways are offered on this form. Leave empty to allow every gateway configured in Settings. A form needs at least one.', 'gratora' ) }
         >
-            <div className="fundkit-sidebar-list">
+            <div className="gratora-sidebar-list">
                 { gateways.map( ( g ) => (
-                    <label key={ g.id } className="fundkit-sidebar-check">
+                    <label key={ g.id } className="gratora-sidebar-check">
                         <input
                             type="checkbox"
                             checked={ gatewayIsOn( allowed, g.id ) }
@@ -1524,13 +1524,13 @@ function GatewaysSection( { gateways, settings, setSettings } ) {
                     </label>
                 ) ) }
             </div>
-            <label className="fundkit-sidebar-check" style={ { marginTop: 14 } }>
+            <label className="gratora-sidebar-check" style={ { marginTop: 14 } }>
                 <input
                     type="checkbox"
                     checked={ !! settings.test_mode }
                     onChange={ () => setSettings( { test_mode: ! settings.test_mode } ) }
                 />
-                <span>{ __( 'Test mode (no real payment, excluded from reporting)', 'fundraising-toolkit' ) }</span>
+                <span>{ __( 'Test mode (no real payment, excluded from reporting)', 'gratora' ) }</span>
             </label>
         </SettingsRow>
     );
@@ -1540,8 +1540,8 @@ function AfterSection( { settings, setSettings } ) {
     return (
         <>
             <SettingsRow
-                title={ __( 'Thank-you message', 'fundraising-toolkit' ) }
-                description={ __( 'Shown to the donor after a successful donation, unless a redirect URL is set.', 'fundraising-toolkit' ) }
+                title={ __( 'Thank-you message', 'gratora' ) }
+                description={ __( 'Shown to the donor after a successful donation, unless a redirect URL is set.', 'gratora' ) }
             >
                 <TextareaControl
                     value={ settings.thank_you_message }
@@ -1551,8 +1551,8 @@ function AfterSection( { settings, setSettings } ) {
                 />
             </SettingsRow>
             <SettingsRow
-                title={ __( 'Redirect URL', 'fundraising-toolkit' ) }
-                description={ __( 'If set, donors are sent here instead of seeing the thank-you message.', 'fundraising-toolkit' ) }
+                title={ __( 'Redirect URL', 'gratora' ) }
+                description={ __( 'If set, donors are sent here instead of seeing the thank-you message.', 'gratora' ) }
             >
                 <TextControl
                     type="url"
@@ -1561,7 +1561,7 @@ function AfterSection( { settings, setSettings } ) {
                     placeholder="https://"
                     help={
                         settings.redirect_url && ! /^https?:\/\//i.test( settings.redirect_url.trim() )
-                            ? __( 'Use a full URL starting with http:// or https://', 'fundraising-toolkit' )
+                            ? __( 'Use a full URL starting with http:// or https://', 'gratora' )
                             : undefined
                     }
                     __nextHasNoMarginBottom
@@ -1578,16 +1578,16 @@ export function EmbedSection( { c } ) {
     // authoritative is the whole question this section answers.
     const slug      = c.savedRecord?.slug || '';
     const pending   = !! c.isEdited?.( 'slug' );
-    const shortcode = `[fundkit_donation_form slug="${ slug }"]`;
+    const shortcode = `[gratora_donation_form slug="${ slug }"]`;
     return (
         <SettingsRow
-            title={ __( 'Embed', 'fundraising-toolkit' ) }
-            description={ __( 'Paste this shortcode into any post or page to render the form.', 'fundraising-toolkit' ) }
+            title={ __( 'Embed', 'gratora' ) }
+            description={ __( 'Paste this shortcode into any post or page to render the form.', 'gratora' ) }
         >
             <ShortcodeField value={ shortcode } />
             { pending && (
-                <p className="fundkit-field__help">
-                    { __( 'Save the form to update this shortcode: the slug you typed is not the one the server will store.', 'fundraising-toolkit' ) }
+                <p className="gratora-field__help">
+                    { __( 'Save the form to update this shortcode: the slug you typed is not the one the server will store.', 'gratora' ) }
                 </p>
             ) }
         </SettingsRow>
@@ -1609,7 +1609,7 @@ function campaignOverrideList( campaign, catalogue ) {
     if ( labels.length <= 3 ) return labels.join( ', ' );
     return sprintf(
         /* translators: 1: first three style setting names, 2: count of the remaining ones. */
-        __( '%1$s, and %2$d more', 'fundraising-toolkit' ),
+        __( '%1$s, and %2$d more', 'gratora' ),
         labels.slice( 0, 3 ).join( ', ' ),
         labels.length - 3
     );
@@ -1617,18 +1617,18 @@ function campaignOverrideList( campaign, catalogue ) {
 
 function overrideNotice( campaign, overrides, gating ) {
     if ( overrides === '' ) return '';
-    const name = campaign?.title || __( 'The campaign', 'fundraising-toolkit' );
+    const name = campaign?.title || __( 'The campaign', 'gratora' );
     if ( gating ) {
         return sprintf(
             /* translators: 1: campaign title, 2: comma-separated list of style setting names. */
-            __( '%1$s overrides %2$s. This form is on a preset of its own, so those overrides do not reach it.', 'fundraising-toolkit' ),
+            __( '%1$s overrides %2$s. This form is on a preset of its own, so those overrides do not reach it.', 'gratora' ),
             name,
             overrides
         );
     }
     return sprintf(
         /* translators: 1: campaign title, 2: comma-separated list of style setting names. */
-        __( '%1$s overrides %2$s. Picking a preset here stops those overrides reaching this form.', 'fundraising-toolkit' ),
+        __( '%1$s overrides %2$s. Picking a preset here stops those overrides reaching this form.', 'gratora' ),
         name,
         overrides
     );
@@ -1641,7 +1641,7 @@ function overrideNotice( campaign, overrides, gating ) {
  * picker names the ones that stop applying.
  */
 export function StylePresetField( { value, onChange, campaign = null } ) {
-    const styling   = window.fundkit?.styling || {};
+    const styling   = window.gratora?.styling || {};
     const presets   = Array.isArray( styling.presets ) ? styling.presets : [];
     const defaultId = String( styling.default_id || '' );
     const defaultName = presets.find( ( p ) => p.id === defaultId )?.name || defaultId;
@@ -1649,15 +1649,15 @@ export function StylePresetField( { value, onChange, campaign = null } ) {
     // lets the campaign through, so the notice must not claim otherwise.
     const gating = value !== '' && presets.some( ( p ) => p.id === value );
     const lost   = overrideNotice( campaign, campaignOverrideList( campaign, styling.catalogue || {} ), gating );
-    const help   = __( 'Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign\'s preset and the overrides it carries.', 'fundraising-toolkit' );
+    const help   = __( 'Picks one of the presets defined in Settings → Brand. Leave on Inherit to follow the campaign\'s preset and the overrides it carries.', 'gratora' );
     return (
         <SelectControl
-            label={ __( 'Style preset', 'fundraising-toolkit' ) }
+            label={ __( 'Style preset', 'gratora' ) }
             value={ value }
             options={ [
                 {
                     value: '',
-                    label: __( 'Inherit (campaign or org default)', 'fundraising-toolkit' ) +
+                    label: __( 'Inherit (campaign or org default)', 'gratora' ) +
                         ( defaultName ? ` (${ defaultName })` : '' ),
                 },
                 ...presets.map( ( p ) => ( { value: p.id, label: p.name } ) ),
@@ -1686,20 +1686,20 @@ function ShortcodeField( { value } ) {
             await navigator.clipboard.writeText( value );
             setCopied( true );
         } catch ( e ) {
-            notify.error( __( 'Could not copy. Select the shortcode above and copy it by hand.', 'fundraising-toolkit' ) );
+            notify.error( __( 'Could not copy. Select the shortcode above and copy it by hand.', 'gratora' ) );
         }
     };
 
     return (
-        <div className="fundkit-shortcode">
-            <code className="fundkit-shortcode__code">{ value }</code>
+        <div className="gratora-shortcode">
+            <code className="gratora-shortcode__code">{ value }</code>
             <Button
                 variant="secondary"
                 size="small"
                 onClick={ onCopy }
-                className="fundkit-shortcode__copy"
+                className="gratora-shortcode__copy"
             >
-                { copied ? __( 'Copied', 'fundraising-toolkit' ) : __( 'Copy', 'fundraising-toolkit' ) }
+                { copied ? __( 'Copied', 'gratora' ) : __( 'Copy', 'gratora' ) }
             </Button>
         </div>
     );

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Upgrade;
+namespace Gratora\Foundation\Upgrade;
 
-use FundKit\Async\AsyncDispatcher;
+use Gratora\Async\AsyncDispatcher;
 
 /**
  * Drains the outstanding upgrade routines off the request.
@@ -22,7 +22,7 @@ use FundKit\Async\AsyncDispatcher;
  */
 final class UpgradeJob
 {
-    public const HOOK = 'fundkit.async.run_upgrades';
+    public const HOOK = 'gratora.async.run_upgrades';
 
     /** @since 1.0.0 */
     public function __construct(

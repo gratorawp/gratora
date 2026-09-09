@@ -51,7 +51,7 @@ let listPaths = [];
 function mount( savedView ) {
     listPaths = [];
     apiFetch.mockImplementation( ( { path, parse } ) => {
-        if ( path.startsWith( '/fundkit/v1/admin/me/table-view' ) ) {
+        if ( path.startsWith( '/gratora/v1/admin/me/table-view' ) ) {
             return Promise.resolve( savedView || {} );
         }
         if ( parse === false ) {
@@ -71,7 +71,7 @@ beforeEach( () => {
     captured.actions = null;
     apiFetch.mockReset();
     document.body.innerHTML = '';
-    delete window.fundkit;
+    delete window.gratora;
 } );
 
 const eligible = () => captured.actions
@@ -79,7 +79,7 @@ const eligible = () => captured.actions
     .map( ( a ) => a.id );
 
 it( 'offers no plan action to a reader who cannot change what is charged', async () => {
-    window.fundkit = { can: { refund_donations: false } };
+    window.gratora = { can: { refund_donations: false } };
 
     mount();
     await waitFor( () => !! captured.actions );
@@ -91,7 +91,7 @@ it( 'offers no plan action to a reader who cannot change what is charged', async
 } );
 
 it( 'still offers them to a reader who can', async () => {
-    window.fundkit = { can: { refund_donations: true } };
+    window.gratora = { can: { refund_donations: true } };
 
     mount();
     await waitFor( () => !! captured.actions );

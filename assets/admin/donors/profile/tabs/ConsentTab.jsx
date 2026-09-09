@@ -25,13 +25,13 @@ function RedactDialog( { donor, onClose, onDone } ) {
         setError( null );
         try {
             await apiFetch( {
-                path:   `/fundkit/v1/admin/donors/${ donor.id }/redact`,
+                path:   `/gratora/v1/admin/donors/${ donor.id }/redact`,
                 method: 'POST',
                 data:   { confirmation: typed.trim() },
             } );
             onDone();
         } catch ( err ) {
-            setError( err?.message || __( 'Redact failed', 'fundraising-toolkit' ) );
+            setError( err?.message || __( 'Redact failed', 'gratora' ) );
         } finally {
             setSaving( false );
         }
@@ -39,18 +39,18 @@ function RedactDialog( { donor, onClose, onDone } ) {
 
     return (
         <Modal
-            title={ __( 'Redact this donor', 'fundraising-toolkit' ) }
+            title={ __( 'Redact this donor', 'gratora' ) }
             onRequestClose={ onClose }
             className="dp-modal"
             size="medium"
         >
             <form onSubmit={ submit } className="dp-edit-form">
                 <p style={ { gridColumn: '1 / -1', color: '#6b7280', fontSize: 13, marginTop: 0 } }>
-                    { __( 'PII (name, email, phone, address, tax id, notes) will be permanently removed, and any active recurring plan is cancelled at the gateway. Lifetime totals, donations, and receipts are retained for accounting. This cannot be undone.', 'fundraising-toolkit' ) }
+                    { __( 'PII (name, email, phone, address, tax id, notes) will be permanently removed, and any active recurring plan is cancelled at the gateway. Lifetime totals, donations, and receipts are retained for accounting. This cannot be undone.', 'gratora' ) }
                 </p>
                 <label style={ { gridColumn: '1 / -1' } }>
-                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'fundraising-toolkit' ), expected ) }
-                    <input className="fundkit-input"
+                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'gratora' ), expected ) }
+                    <input className="gratora-input"
                         type="text"
                         value={ typed }
                         onChange={ ( e ) => setTyped( e.target.value ) }
@@ -62,10 +62,10 @@ function RedactDialog( { donor, onClose, onDone } ) {
                 { error && <div className="dp-edit-form__error">{ error }</div> }
                 <div className="dp-edit-form__actions">
                     <button type="button" className="btn" onClick={ onClose } disabled={ saving }>
-                        { __( 'Cancel', 'fundraising-toolkit' ) }
+                        { __( 'Cancel', 'gratora' ) }
                     </button>
                     <button type="submit" className="btn btn--danger" disabled={ saving || ! matches }>
-                        { saving ? __( 'Redacting…', 'fundraising-toolkit' ) : __( 'Redact donor', 'fundraising-toolkit' ) }
+                        { saving ? __( 'Redacting…', 'gratora' ) : __( 'Redact donor', 'gratora' ) }
                     </button>
                 </div>
             </form>
@@ -84,13 +84,13 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
         setHiding( true );
         try {
             await apiFetch( {
-                path:   `/fundkit/v1/admin/donors/${ donor.id }`,
+                path:   `/gratora/v1/admin/donors/${ donor.id }`,
                 method: 'PATCH',
                 data:   { public_hidden: hidden },
             } );
             onChanged && onChanged();
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not change this.', 'fundraising-toolkit' ) );
+            notify.error( err?.message || __( 'Could not change this.', 'gratora' ) );
         } finally {
             setHiding( false );
         }
@@ -104,8 +104,8 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                         <EmptyState
                             compact
                             icon={ <ShieldCheck size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'No consent records yet', 'fundraising-toolkit' ) }
-                            body={ __( 'Each donation captures opt-ins for the purposes you configure. They land here for audit and right-to-withdraw requests.', 'fundraising-toolkit' ) }
+                            title={ __( 'No consent records yet', 'gratora' ) }
+                            body={ __( 'Each donation captures opt-ins for the purposes you configure. They land here for audit and right-to-withdraw requests.', 'gratora' ) }
                         />
                     )
                     : (
@@ -113,10 +113,10 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                             <table className="dp-table">
                                 <thead>
                                     <tr>
-                                        <th>{ __( 'Purpose',     'fundraising-toolkit' ) }</th>
-                                        <th>{ __( 'Status',      'fundraising-toolkit' ) }</th>
-                                        <th>{ __( 'Granted at',  'fundraising-toolkit' ) }</th>
-                                        <th>{ __( 'Source',      'fundraising-toolkit' ) }</th>
+                                        <th>{ __( 'Purpose',     'gratora' ) }</th>
+                                        <th>{ __( 'Status',      'gratora' ) }</th>
+                                        <th>{ __( 'Granted at',  'gratora' ) }</th>
+                                        <th>{ __( 'Source',      'gratora' ) }</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -125,10 +125,10 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                                             <td>{ c.purpose }</td>
                                             <td>
                                                 { ! c.occurred_at
-                                                    ? <span className="dp-pill is-muted">{ __( 'No response', 'fundraising-toolkit' ) }</span>
+                                                    ? <span className="dp-pill is-muted">{ __( 'No response', 'gratora' ) }</span>
                                                     : c.granted
-                                                        ? <span className="dp-pill is-ok">{ __( 'Granted', 'fundraising-toolkit' ) }</span>
-                                                        : <span className="dp-pill is-muted">{ __( 'Revoked', 'fundraising-toolkit' ) }</span> }
+                                                        ? <span className="dp-pill is-ok">{ __( 'Granted', 'gratora' ) }</span>
+                                                        : <span className="dp-pill is-muted">{ __( 'Revoked', 'gratora' ) }</span> }
                                             </td>
                                             <td>{ c.occurred_at ? formatDateTime( c.occurred_at ) : '-' }</td>
                                             <td className="consent-source">{ c.source || '-' }</td>
@@ -144,11 +144,11 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                 <div className="dp-card__body">
                     <div className="dp-data-action">
                         <div className="dp-data-action__body">
-                            <div className="dp-data-action__title">{ __( 'Public visibility', 'fundraising-toolkit' ) }</div>
+                            <div className="dp-data-action__title">{ __( 'Public visibility', 'gratora' ) }</div>
                             <div className="dp-data-action__sub">
                                 { donor?.public_hidden
-                                    ? __( 'Hidden. This donor does not appear in supporter walls, recent donations or top donor lists, and their picture and message are not shown. Their donations still count toward campaign totals.', 'fundraising-toolkit' )
-                                    : __( 'Visible. This donor can appear by name in supporter walls, recent donations and top donor lists, with their picture and any public message.', 'fundraising-toolkit' ) }
+                                    ? __( 'Hidden. This donor does not appear in supporter walls, recent donations or top donor lists, and their picture and message are not shown. Their donations still count toward campaign totals.', 'gratora' )
+                                    : __( 'Visible. This donor can appear by name in supporter walls, recent donations and top donor lists, with their picture and any public message.', 'gratora' ) }
                             </div>
                         </div>
                         { donor && ! donor.redacted_at && userCan( 'edit_donors' ) && (
@@ -158,26 +158,26 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                                 disabled={ hiding }
                                 onClick={ () => setPublicHidden( ! donor.public_hidden ) }
                             >
-                                { donor.public_hidden ? __( 'Show publicly', 'fundraising-toolkit' ) : __( 'Hide from public pages', 'fundraising-toolkit' ) }
+                                { donor.public_hidden ? __( 'Show publicly', 'gratora' ) : __( 'Hide from public pages', 'gratora' ) }
                             </button>
                         ) }
                     </div>
 
                     <div className="dp-data-action">
                         <div className="dp-data-action__body">
-                            <div className="dp-data-action__title">{ __( 'Data export', 'fundraising-toolkit' ) }</div>
+                            <div className="dp-data-action__title">{ __( 'Data export', 'gratora' ) }</div>
                             <div className="dp-data-action__sub">
-                                { __( 'Bundles donor record, donations, receipts, consents, and event log into a single JSON file.', 'fundraising-toolkit' ) }
+                                { __( 'Bundles donor record, donations, receipts, consents, and event log into a single JSON file.', 'gratora' ) }
                             </div>
                         </div>
                         { donor && userCan( 'export_donors' ) && (
                             <button
                                 type="button"
                                 className="btn"
-                                onClick={ () => downloadFile( `/fundkit/v1/admin/donors/${ donor.id }/export`, `fundkit-donor-${ donor.id }.json` ).catch( ( e ) => notify.error( e?.message || __( 'Could not export personal data.', 'fundraising-toolkit' ) ) ) }
+                                onClick={ () => downloadFile( `/gratora/v1/admin/donors/${ donor.id }/export`, `gratora-donor-${ donor.id }.json` ).catch( ( e ) => notify.error( e?.message || __( 'Could not export personal data.', 'gratora' ) ) ) }
                             >
                                 <IconDownload className="ic" />
-                                { __( 'Export personal data', 'fundraising-toolkit' ) }
+                                { __( 'Export personal data', 'gratora' ) }
                             </button>
                         ) }
                     </div>
@@ -187,10 +187,10 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                     <div className="dp-danger-foot__body">
                         <div className="dp-danger-foot__title">
                             <IconAlert width="14" height="14" />
-                            { __( 'Redact donor', 'fundraising-toolkit' ) }
+                            { __( 'Redact donor', 'gratora' ) }
                         </div>
                         <div className="dp-danger-foot__sub">
-                            { __( 'Drops PII (name, email, phone, address, tax id), cancels any active recurring plan at the gateway, and sets redacted_at. Lifetime totals and donation records are kept for accounting. This cannot be undone.', 'fundraising-toolkit' ) }
+                            { __( 'Drops PII (name, email, phone, address, tax id), cancels any active recurring plan at the gateway, and sets redacted_at. Lifetime totals and donation records are kept for accounting. This cannot be undone.', 'gratora' ) }
                         </div>
                     </div>
                     <div className="dp-danger-foot__actions">
@@ -201,7 +201,7 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                             disabled={ ! donor || !! donor?.redacted_at }
                         >
                             <IconTrash className="ic" />
-                            { donor?.redacted_at ? __( 'Already redacted', 'fundraising-toolkit' ) : __( 'Redact donor', 'fundraising-toolkit' ) }
+                            { donor?.redacted_at ? __( 'Already redacted', 'gratora' ) : __( 'Redact donor', 'gratora' ) }
                         </button>
                     </div>
                 </div>
@@ -222,7 +222,7 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                             { history.map( ( h ) => (
                                 <li key={ h.id }>
                                     <span className={ `dp-pill ${ h.granted ? 'is-ok' : 'is-muted' }` }>
-                                        { h.granted ? __( 'Granted', 'fundraising-toolkit' ) : __( 'Revoked', 'fundraising-toolkit' ) }
+                                        { h.granted ? __( 'Granted', 'gratora' ) : __( 'Revoked', 'gratora' ) }
                                     </span>
                                     { /* The wording as it stood then, where the row kept it: the
                                          registry entry can have been edited since. */ }
@@ -238,7 +238,7 @@ export default function ConsentTab( { consents, donor, onChanged } ) {
                             <p className="dp-muted" style={ { margin: '10px 0 0', fontSize: 13 } }>
                                 { sprintf(
                                     /* translators: 1: rows shown, 2: rows this donor has in total */
-                                    __( 'Showing the %1$s most recent of %2$s entries.', 'fundraising-toolkit' ),
+                                    __( 'Showing the %1$s most recent of %2$s entries.', 'gratora' ),
                                     history.length.toLocaleString(),
                                     historyTotal.toLocaleString()
                                 ) }

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Forms\Form;
+use Gratora\Donations\Donation;
+use Gratora\Forms\Form;
 use WP_REST_Request;
 
 /**
@@ -17,9 +17,9 @@ final class DonorMessageGateTest extends IntegrationTestCase
 {
     private function form(bool $withComment): Form
     {
-        $blocks = '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/email /-->'
-            . ($withComment ? '<!-- wp:fundkit/comment /-->' : '')
-            . '<!-- wp:fundkit/submit-button /-->';
+        $blocks = '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/email /-->'
+            . ($withComment ? '<!-- wp:gratora/comment /-->' : '')
+            . '<!-- wp:gratora/submit-button /-->';
 
         $f = Form::make();
         $f->title      = 'Gate test';
@@ -34,7 +34,7 @@ final class DonorMessageGateTest extends IntegrationTestCase
 
     private function donate(Form $form, array $extra): ?Donation
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($extra + [
             'email'        => 'msg-' . uniqid() . '@example.test',

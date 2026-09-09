@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\MagicLinkService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\MagicLinkService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /** Portal surfaces that showed or spent the wrong thing. */
@@ -22,12 +22,12 @@ final class PortalMediumsTest extends IntegrationTestCase
             ->findOrCreate('portal-med-' . uniqid() . '@example.test');
 
         $sid = $this->portalSession((int) $this->donor->id, 'tok');
-        $_COOKIE['fundkit_donor_session'] = $sid;
+        $_COOKIE['gratora_donor_session'] = $sid;
     }
 
     protected function tearDown(): void
     {
-        unset($_COOKIE['fundkit_donor_session']);
+        unset($_COOKIE['gratora_donor_session']);
         parent::tearDown();
     }
 
@@ -56,7 +56,7 @@ final class PortalMediumsTest extends IntegrationTestCase
         $order = $this->row('order', 'ORDER-' . uniqid());
 
         $refs = array_column(
-            (array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/portal/donations'))->get_data()['items'],
+            (array) rest_do_request(new WP_REST_Request('GET', '/gratora/v1/portal/donations'))->get_data()['items'],
             'reference'
         );
 
@@ -72,7 +72,7 @@ final class PortalMediumsTest extends IntegrationTestCase
     {
         $order = $this->row('order', 'ORDER-' . uniqid());
 
-        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/portal/donations/' . $order->reference));
+        $res = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/portal/donations/' . $order->reference));
 
         $this->assertSame(404, $res->get_status(), 'excluded from the list means excluded from the detail');
     }

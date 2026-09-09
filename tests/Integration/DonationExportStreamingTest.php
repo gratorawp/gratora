@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Foundation\Plugin;
 
 /** Verify ordering across streamed export pages. */
 final class DonationExportStreamingTest extends IntegrationTestCase
@@ -49,7 +49,7 @@ final class DonationExportStreamingTest extends IntegrationTestCase
     {
         $this->seed(3);
 
-        $res = rest_do_request(new \WP_REST_Request('GET', '/fundkit/v1/admin/donations/export.csv'));
+        $res = rest_do_request(new \WP_REST_Request('GET', '/gratora/v1/admin/donations/export.csv'));
 
         $this->assertSame(200, $res->get_status());
         $this->assertNull($res->get_data(), 'a streamed route holds no body in memory');
@@ -59,7 +59,7 @@ final class DonationExportStreamingTest extends IntegrationTestCase
     {
         $this->seed(5);
 
-        $csv   = $this->serveBody('/fundkit/v1/admin/donations/export.csv');
+        $csv   = $this->serveBody('/gratora/v1/admin/donations/export.csv');
         $lines = array_filter(preg_split('/\r?\n/', trim($csv)) ?: []);
 
         $this->assertCount(6, $lines, 'header plus every donation');

@@ -24,13 +24,13 @@ jest.mock( '../../assets/admin/_shared/styling/StylePreview', () => ( { __esModu
 import { PresetEditor } from '../../assets/admin/settings/panels/BrandPanel';
 
 const CATALOGUE = {
-    'fundkit-radius-sm': {
+    'gratora-radius-sm': {
         label: 'Small corner radius', control: 'range', min: 0, max: 16, step: 1, default: '8px',
     },
 };
 
-beforeEach( () => { window.fundkit = { styling: { catalogue: CATALOGUE } }; } );
-afterEach( () => { delete window.fundkit; } );
+beforeEach( () => { window.gratora = { styling: { catalogue: CATALOGUE } }; } );
+afterEach( () => { delete window.gratora; } );
 
 function mount( tokens ) {
     document.body.innerHTML = '<div id="root"></div>';
@@ -39,7 +39,7 @@ function mount( tokens ) {
     render(
         <PresetEditor
             preset={ { id: 'theme', name: 'Site theme', tokens } }
-            resetDefaults={ { 'fundkit-radius-sm': '8px' } }
+            resetDefaults={ { 'gratora-radius-sm': '8px' } }
             isDefault
             onRename={ () => {} }
             onTokens={ () => {} }
@@ -54,18 +54,18 @@ function mount( tokens ) {
 }
 
 it( 'names a radius the slider would read as 1', () => {
-    const host = mount( { 'fundkit-radius-sm': '1rem' } );
+    const host = mount( { 'gratora-radius-sm': '1rem' } );
 
     expect( host.textContent ).toContain( 'Small corner radius' );
     expect( host.textContent ).toContain( '1rem' );
 } );
 
 it( 'names a pill the slider would clamp to its maximum', () => {
-    expect( mount( { 'fundkit-radius-sm': '9999px' } ).textContent ).toContain( '9999px' );
+    expect( mount( { 'gratora-radius-sm': '9999px' } ).textContent ).toContain( '9999px' );
 } );
 
 it( 'says nothing about a value the slider shows honestly', () => {
-    const host = mount( { 'fundkit-radius-sm': '8px' } );
+    const host = mount( { 'gratora-radius-sm': '8px' } );
 
-    expect( host.querySelector( '.fundkit-preset-editor__unshown' ) ).toBeNull();
+    expect( host.querySelector( '.gratora-preset-editor__unshown' ) ).toBeNull();
 } );

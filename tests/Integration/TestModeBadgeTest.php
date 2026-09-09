@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Admin\TestModeBadge;
-use FundKit\Forms\Form;
+use Gratora\Admin\TestModeBadge;
+use Gratora\Forms\Form;
 
 /**
  * Test mode is otherwise invisible: the donations list fills with rows, the
@@ -28,7 +28,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
 
     private function title(): ?string
     {
-        $node = $this->bar()->get_node('fundkit-test-mode');
+        $node = $this->bar()->get_node('gratora-test-mode');
 
         return $node === null ? null : wp_strip_all_tags((string) $node->title);
     }
@@ -50,10 +50,10 @@ final class TestModeBadgeTest extends IntegrationTestCase
 
     private function orgWide(bool $on): void
     {
-        $cfg = get_option('fundkit_gateway_config', []);
+        $cfg = get_option('gratora_gateway_config', []);
         $cfg = is_array($cfg) ? $cfg : [];
         $cfg['test_mode'] = $on;
-        update_option('fundkit_gateway_config', $cfg);
+        update_option('gratora_gateway_config', $cfg);
     }
 
     public function test_nothing_shows_when_every_donation_is_real(): void
@@ -68,7 +68,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
     {
         $this->orgWide(true);
 
-        $this->assertSame('Fundraising Toolkit Test Mode Active', $this->title());
+        $this->assertSame('Gratora Test Mode Active', $this->title());
     }
 
     public function test_a_single_form_left_in_test_mode_is_called_out_on_its_own(): void
@@ -78,7 +78,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->orgWide(false);
         $this->publishedForm(true);
 
-        $this->assertSame('1 Fundraising Toolkit Form in Test Mode', $this->title());
+        $this->assertSame('1 Gratora Form in Test Mode', $this->title());
     }
 
     /**
@@ -116,7 +116,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->publishedForm(true);
         $this->publishedForm(false);
 
-        $this->assertSame('2 Fundraising Toolkit Forms in Test Mode', $this->title());
+        $this->assertSame('2 Gratora Forms in Test Mode', $this->title());
     }
 
     public function test_a_draft_form_in_test_mode_is_not_worth_warning_about(): void
@@ -135,16 +135,16 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->publishedForm(true);
 
         // Both are true, but "some forms" understates a site where nothing is real.
-        $this->assertSame('Fundraising Toolkit Test Mode Active', $this->title());
+        $this->assertSame('Gratora Test Mode Active', $this->title());
     }
 
     public function test_the_badge_links_to_the_tab_that_holds_the_switch(): void
     {
         $this->orgWide(true);
 
-        $href = (string) $this->bar()->get_node('fundkit-test-mode')->href;
+        $href = (string) $this->bar()->get_node('gratora-test-mode')->href;
 
-        $this->assertStringContainsString('page=fundkit-settings', $href);
+        $this->assertStringContainsString('page=gratora-settings', $href);
         $this->assertStringContainsString('tab=gateways', $href);
     }
 
@@ -152,7 +152,7 @@ final class TestModeBadgeTest extends IntegrationTestCase
     {
         $this->orgWide(true);
 
-        $title = (string) $this->bar()->get_node('fundkit-test-mode')->title;
+        $title = (string) $this->bar()->get_node('gratora-test-mode')->title;
 
         $this->assertStringContainsString('<svg', $title);
         // The words already say it; the icon repeating them is just noise.
@@ -164,12 +164,12 @@ final class TestModeBadgeTest extends IntegrationTestCase
         $this->orgWide(true);
 
         // Denied through user_has_cap rather than by picking a role: the
-        // role-to-capability mapping is itself a FundKit setting that other
+        // role-to-capability mapping is itself a Gratora setting that other
         // suites rewrite, so "an editor" is not reliably unprivileged.
         // manage_options too: userCan() treats a full admin as holding every
-        // FundKit capability, so dropping the specific one proves nothing.
+        // Gratora capability, so dropping the specific one proves nothing.
         $deny = static function (array $caps): array {
-            unset($caps['fundkit_view_donations'], $caps['manage_options']);
+            unset($caps['gratora_view_donations'], $caps['manage_options']);
             return $caps;
         };
         add_filter('user_has_cap', $deny, 99);

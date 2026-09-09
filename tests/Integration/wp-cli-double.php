@@ -15,8 +15,8 @@
 
 declare(strict_types=1);
 
-if (! class_exists('FundKitCliHalt')) {
-    class FundKitCliHalt extends \RuntimeException
+if (! class_exists('GratoraCliHalt')) {
+    class GratoraCliHalt extends \RuntimeException
     {
     }
 }
@@ -29,7 +29,7 @@ if (! class_exists('WP_CLI')) {
 
         public static function error(string $message): void
         {
-            throw new FundKitCliHalt('error: ' . $message);
+            throw new GratoraCliHalt('error: ' . $message);
         }
 
         /** @param array<string,mixed> $assoc */
@@ -39,7 +39,7 @@ if (! class_exists('WP_CLI')) {
                 return;
             }
 
-            throw new FundKitCliHalt('confirm: ' . $question);
+            throw new GratoraCliHalt('confirm: ' . $question);
         }
 
         public static function log(string $message): void

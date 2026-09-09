@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/Slider';
+export { default } from '@gratora/ui/components/Slider';

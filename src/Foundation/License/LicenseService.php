@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\License;
+namespace Gratora\Foundation\License;
 
-use FundKit\Foundation\Modules\FundKitModule;
-use FundKit\Foundation\Modules\ModuleManager;
+use Gratora\Foundation\Modules\GratoraModule;
+use Gratora\Foundation\Modules\ModuleManager;
 
 /**
  * Entitlement queries over the installed modules. isPro() reflects whether a
@@ -46,8 +46,8 @@ final class LicenseService
 
     /**
      * License status string for display: active | grace | expired | revoked |
-     * inactive. The fundkit-licensing client (vendored in each Pro add-on)
-     * sets fundkit.pro.license_status from the server's signed response.
+     * inactive. The gratora-licensing client (vendored in each Pro add-on)
+     * sets gratora.pro.license_status from the server's signed response.
      * When no client is loaded, the filter passes through the
      * possession-based default so the admin still reads sensibly.
      *
@@ -56,7 +56,7 @@ final class LicenseService
     public function status(): string
     {
         $default = $this->isPro() ? 'active' : 'inactive';
-        $status  = apply_filters('fundkit.pro.license_status', $default);
+        $status  = apply_filters('gratora.pro.license_status', $default);
 
         return is_string($status) && $status !== '' ? $status : $default;
     }
@@ -78,7 +78,7 @@ final class LicenseService
     {
         $out = [];
         foreach ($this->addons() as $addon) {
-            $status = (string) apply_filters('fundkit.pro.product_status', 'unknown', $addon['id']);
+            $status = (string) apply_filters('gratora.pro.product_status', 'unknown', $addon['id']);
             $out[]  = $addon + [
                 'status'   => $status,
                 'entitled' => in_array($status, self::ENTITLED, true),
@@ -166,7 +166,7 @@ final class LicenseService
 
         $features = [];
         foreach ($this->modules->all() as $id => $module) {
-            if ($module->tier() === FundKitModule::TIER_PRO
+            if ($module->tier() === GratoraModule::TIER_PRO
                 && $this->modules->status($id) === 'booted'
             ) {
                 $features[] = $id;

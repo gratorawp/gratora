@@ -1,19 +1,19 @@
 /**
- * Use FUNDKIT_E2E_CUSTOM_FIELDS_FORM_PATH from wp fundkit e2e-seed. Exercise each control
+ * Use GRATORA_E2E_CUSTOM_FIELDS_FORM_PATH from wp gratora e2e-seed. Exercise each control
  * through full submission.
  */
 
 import { test, expect } from '../fixtures/donor-form';
 
-const FORM_PATH = process.env.FUNDKIT_E2E_CUSTOM_FIELDS_FORM_PATH ?? '';
+const FORM_PATH = process.env.GRATORA_E2E_CUSTOM_FIELDS_FORM_PATH ?? '';
 
 test.describe('custom-field blocks (extended)', () => {
-    test.skip(! FORM_PATH, 'set FUNDKIT_E2E_CUSTOM_FIELDS_FORM_PATH via `wp fundkit e2e-seed`');
+    test.skip(! FORM_PATH, 'set GRATORA_E2E_CUSTOM_FIELDS_FORM_PATH via `wp gratora e2e-seed`');
     test.use({ formPath: FORM_PATH });
 
     test('text-input renders, accepts input, and submits', async ({ donor }) => {
         const field = donor.form
-            .locator('.fundkit-form__field')
+            .locator('.gratora-form__field')
             .filter({ hasText: 'CUSTOM_TEXT_LABEL' });
         await expect(field).toBeVisible();
         await field.locator('input[type="text"]').fill('hello world');
@@ -28,7 +28,7 @@ test.describe('custom-field blocks (extended)', () => {
 
     test('number-input renders as type=number and respects min/max attrs', async ({ donor }) => {
         const field = donor.form
-            .locator('.fundkit-form__field')
+            .locator('.gratora-form__field')
             .filter({ hasText: 'CUSTOM_NUMBER_LABEL' });
         const input = field.locator('input[type="number"]');
         await expect(input).toBeVisible();
@@ -46,7 +46,7 @@ test.describe('custom-field blocks (extended)', () => {
     });
 
     test('radio renders one option per choice and submits the picked one', async ({ donor }) => {
-        const fieldset = donor.form.locator('fieldset.fundkit-form__radio');
+        const fieldset = donor.form.locator('fieldset.gratora-form__radio');
         await expect(fieldset).toBeVisible();
         await expect(fieldset.locator('legend')).toHaveText('CUSTOM_RADIO_LABEL');
 
@@ -68,7 +68,7 @@ test.describe('custom-field blocks (extended)', () => {
     test('checkbox renders, toggles, and submits', async ({ donor }) => {
         // The form has the cover-fees check + the consent check (none here)
         // plus this single custom checkbox. Locate by label text to be sure.
-        const wrapper = donor.form.locator('label.fundkit-form__check--single')
+        const wrapper = donor.form.locator('label.gratora-form__check--single')
             .filter({ hasText: 'CUSTOM_CHECKBOX_LABEL' });
         await expect(wrapper).toBeVisible();
 
@@ -86,7 +86,7 @@ test.describe('custom-field blocks (extended)', () => {
     });
 
     test('multi-select toggles options independently and submits multiple values', async ({ donor }) => {
-        const fieldset = donor.form.locator('fieldset.fundkit-form__multi-select');
+        const fieldset = donor.form.locator('fieldset.gratora-form__multi-select');
         await expect(fieldset).toBeVisible();
         await expect(fieldset.locator('legend')).toHaveText('CUSTOM_MULTISELECT_LABEL');
 

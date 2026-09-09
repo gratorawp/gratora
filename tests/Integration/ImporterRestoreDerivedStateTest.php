@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Foundation\Transfer\DataExporter;
-use FundKit\Foundation\Transfer\DataImporter;
-use FundKit\Funds\Fund;
-use FundKit\Receipts\Receipt;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\References\ReferenceGenerator;
+use Gratora\Foundation\Transfer\DataExporter;
+use Gratora\Foundation\Transfer\DataImporter;
+use Gratora\Funds\Fund;
+use Gratora\Receipts\Receipt;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * What a restore has to rebuild rather than insert.
  *
  * Two kinds of state do not travel in the file. The reference counters are per
- * install, so a restored donation holding FUNDKIT-2026-00001 leaves the counter
+ * install, so a restored donation holding GRATORA-2026-00001 leaves the counter
  * behind it and the next donor mints a reference the unique index refuses. And
  * the fund, campaign and donor totals are columns on rows the restore matches
  * rather than writes, so the money that just landed is missing from every
@@ -73,8 +73,8 @@ final class ImporterRestoreDerivedStateTest extends IntegrationTestCase
     private function forgetCounters(): void
     {
         foreach (['donation', 'receipt', 'refund'] as $scope) {
-            delete_option("fundkit_reference_counter_{$scope}");
-            delete_option("fundkit_reference_counter_{$scope}_" . $this->year());
+            delete_option("gratora_reference_counter_{$scope}");
+            delete_option("gratora_reference_counter_{$scope}_" . $this->year());
         }
     }
 
@@ -82,17 +82,17 @@ final class ImporterRestoreDerivedStateTest extends IntegrationTestCase
     {
         $prefix = DB::getPrefix();
         foreach ([
-            'fundkit_receipts',
-            'fundkit_refunds',
-            'fundkit_consents',
-            'fundkit_donation_notes',
-            'fundkit_donor_notes',
-            'fundkit_donations',
-            'fundkit_donors',
-            'fundkit_form_donation_stats',
-            'fundkit_forms',
-            'fundkit_campaigns',
-            'fundkit_funds',
+            'gratora_receipts',
+            'gratora_refunds',
+            'gratora_consents',
+            'gratora_donation_notes',
+            'gratora_donor_notes',
+            'gratora_donations',
+            'gratora_donors',
+            'gratora_form_donation_stats',
+            'gratora_forms',
+            'gratora_campaigns',
+            'gratora_funds',
         ] as $table) {
             DB::raw("DELETE FROM {$prefix}{$table}");
         }
@@ -297,7 +297,7 @@ final class ImporterRestoreDerivedStateTest extends IntegrationTestCase
 
         $export = $this->export();
 
-        DB::raw('DELETE FROM ' . DB::getPrefix() . 'fundkit_donations');
+        DB::raw('DELETE FROM ' . DB::getPrefix() . 'gratora_donations');
         $this->seedDonation((int) $donor->id, 'RESTORE-SMALL-1', 5000, (int) $fund->id, (int) $campaign->id);
         $syncer->syncFund((int) $fund->id);
         $syncer->syncCampaign((int) $campaign->id);
@@ -307,8 +307,8 @@ final class ImporterRestoreDerivedStateTest extends IntegrationTestCase
 
         $records = $this->import($export);
 
-        $this->assertSame(1, $records['created']['fundkit_donations'] ?? 0, 'the restored donation landed');
-        $this->assertSame(1, $records['existing']['fundkit_funds'] ?? 0, 'and the fund was matched, not written');
+        $this->assertSame(1, $records['created']['gratora_donations'] ?? 0, 'the restored donation landed');
+        $this->assertSame(1, $records['existing']['gratora_funds'] ?? 0, 'and the fund was matched, not written');
 
         $fundRow = Fund::query()->where('id', (int) $fund->id)->get();
         $this->assertSame(95000, (int) $fundRow->raised_cents, 'the fund holds both donations');

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
-use FundKit\Foundation\Helpers\View;
-use FundKit\Gateways\GatewayManager;
+use Gratora\Foundation\Helpers\View;
+use Gratora\Gateways\GatewayManager;
 
 /**
  * Donor-facing gateway selector. The Preact runtime renders the interactive
@@ -25,7 +25,7 @@ final class PaymentGatewaysBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/payment-gateways';
+        return 'gratora/payment-gateways';
     }
 
     /** @since 1.0.0 */

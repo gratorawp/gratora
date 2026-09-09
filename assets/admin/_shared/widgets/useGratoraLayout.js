@@ -8,10 +8,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from '@wordpress/el
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 
-const PATH = '/fundkit/v1/admin/me/layout';
+const PATH = '/gratora/v1/admin/me/layout';
 const DEBOUNCE_MS = 500;
 
-export function useFundKitLayout( scope, allKeys ) {
+export function useGratoraLayout( scope, allKeys ) {
     const [ order, setOrder ]   = useState( allKeys );
     const [ hidden, setHidden ] = useState( [] );
     const [ loaded, setLoaded ] = useState( false );

@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Analytics\Event;
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\SubscriptionAware;
-use FundKit\Gateways\WebhookOutcome;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\Event;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\SubscriptionAware;
+use Gratora\Gateways\WebhookOutcome;
+use Gratora\Recurring\RecurringPlan;
 use RuntimeException;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -36,7 +36,7 @@ final class ErasureGatewayErrorTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        unset($_COOKIE['fundkit_donor_session']);
+        unset($_COOKIE['gratora_donor_session']);
         parent::tearDown();
     }
 
@@ -98,10 +98,10 @@ final class ErasureGatewayErrorTest extends IntegrationTestCase
 
     private function askToBeForgotten(int $donorId): WP_REST_Response
     {
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession($donorId, 'tok');
+        $_COOKIE['gratora_donor_session'] = $this->portalSession($donorId, 'tok');
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/forget');
-        $req->set_header('X-FundKit-Csrf', 'tok');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/forget');
+        $req->set_header('X-Gratora-Csrf', 'tok');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['confirm' => 'DELETE']));
 
@@ -125,7 +125,7 @@ final class ErasureGatewayErrorTest extends IntegrationTestCase
         $res = $this->askToBeForgotten((int) $donor->id);
 
         $this->assertSame(409, $res->get_status());
-        $this->assertSame('fundkit_erasure_blocked', $res->as_error()->get_error_code());
+        $this->assertSame('gratora_erasure_blocked', $res->as_error()->get_error_code());
     }
 
     public function test_nothing_is_erased_when_the_plan_could_not_be_stopped(): void

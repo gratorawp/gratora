@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 
 /**
  * The Roles screen reads the settings defaults while capabilities come from the
- * fundkit_roles option, so the two have to be made to agree: a screen showing a
+ * gratora_roles option, so the two have to be made to agree: a screen showing a
  * capability as granted is a promise that the role holds it, and an
  * administrator refused a refund by command dispatch has no way to grant it
  * from the screen (the administrator column is not editable).
@@ -21,7 +21,7 @@ final class RoleDefaultsAppliedTest extends IntegrationTestCase
     {
         parent::setUp();
         // The fresh-install state: no stored mapping, no role holding anything.
-        delete_option('fundkit_roles');
+        delete_option('gratora_roles');
         Capabilities::applyMapping([]);
 
         // These fire admin_init for real, so every listener on it runs. Three
@@ -30,7 +30,7 @@ final class RoleDefaultsAppliedTest extends IntegrationTestCase
         // has written a byte, and the privacy-policy helper reports incorrect
         // usage because is_admin() is false here.
         remove_action('admin_init', 'wp_admin_headers');
-        update_option('fundkit_onboarding_status', 'completed');
+        update_option('gratora_onboarding_status', 'completed');
         $this->setExpectedIncorrectUsage('wp_add_privacy_policy_content');
     }
 
@@ -47,15 +47,15 @@ final class RoleDefaultsAppliedTest extends IntegrationTestCase
     public function test_the_first_admin_load_grants_the_administrator_what_the_screen_shows(): void
     {
         $this->assertFalse(
-            get_role('administrator')->has_cap('fundkit_refund_donations'),
+            get_role('administrator')->has_cap('gratora_refund_donations'),
             'nothing has applied the mapping yet'
         );
 
         do_action('admin_init');
 
         $admin = get_role('administrator');
-        $this->assertTrue($admin->has_cap('fundkit_refund_donations'));
-        $this->assertTrue($admin->has_cap('fundkit_resend_receipt'));
+        $this->assertTrue($admin->has_cap('gratora_refund_donations'));
+        $this->assertTrue($admin->has_cap('gratora_resend_receipt'));
         $this->assertTrue($admin->has_cap(Capabilities::MANAGE));
     }
 
@@ -77,20 +77,20 @@ final class RoleDefaultsAppliedTest extends IntegrationTestCase
 
     public function test_an_option_another_plugin_created_does_not_count_as_seeded(): void
     {
-        update_option('fundkit_roles', ['mapping' => ['bookkeeper' => ['fundkit_view_donations']]]);
+        update_option('gratora_roles', ['mapping' => ['bookkeeper' => ['gratora_view_donations']]]);
 
         do_action('admin_init');
 
-        $this->assertTrue(get_role('administrator')->has_cap('fundkit_refund_donations'));
+        $this->assertTrue(get_role('administrator')->has_cap('gratora_refund_donations'));
     }
 
     public function test_an_administrator_deliberately_saved_with_nothing_stays_that_way(): void
     {
-        update_option('fundkit_roles', ['mapping' => ['administrator' => []]]);
+        update_option('gratora_roles', ['mapping' => ['administrator' => []]]);
 
         do_action('admin_init');
 
-        $this->assertFalse(get_role('administrator')->has_cap('fundkit_refund_donations'));
+        $this->assertFalse(get_role('administrator')->has_cap('gratora_refund_donations'));
     }
 
     public function test_no_other_role_is_given_donor_access_by_default(): void

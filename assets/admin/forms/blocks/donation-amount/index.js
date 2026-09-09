@@ -7,7 +7,7 @@ import { BlockIcons } from '../_shared/block-icons';
 import Segmented from '../../../_shared/components/Segmented';
 import AmountInput from '../../../_shared/components/AmountInput';
 
-const NAME = 'fundkit/donation-amount';
+const NAME = 'gratora/donation-amount';
 
 // Stable per-row id so React keys survive reorder/delete instead of tracking
 // array position. Persisted in attributes; the server normaliser ignores it.
@@ -86,25 +86,25 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Amounts', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Amounts', 'gratora' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Donation type', 'fundraising-toolkit' ) }
+                        label={ __( 'Donation type', 'gratora' ) }
                         value={ donationType }
                         onChange={ ( v ) => setAttributes( { donationType: v } ) }
                         options={ [
-                            { value: 'multi', label: __( 'Multi-level', 'fundraising-toolkit' ) },
-                            { value: 'fixed', label: __( 'Open amount', 'fundraising-toolkit' ) },
+                            { value: 'multi', label: __( 'Multi-level', 'gratora' ) },
+                            { value: 'fixed', label: __( 'Open amount', 'gratora' ) },
                         ] }
                     />
                     <p style={ { margin: '6px 0 12px', fontSize: 11, color: '#6b7280' } }>
                         { donationType === 'fixed'
-                            ? __( 'Donors enter any amount. No preset tiles.', 'fundraising-toolkit' )
-                            : __( 'Show preset amounts donors can pick from.', 'fundraising-toolkit' ) }
+                            ? __( 'Donors enter any amount. No preset tiles.', 'gratora' )
+                            : __( 'Show preset amounts donors can pick from.', 'gratora' ) }
                     </p>
 
                     { donationType === 'multi' && (
                         <ToggleControl
-                            label={ __( 'Allow custom amount', 'fundraising-toolkit' ) }
+                            label={ __( 'Allow custom amount', 'gratora' ) }
                             checked={ allowCustom }
                             onChange={ ( v ) => setAttributes( { allowCustom: v } ) }
                             __nextHasNoMarginBottom
@@ -116,8 +116,8 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             type="number"
                             min="0"
                             step="0.01"
-                            label={ __( 'Minimum amount', 'fundraising-toolkit' ) }
-                            help={ __( 'Leave empty for no minimum beyond the site default.', 'fundraising-toolkit' ) }
+                            label={ __( 'Minimum amount', 'gratora' ) }
+                            help={ __( 'Leave empty for no minimum beyond the site default.', 'gratora' ) }
                             value={ minCents ? String( minCents / 100 ) : '' }
                             onChange={ ( v ) => setAttributes( {
                                 minCents: v === '' ? 0 : Math.max( 0, Math.round( parseFloat( v ) * 100 ) || 0 ),
@@ -129,14 +129,14 @@ function Edit( { attributes, setAttributes, clientId } ) {
 
                     { donationType === 'multi' && (
                     <>
-                    <div className="fundkit-amounts-head">
-                        <span className="fundkit-amounts-head__label">{ __( 'Options', 'fundraising-toolkit' ) }</span>
+                    <div className="gratora-amounts-head">
+                        <span className="gratora-amounts-head__label">{ __( 'Options', 'gratora' ) }</span>
                         <button
                             type="button"
-                            className="fundkit-amounts-add"
+                            className="gratora-amounts-add"
                             onClick={ addPreset }
-                            aria-label={ __( 'Add amount', 'fundraising-toolkit' ) }
-                            title={ __( 'Add amount', 'fundraising-toolkit' ) }
+                            aria-label={ __( 'Add amount', 'gratora' ) }
+                            title={ __( 'Add amount', 'gratora' ) }
                         >
                             +
                         </button>
@@ -145,12 +145,12 @@ function Edit( { attributes, setAttributes, clientId } ) {
                     { presets.map( ( p, i ) => (
                         <div
                             key={ p.id || i }
-                            className={ `fundkit-preset-row${ dragIndex === i ? ' is-dragging' : '' }` }
+                            className={ `gratora-preset-row${ dragIndex === i ? ' is-dragging' : '' }` }
                             onDragOver={ ( e ) => e.preventDefault() }
                             onDrop={ () => { reorder( dragIndex, i ); setDragIndex( null ); } }
                         >
                             <span
-                                className="fundkit-preset-row__drag"
+                                className="gratora-preset-row__drag"
                                 draggable
                                 tabIndex={ 0 }
                                 onDragStart={ ( e ) => {
@@ -164,22 +164,22 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                     if ( e.key === 'ArrowDown' ) { e.preventDefault(); reorder( i, i + 1 ); }
                                 } }
                                 role="button"
-                                aria-label={ __( 'Drag to reorder, or use the arrow keys', 'fundraising-toolkit' ) }
-                                title={ __( 'Drag to reorder', 'fundraising-toolkit' ) }
+                                aria-label={ __( 'Drag to reorder, or use the arrow keys', 'gratora' ) }
+                                title={ __( 'Drag to reorder', 'gratora' ) }
                             >
                                 ⠿
                             </span>
                             <input
                                 type="radio"
-                                className="fundkit-preset-row__radio"
-                                name={ `fundkit-amount-highlight-${ clientId }` }
+                                className="gratora-preset-row__radio"
+                                name={ `gratora-amount-highlight-${ clientId }` }
                                 checked={ !! p.preselected }
                                 onChange={ () => setPreselected( i ) }
                                 onClick={ () => { if ( p.preselected ) setPreselected( i ); } }
-                                aria-label={ __( 'Preselect this amount', 'fundraising-toolkit' ) }
-                                title={ __( 'Preselect this amount', 'fundraising-toolkit' ) }
+                                aria-label={ __( 'Preselect this amount', 'gratora' ) }
+                                title={ __( 'Preselect this amount', 'gratora' ) }
                             />
-                            <span className="fundkit-preset-row__amt">
+                            <span className="gratora-preset-row__amt">
                                 <AmountInput
                                     value={ p.cents > 0 ? p.cents / 100 : 0 }
                                     onChange={ ( n ) => updatePreset( i, { cents: Math.max( 0, Math.round( Number( n || 0 ) * 100 ) ) } ) }
@@ -190,18 +190,18 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             </span>
                             <button
                                 type="button"
-                                className="fundkit-preset-row__remove"
+                                className="gratora-preset-row__remove"
                                 onClick={ () => removePreset( i ) }
                                 disabled={ presets.length <= 1 }
-                                aria-label={ __( 'Remove amount', 'fundraising-toolkit' ) }
-                                title={ __( 'Remove amount', 'fundraising-toolkit' ) }
+                                aria-label={ __( 'Remove amount', 'gratora' ) }
+                                title={ __( 'Remove amount', 'gratora' ) }
                             >
                                 −
                             </button>
                         </div>
                     ) ) }
                     <p style={ { margin: '6px 0 0', fontSize: 11, color: '#6b7280' } }>
-                        { __( 'Select a radio to preselect an amount.', 'fundraising-toolkit' ) }
+                        { __( 'Select a radio to preselect an amount.', 'gratora' ) }
                     </p>
                     </>
                     ) }
@@ -209,7 +209,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 <div style={ { fontSize: 12, color: '#666', marginBottom: 8 } }>
-                    { __( 'Donation amount', 'fundraising-toolkit' ) }
+                    { __( 'Donation amount', 'gratora' ) }
                 </div>
                 { donationType === 'multi' && (
                 <div style={ { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 } }>
@@ -224,13 +224,13 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             style={ {
                                 padding:      '10px 12px',
                                 background:   '#f0f0f1',
-                                borderRadius: 'var(--fundkit-radius-sm, 6px)',
+                                borderRadius: 'var(--gratora-radius-sm, 6px)',
                                 textAlign:    'center',
                                 display:      'flex',
                                 flexDirection: 'column',
                                 gap:          2,
                                 position:     'relative',
-                                outline:      selected ? '2px solid var(--fundkit-accent, #211d3f)' : 'none',
+                                outline:      selected ? '2px solid var(--gratora-accent, #211d3f)' : 'none',
                                 outlineOffset: selected ? -2 : 0,
                             } }
                         >
@@ -241,7 +241,7 @@ function Edit( { attributes, setAttributes, clientId } ) {
                                 tagName="div"
                                 value={ p.impact }
                                 onChange={ ( v ) => updatePreset( i, { impact: v } ) }
-                                placeholder={ __( 'Add a caption', 'fundraising-toolkit' ) }
+                                placeholder={ __( 'Add a caption', 'gratora' ) }
                                 allowedFormats={ [] }
                                 style={ {
                                     fontSize: 11,
@@ -261,13 +261,13 @@ function Edit( { attributes, setAttributes, clientId } ) {
                             padding:      '10px 12px',
                             background:   '#fff',
                             border:       '1px solid #c3c4c7',
-                            borderRadius: 'var(--fundkit-radius-sm, 6px)',
+                            borderRadius: 'var(--gratora-radius-sm, 6px)',
                             fontSize:     13,
                             color:        '#9ca3af',
                             textAlign:    'left',
                         } }
                     >
-                        { __( 'Custom amount', 'fundraising-toolkit' ) }
+                        { __( 'Custom amount', 'gratora' ) }
                     </div>
                 ) }
             </div>
@@ -278,9 +278,9 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Donation amount', 'fundraising-toolkit' ),
-        description: __( 'Amount picker with preset buttons and an optional custom-amount input.', 'fundraising-toolkit' ),
-        category:   'fundkit-amount',
+        title:      __( 'Donation amount', 'gratora' ),
+        description: __( 'Amount picker with preset buttons and an optional custom-amount input.', 'gratora' ),
+        category:   'gratora-amount',
         icon:       BlockIcons[ 'donation-amount' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

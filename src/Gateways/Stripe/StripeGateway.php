@@ -2,39 +2,39 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways\Stripe;
+namespace Gratora\Gateways\Stripe;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Currency\Currency;
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donations\Refund;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\AccountFingerprint;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\ModeCredentialed;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\PaymentMethodUpdate;
-use FundKit\Gateways\PaymentRetryUnavailable;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\SubscriptionAware;
-use FundKit\Gateways\SubscriptionSchedule;
-use FundKit\Gateways\SupportsPaymentMethodUpdate;
-use FundKit\Gateways\SupportsPaymentRetry;
-use FundKit\Gateways\SupportsScheduleChange;
-use FundKit\Gateways\SupportsSubscriptionPause;
-use FundKit\Gateways\TestMode;
-use FundKit\Gateways\WebhookOutcome;
-use FundKit\Gateways\WebhookPaymentGuard;
-use FundKit\Recurring\FrequencyMap;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Currency\Currency;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donations\Refund;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\AccountFingerprint;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\ModeCredentialed;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\PaymentMethodUpdate;
+use Gratora\Gateways\PaymentRetryUnavailable;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\SubscriptionAware;
+use Gratora\Gateways\SubscriptionSchedule;
+use Gratora\Gateways\SupportsPaymentMethodUpdate;
+use Gratora\Gateways\SupportsPaymentRetry;
+use Gratora\Gateways\SupportsScheduleChange;
+use Gratora\Gateways\SupportsSubscriptionPause;
+use Gratora\Gateways\TestMode;
+use Gratora\Gateways\WebhookOutcome;
+use Gratora\Gateways\WebhookPaymentGuard;
+use Gratora\Recurring\FrequencyMap;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 use RuntimeException;
 use Throwable;
 use WP_REST_Request;
@@ -104,7 +104,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Stripe', 'fundraising-toolkit');
+        return __('Stripe', 'gratora');
     }
 
     /**
@@ -116,7 +116,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     public function description(): string
     {
-        return __('Pay securely by card, or another method offered at checkout.', 'fundraising-toolkit');
+        return __('Pay securely by card, or another method offered at checkout.', 'gratora');
     }
 
     /** @since 1.0.0 */
@@ -193,11 +193,11 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             'currency'    => strtolower($donation->currency),
             'description' => 'Donation ' . $donation->reference,
             'metadata'    => [
-                'fundkit_reference'   => $donation->reference,
-                'fundkit_donation_id' => (string) $donation->id,
-                'fundkit_donor_id'    => (string) $donation->donor_id,
-                'fundkit_form_id'     => (string) ($donation->form_id ?? ''),
-                'fundkit_campaign_id' => (string) ($donation->campaign_id ?? ''),
+                'gratora_reference'   => $donation->reference,
+                'gratora_donation_id' => (string) $donation->id,
+                'gratora_donor_id'    => (string) $donation->donor_id,
+                'gratora_form_id'     => (string) ($donation->form_id ?? ''),
+                'gratora_campaign_id' => (string) ($donation->campaign_id ?? ''),
             ],
             // String 'true': the API client form-encodes, and http_build_query
             // turns PHP true into "1", which Stripe rejects for booleans.
@@ -220,7 +220,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         // Stripe accepted it would otherwise leave a charged intent nothing
         // points at, and the retry would charge again.
         $intent = $this->api->post('/payment_intents', $params, [
-            'Idempotency-Key' => 'fundkit_pi_' . $donation->id,
+            'Idempotency-Key' => 'gratora_pi_' . $donation->id,
         ]);
 
         return new GatewayIntentResult(
@@ -359,7 +359,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         // stays pending for good, with no receipt and no campaign total.
         $healable = false;
         if (! $donation) {
-            $reference = (string) ($intent['metadata']['fundkit_reference'] ?? '');
+            $reference = (string) ($intent['metadata']['gratora_reference'] ?? '');
             if ($reference !== '') {
                 $donation = $this->donations->findByReference($reference);
                 $healable = $donation !== null
@@ -571,7 +571,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             return $this->refused($eventId, $type, $reason);
         }
 
-        $reason = $intent['last_payment_error']['message'] ?? __('Payment declined.', 'fundraising-toolkit');
+        $reason = $intent['last_payment_error']['message'] ?? __('Payment declined.', 'gratora');
 
         // Counted before the row is judged. markFailed refuses to re-run once
         // the row reads failed, so declines after the first apply no row and
@@ -611,7 +611,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         // when it cannot count, which cancels: a channel nothing can meter is
         // the one most worth closing.
         $declines = Plugin::instance()->container->get(AntiSpamGuard::class)->hit(
-            'fundkit_pi_declines_' . hash('sha256', $intentId),
+            'gratora_pi_declines_' . hash('sha256', $intentId),
             self::DECLINE_WINDOW
         );
 
@@ -1167,7 +1167,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         // idempotency key below requires.
         $params = [
             'metadata' => [
-                'fundkit_donor_id' => (string) $donation->donor_id,
+                'gratora_donor_id' => (string) $donation->donor_id,
             ],
         ];
         if ($email !== null && $email !== '') $params['email'] = $email;
@@ -1179,7 +1179,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         // ignored the body would fail their next donation outright rather than
         // deduplicating anything.
         $customer = $this->api->post('/customers', $params, [
-            'Idempotency-Key' => 'fundkit_cus_' . (int) $donation->donor_id
+            'Idempotency-Key' => 'gratora_cus_' . (int) $donation->donor_id
                 . '_' . substr(hash('sha256', (string) wp_json_encode($params)), 0, 16),
         ]);
         $id       = (string) ($customer['id'] ?? '');
@@ -1246,10 +1246,10 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             'proration_behavior'   => 'none',
             'default_payment_method' => $paymentMethodId,
             'metadata' => [
-                'fundkit_donor_id'            => (string) $donation->donor_id,
-                'fundkit_form_id'             => (string) ($donation->form_id ?? ''),
-                'fundkit_campaign_id'         => (string) ($donation->campaign_id ?? ''),
-                'fundkit_initial_donation_id' => (string) $donation->id,
+                'gratora_donor_id'            => (string) $donation->donor_id,
+                'gratora_form_id'             => (string) ($donation->form_id ?? ''),
+                'gratora_campaign_id'         => (string) ($donation->campaign_id ?? ''),
+                'gratora_initial_donation_id' => (string) $donation->id,
             ],
         ];
 
@@ -1267,7 +1267,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             $sub = $this->api->post('/subscriptions', $subParams, [
                 // Deterministic, so a redelivery inside the window re-POSTs the
                 // same key and Stripe returns the original subscription.
-                'Idempotency-Key' => 'fundkit_sub_' . $donation->id,
+                'Idempotency-Key' => 'gratora_sub_' . $donation->id,
             ]);
 
             $subId = (string) ($sub['id'] ?? '');
@@ -1339,7 +1339,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         foreach ((array) ($res['data'] ?? []) as $sub) {
             $metadata = (array) ($sub['metadata'] ?? []);
-            if ((string) ($metadata['fundkit_initial_donation_id'] ?? '') === (string) $donationId) {
+            if ((string) ($metadata['gratora_initial_donation_id'] ?? '') === (string) $donationId) {
                 return (string) ($sub['id'] ?? '');
             }
         }
@@ -1383,7 +1383,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             'stripe.webhook',
             sprintf(
                 /* translators: 1: Stripe event type, 2: Stripe subscription id. */
-                __('Stripe sent %1$s for subscription %2$s, which this site has no plan for. It is live at Stripe and nothing here is recording it.', 'fundraising-toolkit'),
+                __('Stripe sent %1$s for subscription %2$s, which this site has no plan for. It is live at Stripe and nothing here is recording it.', 'gratora'),
                 $type,
                 $subscriptionId
             ),
@@ -1410,7 +1410,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
      */
     private function resolveDonationProduct(bool $isTest): string
     {
-        $opt    = get_option('fundkit_gateway_config', []);
+        $opt    = get_option('gratora_gateway_config', []);
         $stripe = is_array($opt) && is_array($opt['stripe'] ?? null) ? $opt['stripe'] : [];
         $key    = ($isTest ? 'stripe_product_id_test' : 'stripe_product_id_live')
                 . '_' . AccountFingerprint::of($this->account->secretKeyFor($isTest));
@@ -1430,7 +1430,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $stripe[$key]    = $productId;
         $opt['stripe']   = $stripe;
-        update_option('fundkit_gateway_config', $opt, false);
+        update_option('gratora_gateway_config', $opt, false);
         return $productId;
     }
 
@@ -1479,7 +1479,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             // was charged and never recorded.
             ErrorLog::record('stripe.webhook', sprintf(
                 /* translators: 1: Stripe invoice id, 2: error message. */
-                __('Could not re-read invoice %1$s while handling its webhook: %2$s', 'fundraising-toolkit'),
+                __('Could not re-read invoice %1$s while handling its webhook: %2$s', 'gratora'),
                 $invoiceId,
                 $e->getMessage()
             ));
@@ -1551,7 +1551,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
             ErrorLog::record('stripe.webhook', sprintf(
                 /* translators: %s: Stripe subscription id. */
-                __('A renewal on subscription %s named no charge, so nothing was recorded for it.', 'fundraising-toolkit'),
+                __('A renewal on subscription %s named no charge, so nothing was recorded for it.', 'gratora'),
                 $subscriptionId
             ), ['recurring_plan_id' => (int) $plan->id, 'donor_id' => (int) $plan->donor_id]);
 
@@ -1801,21 +1801,21 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
     public function refund(Donation $donation, int $amountCents, ?string $reason = null): RefundResult
     {
         if (! $donation->gateway_intent_id) {
-            return RefundResult::failure(__('No gateway intent on donation; cannot refund via Stripe.', 'fundraising-toolkit'));
+            return RefundResult::failure(__('No gateway intent on donation; cannot refund via Stripe.', 'gratora'));
         }
 
         $this->account->useTestMode((bool) $donation->is_test);
 
         if (! $this->api->isConfigured()) {
-            return RefundResult::failure(__('Stripe is not configured.', 'fundraising-toolkit'));
+            return RefundResult::failure(__('Stripe is not configured.', 'gratora'));
         }
 
         $params = [
             'payment_intent' => $donation->gateway_intent_id,
             'amount'         => Currency::toMinorUnits($amountCents, $donation->currency),
             'metadata'       => [
-                'fundkit_reference'  => $donation->reference,
-                'fundkit_donation_id' => (string) $donation->id,
+                'gratora_reference'  => $donation->reference,
+                'gratora_donation_id' => (string) $donation->id,
             ],
         ];
         if ($reason !== null && $reason !== '') {
@@ -1836,7 +1836,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             // original refund, and the insert then collides on its id.
             $priorRefunds = (int) Refund::query()->where('donation_id', (int) $donation->id)->count();
             $headers = [
-                'Idempotency-Key' => 'fundkit_refund_' . $donation->id
+                'Idempotency-Key' => 'gratora_refund_' . $donation->id
                     . '_' . (int) $donation->refunded_cents
                     . '_' . $priorRefunds
                     . '_' . $amountCents,
@@ -2062,7 +2062,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
         if ($customerId === '') {
-            throw new RuntimeException(esc_html__('This donation has no Stripe customer to attach a card to.', 'fundraising-toolkit'));
+            throw new RuntimeException(esc_html__('This donation has no Stripe customer to attach a card to.', 'gratora'));
         }
 
         $intent = $this->api->post('/setup_intents', [
@@ -2073,7 +2073,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $secret = (string) ($intent['client_secret'] ?? '');
         if ($secret === '') {
-            throw new RuntimeException(esc_html__('Stripe did not return a setup secret.', 'fundraising-toolkit'));
+            throw new RuntimeException(esc_html__('Stripe did not return a setup secret.', 'gratora'));
         }
 
         return PaymentMethodUpdate::inline(
@@ -2094,12 +2094,12 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $token = trim($token);
         if ($token === '') {
-            throw new RuntimeException(esc_html__('No payment method was supplied.', 'fundraising-toolkit'));
+            throw new RuntimeException(esc_html__('No payment method was supplied.', 'gratora'));
         }
 
         $subId = (string) $plan->gateway_subscription_id;
         if (! self::couldBeStripeSubscription($subId)) {
-            throw new RuntimeException(esc_html__('This plan has no Stripe subscription.', 'fundraising-toolkit'));
+            throw new RuntimeException(esc_html__('This plan has no Stripe subscription.', 'gratora'));
         }
 
         $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
@@ -2131,7 +2131,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         $this->account->useTestMode((bool) $plan->is_test);
         $subId = (string) $plan->gateway_subscription_id;
         if (! self::couldBeStripeSubscription($subId)) {
-            throw new PaymentRetryUnavailable(esc_html__('This plan never reached Stripe, so there is nothing to collect.', 'fundraising-toolkit'));
+            throw new PaymentRetryUnavailable(esc_html__('This plan never reached Stripe, so there is nothing to collect.', 'gratora'));
         }
 
         $sub = $this->api->get('/subscriptions/' . rawurlencode($subId));
@@ -2141,7 +2141,7 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
             ? (string) ($sub['latest_invoice']['id'] ?? '')
             : (string) ($sub['latest_invoice'] ?? '');
         if ($invoiceId === '') {
-            throw new PaymentRetryUnavailable(esc_html__('Stripe has no invoice outstanding on this subscription.', 'fundraising-toolkit'));
+            throw new PaymentRetryUnavailable(esc_html__('Stripe has no invoice outstanding on this subscription.', 'gratora'));
         }
 
         $invoice = $this->api->get('/invoices/' . rawurlencode($invoiceId));
@@ -2153,8 +2153,8 @@ final class StripeGateway implements PaymentGateway, SubscriptionAware, Supports
         if ($status !== 'open') {
             throw new PaymentRetryUnavailable(esc_html(sprintf(
                 /* translators: %s: the Stripe invoice status, e.g. paid. */
-                __('Nothing to collect: the latest invoice is %s.', 'fundraising-toolkit'),
-                $status !== '' ? $status : __('unavailable', 'fundraising-toolkit')
+                __('Nothing to collect: the latest invoice is %s.', 'gratora'),
+                $status !== '' ? $status : __('unavailable', 'gratora')
             )));
         }
 

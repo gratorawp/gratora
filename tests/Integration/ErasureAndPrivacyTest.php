@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorRetention;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\Erasure\ErasureHandler;
-use FundKit\Donors\Erasure\ErasureRequest;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Analytics\Event;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorRetention;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\Erasure\ErasureHandler;
+use Gratora\Donors\Erasure\ErasureRequest;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
 use RuntimeException;
 use WP_REST_Request;
 
@@ -116,12 +116,12 @@ final class ErasureAndPrivacyTest extends IntegrationTestCase
      */
     public function test_the_sweep_itself_signs_itself_even_on_an_admin_request(): void
     {
-        Plugin::instance()->container->get(\FundKit\Settings\SettingsService::class)
+        Plugin::instance()->container->get(\Gratora\Settings\SettingsService::class)
             ->update('privacy', ['erase_inactive_donors' => true, 'donor_retention_years' => 1]);
         update_option(DonorRetention::STARTS_AT_OPTION, time() - 86400, false);
 
         $long = gmdate('Y-m-d H:i:s', time() - (20 * 365 * 86400));
-        $d = \FundKit\Donors\Donor::make();
+        $d = \Gratora\Donors\Donor::make();
         $d->email_hash       = hash('sha256', uniqid('sweep', true));
         $d->email_encrypted  = 'x';
         $d->first_name       = 'Ancient';
@@ -175,16 +175,16 @@ final class ErasureAndPrivacyTest extends IntegrationTestCase
         $p->updated_at              = $now;
         $p->save();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/donors/' . (int) $donor->id . '/redact');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/donors/' . (int) $donor->id . '/redact');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['confirmation' => 'stuck-plans@example.test']));
 
         $res = rest_do_request($req);
 
         $this->assertSame(502, $res->get_status(), 'a refusal is an answer, not a fatal');
-        $this->assertSame('fundkit_redact_failed', $res->as_error()->get_error_code());
+        $this->assertSame('gratora_redact_failed', $res->as_error()->get_error_code());
         $this->assertNull(
-            \FundKit\Donors\Donor::query()->find('id', (int) $donor->id)->redacted_at,
+            \Gratora\Donors\Donor::query()->find('id', (int) $donor->id)->redacted_at,
             'nothing was erased'
         );
     }
@@ -214,16 +214,16 @@ final class ErasureAndPrivacyTest extends IntegrationTestCase
 
             return $handlers;
         };
-        add_filter('fundkit.donor.erasure_handlers', $add);
+        add_filter('gratora.donor.erasure_handlers', $add);
 
         try {
-            $req = new WP_REST_Request('POST', '/fundkit/v1/admin/donors/' . (int) $donor->id . '/redact');
+            $req = new WP_REST_Request('POST', '/gratora/v1/admin/donors/' . (int) $donor->id . '/redact');
             $req->set_header('content-type', 'application/json');
             $req->set_body((string) wp_json_encode(['confirmation' => 'no-plans@example.test']));
 
             $res = rest_do_request($req);
         } finally {
-            remove_filter('fundkit.donor.erasure_handlers', $add);
+            remove_filter('gratora.donor.erasure_handlers', $add);
         }
 
         $this->assertSame(500, $res->get_status(), 'this site failed, the gateway did not refuse');

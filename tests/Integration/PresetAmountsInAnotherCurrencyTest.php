@@ -2,32 +2,32 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Currency\FxRates;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormSubmissionValidator;
+use Gratora\Currency\FxRates;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormSubmissionValidator;
 
 /** Allow FX movement between rendering and submission without accepting arbitrary amounts. */
 final class PresetAmountsInAnotherCurrencyTest extends IntegrationTestCase
 {
     private const BLOCKS = <<<BLOCKS
-<!-- wp:fundkit/donation-amount {"allowCustom":false,"presets":[{"cents":2500},{"cents":5000},{"cents":10000}]} /-->
-<!-- wp:fundkit/currency-switcher /-->
-<!-- wp:fundkit/submit-button /-->
+<!-- wp:gratora/donation-amount {"allowCustom":false,"presets":[{"cents":2500},{"cents":5000},{"cents":10000}]} /-->
+<!-- wp:gratora/currency-switcher /-->
+<!-- wp:gratora/submit-button /-->
 BLOCKS;
 
     /** No switcher, so the form can only be paid in the authored currency. */
     private const FIXED_BLOCKS = <<<BLOCKS
-<!-- wp:fundkit/donation-amount {"allowCustom":false,"presets":[{"cents":2500},{"cents":5000}]} /-->
-<!-- wp:fundkit/submit-button /-->
+<!-- wp:gratora/donation-amount {"allowCustom":false,"presets":[{"cents":2500},{"cents":5000}]} /-->
+<!-- wp:gratora/submit-button /-->
 BLOCKS;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'EUR'],
         ]);

@@ -2,14 +2,14 @@
 import { test, expect } from '../../fixtures/donor-form';
 import { settle } from '../../helpers/visual';
 
-const MULTI_STEP_FORM_PATH = process.env.FUNDKIT_E2E_MULTI_STEP_FORM_PATH ?? '';
+const MULTI_STEP_FORM_PATH = process.env.GRATORA_E2E_MULTI_STEP_FORM_PATH ?? '';
 
 test.describe('visual: multi-step wizard', () => {
-    test.skip(! MULTI_STEP_FORM_PATH, 'set FUNDKIT_E2E_MULTI_STEP_FORM_PATH via `wp fundkit e2e-seed`');
+    test.skip(! MULTI_STEP_FORM_PATH, 'set GRATORA_E2E_MULTI_STEP_FORM_PATH via `wp gratora e2e-seed`');
     test.use({ formPath: MULTI_STEP_FORM_PATH });
 
     test('each step renders', async ({ donor }) => {
-        const next = donor.form.locator('.fundkit-form__button--primary');
+        const next = donor.form.locator('.gratora-form__button--primary');
 
         await settle(donor.page);
         await expect(donor.form).toHaveScreenshot('wizard-step-1-amount.png');

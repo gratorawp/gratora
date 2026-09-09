@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Transfer\CsvImporter;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Transfer\CsvImporter;
 
 /**
  * How a written amount is read.

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Rest\Admin\UserPrefsController;
+use Gratora\Rest\Admin\UserPrefsController;
 use WP_REST_Request;
 
 /**
@@ -24,7 +24,7 @@ final class TableViewPrefsTest extends IntegrationTestCase
     /** @param array<string, mixed> $body */
     private function save(string $scope, array $body): array
     {
-        $request = new WP_REST_Request('PUT', '/fundkit/v1/admin/me/table-view');
+        $request = new WP_REST_Request('PUT', '/gratora/v1/admin/me/table-view');
         $request->set_param('scope', $scope);
         $request->set_body(wp_json_encode($body));
         $request->set_header('content-type', 'application/json');
@@ -34,7 +34,7 @@ final class TableViewPrefsTest extends IntegrationTestCase
 
     private function read(string $scope): array
     {
-        $request = new WP_REST_Request('GET', '/fundkit/v1/admin/me/table-view');
+        $request = new WP_REST_Request('GET', '/gratora/v1/admin/me/table-view');
         $request->set_param('scope', $scope);
 
         return (array) (new UserPrefsController())->showView($request)->get_data();
@@ -183,7 +183,7 @@ final class TableViewPrefsTest extends IntegrationTestCase
             $this->save('scope' . $i, ['perPage' => 25]);
         }
 
-        $stored = json_decode((string) get_user_meta(get_current_user_id(), 'fundkit_table_views', true), true);
+        $stored = json_decode((string) get_user_meta(get_current_user_id(), 'gratora_table_views', true), true);
 
         $this->assertLessThanOrEqual(40, count($stored));
         // The ones that did land are still readable, not corrupted by the cap.

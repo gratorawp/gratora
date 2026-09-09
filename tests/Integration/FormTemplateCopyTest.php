@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\FormTemplates;
+use Gratora\Forms\FormTemplates;
 
 /**
  * Shipped template copy is donor-facing verbatim, sitting next to amounts the

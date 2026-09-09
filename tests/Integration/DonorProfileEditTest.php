@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 
 /**
- * editProfile() must write (and fire fundkit.donor.updated) only on a real
+ * editProfile() must write (and fire gratora.donor.updated) only on a real
  * change: a request that merely includes a phone or address key is not an edit,
  * and treating it as one re-runs every donor.updated listener on a no-op.
  */
@@ -38,7 +38,7 @@ final class DonorProfileEditTest extends IntegrationTestCase
         $svc->editProfile($donor, ['phone' => '+1 555 0100']); // establishes the phone
 
         $fired = 0;
-        add_action('fundkit.donor.updated', function () use (&$fired): void {
+        add_action('gratora.donor.updated', function () use (&$fired): void {
             $fired++;
         });
 
@@ -58,7 +58,7 @@ final class DonorProfileEditTest extends IntegrationTestCase
         $donor = $svc->findOrCreate('edit2@example.com', ['first_name' => 'Ann']);
 
         $fired = 0;
-        add_action('fundkit.donor.updated', function () use (&$fired): void {
+        add_action('gratora.donor.updated', function () use (&$fired): void {
             $fired++;
         });
 

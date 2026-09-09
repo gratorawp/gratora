@@ -1,42 +1,42 @@
 
-.fundkit-sched__toggle-row {
+.gratora-sched__toggle-row {
     display: flex;
     align-items: center;
     gap: 14px;
     padding: 12px 14px;
-    background: var(--fundkit-color-bg-page, $bg-page);
-    border: 1px solid var(--fundkit-color-border-soft, $border-soft);
+    background: var(--gratora-color-bg-page, $bg-page);
+    border: 1px solid var(--gratora-color-border-soft, $border-soft);
     border-radius: 8px;
 }
 
-.fundkit-sched__toggle-txt {
+.gratora-sched__toggle-txt {
     flex: 1;
     min-width: 0;
 }
 
-.fundkit-sched__toggle-title {
+.gratora-sched__toggle-title {
     font-size: 13px;
     font-weight: 500;
-    color: var(--fundkit-color-text, $text);
+    color: var(--gratora-color-text, $text);
 }
 
-.fundkit-sched__toggle-sub {
+.gratora-sched__toggle-sub {
     margin-top: 1px;
     font-size: 11.5px;
-    color: var(--fundkit-color-text-muted, $text-muted);
+    color: var(--gratora-color-text-muted, $text-muted);
 }
 
-.fundkit-sched__date-lbl {
+.gratora-sched__date-lbl {
     display: block;
     margin-bottom: 5px;
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--fundkit-color-text-muted, $text-muted);
+    color: var(--gratora-color-text-muted, $text-muted);
 }
 
-.fundkit-sched__dates {
+.gratora-sched__dates {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 14px;

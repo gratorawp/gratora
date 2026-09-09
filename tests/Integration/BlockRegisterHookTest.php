@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\Blocks\Block;
-use FundKit\Forms\Blocks\BlockRegistry;
-use FundKit\Foundation\Plugin;
+use Gratora\Forms\Blocks\Block;
+use Gratora\Forms\Blocks\BlockRegistry;
+use Gratora\Foundation\Plugin;
 
 /**
  * Add-on modules boot after core, so a broadcast fired inside core's own boot
@@ -35,7 +35,7 @@ final class BlockRegisterHookTest extends IntegrationTestCase
             }
         };
 
-        add_action('fundkit.blocks.register_server', static function (BlockRegistry $blocks) use ($block): void {
+        add_action('gratora.blocks.register_server', static function (BlockRegistry $blocks) use ($block): void {
             $blocks->add($block);
         });
 
@@ -45,7 +45,7 @@ final class BlockRegisterHookTest extends IntegrationTestCase
         // and rejected by name, which is only noise here.
         do_action('init');
 
-        // Allow duplicate notices from WordPress registries across versions; fail on FundKit
+        // Allow duplicate notices from WordPress registries across versions; fail on Gratora
         // notices.
         foreach (array_keys($this->caught_doing_it_wrong) as $caught) {
             if (preg_match('/^WP_\w+Registry::register$/', $caught)) {

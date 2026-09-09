@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Recurring;
+namespace Gratora\Recurring;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Foundation\Batch\BatchProcessor;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\SubscriptionAware;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Foundation\Batch\BatchProcessor;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\SubscriptionAware;
 use Throwable;
 
 /**
@@ -21,7 +21,7 @@ use Throwable;
  */
 final class RecurringResumer
 {
-    public const HOOK = 'fundkit.cron.recurring_resume';
+    public const HOOK = 'gratora.cron.recurring_resume';
     private const DAILY = 86400;
     private const BATCH = 100;
 
@@ -117,7 +117,7 @@ final class RecurringResumer
                     $e->getMessage()
                 ), ['recurring_plan_id' => (int) $plan->id, 'donor_id' => (int) $plan->donor_id, 'gateway' => (string) $plan->gateway]);
 
-                do_action('fundkit.recurring.resume_failed', $plan, $e);
+                do_action('gratora.recurring.resume_failed', $plan, $e);
                 return;
             }
         }
@@ -135,7 +135,7 @@ final class RecurringResumer
         ], true);
 
         if ($written) {
-            do_action('fundkit.recurring.plan_resumed', $plan);
+            do_action('gratora.recurring.plan_resumed', $plan);
         }
     }
 

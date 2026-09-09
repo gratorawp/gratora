@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
  * Arming the nightly sweep clears name, email, address, phone, tax id and notes
  * off every donor it reaches, on a schedule and irreversibly. Redacting one
- * donor by hand costs fundkit_redact_donors, so this cannot cost less.
+ * donor by hand costs gratora_redact_donors, so this cannot cost less.
  */
 final class ErasureSettingGateTest extends IntegrationTestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
-        delete_option('fundkit_roles');
+        delete_option('gratora_roles');
         Capabilities::applyMapping([]);
     }
 
@@ -32,7 +32,7 @@ final class ErasureSettingGateTest extends IntegrationTestCase
     private function asSettingsManager(array $extraCaps = []): void
     {
         Capabilities::applyMapping([
-            'editor' => array_merge(['fundkit_manage_settings'], $extraCaps),
+            'editor' => array_merge(['gratora_manage_settings'], $extraCaps),
         ]);
         wp_set_current_user(self::factory()->user->create(['role' => 'editor']));
     }
@@ -40,7 +40,7 @@ final class ErasureSettingGateTest extends IntegrationTestCase
     /** @param array<string, mixed> $body */
     private function savePrivacy(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('PUT', '/fundkit/v1/admin/settings/privacy');
+        $req = new WP_REST_Request('PUT', '/gratora/v1/admin/settings/privacy');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -64,7 +64,7 @@ final class ErasureSettingGateTest extends IntegrationTestCase
 
     public function test_someone_who_may_redact_donors_can(): void
     {
-        $this->asSettingsManager(['fundkit_redact_donors']);
+        $this->asSettingsManager(['gratora_redact_donors']);
 
         $res = $this->savePrivacy(['erase_inactive_donors' => true]);
 
@@ -74,7 +74,7 @@ final class ErasureSettingGateTest extends IntegrationTestCase
 
     public function test_a_settings_manager_cannot_shorten_the_window_either(): void
     {
-        $this->asSettingsManager(['fundkit_redact_donors']);
+        $this->asSettingsManager(['gratora_redact_donors']);
         $this->assertSame(200, $this->savePrivacy(['erase_inactive_donors' => true])->get_status());
 
         $this->asSettingsManager();
@@ -86,7 +86,7 @@ final class ErasureSettingGateTest extends IntegrationTestCase
 
     public function test_turning_the_sweep_off_is_not_a_widening(): void
     {
-        $this->asSettingsManager(['fundkit_redact_donors']);
+        $this->asSettingsManager(['gratora_redact_donors']);
         $this->savePrivacy(['erase_inactive_donors' => true]);
 
         $this->asSettingsManager();
@@ -103,7 +103,7 @@ final class ErasureSettingGateTest extends IntegrationTestCase
      */
     public function test_a_window_of_zero_switches_the_sweep_off_rather_than_widening_it(): void
     {
-        $this->asSettingsManager(['fundkit_redact_donors']);
+        $this->asSettingsManager(['gratora_redact_donors']);
         $this->assertSame(200, $this->savePrivacy(['erase_inactive_donors' => true])->get_status());
 
         $this->asSettingsManager();
@@ -119,18 +119,18 @@ final class ErasureSettingGateTest extends IntegrationTestCase
      */
     public function test_receipt_preview_follows_the_screen_it_lives_on(): void
     {
-        Capabilities::applyMapping(['editor' => ['fundkit_manage_settings']]);
+        Capabilities::applyMapping(['editor' => ['gratora_manage_settings']]);
         wp_set_current_user(self::factory()->user->create(['role' => 'editor']));
         $this->assertSame(
             200,
-            rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/receipts/preview'))->get_status()
+            rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/receipts/preview'))->get_status()
         );
 
-        Capabilities::applyMapping(['author' => ['fundkit_view_donations']]);
+        Capabilities::applyMapping(['author' => ['gratora_view_donations']]);
         wp_set_current_user(self::factory()->user->create(['role' => 'author']));
         $this->assertSame(
             403,
-            rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/receipts/preview'))->get_status()
+            rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/receipts/preview'))->get_status()
         );
     }
 

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Receipts;
+namespace Gratora\Receipts;
 
-use FundKit\Vendor\Dompdf\Dompdf;
-use FundKit\Vendor\Dompdf\Options;
+use Gratora\Vendor\Dompdf\Dompdf;
+use Gratora\Vendor\Dompdf\Options;
 
 /**
  * Turns an HTML string into PDF bytes.
  *
- * Temp dir is forced to wp-content/uploads/fundkit/tmp because /tmp is
+ * Temp dir is forced to wp-content/uploads/gratora/tmp because /tmp is
  * ephemeral on many deployment environments.
  *
  * @since 1.0.0
@@ -26,7 +26,7 @@ final class PdfBuilder
          *
          * @since 1.0.0
          */
-        $html = (string) apply_filters('fundkit.pdf.html', $html, $options);
+        $html = (string) apply_filters('gratora.pdf.html', $html, $options);
 
         $opts = new Options();
         $opts->setTempDir($this->ensureTmpDir());
@@ -54,7 +54,7 @@ final class PdfBuilder
             'Title'   => $options['title']   ?? '',
             'Author'  => $options['author']  ?? '',
             'Subject' => $options['subject'] ?? '',
-            'Creator' => 'Fundraising Toolkit',
+            'Creator' => 'Gratora',
         ] as $key => $value) {
             if ($value !== '') {
                 $dompdf->add_info($key, (string) $value);
@@ -131,7 +131,7 @@ final class PdfBuilder
     private function ensureTmpDir(): string
     {
         $uploads = wp_upload_dir();
-        $dir = trailingslashit($uploads['basedir']) . 'fundkit/tmp';
+        $dir = trailingslashit($uploads['basedir']) . 'gratora/tmp';
 
         if (! is_dir($dir)) {
             wp_mkdir_p($dir);

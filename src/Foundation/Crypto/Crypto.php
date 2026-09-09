@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Crypto;
+namespace Gratora\Foundation\Crypto;
 
-use FundKit\Foundation\Config\SystemSetting;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Foundation\Config\SystemSetting;
+use Gratora\Vendor\Queryable\DB;
 use RuntimeException;
 
 /**
  * Authenticated AES-256-GCM encryption for PII columns.
  *
- * Key lives in fundkit_system_settings (encryption_key_v1), auto-generated on first use.
+ * Key lives in gratora_system_settings (encryption_key_v1), auto-generated on first use.
  * Key loss is unrecoverable: if the key is missing but encrypted records exist, the
  * admin UI is flagged and a fresh key is generated so new writes still work.
  *
@@ -54,7 +54,7 @@ final class Crypto
             self::TAG_LEN
         );
         if ($ciphertext === false) {
-            throw new RuntimeException(esc_html('FundKit Crypto: encryption failed.'));
+            throw new RuntimeException(esc_html('Gratora Crypto: encryption failed.'));
         }
         return base64_encode($iv . $tag . $ciphertext);
     }
@@ -116,7 +116,7 @@ final class Crypto
     private function encryptedRecordsExist(): bool
     {
         $result = DB::raw(
-            'SELECT 1 FROM ' . DB::getPrefix() . "fundkit_donors
+            'SELECT 1 FROM ' . DB::getPrefix() . "gratora_donors
              WHERE email_encrypted IS NOT NULL AND email_encrypted != ''
              LIMIT 1"
         );

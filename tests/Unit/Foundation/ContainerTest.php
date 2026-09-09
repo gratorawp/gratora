@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Foundation;
+namespace Gratora\Tests\Unit\Foundation;
 
-use FundKit\Foundation\Container\Container;
+use Gratora\Foundation\Container\Container;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use stdClass;

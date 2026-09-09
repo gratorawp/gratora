@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Forms\Form;
+use Gratora\Campaigns\Campaign;
+use Gratora\Forms\Form;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -24,19 +24,19 @@ final class CampaignFormGateTest extends IntegrationTestCase
         parent::setUp();
 
         // Published campaign.
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Gate campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
 
         // Form created as draft (default), bumped to published via direct save
         // to bypass the publish-readiness check on minimal test blocks.
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'title'       => 'Gate form',
             'campaign_id' => $this->campaignId,
-            'blocks'      => '<!-- wp:fundkit/donation-amount /-->',
+            'blocks'      => '<!-- wp:gratora/donation-amount /-->',
         ]));
         $created = rest_do_request($req)->get_data();
         $this->formId   = (int) $created['id'];
@@ -57,11 +57,11 @@ final class CampaignFormGateTest extends IntegrationTestCase
     {
         $this->assertStringNotContainsString('data-form-slug=', $html, 'no form is rendered');
 
-        if (current_user_can('manage_options') || current_user_can('manage_fundkit')) {
+        if (current_user_can('manage_options') || current_user_can('manage_gratora')) {
             // One notice either way: the closed states carry the manager's line
             // inside the visitor's, the misconfigured ones are manager-only.
             $this->assertStringContainsString(
-                $publicMessage ? 'fundkit-donation-form__closed-note' : 'fundkit-donation-form__error',
+                $publicMessage ? 'gratora-donation-form__closed-note' : 'gratora-donation-form__error',
                 $html,
                 'and a manager is told why'
             );
@@ -72,7 +72,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         }
 
         if ($publicMessage) {
-            $this->assertStringContainsString('fundkit-donation-form__closed', $html, 'a visitor is told the campaign closed');
+            $this->assertStringContainsString('gratora-donation-form__closed', $html, 'a visitor is told the campaign closed');
             return;
         }
 
@@ -81,8 +81,8 @@ final class CampaignFormGateTest extends IntegrationTestCase
 
     public function test_renders_when_both_form_and_campaign_are_published(): void
     {
-        $html = do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]');
-        $this->assertStringContainsString('fundkit-donation-form--blocks', $html);
+        $html = do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]');
+        $this->assertStringContainsString('gratora-donation-form--blocks', $html);
         $this->assertStringContainsString('data-form-slug="' . $this->formSlug . '"', $html);
     }
 
@@ -92,7 +92,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $form->status = 'draft';
         $form->save();
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]');
         $this->assertNoForm($html);
     }
 
@@ -102,7 +102,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $form->status = 'archived';
         $form->save();
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]');
         $this->assertNoForm($html);
     }
 
@@ -112,7 +112,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $campaign->status = 'draft';
         $campaign->save();
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]');
         $this->assertNoForm($html);
     }
 
@@ -122,7 +122,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $campaign->status = 'archived';
         $campaign->save();
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]');
         $this->assertNoForm($html);
     }
 
@@ -135,7 +135,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $was = get_current_user_id();
         wp_set_current_user(0);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]');
 
         wp_set_current_user($was);
 
@@ -151,7 +151,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $was = get_current_user_id();
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]');
 
         wp_set_current_user($was);
 
@@ -166,7 +166,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $campaign->status = 'archived';
         $campaign->save();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'form_id'      => $this->formId,
@@ -178,14 +178,14 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $res = rest_do_request($req);
 
         $this->assertSame(403, $res->get_status());
-        $this->assertSame('fundkit_campaign_not_available', $res->get_data()['code'] ?? null);
+        $this->assertSame('gratora_campaign_not_available', $res->get_data()['code'] ?? null);
     }
 
     public function test_a_campaign_past_its_end_date_stops_rendering_the_form(): void
     {
         $this->schedule(null, gmdate('Y-m-d', strtotime('-1 day')));
 
-        $this->assertNoForm(do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]'), '', true);
+        $this->assertNoForm(do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]'), '', true);
     }
 
     /**
@@ -199,7 +199,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $res = $this->postDonation();
 
         $this->assertSame(403, $res->get_status());
-        $this->assertSame('fundkit_campaign_not_available', $res->get_data()['code'] ?? null);
+        $this->assertSame('gratora_campaign_not_available', $res->get_data()['code'] ?? null);
     }
 
     /**
@@ -212,8 +212,8 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $this->schedule(null, gmdate('Y-m-d'));
 
         $this->assertStringContainsString(
-            'fundkit-donation-form--blocks',
-            do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]')
+            'gratora-donation-form--blocks',
+            do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]')
         );
         $this->assertSame(201, $this->postDonation()->get_status());
     }
@@ -222,7 +222,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
     {
         $this->schedule(gmdate('Y-m-d', strtotime('+2 days')), null);
 
-        $this->assertNoForm(do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]'), '', true);
+        $this->assertNoForm(do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]'), '', true);
         $this->assertSame(403, $this->postDonation()->get_status());
     }
 
@@ -249,7 +249,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
 
     private function postDonation(): WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'form_id'      => $this->formId,
@@ -268,7 +268,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         // null form.
         Form::query()->where('id', $this->formId)->delete();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'form_id'      => $this->formId,
@@ -280,14 +280,14 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $res = rest_do_request($req);
 
         $this->assertSame(403, $res->get_status());
-        $this->assertSame('fundkit_form_not_available', $res->get_data()['code'] ?? null);
+        $this->assertSame('gratora_form_not_available', $res->get_data()['code'] ?? null);
     }
 
     public function test_publishing_the_page_publishes_the_campaign(): void
     {
-        $service = \FundKit\Foundation\Plugin::instance()
+        $service = \Gratora\Foundation\Plugin::instance()
             ->container
-            ->get(\FundKit\Campaigns\CampaignService::class);
+            ->get(\Gratora\Campaigns\CampaignService::class);
 
         // Drop the campaign to draft; syncPage drops its page to draft too.
         $campaign = Campaign::query()->find('id', $this->campaignId);
@@ -298,7 +298,7 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $this->assertGreaterThan(0, $pageId);
         $this->assertSame('draft', (string) $campaign->status);
         $this->assertSame('draft', get_post_status($pageId));
-        $this->assertNoForm(do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]'));
+        $this->assertNoForm(do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]'));
 
         // Publish the page, as the editor "Publish" button does.
         wp_update_post(['ID' => $pageId, 'post_status' => 'publish']);
@@ -309,15 +309,15 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $this->assertSame('publish', get_post_status($pageId));
 
         // With both published, the gated shortcode now renders.
-        $html = do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]');
-        $this->assertStringContainsString('fundkit-donation-form--blocks', $html);
+        $html = do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]');
+        $this->assertStringContainsString('gratora-donation-form--blocks', $html);
     }
 
     public function test_publishing_campaign_with_draft_default_form_keeps_page_private(): void
     {
-        $service = \FundKit\Foundation\Plugin::instance()
+        $service = \Gratora\Foundation\Plugin::instance()
             ->container
-            ->get(\FundKit\Campaigns\CampaignService::class);
+            ->get(\Gratora\Campaigns\CampaignService::class);
 
         // Make the published Gate form the campaign's default form, then draft it.
         $campaign = Campaign::query()->find('id', $this->campaignId);
@@ -350,11 +350,11 @@ final class CampaignFormGateTest extends IntegrationTestCase
 
     public function test_campaign_type_conversion_is_one_way(): void
     {
-        add_filter('fundkit.campaign.types', static fn (array $t): array => $t + ['squad' => 'Squad']);
+        add_filter('gratora.campaign.types', static fn (array $t): array => $t + ['squad' => 'Squad']);
 
-        $service = \FundKit\Foundation\Plugin::instance()
+        $service = \Gratora\Foundation\Plugin::instance()
             ->container
-            ->get(\FundKit\Campaigns\CampaignService::class);
+            ->get(\Gratora\Campaigns\CampaignService::class);
 
         $campaign = Campaign::query()->find('id', $this->campaignId);
         $this->assertSame('standard', (string) $campaign->campaign_type);
@@ -398,14 +398,14 @@ final class CampaignFormGateTest extends IntegrationTestCase
         $campaign = Campaign::query()->find('id', $this->campaignId);
         $this->assertNotNull($campaign);
 
-        \FundKit\Foundation\Plugin::instance()
+        \Gratora\Foundation\Plugin::instance()
             ->container
-            ->get(\FundKit\Campaigns\CampaignService::class)
+            ->get(\Gratora\Campaigns\CampaignService::class)
             ->delete($campaign);
 
         $this->assertNull(Form::query()->find('id', $this->formId), 'form row goes away with the campaign');
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $this->formSlug . '"]');
-        $this->assertStringContainsString('fundkit-donation-form__error', $html, 'no-such-slug surfaces the admin diagnostic');
+        $html = do_shortcode('[gratora_donation_form slug="' . $this->formSlug . '"]');
+        $this->assertStringContainsString('gratora-donation-form__error', $html, 'no-such-slug surfaces the admin diagnostic');
     }
 }

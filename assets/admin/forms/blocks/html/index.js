@@ -1,5 +1,5 @@
 /**
- * fundkit/html: carries sanitised HTML through to the donor form (sponsor strips,
+ * gratora/html: carries sanitised HTML through to the donor form (sponsor strips,
  * legal copy). The editor previews the sanitised result so authors see what
  * actually survives save, not embeds that will be stripped.
  */
@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 
-const NAME = 'fundkit/html';
+const NAME = 'gratora/html';
 
 // Mirror the server sanitiser (HtmlBlock::sanitize -> wp_kses_post) closely
 // enough for preview: drop scripts, iframes/embeds, inline event handlers, and
@@ -36,19 +36,19 @@ function survivesSave( html ) {
 
 function Edit( { attributes, setAttributes } ) {
     const { content = '', condition = DEFAULT_CONDITION } = attributes;
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--html' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--html' } );
     const preview = survivesSave( content );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'HTML', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'HTML', 'gratora' ) } initialOpen>
                     <TextareaControl
-                        label={ __( 'HTML markup', 'fundraising-toolkit' ) }
+                        label={ __( 'HTML markup', 'gratora' ) }
                         value={ content }
                         onChange={ ( v ) => setAttributes( { content: v } ) }
                         rows={ 8 }
-                        help={ __( 'Sanitised on save: scripts, iframes and embeds, event handlers, and JavaScript URLs are stripped.', 'fundraising-toolkit' ) }
+                        help={ __( 'Sanitised on save: scripts, iframes and embeds, event handlers, and JavaScript URLs are stripped.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -59,16 +59,16 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 { ! content ? (
-                    <div className="fundkit-block-preview__html-empty">
-                        { __( 'Add HTML in the block settings panel.', 'fundraising-toolkit' ) }
+                    <div className="gratora-block-preview__html-empty">
+                        { __( 'Add HTML in the block settings panel.', 'gratora' ) }
                     </div>
                 ) : preview.trim() ? (
                     <Disabled>
                         <SandBox html={ preview } />
                     </Disabled>
                 ) : (
-                    <div className="fundkit-block-preview__html-empty">
-                        { __( 'Nothing to preview: scripts and embeds are removed when the form is saved.', 'fundraising-toolkit' ) }
+                    <div className="gratora-block-preview__html-empty">
+                        { __( 'Nothing to preview: scripts and embeds are removed when the form is saved.', 'gratora' ) }
                     </div>
                 ) }
             </div>
@@ -79,9 +79,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'HTML', 'fundraising-toolkit' ),
-        description: __( 'Add a sponsor strip, formatted text, or other safe HTML. Scripts and embeds are stripped.', 'fundraising-toolkit' ),
-        category:    'fundkit-content',
+        title:       __( 'HTML', 'gratora' ),
+        description: __( 'Add a sponsor strip, formatted text, or other safe HTML. Scripts and embeds are stripped.', 'gratora' ),
+        category:    'gratora-content',
         icon:        BlockIcons[ 'html' ],
         supports:    { html: false, anchor: false, inserter: true },
         attributes: {

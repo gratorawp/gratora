@@ -2,7 +2,7 @@
  * Two donation forms on one page.
  *
  * A failed submit scrolls the donor to the field that stopped them, and the
- * lookup was `document.querySelector( '.fundkit-donation-form [aria-invalid] )`:
+ * lookup was `document.querySelector( '.gratora-donation-form [aria-invalid] )`:
  * page-global, so the second form's failed submit moved the reader into the
  * first form, or nowhere at all if the first form had no error.
  */
@@ -16,7 +16,7 @@ function config( id, overrides = {} ) {
         currency: 'USD',
         gateway:  'offline',
         layout:   'inline',
-        rest:     'https://example.test/wp-json/fundkit/v1/donations',
+        rest:     'https://example.test/wp-json/gratora/v1/donations',
         gateways: { options: [ { id: 'offline', label: 'Offline' } ] },
         steps: [
             { id: 'amount', type: 'amount', presets: [ 2500 ] },
@@ -30,12 +30,12 @@ function config( id, overrides = {} ) {
 
 function addForm( cfg, domId ) {
     const form = document.createElement( 'form' );
-    form.className = 'fundkit-donation-form';
+    form.className = 'gratora-donation-form';
     form.id = domId;
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-fundkit-form-config', '' );
+    json.setAttribute( 'data-gratora-form-config', '' );
     json.textContent = JSON.stringify( cfg );
     form.appendChild( json );
 
@@ -45,15 +45,15 @@ function addForm( cfg, domId ) {
 }
 
 async function bootTwo() {
-    addForm( config( 7 ), 'fundkit-form-7' );
-    addForm( config( 9 ), 'fundkit-form-9' );
+    addForm( config( 7 ), 'gratora-form-7' );
+    addForm( config( 9 ), 'gratora-form-9' );
     jest.isolateModules( () => {
         require( '../../assets/donation-form/runtime.jsx' );
     } );
     await settle();
 }
 
-const submitOf = ( form ) => form.querySelector( '.fundkit-form__button--primary' );
+const submitOf = ( form ) => form.querySelector( '.gratora-form__button--primary' );
 
 /** focusFirstInvalid runs inside requestAnimationFrame, after the error render commits. */
 async function frame() {
@@ -67,7 +67,7 @@ beforeEach( () => {
     // jsdom has no layout, so the scroll the focus helper does after focusing
     // it is not implemented there.
     window.Element.prototype.scrollIntoView = () => {};
-    window.fundkit = {
+    window.gratora = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
@@ -79,8 +79,8 @@ beforeEach( () => {
 test( 'a failed submit moves focus inside the form that was submitted', async () => {
     await bootTwo();
 
-    const first  = document.getElementById( 'fundkit-form-7' );
-    const second = document.getElementById( 'fundkit-form-9' );
+    const first  = document.getElementById( 'gratora-form-7' );
+    const second = document.getElementById( 'gratora-form-9' );
 
     // Leave the first form invalid to detect page-global field lookups.
     submitOf( first ).click();
@@ -96,8 +96,8 @@ test( 'a failed submit moves focus inside the form that was submitted', async ()
 test( 'it does not reach into the other form on the page', async () => {
     await bootTwo();
 
-    const first  = document.getElementById( 'fundkit-form-7' );
-    const second = document.getElementById( 'fundkit-form-9' );
+    const first  = document.getElementById( 'gratora-form-7' );
+    const second = document.getElementById( 'gratora-form-9' );
 
     submitOf( first ).click();
     await frame();
@@ -108,13 +108,13 @@ test( 'it does not reach into the other form on the page', async () => {
 } );
 
 test( 'a single form on the page still focuses its own invalid field', async () => {
-    addForm( config( 7 ), 'fundkit-form-7' );
+    addForm( config( 7 ), 'gratora-form-7' );
     jest.isolateModules( () => {
         require( '../../assets/donation-form/runtime.jsx' );
     } );
     await settle();
 
-    const form = document.getElementById( 'fundkit-form-7' );
+    const form = document.getElementById( 'gratora-form-7' );
     submitOf( form ).click();
     await frame();
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
 /** @since 1.0.0 */
 interface Block

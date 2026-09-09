@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit;
+namespace Gratora\Tests\Unit;
 
-use FundKit\Currency\CurrencyFormats;
+use Gratora\Currency\CurrencyFormats;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -32,7 +32,7 @@ final class CurrencyFormatPresetsTest extends TestCase
     {
         // Anything in the symbol table can be picked as a base currency, so
         // anything in it needs a convention or the pick changes nothing.
-        $symbols = new \ReflectionClassConstant(\FundKit\Foundation\Helpers\Money::class, 'SYMBOLS');
+        $symbols = new \ReflectionClassConstant(\Gratora\Foundation\Helpers\Money::class, 'SYMBOLS');
         $codes   = array_keys($symbols->getValue());
         $presets = CurrencyFormats::all();
 

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns;
+namespace Gratora\Campaigns;
 
 use DateTimeImmutable;
-use FundKit\Donations\ChannelClassifier;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationQueries;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\DonorRepository;
-use FundKit\Forms\Form;
-use FundKit\Foundation\Time\Clock;
+use Gratora\Donations\ChannelClassifier;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\DonorRepository;
+use Gratora\Forms\Form;
+use Gratora\Foundation\Time\Clock;
 
 /** @since 1.0.0 */
 final class CampaignMetricsService
@@ -94,7 +94,7 @@ final class CampaignMetricsService
             $form = $forms[(int) $row['form_id']] ?? null;
             $out[] = [
                 'form_id'         => $row['form_id'],
-                'form_title'      => $form ? $form->title : __('Removed form', 'fundraising-toolkit'),
+                'form_title'      => $form ? $form->title : __('Removed form', 'gratora'),
                 'amount_cents'    => $row['amount_cents'],
                 'donations_count' => $row['donations_count'],
             ];
@@ -264,7 +264,7 @@ final class CampaignMetricsService
 
             $out[] = [
                 'id'           => $d->id,
-                'donor_name'   => $name !== '' ? $name : __('Anonymous', 'fundraising-toolkit'),
+                'donor_name'   => $name !== '' ? $name : __('Anonymous', 'gratora'),
                 'amount_cents' => (int) $d->amount_cents,
                 'currency'     => (string) $d->currency,
                 'paid_at'      => $d->paid_at,
@@ -301,7 +301,7 @@ final class CampaignMetricsService
                 : '';
             $out[] = [
                 'donor_id'        => $row['donor_id'],
-                'name'            => $name !== '' ? $name : __('Donor', 'fundraising-toolkit') . ' #' . $row['donor_id'],
+                'name'            => $name !== '' ? $name : __('Donor', 'gratora') . ' #' . $row['donor_id'],
                 'total_cents'     => $row['amount_cents'],
                 'donations_count' => $row['donations_count'],
             ];
@@ -421,7 +421,7 @@ final class CampaignMetricsService
                 : '';
             $out[] = [
                 'id'           => (int) $d->id,
-                'donor_name'   => $name !== '' ? $name : __('A donor', 'fundraising-toolkit'),
+                'donor_name'   => $name !== '' ? $name : __('A donor', 'gratora'),
                 'amount_cents' => (int) $d->amount_cents,
                 'currency'     => (string) $d->currency,
                 'paid_at'      => $d->paid_at,

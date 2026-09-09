@@ -1,27 +1,27 @@
 // FormsPage owns fullscreen admin-chrome styles.
 
-@import '@fundkit/ui/scss/tokens';
+@import '@gratora/ui/scss/tokens';
 @import '../_shared/admin-base';
 
-@import '@fundkit/ui/scss/components/buttons';
-@import '@fundkit/ui/scss/components/form';
-@import '@fundkit/ui/scss/components/switch';
-@import '@fundkit/ui/scss/components/collapsible';
-@import '@fundkit/ui/scss/components/segmented';
-@import '@fundkit/ui/scss/components/slider';
-@import '@fundkit/ui/scss/components/number-with-unit';
-@import '@fundkit/ui/scss/components/color-input';
-@import '@fundkit/ui/scss/components/field';
-@import '@fundkit/ui/scss/components/box-control';
-@import '@fundkit/ui/scss/components/amount-input';
-@import '@fundkit/ui/scss/components/notice';
-@import '@fundkit/ui/scss/components/toast';
+@import '@gratora/ui/scss/components/buttons';
+@import '@gratora/ui/scss/components/form';
+@import '@gratora/ui/scss/components/switch';
+@import '@gratora/ui/scss/components/collapsible';
+@import '@gratora/ui/scss/components/segmented';
+@import '@gratora/ui/scss/components/slider';
+@import '@gratora/ui/scss/components/number-with-unit';
+@import '@gratora/ui/scss/components/color-input';
+@import '@gratora/ui/scss/components/field';
+@import '@gratora/ui/scss/components/box-control';
+@import '@gratora/ui/scss/components/amount-input';
+@import '@gratora/ui/scss/components/notice';
+@import '@gratora/ui/scss/components/toast';
 @import '../_shared/components/template-picker';
 
 $header-height: 56px;
 $sidebar-width: 300px;
 
-.fundkit-form-editor {
+.gratora-form-editor {
     margin: 0;
     height: 100%;
     min-height: 100vh;
@@ -29,8 +29,8 @@ $sidebar-width: 300px;
     color: $text;
 
     // Match runtime accent-soft derivation.
-    --fundkit-accent-soft: #{$accent-soft};
-    --fundkit-accent-soft: color-mix(in srgb, var(--fundkit-accent) 12%, #fff);
+    --gratora-accent-soft: #{$accent-soft};
+    --gratora-accent-soft: color-mix(in srgb, var(--gratora-accent) 12%, #fff);
 
     &__loading {
         padding: 40px;
@@ -52,7 +52,7 @@ $sidebar-width: 300px;
     }
 
     &__sheet {
-        max-width: var( --fundkit-editor-sheet-width, 540px );
+        max-width: var( --gratora-editor-sheet-width, 540px );
         margin: 0 auto;
         background: #fff;
         border-radius: 14px;
@@ -168,7 +168,7 @@ $sidebar-width: 300px;
         background: #fff;
         border-bottom: 1px solid $border-soft;
 
-        .components-button.fundkit-form-editor__device {
+        .components-button.gratora-form-editor__device {
             width: 32px;
             height: 32px;
             min-width: 32px;
@@ -249,7 +249,7 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-form-editor .interface-interface-skeleton {
+.gratora-form-editor .interface-interface-skeleton {
     position: fixed;
     inset: 0;
     height: auto;
@@ -267,7 +267,7 @@ $sidebar-width: 300px;
     --wp-components-color-accent-darker-20: #{$accent-dark};
 }
 
-.fundkit-form-editor {
+.gratora-form-editor {
     .block-editor-block-list__block.is-selected,
     .block-editor-block-list__block.is-hovered,
     .block-editor-block-list__block.has-child-selected {
@@ -324,19 +324,19 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-form-editor .interface-interface-skeleton__sidebar {
+.gratora-form-editor .interface-interface-skeleton__sidebar {
     width: $sidebar-width;
     border-left: 1px solid $border-soft;
 }
 
-.fundkit-form-editor .interface-interface-skeleton__secondary-sidebar {
+.gratora-form-editor .interface-interface-skeleton__secondary-sidebar {
     // Keep the rail width after animation drops its inline width; match the secondary rail.
     width: 350px;
     border-right: 1px solid $border-soft;
     background: #fff;
 }
 
-.fundkit-form-editor__secondary {
+.gratora-form-editor__secondary {
     // Match the inserter’s 350px width to prevent shrink-wrapping and jumps.
     width: 350px;
     height: 100%;
@@ -412,7 +412,7 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-editor-header {
+.gratora-editor-header {
     height: $header-height;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
@@ -647,7 +647,7 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-form-sidebar {
+.gratora-form-sidebar {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -721,7 +721,7 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-readiness {
+.gratora-readiness {
     &__summary {
         display: flex;
         align-items: center;
@@ -758,9 +758,9 @@ $sidebar-width: 300px;
 
         &:last-child { border-bottom: 0; }
 
-        &.is-pass  .fundkit-readiness__icon { color: #15803d; }
-        &.is-warn  .fundkit-readiness__icon { color: #b45309; }
-        &.is-fail  .fundkit-readiness__icon { color: #b91c1c; }
+        &.is-pass  .gratora-readiness__icon { color: #15803d; }
+        &.is-warn  .gratora-readiness__icon { color: #b45309; }
+        &.is-fail  .gratora-readiness__icon { color: #b91c1c; }
     }
 
     &__icon {
@@ -799,7 +799,7 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-amounts-head {
+.gratora-amounts-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -814,8 +814,8 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-amounts-add,
-.fundkit-preset-row__remove {
+.gratora-amounts-add,
+.gratora-preset-row__remove {
     flex: 0 0 auto;
     width: 24px;
     height: 24px;
@@ -831,14 +831,14 @@ $sidebar-width: 300px;
     justify-content: center;
 }
 
-.fundkit-amounts-add {
+.gratora-amounts-add {
     color: $text;
 
     &:hover:not( :disabled ) { background: $bg-soft; }
     &:disabled { opacity: .4; cursor: default; }
 }
 
-.fundkit-preset-row {
+.gratora-preset-row {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -868,7 +868,7 @@ $sidebar-width: 300px;
         flex: 1;
         min-width: 0;
 
-        .fundkit-amount { width: 100%; }
+        .gratora-amount { width: 100%; }
     }
 
     &__remove:hover:not( :disabled ) {
@@ -884,7 +884,7 @@ $sidebar-width: 300px;
 
 }
 
-.fundkit-checkbox-row {
+.gratora-checkbox-row {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -898,7 +898,7 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-shadow-grid {
+.gratora-shadow-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 6px;
@@ -946,7 +946,7 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-sidebar-intro {
+.gratora-sidebar-intro {
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -985,7 +985,7 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-form-settings {
+.gratora-form-settings {
     display: grid;
     grid-template-columns: 240px 1fr;
     gap: 0;
@@ -1082,7 +1082,7 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-sidebar-heading {
+.gratora-sidebar-heading {
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
@@ -1091,7 +1091,7 @@ $sidebar-width: 300px;
     margin-top: 8px;
 }
 
-.fundkit-sidebar-toggle {
+.gratora-sidebar-toggle {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1099,7 +1099,7 @@ $sidebar-width: 300px;
     cursor: pointer;
 }
 
-.fundkit-sidebar-list {
+.gratora-sidebar-list {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -1121,7 +1121,7 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-sidebar-check {
+.gratora-sidebar-check {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1129,7 +1129,7 @@ $sidebar-width: 300px;
     cursor: pointer;
 }
 
-.fundkit-color-field {
+.gratora-color-field {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -1181,7 +1181,7 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-sidebar-shortcode {
+.gratora-sidebar-shortcode {
     margin-top: 8px;
     padding: 10px 12px;
     background: #f8fafb;
@@ -1199,7 +1199,7 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-shortcode {
+.gratora-shortcode {
     display: flex;
     align-items: stretch;
     gap: 6px;
@@ -1227,7 +1227,7 @@ $sidebar-width: 300px;
     }
 }
 
-.fundkit-block-preview {
+.gratora-block-preview {
     border-radius: 8px;
     padding: 14px 16px;
     background: #fff;
@@ -1498,7 +1498,7 @@ $sidebar-width: 300px;
 
     &__goal-fill {
         height: 100%;
-        background: var(--fundkit-accent, $accent);
+        background: var(--gratora-accent, $accent);
         border-radius: inherit;
         transition: width .25s ease;
         min-width: 2px;
@@ -1513,13 +1513,13 @@ $sidebar-width: 300px;
 
         & > span:first-child {
             font-weight: 600;
-            color: var(--fundkit-accent, $accent);
+            color: var(--gratora-accent, $accent);
         }
     }
 }
 
 // Scope to this editor. !important overrides WordPress component specificity.
-.fundkit-form-editor {
+.gratora-form-editor {
     .components-form-toggle__track {
         width: 34px !important;
         height: 20px !important;

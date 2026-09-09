@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\References\ReferenceGenerator;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\References\ReferenceGenerator;
 
 /**
  * "Reset numbering each year" moves the generator between a year-scoped
@@ -27,7 +27,7 @@ final class ReferenceCounterToggleTest extends IntegrationTestCase
 
     private function numbering(bool $resetYearly): void
     {
-        update_option('fundkit_reference_settings', [
+        update_option('gratora_reference_settings', [
             'include_year' => true,
             'reset_yearly' => $resetYearly,
             'padding'      => 5,

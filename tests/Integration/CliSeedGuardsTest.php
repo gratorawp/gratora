@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Cli\CliCommands;
-use FundKit\Cli\DemoSeeder;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationService;
-use FundKit\Foundation\Plugin;
-use FundKitCliHalt;
+use Gratora\Cli\CliCommands;
+use Gratora\Cli\DemoSeeder;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationService;
+use Gratora\Foundation\Plugin;
+use GratoraCliHalt;
 
 /**
  * The seeding commands ship in the release zip and run against whatever
@@ -49,19 +49,19 @@ final class CliSeedGuardsTest extends IntegrationTestCase
 
     public function test_e2e_seed_refuses_on_an_install_that_reports_production(): void
     {
-        $before = get_option('fundkit_currency_locale');
+        $before = get_option('gratora_currency_locale');
 
         try {
             $this->commands()->e2e_seed([], ['yes' => true]);
             $this->fail('e2e-seed ran on a production install');
-        } catch (FundKitCliHalt $halt) {
+        } catch (GratoraCliHalt $halt) {
             $this->assertStringContainsString('production', $halt->getMessage());
         }
 
-        $this->assertSame($before, get_option('fundkit_currency_locale'), 'the org currency is untouched');
+        $this->assertSame($before, get_option('gratora_currency_locale'), 'the org currency is untouched');
         $this->assertArrayNotHasKey(
             'test_mode',
-            (array) get_option('fundkit_gateway_config', []),
+            (array) get_option('gratora_gateway_config', []),
             'org-wide test mode is not switched on by a refused command'
         );
     }
@@ -69,15 +69,15 @@ final class CliSeedGuardsTest extends IntegrationTestCase
     /** Nothing is written before the refusal, including the onboarding state. */
     public function test_a_refused_e2e_seed_leaves_onboarding_alone(): void
     {
-        update_option('fundkit_onboarding_status', 'pending', false);
+        update_option('gratora_onboarding_status', 'pending', false);
 
         try {
             $this->commands()->e2e_seed([], ['yes' => true]);
-        } catch (FundKitCliHalt) {
+        } catch (GratoraCliHalt) {
             // The refusal is the subject of the test above.
         }
 
-        $this->assertSame('pending', get_option('fundkit_onboarding_status'));
+        $this->assertSame('pending', get_option('gratora_onboarding_status'));
     }
 
     /**
@@ -90,7 +90,7 @@ final class CliSeedGuardsTest extends IntegrationTestCase
         try {
             $this->commands()->e2e_seed([], ['force' => true]);
             $this->fail('e2e-seed wrote without asking');
-        } catch (FundKitCliHalt $halt) {
+        } catch (GratoraCliHalt $halt) {
             $this->assertStringStartsWith('confirm:', $halt->getMessage());
             $this->assertStringContainsString('test mode', $halt->getMessage());
             $this->assertStringContainsString('currency', $halt->getMessage());
@@ -112,7 +112,7 @@ final class CliSeedGuardsTest extends IntegrationTestCase
         try {
             $this->commands()->demo_seed([], ['yes' => true]);
             $this->fail('demo-seed wrote into a real book of record');
-        } catch (FundKitCliHalt $halt) {
+        } catch (GratoraCliHalt $halt) {
             $this->assertStringContainsString('live donations', $halt->getMessage());
         }
     }
@@ -133,7 +133,7 @@ final class CliSeedGuardsTest extends IntegrationTestCase
         $this->assertSame(0, DemoSeeder::foreignLiveDonations());
     }
 
-    private function liveDonation(bool $isTest = false): \FundKit\Donations\Donation
+    private function liveDonation(bool $isTest = false): \Gratora\Donations\Donation
     {
         return $this->donations()->createPending(new DonationIntent(
             email: 'offline.giver@example.test',

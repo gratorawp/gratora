@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeWebhookProvisioner;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeWebhookProvisioner;
+use Gratora\Recurring\RecurringPlan;
 use ReflectionClass;
 use WP_REST_Request;
 
@@ -30,7 +30,7 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
         parent::setUp();
 
         $this->secret = 'whsec_test_' . bin2hex(random_bytes(8));
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'stripe' => ['webhook_secret_test' => $this->secret, 'test_mode' => true],
         ]);
 
@@ -40,17 +40,17 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
         $acct->refresh(['id' => 'acct_test_123', 'charges_enabled' => true]);
 
         $c       = Plugin::instance()->container;
-        $manager = $c->get(\FundKit\Gateways\GatewayManager::class);
+        $manager = $c->get(\Gratora\Gateways\GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \FundKit\Gateways\Stripe\StripeGateway(
-                $c->get(\FundKit\Gateways\Stripe\StripeApi::class),
-                $c->get(\FundKit\Donations\DonationRepository::class),
-                $c->get(\FundKit\Donations\DonationService::class),
-                $c->get(\FundKit\Gateways\Stripe\StripeAccount::class),
-                $c->get(\FundKit\Donors\DonorRepository::class),
-                $c->get(\FundKit\Donors\DonorService::class),
-                $c->get(\FundKit\Foundation\Time\Clock::class),
-                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
+            $manager->register(new \Gratora\Gateways\Stripe\StripeGateway(
+                $c->get(\Gratora\Gateways\Stripe\StripeApi::class),
+                $c->get(\Gratora\Donations\DonationRepository::class),
+                $c->get(\Gratora\Donations\DonationService::class),
+                $c->get(\Gratora\Gateways\Stripe\StripeAccount::class),
+                $c->get(\Gratora\Donors\DonorRepository::class),
+                $c->get(\Gratora\Donors\DonorService::class),
+                $c->get(\Gratora\Foundation\Time\Clock::class),
+                $c->get(\Gratora\Recurring\RecurringPlanRepository::class),
             ));
         }
     }
@@ -204,7 +204,7 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
     private function seedPlan(): RecurringPlan
     {
         $donor = Plugin::instance()->container
-            ->get(\FundKit\Donors\DonorService::class)
+            ->get(\Gratora\Donors\DonorService::class)
             ->findOrCreate('state-sync-' . uniqid() . '@example.test', [
                 'first_name' => 'State',
                 'last_name'  => 'Sync',
@@ -253,7 +253,7 @@ final class StripeSubscriptionStateSyncTest extends IntegrationTestCase
         $timestamp = (string) time();
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $this->secret);
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/gratora/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);

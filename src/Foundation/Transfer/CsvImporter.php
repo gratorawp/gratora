@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Transfer;
+namespace Gratora\Foundation\Transfer;
 
 use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
-use FundKit\Currency\Currency;
-use FundKit\Currency\FxRates;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationQueries;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Identity\IdentityHasher;
+use Gratora\Currency\Currency;
+use Gratora\Currency\FxRates;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Identity\IdentityHasher;
 use Throwable;
 
 /**
@@ -173,7 +173,7 @@ final class CsvImporter
                 'donors_matched' => 0, 'skipped' => [], 'dry_run' => $dryRun,
                 'errors' => [sprintf(
                     /* translators: %s: comma-separated field names. */
-                    __('Map a column to %s before importing.', 'fundraising-toolkit'),
+                    __('Map a column to %s before importing.', 'gratora'),
                     implode(', ', array_map(static fn (string $f): string => self::FIELDS[$f] ?? $f, $missing))
                 )],
             ];
@@ -199,7 +199,7 @@ final class CsvImporter
             } catch (Throwable $e) {
                 $errors[] = sprintf(
                     /* translators: 1: row number, 2: error message. */
-                    __('Row %1$d: %2$s', 'fundraising-toolkit'),
+                    __('Row %1$d: %2$s', 'gratora'),
                     $i + 2,
                     $e->getMessage()
                 );

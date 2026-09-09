@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Analytics\Event;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Currency\FxRates;
-use FundKit\Currency\FxRatesUpdater;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\Event;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Currency\FxRates;
+use Gratora\Currency\FxRatesUpdater;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -277,7 +277,7 @@ final class FxManualOverrideFrameTest extends IntegrationTestCase
         $base = strtoupper(Money::defaultCurrency());
         $this->seed('EUR', ['USD' => 1.0843, 'GBP' => 0.8521]);
 
-        $state = (array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/currency/fx'))->get_data();
+        $state = (array) rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/currency/fx'))->get_data();
         $this->assertSame($base, $state['base'], 'the column is labelled with the org base');
         $this->assertSame('EUR', $state['frame'], 'the numbers under it are not always in it');
 
@@ -310,7 +310,7 @@ final class FxManualOverrideFrameTest extends IntegrationTestCase
 
     private function fxPut(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('PUT', '/fundkit/v1/admin/currency/fx');
+        $req = new WP_REST_Request('PUT', '/gratora/v1/admin/currency/fx');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode($body));
 

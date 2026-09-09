@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Admin\SystemReport;
-use FundKit\Foundation\Config\SystemSetting;
-use FundKit\Foundation\Modules\ModuleManager;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
+use Gratora\Admin\SystemReport;
+use Gratora\Foundation\Config\SystemSetting;
+use Gratora\Foundation\Modules\ModuleManager;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
 
 /**
  * The report exists to be pasted into a support ticket, so the thing it must
@@ -111,7 +111,7 @@ final class SystemReportTest extends IntegrationTestCase
         foreach ($sections['Database'] as $row) {
             $database .= $row['label'] . ': ' . $row['value'] . "\n";
         }
-        $this->assertStringContainsString($wpdb->prefix . 'fundkit_donations', $database);
+        $this->assertStringContainsString($wpdb->prefix . 'gratora_donations', $database);
         $this->assertStringContainsString('rows', $database);
     }
 }

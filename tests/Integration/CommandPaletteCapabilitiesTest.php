@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Admin\AdminMenu;
-use FundKit\Admin\Pages\CampaignsPage;
-use FundKit\Admin\Pages\DonationsPage;
-use FundKit\Admin\Pages\DonorsPage;
-use FundKit\Admin\Pages\SettingsPage;
+use Gratora\Admin\AdminMenu;
+use Gratora\Admin\Pages\CampaignsPage;
+use Gratora\Admin\Pages\DonationsPage;
+use Gratora\Admin\Pages\DonorsPage;
+use Gratora\Admin\Pages\SettingsPage;
 
 /**
  * The palette is enqueued on the umbrella capability, which any single area
@@ -40,13 +40,13 @@ final class CommandPaletteCapabilitiesTest extends IntegrationTestCase
 
         // A second localize on a live handle appends another var of the same
         // name, so the decode below would have two objects to choose from.
-        wp_deregister_script('fundkit-admin-command-palette');
+        wp_deregister_script('gratora-admin-command-palette');
         (new AdminMenu())->enqueueCommandPalette();
 
-        $data = wp_scripts()->get_data('fundkit-admin-command-palette', 'data');
+        $data = wp_scripts()->get_data('gratora-admin-command-palette', 'data');
         $this->assertIsString($data, 'the palette script was not enqueued; run npm run build');
 
-        preg_match('/var fundkitCommandPalette = (.*);/', $data, $m);
+        preg_match('/var gratoraCommandPalette = (.*);/', $data, $m);
         $payload = json_decode($m[1] ?? '', true);
 
         return $payload['can'] ?? [];
@@ -55,14 +55,14 @@ final class CommandPaletteCapabilitiesTest extends IntegrationTestCase
     public function test_a_bookkeeper_is_offered_only_the_donations_screen(): void
     {
         $user = self::factory()->user->create_and_get(['role' => 'subscriber']);
-        $user->add_cap('fundkit_view_donations');
+        $user->add_cap('gratora_view_donations');
 
         $can = $this->canFor($user->ID);
 
-        $this->assertTrue($can['fundkit-donations']);
-        $this->assertFalse($can['fundkit-donors']);
-        $this->assertFalse($can['fundkit-settings']);
-        $this->assertFalse($can['fundkit-campaigns']);
+        $this->assertTrue($can['gratora-donations']);
+        $this->assertFalse($can['gratora-donors']);
+        $this->assertFalse($can['gratora-settings']);
+        $this->assertFalse($can['gratora-campaigns']);
     }
 
     public function test_an_administrator_is_offered_all_of_them(): void
@@ -78,8 +78,8 @@ final class CommandPaletteCapabilitiesTest extends IntegrationTestCase
     public function test_the_dashboard_stays_offered(): void
     {
         $user = self::factory()->user->create_and_get(['role' => 'subscriber']);
-        $user->add_cap('fundkit_view_donations');
+        $user->add_cap('gratora_view_donations');
 
-        $this->assertTrue($this->canFor($user->ID)['fundkit']);
+        $this->assertTrue($this->canFor($user->ID)['gratora']);
     }
 }

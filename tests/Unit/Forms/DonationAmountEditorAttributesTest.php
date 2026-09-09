@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Forms;
+namespace Gratora\Tests\Unit\Forms;
 
-use FundKit\Forms\Blocks\DonationAmountBlock;
+use Gratora\Forms\Blocks\DonationAmountBlock;
 use PHPUnit\Framework\TestCase;
 
 /**

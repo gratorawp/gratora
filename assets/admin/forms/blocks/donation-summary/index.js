@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'fundkit/donation-summary';
+const NAME = 'gratora/donation-summary';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -13,28 +13,28 @@ function Edit( { attributes, setAttributes } ) {
         condition   = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--summary' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--summary' } );
 
     const rows = [
-        [ __( 'Amount', 'fundraising-toolkit' ), '-' ],
-        ...( showDonor   ? [ [ __( 'Donor', 'fundraising-toolkit' ), '-' ], [ __( 'Email', 'fundraising-toolkit' ), '-' ] ] : [] ),
-        ...( showGateway ? [ [ __( 'Payment method', 'fundraising-toolkit' ), '-' ] ] : [] ),
-        [ __( 'Total', 'fundraising-toolkit' ), '-' ],
+        [ __( 'Amount', 'gratora' ), '-' ],
+        ...( showDonor   ? [ [ __( 'Donor', 'gratora' ), '-' ], [ __( 'Email', 'gratora' ), '-' ] ] : [] ),
+        ...( showGateway ? [ [ __( 'Payment method', 'gratora' ), '-' ] ] : [] ),
+        [ __( 'Total', 'gratora' ), '-' ],
     ];
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Summary', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Summary', 'gratora' ) } initialOpen>
                     <ToggleControl
-                        label={ __( 'Show who is giving', 'fundraising-toolkit' ) }
-                        help={ __( 'Name, email and country, when the form collects them.', 'fundraising-toolkit' ) }
+                        label={ __( 'Show who is giving', 'gratora' ) }
+                        help={ __( 'Name, email and country, when the form collects them.', 'gratora' ) }
                         checked={ showDonor }
                         onChange={ ( v ) => setAttributes( { showDonor: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show payment method', 'fundraising-toolkit' ) }
+                        label={ __( 'Show payment method', 'gratora' ) }
                         checked={ showGateway }
                         onChange={ ( v ) => setAttributes( { showGateway: v } ) }
                         __nextHasNoMarginBottom
@@ -47,9 +47,9 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
 
             <div { ...blockProps }>
-                <dl className="fundkit-block-preview__summary">
+                <dl className="gratora-block-preview__summary">
                     { rows.map( ( [ label, value ] ) => (
-                        <div key={ label } className="fundkit-block-preview__summary-row">
+                        <div key={ label } className="gratora-block-preview__summary-row">
                             <dt>{ label }</dt>
                             <dd>{ value }</dd>
                         </div>
@@ -63,9 +63,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Donation summary', 'fundraising-toolkit' ),
-        description: __( 'Reads back what the donor is about to give. Put it wherever the recap belongs.', 'fundraising-toolkit' ),
-        category:    'fundkit-extras',
+        title:       __( 'Donation summary', 'gratora' ),
+        description: __( 'Reads back what the donor is about to give. Put it wherever the recap belongs.', 'gratora' ),
+        category:    'gratora-extras',
         icon:        BlockIcons[ 'donation-summary' ],
         // One recap per form. Two would disagree the moment a condition hid a
         // field from one of them.

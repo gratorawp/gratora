@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Receipts\Renderers;
+namespace Gratora\Receipts\Renderers;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\Styling\CampaignStyleResolver;
-use FundKit\Campaigns\Styling\StylePresets;
-use FundKit\Campaigns\Styling\Tokens;
-use FundKit\Donations\Refund;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Helpers\View;
-use FundKit\Receipts\PdfBuilder;
-use FundKit\Receipts\ReceiptContext;
-use FundKit\Receipts\ReceiptRenderer;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Campaigns\Styling\StylePresets;
+use Gratora\Campaigns\Styling\Tokens;
+use Gratora\Donations\Refund;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\View;
+use Gratora\Receipts\PdfBuilder;
+use Gratora\Receipts\ReceiptContext;
+use Gratora\Receipts\ReceiptRenderer;
 
 /**
  * Generic receipt renderer applied to every paid donation.
@@ -39,7 +39,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Generic Receipt', 'fundraising-toolkit');
+        return __('Generic Receipt', 'gratora');
     }
 
     /** @since 1.0.0 */
@@ -113,9 +113,9 @@ final class GenericReceiptRenderer implements ReceiptRenderer
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: human-readable donation reference. */
-            'title'  => sprintf(__('Donation receipt %s', 'fundraising-toolkit'), $ctx->donation->reference),
-            'author' => $ctx->org['name'] ?? 'Fundraising Toolkit',
-            'subject' => __('Donation receipt', 'fundraising-toolkit'),
+            'title'  => sprintf(__('Donation receipt %s', 'gratora'), $ctx->donation->reference),
+            'author' => $ctx->org['name'] ?? 'Gratora',
+            'subject' => __('Donation receipt', 'gratora'),
         ]);
     }
 
@@ -129,18 +129,18 @@ final class GenericReceiptRenderer implements ReceiptRenderer
      */
     private function loadTemplate(?Campaign $campaign = null): array
     {
-        $stored = get_option('fundkit_receipt_settings', []);
+        $stored = get_option('gratora_receipt_settings', []);
         if (! is_array($stored)) $stored = [];
 
         $defaults = [
-            'header_title'       => __('Donation receipt', 'fundraising-toolkit'),
+            'header_title'       => __('Donation receipt', 'gratora'),
             'intro'              => '',
             // The wording the Receipts panel shows and the admin believes is in
             // effect. Two default sets for one field disagreed about it.
-            'signoff'            => __('Thank you for your support, {donor_name}.', 'fundraising-toolkit'),
+            'signoff'            => __('Thank you for your support, {donor_name}.', 'gratora'),
             'footer_note'        => __(
                 "This is a non-fiscal acknowledgement of receipt. Whether your donation is tax-deductible depends on your local jurisdiction and the recipient organization's status. Keep this receipt for your records.",
-                'fundraising-toolkit'
+                'gratora'
             ),
             'show_tax_id'        => true,
             'show_donor_address' => false,
@@ -181,7 +181,7 @@ final class GenericReceiptRenderer implements ReceiptRenderer
     {
         $donation = $ctx->donation;
         $donorName = trim((string) ($ctx->donor_name ?? ''));
-        if ($donorName === '') $donorName = __('Friend', 'fundraising-toolkit');
+        if ($donorName === '') $donorName = __('Friend', 'gratora');
 
         $replacements = [
             '{donor_name}'        => $donorName,

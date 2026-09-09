@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignPageTemplate;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignPageTemplate;
 use WP_Theme_JSON_Resolver;
 
 /**
@@ -31,7 +31,7 @@ final class CampaignPageTemplateTest extends IntegrationTestCase
             'post_type'   => 'page',
             'post_status' => 'publish',
             'post_title'  => 'Template page',
-            'meta_input'  => ['_fundkit_campaign_id' => (int) $c->id],
+            'meta_input'  => ['_gratora_campaign_id' => (int) $c->id],
         ]);
     }
 
@@ -126,7 +126,7 @@ final class CampaignPageTemplateTest extends IntegrationTestCase
      */
     public function test_the_layout_measure_matches_the_stylesheet(): void
     {
-        $css = (string) file_get_contents(FUNDKIT_DIR . 'assets/campaign-page/page.css');
+        $css = (string) file_get_contents(GRATORA_DIR . 'assets/campaign-page/page.css');
 
         $this->assertSame(
             1,
@@ -143,7 +143,7 @@ final class CampaignPageTemplateTest extends IntegrationTestCase
     /** Only a constrained layout makes alignwide mean anything. */
     public function test_the_main_group_is_constrained(): void
     {
-        $template = get_block_template('fundkit//' . CampaignPageTemplate::SLUG, 'wp_template');
+        $template = get_block_template('gratora//' . CampaignPageTemplate::SLUG, 'wp_template');
 
         $this->assertNotNull($template);
         $this->assertStringContainsString('"type":"constrained"', (string) $template->content);
@@ -163,7 +163,7 @@ final class CampaignPageTemplateTest extends IntegrationTestCase
      */
     public function test_the_layouts_carry_their_own_editor_width(): void
     {
-        $css = (string) file_get_contents(FUNDKIT_DIR . 'assets/campaign-page/page.css');
+        $css = (string) file_get_contents(GRATORA_DIR . 'assets/campaign-page/page.css');
 
         $this->assertMatchesRegularExpression(
             '/\.editor-styles-wrapper \.alignwide\.dp-\w+/',

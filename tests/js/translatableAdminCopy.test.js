@@ -37,13 +37,13 @@ beforeEach( () => {
         '': { plural_forms: 'nplurals=2; plural=(n != 1);' },
         'Type %s to confirm.': [ 'Tapez %s pour confirmer.' ],
         [ SAMPLE ]: [ GERMAN ],
-    }, 'fundraising-toolkit' );
+    }, 'gratora' );
 
-    window.fundkit = { can: { manage_options: true } };
+    window.gratora = { can: { manage_options: true } };
 } );
 
 afterEach( () => {
-    delete window.fundkit;
+    delete window.gratora;
     document.body.innerHTML = '';
 } );
 
@@ -82,10 +82,10 @@ it( 'writes the sample bank details in the language of the screen', () => {
 
     mount( <GatewaysPanel s={ s } /> );
 
-    const head = document.querySelector( '.fundkit-card__head--toggle' );
+    const head = document.querySelector( '.gratora-card__head--toggle' );
     if ( head ) head.dispatchEvent( new MouseEvent( 'click', { bubbles: true } ) );
 
-    const box = document.querySelector( '.fundkit-textarea--mono' );
+    const box = document.querySelector( '.gratora-textarea--mono' );
     expect( box ).toBeTruthy();
     expect( box.placeholder ).toContain( 'Kontoinhaber' );
     expect( box.placeholder ).toContain( '{reference}' );

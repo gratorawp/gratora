@@ -7,7 +7,7 @@ export default function DonorCard( { donor, donationName, isAnonymous, onOpenDon
         return (
             <div className="dd-card">
                 <div className="dd-card__body">
-                    <p className="dd-empty">{ __( 'No donor record is attached to this donation.', 'fundraising-toolkit' ) }</p>
+                    <p className="dd-empty">{ __( 'No donor record is attached to this donation.', 'gratora' ) }</p>
                 </div>
             </div>
         );
@@ -15,7 +15,7 @@ export default function DonorCard( { donor, donationName, isAnonymous, onOpenDon
 
     const lifetime = donor.lifetime || { count: 0, total_cents: 0 };
     const anonNote = isAnonymous
-        ? __( 'This donor asked not to be named on public donor lists. Their details are unchanged here and on their receipt.', 'fundraising-toolkit' )
+        ? __( 'This donor asked not to be named on public donor lists. Their details are unchanged here and on their receipt.', 'gratora' )
         : null;
 
     return (
@@ -29,7 +29,7 @@ export default function DonorCard( { donor, donationName, isAnonymous, onOpenDon
                         <div className="dd-donor-row__name">{ donor.name }</div>
                         { donationName && donationName !== donor.name && (
                             <div className="dd-donor-row__lifetime">
-                                { sprintf( /* translators: %s: donor-provided name */ __( 'Given as "%s" on this donation', 'fundraising-toolkit' ), donationName ) }
+                                { sprintf( /* translators: %s: donor-provided name */ __( 'Given as "%s" on this donation', 'gratora' ), donationName ) }
                             </div>
                         ) }
                         { anonNote && <div className="dd-donor-row__lifetime">{ anonNote }</div> }
@@ -46,12 +46,12 @@ export default function DonorCard( { donor, donationName, isAnonymous, onOpenDon
                             { lifetime.count > 0
                                 ? sprintf(
                                     /* translators: 1: donation count, 2: lifetime amount, 3: first donation date */
-                                    __( '%1$s donations · %2$s lifetime · first donation %3$s', 'fundraising-toolkit' ),
+                                    __( '%1$s donations · %2$s lifetime · first donation %3$s', 'gratora' ),
                                     lifetime.count.toLocaleString(),
                                     formatAmount( lifetime.total_cents ),
                                     formatDate( donor.first_donation_at )
                                 )
-                                : __( 'First donation from this donor', 'fundraising-toolkit' ) }
+                                : __( 'First donation from this donor', 'gratora' ) }
                         </div>
                     </div>
                     <button
@@ -59,7 +59,7 @@ export default function DonorCard( { donor, donationName, isAnonymous, onOpenDon
                         className="dd-donor-row__link"
                         onClick={ () => onOpenDonor?.( donor.id ) }
                     >
-                        { __( 'Open donor →', 'fundraising-toolkit' ) }
+                        { __( 'Open donor →', 'gratora' ) }
                     </button>
                 </div>
             </div>

@@ -15,11 +15,11 @@ import {
 import { formatAmount, formatDateTime, planStatusPill } from '../helpers';
 
 export const STATUS_OPTIONS = [
-    { value: 'active',    label: __( 'Active', 'fundraising-toolkit' ) },
-    { value: 'past_due',  label: __( 'Past due', 'fundraising-toolkit' ) },
-    { value: 'paused',    label: __( 'Paused', 'fundraising-toolkit' ) },
-    { value: 'cancelled', label: __( 'Cancelled', 'fundraising-toolkit' ) },
-    { value: 'expired',   label: __( 'Expired', 'fundraising-toolkit' ) },
+    { value: 'active',    label: __( 'Active', 'gratora' ) },
+    { value: 'past_due',  label: __( 'Past due', 'gratora' ) },
+    { value: 'paused',    label: __( 'Paused', 'gratora' ) },
+    { value: 'cancelled', label: __( 'Cancelled', 'gratora' ) },
+    { value: 'expired',   label: __( 'Expired', 'gratora' ) },
 ];
 
 export default function RecurringTab( { recurring, onChange } ) {
@@ -43,43 +43,43 @@ export default function RecurringTab( { recurring, onChange } ) {
     const fields = useMemo( () => [
         {
             id:    'plan',
-            label: __( 'Plan', 'fundraising-toolkit' ),
+            label: __( 'Plan', 'gratora' ),
             enableSorting: true,
             enableGlobalSearch: true,
             getValue: ( { item } ) => [ item.gateway, item.gateway_subscription_id ].filter( Boolean ).join( ' ' ),
             render: ( { item } ) => (
-                <div className="fundkit-row">
-                    <div className="fundkit-row__body">
-                        <div className="fundkit-row__name" style={ { textTransform: 'capitalize' } }>
+                <div className="gratora-row">
+                    <div className="gratora-row__body">
+                        <div className="gratora-row__name" style={ { textTransform: 'capitalize' } }>
                             { item.gateway }
                             { /* Labelled because the card above deliberately
                                  leaves it out of the totals. */ }
                             { item.is_test && (
                                 <span className="dp-pill is-muted" style={ { marginLeft: 6 } }>
-                                    { __( 'Test', 'fundraising-toolkit' ) }
+                                    { __( 'Test', 'gratora' ) }
                                 </span>
                             ) }
                         </div>
-                        <code className="fundkit-row__sub fundkit-row__sub--mono">{ item.gateway_subscription_id }</code>
+                        <code className="gratora-row__sub gratora-row__sub--mono">{ item.gateway_subscription_id }</code>
                     </div>
                 </div>
             ),
         },
         {
             id:    'amount',
-            label: __( 'Amount / interval', 'fundraising-toolkit' ),
+            label: __( 'Amount / interval', 'gratora' ),
             enableSorting: true,
             getValue: ( { item } ) => item.amount_cents,
             render: ( { item } ) => (
                 <span>
                     { formatAmount( item.amount_cents, item.currency ) }
-                    <span className="fundkit-row__sub"> / { intervalLabel( item.interval_unit, item.interval_count ) }</span>
+                    <span className="gratora-row__sub"> / { intervalLabel( item.interval_unit, item.interval_count ) }</span>
                 </span>
             ),
         },
         {
             id:       'status',
-            label:    __( 'Status', 'fundraising-toolkit' ),
+            label:    __( 'Status', 'gratora' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             enableSorting: true,
@@ -90,60 +90,60 @@ export default function RecurringTab( { recurring, onChange } ) {
         },
         {
             id:    'next_payment_at',
-            label: __( 'Next charge', 'fundraising-toolkit' ),
+            label: __( 'Next charge', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => ( isTerminal( item.status ) || ! item.next_payment_at )
-                ? <span className="fundkit-row__sub">-</span>
+                ? <span className="gratora-row__sub">-</span>
                 : (
-                    <div className="fundkit-row">
-                        <div className="fundkit-row__body">
-                            <div className="fundkit-row__name">{ dueIn( item.next_payment_at ) }</div>
-                            <div className="fundkit-row__sub">{ formatDateTime( item.next_payment_at ) }</div>
+                    <div className="gratora-row">
+                        <div className="gratora-row__body">
+                            <div className="gratora-row__name">{ dueIn( item.next_payment_at ) }</div>
+                            <div className="gratora-row__sub">{ formatDateTime( item.next_payment_at ) }</div>
                         </div>
                     </div>
                 ),
         },
         {
             id:    'failed',
-            label: __( 'Health', 'fundraising-toolkit' ),
+            label: __( 'Health', 'gratora' ),
             enableSorting: true,
             getValue: ( { item } ) => item.failed_renewals_count || 0,
             render: ( { item } ) => renderHealth( item ),
         },
         {
             id:    'gateway',
-            label: __( 'Gateway', 'fundraising-toolkit' ),
+            label: __( 'Gateway', 'gratora' ),
             render: ( { item } ) => (
-                <div className="fundkit-row">
-                    <div className="fundkit-row__body">
-                        <div className="fundkit-row__name" style={ { textTransform: 'capitalize' } }>{ item.gateway }</div>
+                <div className="gratora-row">
+                    <div className="gratora-row__body">
+                        <div className="gratora-row__name" style={ { textTransform: 'capitalize' } }>{ item.gateway }</div>
                         { item.gateway_subscription_id
-                            ? <div className="fundkit-row__sub mono">{ item.gateway_subscription_id }</div>
-                            : <div className="fundkit-row__sub">{ __( 'Not linked', 'fundraising-toolkit' ) }</div> }
+                            ? <div className="gratora-row__sub mono">{ item.gateway_subscription_id }</div>
+                            : <div className="gratora-row__sub">{ __( 'Not linked', 'gratora' ) }</div> }
                     </div>
                 </div>
             ),
         },
         {
             id:    'started_at',
-            label: __( 'Started', 'fundraising-toolkit' ),
+            label: __( 'Started', 'gratora' ),
             enableSorting: true,
             getValue: ( { item } ) => item.started_at || '',
             render: ( { item } ) => <span>{ item.started_at ? formatDateTime( item.started_at ) : '-' }</span>,
         },
         {
             id:    'lifetime',
-            label: __( 'Lifetime', 'fundraising-toolkit' ),
+            label: __( 'Lifetime', 'gratora' ),
             enableSorting: true,
             getValue: ( { item } ) => item.total_paid_cents,
             render: ( { item } ) => (
-                <div className="fundkit-row">
-                    <div className="fundkit-row__body">
-                        <div className="fundkit-row__name">{ formatAmount( item.total_paid_cents, item.currency ) }</div>
-                        <div className="fundkit-row__sub">
+                <div className="gratora-row">
+                    <div className="gratora-row__body">
+                        <div className="gratora-row__name">{ formatAmount( item.total_paid_cents, item.currency ) }</div>
+                        <div className="gratora-row__sub">
                             { sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation', '%d donations', item.payments_count, 'fundraising-toolkit' ),
+                                _n( '%d donation', '%d donations', item.payments_count, 'gratora' ),
                                 item.payments_count
                             ) }
                         </div>
@@ -165,7 +165,7 @@ export default function RecurringTab( { recurring, onChange } ) {
         copySubscriptionIdAction(),
         {
             id:    'retry',
-            label: __( 'Retry payment', 'fundraising-toolkit' ),
+            label: __( 'Retry payment', 'gratora' ),
             // Outside the menu on purpose: collecting a failed renewal is the
             // reason this row is being looked at. The icon is not decoration --
             // DataViews draws a primary action as an icon button, and one
@@ -178,31 +178,31 @@ export default function RecurringTab( { recurring, onChange } ) {
         },
         {
             id:         'pause',
-            label:      __( 'Pause', 'fundraising-toolkit' ),
+            label:      __( 'Pause', 'gratora' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'pause' ),
             callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'pause' } ),
         },
         {
             id:         'resume',
-            label:      __( 'Resume', 'fundraising-toolkit' ),
+            label:      __( 'Resume', 'gratora' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'resume' ),
             callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'resume' } ),
         },
         {
             id:         'skip_next',
-            label:      __( 'Skip next', 'fundraising-toolkit' ),
+            label:      __( 'Skip next', 'gratora' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'skip_next' ),
             callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'skip_next' } ),
         },
         {
             id:         'change_amount',
-            label:      __( 'Change amount', 'fundraising-toolkit' ),
+            label:      __( 'Change amount', 'gratora' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'change_amount' ),
             callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'change_amount' } ),
         },
         {
             id:            'cancel',
-            label:         __( 'Cancel', 'fundraising-toolkit' ),
+            label:         __( 'Cancel', 'gratora' ),
             isDestructive: true,
             isEligible:    ( item ) => actionsFor( item ).some( ( a ) => a.id === 'cancel' ),
             callback:      ( items ) => setDialog( { plan: items[ 0 ], action: 'cancel' } ),
@@ -214,15 +214,15 @@ export default function RecurringTab( { recurring, onChange } ) {
             <div className="dp-card">
                 <EmptyState
                     compact
-                    title={ __( 'No subscriptions on file', 'fundraising-toolkit' ) }
-                    body={ __( 'Recurring plans appear here once this donor sets one up on a form that offers it.', 'fundraising-toolkit' ) }
+                    title={ __( 'No subscriptions on file', 'gratora' ) }
+                    body={ __( 'Recurring plans appear here once this donor sets one up on a form that offers it.', 'gratora' ) }
                 />
             </div>
         );
     }
 
     return (
-        <div className="fundkit-dataviews dp-recurring-dv">
+        <div className="gratora-dataviews dp-recurring-dv">
             <DataViews
                 data={ rows }
                 isLoading={ false }
@@ -233,7 +233,7 @@ export default function RecurringTab( { recurring, onChange } ) {
                 paginationInfo={ paginationInfo }
                 defaultLayouts={ { table: {} } }
                 getItemId={ ( item ) => String( item.id ) }
-                searchLabel={ __( 'Search by subscription ID', 'fundraising-toolkit' ) }
+                searchLabel={ __( 'Search by subscription ID', 'gratora' ) }
             />
 
             { dialog && (

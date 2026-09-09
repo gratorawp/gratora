@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Admin;
+namespace Gratora\Admin;
 
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Http\ClientIp;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Http\ClientIp;
 
 /**
  * Tells an admin that every visitor looks like one address.
@@ -43,20 +43,20 @@ final class ProxyNotice
     /** @since 1.0.0 */
     public function render(): void
     {
-        if (! $this->shouldWarn() || ! Capabilities::userCan('fundkit_manage_settings')) {
+        if (! $this->shouldWarn() || ! Capabilities::userCan('gratora_manage_settings')) {
             return;
         }
 
         printf(
             '<div class="notice notice-warning"><p><strong>%s</strong> %s</p><p>%s</p></div>',
-            esc_html__('Fundraising Toolkit: every visitor looks like one address.', 'fundraising-toolkit'),
+            esc_html__('Gratora: every visitor looks like one address.', 'gratora'),
             esc_html__(
                 'This site is being reached through a CDN, load balancer or reverse proxy, and no trusted proxy has been declared. Spam limits count visitors by address, so they are counting the whole site as one visitor: donors can be refused because of somebody else, and one caller can close the donation form for everyone.',
-                'fundraising-toolkit'
+                'gratora'
             ),
             esc_html__(
                 'Add your proxy\'s address ranges under Settings, Data & privacy. Until then the limits still hold, they are just shared.',
-                'fundraising-toolkit'
+                'gratora'
             )
         );
     }

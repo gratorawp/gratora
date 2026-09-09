@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Recurring\GatewayUnreachable;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Recurring\GatewayUnreachable;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * Erasing a donor must not leave their money moving.

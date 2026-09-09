@@ -2,45 +2,45 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
+namespace Gratora\Rest\Admin;
 
-use FundKit\Rest\Paging;
-use FundKit\Analytics\ErrorLog;
-use FundKit\Analytics\Event;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Currency\BaseCurrencyLocked;
-use FundKit\Currency\FxBackfill;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Donors\DonorRetention;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Maintenance\TestDataPurger;
-use FundKit\Foundation\Transfer\CsvImporter;
-use FundKit\Foundation\Transfer\DataExporter;
-use FundKit\Foundation\Transfer\DataImporter;
-use FundKit\Foundation\Upgrade\UpgradeRunner;
-use FundKit\Settings\SecretRedactor;
-use FundKit\Settings\SettingsService;
-use FundKit\Vendor\Queryable\DB;
-use FundKit\Vendor\Queryable\ModelQueryBuilder;
+use Gratora\Rest\Paging;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\Event;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Currency\BaseCurrencyLocked;
+use Gratora\Currency\FxBackfill;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Donors\DonorRetention;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Maintenance\TestDataPurger;
+use Gratora\Foundation\Transfer\CsvImporter;
+use Gratora\Foundation\Transfer\DataExporter;
+use Gratora\Foundation\Transfer\DataImporter;
+use Gratora\Foundation\Upgrade\UpgradeRunner;
+use Gratora\Settings\SecretRedactor;
+use Gratora\Settings\SettingsService;
+use Gratora\Vendor\Queryable\DB;
+use Gratora\Vendor\Queryable\ModelQueryBuilder;
 use WP_REST_Response;
 use WP_REST_Server;
 
 /** @since 1.0.0 */
 final class ToolsController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /** @since 1.0.0 */
     public function __construct(
         private AggregateSyncer $aggregates,
-        private \FundKit\Mail\Mailer $mailer,
+        private \Gratora\Mail\Mailer $mailer,
         private FxBackfill $fxBackfill,
         private UpgradeRunner $upgrades,
         private DataExporter $exporter,
         private DataImporter $importer,
         private CsvImporter $csv,
         private TestDataPurger $testData,
-        private \FundKit\Admin\SystemReport $report,
+        private \Gratora\Admin\SystemReport $report,
     ) {
     }
 
@@ -55,7 +55,7 @@ final class ToolsController
 
         // Export leaks gateway secrets and import restores the role-capability
         // mapping + secrets, so both need full admin, not the delegatable
-        // fundkit_manage_settings (which a scoped role could otherwise use to
+        // gratora_manage_settings (which a scoped role could otherwise use to
         // read the webhook secret or grant itself capabilities via import).
         register_rest_route(self::NAMESPACE, '/admin/tools/export', [
             'methods'             => WP_REST_Server::READABLE,
@@ -173,7 +173,7 @@ final class ToolsController
 
     /**
      * A delivery that was refused at the signature, and one that verified and
-     * then threw, are both failures. A verified delivery FundKit has no handler
+     * then threw, are both failures. A verified delivery Gratora has no handler
      * for is not, and it is the common case, so it must not be swept in here.
      *
      * Compared as text rather than as JSON: MariaDB has no JSON type and
@@ -188,7 +188,7 @@ final class ToolsController
         . " OR JSON_TYPE(JSON_EXTRACT(IF(JSON_VALID(payload), payload, NULL), '\$.error')) NOT IN ('NULL'))";
 
     /**
-     * Paged log, newest first unless asked otherwise: what FundKit could not
+     * Paged log, newest first unless asked otherwise: what Gratora could not
      * finish and what the gateways sent, optionally narrowed to one source or
      * to the failures.
      *
@@ -273,7 +273,7 @@ final class ToolsController
     }
 
     /**
-     * fundkit_events carries every domain's history, most of it holding donor
+     * gratora_events carries every domain's history, most of it holding donor
      * detail this screen has no business serving. Anything outside the two
      * families it reads is dropped, so a hand-written source can neither widen
      * the list nor widen a delete.
@@ -365,8 +365,8 @@ final class ToolsController
             'source'  => (string) $e->type,
             'message' => $who !== ''
                 /* translators: %s: who performed the action, a staff name or "donor". */
-                ? sprintf(__('Recorded by %s.', 'fundraising-toolkit'), $who)
-                : __('No detail recorded.', 'fundraising-toolkit'),
+                ? sprintf(__('Recorded by %s.', 'gratora'), $who)
+                : __('No detail recorded.', 'gratora'),
             'context'     => $payload,
             'occurred_at' => (string) $e->occurred_at,
         ];
@@ -396,7 +396,7 @@ final class ToolsController
             'id'          => (int) $e->id,
             'kind'        => 'error',
             'source'      => substr((string) $e->type, strlen(ErrorLog::PREFIX)),
-            'message'     => $message !== '' ? $message : __('No detail recorded.', 'fundraising-toolkit'),
+            'message'     => $message !== '' ? $message : __('No detail recorded.', 'gratora'),
             'context'     => $payload,
             'occurred_at' => (string) $e->occurred_at,
         ];
@@ -420,7 +420,7 @@ final class ToolsController
             'id'          => (int) $e->id,
             'kind'        => 'webhook',
             'source'      => substr((string) $e->type, strlen(self::WEBHOOK_PREFIX)),
-            'message'     => $event !== '' ? $event : __('Unnamed event.', 'fundraising-toolkit'),
+            'message'     => $event !== '' ? $event : __('Unnamed event.', 'gratora'),
             'verified'    => (bool) ($payload['verified'] ?? false),
             'processed'   => (bool) ($payload['processed'] ?? false),
             'error'       => $error !== '' ? $error : null,
@@ -431,7 +431,7 @@ final class ToolsController
 
     /**
      * Types present in the log, so the filter offers what is actually there
-     * rather than every source FundKit can emit and every gateway it supports.
+     * rather than every source Gratora can emit and every gateway it supports.
      * Empty also tells the screen that nothing has been recorded at all, which
      * is not the same answer as nothing matching the current filters.
      *
@@ -467,9 +467,9 @@ final class ToolsController
      */
     private static function retentionDays(): int
     {
-        $privacy = get_option('fundkit_privacy', []);
+        $privacy = get_option('gratora_privacy', []);
         $stored  = is_array($privacy) ? (int) ($privacy['event_retention_days'] ?? 730) : 730;
-        $days    = (int) apply_filters('fundkit.event.retention_days', $stored);
+        $days    = (int) apply_filters('gratora.event.retention_days', $stored);
 
         return $days > 0 ? $days : 0;
     }
@@ -489,16 +489,16 @@ final class ToolsController
             $to = (string) ($user->user_email ?? '');
         }
         if (! is_email($to)) {
-            return new \WP_Error('fundkit_invalid_email', __('Provide a valid recipient email.', 'fundraising-toolkit'), ['status' => 422]);
+            return new \WP_Error('gratora_invalid_email', __('Provide a valid recipient email.', 'gratora'), ['status' => 422]);
         }
 
-        $subject = __('Fundraising Toolkit test email', 'fundraising-toolkit');
-        $body    = '<p>' . esc_html__('This is a test email from Fundraising Toolkit.', 'fundraising-toolkit') . '</p>'
-                 . '<p>' . esc_html__('If it landed in your inbox, your sender + transport settings are working.', 'fundraising-toolkit') . '</p>'
+        $subject = __('Gratora test email', 'gratora');
+        $body    = '<p>' . esc_html__('This is a test email from Gratora.', 'gratora') . '</p>'
+                 . '<p>' . esc_html__('If it landed in your inbox, your sender + transport settings are working.', 'gratora') . '</p>'
                  . '<p style="color:#6b7280;font-size:12px">'
                  . esc_html(sprintf(
                      /* translators: %s: site URL */
-                     __('Sent at %1$s from %2$s', 'fundraising-toolkit'),
+                     __('Sent at %1$s from %2$s', 'gratora'),
                      gmdate('c'),
                      site_url()
                  ))
@@ -537,14 +537,14 @@ final class ToolsController
 
         if (! $ok) {
             return new \WP_Error(
-                'fundkit_test_send_failed',
+                'gratora_test_send_failed',
                 $reason !== ''
                     ? sprintf(
                         /* translators: %s: the mail server's own error message. */
-                        __('The mail server refused it: %s', 'fundraising-toolkit'),
+                        __('The mail server refused it: %s', 'gratora'),
                         $reason
                     )
-                    : __('wp_mail() returned false and reported no reason. The site most likely has no mail transport configured: install an SMTP plugin or check your host\'s mail logs.', 'fundraising-toolkit'),
+                    : __('wp_mail() returned false and reported no reason. The site most likely has no mail transport configured: install an SMTP plugin or check your host\'s mail logs.', 'gratora'),
                 ['status' => 500]
             );
         }
@@ -587,7 +587,7 @@ final class ToolsController
          * @since 1.0.0
          */
         $until = microtime(true) + (float) apply_filters(
-            'fundkit.recalculate.budget_seconds',
+            'gratora.recalculate.budget_seconds',
             self::RECALC_BUDGET_SECONDS
         );
 
@@ -637,7 +637,7 @@ final class ToolsController
                  * @since 1.0.0
                  */
                 $bag = (array) apply_filters(
-                    'fundkit.recalculate.addons',
+                    'gratora.recalculate.addons',
                     [
                         'counts' => $state['counts'],
                         'cursor' => (array) ($state['addon_cursor'] ?? []),
@@ -707,16 +707,16 @@ final class ToolsController
     private const RECALC_BUDGET_SECONDS = 15.0;
 
     /** Where an unfinished run got to. Absent between runs. */
-    private const RECALC_CURSOR_OPTION = 'fundkit_recalculate_cursor';
+    private const RECALC_CURSOR_OPTION = 'gratora_recalculate_cursor';
 
     /** In order. currency runs first so a donation that finally has a rate is counted. */
     private const RECALC_PASSES = ['currency', 'donors', 'funds', 'campaigns', 'forms', 'addons'];
 
     private const RECALC_TABLES = [
-        'donors'    => 'fundkit_donors',
-        'funds'     => 'fundkit_funds',
-        'campaigns' => 'fundkit_campaigns',
-        'forms'     => 'fundkit_forms',
+        'donors'    => 'gratora_donors',
+        'funds'     => 'gratora_funds',
+        'campaigns' => 'gratora_campaigns',
+        'forms'     => 'gratora_forms',
     ];
 
     /**
@@ -841,16 +841,16 @@ final class ToolsController
     private const RECALC_CHUNK = 500;
 
     private const SETTINGS_OPTIONS = [
-        'fundkit_org_profile',
-        'fundkit_currency_locale',
-        'fundkit_org_brand',
-        'fundkit_gateway_config',
-        'fundkit_privacy',
-        'fundkit_roles',
-        'fundkit_consents',
-        'fundkit_receipt_settings',
-        'fundkit_email_settings',
-        'fundkit_reference_settings',
+        'gratora_org_profile',
+        'gratora_currency_locale',
+        'gratora_org_brand',
+        'gratora_gateway_config',
+        'gratora_privacy',
+        'gratora_roles',
+        'gratora_consents',
+        'gratora_receipt_settings',
+        'gratora_email_settings',
+        'gratora_reference_settings',
     ];
 
     /**
@@ -869,7 +869,7 @@ final class ToolsController
 
         nocache_headers();
         header('Content-Type: application/json; charset=utf-8');
-        header('Content-Disposition: attachment; filename="fundkit-export-' . gmdate('Y-m-d') . '.json"');
+        header('Content-Disposition: attachment; filename="gratora-export-' . gmdate('Y-m-d') . '.json"');
         fpassthru($out);
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fclose($out);
@@ -882,7 +882,7 @@ final class ToolsController
         $data = [
             'exported_at' => gmdate('c'),
             'site_url'    => site_url(),
-            'version'     => defined('FUNDKIT_VERSION') ? FUNDKIT_VERSION : 'unknown',
+            'version'     => defined('GRATORA_VERSION') ? GRATORA_VERSION : 'unknown',
             'settings'    => [],
         ];
         foreach (self::SETTINGS_OPTIONS as $opt) {
@@ -892,7 +892,7 @@ final class ToolsController
             }
 
             // An export is a file people attach to support tickets and commit
-            // to repositories. fundkit_gateway_config holds the Stripe webhook
+            // to repositories. gratora_gateway_config holds the Stripe webhook
             // signing secret, which is the only authentication on the webhook
             // route, so it leaves masked or not at all.
             $data['settings'][$opt] = is_array($value)
@@ -908,7 +908,7 @@ final class ToolsController
     {
         $csv = (string) ($request->get_json_params()['csv'] ?? '');
         if (trim($csv) === '') {
-            return new \WP_Error('fundkit_invalid_csv', __('That file is empty.', 'fundraising-toolkit'), ['status' => 422]);
+            return new \WP_Error('gratora_invalid_csv', __('That file is empty.', 'gratora'), ['status' => 422]);
         }
 
         return new WP_REST_Response($this->csv->inspect($csv) + ['fields' => CsvImporter::FIELDS], 200);
@@ -923,7 +923,7 @@ final class ToolsController
         $dryRun  = (bool) ($body['dry_run'] ?? true);
 
         if (trim($csv) === '') {
-            return new \WP_Error('fundkit_invalid_csv', __('That file is empty.', 'fundraising-toolkit'), ['status' => 422]);
+            return new \WP_Error('gratora_invalid_csv', __('That file is empty.', 'gratora'), ['status' => 422]);
         }
 
         $result = $this->csv->import($csv, $mapping, $dryRun);
@@ -959,7 +959,7 @@ final class ToolsController
                 return new WP_REST_Response(['imported' => true, 'records' => $records, 'settings_applied' => 0], 200);
             }
 
-            return new \WP_Error('fundkit_invalid_import', __('No settings payload found.', 'fundraising-toolkit'), ['status' => 422]);
+            return new \WP_Error('gratora_invalid_import', __('No settings payload found.', 'gratora'), ['status' => 422]);
         }
 
         // Settings first, so every guard on the write reads the site as it
@@ -991,7 +991,7 @@ final class ToolsController
             // over the group defaults, so the option reads as the defaults, and
             // for the currency group that means the base silently becomes USD.
             if (! is_array($incoming)) {
-                $refused[$opt] = __('That entry is not a settings group.', 'fundraising-toolkit');
+                $refused[$opt] = __('That entry is not a settings group.', 'gratora');
                 continue;
             }
 
@@ -1001,7 +1001,7 @@ final class ToolsController
             // it against and nothing that would read it back. Writing the option
             // anyway would restore a setting nobody honours, past every guard.
             if ($group === null) {
-                $refused[$opt] = __('This site has no settings group by that name.', 'fundraising-toolkit');
+                $refused[$opt] = __('This site has no settings group by that name.', 'gratora');
                 continue;
             }
 
@@ -1020,7 +1020,7 @@ final class ToolsController
 
             // Through the settings writer, so a restore inherits what every
             // other writer does: the base-currency lock, the per-group type
-            // whitelist, and the fundkit.settings.updated broadcast that the FX
+            // whitelist, and the gratora.settings.updated broadcast that the FX
             // snapshot, the campaign currency sync and the role capabilities
             // hang off.
             try {
@@ -1048,10 +1048,10 @@ final class ToolsController
         // denominates it in whatever the site already had.
         if ($refused !== []) {
             return new \WP_Error(
-                $locked ? 'fundkit_base_currency_locked' : 'fundkit_invalid_import',
+                $locked ? 'gratora_base_currency_locked' : 'gratora_invalid_import',
                 sprintf(
                     /* translators: %s: one or more refusal messages, already sentences. */
-                    __('Part of that file was not restored. %s', 'fundraising-toolkit'),
+                    __('Part of that file was not restored. %s', 'gratora'),
                     implode(' ', $refused)
                 ),
                 [
@@ -1090,7 +1090,7 @@ final class ToolsController
      * The settings group that owns an option, or null when nothing declares it.
      *
      * Read off the group map rather than a second list here, so a group an
-     * add-on registers through `fundkit.settings.groups` is written the same way as
+     * add-on registers through `gratora.settings.groups` is written the same way as
      * a core one.
      *
      * @since 1.0.0
@@ -1109,7 +1109,7 @@ final class ToolsController
     /** @since 1.0.0 */
     private static function erasureIsOn(): bool
     {
-        $privacy = get_option('fundkit_privacy', []);
+        $privacy = get_option('gratora_privacy', []);
 
         return is_array($privacy) && ! empty($privacy['erase_inactive_donors']);
     }
@@ -1121,10 +1121,10 @@ final class ToolsController
         // that cannot be restored, and there is no undo behind it.
         if (strtoupper(trim((string) $request->get_param('confirmation'))) !== 'DELETE') {
             return new \WP_Error(
-                'fundkit_confirmation_required',
+                'gratora_confirmation_required',
                 sprintf(
                     /* translators: %s: the literal confirmation keyword to type (DELETE) */
-                    __('Type %s to confirm.', 'fundraising-toolkit'),
+                    __('Type %s to confirm.', 'gratora'),
                     'DELETE'
                 ),
                 ['status' => 400]
@@ -1137,7 +1137,7 @@ final class ToolsController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('fundkit_manage_settings');
+        return Capabilities::userCan('gratora_manage_settings');
     }
 
     /** @since 1.0.0 */
@@ -1161,15 +1161,15 @@ final class ToolsController
     public static function scopes(): array
     {
         $core = [
-            'all'       => __('Everything', 'fundraising-toolkit'),
-            'currency'  => __('Currency conversions', 'fundraising-toolkit'),
-            'donors'    => __('Donors', 'fundraising-toolkit'),
-            'funds'     => __('Funds', 'fundraising-toolkit'),
-            'campaigns' => __('Campaigns', 'fundraising-toolkit'),
-            'forms'     => __('Forms', 'fundraising-toolkit'),
+            'all'       => __('Everything', 'gratora'),
+            'currency'  => __('Currency conversions', 'gratora'),
+            'donors'    => __('Donors', 'gratora'),
+            'funds'     => __('Funds', 'gratora'),
+            'campaigns' => __('Campaigns', 'gratora'),
+            'forms'     => __('Forms', 'gratora'),
         ];
 
-        $added = (array) apply_filters('fundkit.recalculate.scopes', []);
+        $added = (array) apply_filters('gratora.recalculate.scopes', []);
         foreach ($added as $slug => $label) {
             $slug = strtolower(trim((string) $slug));
             // A slug core already owns is not overridable: an add-on renaming
@@ -1211,8 +1211,8 @@ final class ToolsController
     /** @since 1.0.0 */
     public function info(): WP_REST_Response
     {
-        // Action Scheduler, not WP-Cron: every FundKit job is queued through
-        // AsyncDispatcher into the 'fundkit' group, and nothing in the plugin
+        // Action Scheduler, not WP-Cron: every Gratora job is queued through
+        // AsyncDispatcher into the 'gratora' group, and nothing in the plugin
         // calls wp_schedule_event, so _get_cron_array() would report nothing
         // queued on a site with a backlog.
         $cronEvents = [];
@@ -1238,10 +1238,10 @@ final class ToolsController
         }
 
         return new WP_REST_Response([
-            'version'   => defined('FUNDKIT_VERSION') ? FUNDKIT_VERSION : 'unknown',
+            'version'   => defined('GRATORA_VERSION') ? GRATORA_VERSION : 'unknown',
             'php'       => PHP_VERSION,
             'wp'        => get_bloginfo('version'),
-            'rest_root' => esc_url_raw(rest_url('fundkit/v1/')),
+            'rest_root' => esc_url_raw(rest_url('gratora/v1/')),
             'site_url'  => site_url(),
             'cron'      => $cronEvents,
             // Real payments sitting outside every total because no rate exists

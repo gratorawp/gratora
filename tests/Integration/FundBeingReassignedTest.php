@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Plugin;
-use FundKit\Funds\Fund;
-use FundKit\Funds\FundReassignmentJob;
-use FundKit\Funds\FundResolver;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Plugin;
+use Gratora\Funds\Fund;
+use Gratora\Funds\FundReassignmentJob;
+use Gratora\Funds\FundResolver;
+use Gratora\Vendor\Queryable\DB;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -89,8 +89,8 @@ final class FundBeingReassignedTest extends IntegrationTestCase
         $general = $this->fund(['code' => 'general', 'name' => 'General', 'is_default' => true]);
         $source  = $this->queued($this->fund(['code' => 'roof', 'name' => 'Roof']));
 
-        DB::table('fundkit_funds')->where('id', (int) $source->id)->update(['is_default' => 1, 'is_active' => 1]);
-        DB::table('fundkit_funds')->where('id', (int) $general->id)->update(['is_default' => 0]);
+        DB::table('gratora_funds')->where('id', (int) $source->id)->update(['is_default' => 1, 'is_active' => 1]);
+        DB::table('gratora_funds')->where('id', (int) $general->id)->update(['is_default' => 0]);
 
         $this->runPendingAsyncJobs();
 
@@ -109,7 +109,7 @@ final class FundBeingReassignedTest extends IntegrationTestCase
         $source = $this->queued($this->fund(['code' => 'roof', 'name' => 'Roof']));
         $child  = $this->fund(['code' => 'water', 'name' => 'Water']);
 
-        DB::table('fundkit_funds')->where('id', (int) $child->id)->update(['parent_fund_id' => (int) $source->id]);
+        DB::table('gratora_funds')->where('id', (int) $child->id)->update(['parent_fund_id' => (int) $source->id]);
 
         $this->runPendingAsyncJobs();
 
@@ -128,7 +128,7 @@ final class FundBeingReassignedTest extends IntegrationTestCase
         $source = $this->queued($target);
 
         $this->donation((int) $source->id);
-        DB::table('fundkit_funds')->where('id', (int) $target->id)->update(['is_active' => 0]);
+        DB::table('gratora_funds')->where('id', (int) $target->id)->update(['is_active' => 0]);
 
         $this->runPendingAsyncJobs();
 
@@ -147,7 +147,7 @@ final class FundBeingReassignedTest extends IntegrationTestCase
     {
         $source = $this->fund(['code' => 'building', 'name' => 'Building']);
 
-        $req = new WP_REST_Request('DELETE', '/fundkit/v1/admin/funds/' . (int) $source->id);
+        $req = new WP_REST_Request('DELETE', '/gratora/v1/admin/funds/' . (int) $source->id);
         $req->set_param('reassign_to', (int) $target->id);
         $res = rest_do_request($req);
 
@@ -162,7 +162,7 @@ final class FundBeingReassignedTest extends IntegrationTestCase
         $now = gmdate('Y-m-d H:i:s');
         $d   = Donation::make();
 
-        $d->reference    = 'FUNDKIT-REASSIGN-' . $fundId;
+        $d->reference    = 'GRATORA-REASSIGN-' . $fundId;
         $d->donor_id     = 1;
         $d->amount_cents = 5000;
         $d->net_cents    = 5000;
@@ -187,7 +187,7 @@ final class FundBeingReassignedTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function fund(array $body): Fund
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/funds');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/funds');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -200,7 +200,7 @@ final class FundBeingReassignedTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function updateFund(int $id, array $body): WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/funds/' . $id);
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/funds/' . $id);
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 

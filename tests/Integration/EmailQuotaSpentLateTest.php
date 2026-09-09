@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Forms\Form;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Forms\Form;
+use Gratora\Foundation\Plugin;
 use WP_Error;
 use WP_REST_Request;
 
@@ -43,7 +43,7 @@ final class EmailQuotaSpentLateTest extends IntegrationTestCase
 
     private function submit(string $email, int $formId): int
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => $email,

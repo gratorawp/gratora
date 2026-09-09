@@ -14,7 +14,7 @@ function config( checked ) {
         currency: 'USD',
         gateway:  'offline',
         layout:   'inline',
-        rest:     'https://example.test/wp-json/fundkit/v1/donations',
+        rest:     'https://example.test/wp-json/gratora/v1/donations',
         gateways: {
             options: [ {
                 id:          'offline',
@@ -54,12 +54,12 @@ function config( checked ) {
 
 function addForm( cfg ) {
     const form = document.createElement( 'form' );
-    form.className = 'fundkit-donation-form';
-    form.id = 'fundkit-form-1';
+    form.className = 'gratora-donation-form';
+    form.id = 'gratora-form-1';
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-fundkit-form-config', '' );
+    json.setAttribute( 'data-gratora-form-config', '' );
     json.textContent = JSON.stringify( cfg );
     form.appendChild( json );
 
@@ -79,12 +79,12 @@ async function boot() {
 const { settle } = require( './support/waitFor' );
 
 async function donate( form ) {
-    form.querySelector( '.fundkit-form__button--primary' ).click();
+    form.querySelector( '.gratora-form__button--primary' ).click();
     await settle();
 }
 
 function consentBox( form ) {
-    return form.querySelector( '.fundkit-form__consent-purpose input[type="checkbox"]' );
+    return form.querySelector( '.gratora-form__consent-purpose input[type="checkbox"]' );
 }
 
 let sent = [];
@@ -103,7 +103,7 @@ beforeEach( () => {
         return Promise.resolve( {
             ok:   true,
             json: () => Promise.resolve( {
-                reference:    'FUNDKIT-2026-00001',
+                reference:    'GRATORA-2026-00001',
                 status_token: 'tok',
                 status:       'pending',
                 gateway:      'offline',
@@ -138,7 +138,7 @@ describe( 'a required consent purpose', () => {
 
         expect( sent ).toHaveLength( 0 );
 
-        const error = form.querySelector( '.fundkit-form__consent-purpose .fundkit-form__field-error' );
+        const error = form.querySelector( '.gratora-form__consent-purpose .gratora-form__field-error' );
         expect( error ).not.toBeNull();
         expect( consentBox( form ).getAttribute( 'aria-invalid' ) ).toBe( 'true' );
     } );

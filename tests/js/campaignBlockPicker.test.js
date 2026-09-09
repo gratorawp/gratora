@@ -1,6 +1,6 @@
 /**
  * The campaign blocks register for every block-editor user, but the campaign
- * list is gated on a FundKit capability. A refused fetch was read as a campaign
+ * list is gated on a Gratora capability. A refused fetch was read as a campaign
  * that no longer exists, so every block on a campaign's own page collapsed to
  * "choose a campaign" for an Editor.
  */
@@ -16,7 +16,7 @@ const store = { postMetaId: 0, record: null, hasResolved: true, records: [], que
 
 jest.mock( '@wordpress/data', () => ( {
     useSelect: ( mapper ) => mapper( () => ( {
-        getEditedPostAttribute: () => ( { _fundkit_campaign_id: store.postMetaId } ),
+        getEditedPostAttribute: () => ( { _gratora_campaign_id: store.postMetaId } ),
     } ) ),
     useDispatch: () => ( {} ),
 } ) );
@@ -67,7 +67,7 @@ beforeEach( () => {
     store.hasResolved = true;
     store.records = [];
     store.queries = [];
-    window.fundkitCampaignBlocks = { canManageCampaigns: true };
+    window.gratoraCampaignBlocks = { canManageCampaigns: true };
 } );
 
 describe( 'the campaign picker', () => {
@@ -95,7 +95,7 @@ describe( 'the campaign picker', () => {
     } );
 
     it( 'tells a reader who cannot list campaigns why the list is empty', () => {
-        window.fundkitCampaignBlocks = { canManageCampaigns: false };
+        window.gratoraCampaignBlocks = { canManageCampaigns: false };
         // What a 403 actually leaves: the resolver fails and the store holds
         // null, never an empty array, which is why this sentence was
         // unreachable for the one reader it was written for.
@@ -108,7 +108,7 @@ describe( 'the campaign picker', () => {
 
     /** And a reader who can list them, with none to show, still gets the other branch. */
     it( 'tells a reader who can list them that there are none yet', () => {
-        window.fundkitCampaignBlocks = { canManageCampaigns: true };
+        window.gratoraCampaignBlocks = { canManageCampaigns: true };
         store.records = [];
 
         renderPicker();
@@ -119,7 +119,7 @@ describe( 'the campaign picker', () => {
 
 describe( 'a page that names its own campaign', () => {
     it( 'is not treated as orphaned when the reader simply cannot fetch it', () => {
-        window.fundkitCampaignBlocks = { canManageCampaigns: false };
+        window.gratoraCampaignBlocks = { canManageCampaigns: false };
         store.postMetaId = 7;
         store.record = null;
         store.hasResolved = true;
@@ -131,7 +131,7 @@ describe( 'a page that names its own campaign', () => {
     } );
 
     it( 'is still orphaned when a reader who can fetch it finds nothing', () => {
-        window.fundkitCampaignBlocks = { canManageCampaigns: true };
+        window.gratoraCampaignBlocks = { canManageCampaigns: true };
         store.postMetaId = 7;
         store.record = null;
         store.hasResolved = true;

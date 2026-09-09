@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\Refund;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\Refund;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 
 /**
  * A foreign donation's base value is rounded once, from the whole amount. Its
@@ -29,12 +29,12 @@ final class RefundRoundingTest extends IntegrationTestCase
     {
         $campaign = $this->campaign();
 
-        $split = $this->paidDonation($campaign, 'FUNDKIT-RR-SPLIT', 20000);
+        $split = $this->paidDonation($campaign, 'GRATORA-RR-SPLIT', 20000);
         $this->refund($split, 5000);
         $this->refund($split, 5000);
 
         $whole = $this->campaign();
-        $once  = $this->paidDonation($whole, 'FUNDKIT-RR-WHOLE', 20000);
+        $once  = $this->paidDonation($whole, 'GRATORA-RR-WHOLE', 20000);
         $this->refund($once, 10000);
 
         $this->assertSame(
@@ -47,7 +47,7 @@ final class RefundRoundingTest extends IntegrationTestCase
     public function test_the_netted_refund_is_what_the_refunded_total_is_worth(): void
     {
         $campaign = $this->campaign();
-        $donation = $this->paidDonation($campaign, 'FUNDKIT-RR-EXACT', 20000);
+        $donation = $this->paidDonation($campaign, 'GRATORA-RR-EXACT', 20000);
 
         $this->refund($donation, 5000);
         $this->refund($donation, 5000);
@@ -69,7 +69,7 @@ final class RefundRoundingTest extends IntegrationTestCase
 
         // No rate, so no known base value: the donation contributes nothing and
         // its refunds must not claw back anything either.
-        $donation = $this->paidDonation($campaign, 'FUNDKIT-RR-NORATE', 20000, null, null);
+        $donation = $this->paidDonation($campaign, 'GRATORA-RR-NORATE', 20000, null, null);
         $this->refund($donation, 5000);
         $this->refund($donation, 5000);
 

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\WebhookOutcome;
-use FundKit\Donations\Donation;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\WebhookOutcome;
+use Gratora\Donations\Donation;
 use WP_REST_Request;
 
 /**
@@ -52,7 +52,7 @@ final class ReadinessSeesAddonGatewaysTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $data = (array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/readiness'))->get_data();
+        $data = (array) rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/readiness'))->get_data();
 
         foreach ((array) ($data['checks'] ?? $data) as $row) {
             if (is_array($row) && ($row['id'] ?? '') === 'gateway') {

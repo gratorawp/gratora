@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Uninstall\DataEraser;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Uninstall\DataEraser;
 
 /**
- * "Delete all FundKit data" has to take back what the plugin granted, and only
+ * "Delete all Gratora data" has to take back what the plugin granted, and only
  * that. The roles screen hands the same capabilities to editor and below as it
  * does to the administrator, and a capability nobody took back outlives the
  * plugin in wp_user_roles, on a site that has removed it.
@@ -33,18 +33,18 @@ final class UninstallCapabilityRemovalTest extends IntegrationTestCase
     public function test_capabilities_granted_to_a_non_administrator_are_taken_back(): void
     {
         Capabilities::applyMapping([
-            'editor' => ['fundkit_view_donors', 'fundkit_export_donors'],
+            'editor' => ['gratora_view_donors', 'gratora_export_donors'],
         ]);
 
         $editor = get_role('editor');
-        $this->assertTrue($editor->has_cap('fundkit_view_donors'), 'precondition: the grant happened');
+        $this->assertTrue($editor->has_cap('gratora_view_donors'), 'precondition: the grant happened');
         $this->assertTrue($editor->has_cap(Capabilities::MANAGE), 'precondition: the umbrella came with it');
 
         (new DataEraser())->removeCapabilities();
 
         $editor = get_role('editor');
-        $this->assertFalse($editor->has_cap('fundkit_view_donors'));
-        $this->assertFalse($editor->has_cap('fundkit_export_donors'));
+        $this->assertFalse($editor->has_cap('gratora_view_donors'));
+        $this->assertFalse($editor->has_cap('gratora_export_donors'));
         $this->assertFalse($editor->has_cap(Capabilities::MANAGE));
     }
 
@@ -52,7 +52,7 @@ final class UninstallCapabilityRemovalTest extends IntegrationTestCase
     {
         Capabilities::applyMapping(['administrator' => Capabilities::ALL]);
 
-        $this->assertTrue(get_role('administrator')->has_cap('fundkit_refund_donations'), 'precondition');
+        $this->assertTrue(get_role('administrator')->has_cap('gratora_refund_donations'), 'precondition');
 
         (new DataEraser())->removeCapabilities();
 
@@ -64,13 +64,13 @@ final class UninstallCapabilityRemovalTest extends IntegrationTestCase
 
     public function test_an_add_on_capability_survives(): void
     {
-        get_role('editor')->add_cap('fundkit_manage_fundraisers');
+        get_role('editor')->add_cap('gratora_manage_fundraisers');
 
         (new DataEraser())->removeCapabilities();
 
-        $this->assertTrue(get_role('editor')->has_cap('fundkit_manage_fundraisers'));
+        $this->assertTrue(get_role('editor')->has_cap('gratora_manage_fundraisers'));
 
-        get_role('editor')->remove_cap('fundkit_manage_fundraisers');
+        get_role('editor')->remove_cap('gratora_manage_fundraisers');
     }
 
     public function test_no_role_is_removed(): void

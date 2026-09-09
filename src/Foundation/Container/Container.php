@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Container;
+namespace Gratora\Foundation\Container;
 
 use Closure;
 use RuntimeException;
@@ -59,7 +59,7 @@ final class Container
         }
 
         if (! isset($this->bindings[$id])) {
-            throw new RuntimeException(esc_html("FundKit container: no binding registered for {$id}"));
+            throw new RuntimeException(esc_html("Gratora container: no binding registered for {$id}"));
         }
 
         $instance = ($this->bindings[$id])($this);

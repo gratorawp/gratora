@@ -138,14 +138,14 @@ const type = ( label, text ) => {
 
 beforeEach( () => {
     document.body.innerHTML = '';
-    delete window.fundkitFormsEditor;
+    delete window.gratoraFormsEditor;
 } );
 
 describe( 'the payment gateways block', () => {
     const block = () => require( '../../assets/admin/forms/blocks/payment-gateways/index' ).default;
 
     it( 'will not let the last allowed gateway be turned off', () => {
-        window.fundkitFormsEditor = { gateways: [
+        window.gratoraFormsEditor = { gateways: [
             { id: 'stripe', label: 'Stripe', enabled: true },
             { id: 'paypal', label: 'PayPal', enabled: true },
         ] };
@@ -160,7 +160,7 @@ describe( 'the payment gateways block', () => {
     } );
 
     it( 'still lets one be turned off while others remain', () => {
-        window.fundkitFormsEditor = { gateways: [
+        window.gratoraFormsEditor = { gateways: [
             { id: 'stripe', label: 'Stripe', enabled: true },
             { id: 'paypal', label: 'PayPal', enabled: true },
         ] };

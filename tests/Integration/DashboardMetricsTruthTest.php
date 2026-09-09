@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Dashboard\DashboardMetricsService;
-use FundKit\Donations\Donation;
-use FundKit\Donations\Refund;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Dashboard\DashboardMetricsService;
+use Gratora\Donations\Donation;
+use Gratora\Donations\Refund;
+use Gratora\Foundation\Plugin;
 
 /**
  * The dashboard is read as a statement about the organisation, so a figure it
@@ -21,9 +21,9 @@ final class DashboardMetricsTruthTest extends IntegrationTestCase
         $c = Plugin::instance()->container;
 
         return new DashboardMetricsService(
-            $c->get(\FundKit\Foundation\Time\Clock::class),
-            $c->get(\FundKit\Donations\DonationRepository::class),
-            $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
+            $c->get(\Gratora\Foundation\Time\Clock::class),
+            $c->get(\Gratora\Donations\DonationRepository::class),
+            $c->get(\Gratora\Recurring\RecurringPlanRepository::class),
         );
     }
 
@@ -31,7 +31,7 @@ final class DashboardMetricsTruthTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $d   = Donation::make();
-        $d->reference         = 'FUNDKIT-DASH-' . uniqid();
+        $d->reference         = 'GRATORA-DASH-' . uniqid();
         $d->donor_id          = 1;
         $d->amount_cents      = $cents;
         $d->net_cents         = $cents;

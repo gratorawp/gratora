@@ -14,12 +14,12 @@ export default function ScheduleFields( {
     onStartsAt,
     endsAt,
     onEndsAt,
-    title       = __( 'Set a schedule', 'fundraising-toolkit' ),
-    sub         = __( 'Add an optional start and end date', 'fundraising-toolkit' ),
-    startLabel  = __( 'Start date', 'fundraising-toolkit' ),
-    endLabel    = __( 'End date', 'fundraising-toolkit' ),
-    startPlaceholder = __( 'Starts immediately', 'fundraising-toolkit' ),
-    endPlaceholder   = __( 'No end date', 'fundraising-toolkit' ),
+    title       = __( 'Set a schedule', 'gratora' ),
+    sub         = __( 'Add an optional start and end date', 'gratora' ),
+    startLabel  = __( 'Start date', 'gratora' ),
+    endLabel    = __( 'End date', 'gratora' ),
+    startPlaceholder = __( 'Starts immediately', 'gratora' ),
+    endPlaceholder   = __( 'No end date', 'gratora' ),
     disabled = false,
     disabledNote = '',
 } ) {
@@ -36,20 +36,20 @@ export default function ScheduleFields( {
 
     return (
         <>
-            <div className="fundkit-sched__toggle-row">
-                <div className="fundkit-sched__toggle-txt">
-                    <div className="fundkit-sched__toggle-title">{ title }</div>
-                    <div className="fundkit-sched__toggle-sub">{ sub }</div>
+            <div className="gratora-sched__toggle-row">
+                <div className="gratora-sched__toggle-txt">
+                    <div className="gratora-sched__toggle-title">{ title }</div>
+                    <div className="gratora-sched__toggle-sub">{ sub }</div>
                 </div>
                 <Switch checked={ enabled && ! disabled } onChange={ handleToggle } label={ title } disabled={ disabled } />
             </div>
             { disabled && disabledNote && (
-                <p className="fundkit-fld__help">{ disabledNote }</p>
+                <p className="gratora-fld__help">{ disabledNote }</p>
             ) }
             { enabled && ! disabled && (
-                <div className="fundkit-sched__dates">
+                <div className="gratora-sched__dates">
                     <div>
-                        <span className="fundkit-sched__date-lbl">{ startLabel }</span>
+                        <span className="gratora-sched__date-lbl">{ startLabel }</span>
                         <DateField
                             value={ startsAt }
                             onChange={ onStartsAt }
@@ -58,7 +58,7 @@ export default function ScheduleFields( {
                         />
                     </div>
                     <div>
-                        <span className="fundkit-sched__date-lbl">{ endLabel }</span>
+                        <span className="gratora-sched__date-lbl">{ endLabel }</span>
                         <DateField
                             value={ endsAt }
                             onChange={ onEndsAt }

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Consent;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\MagicLinkToken;
-use FundKit\Donors\PendingSignup;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Consent;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\MagicLinkToken;
+use Gratora\Donors\PendingSignup;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 final class DonorDeleteTest extends IntegrationTestCase
@@ -45,7 +45,7 @@ final class DonorDeleteTest extends IntegrationTestCase
 
     private function deleteViaRest(int $id): \WP_REST_Response|\WP_Error
     {
-        return rest_do_request(new WP_REST_Request('DELETE', '/fundkit/v1/admin/donors/' . $id));
+        return rest_do_request(new WP_REST_Request('DELETE', '/gratora/v1/admin/donors/' . $id));
     }
 
     private function exists(int $id): bool
@@ -113,11 +113,11 @@ final class DonorDeleteTest extends IntegrationTestCase
         $donor = $this->donor('vetoed-' . uniqid() . '@example.test');
 
         $veto = static fn () => 'They still run something of ours.';
-        add_filter('fundkit.donor.undeletable_reason', $veto, 10, 2);
+        add_filter('gratora.donor.undeletable_reason', $veto, 10, 2);
 
         $res = $this->deleteViaRest((int) $donor->id);
 
-        remove_filter('fundkit.donor.undeletable_reason', $veto, 10);
+        remove_filter('gratora.donor.undeletable_reason', $veto, 10);
 
         $this->assertSame(409, $res->get_status());
         $this->assertTrue($this->exists((int) $donor->id));
@@ -130,11 +130,11 @@ final class DonorDeleteTest extends IntegrationTestCase
         $id    = (int) $donor->id;
         $hash  = Plugin::instance()->container->get(IdentityHasher::class)->emailHash($email);
 
-        Plugin::instance()->container->get(\FundKit\Donors\ConsentService::class)
+        Plugin::instance()->container->get(\Gratora\Donors\ConsentService::class)
             ->record($id, 'email_updates', true, ['source' => 'admin']);
-        Plugin::instance()->container->get(\FundKit\Donors\MagicLinkService::class)
+        Plugin::instance()->container->get(\Gratora\Donors\MagicLinkService::class)
             ->issue($id, 'donor_portal');
-        Plugin::instance()->container->get(\FundKit\Donors\PendingSignupRepository::class)
+        Plugin::instance()->container->get(\Gratora\Donors\PendingSignupRepository::class)
             ->put($email);
 
         $this->deleteViaRest($id);

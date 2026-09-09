@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Analytics\Event;
+use Gratora\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -42,7 +42,7 @@ final class AdminCancelRecordsUnreachableTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $req = new WP_REST_Request('POST', "/fundkit/v1/admin/recurring/{$id}/action");
+        $req = new WP_REST_Request('POST', "/gratora/v1/admin/recurring/{$id}/action");
         $req->set_body_params(['action' => 'cancel']);
 
         return rest_do_request($req)->get_status();

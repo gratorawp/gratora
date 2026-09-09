@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Currency\FxBackfill;
-use FundKit\Currency\FxRates;
-use FundKit\Donations\Donation;
+use Gratora\Currency\FxBackfill;
+use Gratora\Currency\FxRates;
+use Gratora\Donations\Donation;
 
 /**
  * Recording a donation never blocks on FX, so a currency with no configured
@@ -87,7 +87,7 @@ final class FxBackfillTest extends IntegrationTestCase
     {
         // Something for the rebuild to actually count: with no campaigns the
         // pass runs and reports zero, which looks the same as not running.
-        $c = \FundKit\Campaigns\Campaign::make();
+        $c = \Gratora\Campaigns\Campaign::make();
         $c->title      = 'Rebuild target';
         $c->slug       = 'rebuild-target-' . uniqid();
         $c->status     = 'published';
@@ -98,7 +98,7 @@ final class FxBackfillTest extends IntegrationTestCase
         $c->save();
         $this->unconverted('EUR', 2500);
 
-        $req = new \WP_REST_Request('POST', '/fundkit/v1/admin/tools/recalculate');
+        $req = new \WP_REST_Request('POST', '/gratora/v1/admin/tools/recalculate');
         $req->set_body_params(['scope' => 'currency']);
         $counts = (array) (rest_do_request($req)->get_data()['counts'] ?? []);
 
@@ -108,7 +108,7 @@ final class FxBackfillTest extends IntegrationTestCase
 
     public function test_currency_scope_with_nothing_to_convert_rebuilds_nothing(): void
     {
-        $req = new \WP_REST_Request('POST', '/fundkit/v1/admin/tools/recalculate');
+        $req = new \WP_REST_Request('POST', '/gratora/v1/admin/tools/recalculate');
         $req->set_body_params(['scope' => 'currency']);
         $counts = (array) (rest_do_request($req)->get_data()['counts'] ?? []);
 
@@ -118,7 +118,7 @@ final class FxBackfillTest extends IntegrationTestCase
 
     public function test_recurring_plans_are_converted_too(): void
     {
-        $plan = \FundKit\Recurring\RecurringPlan::make();
+        $plan = \Gratora\Recurring\RecurringPlan::make();
         $plan->status            = 'active';
         $plan->gateway           = 'offline';
         $plan->amount_cents      = 2500;
@@ -134,7 +134,7 @@ final class FxBackfillTest extends IntegrationTestCase
 
         $this->assertSame(1, $result['plans']);
 
-        $reloaded = \FundKit\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $reloaded = \Gratora\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame(2500, (int) $reloaded->base_amount_cents);
         $this->assertNotNull($reloaded->fx_rate);
     }

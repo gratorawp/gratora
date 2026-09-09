@@ -15,8 +15,8 @@ import useCardOpen from '../../_shared/useCardOpen';
 
 function Pill( { tone, children } ) {
     return (
-        <span className={ `fundkit-pill fundkit-pill--${ tone }` }>
-            <span className="fundkit-pill__dot" />
+        <span className={ `gratora-pill gratora-pill--${ tone }` }>
+            <span className="gratora-pill__dot" />
             { children }
         </span>
     );
@@ -24,25 +24,25 @@ function Pill( { tone, children } ) {
 
 function AccountFoot( { account, onRemove, removing } ) {
     const tail = account?.account_id ? account.account_id.slice( -4 ) : '';
-    const yes = <span style={ { color: 'var(--fundkit-color-accent)' } }>{ __( 'Enabled', 'fundraising-toolkit' ) }</span>;
-    const no  = <span style={ { color: 'var(--fundkit-color-red)' } }>{ __( 'Disabled', 'fundraising-toolkit' ) }</span>;
+    const yes = <span style={ { color: 'var(--gratora-color-accent)' } }>{ __( 'Enabled', 'gratora' ) }</span>;
+    const no  = <span style={ { color: 'var(--gratora-color-red)' } }>{ __( 'Disabled', 'gratora' ) }</span>;
     return (
-        <div className="fundkit-gateway-foot">
-            <div className="fundkit-gateway-foot__cell">
-                <div className="lbl">{ __( 'Account', 'fundraising-toolkit' ) }</div>
+        <div className="gratora-gateway-foot">
+            <div className="gratora-gateway-foot__cell">
+                <div className="lbl">{ __( 'Account', 'gratora' ) }</div>
                 <div className="val is-muted is-mono">{ tail ? `acct_…${ tail }` : '...' }</div>
             </div>
-            <div className="fundkit-gateway-foot__cell">
-                <div className="lbl">{ __( 'Charges', 'fundraising-toolkit' ) }</div>
+            <div className="gratora-gateway-foot__cell">
+                <div className="lbl">{ __( 'Charges', 'gratora' ) }</div>
                 <div className="val">{ account?.charges_enabled ? yes : no }</div>
             </div>
-            <div className="fundkit-gateway-foot__cell">
-                <div className="lbl">{ __( 'Payouts', 'fundraising-toolkit' ) }</div>
+            <div className="gratora-gateway-foot__cell">
+                <div className="lbl">{ __( 'Payouts', 'gratora' ) }</div>
                 <div className="val">{ account?.payouts_enabled ? yes : no }</div>
             </div>
             <div style={ { flex: 1 } } />
             <Btn variant="danger" size="sm" onClick={ onRemove } isBusy={ removing } disabled={ removing }>
-                { __( 'Remove keys', 'fundraising-toolkit' ) }
+                { __( 'Remove keys', 'gratora' ) }
             </Btn>
         </div>
     );
@@ -59,17 +59,17 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
     const [ pk, setPk ]     = useState( '' );
     const [ busy, setBusy ] = useState( false );
 
-    const label = isTest ? __( 'Test keys', 'fundraising-toolkit' ) : __( 'Live keys', 'fundraising-toolkit' );
+    const label = isTest ? __( 'Test keys', 'gratora' ) : __( 'Live keys', 'gratora' );
     const prefix = isTest ? 'test' : 'live';
 
     const save = () => {
         if ( ! sk.trim() || ! pk.trim() ) {
-            notify.error( __( 'Enter both the publishable key and the secret key.', 'fundraising-toolkit' ) );
+            notify.error( __( 'Enter both the publishable key and the secret key.', 'gratora' ) );
             return;
         }
         setBusy( true );
         apiFetch( {
-            path:   '/fundkit/v1/gateways/stripe/keys',
+            path:   '/gratora/v1/gateways/stripe/keys',
             method: 'POST',
             data:   { mode, secret_key: sk.trim(), publishable_key: pk.trim() },
         } )
@@ -79,33 +79,33 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
                 setOpen( false );
                 notify.success(
                     isTest
-                        ? __( 'Test keys verified and saved.', 'fundraising-toolkit' )
-                        : __( 'Live keys verified and saved.', 'fundraising-toolkit' )
+                        ? __( 'Test keys verified and saved.', 'gratora' )
+                        : __( 'Live keys verified and saved.', 'gratora' )
                 );
                 onSaved( res );
             } )
-            .catch( ( err ) => notify.error( err?.message || __( 'Could not verify those keys.', 'fundraising-toolkit' ) ) )
+            .catch( ( err ) => notify.error( err?.message || __( 'Could not verify those keys.', 'gratora' ) ) )
             .finally( () => setBusy( false ) );
     };
 
     return (
-        <div className="fundkit-stripe-mode">
-            <div className="fundkit-stripe-mode__head">
+        <div className="gratora-stripe-mode">
+            <div className="gratora-stripe-mode__head">
                 <strong>{ label }</strong>
                 { saved
-                    ? <Pill tone="green">{ __( 'Saved', 'fundraising-toolkit' ) }</Pill>
-                    : <Pill tone="gray">{ __( 'Not set', 'fundraising-toolkit' ) }</Pill> }
+                    ? <Pill tone="green">{ __( 'Saved', 'gratora' ) }</Pill>
+                    : <Pill tone="gray">{ __( 'Not set', 'gratora' ) }</Pill> }
             </div>
 
             { saved && ! open && (
-                <div className="fundkit-stripe-mode__saved">
+                <div className="gratora-stripe-mode__saved">
                     <span className="is-mono is-muted">{ publishable || '' }</span>
-                    <div className="fundkit-stripe-mode__actions">
+                    <div className="gratora-stripe-mode__actions">
                         <Btn variant="secondary" size="sm" onClick={ () => setOpen( true ) }>
-                            { __( 'Replace', 'fundraising-toolkit' ) }
+                            { __( 'Replace', 'gratora' ) }
                         </Btn>
                         <Btn variant="ghost" size="sm" onClick={ () => onRemove( mode ) }>
-                            { __( 'Remove', 'fundraising-toolkit' ) }
+                            { __( 'Remove', 'gratora' ) }
                         </Btn>
                     </div>
                 </div>
@@ -114,24 +114,24 @@ function ModeKeys( { mode, saved, publishable, onSaved, onRemove } ) {
             { open && (
                 <>
                     <FormRow
-                        label={ __( 'Publishable key', 'fundraising-toolkit' ) }
-                        help={ __( 'Safe to expose. Used in the browser to show the payment fields.', 'fundraising-toolkit' ) }
+                        label={ __( 'Publishable key', 'gratora' ) }
+                        help={ __( 'Safe to expose. Used in the browser to show the payment fields.', 'gratora' ) }
                     >
                         <KeyField value={ pk } onChange={ setPk } placeholder={ `pk_${ prefix }_…` } />
                     </FormRow>
                     <FormRow
-                        label={ __( 'Secret key', 'fundraising-toolkit' ) }
-                        help={ __( 'Stored encrypted and never shown again. Fundraising Toolkit verifies it with Stripe before saving.', 'fundraising-toolkit' ) }
+                        label={ __( 'Secret key', 'gratora' ) }
+                        help={ __( 'Stored encrypted and never shown again. Gratora verifies it with Stripe before saving.', 'gratora' ) }
                     >
                         <KeyField value={ sk } onChange={ setSk } placeholder={ `sk_${ prefix }_…` } secret />
                     </FormRow>
-                    <div className="fundkit-stripe-mode__actions">
+                    <div className="gratora-stripe-mode__actions">
                         <Btn variant="primary" size="sm" onClick={ save } isBusy={ busy } disabled={ busy }>
-                            { __( 'Save and verify', 'fundraising-toolkit' ) }
+                            { __( 'Save and verify', 'gratora' ) }
                         </Btn>
                         { saved && (
                             <Btn variant="ghost" size="sm" onClick={ () => { setOpen( false ); setSk( '' ); setPk( '' ); } }>
-                                { __( 'Cancel', 'fundraising-toolkit' ) }
+                                { __( 'Cancel', 'gratora' ) }
                             </Btn>
                         ) }
                     </div>
@@ -162,11 +162,11 @@ function ApplePaySection( { status, onDone } ) {
     const enable = () => {
         const pasted = file.trim();
         if ( ! hasFile && ! pasted ) {
-            notify.error( __( 'Paste the domain association file from Stripe first.', 'fundraising-toolkit' ) );
+            notify.error( __( 'Paste the domain association file from Stripe first.', 'gratora' ) );
             return;
         }
         if ( ! modes.length ) {
-            notify.error( __( 'Save your Stripe keys first.', 'fundraising-toolkit' ) );
+            notify.error( __( 'Save your Stripe keys first.', 'gratora' ) );
             return;
         }
 
@@ -174,7 +174,7 @@ function ApplePaySection( { status, onDone } ) {
         // Stripe registers a domain per mode, so every saved mode needs its own
         // call before Apple Pay works there.
         Promise.all( modes.map( ( mode ) => apiFetch( {
-            path:   '/fundkit/v1/gateways/stripe/apple-pay',
+            path:   '/gratora/v1/gateways/stripe/apple-pay',
             method: 'POST',
             data:   { mode, association_file: pasted },
         } ).then(
@@ -186,12 +186,12 @@ function ApplePaySection( { status, onDone } ) {
                 if ( bad ) {
                     notify.error(
                         bad.message ||
-                        __( 'Stripe could not verify this domain yet. Check the file is reachable, then try again.', 'fundraising-toolkit' )
+                        __( 'Stripe could not verify this domain yet. Check the file is reachable, then try again.', 'gratora' )
                     );
                 } else {
                     setFile( '' );
                     setOpen( false );
-                    notify.success( __( 'Apple Pay is verified for this domain.', 'fundraising-toolkit' ) );
+                    notify.success( __( 'Apple Pay is verified for this domain.', 'gratora' ) );
                 }
                 onDone();
             } )
@@ -200,30 +200,30 @@ function ApplePaySection( { status, onDone } ) {
 
     const stateLabel = ( mode ) => {
         const st = apple?.[ mode ]?.status;
-        if ( st === 'active' )   return __( 'verified', 'fundraising-toolkit' );
-        if ( st === 'inactive' ) return __( 'not verified', 'fundraising-toolkit' );
-        return __( 'not checked yet', 'fundraising-toolkit' );
+        if ( st === 'active' )   return __( 'verified', 'gratora' );
+        if ( st === 'inactive' ) return __( 'not verified', 'gratora' );
+        return __( 'not checked yet', 'gratora' );
     };
 
-    let pill = <Pill tone="gray">{ __( 'Not set up', 'fundraising-toolkit' ) }</Pill>;
-    if ( hasFile && active )      pill = <Pill tone="green">{ __( 'Verified', 'fundraising-toolkit' ) }</Pill>;
-    else if ( hasFile )           pill = <Pill tone="amber">{ __( 'Not verified', 'fundraising-toolkit' ) }</Pill>;
+    let pill = <Pill tone="gray">{ __( 'Not set up', 'gratora' ) }</Pill>;
+    if ( hasFile && active )      pill = <Pill tone="green">{ __( 'Verified', 'gratora' ) }</Pill>;
+    else if ( hasFile )           pill = <Pill tone="amber">{ __( 'Not verified', 'gratora' ) }</Pill>;
 
     const firstMessage = modes.map( ( m ) => apple?.[ m ]?.message ).find( Boolean );
 
     return (
-        <div className="fundkit-connect-options">
-            <div className="fundkit-stripe-mode">
-                <div className="fundkit-stripe-mode__head">
-                    <strong>{ __( 'Apple Pay', 'fundraising-toolkit' ) }</strong>
+        <div className="gratora-connect-options">
+            <div className="gratora-stripe-mode">
+                <div className="gratora-stripe-mode__head">
+                    <strong>{ __( 'Apple Pay', 'gratora' ) }</strong>
                     { pill }
                 </div>
 
-                <p className="fundkit-connect-p">
-                    { __( 'Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple checks that you own this domain first, and until it verifies, the Apple Pay button just never shows.', 'fundraising-toolkit' ) }
+                <p className="gratora-connect-p">
+                    { __( 'Google Pay needs nothing here, it appears as soon as your Stripe account supports it. Apple checks that you own this domain first, and until it verifies, the Apple Pay button just never shows.', 'gratora' ) }
                 </p>
 
-                <FormRow label={ __( 'Domain', 'fundraising-toolkit' ) }>
+                <FormRow label={ __( 'Domain', 'gratora' ) }>
                     { /* No onChange: KeyField renders read-only with a Copy button. */ }
                     <KeyField value={ apple.domain || '' } />
                 </FormRow>
@@ -231,45 +231,45 @@ function ApplePaySection( { status, onDone } ) {
                 { open ? (
                     <>
                         <FormRow
-                            label={ __( 'Domain association file', 'fundraising-toolkit' ) }
-                            help={ __( 'In Stripe, go to Settings, Payment method domains, and add the domain above. Stripe links a file to download, paste its whole contents here.', 'fundraising-toolkit' ) }
+                            label={ __( 'Domain association file', 'gratora' ) }
+                            help={ __( 'In Stripe, go to Settings, Payment method domains, and add the domain above. Stripe links a file to download, paste its whole contents here.', 'gratora' ) }
                             wide
                         >
                             <textarea
-                                className="fundkit-textarea fundkit-textarea--mono"
+                                className="gratora-textarea gratora-textarea--mono"
                                 rows={ 4 }
                                 value={ file }
                                 onChange={ ( e ) => setFile( e.target.value ) }
                                 placeholder="7B227073704964223A…"
                             />
                         </FormRow>
-                        <div className="fundkit-stripe-mode__actions">
+                        <div className="gratora-stripe-mode__actions">
                             <Btn variant="primary" size="sm" onClick={ enable } isBusy={ busy } disabled={ busy }>
-                                { __( 'Enable Apple Pay', 'fundraising-toolkit' ) }
+                                { __( 'Enable Apple Pay', 'gratora' ) }
                             </Btn>
                             { hasFile && (
                                 <Btn variant="ghost" size="sm" onClick={ () => { setOpen( false ); setFile( '' ); } }>
-                                    { __( 'Cancel', 'fundraising-toolkit' ) }
+                                    { __( 'Cancel', 'gratora' ) }
                                 </Btn>
                             ) }
                         </div>
                     </>
                 ) : (
-                    <div className="fundkit-stripe-mode__saved">
+                    <div className="gratora-stripe-mode__saved">
                         <span className="is-muted">
                             { modes.map( ( m ) => sprintf(
                                 /* translators: 1: Stripe mode, test or live. 2: verification state. */
-                                __( '%1$s: %2$s', 'fundraising-toolkit' ),
-                                m === 'test' ? __( 'Test', 'fundraising-toolkit' ) : __( 'Live', 'fundraising-toolkit' ),
+                                __( '%1$s: %2$s', 'gratora' ),
+                                m === 'test' ? __( 'Test', 'gratora' ) : __( 'Live', 'gratora' ),
                                 stateLabel( m )
                             ) ).join( '  ·  ' ) }
                         </span>
-                        <div className="fundkit-stripe-mode__actions">
+                        <div className="gratora-stripe-mode__actions">
                             <Btn variant="secondary" size="sm" onClick={ enable } isBusy={ busy } disabled={ busy }>
-                                { __( 'Check again', 'fundraising-toolkit' ) }
+                                { __( 'Check again', 'gratora' ) }
                             </Btn>
                             <Btn variant="ghost" size="sm" onClick={ () => setOpen( true ) }>
-                                { __( 'Replace file', 'fundraising-toolkit' ) }
+                                { __( 'Replace file', 'gratora' ) }
                             </Btn>
                         </div>
                     </div>
@@ -293,7 +293,7 @@ export default function StripeKeysCard( { s } ) {
     const load = useCallback( () => {
         setLoading( true );
         setLoadError( false );
-        apiFetch( { path: '/fundkit/v1/gateways/stripe/status' } )
+        apiFetch( { path: '/gratora/v1/gateways/stripe/status' } )
             .then( ( r ) => setStatus( r ) )
             .catch( () => { setStatus( null ); setLoadError( true ); } )
             .finally( () => setLoading( false ) );
@@ -304,17 +304,17 @@ export default function StripeKeysCard( { s } ) {
     const removeKeys = useCallback( ( mode ) => {
         const all = mode === 'all';
         setConfirm( {
-            title: all ? __( 'Remove Stripe keys', 'fundraising-toolkit' ) : __( 'Remove these keys', 'fundraising-toolkit' ),
+            title: all ? __( 'Remove Stripe keys', 'gratora' ) : __( 'Remove these keys', 'gratora' ),
             message: all
-                ? __( 'Remove both key pairs? Card donations will stop until you add keys again.', 'fundraising-toolkit' )
-                : __( 'Remove this key pair? Donations in this mode will stop until you add keys again.', 'fundraising-toolkit' ),
-            confirmLabel: __( 'Remove', 'fundraising-toolkit' ),
+                ? __( 'Remove both key pairs? Card donations will stop until you add keys again.', 'gratora' )
+                : __( 'Remove this key pair? Donations in this mode will stop until you add keys again.', 'gratora' ),
+            confirmLabel: __( 'Remove', 'gratora' ),
             destructive: true,
             onConfirm: async () => {
                 setRemoving( true );
-                apiFetch( { path: `/fundkit/v1/gateways/stripe/keys?mode=${ mode }`, method: 'DELETE' } )
+                apiFetch( { path: `/gratora/v1/gateways/stripe/keys?mode=${ mode }`, method: 'DELETE' } )
                     .then( ( res ) => setStatus( res ) )
-                    .catch( ( err ) => notify.error( err?.message || __( 'Could not remove the keys.', 'fundraising-toolkit' ) ) )
+                    .catch( ( err ) => notify.error( err?.message || __( 'Could not remove the keys.', 'gratora' ) ) )
                     .finally( () => setRemoving( false ) );
             },
         } );
@@ -328,17 +328,17 @@ export default function StripeKeysCard( { s } ) {
 
     const head = {
         leading:     <BrandMark letter="S" variant="stripe" />,
-        title:       __( 'Stripe', 'fundraising-toolkit' ),
+        title:       __( 'Stripe', 'gratora' ),
         collapsible: true,
         open,
         onToggle:    setOpen,
     };
-    const sub = __( 'Cards, SEPA, Apple Pay, Google Pay', 'fundraising-toolkit' );
+    const sub = __( 'Cards, SEPA, Apple Pay, Google Pay', 'gratora' );
 
     if ( loading ) {
         return (
-            <Card { ...head } sub={ sub } meta={ <Pill tone="gray">{ __( 'Checking…', 'fundraising-toolkit' ) }</Pill> }>
-                <p className="fundkit-connect-p">{ __( 'Loading Stripe status…', 'fundraising-toolkit' ) }</p>
+            <Card { ...head } sub={ sub } meta={ <Pill tone="gray">{ __( 'Checking…', 'gratora' ) }</Pill> }>
+                <p className="gratora-connect-p">{ __( 'Loading Stripe status…', 'gratora' ) }</p>
             </Card>
         );
     }
@@ -347,21 +347,21 @@ export default function StripeKeysCard( { s } ) {
     // through to a state that misreports the real setup.
     if ( loadError ) {
         return (
-            <Card { ...head } sub={ sub } meta={ <Pill tone="amber">{ __( 'Unavailable', 'fundraising-toolkit' ) }</Pill> }>
+            <Card { ...head } sub={ sub } meta={ <Pill tone="amber">{ __( 'Unavailable', 'gratora' ) }</Pill> }>
                 <Notice status="warning">
-                    <strong>{ __( 'Could not check your Stripe setup.', 'fundraising-toolkit' ) }</strong>{ ' ' }
-                    { __( 'Something went wrong loading the status. Please try again.', 'fundraising-toolkit' ) }
+                    <strong>{ __( 'Could not check your Stripe setup.', 'gratora' ) }</strong>{ ' ' }
+                    { __( 'Something went wrong loading the status. Please try again.', 'gratora' ) }
                 </Notice>
                 <div style={ { marginTop: 18 } }>
-                    <Btn variant="primary" onClick={ load }>{ __( 'Retry', 'fundraising-toolkit' ) }</Btn>
+                    <Btn variant="primary" onClick={ load }>{ __( 'Retry', 'gratora' ) }</Btn>
                 </div>
             </Card>
         );
     }
 
-    let meta = <Pill tone="gray">{ __( 'Not set up', 'fundraising-toolkit' ) }</Pill>;
-    if ( connected && canCharge ) meta = <Pill tone="green">{ __( 'Ready', 'fundraising-toolkit' ) }</Pill>;
-    else if ( connected ) meta = <Pill tone="amber">{ __( 'Action needed', 'fundraising-toolkit' ) }</Pill>;
+    let meta = <Pill tone="gray">{ __( 'Not set up', 'gratora' ) }</Pill>;
+    if ( connected && canCharge ) meta = <Pill tone="green">{ __( 'Ready', 'gratora' ) }</Pill>;
+    else if ( connected ) meta = <Pill tone="amber">{ __( 'Action needed', 'gratora' ) }</Pill>;
 
     const bizName = account?.business_name || account?.email || '';
 
@@ -377,20 +377,20 @@ export default function StripeKeysCard( { s } ) {
         >
             { ! connected && (
                 <>
-                    <p className="fundkit-connect-p">
-                        { __( 'Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and Fundraising Toolkit never takes a cut.', 'fundraising-toolkit' ) }
+                    <p className="gratora-connect-p">
+                        { __( 'Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and Gratora never takes a cut.', 'gratora' ) }
                     </p>
-                    <p className="fundkit-connect-p">
-                        { __( 'Find them in the Stripe dashboard under Developers, API keys. Add your test keys first to try a donation safely.', 'fundraising-toolkit' ) }
+                    <p className="gratora-connect-p">
+                        { __( 'Find them in the Stripe dashboard under Developers, API keys. Add your test keys first to try a donation safely.', 'gratora' ) }
                     </p>
                 </>
             ) }
 
             <ToggleRow
-                title={ __( 'Enable the Stripe gateway', 'fundraising-toolkit' ) }
+                title={ __( 'Enable the Stripe gateway', 'gratora' ) }
                 sub={ connected
-                    ? __( 'Your keys stay on file while it is off.', 'fundraising-toolkit' )
-                    : __( 'Available once your keys are saved.', 'fundraising-toolkit' ) }
+                    ? __( 'Your keys stay on file while it is off.', 'gratora' )
+                    : __( 'Available once your keys are saved.', 'gratora' ) }
                 checked={ connected && !! s.value( 'stripe.enabled', true ) }
                 onChange={ s.setValue( 'stripe.enabled' ) }
                 disabled={ ! connected }
@@ -398,19 +398,19 @@ export default function StripeKeysCard( { s } ) {
 
             { connected && ! canCharge && (
                 <Notice status="warning">
-                    <strong>{ __( 'Your Stripe account cannot take payments yet.', 'fundraising-toolkit' ) }</strong>{ ' ' }
-                    { __( 'Stripe still needs some verification details (ID, bank account, business info). Finish that in your Stripe dashboard; live donations will fail until you do.', 'fundraising-toolkit' ) }
+                    <strong>{ __( 'Your Stripe account cannot take payments yet.', 'gratora' ) }</strong>{ ' ' }
+                    { __( 'Stripe still needs some verification details (ID, bank account, business info). Finish that in your Stripe dashboard; live donations will fail until you do.', 'gratora' ) }
                 </Notice>
             ) }
 
             { connected && canCharge && (
                 <Notice status="success">
-                    <strong>{ __( 'You are all set.', 'fundraising-toolkit' ) }</strong>{ ' ' }
-                    { __( 'Donations are charged on your Stripe account and paid out to your bank.', 'fundraising-toolkit' ) }
+                    <strong>{ __( 'You are all set.', 'gratora' ) }</strong>{ ' ' }
+                    { __( 'Donations are charged on your Stripe account and paid out to your bank.', 'gratora' ) }
                 </Notice>
             ) }
 
-            <div className="fundkit-stripe-modes">
+            <div className="gratora-stripe-modes">
                 <ModeKeys
                     mode="test"
                     saved={ !! account?.has_test }
@@ -429,19 +429,19 @@ export default function StripeKeysCard( { s } ) {
 
             { connected && <ApplePaySection status={ status } onDone={ load } /> }
 
-            <div className="fundkit-connect-options">
-                <p className="fundkit-connect-p">
-                    { __( 'Webhooks tell Fundraising Toolkit when a payment succeeds, fails or is refunded. Fundraising Toolkit registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below.', 'fundraising-toolkit' ) }
+            <div className="gratora-connect-options">
+                <p className="gratora-connect-p">
+                    { __( 'Webhooks tell Gratora when a payment succeeds, fails or is refunded. Gratora registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below.', 'gratora' ) }
                 </p>
-                <FormRow label={ __( 'Webhook endpoint', 'fundraising-toolkit' ) }>
+                <FormRow label={ __( 'Webhook endpoint', 'gratora' ) }>
                     { /* No onChange: KeyField renders read-only with a Copy button. */ }
                     <KeyField value={ status?.webhook_url || '' } />
                 </FormRow>
                 { s && (
                     <>
                         <FormRow
-                            label={ __( 'Webhook signing secret (test)', 'fundraising-toolkit' ) }
-                            help={ __( 'From the test-mode Stripe webhook endpoint. Needed for paid, refund and dispute updates on test donations. Once saved it is hidden, so the dots mean it is set: type a new one to replace it, or clear the field to remove it.', 'fundraising-toolkit' ) }
+                            label={ __( 'Webhook signing secret (test)', 'gratora' ) }
+                            help={ __( 'From the test-mode Stripe webhook endpoint. Needed for paid, refund and dispute updates on test donations. Once saved it is hidden, so the dots mean it is set: type a new one to replace it, or clear the field to remove it.', 'gratora' ) }
                         >
                             <KeyField
                                 value={ s.value( 'stripe.webhook_secret_test', '' ) }
@@ -451,8 +451,8 @@ export default function StripeKeysCard( { s } ) {
                             />
                         </FormRow>
                         <FormRow
-                            label={ __( 'Webhook signing secret (live)', 'fundraising-toolkit' ) }
-                            help={ __( 'From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected. Once saved it is hidden, same as the test one.', 'fundraising-toolkit' ) }
+                            label={ __( 'Webhook signing secret (live)', 'gratora' ) }
+                            help={ __( 'From the live-mode Stripe webhook endpoint. Stripe issues a separate secret for live; without it, live webhooks are rejected. Once saved it is hidden, same as the test one.', 'gratora' ) }
                         >
                             <KeyField
                                 value={ s.value( 'stripe.webhook_secret_live', '' ) }

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Admin;
+namespace Gratora\Admin;
 
-use FundKit\Foundation\Config\SystemSetting;
-use FundKit\Foundation\Http\ClientIp;
-use FundKit\Foundation\Modules\ModuleManager;
-use FundKit\Gateways\GatewayManager;
+use Gratora\Foundation\Config\SystemSetting;
+use Gratora\Foundation\Http\ClientIp;
+use Gratora\Foundation\Modules\ModuleManager;
+use Gratora\Gateways\GatewayManager;
 
 /**
  * What a support request needs to know about a site, in one place.
@@ -21,14 +21,14 @@ use FundKit\Gateways\GatewayManager;
 final class SystemReport
 {
     private const COUNTED = [
-        'fundkit_donations',
-        'fundkit_donors',
-        'fundkit_campaigns',
-        'fundkit_forms',
-        'fundkit_recurring_plans',
-        'fundkit_funds',
-        'fundkit_refunds',
-        'fundkit_receipts',
+        'gratora_donations',
+        'gratora_donors',
+        'gratora_campaigns',
+        'gratora_forms',
+        'gratora_recurring_plans',
+        'gratora_funds',
+        'gratora_refunds',
+        'gratora_receipts',
     ];
 
     private const EXTENSIONS = [
@@ -50,30 +50,30 @@ final class SystemReport
     public function sections(): array
     {
         return [
-            ['title' => __('Fundraising Toolkit', 'fundraising-toolkit'),      'rows' => $this->fundkit()],
-            ['title' => __('Add-ons', 'fundraising-toolkit'),       'rows' => $this->addOns()],
-            ['title' => __('Payments', 'fundraising-toolkit'),      'rows' => $this->payments()],
-            ['title' => __('WordPress', 'fundraising-toolkit'),     'rows' => $this->wordpress()],
-            ['title' => __('Server', 'fundraising-toolkit'),        'rows' => $this->server()],
-            ['title' => __('Database', 'fundraising-toolkit'),      'rows' => $this->database()],
-            ['title' => __('Active plugins', 'fundraising-toolkit'), 'rows' => $this->plugins()],
+            ['title' => __('Gratora', 'gratora'),      'rows' => $this->gratora()],
+            ['title' => __('Add-ons', 'gratora'),       'rows' => $this->addOns()],
+            ['title' => __('Payments', 'gratora'),      'rows' => $this->payments()],
+            ['title' => __('WordPress', 'gratora'),     'rows' => $this->wordpress()],
+            ['title' => __('Server', 'gratora'),        'rows' => $this->server()],
+            ['title' => __('Database', 'gratora'),      'rows' => $this->database()],
+            ['title' => __('Active plugins', 'gratora'), 'rows' => $this->plugins()],
         ];
     }
 
     /** @return list<array{label:string, value:string}> */
-    private function fundkit(): array
+    private function gratora(): array
     {
         // Report key presence only; this output is shared with support.
         $keyHeld = SystemSetting::exists('encryption_key_v1');
         $keyLost = SystemSetting::read('encryption_key_lost_at');
 
         $rows = [
-            self::row(__('Version', 'fundraising-toolkit'), defined('FUNDKIT_VERSION') ? FUNDKIT_VERSION : 'unknown'),
-            self::row(__('Encryption key', 'fundraising-toolkit'), self::yesNo($keyHeld)),
+            self::row(__('Version', 'gratora'), defined('GRATORA_VERSION') ? GRATORA_VERSION : 'unknown'),
+            self::row(__('Encryption key', 'gratora'), self::yesNo($keyHeld)),
         ];
 
         if (is_string($keyLost) && $keyLost !== '') {
-            $rows[] = self::row(__('Encryption key lost at', 'fundraising-toolkit'), $keyLost);
+            $rows[] = self::row(__('Encryption key lost at', 'gratora'), $keyLost);
         }
 
         return $rows;
@@ -98,14 +98,14 @@ final class SystemReport
                 (string) $id,
                 sprintf(
                     /* translators: 1: installed core version, 2: the version constraint the add-on asked for */
-                    __('not loaded: core %1$s does not satisfy %2$s', 'fundraising-toolkit'),
+                    __('not loaded: core %1$s does not satisfy %2$s', 'gratora'),
                     (string) ($pair[0] ?? '?'),
                     (string) ($pair[1] ?? '?')
                 )
             );
         }
 
-        return $rows ?: [self::row(__('Installed', 'fundraising-toolkit'), __('None', 'fundraising-toolkit'))];
+        return $rows ?: [self::row(__('Installed', 'gratora'), __('None', 'gratora'))];
     }
 
     /** @return list<array{label:string, value:string}> */
@@ -117,12 +117,12 @@ final class SystemReport
             $rows[] = self::row(
                 (string) $gateway->label(),
                 $gateway->canCharge()
-                    ? __('ready', 'fundraising-toolkit')
-                    : __('not configured', 'fundraising-toolkit')
+                    ? __('ready', 'gratora')
+                    : __('not configured', 'gratora')
             );
         }
 
-        return $rows ?: [self::row(__('Gateways', 'fundraising-toolkit'), __('None registered', 'fundraising-toolkit'))];
+        return $rows ?: [self::row(__('Gateways', 'gratora'), __('None registered', 'gratora'))];
     }
 
     /** @return list<array{label:string, value:string}> */
@@ -132,25 +132,25 @@ final class SystemReport
         $parent = $theme->parent();
 
         return [
-            self::row(__('Version', 'fundraising-toolkit'), get_bloginfo('version')),
-            self::row(__('Site URL', 'fundraising-toolkit'), site_url()),
-            self::row(__('Home URL', 'fundraising-toolkit'), home_url()),
-            self::row(__('REST root', 'fundraising-toolkit'), esc_url_raw(rest_url('fundkit/v1/'))),
-            self::row(__('Multisite', 'fundraising-toolkit'), self::yesNo(is_multisite())),
-            self::row(__('Locale', 'fundraising-toolkit'), get_locale()),
-            self::row(__('Timezone', 'fundraising-toolkit'), wp_timezone_string()),
-            self::row(__('Permalinks', 'fundraising-toolkit'), (string) get_option('permalink_structure') ?: __('plain', 'fundraising-toolkit')),
-            self::row(__('Theme', 'fundraising-toolkit'), sprintf(
+            self::row(__('Version', 'gratora'), get_bloginfo('version')),
+            self::row(__('Site URL', 'gratora'), site_url()),
+            self::row(__('Home URL', 'gratora'), home_url()),
+            self::row(__('REST root', 'gratora'), esc_url_raw(rest_url('gratora/v1/'))),
+            self::row(__('Multisite', 'gratora'), self::yesNo(is_multisite())),
+            self::row(__('Locale', 'gratora'), get_locale()),
+            self::row(__('Timezone', 'gratora'), wp_timezone_string()),
+            self::row(__('Permalinks', 'gratora'), (string) get_option('permalink_structure') ?: __('plain', 'gratora')),
+            self::row(__('Theme', 'gratora'), sprintf(
                 '%s %s%s',
                 (string) $theme->get('Name'),
                 (string) $theme->get('Version'),
                 $parent ? ' (child of ' . (string) $parent->get('Name') . ')' : ''
             )),
-            self::row(__('Block theme', 'fundraising-toolkit'), self::yesNo(wp_is_block_theme())),
-            self::row(__('Memory limit', 'fundraising-toolkit'), self::constantValue('WP_MEMORY_LIMIT')),
-            self::row(__('Debug mode', 'fundraising-toolkit'), self::yesNo(defined('WP_DEBUG') && WP_DEBUG)),
+            self::row(__('Block theme', 'gratora'), self::yesNo(wp_is_block_theme())),
+            self::row(__('Memory limit', 'gratora'), self::constantValue('WP_MEMORY_LIMIT')),
+            self::row(__('Debug mode', 'gratora'), self::yesNo(defined('WP_DEBUG') && WP_DEBUG)),
             // Action Scheduler depends on WP-cron.
-            self::row(__('WP-Cron disabled', 'fundraising-toolkit'), self::yesNo(defined('DISABLE_WP_CRON') && DISABLE_WP_CRON)),
+            self::row(__('WP-Cron disabled', 'gratora'), self::yesNo(defined('DISABLE_WP_CRON') && DISABLE_WP_CRON)),
         ];
     }
 
@@ -167,40 +167,40 @@ final class SystemReport
             : '';
 
         return [
-            self::row(__('PHP version', 'fundraising-toolkit'), PHP_VERSION),
-            self::row(__('PHP interface', 'fundraising-toolkit'), PHP_SAPI),
-            self::row(__('Web server', 'fundraising-toolkit'), $software !== '' ? $software : __('unknown', 'fundraising-toolkit')),
-            self::row(__('HTTPS', 'fundraising-toolkit'), self::yesNo(is_ssl())),
+            self::row(__('PHP version', 'gratora'), PHP_VERSION),
+            self::row(__('PHP interface', 'gratora'), PHP_SAPI),
+            self::row(__('Web server', 'gratora'), $software !== '' ? $software : __('unknown', 'gratora')),
+            self::row(__('HTTPS', 'gratora'), self::yesNo(is_ssl())),
             // The shape, never the address: this screen is written to be pasted
             // into a ticket, and a visitor's IP is theirs. It still answers the
             // only question an admin has here, which is whether the proxy
             // configuration is doing anything: declare ranges and see this flip
             // to "forwarded header", or it is not matching your edge.
             self::row(
-                __('Trusted proxies', 'fundraising-toolkit'),
+                __('Trusted proxies', 'gratora'),
                 ($count = count(ClientIp::trustedProxies())) > 0
                     /* translators: %d: number of declared CIDR ranges */
-                    ? sprintf(_n('%d range', '%d ranges', $count, 'fundraising-toolkit'), $count)
-                    : __('none declared', 'fundraising-toolkit')
+                    ? sprintf(_n('%d range', '%d ranges', $count, 'gratora'), $count)
+                    : __('none declared', 'gratora')
             ),
             self::row(
-                __('Visitor address from', 'fundraising-toolkit'),
+                __('Visitor address from', 'gratora'),
                 ClientIp::resolve() !== ClientIp::remote()
-                    ? __('forwarded header', 'fundraising-toolkit')
-                    : __('REMOTE_ADDR', 'fundraising-toolkit')
+                    ? __('forwarded header', 'gratora')
+                    : __('REMOTE_ADDR', 'gratora')
             ),
             self::row(
-                __('Undeclared proxy in front', 'fundraising-toolkit'),
+                __('Undeclared proxy in front', 'gratora'),
                 self::yesNo(ClientIp::looksProxied())
             ),
-            self::row(__('Memory limit', 'fundraising-toolkit'), (string) ini_get('memory_limit')),
-            self::row(__('Max execution time', 'fundraising-toolkit'), (string) ini_get('max_execution_time')),
-            self::row(__('Upload max filesize', 'fundraising-toolkit'), (string) ini_get('upload_max_filesize')),
-            self::row(__('Post max size', 'fundraising-toolkit'), (string) ini_get('post_max_size')),
-            self::row(__('Max input vars', 'fundraising-toolkit'), (string) ini_get('max_input_vars')),
+            self::row(__('Memory limit', 'gratora'), (string) ini_get('memory_limit')),
+            self::row(__('Max execution time', 'gratora'), (string) ini_get('max_execution_time')),
+            self::row(__('Upload max filesize', 'gratora'), (string) ini_get('upload_max_filesize')),
+            self::row(__('Post max size', 'gratora'), (string) ini_get('post_max_size')),
+            self::row(__('Max input vars', 'gratora'), (string) ini_get('max_input_vars')),
             self::row(
-                __('Missing PHP extensions', 'fundraising-toolkit'),
-                $missing === [] ? __('None', 'fundraising-toolkit') : implode(', ', $missing)
+                __('Missing PHP extensions', 'gratora'),
+                $missing === [] ? __('None', 'gratora') : implode(', ', $missing)
             ),
         ];
     }
@@ -217,10 +217,10 @@ final class SystemReport
         $version = (string) $wpdb->get_var('SELECT VERSION()');
 
         $rows = [
-            self::row(__('Server', 'fundraising-toolkit'), $version !== '' ? $version : __('unknown', 'fundraising-toolkit')),
-            self::row(__('Charset', 'fundraising-toolkit'), (string) $wpdb->charset),
-            self::row(__('Collation', 'fundraising-toolkit'), (string) $wpdb->collate),
-            self::row(__('Table prefix', 'fundraising-toolkit'), (string) $wpdb->prefix),
+            self::row(__('Server', 'gratora'), $version !== '' ? $version : __('unknown', 'gratora')),
+            self::row(__('Charset', 'gratora'), (string) $wpdb->charset),
+            self::row(__('Collation', 'gratora'), (string) $wpdb->collate),
+            self::row(__('Table prefix', 'gratora'), (string) $wpdb->prefix),
         ];
 
         foreach (self::COUNTED as $base) {
@@ -232,10 +232,10 @@ final class SystemReport
                 $exists
                     ? sprintf(
                         /* translators: %s: a row count */
-                        __('%s rows', 'fundraising-toolkit'),
+                        __('%s rows', 'gratora'),
                         number_format_i18n((int) $wpdb->get_var("SELECT COUNT(*) FROM `{$table}`")) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is built from $wpdb->prefix and a constant in this file, never from input.
                     )
-                    : __('MISSING', 'fundraising-toolkit')
+                    : __('MISSING', 'gratora')
             );
         }
         // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -261,7 +261,7 @@ final class SystemReport
             $data = $all[$file] ?? null;
             if ($data === null) {
                 // Active but not on disk, which is itself worth reporting.
-                $rows[] = self::row((string) $file, __('active, but the file is missing', 'fundraising-toolkit'));
+                $rows[] = self::row((string) $file, __('active, but the file is missing', 'gratora'));
                 continue;
             }
             $rows[] = self::row((string) $data['Name'], (string) $data['Version']);
@@ -272,13 +272,13 @@ final class SystemReport
                 (string) $data['Name'],
                 sprintf(
                     /* translators: %s: plugin version */
-                    __('%s (must-use)', 'fundraising-toolkit'),
+                    __('%s (must-use)', 'gratora'),
                     (string) $data['Version']
                 )
             );
         }
 
-        return $rows ?: [self::row(__('Active', 'fundraising-toolkit'), __('None', 'fundraising-toolkit'))];
+        return $rows ?: [self::row(__('Active', 'gratora'), __('None', 'gratora'))];
     }
 
     /** @return array{label:string, value:string} */
@@ -290,12 +290,12 @@ final class SystemReport
     private static function yesNo(bool $value): string
     {
         return $value
-            ? __('Yes', 'fundraising-toolkit')
-            : __('No', 'fundraising-toolkit');
+            ? __('Yes', 'gratora')
+            : __('No', 'gratora');
     }
 
     private static function constantValue(string $name): string
     {
-        return defined($name) ? (string) constant($name) : __('not set', 'fundraising-toolkit');
+        return defined($name) ? (string) constant($name) : __('not set', 'gratora');
     }
 }

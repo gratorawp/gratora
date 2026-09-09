@@ -4,13 +4,13 @@ import { tablistKeyDown } from '../../_shared/tablistKeys';
 import { IconBars, IconActivity, IconHeart, IconRotate, IconFile, IconNote, IconShield } from './icons';
 
 const TAB_DEFS = [
-    { id: 'overview',  label: __( 'Overview',  'fundraising-toolkit' ), Icon: IconBars     },
-    { id: 'donations', label: __( 'Donations', 'fundraising-toolkit' ), Icon: IconHeart    },
-    { id: 'recurring', label: __( 'Recurring', 'fundraising-toolkit' ), Icon: IconRotate   },
-    { id: 'receipts',  label: __( 'Receipts',  'fundraising-toolkit' ), Icon: IconFile     },
-    { id: 'notes',     label: __( 'Notes',     'fundraising-toolkit' ), Icon: IconNote     },
-    { id: 'consent',   label: __( 'Consent',   'fundraising-toolkit' ), Icon: IconShield   },
-    { id: 'activity',  label: __( 'Activity',  'fundraising-toolkit' ), Icon: IconActivity },
+    { id: 'overview',  label: __( 'Overview',  'gratora' ), Icon: IconBars     },
+    { id: 'donations', label: __( 'Donations', 'gratora' ), Icon: IconHeart    },
+    { id: 'recurring', label: __( 'Recurring', 'gratora' ), Icon: IconRotate   },
+    { id: 'receipts',  label: __( 'Receipts',  'gratora' ), Icon: IconFile     },
+    { id: 'notes',     label: __( 'Notes',     'gratora' ), Icon: IconNote     },
+    { id: 'consent',   label: __( 'Consent',   'gratora' ), Icon: IconShield   },
+    { id: 'activity',  label: __( 'Activity',  'gratora' ), Icon: IconActivity },
 ];
 
 export default function Tabs( { active, onChange, counts = {}, dots = {} } ) {
@@ -19,7 +19,7 @@ export default function Tabs( { active, onChange, counts = {}, dots = {} } ) {
             className="dp-tabs"
             role="tablist"
             tabIndex={ -1 }
-            aria-label={ __( 'Donor sections', 'fundraising-toolkit' ) }
+            aria-label={ __( 'Donor sections', 'gratora' ) }
             onKeyDown={ ( e ) => tablistKeyDown( e, TAB_DEFS.map( ( d ) => d.id ), active, onChange ) }
         >
             { TAB_DEFS.map( ( t ) => (

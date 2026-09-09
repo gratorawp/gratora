@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\PayPal\PayPalApi;
-use FundKit\Gateways\PayPal\PayPalGateway;
-use FundKit\Gateways\PayPal\PayPalPlans;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\PayPal\PayPalApi;
+use Gratora\Gateways\PayPal\PayPalGateway;
+use Gratora\Gateways\PayPal\PayPalPlans;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -39,13 +39,13 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('fundkit_gateway_config', ['test_mode' => true]);
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_gateway_config', ['test_mode' => true]);
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
-        delete_option('fundkit_paypal_product');
-        delete_option('fundkit_paypal_plans');
+        delete_option('gratora_paypal_product');
+        delete_option('gratora_paypal_plans');
 
         $c = Plugin::instance()->container;
         $account = $c->get(PayPalAccount::class);
@@ -61,11 +61,11 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
                 $c->get(PayPalApi::class),
                 $account,
                 $c->get(DonationRepository::class),
-                $c->get(\FundKit\Donations\DonationService::class),
+                $c->get(\Gratora\Donations\DonationService::class),
                 $c->get(PayPalPlans::class),
                 $c->get(RecurringPlanRepository::class),
-                $c->get(\FundKit\Foundation\Time\Clock::class),
-                $c->get(\FundKit\Gateways\PayPal\PayPalPlanRecorder::class),
+                $c->get(\Gratora\Foundation\Time\Clock::class),
+                $c->get(\Gratora\Gateways\PayPal\PayPalPlanRecorder::class),
             ));
         }
     }
@@ -162,7 +162,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         // SDK runs in their browser, so choosing a cheaper plan costs nothing.
         $this->subscriptionPlanId = 'P-PLAN-CHEAP';
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/subscription');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/subscription');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'       => $reference,
@@ -180,7 +180,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
 
     private function createRecurringDonation(int $amount = 2500, string $frequency = 'monthly'): string
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => 'sub' . bin2hex(random_bytes(3)) . '@example.test',
@@ -201,7 +201,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
 
     private function recordSubscription(string $reference, string $subId = 'I-SUB-1'): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/subscription');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/subscription');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference' => $reference, 'subscription_id' => $subId,
@@ -213,7 +213,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
     /** @param array<string,mixed> $resource */
     private function postWebhook(string $type, array $resource, ?string $eventId = null): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/paypal');
+        $req = new WP_REST_Request('POST', '/gratora/v1/webhooks/paypal');
         $req->set_header('content-type', 'application/json');
         foreach ([
             'paypal_transmission_id'   => 'tx-' . bin2hex(random_bytes(3)),
@@ -328,12 +328,12 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
     {
         $reference = $this->createRecurringDonation();
         // Point the canned subscription at a different donation's reference.
-        $this->currentReference = 'FUNDKIT-SOMEONE-ELSE';
+        $this->currentReference = 'GRATORA-SOMEONE-ELSE';
 
         $res = $this->recordSubscription($reference);
 
         $this->assertSame(403, $res->get_status());
-        $this->assertSame('fundkit_paypal_subscription_mismatch', $res->get_data()['code'] ?? null);
+        $this->assertSame('gratora_paypal_subscription_mismatch', $res->get_data()['code'] ?? null);
         $this->assertNull(
             $this->plans()->findBySubscriptionId('paypal', 'I-SUB-1'),
             'no plan is created for a subscription that is not ours'
@@ -377,7 +377,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         // different donation - the delivery must not be accepted: a 200 tells
         // PayPal the payment was booked and it never comes back.
         $reference = $this->createRecurringDonation();
-        $this->currentReference = 'FUNDKIT-SOMEONE-ELSE';
+        $this->currentReference = 'GRATORA-SOMEONE-ELSE';
 
         $res = $this->postWebhook('PAYMENT.SALE.COMPLETED', [
             'id'                   => 'SALE-EARLY',
@@ -553,7 +553,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->recordSubscription($reference);
 
         $failures = 0;
-        add_action('fundkit.recurring.renewal_failed', static function () use (&$failures): void { $failures++; });
+        add_action('gratora.recurring.renewal_failed', static function () use (&$failures): void { $failures++; });
 
         $res = $this->postWebhook('PAYMENT.SALE.DENIED', [
             'id'                   => 'SALE-DENIED-1',
@@ -579,7 +579,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->recordSubscription($reference);
 
         $failures = 0;
-        add_action('fundkit.recurring.renewal_failed', static function () use (&$failures): void { $failures++; });
+        add_action('gratora.recurring.renewal_failed', static function () use (&$failures): void { $failures++; });
 
         $sale = [
             'id'                   => 'SALE-DENIED-DUP',
@@ -690,7 +690,7 @@ final class PayPalSubscriptionTest extends IntegrationTestCase
         $this->assertSame(200, $res->get_status());
         $this->assertFalse($res->get_data()['handled']);
 
-        $rows = \FundKit\Analytics\Event::query()->whereLike('type', 'webhook.%')->orderBy('id', 'DESC')->limit(1)->getAll();
+        $rows = \Gratora\Analytics\Event::query()->whereLike('type', 'webhook.%')->orderBy('id', 'DESC')->limit(1)->getAll();
         $this->assertNotEmpty($rows);
         $this->assertStringStartsWith(
             'Refused:',

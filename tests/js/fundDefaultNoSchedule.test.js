@@ -64,10 +64,10 @@ function mount() {
             posted.push( { path, data } );
             return Promise.resolve( {} );
         }
-        if ( path.startsWith( '/fundkit/v1/admin/me/table-view' ) ) {
+        if ( path.startsWith( '/gratora/v1/admin/me/table-view' ) ) {
             return Promise.resolve( {} );
         }
-        if ( path.startsWith( '/fundkit/v1/admin/funds/stats' ) ) {
+        if ( path.startsWith( '/gratora/v1/admin/funds/stats' ) ) {
             return Promise.resolve( {} );
         }
         if ( parse === false ) {
@@ -103,23 +103,23 @@ async function openEditor( fund ) {
     captured.actions.find( ( a ) => a.id === 'edit' ).callback( [ fund ] );
     await settle();
 
-    const dialog = document.querySelector( '.fundkit-dialog' );
+    const dialog = document.querySelector( '.gratora-dialog' );
     expect( dialog ).not.toBeNull();
     return dialog;
 }
 
 const scheduleSwitch = ( dialog ) =>
-    dialog.querySelector( '.fundkit-sched__toggle-row input[type="checkbox"]' );
+    dialog.querySelector( '.gratora-sched__toggle-row input[type="checkbox"]' );
 
 const defaultSwitch = ( dialog ) => {
-    const row = [ ...dialog.querySelectorAll( '.fundkit-toggle-row' ) ]
+    const row = [ ...dialog.querySelectorAll( '.gratora-toggle-row' ) ]
         .find( ( r ) => r.textContent.includes( 'Default fund' ) );
     return row.querySelector( 'input[type="checkbox"]' );
 };
 
 // DateField renders a picker trigger rather than a bare input, so the date row
 // itself is what says whether a schedule is on offer.
-const dateFields = ( dialog ) => dialog.querySelectorAll( '.fundkit-sched__dates .fundkit-date-field' );
+const dateFields = ( dialog ) => dialog.querySelectorAll( '.gratora-sched__dates .gratora-date-field' );
 
 it( 'offers a schedule on an ordinary fund', async () => {
     const dialog = await openEditor( SCHEDULED );
@@ -166,7 +166,7 @@ it( 'names the dates it is about to clear', async () => {
     await captured.actions.find( ( a ) => a.id === 'set-default' ).callback( [ SCHEDULED ] );
     await settle();
 
-    const dialog = document.querySelector( '.fundkit-dialog' );
+    const dialog = document.querySelector( '.gratora-dialog' );
     expect( dialog.textContent ).toContain( '2026-11-01' );
     expect( dialog.textContent ).toContain( '2026-12-31' );
 } );
@@ -214,11 +214,11 @@ it( 'asks before the row action clears a schedule, and sends the clear itself', 
     // agrees to lose the dates.
     expect( posted ).toHaveLength( 0 );
 
-    const dialog = document.querySelector( '.fundkit-dialog' );
+    const dialog = document.querySelector( '.gratora-dialog' );
     expect( dialog ).not.toBeNull();
     expect( dialog.textContent ).toContain( 'clears those dates' );
 
-    [ ...dialog.querySelectorAll( '.fundkit-dialog__foot button' ) ].pop().click();
+    [ ...dialog.querySelectorAll( '.gratora-dialog__foot button' ) ].pop().click();
     await settle();
 
     expect( posted[ 0 ].data ).toEqual( { is_default: true, starts_at: null, ends_at: null } );
@@ -233,8 +233,8 @@ it( 'leaves the dates alone when the reader cancels', async () => {
     await captured.actions.find( ( a ) => a.id === 'set-default' ).callback( [ SCHEDULED ] );
     await settle();
 
-    const dialog = document.querySelector( '.fundkit-dialog' );
-    [ ...dialog.querySelectorAll( '.fundkit-dialog__foot button' ) ].shift().click();
+    const dialog = document.querySelector( '.gratora-dialog' );
+    [ ...dialog.querySelectorAll( '.gratora-dialog__foot button' ) ].shift().click();
     await settle();
 
     expect( posted ).toHaveLength( 0 );
@@ -248,7 +248,7 @@ it( 'asks nothing when the promoted fund has no schedule', async () => {
     await captured.actions.find( ( a ) => a.id === 'set-default' ).callback( [ PLAIN ] );
     await settle();
 
-    expect( document.querySelector( '.fundkit-dialog' ) ).toBeNull();
+    expect( document.querySelector( '.gratora-dialog' ) ).toBeNull();
     expect( posted[ 0 ].data ).toEqual( { is_default: true } );
 } );
 

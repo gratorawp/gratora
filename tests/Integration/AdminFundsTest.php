@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Funds\Fund;
+use Gratora\Funds\Fund;
 use WP_REST_Request;
 
 final class AdminFundsTest extends IntegrationTestCase
 {
     public function test_index_is_empty_initially(): void
     {
-        $res = $this->get('/fundkit/v1/admin/funds');
+        $res = $this->get('/gratora/v1/admin/funds');
         $this->assertSame(200, $res->get_status());
         $this->assertSame([], $res->get_data());
         $this->assertSame('0', $res->get_headers()['X-WP-Total'] ?? '0');
@@ -19,14 +19,14 @@ final class AdminFundsTest extends IntegrationTestCase
 
     public function test_create_requires_code_and_name(): void
     {
-        $res = $this->post('/fundkit/v1/admin/funds', ['code' => 'building']);
+        $res = $this->post('/gratora/v1/admin/funds', ['code' => 'building']);
         $this->assertSame(400, $res->get_status());
         $this->assertSame('rest_missing_callback_param', $res->get_data()['code']);
     }
 
     public function test_create_fund_returns_shaped_payload(): void
     {
-        $res = $this->post('/fundkit/v1/admin/funds', [
+        $res = $this->post('/gratora/v1/admin/funds', [
             'code'          => 'Building',
             'name'          => 'Building Fund',
             'description'   => 'Capital works',
@@ -47,26 +47,26 @@ final class AdminFundsTest extends IntegrationTestCase
 
     public function test_create_rejects_duplicate_code(): void
     {
-        $this->post('/fundkit/v1/admin/funds', ['code' => 'general', 'name' => 'General']);
-        $res = $this->post('/fundkit/v1/admin/funds', ['code' => 'general', 'name' => 'Other']);
+        $this->post('/gratora/v1/admin/funds', ['code' => 'general', 'name' => 'General']);
+        $res = $this->post('/gratora/v1/admin/funds', ['code' => 'general', 'name' => 'Other']);
         $this->assertSame(422, $res->get_status());
-        $this->assertSame('fundkit_invalid_input', $res->get_data()['code']);
+        $this->assertSame('gratora_invalid_input', $res->get_data()['code']);
     }
 
     public function test_show_404s_unknown_fund(): void
     {
-        $res = $this->get('/fundkit/v1/admin/funds/99999');
+        $res = $this->get('/gratora/v1/admin/funds/99999');
         $this->assertSame(404, $res->get_status());
-        $this->assertSame('fundkit_not_found', $res->get_data()['code']);
+        $this->assertSame('gratora_not_found', $res->get_data()['code']);
     }
 
     public function test_update_is_partial(): void
     {
-        $created = $this->post('/fundkit/v1/admin/funds', [
+        $created = $this->post('/gratora/v1/admin/funds', [
             'code' => 'scholar', 'name' => 'Scholarship',
         ])->get_data();
 
-        $res = $this->put("/fundkit/v1/admin/funds/{$created['id']}", ['name' => 'Scholarship Fund']);
+        $res = $this->put("/gratora/v1/admin/funds/{$created['id']}", ['name' => 'Scholarship Fund']);
         $this->assertSame(200, $res->get_status());
         $this->assertSame('Scholarship Fund', $res->get_data()['name']);
         $this->assertSame('scholar', $res->get_data()['code'], 'Untouched fields keep their value');
@@ -74,68 +74,68 @@ final class AdminFundsTest extends IntegrationTestCase
 
     public function test_setting_default_demotes_the_previous_default(): void
     {
-        $a = $this->post('/fundkit/v1/admin/funds', [
+        $a = $this->post('/gratora/v1/admin/funds', [
             'code' => 'general', 'name' => 'General', 'is_default' => true,
         ])->get_data();
         $this->assertTrue($a['is_default']);
 
-        $b = $this->post('/fundkit/v1/admin/funds', [
+        $b = $this->post('/gratora/v1/admin/funds', [
             'code' => 'capital', 'name' => 'Capital', 'is_default' => true,
         ])->get_data();
         $this->assertTrue($b['is_default']);
 
-        $reloadedA = $this->get("/fundkit/v1/admin/funds/{$a['id']}")->get_data();
+        $reloadedA = $this->get("/gratora/v1/admin/funds/{$a['id']}")->get_data();
         $this->assertFalse($reloadedA['is_default'], 'Only one fund stays default');
     }
 
     public function test_default_fund_cannot_be_deleted(): void
     {
-        $fund = $this->post('/fundkit/v1/admin/funds', [
+        $fund = $this->post('/gratora/v1/admin/funds', [
             'code' => 'general', 'name' => 'General', 'is_default' => true,
         ])->get_data();
 
-        $res = $this->deleteReq("/fundkit/v1/admin/funds/{$fund['id']}");
+        $res = $this->deleteReq("/gratora/v1/admin/funds/{$fund['id']}");
         $this->assertSame(422, $res->get_status());
-        $this->assertSame('fundkit_fund_delete_blocked', $res->get_data()['code']);
+        $this->assertSame('gratora_fund_delete_blocked', $res->get_data()['code']);
     }
 
     public function test_unused_fund_is_hard_deleted(): void
     {
-        $fund = $this->post('/fundkit/v1/admin/funds', [
+        $fund = $this->post('/gratora/v1/admin/funds', [
             'code' => 'temp', 'name' => 'Temporary',
         ])->get_data();
 
-        $res = $this->deleteReq("/fundkit/v1/admin/funds/{$fund['id']}");
+        $res = $this->deleteReq("/gratora/v1/admin/funds/{$fund['id']}");
         $this->assertSame(200, $res->get_status());
         $this->assertSame('deleted', $res->get_data()['action']);
-        $this->assertSame(404, $this->get("/fundkit/v1/admin/funds/{$fund['id']}")->get_status());
+        $this->assertSame(404, $this->get("/gratora/v1/admin/funds/{$fund['id']}")->get_status());
     }
 
     public function test_referenced_fund_is_deactivated_not_deleted(): void
     {
-        $fund     = $this->post('/fundkit/v1/admin/funds', ['code' => 'restricted', 'name' => 'Restricted'])->get_data();
-        $campaign = $this->post('/fundkit/v1/admin/campaigns', ['title' => 'Appeal'])->get_data();
-        $this->put("/fundkit/v1/admin/campaigns/{$campaign['id']}", ['default_fund_id' => $fund['id']]);
+        $fund     = $this->post('/gratora/v1/admin/funds', ['code' => 'restricted', 'name' => 'Restricted'])->get_data();
+        $campaign = $this->post('/gratora/v1/admin/campaigns', ['title' => 'Appeal'])->get_data();
+        $this->put("/gratora/v1/admin/campaigns/{$campaign['id']}", ['default_fund_id' => $fund['id']]);
 
-        $res = $this->deleteReq("/fundkit/v1/admin/funds/{$fund['id']}");
+        $res = $this->deleteReq("/gratora/v1/admin/funds/{$fund['id']}");
         $this->assertSame(200, $res->get_status());
         $this->assertSame('deactivated', $res->get_data()['action']);
         $this->assertGreaterThanOrEqual(1, $res->get_data()['campaigns']);
 
-        $reloaded = $this->get("/fundkit/v1/admin/funds/{$fund['id']}");
+        $reloaded = $this->get("/gratora/v1/admin/funds/{$fund['id']}");
         $this->assertSame(200, $reloaded->get_status(), 'Fund is kept, not deleted');
         $this->assertFalse($reloaded->get_data()['is_active'], 'Fund is deactivated');
     }
 
     public function test_fund_designated_by_a_form_is_deactivated_not_deleted(): void
     {
-        $fund     = $this->post('/fundkit/v1/admin/funds', ['code' => 'formfund', 'name' => 'Form Fund'])->get_data();
-        $campaign = $this->post('/fundkit/v1/admin/campaigns', ['title' => 'Has Form'])->get_data();
+        $fund     = $this->post('/gratora/v1/admin/funds', ['code' => 'formfund', 'name' => 'Form Fund'])->get_data();
+        $campaign = $this->post('/gratora/v1/admin/campaigns', ['title' => 'Has Form'])->get_data();
 
         // A form designates this fund as its default. Hard-deleting it would
         // dangle Form.default_fund_id, so it must deactivate-and-keep instead.
         $now  = gmdate('Y-m-d H:i:s');
-        $form = \FundKit\Forms\Form::make();
+        $form = \Gratora\Forms\Form::make();
         $form->title           = 'Designating form';
         $form->slug            = 'designating-form-' . substr(md5(uniqid('', true)), 0, 6);
         $form->status          = 'published';
@@ -145,33 +145,33 @@ final class AdminFundsTest extends IntegrationTestCase
         $form->updated_at      = $now;
         $form->save();
 
-        $res = $this->deleteReq("/fundkit/v1/admin/funds/{$fund['id']}");
+        $res = $this->deleteReq("/gratora/v1/admin/funds/{$fund['id']}");
         $this->assertSame(200, $res->get_status());
         $this->assertSame('deactivated', $res->get_data()['action']);
         $this->assertGreaterThanOrEqual(1, (int) $res->get_data()['forms']);
 
-        $reloaded = $this->get("/fundkit/v1/admin/funds/{$fund['id']}");
+        $reloaded = $this->get("/gratora/v1/admin/funds/{$fund['id']}");
         $this->assertSame(200, $reloaded->get_status(), 'fund kept, not deleted');
         $this->assertFalse($reloaded->get_data()['is_active']);
     }
 
     public function test_reassign_then_delete_moves_references_and_removes_fund(): void
     {
-        $fund     = $this->post('/fundkit/v1/admin/funds', ['code' => 'old', 'name' => 'Old'])->get_data();
-        $target   = $this->post('/fundkit/v1/admin/funds', ['code' => 'new', 'name' => 'New'])->get_data();
-        $campaign = $this->post('/fundkit/v1/admin/campaigns', ['title' => 'Appeal'])->get_data();
-        $this->put("/fundkit/v1/admin/campaigns/{$campaign['id']}", ['default_fund_id' => $fund['id']]);
+        $fund     = $this->post('/gratora/v1/admin/funds', ['code' => 'old', 'name' => 'Old'])->get_data();
+        $target   = $this->post('/gratora/v1/admin/funds', ['code' => 'new', 'name' => 'New'])->get_data();
+        $campaign = $this->post('/gratora/v1/admin/campaigns', ['title' => 'Appeal'])->get_data();
+        $this->put("/gratora/v1/admin/campaigns/{$campaign['id']}", ['default_fund_id' => $fund['id']]);
 
         // A form defaulting to the fund + a recurring plan crediting it: both
         // must repoint, else new donations / renewals would hit the deleted fund.
         $now  = gmdate('Y-m-d H:i:s');
-        $form = \FundKit\Forms\Form::make();
+        $form = \Gratora\Forms\Form::make();
         $form->title = 'Plan form'; $form->slug = 'plan-form'; $form->status = 'published';
         $form->blocks = ''; $form->spec_version = 1; $form->default_fund_id = (int) $fund['id'];
         $form->created_at = $now; $form->updated_at = $now;
         $form->save();
 
-        $plan = \FundKit\Recurring\RecurringPlan::make();
+        $plan = \Gratora\Recurring\RecurringPlan::make();
         $plan->donor_id = 1; $plan->gateway = 'stripe';
         $plan->gateway_subscription_id = 'sub_reassign_' . bin2hex(random_bytes(3));
         $plan->amount_cents = 2000; $plan->currency = 'USD'; $plan->fund_id = (int) $fund['id'];
@@ -180,8 +180,8 @@ final class AdminFundsTest extends IntegrationTestCase
 
         // A paid donation on the source fund: its money must follow to the
         // target fund's aggregate, not vanish with the deleted source.
-        $donation = \FundKit\Donations\Donation::make();
-        $donation->reference = 'FUNDKIT-FUND-MOVE'; $donation->donor_id = 1;
+        $donation = \Gratora\Donations\Donation::make();
+        $donation->reference = 'GRATORA-FUND-MOVE'; $donation->donor_id = 1;
         $donation->amount_cents = 7000; $donation->net_cents = 7000;
         $donation->currency = 'USD'; $donation->base_amount_cents = 7000;
         $donation->base_currency = 'USD'; $donation->fx_rate = '1.00000000';
@@ -190,28 +190,28 @@ final class AdminFundsTest extends IntegrationTestCase
         $donation->paid_at = $now; $donation->created_at = $now; $donation->updated_at = $now;
         $donation->save();
 
-        $res = $this->deleteReq("/fundkit/v1/admin/funds/{$fund['id']}", ['reassign_to' => $target['id']]);
+        $res = $this->deleteReq("/gratora/v1/admin/funds/{$fund['id']}", ['reassign_to' => $target['id']]);
         $this->assertSame(202, $res->get_status());
         $this->assertSame('reassign_queued', $res->get_data()['action']);
 
-        $pending = $this->get("/fundkit/v1/admin/funds/{$fund['id']}");
+        $pending = $this->get("/gratora/v1/admin/funds/{$fund['id']}");
         $this->assertSame(200, $pending->get_status(), 'Source kept until the job finishes');
         $this->assertTrue($pending->get_data()['reassign_pending']);
 
         $this->runPendingAsyncJobs();
 
-        $this->assertSame(404, $this->get("/fundkit/v1/admin/funds/{$fund['id']}")->get_status(),
+        $this->assertSame(404, $this->get("/gratora/v1/admin/funds/{$fund['id']}")->get_status(),
             'Source fund removed once references moved');
-        $reloadedCampaign = $this->get("/fundkit/v1/admin/campaigns/{$campaign['id']}")->get_data();
+        $reloadedCampaign = $this->get("/gratora/v1/admin/campaigns/{$campaign['id']}")->get_data();
         $this->assertSame($target['id'], (int) $reloadedCampaign['default_fund_id'],
             'Campaign default fund repointed to the target');
 
-        $this->assertSame((int) $target['id'], (int) \FundKit\Forms\Form::query()->where('id', $form->id)->get()->default_fund_id,
+        $this->assertSame((int) $target['id'], (int) \Gratora\Forms\Form::query()->where('id', $form->id)->get()->default_fund_id,
             'Form default fund repointed to the target');
-        $this->assertSame((int) $target['id'], (int) \FundKit\Recurring\RecurringPlan::query()->where('id', $plan->id)->get()->fund_id,
+        $this->assertSame((int) $target['id'], (int) \Gratora\Recurring\RecurringPlan::query()->where('id', $plan->id)->get()->fund_id,
             'Recurring plan fund repointed to the target');
 
-        $targetFund = \FundKit\Funds\Fund::query()->where('id', (int) $target['id'])->get();
+        $targetFund = \Gratora\Funds\Fund::query()->where('id', (int) $target['id'])->get();
         $this->assertSame(7000, (int) $targetFund->raised_cents,
             'Target fund raised_cents resynced to include the moved donation');
         $this->assertSame(1, (int) $targetFund->donations_count,
@@ -220,56 +220,56 @@ final class AdminFundsTest extends IntegrationTestCase
 
     public function test_reassign_to_invalid_target_is_422(): void
     {
-        $fund     = $this->post('/fundkit/v1/admin/funds', ['code' => 'src', 'name' => 'Src'])->get_data();
-        $campaign = $this->post('/fundkit/v1/admin/campaigns', ['title' => 'Appeal'])->get_data();
-        $this->put("/fundkit/v1/admin/campaigns/{$campaign['id']}", ['default_fund_id' => $fund['id']]);
+        $fund     = $this->post('/gratora/v1/admin/funds', ['code' => 'src', 'name' => 'Src'])->get_data();
+        $campaign = $this->post('/gratora/v1/admin/campaigns', ['title' => 'Appeal'])->get_data();
+        $this->put("/gratora/v1/admin/campaigns/{$campaign['id']}", ['default_fund_id' => $fund['id']]);
 
-        $missing = $this->deleteReq("/fundkit/v1/admin/funds/{$fund['id']}", ['reassign_to' => 999999]);
+        $missing = $this->deleteReq("/gratora/v1/admin/funds/{$fund['id']}", ['reassign_to' => 999999]);
         $this->assertSame(422, $missing->get_status());
-        $this->assertSame('fundkit_invalid_input', $missing->get_data()['code']);
+        $this->assertSame('gratora_invalid_input', $missing->get_data()['code']);
 
-        $self = $this->deleteReq("/fundkit/v1/admin/funds/{$fund['id']}", ['reassign_to' => $fund['id']]);
+        $self = $this->deleteReq("/gratora/v1/admin/funds/{$fund['id']}", ['reassign_to' => $fund['id']]);
         $this->assertSame(422, $self->get_status());
-        $this->assertSame('fundkit_invalid_input', $self->get_data()['code']);
+        $this->assertSame('gratora_invalid_input', $self->get_data()['code']);
     }
 
     public function test_orphaned_reassignment_is_self_healed_on_list_load(): void
     {
-        $fund     = $this->post('/fundkit/v1/admin/funds', ['code' => 'orphan', 'name' => 'Orphan'])->get_data();
-        $target   = $this->post('/fundkit/v1/admin/funds', ['code' => 'keep', 'name' => 'Keep'])->get_data();
-        $campaign = $this->post('/fundkit/v1/admin/campaigns', ['title' => 'Appeal'])->get_data();
-        $this->put("/fundkit/v1/admin/campaigns/{$campaign['id']}", ['default_fund_id' => $fund['id']]);
+        $fund     = $this->post('/gratora/v1/admin/funds', ['code' => 'orphan', 'name' => 'Orphan'])->get_data();
+        $target   = $this->post('/gratora/v1/admin/funds', ['code' => 'keep', 'name' => 'Keep'])->get_data();
+        $campaign = $this->post('/gratora/v1/admin/campaigns', ['title' => 'Appeal'])->get_data();
+        $this->put("/gratora/v1/admin/campaigns/{$campaign['id']}", ['default_fund_id' => $fund['id']]);
 
         // Simulate a pending reassignment whose job was lost.
-        \FundKit\Funds\FundReassignmentJob::markPending((int) $fund['id'], (int) $target['id']);
+        \Gratora\Funds\FundReassignmentJob::markPending((int) $fund['id'], (int) $target['id']);
 
         $pendingActions = static fn (): int => (int) self::$wpdb->get_var(
             "SELECT COUNT(*) FROM " . self::$prefix . "actionscheduler_actions"
-            . " WHERE hook = '" . \FundKit\Funds\FundReassignmentJob::HOOK . "' AND status = 'pending'"
+            . " WHERE hook = '" . \Gratora\Funds\FundReassignmentJob::HOOK . "' AND status = 'pending'"
         );
         $this->assertSame(0, $pendingActions(), 'Precondition: no live reassignment job');
 
         // Loading the funds list reconciles and re-queues the lost job.
-        $this->get('/fundkit/v1/admin/funds');
+        $this->get('/gratora/v1/admin/funds');
         $this->assertGreaterThanOrEqual(1, $pendingActions(), 'Reconcile re-queued the lost job');
 
         $this->runPendingAsyncJobs();
 
-        $this->assertSame(404, $this->get("/fundkit/v1/admin/funds/{$fund['id']}")->get_status(),
+        $this->assertSame(404, $this->get("/gratora/v1/admin/funds/{$fund['id']}")->get_status(),
             'Source fund removed once the re-queued job ran');
-        $this->assertArrayNotHasKey((int) $fund['id'], \FundKit\Funds\FundReassignmentJob::pending(),
+        $this->assertArrayNotHasKey((int) $fund['id'], \Gratora\Funds\FundReassignmentJob::pending(),
             'Pending marker cleared, so the badge resolves');
-        $reCampaign = $this->get("/fundkit/v1/admin/campaigns/{$campaign['id']}")->get_data();
+        $reCampaign = $this->get("/gratora/v1/admin/campaigns/{$campaign['id']}")->get_data();
         $this->assertSame((int) $target['id'], (int) $reCampaign['default_fund_id']);
     }
 
     public function test_index_paginates_and_sets_headers(): void
     {
         for ($i = 1; $i <= 6; $i++) {
-            $this->post('/fundkit/v1/admin/funds', ['code' => "fund-$i", 'name' => "Fund $i"]);
+            $this->post('/gratora/v1/admin/funds', ['code' => "fund-$i", 'name' => "Fund $i"]);
         }
 
-        $res = $this->get('/fundkit/v1/admin/funds', ['per_page' => 5, 'page' => 1]);
+        $res = $this->get('/gratora/v1/admin/funds', ['per_page' => 5, 'page' => 1]);
         $this->assertSame(200, $res->get_status());
         $this->assertCount(5, $res->get_data());
         $this->assertSame('6', $res->get_headers()['X-WP-Total'] ?? '0');
@@ -278,10 +278,10 @@ final class AdminFundsTest extends IntegrationTestCase
 
     public function test_search_matches_name_or_code(): void
     {
-        $this->post('/fundkit/v1/admin/funds', ['code' => 'roof', 'name' => 'Roof Repair']);
-        $this->post('/fundkit/v1/admin/funds', ['code' => 'general', 'name' => 'General']);
+        $this->post('/gratora/v1/admin/funds', ['code' => 'roof', 'name' => 'Roof Repair']);
+        $this->post('/gratora/v1/admin/funds', ['code' => 'general', 'name' => 'General']);
 
-        $res = $this->get('/fundkit/v1/admin/funds', ['search' => 'roof']);
+        $res = $this->get('/gratora/v1/admin/funds', ['search' => 'roof']);
         $names = array_column($res->get_data(), 'code');
         $this->assertContains('roof', $names);
         $this->assertNotContains('general', $names);
@@ -289,58 +289,58 @@ final class AdminFundsTest extends IntegrationTestCase
 
     public function test_fund_cannot_be_its_own_parent(): void
     {
-        $a = $this->post('/fundkit/v1/admin/funds', ['code' => 'a', 'name' => 'A'])->get_data();
+        $a = $this->post('/gratora/v1/admin/funds', ['code' => 'a', 'name' => 'A'])->get_data();
 
-        $res = $this->put("/fundkit/v1/admin/funds/{$a['id']}", ['parent_fund_id' => $a['id']]);
+        $res = $this->put("/gratora/v1/admin/funds/{$a['id']}", ['parent_fund_id' => $a['id']]);
         $this->assertSame(422, $res->get_status());
-        $this->assertSame('fundkit_invalid_input', $res->get_data()['code']);
+        $this->assertSame('gratora_invalid_input', $res->get_data()['code']);
     }
 
     public function test_nesting_is_limited_to_one_level(): void
     {
-        $parent = $this->post('/fundkit/v1/admin/funds', ['code' => 'parent', 'name' => 'Parent'])->get_data();
-        $child  = $this->post('/fundkit/v1/admin/funds', [
+        $parent = $this->post('/gratora/v1/admin/funds', ['code' => 'parent', 'name' => 'Parent'])->get_data();
+        $child  = $this->post('/gratora/v1/admin/funds', [
             'code' => 'child', 'name' => 'Child', 'parent_fund_id' => $parent['id'],
         ])->get_data();
         $this->assertSame($parent['id'], $child['parent_fund_id']);
 
         // A sub-fund cannot itself be a parent (would be three levels deep).
-        $res = $this->post('/fundkit/v1/admin/funds', [
+        $res = $this->post('/gratora/v1/admin/funds', [
             'code' => 'grandchild', 'name' => 'Grandchild', 'parent_fund_id' => $child['id'],
         ]);
         $this->assertSame(422, $res->get_status());
-        $this->assertSame('fundkit_invalid_input', $res->get_data()['code']);
+        $this->assertSame('gratora_invalid_input', $res->get_data()['code']);
     }
 
     public function test_fund_with_children_cannot_become_a_child(): void
     {
-        $parent = $this->post('/fundkit/v1/admin/funds', ['code' => 'parent', 'name' => 'Parent'])->get_data();
-        $this->post('/fundkit/v1/admin/funds', [
+        $parent = $this->post('/gratora/v1/admin/funds', ['code' => 'parent', 'name' => 'Parent'])->get_data();
+        $this->post('/gratora/v1/admin/funds', [
             'code' => 'child', 'name' => 'Child', 'parent_fund_id' => $parent['id'],
         ]);
-        $other = $this->post('/fundkit/v1/admin/funds', ['code' => 'other', 'name' => 'Other'])->get_data();
+        $other = $this->post('/gratora/v1/admin/funds', ['code' => 'other', 'name' => 'Other'])->get_data();
 
         // Parent has a sub-fund, so it cannot be nested under Other (and this
         // is exactly the A->B, B->A cycle case).
-        $res = $this->put("/fundkit/v1/admin/funds/{$parent['id']}", ['parent_fund_id' => $other['id']]);
+        $res = $this->put("/gratora/v1/admin/funds/{$parent['id']}", ['parent_fund_id' => $other['id']]);
         $this->assertSame(422, $res->get_status());
-        $this->assertSame('fundkit_invalid_input', $res->get_data()['code']);
+        $this->assertSame('gratora_invalid_input', $res->get_data()['code']);
     }
 
     public function test_stats_returns_org_wide_aggregates(): void
     {
-        $this->post('/fundkit/v1/admin/funds', [
+        $this->post('/gratora/v1/admin/funds', [
             'code' => 'general', 'name' => 'General', 'is_default' => true, 'goal_cents' => 0,
         ]);
-        $this->post('/fundkit/v1/admin/funds', [
+        $this->post('/gratora/v1/admin/funds', [
             'code' => 'building', 'name' => 'Building', 'is_restricted' => true,
         ]);
-        $inactive = $this->post('/fundkit/v1/admin/funds', [
+        $inactive = $this->post('/gratora/v1/admin/funds', [
             'code' => 'old', 'name' => 'Old',
         ])->get_data();
-        $this->put("/fundkit/v1/admin/funds/{$inactive['id']}", ['is_active' => false]);
+        $this->put("/gratora/v1/admin/funds/{$inactive['id']}", ['is_active' => false]);
 
-        $stats = $this->get('/fundkit/v1/admin/funds/stats')->get_data();
+        $stats = $this->get('/gratora/v1/admin/funds/stats')->get_data();
 
         $this->assertSame(3, $stats['total']);
         $this->assertSame(2, $stats['active'], 'general + building active; old deactivated');
@@ -351,20 +351,20 @@ final class AdminFundsTest extends IntegrationTestCase
 
     public function test_parent_fund_rolls_up_child_totals(): void
     {
-        $parent = $this->post('/fundkit/v1/admin/funds', [
+        $parent = $this->post('/gratora/v1/admin/funds', [
             'code' => 'parent', 'name' => 'Parent', 'goal_cents' => 100000,
         ])->get_data();
-        $child = $this->post('/fundkit/v1/admin/funds', [
+        $child = $this->post('/gratora/v1/admin/funds', [
             'code' => 'child', 'name' => 'Child', 'parent_fund_id' => $parent['id'],
         ])->get_data();
 
         // A synced child that has collected donations; the parent's own row
         // stays 0 because donations name the exact fund.
-        \FundKit\Funds\Fund::query()->where('id', (int) $child['id'])
+        \Gratora\Funds\Fund::query()->where('id', (int) $child['id'])
             ->update(['raised_cents' => 7000, 'donations_count' => 2]);
 
         $byId = [];
-        foreach ($this->get('/fundkit/v1/admin/funds')->get_data() as $row) {
+        foreach ($this->get('/gratora/v1/admin/funds')->get_data() as $row) {
             $byId[(int) $row['id']] = $row;
         }
 
@@ -375,27 +375,27 @@ final class AdminFundsTest extends IntegrationTestCase
         $this->assertSame(7000, $byId[(int) $child['id']]['raised_cents'],
             'Child keeps its own total');
 
-        $this->assertSame(7000, $this->get('/fundkit/v1/admin/funds/stats')->get_data()['raised_cents'],
+        $this->assertSame(7000, $this->get('/gratora/v1/admin/funds/stats')->get_data()['raised_cents'],
             'Org-wide raised counts the money once, not once per level');
     }
 
     public function test_deletable_flag_mirrors_the_delete_guard(): void
     {
         // An untouched fund is hard-deletable.
-        $free = $this->post('/fundkit/v1/admin/funds', ['code' => 'free', 'name' => 'Free'])->get_data();
+        $free = $this->post('/gratora/v1/admin/funds', ['code' => 'free', 'name' => 'Free'])->get_data();
         $this->assertTrue($free['deletable']);
 
         // A fund a campaign points to is NOT deletable even with zero donations
         // - the case the old live-only donation count got wrong.
-        $used     = $this->post('/fundkit/v1/admin/funds', ['code' => 'used', 'name' => 'Used'])->get_data();
-        $campaign = $this->post('/fundkit/v1/admin/campaigns', ['title' => 'Appeal'])->get_data();
-        $this->put("/fundkit/v1/admin/campaigns/{$campaign['id']}", ['default_fund_id' => $used['id']]);
+        $used     = $this->post('/gratora/v1/admin/funds', ['code' => 'used', 'name' => 'Used'])->get_data();
+        $campaign = $this->post('/gratora/v1/admin/campaigns', ['title' => 'Appeal'])->get_data();
+        $this->put("/gratora/v1/admin/campaigns/{$campaign['id']}", ['default_fund_id' => $used['id']]);
 
         // A fund reached only by a test donation is likewise blocked.
-        $tested = $this->post('/fundkit/v1/admin/funds', ['code' => 'tested', 'name' => 'Tested'])->get_data();
+        $tested = $this->post('/gratora/v1/admin/funds', ['code' => 'tested', 'name' => 'Tested'])->get_data();
         $now = gmdate('Y-m-d H:i:s');
-        $d = \FundKit\Donations\Donation::make();
-        $d->reference = 'FUNDKIT-DEL-TEST'; $d->donor_id = 1;
+        $d = \Gratora\Donations\Donation::make();
+        $d->reference = 'GRATORA-DEL-TEST'; $d->donor_id = 1;
         $d->amount_cents = 1000; $d->net_cents = 1000; $d->currency = 'USD';
         $d->base_amount_cents = 1000; $d->base_currency = 'USD'; $d->fx_rate = '1.00000000';
         $d->gateway = 'offline'; $d->status = 'paid'; $d->is_test = true;
@@ -404,7 +404,7 @@ final class AdminFundsTest extends IntegrationTestCase
         $d->save();
 
         $byId = [];
-        foreach ($this->get('/fundkit/v1/admin/funds')->get_data() as $row) {
+        foreach ($this->get('/gratora/v1/admin/funds')->get_data() as $row) {
             $byId[(int) $row['id']] = $row;
         }
 
@@ -413,10 +413,10 @@ final class AdminFundsTest extends IntegrationTestCase
         $this->assertFalse($byId[(int) $tested['id']]['deletable'], 'even a test donation blocks hard-delete');
 
         // The default fund is never deletable.
-        $default = $this->post('/fundkit/v1/admin/funds', [
+        $default = $this->post('/gratora/v1/admin/funds', [
             'code' => 'main', 'name' => 'Main', 'is_default' => true,
         ])->get_data();
-        $this->assertFalse($this->get("/fundkit/v1/admin/funds/{$default['id']}")->get_data()['deletable']);
+        $this->assertFalse($this->get("/gratora/v1/admin/funds/{$default['id']}")->get_data()['deletable']);
     }
 
     private function get(string $path, array $params = []): \WP_REST_Response
@@ -433,9 +433,9 @@ final class AdminFundsTest extends IntegrationTestCase
      */
     public function test_an_unparseable_end_date_is_refused_rather_than_closing_the_fund(): void
     {
-        $fund = $this->post('/fundkit/v1/admin/funds', ['code' => 'baddate', 'name' => 'Bad Date'])->get_data();
+        $fund = $this->post('/gratora/v1/admin/funds', ['code' => 'baddate', 'name' => 'Bad Date'])->get_data();
 
-        $res = $this->put("/fundkit/v1/admin/funds/{$fund['id']}", ['ends_at' => '31/12/2026']);
+        $res = $this->put("/gratora/v1/admin/funds/{$fund['id']}", ['ends_at' => '31/12/2026']);
         $this->assertSame(422, $res->get_status());
 
         $reloaded = Fund::query()->where('id', (int) $fund['id'])->get();
@@ -445,9 +445,9 @@ final class AdminFundsTest extends IntegrationTestCase
 
     public function test_a_real_end_date_is_still_accepted(): void
     {
-        $fund = $this->post('/fundkit/v1/admin/funds', ['code' => 'gooddate', 'name' => 'Good Date'])->get_data();
+        $fund = $this->post('/gratora/v1/admin/funds', ['code' => 'gooddate', 'name' => 'Good Date'])->get_data();
 
-        $this->assertSame(200, $this->put("/fundkit/v1/admin/funds/{$fund['id']}", ['ends_at' => '2027-01-31'])->get_status());
+        $this->assertSame(200, $this->put("/gratora/v1/admin/funds/{$fund['id']}", ['ends_at' => '2027-01-31'])->get_status());
         $this->assertSame(
             '2027-01-31 00:00:00',
             (string) Fund::query()->where('id', (int) $fund['id'])->get()->ends_at
@@ -461,9 +461,9 @@ final class AdminFundsTest extends IntegrationTestCase
      */
     public function test_a_backwards_schedule_is_refused_in_words_the_dialog_can_render(): void
     {
-        $fund = $this->post('/fundkit/v1/admin/funds', ['code' => 'window', 'name' => 'Window'])->get_data();
+        $fund = $this->post('/gratora/v1/admin/funds', ['code' => 'window', 'name' => 'Window'])->get_data();
 
-        $res = $this->put("/fundkit/v1/admin/funds/{$fund['id']}", [
+        $res = $this->put("/gratora/v1/admin/funds/{$fund['id']}", [
             'starts_at' => '2026-12-01',
             'ends_at'   => '2026-01-01',
         ]);

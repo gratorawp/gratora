@@ -5,10 +5,10 @@ defined('ABSPATH') || exit;
  * @var string $placeholder
  * @var bool   $required
  */
-$labelText = $label !== '' ? $label : __('Email', 'fundraising-toolkit');
+$labelText = $label !== '' ? $label : __('Email', 'gratora');
 ?>
-<label class="fundkit-block fundkit-block--email fundkit-donor__field">
-    <span class="fundkit-donor__label"><?php echo esc_html($labelText); ?></span>
+<label class="gratora-block gratora-block--email gratora-donor__field">
+    <span class="gratora-donor__label"><?php echo esc_html($labelText); ?></span>
     <input type="email" name="email" autocomplete="email"
            placeholder="<?php echo esc_attr($placeholder); ?>"
            <?php echo esc_attr($required ? 'required' : ''); ?>>

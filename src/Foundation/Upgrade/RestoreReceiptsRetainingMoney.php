@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Upgrade;
+namespace Gratora\Foundation\Upgrade;
 
-use FundKit\Donations\Donation;
-use FundKit\Receipts\Receipt;
+use Gratora\Donations\Donation;
+use Gratora\Receipts\Receipt;
 
 /**
  * Puts back the receipts a partial refund voided.
@@ -19,7 +19,7 @@ use FundKit\Receipts\Receipt;
  */
 final class RestoreReceiptsRetainingMoney implements UpgradeRoutine
 {
-    private const OPTION_CURSOR = 'fundkit_upgrade_restore_receipts_cursor';
+    private const OPTION_CURSOR = 'gratora_upgrade_restore_receipts_cursor';
     private const BATCH         = 200;
 
     /** @since 1.0.0 */
@@ -31,7 +31,7 @@ final class RestoreReceiptsRetainingMoney implements UpgradeRoutine
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Restoring receipts that a partial refund withdrew.', 'fundraising-toolkit');
+        return __('Restoring receipts that a partial refund withdrew.', 'gratora');
     }
 
     /** @since 1.0.0 */

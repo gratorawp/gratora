@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\Stripe\StripeGateway;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\Stripe\StripeGateway;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 
 /**
  * gateway_subscription_id is NOT NULL under a unique index, so a plan that
@@ -128,7 +128,7 @@ final class ImportedPlanIdsAreNotSentTest extends IntegrationTestCase
 
     public function test_a_retry_says_there_is_nothing_to_collect(): void
     {
-        $this->expectException(\FundKit\Gateways\PaymentRetryUnavailable::class);
+        $this->expectException(\Gratora\Gateways\PaymentRetryUnavailable::class);
 
         try {
             $this->gateway()->retryPayment($this->importedPlan());

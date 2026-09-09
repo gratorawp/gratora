@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorRetention;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorRetention;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
- * Retention is the only thing in FundKit that destroys data without being asked,
+ * Retention is the only thing in Gratora that destroys data without being asked,
  * so the three things that stop it surprising anyone are pinned here: it does
  * nothing until an org switches it on, it does not run the day it is switched
  * on, and it can be counted before it is let loose.
@@ -51,14 +51,14 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('fundkit_privacy');
+        delete_option('gratora_privacy');
         delete_option(DonorRetention::STARTS_AT_OPTION);
         parent::tearDown();
     }
 
     public function test_a_fresh_site_erases_nobody_and_offers_a_seven_year_window(): void
     {
-        delete_option('fundkit_privacy');
+        delete_option('gratora_privacy');
 
         $privacy = Plugin::instance()->container->get(SettingsService::class)->get('privacy');
 
@@ -94,13 +94,13 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         // Gift Aid: HMRC can ask about the donor's name and address for six
         // years after the tax year, and redaction takes exactly those.
         $floor = static fn (): int => 6;
-        add_filter('fundkit.donor.retention_years', $floor);
+        add_filter('gratora.donor.retention_years', $floor);
 
         try {
             $this->retention()->run();
             $preview = $this->retention()->preview(30);
         } finally {
-            remove_filter('fundkit.donor.retention_years', $floor);
+            remove_filter('gratora.donor.retention_years', $floor);
         }
 
         $this->assertNull(
@@ -118,12 +118,12 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         update_option(DonorRetention::STARTS_AT_OPTION, time() - 86400, false);
 
         $floor = static fn (): int => 30;
-        add_filter('fundkit.donor.retention_years', $floor);
+        add_filter('gratora.donor.retention_years', $floor);
 
         try {
             $this->retention()->run();
         } finally {
-            remove_filter('fundkit.donor.retention_years', $floor);
+            remove_filter('gratora.donor.retention_years', $floor);
         }
 
         $this->assertNull(
@@ -140,7 +140,7 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         update_option(DonorRetention::STARTS_AT_OPTION, time() - 86400, false);
 
         $data = (array) rest_do_request(
-            new WP_REST_Request('GET', '/fundkit/v1/admin/settings/retention-preview')
+            new WP_REST_Request('GET', '/gratora/v1/admin/settings/retention-preview')
         )->get_data();
 
         $this->assertSame(0, $data['years'], 'zero years is what makes the panel hide the warning');
@@ -182,10 +182,10 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         update_option(DonorRetention::STARTS_AT_OPTION, time() - (365 * 86400), false);
         $donor = $this->ancientDonor();
 
-        $request = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/import');
+        $request = new WP_REST_Request('POST', '/gratora/v1/admin/tools/import');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode(['settings' => [
-            'fundkit_privacy' => ['erase_inactive_donors' => true, 'donor_retention_years' => 1],
+            'gratora_privacy' => ['erase_inactive_donors' => true, 'donor_retention_years' => 1],
         ]]));
 
         $this->assertSame(200, rest_do_request($request)->get_status());
@@ -208,10 +208,10 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         // An org that has been erasing for a while: the grace period is over.
         update_option(DonorRetention::STARTS_AT_OPTION, time() - 86400, false);
 
-        $request = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/import');
+        $request = new WP_REST_Request('POST', '/gratora/v1/admin/tools/import');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode(['settings' => [
-            'fundkit_privacy' => ['erase_inactive_donors' => true, 'donor_retention_years' => 1],
+            'gratora_privacy' => ['erase_inactive_donors' => true, 'donor_retention_years' => 1],
         ]]));
 
         $this->assertSame(200, rest_do_request($request)->get_status());
@@ -271,12 +271,12 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         $this->ancientDonor();
 
         $floor = static fn (): int => 30;
-        add_filter('fundkit.donor.retention_years', $floor);
+        add_filter('gratora.donor.retention_years', $floor);
 
         try {
             $preview = $this->retention()->preview(30, 2);
         } finally {
-            remove_filter('fundkit.donor.retention_years', $floor);
+            remove_filter('gratora.donor.retention_years', $floor);
         }
 
         $this->assertSame(30, $preview['years'], 'the floor is the window, not the number typed');
@@ -289,7 +289,7 @@ final class DonorRetentionGraceTest extends IntegrationTestCase
         $this->erasure(false, 7);
         $this->ancientDonor();
 
-        $request = new WP_REST_Request('GET', '/fundkit/v1/admin/settings/retention-preview');
+        $request = new WP_REST_Request('GET', '/gratora/v1/admin/settings/retention-preview');
         $request->set_param('years', 5);
 
         $data = (array) rest_do_request($request)->get_data();

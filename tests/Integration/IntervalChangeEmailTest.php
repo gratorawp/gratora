@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\Sandbox\SandboxGateway;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanActions;
-use FundKit\Recurring\RecurringPlanChange;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\Sandbox\SandboxGateway;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanActions;
+use Gratora\Recurring\RecurringPlanChange;
 
 /**
  * The admin dialog offers "Notify donor" on a schedule change, defaulted on,
@@ -27,8 +27,8 @@ final class IntervalChangeEmailTest extends IntegrationTestCase
         $manager = $c->get(GatewayManager::class);
         if ($manager->get('sandbox') === null) {
             $manager->register(new SandboxGateway(
-                $c->get(\FundKit\Foundation\Time\Clock::class),
-                $c->get(\FundKit\Recurring\RecurringPlanRepository::class)
+                $c->get(\Gratora\Foundation\Time\Clock::class),
+                $c->get(\Gratora\Recurring\RecurringPlanRepository::class)
             ));
         }
     }
@@ -107,7 +107,7 @@ final class IntervalChangeEmailTest extends IntegrationTestCase
         $this->assertStringContainsString("'recurring_interval_changed'", $descriptors);
 
         $templates = (array) (Plugin::instance()->container
-            ->get(\FundKit\Settings\SettingsService::class)->get('email')['templates'] ?? []);
+            ->get(\Gratora\Settings\SettingsService::class)->get('email')['templates'] ?? []);
 
         $this->assertArrayHasKey('recurring_interval_changed', $templates);
         $this->assertTrue((bool) $templates['recurring_interval_changed']['enabled']);

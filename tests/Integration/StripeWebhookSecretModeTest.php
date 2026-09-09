@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\Stripe\StripeApi;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\Stripe\StripeApi;
 
 /**
  * The signing secret that matters is the one for the mode the site charges in.
@@ -30,7 +30,7 @@ final class StripeWebhookSecretModeTest extends IntegrationTestCase
     /** @param array<string,string> $stripe */
     private function config(bool $testMode, array $stripe): void
     {
-        update_option('fundkit_gateway_config', ['test_mode' => $testMode, 'stripe' => $stripe]);
+        update_option('gratora_gateway_config', ['test_mode' => $testMode, 'stripe' => $stripe]);
     }
 
     public function test_a_live_site_is_not_satisfied_by_the_test_secret(): void

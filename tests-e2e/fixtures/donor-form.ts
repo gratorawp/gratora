@@ -7,8 +7,8 @@ type Fixtures = {
 
 /**
  * Per-spec override of the form path the `donor` fixture opens. Default empty
- * means "use the canonical form at FUNDKIT_E2E_FORM_PATH" (DonorFormPage.open()).
- * Set via `test.use({ formPath: process.env.FUNDKIT_E2E_SOMETHING ?? '' })` in a
+ * means "use the canonical form at GRATORA_E2E_FORM_PATH" (DonorFormPage.open()).
+ * Set via `test.use({ formPath: process.env.GRATORA_E2E_SOMETHING ?? '' })` in a
  * spec that needs a different seeded form.
  */
 type Options = {

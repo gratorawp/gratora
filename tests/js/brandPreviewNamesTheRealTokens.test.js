@@ -20,17 +20,17 @@ jest.mock( 'react/jsx-dev-runtime', () => require( 'preact/compat/jsx-dev-runtim
 
 import StylePreview, { resolveEffectiveTokens } from '../../assets/admin/_shared/styling/StylePreview';
 
-const pkg = path.dirname( require.resolve( '@fundkit/ui/package.json' ) );
+const pkg = path.dirname( require.resolve( '@gratora/ui/package.json' ) );
 
 const PREVIEW = sass.compile( path.join( pkg, 'src/scss/components/_style-preview.scss' ) ).css;
 const RUNTIME = sass.compile( path.join( __dirname, '../../assets/donation-form/runtime.scss' ) ).css;
 
 const reads = ( css ) => new Set(
-    [ ...css.matchAll( /var\(\s*(--fundkit-[a-z0-9-]+)/g ) ].map( ( m ) => m[ 1 ] )
+    [ ...css.matchAll( /var\(\s*(--gratora-[a-z0-9-]+)/g ) ].map( ( m ) => m[ 1 ] )
 );
 
 const declares = ( css ) => new Set(
-    [ ...css.matchAll( /(?:^|[;{\s])(--fundkit-[a-z0-9-]+)\s*:/g ) ].map( ( m ) => m[ 1 ] )
+    [ ...css.matchAll( /(?:^|[;{\s])(--gratora-[a-z0-9-]+)\s*:/g ) ].map( ( m ) => m[ 1 ] )
 );
 
 const CARRIED = new Set( [ ...reads( RUNTIME ), ...declares( RUNTIME ) ] );
@@ -50,24 +50,24 @@ it( 'reads no property the published form lacks', () => {
 
 it( 'shows the typography and border-width controls moving', () => {
     const frame = preview( {
-        'fundkit-typeface':  'Georgia, serif',
-        'fundkit-type-size': '18px',
-        'fundkit-stroke':    '3px',
-    } ).querySelector( '.fundkit-style-preview__frame' );
+        'gratora-typeface':  'Georgia, serif',
+        'gratora-type-size': '18px',
+        'gratora-stroke':    '3px',
+    } ).querySelector( '.gratora-style-preview__frame' );
 
-    for ( const name of [ '--fundkit-typeface', '--fundkit-type-size', '--fundkit-stroke' ] ) {
+    for ( const name of [ '--gratora-typeface', '--gratora-type-size', '--gratora-stroke' ] ) {
         expect( frame.style.getPropertyValue( name ).trim() ).not.toBe( '' );
         expect( reads( PREVIEW ) ).toContain( name );
     }
 } );
 
 it( 'mounts the preview with no box of its own around it', () => {
-    expect( preview( {} ).firstElementChild.className ).toBe( 'fundkit-style-preview' );
+    expect( preview( {} ).firstElementChild.className ).toBe( 'gratora-style-preview' );
 } );
 
 it( 'still hands the campaign screen the resolver it imports', () => {
-    expect( resolveEffectiveTokens( { layer: 'brand', tokens: { 'fundkit-accent': '#ffd400' }, styling: {} } ) )
-        .toEqual( { 'fundkit-accent': '#ffd400' } );
+    expect( resolveEffectiveTokens( { layer: 'brand', tokens: { 'gratora-accent': '#ffd400' }, styling: {} } ) )
+        .toEqual( { 'gratora-accent': '#ffd400' } );
 } );
 
 /**
@@ -82,10 +82,10 @@ it( 'rests the amount tiles on the ground the published form rests them on', () 
         return css.slice( at, css.indexOf( '}', at ) );
     };
 
-    const previewTile = rule( PREVIEW, '.fundkit-style-preview__amount ' );
-    const formTile    = rule( RUNTIME, '.fundkit-form__preset ' );
+    const previewTile = rule( PREVIEW, '.gratora-style-preview__amount ' );
+    const formTile    = rule( RUNTIME, '.gratora-form__preset ' );
 
-    for ( const name of [ '--fundkit-bg-soft', '--fundkit-on-soft' ] ) {
+    for ( const name of [ '--gratora-bg-soft', '--gratora-on-soft' ] ) {
         expect( formTile ).toContain( `var(${ name }` );
         expect( previewTile ).toContain( `var(${ name }` );
     }

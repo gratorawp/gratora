@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Transfer;
+namespace Gratora\Foundation\Transfer;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Foundation\Time\SystemClock;
-use FundKit\Funds\Fund;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\References\ReferenceGenerator;
+use Gratora\Foundation\Time\SystemClock;
+use Gratora\Funds\Fund;
+use Gratora\Vendor\Queryable\DB;
 use Throwable;
 
 /**
@@ -29,17 +29,17 @@ final class DataImporter
      * before the donations that belong to them.
      */
     private const ORDER = [
-        'fundkit_funds',
-        'fundkit_campaigns',
-        'fundkit_forms',
-        'fundkit_donors',
-        'fundkit_recurring_plans',
-        'fundkit_donations',
-        'fundkit_consents',
-        'fundkit_donor_notes',
-        'fundkit_donation_notes',
-        'fundkit_refunds',
-        'fundkit_receipts',
+        'gratora_funds',
+        'gratora_campaigns',
+        'gratora_forms',
+        'gratora_donors',
+        'gratora_recurring_plans',
+        'gratora_donations',
+        'gratora_consents',
+        'gratora_donor_notes',
+        'gratora_donation_notes',
+        'gratora_refunds',
+        'gratora_receipts',
     ];
 
     /**
@@ -47,23 +47,23 @@ final class DataImporter
      * duplicate everything and a resumed import would double what it had done.
      */
     private const NATURAL_KEY = [
-        'fundkit_funds'           => ['code'],
-        'fundkit_campaigns'       => ['slug'],
-        'fundkit_forms'           => ['slug'],
-        'fundkit_donors'          => ['email_hash'],
-        'fundkit_donations'       => ['reference'],
-        'fundkit_recurring_plans' => ['gateway', 'gateway_subscription_id'],
-        'fundkit_refunds'         => ['gateway_refund_id'],
-        'fundkit_receipts'        => ['renderer_id', 'receipt_number'],
+        'gratora_funds'           => ['code'],
+        'gratora_campaigns'       => ['slug'],
+        'gratora_forms'           => ['slug'],
+        'gratora_donors'          => ['email_hash'],
+        'gratora_donations'       => ['reference'],
+        'gratora_recurring_plans' => ['gateway', 'gateway_subscription_id'],
+        'gratora_refunds'         => ['gateway_refund_id'],
+        'gratora_receipts'        => ['renderer_id', 'receipt_number'],
         // No unique index backs these three, so the columns below are the only
         // thing standing between a second run and a doubled audit trail. A
         // consent is the lawful basis for having mailed someone and a note is
         // what a fundraiser wrote about them; neither may arrive twice. The
         // trade is second-resolution: two rows alike in every column named
         // here, written within the same second, restore as one.
-        'fundkit_consents'        => ['donor_id', 'purpose', 'granted', 'occurred_at'],
-        'fundkit_donor_notes'     => ['donor_id', 'created_at'],
-        'fundkit_donation_notes'  => ['donation_id', 'created_at'],
+        'gratora_consents'        => ['donor_id', 'purpose', 'granted', 'occurred_at'],
+        'gratora_donor_notes'     => ['donor_id', 'created_at'],
+        'gratora_donation_notes'  => ['donation_id', 'created_at'],
     ];
 
     /**
@@ -72,8 +72,8 @@ final class DataImporter
      * ALSO_UNIQUE_WHEN_EMPTY.
      */
     private const ALSO_UNIQUE = [
-        'fundkit_receipts' => ['donation_id', 'renderer_id'],
-        'fundkit_refunds'  => ['donation_id', 'amount_cents', 'occurred_at'],
+        'gratora_receipts' => ['donation_id', 'renderer_id'],
+        'gratora_refunds'  => ['donation_id', 'amount_cents', 'occurred_at'],
     ];
 
     /**
@@ -88,7 +88,7 @@ final class DataImporter
      * ever match a row the insert would be refused against anyway.
      */
     private const ALSO_UNIQUE_WHEN_EMPTY = [
-        'fundkit_refunds' => 'gateway_refund_id',
+        'gratora_refunds' => 'gateway_refund_id',
     ];
 
     /** Columns holding an id from another exported table, by the table it points at. */
@@ -96,25 +96,25 @@ final class DataImporter
     private const NO_FUND = -1;
 
     private const REFERENCES = [
-        'donor_id'           => 'fundkit_donors',
-        'household_id'       => 'fundkit_donors',
-        'campaign_id'        => 'fundkit_campaigns',
-        'form_id'            => 'fundkit_forms',
-        'source_form_id'     => 'fundkit_forms',
-        'default_form_id'    => 'fundkit_forms',
-        'fund_id'            => 'fundkit_funds',
-        'default_fund_id'    => 'fundkit_funds',
-        'parent_fund_id'     => 'fundkit_funds',
-        'donation_id'        => 'fundkit_donations',
-        'source_donation_id' => 'fundkit_donations',
-        'recurring_plan_id'  => 'fundkit_recurring_plans',
+        'donor_id'           => 'gratora_donors',
+        'household_id'       => 'gratora_donors',
+        'campaign_id'        => 'gratora_campaigns',
+        'form_id'            => 'gratora_forms',
+        'source_form_id'     => 'gratora_forms',
+        'default_form_id'    => 'gratora_forms',
+        'fund_id'            => 'gratora_funds',
+        'default_fund_id'    => 'gratora_funds',
+        'parent_fund_id'     => 'gratora_funds',
+        'donation_id'        => 'gratora_donations',
+        'source_donation_id' => 'gratora_donations',
+        'recurring_plan_id'  => 'gratora_recurring_plans',
     ];
 
     /** Filled on a second pass, once the table they point at has been walked. */
     private const DEFERRED = [
-        'fundkit_campaigns' => ['default_form_id'],
-        'fundkit_funds'     => ['parent_fund_id'],
-        'fundkit_donors'    => ['household_id'],
+        'gratora_campaigns' => ['default_form_id'],
+        'gratora_funds'     => ['parent_fund_id'],
+        'gratora_donors'    => ['household_id'],
     ];
 
     /**
@@ -146,18 +146,18 @@ final class DataImporter
     /**
      * Where a minted reference lands, by the counter scope that mints it.
      *
-     * fundkit_refunds carries no reference column, so no scope reads from it: the
+     * gratora_refunds carries no reference column, so no scope reads from it: the
      * refund prefix in the numbering settings is configuration for a sequence
      * nothing issues yet. A renderer numbering its receipts in a scope of its
      * own prints a prefix of its own with them, so its numbers do not answer to
      * the scopes named here and its counter is the add-on's to raise.
      */
     private const REFERENCE_SCOPES = [
-        'donation' => ['fundkit_donations', 'reference'],
-        'receipt'  => ['fundkit_receipts', 'receipt_number'],
+        'donation' => ['gratora_donations', 'reference'],
+        'receipt'  => ['gratora_receipts', 'receipt_number'],
         // Rehearsal donations number from their own counter, for the same
         // reason receipts do, and a restore has to raise that one too.
-        'test_donation' => ['fundkit_donations', 'reference'],
+        'test_donation' => ['gratora_donations', 'reference'],
         // Rehearsal receipts number from a counter of their own so the live
         // sequence stays gap-free, and the export carries them like any other
         // row. Left out, the counter stays at zero after a restore and the next
@@ -165,7 +165,7 @@ final class DataImporter
         // index refuses: the org can no longer test a form at all. Same table as
         // the live scope, which is safe because a row only counts toward a scope
         // whose own format reproduces the number printed on it.
-        'test_receipt' => ['fundkit_receipts', 'receipt_number'],
+        'test_receipt' => ['gratora_receipts', 'receipt_number'],
     ];
 
     /** @var array<string, array<int,int>> source id => id here, per table */
@@ -273,7 +273,7 @@ final class DataImporter
         // mapping private records to another donor. Renumbering requires an operator decision
         // because references appear on receipts and emails.
         if ($existingId > 0
-            && $table === 'fundkit_donations'
+            && $table === 'gratora_donations'
             && ! self::sameDonation($row, DB::table($table)->where('id', $existingId)->get())
         ) {
             $this->drop($table, 'reference_collision');
@@ -341,15 +341,15 @@ final class DataImporter
             $row[$column] = $mapped;
         }
 
-        if ($table === 'fundkit_forms' && isset($row['blocks'])) {
+        if ($table === 'gratora_forms' && isset($row['blocks'])) {
             $row['blocks'] = $this->remapFundIdsInBlocks((string) $row['blocks']);
         }
 
-        if ($table === 'fundkit_funds') {
+        if ($table === 'gratora_funds') {
             $row = $this->prepareFund($row);
         }
 
-        if ($table === 'fundkit_donors') {
+        if ($table === 'gratora_donors') {
             return $this->prepareDonor($row);
         }
 
@@ -379,7 +379,7 @@ final class DataImporter
     private function remapFundPickers(array &$blocks): void
     {
         foreach ($blocks as &$block) {
-            if (($block['blockName'] ?? '') === 'fundkit/fund-picker') {
+            if (($block['blockName'] ?? '') === 'gratora/fund-picker') {
                 $attrs = is_array($block['attrs'] ?? null) ? $block['attrs'] : [];
 
                 if (is_array($attrs['fundIds'] ?? null)) {
@@ -390,7 +390,7 @@ final class DataImporter
                 // block's own fallback chain, so neither is an id to rewrite.
                 $default = (string) ($attrs['defaultId'] ?? '');
                 if ($default !== '' && $default !== '__none__') {
-                    $mapped = $this->map['fundkit_funds'][(int) $default] ?? null;
+                    $mapped = $this->map['gratora_funds'][(int) $default] ?? null;
                     $attrs['defaultId'] = $mapped === null ? '' : (string) $mapped;
                 }
 
@@ -424,7 +424,7 @@ final class DataImporter
     {
         $mapped = [];
         foreach ($sourceIds as $sourceId) {
-            $here = $this->map['fundkit_funds'][(int) $sourceId] ?? null;
+            $here = $this->map['gratora_funds'][(int) $sourceId] ?? null;
             if ($here !== null) $mapped[(int) $here] = true;
         }
 
@@ -482,7 +482,7 @@ final class DataImporter
         $row['email']      = $email;
         $row['email_hash'] = $this->hasher->emailHash($email);
 
-        return $this->reseal('fundkit_donors', $row);
+        return $this->reseal('gratora_donors', $row);
     }
 
     /**
@@ -505,14 +505,14 @@ final class DataImporter
         if ($sourceId <= 0) {
             // Every shell would answer to the same identity, which would
             // gather unrelated donors into one row.
-            return $this->drop('fundkit_donors', 'no_source_id');
+            return $this->drop('gratora_donors', 'no_source_id');
         }
 
         foreach (['email', 'first_name', 'last_name', 'company', 'address', 'phone', 'tax_id', 'notes'] as $pii) {
             unset($row[$pii]);
         }
 
-        $row = $this->reseal('fundkit_donors', $row);
+        $row = $this->reseal('gratora_donors', $row);
         $row['email_hash'] = $this->shellHash($sourceId);
         // The literal empty string is the marker redaction itself writes, and
         // what DonorService reads to mean this row has no address.
@@ -566,7 +566,7 @@ final class DataImporter
             if ($hash !== '') return $hash;
         }
 
-        return hash('sha256', 'fundkit-restored-shell:' . $this->origin . ':' . $sourceId);
+        return hash('sha256', 'gratora-restored-shell:' . $this->origin . ':' . $sourceId);
     }
 
     /**
@@ -581,13 +581,13 @@ final class DataImporter
         $reference = trim((string) ($anchor['reference'] ?? ''));
         if ($reference === '') return '';
 
-        $donation = DB::table('fundkit_donations')->where('reference', $reference)->get();
+        $donation = DB::table('gratora_donations')->where('reference', $reference)->get();
         if (! self::sameDonation($anchor, $donation)) return '';
 
         $donorId = (int) self::field($donation, 'donor_id');
         if ($donorId <= 0) return '';
 
-        return (string) self::field(DB::table('fundkit_donors')->where('id', $donorId)->get(), 'email_hash');
+        return (string) self::field(DB::table('gratora_donors')->where('id', $donorId)->get(), 'email_hash');
     }
 
     /**
@@ -627,7 +627,7 @@ final class DataImporter
     private function indexShellDonors(array $tables): void
     {
         $wanted = [];
-        foreach (($tables['fundkit_donors'] ?? []) as $row) {
+        foreach (($tables['gratora_donors'] ?? []) as $row) {
             if (! is_array($row) || ! self::hasNoAddress($row)) continue;
 
             $id = (int) ($row['id'] ?? 0);
@@ -636,7 +636,7 @@ final class DataImporter
 
         if ($wanted === []) return;
 
-        foreach (($tables['fundkit_donations'] ?? []) as $row) {
+        foreach (($tables['gratora_donations'] ?? []) as $row) {
             if (! is_array($row)) continue;
 
             $donorId   = (int) ($row['donor_id'] ?? 0);
@@ -787,19 +787,19 @@ final class DataImporter
         // Campaign, form, fund, donor: the same order a donation takes these
         // row locks in, so an import running beside live traffic queues behind
         // it rather than deadlocking against it.
-        foreach ($this->map['fundkit_campaigns'] ?? [] as $id) {
+        foreach ($this->map['gratora_campaigns'] ?? [] as $id) {
             $syncer->syncCampaign((int) $id);
         }
 
-        foreach ($this->map['fundkit_forms'] ?? [] as $id) {
+        foreach ($this->map['gratora_forms'] ?? [] as $id) {
             $syncer->syncForm((int) $id);
         }
 
-        foreach ($this->map['fundkit_funds'] ?? [] as $id) {
+        foreach ($this->map['gratora_funds'] ?? [] as $id) {
             $syncer->syncFund((int) $id);
         }
 
-        foreach ($this->map['fundkit_donors'] ?? [] as $id) {
+        foreach ($this->map['gratora_donors'] ?? [] as $id) {
             $syncer->syncDonor((int) $id);
         }
     }
@@ -891,7 +891,7 @@ final class DataImporter
 
     /**
      * Tables the file carries that this importer has no contract for, which is
-     * how an add-on's tables arrive: fundkit.export.tables puts them in the file,
+     * how an add-on's tables arrive: gratora.export.tables puts them in the file,
      * and restoring one needs a natural key, a reference map and a deferred
      * map it has not declared. Without a natural key a second run would
      * duplicate every row of it, so they are named to the operator rather than

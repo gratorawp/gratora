@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -29,7 +29,7 @@ final class DonorSearchIsBoundedTest extends IntegrationTestCase
         }
 
         $wpdb->query(
-            'INSERT INTO ' . $wpdb->prefix . 'fundkit_donors '
+            'INSERT INTO ' . $wpdb->prefix . 'gratora_donors '
             . '(email_hash, email_encrypted, last_name, created_at, updated_at) VALUES '
             . implode(',', $tuples)
         );
@@ -49,7 +49,7 @@ final class DonorSearchIsBoundedTest extends IntegrationTestCase
     {
         $this->seedDonors(5);
 
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donations/stats');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/donations/stats');
         $req->set_query_params(['search' => self::SURNAME]);
 
         $this->assertSame(200, rest_do_request($req)->get_status());

@@ -95,7 +95,7 @@ export default function CountrySelect( {
         // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- presentational wrapper; the combobox is the input inside. onMouseDown only prevents focus theft.
         <div
             ref={ wrapRef }
-            class={ `fundkit-form__country-select${ open ? ' is-open' : '' }` }
+            class={ `gratora-form__country-select${ open ? ' is-open' : '' }` }
             onMouseDown={ ( e ) => {
                 if ( inputRef.current && ! inputRef.current.contains( e.target ) ) {
                     e.preventDefault();
@@ -106,7 +106,7 @@ export default function CountrySelect( {
                 ref={ inputRef }
                 id={ id }
                 type="text"
-                class="fundkit-form__country-select-input"
+                class="gratora-form__country-select-input"
                 value={ open ? query : selectedName }
                 placeholder={ selectedName || placeholder }
                 required={ required }
@@ -131,14 +131,14 @@ export default function CountrySelect( {
                 onInput={ ( e ) => { setQuery( e.target.value ); if ( ! open ) setOpen( true ); } }
                 onKeyDown={ onKeyDown }
             />
-            <span class="fundkit-form__country-select-chevron" aria-hidden="true">
+            <span class="gratora-form__country-select-chevron" aria-hidden="true">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                     <path d="M2 4 L5 7 L8 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
             </span>
 
             { open && matches.length > 0 && (
-                <ul id={ listId } class="fundkit-form__country-select-list" role="listbox">
+                <ul id={ listId } class="gratora-form__country-select-list" role="listbox">
                     { matches.map( ( c, i ) => (
                         // eslint-disable-next-line jsx-a11y/click-events-have-key-events -- option selection is keyboard-driven through the combobox input's onKeyDown; the option is mouse-activated only.
                         <li
@@ -146,15 +146,15 @@ export default function CountrySelect( {
                             id={ optId( c ) }
                             role="option"
                             aria-selected={ i === active }
-                            class={ `fundkit-form__country-select-option${ i === active ? ' is-active' : '' }${ c.code === code ? ' is-current' : '' }` }
+                            class={ `gratora-form__country-select-option${ i === active ? ' is-active' : '' }${ c.code === code ? ' is-current' : '' }` }
                             onMouseEnter={ () => setActive( i ) }
                             // The picker sits inside a bare label, which forwards
                             // an uncancelled click on to the input, where it
                             // would reopen the list on top of the pick.
                             onClick={ ( e ) => { e.preventDefault(); pick( c ); } }
                         >
-                            <span class="fundkit-form__country-select-label">{ c.label }</span>
-                            <span class="fundkit-form__country-select-hint">{ c.code }</span>
+                            <span class="gratora-form__country-select-label">{ c.label }</span>
+                            <span class="gratora-form__country-select-hint">{ c.code }</span>
                         </li>
                     ) ) }
                 </ul>

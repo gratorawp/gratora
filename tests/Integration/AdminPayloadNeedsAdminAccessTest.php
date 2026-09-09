@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Admin\AdminGlobals;
-use FundKit\Foundation\License\LicenseService;
-use FundKit\Rest\Admin\DonationsController;
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Plugin;
+use Gratora\Admin\AdminGlobals;
+use Gratora\Foundation\License\LicenseService;
+use Gratora\Rest\Admin\DonationsController;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -34,7 +34,7 @@ final class AdminPayloadNeedsAdminAccessTest extends IntegrationTestCase
 
     private function injected(): string
     {
-        $_GET['page'] = 'fundkit';
+        $_GET['page'] = 'gratora';
 
         ob_start();
         (new AdminGlobals(Plugin::instance()->container->get(LicenseService::class)))->inject();
@@ -47,25 +47,25 @@ final class AdminPayloadNeedsAdminAccessTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
 
-        $this->assertFalse(str_contains($this->injected(), 'window.fundkit'), 'the payload was printed for a subscriber');
+        $this->assertFalse(str_contains($this->injected(), 'window.gratora'), 'the payload was printed for a subscriber');
     }
 
     public function test_an_administrator_still_gets_it(): void
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $this->assertTrue(str_contains($this->injected(), 'window.fundkit'), 'the payload never reached an administrator');
+        $this->assertTrue(str_contains($this->injected(), 'window.gratora'), 'the payload never reached an administrator');
     }
 
     public function test_marking_paid_answers_without_the_read_payload(): void
     {
         $donation = $this->pendingDonation();
 
-        $role = 'fundkit_refunder_' . uniqid();
-        add_role($role, 'Refunder', ['read' => true, 'fundkit_refund_donations' => true]);
+        $role = 'gratora_refunder_' . uniqid();
+        add_role($role, 'Refunder', ['read' => true, 'gratora_refund_donations' => true]);
         wp_set_current_user(self::factory()->user->create(['role' => $role]));
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/donations/' . $donation->reference . '/mark-paid');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/donations/' . $donation->reference . '/mark-paid');
         $res = rest_do_request($req);
 
         $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
@@ -82,7 +82,7 @@ final class AdminPayloadNeedsAdminAccessTest extends IntegrationTestCase
         $donation = $this->pendingDonation();
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/donations/' . $donation->reference . '/mark-paid');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/donations/' . $donation->reference . '/mark-paid');
         $data = (array) rest_do_request($req)->get_data();
 
         $this->assertArrayHasKey('donor', $data);

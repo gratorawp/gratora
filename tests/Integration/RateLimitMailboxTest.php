@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
 
 /** Normalize mailbox aliases so plus tags and provider-specific dots cannot bypass mail quotas. */
 final class RateLimitMailboxTest extends IntegrationTestCase

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Foundation\Plugin;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 use ReflectionProperty;
 
 /**

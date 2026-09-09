@@ -1,1 +1,1 @@
-export { default, ComparisonBadge } from '@fundkit/ui/widgets/MetricCard';
+export { default, ComparisonBadge } from '@gratora/ui/widgets/MetricCard';

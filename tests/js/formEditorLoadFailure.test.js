@@ -18,9 +18,9 @@ window.matchMedia = () => ( {
     addEventListener: () => {}, removeEventListener: () => {},
 } );
 
-jest.mock( '../../assets/admin/_shared/useFundKitRecord', () => ( {
+jest.mock( '../../assets/admin/_shared/useGratoraRecord', () => ( {
     __esModule: true,
-    useFundKitRecord: () => global.__record,
+    useGratoraRecord: () => global.__record,
 } ) );
 
 const { render } = require( 'preact' );

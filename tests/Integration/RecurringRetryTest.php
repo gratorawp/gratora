@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\PaymentRetryUnavailable;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\SubscriptionAware;
-use FundKit\Gateways\SupportsPaymentRetry;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanActions;
-use FundKit\Recurring\RecurringPlanChange;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\PaymentRetryUnavailable;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\SubscriptionAware;
+use Gratora\Gateways\SupportsPaymentRetry;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanActions;
+use Gratora\Recurring\RecurringPlanChange;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -98,7 +98,7 @@ final class RecurringRetryTest extends IntegrationTestCase
         $plan = $this->plan('retryable_rest');
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/recurring/' . (int) $plan->id . '/action');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/recurring/' . (int) $plan->id . '/action');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['action' => 'retry']));
         $res = rest_do_request($req);
@@ -139,19 +139,19 @@ final class RetryableGateway implements PaymentGateway, SubscriptionAware, Suppo
     public function currencies(): array { return ['USD']; }
     public function canCharge(): bool { return true; }
 
-    public function createIntent(\FundKit\Donations\Donation $d): GatewayIntentResult
+    public function createIntent(\Gratora\Donations\Donation $d): GatewayIntentResult
     {
         return new GatewayIntentResult(ok: false, error: 'not used');
     }
-    public function confirm(\FundKit\Donations\Donation $d, array $payload = []): GatewayConfirmResult
+    public function confirm(\Gratora\Donations\Donation $d, array $payload = []): GatewayConfirmResult
     {
         return new GatewayConfirmResult(ok: false, error: 'not used');
     }
-    public function handleWebhook(WP_REST_Request $r): \FundKit\Gateways\WebhookOutcome
+    public function handleWebhook(WP_REST_Request $r): \Gratora\Gateways\WebhookOutcome
     {
-        return new \FundKit\Gateways\WebhookOutcome(signature_ok: false, external_id: '', event_type: '', handled: false);
+        return new \Gratora\Gateways\WebhookOutcome(signature_ok: false, external_id: '', event_type: '', handled: false);
     }
-    public function refund(\FundKit\Donations\Donation $d, int $cents, ?string $reason = null): RefundResult
+    public function refund(\Gratora\Donations\Donation $d, int $cents, ?string $reason = null): RefundResult
     {
         return new RefundResult(ok: false, error: 'not used');
     }
@@ -184,19 +184,19 @@ final class NoRetryGateway implements PaymentGateway, SubscriptionAware
     public function currencies(): array { return ['USD']; }
     public function canCharge(): bool { return true; }
 
-    public function createIntent(\FundKit\Donations\Donation $d): GatewayIntentResult
+    public function createIntent(\Gratora\Donations\Donation $d): GatewayIntentResult
     {
         return new GatewayIntentResult(ok: false, error: 'not used');
     }
-    public function confirm(\FundKit\Donations\Donation $d, array $payload = []): GatewayConfirmResult
+    public function confirm(\Gratora\Donations\Donation $d, array $payload = []): GatewayConfirmResult
     {
         return new GatewayConfirmResult(ok: false, error: 'not used');
     }
-    public function handleWebhook(WP_REST_Request $r): \FundKit\Gateways\WebhookOutcome
+    public function handleWebhook(WP_REST_Request $r): \Gratora\Gateways\WebhookOutcome
     {
-        return new \FundKit\Gateways\WebhookOutcome(signature_ok: false, external_id: '', event_type: '', handled: false);
+        return new \Gratora\Gateways\WebhookOutcome(signature_ok: false, external_id: '', event_type: '', handled: false);
     }
-    public function refund(\FundKit\Donations\Donation $d, int $cents, ?string $reason = null): RefundResult
+    public function refund(\Gratora\Donations\Donation $d, int $cents, ?string $reason = null): RefundResult
     {
         return new RefundResult(ok: false, error: 'not used');
     }

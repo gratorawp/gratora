@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\EventRecorder;
-use FundKit\Core\Commands\CoreCommandProvider;
-use FundKit\Foundation\Commands\CommandContext;
-use FundKit\Foundation\Commands\CommandRegistry;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Core\Commands\CoreCommandProvider;
+use Gratora\Foundation\Commands\CommandContext;
+use Gratora\Foundation\Commands\CommandRegistry;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 
 /**
  * settings.get / settings.update let the assistant read and write benign org
@@ -30,7 +30,7 @@ final class CoreSettingsCommandsTest extends IntegrationTestCase
     private function adminCtx(): CommandContext
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_manage_settings');
+        get_role('administrator')->add_cap('gratora_manage_settings');
         wp_set_current_user($admin);
         return new CommandContext($admin, 'rest', 'req-' . uniqid());
     }
@@ -57,7 +57,7 @@ final class CoreSettingsCommandsTest extends IntegrationTestCase
         $this->assertFalse($byId['settings.update']['idempotent'], 'settings.update must not be idempotent');
 
         foreach (['settings.get', 'settings.update'] as $id) {
-            $this->assertSame('fundkit_manage_settings', $byId[$id]['capability'], "{$id} must be gated on fundkit_manage_settings");
+            $this->assertSame('gratora_manage_settings', $byId[$id]['capability'], "{$id} must be gated on gratora_manage_settings");
         }
     }
 
@@ -156,7 +156,7 @@ final class CoreSettingsCommandsTest extends IntegrationTestCase
         // No allowlisted group ships a secret, so inject secret-shaped keys into
         // an allowed group's option to prove the redaction walk (top-level +
         // nested). SettingsService::get merges the stored option over defaults.
-        update_option('fundkit_org_profile', [
+        update_option('gratora_org_profile', [
             'name'    => 'Hope Foundation',
             'api_key' => 'sk_live_should_not_leak',
             'nested'  => ['webhook_secret' => 'whsec_should_not_leak', 'city' => 'Berlin'],

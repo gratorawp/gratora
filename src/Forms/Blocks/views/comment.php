@@ -6,8 +6,8 @@ defined('ABSPATH') || exit;
  * @var bool   $required
  */
 ?>
-<label class="fundkit-block fundkit-block--comment fundkit-comment">
-    <span class="fundkit-comment__label"><?php echo esc_html((string) $label); ?></span>
+<label class="gratora-block gratora-block--comment gratora-comment">
+    <span class="gratora-comment__label"><?php echo esc_html((string) $label); ?></span>
     <textarea
         name="note_to_org"
         placeholder="<?php echo esc_attr((string) $placeholder); ?>"

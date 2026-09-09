@@ -1,5 +1,5 @@
 /**
- * `fundkit/address` block - full fieldset with inner CountrySelect.
+ * `gratora/address` block - full fieldset with inner CountrySelect.
  */
 
 import { test, expect } from '../fixtures/donor-form';
@@ -21,11 +21,11 @@ test.describe('address block', () => {
         const fs = donor.addressFieldset();
 
         const inner = donor.countrySelect(fs);
-        const input = inner.locator('.fundkit-form__country-select-input');
+        const input = inner.locator('.gratora-form__country-select-input');
         await input.click();
         await input.fill('Spa');
-        await expect(inner.locator('.fundkit-form__country-select-option').first()).toBeVisible();
-        await inner.locator('.fundkit-form__country-select-option').filter({ hasText: 'Spain' }).first().click();
+        await expect(inner.locator('.gratora-form__country-select-option').first()).toBeVisible();
+        await inner.locator('.gratora-form__country-select-option').filter({ hasText: 'Spain' }).first().click();
         await expect(input).toHaveValue('Spain');
     });
 

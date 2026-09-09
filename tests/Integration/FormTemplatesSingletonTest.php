@@ -2,36 +2,36 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\CampaignService;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormTemplates;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\CampaignService;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormTemplates;
+use Gratora\Foundation\Plugin;
 
 final class FormTemplatesSingletonTest extends IntegrationTestCase
 {
     /** Block names whose JS registration sets `supports.multiple = false`. */
     private const SINGLETONS = [
-        'fundkit/fund-picker',
-        'fundkit/anonymous-toggle',
-        'fundkit/privacy-notice',
-        'fundkit/comment',
-        'fundkit/cover-fees',
-        'fundkit/submit-button',
-        'fundkit/donation-amount',
-        'fundkit/donation-summary',
-        'fundkit/payment-gateways',
-        'fundkit/consent',
-        'fundkit/currency-switcher',
-        'fundkit/steps',
-        'fundkit/phone',
-        'fundkit/address',
-        'fundkit/name',
-        'fundkit/email',
-        'fundkit/country',
-        'fundkit/recurring-toggle',
-        'fundkit/goal',
+        'gratora/fund-picker',
+        'gratora/anonymous-toggle',
+        'gratora/privacy-notice',
+        'gratora/comment',
+        'gratora/cover-fees',
+        'gratora/submit-button',
+        'gratora/donation-amount',
+        'gratora/donation-summary',
+        'gratora/payment-gateways',
+        'gratora/consent',
+        'gratora/currency-switcher',
+        'gratora/steps',
+        'gratora/phone',
+        'gratora/address',
+        'gratora/name',
+        'gratora/email',
+        'gratora/country',
+        'gratora/recurring-toggle',
+        'gratora/goal',
     ];
 
     public function test_no_template_duplicates_a_single_instance_block(): void
@@ -61,10 +61,10 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
         $missing = [];
         foreach (FormTemplates::all() as $template) {
             $blocks = (string) ($template['blocks'] ?? '');
-            if (! str_contains($blocks, 'wp:fundkit/submit-button')) {
+            if (! str_contains($blocks, 'wp:gratora/submit-button')) {
                 continue;   // Blank ships no markup at all, by design.
             }
-            if (! str_contains($blocks, 'wp:fundkit/payment-gateways')) {
+            if (! str_contains($blocks, 'wp:gratora/payment-gateways')) {
                 $missing[] = (string) $template['id'];
             }
         }
@@ -91,9 +91,9 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
         $form = Form::query()->find('id', (int) $campaign->default_form_id);
 
         $this->assertNotNull($form, 'a campaign is created with a default form');
-        $this->assertStringContainsString('wp:fundkit/submit-button', (string) $form->blocks);
+        $this->assertStringContainsString('wp:gratora/submit-button', (string) $form->blocks);
         $this->assertStringContainsString(
-            'wp:fundkit/payment-gateways',
+            'wp:gratora/payment-gateways',
             (string) $form->blocks,
             'the starter form must ask how to pay, like every template does'
         );
@@ -103,10 +103,10 @@ final class FormTemplatesSingletonTest extends IntegrationTestCase
     {
         foreach (FormTemplates::all() as $id => $template) {
             $blocks = (string) ($template['blocks'] ?? '');
-            if (! str_contains($blocks, 'fundkit/submit-button')) continue;
+            if (! str_contains($blocks, 'gratora/submit-button')) continue;
 
             $this->assertStringContainsString(
-                'fundkit/donation-summary',
+                'gratora/donation-summary',
                 $blocks,
                 "template {$id} asks for money without showing the total"
             );

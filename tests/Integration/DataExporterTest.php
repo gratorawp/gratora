@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Transfer\DataExporter;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Transfer\DataExporter;
 
 /**
  * An export is a file people email to support and commit to repositories, and
@@ -52,7 +52,7 @@ final class DataExporterTest extends IntegrationTestCase
     {
         $this->seedDonor('plaintext@example.test');
 
-        $donors = $this->export()['tables']['fundkit_donors'] ?? [];
+        $donors = $this->export()['tables']['gratora_donors'] ?? [];
         $match  = null;
         foreach ($donors as $d) {
             if (($d['email'] ?? '') === 'plaintext@example.test') $match = $d;
@@ -68,13 +68,13 @@ final class DataExporterTest extends IntegrationTestCase
     {
         $this->seedDonor();
 
-        foreach ($this->export()['tables']['fundkit_donors'] ?? [] as $d) {
+        foreach ($this->export()['tables']['gratora_donors'] ?? [] as $d) {
             $this->assertArrayNotHasKey('email_hash', $d);
         }
     }
 
     /**
-     * fundkit_system_settings holds encryption_key_v1, email_pepper_v1,
+     * gratora_system_settings holds encryption_key_v1, email_pepper_v1,
      * form_signing_secret_v1 and ip_salt_v1. If this ever passes by accident,
      * the export hands over the keys to every encrypted column in the database.
      */
@@ -82,19 +82,19 @@ final class DataExporterTest extends IntegrationTestCase
     {
         $tables = $this->export()['tables'] ?? [];
 
-        $this->assertArrayNotHasKey('fundkit_system_settings', $tables);
-        $this->assertNotContains('fundkit_system_settings', DataExporter::tables());
+        $this->assertArrayNotHasKey('gratora_system_settings', $tables);
+        $this->assertNotContains('gratora_system_settings', DataExporter::tables());
     }
 
     public function test_magic_link_tokens_are_never_exported(): void
     {
-        $this->assertArrayNotHasKey('fundkit_magic_link_tokens', $this->export()['tables'] ?? []);
+        $this->assertArrayNotHasKey('gratora_magic_link_tokens', $this->export()['tables'] ?? []);
     }
 
-    /** A delivery records what arrived and what FundKit did, never the body. */
+    /** A delivery records what arrived and what Gratora did, never the body. */
     public function test_an_exported_delivery_carries_no_gateway_payload(): void
     {
-        $req = new \WP_REST_Request('POST', '/fundkit/v1/webhooks/offline');
+        $req = new \WP_REST_Request('POST', '/gratora/v1/webhooks/offline');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['payer' => ['email_address' => 'donor@example.test']]));
         rest_do_request($req);
@@ -104,7 +104,7 @@ final class DataExporterTest extends IntegrationTestCase
 
     public function test_gateway_secrets_are_redacted_in_settings(): void
     {
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'stripe' => ['webhook_secret_live' => 'whsec_this_must_not_travel'],
         ]);
 
@@ -116,20 +116,20 @@ final class DataExporterTest extends IntegrationTestCase
             'the webhook secret is the only authentication on that route'
         );
 
-        delete_option('fundkit_gateway_config');
+        delete_option('gratora_gateway_config');
     }
 
     public function test_an_add_on_cannot_add_back_a_skipped_table(): void
     {
-        $sneak = static fn (array $t): array => array_merge($t, ['fundkit_system_settings', 'fundkit_tributes']);
-        add_filter('fundkit.export.tables', $sneak);
+        $sneak = static fn (array $t): array => array_merge($t, ['gratora_system_settings', 'gratora_tributes']);
+        add_filter('gratora.export.tables', $sneak);
 
         try {
             $tables = DataExporter::tables();
-            $this->assertContains('fundkit_tributes', $tables, 'an add-on can contribute its own');
-            $this->assertNotContains('fundkit_system_settings', $tables, 'but never a skipped one');
+            $this->assertContains('gratora_tributes', $tables, 'an add-on can contribute its own');
+            $this->assertNotContains('gratora_system_settings', $tables, 'but never a skipped one');
         } finally {
-            remove_filter('fundkit.export.tables', $sneak);
+            remove_filter('gratora.export.tables', $sneak);
         }
     }
 
@@ -138,9 +138,9 @@ final class DataExporterTest extends IntegrationTestCase
     {
         $order = array_flip(DataExporter::tables());
 
-        $this->assertLessThan($order['fundkit_donations'], $order['fundkit_donors']);
-        $this->assertLessThan($order['fundkit_donations'], $order['fundkit_campaigns']);
-        $this->assertLessThan($order['fundkit_receipts'], $order['fundkit_donations']);
+        $this->assertLessThan($order['gratora_donations'], $order['gratora_donors']);
+        $this->assertLessThan($order['gratora_donations'], $order['gratora_campaigns']);
+        $this->assertLessThan($order['gratora_receipts'], $order['gratora_donations']);
     }
 
 }

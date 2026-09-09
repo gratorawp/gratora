@@ -55,7 +55,7 @@ beforeEach( () => {
         if ( parse === false ) {
             return Promise.resolve( { json: async () => rows, headers: { get: () => '2' } } );
         }
-        if ( path.startsWith( '/fundkit/v1/admin/donors/stats' ) ) {
+        if ( path.startsWith( '/gratora/v1/admin/donors/stats' ) ) {
             return Promise.resolve( null );
         }
         return Promise.resolve( {} );
@@ -123,7 +123,7 @@ describe( 'a bulk action acts only on the rows it was offered for', () => {
 	test( 'Delete requests only the donors it is allowed to delete', async () => {
 		const { paths } = await fire( 'delete', [ UNDELETABLE, DELETABLE ] );
 
-		expect( paths ).toEqual( [ `DELETE /fundkit/v1/admin/donors/${ DELETABLE.id }` ] );
+		expect( paths ).toEqual( [ `DELETE /gratora/v1/admin/donors/${ DELETABLE.id }` ] );
 	} );
 
 	test( 'and says how many that actually is', async () => {

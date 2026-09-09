@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Recurring;
+namespace Gratora\Tests\Unit\Recurring;
 
-use FundKit\Recurring\FrequencyMap;
+use Gratora\Recurring\FrequencyMap;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 

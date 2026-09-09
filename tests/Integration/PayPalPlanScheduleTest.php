@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\PayPal\PayPalPlans;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\PayPal\PayPalPlans;
 
 /**
  * A PayPal plan id stands for an amount AND a cadence together, and the key it
@@ -14,7 +14,7 @@ use FundKit\Gateways\PayPal\PayPalPlans;
  */
 final class PayPalPlanScheduleTest extends IntegrationTestCase
 {
-    private const OPTION = 'fundkit_paypal_plans';
+    private const OPTION = 'gratora_paypal_plans';
 
     private function seed(array $map): void
     {

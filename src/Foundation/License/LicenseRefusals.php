@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\License;
+namespace Gratora\Foundation\License;
 
 /**
  * Turns refused add-ons into what an admin should actually be told.
@@ -58,7 +58,7 @@ final class LicenseRefusals
      */
     private static function copy(string $status, string $names): array
     {
-        $keepRunning = __('They keep running for now, but they will not receive updates or security fixes.', 'fundraising-toolkit');
+        $keepRunning = __('They keep running for now, but they will not receive updates or security fixes.', 'gratora');
 
         switch ($status) {
             case 'invalid':
@@ -67,10 +67,10 @@ final class LicenseRefusals
                     'names'    => $names,
                     'headline' => sprintf(
                         /* translators: %s: comma-separated add-on names */
-                        __('The license key on this site was not recognised, so %s could not be checked', 'fundraising-toolkit'),
+                        __('The license key on this site was not recognised, so %s could not be checked', 'gratora'),
                         $names
                     ),
-                    'detail'   => __('Check the key against your purchase email. Until it is accepted they keep running, but they will not receive updates or security fixes.', 'fundraising-toolkit'),
+                    'detail'   => __('Check the key against your purchase email. Until it is accepted they keep running, but they will not receive updates or security fixes.', 'gratora'),
                 ];
 
             case 'over_limit':
@@ -79,12 +79,12 @@ final class LicenseRefusals
                     'names'    => $names,
                     'headline' => sprintf(
                         /* translators: %s: comma-separated add-on names */
-                        __('Your license has no sites left for %s', 'fundraising-toolkit'),
+                        __('Your license has no sites left for %s', 'gratora'),
                         $names
                     ),
                     // Deactivating elsewhere is enough: the client re-activates
                     // on its own next check, with no need to re-enter the key.
-                    'detail'   => __('Deactivate the license on a site you no longer use, or move to a larger plan, and this site picks it up on its own.', 'fundraising-toolkit'),
+                    'detail'   => __('Deactivate the license on a site you no longer use, or move to a larger plan, and this site picks it up on its own.', 'gratora'),
                 ];
 
             case 'revoked':
@@ -93,7 +93,7 @@ final class LicenseRefusals
                     'names'    => $names,
                     'headline' => sprintf(
                         /* translators: %s: comma-separated add-on names */
-                        __('The license for %s has been revoked', 'fundraising-toolkit'),
+                        __('The license for %s has been revoked', 'gratora'),
                         $names
                     ),
                     'detail'   => $keepRunning,
@@ -106,7 +106,7 @@ final class LicenseRefusals
                     'names'    => $names,
                     'headline' => sprintf(
                         /* translators: %s: comma-separated add-on names */
-                        __('Your license does not cover %s', 'fundraising-toolkit'),
+                        __('Your license does not cover %s', 'gratora'),
                         $names
                     ),
                     'detail'   => $keepRunning,

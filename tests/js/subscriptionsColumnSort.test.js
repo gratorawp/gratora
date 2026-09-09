@@ -56,10 +56,10 @@ function seedApi() {
                 headers: { get: () => '0' },
             } );
         }
-        if ( path.startsWith( '/fundkit/v1/admin/recurring/unlinked' ) ) {
+        if ( path.startsWith( '/gratora/v1/admin/recurring/unlinked' ) ) {
             return Promise.resolve( { total: 0, items: [], window_days: 7, can_retry: false } );
         }
-        if ( path.startsWith( '/fundkit/v1/admin/recurring/stats' ) ) {
+        if ( path.startsWith( '/gratora/v1/admin/recurring/stats' ) ) {
             return Promise.resolve( null );
         }
         return Promise.resolve( {} );

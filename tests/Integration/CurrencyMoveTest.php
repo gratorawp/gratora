@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Currency\FxRates;
-use FundKit\Currency\FxRatesUpdater;
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Settings\SettingsService;
+use Gratora\Currency\FxRates;
+use Gratora\Currency\FxRatesUpdater;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Settings\SettingsService;
 
 /**
  * Money that has not settled yet still carries a base figure, and the rates
@@ -88,7 +88,7 @@ final class CurrencyMoveTest extends IntegrationTestCase
         $after = Donation::query()->find('id', (int) $donation->id);
         $this->assertSame(90000, (int) $after->base_amount_cents);
 
-        $logged = \FundKit\Analytics\Event::query()
+        $logged = \Gratora\Analytics\Event::query()
             ->whereLike('type', 'error.currency.rebase')
             ->get();
         $this->assertNotNull($logged, 'the operator is told which rows are still wrong');
@@ -116,7 +116,7 @@ final class CurrencyMoveTest extends IntegrationTestCase
             'supported_currencies' => ['USD'],
         ]);
 
-        $updater = new FxRatesUpdater(Plugin::instance()->container->get(\FundKit\Async\AsyncDispatcher::class));
+        $updater = new FxRatesUpdater(Plugin::instance()->container->get(\Gratora\Async\AsyncDispatcher::class));
         $needs   = new \ReflectionMethod($updater, 'needsRates');
         $needs->setAccessible(true);
 
@@ -167,7 +167,7 @@ final class CurrencyMoveTest extends IntegrationTestCase
         $p->updated_at              = $now;
         $p->save();
 
-        $updater = new FxRatesUpdater(Plugin::instance()->container->get(\FundKit\Async\AsyncDispatcher::class));
+        $updater = new FxRatesUpdater(Plugin::instance()->container->get(\Gratora\Async\AsyncDispatcher::class));
         $needs   = new \ReflectionMethod($updater, 'needsRates');
         $needs->setAccessible(true);
 
@@ -197,7 +197,7 @@ final class CurrencyMoveTest extends IntegrationTestCase
         $p->updated_at              = $now;
         $p->save();
 
-        $updater = new FxRatesUpdater(Plugin::instance()->container->get(\FundKit\Async\AsyncDispatcher::class));
+        $updater = new FxRatesUpdater(Plugin::instance()->container->get(\Gratora\Async\AsyncDispatcher::class));
         $needs   = new \ReflectionMethod($updater, 'needsRates');
         $needs->setAccessible(true);
 

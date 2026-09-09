@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorEmailRehasher;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorEmailRehasher;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * A rehash runs after the pepper is regenerated, so for as long as it runs
@@ -25,7 +25,7 @@ final class DonorRehashCollisionTest extends IntegrationTestCase
     protected function tearDown(): void
     {
         delete_option(DonorEmailRehasher::PENDING_OPTION);
-        delete_option('fundkit_donor_rehash_after_id');
+        delete_option('gratora_donor_rehash_after_id');
 
         parent::tearDown();
     }
@@ -50,7 +50,7 @@ final class DonorRehashCollisionTest extends IntegrationTestCase
 
     private function hashOf(int $id): string
     {
-        $row = DB::table('fundkit_donors')->where('id', $id)->select('email_hash')->get();
+        $row = DB::table('gratora_donors')->where('id', $id)->select('email_hash')->get();
 
         return (string) ($row['email_hash'] ?? '');
     }
@@ -68,7 +68,7 @@ final class DonorRehashCollisionTest extends IntegrationTestCase
         // And a donor the walk has not reached yet.
         $behind = $this->seed($later, 'stale-behind-' . $suffix);
 
-        update_option('fundkit_donor_rehash_after_id', (string) ($original - 1), false);
+        update_option('gratora_donor_rehash_after_id', (string) ($original - 1), false);
         update_option(DonorEmailRehasher::PENDING_OPTION, '1', false);
 
         Plugin::instance()->container->get(DonorEmailRehasher::class)->run();
@@ -88,7 +88,7 @@ final class DonorRehashCollisionTest extends IntegrationTestCase
         $original = $this->seed($shared, 'stale-' . $suffix);
         $this->seed($shared, $this->hasher()->emailHash($shared));
 
-        update_option('fundkit_donor_rehash_after_id', (string) ($original - 1), false);
+        update_option('gratora_donor_rehash_after_id', (string) ($original - 1), false);
         Plugin::instance()->container->get(DonorEmailRehasher::class)->run();
 
         $this->assertSame('stale-' . $suffix, $this->hashOf($original));
@@ -102,10 +102,10 @@ final class DonorRehashCollisionTest extends IntegrationTestCase
         $original  = $this->seed($shared, 'stale-' . $suffix);
         $duplicate = $this->seed($shared, $this->hasher()->emailHash($shared));
 
-        update_option('fundkit_donor_rehash_after_id', (string) ($original - 1), false);
+        update_option('gratora_donor_rehash_after_id', (string) ($original - 1), false);
         Plugin::instance()->container->get(DonorEmailRehasher::class)->run();
 
-        $event = DB::table('fundkit_events')
+        $event = DB::table('gratora_events')
             ->where('type', 'error.donor.rehash')
             ->where('donor_id', $original)
             ->orderBy('id', 'DESC')
@@ -127,7 +127,7 @@ final class DonorRehashCollisionTest extends IntegrationTestCase
         $original = $this->seed($shared, 'stale-' . $suffix);
         $this->seed($shared, $this->hasher()->emailHash($shared));
 
-        update_option('fundkit_donor_rehash_after_id', (string) ($original - 1), false);
+        update_option('gratora_donor_rehash_after_id', (string) ($original - 1), false);
         update_option(DonorEmailRehasher::PENDING_OPTION, '1', false);
 
         Plugin::instance()->container->get(DonorEmailRehasher::class)->run();

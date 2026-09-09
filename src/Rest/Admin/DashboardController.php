@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
-use FundKit\Dashboard\DashboardMetricsService;
-use FundKit\Foundation\Auth\Capabilities;
+namespace Gratora\Rest\Admin;
+use Gratora\Dashboard\DashboardMetricsService;
+use Gratora\Foundation\Auth\Capabilities;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -14,7 +14,7 @@ final class DashboardController
 {
     private const RANGES = ['today', 'last-7', 'last-30', 'last-90', 'all-time'];
 
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /** @since 1.0.0 */
     public function __construct(private DashboardMetricsService $metrics)
@@ -46,7 +46,7 @@ final class DashboardController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('fundkit_view_reports');
+        return Capabilities::userCan('gratora_view_reports');
     }
 
     /** @since 1.0.0 */

@@ -15,14 +15,14 @@ import { resolveEffectiveTokens } from '../styling/StylePreview';
 
 // Category values are stable grouping keys; translate only for display.
 const CATEGORY_LABELS = {
-    All:       __( 'All', 'fundraising-toolkit' ),
-    Blank:     __( 'Blank', 'fundraising-toolkit' ),
-    Starter:   __( 'Starter', 'fundraising-toolkit' ),
-    Standard:  __( 'Standard', 'fundraising-toolkit' ),
-    Recurring: __( 'Recurring', 'fundraising-toolkit' ),
-    Wizard:    __( 'Wizard', 'fundraising-toolkit' ),
-    Formal:    __( 'Formal', 'fundraising-toolkit' ),
-    Other:     __( 'Other', 'fundraising-toolkit' ),
+    All:       __( 'All', 'gratora' ),
+    Blank:     __( 'Blank', 'gratora' ),
+    Starter:   __( 'Starter', 'gratora' ),
+    Standard:  __( 'Standard', 'gratora' ),
+    Recurring: __( 'Recurring', 'gratora' ),
+    Wizard:    __( 'Wizard', 'gratora' ),
+    Formal:    __( 'Formal', 'gratora' ),
+    Other:     __( 'Other', 'gratora' ),
 };
 
 export default function FormTemplatePicker( { onPick, onClose, creating = false, intro } ) {
@@ -36,7 +36,7 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
     const load = () => {
         setLoading( true );
         setFailed( false );
-        apiFetch( { path: '/fundkit/v1/admin/forms/templates' } )
+        apiFetch( { path: '/gratora/v1/admin/forms/templates' } )
             .then( ( list ) => setTemplates( Array.isArray( list ) ? list : [] ) )
             .catch( () => {
                 setTemplates( [] );
@@ -62,16 +62,16 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
 
     return (
         <Modal
-            title={ __( 'Choose a starter template', 'fundraising-toolkit' ) }
+            title={ __( 'Choose a starter template', 'gratora' ) }
             onRequestClose={ onClose }
-            className="fundkit-template-picker"
+            className="gratora-template-picker"
             size="large"
         >
             { failed ? (
                 <div style={ { padding: 40, textAlign: 'center' } }>
-                    <p>{ __( 'The starter templates could not be loaded.', 'fundraising-toolkit' ) }</p>
+                    <p>{ __( 'The starter templates could not be loaded.', 'gratora' ) }</p>
                     <button type="button" className="btn" onClick={ load }>
-                        { __( 'Try again', 'fundraising-toolkit' ) }
+                        { __( 'Try again', 'gratora' ) }
                     </button>
                 </div>
             ) : loading ? (
@@ -79,35 +79,35 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
             ) : (
                 <>
                     { intro && (
-                        <p className="fundkit-template-picker__intro">{ intro }</p>
+                        <p className="gratora-template-picker__intro">{ intro }</p>
                     ) }
-                    <div className="fundkit-template-picker__filters" role="tablist">
+                    <div className="gratora-template-picker__filters" role="tablist">
                         { categories.map( ( c ) => (
                             <button
                                 key={ c }
                                 type="button"
                                 role="tab"
                                 aria-selected={ category === c }
-                                className={ `fundkit-template-picker__filter${ category === c ? ' is-active' : '' }` }
+                                className={ `gratora-template-picker__filter${ category === c ? ' is-active' : '' }` }
                                 onClick={ () => setCategory( c ) }
                             >
                                 { CATEGORY_LABELS[ c ] || c }
                             </button>
                         ) ) }
                     </div>
-                    <div className="fundkit-template-picker__grid">
+                    <div className="gratora-template-picker__grid">
                         { visible.map( ( t ) => (
                             <button
                                 key={ t.id }
                                 type="button"
-                                className="fundkit-template-picker__card"
+                                className="gratora-template-picker__card"
                                 onClick={ () => onPick( t ) }
                                 disabled={ creating }
                             >
                                 <FormTemplateThumb template={ t } />
-                                <div className="fundkit-template-picker__meta">
+                                <div className="gratora-template-picker__meta">
                                     <strong>{ t.name }</strong>
-                                    <span className="fundkit-template-picker__desc">{ t.description }</span>
+                                    <span className="gratora-template-picker__desc">{ t.description }</span>
                                 </div>
                             </button>
                         ) ) }
@@ -121,23 +121,23 @@ export default function FormTemplatePicker( { onPick, onClose, creating = false,
 function Band( { part } ) {
     switch ( part.kind ) {
         case 'title':
-            return <span className={ `fundkit-template-thumb__title${ part.small ? ' is-sm' : '' }` } />;
+            return <span className={ `gratora-template-thumb__title${ part.small ? ' is-sm' : '' }` } />;
 
         case 'text':
         case 'fine-print':
             return (
-                <span className={ `fundkit-template-thumb__text${ part.kind === 'fine-print' ? ' is-fine' : '' }` }>
+                <span className={ `gratora-template-thumb__text${ part.kind === 'fine-print' ? ' is-fine' : '' }` }>
                     <i /><i />
                 </span>
             );
 
         case 'rule':
-            return <span className="fundkit-template-thumb__rule" />;
+            return <span className="gratora-template-thumb__rule" />;
 
         case 'tiles':
             return (
                 <span
-                    className={ `fundkit-template-thumb__tiles${ part.labels ? ' has-labels' : '' }` }
+                    className={ `gratora-template-thumb__tiles${ part.labels ? ' has-labels' : '' }` }
                     style={ { '--thumb-tile-cols': part.cols } }
                 >
                     { Array.from( { length: part.count }, ( _, i ) => (
@@ -149,11 +149,11 @@ function Band( { part } ) {
             );
 
         case 'amount':
-            return <span className="fundkit-template-thumb__amount" />;
+            return <span className="gratora-template-thumb__amount" />;
 
         case 'pills':
             return (
-                <span className={ `fundkit-template-thumb__pills${ part.joined ? ' is-joined' : '' }` }>
+                <span className={ `gratora-template-thumb__pills${ part.joined ? ' is-joined' : '' }` }>
                     { Array.from( { length: part.count }, ( _, i ) => (
                         <i key={ i } className={ i === part.on ? 'is-on' : '' } />
                     ) ) }
@@ -162,7 +162,7 @@ function Band( { part } ) {
 
         case 'goal':
             return (
-                <span className="fundkit-template-thumb__goal">
+                <span className="gratora-template-thumb__goal">
                     { part.figures > 0 && (
                         <span className="figs">
                             { Array.from( { length: part.figures }, ( _, i ) => <i key={ i } /> ) }
@@ -177,7 +177,7 @@ function Band( { part } ) {
 
         case 'choices':
             return (
-                <span className="fundkit-template-thumb__choices">
+                <span className="gratora-template-thumb__choices">
                     { Array.from( { length: part.count }, ( _, i ) => (
                         <i key={ i } className={ i === part.on ? 'is-on' : '' }>
                             <b className="dot" />
@@ -190,7 +190,7 @@ function Band( { part } ) {
 
         case 'fields':
             return (
-                <span className="fundkit-template-thumb__fields">
+                <span className="gratora-template-thumb__fields">
                     { part.rows.map( ( row, i ) => ( row === 'pair' ? (
                         <i key={ i } className="pair"><b /><b /></i>
                     ) : (
@@ -200,11 +200,11 @@ function Band( { part } ) {
             );
 
         case 'textarea':
-            return <span className="fundkit-template-thumb__textarea"><i /><i /></span>;
+            return <span className="gratora-template-thumb__textarea"><i /><i /></span>;
 
         case 'check':
             return (
-                <span className="fundkit-template-thumb__check">
+                <span className="gratora-template-thumb__check">
                     { Array.from( { length: part.count }, ( _, i ) => (
                         <i key={ i } className={ part.on ? 'is-on' : '' }><b className="box" /><b className="lbl" /></i>
                     ) ) }
@@ -213,28 +213,28 @@ function Band( { part } ) {
 
         case 'ghost':
             return (
-                <span className="fundkit-template-thumb__ghost">
+                <span className="gratora-template-thumb__ghost">
                     { Array.from( { length: part.count }, ( _, i ) => <i key={ i } /> ) }
                 </span>
             );
 
         case 'panel':
             return (
-                <span className="fundkit-template-thumb__panel">
+                <span className="gratora-template-thumb__panel">
                     { part.children.map( ( child, i ) => <Band key={ i } part={ child } /> ) }
                 </span>
             );
 
         case 'cols':
             return (
-                <span className="fundkit-template-thumb__cols" style={ { '--thumb-cols': part.cols } }>
+                <span className="gratora-template-thumb__cols" style={ { '--thumb-cols': part.cols } }>
                     { part.children.map( ( child, i ) => <Band key={ i } part={ child } /> ) }
                 </span>
             );
 
         case 'checkout':
             return (
-                <span className="fundkit-template-thumb__checkout">
+                <span className="gratora-template-thumb__checkout">
                     { part.chips > 0 && (
                         <span className="cards">
                             { Array.from( { length: part.chips }, ( _, i ) => <i key={ i } /> ) }
@@ -245,7 +245,7 @@ function Band( { part } ) {
             );
 
         case 'advance':
-            return <span className="fundkit-template-thumb__checkout is-advance"><b className="bar" /></span>;
+            return <span className="gratora-template-thumb__checkout is-advance"><b className="bar" /></span>;
 
         default:
             return null;
@@ -256,16 +256,16 @@ export function FormTemplateThumb( { template } ) {
     const settings = template.settings || {};
     const layout   = settings.layout  || 'inline';
 
-    // A template is free to name a preset, and fundkit.form.templates lets a
+    // A template is free to name a preset, and gratora.form.templates lets a
     // site add one that names a preset it later deleted.
     const tokens = resolveEffectiveTokens( {
         tokens:   {},
         presetId: String( settings.style?.preset_id || '' ),
         layer:    'campaign',
-        styling:  window.fundkit?.styling || {},
+        styling:  window.gratora?.styling || {},
     } );
-    const accent = tokens[ 'fundkit-accent' ] || '#211d3f';
-    const radius = tokens[ 'fundkit-radius' ] || '8px';
+    const accent = tokens[ 'gratora-accent' ] || '#211d3f';
+    const radius = tokens[ 'gratora-radius' ] || '8px';
 
     // The sheet stands for a form about four times its width, so the template's
     // own radius has to come down with it: 8px on an 11px tile is a capsule,
@@ -276,16 +276,16 @@ export function FormTemplateThumb( { template } ) {
 
     if ( shape.parts.length === 1 && shape.parts[ 0 ].kind === 'empty' ) {
         return (
-            <div className="fundkit-template-thumb fundkit-template-thumb--blank">
+            <div className="gratora-template-thumb gratora-template-thumb--blank">
                 <Icon name="plus" size={ 20 } aria-hidden="true" />
             </div>
         );
     }
 
     const sheet = (
-        <div className="fundkit-template-thumb__sheet" style={ { borderRadius: radius } }>
+        <div className="gratora-template-thumb__sheet" style={ { borderRadius: radius } }>
             { shape.chrome === 'bar' && (
-                <span className="fundkit-template-thumb__steps is-bar">
+                <span className="gratora-template-thumb__steps is-bar">
                     { Array.from( { length: shape.steps }, ( _, i ) => (
                         <i key={ i } className={ i === 0 ? 'is-active' : '' } />
                     ) ) }
@@ -294,7 +294,7 @@ export function FormTemplateThumb( { template } ) {
             { shape.parts.map( ( part, i ) => <Band key={ i } part={ part } /> ) }
             { /* The runtime renders the dot strip below the form, not above it. */ }
             { shape.chrome === 'dots' && (
-                <span className="fundkit-template-thumb__steps">
+                <span className="gratora-template-thumb__steps">
                     { Array.from( { length: shape.steps }, ( _, i ) => (
                         <i key={ i } className={ i === 0 ? 'is-active' : '' } />
                     ) ) }
@@ -305,11 +305,11 @@ export function FormTemplateThumb( { template } ) {
 
     return (
         <div
-            className={ `fundkit-template-thumb fundkit-template-thumb--${ layout }` }
+            className={ `gratora-template-thumb gratora-template-thumb--${ layout }` }
             style={ { '--thumb-accent': accent, '--thumb-radius': `${ scaled }px` } }
         >
             { layout === 'modal' ? (
-                <div className="fundkit-template-thumb__modal-backdrop">
+                <div className="gratora-template-thumb__modal-backdrop">
                     { sheet }
                 </div>
             ) : sheet }

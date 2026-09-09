@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Currency;
+namespace Gratora\Tests\Unit\Currency;
 
-use FundKit\Currency\Currency;
+use Gratora\Currency\Currency;
 use PHPUnit\Framework\TestCase;
 
 /** Verify conversion between major-times-100 storage and processor minor units. */

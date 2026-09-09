@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Plugin;
-use FundKit\Funds\Fund;
-use FundKit\Funds\FundService;
-use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Plugin;
+use Gratora\Funds\Fund;
+use Gratora\Funds\FundService;
+use Gratora\Receipts\ReceiptIssuer;
+use Gratora\Recurring\RecurringPlan;
 use InvalidArgumentException;
 
 /**
@@ -25,8 +25,8 @@ final class MoneyPathGuardsTest extends IntegrationTestCase
 
         // The PayPal cases need a connected account, or the API fails closed
         // before the guard under test is reached and every call looks skipped.
-        update_option('fundkit_gateway_config', ['test_mode' => true]);
-        $account = Plugin::instance()->container->get(\FundKit\Gateways\PayPal\PayPalAccount::class);
+        update_option('gratora_gateway_config', ['test_mode' => true]);
+        $account = Plugin::instance()->container->get(\Gratora\Gateways\PayPal\PayPalAccount::class);
         $account->forget();
         $account->saveKeys(true, 'AeA1QIZ_client', 'EO422dn3_secret');
         $account->saveWebhookId(true, 'WH-GUARD-1');
@@ -114,7 +114,7 @@ final class MoneyPathGuardsTest extends IntegrationTestCase
         // receipt is issued by the add-on with the meal value stated.
         $suppress = static fn (bool $should, Donation $d): bool
             => (string) $d->kind === 'order' ? false : $should;
-        add_filter('fundkit.receipt.should_issue', $suppress, 10, 2);
+        add_filter('gratora.receipt.should_issue', $suppress, 10, 2);
 
         try {
             $order = $this->paidDonation('order');
@@ -125,7 +125,7 @@ final class MoneyPathGuardsTest extends IntegrationTestCase
                 'Resend reissued a receipt the policy had suppressed'
             );
         } finally {
-            remove_filter('fundkit.receipt.should_issue', $suppress, 10);
+            remove_filter('gratora.receipt.should_issue', $suppress, 10);
         }
     }
 
@@ -200,19 +200,19 @@ final class MoneyPathGuardsTest extends IntegrationTestCase
         return $p;
     }
 
-    private function paypal(): \FundKit\Gateways\PayPal\PayPalGateway
+    private function paypal(): \Gratora\Gateways\PayPal\PayPalGateway
     {
         $c = Plugin::instance()->container;
 
-        return new \FundKit\Gateways\PayPal\PayPalGateway(
-            $c->get(\FundKit\Gateways\PayPal\PayPalApi::class),
-            $c->get(\FundKit\Gateways\PayPal\PayPalAccount::class),
-            $c->get(\FundKit\Donations\DonationRepository::class),
-            $c->get(\FundKit\Donations\DonationService::class),
-            $c->get(\FundKit\Gateways\PayPal\PayPalPlans::class),
-            $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
-            $c->get(\FundKit\Foundation\Time\Clock::class),
-            $c->get(\FundKit\Gateways\PayPal\PayPalPlanRecorder::class),
+        return new \Gratora\Gateways\PayPal\PayPalGateway(
+            $c->get(\Gratora\Gateways\PayPal\PayPalApi::class),
+            $c->get(\Gratora\Gateways\PayPal\PayPalAccount::class),
+            $c->get(\Gratora\Donations\DonationRepository::class),
+            $c->get(\Gratora\Donations\DonationService::class),
+            $c->get(\Gratora\Gateways\PayPal\PayPalPlans::class),
+            $c->get(\Gratora\Recurring\RecurringPlanRepository::class),
+            $c->get(\Gratora\Foundation\Time\Clock::class),
+            $c->get(\Gratora\Gateways\PayPal\PayPalPlanRecorder::class),
         );
     }
 

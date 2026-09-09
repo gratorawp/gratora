@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest;
+namespace Gratora\Rest;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\PayPal\PayPalApi;
-use FundKit\Gateways\PayPal\PayPalGateway;
-use FundKit\Gateways\PayPal\PayPalPlanRecorder;
-use FundKit\Gateways\PayPal\PayPalPlanRefused;
-use FundKit\Recurring\FrequencyMap;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\PayPal\PayPalApi;
+use Gratora\Gateways\PayPal\PayPalGateway;
+use Gratora\Gateways\PayPal\PayPalPlanRecorder;
+use Gratora\Gateways\PayPal\PayPalPlanRefused;
+use Gratora\Recurring\FrequencyMap;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -28,7 +28,7 @@ use WP_REST_Server;
  *
  * These are unauthenticated by necessity (the donor is a stranger), so neither
  * route trusts the browser for anything that decides money:
- *  - capture uses the order id FundKit stored at createIntent, never the one the
+ *  - capture uses the order id Gratora stored at createIntent, never the one the
  *    client posts, so a caller cannot point a capture at a different order;
  *  - the subscription route re-reads the subscription from PayPal and requires
  *    its custom_id to match the donation reference before it records anything.
@@ -37,7 +37,7 @@ use WP_REST_Server;
  */
 final class PayPalController
 {
-    private const NS = 'fundkit/v1';
+    private const NS = 'gratora/v1';
 
     /**
      * Both routes here call PayPal, so a caller who repeats one spends this
@@ -94,7 +94,7 @@ final class PayPalController
     /** @since 1.0.0 */
     public function capture(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
-        if ($err = $this->spam->consumeIpBudget('fundkit_paypal_cb', self::CALLBACK_MAX, self::CALLBACK_WINDOW)) {
+        if ($err = $this->spam->consumeIpBudget('gratora_paypal_cb', self::CALLBACK_MAX, self::CALLBACK_WINDOW)) {
             return $err;
         }
 
@@ -120,7 +120,7 @@ final class PayPalController
 
         $gateway = $this->gateways->get('paypal');
         if (! $gateway instanceof PayPalGateway) {
-            return $this->error('fundkit_paypal_unavailable', __('PayPal is not available.', 'fundraising-toolkit'), 400);
+            return $this->error('gratora_paypal_unavailable', __('PayPal is not available.', 'gratora'), 400);
         }
 
         // confirm() reads the stored gateway_intent_id: the client cannot
@@ -162,8 +162,8 @@ final class PayPalController
             ]);
 
             return $this->error(
-                'fundkit_paypal_capture_failed',
-                __('PayPal could not complete this donation. If any money has left your account we will email your receipt, so please check before donating again.', 'fundraising-toolkit'),
+                'gratora_paypal_capture_failed',
+                __('PayPal could not complete this donation. If any money has left your account we will email your receipt, so please check before donating again.', 'gratora'),
                 400
             );
         }
@@ -186,7 +186,7 @@ final class PayPalController
      */
     public function recordSubscription(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
-        if ($err = $this->spam->consumeIpBudget('fundkit_paypal_cb', self::CALLBACK_MAX, self::CALLBACK_WINDOW)) {
+        if ($err = $this->spam->consumeIpBudget('gratora_paypal_cb', self::CALLBACK_MAX, self::CALLBACK_WINDOW)) {
             return $err;
         }
 
@@ -196,11 +196,11 @@ final class PayPalController
         }
 
         if (! FrequencyMap::isRecurring((string) $donation->frequency)) {
-            return $this->error('fundkit_paypal_not_recurring', __('That donation is not recurring.', 'fundraising-toolkit'), 400);
+            return $this->error('gratora_paypal_not_recurring', __('That donation is not recurring.', 'gratora'), 400);
         }
         $subId = trim((string) $request->get_param('subscription_id'));
         if ($subId === '') {
-            return $this->error('fundkit_paypal_bad_subscription', __('Missing subscription id.', 'fundraising-toolkit'), 400);
+            return $this->error('gratora_paypal_bad_subscription', __('Missing subscription id.', 'gratora'), 400);
         }
 
         $this->account->useTestMode((bool) $donation->is_test);
@@ -219,8 +219,8 @@ final class PayPalController
             ]);
 
             return $this->error(
-                'fundkit_paypal_subscription_lookup',
-                __('PayPal has your donation, but we could not finish setting up the repeat schedule here. There is no need to donate again: we will email you once it is confirmed.', 'fundraising-toolkit'),
+                'gratora_paypal_subscription_lookup',
+                __('PayPal has your donation, but we could not finish setting up the repeat schedule here. There is no need to donate again: we will email you once it is confirmed.', 'gratora'),
                 400
             );
         }
@@ -251,13 +251,13 @@ final class PayPalController
      * both routes here move money.
      *
      * A wrong token answers exactly like a wrong reference: telling a stranger
-     * that FUNDKIT-2026-00007 exists is the same leak either way.
+     * that GRATORA-2026-00007 exists is the same leak either way.
      */
     private function pendingDonation(WP_REST_Request $request): Donation|WP_Error
     {
         $notFound = $this->error(
-            'fundkit_paypal_no_donation',
-            __('We could not find that donation.', 'fundraising-toolkit'),
+            'gratora_paypal_no_donation',
+            __('We could not find that donation.', 'gratora'),
             404
         );
 

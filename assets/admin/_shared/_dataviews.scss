@@ -1,12 +1,12 @@
-@import '@fundkit/ui/scss/dataviews';
+@import '@gratora/ui/scss/dataviews';
 
 // Keep filter controls visible with the custom empty state.
-.fundkit-dataviews.is-no-results {
+.gratora-dataviews.is-no-results {
     .dataviews-no-results {
         display: none;
     }
 
-    .fundkit-empty-state {
-        border-top: 1px solid var(--fundkit-admin-border, #e5e7eb);
+    .gratora-empty-state {
+        border-top: 1px solid var(--gratora-admin-border, #e5e7eb);
     }
 }

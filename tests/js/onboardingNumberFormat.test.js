@@ -68,7 +68,7 @@ describe( 'the format follows the currency, not the country', () => {
     };
 
     beforeEach( () => {
-        global.window = { fundkit: { currency_formats: PRESETS } };
+        global.window = { gratora: { currency_formats: PRESETS } };
     } );
 
     afterEach( () => {

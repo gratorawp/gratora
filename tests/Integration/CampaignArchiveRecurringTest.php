@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\CampaignCancelRecurringJob;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\CampaignCancelRecurringJob;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -67,7 +67,7 @@ final class CampaignArchiveRecurringTest extends IntegrationTestCase
 
     private function archive(int $campaignId, array $extra = []): int
     {
-        $req = new WP_REST_Request('PUT', "/fundkit/v1/admin/campaigns/{$campaignId}");
+        $req = new WP_REST_Request('PUT', "/gratora/v1/admin/campaigns/{$campaignId}");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['status' => 'archived'] + $extra));
         return rest_do_request($req)->get_status();
@@ -84,7 +84,7 @@ final class CampaignArchiveRecurringTest extends IntegrationTestCase
         RecurringPlan::query()->where('id', (int) $plan->id)->update(['gateway' => 'stripe']);
 
         $reported = null;
-        add_action('fundkit.campaign.recurring_cancelled', static function ($id, $failed = []) use (&$reported): void {
+        add_action('gratora.campaign.recurring_cancelled', static function ($id, $failed = []) use (&$reported): void {
             $reported = $failed;
         }, 10, 2);
 
@@ -169,7 +169,7 @@ final class CampaignArchiveRecurringTest extends IntegrationTestCase
         $this->seedActivePlan((int) $c->id);
         $this->seedActivePlan((int) $c->id);
 
-        $req  = new WP_REST_Request('GET', "/fundkit/v1/admin/campaigns/{$c->id}/recurring-summary");
+        $req  = new WP_REST_Request('GET', "/gratora/v1/admin/campaigns/{$c->id}/recurring-summary");
         $data = rest_do_request($req)->get_data();
 
         $this->assertSame(2, $data['count']);
@@ -193,7 +193,7 @@ final class CampaignArchiveRecurringTest extends IntegrationTestCase
         $dialog = Plugin::instance()->container->get(RecurringPlanRepository::class)
             ->liveForCampaign((int) $c->id);
 
-        $req = new WP_REST_Request('PUT', "/fundkit/v1/admin/campaigns/{$c->id}");
+        $req = new WP_REST_Request('PUT', "/gratora/v1/admin/campaigns/{$c->id}");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['status' => 'archived', 'cancel_recurring' => true]));
         $queued = (int) (rest_do_request($req)->get_data()['recurring_cancel']['queued'] ?? -1);
@@ -217,7 +217,7 @@ final class CampaignArchiveRecurringTest extends IntegrationTestCase
         $this->seedPlan((int) $c->id, 'paused');
         $this->seedPlan((int) $c->id, 'past_due');
 
-        $req = new WP_REST_Request('PUT', "/fundkit/v1/admin/campaigns/{$c->id}");
+        $req = new WP_REST_Request('PUT', "/gratora/v1/admin/campaigns/{$c->id}");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['status' => 'archived', 'cancel_recurring' => true]));
 

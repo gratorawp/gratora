@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\AtRiskReason;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorMetricsService;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donors\AtRiskReason;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorMetricsService;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * The at-risk rows carry why each donor is there. The load fixture has no

@@ -10,39 +10,39 @@
 // saved markup routinely carries no presets and no frequencies at all. Derived
 // from a block's attributes alone, a four-preset grid reads as empty.
 export const DEFAULTS = {
-    'fundkit/heading':           { level: 2 },
-    'fundkit/donation-amount':   { donationType: 'multi', presets: [ {}, {}, {}, {} ], allowCustom: true },
-    'fundkit/recurring-toggle':  { frequencies: [ 'one-time', 'monthly' ], defaultFrequency: 'one-time', style: 'pills' },
-    'fundkit/goal':              { showAmount: true, showDonors: true, showDeadline: false },
-    'fundkit/fund-picker':       { allowEmpty: false, showDescriptions: true, emptyDescription: '' },
-    'fundkit/anonymous-toggle':  { defaultOn: false },
-    'fundkit/cover-fees':        { defaultOn: false },
-    'fundkit/checkbox':          { defaultOn: false },
-    'fundkit/steps':             { progressStyle: 'dots' },
-    'fundkit/step':              { showTitle: true, title: '' },
-    'fundkit/row':               { columns: 2 },
-    'fundkit/columns':           { columns: 2 },
-    'fundkit/payment-gateways':  { style: 'cards' },
-    'fundkit/currency-switcher': { style: 'dropdown' },
-    'fundkit/address':           { showLine1: true, showLine2: true, showCity: true, showRegion: true, showPostal: true, showCountry: true },
-    'fundkit/consent':           { purposeKeys: [] },
-    'fundkit/terms':             { terms: '', linkUrl: '' },
-    'fundkit/section':           { background: '', border: { width: 0 } },
+    'gratora/heading':           { level: 2 },
+    'gratora/donation-amount':   { donationType: 'multi', presets: [ {}, {}, {}, {} ], allowCustom: true },
+    'gratora/recurring-toggle':  { frequencies: [ 'one-time', 'monthly' ], defaultFrequency: 'one-time', style: 'pills' },
+    'gratora/goal':              { showAmount: true, showDonors: true, showDeadline: false },
+    'gratora/fund-picker':       { allowEmpty: false, showDescriptions: true, emptyDescription: '' },
+    'gratora/anonymous-toggle':  { defaultOn: false },
+    'gratora/cover-fees':        { defaultOn: false },
+    'gratora/checkbox':          { defaultOn: false },
+    'gratora/steps':             { progressStyle: 'dots' },
+    'gratora/step':              { showTitle: true, title: '' },
+    'gratora/row':               { columns: 2 },
+    'gratora/columns':           { columns: 2 },
+    'gratora/payment-gateways':  { style: 'cards' },
+    'gratora/currency-switcher': { style: 'dropdown' },
+    'gratora/address':           { showLine1: true, showLine2: true, showCity: true, showRegion: true, showPostal: true, showCountry: true },
+    'gratora/consent':           { purposeKeys: [] },
+    'gratora/terms':             { terms: '', linkUrl: '' },
+    'gratora/section':           { background: '', border: { width: 0 } },
 };
 
 const DRAWS_NOTHING = [
-    'fundkit/hidden',      // renders no markup at all
-    'fundkit/html',        // author's own, and unknowable from here
-    'fundkit/donation-summary',
-    'fundkit/heading-page', // page blocks have no walker case
+    'gratora/hidden',      // renders no markup at all
+    'gratora/html',        // author's own, and unknowable from here
+    'gratora/donation-summary',
+    'gratora/heading-page', // page blocks have no walker case
 ];
 
 // What makes a following paragraph small print rather than a lead.
 const ANCHORS = [ 'tiles', 'amount', 'goal', 'choices', 'fields' ];
 
 const FIELD_ROW = [
-    'fundkit/email', 'fundkit/country', 'fundkit/phone', 'fundkit/date',
-    'fundkit/text-input', 'fundkit/number-input',
+    'gratora/email', 'gratora/country', 'gratora/phone', 'gratora/date',
+    'gratora/text-input', 'gratora/number-input',
 ];
 
 /**
@@ -83,10 +83,10 @@ function fieldsFor( node ) {
 
     switch ( node.name ) {
         // views/name.php renders both inputs; requireLast only flags one.
-        case 'fundkit/name':
+        case 'gratora/name':
             return [ 'pair' ];
 
-        case 'fundkit/address': {
+        case 'gratora/address': {
             const out = [];
             if ( a.showLine1 ) out.push( 'full' );
             if ( a.showLine2 ) out.push( 'full' );
@@ -97,12 +97,12 @@ function fieldsFor( node ) {
             return out;
         }
 
-        case 'fundkit/dropdown':
-        case 'fundkit/multi-select':
-        case 'fundkit/radio':
+        case 'gratora/dropdown':
+        case 'gratora/multi-select':
+        case 'gratora/radio':
             return [ 'select' ];
 
-        case 'fundkit/currency-switcher':
+        case 'gratora/currency-switcher':
             return a.style === 'pills' ? null : [ 'select' ];
 
         default:
@@ -118,7 +118,7 @@ function tilesFor( attrs ) {
 
     const presets = Array.isArray( attrs.presets ) && attrs.presets.length
         ? attrs.presets
-        : DEFAULTS[ 'fundkit/donation-amount' ].presets;
+        : DEFAULTS[ 'gratora/donation-amount' ].presets;
 
     const cols   = presets.length > 4 ? 3 : Math.max( 1, presets.length );
     const labels = presets.some( ( p ) => p && String( p.impact || '' ) !== '' );
@@ -140,31 +140,31 @@ function simplePart( node ) {
     const a = node.attrs;
 
     switch ( node.name ) {
-        case 'fundkit/heading':
+        case 'gratora/heading':
             return { kind: 'title', small: Number( a.level || 2 ) > 1 };
 
         // Position decides, not content: prose above the first thing a donor
         // fills in is a lead, prose below it is the small print.
-        case 'fundkit/paragraph':
+        case 'gratora/paragraph':
             return { kind: 'text' };
 
-        case 'fundkit/privacy-notice':
+        case 'gratora/privacy-notice':
             return { kind: 'fine-print' };
 
-        case 'fundkit/divider':
+        case 'gratora/divider':
             return { kind: 'rule' };
 
-        case 'fundkit/goal':
+        case 'gratora/goal':
             return {
                 kind:    'goal',
                 figures: ( a.showAmount ? 1 : 0 ) + ( a.showDonors ? 1 : 0 ),
                 pip:     !! a.showDeadline,
             };
 
-        case 'fundkit/recurring-toggle': {
+        case 'gratora/recurring-toggle': {
             const list = Array.isArray( a.frequencies ) && a.frequencies.length
                 ? a.frequencies
-                : DEFAULTS[ 'fundkit/recurring-toggle' ].frequencies;
+                : DEFAULTS[ 'gratora/recurring-toggle' ].frequencies;
             // The walker prepends one-time when the block omits it, which is
             // what separates a sustainer form from an everyday one.
             const all = list.includes( 'one-time' ) ? list : [ 'one-time', ...list ];
@@ -172,10 +172,10 @@ function simplePart( node ) {
             return { kind: 'pills', count: all.length, on, joined: a.style === 'tabs' };
         }
 
-        case 'fundkit/currency-switcher':
+        case 'gratora/currency-switcher':
             return a.style === 'pills' ? { kind: 'pills', count: 2, on: 0 } : null;
 
-        case 'fundkit/fund-picker':
+        case 'gratora/fund-picker':
             return {
                 kind: 'choices',
                 count: 3,
@@ -183,21 +183,21 @@ function simplePart( node ) {
                 sub:  !! ( a.allowEmpty && a.showDescriptions && a.emptyDescription ),
             };
 
-        case 'fundkit/comment':
+        case 'gratora/comment':
             return { kind: 'textarea' };
 
-        case 'fundkit/anonymous-toggle':
-        case 'fundkit/cover-fees':
-        case 'fundkit/checkbox':
+        case 'gratora/anonymous-toggle':
+        case 'gratora/cover-fees':
+        case 'gratora/checkbox':
             return { kind: 'check', count: 1, on: !! a.defaultOn };
 
         // Renders nothing for donors until it is configured.
-        case 'fundkit/consent':
+        case 'gratora/consent':
             return ( Array.isArray( a.purposeKeys ) ? a.purposeKeys.length : 0 )
                 ? { kind: 'check', count: Math.min( a.purposeKeys.length, 2 ), on: false }
                 : null;
 
-        case 'fundkit/terms':
+        case 'gratora/terms':
             return ( a.terms || a.linkUrl ) ? { kind: 'check', count: 1, on: false } : null;
 
         default:
@@ -213,13 +213,13 @@ function walk( nodes, ctx ) {
 
         // Emitted where it is authored: the walker flushes it to sheet level,
         // which takes it out of any container, not out of document order.
-        if ( node.name === 'fundkit/donation-amount' ) { out.push( tilesFor( node.attrs ) ); ctx.anchored = true; continue; }
-        if ( node.name === 'fundkit/submit-button' )   { ctx.hasSubmit = true; continue; }
-        if ( node.name === 'fundkit/payment-gateways' ) { ctx.chips = node.attrs.style === 'cards' ? 3 : 0; continue; }
+        if ( node.name === 'gratora/donation-amount' ) { out.push( tilesFor( node.attrs ) ); ctx.anchored = true; continue; }
+        if ( node.name === 'gratora/submit-button' )   { ctx.hasSubmit = true; continue; }
+        if ( node.name === 'gratora/payment-gateways' ) { ctx.chips = node.attrs.style === 'cards' ? 3 : 0; continue; }
 
-        if ( node.name === 'fundkit/steps' ) { ctx.steps = node; continue; }
+        if ( node.name === 'gratora/steps' ) { ctx.steps = node; continue; }
 
-        if ( node.name === 'fundkit/section' ) {
+        if ( node.name === 'gratora/section' ) {
             const inner = walk( node.children, ctx );
             if ( ! inner.length ) continue;
             const framed = String( node.attrs.background || '' ) !== ''
@@ -233,9 +233,9 @@ function walk( nodes, ctx ) {
             continue;
         }
 
-        if ( node.name === 'fundkit/row' || node.name === 'fundkit/columns' ) {
+        if ( node.name === 'gratora/row' || node.name === 'gratora/columns' ) {
             const declared = Number( node.attrs.columns );
-            const max = node.name === 'fundkit/row' ? 4 : 6;
+            const max = node.name === 'gratora/row' ? 4 : 6;
             // Both blocks RESET an out-of-range count to 2 rather than clamping.
             const real = declared >= 1 && declared <= max ? declared : 2;
             const inner = walk( node.children, ctx );
@@ -381,7 +381,7 @@ export function thumbFor( template ) {
     let chrome = null;
 
     if ( ctx.steps ) {
-        const steps = ctx.steps.children.filter( ( c ) => c.name === 'fundkit/step' );
+        const steps = ctx.steps.children.filter( ( c ) => c.name === 'gratora/step' );
         stepCount = steps.length;
         const style = ctx.steps.attrs.progressStyle || 'dots';
         chrome = style === 'none' ? null : style;

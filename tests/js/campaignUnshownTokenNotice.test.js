@@ -16,22 +16,22 @@ jest.mock( '../../assets/admin/_shared/styling/TokenEditor', () => ( { __esModul
 import { AppearancePanel } from '../../assets/admin/campaigns/Detail';
 
 const CATALOGUE = {
-    'fundkit-radius-sm': {
+    'gratora-radius-sm': {
         label: 'Small corner radius', control: 'range', min: 0, max: 16, step: 1, default: '8px',
     },
 };
 
 beforeEach( () => {
-    window.fundkit = {
+    window.gratora = {
         styling: {
             catalogue: CATALOGUE,
             groups:    {},
-            defaults:  { 'fundkit-radius-sm': '8px' },
-            presets:   [ { id: 'theme', name: 'Site theme', tokens: { 'fundkit-radius-sm': '1rem' } } ],
+            defaults:  { 'gratora-radius-sm': '8px' },
+            presets:   [ { id: 'theme', name: 'Site theme', tokens: { 'gratora-radius-sm': '1rem' } } ],
         },
     };
 } );
-afterEach( () => { delete window.fundkit; } );
+afterEach( () => { delete window.gratora; } );
 
 function mount( style ) {
     document.body.innerHTML = '<div id="root"></div>';
@@ -59,7 +59,7 @@ it( 'names the theme radius the slider would read as 1', () => {
 } );
 
 it( 'says nothing once the campaign overrides it with a pixel size', () => {
-    const host = mount( { preset_id: 'theme', tokens: { 'fundkit-radius-sm': '6px' } } );
+    const host = mount( { preset_id: 'theme', tokens: { 'gratora-radius-sm': '6px' } } );
 
-    expect( host.querySelector( '.fundkit-preset-editor__unshown' ) ).toBeNull();
+    expect( host.querySelector( '.gratora-preset-editor__unshown' ) ).toBeNull();
 } );

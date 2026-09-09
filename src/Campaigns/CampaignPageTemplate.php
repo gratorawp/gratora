@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns;
+namespace Gratora\Campaigns;
 
-use FundKit\Foundation\Hooks\HookProvider;
+use Gratora\Foundation\Hooks\HookProvider;
 use WP_Post;
 
 /**
@@ -21,7 +21,7 @@ use WP_Post;
  */
 final class CampaignPageTemplate extends HookProvider
 {
-    public const SLUG = 'fundkit-campaign-page';
+    public const SLUG = 'gratora-campaign-page';
 
     /**
      * The page's own measure, matching --dp-measure in page.css.
@@ -51,9 +51,9 @@ final class CampaignPageTemplate extends HookProvider
         if (! function_exists('register_block_template')) {
             return;
         }
-        register_block_template('fundkit//' . self::SLUG, [
-            'title'       => __('Campaign page', 'fundraising-toolkit'),
-            'description' => __('Site header and footer around the campaign page content, without the theme page banner.', 'fundraising-toolkit'),
+        register_block_template('gratora//' . self::SLUG, [
+            'title'       => __('Campaign page', 'gratora'),
+            'description' => __('Site header and footer around the campaign page content, without the theme page banner.', 'gratora'),
             'content'     => '<!-- wp:template-part {"slug":"header","tagName":"header"} /-->'
                 . '<!-- wp:group {"tagName":"main","layout":{"type":"constrained","contentSize":"' . self::MEASURE . '","wideSize":"' . self::MEASURE . '"}} -->'
                 . '<main class="wp-block-group"><!-- wp:post-content /--></main>'
@@ -74,7 +74,7 @@ final class CampaignPageTemplate extends HookProvider
         if (! $post instanceof WP_Post || $post->post_type !== 'page') {
             return $templates;
         }
-        if ((int) get_post_meta($post->ID, '_fundkit_campaign_id', true) <= 0) {
+        if ((int) get_post_meta($post->ID, '_gratora_campaign_id', true) <= 0) {
             return $templates;
         }
         $explicit = (string) get_post_meta($post->ID, '_wp_page_template', true);

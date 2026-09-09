@@ -2,28 +2,28 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Foundation\Plugin;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 use ReflectionProperty;
 
 /**
- * Schema changes require FUNDKIT_DB_VERSION and fingerprint updates. Use a patch bump for plain
+ * Schema changes require GRATORA_DB_VERSION and fingerprint updates. Use a patch bump for plain
  * migrations, minor for data-moving UpgradeRoutines.
  */
 final class SchemaVersionTest extends IntegrationTestCase
 {
     /**
      * sha256 of every registered model's compiled CREATE TABLE, in class order.
-     * Update it in the same commit as the FUNDKIT_DB_VERSION bump.
+     * Update it in the same commit as the GRATORA_DB_VERSION bump.
      *
      * Dropping a model is the one schema change that needs no bump: migrate()
      * iterates registered models, and dbDelta never drops a table, so there is
      * nothing for a migration to do and the orphaned table is inert either way.
      */
-    private const FINGERPRINT = '7213eb7e6939fe2da050ddc9cdf0ff4e7a2ffc364cf770592a3518c86f419f96';
+    private const FINGERPRINT = '45c09ba5ee868da61f6fb77e7691c7da789f920807168cfab268b4f96f0c909d';
 
     public function test_the_schema_matches_the_declared_db_version(): void
     {
@@ -32,7 +32,7 @@ final class SchemaVersionTest extends IntegrationTestCase
         $this->assertSame(
             self::FINGERPRINT,
             $actual,
-            "A model's schema changed. Bump FUNDKIT_DB_VERSION in fundkit.php so existing"
+            "A model's schema changed. Bump GRATORA_DB_VERSION in gratora.php so existing"
             . " installs migrate on update, then set FINGERPRINT to:\n{$actual}"
         );
     }
@@ -47,8 +47,8 @@ final class SchemaVersionTest extends IntegrationTestCase
     {
         $this->assertMatchesRegularExpression(
             '/^\d+\.\d+\.\d+$/',
-            FUNDKIT_DB_VERSION,
-            'FUNDKIT_DB_VERSION is major.minor.patch'
+            GRATORA_DB_VERSION,
+            'GRATORA_DB_VERSION is major.minor.patch'
         );
     }
 
@@ -57,7 +57,7 @@ final class SchemaVersionTest extends IntegrationTestCase
     {
         Plugin::onActivation();
 
-        $this->assertSame(FUNDKIT_DB_VERSION, get_option('fundkit_db_version'));
+        $this->assertSame(GRATORA_DB_VERSION, get_option('gratora_db_version'));
     }
 
     private static function fingerprint(): string

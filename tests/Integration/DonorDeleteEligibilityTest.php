@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -27,7 +27,7 @@ final class DonorDeleteEligibilityTest extends IntegrationTestCase
     /** Creates a donor through the donation route and leaves the donation $status. */
     private function donorWithDonation(string $email, string $status): Donor
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => $email,
@@ -53,7 +53,7 @@ final class DonorDeleteEligibilityTest extends IntegrationTestCase
     /** @return array<int,array<string,mixed>> keyed by donor id */
     private function listRows(): array
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donors');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/donors');
         $req->set_query_params(['page' => 1, 'per_page' => 100]);
 
         $out = [];
@@ -66,7 +66,7 @@ final class DonorDeleteEligibilityTest extends IntegrationTestCase
 
     private function deleteStatus(int $donorId): int
     {
-        return rest_do_request(new WP_REST_Request('DELETE', "/fundkit/v1/admin/donors/{$donorId}"))->get_status();
+        return rest_do_request(new WP_REST_Request('DELETE', "/gratora/v1/admin/donors/{$donorId}"))->get_status();
     }
 
     public function test_a_donor_whose_only_donation_never_completed_is_not_offered_delete(): void

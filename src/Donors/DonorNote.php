@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /**
  * Internal fundraiser notes on a donor. Body is encrypted; author is a WP
@@ -17,7 +17,7 @@ use FundKit\Vendor\Queryable\Schema\Table;
  */
 final class DonorNote extends Model
 {
-    protected string $table = 'fundkit_donor_notes';
+    protected string $table = 'gratora_donor_notes';
     protected string $version = '1.0.0';
 
     public int $id;

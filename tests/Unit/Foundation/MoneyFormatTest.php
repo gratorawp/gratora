@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Foundation;
+namespace Gratora\Tests\Unit\Foundation;
 
-use FundKit\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\Money;
 use PHPUnit\Framework\TestCase;
 
 /**

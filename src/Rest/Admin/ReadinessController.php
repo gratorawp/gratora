@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
+namespace Gratora\Rest\Admin;
 
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Settings\ReadinessService;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Settings\ReadinessService;
 use WP_REST_Response;
 use WP_REST_Server;
 
@@ -16,7 +16,7 @@ use WP_REST_Server;
  */
 final class ReadinessController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /** @since 1.0.0 */
     public function __construct(private ReadinessService $readiness)
@@ -36,7 +36,7 @@ final class ReadinessController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('fundkit_manage_settings') || current_user_can('manage_options');
+        return Capabilities::userCan('gratora_manage_settings') || current_user_can('manage_options');
     }
 
     /** @since 1.0.0 */

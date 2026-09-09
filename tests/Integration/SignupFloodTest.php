@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donors\PendingSignup;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donors\PendingSignup;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -25,7 +25,7 @@ final class SignupFloodTest extends IntegrationTestCase
 
     private function register(string $email): int
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/register');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/register');
         $req->set_header('content-type', 'application/json');
         $req->set_header('Sec-Fetch-Site', 'same-origin');
         $req->set_header('Origin', home_url());

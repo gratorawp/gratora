@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Plugin;
-use FundKit\Receipts\Receipt;
-use FundKit\Receipts\ReceiptIssuer;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Plugin;
+use Gratora\Receipts\Receipt;
+use Gratora\Receipts\ReceiptIssuer;
 use WP_REST_Request;
 
 /**
@@ -18,7 +18,7 @@ final class LocalisationGapsTest extends IntegrationTestCase
 
     private function receiptedDonation(string $locale): Receipt
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'locale-' . uniqid() . '@example.test',
@@ -30,7 +30,7 @@ final class LocalisationGapsTest extends IntegrationTestCase
         ]));
         $reference = (string) rest_do_request($create)->get_data()['reference'];
 
-        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);
@@ -46,7 +46,7 @@ final class LocalisationGapsTest extends IntegrationTestCase
     /** A renderer that answers only "what language was I called in". */
     private function recordingRenderer(string $id, array &$seen): object
     {
-        return new class ($id, $seen) implements \FundKit\Receipts\ReceiptRenderer {
+        return new class ($id, $seen) implements \Gratora\Receipts\ReceiptRenderer {
             /** @param list<string> $seen */
             public function __construct(private string $rid, private array &$seen)
             {
@@ -55,9 +55,9 @@ final class LocalisationGapsTest extends IntegrationTestCase
             public function id(): string { return $this->rid; }
             public function label(): string { return 'Recording'; }
             public function referenceScope(): string { return 'receipt'; }
-            public function appliesTo(\FundKit\Receipts\ReceiptContext $ctx): bool { return true; }
+            public function appliesTo(\Gratora\Receipts\ReceiptContext $ctx): bool { return true; }
 
-            public function render(\FundKit\Receipts\ReceiptContext $ctx): string
+            public function render(\Gratora\Receipts\ReceiptContext $ctx): string
             {
                 $this->seen[] = get_locale();
 
@@ -72,7 +72,7 @@ final class LocalisationGapsTest extends IntegrationTestCase
         $seen    = [];
         $mine    = $this->recordingRenderer((string) $receipt->renderer_id, $seen);
 
-        add_filter('fundkit.receipt.renderers', static fn (): array => [$mine], 99);
+        add_filter('gratora.receipt.renderers', static fn (): array => [$mine], 99);
 
         Plugin::instance()->container->get(ReceiptIssuer::class)->renderReceiptPdf((int) $receipt->id);
 
@@ -97,7 +97,7 @@ final class LocalisationGapsTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function formConfig(): array
     {
-        $shortcode = Plugin::instance()->container->get(\FundKit\Forms\Shortcode\DonationFormShortcode::class);
+        $shortcode = Plugin::instance()->container->get(\Gratora\Forms\Shortcode\DonationFormShortcode::class);
         $html      = (string) $shortcode->renderPreview('')['html'];
 
         preg_match('/<script type="application\/json"[^>]*>(.*?)<\/script>/s', $html, $m);
@@ -161,12 +161,12 @@ final class LocalisationGapsTest extends IntegrationTestCase
     public static function adminScreens(): array
     {
         return [
-            'donations'     => [\FundKit\Admin\Pages\DonationsPage::class, 'fundkit-admin-donations'],
-            'donors'        => [\FundKit\Admin\Pages\DonorsPage::class, 'fundkit-admin-donors'],
-            'campaigns'     => [\FundKit\Admin\Pages\CampaignsPage::class, 'fundkit-admin-campaigns'],
-            'funds'         => [\FundKit\Admin\Pages\FundsPage::class, 'fundkit-admin-funds'],
-            'subscriptions' => [\FundKit\Admin\Pages\SubscriptionsPage::class, 'fundkit-admin-subscriptions'],
-            'tools'         => [\FundKit\Admin\Pages\ToolsPage::class, 'fundkit-admin-tools'],
+            'donations'     => [\Gratora\Admin\Pages\DonationsPage::class, 'gratora-admin-donations'],
+            'donors'        => [\Gratora\Admin\Pages\DonorsPage::class, 'gratora-admin-donors'],
+            'campaigns'     => [\Gratora\Admin\Pages\CampaignsPage::class, 'gratora-admin-campaigns'],
+            'funds'         => [\Gratora\Admin\Pages\FundsPage::class, 'gratora-admin-funds'],
+            'subscriptions' => [\Gratora\Admin\Pages\SubscriptionsPage::class, 'gratora-admin-subscriptions'],
+            'tools'         => [\Gratora\Admin\Pages\ToolsPage::class, 'gratora-admin-tools'],
         ];
     }
 }

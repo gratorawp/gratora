@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
-use FundKit\Foundation\Helpers\View;
+use Gratora\Foundation\Helpers\View;
 
 /** @since 1.0.0 */
 final class DividerBlock implements Block
@@ -12,7 +12,7 @@ final class DividerBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/divider';
+        return 'gratora/divider';
     }
 
     /** @since 1.0.0 */
@@ -22,7 +22,7 @@ final class DividerBlock implements Block
             'marginTop'    => ['type' => 'number', 'default' => 16],
             'marginBottom' => ['type' => 'number', 'default' => 16],
             'thickness'    => ['type' => 'number', 'default' => 1],
-            // Empty = inherit the form border token (--fundkit-border).
+            // Empty = inherit the form border token (--gratora-border).
             'color'        => ['type' => 'string', 'default' => ''],
         ];
     }

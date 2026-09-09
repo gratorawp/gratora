@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Blocks\DonateButtonBlock;
-use FundKit\Campaigns\Campaign;
-use FundKit\Forms\Form;
+use Gratora\Campaigns\Blocks\DonateButtonBlock;
+use Gratora\Campaigns\Campaign;
+use Gratora\Forms\Form;
 use ReflectionMethod;
 use WP_REST_Request;
 
@@ -16,7 +16,7 @@ use WP_REST_Request;
  */
 final class DonateButtonRestRenderTest extends IntegrationTestCase
 {
-    private const BLOCK_RENDERER_ROUTE = '/wp/v2/block-renderer/fundkit/donate-button';
+    private const BLOCK_RENDERER_ROUTE = '/wp/v2/block-renderer/gratora/donate-button';
 
     private int $campaignId;
 
@@ -24,7 +24,7 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Button REST probe', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -44,14 +44,14 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
      */
     private function publishedForm(): void
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'title'       => 'Button REST probe form',
             'campaign_id' => $this->campaignId,
-            'blocks'      => '<!-- wp:fundkit/donation-amount {"presets":[1000],"currency":"EUR"} /-->'
-                . '<!-- wp:fundkit/email /-->'
-                . '<!-- wp:fundkit/submit-button /-->',
+            'blocks'      => '<!-- wp:gratora/donation-amount {"presets":[1000],"currency":"EUR"} /-->'
+                . '<!-- wp:gratora/email /-->'
+                . '<!-- wp:gratora/submit-button /-->',
         ]));
         $created = rest_do_request($req)->get_data();
 
@@ -69,7 +69,7 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
     {
         $GLOBALS['wp']->query_vars['rest_route'] = $route;
 
-        $html = do_blocks('<!-- wp:fundkit/donate-button {"campaignId":' . $this->campaignId . '} /-->');
+        $html = do_blocks('<!-- wp:gratora/donate-button {"campaignId":' . $this->campaignId . '} /-->');
 
         unset($GLOBALS['wp']->query_vars['rest_route']);
 
@@ -80,9 +80,9 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
     {
         $html = $this->renderButtonOn(self::BLOCK_RENDERER_ROUTE);
 
-        $this->assertStringContainsString('fundkit-donate-button', $html, 'the editor still sees its button');
+        $this->assertStringContainsString('gratora-donate-button', $html, 'the editor still sees its button');
         $this->assertStringNotContainsString(
-            'fundkit-donate-modal',
+            'gratora-donate-modal',
             $html,
             'and no form runtime is booted inside the editor frame'
         );
@@ -100,7 +100,7 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
             wp_set_current_user($userId);
             $html = $this->renderButtonOn($route);
 
-            $this->assertStringContainsString('fundkit-donate-modal', $html, 'a page read is not the block editor');
+            $this->assertStringContainsString('gratora-donate-modal', $html, 'a page read is not the block editor');
             $this->assertStringContainsString('data-form-slug=', $html);
         }
     }
@@ -111,7 +111,7 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
 
         $html = $this->renderButtonOn(self::BLOCK_RENDERER_ROUTE);
 
-        $this->assertStringContainsString('fundkit-donate-modal', $html, 'the real button and its form render instead');
+        $this->assertStringContainsString('gratora-donate-modal', $html, 'the real button and its form render instead');
     }
 
     /**
@@ -129,7 +129,7 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
         $html = $this->renderButtonOn('/wp/v2/pages/' . self::factory()->post->create(['post_type' => 'page']));
 
         $this->assertStringContainsString('This campaign has finished accepting donations.', $html);
-        $this->assertStringNotContainsString('fundkit-donate-button', $html);
+        $this->assertStringNotContainsString('gratora-donate-button', $html);
     }
 
     /**
@@ -141,9 +141,9 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
      */
     public function test_a_page_only_editor_gets_the_preview_core_let_them_ask_for(): void
     {
-        add_role('fundkit_page_only', 'FundKit page only', ['read' => true, 'edit_pages' => true]);
+        add_role('gratora_page_only', 'Gratora page only', ['read' => true, 'edit_pages' => true]);
 
-        $userId = self::factory()->user->create(['role' => 'fundkit_page_only']);
+        $userId = self::factory()->user->create(['role' => 'gratora_page_only']);
         $pageId = self::factory()->post->create([
             'post_type'   => 'page',
             'post_status' => 'draft',
@@ -160,11 +160,11 @@ final class DonateButtonRestRenderTest extends IntegrationTestCase
             $html = $this->renderButtonOn(self::BLOCK_RENDERER_ROUTE);
         } finally {
             unset($_GET['post_id']);
-            remove_role('fundkit_page_only');
+            remove_role('gratora_page_only');
         }
 
-        $this->assertStringNotContainsString('fundkit-donate-modal', $html, 'no live form in the editor canvas');
-        $this->assertStringContainsString('fundkit-donate-button', $html, 'the editor still sees its button');
+        $this->assertStringNotContainsString('gratora-donate-modal', $html, 'no live form in the editor canvas');
+        $this->assertStringContainsString('gratora-donate-button', $html, 'the editor still sees its button');
     }
 
     /** Inspect source to check REST_REQUEST handling without defining a process-wide constant. */

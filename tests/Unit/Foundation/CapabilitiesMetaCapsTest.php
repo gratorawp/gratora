@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Foundation;
+namespace Gratora\Tests\Unit\Foundation;
 
-use FundKit\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Auth\Capabilities;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -17,7 +17,7 @@ final class CapabilitiesMetaCapsTest extends TestCase
     public function test_no_caps_grants_nothing(): void
     {
         $out = Capabilities::grantMetaCaps([]);
-        $this->assertArrayNotHasKey('fundkit_access', $out);
+        $this->assertArrayNotHasKey('gratora_access', $out);
         foreach (array_keys(Capabilities::MENU_AREAS) as $area) {
             $this->assertArrayNotHasKey($area, $out);
         }
@@ -26,16 +26,16 @@ final class CapabilitiesMetaCapsTest extends TestCase
     public function test_manage_options_grants_every_area_and_umbrella(): void
     {
         $out = Capabilities::grantMetaCaps(['manage_options' => true]);
-        $this->assertTrue($out['fundkit_access']);
+        $this->assertTrue($out['gratora_access']);
         foreach (array_keys(Capabilities::MENU_AREAS) as $area) {
             $this->assertTrue($out[$area], "$area granted to super-admin");
         }
     }
 
-    public function test_manage_fundkit_umbrella_sees_menu_but_no_area(): void
+    public function test_manage_gratora_umbrella_sees_menu_but_no_area(): void
     {
         $out = Capabilities::grantMetaCaps([Capabilities::MANAGE => true]);
-        $this->assertTrue($out['fundkit_access'], 'umbrella sees the top menu');
+        $this->assertTrue($out['gratora_access'], 'umbrella sees the top menu');
         foreach (array_keys(Capabilities::MENU_AREAS) as $area) {
             $this->assertArrayNotHasKey($area, $out, "$area is not granted by the umbrella alone");
         }
@@ -43,36 +43,36 @@ final class CapabilitiesMetaCapsTest extends TestCase
 
     public function test_granular_cap_grants_only_its_own_area(): void
     {
-        $out = Capabilities::grantMetaCaps(['fundkit_view_donations' => true]);
-        $this->assertTrue($out['fundkit_access']);
-        $this->assertTrue($out['fundkit_access_donations']);
-        $this->assertArrayNotHasKey('fundkit_access_donors', $out);
-        $this->assertArrayNotHasKey('fundkit_access_settings', $out);
-        $this->assertArrayNotHasKey('fundkit_access_reports', $out);
-        $this->assertArrayNotHasKey('fundkit_access_campaigns', $out);
-        $this->assertArrayNotHasKey('fundkit_access_forms', $out);
+        $out = Capabilities::grantMetaCaps(['gratora_view_donations' => true]);
+        $this->assertTrue($out['gratora_access']);
+        $this->assertTrue($out['gratora_access_donations']);
+        $this->assertArrayNotHasKey('gratora_access_donors', $out);
+        $this->assertArrayNotHasKey('gratora_access_settings', $out);
+        $this->assertArrayNotHasKey('gratora_access_reports', $out);
+        $this->assertArrayNotHasKey('gratora_access_campaigns', $out);
+        $this->assertArrayNotHasKey('gratora_access_forms', $out);
     }
 
     public function test_manage_campaigns_covers_campaigns_area(): void
     {
-        $out = Capabilities::grantMetaCaps(['fundkit_manage_campaigns' => true]);
-        $this->assertTrue($out['fundkit_access_campaigns']);
-        $this->assertTrue($out['fundkit_access']);
-        $this->assertArrayNotHasKey('fundkit_access_donors', $out);
+        $out = Capabilities::grantMetaCaps(['gratora_manage_campaigns' => true]);
+        $this->assertTrue($out['gratora_access_campaigns']);
+        $this->assertTrue($out['gratora_access']);
+        $this->assertArrayNotHasKey('gratora_access_donors', $out);
     }
 
     public function test_existing_caps_are_preserved(): void
     {
-        $out = Capabilities::grantMetaCaps(['read' => true, 'fundkit_view_donors' => true]);
+        $out = Capabilities::grantMetaCaps(['read' => true, 'gratora_view_donors' => true]);
         $this->assertTrue($out['read']);
-        $this->assertTrue($out['fundkit_view_donors']);
-        $this->assertTrue($out['fundkit_access_donors']);
+        $this->assertTrue($out['gratora_view_donors']);
+        $this->assertTrue($out['gratora_access_donors']);
     }
 
     public function test_every_menu_area_maps_to_a_real_granular_cap(): void
     {
         foreach (Capabilities::MENU_AREAS as $virtual => $real) {
-            $this->assertStringStartsWith('fundkit_access_', $virtual);
+            $this->assertStringStartsWith('gratora_access_', $virtual);
             $this->assertContains($real, Capabilities::ALL, "$real is a real granular cap");
         }
     }

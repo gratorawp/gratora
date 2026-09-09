@@ -102,7 +102,7 @@ describe( 'the refund dialog, as an admin drives it', () => {
 			host
 		);
 
-		return { host, input: host.querySelector( '.fundkit-amount__input' ) };
+		return { host, input: host.querySelector( '.gratora-amount__input' ) };
 	}
 
 	// Preact renders on a later tick, so the dialog holds the old amount until

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SecretRedactor;
-use FundKit\Settings\SettingsService;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SecretRedactor;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -18,7 +18,7 @@ use WP_REST_Request;
  */
 final class SettingsImportSecretsTest extends IntegrationTestCase
 {
-    private const GATEWAYS = 'fundkit_gateway_config';
+    private const GATEWAYS = 'gratora_gateway_config';
 
     protected function setUp(): void
     {
@@ -34,7 +34,7 @@ final class SettingsImportSecretsTest extends IntegrationTestCase
 
     private function import(array $settings): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/import');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/tools/import');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['settings' => $settings]));
 

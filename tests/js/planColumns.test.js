@@ -30,14 +30,14 @@ test( 'a declined renewal reads as a failure', () => {
 	const host = health( { failed_renewals_count: 3, errors: [] } );
 
 	expect( host.textContent ).toBe( '3 failures' );
-	expect( host.querySelector( '.fundkit-pill--amber' ) ).not.toBeNull();
+	expect( host.querySelector( '.gratora-pill--amber' ) ).not.toBeNull();
 } );
 
 test( 'a failed operation reads as a problem, worded apart from a failure', () => {
 	const host = health( { failed_renewals_count: 0, errors: [ {}, {} ] } );
 
 	expect( host.textContent ).toBe( '2 problems' );
-	expect( host.querySelector( '.fundkit-pill--red' ) ).not.toBeNull();
+	expect( host.querySelector( '.gratora-pill--red' ) ).not.toBeNull();
 } );
 
 test( 'a renewal failure wins, since the donor card is the more urgent fact', () => {

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\PublicDonorNames;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\PublicDonorNames;
+use Gratora\Foundation\Plugin;
 
 final class PublicDonorNamesTest extends IntegrationTestCase
 {

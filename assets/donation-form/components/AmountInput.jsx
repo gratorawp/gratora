@@ -85,14 +85,14 @@ export default function AmountInput( {
     };
 
     return (
-        <div class={ `fundkit-amount${ className ? ' ' + className : '' }` }>
-            <span class="fundkit-amount__prefix" aria-hidden="true">
-                <span class="fundkit-amount__code">{ currency }</span>
+        <div class={ `gratora-amount${ className ? ' ' + className : '' }` }>
+            <span class="gratora-amount__prefix" aria-hidden="true">
+                <span class="gratora-amount__code">{ currency }</span>
             </span>
             <input
                 type="text"
                 inputmode={ dp > 0 ? 'decimal' : 'numeric' }
-                class="fundkit-amount__input"
+                class="gratora-amount__input"
                 value={ text }
                 onInput={ handleInput }
                 onFocus={ () => setFocused( true ) }

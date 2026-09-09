@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Blocks;
+namespace Gratora\Campaigns\Blocks;
 
-use FundKit\Forms\FormRepository;
-use FundKit\Foundation\Helpers\View;
+use Gratora\Forms\FormRepository;
+use Gratora\Foundation\Helpers\View;
 
 /** @since 1.0.0 */
 final class DonateButtonBlock extends CampaignBlock
 {
     /** @since 1.0.0 */
     public function __construct(
-        \FundKit\Campaigns\CampaignRepository $campaigns,
+        \Gratora\Campaigns\CampaignRepository $campaigns,
         private readonly FormRepository $forms,
     ) {
         parent::__construct($campaigns);
@@ -21,7 +21,7 @@ final class DonateButtonBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/donate-button';
+        return 'gratora/donate-button';
     }
 
     /** @since 1.0.0 */
@@ -49,8 +49,8 @@ final class DonateButtonBlock extends CampaignBlock
         // Show missing-form notices only to editors.
         if (! $form) {
             return (is_user_logged_in() && current_user_can('edit_posts'))
-                ? '<div class="fundkit-block-notice">'
-                    . esc_html__('This campaign has no published donation form yet.', 'fundraising-toolkit')
+                ? '<div class="gratora-block-notice">'
+                    . esc_html__('This campaign has no published donation form yet.', 'gratora')
                     . '</div>'
                 : '';
         }
@@ -61,7 +61,7 @@ final class DonateButtonBlock extends CampaignBlock
         $editorPreview = $this->isBlockRendererRequest();
         $formHtml      = '';
         if (! $editorPreview) {
-            $formHtml = do_shortcode('[fundkit_donation_form slug="' . esc_attr($form->slug) . '"]');
+            $formHtml = do_shortcode('[gratora_donation_form slug="' . esc_attr($form->slug) . '"]');
         }
 
         // The form gate renders no form while the campaign sits outside its
@@ -69,28 +69,28 @@ final class DonateButtonBlock extends CampaignBlock
         // a button here would open nothing at all.
         //
         // Asked of the markup rather than of emptiness: the gate also returns a
-        // short explanation to anyone who can manage FundKit, and a button opening
+        // short explanation to anyone who can manage Gratora, and a button opening
         // that is no better than a button opening nothing.
         $hasForm = str_contains($formHtml, 'data-form-slug=');
         if (! $editorPreview && ! $hasForm) {
             $message = match ($campaign->notAcceptingReason()) {
-                'ended'    => __('This campaign has finished accepting donations.', 'fundraising-toolkit'),
-                'goal_met' => __('This campaign has reached its goal. Thank you.', 'fundraising-toolkit'),
-                default    => __('Donations are not open for this campaign yet.', 'fundraising-toolkit'),
+                'ended'    => __('This campaign has finished accepting donations.', 'gratora'),
+                'goal_met' => __('This campaign has reached its goal. Thank you.', 'gratora'),
+                default    => __('Donations are not open for this campaign yet.', 'gratora'),
             };
 
             $notice = (is_user_logged_in() && current_user_can('edit_posts'))
-                ? '<div class="fundkit-block-notice">'
-                    . esc_html__('This campaign is not accepting donations, so the donate button is hidden. Publish the campaign and check its schedule.', 'fundraising-toolkit')
+                ? '<div class="gratora-block-notice">'
+                    . esc_html__('This campaign is not accepting donations, so the donate button is hidden. Publish the campaign and check its schedule.', 'gratora')
                     . '</div>'
                 : '';
 
-            return '<p class="fundkit-block__empty">' . esc_html($message) . '</p>' . $notice;
+            return '<p class="gratora-block__empty">' . esc_html($message) . '</p>' . $notice;
         }
 
         return View::loadRelative(__DIR__, 'views/donate-button', [
             // Use ?: because an unset label is an empty string.
-            'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'fundraising-toolkit'),
+            'label'        => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'gratora'),
             'align'        => (string) ($attrs['align'] ?? 'left'),
             'size'         => in_array($attrs['size'] ?? 'md', ['sm', 'md', 'lg'], true)
                 ? (string) $attrs['size'] : 'md',

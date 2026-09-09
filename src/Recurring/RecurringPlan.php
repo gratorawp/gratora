@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Recurring;
+namespace Gratora\Recurring;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /**
  * Mirrors a gateway subscription with many renewal donations.
@@ -16,7 +16,7 @@ use FundKit\Vendor\Queryable\Schema\Table;
  */
 final class RecurringPlan extends Model
 {
-    protected string $table = 'fundkit_recurring_plans';
+    protected string $table = 'gratora_recurring_plans';
     protected string $version = '1.0.2';
 
     public int $id;

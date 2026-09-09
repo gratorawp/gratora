@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/Btn';
+export { default } from '@gratora/ui/components/Btn';

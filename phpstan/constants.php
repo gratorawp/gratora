@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Static-analysis constants. Paths must resolve real require targets; fundkit.php needs
+ * Static-analysis constants. Paths must resolve real require targets; gratora.php needs
  * WordPress to run.
  */
 
 declare(strict_types=1);
 
-define('FUNDKIT_VERSION', '0.0.0');
-define('FUNDKIT_DB_VERSION', '0.0.0');
-define('FUNDKIT_FILE', dirname(__DIR__) . '/fundkit.php');
-define('FUNDKIT_DIR', dirname(__DIR__) . '/');
-define('FUNDKIT_URL', 'https://example.test/');
+define('GRATORA_VERSION', '0.0.0');
+define('GRATORA_DB_VERSION', '0.0.0');
+define('GRATORA_FILE', dirname(__DIR__) . '/gratora.php');
+define('GRATORA_DIR', dirname(__DIR__) . '/');
+define('GRATORA_URL', 'https://example.test/');
 
 // Prefer the test WordPress install; a standalone CI checkout has no WordPress parent
 // directory.
@@ -19,7 +19,7 @@ define('ABSPATH', (static function (): string {
     $home       = getenv('HOME') ?: '';
     $candidates = array_values(array_filter([
         getenv('WP_CORE_DIR') ?: null,
-        $home !== '' ? $home . '/.fundkit-wp-tests/wordpress' : null,
+        $home !== '' ? $home . '/.gratora-wp-tests/wordpress' : null,
         dirname(__DIR__, 4),
     ]));
 

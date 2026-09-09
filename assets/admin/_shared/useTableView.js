@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 
-const PATH = '/fundkit/v1/admin/me/table-view';
+const PATH = '/gratora/v1/admin/me/table-view';
 const DEBOUNCE_MS = 600;
 
 const isPlainObject = ( v ) => !! v && typeof v === 'object' && ! Array.isArray( v );

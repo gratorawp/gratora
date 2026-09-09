@@ -15,9 +15,9 @@ export default function ReceiptCard( { donation, receipts, onResend } ) {
                     <div className="dd-receipt-row">
                         <span className="dd-receipt-row__icon"><IconReceipt width="18" height="18" /></span>
                         <div className="dd-receipt-row__main">
-                            <span className="dd-pill is-warn">{ __( 'Receipt queued', 'fundraising-toolkit' ) }</span>
+                            <span className="dd-pill is-warn">{ __( 'Receipt queued', 'gratora' ) }</span>
                             <div className="dd-receipt-row__meta">
-                                { __( 'A receipt will be generated as soon as the renderer runs.', 'fundraising-toolkit' ) }
+                                { __( 'A receipt will be generated as soon as the renderer runs.', 'gratora' ) }
                             </div>
                         </div>
                     </div>
@@ -38,32 +38,32 @@ export default function ReceiptCard( { donation, receipts, onResend } ) {
                                 <span className={ `dd-receipt-row__num mono${ r.voided ? ' is-strike' : '' }` }>{ r.receipt_number }</span>
                             </span>
                             <div className="dd-receipt-row__meta">
-                                { __( 'Issued', 'fundraising-toolkit' ) } <strong>{ formatDateTime( r.issued_at ) }</strong>
+                                { __( 'Issued', 'gratora' ) } <strong>{ formatDateTime( r.issued_at ) }</strong>
                                 { r.sent_to_email_at && (
                                     <>
                                         { ' · ' }
-                                        { __( 'emailed', 'fundraising-toolkit' ) } <strong>{ formatDateTime( r.sent_to_email_at ) }</strong>
+                                        { __( 'emailed', 'gratora' ) } <strong>{ formatDateTime( r.sent_to_email_at ) }</strong>
                                     </>
                                 ) }
                                 { r.voided && (
-                                    <>{ ' · ' }<span style={ { color: 'var(--dd-red, #b42318)' } }>{ __( 'Voided', 'fundraising-toolkit' ) }</span></>
+                                    <>{ ' · ' }<span style={ { color: 'var(--dd-red, #b42318)' } }>{ __( 'Voided', 'gratora' ) }</span></>
                                 ) }
                             </div>
                         </div>
                         <div className="dd-receipt-row__actions">
                             { ! r.voided && userCan( 'resend_receipt' ) && (
                                 <button type="button" className="btn btn--sm" onClick={ onResend }>
-                                    { __( 'Resend', 'fundraising-toolkit' ) }
+                                    { __( 'Resend', 'gratora' ) }
                                 </button>
                             ) }
                             { userCan( 'view_donors' ) && (
                             <button
                                 type="button"
                                 className="btn btn--sm"
-                                onClick={ () => downloadFile( `/fundkit/v1/admin/receipts/${ r.id }/pdf`, `${ r.receipt_number }.pdf` ).catch( ( e ) => notify.error( e?.message || __( 'Could not download the receipt.', 'fundraising-toolkit' ) ) ) }
+                                onClick={ () => downloadFile( `/gratora/v1/admin/receipts/${ r.id }/pdf`, `${ r.receipt_number }.pdf` ).catch( ( e ) => notify.error( e?.message || __( 'Could not download the receipt.', 'gratora' ) ) ) }
                             >
                                 <IconDownload className="ic" />
-                                { __( 'PDF', 'fundraising-toolkit' ) }
+                                { __( 'PDF', 'gratora' ) }
                             </button>
                             ) }
                         </div>

@@ -10,8 +10,8 @@ import { ToggleRow } from '../../_shared/components/Switch';
 import { notify } from '../../_shared/notify';
 
 const SCOPES = [
-    { key: 'donation', label: __( 'Donation', 'fundraising-toolkit' ) },
-    { key: 'receipt',  label: __( 'Receipt', 'fundraising-toolkit' ) },
+    { key: 'donation', label: __( 'Donation', 'gratora' ) },
+    { key: 'receipt',  label: __( 'Receipt', 'gratora' ) },
 ];
 
 /**
@@ -58,7 +58,7 @@ export const isRefToken = ( raw ) => /^[A-Za-z0-9_-]+$/.test( String( raw ) );
 export const asRefToken = ( raw, fallback ) =>
     String( raw ?? '' ).replace( /[^A-Za-z0-9_-]/g, '' ) || fallback;
 
-const tokenHelp = __( 'Letters, numbers, hyphens and underscores only.', 'fundraising-toolkit' );
+const tokenHelp = __( 'Letters, numbers, hyphens and underscores only.', 'gratora' );
 
 /** @since 1.0.0 */
 function TokenInput( { value, bind, maxLength, placeholder, style } ) {
@@ -67,7 +67,7 @@ function TokenInput( { value, bind, maxLength, placeholder, style } ) {
         <>
             <input
                 type="text"
-                className={ `fundkit-input${ invalid ? ' is-invalid' : '' }` }
+                className={ `gratora-input${ invalid ? ' is-invalid' : '' }` }
                 aria-invalid={ invalid || undefined }
                 maxLength={ maxLength }
                 placeholder={ placeholder }
@@ -75,7 +75,7 @@ function TokenInput( { value, bind, maxLength, placeholder, style } ) {
                 { ...bind }
             />
             { invalid && (
-                <p className="fundkit-form-row__field-help" style={ { color: '#b42318' } }>{ tokenHelp }</p>
+                <p className="gratora-form-row__field-help" style={ { color: '#b42318' } }>{ tokenHelp }</p>
             ) }
         </>
     );
@@ -126,7 +126,7 @@ export default function NumberingPanel( { s , active } ) {
 
     const loadCounters = () => {
         setLoadError( false );
-        apiFetch( { path: '/fundkit/v1/admin/numbering/counters' } )
+        apiFetch( { path: '/gratora/v1/admin/numbering/counters' } )
             .then( ( data ) => {
                 setCounters( data || {} );
                 setDrafts( data || {} );
@@ -147,15 +147,15 @@ export default function NumberingPanel( { s , active } ) {
         setBusy( key );
         try {
             const res = await apiFetch( {
-                path:   '/fundkit/v1/admin/numbering/counter',
+                path:   '/gratora/v1/admin/numbering/counter',
                 method: 'POST',
                 data:   { scope: key, next },
             } );
             setCounters( ( prev ) => ( { ...prev, [ key ]: res.next } ) );
             setDrafts( ( prev ) => ( { ...prev, [ key ]: res.next } ) );
-            notify.success( __( 'Next number updated.', 'fundraising-toolkit' ) );
+            notify.success( __( 'Next number updated.', 'gratora' ) );
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not update the counter.', 'fundraising-toolkit' ) );
+            notify.error( err?.message || __( 'Could not update the counter.', 'gratora' ) );
             setDrafts( ( prev ) => ( { ...prev, [ key ]: counters[ key ] } ) );
         } finally {
             setBusy( '' );
@@ -165,35 +165,35 @@ export default function NumberingPanel( { s , active } ) {
     const confirmSet = ( key, label ) => {
         const next = Number( drafts[ key ] );
         setConfirm( {
-            title:        __( 'Set next number', 'fundraising-toolkit' ),
+            title:        __( 'Set next number', 'gratora' ),
             message:      sprintf(
                 /* translators: 1: reference type, 2: the formatted next reference */
-                __( 'The next %1$s reference will be %2$s. A counter can only move forward, so this cannot be lowered later. Continue?', 'fundraising-toolkit' ),
+                __( 'The next %1$s reference will be %2$s. A counter can only move forward, so this cannot be lowered later. Continue?', 'gratora' ),
                 label.toLowerCase(),
                 buildRef( savedFmt, savedPrefix[ key ], next, year ),
             ),
-            confirmLabel: __( 'Set number', 'fundraising-toolkit' ),
+            confirmLabel: __( 'Set number', 'gratora' ),
             destructive:  false,
             onConfirm:    () => doSet( key ),
         } );
     };
 
     return (
-        <div className="fundkit-panel">
+        <div className="gratora-panel">
             <Card
-                title={ __( 'Reference numbering', 'fundraising-toolkit' ) }
-                sub={ __( 'How donations and receipts are numbered. References are gap-free and increment automatically.', 'fundraising-toolkit' ) }
+                title={ __( 'Reference numbering', 'gratora' ) }
+                sub={ __( 'How donations and receipts are numbered. References are gap-free and increment automatically.', 'gratora' ) }
                 edited={ s.isDirty }
             >
-                <div className="fundkit-ref-previews">
+                <div className="gratora-ref-previews">
                     { SCOPES.map( ( p ) => {
                         const { head, seq } = refParts( liveFmt, livePrefix[ p.key ], 1, year );
                         return (
-                            <div key={ p.key } className="fundkit-ref-preview">
-                                <span className="fundkit-ref-preview__label">{ p.label }</span>
-                                <span className="fundkit-ref-preview__value">
+                            <div key={ p.key } className="gratora-ref-preview">
+                                <span className="gratora-ref-preview__label">{ p.label }</span>
+                                <span className="gratora-ref-preview__value">
                                     { head }
-                                    <span className="fundkit-ref-preview__seq">{ seq }</span>
+                                    <span className="gratora-ref-preview__seq">{ seq }</span>
                                 </span>
                             </div>
                         );
@@ -201,8 +201,8 @@ export default function NumberingPanel( { s , active } ) {
                 </div>
 
                 <FormRow
-                    label={ __( 'Donation prefix', 'fundraising-toolkit' ) }
-                    help={ __( 'Leads every donation reference.', 'fundraising-toolkit' ) }
+                    label={ __( 'Donation prefix', 'gratora' ) }
+                    help={ __( 'Leads every donation reference.', 'gratora' ) }
                 >
                     <TokenInput
                         value={ rawPrefix.donation }
@@ -213,8 +213,8 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Receipt prefix', 'fundraising-toolkit' ) }
-                    help={ __( 'Leads every receipt number.', 'fundraising-toolkit' ) }
+                    label={ __( 'Receipt prefix', 'gratora' ) }
+                    help={ __( 'Leads every receipt number.', 'gratora' ) }
                 >
                     <TokenInput
                         value={ rawPrefix.receipt }
@@ -225,8 +225,8 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Separator', 'fundraising-toolkit' ) }
-                    help={ __( 'Character between the prefix, year, and number.', 'fundraising-toolkit' ) }
+                    label={ __( 'Separator', 'gratora' ) }
+                    help={ __( 'Character between the prefix, year, and number.', 'gratora' ) }
                 >
                     <TokenInput
                         value={ rawSep }
@@ -238,12 +238,12 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Minimum digits', 'fundraising-toolkit' ) }
-                    help={ __( 'Zero-padded width of the running number. 5 gives 00001.', 'fundraising-toolkit' ) }
+                    label={ __( 'Minimum digits', 'gratora' ) }
+                    help={ __( 'Zero-padded width of the running number. 5 gives 00001.', 'gratora' ) }
                 >
                     <input
                         type="number"
-                        className="fundkit-input"
+                        className="gratora-input"
                         min={ 1 }
                         max={ 12 }
                         style={ { maxWidth: 90 } }
@@ -252,17 +252,17 @@ export default function NumberingPanel( { s , active } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Include the year', 'fundraising-toolkit' ) }
-                    sub={ __( 'Adds the current year, e.g. DON-2026-00001 instead of DON-00001.', 'fundraising-toolkit' ) }
+                    title={ __( 'Include the year', 'gratora' ) }
+                    sub={ __( 'Adds the current year, e.g. DON-2026-00001 instead of DON-00001.', 'gratora' ) }
                     checked={ liveFmt.includeYear }
                     onChange={ s.setValue( 'include_year' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Reset numbering each year', 'fundraising-toolkit' ) }
+                    title={ __( 'Reset numbering each year', 'gratora' ) }
                     sub={ liveFmt.includeYear
-                        ? __( 'Start again at 1 every January. Turn off for one continuous sequence across years.', 'fundraising-toolkit' )
-                        : __( 'Needs the year, which is off. Restarting at 1 without it would reissue numbers already printed, so numbering stays continuous.', 'fundraising-toolkit' ) }
+                        ? __( 'Start again at 1 every January. Turn off for one continuous sequence across years.', 'gratora' )
+                        : __( 'Needs the year, which is off. Restarting at 1 without it would reissue numbers already printed, so numbering stays continuous.', 'gratora' ) }
                     checked={ liveFmt.includeYear && !! s.value( 'reset_yearly', true ) }
                     onChange={ s.setValue( 'reset_yearly' ) }
                     disabled={ ! liveFmt.includeYear }
@@ -270,23 +270,23 @@ export default function NumberingPanel( { s , active } ) {
             </Card>
 
             <Card
-                title={ __( 'Next numbers', 'fundraising-toolkit' ) }
-                sub={ __( 'The number each type will use next. Jump a counter forward to continue an existing sequence; it can only increase, never go back.', 'fundraising-toolkit' ) }
+                title={ __( 'Next numbers', 'gratora' ) }
+                sub={ __( 'The number each type will use next. Jump a counter forward to continue an existing sequence; it can only increase, never go back.', 'gratora' ) }
             >
                 { s.isDirty && (
                     <p style={ { margin: '0 0 14px', fontSize: 12.5, color: '#b54708' } }>
-                        { __( 'You have unsaved format changes above. Previews here use the saved format, so save first if you want new references to use the updated format.', 'fundraising-toolkit' ) }
+                        { __( 'You have unsaved format changes above. Previews here use the saved format, so save first if you want new references to use the updated format.', 'gratora' ) }
                     </p>
                 ) }
                 { loadError ? (
                     <div style={ { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } }>
                         <p style={ { color: '#b42318', margin: 0 } }>
-                            { __( 'Could not load the current counters.', 'fundraising-toolkit' ) }
+                            { __( 'Could not load the current counters.', 'gratora' ) }
                         </p>
-                        <Btn variant="secondary" onClick={ loadCounters }>{ __( 'Retry', 'fundraising-toolkit' ) }</Btn>
+                        <Btn variant="secondary" onClick={ loadCounters }>{ __( 'Retry', 'gratora' ) }</Btn>
                     </div>
                 ) : counters === null ? (
-                    <p style={ { color: '#6b7280' } }>{ __( 'Loading…', 'fundraising-toolkit' ) }</p>
+                    <p style={ { color: '#6b7280' } }>{ __( 'Loading…', 'gratora' ) }</p>
                 ) : (
                     SCOPES.map( ( p ) => {
                         const current = Number( counters[ p.key ] ?? 1 );
@@ -301,14 +301,14 @@ export default function NumberingPanel( { s , active } ) {
                                 label={ p.label }
                                 help={ sprintf(
                                     /* translators: %s: the formatted next reference */
-                                    __( 'Next reference: %s', 'fundraising-toolkit' ),
+                                    __( 'Next reference: %s', 'gratora' ),
                                     buildRef( savedFmt, savedPrefix[ p.key ], Number( draft ) || current, year ),
                                 ) }
                             >
                                 <div style={ { display: 'flex', gap: 8, alignItems: 'center' } }>
                                     <input
                                         type="number"
-                                        className="fundkit-input"
+                                        className="gratora-input"
                                         min={ current }
                                         style={ { maxWidth: 120 } }
                                         value={ draft }
@@ -320,7 +320,7 @@ export default function NumberingPanel( { s , active } ) {
                                         disabled={ ! changed || busy === p.key }
                                         isBusy={ busy === p.key }
                                     >
-                                        { __( 'Set', 'fundraising-toolkit' ) }
+                                        { __( 'Set', 'gratora' ) }
                                     </Btn>
                                 </div>
                             </FormRow>

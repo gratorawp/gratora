@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Styling;
+namespace Gratora\Campaigns\Styling;
 
-use FundKit\Campaigns\Campaign;
+use Gratora\Campaigns\Campaign;
 
 /**
  * A campaign's style is a map of 26 tokens, not one color. This emits the
@@ -66,7 +66,7 @@ final class CampaignStyleVars
 
         $tokens = (new CampaignStyleResolver())->resolveForCampaign($campaign);
 
-        // resolveForCampaign applies fundkit.campaign_style.tokens after merging,
+        // resolveForCampaign applies gratora.campaign_style.tokens after merging,
         // so whatever a filter returned has not been through the allowlist.
         // These values land verbatim in CSS, where a stray ; or } escapes the
         // declaration, so sanitize once more rather than trusting the filter.
@@ -84,7 +84,7 @@ final class CampaignStyleVars
         // Derived, not authored: nothing in the catalogue knows what the accent
         // is dark enough to need. Appended last so a filter cannot leave a
         // filled panel reversing white out of a pale accent.
-        $css .= Ink::declarationsFor((string) ($tokens['fundkit-accent'] ?? ''));
+        $css .= Ink::declarationsFor((string) ($tokens['gratora-accent'] ?? ''));
         $css .= Ink::softDeclarations($tokens);
         $css .= Ink::fieldDeclarations($tokens);
         $css .= self::coverImage($campaign);
@@ -125,7 +125,7 @@ final class CampaignStyleVars
 
         // A url() token, not a bare address: the stylesheet uses it directly and
         // the parentheses are what keep a stray one from ending the declaration.
-        return '--fundkit-cover-image:url(' . esc_url_raw($url) . ');';
+        return '--gratora-cover-image:url(' . esc_url_raw($url) . ');';
     }
 
     /**

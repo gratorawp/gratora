@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Reports;
+namespace Gratora\Reports;
 
-use FundKit\Campaigns\Styling\Tokens;
-use FundKit\Campaigns\Styling\CampaignStyleResolver;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Helpers\View;
-use FundKit\Receipts\OrgProfile;
-use FundKit\Receipts\PdfBuilder;
+use Gratora\Campaigns\Styling\Tokens;
+use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\View;
+use Gratora\Receipts\OrgProfile;
+use Gratora\Receipts\PdfBuilder;
 
 /**
  * Builds a donor year-end tax statement PDF (US 501(c)(3) style contribution
@@ -27,7 +27,7 @@ use FundKit\Receipts\PdfBuilder;
  */
 final class TaxStatementBuilder
 {
-    /** Names this builder to the fundkit.statement.pdf filter. */
+    /** Names this builder to the gratora.statement.pdf filter. */
     public const KIND = 'tax';
 
     /** @since 1.0.0 */
@@ -44,7 +44,7 @@ final class TaxStatementBuilder
         // See AnnualStatementBuilder: an add-on replacing annual documents
         // has to replace both, or the admin route and the portal route
         // hand out different statements for the same year.
-        $override = apply_filters('fundkit.statement.pdf', null, $donor, $year, self::KIND);
+        $override = apply_filters('gratora.statement.pdf', null, $donor, $year, self::KIND);
         if (is_string($override) && $override !== '') {
             return $override;
         }
@@ -65,7 +65,7 @@ final class TaxStatementBuilder
             'org_name'            => $orgName,
             'org_address_lines'   => $this->orgAddressLines($org),
             'org_tax_id'          => trim((string) ($org['tax_id'] ?? '')),
-            'donor_name'          => $donorName !== '' ? $donorName : __('Donor', 'fundraising-toolkit'),
+            'donor_name'          => $donorName !== '' ? $donorName : __('Donor', 'gratora'),
             'donor_address_lines' => $donorAddr !== null ? explode("\n", $donorAddr) : [],
             'lines'               => $itemized['lines'],
             'totals'              => $itemized['totals'],
@@ -75,9 +75,9 @@ final class TaxStatementBuilder
 
         return $this->pdf->fromHtml($html, [
             /* translators: %d: statement year. */
-            'title'   => sprintf(__('%d annual donation statement', 'fundraising-toolkit'), $year),
+            'title'   => sprintf(__('%d annual donation statement', 'gratora'), $year),
             'author'  => $orgName,
-            'subject' => __('Annual donation statement', 'fundraising-toolkit'),
+            'subject' => __('Annual donation statement', 'gratora'),
             'format'  => 'Letter',
         ]);
     }
@@ -109,7 +109,7 @@ final class TaxStatementBuilder
     /** @since 1.0.0 */
     public static function filename(int $donorId, int $year): string
     {
-        return sprintf('fundkit-tax-statement-%d-donor-%d.pdf', $year, $donorId);
+        return sprintf('gratora-tax-statement-%d-donor-%d.pdf', $year, $donorId);
     }
 
     /**
@@ -147,7 +147,7 @@ final class TaxStatementBuilder
                 'amount'        => Money::format($net, $currency),
                 'refunded_note' => $refunded > 0
                     /* translators: %s: formatted refunded amount */
-                    ? sprintf(__('Net of %s refunded', 'fundraising-toolkit'), Money::format($refunded, $currency))
+                    ? sprintf(__('Net of %s refunded', 'gratora'), Money::format($refunded, $currency))
                     : '',
             ];
         }
@@ -158,8 +158,8 @@ final class TaxStatementBuilder
             $totals[] = [
                 'label'  => $multi
                     /* translators: %s: currency code */
-                    ? sprintf(__('Total contributions (%s)', 'fundraising-toolkit'), $currency)
-                    : __('Total contributions', 'fundraising-toolkit'),
+                    ? sprintf(__('Total contributions (%s)', 'gratora'), $currency)
+                    : __('Total contributions', 'gratora'),
                 'amount' => Money::format($cents, $currency),
             ];
         }
@@ -238,7 +238,7 @@ final class TaxStatementBuilder
      */
     private function orgDisclaimer(string $orgName, string $donorName): string
     {
-        $stored = get_option('fundkit_receipt_settings', []);
+        $stored = get_option('gratora_receipt_settings', []);
         if (! is_array($stored)) {
             return '';
         }

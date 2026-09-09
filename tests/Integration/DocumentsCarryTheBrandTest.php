@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\Styling\CampaignStyleVars;
-use FundKit\Reports\CampaignReportBuilder;
-use FundKit\Reports\RevenueReportBuilder;
-use FundKit\Settings\SettingsService;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\Styling\CampaignStyleVars;
+use Gratora\Reports\CampaignReportBuilder;
+use Gratora\Reports\RevenueReportBuilder;
+use Gratora\Settings\SettingsService;
+use Gratora\Foundation\Plugin;
 
 /**
  * A donor who gave on a branded page and then downloads the paperwork should
@@ -21,7 +21,7 @@ final class DocumentsCarryTheBrandTest extends IntegrationTestCase
     private function orgAccent(string $hex): void
     {
         Plugin::instance()->container->get(SettingsService::class)->update('org-brand', [
-            'presets'    => [['id' => 'classic', 'name' => 'Classic', 'tokens' => ['fundkit-accent' => $hex]]],
+            'presets'    => [['id' => 'classic', 'name' => 'Classic', 'tokens' => ['gratora-accent' => $hex]]],
             'default_id' => 'classic',
         ]);
         CampaignStyleVars::flush();
@@ -35,7 +35,7 @@ final class DocumentsCarryTheBrandTest extends IntegrationTestCase
         $c->slug       = 'branded-' . uniqid();
         $c->status     = 'published';
         $c->currency   = 'USD';
-        $c->style      = ['tokens' => ['fundkit-accent' => $accent]];
+        $c->style      = ['tokens' => ['gratora-accent' => $accent]];
         $c->created_at = $now;
         $c->updated_at = $now;
         $c->save();
@@ -54,12 +54,12 @@ final class DocumentsCarryTheBrandTest extends IntegrationTestCase
 
             return $html;
         };
-        add_filter('fundkit.pdf.html', $spy, 10);
+        add_filter('gratora.pdf.html', $spy, 10);
 
         try {
             $build();
         } finally {
-            remove_filter('fundkit.pdf.html', $spy, 10);
+            remove_filter('gratora.pdf.html', $spy, 10);
         }
 
         return $seen;

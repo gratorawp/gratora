@@ -23,7 +23,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
         setError( null );
         try {
             const note = await apiFetch( {
-                path:   `/fundkit/v1/admin/donations/${ donationRef }/notes`,
+                path:   `/gratora/v1/admin/donations/${ donationRef }/notes`,
                 method: 'POST',
                 data:   { body: body.trim() },
             } );
@@ -31,7 +31,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
             setBody( '' );
             onChanged?.();
         } catch ( err ) {
-            setError( err?.message || __( 'Could not save', 'fundraising-toolkit' ) );
+            setError( err?.message || __( 'Could not save', 'gratora' ) );
         } finally {
             setSaving( false );
         }
@@ -39,20 +39,20 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
 
     const remove = ( noteId ) => {
         setConfirm( {
-            title:        __( 'Delete note', 'fundraising-toolkit' ),
-            message:      __( 'Delete this note?', 'fundraising-toolkit' ),
-            confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
+            title:        __( 'Delete note', 'gratora' ),
+            message:      __( 'Delete this note?', 'gratora' ),
+            confirmLabel: __( 'Delete', 'gratora' ),
             destructive:  true,
             onConfirm: async () => {
                 try {
                     await apiFetch( {
-                        path:   `/fundkit/v1/admin/donations/notes/${ noteId }`,
+                        path:   `/gratora/v1/admin/donations/notes/${ noteId }`,
                         method: 'DELETE',
                     } );
                     setNotes( ( ns ) => ns.filter( ( n ) => n.id !== noteId ) );
                     onChanged?.();
                 } catch ( err ) {
-                    setError( err?.message || __( 'Could not delete', 'fundraising-toolkit' ) );
+                    setError( err?.message || __( 'Could not delete', 'gratora' ) );
                 }
             },
         } );
@@ -66,14 +66,14 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                         <EmptyState
                             compact
                             icon={ <StickyNote size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'No notes yet', 'fundraising-toolkit' ) }
-                            body={ __( 'Add notes to keep context attached to this donation: refund reasons, follow-ups, special handling.', 'fundraising-toolkit' ) }
+                            title={ __( 'No notes yet', 'gratora' ) }
+                            body={ __( 'Add notes to keep context attached to this donation: refund reasons, follow-ups, special handling.', 'gratora' ) }
                         />
                     )
                     : (
                         <div className="dd-notes-list">
                             { notes.map( ( n ) => {
-                                const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'fundraising-toolkit' ) : __( 'System', 'fundraising-toolkit' ) );
+                                const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'gratora' ) : __( 'System', 'gratora' ) );
                                 return (
                                     <div key={ n.id } className="dd-note">
                                         <span className="dd-avatar dd-avatar--md">{ initials( author ) }</span>
@@ -91,7 +91,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                                         <button
                                             type="button"
                                             className="dd-note__delete"
-                                            aria-label={ __( 'Delete note', 'fundraising-toolkit' ) }
+                                            aria-label={ __( 'Delete note', 'gratora' ) }
                                             onClick={ () => remove( n.id ) }
                                         >
                                             <IconTrash width="14" height="14" />
@@ -108,7 +108,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                     <textarea
                         value={ body }
                         onChange={ ( e ) => setBody( e.target.value ) }
-                        placeholder={ __( 'Write a note about this donation. Notes are visible to admins only.', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Write a note about this donation. Notes are visible to admins only.', 'gratora' ) }
                         rows={ 3 }
                     />
                     { error && <div className="dd-note-form__error">{ error }</div> }
@@ -118,7 +118,7 @@ export default function NotesCard( { donationRef, notes: initial, onChanged } ) 
                             className="btn btn--primary"
                             disabled={ saving || ! body.trim() }
                         >
-                            { saving ? __( 'Saving…', 'fundraising-toolkit' ) : __( 'Add note', 'fundraising-toolkit' ) }
+                            { saving ? __( 'Saving…', 'gratora' ) : __( 'Add note', 'gratora' ) }
                         </button>
                     </div>
                 </form>

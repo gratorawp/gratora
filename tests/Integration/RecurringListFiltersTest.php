@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -55,7 +55,7 @@ final class RecurringListFiltersTest extends IntegrationTestCase
     /** @return array{0: list<int>, 1: int} the ids on the page and the reported total */
     private function list(array $params): array
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/recurring');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/recurring');
         foreach ($params as $k => $v) {
             $req->set_param($k, $v);
         }

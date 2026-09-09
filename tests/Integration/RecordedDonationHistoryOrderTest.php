@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
+use Gratora\Donations\Donation;
 use WP_REST_Request;
 
 /**
@@ -19,7 +19,7 @@ final class RecordedDonationHistoryOrderTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) json_encode([
             'email'          => 'cash-' . uniqid() . '@example.test',
@@ -74,7 +74,7 @@ final class RecordedDonationHistoryOrderTest extends IntegrationTestCase
     {
         $donation = $this->record(current_time('Y-m-d'));
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/donations/' . $donation->reference . '/notes');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/donations/' . $donation->reference . '/notes');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) json_encode(['body' => 'Received as cash at the door.']));
         $res = rest_do_request($req);

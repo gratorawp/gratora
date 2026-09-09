@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Funds;
+namespace Gratora\Funds;
 
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Donations\Donation;
-use FundKit\Forms\Form;
-use FundKit\Foundation\Batch\BatchProcessor;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Donations\Donation;
+use Gratora\Forms\Form;
+use Gratora\Foundation\Batch\BatchProcessor;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * Moves donations, campaign + form default-fund pointers, and recurring-plan
@@ -24,9 +24,9 @@ use FundKit\Recurring\RecurringPlan;
  */
 final class FundReassignmentJob
 {
-    public const HOOK = 'fundkit.async.reassign_fund';
+    public const HOOK = 'gratora.async.reassign_fund';
 
-    private const OPTION = 'fundkit_fund_reassignments';
+    private const OPTION = 'gratora_fund_reassignments';
     private const BATCH  = 500;
 
     /** @since 1.0.0 */
@@ -72,7 +72,7 @@ final class FundReassignmentJob
             // rather than "Reassigning" forever. Donations stay on the deactivated
             // source - never orphaned.
             self::clearPending($fundId);
-            do_action('fundkit.fund.reassign_failed', $source, $targetId);
+            do_action('gratora.fund.reassign_failed', $source, $targetId);
             return;
         }
 
@@ -88,7 +88,7 @@ final class FundReassignmentJob
             self::clearPending($fundId);
             $this->aggregates->syncFund($fundId);
             $this->aggregates->syncFund($targetId);
-            do_action('fundkit.fund.reassign_failed', $source, $targetId);
+            do_action('gratora.fund.reassign_failed', $source, $targetId);
             return;
         }
 
@@ -152,8 +152,8 @@ final class FundReassignmentJob
 
         Fund::query()->where('id', $fundId)->delete();
         self::clearPending($fundId);
-        do_action('fundkit.fund.reassigned', $source, $target);
-        do_action('fundkit.fund.deleted', $source);
+        do_action('gratora.fund.reassigned', $source, $target);
+        do_action('gratora.fund.deleted', $source);
     }
 
     /**

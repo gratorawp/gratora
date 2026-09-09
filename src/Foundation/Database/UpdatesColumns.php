@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Database;
+namespace Gratora\Foundation\Database;
 
 defined('ABSPATH') || exit;
 

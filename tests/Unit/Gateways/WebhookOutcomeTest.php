@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Gateways;
+namespace Gratora\Tests\Unit\Gateways;
 
-use FundKit\Gateways\WebhookOutcome;
+use Gratora\Gateways\WebhookOutcome;
 use PHPUnit\Framework\TestCase;
 
 final class WebhookOutcomeTest extends TestCase

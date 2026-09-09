@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Dashboard;
+namespace Gratora\Dashboard;
 
 use DateTimeImmutable;
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\ChannelClassifier;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationQueries;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\Donor;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Foundation\Time\ScheduleWindow;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\ChannelClassifier;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\Donor;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Foundation\Time\ScheduleWindow;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
+use Gratora\Vendor\Queryable\DB;
 
 /** @since 1.0.0 */
 final class DashboardMetricsService
@@ -185,7 +185,7 @@ final class DashboardMetricsService
 
             $out[] = [
                 'id'             => (int) $d->id,
-                'donor_name'     => $name !== '' ? $name : __('Anonymous', 'fundraising-toolkit'),
+                'donor_name'     => $name !== '' ? $name : __('Anonymous', 'gratora'),
                 'amount_cents'   => (int) $d->amount_cents,
                 'currency'       => (string) $d->currency,
                 'paid_at'        => $d->paid_at,
@@ -313,11 +313,11 @@ final class DashboardMetricsService
                 'tone'  => 'error',
                 'title' => sprintf(
                     /* translators: %d: failed donations count */
-                    _n('%d donation failed in the last 24 hours.', '%d donations failed in the last 24 hours.', $failed, 'fundraising-toolkit'),
+                    _n('%d donation failed in the last 24 hours.', '%d donations failed in the last 24 hours.', $failed, 'gratora'),
                     $failed
                 ),
-                'action_label' => __('Review', 'fundraising-toolkit'),
-                'action_href'  => admin_url('admin.php?page=fundkit-donations&status=failed'),
+                'action_label' => __('Review', 'gratora'),
+                'action_href'  => admin_url('admin.php?page=gratora-donations&status=failed'),
                 'count'        => $failed,
             ];
         }
@@ -339,13 +339,13 @@ final class DashboardMetricsService
                 'tone'  => 'error',
                 'title' => sprintf(
                     /* translators: %d: failed test donations count */
-                    _n('%d test donation failed in the last 24 hours.', '%d test donations failed in the last 24 hours.', $failedTest, 'fundraising-toolkit'),
+                    _n('%d test donation failed in the last 24 hours.', '%d test donations failed in the last 24 hours.', $failedTest, 'gratora'),
                     $failedTest
                 ),
-                'action_label' => __('Review', 'fundraising-toolkit'),
+                'action_label' => __('Review', 'gratora'),
                 // The live link hides test rows, so it would land on an empty
                 // screen.
-                'action_href'  => admin_url('admin.php?page=fundkit-donations&status=failed&include_test=1'),
+                'action_href'  => admin_url('admin.php?page=gratora-donations&status=failed&include_test=1'),
                 'count'        => $failedTest,
             ];
         }
@@ -393,12 +393,12 @@ final class DashboardMetricsService
                 'tone'  => 'warn',
                 'title' => sprintf(
                     /* translators: 1: campaign title, 2: days remaining */
-                    _n('"%1$s" ends in %2$d day.', '"%1$s" ends in %2$d days.', $daysLeft, 'fundraising-toolkit'),
+                    _n('"%1$s" ends in %2$d day.', '"%1$s" ends in %2$d days.', $daysLeft, 'gratora'),
                     $c->title,
                     $daysLeft
                 ),
-                'action_label' => __('Open', 'fundraising-toolkit'),
-                'action_href'  => admin_url('admin.php?page=fundkit-campaigns&view=detail&id=' . $c->id . '&tab=overview'),
+                'action_label' => __('Open', 'gratora'),
+                'action_href'  => admin_url('admin.php?page=gratora-campaigns&view=detail&id=' . $c->id . '&tab=overview'),
             ];
         }
 
@@ -426,11 +426,11 @@ final class DashboardMetricsService
                 'tone'  => 'warn',
                 'title' => sprintf(
                     /* translators: %s: campaign title */
-                    __('"%s" has no default form. The donate button on its page does nothing.', 'fundraising-toolkit'),
+                    __('"%s" has no default form. The donate button on its page does nothing.', 'gratora'),
                     $c->title
                 ),
-                'action_label' => __('Set form', 'fundraising-toolkit'),
-                'action_href'  => admin_url('admin.php?page=fundkit-campaigns&view=detail&id=' . $c->id . '&tab=settings'),
+                'action_label' => __('Set form', 'gratora'),
+                'action_href'  => admin_url('admin.php?page=gratora-campaigns&view=detail&id=' . $c->id . '&tab=settings'),
             ];
         }
 
@@ -439,7 +439,7 @@ final class DashboardMetricsService
         // donors, so one donor leaving three notes is one donor.
         // whereRaw emits no AND connector, so it has to open the chain.
         $noteRows = DonationQueries::donationRows(
-            DB::table('fundkit_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
+            DB::table('gratora_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
             $includeTest
         )
             ->whereIn('status', ['paid', 'partial_refund'])
@@ -454,7 +454,7 @@ final class DashboardMetricsService
         $onlyNote = '';
         if ($noteCount === 1) {
             $one = DonationQueries::donationRows(
-                DB::table('fundkit_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
+                DB::table('gratora_donations')->whereRaw("TRIM(COALESCE(note_to_org, '')) <> ''"),
                 $includeTest
             )
                 ->whereIn('status', ['paid', 'partial_refund'])
@@ -468,8 +468,8 @@ final class DashboardMetricsService
             // donation's own screen, so that is where Read goes. The donor's
             // profile does not carry the note at all.
             $href = $onlyNote !== ''
-                ? admin_url('admin.php?page=fundkit-donations&view=detail&reference=' . rawurlencode($onlyNote))
-                : admin_url('admin.php?page=fundkit-donations');
+                ? admin_url('admin.php?page=gratora-donations&view=detail&reference=' . rawurlencode($onlyNote))
+                : admin_url('admin.php?page=gratora-donations');
             $items[] = [
                 'key'   => 'donor-notes',
                 'tone'  => 'info',
@@ -479,11 +479,11 @@ final class DashboardMetricsService
                         '%d donor left a note in the last 7 days.',
                         '%d donors left notes in the last 7 days.',
                         $donorCount,
-                        'fundraising-toolkit'
+                        'gratora'
                     ),
                     $donorCount
                 ),
-                'action_label' => __('Read', 'fundraising-toolkit'),
+                'action_label' => __('Read', 'gratora'),
                 'action_href'  => $href,
                 'count'        => $noteCount,
             ];
@@ -495,9 +495,9 @@ final class DashboardMetricsService
             $items[] = [
                 'key'          => 'no-campaigns',
                 'tone'         => 'info',
-                'title'        => __('No published campaigns yet. Start one to begin collecting donations.', 'fundraising-toolkit'),
-                'action_label' => __('Create campaign', 'fundraising-toolkit'),
-                'action_href'  => admin_url('admin.php?page=fundkit-campaigns'),
+                'title'        => __('No published campaigns yet. Start one to begin collecting donations.', 'gratora'),
+                'action_label' => __('Create campaign', 'gratora'),
+                'action_href'  => admin_url('admin.php?page=gratora-campaigns'),
             ];
         }
 
@@ -640,7 +640,7 @@ final class DashboardMetricsService
      */
     public function recurring(bool $includeTest = false): array
     {
-        // Single SQL roll-up over fundkit_recurring_plans: monthly-normalized
+        // Single SQL roll-up over gratora_recurring_plans: monthly-normalized
         // amounts, bounded memory, currency-correct via the base column.
         $stats = $this->recurringPlans->recurringStats($this->clock->now()->format('Y-m-d'), $includeTest);
         $currency = strtoupper(Money::defaultCurrency());
@@ -697,7 +697,7 @@ final class DashboardMetricsService
         $campaignIds = array_map(static fn ($c) => (int) $c->id, $rows);
         $lastByCampaign = [];
         $lastRows = DonationQueries::donationRows(
-            DB::table('fundkit_donations')
+            DB::table('gratora_donations')
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->whereIn('campaign_id', $campaignIds),
             $includeTest
@@ -716,7 +716,7 @@ final class DashboardMetricsService
         $testTotals = [];
         if ($includeTest) {
             $totalRows = DonationQueries::donationRows(
-                DB::table('fundkit_donations')
+                DB::table('gratora_donations')
                     ->whereIn('status', ['paid', 'partial_refund'])
                     ->whereIn('campaign_id', $campaignIds),
                 true
@@ -833,7 +833,7 @@ final class DashboardMetricsService
         // consumers, which all apply the kind filter too, so a live ticket
         // order could start an all-time chart before the first donation.
         $row = DonationQueries::donationRows(
-            DB::table('fundkit_donations')->whereIn('status', ['paid', 'partial_refund']),
+            DB::table('gratora_donations')->whereIn('status', ['paid', 'partial_refund']),
             $includeTest
         )
             ->selectRaw('MIN(paid_at) AS first_paid')

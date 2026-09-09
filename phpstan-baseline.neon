@@ -1,7 +1,7 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Using nullsafe property access on non\-nullable type FundKit\\Forms\\Form\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe property access on non\-nullable type Gratora\\Forms\\Form\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: src/Campaigns/Blocks/DonateButtonBlock.php
@@ -31,13 +31,13 @@ parameters:
 			path: src/Donors/DonorMetricsService.php
 
 		-
-			message: '#^Method FundKit\\Donors\\DonorMetricsService\:\:noteForEvent\(\) never returns string so it can be removed from the return type\.$#'
+			message: '#^Method Gratora\\Donors\\DonorMetricsService\:\:noteForEvent\(\) never returns string so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
 			path: src/Donors/DonorMetricsService.php
 
 		-
-			message: '#^Parameter \#2 \$noteMap of method FundKit\\Donors\\DonorMetricsService\:\:noteForEvent\(\) expects array\<int, string\>, array\<int, array\<string, string\|null\>\> given\.$#'
+			message: '#^Parameter \#2 \$noteMap of method Gratora\\Donors\\DonorMetricsService\:\:noteForEvent\(\) expects array\<int, string\>, array\<int, array\<string, string\|null\>\> given\.$#'
 			identifier: argument.type
 			count: 2
 			path: src/Donors/DonorMetricsService.php
@@ -49,25 +49,25 @@ parameters:
 			path: src/Donors/DonorService.php
 
 		-
-			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$donations_count \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property Gratora\\Campaigns\\Campaign\:\:\$donations_count \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Forms/Blocks/GoalBlock.php
 
 		-
-			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$donors_count \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property Gratora\\Campaigns\\Campaign\:\:\$donors_count \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 2
 			path: src/Forms/Blocks/GoalBlock.php
 
 		-
-			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property Gratora\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Forms/Blocks/GoalBlock.php
 
 		-
-			message: '#^Method FundKit\\Forms\\Blocks\\NumberInputBlock\:\:attributes\(\) should return array\<string, array\{type\: string, default\?\: mixed\}\> but returns array\{label\: array\{type\: ''string'', default\: ''''\}, placeholder\: array\{type\: ''string'', default\: ''''\}, helpText\: array\{type\: ''string'', default\: ''''\}, required\: array\{type\: ''boolean'', default\: false\}, min\: array\{type\: array\{''number'', ''null''\}, default\: null\}, max\: array\{type\: array\{''number'', ''null''\}, default\: null\}, step\: array\{type\: ''number'', default\: 1\}, field\: array\{type\: ''string'', default\: ''''\}\}\.$#'
+			message: '#^Method Gratora\\Forms\\Blocks\\NumberInputBlock\:\:attributes\(\) should return array\<string, array\{type\: string, default\?\: mixed\}\> but returns array\{label\: array\{type\: ''string'', default\: ''''\}, placeholder\: array\{type\: ''string'', default\: ''''\}, helpText\: array\{type\: ''string'', default\: ''''\}, required\: array\{type\: ''boolean'', default\: false\}, min\: array\{type\: array\{''number'', ''null''\}, default\: null\}, max\: array\{type\: array\{''number'', ''null''\}, default\: null\}, step\: array\{type\: ''number'', default\: 1\}, field\: array\{type\: ''string'', default\: ''''\}\}\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Forms/Blocks/NumberInputBlock.php
@@ -85,7 +85,7 @@ parameters:
 			path: src/Forms/FormService.php
 
 		-
-			message: '#^Property FundKit\\Forms\\Form\:\:\$blocks \(string\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property Gratora\\Forms\\Form\:\:\$blocks \(string\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Forms/FormSubmissionValidator.php
@@ -109,7 +109,7 @@ parameters:
 			path: src/Forms/Shortcode/DonationFormShortcode.php
 
 		-
-			message: '#^Method FundKit\\Forms\\Shortcode\\DonationFormShortcode\:\:hasPaymentGatewaysBlock\(\) is unused\.$#'
+			message: '#^Method Gratora\\Forms\\Shortcode\\DonationFormShortcode\:\:hasPaymentGatewaysBlock\(\) is unused\.$#'
 			identifier: method.unused
 			count: 1
 			path: src/Forms/Shortcode/DonationFormShortcode.php
@@ -175,7 +175,7 @@ parameters:
 			path: src/Forms/Shortcode/DonationFormShortcode.php
 
 		-
-			message: '#^Template type T of method FundKit\\Foundation\\Container\\Container\:\:get\(\) is not referenced in a parameter\.$#'
+			message: '#^Template type T of method Gratora\\Foundation\\Container\\Container\:\:get\(\) is not referenced in a parameter\.$#'
 			identifier: method.templateTypeNotInParameter
 			count: 1
 			path: src/Foundation/Container/Container.php
@@ -187,13 +187,13 @@ parameters:
 			path: src/Foundation/Transfer/CsvImporter.php
 
 		-
-			message: '#^Method FundKit\\Foundation\\Transfer\\DataImporter\:\:drop\(\) never returns array\<string, mixed\> so it can be removed from the return type\.$#'
+			message: '#^Method Gratora\\Foundation\\Transfer\\DataImporter\:\:drop\(\) never returns array\<string, mixed\> so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
 			path: src/Foundation/Transfer/DataImporter.php
 
 		-
-			message: '#^Offset ''default_form_id''\|''household_id''\|''parent_fund_id'' on array\{donor_id\: ''fundkit_donors'', household_id\: ''fundkit_donors'', campaign_id\: ''fundkit_campaigns'', form_id\: ''fundkit_forms'', source_form_id\: ''fundkit_forms'', default_form_id\: ''fundkit_forms'', fund_id\: ''fundkit_funds'', default_fund_id\: ''fundkit_funds'', \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			message: '#^Offset ''default_form_id''\|''household_id''\|''parent_fund_id'' on array\{donor_id\: ''gratora_donors'', household_id\: ''gratora_donors'', campaign_id\: ''gratora_campaigns'', form_id\: ''gratora_forms'', source_form_id\: ''gratora_forms'', default_form_id\: ''gratora_forms'', fund_id\: ''gratora_funds'', default_fund_id\: ''gratora_funds'', \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
 			path: src/Foundation/Transfer/DataImporter.php
@@ -205,13 +205,13 @@ parameters:
 			path: src/Foundation/Transfer/DataImporter.php
 
 		-
-			message: '#^Property FundKit\\Donations\\Donation\:\:\$kind \(string\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property Gratora\\Donations\\Donation\:\:\$kind \(string\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Receipts/ReceiptIssuer.php
 
 		-
-			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property Gratora\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Admin/CampaignsController.php
@@ -223,7 +223,7 @@ parameters:
 			path: src/Rest/Admin/DonationsController.php
 
 		-
-			message: '#^Method FundKit\\Rest\\Admin\\DonorsController\:\:index\(\) never returns WP_Error so it can be removed from the return type\.$#'
+			message: '#^Method Gratora\\Rest\\Admin\\DonorsController\:\:index\(\) never returns WP_Error so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
 			path: src/Rest/Admin/DonorsController.php
@@ -235,37 +235,37 @@ parameters:
 			path: src/Rest/Admin/FormsController.php
 
 		-
-			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$donations_count \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property Gratora\\Campaigns\\Campaign\:\:\$donations_count \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Admin/FormsController.php
 
 		-
-			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$donors_count \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property Gratora\\Campaigns\\Campaign\:\:\$donors_count \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Admin/FormsController.php
 
 		-
-			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$goal_type \(string\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property Gratora\\Campaigns\\Campaign\:\:\$goal_type \(string\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Admin/FormsController.php
 
 		-
-			message: '#^Property FundKit\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property Gratora\\Campaigns\\Campaign\:\:\$raised_cents \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Admin/FormsController.php
 
 		-
-			message: '#^Method FundKit\\Rest\\Admin\\OnboardingController\:\:finalize\(\) never returns WP_Error so it can be removed from the return type\.$#'
+			message: '#^Method Gratora\\Rest\\Admin\\OnboardingController\:\:finalize\(\) never returns WP_Error so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
 			path: src/Rest/Admin/OnboardingController.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(FundKit\\Vendor\\Queryable\\Model\)\: mixed\)\|null, Closure\(FundKit\\Donations\\Donation\)\: array\{reference\: string, amount_cents\: int, currency\: string, frequency\: string, is_test\: bool, failure_recorded\: bool\} given\.$#'
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(Gratora\\Vendor\\Queryable\\Model\)\: mixed\)\|null, Closure\(Gratora\\Donations\\Donation\)\: array\{reference\: string, amount_cents\: int, currency\: string, frequency\: string, is_test\: bool, failure_recorded\: bool\} given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Rest/Admin/RecurringController.php
@@ -283,7 +283,7 @@ parameters:
 			path: src/Rest/DonationsController.php
 
 		-
-			message: '#^Property FundKit\\Forms\\Form\:\:\$blocks \(string\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property Gratora\\Forms\\Form\:\:\$blocks \(string\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 2
 			path: src/Rest/DonationsController.php
@@ -295,7 +295,7 @@ parameters:
 			path: src/Rest/PayPalController.php
 
 		-
-			message: '#^Property FundKit\\Donors\\Consent\:\:\$purpose_version \(int\) on left side of \?\? is not nullable\.$#'
+			message: '#^Property Gratora\\Donors\\Consent\:\:\$purpose_version \(int\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
 			path: src/Rest/Portal/PortalController.php

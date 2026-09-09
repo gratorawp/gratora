@@ -42,32 +42,32 @@ const SCREENS = [
     {
         name:   'campaigns',
         module: '../../assets/admin/campaigns/List',
-        route:  '/fundkit/v1/admin/campaigns',
+        route:  '/gratora/v1/admin/campaigns',
         saved:  { sort: { field: 'name', direction: 'asc' } },
     },
     {
         name:   'donations',
         module: '../../assets/admin/donations/List',
-        route:  '/fundkit/v1/admin/donations',
+        route:  '/gratora/v1/admin/donations',
         saved:  { sort: { field: 'amount', direction: 'asc' } },
     },
     {
         name:   'donors',
         module: '../../assets/admin/donors/index',
         export: 'DonorsApp',
-        route:  '/fundkit/v1/admin/donors',
+        route:  '/gratora/v1/admin/donors',
         saved:  { sort: { field: 'name', direction: 'asc' } },
     },
     {
         name:   'funds',
         module: '../../assets/admin/funds/List',
-        route:  '/fundkit/v1/admin/funds',
+        route:  '/gratora/v1/admin/funds',
         saved:  { sort: { field: 'name', direction: 'desc' } },
     },
     {
         name:   'subscriptions',
         module: '../../assets/admin/subscriptions/List',
-        route:  '/fundkit/v1/admin/recurring',
+        route:  '/gratora/v1/admin/recurring',
         saved:  { sort: { field: 'amount', direction: 'desc' } },
     },
 ];
@@ -84,7 +84,7 @@ function serve( saved ) {
     apiFetch.mockImplementation( ( { path, parse } ) => {
         calls.push( path );
 
-        if ( path.startsWith( '/fundkit/v1/admin/me/table-view' ) ) {
+        if ( path.startsWith( '/gratora/v1/admin/me/table-view' ) ) {
             return Promise.resolve( saved );
         }
 

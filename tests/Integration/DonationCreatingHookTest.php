@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\Donor;
-use FundKit\Foundation\Plugin;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\Donor;
+use Gratora\Foundation\Plugin;
+use Gratora\Vendor\Queryable\DB;
 use ReflectionProperty;
 use RuntimeException;
 
 /**
  * The seam an add-on needs to write a row that belongs to a donation.
  *
- * `fundkit.donation.intent_created` fires after the transaction has committed, so
+ * `gratora.donation.intent_created` fires after the transaction has committed, so
  * anything it writes can survive a donation that did not. This one runs inside
  * the transaction, with the donation already saved and its id available.
  */
@@ -25,7 +25,7 @@ final class DonationCreatingHookTest extends IntegrationTestCase
     public function test_it_hands_over_the_saved_donation_and_the_intent(): void
     {
         $seen = [];
-        add_action('fundkit.donation.creating', static function ($donation, $intent) use (&$seen): void {
+        add_action('gratora.donation.creating', static function ($donation, $intent) use (&$seen): void {
             $seen[] = [$donation, $intent];
         }, 10, 2);
 
@@ -45,7 +45,7 @@ final class DonationCreatingHookTest extends IntegrationTestCase
     public function test_it_runs_inside_the_create_transaction(): void
     {
         $depthInside = null;
-        add_action('fundkit.donation.creating', static function () use (&$depthInside): void {
+        add_action('gratora.donation.creating', static function () use (&$depthInside): void {
             $depthInside = self::transactionDepth();
         });
 
@@ -67,7 +67,7 @@ final class DonationCreatingHookTest extends IntegrationTestCase
         $donationsBefore = (int) Donation::query()->count();
         $donorsBefore    = (int) Donor::query()->count();
 
-        add_action('fundkit.donation.creating', static function (): void {
+        add_action('gratora.donation.creating', static function (): void {
             throw new RuntimeException('the add-on could not write its row');
         });
 
@@ -85,10 +85,10 @@ final class DonationCreatingHookTest extends IntegrationTestCase
     public function test_it_fires_before_the_committed_intent_created_broadcast(): void
     {
         $order = [];
-        add_action('fundkit.donation.creating', static function () use (&$order): void {
+        add_action('gratora.donation.creating', static function () use (&$order): void {
             $order[] = 'creating';
         });
-        add_action('fundkit.donation.intent_created', static function () use (&$order): void {
+        add_action('gratora.donation.intent_created', static function () use (&$order): void {
             $order[] = 'intent_created';
         });
 

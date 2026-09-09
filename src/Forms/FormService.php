@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms;
+namespace Gratora\Forms;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Recurring\RecurringPlan;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -21,9 +21,9 @@ final class FormService
      * @var list<array{block:string,label:string}>
      */
     private const REQUIRED_BLOCKS = [
-        ['block' => 'fundkit/donation-amount', 'label' => 'Amount'],
-        ['block' => 'fundkit/name',            'label' => 'Name'],
-        ['block' => 'fundkit/email',           'label' => 'Email'],
+        ['block' => 'gratora/donation-amount', 'label' => 'Amount'],
+        ['block' => 'gratora/name',            'label' => 'Name'],
+        ['block' => 'gratora/email',           'label' => 'Email'],
     ];
 
     /**
@@ -55,9 +55,9 @@ final class FormService
     private static function requiredLabel(string $label): string
     {
         return match ($label) {
-            'Amount' => __('Amount', 'fundraising-toolkit'),
-            'Name'   => __('Name', 'fundraising-toolkit'),
-            'Email'  => __('Email', 'fundraising-toolkit'),
+            'Amount' => __('Amount', 'gratora'),
+            'Name'   => __('Name', 'gratora'),
+            'Email'  => __('Email', 'gratora'),
             default  => $label,
         };
     }
@@ -93,7 +93,7 @@ final class FormService
 
         $title = trim((string) ($input['title'] ?? ''));
         if ($title === '') {
-            $title = __('Untitled donation form', 'fundraising-toolkit');
+            $title = __('Untitled donation form', 'gratora');
         }
 
         $campaign = $this->resolveCampaign($input['campaign_id'] ?? null);
@@ -121,7 +121,7 @@ final class FormService
         $this->syncGatewayAllowed($form);
         $form->save();
 
-        do_action('fundkit.form.created', $form);
+        do_action('gratora.form.created', $form);
         return $form;
     }
 
@@ -201,7 +201,7 @@ final class FormService
     private function findGatewayAllowed(array $blocks): ?array
     {
         foreach ($blocks as $b) {
-            if (($b['blockName'] ?? '') === 'fundkit/payment-gateways') {
+            if (($b['blockName'] ?? '') === 'gratora/payment-gateways') {
                 $a = $b['attrs']['allowed'] ?? [];
                 return is_array($a)
                     ? array_values(array_filter(array_map('strval', $a), static fn ($s) => $s !== ''))
@@ -241,10 +241,10 @@ final class FormService
             if ($raw !== '') {
                 $next = sanitize_title($raw);
                 if ($next === '') {
-                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'fundraising-toolkit'));
+                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'gratora'));
                 }
                 if ($next !== $form->slug && $this->forms->slugExists($next, $form->id)) {
-                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'fundraising-toolkit'));
+                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'gratora'));
                 }
                 $form->slug = $next;
             }
@@ -295,7 +295,7 @@ final class FormService
         $this->syncGatewayAllowed($form);
         $form->save();
 
-        do_action('fundkit.form.updated', $form);
+        do_action('gratora.form.updated', $form);
         return $form;
     }
 
@@ -315,7 +315,7 @@ final class FormService
 
         if ($defaultFormId === (int) $form->id) {
             throw new InvalidArgumentException(
-                esc_html__('This form is the campaign default. Pick a different default form before deleting it.', 'fundraising-toolkit')
+                esc_html__('This form is the campaign default. Pick a different default form before deleting it.', 'gratora')
             );
         }
 
@@ -326,7 +326,7 @@ final class FormService
 
         Form::query()->where('id', $form->id)->delete();
 
-        do_action('fundkit.form.deleted', $form);
+        do_action('gratora.form.deleted', $form);
     }
 
     /**
@@ -350,7 +350,7 @@ final class FormService
         $plans     = (int) RecurringPlan::query()->where('form_id', $form->id)->count();
 
         if ($donations > 0 || $plans > 0) {
-            return __('This form has donations and cannot be deleted. Its records would be left pointing at nothing. Set it back to draft instead.', 'fundraising-toolkit');
+            return __('This form has donations and cannot be deleted. Its records would be left pointing at nothing. Set it back to draft instead.', 'gratora');
         }
 
         return null;
@@ -362,7 +362,7 @@ final class FormService
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
         /* translators: %s: original form title */
-        $title = sprintf(__('%s (copy)', 'fundraising-toolkit'), $source->title);
+        $title = sprintf(__('%s (copy)', 'gratora'), $source->title);
 
         $copy = Form::make();
         $copy->title        = $title;
@@ -380,7 +380,7 @@ final class FormService
 
         $copy->save();
 
-        do_action('fundkit.form.duplicated', $copy, $source);
+        do_action('gratora.form.duplicated', $copy, $source);
         return $copy;
     }
 
@@ -405,7 +405,7 @@ final class FormService
         throw new InvalidArgumentException(
             esc_html(sprintf(
                 /* translators: %s: comma-separated list of missing block labels (Amount, Name, Email). */
-                __('This form is published and cannot be saved without these blocks: %s. Add them back, or move the form to draft to keep editing.', 'fundraising-toolkit'),
+                __('This form is published and cannot be saved without these blocks: %s. Add them back, or move the form to draft to keep editing.', 'gratora'),
                 implode(', ', $labels)
             ))
         );
@@ -425,7 +425,7 @@ final class FormService
         throw new InvalidArgumentException(
             esc_html(sprintf(
                 /* translators: %s: comma-separated list of missing block labels (Amount, Name, Email). */
-                __('A published donation form needs these blocks: %s.', 'fundraising-toolkit'),
+                __('A published donation form needs these blocks: %s.', 'gratora'),
                 implode(', ', $labels)
             ))
         );
@@ -436,11 +436,11 @@ final class FormService
     {
         $id = (int) ($idOrNull ?? 0);
         if ($id <= 0) {
-            throw new InvalidArgumentException(esc_html__('A campaign is required.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('A campaign is required.', 'gratora'));
         }
         $campaign = $this->campaigns->findById($id);
         if (! $campaign) {
-            throw new InvalidArgumentException(esc_html__('Campaign not found.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('Campaign not found.', 'gratora'));
         }
         return $campaign;
     }
@@ -516,7 +516,7 @@ final class FormService
 
         throw new InvalidArgumentException(esc_html(sprintf(
             /* translators: %s: campaign title. */
-            __('This is the default donation form for %s, so it cannot be moved. Make another form the default first.', 'fundraising-toolkit'),
+            __('This is the default donation form for %s, so it cannot be moved. Make another form the default first.', 'gratora'),
             $campaign->title
         )));
     }

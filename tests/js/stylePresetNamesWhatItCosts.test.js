@@ -41,13 +41,13 @@ window.matchMedia = () => ( {
     dispatchEvent: () => false,
 } );
 
-window.fundkit = {
+window.gratora = {
     styling: {
         presets:    [ { id: 'bold', name: 'Bold' }, { id: 'quiet', name: 'Quiet' } ],
         default_id: 'bold',
         catalogue:  {
-            'fundkit-accent': { label: 'Accent' },
-            'fundkit-bg':     { label: 'Background' },
+            'gratora-accent': { label: 'Accent' },
+            'gratora-bg':     { label: 'Background' },
         },
     },
 };
@@ -58,7 +58,7 @@ const { StylePresetField } = require( '../../assets/admin/forms/Editor' );
 const campaign = {
     id:    4,
     title: 'Spring Gala',
-    style: { tokens: { 'fundkit-accent': '#c62828', 'fundkit-bg': '#fff8f0' } },
+    style: { tokens: { 'gratora-accent': '#c62828', 'gratora-bg': '#fff8f0' } },
 };
 
 beforeEach( () => { document.body.innerHTML = '<div id="root"></div>'; } );

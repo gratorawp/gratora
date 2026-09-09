@@ -1,1 +1,1 @@
-export { default, ICONS } from '@fundkit/ui/components/Icon';
+export { default, ICONS } from '@gratora/ui/components/Icon';

@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Onboarding;
+namespace Gratora\Onboarding;
 
-use FundKit\Foundation\Hooks\HookProvider;
+use Gratora\Foundation\Hooks\HookProvider;
 
 /**
- * Redirects to the onboarding page while `fundkit_onboarding_status` is 'pending'.
+ * Redirects to the onboarding page while `gratora_onboarding_status` is 'pending'.
  *
  * @since 1.0.0
  */
 final class Onboarding extends HookProvider
 {
-    public const OPTION = 'fundkit_onboarding_status';
+    public const OPTION = 'gratora_onboarding_status';
 
     /** Set at activation, spent on the first admin page load. */
-    private const GREET = 'fundkit_onboarding_greet';
+    private const GREET = 'gratora_onboarding_greet';
 
     /** @since 1.0.0 */
     protected function actions(): array

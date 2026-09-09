@@ -19,15 +19,15 @@ $icons = [
 ];
 $icon = $icons[$emptyIcon ?? ''] ?? $icons['donation'];
 ?>
-<div class="fundkit-block__empty fundkit-empty">
-    <span class="fundkit-empty__icon" aria-hidden="true">
+<div class="gratora-block__empty gratora-empty">
+    <span class="gratora-empty__icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor"
              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <?php echo $icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed markup from the map above ?>
         </svg>
     </span>
-    <p class="fundkit-empty__title"><?php echo esc_html($emptyText); ?></p>
+    <p class="gratora-empty__title"><?php echo esc_html($emptyText); ?></p>
     <?php if (($emptySubText ?? '') !== ''): ?>
-        <p class="fundkit-empty__sub"><?php echo esc_html($emptySubText); ?></p>
+        <p class="gratora-empty__sub"><?php echo esc_html($emptySubText); ?></p>
     <?php endif; ?>
 </div>

@@ -3,7 +3,7 @@
 import { __ } from '@wordpress/i18n';
 // MySQL strings arrive in UTC with no zone marker, which a browser reads as
 // local time. parseTimestamp marks them.
-import { parseTimestamp } from '@fundkit/ui/utils/format';
+import { parseTimestamp } from '@gratora/ui/utils/format';
 
 export { formatAmount, formatAmountCompact } from '../_shared/format';
 
@@ -22,11 +22,11 @@ export function formatDate( iso, opts = {} ) {
 }
 
 export const STATUS_LABEL = {
-    pending:        __( 'Pending', 'fundraising-toolkit' ),
-    processing:     __( 'Processing', 'fundraising-toolkit' ),
-    paid:           __( 'Paid', 'fundraising-toolkit' ),
-    failed:         __( 'Failed', 'fundraising-toolkit' ),
-    refunded:       __( 'Refunded', 'fundraising-toolkit' ),
-    partial_refund: __( 'Partially refunded', 'fundraising-toolkit' ),
-    disputed:       __( 'Disputed', 'fundraising-toolkit' ),
+    pending:        __( 'Pending', 'gratora' ),
+    processing:     __( 'Processing', 'gratora' ),
+    paid:           __( 'Paid', 'gratora' ),
+    failed:         __( 'Failed', 'gratora' ),
+    refunded:       __( 'Refunded', 'gratora' ),
+    partial_refund: __( 'Partially refunded', 'gratora' ),
+    disputed:       __( 'Disputed', 'gratora' ),
 };

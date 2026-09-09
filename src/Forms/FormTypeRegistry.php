@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms;
+namespace Gratora\Forms;
 
-use FundKit\Donations\DonationIntent;
+use Gratora\Donations\DonationIntent;
 use RuntimeException;
 
 /** @since 1.0.0 */

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns;
+namespace Gratora\Campaigns;
 
-use FundKit\Foundation\Hooks\HookProvider;
+use Gratora\Foundation\Hooks\HookProvider;
 
 /**
  * Hides the theme header/footer on a campaign's public pages when the campaign
@@ -52,7 +52,7 @@ final class CampaignChrome extends HookProvider
         if ($campaign === null) {
             return $template;
         }
-        $GLOBALS['fundkit_chrome_flags'] = [
+        $GLOBALS['gratora_chrome_flags'] = [
             'header' => (bool) $campaign->hide_header,
             'footer' => (bool) $campaign->hide_footer,
         ];
@@ -144,7 +144,7 @@ final class CampaignChrome extends HookProvider
         if ($postId <= 0) {
             return null;
         }
-        $campaignId = (int) get_post_meta($postId, '_fundkit_campaign_id', true);
+        $campaignId = (int) get_post_meta($postId, '_gratora_campaign_id', true);
         if ($campaignId <= 0) {
             return null;
         }

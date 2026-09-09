@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Schemas;
+namespace Gratora\Rest\Schemas;
 
 /**
  * Reuse properties with optional fields for partial updates.

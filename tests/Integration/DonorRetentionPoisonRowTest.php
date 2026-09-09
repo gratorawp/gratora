@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Analytics\Event;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorRetention;
-use FundKit\Donors\Erasure\ErasureHandler;
-use FundKit\Donors\Erasure\ErasureRequest;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\Event;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorRetention;
+use Gratora\Donors\Erasure\ErasureHandler;
+use Gratora\Donors\Erasure\ErasureRequest;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
+use Gratora\Vendor\Queryable\DB;
 use ReflectionClassConstant;
 use RuntimeException;
 
 /**
  * The nightly sweep runs third-party code, through the documented
- * `fundkit.donor.erasure_handlers` filter, once per donor and inside the loop. A
+ * `gratora.donor.erasure_handlers` filter, once per donor and inside the loop. A
  * handler that throws leaves that donor unredacted, so a sweep that always
  * reads the oldest matching rows would be handed the same donor every night
  * and never reach anyone behind them: an org that asked for automatic erasure
@@ -97,7 +97,7 @@ final class DonorRetentionPoisonRowTest extends IntegrationTestCase
 
                 $prefix = DB::getPrefix();
                 DB::raw(
-                    "UPDATE {$prefix}fundkit_donors SET redacted_at = NULL WHERE id = %d",
+                    "UPDATE {$prefix}gratora_donors SET redacted_at = NULL WHERE id = %d",
                     [$request->donorId]
                 );
 
@@ -109,7 +109,7 @@ final class DonorRetentionPoisonRowTest extends IntegrationTestCase
             $h[] = $handler;
             return $h;
         };
-        add_filter('fundkit.donor.erasure_handlers', $add);
+        add_filter('gratora.donor.erasure_handlers', $add);
 
         return $add;
     }
@@ -119,7 +119,7 @@ final class DonorRetentionPoisonRowTest extends IntegrationTestCase
         try {
             $this->retention()->run();
         } finally {
-            remove_filter('fundkit.donor.erasure_handlers', $handler);
+            remove_filter('gratora.donor.erasure_handlers', $handler);
         }
     }
 
@@ -139,7 +139,7 @@ final class DonorRetentionPoisonRowTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('fundkit_privacy');
+        delete_option('gratora_privacy');
         delete_option(DonorRetention::STARTS_AT_OPTION);
         parent::tearDown();
     }
@@ -220,7 +220,7 @@ final class DonorRetentionPoisonRowTest extends IntegrationTestCase
             $this->retention()->run();
             $afterContinuation = count($this->retentionErrors());
         } finally {
-            remove_filter('fundkit.donor.erasure_handlers', $add);
+            remove_filter('gratora.donor.erasure_handlers', $add);
         }
 
         $this->assertSame($batch, $afterFirstPass, 'every donor in the batch was attempted once');

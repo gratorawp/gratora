@@ -5,7 +5,7 @@ import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 import { SlugTextControl } from '../_shared/SlugTextControl';
 
-const NAME = 'fundkit/checkbox';
+const NAME = 'gratora/checkbox';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -17,43 +17,43 @@ function Edit( { attributes, setAttributes } ) {
         condition = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--check' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--check' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Checkbox', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Checkbox', 'gratora' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundraising-toolkit' ) }
+                        label={ __( 'Label', 'gratora' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or help text to edit inline.', 'fundraising-toolkit' ) }
+                        help={ __( 'Click the label or help text to edit inline.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'fundraising-toolkit' ) }
+                        label={ __( 'Help text', 'gratora' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Field name', 'fundraising-toolkit' ) }
+                        label={ __( 'Field name', 'gratora' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v } ) }
-                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'fundraising-toolkit' ) }
+                        help={ __( 'Key the value is stored under. Auto-derived from label if empty.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Default on', 'fundraising-toolkit' ) }
+                        label={ __( 'Default on', 'gratora' ) }
                         checked={ defaultOn }
                         onChange={ ( v ) => setAttributes( { defaultOn: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundraising-toolkit' ) }
+                        label={ __( 'Required', 'gratora' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
-                        help={ __( 'Donor must tick this to submit.', 'fundraising-toolkit' ) }
+                        help={ __( 'Donor must tick this to submit.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -69,7 +69,7 @@ function Edit( { attributes, setAttributes } ) {
                         height:       16,
                         borderRadius: 3,
                         border:       '1px solid #888',
-                        background:   defaultOn ? 'var(--fundkit-accent, #211d3f)' : '#fff',
+                        background:   defaultOn ? 'var(--gratora-accent, #211d3f)' : '#fff',
                         flexShrink:   0,
                         marginTop:    2,
                     } }
@@ -79,16 +79,16 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="span"
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'I agree to…', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'I agree to…', 'gratora' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 13, color: '#111827' } }
                     />
-                    { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
+                    { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
                     <RichText
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Optional help text', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Optional help text', 'gratora' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', lineHeight: 1.3 } }
                     />
@@ -101,9 +101,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Checkbox', 'fundraising-toolkit' ),
-        description: __( 'Single yes/no checkbox for agreements, opt-ins, or any boolean.', 'fundraising-toolkit' ),
-        category:    'fundkit-fields',
+        title:       __( 'Checkbox', 'gratora' ),
+        description: __( 'Single yes/no checkbox for agreements, opt-ins, or any boolean.', 'gratora' ),
+        category:    'gratora-fields',
         icon:        BlockIcons[ 'checkbox' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

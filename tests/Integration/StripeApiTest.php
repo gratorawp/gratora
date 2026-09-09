@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\Stripe\StripeAccount;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\Stripe\StripeAccount;
 
 /**
  * StripeApi is "configured" when the org has stored a secret key for the
- * active mode; the webhook secret comes from fundkit_gateway_config. Both are
+ * active mode; the webhook secret comes from gratora_gateway_config. Both are
  * DB-backed, so this is an integration test.
  */
 final class StripeApiTest extends IntegrationTestCase
@@ -21,7 +21,7 @@ final class StripeApiTest extends IntegrationTestCase
     {
         parent::setUp();
         $this->secret = 'whsec_test_' . bin2hex(random_bytes(8));
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'stripe' => ['webhook_secret_test' => $this->secret, 'test_mode' => true],
         ]);
     }
@@ -63,7 +63,7 @@ final class StripeApiTest extends IntegrationTestCase
     {
         // Test and live endpoints have distinct secrets; a delivery signed by
         // either must verify (the other mode's deliveries are not rejected).
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'stripe' => [
                 'webhook_secret_test' => 'whsec_mode_test',
                 'webhook_secret_live' => 'whsec_mode_live',
@@ -130,7 +130,7 @@ final class StripeApiTest extends IntegrationTestCase
 
     public function test_no_webhook_secret_configured_rejects_all(): void
     {
-        update_option('fundkit_gateway_config', ['stripe' => ['test_mode' => true]]);
+        update_option('gratora_gateway_config', ['stripe' => ['test_mode' => true]]);
 
         $payload = '{}';
         $timestamp = (string) time();

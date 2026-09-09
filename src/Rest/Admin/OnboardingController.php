@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
+namespace Gratora\Rest\Admin;
 
-use FundKit\Onboarding\Onboarding;
-use FundKit\Settings\SettingsService;
+use Gratora\Onboarding\Onboarding;
+use Gratora\Settings\SettingsService;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -18,7 +18,7 @@ use WP_REST_Server;
  */
 final class OnboardingController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /** @since 1.0.0 */
     public function __construct(

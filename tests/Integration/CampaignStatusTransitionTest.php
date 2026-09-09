@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Campaigns\CampaignService;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Campaigns\CampaignService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 final class CampaignStatusTransitionTest extends IntegrationTestCase
@@ -15,7 +15,7 @@ final class CampaignStatusTransitionTest extends IntegrationTestCase
     {
         $id = $this->seedDraft();
 
-        $res = $this->put("/fundkit/v1/admin/campaigns/{$id}", ['status' => 'published']);
+        $res = $this->put("/gratora/v1/admin/campaigns/{$id}", ['status' => 'published']);
         $this->assertSame(200, $res->get_status());
         $this->assertSame('published', $res->get_data()['status'] ?? '');
 
@@ -26,9 +26,9 @@ final class CampaignStatusTransitionTest extends IntegrationTestCase
     public function test_put_status_draft_unpublishes_a_published_campaign(): void
     {
         $id = $this->seedDraft();
-        $this->put("/fundkit/v1/admin/campaigns/{$id}", ['status' => 'published']);
+        $this->put("/gratora/v1/admin/campaigns/{$id}", ['status' => 'published']);
 
-        $res = $this->put("/fundkit/v1/admin/campaigns/{$id}", ['status' => 'draft']);
+        $res = $this->put("/gratora/v1/admin/campaigns/{$id}", ['status' => 'draft']);
         $this->assertSame(200, $res->get_status());
         $this->assertSame('draft', $res->get_data()['status'] ?? '');
 
@@ -42,7 +42,7 @@ final class CampaignStatusTransitionTest extends IntegrationTestCase
 
         // 'active' is the UI-facing label; the REST API speaks 'published'.
         // Sending the wrong value must 400, not silently no-op.
-        $res = $this->put("/fundkit/v1/admin/campaigns/{$id}", ['status' => 'active']);
+        $res = $this->put("/gratora/v1/admin/campaigns/{$id}", ['status' => 'active']);
         $this->assertSame(400, $res->get_status(), '"active" is not a valid status enum value');
     }
 

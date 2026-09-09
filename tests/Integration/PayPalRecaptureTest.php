@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\PayPal\PayPalApi;
-use FundKit\Gateways\PayPal\PayPalGateway;
-use FundKit\Gateways\PayPal\PayPalPlans;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\PayPal\PayPalApi;
+use Gratora\Gateways\PayPal\PayPalGateway;
+use Gratora\Gateways\PayPal\PayPalPlans;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -46,8 +46,8 @@ final class PayPalRecaptureTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('fundkit_gateway_config', ['test_mode' => true]);
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_gateway_config', ['test_mode' => true]);
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
@@ -102,7 +102,7 @@ final class PayPalRecaptureTest extends IntegrationTestCase
                 $c->get(PayPalPlans::class),
                 $c->get(RecurringPlanRepository::class),
                 $c->get(Clock::class),
-                $c->get(\FundKit\Gateways\PayPal\PayPalPlanRecorder::class),
+                $c->get(\Gratora\Gateways\PayPal\PayPalPlanRecorder::class),
             ));
         }
     }
@@ -120,7 +120,7 @@ final class PayPalRecaptureTest extends IntegrationTestCase
 
     public function test_a_second_capture_confirms_the_donation_instead_of_failing_the_donor(): void
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'recapture@example.test',

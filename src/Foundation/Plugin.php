@@ -2,28 +2,28 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation;
+namespace Gratora\Foundation;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Campaigns\CampaignPermalinks;
-use FundKit\Core\Activator;
-use FundKit\Core\CoreModule;
-use FundKit\Donors\DonorRetention;
-use FundKit\Donors\Portal\PortalPage;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Commands\CommandRegistry;
-use FundKit\Foundation\Container\Container;
-use FundKit\Foundation\Modules\ModuleManager;
-use FundKit\Foundation\Time\SystemClock;
-use FundKit\Foundation\Uninstall\DataEraser;
-use FundKit\Foundation\Upgrade\MigrationLock;
-use FundKit\Foundation\Upgrade\SchemaGuard;
-use FundKit\Foundation\Upgrade\UpgradeJob;
-use FundKit\Foundation\Upgrade\UpgradeRunner;
-use FundKit\Funds\FundRepository;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Onboarding\Onboarding;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Campaigns\CampaignPermalinks;
+use Gratora\Core\Activator;
+use Gratora\Core\CoreModule;
+use Gratora\Donors\DonorRetention;
+use Gratora\Donors\Portal\PortalPage;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Commands\CommandRegistry;
+use Gratora\Foundation\Container\Container;
+use Gratora\Foundation\Modules\ModuleManager;
+use Gratora\Foundation\Time\SystemClock;
+use Gratora\Foundation\Uninstall\DataEraser;
+use Gratora\Foundation\Upgrade\MigrationLock;
+use Gratora\Foundation\Upgrade\SchemaGuard;
+use Gratora\Foundation\Upgrade\UpgradeJob;
+use Gratora\Foundation\Upgrade\UpgradeRunner;
+use Gratora\Funds\FundRepository;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Onboarding\Onboarding;
 
 /** @since 1.0.0 */
 final class Plugin
@@ -71,7 +71,7 @@ final class Plugin
         }
 
         // Allow external modules to register on this hook.
-        do_action('fundkit.modules.register', $self->modules);
+        do_action('gratora.modules.register', $self->modules);
 
         $self->modules->bootAll();
 
@@ -79,7 +79,7 @@ final class Plugin
         // listener during its boot and would miss a broadcast fired earlier.
         if ($self->container->has(GatewayManager::class)) {
             do_action(
-                'fundkit.gateways.register',
+                'gratora.gateways.register',
                 $self->container->get(GatewayManager::class),
                 $self->container
             );
@@ -105,21 +105,21 @@ final class Plugin
             $broadcast = true;
 
             do_action(
-                'fundkit.commands.register',
+                'gratora.commands.register',
                 $self->container->get(CommandRegistry::class),
                 $self->container
             );
         }, 5);
 
-        // Virtual `fundkit_access` cap for admin-menu visibility (super-admins,
-        // the manage_fundkit umbrella, or any granular fundkit_* cap holder). REST
+        // Virtual `gratora_access` cap for admin-menu visibility (super-admins,
+        // the manage_gratora umbrella, or any granular gratora_* cap holder). REST
         // endpoints still enforce per-area granular caps.
         add_filter('user_has_cap', [Capabilities::class, 'grantMetaCaps']);
 
         // Activation hooks don't fire on plugin updates, so a release that adds
         // a table or column would never migrate on a normal update, causing
         // "unknown column" errors until a reactivation. Run the schema
-        // migration once per FUNDKIT_DB_VERSION bump (cheap on steady state: one
+        // migration once per GRATORA_DB_VERSION bump (cheap on steady state: one
         // option read). Priority 99 so tables exist before the portal heal.
         // A closure declared here, not an array callable: a test that fires
         // wp_loaded with only this file's callbacks standing identifies them by
@@ -140,14 +140,14 @@ final class Plugin
             UpgradeJob::reconcile($c->get(AsyncDispatcher::class), $c->get(UpgradeRunner::class));
         });
 
-        // Re-ensure the donor portal page once per FUNDKIT_VERSION bump so existing
+        // Re-ensure the donor portal page once per GRATORA_VERSION bump so existing
         // installs that skip a reactivation still get the page (and recover from
         // manual deletion). Cheap on steady state (one option read).
         add_action('wp_loaded', static function (): void {
             (new PortalPage())->maybeHeal();
         }, 100);
 
-        do_action('fundkit.booted', $self);
+        do_action('gratora.booted', $self);
     }
 
     /** @since 1.0.0 */
@@ -159,7 +159,7 @@ final class Plugin
         try {
             $fresh = get_option(SchemaGuard::OPTION, null) === null;
 
-            if (get_option(SchemaGuard::OPTION) !== FUNDKIT_DB_VERSION) {
+            if (get_option(SchemaGuard::OPTION) !== GRATORA_DB_VERSION) {
                 // One request migrates. The rest of a burst would otherwise run
                 // the whole pass concurrently against the same tables.
                 if (! MigrationLock::claim()) {
@@ -200,7 +200,7 @@ final class Plugin
     /**
      * Register modules and run all model migrations (schema only). Idempotent
      * and safe to call before plugins_loaded - the integration test bootstrap
-     * calls this so the fundkit_* tables exist before boot() constructs services
+     * calls this so the gratora_* tables exist before boot() constructs services
      * (e.g. IdentityHasher) that read them.
      *
      * @since 1.0.0
@@ -322,16 +322,16 @@ final class Plugin
             new SystemClock()
         ))->activate();
 
-        // The donor portal page hosts [fundkit_donor_portal] and is what every
+        // The donor portal page hosts [gratora_donor_portal] and is what every
         // magic-link email points at - create or adopt it before any donor
         // ever needs the URL.
         (new PortalPage())->ensure();
-        update_option(PortalPage::OPTION_VERSION, FUNDKIT_VERSION, false);
+        update_option(PortalPage::OPTION_VERSION, GRATORA_VERSION, false);
 
         (new CampaignPermalinks())->addRule();
         flush_rewrite_rules();
 
-        do_action('fundkit.activated');
+        do_action('gratora.activated');
     }
 
     /**
@@ -360,8 +360,8 @@ final class Plugin
         // happens to sit in. plugin_basename() is no good either: it returns the
         // whole absolute path when the plugin is outside the registered plugin
         // directory, and the slug would then match no add-on at all.
-        $slug = (string) (get_file_data(FUNDKIT_FILE, ['TextDomain' => 'Text Domain'])['TextDomain'] ?? '');
-        $here = basename(dirname(FUNDKIT_FILE));
+        $slug = (string) (get_file_data(GRATORA_FILE, ['TextDomain' => 'Text Domain'])['TextDomain'] ?? '');
+        $here = basename(dirname(GRATORA_FILE));
 
         $dependents = [];
 
@@ -395,7 +395,7 @@ final class Plugin
          * @param list<string> $dependents Plugin basenames.
          * @since 1.0.0
          */
-        $dependents = (array) apply_filters('fundkit.dependent_plugins', $dependents);
+        $dependents = (array) apply_filters('gratora.dependent_plugins', $dependents);
 
         if ($dependents === []) {
             return;
@@ -429,11 +429,11 @@ final class Plugin
      */
     public static function onDeactivation(bool $networkDeactivating = false): void
     {
-        // Anything that reads FundKit's own tables runs before the wipe, because
+        // Anything that reads Gratora's own tables runs before the wipe, because
         // the plugin is still loaded and hooked for the rest of this request.
         self::deactivateDependents();
 
-        do_action('fundkit.deactivated');
+        do_action('gratora.deactivated');
 
         // Deleted rather than flushed, and after the dependents: a flush from a
         // plugin that is still loaded stores its own rules again, and

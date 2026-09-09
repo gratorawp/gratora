@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -25,12 +25,12 @@ final class StatementRenderIsBudgetedTest extends IntegrationTestCase
         parent::setUp();
         // Test mode multiplies every ceiling tenfold, which would take this
         // route past any loop a test can afford to run.
-        update_option('fundkit_gateway_config', ['test_mode' => false]);
+        update_option('gratora_gateway_config', ['test_mode' => false]);
     }
 
     protected function tearDown(): void
     {
-        unset($_COOKIE['fundkit_donor_session']);
+        unset($_COOKIE['gratora_donor_session']);
         parent::tearDown();
     }
 
@@ -40,15 +40,15 @@ final class StatementRenderIsBudgetedTest extends IntegrationTestCase
             ->findOrCreate('stmt-' . uniqid() . '@example.test', ['first_name' => 'Ada']);
 
         $this->csrf = bin2hex(random_bytes(8));
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession((int) $donor->id, $this->csrf);
+        $_COOKIE['gratora_donor_session'] = $this->portalSession((int) $donor->id, $this->csrf);
 
         return $donor;
     }
 
     private function statement(): int
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/portal/annual-statement/2026');
-        $req->set_header('X-FundKit-Csrf', $this->csrf);
+        $req = new WP_REST_Request('GET', '/gratora/v1/portal/annual-statement/2026');
+        $req->set_header('X-Gratora-Csrf', $this->csrf);
 
         return rest_do_request($req)->get_status();
     }

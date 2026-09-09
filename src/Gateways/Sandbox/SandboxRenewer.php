@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways\Sandbox;
+namespace Gratora\Gateways\Sandbox;
 
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Donations\DonationService;
-use FundKit\Foundation\Batch\BatchProcessor;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\TestMode;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Donations\DonationService;
+use Gratora\Foundation\Batch\BatchProcessor;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\TestMode;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 use Throwable;
 
 /**
@@ -21,7 +21,7 @@ use Throwable;
  */
 final class SandboxRenewer
 {
-    public const HOOK = 'fundkit.cron.sandbox_renew';
+    public const HOOK = 'gratora.cron.sandbox_renew';
 
     /**
      * Where the rehearsal stops. Twelve is enough to watch a plan mature, fail
@@ -60,7 +60,7 @@ final class SandboxRenewer
         // itself then, and a plan whose gateway is gone cannot be cancelled at
         // all: RecurringCanceller has nothing to call and throws.
         if (! $this->testMode->forForm(null)) {
-            $this->expireAll(__('Test mode was switched off.', 'fundraising-toolkit'));
+            $this->expireAll(__('Test mode was switched off.', 'gratora'));
             return;
         }
 
@@ -95,7 +95,7 @@ final class SandboxRenewer
         if ((int) $plan->payments_count >= self::MAX_CYCLES) {
             $this->expire($plan, sprintf(
                 /* translators: %d: how many simulated cycles the plan ran for. */
-                __('Sandbox rehearsal completed after %d cycles.', 'fundraising-toolkit'),
+                __('Sandbox rehearsal completed after %d cycles.', 'gratora'),
                 self::MAX_CYCLES
             ));
             return;
@@ -132,7 +132,7 @@ final class SandboxRenewer
             // stays in the sweep but leaves this batch, which is what stops a
             // failing plan spinning it.
             $this->push($plan, $nextAt, $nowStr);
-            do_action('fundkit.sandbox.renewal_failed', $plan, $e);
+            do_action('gratora.sandbox.renewal_failed', $plan, $e);
             return;
         }
 
@@ -174,7 +174,7 @@ final class SandboxRenewer
                 'updated_at'          => $now,
             ]);
 
-        do_action('fundkit.sandbox.rehearsal_ended', $plan, $reason);
+        do_action('gratora.sandbox.rehearsal_ended', $plan, $reason);
     }
 
     /** @since 1.0.0 */

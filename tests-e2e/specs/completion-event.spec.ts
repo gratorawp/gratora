@@ -13,16 +13,16 @@ import { test, expect } from '../fixtures/donor-form';
  * selection rather than on the assertion.
  */
 const COLLECT = `
-    window.__fundkitCompleted = [];
-    window.addEventListener( 'fundkit:donation:completed', ( e ) => {
-        window.__fundkitCompleted.push( e.detail );
+    window.__gratoraCompleted = [];
+    window.addEventListener( 'gratora:donation:completed', ( e ) => {
+        window.__gratoraCompleted.push( e.detail );
     } );
 `;
 
 type Detail = { reference: string; statusToken: string; status: string };
 
 async function collected( page ): Promise<Detail[]> {
-    return page.evaluate( () => window.__fundkitCompleted ?? [] );
+    return page.evaluate( () => window.__gratoraCompleted ?? [] );
 }
 
 /**
@@ -33,7 +33,7 @@ async function collected( page ): Promise<Detail[]> {
  * nothing to exclude. Asking the browser keeps the distinction that matters.
  */
 async function collectedDataKeys( page ): Promise<string[][]> {
-    return page.evaluate( () => ( window.__fundkitCompleted ?? [] ).map(
+    return page.evaluate( () => ( window.__gratoraCompleted ?? [] ).map(
         ( d ) => Object.keys( d ).filter( ( k ) => typeof d[ k ] !== 'function' ).sort()
     ) );
 }

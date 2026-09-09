@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignService;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignService;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Plugin;
 
 /**
  * Locks the create-drawer-facing behaviour added to CampaignService::create():
  * default_fund_id + image_attachment_id now persist at create time, and
  * currency defaults to the org currency (not a hardcoded EUR) when the form
  * does not send one. Verified against the persisted row, not the return value
- * (fundkit_queryable_silent_write_failure.md).
+ * (gratora_queryable_silent_write_failure.md).
  */
 final class CampaignCreateTest extends IntegrationTestCase
 {

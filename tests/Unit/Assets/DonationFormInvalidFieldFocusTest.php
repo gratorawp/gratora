@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Assets;
+namespace Gratora\Tests\Unit\Assets;
 
 use PHPUnit\Framework\TestCase;
 
@@ -65,7 +65,7 @@ final class DonationFormInvalidFieldFocusTest extends TestCase
     {
         $arm = $this->fieldCase('multi-select');
 
-        $this->assertStringContainsString('fundkit-form__multi-select-option', $arm);
+        $this->assertStringContainsString('gratora-form__multi-select-option', $arm);
         $this->assertStringNotContainsString("case 'hidden'", $arm);
         $this->assertStringContainsString(
             'aria-invalid={ !! err[ errKey ] }',
@@ -89,7 +89,7 @@ final class DonationFormInvalidFieldFocusTest extends TestCase
         $this->assertIsInt($end);
 
         $this->assertMatchesRegularExpression(
-            '/outline:[^;]*var\(\s*--fundkit-error-fg/',
+            '/outline:[^;]*var\(\s*--gratora-error-fg/',
             substr($css, (int) $start, (int) $end - (int) $start),
             'the mark has to be visible, and themed like every other error.'
         );

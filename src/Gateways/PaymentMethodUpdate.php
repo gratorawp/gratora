@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways;
+namespace Gratora\Gateways;
 
 /**
  * How a donor is to be taken through changing the card on a plan.

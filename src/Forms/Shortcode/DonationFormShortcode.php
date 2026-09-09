@@ -2,38 +2,38 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Shortcode;
+namespace Gratora\Forms\Shortcode;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Campaigns\Styling\CampaignStyleResolver;
-use FundKit\Campaigns\Styling\Ink;
-use FundKit\Campaigns\Styling\Tokens;
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donors\ConsentService;
-use FundKit\Forms\Blocks\ColumnsBlock;
-use FundKit\Forms\Blocks\ConsentBlock;
-use FundKit\Forms\Blocks\CurrencySwitcherBlock;
-use FundKit\Forms\Blocks\DateBlock;
-use FundKit\Forms\Blocks\DividerBlock;
-use FundKit\Forms\Blocks\DonationAmountBlock;
-use FundKit\Forms\Blocks\DropdownBlock;
-use FundKit\Forms\Blocks\FundPickerBlock;
-use FundKit\Forms\Blocks\HtmlBlock;
-use FundKit\Forms\Blocks\MultiSelectBlock;
-use FundKit\Forms\Blocks\PaymentGatewaysBlock;
-use FundKit\Forms\Blocks\RecurringToggleBlock;
-use FundKit\Forms\Blocks\SectionBlock;
-use FundKit\Forms\Blocks\TermsBlock;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormRepository;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Hooks\HookProvider;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\BrowserAware;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\TestMode;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Campaigns\Styling\Ink;
+use Gratora\Campaigns\Styling\Tokens;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donors\ConsentService;
+use Gratora\Forms\Blocks\ColumnsBlock;
+use Gratora\Forms\Blocks\ConsentBlock;
+use Gratora\Forms\Blocks\CurrencySwitcherBlock;
+use Gratora\Forms\Blocks\DateBlock;
+use Gratora\Forms\Blocks\DividerBlock;
+use Gratora\Forms\Blocks\DonationAmountBlock;
+use Gratora\Forms\Blocks\DropdownBlock;
+use Gratora\Forms\Blocks\FundPickerBlock;
+use Gratora\Forms\Blocks\HtmlBlock;
+use Gratora\Forms\Blocks\MultiSelectBlock;
+use Gratora\Forms\Blocks\PaymentGatewaysBlock;
+use Gratora\Forms\Blocks\RecurringToggleBlock;
+use Gratora\Forms\Blocks\SectionBlock;
+use Gratora\Forms\Blocks\TermsBlock;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormRepository;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Hooks\HookProvider;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\BrowserAware;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\TestMode;
 use Throwable;
 
 /**
@@ -43,8 +43,8 @@ use Throwable;
  */
 final class DonationFormShortcode extends HookProvider
 {
-    private const TAG    = 'fundkit_donation_form';
-    private const HANDLE = 'fundkit-donation-form-runtime';
+    private const TAG    = 'gratora_donation_form';
+    private const HANDLE = 'gratora-donation-form-runtime';
 
     private bool $cssLinkInlined = false;
 
@@ -98,24 +98,24 @@ final class DonationFormShortcode extends HookProvider
         FormGatewayAssets::enqueue();
         FormFieldAssets::enqueue();
 
-        $assetPath = FUNDKIT_DIR . 'build/donation-form/runtime/index.asset.php';
+        $assetPath = GRATORA_DIR . 'build/donation-form/runtime/index.asset.php';
         if (file_exists($assetPath)) {
             $asset = require $assetPath;
             wp_register_script(
                 self::HANDLE,
-                FUNDKIT_URL . 'build/donation-form/runtime/index.js',
+                GRATORA_URL . 'build/donation-form/runtime/index.js',
                 array_merge($asset['dependencies'] ?? [], [FormGatewayAssets::HANDLE, FormFieldAssets::HANDLE]),
-                $asset['version']      ?? FUNDKIT_VERSION,
+                $asset['version']      ?? GRATORA_VERSION,
                 true
             );
             wp_enqueue_script(self::HANDLE);
         }
 
-        $cssPath = FUNDKIT_DIR . 'build/donation-form/runtime.css';
+        $cssPath = GRATORA_DIR . 'build/donation-form/runtime.css';
         if (file_exists($cssPath)) {
             wp_register_style(
                 self::HANDLE,
-                FUNDKIT_URL . 'build/donation-form/runtime.css',
+                GRATORA_URL . 'build/donation-form/runtime.css',
                 [],
                 $this->cssVersion()
             );
@@ -136,14 +136,14 @@ final class DonationFormShortcode extends HookProvider
         $atts = is_array($atts) ? $atts : [];
         $slug = trim((string) ($atts['slug'] ?? ''));
         if ($slug === '') {
-            return $this->renderError(__('Specify a form slug: [fundkit_donation_form slug="..."].', 'fundraising-toolkit'));
+            return $this->renderError(__('Specify a form slug: [gratora_donation_form slug="..."].', 'gratora'));
         }
 
         $form = $this->forms->findBySlug($slug);
         if (! $form) {
             return $this->renderError(sprintf(
                 /* translators: %s: form slug */
-                __('No donation form found for slug "%s".', 'fundraising-toolkit'),
+                __('No donation form found for slug "%s".', 'gratora'),
                 $slug
             ));
         }
@@ -152,18 +152,18 @@ final class DonationFormShortcode extends HookProvider
         // nothing. The preview filter only takes effect for a user who can
         // edit, so the gate is never bypassed for a public visitor.
         $editorPreview = current_user_can('edit_posts')
-            && (bool) apply_filters('fundkit.form.editor_preview', false, $form);
+            && (bool) apply_filters('gratora.form.editor_preview', false, $form);
         if (! $editorPreview) {
             // Nothing renders for a visitor either way. renderError adds the
             // reason for whoever can act on it, so a page that has quietly lost
             // its form does not depend on the admin thinking to check the
             // campaign screen. The equivalent block already explains itself.
             if ($form->status !== 'published') {
-                return $this->renderError(__('This form is not published, so it is hidden here.', 'fundraising-toolkit'));
+                return $this->renderError(__('This form is not published, so it is hidden here.', 'gratora'));
             }
             $campaign = $this->campaigns ? $this->campaigns->findById($form->campaign_id) : null;
             if (! $campaign) {
-                return $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'fundraising-toolkit'));
+                return $this->renderError(__('The campaign this form belongs to no longer exists, so the form is hidden.', 'gratora'));
             }
             if (! $campaign->acceptsDonations()) {
                 return $this->renderNotAccepting($campaign->notAcceptingReason());
@@ -187,16 +187,16 @@ final class DonationFormShortcode extends HookProvider
         ) {
             $this->cssLinkInlined = true;
             wp_dequeue_style(self::HANDLE);
-            $href = FUNDKIT_URL . 'build/donation-form/' . $this->cssFileName() . '?ver=' . rawurlencode($this->cssVersion());
+            $href = GRATORA_URL . 'build/donation-form/' . $this->cssFileName() . '?ver=' . rawurlencode($this->cssVersion());
             // The enqueued route is the one dequeued two lines up, for the
             // reason above; the handle stays registered so the version and the
             // filename still come from wp_styles.
             // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- wp_dequeue_style() drops this same handle just above; href is esc_url()d and its version comes from wp_styles.
-            $html = '<link rel="stylesheet" id="fundkit-runtime-css" href="' . esc_url($href) . '">' . $html;
+            $html = '<link rel="stylesheet" id="gratora-runtime-css" href="' . esc_url($href) . '">' . $html;
         }
 
         // The server fallback markup is not styled by the runtime CSS, so it
-        // flashes unstyled until the (footer) runtime mounts. The `fundkit-js`
+        // flashes unstyled until the (footer) runtime mounts. The `gratora-js`
         // class is only added when JS runs, so no-JS visitors keep the visible
         // fallback, and the timeout failsafe reveals the form if the runtime
         // never loads. Once per request.
@@ -207,10 +207,10 @@ final class DonationFormShortcode extends HookProvider
         // phpcs:ignore WordPress.WP.EnqueuedResources -- see above.
         if (! $this->cloakEmitted) {
             $this->cloakEmitted = true;
-            $html = "<style>.fundkit-js .fundkit-donation-form:not([data-fundkit-ready]){visibility:hidden}</style>"
-                . "<script>document.documentElement.classList.add('fundkit-js');"
-                . "setTimeout(function(){var n=document.querySelectorAll('.fundkit-donation-form:not([data-fundkit-ready])');"
-                . "for(var i=0;i<n.length;i++)n[i].setAttribute('data-fundkit-ready','1')},4000)</script>"
+            $html = "<style>.gratora-js .gratora-donation-form:not([data-gratora-ready]){visibility:hidden}</style>"
+                . "<script>document.documentElement.classList.add('gratora-js');"
+                . "setTimeout(function(){var n=document.querySelectorAll('.gratora-donation-form:not([data-gratora-ready])');"
+                . "for(var i=0;i<n.length;i++)n[i].setAttribute('data-gratora-ready','1')},4000)</script>"
                 . $html;
         }
 
@@ -220,7 +220,7 @@ final class DonationFormShortcode extends HookProvider
     /** @since 1.0.0 */
     private function renderBlocks(Form $form): string
     {
-        $formId = 'fundkit-form-' . wp_unique_id();
+        $formId = 'gratora-form-' . wp_unique_id();
 
         // SSR fund-picker pre-selects the campaign default, matching the walker.
         $campDefaultFund = 0;
@@ -239,7 +239,7 @@ final class DonationFormShortcode extends HookProvider
         PaymentGatewaysBlock::$renderTestMode = null;
         FundPickerBlock::$renderCampaignDefaultFundId = 0;
 
-        $variant = apply_filters('fundkit.form.variant', null, $form, $this->visitorContext());
+        $variant = apply_filters('gratora.form.variant', null, $form, $this->visitorContext());
         $gateway = $this->pickGateway($form);
         $config  = $this->buildConfig($form, $gateway, $variant);
 
@@ -251,12 +251,12 @@ final class DonationFormShortcode extends HookProvider
 
         // Only a no-JS visitor sees this: a dead form would GET their inputs
         // into the URL on submit.
-        $noscript = '<noscript><div class="fundkit-donation-form__noscript">'
-            . esc_html__('This donation form needs JavaScript enabled. Please turn it on and reload the page to donate.', 'fundraising-toolkit')
+        $noscript = '<noscript><div class="gratora-donation-form__noscript">'
+            . esc_html__('This donation form needs JavaScript enabled. Please turn it on and reload the page to donate.', 'gratora')
             . '</div></noscript>';
 
         return sprintf(
-            '<form class="fundkit-donation-form fundkit-donation-form--blocks%s" id="%s" data-form-slug="%s" data-gateway="%s" data-layout="%s"%s%s novalidate>%s<script type="application/json" data-fundkit-form-config>%s</script></form>',
+            '<form class="gratora-donation-form gratora-donation-form--blocks%s" id="%s" data-form-slug="%s" data-gateway="%s" data-layout="%s"%s%s novalidate>%s<script type="application/json" data-gratora-form-config>%s</script></form>',
             $containerClass,
             esc_attr($formId),
             esc_attr($form->slug),
@@ -294,12 +294,12 @@ final class DonationFormShortcode extends HookProvider
         }
 
         $classSuffix = $style === 'plain'
-            ? ' fundkit-donation-form--plain'
-            : ' fundkit-donation-form--framed';
+            ? ' gratora-donation-form--plain'
+            : ' gratora-donation-form--framed';
 
         // Inline max-width (not just the CSS var) so host-theme selectors cannot out-specify it.
         $containerDecls = $width > 0
-            ? '--fundkit-form-max-width:' . $width . 'px;max-width:' . $width . 'px'
+            ? '--gratora-form-max-width:' . $width . 'px;max-width:' . $width . 'px'
             : '';
 
         return [$classSuffix, $containerDecls];
@@ -324,7 +324,7 @@ final class DonationFormShortcode extends HookProvider
 
         // Derived, not authored: the accent and the soft ground are the
         // org's to choose, so what is drawn on them cannot assume a colour.
-        $out .= Ink::declarationsFor((string) ($tokens['fundkit-accent'] ?? ''));
+        $out .= Ink::declarationsFor((string) ($tokens['gratora-accent'] ?? ''));
         $out .= Ink::softDeclarations($tokens);
         $out .= Ink::fieldDeclarations($tokens);
 
@@ -363,14 +363,14 @@ final class DonationFormShortcode extends HookProvider
 
         $html = $this->renderBlocks($stub);
 
-        $assetPath = FUNDKIT_DIR . 'build/donation-form/runtime/index.asset.php';
-        $asset     = is_file($assetPath) ? include $assetPath : ['dependencies' => [], 'version' => FUNDKIT_VERSION];
+        $assetPath = GRATORA_DIR . 'build/donation-form/runtime/index.asset.php';
+        $asset     = is_file($assetPath) ? include $assetPath : ['dependencies' => [], 'version' => GRATORA_VERSION];
 
         // Version CSS by mtime so SCSS-only rebuilds bust the iframe cache
         return [
             'html'   => $html,
-            'cssUrl' => FUNDKIT_URL . 'build/donation-form/' . $this->cssFileName() . '?v=' . $this->cssVersion(),
-            'jsUrl'  => FUNDKIT_URL . 'build/donation-form/runtime/index.js?v=' . ($asset['version'] ?? FUNDKIT_VERSION),
+            'cssUrl' => GRATORA_URL . 'build/donation-form/' . $this->cssFileName() . '?v=' . $this->cssVersion(),
+            'jsUrl'  => GRATORA_URL . 'build/donation-form/runtime/index.js?v=' . ($asset['version'] ?? GRATORA_VERSION),
             'jsDeps' => (array) ($asset['dependencies'] ?? []),
         ];
     }
@@ -428,7 +428,7 @@ final class DonationFormShortcode extends HookProvider
             // cannot tell it from a hostile embed. Only a document this server
             // built carries the flag: a site framing the real form cannot
             // script into it to set one.
-            '    <script>window.fundkitFormPreview = true;</script>',
+            '    <script>window.gratoraFormPreview = true;</script>',
             '    <link rel="stylesheet" href="' . $cssUrl . '">',
             '    <style>',
             '        html, body { margin: 0; padding: 0; background: ' . $background . '; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif; }',
@@ -493,7 +493,7 @@ final class DonationFormShortcode extends HookProvider
             'country' => null,
             'user_id' => get_current_user_id() ?: null,
         ];
-        return (array) apply_filters('fundkit.form.visitor_context', $base);
+        return (array) apply_filters('gratora.form.visitor_context', $base);
     }
 
     /** @since 1.0.0 */
@@ -528,7 +528,7 @@ final class DonationFormShortcode extends HookProvider
     {
         $visitor = $this->visitorContext();
         $built    = $this->buildSteps($form, $variant, $visitor);
-        $steps    = (array) apply_filters('fundkit.form.steps', $built['steps'], $form, $variant, $visitor);
+        $steps    = (array) apply_filters('gratora.form.steps', $built['steps'], $form, $variant, $visitor);
         $pages    = $built['pages'];
         $pageNav  = $built['pageNav'];
         $preamble = $built['preamble'] ?? [];
@@ -548,23 +548,23 @@ final class DonationFormShortcode extends HookProvider
 
         $thankYouMessage = trim((string) ($form->settings['thank_you_message'] ?? ''));
         if ($thankYouMessage === '') {
-            $thankYouMessage = __('Thanks for your donation. A receipt is on the way to your inbox.', 'fundraising-toolkit');
+            $thankYouMessage = __('Thanks for your donation. A receipt is on the way to your inbox.', 'gratora');
         }
         $redirectUrl = trim((string) ($form->settings['redirect_url'] ?? ''));
 
         $currency = $this->detectCurrency($form);
 
-        $currencyCfg = get_option('fundkit_currency_locale', []);
+        $currencyCfg = get_option('gratora_currency_locale', []);
         $fmtCfg      = is_array($currencyCfg['format'] ?? null) ? $currencyCfg['format'] : [];
         $numberFormat = [
             'decimalPlaces'  => (int) ($fmtCfg['decimal_places'] ?? 2),
             'decimalSep'     => (string) ($fmtCfg['decimal_sep']  ?? '.'),
             'thousandSep'    => (string) ($fmtCfg['thousand_sep'] ?? ','),
             'symbolPosition' => (string) ($fmtCfg['symbol_position'] ?? 'before'),
-            'symbol'         => \FundKit\Foundation\Helpers\Money::symbolFor($currency),
+            'symbol'         => \Gratora\Foundation\Helpers\Money::symbolFor($currency),
         ];
 
-        $privacy = get_option('fundkit_privacy', []);
+        $privacy = get_option('gratora_privacy', []);
         $privacyUrl = is_array($privacy) ? trim((string) ($privacy['privacy_policy_url'] ?? '')) : '';
 
         $currencies = $this->detectCurrencies($form);
@@ -643,7 +643,7 @@ final class DonationFormShortcode extends HookProvider
                 'tokens' => $resolvedStyle['tokens'],
                 'accent' => (string) $resolvedStyle['accent'],
             ],
-            'rest'        => esc_url_raw(rest_url('fundkit/v1/donations')),
+            'rest'        => esc_url_raw(rest_url('gratora/v1/donations')),
             // Anonymous donors send none, so a page-cached form never carries a
             // stale nonce the REST layer would 403. The create route is public;
             // spam and rate-limit gates protect it.
@@ -657,10 +657,10 @@ final class DonationFormShortcode extends HookProvider
             // because the form takes an address on trust and a card need not
             // match it.
             'portal'      => [
-                'url'      => ( new \FundKit\Donors\Portal\PortalPage() )->url(),
+                'url'      => ( new \Gratora\Donors\Portal\PortalPage() )->url(),
                 // Published whole: the donations endpoint is a full URL, not a
                 // base to append to.
-                'sendLink' => esc_url_raw(rest_url('fundkit/v1/portal/send-link')),
+                'sendLink' => esc_url_raw(rest_url('gratora/v1/portal/send-link')),
                 'token'    => $this->spam ? $this->spam->mintPortalToken() : '',
             ],
             // HMAC token (tied to render timestamp) echoed back on submit.
@@ -676,7 +676,7 @@ final class DonationFormShortcode extends HookProvider
                 // set on the amount block raises it for this form; the org-wide
                 // floor still applies underneath, so take the larger.
                 'minAmountCents' => max(
-                    (int) apply_filters('fundkit.spam.min_amount_cents', 100),
+                    (int) apply_filters('gratora.spam.min_amount_cents', 100),
                     self::amountBlockMinCents($form)
                 ),
             ],
@@ -685,37 +685,37 @@ final class DonationFormShortcode extends HookProvider
             'pageNav'    => $pageNav,
             'preamble'   => $preamble,
             'i18n'     => [
-                'chooseAmount'   => __('Choose an amount', 'fundraising-toolkit'),
-                'customAmount'   => __('Custom amount', 'fundraising-toolkit'),
-                'yourDetails'    => __('Your details', 'fundraising-toolkit'),
-                'firstName'      => __('First name', 'fundraising-toolkit'),
-                'lastName'       => __('Last name', 'fundraising-toolkit'),
-                'email'          => __('Email', 'fundraising-toolkit'),
-                'country'        => __('Country', 'fundraising-toolkit'),
-                'reviewDonation' => __('Review your donation', 'fundraising-toolkit'),
-                'amount'         => __('Amount', 'fundraising-toolkit'),
-                'frequency'      => __('Donation frequency', 'fundraising-toolkit'),
-                'fees'           => __('Processing fee', 'fundraising-toolkit'),
-                'total'          => __('Total', 'fundraising-toolkit'),
-                'manageGiving'   => __('Manage your giving', 'fundraising-toolkit'),
-                'portalLinkSent' => __('Check your email', 'fundraising-toolkit'),
-                'donor'          => __('Donor', 'fundraising-toolkit'),
-                'paymentMethod'  => __('Payment method', 'fundraising-toolkit'),
+                'chooseAmount'   => __('Choose an amount', 'gratora'),
+                'customAmount'   => __('Custom amount', 'gratora'),
+                'yourDetails'    => __('Your details', 'gratora'),
+                'firstName'      => __('First name', 'gratora'),
+                'lastName'       => __('Last name', 'gratora'),
+                'email'          => __('Email', 'gratora'),
+                'country'        => __('Country', 'gratora'),
+                'reviewDonation' => __('Review your donation', 'gratora'),
+                'amount'         => __('Amount', 'gratora'),
+                'frequency'      => __('Donation frequency', 'gratora'),
+                'fees'           => __('Processing fee', 'gratora'),
+                'total'          => __('Total', 'gratora'),
+                'manageGiving'   => __('Manage your giving', 'gratora'),
+                'portalLinkSent' => __('Check your email', 'gratora'),
+                'donor'          => __('Donor', 'gratora'),
+                'paymentMethod'  => __('Payment method', 'gratora'),
                 /* translators: %s: the selected currency code, e.g. INR. */
-                'noGatewayForCurrency' => __('No payment method here accepts %s. Choose another currency to continue.', 'fundraising-toolkit'),
-                'noGatewayForFrequency' => __('No payment method here can take a recurring donation. Choose a one-time donation to continue.', 'fundraising-toolkit'),
+                'noGatewayForCurrency' => __('No payment method here accepts %s. Choose another currency to continue.', 'gratora'),
+                'noGatewayForFrequency' => __('No payment method here can take a recurring donation. Choose a one-time donation to continue.', 'gratora'),
                 // Not a currency problem: no allowed gateway is switched on.
                 // Naming the currency sends donors hunting for a fix that is not
                 // theirs to make.
-                'noGatewayAvailable' => __('Online donations are unavailable right now. Please try again later.', 'fundraising-toolkit'),
-                'testModeNotice' => __('Test mode is on. No real payment is taken and this donation is excluded from reporting.', 'fundraising-toolkit'),
-                'back'           => __('Back', 'fundraising-toolkit'),
-                'next'           => __('Continue', 'fundraising-toolkit'),
-                'donateNow'      => __('Donate now', 'fundraising-toolkit'),
-                'processing'     => __('Processing…', 'fundraising-toolkit'),
-                'thanks'         => __('Thank you for your donation!', 'fundraising-toolkit'),
-                'pendingTitle'   => __('Your donation is pending', 'fundraising-toolkit'),
-                'pendingMessage' => __('Thank you. We have emailed you instructions to complete your payment.', 'fundraising-toolkit'),
+                'noGatewayAvailable' => __('Online donations are unavailable right now. Please try again later.', 'gratora'),
+                'testModeNotice' => __('Test mode is on. No real payment is taken and this donation is excluded from reporting.', 'gratora'),
+                'back'           => __('Back', 'gratora'),
+                'next'           => __('Continue', 'gratora'),
+                'donateNow'      => __('Donate now', 'gratora'),
+                'processing'     => __('Processing…', 'gratora'),
+                'thanks'         => __('Thank you for your donation!', 'gratora'),
+                'pendingTitle'   => __('Your donation is pending', 'gratora'),
+                'pendingMessage' => __('Thank you. We have emailed you instructions to complete your payment.', 'gratora'),
                 // The donor has finished and nothing is expected of them. The
                 // pending copy would tell someone who has already paid that we
                 // are still waiting on them.
@@ -725,90 +725,90 @@ final class DonationFormShortcode extends HookProvider
                 // clearing, and by a card PayPal has held for review, and those
                 // owe the donor different explanations. Naming a bank told a
                 // card donor something untrue about their own payment.
-                'processingTitle'   => __('Thank you, your donation is on its way', 'fundraising-toolkit'),
-                'processingMessage' => __('Your payment is being processed. This can take a few working days, and we will email you once it completes.', 'fundraising-toolkit'),
-                'donateAgain'    => __('Donate again', 'fundraising-toolkit'),
-                'error'          => __('Sorry, something went wrong. Please try again.', 'fundraising-toolkit'),
+                'processingTitle'   => __('Thank you, your donation is on its way', 'gratora'),
+                'processingMessage' => __('Your payment is being processed. This can take a few working days, and we will email you once it completes.', 'gratora'),
+                'donateAgain'    => __('Donate again', 'gratora'),
+                'error'          => __('Sorry, something went wrong. Please try again.', 'gratora'),
                 // A donor who cancelled at their bank, or whose bank refused
                 // the debit, comes back to the same page as a donor whose
                 // payment broke. Only this one can promise the money stayed
                 // where it was, and the generic copy sends them to check a
                 // statement with nothing on it.
-                'notCompleted'   => __('Your payment was not completed, so nothing has been charged. Please try again when you are ready.', 'fundraising-toolkit'),
+                'notCompleted'   => __('Your payment was not completed, so nothing has been charged. Please try again when you are ready.', 'gratora'),
                 // The other half of that pair: the browser could not find out
                 // what happened, which is not the same as knowing nothing
                 // happened. A donor whose bank has taken the money must not be
                 // sent back to the form to pay a second time.
-                'unresolvedTitle'  => __('We could not confirm your payment', 'fundraising-toolkit'),
-                'returnUnresolved' => __('We could not check on your payment, and your bank may still have taken it. Please do not pay again yet. Check again in a moment, or contact us with your reference and we will look it up.', 'fundraising-toolkit'),
-                'checkAgain'       => __('Check again', 'fundraising-toolkit'),
-                'paymentTitle'   => __('Complete your donation', 'fundraising-toolkit'),
-                'paymentLoading' => __('Loading secure payment…', 'fundraising-toolkit'),
-                'payNow'         => __('Pay', 'fundraising-toolkit'),
-                'confirming'     => __('Confirming your payment…', 'fundraising-toolkit'),
-                'cancel'         => __('Cancel', 'fundraising-toolkit'),
-                'comment'        => __('Add a message', 'fundraising-toolkit'),
-                'notePublic'     => __('Show my message publicly on the supporter wall', 'fundraising-toolkit'),
-                'anonymous'      => __('Make this donation anonymous', 'fundraising-toolkit'),
-                'phone'          => __('Phone', 'fundraising-toolkit'),
-                'addressLine1'   => __('Address line 1', 'fundraising-toolkit'),
-                'addressLine2'   => __('Apartment, suite, etc.', 'fundraising-toolkit'),
-                'addressCity'    => __('City', 'fundraising-toolkit'),
-                'addressRegion'  => __('State / region', 'fundraising-toolkit'),
-                'addressPostal'  => __('Postal code', 'fundraising-toolkit'),
-                'addressCountry' => __('Country', 'fundraising-toolkit'),
-                'noSpecificFund' => __('No specific fund', 'fundraising-toolkit'),
-                'number'         => __('Number', 'fundraising-toolkit'),
-                'impact'         => __('Provides', 'fundraising-toolkit'),
-                'currency'       => __('Currency', 'fundraising-toolkit'),
-                'coverFees'      => __('I\'d like to help cover the transaction fee', 'fundraising-toolkit'),
-                'feesTotal'      => __('Total with fees:', 'fundraising-toolkit'),
-                'formTitle'      => __('Donation form', 'fundraising-toolkit'),
-                'close'          => __('Close', 'fundraising-toolkit'),
-                'required'       => __('Required', 'fundraising-toolkit'),
-                'freqOneTime'    => __('One-time', 'fundraising-toolkit'),
-                'freqWeekly'     => __('Weekly', 'fundraising-toolkit'),
-                'freqBiweekly'   => __('Every 2 weeks', 'fundraising-toolkit'),
-                'freqMonthly'    => __('Monthly', 'fundraising-toolkit'),
-                'freqQuarterly'  => __('Quarterly', 'fundraising-toolkit'),
-                'freqYearly'     => __('Yearly', 'fundraising-toolkit'),
-                'searchCountry'  => __('Search country…', 'fundraising-toolkit'),
-                'framedTitle'    => __('This donation form is being shown inside another website.', 'fundraising-toolkit'),
-                'framedAction'   => __('Open the donation page', 'fundraising-toolkit'),
+                'unresolvedTitle'  => __('We could not confirm your payment', 'gratora'),
+                'returnUnresolved' => __('We could not check on your payment, and your bank may still have taken it. Please do not pay again yet. Check again in a moment, or contact us with your reference and we will look it up.', 'gratora'),
+                'checkAgain'       => __('Check again', 'gratora'),
+                'paymentTitle'   => __('Complete your donation', 'gratora'),
+                'paymentLoading' => __('Loading secure payment…', 'gratora'),
+                'payNow'         => __('Pay', 'gratora'),
+                'confirming'     => __('Confirming your payment…', 'gratora'),
+                'cancel'         => __('Cancel', 'gratora'),
+                'comment'        => __('Add a message', 'gratora'),
+                'notePublic'     => __('Show my message publicly on the supporter wall', 'gratora'),
+                'anonymous'      => __('Make this donation anonymous', 'gratora'),
+                'phone'          => __('Phone', 'gratora'),
+                'addressLine1'   => __('Address line 1', 'gratora'),
+                'addressLine2'   => __('Apartment, suite, etc.', 'gratora'),
+                'addressCity'    => __('City', 'gratora'),
+                'addressRegion'  => __('State / region', 'gratora'),
+                'addressPostal'  => __('Postal code', 'gratora'),
+                'addressCountry' => __('Country', 'gratora'),
+                'noSpecificFund' => __('No specific fund', 'gratora'),
+                'number'         => __('Number', 'gratora'),
+                'impact'         => __('Provides', 'gratora'),
+                'currency'       => __('Currency', 'gratora'),
+                'coverFees'      => __('I\'d like to help cover the transaction fee', 'gratora'),
+                'feesTotal'      => __('Total with fees:', 'gratora'),
+                'formTitle'      => __('Donation form', 'gratora'),
+                'close'          => __('Close', 'gratora'),
+                'required'       => __('Required', 'gratora'),
+                'freqOneTime'    => __('One-time', 'gratora'),
+                'freqWeekly'     => __('Weekly', 'gratora'),
+                'freqBiweekly'   => __('Every 2 weeks', 'gratora'),
+                'freqMonthly'    => __('Monthly', 'gratora'),
+                'freqQuarterly'  => __('Quarterly', 'gratora'),
+                'freqYearly'     => __('Yearly', 'gratora'),
+                'searchCountry'  => __('Search country…', 'gratora'),
+                'framedTitle'    => __('This donation form is being shown inside another website.', 'gratora'),
+                'framedAction'   => __('Open the donation page', 'gratora'),
                 // The same source strings the server-rendered terms field
                 // uses, so one translation covers both render paths.
-                'agreeToTerms'   => __('I agree to the terms', 'fundraising-toolkit'),
-                'readTerms'      => __('Read the terms', 'fundraising-toolkit'),
+                'agreeToTerms'   => __('I agree to the terms', 'gratora'),
+                'readTerms'      => __('Read the terms', 'gratora'),
                 'validation'     => [
-                    'required'       => __('Required.', 'fundraising-toolkit'),
-                    'termsRequired'  => __('Please agree to continue.', 'fundraising-toolkit'),
-                    'pickAmount'     => __('Pick or enter an amount.', 'fundraising-toolkit'),
+                    'required'       => __('Required.', 'gratora'),
+                    'termsRequired'  => __('Please agree to continue.', 'gratora'),
+                    'pickAmount'     => __('Pick or enter an amount.', 'gratora'),
                     /* translators: %s: minimum donation amount formatted */
-                    'minAmount'      => __('Minimum donation is %s.', 'fundraising-toolkit'),
-                    'invalidEmail'   => __('Enter a valid email.', 'fundraising-toolkit'),
-                    'enterName'      => __('Enter a name.', 'fundraising-toolkit'),
-                    'invalidNumber'  => __('Enter a number.', 'fundraising-toolkit'),
+                    'minAmount'      => __('Minimum donation is %s.', 'gratora'),
+                    'invalidEmail'   => __('Enter a valid email.', 'gratora'),
+                    'enterName'      => __('Enter a name.', 'gratora'),
+                    'invalidNumber'  => __('Enter a number.', 'gratora'),
                     /* translators: %s: minimum value */
-                    'minNumber'      => __('Must be at least %s.', 'fundraising-toolkit'),
+                    'minNumber'      => __('Must be at least %s.', 'gratora'),
                     /* translators: %s: maximum value */
-                    'maxNumber'      => __('Must be at most %s.', 'fundraising-toolkit'),
+                    'maxNumber'      => __('Must be at most %s.', 'gratora'),
                     /* translators: %s: earliest allowed date */
-                    'minDate'        => __('On or after %s.', 'fundraising-toolkit'),
+                    'minDate'        => __('On or after %s.', 'gratora'),
                     /* translators: %s: latest allowed date */
-                    'maxDate'        => __('On or before %s.', 'fundraising-toolkit'),
+                    'maxDate'        => __('On or before %s.', 'gratora'),
                     /* translators: %s: maximum length */
-                    'tooLong'        => __('Too long (max %s).', 'fundraising-toolkit'),
-                    'invalidFormat'  => __('Invalid format.', 'fundraising-toolkit'),
-                    'pickAtLeastOne' => __('Pick at least one.', 'fundraising-toolkit'),
+                    'tooLong'        => __('Too long (max %s).', 'gratora'),
+                    'invalidFormat'  => __('Invalid format.', 'gratora'),
+                    'pickAtLeastOne' => __('Pick at least one.', 'gratora'),
                     /* translators: %s: minimum number of selections */
-                    'pickAtLeast'    => __('Pick at least %s.', 'fundraising-toolkit'),
+                    'pickAtLeast'    => __('Pick at least %s.', 'gratora'),
                     /* translators: %s: maximum number of selections */
-                    'pickNoMoreThan' => __('Pick no more than %s.', 'fundraising-toolkit'),
+                    'pickNoMoreThan' => __('Pick no more than %s.', 'gratora'),
                 ],
             ],
         ];
 
-        return (array) apply_filters('fundkit.form.config', $config, $form, $variant, $visitor);
+        return (array) apply_filters('gratora.form.config', $config, $form, $variant, $visitor);
     }
 
     /**
@@ -828,10 +828,10 @@ final class DonationFormShortcode extends HookProvider
         // One ordered stream of fields and content, so the runtime renders them
         // interleaved in authored order rather than all content then all fields.
         $items        = [];
-        // Root content before a fundkit/steps wizard: rendered once above it.
+        // Root content before a gratora/steps wizard: rendered once above it.
         $preamble     = [];
         $rowSeq       = 0;
-        // The fundkit/step index a step sits in (0 = none).
+        // The gratora/step index a step sits in (0 = none).
         $currentPage  = 0;
         $stepDefs     = [];
         $pageNav      = [
@@ -887,7 +887,7 @@ final class DonationFormShortcode extends HookProvider
             $attrs = (array) ($block['attrs'] ?? []);
 
             switch ($name) {
-                case 'fundkit/heading':
+                case 'gratora/heading':
                     $level = (int) ($attrs['level'] ?? 2);
                     if ($level < 1 || $level > 6) $level = 2;
                     $items[] = $withCond([
@@ -898,7 +898,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $attrs);
                     break;
 
-                case 'fundkit/paragraph':
+                case 'gratora/paragraph':
                     $items[] = $withCond([
                         'kind'  => 'paragraph',
                         'html'  => wp_kses_post((string) ($attrs['text'] ?? '')),
@@ -906,21 +906,21 @@ final class DonationFormShortcode extends HookProvider
                     ], $attrs);
                     break;
 
-                case 'fundkit/divider':
+                case 'gratora/divider':
                     $items[] = $withCond(
                         ['kind' => 'divider'] + DividerBlock::settings($attrs),
                         $attrs
                     );
                     break;
 
-                case 'fundkit/html':
+                case 'gratora/html':
                     $items[] = $withCond([
                         'kind' => 'html',
                         'html' => HtmlBlock::sanitize((string) ($attrs['content'] ?? '')),
                     ], $attrs);
                     break;
 
-                case 'fundkit/currency-switcher':
+                case 'gratora/currency-switcher':
                     $sw = CurrencySwitcherBlock::settings($attrs);
                     $items[] = $withCond([
                         'kind'    => 'currency-switcher',
@@ -930,20 +930,20 @@ final class DonationFormShortcode extends HookProvider
                     ], $attrs);
                     break;
 
-                case 'fundkit/payment-gateways':
+                case 'gratora/payment-gateways':
                     $items[] = $withCond(['kind' => 'payment-gateways'], $attrs);
                     break;
 
-                case 'fundkit/privacy-notice':
+                case 'gratora/privacy-notice':
                     // Cast to object so empty attrs encode as {} not []; [] makes
                     // the block comment unparseable and the notice silently vanishes.
                     $privacyHtml = (string) do_blocks(
-                        '<!-- wp:fundkit/privacy-notice ' . wp_json_encode((object) $attrs) . ' /-->'
+                        '<!-- wp:gratora/privacy-notice ' . wp_json_encode((object) $attrs) . ' /-->'
                     );
                     $items[] = $withCond(['kind' => 'html', 'html' => $privacyHtml], $attrs);
                     break;
 
-                case 'fundkit/hidden':
+                case 'gratora/hidden':
                     $items[] = $tagRow([
                         'kind'         => 'hidden',
                         'field'        => (string) ($attrs['field']        ?? ''),
@@ -953,17 +953,17 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/goal':
+                case 'gratora/goal':
                     $goalAttrs = $attrs;
                     $goalAttrs['campaignId'] = $form->campaign_id;
                     $goalAttrs['formId']     = $form->id;
                     $html = (string) do_blocks(
-                        '<!-- wp:fundkit/goal ' . wp_json_encode($goalAttrs) . ' /-->'
+                        '<!-- wp:gratora/goal ' . wp_json_encode($goalAttrs) . ' /-->'
                     );
                     $items[] = $withCond(['kind' => 'html', 'html' => $html], $attrs);
                     break;
 
-                case 'fundkit/row':
+                case 'gratora/row':
                     $columns = (int) ($attrs['columns'] ?? 2);
                     if ($columns < 1 || $columns > 4) $columns = 2;
                     $gap = (int) ($attrs['gap'] ?? 12);
@@ -983,7 +983,7 @@ final class DonationFormShortcode extends HookProvider
                     $walk($children, $childRow);
                     break;
 
-                case 'fundkit/columns':
+                case 'gratora/columns':
                     $columnsInlineStyle = ColumnsBlock::columnsStyle($attrs);
                     $outerItems         = $items;
                     $items              = [];
@@ -999,13 +999,13 @@ final class DonationFormShortcode extends HookProvider
                     $items   = array_merge($outerItems, $bubbled);
                     $items[] = $withCond([
                         'kind'     => 'columns',
-                        'classes'  => ['fundkit-block', 'fundkit-block--columns'],
+                        'classes'  => ['gratora-block', 'gratora-block--columns'],
                         'style'    => $columnsInlineStyle,
                         'children' => $columnsChildren,
                     ], $attrs);
                     break;
 
-                case 'fundkit/steps':
+                case 'gratora/steps':
                     $progressStyle = (string) ($attrs['progressStyle'] ?? 'dots');
                     if (! in_array($progressStyle, ['dots', 'bar', 'none'], true)) {
                         $progressStyle = 'dots';
@@ -1025,7 +1025,7 @@ final class DonationFormShortcode extends HookProvider
                     $walk($children, $row);
                     break;
 
-                case 'fundkit/step':
+                case 'gratora/step':
                     $flushItems();
                     $currentPage++;
                     $stepDefs[$currentPage] = [
@@ -1050,7 +1050,7 @@ final class DonationFormShortcode extends HookProvider
                     }
                     break;
 
-                case 'fundkit/section':
+                case 'gratora/section':
                     $sectionInlineStyle = SectionBlock::sectionStyle($attrs);
                     $outerItems       = $items;
                     $items            = [];
@@ -1064,13 +1064,13 @@ final class DonationFormShortcode extends HookProvider
                     $items   = array_merge($outerItems, $bubbled);
                     $items[] = $withCond([
                         'kind'     => 'section',
-                        'classes'  => ['fundkit-block', 'fundkit-block--section'],
+                        'classes'  => ['gratora-block', 'gratora-block--section'],
                         'style'    => $sectionInlineStyle,
                         'children' => $sectionChildren,
                     ], $attrs);
                     break;
 
-                case 'fundkit/name':
+                case 'gratora/name':
                     // Required block: never conditional. Pass no attrs so a stale condition can't hide it.
                     $items[] = $tagRow([
                         'kind'             => 'name',
@@ -1083,8 +1083,8 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, []);
                     break;
 
-                case 'fundkit/email':
-                    // Required block: never conditional (see fundkit/name).
+                case 'gratora/email':
+                    // Required block: never conditional (see gratora/name).
                     $items[] = $tagRow([
                         'kind'        => 'email',
                         'label'       => (string) ($attrs['label'] ?? ''),
@@ -1093,7 +1093,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, []);
                     break;
 
-                case 'fundkit/country':
+                case 'gratora/country':
                     $items[] = $tagRow([
                         'kind'        => 'country',
                         'label'       => (string) ($attrs['label'] ?? ''),
@@ -1102,7 +1102,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/phone':
+                case 'gratora/phone':
                     $items[] = $tagRow([
                         'kind'        => 'phone',
                         'label'       => (string) ($attrs['label'] ?? ''),
@@ -1111,38 +1111,38 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/comment':
+                case 'gratora/comment':
                     $items[] = $tagRow([
                         'kind'        => 'comment',
-                        'label'       => (string) ($attrs['label']       ?? __('Add a message', 'fundraising-toolkit')),
-                        'placeholder' => (string) ($attrs['placeholder'] ?? __('Anything you want to share?', 'fundraising-toolkit')),
+                        'label'       => (string) ($attrs['label']       ?? __('Add a message', 'gratora')),
+                        'placeholder' => (string) ($attrs['placeholder'] ?? __('Anything you want to share?', 'gratora')),
                         'required'    => (bool)   ($attrs['required']    ?? false),
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/anonymous-toggle':
-                    $privacyCfg     = get_option('fundkit_privacy', []);
+                case 'gratora/anonymous-toggle':
+                    $privacyCfg     = get_option('gratora_privacy', []);
                     $globalDefault  = is_array($privacyCfg) && ! empty($privacyCfg['always_anonymous_default']);
                     $items[] = $tagRow([
                         'kind'      => 'anonymous',
-                        'label'     => (string) ($attrs['label']     ?? __('Make this donation anonymous', 'fundraising-toolkit')),
+                        'label'     => (string) ($attrs['label']     ?? __('Make this donation anonymous', 'gratora')),
                         'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false) || $globalDefault,
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/cover-fees':
+                case 'gratora/cover-fees':
                     $items[] = $tagRow([
                         'kind'      => 'cover_fees',
-                        'label'     => (string) ($attrs['label']     ?? __('Cover the processing fee so 100% of my donation reaches you', 'fundraising-toolkit')),
+                        'label'     => (string) ($attrs['label']     ?? __('Cover the processing fee so 100% of my donation reaches you', 'gratora')),
                         'percent'   => (float)  ($attrs['percent']   ?? 2.9),
                         'fixed'     => (int)    ($attrs['fixed']     ?? 30),
                         'defaultOn' => (bool)   ($attrs['defaultOn'] ?? false),
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/fund-picker':
+                case 'gratora/fund-picker':
                     $fpAllow      = (bool) ($attrs['allowEmpty'] ?? false);
-                    $fpRepo       = new \FundKit\Funds\FundRepository();
+                    $fpRepo       = new \Gratora\Funds\FundRepository();
                     $fpAllowedIds = array_values(array_filter(array_map('intval', (array) ($attrs['fundIds'] ?? []))));
                     $fpDescriptions = (bool) ($attrs['showDescriptions'] ?? true);
                     $fpOptions    = $fpRepo->pickerOptions(
@@ -1202,7 +1202,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/address':
+                case 'gratora/address':
                     $items[] = $tagRow([
                         'kind'           => 'address',
                         'label'          => (string) ($attrs['label']          ?? ''),
@@ -1226,7 +1226,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/consent':
+                case 'gratora/consent':
                     // Resolved from the org registry, same as the server render:
                     // the block names purposes, it does not define them, so a
                     // key the org deleted drops out rather than being invented.
@@ -1255,7 +1255,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/donation-summary':
+                case 'gratora/donation-summary':
                     // A decoration, not a field: it reads state back rather than
                     // collecting anything, and only decorations reach
                     // renderDecorationItem.
@@ -1266,7 +1266,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $attrs);
                     break;
 
-                case 'fundkit/terms':
+                case 'gratora/terms':
                     if (TermsBlock::isConfigured($attrs)) {
                         $items[] = $tagRow([
                             'kind'     => 'terms',
@@ -1286,7 +1286,7 @@ final class DonationFormShortcode extends HookProvider
                     }
                     break;
 
-                case 'fundkit/donation-amount':
+                case 'gratora/donation-amount':
                     // The amount UI is a fixed step, so preceding content leads
                     // it as its own step rather than nesting inside it.
                     $flushItems();
@@ -1307,7 +1307,7 @@ final class DonationFormShortcode extends HookProvider
                         }
                     }
                     $presets = DonationAmountBlock::normalizePresets($raw);
-                    $presets = (array) apply_filters('fundkit.form.amounts', $presets, $form, $variant, $visitor);
+                    $presets = (array) apply_filters('gratora.form.amounts', $presets, $form, $variant, $visitor);
                     $steps[] = [
                         'type'        => 'amount',
                         'page'        => $currentPage,
@@ -1316,7 +1316,7 @@ final class DonationFormShortcode extends HookProvider
                     ];
                     break;
 
-                case 'fundkit/submit-button':
+                case 'gratora/submit-button':
                     $flushItems();
                     $sbAlign = (string) ($attrs['align'] ?? 'left');
                     if (! in_array($sbAlign, ['left', 'center', 'right', 'full'], true)) {
@@ -1325,12 +1325,12 @@ final class DonationFormShortcode extends HookProvider
                     $steps[] = [
                         'type'        => 'submit',
                         'page'        => $currentPage,
-                        'label'       => (string) ($attrs['label'] ?? __('Donate now', 'fundraising-toolkit')),
+                        'label'       => (string) ($attrs['label'] ?? __('Donate now', 'gratora')),
                         'align'       => $sbAlign,
                     ];
                     break;
 
-                case 'fundkit/date':
+                case 'gratora/date':
                     $items[] = $tagRow([
                         'kind'     => 'date',
                         'label'    => (string) ($attrs['label']    ?? ''),
@@ -1342,7 +1342,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/text-input':
+                case 'gratora/text-input':
                     $items[] = $tagRow([
                         'kind'        => 'text',
                         'label'       => (string) ($attrs['label']       ?? ''),
@@ -1355,7 +1355,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/number-input':
+                case 'gratora/number-input':
                     $nMin  = $attrs['min']  ?? null;
                     $nMax  = $attrs['max']  ?? null;
                     $nStep = $attrs['step'] ?? 1;
@@ -1372,7 +1372,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/recurring-toggle':
+                case 'gratora/recurring-toggle':
                     $rFreqs = RecurringToggleBlock::normalizeFrequencies($attrs['frequencies'] ?? RecurringToggleBlock::DEFAULT_FREQUENCIES);
                     if (! in_array('one-time', $rFreqs, true) && ! empty($rFreqs)) {
                         array_unshift($rFreqs, 'one-time');
@@ -1396,7 +1396,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/dropdown':
+                case 'gratora/dropdown':
                     $dOptions = DropdownBlock::normalizeOptions($attrs['options'] ?? null);
                     $dDefault = '';
                     foreach ($dOptions as $opt) {
@@ -1413,7 +1413,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/radio':
+                case 'gratora/radio':
                     $rOptions = DropdownBlock::normalizeOptions($attrs['options'] ?? null);
                     $rrDefault = '';
                     foreach ($rOptions as $opt) {
@@ -1432,7 +1432,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/checkbox':
+                case 'gratora/checkbox':
                     $items[] = $tagRow([
                         'kind'      => 'checkbox',
                         'label'     => (string) ($attrs['label']    ?? ''),
@@ -1443,7 +1443,7 @@ final class DonationFormShortcode extends HookProvider
                     ], $row, $attrs);
                     break;
 
-                case 'fundkit/multi-select':
+                case 'gratora/multi-select':
                     $msOptions = DropdownBlock::normalizeOptions($attrs['options'] ?? null);
                     $msDefaults = [];
                     foreach ($msOptions as $opt) {
@@ -1465,7 +1465,7 @@ final class DonationFormShortcode extends HookProvider
                     // A field block shipped outside core answers with the runtime
                     // item its component renders from; a block nobody claims stays
                     // out of the config rather than reaching the donor half-built.
-                    $extra = apply_filters('fundkit.form.block_field', null, $name, $attrs, $form);
+                    $extra = apply_filters('gratora.form.block_field', null, $name, $attrs, $form);
                     if (is_array($extra) && isset($extra['kind'])) {
                         $items[] = $tagRow($extra, $row, $attrs);
                     }
@@ -1482,7 +1482,7 @@ final class DonationFormShortcode extends HookProvider
             if ($s['type'] === 'submit') { $hasSubmit = true; break; }
         }
         if (! $hasSubmit) {
-            $steps[] = ['type' => 'submit', 'page' => $currentPage, 'label' => __('Donate now', 'fundraising-toolkit')];
+            $steps[] = ['type' => 'submit', 'page' => $currentPage, 'label' => __('Donate now', 'gratora')];
         }
 
         // Walker pages are 1-indexed; runtime wants dense 0-indexed.
@@ -1522,7 +1522,7 @@ final class DonationFormShortcode extends HookProvider
         $scan = function (array $list) use (&$scan, &$found): void {
             foreach ($list as $b) {
                 if ($found !== null) return;
-                if (($b['blockName'] ?? '') === 'fundkit/donation-amount') {
+                if (($b['blockName'] ?? '') === 'gratora/donation-amount') {
                     $c = strtoupper((string) ($b['attrs']['currency'] ?? ''));
                     if ($c !== '') { $found = $c; return; }
                 }
@@ -1542,7 +1542,7 @@ final class DonationFormShortcode extends HookProvider
         $blocks = parse_blocks((string) $form->blocks);
         $scan = function (array $list) use (&$scan, &$codes): void {
             foreach ($list as $b) {
-                if (($b['blockName'] ?? '') === 'fundkit/currency-switcher') {
+                if (($b['blockName'] ?? '') === 'gratora/currency-switcher') {
                     foreach (CurrencySwitcherBlock::resolve($b['attrs']['currencies'] ?? []) as $c) {
                         if (! in_array($c, $codes, true)) $codes[] = $c;
                     }
@@ -1562,7 +1562,7 @@ final class DonationFormShortcode extends HookProvider
         $scan = function (array $list) use (&$scan, &$found): void {
             foreach ($list as $b) {
                 if ($found !== null) return;
-                if (($b['blockName'] ?? '') === 'fundkit/currency-switcher') {
+                if (($b['blockName'] ?? '') === 'gratora/currency-switcher') {
                     $found = CurrencySwitcherBlock::settings(
                         (array) ($b['attrs'] ?? [])
                     );
@@ -1589,7 +1589,7 @@ final class DonationFormShortcode extends HookProvider
         $scan = function (array $list) use (&$scan, &$found): void {
             foreach ($list as $b) {
                 if ($found !== null) return;
-                if (($b['blockName'] ?? '') === 'fundkit/payment-gateways') {
+                if (($b['blockName'] ?? '') === 'gratora/payment-gateways') {
                     $found = is_array($b['attrs'] ?? null) ? $b['attrs'] : [];
                     return;
                 }
@@ -1608,7 +1608,7 @@ final class DonationFormShortcode extends HookProvider
      */
     private function fxConfig(string $formCurrency, array $switcherCurrencies): array
     {
-        $fx   = new \FundKit\Currency\FxRates();
+        $fx   = new \Gratora\Currency\FxRates();
         $base = $fx->base() ?: strtoupper($formCurrency);
 
         $codes = array_values(array_unique(array_merge(
@@ -1639,14 +1639,14 @@ final class DonationFormShortcode extends HookProvider
     private function renderNotAccepting(?string $reason): string
     {
         $public = match ($reason) {
-            'ended'     => __('This campaign has finished accepting donations. Thank you to everyone who gave.', 'fundraising-toolkit'),
-            'goal_met'  => __('This campaign has reached its goal. Thank you to everyone who gave.', 'fundraising-toolkit'),
-            'scheduled' => __('This campaign is not open for donations yet. Please check back soon.', 'fundraising-toolkit'),
+            'ended'     => __('This campaign has finished accepting donations. Thank you to everyone who gave.', 'gratora'),
+            'goal_met'  => __('This campaign has reached its goal. Thank you to everyone who gave.', 'gratora'),
+            'scheduled' => __('This campaign is not open for donations yet. Please check back soon.', 'gratora'),
             default     => null,
         };
 
         if ($public === null) {
-            return $this->renderError(__('This campaign is not accepting donations, so the form is hidden. Publish the campaign to show it.', 'fundraising-toolkit'));
+            return $this->renderError(__('This campaign is not accepting donations, so the form is hidden. Publish the campaign to show it.', 'gratora'));
         }
 
         // The visitor's sentence explains the situation; it does not say what to
@@ -1654,24 +1654,24 @@ final class DonationFormShortcode extends HookProvider
         // a closed campaign is not an error, and two stacked boxes read as one
         // thing having gone wrong twice.
         $note = '';
-        if (current_user_can('manage_options') || current_user_can('manage_fundkit')) {
+        if (current_user_can('manage_options') || current_user_can('manage_gratora')) {
             $for = match ($reason) {
-                'ended'     => __('The end date on this campaign has passed. Change the schedule to reopen it.', 'fundraising-toolkit'),
-                'goal_met'  => __('This campaign is set to close when it meets its goal, and it has. Raise the target or turn that setting off to reopen it.', 'fundraising-toolkit'),
-                'scheduled' => __('It opens on its start date. Only you can see this note.', 'fundraising-toolkit'),
+                'ended'     => __('The end date on this campaign has passed. Change the schedule to reopen it.', 'gratora'),
+                'goal_met'  => __('This campaign is set to close when it meets its goal, and it has. Raise the target or turn that setting off to reopen it.', 'gratora'),
+                'scheduled' => __('It opens on its start date. Only you can see this note.', 'gratora'),
                 default     => '',
             };
 
             if ($for !== '') {
                 $note = sprintf(
-                    '<span class="fundkit-donation-form__closed-note" style="display:block;margin-top:8px;font-size:13px;color:#6b6558;">%s</span>',
+                    '<span class="gratora-donation-form__closed-note" style="display:block;margin-top:8px;font-size:13px;color:#6b6558;">%s</span>',
                     esc_html($for)
                 );
             }
         }
 
         return sprintf(
-            '<div class="fundkit-donation-form__closed" style="padding:16px 20px;border:1px solid #e5e0d8;border-radius:10px;background:#faf8f4;color:#3f3a33;font-size:15px;line-height:1.55;">%s%s</div>',
+            '<div class="gratora-donation-form__closed" style="padding:16px 20px;border:1px solid #e5e0d8;border-radius:10px;background:#faf8f4;color:#3f3a33;font-size:15px;line-height:1.55;">%s%s</div>',
             esc_html($public),
             $note
         );
@@ -1680,11 +1680,11 @@ final class DonationFormShortcode extends HookProvider
     /** @since 1.0.0 */
     private function renderError(string $message): string
     {
-        if (! current_user_can('manage_options') && ! current_user_can('manage_fundkit')) {
+        if (! current_user_can('manage_options') && ! current_user_can('manage_gratora')) {
             return '';
         }
         return sprintf(
-            '<div class="fundkit-donation-form__error" style="padding:12px 16px;border:1px solid #c00;background:#fee;color:#900;font-size:13px;">%s</div>',
+            '<div class="gratora-donation-form__error" style="padding:12px 16px;border:1px solid #c00;background:#fee;color:#900;font-size:13px;">%s</div>',
             esc_html($message)
         );
     }
@@ -1693,8 +1693,8 @@ final class DonationFormShortcode extends HookProvider
     private function cssVersion(): string
     {
         if ($this->cssVersion === null) {
-            $path = FUNDKIT_DIR . 'build/donation-form/runtime.css';
-            $this->cssVersion = (string) (@filemtime($path) ?: FUNDKIT_VERSION);
+            $path = GRATORA_DIR . 'build/donation-form/runtime.css';
+            $this->cssVersion = (string) (@filemtime($path) ?: GRATORA_VERSION);
         }
         return $this->cssVersion;
     }
@@ -1736,7 +1736,7 @@ final class DonationFormShortcode extends HookProvider
 
         try {
             $clientId = Plugin::instance()->container
-                ->get(\FundKit\Gateways\PayPal\PayPalAccount::class)
+                ->get(\Gratora\Gateways\PayPal\PayPalAccount::class)
                 ->clientIdFor($testMode);
         } catch (Throwable) {
             return null;
@@ -1789,7 +1789,7 @@ final class DonationFormShortcode extends HookProvider
      */
     private static function amountBlockMinCents($form): int
     {
-        if (! preg_match_all('/<!--\s+wp:fundkit\/donation-amount\s+(\{.*?\})\s+\/?-->/s', (string) $form->blocks, $m)) {
+        if (! preg_match_all('/<!--\s+wp:gratora\/donation-amount\s+(\{.*?\})\s+\/?-->/s', (string) $form->blocks, $m)) {
             return 0;
         }
 

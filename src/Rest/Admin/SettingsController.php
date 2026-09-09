@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
-use FundKit\Currency\BaseCurrencyLock;
-use FundKit\Currency\BaseCurrencyLocked;
-use FundKit\Donors\DonorRetention;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\References\InvalidReferenceToken;
-use FundKit\Settings\SecretRedactor;
-use FundKit\Settings\SettingsService;
+namespace Gratora\Rest\Admin;
+use Gratora\Currency\BaseCurrencyLock;
+use Gratora\Currency\BaseCurrencyLocked;
+use Gratora\Donors\DonorRetention;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\References\InvalidReferenceToken;
+use Gratora\Settings\SecretRedactor;
+use Gratora\Settings\SettingsService;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -18,7 +18,7 @@ use WP_REST_Server;
 /** @since 1.0.0 */
 final class SettingsController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -70,7 +70,7 @@ final class SettingsController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('fundkit_manage_settings');
+        return Capabilities::userCan('gratora_manage_settings');
     }
 
     /** @since 1.0.0 */
@@ -78,7 +78,7 @@ final class SettingsController
     {
         $group = (string) $request['group'];
         if (! $this->settings->knows($group)) {
-            return new WP_Error('fundkit_unknown_group', __('Unknown settings group.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_unknown_group', __('Unknown settings group.', 'gratora'), ['status' => 404]);
         }
         // Never hand a stored secret back out. The gateways group holds the
         // Stripe webhook signing secret, which is the only authentication on
@@ -93,13 +93,13 @@ final class SettingsController
     {
         $group = (string) $request['group'];
         if (! $this->settings->knows($group)) {
-            return new WP_Error('fundkit_unknown_group', __('Unknown settings group.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_unknown_group', __('Unknown settings group.', 'gratora'), ['status' => 404]);
         }
-        // Assigning FundKit capabilities to roles grants privileges, so it needs
-        // full admin - not the delegatable fundkit_manage_settings, which a scoped
+        // Assigning Gratora capabilities to roles grants privileges, so it needs
+        // full admin - not the delegatable gratora_manage_settings, which a scoped
         // role could otherwise use to grant itself refund/redact/export caps.
         if ($group === 'roles' && ! current_user_can('manage_options')) {
-            return new WP_Error('fundkit_forbidden', __('Managing roles requires full administrator access.', 'fundraising-toolkit'), ['status' => 403]);
+            return new WP_Error('gratora_forbidden', __('Managing roles requires full administrator access.', 'gratora'), ['status' => 403]);
         }
         $body = (array) $request->get_json_params();
         // Whitelist to known top-level keys for this group so arbitrary keys
@@ -118,10 +118,10 @@ final class SettingsController
         // Arming or shortening the nightly sweep destroys donor contact details
         // on a schedule and cannot be undone, so it cannot cost less capability
         // than redacting one donor by hand does.
-        if ($group === 'privacy' && $this->widensErasure($body) && ! Capabilities::userCan('fundkit_redact_donors')) {
+        if ($group === 'privacy' && $this->widensErasure($body) && ! Capabilities::userCan('gratora_redact_donors')) {
             return new WP_Error(
-                'fundkit_forbidden',
-                __('Automatic donor erasure can only be changed by someone who may redact donors.', 'fundraising-toolkit'),
+                'gratora_forbidden',
+                __('Automatic donor erasure can only be changed by someone who may redact donors.', 'gratora'),
                 ['status' => 403]
             );
         }
@@ -131,14 +131,14 @@ final class SettingsController
         try {
             $saved = $this->settings->update($group, $body);
         } catch (BaseCurrencyLocked $e) {
-            return new WP_Error('fundkit_base_currency_locked', $e->getMessage(), ['status' => 409]);
+            return new WP_Error('gratora_base_currency_locked', $e->getMessage(), ['status' => 409]);
         } catch (InvalidReferenceToken $e) {
-            return new WP_Error('fundkit_invalid_reference_token', $e->getMessage(), ['status' => 400]);
+            return new WP_Error('gratora_invalid_reference_token', $e->getMessage(), ['status' => 400]);
         } catch (\InvalidArgumentException $e) {
             // A value the writer refuses on its own terms: a currency that is
             // not a code, a numbering format too long for the column. The
             // sentence is written for the admin, so it is the response.
-            return new WP_Error('fundkit_invalid_setting', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('gratora_invalid_setting', $e->getMessage(), ['status' => 422]);
         }
 
         // The same read-only fields the GET carries. The client replaces its

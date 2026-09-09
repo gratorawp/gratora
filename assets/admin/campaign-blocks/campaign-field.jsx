@@ -8,18 +8,18 @@ import Notice from '../_shared/components/Notice';
 
 // Read per render, not once at module scope: the payload is inlined before the
 // bundle, but a stale global must not decide this for a whole session.
-export const canManageCampaigns = () => !! ( window.fundkitCampaignBlocks || {} ).canManageCampaigns;
+export const canManageCampaigns = () => !! ( window.gratoraCampaignBlocks || {} ).canManageCampaigns;
 
 export function useBoundCampaign( campaignId ) {
     const postMetaId = useSelect( ( select ) => {
         const editor = select( 'core/editor' );
         if ( ! editor || ! editor.getEditedPostAttribute ) return 0;
         const meta = editor.getEditedPostAttribute( 'meta' ) || {};
-        return Number( meta._fundkit_campaign_id || 0 );
+        return Number( meta._gratora_campaign_id || 0 );
     }, [] );
 
     const resolvedId = campaignId || postMetaId || 0;
-    const { record, hasResolved } = useEntityRecord( 'fundkit/v1', 'campaign', resolvedId, {
+    const { record, hasResolved } = useEntityRecord( 'gratora/v1', 'campaign', resolvedId, {
         enabled: resolvedId > 0,
     } );
 
@@ -39,7 +39,7 @@ export function CampaignPicker( { value, onChange, noneLabel } ) {
     // Narrowed on the server: a page of a hundred cannot hold every campaign,
     // and one outside it could not be picked at all.
     const [ search, setSearch ] = useState( '' );
-    const { records } = useEntityRecords( 'fundkit/v1', 'campaign', {
+    const { records } = useEntityRecords( 'gratora/v1', 'campaign', {
         per_page: 100,
         orderby:  'title',
         order:    'asc',
@@ -57,11 +57,11 @@ export function CampaignPicker( { value, onChange, noneLabel } ) {
 
     // Resolved on its own so a block bound to a campaign outside the current
     // page still reads as bound rather than as unset.
-    const { record: bound } = useEntityRecord( 'fundkit/v1', 'campaign', value || 0, {
+    const { record: bound } = useEntityRecord( 'gratora/v1', 'campaign', value || 0, {
         enabled: Number( value ) > 0,
     } );
 
-    const options = [ { value: 0, label: noneLabel || __( 'Select a campaign', 'fundraising-toolkit' ) } ];
+    const options = [ { value: 0, label: noneLabel || __( 'Select a campaign', 'gratora' ) } ];
     const seen    = new Set( [ 0 ] );
     for ( const c of [ ...( bound ? [ bound ] : [] ), ...campaigns ] ) {
         if ( seen.has( c.id ) ) continue;
@@ -72,7 +72,7 @@ export function CampaignPicker( { value, onChange, noneLabel } ) {
     return (
         <>
             <ComboboxControl
-                label={ __( 'Campaign', 'fundraising-toolkit' ) }
+                label={ __( 'Campaign', 'gratora' ) }
                 value={ Number( value ) || 0 }
                 options={ options }
                 onFilterValueChange={ setSearch }
@@ -82,8 +82,8 @@ export function CampaignPicker( { value, onChange, noneLabel } ) {
             { empty && (
                 <Notice status="warning" isDismissible={ false }>
                     { canManageCampaigns()
-                        ? __( 'No campaigns have been created yet.', 'fundraising-toolkit' )
-                        : __( 'You do not have permission to list campaigns, so this block can only use the one the page is already for.', 'fundraising-toolkit' ) }
+                        ? __( 'No campaigns have been created yet.', 'gratora' )
+                        : __( 'You do not have permission to list campaigns, so this block can only use the one the page is already for.', 'gratora' ) }
                 </Notice>
             ) }
         </>

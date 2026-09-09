@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Upgrade;
+namespace Gratora\Foundation\Upgrade;
 
 /**
  * Take the gateway config out of the autoloaded set.
@@ -18,7 +18,7 @@ namespace FundKit\Foundation\Upgrade;
  */
 final class UnautoloadGatewayConfig implements UpgradeRoutine
 {
-    private const OPTION = 'fundkit_gateway_config';
+    private const OPTION = 'gratora_gateway_config';
 
     /** @since 1.0.0 */
     public function id(): string
@@ -29,7 +29,7 @@ final class UnautoloadGatewayConfig implements UpgradeRoutine
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Taking the payment gateway credentials out of the options loaded on every page view.', 'fundraising-toolkit');
+        return __('Taking the payment gateway credentials out of the options loaded on every page view.', 'gratora');
     }
 
     /** @since 1.0.0 */

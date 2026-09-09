@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Recurring\PlanRow;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Recurring\PlanRow;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * The subscriptions list shapes a page of plans at a time. Doing it row by row
@@ -45,8 +45,8 @@ final class PlanRowBatchTest extends IntegrationTestCase
             $plan->updated_at              = $now;
             $plan->save();
 
-            $this->seedFailedRenewal((int) $plan->id, "FUNDKIT-{$tag}-{$i}-OLD", '2026-01-01 00:00:00', 'Old decline');
-            $this->seedFailedRenewal((int) $plan->id, "FUNDKIT-{$tag}-{$i}-NEW", '2026-02-01 00:00:00', 'Card expired');
+            $this->seedFailedRenewal((int) $plan->id, "GRATORA-{$tag}-{$i}-OLD", '2026-01-01 00:00:00', 'Old decline');
+            $this->seedFailedRenewal((int) $plan->id, "GRATORA-{$tag}-{$i}-NEW", '2026-02-01 00:00:00', 'Card expired');
             $this->seedPlanError((int) $plan->id, "cancel failed on {$tag}-{$i}");
 
             $out[] = $plan;
@@ -78,7 +78,7 @@ final class PlanRowBatchTest extends IntegrationTestCase
 
     private function seedPlanError(int $planId, string $message): void
     {
-        Plugin::instance()->container->get(\FundKit\Analytics\EventRecorder::class)->record(
+        Plugin::instance()->container->get(\Gratora\Analytics\EventRecorder::class)->record(
             ErrorLog::PREFIX . 'gateway.offline',
             ['recurring_plan_id' => $planId, 'payload' => ['message' => $message]]
         );
@@ -114,7 +114,7 @@ final class PlanRowBatchTest extends IntegrationTestCase
             $failure = $shaped[(int) $plan->id]['last_failure'] ?? null;
 
             $this->assertNotNull($failure, 'a plan with a declined renewal reported none');
-            $this->assertSame("FUNDKIT-decline-{$i}-NEW", $failure['reference'], 'the older decline won');
+            $this->assertSame("GRATORA-decline-{$i}-NEW", $failure['reference'], 'the older decline won');
             $this->assertSame('Card expired', $failure['reason']);
         }
     }

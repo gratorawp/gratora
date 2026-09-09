@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
 /** @since 1.0.0 */
 final class StepsBlock implements Block
@@ -10,7 +10,7 @@ final class StepsBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/steps';
+        return 'gratora/steps';
     }
 
     /** @since 1.0.0 */
@@ -31,6 +31,6 @@ final class StepsBlock implements Block
      */
     public function render(array $attrs, string $content): string
     {
-        return sprintf('<div class="fundkit-block fundkit-block--steps">%s</div>', $content);
+        return sprintf('<div class="gratora-block gratora-block--steps">%s</div>', $content);
     }
 }

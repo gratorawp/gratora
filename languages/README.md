@@ -1,20 +1,20 @@
-# FundKit translations
+# Gratora translations
 
 Notes for whoever regenerates the template. Kept out of the distributed zip by
 `.distignore`.
 
 ## Text domain
 
-Every translatable string uses the `fundraising-toolkit` text domain,
+Every translatable string uses the `gratora` text domain,
 which is the plugin slug and has to stay that way: WordPress.org derives the
 slug from the plugin name and refuses a domain that disagrees with it. File
 naming follows from the domain:
 
 ```
-fundraising-toolkit.pot           - template
-fundraising-toolkit-de_DE.po/.mo  - German
-fundraising-toolkit-fr_FR.po/.mo  - French
-fundraising-toolkit-hr.po/.mo     - Croatian
+gratora.pot           - template
+gratora-de_DE.po/.mo  - German
+gratora-fr_FR.po/.mo  - French
+gratora-hr.po/.mo     - Croatian
 ```
 
 ## Regenerating the POT file
@@ -25,7 +25,7 @@ From the plugin root:
 npm run i18n
 ```
 
-That merges the strings from `@fundkit/ui` and then runs `wp i18n make-pot` over
+That merges the strings from `@gratora/ui` and then runs `wp i18n make-pot` over
 the plugin. Requires `wp-cli` with the `i18n` command.
 
 ## JavaScript strings

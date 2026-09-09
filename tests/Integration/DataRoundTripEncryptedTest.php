@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationNote;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorNote;
-use FundKit\Donors\DonorNoteRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Transfer\DataExporter;
-use FundKit\Foundation\Transfer\DataImporter;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationNote;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorNote;
+use Gratora\Donors\DonorNoteRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Transfer\DataExporter;
+use Gratora\Foundation\Transfer\DataImporter;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * The sealed columns that are not a donor's.
@@ -56,7 +56,7 @@ final class DataRoundTripEncryptedTest extends IntegrationTestCase
     private function wipe(): void
     {
         $prefix = DB::getPrefix();
-        foreach (['fundkit_donation_notes', 'fundkit_donor_notes', 'fundkit_donations', 'fundkit_donors'] as $table) {
+        foreach (['gratora_donation_notes', 'gratora_donor_notes', 'gratora_donations', 'gratora_donors'] as $table) {
             DB::raw("DELETE FROM {$prefix}{$table}");
         }
     }
@@ -201,7 +201,7 @@ final class DataRoundTripEncryptedTest extends IntegrationTestCase
         $now    = gmdate('Y-m-d H:i:s');
         $export = [
             'tables' => [
-                'fundkit_donors' => [[
+                'gratora_donors' => [[
                     'id'         => 1,
                     'email'      => 'bodyless@example.test',
                     'first_name' => 'Bodyless',
@@ -209,7 +209,7 @@ final class DataRoundTripEncryptedTest extends IntegrationTestCase
                     'created_at' => $now,
                     'updated_at' => $now,
                 ]],
-                'fundkit_donor_notes' => [[
+                'gratora_donor_notes' => [[
                     'id'             => 7,
                     'donor_id'       => 1,
                     'author_user_id' => 3,
@@ -221,7 +221,7 @@ final class DataRoundTripEncryptedTest extends IntegrationTestCase
 
         $result = $this->import($export);
 
-        $this->assertSame(1, $result['created']['fundkit_donor_notes'] ?? 0, 'the note was inserted');
+        $this->assertSame(1, $result['created']['gratora_donor_notes'] ?? 0, 'the note was inserted');
 
         $donor = Donor::query()->where('first_name', 'Bodyless')->get();
         $this->assertNotNull($donor);

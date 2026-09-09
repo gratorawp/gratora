@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Identity;
+namespace Gratora\Foundation\Identity;
 
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorEmailRehasher;
-use FundKit\Foundation\Config\SystemSetting;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorEmailRehasher;
+use Gratora\Foundation\Config\SystemSetting;
 
 /**
  * Hash helpers for indexed lookup of sensitive identifiers. Losing the email

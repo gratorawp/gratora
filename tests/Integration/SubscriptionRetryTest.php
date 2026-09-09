@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -28,7 +28,7 @@ final class SubscriptionRetryTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'test_mode' => true,
             'stripe'    => ['webhook_secret_test' => 'whsec_retry'],
         ]);
@@ -39,17 +39,17 @@ final class SubscriptionRetryTest extends IntegrationTestCase
         $stripeAcct->saveKeys(false, 'sk_live_retry', 'pk_live_seed');
         $stripeAcct->refresh(['id' => 'acct_retry', 'charges_enabled' => true]);
 
-        $manager = $c->get(\FundKit\Gateways\GatewayManager::class);
+        $manager = $c->get(\Gratora\Gateways\GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \FundKit\Gateways\Stripe\StripeGateway(
-                $c->get(\FundKit\Gateways\Stripe\StripeApi::class),
-                $c->get(\FundKit\Donations\DonationRepository::class),
-                $c->get(\FundKit\Donations\DonationService::class),
-                $c->get(\FundKit\Gateways\Stripe\StripeAccount::class),
-                $c->get(\FundKit\Donors\DonorRepository::class),
-                $c->get(\FundKit\Donors\DonorService::class),
-                $c->get(\FundKit\Foundation\Time\Clock::class),
-                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
+            $manager->register(new \Gratora\Gateways\Stripe\StripeGateway(
+                $c->get(\Gratora\Gateways\Stripe\StripeApi::class),
+                $c->get(\Gratora\Donations\DonationRepository::class),
+                $c->get(\Gratora\Donations\DonationService::class),
+                $c->get(\Gratora\Gateways\Stripe\StripeAccount::class),
+                $c->get(\Gratora\Donors\DonorRepository::class),
+                $c->get(\Gratora\Donors\DonorService::class),
+                $c->get(\Gratora\Foundation\Time\Clock::class),
+                $c->get(\Gratora\Recurring\RecurringPlanRepository::class),
             ));
         }
 
@@ -89,8 +89,8 @@ final class SubscriptionRetryTest extends IntegrationTestCase
         // The log is where someone looks when a recurring donation misbehaved,
         // and a donor left on a schedule nobody collects is the loudest thing
         // it could be asked to report.
-        $logged = \FundKit\Analytics\Event::query()
-            ->whereLike('type', \FundKit\Analytics\ErrorLog::PREFIX . 'recurring.%')
+        $logged = \Gratora\Analytics\Event::query()
+            ->whereLike('type', \Gratora\Analytics\ErrorLog::PREFIX . 'recurring.%')
             ->getAll();
 
         $this->assertNotEmpty($logged, 'the failure reaches the log');
@@ -104,7 +104,7 @@ final class SubscriptionRetryTest extends IntegrationTestCase
         $this->failSubscriptionOnce = false;
         $this->stripeCalls          = [];
 
-        $req = new WP_REST_Request('POST', "/fundkit/v1/admin/donations/{$reference}/retry-subscription");
+        $req = new WP_REST_Request('POST', "/gratora/v1/admin/donations/{$reference}/retry-subscription");
         $req->set_header('content-type', 'application/json');
         $req->set_body('{}');
         $res = $this->asAdmin(fn () => rest_do_request($req));
@@ -131,18 +131,18 @@ final class SubscriptionRetryTest extends IntegrationTestCase
     {
         $reference = $this->createMonthlyDonation();
 
-        $req = new WP_REST_Request('POST', "/fundkit/v1/admin/donations/{$reference}/retry-subscription");
+        $req = new WP_REST_Request('POST', "/gratora/v1/admin/donations/{$reference}/retry-subscription");
         $req->set_body('{}');
         $res = $this->asAdmin(fn () => rest_do_request($req));
 
         $this->assertSame(422, $res->get_status());
         $data = $res->get_data();
-        $this->assertSame('fundkit_no_retry_needed', $data['code']);
+        $this->assertSame('gratora_no_retry_needed', $data['code']);
     }
 
     private function createMonthlyDonation(): string
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => 'retry+' . bin2hex(random_bytes(3)) . '@example.com',
@@ -172,7 +172,7 @@ final class SubscriptionRetryTest extends IntegrationTestCase
         $timestamp = (string) time();
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $secret);
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/gratora/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);

@@ -1,1 +1,1 @@
-export { default, RANGE_OPTIONS } from '@fundkit/ui/widgets/SectionBar';
+export { default, RANGE_OPTIONS } from '@gratora/ui/widgets/SectionBar';

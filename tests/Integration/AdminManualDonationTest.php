@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
+use Gratora\Donations\Donation;
 use WP_REST_Request;
 
 /**
@@ -24,7 +24,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function record(array $body = []): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(array_merge([
             'email'          => 'nadia@example.com',
@@ -124,8 +124,8 @@ final class AdminManualDonationTest extends IntegrationTestCase
 
     public function test_real_money_is_recorded_even_while_the_site_is_in_test_mode(): void
     {
-        update_option('fundkit_gateway_config', array_merge(
-            (array) get_option('fundkit_gateway_config', []),
+        update_option('gratora_gateway_config', array_merge(
+            (array) get_option('gratora_gateway_config', []),
             ['test_mode' => true]
         ));
 
@@ -141,9 +141,9 @@ final class AdminManualDonationTest extends IntegrationTestCase
     {
         $campaignId = $this->aCampaign();
 
-        $before = (int) \FundKit\Campaigns\Campaign::query()->find('id', $campaignId)->raised_cents;
+        $before = (int) \Gratora\Campaigns\Campaign::query()->find('id', $campaignId)->raised_cents;
         $this->record(['campaign_id' => $campaignId, 'amount_cents' => 25000]);
-        $after = (int) \FundKit\Campaigns\Campaign::query()->find('id', $campaignId)->raised_cents;
+        $after = (int) \Gratora\Campaigns\Campaign::query()->find('id', $campaignId)->raised_cents;
 
         $this->assertSame($before + 25000, $after);
     }
@@ -174,7 +174,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
 
         $this->assertSame(
             'manual',
-            \FundKit\Donations\ChannelClassifier::classify(
+            \Gratora\Donations\ChannelClassifier::classify(
                 (array) $this->donation($reference)->source_attribution
             )
         );
@@ -241,7 +241,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $res = $this->record();
 
         $this->assertSame(409, $res->get_status());
-        $this->assertSame('fundkit_duplicate_donation', $res->get_data()['code']);
+        $this->assertSame('gratora_duplicate_donation', $res->get_data()['code']);
         $this->assertSame($first, $res->get_data()['data']['reference'], 'the warning must name what it matched');
     }
 
@@ -277,12 +277,12 @@ final class AdminManualDonationTest extends IntegrationTestCase
     {
         $donorId = (int) $this->donation((string) $this->record()->get_data()['reference'])->donor_id;
 
-        $donors = \FundKit\Foundation\Plugin::instance()->container->get(\FundKit\Donors\DonorService::class);
-        $donors->redact(\FundKit\Donors\Donor::query()->find('id', $donorId));
+        $donors = \Gratora\Foundation\Plugin::instance()->container->get(\Gratora\Donors\DonorService::class);
+        $donors->redact(\Gratora\Donors\Donor::query()->find('id', $donorId));
 
         $reference = (string) $this->record(['amount_cents' => 4200])->get_data()['reference'];
 
-        $donor = \FundKit\Donors\Donor::query()->find('id', $donorId);
+        $donor = \Gratora\Donors\Donor::query()->find('id', $donorId);
         $this->assertNotNull($donor->redacted_at, 'a hand-recorded check un-erased a donor who asked to be forgotten');
 
         $donation = $this->donation($reference);
@@ -300,10 +300,10 @@ final class AdminManualDonationTest extends IntegrationTestCase
      */
     public function test_an_unusable_paid_at_falls_back_to_the_clock_rather_than_being_stored(): void
     {
-        $service = \FundKit\Foundation\Plugin::instance()->container->get(\FundKit\Donations\DonationService::class);
+        $service = \Gratora\Foundation\Plugin::instance()->container->get(\Gratora\Donations\DonationService::class);
 
         foreach (['not a date', '2099-01-01 00:00:00', '1804-05-01 00:00:00'] as $bad) {
-            $pending = $service->createPending(new \FundKit\Donations\DonationIntent(
+            $pending = $service->createPending(new \Gratora\Donations\DonationIntent(
                 email: 'clock@example.com',
                 amount_cents: 1000,
                 currency: 'USD',
@@ -343,12 +343,12 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $boom = static function (): void {
             throw new \RuntimeException('a listener exploded');
         };
-        add_action('fundkit.donation.completed', $boom, 1);
+        add_action('gratora.donation.completed', $boom, 1);
 
         try {
             $res = $this->record();
         } finally {
-            remove_action('fundkit.donation.completed', $boom, 1);
+            remove_action('gratora.donation.completed', $boom, 1);
         }
 
         $this->assertSame(
@@ -367,12 +367,12 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $boom = static function (): void {
             throw new \RuntimeException('a listener exploded');
         };
-        add_action('fundkit.donation.completed', $boom, 1);
+        add_action('gratora.donation.completed', $boom, 1);
 
         try {
             $this->record();
         } finally {
-            remove_action('fundkit.donation.completed', $boom, 1);
+            remove_action('gratora.donation.completed', $boom, 1);
         }
 
         $this->assertSame(
@@ -391,8 +391,8 @@ final class AdminManualDonationTest extends IntegrationTestCase
     {
         $this->record();
 
-        $missing = \FundKit\Foundation\Plugin::instance()->container
-            ->get(\FundKit\Donations\DonationRepository::class)
+        $missing = \Gratora\Foundation\Plugin::instance()->container
+            ->get(\Gratora\Donations\DonationRepository::class)
             ->paidWithoutReceipt();
 
         $this->assertSame(0, (int) $missing['total'], 'a hand-recorded check is not a receipt that went missing');
@@ -400,8 +400,8 @@ final class AdminManualDonationTest extends IntegrationTestCase
 
     public function test_an_online_donation_with_no_receipt_is_still_reported(): void
     {
-        $service = \FundKit\Foundation\Plugin::instance()->container->get(\FundKit\Donations\DonationService::class);
-        $pending = $service->createPending(new \FundKit\Donations\DonationIntent(
+        $service = \Gratora\Foundation\Plugin::instance()->container->get(\Gratora\Donations\DonationService::class);
+        $pending = $service->createPending(new \Gratora\Donations\DonationIntent(
             email: 'online@example.com',
             amount_cents: 1000,
             currency: 'USD',
@@ -409,8 +409,8 @@ final class AdminManualDonationTest extends IntegrationTestCase
         ))['donation'];
         $service->confirm($pending, []);
 
-        $missing = \FundKit\Foundation\Plugin::instance()->container
-            ->get(\FundKit\Donations\DonationRepository::class)
+        $missing = \Gratora\Foundation\Plugin::instance()->container
+            ->get(\Gratora\Donations\DonationRepository::class)
             ->paidWithoutReceipt();
 
         $this->assertGreaterThan(0, (int) $missing['total']);
@@ -418,7 +418,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
 
     /**
      * M8. The drawer's picker used /admin/campaigns, which needs
-     * fundkit_manage_campaigns: exactly what a role created to enter checks does
+     * gratora_manage_campaigns: exactly what a role created to enter checks does
      * not have. The catch was empty, so it rendered blank and every donation
      * that role recorded went uncategorised.
      */
@@ -428,12 +428,12 @@ final class AdminManualDonationTest extends IntegrationTestCase
 
         $user = self::factory()->user->create(['role' => 'subscriber']);
         $wpUser = get_user_by('id', $user);
-        $wpUser->add_cap('fundkit_access');
-        $wpUser->add_cap('fundkit_view_donations');
-        $wpUser->add_cap('fundkit_refund_donations');
+        $wpUser->add_cap('gratora_access');
+        $wpUser->add_cap('gratora_view_donations');
+        $wpUser->add_cap('gratora_refund_donations');
         wp_set_current_user($user);
 
-        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/donations/campaign-options'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/donations/campaign-options'));
 
         $this->assertSame(200, $res->get_status());
         $this->assertContains(
@@ -452,7 +452,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
 
     private function aCampaign(): int
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Manual entry', 'status' => 'published']));
 
@@ -471,7 +471,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
         $res = $this->record(['currency' => 'BGN']);
 
         $this->assertSame(422, $res->get_status());
-        $this->assertSame('fundkit_unsupported_currency', $res->get_data()['code'] ?? null);
+        $this->assertSame('gratora_unsupported_currency', $res->get_data()['code'] ?? null);
         $this->assertSame(0, Donation::query()->where('currency', 'BGN')->count());
     }
 
@@ -490,7 +490,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
             if (! $fired && str_contains($sql, $needle)) {
                 $fired = true;
 
-                return 'UPDATE ' . self::$prefix . 'fundkit_donations SET fundkit_no_such_column = 1 WHERE id = 0';
+                return 'UPDATE ' . self::$prefix . 'gratora_donations SET gratora_no_such_column = 1 WHERE id = 0';
             }
 
             return $sql;
@@ -516,7 +516,7 @@ final class AdminManualDonationTest extends IntegrationTestCase
      */
     public function test_a_note_that_will_not_write_does_not_report_recorded_money_as_a_failure(): void
     {
-        $restore = $this->breakFirstQueryMatching('fundkit_donation_notes');
+        $restore = $this->breakFirstQueryMatching('gratora_donation_notes');
 
         try {
             $res = $this->record();

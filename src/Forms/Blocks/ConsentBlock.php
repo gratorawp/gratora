@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
-use FundKit\Donors\ConsentService;
-use FundKit\Foundation\Helpers\View;
+use Gratora\Donors\ConsentService;
+use Gratora\Foundation\Helpers\View;
 
 /** @since 1.0.0 */
 final class ConsentBlock implements Block
@@ -18,7 +18,7 @@ final class ConsentBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/consent';
+        return 'gratora/consent';
     }
 
     /** @since 1.0.0 */
@@ -47,8 +47,8 @@ final class ConsentBlock implements Block
                 return '';
             }
 
-            return '<div class="fundkit-block-notice">'
-                . esc_html__('Pick which consent purposes this form asks for, or add one in Settings, Consents.', 'fundraising-toolkit')
+            return '<div class="gratora-block-notice">'
+                . esc_html__('Pick which consent purposes this form asks for, or add one in Settings, Consents.', 'gratora')
                 . '</div>';
         }
 

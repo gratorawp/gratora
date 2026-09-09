@@ -7,43 +7,43 @@ defined('ABSPATH') || exit;
  * @var int    $default
  */
 ?>
-<div class="fundkit-block fundkit-block--amount" data-block="fundkit/donation-amount">
-    <fieldset class="fundkit-amount">
-        <legend class="fundkit-amount__legend"><?php esc_html_e('Choose an amount', 'fundraising-toolkit'); ?></legend>
+<div class="gratora-block gratora-block--amount" data-block="gratora/donation-amount">
+    <fieldset class="gratora-amount">
+        <legend class="gratora-amount__legend"><?php esc_html_e('Choose an amount', 'gratora'); ?></legend>
         <input type="hidden" name="amount_cents" value="<?php echo esc_attr((string) $default); ?>">
         <input type="hidden" name="currency"     value="<?php echo esc_attr($currency); ?>">
 
-        <div class="fundkit-amount__presets" role="radiogroup">
+        <div class="gratora-amount__presets" role="radiogroup">
             <?php foreach ($presets as $i => $preset):
                 $cents   = (int) ($preset['cents'] ?? 0);
                 if ($cents <= 0) continue;
                 $impact  = (string) ($preset['impact'] ?? '');
-                $label   = \FundKit\Foundation\Helpers\Money::compact($cents, $currency);
+                $label   = \Gratora\Foundation\Helpers\Money::compact($cents, $currency);
                 $selected = $cents === (int) $default;
-                $classes = 'fundkit-amount__preset' . ($selected ? ' is-selected' : '');
+                $classes = 'gratora-amount__preset' . ($selected ? ' is-selected' : '');
                 ?>
                 <button type="button"
                         class="<?php echo esc_attr($classes); ?>"
                         data-cents="<?php echo esc_attr((string) $cents); ?>"
                         role="radio"
                         aria-checked="<?php echo esc_attr($selected ? 'true' : 'false'); ?>">
-                    <span class="fundkit-amount__preset-value"><?php echo esc_html($label); ?></span>
+                    <span class="gratora-amount__preset-value"><?php echo esc_html($label); ?></span>
                     <?php if ($impact !== ''): ?>
-                        <span class="fundkit-amount__preset-impact"><?php echo esc_html($impact); ?></span>
+                        <span class="gratora-amount__preset-impact"><?php echo esc_html($impact); ?></span>
                     <?php endif; ?>
                 </button>
             <?php endforeach; ?>
         </div>
 
         <?php if ($allowCustom): ?>
-            <label class="fundkit-amount__custom">
-                <span class="fundkit-amount__custom-label"><?php esc_html_e('Custom amount', 'fundraising-toolkit'); ?></span>
+            <label class="gratora-amount__custom">
+                <span class="gratora-amount__custom-label"><?php esc_html_e('Custom amount', 'gratora'); ?></span>
                 <input type="number"
-                       class="fundkit-amount__custom-input"
-                       name="fundkit_amount_custom"
+                       class="gratora-amount__custom-input"
+                       name="gratora_amount_custom"
                        step="0.01"
                        min="0.5"
-                       placeholder="<?php esc_attr_e('0.00', 'fundraising-toolkit'); ?>"
+                       placeholder="<?php esc_attr_e('0.00', 'gratora'); ?>"
                        inputmode="decimal">
             </label>
         <?php endif; ?>

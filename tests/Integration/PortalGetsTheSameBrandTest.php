@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Settings\SettingsService;
-use FundKit\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
+use Gratora\Foundation\Plugin;
 
 /**
  * The portal built its token map by hand, so it skipped the derivations the
@@ -24,8 +24,8 @@ final class PortalGetsTheSameBrandTest extends IntegrationTestCase
 
     private function css(): string
     {
-        $shortcode = new \FundKit\Donors\Portal\PortalShortcode(
-            Plugin::instance()->container->get(\FundKit\Donations\AntiSpamGuard::class)
+        $shortcode = new \Gratora\Donors\Portal\PortalShortcode(
+            Plugin::instance()->container->get(\Gratora\Donations\AntiSpamGuard::class)
         );
         $method    = new \ReflectionMethod($shortcode, 'brandCss');
         $method->setAccessible(true);
@@ -35,24 +35,24 @@ final class PortalGetsTheSameBrandTest extends IntegrationTestCase
 
     public function test_a_dark_ground_reaches_the_portal_with_light_ink(): void
     {
-        $this->brand(['fundkit-bg' => '#0f172a']);
+        $this->brand(['gratora-bg' => '#0f172a']);
 
         $css = $this->css();
 
-        $this->assertStringContainsString('--fundkit-text: #ffffff', str_replace(':#', ': #', $css));
+        $this->assertStringContainsString('--gratora-text: #ffffff', str_replace(':#', ': #', $css));
     }
 
     public function test_a_pale_accent_reaches_the_portal_with_dark_ink(): void
     {
-        $this->brand(['fundkit-accent' => '#ffd400']);
+        $this->brand(['gratora-accent' => '#ffd400']);
 
-        $this->assertStringContainsString('--fundkit-on-accent:#10162a;', $this->css());
+        $this->assertStringContainsString('--gratora-on-accent:#10162a;', $this->css());
     }
 
     public function test_the_fields_keep_ink_of_their_own(): void
     {
-        $this->brand(['fundkit-bg' => '#0f172a']);
+        $this->brand(['gratora-bg' => '#0f172a']);
 
-        $this->assertStringContainsString('--fundkit-on-field:#10162a;', $this->css());
+        $this->assertStringContainsString('--gratora-on-field:#10162a;', $this->css());
     }
 }

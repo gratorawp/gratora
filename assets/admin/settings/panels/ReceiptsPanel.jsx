@@ -51,7 +51,7 @@ export default function ReceiptsPanel( { s } ) {
 
     const pickLogo = () => {
         const frame = window.wp.media( {
-            title:    __( 'Choose receipt logo', 'fundraising-toolkit' ),
+            title:    __( 'Choose receipt logo', 'gratora' ),
             multiple: false,
             library:  { type: 'image' },
         } );
@@ -67,19 +67,19 @@ export default function ReceiptsPanel( { s } ) {
     // assumes JSON); using the REST URL directly keeps the auth nonce
     // out of the address bar.
     const openPreview = () => {
-        const url = `${ window.wpApiSettings.root }fundkit/v1/admin/receipts/preview?_wpnonce=${ encodeURIComponent( window.wpApiSettings.nonce ) }`;
+        const url = `${ window.wpApiSettings.root }gratora/v1/admin/receipts/preview?_wpnonce=${ encodeURIComponent( window.wpApiSettings.nonce ) }`;
         window.open( url, '_blank', 'noopener' );
     };
 
     const previewReceipt = () => {
-        // The preview endpoint reads fundkit_receipt_settings from disk, so any
+        // The preview endpoint reads gratora_receipt_settings from disk, so any
         // unsaved edits won't show up. Nudge the admin to save first instead of
         // confusing them with a stale PDF.
         if ( s.isDirty ) {
             setConfirm( {
-                title:        __( 'Unsaved changes', 'fundraising-toolkit' ),
-                message:      __( 'You have unsaved changes that won\'t show in the preview. Continue anyway?', 'fundraising-toolkit' ),
-                confirmLabel: __( 'Continue', 'fundraising-toolkit' ),
+                title:        __( 'Unsaved changes', 'gratora' ),
+                message:      __( 'You have unsaved changes that won\'t show in the preview. Continue anyway?', 'gratora' ),
+                confirmLabel: __( 'Continue', 'gratora' ),
                 destructive:  false,
                 onConfirm: async () => {
                     openPreview();
@@ -91,20 +91,20 @@ export default function ReceiptsPanel( { s } ) {
     };
 
     return (
-        <div className="fundkit-panel">
+        <div className="gratora-panel">
             <Card
-                title={ __( 'Generic receipt template', 'fundraising-toolkit' ) }
-                sub={ __( 'The default receipt every donor gets, unless their country has its own format.', 'fundraising-toolkit' ) }
+                title={ __( 'Generic receipt template', 'gratora' ) }
+                sub={ __( 'The default receipt every donor gets, unless their country has its own format.', 'gratora' ) }
                 edited={ s.isDirty }
             >
                 <div style={ { marginBottom: 16, display: 'flex', justifyContent: 'flex-end' } }>
                     <Btn variant="secondary" onClick={ previewReceipt }>
-                        { __( 'Preview receipt', 'fundraising-toolkit' ) }
+                        { __( 'Preview receipt', 'gratora' ) }
                     </Btn>
                 </div>
                 <FormRow
-                    label={ __( 'Logo', 'fundraising-toolkit' ) }
-                    help={ __( 'Shown above the header. PNG or JPG recommended.', 'fundraising-toolkit' ) }
+                    label={ __( 'Logo', 'gratora' ) }
+                    help={ __( 'Shown above the header. PNG or JPG recommended.', 'gratora' ) }
                 >
                     <div style={ { display: 'flex', alignItems: 'center', gap: 12 } }>
                         { logoId > 0 && logoUrl && (
@@ -115,68 +115,68 @@ export default function ReceiptsPanel( { s } ) {
                             />
                         ) }
                         <Btn variant="secondary" onClick={ pickLogo }>
-                            { logoId > 0 ? __( 'Replace logo', 'fundraising-toolkit' ) : __( 'Select logo', 'fundraising-toolkit' ) }
+                            { logoId > 0 ? __( 'Replace logo', 'gratora' ) : __( 'Select logo', 'gratora' ) }
                         </Btn>
                         { logoId > 0 && (
                             <Btn variant="ghost" onClick={ () => setLogoId( 0 ) }>
-                                { __( 'Remove', 'fundraising-toolkit' ) }
+                                { __( 'Remove', 'gratora' ) }
                             </Btn>
                         ) }
                     </div>
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Header title', 'fundraising-toolkit' ) }
-                    help={ __( 'Big heading at the top of the receipt. Leave blank for the default "Donation receipt".', 'fundraising-toolkit' ) }
+                    label={ __( 'Header title', 'gratora' ) }
+                    help={ __( 'Big heading at the top of the receipt. Leave blank for the default "Donation receipt".', 'gratora' ) }
                 >
                     <input
                         type="text"
-                        className="fundkit-input"
+                        className="gratora-input"
                         value={ headerTitle }
                         onChange={ ( e ) => setHeader( e.target.value ) }
-                        placeholder={ __( 'Donation receipt', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Donation receipt', 'gratora' ) }
                         maxLength={ 80 }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Intro paragraph', 'fundraising-toolkit' ) }
-                    help={ __( 'Optional paragraph between the header and the donation details.', 'fundraising-toolkit' ) }
+                    label={ __( 'Intro paragraph', 'gratora' ) }
+                    help={ __( 'Optional paragraph between the header and the donation details.', 'gratora' ) }
                     wide
                 >
                     <MergeTagInserter onInsert={ ( t ) => setIntro( `${ intro }${ t }` ) } />
                     <textarea
-                        className="fundkit-textarea"
+                        className="gratora-textarea"
                         rows={ 3 }
                         value={ intro }
                         onChange={ ( e ) => setIntro( e.target.value ) }
-                        placeholder={ __( 'Enter an opening paragraph', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Enter an opening paragraph', 'gratora' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Signoff', 'fundraising-toolkit' ) }
-                    help={ __( 'Short thank-you line near the bottom of the receipt.', 'fundraising-toolkit' ) }
+                    label={ __( 'Signoff', 'gratora' ) }
+                    help={ __( 'Short thank-you line near the bottom of the receipt.', 'gratora' ) }
                     wide
                 >
                     <MergeTagInserter onInsert={ ( t ) => setSignoff( `${ signoff }${ t }` ) } />
                     <textarea
-                        className="fundkit-textarea"
+                        className="gratora-textarea"
                         rows={ 2 }
                         value={ signoff }
                         onChange={ ( e ) => setSignoff( e.target.value ) }
-                        placeholder={ __( 'Thank you for your support, {donor_name}.', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Thank you for your support, {donor_name}.', 'gratora' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Footer note', 'fundraising-toolkit' ) }
-                    help={ __( 'Small print at the bottom. Use this for the tax-deduction disclaimer, contact info, or organization registration details.', 'fundraising-toolkit' ) }
+                    label={ __( 'Footer note', 'gratora' ) }
+                    help={ __( 'Small print at the bottom. Use this for the tax-deduction disclaimer, contact info, or organization registration details.', 'gratora' ) }
                     wide
                 >
                     <MergeTagInserter onInsert={ ( t ) => setFooter( `${ footerNote }${ t }` ) } />
                     <textarea
-                        className="fundkit-textarea"
+                        className="gratora-textarea"
                         rows={ 5 }
                         value={ footerNote }
                         onChange={ ( e ) => setFooter( e.target.value ) }
@@ -184,15 +184,15 @@ export default function ReceiptsPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Show organization tax ID', 'fundraising-toolkit' ) }
-                    sub={ __( 'Includes the tax ID from your Organization settings in the reference block.', 'fundraising-toolkit' ) }
+                    title={ __( 'Show organization tax ID', 'gratora' ) }
+                    sub={ __( 'Includes the tax ID from your Organization settings in the reference block.', 'gratora' ) }
                     checked={ showTaxId }
                     onChange={ setShowTax }
                 />
 
                 <ToggleRow
-                    title={ __( 'Show donor address', 'fundraising-toolkit' ) }
-                    sub={ __( 'Prints the donor billing address on the receipt (recommended for jurisdictions that require it).', 'fundraising-toolkit' ) }
+                    title={ __( 'Show donor address', 'gratora' ) }
+                    sub={ __( 'Prints the donor billing address on the receipt (recommended for jurisdictions that require it).', 'gratora' ) }
                     checked={ showAddress }
                     onChange={ setShowAddr }
                 />
@@ -205,14 +205,14 @@ export default function ReceiptsPanel( { s } ) {
 
 function MergeTagInserter( { onInsert } ) {
     return (
-        <div className="fundkit-merge-tags">
+        <div className="gratora-merge-tags">
             { MERGE_TAGS.map( ( t ) => (
                 <button
                     key={ t }
                     type="button"
-                    className="fundkit-merge-tag"
+                    className="gratora-merge-tag"
                     onClick={ () => onInsert( t ) }
-                    title={ __( 'Insert merge tag', 'fundraising-toolkit' ) }
+                    title={ __( 'Insert merge tag', 'gratora' ) }
                 >
                     { t }
                 </button>

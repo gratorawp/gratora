@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\MagicLinkService;
-use FundKit\Donors\MagicLinkToken;
-use FundKit\Donors\PendingSignup;
-use FundKit\Donors\PendingSignupRepository;
-use FundKit\Donors\Portal\PortalSession;
-use FundKit\Donors\SignupRedemption;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\MagicLinkService;
+use Gratora\Donors\MagicLinkToken;
+use Gratora\Donors\PendingSignup;
+use Gratora\Donors\PendingSignupRepository;
+use Gratora\Donors\Portal\PortalSession;
+use Gratora\Donors\SignupRedemption;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -53,7 +53,7 @@ final class DeferredSignupTest extends IntegrationTestCase
     /** @param array<string,mixed> $extra */
     private function signUp(string $email, array $extra = []): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/register');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/register');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($extra + [
             'email' => $email,
@@ -211,7 +211,7 @@ final class DeferredSignupTest extends IntegrationTestCase
 
         // The per-mailbox send limit is the thing being stepped over here, not
         // the behaviour under test.
-        delete_transient('fundkit_send_link_mailbox_' . substr($this->hash($email), 0, 32));
+        delete_transient('gratora_send_link_mailbox_' . substr($this->hash($email), 0, 32));
         $this->signUp($email, ['first_name' => 'Second', 'last_name' => 'Surname']);
 
         $this->assertSame(1, PendingSignup::query()->where('email_hash', $this->hash($email))->count());
@@ -323,7 +323,7 @@ final class DeferredSignupTest extends IntegrationTestCase
         $email = 'signin-' . uniqid() . '@example.test';
         $donor = $this->container()->get(DonorService::class)->findOrCreate($email);
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/send-link');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/send-link');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email' => $email,

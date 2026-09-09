@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Core;
+namespace Gratora\Core;
 
-use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Foundation\Uninstall\DataEraser;
-use FundKit\Funds\Fund;
-use FundKit\Funds\FundRepository;
+use Gratora\Foundation\References\ReferenceGenerator;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Foundation\Uninstall\DataEraser;
+use Gratora\Funds\Fund;
+use Gratora\Funds\FundRepository;
 
 /**
  * Idempotent activation: each step checks state and only acts on what's missing.
@@ -17,8 +17,8 @@ use FundKit\Funds\FundRepository;
  */
 final class Activator
 {
-    public const OPT_ACTIVATED_AT = 'fundkit_activated_at';
-    public const CAP_MANAGE       = 'manage_fundkit';
+    public const OPT_ACTIVATED_AT = 'gratora_activated_at';
+    public const CAP_MANAGE       = 'manage_gratora';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -34,12 +34,12 @@ final class Activator
         $this->grantCapabilities();
         $this->seedReferenceSettings();
         $this->markActivated();
-        // Switching FundKit back on withdraws a standing instruction to wipe. It
+        // Switching Gratora back on withdraws a standing instruction to wipe. It
         // was given while removing the plugin, and it must not lie in wait to
         // destroy the records of a site that changed its mind.
         delete_option(DataEraser::OPT_IN);
 
-        do_action('fundkit.activator.ran');
+        do_action('gratora.activator.ran');
     }
 
     /** @since 1.0.0 */
@@ -59,8 +59,8 @@ final class Activator
 
         $fund = Fund::make();
         $fund->code           = 'general';
-        $fund->name           = __('General', 'fundraising-toolkit');
-        $fund->description    = __('Default fund for unrestricted donations.', 'fundraising-toolkit');
+        $fund->name           = __('General', 'gratora');
+        $fund->description    = __('Default fund for unrestricted donations.', 'gratora');
         $fund->is_restricted  = false;
         $fund->is_default     = true;
         $fund->is_active      = true;

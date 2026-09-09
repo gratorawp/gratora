@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
  * run in the client editor.
  */
 
-const ENTITY_KIND = 'fundkit/v1';
+const ENTITY_KIND = 'gratora/v1';
 const ENTITY_NAME = 'campaign-binding-preview';
 
 function ensureEntity() {
@@ -20,8 +20,8 @@ function ensureEntity() {
         {
             kind: ENTITY_KIND,
             name: ENTITY_NAME,
-            baseURL: '/fundkit/v1/campaign-binding-preview',
-            label: __( 'Fundraising Toolkit campaign binding preview', 'fundraising-toolkit' ),
+            baseURL: '/gratora/v1/campaign-binding-preview',
+            label: __( 'Gratora campaign binding preview', 'gratora' ),
         },
     ] );
 }
@@ -43,8 +43,8 @@ export function registerCampaignBindingSource( fields ) {
     ensureEntity();
 
     registerBlockBindingsSource( {
-        name: 'fundkit/campaign',
-        label: __( 'Fundraising Toolkit campaign', 'fundraising-toolkit' ),
+        name: 'gratora/campaign',
+        label: __( 'Gratora campaign', 'gratora' ),
         usesContext: [ 'postId' ],
         getValues: ( { select, context, bindings } ) => {
             const record = preview( select, context );

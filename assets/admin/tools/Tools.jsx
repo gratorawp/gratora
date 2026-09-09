@@ -16,11 +16,11 @@ import { userCan } from '../_shared/caps';
 // capabilities, so every route behind that tab wants a full administrator. A
 // settings manager reaching it finds a screen where nothing works.
 const TABS = [
-    { key: 'maintenance', label: __( 'Maintenance', 'fundraising-toolkit' ) },
-    { key: 'logs',        label: __( 'Logs', 'fundraising-toolkit' ) },
-    { key: 'system',      label: __( 'System info', 'fundraising-toolkit' ) },
-    { key: 'export',      label: __( 'Export', 'fundraising-toolkit' ) },
-    ...( userCan( 'manage_options' ) ? [ { key: 'import', label: __( 'Import', 'fundraising-toolkit' ) } ] : [] ),
+    { key: 'maintenance', label: __( 'Maintenance', 'gratora' ) },
+    { key: 'logs',        label: __( 'Logs', 'gratora' ) },
+    { key: 'system',      label: __( 'System info', 'gratora' ) },
+    { key: 'export',      label: __( 'Export', 'gratora' ) },
+    ...( userCan( 'manage_options' ) ? [ { key: 'import', label: __( 'Import', 'gratora' ) } ] : [] ),
 ];
 
 const fromHash = () => {
@@ -36,7 +36,7 @@ export default function Tools() {
 
     const loadInfo = useCallback( () => {
         setInfoError( false );
-        apiFetch( { path: '/fundkit/v1/admin/tools/info' } )
+        apiFetch( { path: '/gratora/v1/admin/tools/info' } )
             .then( setInfo )
             .catch( () => setInfoError( true ) );
     }, [] );
@@ -57,29 +57,29 @@ export default function Tools() {
     const shared = { info, infoError, loadInfo, notice, setNotice };
 
     return (
-        <div className="fundkit-settings-page">
-            <div className="fundkit-crumbs">
-                <a href="admin.php?page=fundkit">{ __( 'Fundraising', 'fundraising-toolkit' ) }</a>
+        <div className="gratora-settings-page">
+            <div className="gratora-crumbs">
+                <a href="admin.php?page=gratora">{ __( 'Fundraising', 'gratora' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Tools', 'fundraising-toolkit' ) }</span>
+                <span>{ __( 'Tools', 'gratora' ) }</span>
                 <span className="sep">›</span>
                 <span>{ TABS.find( ( t ) => t.key === tab )?.label || '' }</span>
             </div>
 
-            <div className="fundkit-page-head">
-                <div className="fundkit-page-head__title-row">
-                    <h1>{ __( 'Tools', 'fundraising-toolkit' ) }</h1>
+            <div className="gratora-page-head">
+                <div className="gratora-page-head__title-row">
+                    <h1>{ __( 'Tools', 'gratora' ) }</h1>
                 </div>
             </div>
 
             <div
-                className="fundkit-tabs"
+                className="gratora-tabs"
                 role="tablist"
                 tabIndex={ -1 }
-                aria-label={ __( 'Tools sections', 'fundraising-toolkit' ) }
+                aria-label={ __( 'Tools sections', 'gratora' ) }
                 onKeyDown={ ( e ) => tablistKeyDown( e, TABS.map( ( t ) => t.key ), tab, jumpTo ) }
             >
-                <div className="fundkit-tabs__scroll">
+                <div className="gratora-tabs__scroll">
                     { TABS.map( ( t ) => (
                         <a
                             key={ t.key }
@@ -104,7 +104,7 @@ export default function Tools() {
                 </Notice>
             ) }
 
-            <div className="fundkit-settings-page__body">
+            <div className="gratora-settings-page__body">
                 <div hidden={ tab !== 'maintenance' }><MaintenanceTab { ...shared } active={ tab === 'maintenance' } /></div>
                 <div hidden={ tab !== 'logs' }><LogsTab { ...shared } active={ tab === 'logs' } /></div>
                 <div hidden={ tab !== 'system' }><SystemInfoTab { ...shared } /></div>

@@ -24,9 +24,9 @@ jest.mock( '../../assets/admin/_shared/notify', () => ( {
     default: { success: jest.fn(), error: jest.fn(), info: jest.fn() },
 } ) );
 
-jest.mock( '../../assets/admin/_shared/useFundKitRecord', () => ( {
+jest.mock( '../../assets/admin/_shared/useGratoraRecord', () => ( {
     __esModule: true,
-    useFundKitRecord: () => global.__record,
+    useGratoraRecord: () => global.__record,
 } ) );
 
 jest.mock( '../../assets/admin/_shared/extensionTabs', () => ( {

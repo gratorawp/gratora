@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Gateways;
+namespace Gratora\Tests\Unit\Gateways;
 
 use DateTimeImmutable;
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Time\FrozenClock;
-use FundKit\Gateways\Offline\OfflineGateway;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Time\FrozenClock;
+use Gratora\Gateways\Offline\OfflineGateway;
 use PHPUnit\Framework\TestCase;
 use WP_REST_Request;
 

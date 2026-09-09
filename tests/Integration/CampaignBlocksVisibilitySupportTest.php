@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 /**
  * Verifies each campaign block opts into the WP 7.0 responsive visibility
@@ -17,13 +17,13 @@ final class CampaignBlocksVisibilitySupportTest extends IntegrationTestCase
     public function campaignBlockNames(): array
     {
         return [
-            ['fundkit/campaign-image'],
-            ['fundkit/campaign-progress'],
-            ['fundkit/campaign-stat'],
-            ['fundkit/donate-button'],
-            ['fundkit/top-donors'],
-            ['fundkit/recent-donations'],
-            ['fundkit/supporter-wall'],
+            ['gratora/campaign-image'],
+            ['gratora/campaign-progress'],
+            ['gratora/campaign-stat'],
+            ['gratora/donate-button'],
+            ['gratora/top-donors'],
+            ['gratora/recent-donations'],
+            ['gratora/supporter-wall'],
         ];
     }
 

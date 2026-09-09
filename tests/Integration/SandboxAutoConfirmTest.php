@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Gateways\Sandbox\SandboxGateway;
+use Gratora\Donations\Donation;
+use Gratora\Gateways\Sandbox\SandboxGateway;
 use WP_REST_Request;
 
 final class SandboxAutoConfirmTest extends IntegrationTestCase
@@ -15,10 +15,10 @@ final class SandboxAutoConfirmTest extends IntegrationTestCase
         // The flag is the contract between the gateway and the controller.
         // If a future change drops it, the symptom is silent (pending donations),
         // so lock it in directly.
-        $clock  = \FundKit\Foundation\Plugin::instance()->container->get(\FundKit\Foundation\Time\Clock::class);
-        $donation = \FundKit\Donations\Donation::make();
+        $clock  = \Gratora\Foundation\Plugin::instance()->container->get(\Gratora\Foundation\Time\Clock::class);
+        $donation = \Gratora\Donations\Donation::make();
         $donation->reference = 'SANDBOX-TEST';
-        $intent = (new SandboxGateway($clock, new \FundKit\Recurring\RecurringPlanRepository()))->createIntent($donation);
+        $intent = (new SandboxGateway($clock, new \Gratora\Recurring\RecurringPlanRepository()))->createIntent($donation);
         $this->assertTrue(
             $intent->auto_confirm,
             'sandbox createIntent must set auto_confirm=true so the controller fires confirm in the same request'
@@ -28,29 +28,29 @@ final class SandboxAutoConfirmTest extends IntegrationTestCase
     public function test_sandbox_donation_via_rest_lands_as_paid(): void
     {
         // Org-wide test mode must be on for the sandbox gateway to register.
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'test_mode' => true,
             'sandbox'   => ['enabled' => true],
         ]);
 
         // Register sandbox explicitly because bootstrap ran before test_mode was enabled.
-        $container = \FundKit\Foundation\Plugin::instance()->container;
-        $manager   = $container->get(\FundKit\Gateways\GatewayManager::class);
+        $container = \Gratora\Foundation\Plugin::instance()->container;
+        $manager   = $container->get(\Gratora\Gateways\GatewayManager::class);
         if (! $manager->get('sandbox')) {
             $manager->register(new SandboxGateway(
-                $container->get(\FundKit\Foundation\Time\Clock::class),
-                $container->get(\FundKit\Recurring\RecurringPlanRepository::class)
+                $container->get(\Gratora\Foundation\Time\Clock::class),
+                $container->get(\Gratora\Recurring\RecurringPlanRepository::class)
             ));
         }
 
         $campaignId = $this->seedCampaign();
 
-        $res = $this->postJson('/fundkit/v1/donations', [
+        $res = $this->postJson('/gratora/v1/donations', [
             'campaign_id'  => $campaignId,
             'gateway'      => 'sandbox',
             'amount_cents' => 1500,
             'currency'     => 'EUR',
-            'email'        => 'sandbox-auto-' . uniqid() . '@fundkit.test',
+            'email'        => 'sandbox-auto-' . uniqid() . '@gratora.test',
             'profile'      => ['first_name' => 'Sandy', 'last_name' => 'Auto'],
         ]);
         $this->assertSame(201, $res->get_status(), 'donation create returns 201');
@@ -76,7 +76,7 @@ final class SandboxAutoConfirmTest extends IntegrationTestCase
 
     private function seedCampaign(): int
     {
-        $service = \FundKit\Foundation\Plugin::instance()->container->get(\FundKit\Campaigns\CampaignService::class);
+        $service = \Gratora\Foundation\Plugin::instance()->container->get(\Gratora\Campaigns\CampaignService::class);
         $campaign = $service->create([
             'title'      => 'Sandbox AutoConfirm Test',
             'goal_type'  => 'amount',

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns;
+namespace Gratora\Campaigns;
 
 /**
  * Starter layouts for a campaign page.
@@ -38,126 +38,126 @@ final class CampaignTemplates
             [
                 'id'          => self::DEFAULT_ID,
                 'category'    => 'General',
-                'name'        => __( 'Standard campaign', 'fundraising-toolkit' ),
-                'description' => __( 'Image, raised and goal figures, a progress bar, your description, then recent donations and top donors, with the form alongside.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'Most campaigns. Start here if none of the others obviously fit.', 'fundraising-toolkit' ),
+                'name'        => __( 'Standard campaign', 'gratora' ),
+                'description' => __( 'Image, raised and goal figures, a progress bar, your description, then recent donations and top donors, with the form alongside.', 'gratora' ),
+                'best_for'    => __( 'Most campaigns. Start here if none of the others obviously fit.', 'gratora' ),
                 'form'        => 'campaign-page',
             ],
             [
                 'id'          => 'hero',
                 'category'    => 'General',
-                'name'        => __( 'Colour hero', 'fundraising-toolkit' ),
-                'description' => __( 'Opens on a full-width band in your campaign colour carrying the title, the figures and the progress bar, with everything else below it.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'A campaign that should look like an event rather than a page.', 'fundraising-toolkit' ),
+                'name'        => __( 'Colour hero', 'gratora' ),
+                'description' => __( 'Opens on a full-width band in your campaign colour carrying the title, the figures and the progress bar, with everything else below it.', 'gratora' ),
+                'best_for'    => __( 'A campaign that should look like an event rather than a page.', 'gratora' ),
                 'form'        => 'everyday',
             ],
             [
                 'id'          => 'cover',
                 'category'    => 'General',
-                'name'        => __( 'Photo cover', 'fundraising-toolkit' ),
-                'description' => __( 'Opens on the campaign image running the full width, with the title, the figures and the progress bar laid over it.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'A campaign with one photograph strong enough to carry the page.', 'fundraising-toolkit' ),
+                'name'        => __( 'Photo cover', 'gratora' ),
+                'description' => __( 'Opens on the campaign image running the full width, with the title, the figures and the progress bar laid over it.', 'gratora' ),
+                'best_for'    => __( 'A campaign with one photograph strong enough to carry the page.', 'gratora' ),
                 'form'        => 'quick-give',
             ],
             [
                 'id'          => 'split',
                 'category'    => 'General',
-                'name'        => __( 'Split panel', 'fundraising-toolkit' ),
-                'description' => __( 'The figures sit in a coloured panel next to the form, so the ask and the progress share the first screen.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'A short campaign where the number is the argument.', 'fundraising-toolkit' ),
+                'name'        => __( 'Split panel', 'gratora' ),
+                'description' => __( 'The figures sit in a coloured panel next to the form, so the ask and the progress share the first screen.', 'gratora' ),
+                'best_for'    => __( 'A short campaign where the number is the argument.', 'gratora' ),
                 'form'        => 'everyday',
             ],
             [
                 'id'          => 'story',
                 'category'    => 'General',
-                'name'        => __( 'Story first', 'fundraising-toolkit' ),
-                'description' => __( 'A full-width image and the description before any figures at all. The ask comes after the reader knows what they are being asked about.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'An appeal that has to explain itself before it asks, and campaigns with a strong photograph.', 'fundraising-toolkit' ),
+                'name'        => __( 'Story first', 'gratora' ),
+                'description' => __( 'A full-width image and the description before any figures at all. The ask comes after the reader knows what they are being asked about.', 'gratora' ),
+                'best_for'    => __( 'An appeal that has to explain itself before it asks, and campaigns with a strong photograph.', 'gratora' ),
                 'form'        => 'guided',
             ],
             [
                 'id'          => 'gallery',
                 'category'    => 'General',
-                'name'        => __( 'With other campaigns', 'fundraising-toolkit' ),
-                'description' => __( 'The usual layout, then a band at the foot showing your other campaigns, so somebody who has just given sees what else needs them.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'An organisation running several appeals at once.', 'fundraising-toolkit' ),
+                'name'        => __( 'With other campaigns', 'gratora' ),
+                'description' => __( 'The usual layout, then a band at the foot showing your other campaigns, so somebody who has just given sees what else needs them.', 'gratora' ),
+                'best_for'    => __( 'An organisation running several appeals at once.', 'gratora' ),
                 'form'        => 'campaign-page',
             ],
             [
                 'id'          => 'deadline',
                 'category'    => 'Appeals',
-                'name'        => __( 'Appeal with a deadline', 'fundraising-toolkit' ),
-                'description' => __( 'Leads with the goal and how far off it is, puts the form above the fold, and holds the description back until after the ask.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'A crisis or a matched appeal, where the reason to give now is the deadline.', 'fundraising-toolkit' ),
+                'name'        => __( 'Appeal with a deadline', 'gratora' ),
+                'description' => __( 'Leads with the goal and how far off it is, puts the form above the fold, and holds the description back until after the ask.', 'gratora' ),
+                'best_for'    => __( 'A crisis or a matched appeal, where the reason to give now is the deadline.', 'gratora' ),
                 'form'        => 'emergency-appeal',
             ],
             [
                 'id'          => 'urgent',
                 'category'    => 'Appeals',
-                'name'        => __( 'Emergency appeal', 'fundraising-toolkit' ),
-                'description' => __( 'A colour band carrying what is still needed and how long is left, then the form. Nothing on the page that is not the ask.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'A crisis, where anything the reader has to scroll past is a reader you lose.', 'fundraising-toolkit' ),
+                'name'        => __( 'Emergency appeal', 'gratora' ),
+                'description' => __( 'A colour band carrying what is still needed and how long is left, then the form. Nothing on the page that is not the ask.', 'gratora' ),
+                'best_for'    => __( 'A crisis, where anything the reader has to scroll past is a reader you lose.', 'gratora' ),
                 'form'        => 'emergency-appeal',
             ],
             [
                 'id'          => 'matched',
                 'category'    => 'Appeals',
-                'name'        => __( 'Matched giving', 'fundraising-toolkit' ),
-                'description' => __( 'Raised, goal and donor count together in a coloured band under the title, so the size of the effort reads before the description.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'A match or a challenge, where how many have joined in matters as much as the total.', 'fundraising-toolkit' ),
+                'name'        => __( 'Matched giving', 'gratora' ),
+                'description' => __( 'Raised, goal and donor count together in a coloured band under the title, so the size of the effort reads before the description.', 'gratora' ),
+                'best_for'    => __( 'A match or a challenge, where how many have joined in matters as much as the total.', 'gratora' ),
                 'form'        => 'everyday',
             ],
             [
                 'id'          => 'supporters',
                 'category'    => 'Community',
-                'name'        => __( 'Supporter wall', 'fundraising-toolkit' ),
-                'description' => __( 'The people who have already given are the main content, with their messages shown and the wall running the full width beneath the form.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'A community appeal where seeing familiar names is the reason somebody gives.', 'fundraising-toolkit' ),
+                'name'        => __( 'Supporter wall', 'gratora' ),
+                'description' => __( 'The people who have already given are the main content, with their messages shown and the wall running the full width beneath the form.', 'gratora' ),
+                'best_for'    => __( 'A community appeal where seeing familiar names is the reason somebody gives.', 'gratora' ),
                 'form'        => 'campaign-page',
             ],
             [
                 'id'          => 'leaderboard',
                 'category'    => 'Community',
-                'name'        => __( 'Leaderboard', 'fundraising-toolkit' ),
-                'description' => __( 'Top donors and recent donations carry the page, over a tinted panel of the donor and donation counts.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'A competitive campaign, a challenge between teams or offices.', 'fundraising-toolkit' ),
+                'name'        => __( 'Leaderboard', 'gratora' ),
+                'description' => __( 'Top donors and recent donations carry the page, over a tinted panel of the donor and donation counts.', 'gratora' ),
+                'best_for'    => __( 'A competitive campaign, a challenge between teams or offices.', 'gratora' ),
                 'form'        => 'campaign-page',
             ],
             [
                 'id'          => 'thermometer',
                 'category'    => 'Community',
-                'name'        => __( 'Thermometer', 'fundraising-toolkit' ),
-                'description' => __( 'The percentage, the amount raised and what is left, large and in colour, with the supporter wall beneath.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'A campaign with one number everybody is watching.', 'fundraising-toolkit' ),
+                'name'        => __( 'Thermometer', 'gratora' ),
+                'description' => __( 'The percentage, the amount raised and what is left, large and in colour, with the supporter wall beneath.', 'gratora' ),
+                'best_for'    => __( 'A campaign with one number everybody is watching.', 'gratora' ),
                 'form'        => 'campaign-page',
             ],
             [
                 'id'          => 'tiers',
                 'category'    => 'Impact',
-                'name'        => __( 'Impact figures', 'fundraising-toolkit' ),
-                'description' => __( 'Three tinted cards carrying the raised total, the number of donors and the average donation, above the image and the form.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'An appeal where the shape of the giving is the story.', 'fundraising-toolkit' ),
+                'name'        => __( 'Impact figures', 'gratora' ),
+                'description' => __( 'Three tinted cards carrying the raised total, the number of donors and the average donation, above the image and the form.', 'gratora' ),
+                'best_for'    => __( 'An appeal where the shape of the giving is the story.', 'gratora' ),
                 'form'        => 'impact-tiers',
             ],
             [
                 'id'          => 'transparency',
                 'category'    => 'Impact',
-                'name'        => __( 'Open books', 'fundraising-toolkit' ),
-                'description' => __( 'Four figures across a tinted band: raised, donors, donations and the average, with the image above them.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'An organisation that wants the numbers visible before the ask.', 'fundraising-toolkit' ),
+                'name'        => __( 'Open books', 'gratora' ),
+                'description' => __( 'Four figures across a tinted band: raised, donors, donations and the average, with the image above them.', 'gratora' ),
+                'best_for'    => __( 'An organisation that wants the numbers visible before the ask.', 'gratora' ),
                 'form'        => 'campaign-page',
             ],
             [
                 'id'          => 'minimal',
                 'category'    => 'Bare',
-                'name'        => __( 'Just the form', 'fundraising-toolkit' ),
-                'description' => __( 'Title, description and the donation form. No figures, no donor lists, nothing that needs data to look right.', 'fundraising-toolkit' ),
-                'best_for'    => __( 'A page you will design yourself, and a campaign with no goal to show.', 'fundraising-toolkit' ),
+                'name'        => __( 'Just the form', 'gratora' ),
+                'description' => __( 'Title, description and the donation form. No figures, no donor lists, nothing that needs data to look right.', 'gratora' ),
+                'best_for'    => __( 'A page you will design yourself, and a campaign with no goal to show.', 'gratora' ),
                 'form'        => 'quick-give',
             ],
         ];
 
-        return (array) apply_filters('fundkit.campaign.templates', $templates, $campaignType);
+        return (array) apply_filters('gratora.campaign.templates', $templates, $campaignType);
     }
 
     /** @since 1.0.0 */
@@ -175,7 +175,7 @@ final class CampaignTemplates
 
     /** @since 1.0.0 */
     private const STANDARD = <<<'BLOCKS'
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
@@ -183,25 +183,25 @@ final class CampaignTemplates
 <div class="wp-block-columns alignwide dp-layout">
 <!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
-<!-- wp:fundkit/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
 
 <!-- wp:columns {"className":"dp-figures"} -->
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 </div>
 <!-- /wp:columns -->
 
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
@@ -209,15 +209,15 @@ final class CampaignTemplates
 <h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
 <!-- /wp:group -->
 
-<!-- wp:fundkit/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
+<!-- wp:gratora/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
 
-<!-- wp:fundkit/top-donors {"campaignId":%%CAMPAIGN_ID%%,"title":%%TOP_TITLE%%,"limit":5,"layout":"list"} /-->
+<!-- wp:gratora/top-donors {"campaignId":%%CAMPAIGN_ID%%,"title":%%TOP_TITLE%%,"limit":5,"layout":"list"} /-->
 </div>
 <!-- /wp:column -->
 
@@ -227,7 +227,7 @@ final class CampaignTemplates
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 </div>
@@ -238,7 +238,7 @@ BLOCKS;
     private const HERO = <<<'BLOCKS'
 <!-- wp:group {"align":"wide","className":"dp-panel dp-panel--accent dp-panel--lead"} -->
 <div class="wp-block-group alignwide dp-panel dp-panel--accent dp-panel--lead">
-<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}}} -->
+<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}}} -->
 <h1 class="wp-block-heading">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
@@ -246,20 +246,20 @@ BLOCKS;
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 </div>
 <!-- /wp:columns -->
 
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:group -->
 
@@ -273,13 +273,13 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
 <!-- /wp:group -->
 
-<!-- wp:fundkit/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
+<!-- wp:gratora/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
 </div>
 <!-- /wp:column -->
 
@@ -289,7 +289,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 
@@ -310,7 +310,7 @@ BLOCKS;
 <div class="wp-block-group alignwide dp-panel dp-cover">
 <!-- wp:group {"className":"dp-cover__body"} -->
 <div class="wp-block-group dp-cover__body">
-<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}}} -->
+<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}}} -->
 <h1 class="wp-block-heading">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
@@ -318,20 +318,20 @@ BLOCKS;
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 </div>
 <!-- /wp:columns -->
 
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:group -->
 </div>
@@ -347,13 +347,13 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
 <!-- /wp:group -->
 
-<!-- wp:fundkit/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
+<!-- wp:gratora/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
 </div>
 <!-- /wp:column -->
 
@@ -363,7 +363,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 
@@ -373,7 +373,7 @@ BLOCKS;
 
     /** @since 1.0.0 */
     private const SPLIT = <<<'BLOCKS'
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
@@ -387,20 +387,20 @@ BLOCKS;
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 </div>
 <!-- /wp:columns -->
 
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:group -->
 </div>
@@ -412,7 +412,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 
@@ -425,7 +425,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
@@ -433,7 +433,7 @@ BLOCKS;
 
 <!-- wp:group {"align":"wide","className":"dp-wide"} -->
 <div class="wp-block-group alignwide dp-wide">
-<!-- wp:fundkit/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:group -->
 BLOCKS;
@@ -442,17 +442,17 @@ BLOCKS;
     private const STORY = <<<'BLOCKS'
 <!-- wp:group {"align":"wide","className":"dp-wide"} -->
 <div class="wp-block-group alignwide dp-wide">
-<!-- wp:fundkit/campaign-image {"campaignId":%%CAMPAIGN_ID%%,"aspectRatio":"16-9"} /-->
+<!-- wp:gratora/campaign-image {"campaignId":%%CAMPAIGN_ID%%,"aspectRatio":"16-9"} /-->
 </div>
 <!-- /wp:group -->
 
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
 <!-- wp:group {"className":"dp-band"} -->
 <div class="wp-block-group dp-band">
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
@@ -462,9 +462,9 @@ BLOCKS;
 <div class="wp-block-columns alignwide dp-layout">
 <!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 
-<!-- wp:fundkit/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
+<!-- wp:gratora/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
 </div>
 <!-- /wp:column -->
 
@@ -474,7 +474,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 </div>
@@ -483,13 +483,13 @@ BLOCKS;
 
     /** @since 1.0.0 */
     private const GALLERY = <<<'BLOCKS'
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
 <!-- wp:group {"align":"wide","className":"dp-wide"} -->
 <div class="wp-block-group alignwide dp-wide">
-<!-- wp:fundkit/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:group -->
 
@@ -503,13 +503,13 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
 <!-- /wp:group -->
 
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 
@@ -519,7 +519,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 
@@ -532,14 +532,14 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%MORE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/campaign-grid {"count":3,"heading":""} /-->
+<!-- wp:gratora/campaign-grid {"count":3,"heading":""} /-->
 </div>
 <!-- /wp:group -->
 BLOCKS;
 
     /** @since 1.0.0 */
     private const DEADLINE = <<<'BLOCKS'
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
@@ -551,27 +551,27 @@ BLOCKS;
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"days_left","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"days_left","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 </div>
 <!-- /wp:columns -->
 
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 
-<!-- wp:fundkit/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
@@ -579,13 +579,13 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
 <!-- /wp:group -->
 
-<!-- wp:fundkit/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
+<!-- wp:gratora/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":5} /-->
 </div>
 <!-- /wp:column -->
 
@@ -595,7 +595,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 </div>
@@ -606,7 +606,7 @@ BLOCKS;
     private const URGENT = <<<'BLOCKS'
 <!-- wp:group {"align":"wide","className":"dp-panel dp-panel--accent dp-panel--lead"} -->
 <div class="wp-block-group alignwide dp-panel dp-panel--accent dp-panel--lead">
-<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}}} -->
+<!-- wp:heading {"level":1,"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}}} -->
 <h1 class="wp-block-heading">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
@@ -614,20 +614,20 @@ BLOCKS;
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"remaining","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"remaining","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"days_left","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"days_left","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 </div>
 <!-- /wp:columns -->
 
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:group -->
 
@@ -641,7 +641,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
@@ -655,7 +655,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 
@@ -665,7 +665,7 @@ BLOCKS;
 
     /** @since 1.0.0 */
     private const MATCHED = <<<'BLOCKS'
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
@@ -675,26 +675,26 @@ BLOCKS;
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"goal","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 </div>
 <!-- /wp:columns -->
 
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:group -->
 
@@ -702,7 +702,7 @@ BLOCKS;
 <div class="wp-block-columns alignwide dp-layout">
 <!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
-<!-- wp:fundkit/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
@@ -710,7 +710,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
@@ -724,7 +724,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 
@@ -734,7 +734,7 @@ BLOCKS;
 
     /** @since 1.0.0 */
     private const SUPPORTERS = <<<'BLOCKS'
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
@@ -742,7 +742,7 @@ BLOCKS;
 <div class="wp-block-columns alignwide dp-layout">
 <!-- wp:column {"width":"62%","className":"dp-layout__main"} -->
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
@@ -750,7 +750,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
@@ -764,7 +764,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 </div>
@@ -772,14 +772,14 @@ BLOCKS;
 
 <!-- wp:group {"align":"wide","className":"dp-wide"} -->
 <div class="wp-block-group alignwide dp-wide">
-<!-- wp:fundkit/supporter-wall {"campaignId":%%CAMPAIGN_ID%%,"title":%%WALL_TITLE%%,"limit":50,"showMessage":true} /-->
+<!-- wp:gratora/supporter-wall {"campaignId":%%CAMPAIGN_ID%%,"title":%%WALL_TITLE%%,"limit":50,"showMessage":true} /-->
 </div>
 <!-- /wp:group -->
 BLOCKS;
 
     /** @since 1.0.0 */
     private const LEADERBOARD = <<<'BLOCKS'
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
@@ -789,19 +789,19 @@ BLOCKS;
 <div class="wp-block-column dp-layout__main" style="flex-basis:62%">
 <!-- wp:group {"className":"dp-panel dp-panel--soft"} -->
 <div class="wp-block-group dp-panel dp-panel--soft">
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 
 <!-- wp:columns {"className":"dp-figures"} -->
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donations","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donations","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
@@ -810,9 +810,9 @@ BLOCKS;
 </div>
 <!-- /wp:group -->
 
-<!-- wp:fundkit/top-donors {"campaignId":%%CAMPAIGN_ID%%,"title":%%TOP_TITLE%%,"limit":10,"layout":"list"} /-->
+<!-- wp:gratora/top-donors {"campaignId":%%CAMPAIGN_ID%%,"title":%%TOP_TITLE%%,"limit":10,"layout":"list"} /-->
 
-<!-- wp:fundkit/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":8} /-->
+<!-- wp:gratora/recent-donations {"campaignId":%%CAMPAIGN_ID%%,"title":%%RECENT_TITLE%%,"limit":8} /-->
 </div>
 <!-- /wp:column -->
 
@@ -822,7 +822,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 
@@ -835,7 +835,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
@@ -844,7 +844,7 @@ BLOCKS;
 
     /** @since 1.0.0 */
     private const THERMOMETER = <<<'BLOCKS'
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
@@ -854,26 +854,26 @@ BLOCKS;
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"percent","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"percent","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"remaining","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"remaining","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 </div>
 <!-- /wp:columns -->
 
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:group -->
 
@@ -887,7 +887,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
@@ -901,7 +901,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 
@@ -910,14 +910,14 @@ BLOCKS;
 
 <!-- wp:group {"align":"wide","className":"dp-wide"} -->
 <div class="wp-block-group alignwide dp-wide">
-<!-- wp:fundkit/supporter-wall {"campaignId":%%CAMPAIGN_ID%%,"title":%%WALL_TITLE%%,"limit":40,"showMessage":true} /-->
+<!-- wp:gratora/supporter-wall {"campaignId":%%CAMPAIGN_ID%%,"title":%%WALL_TITLE%%,"limit":40,"showMessage":true} /-->
 </div>
 <!-- /wp:group -->
 BLOCKS;
 
     /** @since 1.0.0 */
     private const TIERS = <<<'BLOCKS'
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
@@ -927,7 +927,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
@@ -939,7 +939,7 @@ BLOCKS;
 <div class="wp-block-column" style="flex-basis:33.33%">
 <!-- wp:group {"className":"dp-panel dp-panel--soft"} -->
 <div class="wp-block-group dp-panel dp-panel--soft">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:group -->
 </div>
@@ -949,7 +949,7 @@ BLOCKS;
 <div class="wp-block-column" style="flex-basis:33.33%">
 <!-- wp:group {"className":"dp-panel dp-panel--soft"} -->
 <div class="wp-block-group dp-panel dp-panel--soft">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg"} /-->
 </div>
 <!-- /wp:group -->
 </div>
@@ -959,7 +959,7 @@ BLOCKS;
 <div class="wp-block-column" style="flex-basis:33.33%">
 <!-- wp:group {"className":"dp-panel dp-panel--soft"} -->
 <div class="wp-block-group dp-panel dp-panel--soft">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"average","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"average","size":"lg"} /-->
 </div>
 <!-- /wp:group -->
 </div>
@@ -970,7 +970,7 @@ BLOCKS;
 
 <!-- wp:group {"align":"wide","className":"dp-wide"} -->
 <div class="wp-block-group alignwide dp-wide">
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:group -->
 
@@ -978,7 +978,7 @@ BLOCKS;
 <div class="wp-block-columns alignwide dp-layout">
 <!-- wp:column {"width":"55%","className":"dp-layout__main"} -->
 <div class="wp-block-column dp-layout__main" style="flex-basis:55%">
-<!-- wp:fundkit/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 
@@ -988,7 +988,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 
@@ -998,13 +998,13 @@ BLOCKS;
 
     /** @since 1.0.0 */
     private const TRANSPARENCY = <<<'BLOCKS'
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
 <!-- wp:group {"align":"wide","className":"dp-wide"} -->
 <div class="wp-block-group alignwide dp-wide">
-<!-- wp:fundkit/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-image {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:group -->
 
@@ -1014,25 +1014,25 @@ BLOCKS;
 <div class="wp-block-columns dp-figures">
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"raised","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donors","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donations","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"donations","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:fundkit/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"average","size":"lg"} /-->
+<!-- wp:gratora/campaign-stat {"campaignId":%%CAMPAIGN_ID%%,"metric":"average","size":"lg"} /-->
 </div>
 <!-- /wp:column -->
 
@@ -1051,13 +1051,13 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%ABOUT_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
 <!-- /wp:group -->
 
-<!-- wp:fundkit/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/campaign-progress {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 
@@ -1067,7 +1067,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:column -->
 
@@ -1077,13 +1077,13 @@ BLOCKS;
 
     /** @since 1.0.0 */
     private const MINIMAL = <<<'BLOCKS'
-<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
+<!-- wp:heading {"level":1,"align":"wide","metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"title","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-display dp-rail dp-top"} -->
 <h1 class="wp-block-heading alignwide dp-display dp-rail dp-top">%%TITLE%%</h1>
 <!-- /wp:heading -->
 
 <!-- wp:group {"className":"dp-band dp-band--tight"} -->
 <div class="wp-block-group dp-band dp-band--tight">
-<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"fundkit/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"gratora/campaign","args":{"key":"description","campaign_id":%%CAMPAIGN_ID%%}}}},"className":"dp-body"} -->
 <p class="dp-body">%%DESCRIPTION%%</p>
 <!-- /wp:paragraph -->
 </div>
@@ -1095,7 +1095,7 @@ BLOCKS;
 <h2 class="wp-block-heading dp-h2">%%DONATE_TITLE%%</h2>
 <!-- /wp:heading -->
 
-<!-- wp:fundkit/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
+<!-- wp:gratora/donation-form {"campaignId":%%CAMPAIGN_ID%%} /-->
 </div>
 <!-- /wp:group -->
 BLOCKS;

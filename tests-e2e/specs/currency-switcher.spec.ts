@@ -7,7 +7,7 @@ test.describe('currency-switcher block', () => {
 
     test('changing currency updates preset tile amounts', async ({ donor }) => {
         const firstPreset = donor.presets().first();
-        const before = (await firstPreset.locator('.fundkit-form__preset-amount').textContent()) ?? '';
+        const before = (await firstPreset.locator('.gratora-form__preset-amount').textContent()) ?? '';
 
         // Switch to a different currency from whatever the form opened with.
         const select = donor.currencySwitcher().locator('select');
@@ -21,7 +21,7 @@ test.describe('currency-switcher block', () => {
                 }
             }
         } else {
-            const pills = donor.currencySwitcher().locator('.fundkit-form__currency-pill');
+            const pills = donor.currencySwitcher().locator('.gratora-form__currency-pill');
             const count = await pills.count();
             for (let i = 0; i < count; i++) {
                 const pill = pills.nth(i);
@@ -33,7 +33,7 @@ test.describe('currency-switcher block', () => {
             }
         }
 
-        const after = (await firstPreset.locator('.fundkit-form__preset-amount').textContent()) ?? '';
+        const after = (await firstPreset.locator('.gratora-form__preset-amount').textContent()) ?? '';
         expect(after).not.toBe(before);
     });
 

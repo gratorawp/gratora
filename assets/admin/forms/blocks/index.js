@@ -39,25 +39,25 @@ import registerHiddenBlock          from './hidden';
 import registerHtmlBlock            from './html';
 import registerPrivacyNoticeBlock   from './privacy-notice';
 
-const FUNDKIT_CATEGORIES = [
-    { slug: 'fundkit-amount',  title: __( 'Donation amount',   'fundraising-toolkit' ) },
-    { slug: 'fundkit-donor',   title: __( 'Donor information', 'fundraising-toolkit' ) },
-    { slug: 'fundkit-fields',  title: __( 'Custom fields',     'fundraising-toolkit' ) },
-    { slug: 'fundkit-content', title: __( 'Content & layout',  'fundraising-toolkit' ) },
-    { slug: 'fundkit-extras',  title: __( 'Extras',            'fundraising-toolkit' ) },
+const GRATORA_CATEGORIES = [
+    { slug: 'gratora-amount',  title: __( 'Donation amount',   'gratora' ) },
+    { slug: 'gratora-donor',   title: __( 'Donor information', 'gratora' ) },
+    { slug: 'gratora-fields',  title: __( 'Custom fields',     'gratora' ) },
+    { slug: 'gratora-content', title: __( 'Content & layout',  'gratora' ) },
+    { slug: 'gratora-extras',  title: __( 'Extras',            'gratora' ) },
 ];
 
 function ensureCategories() {
     try {
         const existing = select( 'core/blocks' ).getCategories();
-        const keep = existing.filter( ( c ) => ! String( c.slug ).startsWith( 'fundkit-' ) );
-        dispatch( 'core/blocks' ).setCategories( [ ...FUNDKIT_CATEGORIES, ...keep ] );
+        const keep = existing.filter( ( c ) => ! String( c.slug ).startsWith( 'gratora-' ) );
+        dispatch( 'core/blocks' ).setCategories( [ ...GRATORA_CATEGORIES, ...keep ] );
     } catch ( err ) {
         // setCategories not available on this version; harmless.
     }
 }
 
-addAction( 'fundkit.editor.registerBlocks', 'fundkit/core-blocks', ( api ) => {
+addAction( 'gratora.editor.registerBlocks', 'gratora/core-blocks', ( api ) => {
     ensureCategories();
     registerHeadingBlock( api );
     registerParagraphBlock( api );

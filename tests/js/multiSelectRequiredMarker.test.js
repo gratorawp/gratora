@@ -35,7 +35,7 @@ function mount( f ) {
     );
 }
 
-const marks = () => root.querySelectorAll( '.fundkit-form__required' ).length;
+const marks = () => root.querySelectorAll( '.gratora-form__required' ).length;
 
 it( 'marks a required multi-select', () => {
     mount( field( { required: true } ) );

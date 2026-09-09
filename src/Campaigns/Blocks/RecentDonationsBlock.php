@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Blocks;
+namespace Gratora\Campaigns\Blocks;
 
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorAvatars;
-use FundKit\Donors\PublicDonorNames;
-use FundKit\Foundation\Helpers\View;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorAvatars;
+use Gratora\Donors\PublicDonorNames;
+use Gratora\Foundation\Helpers\View;
 
 /** @since 1.0.0 */
 final class RecentDonationsBlock extends CampaignBlock
@@ -26,7 +26,7 @@ final class RecentDonationsBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/recent-donations';
+        return 'gratora/recent-donations';
     }
 
     /** @since 1.0.0 */
@@ -83,7 +83,7 @@ final class RecentDonationsBlock extends CampaignBlock
 
             // Hiding a donor also suppresses their name and message.
             if ($isAnonymous || $name === '' || $hidden) {
-                $name = __('Anonymous', 'fundraising-toolkit');
+                $name = __('Anonymous', 'gratora');
                 $isAnonymous = true;
             }
 
@@ -91,7 +91,7 @@ final class RecentDonationsBlock extends CampaignBlock
             $paidTs = strtotime((string) $paidAt) ?: $nowTs;
             $timeAgo = sprintf(
                 /* translators: %s: human-readable time difference, e.g. "5 minutes" */
-                __('%s ago', 'fundraising-toolkit'),
+                __('%s ago', 'gratora'),
                 human_time_diff($paidTs, $nowTs)
             );
 
@@ -115,8 +115,8 @@ final class RecentDonationsBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/recent-donations', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donations to show yet.', 'fundraising-toolkit'),
-            'emptySubText' => __('Donations tend to follow the first one.', 'fundraising-toolkit'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donations to show yet.', 'gratora'),
+            'emptySubText' => __('Donations tend to follow the first one.', 'gratora'),
             'emptyIcon'    => 'donation',
             'entries'      => $entries,
             'showAmount'   => (bool) ($attrs['showAmount'] ?? true),

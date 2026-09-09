@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
 /** @since 1.0.0 */
 final class RowBlock implements Block
@@ -10,7 +10,7 @@ final class RowBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/row';
+        return 'gratora/row';
     }
 
     /** @since 1.0.0 */
@@ -37,7 +37,7 @@ final class RowBlock implements Block
         }
 
         return sprintf(
-            '<div class="fundkit-block fundkit-block--row" style="display:grid;grid-template-columns:repeat(%d,minmax(0,1fr));gap:%d%s">%s</div>',
+            '<div class="gratora-block gratora-block--row" style="display:grid;grid-template-columns:repeat(%d,minmax(0,1fr));gap:%d%s">%s</div>',
             $columns,
             $gap,
             $gapUnit,

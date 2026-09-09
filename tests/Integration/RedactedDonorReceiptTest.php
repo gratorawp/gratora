@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Receipts\Receipt;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Receipts\Receipt;
 use WP_REST_Request;
 
 /**
@@ -23,17 +23,17 @@ final class RedactedDonorReceiptTest extends IntegrationTestCase
         $this->redactDonorFor($reference);
 
         $res = rest_do_request(
-            new WP_REST_Request('POST', "/fundkit/v1/admin/donations/{$reference}/resend-receipt")
+            new WP_REST_Request('POST', "/gratora/v1/admin/donations/{$reference}/resend-receipt")
         );
 
         $this->assertSame(422, $res->get_status(), 'the API refuses instead of reporting a send');
-        $this->assertSame('fundkit_donor_redacted', $res->as_error()->get_error_code());
+        $this->assertSame('gratora_donor_redacted', $res->as_error()->get_error_code());
     }
 
     public function test_a_refused_resend_leaves_the_sent_stamp_intact(): void
     {
         $reference = $this->paidDonation('erased-stamp@example.test');
-        $donation  = \FundKit\Donations\Donation::query()->find('reference', $reference);
+        $donation  = \Gratora\Donations\Donation::query()->find('reference', $reference);
 
         // A receipt that really was emailed at the time. Issuance is async, so
         // stand one up directly rather than waiting on the queue.
@@ -48,7 +48,7 @@ final class RedactedDonorReceiptTest extends IntegrationTestCase
 
         $this->redactDonorFor($reference);
 
-        rest_do_request(new WP_REST_Request('POST', "/fundkit/v1/admin/donations/{$reference}/resend-receipt"));
+        rest_do_request(new WP_REST_Request('POST', "/gratora/v1/admin/donations/{$reference}/resend-receipt"));
 
         $fresh = Receipt::query()->find('id', (int) $receipt->id);
         $this->assertSame(
@@ -63,7 +63,7 @@ final class RedactedDonorReceiptTest extends IntegrationTestCase
         $reference = $this->paidDonation('erased-flag@example.test');
         $this->redactDonorFor($reference);
 
-        $res = rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/admin/donations/{$reference}"));
+        $res = rest_do_request(new WP_REST_Request('GET', "/gratora/v1/admin/donations/{$reference}"));
         $this->assertSame(200, $res->get_status());
 
         $donor = (array) $res->get_data()['donor'];
@@ -73,14 +73,14 @@ final class RedactedDonorReceiptTest extends IntegrationTestCase
 
     private function redactDonorFor(string $reference): void
     {
-        $donation = \FundKit\Donations\Donation::query()->find('reference', $reference);
+        $donation = \Gratora\Donations\Donation::query()->find('reference', $reference);
         $donor    = Donor::query()->find('id', (int) $donation->donor_id);
         Plugin::instance()->container->get(DonorService::class)->redact($donor);
     }
 
     private function paidDonation(string $email): string
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => $email,
@@ -91,7 +91,7 @@ final class RedactedDonorReceiptTest extends IntegrationTestCase
         ]));
         $reference = (string) rest_do_request($create)->get_data()['reference'];
 
-        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);

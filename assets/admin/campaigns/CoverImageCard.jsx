@@ -12,11 +12,11 @@ export default function CoverImageCard( { id, url, onChange } ) {
 
     if ( ! url ) {
         return (
-            <div className="fundkit-cover-card" style={ { gridTemplateColumns: '1fr' } }>
+            <div className="gratora-cover-card" style={ { gridTemplateColumns: '1fr' } }>
                 <div>
-                    <Btn variant="primary" onClick={ pick }>{ __( 'Select an image', 'fundraising-toolkit' ) }</Btn>
+                    <Btn variant="primary" onClick={ pick }>{ __( 'Select an image', 'gratora' ) }</Btn>
                     <div style={ { marginTop: 8, fontSize: 12, color: '#6b7280' } }>
-                        { __( '1600 × 900 (16:9) recommended.', 'fundraising-toolkit' ) }
+                        { __( '1600 × 900 (16:9) recommended.', 'gratora' ) }
                     </div>
                 </div>
             </div>
@@ -24,15 +24,15 @@ export default function CoverImageCard( { id, url, onChange } ) {
     }
 
     return (
-        <div className="fundkit-cover-card">
-            <div className="fundkit-cover-card__thumb" style={ { backgroundImage: `url(${ url })` } } />
-            <div className="fundkit-cover-card__meta">
+        <div className="gratora-cover-card">
+            <div className="gratora-cover-card__thumb" style={ { backgroundImage: `url(${ url })` } } />
+            <div className="gratora-cover-card__meta">
                 <AttachmentMeta id={ id } url={ url } />
-                <div className="fundkit-cover-card__actions">
-                    <Btn variant="secondary" size="sm" onClick={ pick }>{ __( 'Replace', 'fundraising-toolkit' ) }</Btn>
-                    <Btn variant="ghost" size="sm" onClick={ remove }>{ __( 'Remove', 'fundraising-toolkit' ) }</Btn>
+                <div className="gratora-cover-card__actions">
+                    <Btn variant="secondary" size="sm" onClick={ pick }>{ __( 'Replace', 'gratora' ) }</Btn>
+                    <Btn variant="ghost" size="sm" onClick={ remove }>{ __( 'Remove', 'gratora' ) }</Btn>
                 </div>
-                <span className="fundkit-cover-card__chip">{ __( 'Cropped on cards · 16:9 expected', 'fundraising-toolkit' ) }</span>
+                <span className="gratora-cover-card__chip">{ __( 'Cropped on cards · 16:9 expected', 'gratora' ) }</span>
             </div>
         </div>
     );
@@ -73,11 +73,11 @@ function AttachmentMeta( { id, url } ) {
 
     return (
         <>
-            <strong>{ meta.filename || __( 'Cover image', 'fundraising-toolkit' ) }</strong>
+            <strong>{ meta.filename || __( 'Cover image', 'gratora' ) }</strong>
             { parts && <>{ parts }<br /></> }
             { meta.uploaded && sprintf(
                 /* translators: %s: relative time, e.g. "12d ago" */
-                __( 'Uploaded %s', 'fundraising-toolkit' ),
+                __( 'Uploaded %s', 'gratora' ),
                 timeAgo( meta.uploaded ),
             ) }
         </>
@@ -93,12 +93,12 @@ function formatBytes( bytes ) {
 
 function openMediaFrame( { onSelect, currentId } ) {
     if ( ! window.wp?.media ) {
-        notify.error( __( 'Media library not loaded.', 'fundraising-toolkit' ) );
+        notify.error( __( 'Media library not loaded.', 'gratora' ) );
         return;
     }
     const frame = window.wp.media( {
-        title:    __( 'Select campaign cover image', 'fundraising-toolkit' ),
-        button:   { text: __( 'Use this image', 'fundraising-toolkit' ) },
+        title:    __( 'Select campaign cover image', 'gratora' ),
+        button:   { text: __( 'Use this image', 'gratora' ) },
         library:  { type: 'image' },
         multiple: false,
     } );

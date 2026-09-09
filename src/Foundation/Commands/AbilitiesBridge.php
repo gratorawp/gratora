@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Commands;
+namespace Gratora\Foundation\Commands;
 
 /**
- * Every FundKit command, published as a WordPress ability.
+ * Every Gratora command, published as a WordPress ability.
  *
  * The Abilities API (core, since 6.9) is the registry an MCP server reads, so
- * bridging to it is the whole of "expose FundKit over MCP": no transport, no
+ * bridging to it is the whole of "expose Gratora over MCP": no transport, no
  * token table, no scope machinery of our own. Whatever adapter the site runs
  * gets the same commands the assistant and the REST endpoint already use, with
  * the same capability checks and the same confirmation gate behind them.
@@ -19,7 +19,7 @@ namespace FundKit\Foundation\Commands;
  */
 final class AbilitiesBridge
 {
-    public const CATEGORY = 'fundkit';
+    public const CATEGORY = 'gratora';
 
     /** @since 1.0.0 */
     public function __construct(private CommandRegistry $registry)
@@ -45,8 +45,8 @@ final class AbilitiesBridge
     public function registerCategory(): void
     {
         wp_register_ability_category(self::CATEGORY, [
-            'label'       => __('Fundraising Toolkit', 'fundraising-toolkit'),
-            'description' => __('Campaigns, donations, donors and everything the installed add-ons add.', 'fundraising-toolkit'),
+            'label'       => __('Gratora', 'gratora'),
+            'description' => __('Campaigns, donations, donors and everything the installed add-ons add.', 'gratora'),
         ]);
     }
 
@@ -98,8 +98,8 @@ final class AbilitiesBridge
 
         if (! $result->ok) {
             return new \WP_Error(
-                (string) ($result->error_code ?? 'fundkit_command_failed'),
-                (string) ($result->error ?? __('The command did not run.', 'fundraising-toolkit')),
+                (string) ($result->error_code ?? 'gratora_command_failed'),
+                (string) ($result->error ?? __('The command did not run.', 'gratora')),
                 $result->data
             );
         }

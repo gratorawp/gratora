@@ -1,6 +1,6 @@
 // Import in both campaign and form-editor bundles.
 
-.fundkit-template-picker {
+.gratora-template-picker {
     .components-modal__content { padding-top: 12px; }
 
     &__intro {
@@ -86,7 +86,7 @@
     }
 }
 
-.fundkit-template-thumb {
+.gratora-template-thumb {
     --thumb-accent: #{$accent};
     position: relative;
     aspect-ratio: 4 / 3;
@@ -400,7 +400,7 @@ $gctp-ink3: rgba(0, 0, 0, 0.06);
 $gctp-photo: linear-gradient( 152deg, #7c8593 0%, #3f4753 54%, #232932 100% );
 $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100% );
 
-.fundkit-ctp {
+.gratora-ctp {
     &__thumb {
         display: flex;
         flex-direction: column;
@@ -633,9 +633,9 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     justify-content: space-between;
 }
 
-.fundkit-ctp {
+.gratora-ctp {
     // Keep full descriptions so layout differences remain readable.
-    .fundkit-template-picker__desc {
+    .gratora-template-picker__desc {
         display: block;
         -webkit-line-clamp: none;
         overflow: visible;
@@ -692,7 +692,7 @@ $gctp-photo-deep: linear-gradient( 152deg, #6b7482 0%, #2b313b 52%, #12161d 100%
     .over .figs { justify-content: center; }
 }
 
-.fundkit-ctp__thumb.is-dark {
+.gratora-ctp__thumb.is-dark {
     background: #12161d;
     border-color: rgba(255, 255, 255, .12);
 

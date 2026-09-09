@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\SignupRedemption;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\WebhookPaymentGuard;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\SignupRedemption;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\WebhookPaymentGuard;
 use WP_REST_Request;
 
 /**
@@ -30,7 +30,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
     private function portalToken(): string
     {
         return Plugin::instance()->container
-            ->get(\FundKit\Donations\AntiSpamGuard::class)
+            ->get(\Gratora\Donations\AntiSpamGuard::class)
             ->mintPortalToken();
     }
 
@@ -47,7 +47,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
     {
         $sent = $this->captureLinkMail();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/register');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/register');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body + ['token' => $this->portalToken()]));
         rest_do_request($req);
@@ -136,7 +136,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         $email = 'existing-' . uniqid() . '@example.test';
         $sent  = $this->captureLinkMail();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/register');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/register');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'      => $email,
@@ -176,24 +176,24 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         ]);
 
         $canonical = Plugin::instance()->container
-            ->get(\FundKit\Donors\DonorMetricsService::class)
+            ->get(\Gratora\Donors\DonorMetricsService::class)
             ->exportData((int) $donor->id);
 
         $sid = $this->portalSession((int) $donor->id, 'tok');
-        $_COOKIE['fundkit_donor_session'] = $sid;
+        $_COOKIE['gratora_donor_session'] = $sid;
 
         // The bundle is streamed from a rest_pre_serve_request filter, which
         // only fires when the server actually serves. rest_do_request stops
         // short of that, so the filter is invoked here the way the server would.
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/data-export');
-        $req->set_header('X-FundKit-Csrf', 'tok');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/data-export');
+        $req->set_header('X-Gratora-Csrf', 'tok');
         $res = rest_do_request($req);
 
         ob_start();
         apply_filters('rest_pre_serve_request', false, $res, $req, rest_get_server());
         $body = ob_get_clean();
 
-        unset($_COOKIE['fundkit_donor_session']);
+        unset($_COOKIE['gratora_donor_session']);
 
         $bundle = json_decode((string) $body, true);
         $this->assertIsArray($bundle, 'the export streams a JSON body');
@@ -224,7 +224,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         $donor = Plugin::instance()->container->get(DonorService::class)
             ->findOrCreate('approve-' . uniqid() . '@example.test');
 
-        $plan = \FundKit\Recurring\RecurringPlan::make();
+        $plan = \Gratora\Recurring\RecurringPlan::make();
         $plan->donor_id                = (int) $donor->id;
         $plan->gateway                 = 'needsapproval';
         $plan->gateway_subscription_id = 'I-' . strtoupper(bin2hex(random_bytes(4)));
@@ -238,23 +238,23 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
         $plan->updated_at              = gmdate('Y-m-d H:i:s');
         $plan->save();
 
-        Plugin::instance()->container->get(\FundKit\Gateways\GatewayManager::class)
+        Plugin::instance()->container->get(\Gratora\Gateways\GatewayManager::class)
             ->register(new NeedsApprovalGateway());
 
         $sid = $this->portalSession((int) $donor->id, 'tok');
-        $_COOKIE['fundkit_donor_session'] = $sid;
+        $_COOKIE['gratora_donor_session'] = $sid;
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/recurring/' . (int) $plan->id . '/action');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/recurring/' . (int) $plan->id . '/action');
         $req->set_header('content-type', 'application/json');
-        $req->set_header('X-FundKit-Csrf', 'tok');
+        $req->set_header('X-Gratora-Csrf', 'tok');
         $req->set_body((string) wp_json_encode(['action' => 'change_amount', 'amount_cents' => 5000]));
         $res = rest_do_request($req);
 
-        unset($_COOKIE['fundkit_donor_session']);
+        unset($_COOKIE['gratora_donor_session']);
 
         $this->assertSame(409, $res->get_status(), 'the donor is told it is waiting on them');
 
-        $fresh = \FundKit\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
+        $fresh = \Gratora\Recurring\RecurringPlan::query()->find('id', (int) $plan->id);
         $this->assertSame(
             2500,
             (int) $fresh->amount_cents,
@@ -314,7 +314,7 @@ final class WebhookAndPortalHardeningTest extends IntegrationTestCase
 }
 
 /** Answers a revise the way PayPal does when the subscriber must approve it. */
-final class NeedsApprovalGateway implements \FundKit\Gateways\PaymentGateway, \FundKit\Gateways\SubscriptionAware
+final class NeedsApprovalGateway implements \Gratora\Gateways\PaymentGateway, \Gratora\Gateways\SubscriptionAware
 {
     public function id(): string { return 'needsapproval'; }
     public function label(): string { return 'Needs approval'; }
@@ -325,33 +325,33 @@ final class NeedsApprovalGateway implements \FundKit\Gateways\PaymentGateway, \F
     public function currencies(): array { return ['USD']; }
     public function canCharge(): bool { return true; }
 
-    public function createIntent(\FundKit\Donations\Donation $donation): \FundKit\Gateways\GatewayIntentResult
+    public function createIntent(\Gratora\Donations\Donation $donation): \Gratora\Gateways\GatewayIntentResult
     {
-        return new \FundKit\Gateways\GatewayIntentResult(ok: false, error: 'not used');
+        return new \Gratora\Gateways\GatewayIntentResult(ok: false, error: 'not used');
     }
 
-    public function confirm(\FundKit\Donations\Donation $donation, array $payload = []): \FundKit\Gateways\GatewayConfirmResult
+    public function confirm(\Gratora\Donations\Donation $donation, array $payload = []): \Gratora\Gateways\GatewayConfirmResult
     {
-        return new \FundKit\Gateways\GatewayConfirmResult(ok: false, error: 'not used');
+        return new \Gratora\Gateways\GatewayConfirmResult(ok: false, error: 'not used');
     }
 
-    public function handleWebhook(WP_REST_Request $request): \FundKit\Gateways\WebhookOutcome
+    public function handleWebhook(WP_REST_Request $request): \Gratora\Gateways\WebhookOutcome
     {
-        return new \FundKit\Gateways\WebhookOutcome(signature_ok: false, external_id: '', event_type: '', handled: false);
+        return new \Gratora\Gateways\WebhookOutcome(signature_ok: false, external_id: '', event_type: '', handled: false);
     }
 
-    public function refund(\FundKit\Donations\Donation $donation, int $amountCents, ?string $reason = null): \FundKit\Gateways\RefundResult
+    public function refund(\Gratora\Donations\Donation $donation, int $amountCents, ?string $reason = null): \Gratora\Gateways\RefundResult
     {
-        return new \FundKit\Gateways\RefundResult(ok: false, error: 'not used');
+        return new \Gratora\Gateways\RefundResult(ok: false, error: 'not used');
     }
 
-    public function cancelSubscription(\FundKit\Recurring\RecurringPlan $plan, ?string $reason = null): void {}
-    public function pauseSubscription(\FundKit\Recurring\RecurringPlan $plan, ?string $resumesAt = null): void {}
-    public function resumeSubscription(\FundKit\Recurring\RecurringPlan $plan): void {}
+    public function cancelSubscription(\Gratora\Recurring\RecurringPlan $plan, ?string $reason = null): void {}
+    public function pauseSubscription(\Gratora\Recurring\RecurringPlan $plan, ?string $resumesAt = null): void {}
+    public function resumeSubscription(\Gratora\Recurring\RecurringPlan $plan): void {}
 
-    public function updateSubscriptionAmount(\FundKit\Recurring\RecurringPlan $plan, int $amountCents): void
+    public function updateSubscriptionAmount(\Gratora\Recurring\RecurringPlan $plan, int $amountCents): void
     {
-        throw new \FundKit\Gateways\SubscriptionChangeNeedsApproval(
+        throw new \Gratora\Gateways\SubscriptionChangeNeedsApproval(
             'needs approval',
             'https://www.paypal.com/approve/xyz'
         );

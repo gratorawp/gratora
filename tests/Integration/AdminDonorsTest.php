@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use WP_REST_Request;
 
 /**
- * Exercises GET /wp-json/fundkit/v1/admin/donors.
+ * Exercises GET /wp-json/gratora/v1/admin/donors.
  *
  * Donor records get materialized as a side-effect of POSTing a donation -
  * we drive them through the existing public donations endpoint rather than
@@ -70,7 +70,7 @@ final class AdminDonorsTest extends IntegrationTestCase
     {
         // Bump Luca's totals so we get a deterministic order without re-seeding.
         self::$wpdb->query(
-            "UPDATE " . self::$prefix . "fundkit_donors SET total_donated_cents = 99999 WHERE first_name = 'Luca'"
+            "UPDATE " . self::$prefix . "gratora_donors SET total_donated_cents = 99999 WHERE first_name = 'Luca'"
         );
 
         $items = $this->get([
@@ -90,7 +90,7 @@ final class AdminDonorsTest extends IntegrationTestCase
 
     private function get(array $params): \WP_REST_Response
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donors');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/donors');
         $req->set_query_params($params);
         return rest_do_request($req);
     }
@@ -104,7 +104,7 @@ final class AdminDonorsTest extends IntegrationTestCase
             ['luca.rossi@example.it',      'Luca',   'Rossi',  'IT'],
         ];
         foreach ($fixtures as [$email, $first, $last, $country]) {
-            $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+            $req = new WP_REST_Request('POST', '/gratora/v1/donations');
             $req->set_header('content-type', 'application/json');
             $req->set_body(json_encode([
                 'email'        => $email,
@@ -116,7 +116,7 @@ final class AdminDonorsTest extends IntegrationTestCase
             $reference = rest_do_request($req)->get_data()['reference'];
 
             // Confirm so last_donation_at + totals reflect a real flow.
-            $req2 = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+            $req2 = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
             $req2->set_header('content-type', 'application/json');
             $req2->set_body('{}');
             rest_do_request($req2);

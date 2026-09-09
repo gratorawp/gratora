@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Styling;
+namespace Gratora\Campaigns\Styling;
 
 /**
- * Brand style presets (built-ins + user customs), stored in fundkit_org_brand as
+ * Brand style presets (built-ins + user customs), stored in gratora_org_brand as
  * ['presets' => [...], 'default_id' => id]. Built-ins are always present in all();
  * users may edit a built-in's tokens but cannot delete one.
  *
@@ -15,7 +15,7 @@ use WP_Theme_JSON_Resolver;
 
 final class StylePresets
 {
-    private const OPTION = 'fundkit_org_brand';
+    private const OPTION = 'gratora_org_brand';
 
     /**
      * @return array<int, array{
@@ -33,53 +33,53 @@ final class StylePresets
         return [
             [
                 'id'          => 'classic',
-                'name'        => __('Classic', 'fundraising-toolkit'),
-                'description' => __('Balanced, friendly, accent green. The Fundraising Toolkit default.', 'fundraising-toolkit'),
+                'name'        => __('Classic', 'gratora'),
+                'description' => __('Balanced, friendly, accent green. The Gratora default.', 'gratora'),
                 'tokens'      => [
-                    // Signature FundKit pill donate button. Other presets fall
-                    // back to --fundkit-radius-sm; the Theme preset inherits the
+                    // Signature Gratora pill donate button. Other presets fall
+                    // back to --gratora-radius-sm; the Theme preset inherits the
                     // site's button radius via themePreset().
-                    'fundkit-button-radius' => '999px',
+                    'gratora-button-radius' => '999px',
                 ],
                 'builtin'     => true,
             ],
             [
                 'id'          => 'bold',
-                'name'        => __('Bold', 'fundraising-toolkit'),
-                'description' => __('Deep navy with strong typography and a dramatic shadow.', 'fundraising-toolkit'),
+                'name'        => __('Bold', 'gratora'),
+                'description' => __('Deep navy with strong typography and a dramatic shadow.', 'gratora'),
                 'tokens'      => [
-                    'fundkit-accent'         => '#0F3D5C',
-                    'fundkit-accent-soft'    => '#dde6ed',
-                    'fundkit-radius'         => '6px',
-                    'fundkit-radius-sm'      => '4px',
-                    'fundkit-button-weight'  => '700',
-                    'fundkit-button-shadow'  => '0 6px 16px rgba(0,0,0,.12)',
-                    'fundkit-heading-weight' => '700',
-                    'fundkit-card-shadow'    => '0 30px 60px rgba(0, 0, 0, .25)',
-                    'fundkit-focus-ring'     => '#0F3D5C',
+                    'gratora-accent'         => '#0F3D5C',
+                    'gratora-accent-soft'    => '#dde6ed',
+                    'gratora-radius'         => '6px',
+                    'gratora-radius-sm'      => '4px',
+                    'gratora-button-weight'  => '700',
+                    'gratora-button-shadow'  => '0 6px 16px rgba(0,0,0,.12)',
+                    'gratora-heading-weight' => '700',
+                    'gratora-card-shadow'    => '0 30px 60px rgba(0, 0, 0, .25)',
+                    'gratora-focus-ring'     => '#0F3D5C',
                 ],
                 'builtin'     => true,
             ],
             [
                 'id'          => 'quiet',
-                'name'        => __('Quiet', 'fundraising-toolkit'),
-                'description' => __('Minimal lines and lots of white space. Outlined button, no color, no shadows.', 'fundraising-toolkit'),
+                'name'        => __('Quiet', 'gratora'),
+                'description' => __('Minimal lines and lots of white space. Outlined button, no color, no shadows.', 'gratora'),
                 'tokens'      => [
-                    'fundkit-accent'          => '#111827',
-                    'fundkit-accent-soft'     => '#f3f4f6',
-                    'fundkit-radius'          => '0px',
-                    'fundkit-radius-sm'       => '0px',
-                    'fundkit-bg-soft'         => '#f9fafb',
-                    'fundkit-heading-weight'  => '500',
-                    'fundkit-button-weight'   => '500',
-                    'fundkit-button-shadow'   => 'none',
-                    'fundkit-card-shadow'     => 'none',
-                    'fundkit-focus-ring'      => '#111827',
-                    'fundkit-gap'             => '28px',
-                    'fundkit-button-bg'       => 'transparent',
-                    'fundkit-button-fg'       => '#111827',
-                    'fundkit-button-border'   => '1px solid currentColor',
-                    'fundkit-button-hover-bg' => '#f3f4f6',
+                    'gratora-accent'          => '#111827',
+                    'gratora-accent-soft'     => '#f3f4f6',
+                    'gratora-radius'          => '0px',
+                    'gratora-radius-sm'       => '0px',
+                    'gratora-bg-soft'         => '#f9fafb',
+                    'gratora-heading-weight'  => '500',
+                    'gratora-button-weight'   => '500',
+                    'gratora-button-shadow'   => 'none',
+                    'gratora-card-shadow'     => 'none',
+                    'gratora-focus-ring'      => '#111827',
+                    'gratora-gap'             => '28px',
+                    'gratora-button-bg'       => 'transparent',
+                    'gratora-button-fg'       => '#111827',
+                    'gratora-button-border'   => '1px solid currentColor',
+                    'gratora-button-hover-bg' => '#f3f4f6',
                 ],
                 'builtin'     => true,
             ],
@@ -191,25 +191,25 @@ final class StylePresets
             ?? $bySlug['accent-1']
             ?? ($colors[0]['color'] ?? null);
         if (is_string($accent) && $accent !== '') {
-            $tokens['fundkit-accent']     = $accent;
-            $tokens['fundkit-focus-ring'] = $accent;
+            $tokens['gratora-accent']     = $accent;
+            $tokens['gratora-focus-ring'] = $accent;
         }
-        if (isset($bySlug['background'])) $tokens['fundkit-bg']   = $bySlug['background'];
-        if (isset($bySlug['foreground'])) $tokens['fundkit-text'] = $bySlug['foreground'];
+        if (isset($bySlug['background'])) $tokens['gratora-bg']   = $bySlug['background'];
+        if (isset($bySlug['foreground'])) $tokens['gratora-text'] = $bySlug['foreground'];
 
         $button = (array) ($raw['styles']['elements']['button'] ?? []);
         $radius = $button['border']['radius'] ?? null;
         if (is_string($radius) && $radius !== '') {
-            $tokens['fundkit-radius-sm'] = $radius;
+            $tokens['gratora-radius-sm'] = $radius;
         }
         $weight = $button['typography']['fontWeight'] ?? null;
         if ($weight !== null && $weight !== '') {
-            $tokens['fundkit-button-weight'] = (string) $weight;
+            $tokens['gratora-button-weight'] = (string) $weight;
         }
         $btnBg = $button['color']['background'] ?? null;
-        if (is_string($btnBg) && $btnBg !== '' && ! isset($tokens['fundkit-accent'])) {
-            $tokens['fundkit-accent']     = $btnBg;
-            $tokens['fundkit-focus-ring'] = $btnBg;
+        if (is_string($btnBg) && $btnBg !== '' && ! isset($tokens['gratora-accent'])) {
+            $tokens['gratora-accent']     = $btnBg;
+            $tokens['gratora-focus-ring'] = $btnBg;
         }
 
         // theme.json is not the token catalogue: it yields values like the
@@ -221,8 +221,8 @@ final class StylePresets
 
         return [
             'id'          => 'theme',
-            'name'        => __('Site theme', 'fundraising-toolkit'),
-            'description' => __('Picks up accent, background, and button styles from the active WordPress theme (theme.json).', 'fundraising-toolkit'),
+            'name'        => __('Site theme', 'gratora'),
+            'description' => __('Picks up accent, background, and button styles from the active WordPress theme (theme.json).', 'gratora'),
             'tokens'      => $tokens,
             'builtin'     => true,
             'source'      => 'theme',

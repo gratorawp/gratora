@@ -129,26 +129,26 @@ export default function StripePayment( { config, payment, dispatch } ) {
         : '';
 
     return (
-        <div class="fundkit-form fundkit-form--payment">
-            <h3 class="fundkit-form__payment-title">{ i18n.paymentTitle || 'Complete your donation' }</h3>
+        <div class="gratora-form gratora-form--payment">
+            <h3 class="gratora-form__payment-title">{ i18n.paymentTitle || 'Complete your donation' }</h3>
             { amountLine && (
-                <p class="fundkit-form__payment-amount">{ amountLine }</p>
+                <p class="gratora-form__payment-amount">{ amountLine }</p>
             ) }
 
-            <div ref={ mountRef } class="fundkit-form__payment-element" />
+            <div ref={ mountRef } class="gratora-form__payment-element" />
 
             { ! ready && ! error && (
-                <p class="fundkit-form__payment-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
+                <p class="gratora-form__payment-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
             ) }
 
             { error && (
-                <div class="fundkit-form__error" role="alert">{ error }</div>
+                <div class="gratora-form__error" role="alert">{ error }</div>
             ) }
 
-            <div class="fundkit-form__nav fundkit-form__nav--align-left">
+            <div class="gratora-form__nav gratora-form__nav--align-left">
                 <button
                     type="button"
-                    class="fundkit-form__button fundkit-form__button--primary"
+                    class="gratora-form__button gratora-form__button--primary"
                     disabled={ ! ready || paying }
                     onClick={ onPay }
                 >
@@ -156,7 +156,7 @@ export default function StripePayment( { config, payment, dispatch } ) {
                 </button>
                 <button
                     type="button"
-                    class="fundkit-form__button fundkit-form__button--secondary"
+                    class="gratora-form__button gratora-form__button--secondary"
                     disabled={ paying }
                     onClick={ () => dispatch( { type: 'CANCEL_PAYMENT' } ) }
                 >
@@ -169,10 +169,10 @@ export default function StripePayment( { config, payment, dispatch } ) {
 
 function stripeVars( el ) {
     try {
-        // --fundkit-accent is set on the .fundkit-donation-form element and inherits
+        // --gratora-accent is set on the .gratora-donation-form element and inherits
         // down to the mount node; documentElement wouldn't see the override.
         const cs = getComputedStyle( el || document.documentElement );
-        const accent = cs.getPropertyValue( '--fundkit-accent' ).trim();
+        const accent = cs.getPropertyValue( '--gratora-accent' ).trim();
         return accent ? { colorPrimary: accent } : {};
     } catch {
         return {};
@@ -186,7 +186,7 @@ function stripeVars( el ) {
  */
 function buildReturnUrl( payment ) {
     const url = new URL( window.location.href );
-    url.searchParams.set( 'fundkit_return', '1' );
-    if ( payment?.reference ) url.searchParams.set( 'fundkit_ref', payment.reference );
+    url.searchParams.set( 'gratora_return', '1' );
+    if ( payment?.reference ) url.searchParams.set( 'gratora_ref', payment.reference );
     return url.toString();
 }

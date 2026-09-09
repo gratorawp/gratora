@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Styling\Tokens;
+use Gratora\Campaigns\Styling\Tokens;
 
 /**
  * The donation form painted its fields, its amount box and its currency picker
@@ -18,8 +18,8 @@ final class FieldBackgroundIsItsOwnTokenTest extends IntegrationTestCase
     {
         $catalogue = Tokens::catalogue();
 
-        $this->assertArrayHasKey('fundkit-field-bg', $catalogue);
-        $this->assertSame('surface', $catalogue['fundkit-field-bg']['group']);
+        $this->assertArrayHasKey('gratora-field-bg', $catalogue);
+        $this->assertSame('surface', $catalogue['gratora-field-bg']['group']);
     }
 
     /** A brand that only sets the surface leaves the boxes readable. */
@@ -27,18 +27,18 @@ final class FieldBackgroundIsItsOwnTokenTest extends IntegrationTestCase
     {
         $defaults = Tokens::defaults();
 
-        $this->assertSame('#ffffff', $defaults['fundkit-field-bg']);
+        $this->assertSame('#ffffff', $defaults['gratora-field-bg']);
 
-        $saved = Tokens::sanitize(['fundkit-bg' => '#ed1212']);
+        $saved = Tokens::sanitize(['gratora-bg' => '#ed1212']);
 
-        $this->assertArrayNotHasKey('fundkit-field-bg', $saved);
+        $this->assertArrayNotHasKey('gratora-field-bg', $saved);
     }
 
     public function test_a_field_fill_the_org_chose_is_kept(): void
     {
         $this->assertSame(
-            ['fundkit-field-bg' => '#101828'],
-            Tokens::sanitize(['fundkit-field-bg' => '#101828'])
+            ['gratora-field-bg' => '#101828'],
+            Tokens::sanitize(['gratora-field-bg' => '#101828'])
         );
     }
 }

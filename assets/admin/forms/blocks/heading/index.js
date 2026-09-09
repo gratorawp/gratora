@@ -5,7 +5,7 @@ import { BlockIcons } from '../_shared/block-icons';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import Segmented from '../../../_shared/components/Segmented';
 
-const NAME = 'fundkit/heading';
+const NAME = 'gratora/heading';
 
 const LEVEL_OPTIONS = [
     { value: 1, label: 'H1' },
@@ -15,9 +15,9 @@ const LEVEL_OPTIONS = [
 ];
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'fundraising-toolkit' ) },
-    { value: 'center', label: __( 'Center', 'fundraising-toolkit' ) },
-    { value: 'right',  label: __( 'Right',  'fundraising-toolkit' ) },
+    { value: 'left',   label: __( 'Left',   'gratora' ) },
+    { value: 'center', label: __( 'Center', 'gratora' ) },
+    { value: 'right',  label: __( 'Right',  'gratora' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -32,15 +32,15 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Heading', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Heading', 'gratora' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Level', 'fundraising-toolkit' ) }
+                        label={ __( 'Level', 'gratora' ) }
                         value={ level }
                         onChange={ ( v ) => setAttributes( { level: Number( v ) } ) }
                         options={ LEVEL_OPTIONS }
                     />
                     <Segmented
-                        label={ __( 'Alignment', 'fundraising-toolkit' ) }
+                        label={ __( 'Alignment', 'gratora' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
@@ -56,7 +56,7 @@ function Edit( { attributes, setAttributes } ) {
                     tagName={ `h${ level }` }
                     value={ text }
                     onChange={ ( v ) => setAttributes( { text: v } ) }
-                    placeholder={ __( 'Section heading', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'Section heading', 'gratora' ) }
                     allowedFormats={ [] }
                     style={ { margin: 0, fontWeight: 600 } }
                 />
@@ -68,9 +68,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Heading', 'fundraising-toolkit' ),
-        description: __( 'Section heading shown above the next field step.', 'fundraising-toolkit' ),
-        category:   'fundkit-content',
+        title:      __( 'Heading', 'gratora' ),
+        description: __( 'Section heading shown above the next field step.', 'gratora' ),
+        category:   'gratora-content',
         icon:       BlockIcons[ 'heading' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

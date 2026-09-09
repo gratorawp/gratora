@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use WP_REST_Request;
 
 /**
- * fundkit_view_donations reads the donation record. Who gave, and how to reach
- * them, is the donor record, and that is fundkit_view_donors: paging the admin
+ * gratora_view_donations reads the donation record. Who gave, and how to reach
+ * them, is the donor record, and that is gratora_view_donors: paging the admin
  * donations list would otherwise hand a donations-only role the whole donor
  * email list, which the CSV export already refuses to do.
  */
@@ -27,7 +27,7 @@ final class DonationDonorPiiCapabilityTest extends IntegrationTestCase
 
     private function seedDonation(): string
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'sarah.mueller@example.de',
@@ -38,7 +38,7 @@ final class DonationDonorPiiCapabilityTest extends IntegrationTestCase
         ]));
         $reference = (string) rest_do_request($create)->get_data()['reference'];
 
-        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);
@@ -49,9 +49,9 @@ final class DonationDonorPiiCapabilityTest extends IntegrationTestCase
     public function test_the_detail_route_withholds_contact_details_without_view_donors(): void
     {
         $reference = $this->seedDonation();
-        $this->actAs(['fundkit_view_donations']);
+        $this->actAs(['gratora_view_donations']);
 
-        $res = rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/admin/donations/{$reference}"));
+        $res = rest_do_request(new WP_REST_Request('GET', "/gratora/v1/admin/donations/{$reference}"));
         $this->assertSame(200, $res->get_status());
 
         $donor = ((array) $res->get_data())['donor'];
@@ -65,9 +65,9 @@ final class DonationDonorPiiCapabilityTest extends IntegrationTestCase
     public function test_the_list_route_withholds_donor_email_without_view_donors(): void
     {
         $this->seedDonation();
-        $this->actAs(['fundkit_view_donations']);
+        $this->actAs(['gratora_view_donations']);
 
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donations');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/donations');
         $req->set_query_params(['page' => 1, 'per_page' => 25]);
         $rows = (array) rest_do_request($req)->get_data();
 
@@ -82,9 +82,9 @@ final class DonationDonorPiiCapabilityTest extends IntegrationTestCase
     public function test_view_donors_still_reads_the_contact_details(): void
     {
         $reference = $this->seedDonation();
-        $this->actAs(['fundkit_view_donations', 'fundkit_view_donors']);
+        $this->actAs(['gratora_view_donations', 'gratora_view_donors']);
 
-        $res   = rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/admin/donations/{$reference}"));
+        $res   = rest_do_request(new WP_REST_Request('GET', "/gratora/v1/admin/donations/{$reference}"));
         $donor = ((array) $res->get_data())['donor'];
 
         $this->assertSame('sarah.mueller@example.de', $donor['email']);

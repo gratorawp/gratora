@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * Which donors are test-only, and which may leave the site in a CSV.
@@ -51,7 +51,7 @@ final class DonorVisibilityPredicateTest extends IntegrationTestCase
     /** @return list<int> */
     private function idsMatching(string $predicate): array
     {
-        $rows = DB::table('fundkit_donors')
+        $rows = DB::table('gratora_donors')
             ->selectRaw('id')
             ->whereRaw($predicate)
             ->getAll();
@@ -112,7 +112,7 @@ final class DonorVisibilityPredicateTest extends IntegrationTestCase
         // predicate entirely while the export keeps one.
         $this->assertSame([], array_intersect($testIds, $mailIds));
         $this->assertSame(
-            (int) DB::table('fundkit_donors')->count(),
+            (int) DB::table('gratora_donors')->count(),
             count($testIds) + count($mailIds)
         );
         $this->assertContains($testOnly, $testIds);
@@ -129,7 +129,7 @@ final class DonorVisibilityPredicateTest extends IntegrationTestCase
         $id = $this->donorId('kpi-order');
         $this->donation($id, false, 'order');
 
-        $kpi = Plugin::instance()->container->get(\FundKit\Donors\DonorRepository::class)
+        $kpi = Plugin::instance()->container->get(\Gratora\Donors\DonorRepository::class)
             ->lifecycleKpi(gmdate('Y-m-d'));
 
         $withOrder = (int) $kpi['total'];
@@ -137,7 +137,7 @@ final class DonorVisibilityPredicateTest extends IntegrationTestCase
         $hidden = $this->donorId('kpi-test-only');
         $this->donation($hidden, true);
 
-        $after = (int) Plugin::instance()->container->get(\FundKit\Donors\DonorRepository::class)
+        $after = (int) Plugin::instance()->container->get(\Gratora\Donors\DonorRepository::class)
             ->lifecycleKpi(gmdate('Y-m-d'))['total'];
 
         $this->assertSame($withOrder, $after, 'a test-only donor does not join the KPI');

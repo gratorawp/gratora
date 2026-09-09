@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\ConsentService;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\ConsentService;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -29,12 +29,12 @@ final class PortalFormConsentTest extends IntegrationTestCase
             ->findOrCreate('consent-' . uniqid() . '@example.test');
 
         $sid = $this->portalSession((int) $this->donor->id, self::CSRF);
-        $_COOKIE['fundkit_donor_session'] = $sid;
+        $_COOKIE['gratora_donor_session'] = $sid;
     }
 
     protected function tearDown(): void
     {
-        unset($_COOKIE['fundkit_donor_session']);
+        unset($_COOKIE['gratora_donor_session']);
         parent::tearDown();
     }
 
@@ -51,7 +51,7 @@ final class PortalFormConsentTest extends IntegrationTestCase
 
     private function listed(): array
     {
-        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/portal/consents'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/portal/consents'));
 
         return (array) $res->get_data();
     }
@@ -82,9 +82,9 @@ final class PortalFormConsentTest extends IntegrationTestCase
     {
         $this->grantFromForm();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/consents');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/consents');
         $req->set_header('content-type', 'application/json');
-        $req->set_header('X-FundKit-Csrf', self::CSRF);
+        $req->set_header('X-Gratora-Csrf', self::CSRF);
         $req->set_body((string) wp_json_encode([
             'items' => [[ 'key' => self::FORM_PURPOSE, 'granted' => false ]],
         ]));
@@ -104,9 +104,9 @@ final class PortalFormConsentTest extends IntegrationTestCase
     {
         // Widening withdrawal must not widen granting: a crafted payload
         // cannot mint consent for an arbitrary purpose.
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/consents');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/consents');
         $req->set_header('content-type', 'application/json');
-        $req->set_header('X-FundKit-Csrf', self::CSRF);
+        $req->set_header('X-Gratora-Csrf', self::CSRF);
         $req->set_body((string) wp_json_encode([
             'items' => [[ 'key' => 'invented_purpose', 'granted' => true ]],
         ]));

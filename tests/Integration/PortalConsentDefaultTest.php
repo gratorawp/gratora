@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -22,7 +22,7 @@ final class PortalConsentDefaultTest extends IntegrationTestCase
 {
     protected function tearDown(): void
     {
-        delete_option('fundkit_consents');
+        delete_option('gratora_consents');
         parent::tearDown();
     }
 
@@ -70,15 +70,15 @@ final class PortalConsentDefaultTest extends IntegrationTestCase
     private function portalConsents(int $donorId): array
     {
         $sid = $this->portalSession($donorId, bin2hex(random_bytes(8)));
-        $_COOKIE['fundkit_donor_session'] = $sid;
+        $_COOKIE['gratora_donor_session'] = $sid;
 
         try {
-            $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/portal/consents'));
+            $res = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/portal/consents'));
             $this->assertSame(200, $res->get_status());
 
             return (array) $res->get_data();
         } finally {
-            unset($_COOKIE['fundkit_donor_session']);
+            unset($_COOKIE['gratora_donor_session']);
         }
     }
 }

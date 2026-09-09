@@ -2,14 +2,14 @@
 
 import { Heart } from 'lucide-react';
 
-export default function FundKitMark( { size = 28 } ) {
+export default function GratoraMark( { size = 28 } ) {
     const px     = Number( size );
     const radius = Math.max( 4, Math.round( px * 0.22 ) );
     const glyph  = Math.round( px * 0.58 );
 
     return (
         <span
-            className="fundkit-mark"
+            className="gratora-mark"
             aria-hidden="true"
             style={ {
                 display:         'inline-flex',

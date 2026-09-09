@@ -83,7 +83,7 @@ describe( 'the derivation reads the blocks the way the runtime does', () => {
 	test( 'an amount block saved with no attributes still draws its four presets', () => {
 		// Gutenberg omits any attribute equal to its registered default, so the
 		// saved markup of a stock amount block carries no presets at all.
-		const tiles = shapeOf( '<!-- wp:fundkit/donation-amount /-->' ).parts
+		const tiles = shapeOf( '<!-- wp:gratora/donation-amount /-->' ).parts
 			.find( ( p ) => p.kind === 'tiles' );
 
 		expect( tiles ).toBeTruthy();
@@ -91,7 +91,7 @@ describe( 'the derivation reads the blocks the way the runtime does', () => {
 	} );
 
 	test( 'a fixed-amount block draws one amount, not a grid', () => {
-		const parts = shapeOf( '<!-- wp:fundkit/donation-amount {"donationType":"fixed"} /-->' ).parts;
+		const parts = shapeOf( '<!-- wp:gratora/donation-amount {"donationType":"fixed"} /-->' ).parts;
 
 		expect( parts.map( ( p ) => p.kind ) ).toContain( 'amount' );
 		expect( parts.map( ( p ) => p.kind ) ).not.toContain( 'tiles' );
@@ -99,13 +99,13 @@ describe( 'the derivation reads the blocks the way the runtime does', () => {
 
 	test( 'an explicitly empty presets array is not a fixed amount', () => {
 		// DonationAmountBlock substitutes its four defaults for an empty array.
-		const parts = shapeOf( '<!-- wp:fundkit/donation-amount {"presets":[]} /-->' ).parts;
+		const parts = shapeOf( '<!-- wp:gratora/donation-amount {"presets":[]} /-->' ).parts;
 
 		expect( parts.map( ( p ) => p.kind ) ).toContain( 'tiles' );
 	} );
 
 	test( 'the runtime always highlights a tile, so the thumbnail does too', () => {
-		const tiles = shapeOf( '<!-- wp:fundkit/donation-amount /-->' ).parts
+		const tiles = shapeOf( '<!-- wp:gratora/donation-amount /-->' ).parts
 			.find( ( p ) => p.kind === 'tiles' );
 
 		expect( tiles.active ).toBe( 0 );
@@ -113,17 +113,17 @@ describe( 'the derivation reads the blocks the way the runtime does', () => {
 
 	test( 'blocks that render nothing draw nothing', () => {
 		const parts = shapeOf(
-			'<!-- wp:fundkit/hidden {"field":"utm"} /-->'
-			+ '<!-- wp:fundkit/hidden {"field":"src"} /-->'
-			+ '<!-- wp:fundkit/consent /-->'
-			+ '<!-- wp:fundkit/terms /-->'
+			'<!-- wp:gratora/hidden {"field":"utm"} /-->'
+			+ '<!-- wp:gratora/hidden {"field":"src"} /-->'
+			+ '<!-- wp:gratora/consent /-->'
+			+ '<!-- wp:gratora/terms /-->'
 		).parts;
 
 		expect( parts.map( ( p ) => p.kind ) ).toEqual( [ 'checkout' ] );
 	} );
 
 	test( 'a divider is a rule, never an input row', () => {
-		const parts = shapeOf( '<!-- wp:fundkit/divider /-->' ).parts;
+		const parts = shapeOf( '<!-- wp:gratora/divider /-->' ).parts;
 
 		expect( parts.map( ( p ) => p.kind ) ).toContain( 'rule' );
 		expect( parts.map( ( p ) => p.kind ) ).not.toContain( 'fields' );
@@ -131,7 +131,7 @@ describe( 'the derivation reads the blocks the way the runtime does', () => {
 
 	test( 'a section is walked through rather than drawn as one grey row', () => {
 		const wrapped = shapeOf(
-			'<!-- wp:fundkit/section --><!-- wp:fundkit/email /--><!-- wp:fundkit/phone /--><!-- /wp:fundkit/section -->'
+			'<!-- wp:gratora/section --><!-- wp:gratora/email /--><!-- wp:gratora/phone /--><!-- /wp:gratora/section -->'
 		).parts;
 
 		const fields = wrapped.find( ( p ) => p.kind === 'fields' );
@@ -141,7 +141,7 @@ describe( 'the derivation reads the blocks the way the runtime does', () => {
 
 	test( 'a row lays its fields out side by side', () => {
 		const cols = shapeOf(
-			'<!-- wp:fundkit/row {"columns":2} --><!-- wp:fundkit/email /--><!-- wp:fundkit/phone /--><!-- /wp:fundkit/row -->'
+			'<!-- wp:gratora/row {"columns":2} --><!-- wp:gratora/email /--><!-- wp:gratora/phone /--><!-- /wp:gratora/row -->'
 		).parts.find( ( p ) => p.kind === 'cols' );
 
 		expect( cols ).toBeTruthy();
@@ -151,7 +151,7 @@ describe( 'the derivation reads the blocks the way the runtime does', () => {
 
 	test( 'an out-of-range column count resets to two, matching the block', () => {
 		const cols = shapeOf(
-			'<!-- wp:fundkit/row {"columns":9} --><!-- wp:fundkit/email /--><!-- wp:fundkit/phone /--><!-- /wp:fundkit/row -->'
+			'<!-- wp:gratora/row {"columns":9} --><!-- wp:gratora/email /--><!-- wp:gratora/phone /--><!-- /wp:gratora/row -->'
 		).parts.find( ( p ) => p.kind === 'cols' );
 
 		expect( cols.cols ).toBe( 2 );
@@ -170,7 +170,7 @@ describe( 'the derivation reads the blocks the way the runtime does', () => {
 
 	test( 'a wizard that shows no progress indicator is not given one', () => {
 		const shape = shapeOf(
-			'<!-- wp:fundkit/steps {"progressStyle":"none"} --><!-- wp:fundkit/step --><!-- wp:fundkit/email /--><!-- /wp:fundkit/step --><!-- /wp:fundkit/steps -->'
+			'<!-- wp:gratora/steps {"progressStyle":"none"} --><!-- wp:gratora/step --><!-- wp:gratora/email /--><!-- /wp:gratora/step --><!-- /wp:gratora/steps -->'
 		);
 
 		expect( shape.chrome ).toBeNull();
@@ -179,7 +179,7 @@ describe( 'the derivation reads the blocks the way the runtime does', () => {
 
 	test( 'trailing prose is small print, leading prose is not', () => {
 		const parts = shapeOf(
-			'<!-- wp:fundkit/paragraph /--><!-- wp:fundkit/email /--><!-- wp:fundkit/paragraph /-->'
+			'<!-- wp:gratora/paragraph /--><!-- wp:gratora/email /--><!-- wp:gratora/paragraph /-->'
 		).parts.map( ( p ) => p.kind );
 
 		expect( parts ).toContain( 'text' );
@@ -201,11 +201,11 @@ describe( 'the derivation reads the blocks the way the runtime does', () => {
 		// Kinds that do not merge into one another, so only the drop pass can
 		// bring this back inside the sheet.
 		const long = Array.from( { length: 8 }, () =>
-			'<!-- wp:fundkit/goal /--><!-- wp:fundkit/divider /-->'
-			+ '<!-- wp:fundkit/comment /--><!-- wp:fundkit/fund-picker /-->'
+			'<!-- wp:gratora/goal /--><!-- wp:gratora/divider /-->'
+			+ '<!-- wp:gratora/comment /--><!-- wp:gratora/fund-picker /-->'
 		).join( '' );
 
-		const parts = shapeOf( '<!-- wp:fundkit/donation-amount /-->' + long ).parts;
+		const parts = shapeOf( '<!-- wp:gratora/donation-amount /-->' + long ).parts;
 
 		expect( parts.length ).toBeLessThanOrEqual( 7 );
 		// What the sheet is about survives the cut.
@@ -214,7 +214,7 @@ describe( 'the derivation reads the blocks the way the runtime does', () => {
 	} );
 
 	test( 'a form of nothing but undroppable parts still terminates', () => {
-		const tiles = Array.from( { length: 30 }, () => '<!-- wp:fundkit/donation-amount /-->' ).join( '' );
+		const tiles = Array.from( { length: 30 }, () => '<!-- wp:gratora/donation-amount /-->' ).join( '' );
 
 		expect( () => shapeOf( tiles ) ).not.toThrow();
 		expect( shapeOf( tiles ).parts.length ).toBeGreaterThan( 0 );
@@ -223,23 +223,23 @@ describe( 'the derivation reads the blocks the way the runtime does', () => {
 
 describe( 'the markup tokenizer', () => {
 	test( 'it merges parsed attributes over the registered defaults', () => {
-		const [ block ] = parseBlocks( '<!-- wp:fundkit/goal {"showDeadline":true} /-->' );
+		const [ block ] = parseBlocks( '<!-- wp:gratora/goal {"showDeadline":true} /-->' );
 
 		expect( block.attrs.showDeadline ).toBe( true );
-		expect( block.attrs.showAmount ).toBe( DEFAULTS[ 'fundkit/goal' ].showAmount );
+		expect( block.attrs.showAmount ).toBe( DEFAULTS[ 'gratora/goal' ].showAmount );
 	} );
 
 	test( 'it nests paired blocks and closes them', () => {
 		const [ steps ] = parseBlocks(
-			'<!-- wp:fundkit/steps --><!-- wp:fundkit/step --><!-- wp:fundkit/email /--><!-- /wp:fundkit/step --><!-- /wp:fundkit/steps -->'
+			'<!-- wp:gratora/steps --><!-- wp:gratora/step --><!-- wp:gratora/email /--><!-- /wp:gratora/step --><!-- /wp:gratora/steps -->'
 		);
 
-		expect( steps.name ).toBe( 'fundkit/steps' );
+		expect( steps.name ).toBe( 'gratora/steps' );
 		expect( steps.children ).toHaveLength( 1 );
-		expect( steps.children[ 0 ].children[ 0 ].name ).toBe( 'fundkit/email' );
+		expect( steps.children[ 0 ].children[ 0 ].name ).toBe( 'gratora/email' );
 	} );
 
 	test( 'malformed attributes do not take the whole picker down', () => {
-		expect( () => parseBlocks( '<!-- wp:fundkit/goal {not json} /-->' ) ).not.toThrow();
+		expect( () => parseBlocks( '<!-- wp:gratora/goal {not json} /-->' ) ).not.toThrow();
 	} );
 } );

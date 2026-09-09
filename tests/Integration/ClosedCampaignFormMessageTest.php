@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\Shortcode\DonationFormShortcode;
+use Gratora\Forms\Shortcode\DonationFormShortcode;
 
 final class ClosedCampaignFormMessageTest extends IntegrationTestCase
 {

@@ -43,7 +43,7 @@ it( 'names the act on the confirm button', () => {
 } );
 
 it( 'draws it as the destructive choice it is', () => {
-    expect( confirmButton( open( 'cancel' ) ).className ).toContain( 'fundkit-btn--danger' );
+    expect( confirmButton( open( 'cancel' ) ).className ).toContain( 'gratora-btn--danger' );
 } );
 
 it( 'forwards no unknown prop to the DOM', () => {
@@ -54,7 +54,7 @@ it( 'leaves a reversible change as an ordinary primary', () => {
     const button = confirmButton( open( 'pause' ) );
 
     expect( button.textContent ).toContain( 'Apply change' );
-    expect( button.className ).toContain( 'fundkit-btn--primary' );
+    expect( button.className ).toContain( 'gratora-btn--primary' );
 } );
 
 it( 'keeps the retry wording it already had', () => {

@@ -10,8 +10,8 @@ DB_PASS=${3:-}
 DB_HOST=${4:-127.0.0.1}
 WP_VERSION=${5:-latest}
 
-WP_CORE_DIR=${WP_CORE_DIR:-$HOME/.fundkit-wp-tests/wordpress}
-WP_TESTS_DIR=${WP_TESTS_DIR:-$HOME/.fundkit-wp-tests/wordpress-tests-lib}
+WP_CORE_DIR=${WP_CORE_DIR:-$HOME/.gratora-wp-tests/wordpress}
+WP_TESTS_DIR=${WP_TESTS_DIR:-$HOME/.gratora-wp-tests/wordpress-tests-lib}
 
 
 if [ ! -f "${WP_CORE_DIR}/wp-load.php" ]; then
@@ -53,7 +53,7 @@ define( 'DB_COLLATE', '' );
 
 define( 'WP_TESTS_DOMAIN', 'example.org' );
 define( 'WP_TESTS_EMAIL', 'admin@example.org' );
-define( 'WP_TESTS_TITLE', 'FundKit Test Suite' );
+define( 'WP_TESTS_TITLE', 'Gratora Test Suite' );
 define( 'WP_PHP_BINARY', 'php' );
 define( 'WPLANG', '' );
 PHP

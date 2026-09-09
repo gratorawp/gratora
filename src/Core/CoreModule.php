@@ -2,241 +2,241 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Core;
+namespace Gratora\Core;
 
-use FundKit\Admin\AdminFooter;
-use FundKit\Admin\AdminGlobals;
-use FundKit\Admin\AdminMenu;
-use FundKit\Admin\DeactivationDialog;
-use FundKit\Admin\ManagedPageStates;
-use FundKit\Admin\Pages\CampaignsPage;
-use FundKit\Admin\Pages\DonationsPage;
-use FundKit\Admin\Pages\DonorsPage;
-use FundKit\Admin\Pages\FormsPage;
-use FundKit\Admin\Pages\FundsPage;
-use FundKit\Admin\Pages\SettingsPage;
-use FundKit\Admin\Pages\SubscriptionsPage;
-use FundKit\Admin\Pages\ToolsPage;
-use FundKit\Admin\ProxyNotice;
-use FundKit\Admin\TestModeBadge;
-use FundKit\Analytics\ErrorLog;
-use FundKit\Analytics\Event;
-use FundKit\Analytics\EventRecorder;
-use FundKit\Analytics\EventRetention;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Campaigns\Blocks\BlockEditorIntegration as CampaignBlockEditorIntegration;
-use FundKit\Campaigns\Blocks\CampaignBindingPreviewController;
-use FundKit\Campaigns\Blocks\CampaignBindings;
-use FundKit\Campaigns\Blocks\CampaignGridBlock;
-use FundKit\Campaigns\Blocks\CampaignImageBlock;
-use FundKit\Campaigns\Blocks\CampaignProgressBlock;
-use FundKit\Campaigns\Blocks\CampaignStatBlock;
-use FundKit\Campaigns\Blocks\DonateButtonBlock;
-use FundKit\Campaigns\Blocks\DonationFormBlock;
-use FundKit\Campaigns\Blocks\RecentDonationsBlock;
-use FundKit\Campaigns\Blocks\SupporterWallBlock;
-use FundKit\Campaigns\Blocks\TopDonorsBlock;
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignChrome;
-use FundKit\Campaigns\CampaignMetricsService;
-use FundKit\Campaigns\CampaignPageTemplate;
-use FundKit\Campaigns\CampaignPermalinks;
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Campaigns\CampaignService;
-use FundKit\Campaigns\CampaignStatMetrics;
-use FundKit\Campaigns\CampaignTypeRegistry;
-use FundKit\Campaigns\DefaultCampaignTypeHandler;
-use FundKit\Campaigns\SocialMeta;
-use FundKit\Campaigns\Styling\CampaignStyleResolver;
-use FundKit\Campaigns\Styling\CampaignStyleVars;
-use FundKit\Campaigns\Styling\PageStyle;
-use FundKit\Core\Commands\CoreCommandProvider;
-use FundKit\Currency\FxBackfill;
-use FundKit\Currency\FxRates;
-use FundKit\Currency\FxRatesUpdater;
-use FundKit\Dashboard\DashboardMetricsService;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationEmails;
-use FundKit\Donations\DonationNote;
-use FundKit\Donations\DonationNoteRepository;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donations\Refund;
-use FundKit\Donors\Consent;
-use FundKit\Donors\ConsentService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorAggregateSyncer;
-use FundKit\Donors\DonorAvatars;
-use FundKit\Donors\DonorAvatarUploader;
-use FundKit\Donors\DonorEmailRehasher;
-use FundKit\Donors\DonorMetricsService;
-use FundKit\Donors\DonorNote;
-use FundKit\Donors\DonorNoteRepository;
-use FundKit\Donors\DonorPurge;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorRetention;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\Erasure\AnalyticsEventHandler;
-use FundKit\Donors\Erasure\CoreDonorDataHandler;
-use FundKit\Donors\Erasure\ErasureRegistry;
-use FundKit\Donors\MagicLinkService;
-use FundKit\Donors\MagicLinkToken;
-use FundKit\Donors\PendingSignup;
-use FundKit\Donors\PendingSignupRepository;
-use FundKit\Donors\Portal\AnnualStatementBuilder;
-use FundKit\Donors\Portal\PortalPage;
-use FundKit\Donors\Portal\PortalSession;
-use FundKit\Donors\Portal\PortalShortcode;
-use FundKit\Donors\SignupRedemption;
-use FundKit\Exports\DonorExporter;
-use FundKit\Exports\RevenueExporter;
-use FundKit\Forms\Blocks\AddressBlock;
-use FundKit\Forms\Blocks\AnonymousToggleBlock;
-use FundKit\Forms\Blocks\BlockRegistry;
-use FundKit\Forms\Blocks\CheckboxBlock;
-use FundKit\Forms\Blocks\ColumnsBlock;
-use FundKit\Forms\Blocks\CommentBlock;
-use FundKit\Forms\Blocks\ConsentBlock;
-use FundKit\Forms\Blocks\CountryBlock;
-use FundKit\Forms\Blocks\CoverFeesBlock;
-use FundKit\Forms\Blocks\CurrencySwitcherBlock;
-use FundKit\Forms\Blocks\DateBlock;
-use FundKit\Forms\Blocks\DividerBlock;
-use FundKit\Forms\Blocks\DonationAmountBlock;
-use FundKit\Forms\Blocks\DonationSummaryBlock;
-use FundKit\Forms\Blocks\DropdownBlock;
-use FundKit\Forms\Blocks\EmailBlock;
-use FundKit\Forms\Blocks\FundPickerBlock;
-use FundKit\Forms\Blocks\GoalBlock;
-use FundKit\Forms\Blocks\HeadingBlock;
-use FundKit\Forms\Blocks\HiddenBlock;
-use FundKit\Forms\Blocks\HtmlBlock;
-use FundKit\Forms\Blocks\MultiSelectBlock;
-use FundKit\Forms\Blocks\NameBlock;
-use FundKit\Forms\Blocks\NumberInputBlock;
-use FundKit\Forms\Blocks\ParagraphBlock;
-use FundKit\Forms\Blocks\PaymentGatewaysBlock;
-use FundKit\Forms\Blocks\PhoneBlock;
-use FundKit\Forms\Blocks\PrivacyNoticeBlock;
-use FundKit\Forms\Blocks\RadioBlock;
-use FundKit\Forms\Blocks\RecurringToggleBlock;
-use FundKit\Forms\Blocks\RowBlock;
-use FundKit\Forms\Blocks\SectionBlock;
-use FundKit\Forms\Blocks\StepBlock;
-use FundKit\Forms\Blocks\StepsBlock;
-use FundKit\Forms\Blocks\SubmitButtonBlock;
-use FundKit\Forms\Blocks\TermsBlock;
-use FundKit\Forms\Blocks\TextInputBlock;
-use FundKit\Forms\DefaultFormTypeHandler;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormDonationStats;
-use FundKit\Forms\FormReadinessService;
-use FundKit\Forms\FormRepository;
-use FundKit\Forms\FormService;
-use FundKit\Forms\FormTypeRegistry;
-use FundKit\Forms\Shortcode\DonationFormShortcode;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Commands\CommandRegistry;
-use FundKit\Foundation\Config\SystemSetting;
-use FundKit\Foundation\Container\Container;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\License\LicenseNotice;
-use FundKit\Foundation\License\LicenseService;
-use FundKit\Foundation\Maintenance\AbandonedPendingReaper;
-use FundKit\Foundation\Maintenance\TransientGc;
-use FundKit\Foundation\Modules\FundKitModule;
-use FundKit\Foundation\Modules\ModuleManager;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Foundation\Time\SystemClock;
-use FundKit\Foundation\Transfer\CsvImporter;
-use FundKit\Foundation\Transfer\DataExporter;
-use FundKit\Foundation\Transfer\DataImporter;
-use FundKit\Foundation\Upgrade\OpenTheDefaultFund;
-use FundKit\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
-use FundKit\Foundation\Upgrade\UnautoloadGatewayConfig;
-use FundKit\Foundation\Upgrade\UnpinSiteIdentity;
-use FundKit\Foundation\Upgrade\UpgradeJob;
-use FundKit\Foundation\Upgrade\UpgradeNotice;
-use FundKit\Foundation\Upgrade\UpgradeRunner;
-use FundKit\Funds\Fund;
-use FundKit\Funds\FundReassignmentJob;
-use FundKit\Funds\FundRepository;
-use FundKit\Funds\FundResolver;
-use FundKit\Funds\FundService;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\GatewayReconciler;
-use FundKit\Gateways\Offline\OfflineGateway;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\PayPal\PayPalApi;
-use FundKit\Gateways\PayPal\PayPalGateway;
-use FundKit\Gateways\PayPal\PayPalPlanRecorder;
-use FundKit\Gateways\PayPal\PayPalPlans;
-use FundKit\Gateways\Sandbox\SandboxGateway;
-use FundKit\Gateways\Sandbox\SandboxRenewer;
-use FundKit\Gateways\Stripe\ApplePayDomain;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\Stripe\StripeGateway;
-use FundKit\Gateways\Stripe\StripeWebhookNotice;
-use FundKit\Gateways\TestMode;
-use FundKit\Mail\Mailer;
-use FundKit\Onboarding\Onboarding;
-use FundKit\Onboarding\OnboardingPage;
-use FundKit\Receipts\PdfBuilder;
-use FundKit\Receipts\Receipt;
-use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Receipts\ReceiptRepository;
-use FundKit\Receipts\Renderers\GenericReceiptRenderer;
-use FundKit\Recurring\CampaignCancelRecurringJob;
-use FundKit\Recurring\RecurringCanceller;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanActions;
-use FundKit\Recurring\RecurringPlanRepository;
-use FundKit\Recurring\RecurringResumer;
-use FundKit\Reports\CampaignReportBuilder;
-use FundKit\Reports\RevenueReportBuilder;
-use FundKit\Reports\TaxStatementBuilder;
-use FundKit\Rest\Admin\CampaignsController as AdminCampaignsController;
-use FundKit\Rest\Admin\CommandsController;
-use FundKit\Rest\Admin\DashboardController;
-use FundKit\Rest\Admin\DonationsController as AdminDonationsController;
-use FundKit\Rest\Admin\DonorsController as AdminDonorsController;
-use FundKit\Rest\Admin\ExportsController;
-use FundKit\Rest\Admin\FormsController as AdminFormsController;
-use FundKit\Rest\Admin\FundsController as AdminFundsController;
-use FundKit\Rest\Admin\FxController;
-use FundKit\Rest\Admin\NumberingController;
-use FundKit\Rest\Admin\OnboardingController;
-use FundKit\Rest\Admin\PayPalKeysController;
-use FundKit\Rest\Admin\ReadinessController;
-use FundKit\Rest\Admin\RecurringController;
-use FundKit\Rest\Admin\ReportsController;
-use FundKit\Rest\Admin\RolesController;
-use FundKit\Rest\Admin\SettingsController;
-use FundKit\Rest\Admin\StripeKeysController;
-use FundKit\Rest\Admin\ToolsController;
-use FundKit\Rest\Admin\UserPrefsController;
-use FundKit\Rest\DonationsController;
-use FundKit\Rest\PayPalController;
-use FundKit\Rest\Portal\PortalController as PortalController;
-use FundKit\Rest\ReceiptsController;
-use FundKit\Rest\RestProvider;
-use FundKit\Rest\WebhookController;
-use FundKit\Settings\ReadinessService;
-use FundKit\Settings\SettingsService;
-use FundKit\Vendor\Queryable\QueryException;
+use Gratora\Admin\AdminFooter;
+use Gratora\Admin\AdminGlobals;
+use Gratora\Admin\AdminMenu;
+use Gratora\Admin\DeactivationDialog;
+use Gratora\Admin\ManagedPageStates;
+use Gratora\Admin\Pages\CampaignsPage;
+use Gratora\Admin\Pages\DonationsPage;
+use Gratora\Admin\Pages\DonorsPage;
+use Gratora\Admin\Pages\FormsPage;
+use Gratora\Admin\Pages\FundsPage;
+use Gratora\Admin\Pages\SettingsPage;
+use Gratora\Admin\Pages\SubscriptionsPage;
+use Gratora\Admin\Pages\ToolsPage;
+use Gratora\Admin\ProxyNotice;
+use Gratora\Admin\TestModeBadge;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\Event;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Analytics\EventRetention;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Campaigns\Blocks\BlockEditorIntegration as CampaignBlockEditorIntegration;
+use Gratora\Campaigns\Blocks\CampaignBindingPreviewController;
+use Gratora\Campaigns\Blocks\CampaignBindings;
+use Gratora\Campaigns\Blocks\CampaignGridBlock;
+use Gratora\Campaigns\Blocks\CampaignImageBlock;
+use Gratora\Campaigns\Blocks\CampaignProgressBlock;
+use Gratora\Campaigns\Blocks\CampaignStatBlock;
+use Gratora\Campaigns\Blocks\DonateButtonBlock;
+use Gratora\Campaigns\Blocks\DonationFormBlock;
+use Gratora\Campaigns\Blocks\RecentDonationsBlock;
+use Gratora\Campaigns\Blocks\SupporterWallBlock;
+use Gratora\Campaigns\Blocks\TopDonorsBlock;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignChrome;
+use Gratora\Campaigns\CampaignMetricsService;
+use Gratora\Campaigns\CampaignPageTemplate;
+use Gratora\Campaigns\CampaignPermalinks;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Campaigns\CampaignService;
+use Gratora\Campaigns\CampaignStatMetrics;
+use Gratora\Campaigns\CampaignTypeRegistry;
+use Gratora\Campaigns\DefaultCampaignTypeHandler;
+use Gratora\Campaigns\SocialMeta;
+use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Campaigns\Styling\CampaignStyleVars;
+use Gratora\Campaigns\Styling\PageStyle;
+use Gratora\Core\Commands\CoreCommandProvider;
+use Gratora\Currency\FxBackfill;
+use Gratora\Currency\FxRates;
+use Gratora\Currency\FxRatesUpdater;
+use Gratora\Dashboard\DashboardMetricsService;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationEmails;
+use Gratora\Donations\DonationNote;
+use Gratora\Donations\DonationNoteRepository;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donations\Refund;
+use Gratora\Donors\Consent;
+use Gratora\Donors\ConsentService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorAggregateSyncer;
+use Gratora\Donors\DonorAvatars;
+use Gratora\Donors\DonorAvatarUploader;
+use Gratora\Donors\DonorEmailRehasher;
+use Gratora\Donors\DonorMetricsService;
+use Gratora\Donors\DonorNote;
+use Gratora\Donors\DonorNoteRepository;
+use Gratora\Donors\DonorPurge;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorRetention;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\Erasure\AnalyticsEventHandler;
+use Gratora\Donors\Erasure\CoreDonorDataHandler;
+use Gratora\Donors\Erasure\ErasureRegistry;
+use Gratora\Donors\MagicLinkService;
+use Gratora\Donors\MagicLinkToken;
+use Gratora\Donors\PendingSignup;
+use Gratora\Donors\PendingSignupRepository;
+use Gratora\Donors\Portal\AnnualStatementBuilder;
+use Gratora\Donors\Portal\PortalPage;
+use Gratora\Donors\Portal\PortalSession;
+use Gratora\Donors\Portal\PortalShortcode;
+use Gratora\Donors\SignupRedemption;
+use Gratora\Exports\DonorExporter;
+use Gratora\Exports\RevenueExporter;
+use Gratora\Forms\Blocks\AddressBlock;
+use Gratora\Forms\Blocks\AnonymousToggleBlock;
+use Gratora\Forms\Blocks\BlockRegistry;
+use Gratora\Forms\Blocks\CheckboxBlock;
+use Gratora\Forms\Blocks\ColumnsBlock;
+use Gratora\Forms\Blocks\CommentBlock;
+use Gratora\Forms\Blocks\ConsentBlock;
+use Gratora\Forms\Blocks\CountryBlock;
+use Gratora\Forms\Blocks\CoverFeesBlock;
+use Gratora\Forms\Blocks\CurrencySwitcherBlock;
+use Gratora\Forms\Blocks\DateBlock;
+use Gratora\Forms\Blocks\DividerBlock;
+use Gratora\Forms\Blocks\DonationAmountBlock;
+use Gratora\Forms\Blocks\DonationSummaryBlock;
+use Gratora\Forms\Blocks\DropdownBlock;
+use Gratora\Forms\Blocks\EmailBlock;
+use Gratora\Forms\Blocks\FundPickerBlock;
+use Gratora\Forms\Blocks\GoalBlock;
+use Gratora\Forms\Blocks\HeadingBlock;
+use Gratora\Forms\Blocks\HiddenBlock;
+use Gratora\Forms\Blocks\HtmlBlock;
+use Gratora\Forms\Blocks\MultiSelectBlock;
+use Gratora\Forms\Blocks\NameBlock;
+use Gratora\Forms\Blocks\NumberInputBlock;
+use Gratora\Forms\Blocks\ParagraphBlock;
+use Gratora\Forms\Blocks\PaymentGatewaysBlock;
+use Gratora\Forms\Blocks\PhoneBlock;
+use Gratora\Forms\Blocks\PrivacyNoticeBlock;
+use Gratora\Forms\Blocks\RadioBlock;
+use Gratora\Forms\Blocks\RecurringToggleBlock;
+use Gratora\Forms\Blocks\RowBlock;
+use Gratora\Forms\Blocks\SectionBlock;
+use Gratora\Forms\Blocks\StepBlock;
+use Gratora\Forms\Blocks\StepsBlock;
+use Gratora\Forms\Blocks\SubmitButtonBlock;
+use Gratora\Forms\Blocks\TermsBlock;
+use Gratora\Forms\Blocks\TextInputBlock;
+use Gratora\Forms\DefaultFormTypeHandler;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormDonationStats;
+use Gratora\Forms\FormReadinessService;
+use Gratora\Forms\FormRepository;
+use Gratora\Forms\FormService;
+use Gratora\Forms\FormTypeRegistry;
+use Gratora\Forms\Shortcode\DonationFormShortcode;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Commands\CommandRegistry;
+use Gratora\Foundation\Config\SystemSetting;
+use Gratora\Foundation\Container\Container;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\License\LicenseNotice;
+use Gratora\Foundation\License\LicenseService;
+use Gratora\Foundation\Maintenance\AbandonedPendingReaper;
+use Gratora\Foundation\Maintenance\TransientGc;
+use Gratora\Foundation\Modules\GratoraModule;
+use Gratora\Foundation\Modules\ModuleManager;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\References\ReferenceGenerator;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Foundation\Time\SystemClock;
+use Gratora\Foundation\Transfer\CsvImporter;
+use Gratora\Foundation\Transfer\DataExporter;
+use Gratora\Foundation\Transfer\DataImporter;
+use Gratora\Foundation\Upgrade\OpenTheDefaultFund;
+use Gratora\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
+use Gratora\Foundation\Upgrade\UnautoloadGatewayConfig;
+use Gratora\Foundation\Upgrade\UnpinSiteIdentity;
+use Gratora\Foundation\Upgrade\UpgradeJob;
+use Gratora\Foundation\Upgrade\UpgradeNotice;
+use Gratora\Foundation\Upgrade\UpgradeRunner;
+use Gratora\Funds\Fund;
+use Gratora\Funds\FundReassignmentJob;
+use Gratora\Funds\FundRepository;
+use Gratora\Funds\FundResolver;
+use Gratora\Funds\FundService;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\GatewayReconciler;
+use Gratora\Gateways\Offline\OfflineGateway;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\PayPal\PayPalApi;
+use Gratora\Gateways\PayPal\PayPalGateway;
+use Gratora\Gateways\PayPal\PayPalPlanRecorder;
+use Gratora\Gateways\PayPal\PayPalPlans;
+use Gratora\Gateways\Sandbox\SandboxGateway;
+use Gratora\Gateways\Sandbox\SandboxRenewer;
+use Gratora\Gateways\Stripe\ApplePayDomain;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\Stripe\StripeGateway;
+use Gratora\Gateways\Stripe\StripeWebhookNotice;
+use Gratora\Gateways\TestMode;
+use Gratora\Mail\Mailer;
+use Gratora\Onboarding\Onboarding;
+use Gratora\Onboarding\OnboardingPage;
+use Gratora\Receipts\PdfBuilder;
+use Gratora\Receipts\Receipt;
+use Gratora\Receipts\ReceiptIssuer;
+use Gratora\Receipts\ReceiptRepository;
+use Gratora\Receipts\Renderers\GenericReceiptRenderer;
+use Gratora\Recurring\CampaignCancelRecurringJob;
+use Gratora\Recurring\RecurringCanceller;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanActions;
+use Gratora\Recurring\RecurringPlanRepository;
+use Gratora\Recurring\RecurringResumer;
+use Gratora\Reports\CampaignReportBuilder;
+use Gratora\Reports\RevenueReportBuilder;
+use Gratora\Reports\TaxStatementBuilder;
+use Gratora\Rest\Admin\CampaignsController as AdminCampaignsController;
+use Gratora\Rest\Admin\CommandsController;
+use Gratora\Rest\Admin\DashboardController;
+use Gratora\Rest\Admin\DonationsController as AdminDonationsController;
+use Gratora\Rest\Admin\DonorsController as AdminDonorsController;
+use Gratora\Rest\Admin\ExportsController;
+use Gratora\Rest\Admin\FormsController as AdminFormsController;
+use Gratora\Rest\Admin\FundsController as AdminFundsController;
+use Gratora\Rest\Admin\FxController;
+use Gratora\Rest\Admin\NumberingController;
+use Gratora\Rest\Admin\OnboardingController;
+use Gratora\Rest\Admin\PayPalKeysController;
+use Gratora\Rest\Admin\ReadinessController;
+use Gratora\Rest\Admin\RecurringController;
+use Gratora\Rest\Admin\ReportsController;
+use Gratora\Rest\Admin\RolesController;
+use Gratora\Rest\Admin\SettingsController;
+use Gratora\Rest\Admin\StripeKeysController;
+use Gratora\Rest\Admin\ToolsController;
+use Gratora\Rest\Admin\UserPrefsController;
+use Gratora\Rest\DonationsController;
+use Gratora\Rest\PayPalController;
+use Gratora\Rest\Portal\PortalController as PortalController;
+use Gratora\Rest\ReceiptsController;
+use Gratora\Rest\RestProvider;
+use Gratora\Rest\WebhookController;
+use Gratora\Settings\ReadinessService;
+use Gratora\Settings\SettingsService;
+use Gratora\Vendor\Queryable\QueryException;
 
 /**
  * Always-on module: migrations, service bindings, admin/REST/asset wiring.
  *
  * @since 1.0.0
  */
-final class CoreModule implements FundKitModule
+final class CoreModule implements GratoraModule
 {
     /** @since 1.0.0 */
     public function id(): string
@@ -247,13 +247,13 @@ final class CoreModule implements FundKitModule
     /** @since 1.0.0 */
     public function name(): string
     {
-        return __('Fundraising Toolkit Core', 'fundraising-toolkit');
+        return __('Gratora Core', 'gratora');
     }
 
     /** @since 1.0.0 */
     public function version(): string
     {
-        return FUNDKIT_VERSION;
+        return GRATORA_VERSION;
     }
 
     /** @since 1.0.0 */
@@ -298,15 +298,15 @@ final class CoreModule implements FundKitModule
     /** @since 1.0.0 */
     public function boot(Container $c): void
     {
-        // Cache-bust every FundKit build/ stylesheet by file mtime instead of
-        // FUNDKIT_VERSION, so CSS changes show on a normal reload without a plugin
+        // Cache-bust every Gratora build/ stylesheet by file mtime instead of
+        // GRATORA_VERSION, so CSS changes show on a normal reload without a plugin
         // version bump (JS already busts via its content-hashed asset.php).
         add_filter('style_loader_src', static function ($src) {
-            if (! is_string($src) || strpos($src, FUNDKIT_URL . 'build/') !== 0) {
+            if (! is_string($src) || strpos($src, GRATORA_URL . 'build/') !== 0) {
                 return $src;
             }
             $clean = strtok($src, '?');
-            $file  = FUNDKIT_DIR . substr($clean, strlen(FUNDKIT_URL));
+            $file  = GRATORA_DIR . substr($clean, strlen(GRATORA_URL));
             return file_exists($file) ? $clean . '?ver=' . filemtime($file) : $src;
         }, 20);
 
@@ -317,7 +317,7 @@ final class CoreModule implements FundKitModule
             $c->get(AsyncDispatcher::class)
         ));
 
-        // Both read fundkit_system_settings the moment they are constructed, and
+        // Both read gratora_system_settings the moment they are constructed, and
         // boot constructs them. plugins_loaded is far ahead of the wp_loaded
         // migration, so on an install whose tables are absent (a subsite of a
         // network activation, a half-restored database) that read throws and
@@ -340,7 +340,7 @@ final class CoreModule implements FundKitModule
         $c->bind(LicenseService::class, fn (Container $c) => new LicenseService($c->get(ModuleManager::class)));
         // Bound, not built at the one call site: the tools screen renders it and
         // the assistant's support commands answer from it.
-        $c->bind(\FundKit\Admin\SystemReport::class, fn (Container $c) => new \FundKit\Admin\SystemReport(
+        $c->bind(\Gratora\Admin\SystemReport::class, fn (Container $c) => new \Gratora\Admin\SystemReport(
             $c->get(ModuleManager::class),
             $c->get(GatewayManager::class),
         ));
@@ -380,7 +380,7 @@ final class CoreModule implements FundKitModule
 
         // Purge expired magic-link tokens daily to prevent unbounded table growth.
         $async = $c->get(AsyncDispatcher::class);
-        add_action('fundkit.cron.magic_link_gc', function () use ($c, $async): void {
+        add_action('gratora.cron.magic_link_gc', function () use ($c, $async): void {
             $c->get(MagicLinkService::class)->purgeExpired();
             // An address nobody proved is not kept past its window. Same job,
             // because a pending row and its link expire together.
@@ -390,15 +390,15 @@ final class CoreModule implements FundKitModule
             // A full pass means there is more behind it. Draining it here would
             // die on the time limit and leave a larger set for tomorrow.
             if ($done >= $limit) {
-                $async->enqueue('fundkit.cron.magic_link_gc');
+                $async->enqueue('gratora.cron.magic_link_gc');
             }
         });
-        add_action('init', fn () => $async->scheduleRecurring('fundkit.cron.magic_link_gc', 86400));
+        add_action('init', fn () => $async->scheduleRecurring('gratora.cron.magic_link_gc', 86400));
 
         // Daily FX snapshot; last-good value on failure.
         $c->bind(FxRates::class, fn () => new FxRates());
         (new FxRatesUpdater($c->get(AsyncDispatcher::class)))->register();
-        (new \FundKit\Currency\OutstandingRebase())->register();
+        (new \Gratora\Currency\OutstandingRebase())->register();
 
         // GDPR retention: donor PII wiped after inactivity where the org has
         // switched that on, events pruned by age.
@@ -455,7 +455,7 @@ final class CoreModule implements FundKitModule
         (new SocialMeta($c->get(CampaignRepository::class)))->register();
 
         // Keep campaign page visibility in sync with form status.
-        add_action('fundkit.form.updated', static function ($form) use ($c) {
+        add_action('gratora.form.updated', static function ($form) use ($c) {
             $c->get(CampaignService::class)->onFormUpdated($form);
         }, 10, 1);
 
@@ -519,7 +519,7 @@ final class CoreModule implements FundKitModule
         // Core erases through the same registry add-ons use, so there is one
         // mechanism and one order rather than core's inline copy plus a hook
         // everyone else is expected to remember.
-        add_filter('fundkit.donor.erasure_handlers', static function (array $handlers) use ($c): array {
+        add_filter('gratora.donor.erasure_handlers', static function (array $handlers) use ($c): array {
             $handlers[] = new CoreDonorDataHandler();
             $handlers[] = new AnalyticsEventHandler();
             return $handlers;
@@ -643,7 +643,7 @@ final class CoreModule implements FundKitModule
             $c->get(PendingSignupRepository::class),
             $c->get(DonorAvatarUploader::class),
             $c->get(DonorAvatars::class),
-            $c->get(\FundKit\Foundation\Crypto\Crypto::class),
+            $c->get(\Gratora\Foundation\Crypto\Crypto::class),
         ));
 
         $c->bind(AggregateSyncer::class, fn () => new AggregateSyncer());
@@ -651,14 +651,14 @@ final class CoreModule implements FundKitModule
         $c->bind( FormTypeRegistry::class, function (): FormTypeRegistry {
             $r = new FormTypeRegistry();
             $r->register(new DefaultFormTypeHandler());
-            do_action('fundkit.form_types.register', $r);
+            do_action('gratora.form_types.register', $r);
             return $r;
         });
 
         $c->bind( CampaignTypeRegistry::class, function (): CampaignTypeRegistry {
             $r = new CampaignTypeRegistry();
             $r->register(new DefaultCampaignTypeHandler());
-            do_action('fundkit.campaign_types.register', $r);
+            do_action('gratora.campaign_types.register', $r);
             return $r;
         });
 
@@ -760,7 +760,7 @@ final class CoreModule implements FundKitModule
         $c->get(GatewayReconciler::class)->register();
 
         // Sandbox gateway only available when org-wide test mode is on.
-        $gwCfg = get_option('fundkit_gateway_config', []);
+        $gwCfg = get_option('gratora_gateway_config', []);
         if (is_array($gwCfg) && ! empty($gwCfg['test_mode'])) {
             $gateways->register(new SandboxGateway($c->get(Clock::class), $c->get(RecurringPlanRepository::class)));
         }
@@ -817,7 +817,7 @@ final class CoreModule implements FundKitModule
 
         // Add-ons can register additional renderers via the same filter.
         $genericRenderer = $c->get(GenericReceiptRenderer::class);
-        add_filter('fundkit.receipt.renderers', function (array $renderers) use ($genericRenderer): array {
+        add_filter('gratora.receipt.renderers', function (array $renderers) use ($genericRenderer): array {
             $renderers[] = $genericRenderer;
             return $renderers;
         });
@@ -942,7 +942,7 @@ final class CoreModule implements FundKitModule
         // catalogue in the site locale rather than the reader's, on top of the
         // _doing_it_wrong it logs for the domain on every request.
         //
-        // Priority 4 keeps core ahead of the fundkit.commands.register broadcast
+        // Priority 4 keeps core ahead of the gratora.commands.register broadcast
         // Plugin::boot fires at 5, which is where add-on packs land.
         add_action('init', static function () use ($c): void {
             // init can fire more than once, and the registry refuses a name it
@@ -993,8 +993,8 @@ final class CoreModule implements FundKitModule
                 $c->get(DataExporter::class),
                 $c->get(DataImporter::class),
                 $c->get(CsvImporter::class),
-                new \FundKit\Foundation\Maintenance\TestDataPurger($c->get(DonorService::class)),
-                $c->get(\FundKit\Admin\SystemReport::class),
+                new \Gratora\Foundation\Maintenance\TestDataPurger($c->get(DonorService::class)),
+                $c->get(\Gratora\Admin\SystemReport::class),
             ),
             new ExportsController(
                 $c->get(DonorExporter::class),
@@ -1092,7 +1092,7 @@ final class CoreModule implements FundKitModule
         $blocks->add(new MultiSelectBlock());
 
         add_filter(
-            'fundkit.settings.groups',
+            'gratora.settings.groups',
             [$c->get(GatewayManager::class), 'declareSettings']
         );
 
@@ -1143,19 +1143,19 @@ final class CoreModule implements FundKitModule
         // handler they attach during their own boot would miss a broadcast
         // fired inside this method and their block would never register.
         add_action('init', static function () use ($blocks): void {
-            do_action('fundkit.blocks.register_server', $blocks);
+            do_action('gratora.blocks.register_server', $blocks);
             $blocks->register();
         });
 
         // WordPress's own Tools, Export and Erase Personal Data. They answered
         // nothing for donors until this, which is the screen a site owner is
         // told to use when a request arrives.
-        (new \FundKit\Donors\Privacy\WordPressPrivacy(
+        (new \Gratora\Donors\Privacy\WordPressPrivacy(
             $c->get(DonorRepository::class),
             $c->get(DonorService::class),
             $c->get(IdentityHasher::class),
-            $c->get(\FundKit\Donors\DonorMetricsService::class),
-            $c->get(\FundKit\Donors\ConsentService::class),
+            $c->get(\Gratora\Donors\DonorMetricsService::class),
+            $c->get(\Gratora\Donors\ConsentService::class),
         ))->register();
 
         (new CampaignBlockEditorIntegration())->register();
@@ -1164,7 +1164,7 @@ final class CoreModule implements FundKitModule
         // what an MCP server reads. Add-on packs are included because the
         // bridge reads the registry when the abilities hook fires, after the
         // command broadcast on init:5.
-        (new \FundKit\Foundation\Commands\AbilitiesBridge(
+        (new \Gratora\Foundation\Commands\AbilitiesBridge(
             $c->get(CommandRegistry::class)
         ))->register();
         $campaignBindings = new CampaignBindings($c->get(CampaignRepository::class));
@@ -1184,7 +1184,7 @@ final class CoreModule implements FundKitModule
         // register outside any is_admin() gate.
         $c->get(ApplePayDomain::class)->register();
 
-        add_action('fundkit.settings.updated', static function (string $group, array $next, array $prev = []): void {
+        add_action('gratora.settings.updated', static function (string $group, array $next, array $prev = []): void {
             if ($group === 'roles') {
                 Capabilities::applyMapping(is_array($next['mapping'] ?? null) ? $next['mapping'] : []);
             }
@@ -1205,7 +1205,7 @@ final class CoreModule implements FundKitModule
         // Seed actual role capabilities to match displayed defaults, even if an add-on already
         // created the option.
         add_action('admin_init', static function () use ($c): void {
-            $stored  = get_option('fundkit_roles', []);
+            $stored  = get_option('gratora_roles', []);
             $mapping = is_array($stored) && is_array($stored['mapping'] ?? null) ? $stored['mapping'] : [];
             if (array_key_exists('administrator', $mapping)) return;
             $c->get(SettingsService::class)->update('roles', []);
@@ -1240,15 +1240,15 @@ final class CoreModule implements FundKitModule
                 if (! current_user_can('manage_options')) return;
                 $lostAt = Crypto::keyLostAt();
                 if ($lostAt === null) return;
-                echo '<div class="notice fundkit-admin-notice" role="alert" style="'
+                echo '<div class="notice gratora-admin-notice" role="alert" style="'
                     . 'border:1px solid #e5e7eb;border-left:3px solid #b42318;border-radius:8px;'
                     . 'background:#fff7f7;color:#b42318;padding:11px 14px;'
                     . 'font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Oxygen,Ubuntu,sans-serif;'
                     . 'font-size:13px;line-height:1.45;">'
-                    . '<strong>Fundraising Toolkit:</strong> '
+                    . '<strong>Gratora:</strong> '
                     . esc_html(sprintf(
                         /* translators: %s: timestamp the key loss was detected */
-                        __('Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore fundkit_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key.', 'fundraising-toolkit'),
+                        __('Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore gratora_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key.', 'gratora'),
                         $lostAt
                     ))
                     . '</div>';

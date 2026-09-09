@@ -6,7 +6,7 @@ import EmptyState from '../../../_shared/components/EmptyState';
 import { intervalLabel } from '../../../_shared/recurring/planColumns';
 
 function donationHref( reference ) {
-    return addQueryArgs( window.location.pathname, { page: 'fundkit-donations', view: 'detail', reference } );
+    return addQueryArgs( window.location.pathname, { page: 'gratora-donations', view: 'detail', reference } );
 }
 import { formatAmount, formatDateTime, formatDate, timeAgo, donationStatusPill, eventMeta } from '../helpers';
 import {
@@ -40,7 +40,7 @@ export function eventTitle( event, campaignTitle ) {
         : null;
 
     const toCampaign = campaignTitle
-        ? <> { __( 'to', 'fundraising-toolkit' ) } <span className="dp-tl-camp">{ campaignTitle }</span></>
+        ? <> { __( 'to', 'gratora' ) } <span className="dp-tl-camp">{ campaignTitle }</span></>
         : null;
 
     let title = <>{ meta.label }</>;
@@ -48,32 +48,32 @@ export function eventTitle( event, campaignTitle ) {
     switch ( event.type ) {
         case 'donation.completed':
             title = amount
-                ? <>{ __( 'Donated', 'fundraising-toolkit' ) } <strong>{ amount }</strong>{ toCampaign }</>
+                ? <>{ __( 'Donated', 'gratora' ) } <strong>{ amount }</strong>{ toCampaign }</>
                 : title;
             break;
         case 'donation.intent_created':
             title = amount
-                ? <>{ __( 'Started a donation of', 'fundraising-toolkit' ) } <strong>{ amount }</strong>{ toCampaign }</>
+                ? <>{ __( 'Started a donation of', 'gratora' ) } <strong>{ amount }</strong>{ toCampaign }</>
                 : title;
             break;
         case 'donation.failed':
             title = amount
-                ? <>{ __( 'Payment of', 'fundraising-toolkit' ) } <strong>{ amount }</strong> { __( 'failed', 'fundraising-toolkit' ) }</>
+                ? <>{ __( 'Payment of', 'gratora' ) } <strong>{ amount }</strong> { __( 'failed', 'gratora' ) }</>
                 : title;
             break;
         case 'donation.refunded':
             title = amount
-                ? <>{ __( 'Refund of', 'fundraising-toolkit' ) } <strong>{ amount }</strong> { __( 'issued', 'fundraising-toolkit' ) }</>
+                ? <>{ __( 'Refund of', 'gratora' ) } <strong>{ amount }</strong> { __( 'issued', 'gratora' ) }</>
                 : title;
             break;
         case 'recurring.renewed':
             title = amount
-                ? <>{ __( 'Recurring renewal of', 'fundraising-toolkit' ) } <strong>{ amount }</strong>{ toCampaign }</>
+                ? <>{ __( 'Recurring renewal of', 'gratora' ) } <strong>{ amount }</strong>{ toCampaign }</>
                 : title;
             break;
         case 'recurring.failed':
             title = amount
-                ? <>{ __( 'Renewal of', 'fundraising-toolkit' ) } <strong>{ amount }</strong> { __( 'was declined', 'fundraising-toolkit' ) }</>
+                ? <>{ __( 'Renewal of', 'gratora' ) } <strong>{ amount }</strong> { __( 'was declined', 'gratora' ) }</>
                 : title;
             break;
         case 'recurring.amount_changed': {
@@ -82,8 +82,8 @@ export function eventTitle( event, campaignTitle ) {
             title = ( from !== undefined && to !== undefined )
                 ? (
                     <>
-                        { __( 'Recurring amount changed from', 'fundraising-toolkit' ) } <strong>{ formatAmount( from, event.currency ) }</strong>
-                        { ' ' }{ __( 'to', 'fundraising-toolkit' ) } <strong>{ formatAmount( to, event.currency ) }</strong>
+                        { __( 'Recurring amount changed from', 'gratora' ) } <strong>{ formatAmount( from, event.currency ) }</strong>
+                        { ' ' }{ __( 'to', 'gratora' ) } <strong>{ formatAmount( to, event.currency ) }</strong>
                     </>
                 )
                 : title;
@@ -119,7 +119,7 @@ function TimelineRow( { event, campaigns } ) {
         facts.push( <span key="rec" className="dp-tl-ref">{ event.receipt_number }</span> );
     }
     if ( event.payload?.by === 'admin' ) {
-        facts.push( <span key="by">{ __( 'by an admin', 'fundraising-toolkit' ) }</span> );
+        facts.push( <span key="by">{ __( 'by an admin', 'gratora' ) }</span> );
     }
 
     // A note the donor left with the donation, in the same row as the rest so
@@ -156,8 +156,8 @@ function RecentDonationsCard( { donations, campaigns, donationsTotal, onAllDonat
                         <EmptyState
                             compact
                             icon={ <Coins size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'No donations yet', 'fundraising-toolkit' ) }
-                            body={ __( 'This donor’s donations will appear here as they come in.', 'fundraising-toolkit' ) }
+                            title={ __( 'No donations yet', 'gratora' ) }
+                            body={ __( 'This donor’s donations will appear here as they come in.', 'gratora' ) }
                         />
                     )
                     : (
@@ -175,7 +175,7 @@ function RecentDonationsCard( { donations, campaigns, donationsTotal, onAllDonat
                                             <span className="dp-recent-row__sub">
                                                 <a href={ donationHref( d.reference ) }>{ d.reference }</a>
                                                 { d.is_test && (
-                                                    <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundraising-toolkit' ) }</span>
+                                                    <span className="gratora-pill gratora-pill--test">{ __( 'Test', 'gratora' ) }</span>
                                                 ) }
                                                 <span>{ timeAgo( d.paid_at || d.created_at ) }</span>
                                             </span>
@@ -192,12 +192,12 @@ function RecentDonationsCard( { donations, campaigns, donationsTotal, onAllDonat
                      pending and failed ones. lifetime.count is live paid
                      donations only, so it disagreed with both the list above it
                      and the tab badge that opens the same list. */ }
-                <span className="num">{ sprintf( /* translators: %d: how many donations this donor has */ __( '%d in total', 'fundraising-toolkit' ), donationsTotal ) }</span>
+                <span className="num">{ sprintf( /* translators: %d: how many donations this donor has */ __( '%d in total', 'gratora' ), donationsTotal ) }</span>
                 <a
                     href="#donations"
                     onClick={ ( e ) => { e.preventDefault(); onAllDonations?.(); } }
                 >
-                    { __( 'All donations →', 'fundraising-toolkit' ) }
+                    { __( 'All donations →', 'gratora' ) }
                 </a>
             </div>
         </div>
@@ -210,14 +210,14 @@ function ActivePlanCard( { plans } ) {
         return (
             <div className="dp-card">
                 <div className="dp-card__body" style={ { padding: '14px 18px' } }>
-                    <p className="dp-empty" style={ { padding: '8px 0' } }>{ __( 'No active recurring plan.', 'fundraising-toolkit' ) }</p>
+                    <p className="dp-empty" style={ { padding: '8px 0' } }>{ __( 'No active recurring plan.', 'gratora' ) }</p>
                 </div>
             </div>
         );
     }
     const pill = active.status === 'past_due'
-        ? { cls: 'is-warn', label: __( 'Past due', 'fundraising-toolkit' ) }
-        : { cls: 'is-ok',   label: __( 'Active', 'fundraising-toolkit' ) };
+        ? { cls: 'is-warn', label: __( 'Past due', 'gratora' ) }
+        : { cls: 'is-ok',   label: __( 'Active', 'gratora' ) };
     return (
         <div className="dp-card">
             <div className="dp-card__body" style={ { padding: '14px 18px' } }>
@@ -227,9 +227,9 @@ function ActivePlanCard( { plans } ) {
                     </strong>
                     <span className={ `dp-pill ${ pill.cls }` }>{ pill.label }</span>
                 </div>
-                <Row label={ __( 'Next attempt', 'fundraising-toolkit' ) }       value={ formatDate( active.next_payment_at ) } />
-                <Row label={ __( 'Last successful', 'fundraising-toolkit' ) }    value={ active.last_payment_at ? formatDate( active.last_payment_at ) : '-' } />
-                <Row label={ __( 'Lifetime on plan', 'fundraising-toolkit' ) }   value={ formatAmount( active.total_paid_cents, active.currency ) } strong />
+                <Row label={ __( 'Next attempt', 'gratora' ) }       value={ formatDate( active.next_payment_at ) } />
+                <Row label={ __( 'Last successful', 'gratora' ) }    value={ active.last_payment_at ? formatDate( active.last_payment_at ) : '-' } />
+                <Row label={ __( 'Lifetime on plan', 'gratora' ) }   value={ formatAmount( active.total_paid_cents, active.currency ) } strong />
             </div>
         </div>
     );
@@ -269,8 +269,8 @@ export default function ActivityTab( { donations, events, eventsTotal, campaigns
                                     <EmptyState
                                         compact
                                         icon={ <History size={ 22 } strokeWidth={ 1.75 } /> }
-                                        title={ __( 'No events yet', 'fundraising-toolkit' ) }
-                                        body={ __( 'Status changes, refunds, and admin notes show up here over time.', 'fundraising-toolkit' ) }
+                                        title={ __( 'No events yet', 'gratora' ) }
+                                        body={ __( 'Status changes, refunds, and admin notes show up here over time.', 'gratora' ) }
                                     />
                                 )
                                 : (
@@ -288,7 +288,7 @@ export default function ActivityTab( { donations, events, eventsTotal, campaigns
                                 <span className="num">
                                     { sprintf(
                                         /* translators: %d: total number of recorded events for this donor. */
-                                        _n( '%d event', '%d events', eventsTotal, 'fundraising-toolkit' ),
+                                        _n( '%d event', '%d events', eventsTotal, 'gratora' ),
                                         eventsTotal
                                     ) }
                                 </span>
@@ -297,7 +297,7 @@ export default function ActivityTab( { donations, events, eventsTotal, campaigns
                                         href="#activity"
                                         onClick={ ( e ) => { e.preventDefault(); onSeeAllActivity(); } }
                                     >
-                                        { __( 'All activity →', 'fundraising-toolkit' ) }
+                                        { __( 'All activity →', 'gratora' ) }
                                     </a>
                                 ) }
                             </div>

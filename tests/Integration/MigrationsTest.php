@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 final class MigrationsTest extends IntegrationTestCase
 {
     public function test_all_10_core_tables_exist(): void
     {
         $expected = [
-            'fundkit_donors', 'fundkit_consents', 'fundkit_magic_link_tokens',
-            'fundkit_campaigns', 'fundkit_funds',
-            'fundkit_donations', 'fundkit_recurring_plans', 'fundkit_receipts',
-            'fundkit_forms', 'fundkit_events',
+            'gratora_donors', 'gratora_consents', 'gratora_magic_link_tokens',
+            'gratora_campaigns', 'gratora_funds',
+            'gratora_donations', 'gratora_recurring_plans', 'gratora_receipts',
+            'gratora_forms', 'gratora_events',
         ];
 
         foreach ($expected as $t) {
@@ -27,7 +27,7 @@ final class MigrationsTest extends IntegrationTestCase
 
     public function test_donations_has_webhook_dedup_unique_indexes(): void
     {
-        $tbl = self::$prefix . 'fundkit_donations';
+        $tbl = self::$prefix . 'gratora_donations';
         $indexes = self::$wpdb->get_results("SHOW INDEX FROM {$tbl}");
 
         $named = [];
@@ -44,7 +44,7 @@ final class MigrationsTest extends IntegrationTestCase
 
     public function test_events_table_has_funnel_indexes(): void
     {
-        $tbl = self::$prefix . 'fundkit_events';
+        $tbl = self::$prefix . 'gratora_events';
         $indexes = self::$wpdb->get_results("SHOW INDEX FROM {$tbl}");
 
         $names = array_unique(array_map(fn ($r) => $r->Key_name, $indexes));

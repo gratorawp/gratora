@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Maintenance\AbandonedPendingReaper;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Maintenance\AbandonedPendingReaper;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -55,7 +55,7 @@ final class ErasedDonorReturnsTest extends IntegrationTestCase
 
     private function submit(string $email): Donation
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => $email,
@@ -68,7 +68,7 @@ final class ErasedDonorReturnsTest extends IntegrationTestCase
         $data = (array) rest_do_request($req)->get_data();
         $this->assertArrayHasKey('reference', $data, (string) wp_json_encode($data));
 
-        return Plugin::instance()->container->get(\FundKit\Donations\DonationRepository::class)
+        return Plugin::instance()->container->get(\Gratora\Donations\DonationRepository::class)
             ->findByReference((string) $data['reference']);
     }
 
@@ -130,7 +130,7 @@ final class ErasedDonorReturnsTest extends IntegrationTestCase
         $donation = $this->submit($email);
         $this->donations()->confirm($donation, ['gateway_txn_id' => 'txn_paid']);
 
-        $fresh = Plugin::instance()->container->get(\FundKit\Donations\DonationRepository::class)
+        $fresh = Plugin::instance()->container->get(\Gratora\Donations\DonationRepository::class)
             ->findById((int) $donation->id);
         $this->assertNull($fresh->pending_reactivation_email);
     }
@@ -154,9 +154,9 @@ final class ErasedDonorReturnsTest extends IntegrationTestCase
             ->update(['created_at' => gmdate('Y-m-d H:i:s', time() - (90 * DAY_IN_SECONDS)), 'gateway' => 'stripe']);
 
         $c = Plugin::instance()->container;
-        (new AbandonedPendingReaper($c->get(\FundKit\Async\AsyncDispatcher::class), $c->get(\FundKit\Foundation\Time\Clock::class)))->run();
+        (new AbandonedPendingReaper($c->get(\Gratora\Async\AsyncDispatcher::class), $c->get(\Gratora\Foundation\Time\Clock::class)))->run();
 
-        $fresh = $c->get(\FundKit\Donations\DonationRepository::class)->findById((int) $donation->id);
+        $fresh = $c->get(\Gratora\Donations\DonationRepository::class)->findById((int) $donation->id);
         $this->assertNull($fresh->pending_reactivation_email, 'an attempt that never paid does not keep it');
         $this->assertNotNull($this->stateOf((int) $donor->id));
     }
@@ -190,7 +190,7 @@ final class ErasedDonorReturnsTest extends IntegrationTestCase
         // And they leave again, with the second attempt still open.
         $this->donors()->redact($this->donors()->findById((int) $donor->id));
 
-        $fresh = Plugin::instance()->container->get(\FundKit\Donations\DonationRepository::class)
+        $fresh = Plugin::instance()->container->get(\Gratora\Donations\DonationRepository::class)
             ->findById((int) $inFlight->id);
         $this->assertNull(
             $fresh->pending_reactivation_email,

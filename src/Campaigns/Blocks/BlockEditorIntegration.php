@@ -2,33 +2,33 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Blocks;
+namespace Gratora\Campaigns\Blocks;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignPageTemplate;
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Foundation\Auth\Capabilities;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignPageTemplate;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Foundation\Auth\Capabilities;
 use WP_Theme_JSON_Data;
 
 /** @since 1.0.0 */
 final class BlockEditorIntegration
 {
-    private const HANDLE_EDITOR    = 'fundkit-campaign-blocks-editor';
-    private const HANDLE_EDITOR_UI = 'fundkit-campaign-blocks-editor-ui';
-    private const HANDLE_FRONTEND = 'fundkit-campaign-blocks';
+    private const HANDLE_EDITOR    = 'gratora-campaign-blocks-editor';
+    private const HANDLE_EDITOR_UI = 'gratora-campaign-blocks-editor-ui';
+    private const HANDLE_FRONTEND = 'gratora-campaign-blocks';
     private const BUILD_DIR       = 'build/admin/campaign-blocks';
 
     // Must list every registered campaign block: gates the front-end CSS enqueue.
     private const BLOCK_NAMES = [
-        'fundkit/campaign-image',
-        'fundkit/campaign-stat',
-        'fundkit/campaign-progress',
-        'fundkit/campaign-grid',
-        'fundkit/donate-button',
-        'fundkit/donation-form',
-        'fundkit/top-donors',
-        'fundkit/recent-donations',
-        'fundkit/supporter-wall',
+        'gratora/campaign-image',
+        'gratora/campaign-stat',
+        'gratora/campaign-progress',
+        'gratora/campaign-grid',
+        'gratora/donate-button',
+        'gratora/donation-form',
+        'gratora/top-donors',
+        'gratora/recent-donations',
+        'gratora/supporter-wall',
     ];
 
     /** @since 1.0.0 */
@@ -48,11 +48,11 @@ final class BlockEditorIntegration
      *
      * @since 1.0.0
      */
-    public const META_TEMPLATE = '_fundkit_campaign_page_template';
+    public const META_TEMPLATE = '_gratora_campaign_page_template';
 
     public function registerPageMeta(): void
     {
-        register_post_meta('page', '_fundkit_campaign_id', [
+        register_post_meta('page', '_gratora_campaign_id', [
             'type'          => 'integer',
             'single'        => true,
             'show_in_rest'  => true,
@@ -90,7 +90,7 @@ final class BlockEditorIntegration
     {
         $postId = self::editedPostId();
 
-        return $postId > 0 ? (int) get_post_meta($postId, '_fundkit_campaign_id', true) : 0;
+        return $postId > 0 ? (int) get_post_meta($postId, '_gratora_campaign_id', true) : 0;
     }
 
     /** Returns 0 when no post is open. */
@@ -119,7 +119,7 @@ final class BlockEditorIntegration
         // Both routes behind the button want this cap, so offering it to anyone
         // else offers a modal that can only fail, with a Try again that never
         // succeeds and a template choice that 403s after it is made.
-        if (! Capabilities::userCan('fundkit_manage_campaigns')) {
+        if (! Capabilities::userCan('gratora_manage_campaigns')) {
             return false;
         }
 
@@ -136,7 +136,7 @@ final class BlockEditorIntegration
         }
 
         return (bool) apply_filters(
-            'fundkit.campaign.supports_page_templates',
+            'gratora.campaign.supports_page_templates',
             true,
             (string) $campaign->campaign_type,
             $campaign
@@ -198,11 +198,11 @@ final class BlockEditorIntegration
     public function registerCategory(array $categories): array
     {
         foreach ($categories as $category) {
-            if (($category['slug'] ?? '') === 'fundkit') return $categories;
+            if (($category['slug'] ?? '') === 'gratora') return $categories;
         }
         array_unshift($categories, [
-            'slug'  => 'fundkit',
-            'title' => __('Fundraising Toolkit', 'fundraising-toolkit'),
+            'slug'  => 'gratora',
+            'title' => __('Gratora', 'gratora'),
             'icon'  => 'heart',
         ]);
         return $categories;
@@ -211,30 +211,30 @@ final class BlockEditorIntegration
     /** @since 1.0.0 */
     public function enqueueEditorAssets(): void
     {
-        $assetPath = FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
+        $assetPath = GRATORA_DIR . self::BUILD_DIR . '/index.asset.php';
         if (! file_exists($assetPath)) return;
         $asset = require $assetPath;
 
         wp_enqueue_script(
             self::HANDLE_EDITOR,
-            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
+            GRATORA_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? FUNDKIT_VERSION,
+            $asset['version']      ?? GRATORA_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE_EDITOR, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE_EDITOR, 'gratora', GRATORA_DIR . 'languages');
 
         // Editor-chrome styles (the layout picker's modal). Kept out of
         // campaign-blocks.css, which the front end also loads, and only sent to
         // the screens that can open the picker: the blocks themselves can be
         // used on any page, but the layout switcher shows on a campaign's own.
         $uiCss = 'build/admin/campaign-blocks-ui.css';
-        if (self::pageTemplatesAvailable() && file_exists(FUNDKIT_DIR . $uiCss)) {
+        if (self::pageTemplatesAvailable() && file_exists(GRATORA_DIR . $uiCss)) {
             wp_enqueue_style(
                 self::HANDLE_EDITOR_UI,
-                FUNDKIT_URL . $uiCss,
+                GRATORA_URL . $uiCss,
                 ['wp-components'],
-                (string) filemtime(FUNDKIT_DIR . $uiCss)
+                (string) filemtime(GRATORA_DIR . $uiCss)
             );
             wp_style_add_data(self::HANDLE_EDITOR_UI, 'rtl', 'replace');
         }
@@ -244,7 +244,7 @@ final class BlockEditorIntegration
         // disagree about which values exist.
         wp_add_inline_script(
             self::HANDLE_EDITOR,
-            'window.fundkitCampaignBlocks = Object.assign( window.fundkitCampaignBlocks || {}, '
+            'window.gratoraCampaignBlocks = Object.assign( window.gratoraCampaignBlocks || {}, '
             . wp_json_encode([
                 'bindingFields' => CampaignBindings::fields(),
                 'pageTemplates' => self::pageTemplatesAvailable(),
@@ -252,7 +252,7 @@ final class BlockEditorIntegration
                 // The blocks register for every block-editor user, but the
                 // campaign list is gated. Without this the editor reads a
                 // refused fetch as a campaign that no longer exists.
-                'canManageCampaigns' => Capabilities::userCan('fundkit_manage_campaigns'),
+                'canManageCampaigns' => Capabilities::userCan('gratora_manage_campaigns'),
             ]) . ' );',
             'before'
         );
@@ -268,14 +268,14 @@ final class BlockEditorIntegration
         if (! is_admin()) {
             return;
         }
-        $cssPath = FUNDKIT_DIR . 'build/admin/campaign-blocks.css';
+        $cssPath = GRATORA_DIR . 'build/admin/campaign-blocks.css';
         if (file_exists($cssPath)) {
             wp_enqueue_style(
                 self::HANDLE_FRONTEND,
-                FUNDKIT_URL . 'build/admin/campaign-blocks.css',
+                GRATORA_URL . 'build/admin/campaign-blocks.css',
                 [],
                 // Use mtime to invalidate unreleased CSS changes.
-                (string) (@filemtime($cssPath) ?: FUNDKIT_VERSION)
+                (string) (@filemtime($cssPath) ?: GRATORA_VERSION)
             );
             wp_style_add_data(self::HANDLE_FRONTEND, 'rtl', 'replace');
         }
@@ -298,7 +298,7 @@ final class BlockEditorIntegration
         foreach (self::BLOCK_NAMES as $name) {
             if (has_block($name, $post)) {
                 $hasAnyBlock = true;
-                if ($name === 'fundkit/donate-button') {
+                if ($name === 'gratora/donate-button') {
                     $hasDonateButton = true;
                 }
             }
@@ -315,7 +315,7 @@ final class BlockEditorIntegration
     }
 
     /**
-     * has_block() only sees the post's own content, so a FundKit block nested in a
+     * has_block() only sees the post's own content, so a Gratora block nested in a
      * synced pattern or template part would render unstyled. render_block fires
      * wherever the block lives, and a late enqueue still prints.
      *
@@ -328,7 +328,7 @@ final class BlockEditorIntegration
             return $content;
         }
         $this->enqueueBlockStyle();
-        if ($name === 'fundkit/donate-button') {
+        if ($name === 'gratora/donate-button') {
             $this->enqueueDonateButtonModal();
         }
         return $content;
@@ -340,13 +340,13 @@ final class BlockEditorIntegration
         if (wp_style_is(self::HANDLE_FRONTEND, 'enqueued')) {
             return;
         }
-        $cssPath = FUNDKIT_DIR . 'build/admin/campaign-blocks.css';
+        $cssPath = GRATORA_DIR . 'build/admin/campaign-blocks.css';
         if (file_exists($cssPath)) {
             wp_enqueue_style(
                 self::HANDLE_FRONTEND,
-                FUNDKIT_URL . 'build/admin/campaign-blocks.css',
+                GRATORA_URL . 'build/admin/campaign-blocks.css',
                 [],
-                (string) (@filemtime($cssPath) ?: FUNDKIT_VERSION)
+                (string) (@filemtime($cssPath) ?: GRATORA_VERSION)
             );
             wp_style_add_data(self::HANDLE_FRONTEND, 'rtl', 'replace');
         }
@@ -355,14 +355,14 @@ final class BlockEditorIntegration
     /** @since 1.0.0 */
     private function enqueueDonateButtonModal(): void
     {
-        if (wp_script_is('fundkit-donate-button-modal', 'enqueued')) {
+        if (wp_script_is('gratora-donate-button-modal', 'enqueued')) {
             return;
         }
         wp_enqueue_script(
-            'fundkit-donate-button-modal',
-            FUNDKIT_URL . 'assets/donate-button/modal.js',
+            'gratora-donate-button-modal',
+            GRATORA_URL . 'assets/donate-button/modal.js',
             [],
-            FUNDKIT_VERSION,
+            GRATORA_VERSION,
             true
         );
     }

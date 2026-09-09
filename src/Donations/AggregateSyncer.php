@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donations;
+namespace Gratora\Donations;
 
-use FundKit\Donors\DonorAggregateSyncer;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donors\DonorAggregateSyncer;
+use Gratora\Vendor\Queryable\DB;
 
 /** @since 1.0.0 */
 final class AggregateSyncer
 {
     /**
      * Delegates to DonorAggregateSyncer, which is what the live
-     * fundkit.donation.completed hook runs, so a resync and the live path cannot
+     * gratora.donation.completed hook runs, so a resync and the live path cannot
      * disagree.
      *
      * @since 1.0.0
@@ -28,9 +28,9 @@ final class AggregateSyncer
         if ($campaignId <= 0) return;
 
         DB::transaction(function () use ($campaignId): void {
-            if (! $this->lockRow('fundkit_campaigns', $campaignId)) return;
+            if (! $this->lockRow('gratora_campaigns', $campaignId)) return;
 
-            $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
+            $row = DonationQueries::donationsOnly(DB::table('gratora_donations')
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->where('campaign_id', $campaignId))
                 ->selectRaw("
@@ -42,7 +42,7 @@ final class AggregateSyncer
                 ")
                 ->get();
 
-            DB::table('fundkit_campaigns')
+            DB::table('gratora_campaigns')
                 ->where('id', $campaignId)
                 ->update([
                     'raised_cents'    => (int) ($row['raised']    ?? 0),
@@ -59,9 +59,9 @@ final class AggregateSyncer
         if ($fundId <= 0) return;
 
         DB::transaction(function () use ($fundId): void {
-            if (! $this->lockRow('fundkit_funds', $fundId)) return;
+            if (! $this->lockRow('gratora_funds', $fundId)) return;
 
-            $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
+            $row = DonationQueries::donationsOnly(DB::table('gratora_donations')
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->where('fund_id', $fundId))
                 ->selectRaw("
@@ -74,7 +74,7 @@ final class AggregateSyncer
                 ")
                 ->get();
 
-            DB::table('fundkit_funds')
+            DB::table('gratora_funds')
                 ->where('id', $fundId)
                 ->update([
                     'raised_cents'    => (int) ($row['raised']    ?? 0),
@@ -94,9 +94,9 @@ final class AggregateSyncer
         DB::transaction(function () use ($formId): void {
             // The form row, not the stats row the upsert may be creating: a key
             // that is not there yet locks a gap rather than a row.
-            if (! $this->lockRow('fundkit_forms', $formId)) return;
+            if (! $this->lockRow('gratora_forms', $formId)) return;
 
-            $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
+            $row = DonationQueries::donationsOnly(DB::table('gratora_donations')
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->where('form_id', $formId))
                 ->selectRaw("
@@ -113,7 +113,7 @@ final class AggregateSyncer
             $now = gmdate('Y-m-d H:i:s');
 
             // Separate table: only donation-type forms have donation aggregates.
-            DB::table('fundkit_form_donation_stats')->upsert(
+            DB::table('gratora_form_donation_stats')->upsert(
                 [
                     'form_id'         => $formId,
                     'raised_cents'    => (int) ($row['raised']    ?? 0),
@@ -153,7 +153,7 @@ final class AggregateSyncer
     // source of truth for the netted figure, independent of the donation's
     // refunded_cents over-refund counter.
     // Fully-qualified table name on both sides: unqualified `id` would bind
-    // to wp_fundkit_refunds.id since refunds also has an id column.
+    // to wp_gratora_refunds.id since refunds also has an id column.
     /** @since 1.0.0 */
     private function refundedSubquery(): string
     {

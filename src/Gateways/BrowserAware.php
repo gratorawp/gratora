@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways;
+namespace Gratora\Gateways;
 
 /**
  * Optional capability: a gateway that needs the donor's browser to finish the

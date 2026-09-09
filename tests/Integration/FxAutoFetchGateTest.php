@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Currency\FxRates;
-use FundKit\Currency\FxRatesUpdater;
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Plugin;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Currency\FxRates;
+use Gratora\Currency\FxRatesUpdater;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Plugin;
 
 /**
  * The daily rate fetch reaches a third party. A site that converts nothing has
@@ -56,10 +56,10 @@ final class FxAutoFetchGateTest extends IntegrationTestCase
 
     private function accepts(array $currencies): void
     {
-        $opt = get_option('fundkit_currency_locale', []);
+        $opt = get_option('gratora_currency_locale', []);
         $opt = is_array($opt) ? $opt : [];
         $opt['supported_currencies'] = $currencies;
-        update_option('fundkit_currency_locale', $opt);
+        update_option('gratora_currency_locale', $opt);
     }
 
     private function auto(bool $on): void
@@ -92,7 +92,7 @@ final class FxAutoFetchGateTest extends IntegrationTestCase
     /** The suite's base currency, so the assertions do not hardcode one. */
     private function base(): string
     {
-        return strtoupper(\FundKit\Foundation\Helpers\Money::defaultCurrency());
+        return strtoupper(\Gratora\Foundation\Helpers\Money::defaultCurrency());
     }
 
     public function test_a_single_currency_site_never_calls_out(): void

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Currency;
+namespace Gratora\Currency;
 
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Settings\SettingsService;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Settings\SettingsService;
 
 /**
  * The currencies an organization accepts.

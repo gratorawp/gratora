@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns;
+namespace Gratora\Campaigns;
 
 /** @since 1.0.0 */
 final class DefaultCampaignTypeHandler implements CampaignTypeHandler
@@ -16,7 +16,7 @@ final class DefaultCampaignTypeHandler implements CampaignTypeHandler
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Standard', 'fundraising-toolkit');
+        return __('Standard', 'gratora');
     }
 
     /** @since 1.0.0 */

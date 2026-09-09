@@ -1,5 +1,5 @@
 /**
- * fundkit/section: a styled container for headings and copy.
+ * gratora/section: a styled container for headings and copy.
  *
  * Storage is plain custom attributes (no WP block-supports, no Style Engine).
  * The editor + the donor-facing runtime + the server walker all read the
@@ -19,17 +19,17 @@ import Slider         from '../../../_shared/components/Slider';
 import BoxControl     from '../../../_shared/components/BoxControl';
 import Segmented      from '../../../_shared/components/Segmented';
 
-const NAME = 'fundkit/section';
-const ALLOWED = [ 'fundkit/heading', 'fundkit/paragraph', 'fundkit/section' ];
+const NAME = 'gratora/section';
+const ALLOWED = [ 'gratora/heading', 'gratora/paragraph', 'gratora/section' ];
 
 const BORDER_STYLES = [ 'none', 'solid', 'dashed', 'dotted' ];
 
 const SHADOW_PRESETS = [
-    { value: '',                                                                       label: __( 'None',       'fundraising-toolkit' ) },
-    { value: '0 1px 2px rgba(15,23,42,.06)',                                           label: __( 'Subtle',     'fundraising-toolkit' ) },
-    { value: '0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04)',             label: __( 'Soft',       'fundraising-toolkit' ) },
-    { value: '0 4px 14px rgba(15,23,42,.10)',                                          label: __( 'Medium',     'fundraising-toolkit' ) },
-    { value: '0 12px 32px rgba(15,23,42,.14)',                                         label: __( 'Pronounced', 'fundraising-toolkit' ) },
+    { value: '',                                                                       label: __( 'None',       'gratora' ) },
+    { value: '0 1px 2px rgba(15,23,42,.06)',                                           label: __( 'Subtle',     'gratora' ) },
+    { value: '0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04)',             label: __( 'Soft',       'gratora' ) },
+    { value: '0 4px 14px rgba(15,23,42,.10)',                                          label: __( 'Medium',     'gratora' ) },
+    { value: '0 12px 32px rgba(15,23,42,.14)',                                         label: __( 'Pronounced', 'gratora' ) },
 ];
 
 /**
@@ -81,65 +81,65 @@ function Edit( { attributes, setAttributes } ) {
     const [ showCustomShadow, setShowCustomShadow ] = useState( !! shadow && ! isPresetShadow );
 
     const blockProps = useBlockProps( {
-        className: 'fundkit-block-preview fundkit-block-preview--section',
+        className: 'gratora-block-preview gratora-block-preview--section',
         style:     sectionStyle( attributes ),
     } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Section', 'fundraising-toolkit' ) } initialOpen>
-                    <Field label={ __( 'Background color', 'fundraising-toolkit' ) }>
+                <PanelBody title={ __( 'Section', 'gratora' ) } initialOpen>
+                    <Field label={ __( 'Background color', 'gratora' ) }>
                         <ColorInput
-                            label={ __( 'Background color', 'fundraising-toolkit' ) }
+                            label={ __( 'Background color', 'gratora' ) }
                             value={ background }
                             onChange={ ( v ) => setAttributes( { background: v } ) }
                         />
                     </Field>
 
-                    <Field label={ __( 'Text color', 'fundraising-toolkit' ) }>
+                    <Field label={ __( 'Text color', 'gratora' ) }>
                         <ColorInput
-                            label={ __( 'Text color', 'fundraising-toolkit' ) }
+                            label={ __( 'Text color', 'gratora' ) }
                             value={ textColor }
                             onChange={ ( v ) => setAttributes( { textColor: v } ) }
                         />
                     </Field>
 
-                    <Field label={ __( 'Border color', 'fundraising-toolkit' ) }>
+                    <Field label={ __( 'Border color', 'gratora' ) }>
                         <ColorInput
-                            label={ __( 'Border color', 'fundraising-toolkit' ) }
+                            label={ __( 'Border color', 'gratora' ) }
                             value={ border.color }
                             onChange={ ( v ) => setBorder( { color: v } ) }
                         />
                     </Field>
                     <Slider
-                        label={ __( 'Border width', 'fundraising-toolkit' ) }
+                        label={ __( 'Border width', 'gratora' ) }
                         value={ border.width || 0 }
                         onChange={ ( v ) => setBorder( { width: v } ) }
                         min={ 0 } max={ 20 } unit="px"
                     />
                     <Segmented
-                        label={ __( 'Border style', 'fundraising-toolkit' ) }
+                        label={ __( 'Border style', 'gratora' ) }
                         value={ border.style || 'solid' }
                         onChange={ ( v ) => setBorder( { style: v } ) }
                         options={ BORDER_STYLES }
                     />
                     <Slider
-                        label={ __( 'Border radius', 'fundraising-toolkit' ) }
+                        label={ __( 'Border radius', 'gratora' ) }
                         value={ border.radius || 0 }
                         onChange={ ( v ) => setBorder( { radius: v } ) }
                         min={ 0 } max={ 60 } unit="px"
                     />
 
-                    <Field label={ __( 'Shadow', 'fundraising-toolkit' ) }>
-                        <div className="fundkit-shadow-grid">
+                    <Field label={ __( 'Shadow', 'gratora' ) }>
+                        <div className="gratora-shadow-grid">
                             { SHADOW_PRESETS.map( ( p ) => {
                                 const isOn = ! showCustomShadow && shadow === p.value;
                                 return (
                                     <button
                                         key={ p.label }
                                         type="button"
-                                        className={ `fundkit-shadow-grid__tile ${ isOn ? 'is-on' : '' }` }
+                                        className={ `gratora-shadow-grid__tile ${ isOn ? 'is-on' : '' }` }
                                         title={ p.label }
                                         aria-label={ p.label }
                                         aria-pressed={ isOn }
@@ -149,12 +149,12 @@ function Edit( { attributes, setAttributes } ) {
                                         } }
                                     >
                                         { p.value === '' ? (
-                                            <span className="fundkit-shadow-grid__tile__none">
-                                                { __( 'None', 'fundraising-toolkit' ) }
+                                            <span className="gratora-shadow-grid__tile__none">
+                                                { __( 'None', 'gratora' ) }
                                             </span>
                                         ) : (
                                             <span
-                                                className="fundkit-shadow-grid__tile__sample"
+                                                className="gratora-shadow-grid__tile__sample"
                                                 style={ { boxShadow: p.value } }
                                             />
                                         ) }
@@ -164,20 +164,20 @@ function Edit( { attributes, setAttributes } ) {
                         </div>
                     </Field>
                     <Field>
-                        <label className="fundkit-checkbox-row">
+                        <label className="gratora-checkbox-row">
                             <input
                                 type="checkbox"
                                 checked={ showCustomShadow }
                                 onChange={ ( e ) => setShowCustomShadow( e.target.checked ) }
                             />
-                            <span>{ __( 'Use custom shadow value', 'fundraising-toolkit' ) }</span>
+                            <span>{ __( 'Use custom shadow value', 'gratora' ) }</span>
                         </label>
                     </Field>
                     { showCustomShadow && (
-                        <Field label={ __( 'Custom shadow CSS', 'fundraising-toolkit' ) } help={ __( 'Any valid box-shadow value.', 'fundraising-toolkit' ) }>
+                        <Field label={ __( 'Custom shadow CSS', 'gratora' ) } help={ __( 'Any valid box-shadow value.', 'gratora' ) }>
                             <input
                                 type="text"
-                                className="fundkit-input"
+                                className="gratora-input"
                                 value={ shadow }
                                 onChange={ ( e ) => setAttributes( { shadow: e.target.value } ) }
                                 placeholder="0 4px 14px rgba(0,0,0,.1)"
@@ -186,7 +186,7 @@ function Edit( { attributes, setAttributes } ) {
                     ) }
 
                     <BoxControl
-                        title={ __( 'Padding', 'fundraising-toolkit' ) }
+                        title={ __( 'Padding', 'gratora' ) }
                         value={ padding }
                         onChange={ ( next ) => setAttributes( { padding: { ...padding, ...next } } ) }
                         sides="four"
@@ -194,7 +194,7 @@ function Edit( { attributes, setAttributes } ) {
                         linkable
                     />
                     <BoxControl
-                        title={ __( 'Margin', 'fundraising-toolkit' ) }
+                        title={ __( 'Margin', 'gratora' ) }
                         value={ margin }
                         onChange={ ( next ) => setAttributes( { margin: { ...margin, ...next } } ) }
                         sides="four"
@@ -202,7 +202,7 @@ function Edit( { attributes, setAttributes } ) {
                         linkable
                     />
                     <Slider
-                        label={ __( 'Minimum height', 'fundraising-toolkit' ) }
+                        label={ __( 'Minimum height', 'gratora' ) }
                         value={ minHeight || 0 }
                         onChange={ ( v ) => setAttributes( { minHeight: v } ) }
                         min={ 0 } max={ 800 } unit="px"
@@ -226,9 +226,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Section', 'fundraising-toolkit' ),
-        description: __( 'A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs.', 'fundraising-toolkit' ),
-        category:    'fundkit-content',
+        title:       __( 'Section', 'gratora' ),
+        description: __( 'A styled container for headings and copy. Use it for hero areas, impact statements, or intro blurbs.', 'gratora' ),
+        category:    'gratora-content',
         icon:        BlockIcons[ 'section' ],
         supports:    { html: false, anchor: false, inserter: true },
         attributes: {

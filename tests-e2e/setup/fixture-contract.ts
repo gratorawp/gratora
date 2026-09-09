@@ -31,9 +31,9 @@ type FormConfig = {
  * can appear inside a string, so the non-greedy match is safe.
  */
 export function parseFormConfig(html: string): FormConfig {
-    const match = /<script type="application\/json" data-fundkit-form-config>([\s\S]*?)<\/script>/.exec(html);
+    const match = /<script type="application\/json" data-gratora-form-config>([\s\S]*?)<\/script>/.exec(html);
     if (! match) {
-        throw new Error('The page carries no FundKit form config. Run `wp fundkit e2e-seed`.');
+        throw new Error('The page carries no Gratora form config. Run `wp gratora e2e-seed`.');
     }
 
     return JSON.parse(match[1]) as FormConfig;
@@ -48,7 +48,7 @@ export function assertCanonicalForm(html: string, path: string): void {
     if (missing.length > 0) {
         throw new Error(
             `The form at ${path} is missing ${missing.join(', ')}. Every spec for those ` +
-            'blocks would skip and the run would still pass. Re-run `wp fundkit e2e-seed`.',
+            'blocks would skip and the run would still pass. Re-run `wp gratora e2e-seed`.',
         );
     }
 
@@ -60,7 +60,7 @@ export function assertCanonicalForm(html: string, path: string): void {
     if (required < 1 || optional < 1) {
         throw new Error(
             `The consent block at ${path} offers ${required} required and ${optional} optional ` +
-            'purposes; the specs need one of each. Re-run `wp fundkit e2e-seed`.',
+            'purposes; the specs need one of each. Re-run `wp gratora e2e-seed`.',
         );
     }
 }

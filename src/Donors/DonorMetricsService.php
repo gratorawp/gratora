@@ -2,27 +2,27 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
 use DateTimeImmutable;
-use FundKit\Analytics\Event;
-use FundKit\Analytics\EventRecorder;
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\ChannelClassifier;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationQueries;
-use FundKit\Donors\Portal\PortalPage;
-use FundKit\Donors\Portal\PortalSession;
-use FundKit\Foundation\Helpers\Csv;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Receipts\Receipt;
-use FundKit\Recurring\PlanRow;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
-use FundKit\Settings\SettingsService;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Analytics\Event;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\ChannelClassifier;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
+use Gratora\Donors\Portal\PortalPage;
+use Gratora\Donors\Portal\PortalSession;
+use Gratora\Foundation\Helpers\Csv;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Receipts\Receipt;
+use Gratora\Recurring\PlanRow;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
+use Gratora\Settings\SettingsService;
+use Gratora\Vendor\Queryable\DB;
 use Throwable;
 
 /** @since 1.0.0 */
@@ -50,7 +50,7 @@ final class DonorMetricsService
         private DonorNoteRepository $notes,
         private MagicLinkService $magicLinks,
         private Clock $clock,
-        private \FundKit\Gateways\GatewayManager $gateways,
+        private \Gratora\Gateways\GatewayManager $gateways,
         private DonorAvatars $avatars,
     ) {
     }
@@ -136,7 +136,7 @@ final class DonorMetricsService
             $reason = AtRiskReason::classify($r, $plans[(int) $r['id']] ?? null, $today);
             return [
                 'id'                  => $r['id'],
-                'name'                => $name !== '' ? $name : __('Donor', 'fundraising-toolkit') . ' #' . $r['id'],
+                'name'                => $name !== '' ? $name : __('Donor', 'gratora') . ' #' . $r['id'],
                 'email'               => $email,
                 'country'             => $r['country'],
                 'donations_count'     => $r['donations_count'],
@@ -287,7 +287,7 @@ final class DonorMetricsService
         // donationsOnly, not live: the total, count and average beside this are
         // donation-only, so a ticket order here made the largest donation exceed a
         // lifetime that does not contain it.
-        $largestDonation = (int) (DonationQueries::donationsOnly(DB::table('fundkit_donations')
+        $largestDonation = (int) (DonationQueries::donationsOnly(DB::table('gratora_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId))
             ->selectRaw("COALESCE(MAX({$netExpr}), 0) AS m")
@@ -296,7 +296,7 @@ final class DonorMetricsService
         // Counted in SQL over the population the headline counts. Iterating the
         // donations array split a capped 25 rows, so past 25 donations the two
         // halves of the same card disagreed.
-        $splitRows = DonationQueries::donationsOnly(DB::table('fundkit_donations')
+        $splitRows = DonationQueries::donationsOnly(DB::table('gratora_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId))
             ->selectRaw("CASE WHEN frequency = 'one_time' THEN 1 ELSE 0 END AS is_one_time, COUNT(*) AS n")
@@ -396,7 +396,7 @@ final class DonorMetricsService
         // Contextual banners.
         $banners = [];
         if ($donor->redacted_at !== null) {
-            $banners[] = ['kind' => 'redacted', 'message' => __('This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting.', 'fundraising-toolkit')];
+            $banners[] = ['kind' => 'redacted', 'message' => __('This donor has been redacted under GDPR. PII has been removed; lifetime totals are kept for accounting.', 'gratora')];
         }
         $pastDuePlan = null;
         foreach ($recurringPlans as $p) {
@@ -410,18 +410,18 @@ final class DonorMetricsService
             $gateway  = $this->gateways->get((string) $pastDuePlan->gateway);
             $name     = ucfirst((string) $pastDuePlan->gateway);
 
-            if ($gateway instanceof \FundKit\Gateways\SupportsPaymentRetry) {
-                $message = __('A renewal was declined. Open the Recurring tab to collect it again.', 'fundraising-toolkit');
+            if ($gateway instanceof \Gratora\Gateways\SupportsPaymentRetry) {
+                $message = __('A renewal was declined. Open the Recurring tab to collect it again.', 'gratora');
             } elseif ($gateway === null) {
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. Stripe. */
-                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways.', 'fundraising-toolkit'),
+                    __('A renewal was declined, but the %s connection is not active, so nothing can be collected from here. Reconnect it in Settings, Payment gateways.', 'gratora'),
                     $name
                 );
-            } elseif ($gateway instanceof \FundKit\Gateways\SupportsPaymentMethodUpdate) {
+            } elseif ($gateway instanceof \Gratora\Gateways\SupportsPaymentMethodUpdate) {
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. PayPal. */
-                    __('A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal.', 'fundraising-toolkit'),
+                    __('A renewal was declined. %s retries on its own schedule; to fix it sooner, ask the donor to update their card in the donor portal.', 'gratora'),
                     $name
                 );
             } else {
@@ -433,7 +433,7 @@ final class DonorMetricsService
                 // gateways, and the route answers 422.
                 $message = sprintf(
                     /* translators: %s: the payment gateway name, e.g. GoCardless. */
-                    __('A renewal was declined. %s retries on its own schedule, and neither you nor the donor can change the payment details from here. If it keeps failing, ask the donor to set the donation up again.', 'fundraising-toolkit'),
+                    __('A renewal was declined. %s retries on its own schedule, and neither you nor the donor can change the payment details from here. If it keeps failing, ask the donor to set the donation up again.', 'gratora'),
                     $name
                 );
             }
@@ -668,11 +668,11 @@ final class DonorMetricsService
     private function donorName(Donor $d): string
     {
         if ($d->redacted_at !== null) {
-            return __('[redacted]', 'fundraising-toolkit');
+            return __('[redacted]', 'gratora');
         }
 
         $name = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
-        return $name !== '' ? $name : __('Donor', 'fundraising-toolkit') . ' #' . $d->id;
+        return $name !== '' ? $name : __('Donor', 'gratora') . ' #' . $d->id;
     }
 
     /**
@@ -713,7 +713,7 @@ final class DonorMetricsService
             $name = trim(($r['first_name'] ?? '') . ' ' . ($r['last_name'] ?? ''));
             return [
                 'id'                  => $r['id'],
-                'name'                => $name !== '' ? $name : __('Donor', 'fundraising-toolkit') . ' #' . $r['id'],
+                'name'                => $name !== '' ? $name : __('Donor', 'gratora') . ' #' . $r['id'],
                 'email'               => $this->donorService->decryptEmail($donor),
                 'country'             => $r['country'],
                 'total_donated_cents' => $r['total_donated_cents'],
@@ -847,7 +847,7 @@ final class DonorMetricsService
     {
         return DonationQueries::notSupersededDonation(
             Event::query()->where('donor_id', $donorId),
-            DB::getPrefix() . 'fundkit_events.donation_id',
+            DB::getPrefix() . 'gratora_events.donation_id',
             $donorId
         );
     }

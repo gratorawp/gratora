@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\Blocks\CustomFieldLabels;
-use FundKit\Forms\Blocks\DateBlock;
-use FundKit\Forms\Blocks\DropdownBlock;
+use Gratora\Forms\Blocks\CustomFieldLabels;
+use Gratora\Forms\Blocks\DateBlock;
+use Gratora\Forms\Blocks\DropdownBlock;
 
 /**
  * Slug => label resolution must use the same slug derivation buildSteps
@@ -17,8 +17,8 @@ final class CustomFieldLabelsTest extends IntegrationTestCase
     public function test_resolves_text_and_choice_fields_with_canonical_slugs(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:fundkit/text-input {"field":"Donor Org","label":"Your organization"} /-->
-<!-- wp:fundkit/dropdown {"label":"How did you hear?"} /-->
+<!-- wp:gratora/text-input {"field":"Donor Org","label":"Your organization"} /-->
+<!-- wp:gratora/dropdown {"label":"How did you hear?"} /-->
 BLOCKS;
 
         $map = CustomFieldLabels::forBlocks($blocks);
@@ -34,10 +34,10 @@ BLOCKS;
     public function test_recurses_into_layout_containers(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:fundkit/row {"columns":2} -->
-<!-- wp:fundkit/text-input {"field":"city","label":"City"} /-->
-<!-- wp:fundkit/text-input {"field":"region","label":"Region"} /-->
-<!-- /wp:fundkit/row -->
+<!-- wp:gratora/row {"columns":2} -->
+<!-- wp:gratora/text-input {"field":"city","label":"City"} /-->
+<!-- wp:gratora/text-input {"field":"region","label":"Region"} /-->
+<!-- /wp:gratora/row -->
 BLOCKS;
 
         $map = CustomFieldLabels::forBlocks($blocks);
@@ -51,9 +51,9 @@ BLOCKS;
         // A blank field key derives from the label (like dropdown/radio), the
         // same key the runtime submits under, so the answer is labelled.
         $map = CustomFieldLabels::forBlocks(<<<BLOCKS
-<!-- wp:fundkit/text-input {"label":"Free text"} /-->
-<!-- wp:fundkit/number-input {"label":"A number"} /-->
-<!-- wp:fundkit/date {"label":"A date"} /-->
+<!-- wp:gratora/text-input {"label":"Free text"} /-->
+<!-- wp:gratora/number-input {"label":"A number"} /-->
+<!-- wp:gratora/date {"label":"A date"} /-->
 BLOCKS);
 
         $this->assertSame('Free text', $map['free_text'] ?? null);
@@ -65,7 +65,7 @@ BLOCKS);
     {
         // Hidden field with no label contributes no display row.
         $map = CustomFieldLabels::forBlocks(
-            '<!-- wp:fundkit/hidden {"field":"utm_source"} /-->'
+            '<!-- wp:gratora/hidden {"field":"utm_source"} /-->'
         );
         $this->assertArrayNotHasKey('utm_source', $map);
 

@@ -9,19 +9,19 @@ import Btn from '../../_shared/components/Btn';
 import { userCan } from '../../_shared/caps';
 
 const COUNT_LABELS = {
-    donors:              __( 'Donors', 'fundraising-toolkit' ),
-    funds:               __( 'Funds', 'fundraising-toolkit' ),
-    campaigns:           __( 'Campaigns', 'fundraising-toolkit' ),
-    forms:               __( 'Forms', 'fundraising-toolkit' ),
-    converted_donations: __( 'Donations given a value in your base currency', 'fundraising-toolkit' ),
-    converted_plans:     __( 'Recurring plans given a value in your base currency', 'fundraising-toolkit' ),
+    donors:              __( 'Donors', 'gratora' ),
+    funds:               __( 'Funds', 'gratora' ),
+    campaigns:           __( 'Campaigns', 'gratora' ),
+    forms:               __( 'Forms', 'gratora' ),
+    converted_donations: __( 'Donations given a value in your base currency', 'gratora' ),
+    converted_plans:     __( 'Recurring plans given a value in your base currency', 'gratora' ),
 };
 
 // Typed verbatim, so it is a placeholder rather than a word a translator can
 // change out from under the check that reads it back.
 const CONFIRM_WORD = 'DELETE';
 
-// An add-on can contribute a count through fundkit.recalculate.addons, and a
+// An add-on can contribute a count through gratora.recalculate.addons, and a
 // raw key is not a sentence.
 const countLabel = ( key ) => COUNT_LABELS[ key ]
     || ( key.charAt( 0 ).toUpperCase() + key.slice( 1 ) ).replace( /_/g, ' ' );
@@ -36,7 +36,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
 
     const scopes = info?.recalc_scopes?.length
         ? info.recalc_scopes
-        : [ { value: 'all', label: __( 'Everything', 'fundraising-toolkit' ) } ];
+        : [ { value: 'all', label: __( 'Everything', 'gratora' ) } ];
 
     // Tabs are hidden rather than unmounted. Saving a currency on another
     // screen changes which donations are stranded, so refetch on each visit.
@@ -46,17 +46,17 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
         setUpgrading( true );
         setNotice( null );
         try {
-            const res  = await apiFetch( { path: '/fundkit/v1/admin/tools/run-upgrades', method: 'POST' } );
+            const res  = await apiFetch( { path: '/gratora/v1/admin/tools/run-upgrades', method: 'POST' } );
             const left = res?.remaining?.length || 0;
             setNotice( {
                 type: 'success',
                 text: left > 0
-                    ? __( 'Progress made. There is more to do, run it again.', 'fundraising-toolkit' )
-                    : __( 'Data updates finished.', 'fundraising-toolkit' ),
+                    ? __( 'Progress made. There is more to do, run it again.', 'gratora' )
+                    : __( 'Data updates finished.', 'gratora' ),
             } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not finish the data updates.', 'fundraising-toolkit' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not finish the data updates.', 'gratora' ) } );
         } finally {
             setUpgrading( false );
         }
@@ -75,7 +75,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
 
             for ( let round = 0; ! done && round < 500; round++ ) {
                 const res = await apiFetch( {
-                    path:   '/fundkit/v1/admin/tools/recalculate',
+                    path:   '/gratora/v1/admin/tools/recalculate',
                     method: 'POST',
                     data:   { scope: recalcScope },
                 } );
@@ -89,16 +89,16 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                 } );
 
                 if ( ! done ) {
-                    setNotice( { type: 'info', text: __( 'Still recomputing. Leave this open.', 'fundraising-toolkit' ) } );
+                    setNotice( { type: 'info', text: __( 'Still recomputing. Leave this open.', 'gratora' ) } );
                 }
             }
 
             setNotice( done
-                ? { type: 'success', text: __( 'Aggregates recomputed.', 'fundraising-toolkit' ) }
-                : { type: 'warning', text: __( 'Progress made. There is more to do, run it again.', 'fundraising-toolkit' ) } );
+                ? { type: 'success', text: __( 'Aggregates recomputed.', 'gratora' ) }
+                : { type: 'warning', text: __( 'Progress made. There is more to do, run it again.', 'gratora' ) } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Recalculation failed.', 'fundraising-toolkit' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Recalculation failed.', 'gratora' ) } );
         } finally {
             setRecalcRunning( false );
         }
@@ -109,7 +109,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
         setNotice( null );
         try {
             const res = await apiFetch( {
-                path:   '/fundkit/v1/admin/tools/purge-test-data',
+                path:   '/gratora/v1/admin/tools/purge-test-data',
                 method: 'POST',
                 data:   { confirmation: purgeText },
             } );
@@ -118,7 +118,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                 type: 'success',
                 text: sprintf(
                     /* translators: 1: donations removed, 2: recurring plans removed, 3: donors removed */
-                    __( 'Removed %1$d test donations, %2$d test recurring plans and %3$d donors left with nothing.', 'fundraising-toolkit' ),
+                    __( 'Removed %1$d test donations, %2$d test recurring plans and %3$d donors left with nothing.', 'gratora' ),
                     res?.donations || 0,
                     res?.recurring_plans || 0,
                     res?.donors || 0,
@@ -126,7 +126,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
             } );
             loadInfo();
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not remove the test data.', 'fundraising-toolkit' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not remove the test data.', 'gratora' ) } );
         } finally {
             setPurging( false );
         }
@@ -136,24 +136,24 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
     const testTotal = ( testData?.donations || 0 ) + ( testData?.recurring_plans || 0 );
 
     return (
-        <div className="fundkit-panel">
+        <div className="gratora-panel">
             { infoError && (
                 <Card
-                    title={ __( 'Could not check this site', 'fundraising-toolkit' ) }
-                    sub={ __( 'The checks behind this screen did not run, so it cannot say whether data updates are outstanding, whether completed donations are missing from your totals, or whether test data is still here. Nothing below is a clean bill of health until it does.', 'fundraising-toolkit' ) }
+                    title={ __( 'Could not check this site', 'gratora' ) }
+                    sub={ __( 'The checks behind this screen did not run, so it cannot say whether data updates are outstanding, whether completed donations are missing from your totals, or whether test data is still here. Nothing below is a clean bill of health until it does.', 'gratora' ) }
                 >
                     <Btn variant="secondary" onClick={ loadInfo }>
-                        { __( 'Check again', 'fundraising-toolkit' ) }
+                        { __( 'Check again', 'gratora' ) }
                     </Btn>
                 </Card>
             ) }
 
             { userCan( 'manage_options' ) && info?.pending_upgrades?.length > 0 && (
                 <Card
-                    title={ __( 'Data updates are outstanding', 'fundraising-toolkit' ) }
-                    sub={ __( 'These run by themselves in the background. If they are still here after a few minutes, this site\'s scheduled tasks are not running and you can finish them here.', 'fundraising-toolkit' ) }
+                    title={ __( 'Data updates are outstanding', 'gratora' ) }
+                    sub={ __( 'These run by themselves in the background. If they are still here after a few minutes, this site\'s scheduled tasks are not running and you can finish them here.', 'gratora' ) }
                 >
-                    <ul className="fundkit-advanced-cron">
+                    <ul className="gratora-advanced-cron">
                         { info.pending_upgrades.map( ( u ) => (
                             <li key={ u.id }>
                                 { u.description }
@@ -165,7 +165,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                                                 'Stopped with: %1$s (failed %2$d time)',
                                                 'Stopped with: %1$s (failed %2$d times)',
                                                 u.failure.attempts,
-                                                'fundraising-toolkit'
+                                                'gratora'
                                             ),
                                             u.failure.message,
                                             u.failure.attempts
@@ -175,9 +175,9 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                             </li>
                         ) ) }
                     </ul>
-                    <div className="fundkit-advanced-actions" style={ { marginTop: 12 } }>
+                    <div className="gratora-advanced-actions" style={ { marginTop: 12 } }>
                         <Btn variant="primary" onClick={ doRunUpgrades } disabled={ upgrading } isBusy={ upgrading }>
-                            { upgrading ? __( 'Working…', 'fundraising-toolkit' ) : __( 'Run them now', 'fundraising-toolkit' ) }
+                            { upgrading ? __( 'Working…', 'gratora' ) : __( 'Run them now', 'gratora' ) }
                         </Btn>
                     </div>
                 </Card>
@@ -185,28 +185,28 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
 
             { info?.unconverted_donations?.length > 0 && (
                 <Card
-                    title={ __( 'Donations missing from your totals', 'fundraising-toolkit' ) }
+                    title={ __( 'Donations missing from your totals', 'gratora' ) }
                     sub={
                         info.unconverted_donations.some( ( row ) => row.needs_rate )
-                            ? __( 'A donation is never refused for want of an exchange rate, so these completed donations were recorded in their own currency and left out of every total. Add a rate for the currency on Settings > Currency, then recalculate to bring them in.', 'fundraising-toolkit' )
-                            : __( 'These completed donations were recorded without a value in your base currency, so every total leaves them out. Recalculate to bring them in; no exchange rate is needed.', 'fundraising-toolkit' )
+                            ? __( 'A donation is never refused for want of an exchange rate, so these completed donations were recorded in their own currency and left out of every total. Add a rate for the currency on Settings > Currency, then recalculate to bring them in.', 'gratora' )
+                            : __( 'These completed donations were recorded without a value in your base currency, so every total leaves them out. Recalculate to bring them in; no exchange rate is needed.', 'gratora' )
                     }
                 >
-                    <ul className="fundkit-advanced-cron">
+                    <ul className="gratora-advanced-cron">
                         { info.unconverted_donations.map( ( row ) => (
                             <li key={ row.currency }>
                                 <strong>{ row.currency }</strong>
                                 { ' ' }
                                 { sprintf(
                                     /* translators: 1: how many donations, 2: their total in that currency. */
-                                    _n( '%1$s donation, %2$s', '%1$s donations, %2$s', row.count, 'fundraising-toolkit' ),
+                                    _n( '%1$s donation, %2$s', '%1$s donations, %2$s', row.count, 'gratora' ),
                                     row.count,
                                     formatAmount( row.amount_cents, row.currency )
                                 ) }
                                 { ! row.needs_rate && (
                                     <>
                                         { ' ' }
-                                        <em>{ __( '(your base currency: recalculate is all this needs)', 'fundraising-toolkit' ) }</em>
+                                        <em>{ __( '(your base currency: recalculate is all this needs)', 'gratora' ) }</em>
                                     </>
                                 ) }
                             </li>
@@ -216,14 +216,14 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
             ) }
 
             <Card
-                title={ __( 'Recalculate aggregates', 'fundraising-toolkit' ) }
-                sub={ __( 'Re-derive donor, fund, campaign and form counters from the donation rows. Safe to run any time; donations are only read.', 'fundraising-toolkit' ) }
+                title={ __( 'Recalculate aggregates', 'gratora' ) }
+                sub={ __( 'Re-derive donor, fund, campaign and form counters from the donation rows. Safe to run any time; donations are only read.', 'gratora' ) }
             >
-                <div className="fundkit-advanced-actions">
-                    <label className="fundkit-tools-field">
-                        { __( 'Scope', 'fundraising-toolkit' ) }
+                <div className="gratora-advanced-actions">
+                    <label className="gratora-tools-field">
+                        { __( 'Scope', 'gratora' ) }
                         <select
-                            className="fundkit-select"
+                            className="gratora-select"
                             value={ recalcScope }
                             onChange={ ( e ) => setRecalcScope( e.target.value ) }
                             disabled={ recalcRunning }
@@ -234,18 +234,18 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                         </select>
                     </label>
                     <Btn variant="primary" onClick={ doRecalculate } disabled={ recalcRunning } isBusy={ recalcRunning }>
-                        { recalcRunning ? __( 'Recalculating…', 'fundraising-toolkit' ) : __( 'Recalculate', 'fundraising-toolkit' ) }
+                        { recalcRunning ? __( 'Recalculating…', 'gratora' ) : __( 'Recalculate', 'gratora' ) }
                     </Btn>
                 </div>
                 { recalcResult && (
-                    <ul className="fundkit-advanced-cron" style={ { marginTop: 12 } }>
+                    <ul className="gratora-advanced-cron" style={ { marginTop: 12 } }>
                         { Object.entries( recalcResult.counts || {} )
                             .filter( ( [ , n ] ) => n > 0 )
                             .map( ( [ k, n ] ) => (
                                 <li key={ k }>
                                     { sprintf(
                                         /* translators: 1: what was recomputed (Donors, Funds, ...), 2: how many */
-                                        __( '%1$s: %2$d synced', 'fundraising-toolkit' ),
+                                        __( '%1$s: %2$d synced', 'gratora' ),
                                         countLabel( k ),
                                         n
                                     ) }
@@ -262,7 +262,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                                 '%1$d donation is still missing from your totals: there is no exchange rate for %2$s.',
                                 '%1$d donations are still missing from your totals: there is no exchange rate for %2$s.',
                                 recalcResult.stillUnconvertible,
-                                'fundraising-toolkit'
+                                'gratora'
                             ),
                             recalcResult.stillUnconvertible,
                             ( recalcResult.currencies || [] ).join( ', ' )
@@ -273,15 +273,15 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
 
             { userCan( 'manage_options' ) && testTotal > 0 && (
                 <Card
-                    title={ __( 'Test data', 'fundraising-toolkit' ) }
-                    sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are left out of your reported totals unless you ask to see them, so this changes nothing you have quoted: it clears the ledger you read by eye before going live. There is no undo.', 'fundraising-toolkit' ) }
+                    title={ __( 'Test data', 'gratora' ) }
+                    sub={ __( 'Everything a gateway in test mode left behind: donations, the recurring plans set up against them, and donors who would have nothing left on record. Test rows are left out of your reported totals unless you ask to see them, so this changes nothing you have quoted: it clears the ledger you read by eye before going live. There is no undo.', 'gratora' ) }
                 >
-                    <ul className="fundkit-advanced-cron">
+                    <ul className="gratora-advanced-cron">
                         { testData.donations > 0 && (
                             <li>
                                 { sprintf(
                                     /* translators: %d: number of test donations */
-                                    _n( '%d test donation', '%d test donations', testData.donations, 'fundraising-toolkit' ),
+                                    _n( '%d test donation', '%d test donations', testData.donations, 'gratora' ),
                                     testData.donations
                                 ) }
                             </li>
@@ -290,7 +290,7 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                             <li>
                                 { sprintf(
                                     /* translators: %d: number of test recurring plans */
-                                    _n( '%d test recurring plan', '%d test recurring plans', testData.recurring_plans, 'fundraising-toolkit' ),
+                                    _n( '%d test recurring plan', '%d test recurring plans', testData.recurring_plans, 'gratora' ),
                                     testData.recurring_plans
                                 ) }
                             </li>
@@ -303,23 +303,23 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                                         '%d donor, who would have nothing left on record',
                                         '%d donors, who would have nothing left on record',
                                         testData.donors,
-                                        'fundraising-toolkit'
+                                        'gratora'
                                     ),
                                     testData.donors
                                 ) }
                             </li>
                         ) }
                     </ul>
-                    <div className="fundkit-advanced-actions" style={ { marginTop: 12 } }>
-                        <label className="fundkit-tools-field">
+                    <div className="gratora-advanced-actions" style={ { marginTop: 12 } }>
+                        <label className="gratora-tools-field">
                             { sprintf(
                                 /* translators: %s: the literal confirmation keyword to type (DELETE) */
-                                __( 'Type %s to confirm.', 'fundraising-toolkit' ),
+                                __( 'Type %s to confirm.', 'gratora' ),
                                 CONFIRM_WORD
                             ) }
                             <input
                                 type="text"
-                                className="fundkit-input"
+                                className="gratora-input"
                                 value={ purgeText }
                                 onChange={ ( e ) => setPurgeText( e.target.value ) }
                                 disabled={ purging }
@@ -331,19 +331,19 @@ export default function MaintenanceTab( { info, infoError, active, loadInfo, set
                             disabled={ purging || purgeText.trim().toUpperCase() !== CONFIRM_WORD }
                             isBusy={ purging }
                         >
-                            { purging ? __( 'Removing…', 'fundraising-toolkit' ) : __( 'Delete test data', 'fundraising-toolkit' ) }
+                            { purging ? __( 'Removing…', 'gratora' ) : __( 'Delete test data', 'gratora' ) }
                         </Btn>
                     </div>
                 </Card>
             ) }
 
             <Card
-                title={ __( 'Setup wizard', 'fundraising-toolkit' ) }
-                sub={ __( 'Walks through currency, the first campaign, and a payment gateway. Re-running it changes nothing you have already set unless you complete a step.', 'fundraising-toolkit' ) }
+                title={ __( 'Setup wizard', 'gratora' ) }
+                sub={ __( 'Walks through currency, the first campaign, and a payment gateway. Re-running it changes nothing you have already set unless you complete a step.', 'gratora' ) }
             >
-                <div className="fundkit-advanced-actions">
-                    <Btn variant="secondary" href="admin.php?page=fundkit-onboarding">
-                        { __( 'Open setup wizard', 'fundraising-toolkit' ) }
+                <div className="gratora-advanced-actions">
+                    <Btn variant="secondary" href="admin.php?page=gratora-onboarding">
+                        { __( 'Open setup wizard', 'gratora' ) }
                     </Btn>
                 </div>
             </Card>

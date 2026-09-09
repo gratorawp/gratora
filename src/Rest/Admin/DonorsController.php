@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
-use FundKit\Analytics\ErrorLog;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorAvatars;
-use FundKit\Donors\DonorMetricsService;
-use FundKit\Donors\DonorNoteRepository;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\EmailAlreadyAssignedException;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
-use FundKit\Rest\Paging;
-use FundKit\Vendor\Queryable\DB;
+namespace Gratora\Rest\Admin;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorAvatars;
+use Gratora\Donors\DonorMetricsService;
+use Gratora\Donors\DonorNoteRepository;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\EmailAlreadyAssignedException;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
+use Gratora\Rest\Paging;
+use Gratora\Vendor\Queryable\DB;
 use InvalidArgumentException;
 use Throwable;
 use WP_Error;
@@ -28,7 +28,7 @@ use WP_REST_Server;
 /** @since 1.0.0 */
 final class DonorsController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     // TEXT holds 65,535 bytes and a note body is stored as AES-GCM ciphertext,
     // base64 of iv + tag + ciphertext. An overflow truncates silently and the
@@ -106,7 +106,7 @@ final class DonorsController
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)', [
             'methods'             => 'PATCH',
             'callback'            => [$this, 'update'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_edit_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_edit_donors'),
             'args'                => [
                 'id'         => ['type' => 'integer', 'required' => true],
                 'email'      => ['type' => 'string', 'format' => 'email'],
@@ -149,7 +149,7 @@ final class DonorsController
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'atRiskExport'],
             // Bulk PII (names + emails): gate on the export cap, not just view.
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_export_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_export_donors'),
         ]);
 
         // Minting a portal login is an action the admin takes, never something
@@ -158,7 +158,7 @@ final class DonorsController
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)/portal-link', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'issuePortalLink'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_edit_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_edit_donors'),
             'args'                => [
                 'id' => ['type' => 'integer', 'required' => true],
             ],
@@ -167,7 +167,7 @@ final class DonorsController
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)/notes', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'createNote'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_edit_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_edit_donors'),
             'args'                => [
                 'id'   => ['type' => 'integer', 'required' => true],
                 'body' => ['type' => 'string',  'required' => true, 'maxLength' => self::NOTE_MAX_LENGTH],
@@ -177,7 +177,7 @@ final class DonorsController
         register_rest_route(self::NAMESPACE, '/admin/donors/notes/(?P<note_id>\d+)', [
             'methods'             => 'DELETE',
             'callback'            => [$this, 'deleteNote'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_edit_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_edit_donors'),
             'args'                => [
                 'note_id' => ['type' => 'integer', 'required' => true],
             ],
@@ -186,7 +186,7 @@ final class DonorsController
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)/export', [
             'methods'             => WP_REST_Server::READABLE,
             'callback'            => [$this, 'exportPersonalData'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_export_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_export_donors'),
             'args'                => [
                 'id' => ['type' => 'integer', 'required' => true],
             ],
@@ -197,7 +197,7 @@ final class DonorsController
             'callback'            => [$this, 'delete'],
             // Erasing and deleting are both irreversible, so they answer to the
             // same capability.
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_redact_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_redact_donors'),
             'args'                => [
                 'id' => ['type' => 'integer', 'required' => true],
             ],
@@ -206,7 +206,7 @@ final class DonorsController
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)/redact', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'redact'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_redact_donors'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_redact_donors'),
             'args'                => [
                 'id'           => ['type' => 'integer', 'required' => true],
                 'confirmation' => ['type' => 'string',  'required' => true],
@@ -223,9 +223,9 @@ final class DonorsController
     /** @since 1.0.0 */
     public function profile(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
-        $payload = $this->metrics->profile((int) $request['id'], Capabilities::userCan('fundkit_edit_donors'));
+        $payload = $this->metrics->profile((int) $request['id'], Capabilities::userCan('gratora_edit_donors'));
         if (! $payload) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
         }
         return new WP_REST_Response($payload, 200);
     }
@@ -235,7 +235,7 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
         }
 
         $perPage = (int) $request['per_page'];
@@ -257,14 +257,14 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
         }
         // This handler writes name/company/country via a direct UPDATE and
         // phone/address via setEncryptedField, neither of which passes through
         // DonorService::editProfile's guard, so the whole edit is blocked here
         // or those writes would re-populate an erased row.
         if ($donor->redacted_at !== null) {
-            return new WP_Error('fundkit_donor_redacted', __('This donor has been erased and can no longer be edited.', 'fundraising-toolkit'), ['status' => 422]);
+            return new WP_Error('gratora_donor_redacted', __('This donor has been erased and can no longer be edited.', 'gratora'), ['status' => 422]);
         }
 
         // Present keys set the value, empty string clears to NULL. Direct
@@ -333,7 +333,7 @@ final class DonorsController
             DB::transaction(function () use ($donor, $params, $update, &$changed): void {
                 if ($update) {
                     $update['updated_at'] = gmdate('Y-m-d H:i:s');
-                    DB::table('fundkit_donors')->where('id', $donor->id)->update($update);
+                    DB::table('gratora_donors')->where('id', $donor->id)->update($update);
                     $changed = true;
 
                     // The email write below saves the whole model, so the model
@@ -372,20 +372,20 @@ final class DonorsController
             });
         } catch (EmailAlreadyAssignedException $e) {
             return new WP_Error(
-                'fundkit_email_collision',
+                'gratora_email_collision',
                 /* translators: %d: donor id that already owns the requested email */
-                sprintf(__('Another donor (#%d) already uses that email. Merge donors first if you want to consolidate them.', 'fundraising-toolkit'), $e->existingDonorId),
+                sprintf(__('Another donor (#%d) already uses that email. Merge donors first if you want to consolidate them.', 'gratora'), $e->existingDonorId),
                 ['status' => 409, 'existing_donor_id' => $e->existingDonorId]
             );
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('fundkit_invalid_email', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('gratora_invalid_email', $e->getMessage(), ['status' => 422]);
         }
 
         if ($changed) {
-            do_action('fundkit.donor.updated', $this->donors->findById($donor->id));
+            do_action('gratora.donor.updated', $this->donors->findById($donor->id));
         }
 
-        return new WP_REST_Response($this->metrics->profile($donor->id, Capabilities::userCan('fundkit_edit_donors')), 200);
+        return new WP_REST_Response($this->metrics->profile($donor->id, Capabilities::userCan('gratora_edit_donors')), 200);
     }
 
     /** @since 1.0.0 */
@@ -406,7 +406,7 @@ final class DonorsController
     public function atRiskExport(WP_REST_Request $request): WP_REST_Response
     {
         $csv      = $this->metrics->atRiskCsv();
-        $filename = 'fundkit-at-risk-' . gmdate('Y-m-d') . '.csv';
+        $filename = 'gratora-at-risk-' . gmdate('Y-m-d') . '.csv';
         $route    = $request->get_route();
 
         add_filter('rest_pre_serve_request', function (bool $served, $result, $req, $server) use ($route, $csv, $filename) {
@@ -435,7 +435,7 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('fundkit_donor_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_donor_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
         }
 
         // Asked here rather than read off a null, because issuePortalLink also
@@ -444,8 +444,8 @@ final class DonorsController
         // even rendered for an erased donor, so the message was always wrong.
         if ($donor->redacted_at !== null) {
             return new WP_Error(
-                'fundkit_portal_link_unavailable',
-                __('A sign-in link cannot be issued for an erased donor.', 'fundraising-toolkit'),
+                'gratora_portal_link_unavailable',
+                __('A sign-in link cannot be issued for an erased donor.', 'gratora'),
                 ['status' => 409]
             );
         }
@@ -453,8 +453,8 @@ final class DonorsController
         $link = $this->metrics->issuePortalLink($donor);
         if ($link === null) {
             return new WP_Error(
-                'fundkit_portal_link_failed',
-                __('The sign-in link could not be created. Please try again.', 'fundraising-toolkit'),
+                'gratora_portal_link_failed',
+                __('The sign-in link could not be created. Please try again.', 'gratora'),
                 ['status' => 500]
             );
         }
@@ -471,7 +471,7 @@ final class DonorsController
         $donorId = (int) $request['id'];
         $donor   = $this->donors->findById($donorId);
         if (! $donor) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
         }
 
         // redact() early-returns on an already-redacted row, so free text
@@ -480,8 +480,8 @@ final class DonorsController
         // number or a reason for the erasure gets typed.
         if ($donor->redacted_at !== null) {
             return new WP_Error(
-                'fundkit_donor_redacted',
-                __('This donor has been erased, so nothing further can be recorded against them.', 'fundraising-toolkit'),
+                'gratora_donor_redacted',
+                __('This donor has been erased, so nothing further can be recorded against them.', 'gratora'),
                 ['status' => 422]
             );
         }
@@ -489,7 +489,7 @@ final class DonorsController
         $params = $request->get_json_params() ?: $request->get_body_params();
         $body   = trim((string) ($params['body'] ?? ''));
         if ($body === '') {
-            return new WP_Error('fundkit_invalid', __('Note body is required.', 'fundraising-toolkit'), ['status' => 400]);
+            return new WP_Error('gratora_invalid', __('Note body is required.', 'gratora'), ['status' => 400]);
         }
         $note = $this->notes->create($donorId, $body, get_current_user_id() ?: null);
         return new WP_REST_Response($note, 201);
@@ -501,10 +501,10 @@ final class DonorsController
         $noteId = (int) $request['note_id'];
         $note = $this->notes->findById($noteId);
         if (! $note) {
-            return new WP_Error('fundkit_not_found', __('Note not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Note not found.', 'gratora'), ['status' => 404]);
         }
         if (! DonorNoteRepository::deletableBy($note, get_current_user_id())) {
-            return new WP_Error('fundkit_forbidden', __('You cannot delete this note.', 'fundraising-toolkit'), ['status' => 403]);
+            return new WP_Error('gratora_forbidden', __('You cannot delete this note.', 'gratora'), ['status' => 403]);
         }
         $this->notes->delete($noteId);
         return new WP_REST_Response(['deleted' => true], 200);
@@ -515,12 +515,12 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
         }
 
         $data = $this->metrics->exportData($donor->id);
         if ($data === null) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
         }
         $bundle = [
             'exported_at' => gmdate('c'),
@@ -534,7 +534,7 @@ final class DonorsController
         ];
 
         $json     = wp_json_encode($bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $filename = sprintf('fundkit-donor-%d-%s.json', $donor->id, gmdate('Y-m-d'));
+        $filename = sprintf('gratora-donor-%d-%s.json', $donor->id, gmdate('Y-m-d'));
         $route    = $request->get_route();
 
         add_filter('rest_pre_serve_request', function (bool $served, $result, $req, $server) use ($route, $json, $filename) {
@@ -599,12 +599,12 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
         }
 
         $reason = $this->donorService->undeletableReason($donor);
         if ($reason !== null) {
-            return new WP_Error('fundkit_donor_not_deletable', $reason, ['status' => 409]);
+            return new WP_Error('gratora_donor_not_deletable', $reason, ['status' => 409]);
         }
 
         try {
@@ -613,13 +613,13 @@ final class DonorsController
             // The receipt and refund guards run inside the transaction, where
             // the pre-check cannot see them, and they mean the same thing to
             // the operator as the pre-check's own refusal.
-            return new WP_Error('fundkit_donor_not_deletable', $e->getMessage(), ['status' => 409]);
+            return new WP_Error('gratora_donor_not_deletable', $e->getMessage(), ['status' => 409]);
         } catch (Throwable $e) {
             ErrorLog::record('admin.donor.delete', $e->getMessage(), ['donor_id' => (int) $donor->id]);
 
             return new WP_Error(
-                'fundkit_delete_failed',
-                __('The donor was not deleted. The reason is in the log under Tools.', 'fundraising-toolkit'),
+                'gratora_delete_failed',
+                __('The donor was not deleted. The reason is in the log under Tools.', 'gratora'),
                 ['status' => 500]
             );
         }
@@ -637,10 +637,10 @@ final class DonorsController
     {
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
-            return new WP_Error('fundkit_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
         }
         if ($donor->redacted_at !== null) {
-            return new WP_Error('fundkit_already_redacted', __('This donor is already redacted.', 'fundraising-toolkit'), ['status' => 409]);
+            return new WP_Error('gratora_already_redacted', __('This donor is already redacted.', 'gratora'), ['status' => 409]);
         }
 
         $params = $request->get_json_params() ?: $request->get_body_params() ?: [];
@@ -649,8 +649,8 @@ final class DonorsController
         $expected = $this->donorService->decryptEmail($donor) ?: sprintf('DONOR_%d', $donor->id);
         if ($confirmation === '' || strcasecmp($confirmation, $expected) !== 0) {
             return new WP_Error(
-                'fundkit_confirmation_mismatch',
-                __('Confirmation does not match the donor email. Redact cancelled.', 'fundraising-toolkit'),
+                'gratora_confirmation_mismatch',
+                __('Confirmation does not match the donor email. Redact cancelled.', 'gratora'),
                 ['status' => 422],
             );
         }
@@ -669,14 +669,14 @@ final class DonorsController
 
             if ($liveBefore === []) {
                 return new WP_Error(
-                    'fundkit_redact_failed',
-                    __('The donor was not erased. The reason is in the log under Tools.', 'fundraising-toolkit'),
+                    'gratora_redact_failed',
+                    __('The donor was not erased. The reason is in the log under Tools.', 'gratora'),
                     ['status' => 500],
                 );
             }
 
             return new WP_Error(
-                'fundkit_redact_failed',
+                'gratora_redact_failed',
                 $stopped > 0
                     ? sprintf(
                         /* translators: 1: how many recurring plans were stopped, 2: how many are still billing. */
@@ -684,12 +684,12 @@ final class DonorsController
                             'The donor was not erased. %1$d recurring plan was stopped first, and %2$d is still billing: cancel it at the gateway, then try again.',
                             'The donor was not erased. %1$d recurring plans were stopped first, and %2$d are still billing: cancel them at the gateway, then try again.',
                             $stopped,
-                            'fundraising-toolkit'
+                            'gratora'
                         ),
                         $stopped,
                         count($stillLive)
                     )
-                    : __('The donor was not erased: their recurring plans could not be stopped. Cancel them at the gateway, then try again.', 'fundraising-toolkit'),
+                    : __('The donor was not erased: their recurring plans could not be stopped. Cancel them at the gateway, then try again.', 'gratora'),
                 [
                     'status'           => 502,
                     'stopped'          => $stopped,
@@ -723,7 +723,7 @@ final class DonorsController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('fundkit_view_donors');
+        return Capabilities::userCan('gratora_view_donors');
     }
 
     /** @since 1.0.0 */
@@ -815,7 +815,7 @@ final class DonorsController
     private function donorName(Donor $d): string
     {
         if ($d->redacted_at !== null) {
-            return __('[redacted]', 'fundraising-toolkit');
+            return __('[redacted]', 'gratora');
         }
 
         $full = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));

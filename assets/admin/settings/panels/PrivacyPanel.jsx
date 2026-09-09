@@ -1,7 +1,7 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { formatDate } from '@fundkit/ui/utils/format';
+import { formatDate } from '@gratora/ui/utils/format';
 
 import Card from '../../_shared/components/Card';
 import FormRow from '../../_shared/components/FormRow';
@@ -19,7 +19,7 @@ function RetentionPreview( { years, inForce } ) {
         // Choosing a window is several keystrokes, and each one is a count over
         // the donor table.
         const timer = setTimeout( () => {
-            apiFetch( { path: `/fundkit/v1/admin/settings/retention-preview?days=30&years=${ years }` } )
+            apiFetch( { path: `/gratora/v1/admin/settings/retention-preview?days=30&years=${ years }` } )
                 .then( ( d ) => { if ( ! aborted ) setData( d ); } )
                 .catch( () => { if ( ! aborted ) setData( null ); } );
         }, 400 );
@@ -31,8 +31,8 @@ function RetentionPreview( { years, inForce } ) {
 
     if ( ! data.years ) {
         return (
-            <p className="fundkit-muted">
-                { __( 'No window is set, so nothing is erased automatically. Enter a number of years above.', 'fundraising-toolkit' ) }
+            <p className="gratora-muted">
+                { __( 'No window is set, so nothing is erased automatically. Enter a number of years above.', 'gratora' ) }
             </p>
         );
     }
@@ -51,7 +51,7 @@ function RetentionPreview( { years, inForce } ) {
                 '%s donor is past this window.',
                 '%s donors are past this window.',
                 now,
-                'fundraising-toolkit'
+                'gratora'
             ),
             now.toLocaleString()
         ) );
@@ -63,7 +63,7 @@ function RetentionPreview( { years, inForce } ) {
                     '%s in total reaches it within 30 days.',
                     '%s in total reach it within 30 days.',
                     soon,
-                    'fundraising-toolkit'
+                    'gratora'
                 ),
                 soon.toLocaleString()
             ) );
@@ -75,18 +75,18 @@ function RetentionPreview( { years, inForce } ) {
                 '%s donor reaches this window within 30 days.',
                 '%s donors reach this window within 30 days.',
                 soon,
-                'fundraising-toolkit'
+                'gratora'
             ),
             soon.toLocaleString()
         ) );
     }
 
     if ( lines.length === 0 ) {
-        lines.push( __( 'No donor is due for erasure in the next 30 days.', 'fundraising-toolkit' ) );
+        lines.push( __( 'No donor is due for erasure in the next 30 days.', 'gratora' ) );
     } else if ( ! inForce ) {
-        lines.push( __( 'Nothing is erased until this is saved.', 'fundraising-toolkit' ) );
+        lines.push( __( 'Nothing is erased until this is saved.', 'gratora' ) );
     } else if ( ! pending ) {
-        lines.push( __( 'They are erased on the next nightly run.', 'fundraising-toolkit' ) );
+        lines.push( __( 'They are erased on the next nightly run.', 'gratora' ) );
     }
 
     // Only once the window is the saved one. While it is still being chosen the
@@ -95,7 +95,7 @@ function RetentionPreview( { years, inForce } ) {
     if ( pending && inForce ) {
         lines.push( sprintf(
             /* translators: %s: a date. */
-            __( 'Nothing is erased before %s.', 'fundraising-toolkit' ),
+            __( 'Nothing is erased before %s.', 'gratora' ),
             formatDate( new Date( startsAt ).toISOString() )
         ) );
     }
@@ -112,7 +112,7 @@ function RetentionPreview( { years, inForce } ) {
         );
     }
 
-    return <p className="fundkit-muted">{ lines.join( ' ' ) }</p>;
+    return <p className="gratora-muted">{ lines.join( ' ' ) }</p>;
 }
 
 /**
@@ -120,7 +120,7 @@ function RetentionPreview( { years, inForce } ) {
  * infrastructure.
  */
 function ProxyFix( { s } ) {
-    const detected = window.fundkit?.detectedProxy || null;
+    const detected = window.gratora?.detectedProxy || null;
     const current  = s.value( 'trusted_proxies', [] ) || [];
 
     if ( ! detected || current.length ) {
@@ -128,14 +128,14 @@ function ProxyFix( { s } ) {
     }
 
     const label = detected === 'cloudflare'
-        ? __( 'This site is behind Cloudflare.', 'fundraising-toolkit' )
-        : __( 'This site is behind a proxy or load balancer.', 'fundraising-toolkit' );
+        ? __( 'This site is behind Cloudflare.', 'gratora' )
+        : __( 'This site is behind a proxy or load balancer.', 'gratora' );
 
     return (
         <Notice status="warning" isDismissible={ false }>
             <p>
                 <strong>{ label }</strong>{ ' ' }
-                { __( 'Every visitor is reaching the site as the same address, so spam limits are counting the whole site as one visitor. Donors can be turned away because of somebody else.', 'fundraising-toolkit' ) }
+                { __( 'Every visitor is reaching the site as the same address, so spam limits are counting the whole site as one visitor. Donors can be turned away because of somebody else.', 'gratora' ) }
             </p>
             <p>
                 <button
@@ -143,11 +143,11 @@ function ProxyFix( { s } ) {
                     className="button button-primary"
                     onClick={ () => s.setValue( 'trusted_proxies' )( [ detected ] ) }
                 >
-                    { __( 'Fix this', 'fundraising-toolkit' ) }
+                    { __( 'Fix this', 'gratora' ) }
                 </button>
                 { ' ' }
-                <span className="fundkit-muted">
-                    { __( 'Then save. Nothing else to look up.', 'fundraising-toolkit' ) }
+                <span className="gratora-muted">
+                    { __( 'Then save. Nothing else to look up.', 'gratora' ) }
                 </span>
             </p>
         </Notice>
@@ -165,34 +165,34 @@ export default function PrivacyPanel( { s } ) {
         && Number( s.savedRecord.donor_retention_years ) === Number( years );
 
     return (
-        <div className="fundkit-panel">
+        <div className="gratora-panel">
             <Card
-                title={ __( 'Donor data handling', 'fundraising-toolkit' ) }
-                sub={ __( 'Controls applied to the donor record, IP logs, and what donors can do from their portal.', 'fundraising-toolkit' ) }
+                title={ __( 'Donor data handling', 'gratora' ) }
+                sub={ __( 'Controls applied to the donor record, IP logs, and what donors can do from their portal.', 'gratora' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'Privacy policy URL', 'fundraising-toolkit' ) }
-                    help={ __( 'Linked from the donation form, wherever a privacy notice block is placed.', 'fundraising-toolkit' ) }
+                    label={ __( 'Privacy policy URL', 'gratora' ) }
+                    help={ __( 'Linked from the donation form, wherever a privacy notice block is placed.', 'gratora' ) }
                 >
                     <input
                         type="url"
-                        className="fundkit-input"
+                        className="gratora-input"
                         value={ s.value( 'privacy_policy_url', '' ) }
                         onChange={ ( e ) => s.edit( { privacy_policy_url: e.target.value } ) }
-                        placeholder={ __( 'Enter your privacy policy URL', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Enter your privacy policy URL', 'gratora' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Reunite window after redaction (days)', 'fundraising-toolkit' ) }
-                    fieldHelp={ __( 'An erased donor who gives again within this window keeps their giving history. After it, they start over as a new donor. Past donations stay counted either way. 0 severs the link at once; it does not mean off.', 'fundraising-toolkit' ) }
+                    label={ __( 'Reunite window after redaction (days)', 'gratora' ) }
+                    fieldHelp={ __( 'An erased donor who gives again within this window keeps their giving history. After it, they start over as a new donor. Past donations stay counted either way. 0 severs the link at once; it does not mean off.', 'gratora' ) }
                 >
                     <input
                         type="number"
                         min={ 0 }
                         max={ 3650 }
-                        className="fundkit-input"
+                        className="gratora-input"
                         style={ { maxWidth: 120 } }
                         value={ s.value( 'retention_days_after_redaction', 90 ) }
                         onChange={ ( e ) => s.edit( { retention_days_after_redaction: parseInt( e.target.value, 10 ) || 0 } ) }
@@ -200,8 +200,8 @@ export default function PrivacyPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Erase inactive donors automatically', 'fundraising-toolkit' ) }
-                    sub={ __( 'While this is off, a donor is only ever erased because they asked or because an admin erased them. Turning it on lets a nightly run erase donors who have gone years without giving.', 'fundraising-toolkit' ) }
+                    title={ __( 'Erase inactive donors automatically', 'gratora' ) }
+                    sub={ __( 'While this is off, a donor is only ever erased because they asked or because an admin erased them. Turning it on lets a nightly run erase donors who have gone years without giving.', 'gratora' ) }
                     checked={ eraseInactive }
                     onChange={ s.setValue( 'erase_inactive_donors' ) }
                 />
@@ -209,14 +209,14 @@ export default function PrivacyPanel( { s } ) {
                 { eraseInactive && (
                     <>
                         <FormRow
-                            label={ __( 'Erase donors inactive for (years)', 'fundraising-toolkit' ) }
-                            fieldHelp={ __( 'Donors with no donation for this long are erased on the nightly run, as if they had asked. Anyone on a recurring plan is skipped. Their donations stay counted.', 'fundraising-toolkit' ) }
+                            label={ __( 'Erase donors inactive for (years)', 'gratora' ) }
+                            fieldHelp={ __( 'Donors with no donation for this long are erased on the nightly run, as if they had asked. Anyone on a recurring plan is skipped. Their donations stay counted.', 'gratora' ) }
                         >
                             <input
                                 type="number"
                                 min={ 1 }
                                 max={ 100 }
-                                className="fundkit-input"
+                                className="gratora-input"
                                 style={ { maxWidth: 120 } }
                                 { ...s.bindNumber( 'donor_retention_years' ) }
                             />
@@ -227,14 +227,14 @@ export default function PrivacyPanel( { s } ) {
                 ) }
 
                 <FormRow
-                    label={ __( 'Keep the activity log for (days)', 'fundraising-toolkit' ) }
-                    fieldHelp={ __( 'Older entries are deleted. Only the log is affected; donations, donors and receipts are kept. 0 turns this off.', 'fundraising-toolkit' ) }
+                    label={ __( 'Keep the activity log for (days)', 'gratora' ) }
+                    fieldHelp={ __( 'Older entries are deleted. Only the log is affected; donations, donors and receipts are kept. 0 turns this off.', 'gratora' ) }
                 >
                     <input
                         type="number"
                         min={ 0 }
                         max={ 36500 }
-                        className="fundkit-input"
+                        className="gratora-input"
                         style={ { maxWidth: 120 } }
                         value={ s.value( 'event_retention_days', 730 ) }
                         onChange={ ( e ) => s.edit( { event_retention_days: parseInt( e.target.value, 10 ) || 0 } ) }
@@ -242,8 +242,8 @@ export default function PrivacyPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Anonymize IPs in event logs', 'fundraising-toolkit' ) }
-                    sub={ __( 'IPs are hashed (SHA-256) before storage. Only the country is kept in clear text.', 'fundraising-toolkit' ) }
+                    title={ __( 'Anonymize IPs in event logs', 'gratora' ) }
+                    sub={ __( 'IPs are hashed (SHA-256) before storage. Only the country is kept in clear text.', 'gratora' ) }
                     checked={ !! s.value( 'anonymize_ips', true ) }
                     onChange={ s.setValue( 'anonymize_ips' ) }
                 />
@@ -251,12 +251,12 @@ export default function PrivacyPanel( { s } ) {
                 <ProxyFix s={ s } />
 
                 <FormRow
-                    label={ __( 'What is in front of this site', 'fundraising-toolkit' ) }
-                    help={ __( 'Leave empty unless a CDN, load balancer or reverse proxy serves this site. Write cloudflare, or private_ranges for a proxy on your own network, or list addresses and CIDR ranges one per line. Spam limits count visitors by address, and behind a proxy every visitor arrives as the proxy, so the whole site would share one visitor\'s allowance.', 'fundraising-toolkit' ) }
+                    label={ __( 'What is in front of this site', 'gratora' ) }
+                    help={ __( 'Leave empty unless a CDN, load balancer or reverse proxy serves this site. Write cloudflare, or private_ranges for a proxy on your own network, or list addresses and CIDR ranges one per line. Spam limits count visitors by address, and behind a proxy every visitor arrives as the proxy, so the whole site would share one visitor\'s allowance.', 'gratora' ) }
                     wide
                 >
                     <textarea
-                        className="fundkit-textarea"
+                        className="gratora-textarea"
                         rows={ 3 }
                         spellCheck={ false }
                         placeholder={ 'cloudflare' }
@@ -268,29 +268,29 @@ export default function PrivacyPanel( { s } ) {
                 </FormRow>
 
                 <ToggleRow
-                    title={ __( 'Show Gravatar profile pictures', 'fundraising-toolkit' ) }
-                    sub={ __( "Donor lists show Gravatars instead of initials. Each one sends a hash of the donor's email to gravatar.com from the visitor's browser. Anonymous donors are never shown one.", 'fundraising-toolkit' ) }
+                    title={ __( 'Show Gravatar profile pictures', 'gratora' ) }
+                    sub={ __( "Donor lists show Gravatars instead of initials. Each one sends a hash of the donor's email to gravatar.com from the visitor's browser. Anonymous donors are never shown one.", 'gratora' ) }
                     checked={ !! s.value( 'gravatar_avatars', false ) }
                     onChange={ s.setValue( 'gravatar_avatars' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Default new donations to anonymous', 'fundraising-toolkit' ) }
-                    sub={ __( 'Pre-check the anonymous toggle on every donation form. Donors can opt out.', 'fundraising-toolkit' ) }
+                    title={ __( 'Default new donations to anonymous', 'gratora' ) }
+                    sub={ __( 'Pre-check the anonymous toggle on every donation form. Donors can opt out.', 'gratora' ) }
                     checked={ !! s.value( 'always_anonymous_default', false ) }
                     onChange={ s.setValue( 'always_anonymous_default' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Allow data export from portal', 'fundraising-toolkit' ) }
-                    sub={ __( 'Donors can download a JSON archive of their data from the portal.', 'fundraising-toolkit' ) }
+                    title={ __( 'Allow data export from portal', 'gratora' ) }
+                    sub={ __( 'Donors can download a JSON archive of their data from the portal.', 'gratora' ) }
                     checked={ !! s.value( 'allow_data_export', true ) }
                     onChange={ s.setValue( 'allow_data_export' ) }
                 />
 
                 <ToggleRow
-                    title={ __( 'Allow account delete from portal', 'fundraising-toolkit' ) }
-                    sub={ __( 'Donors can request redaction directly. Donations and receipts are kept either way, for tax and accounting; only the personal details are erased.', 'fundraising-toolkit' ) }
+                    title={ __( 'Allow account delete from portal', 'gratora' ) }
+                    sub={ __( 'Donors can request redaction directly. Donations and receipts are kept either way, for tax and accounting; only the personal details are erased.', 'gratora' ) }
                     checked={ !! s.value( 'allow_account_delete', true ) }
                     onChange={ s.setValue( 'allow_account_delete' ) }
                 />

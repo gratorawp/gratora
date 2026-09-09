@@ -11,18 +11,18 @@ import { notify } from '../../../_shared/notify';
 import { formatAmount, formatDateTime, timeAgo, donationStatusPill } from '../helpers';
 
 const STATUS_OPTIONS = [
-    { value: 'paid',           label: __( 'Paid', 'fundraising-toolkit' ) },
-    { value: 'pending',        label: __( 'Pending', 'fundraising-toolkit' ) },
-    { value: 'processing',     label: __( 'Processing', 'fundraising-toolkit' ) },
-    { value: 'failed',         label: __( 'Failed', 'fundraising-toolkit' ) },
-    { value: 'refunded',       label: __( 'Refunded', 'fundraising-toolkit' ) },
-    { value: 'partial_refund', label: __( 'Partial refund', 'fundraising-toolkit' ) },
-    { value: 'disputed',       label: __( 'Disputed', 'fundraising-toolkit' ) },
+    { value: 'paid',           label: __( 'Paid', 'gratora' ) },
+    { value: 'pending',        label: __( 'Pending', 'gratora' ) },
+    { value: 'processing',     label: __( 'Processing', 'gratora' ) },
+    { value: 'failed',         label: __( 'Failed', 'gratora' ) },
+    { value: 'refunded',       label: __( 'Refunded', 'gratora' ) },
+    { value: 'partial_refund', label: __( 'Partial refund', 'gratora' ) },
+    { value: 'disputed',       label: __( 'Disputed', 'gratora' ) },
 ];
 
 function donationHref( reference ) {
     return addQueryArgs( window.location.pathname, {
-        page:      'fundkit-donations',
+        page:      'gratora-donations',
         view:      'detail',
         reference,
     } );
@@ -64,7 +64,7 @@ export default function DonationsTab( { donorId, redacted } ) {
     useEffect( () => {
         let aborted = false;
         setLoading( true );
-        apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/donations', apiParams ), parse: false } )
+        apiFetch( { path: addQueryArgs( '/gratora/v1/admin/donations', apiParams ), parse: false } )
             .then( async ( res ) => {
                 if ( aborted ) return;
                 const items = await res.json();
@@ -72,7 +72,7 @@ export default function DonationsTab( { donorId, redacted } ) {
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
                 setError( '' );
             } )
-            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load donations. Refresh to try again.', 'fundraising-toolkit' ) ); } } )
+            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load donations. Refresh to try again.', 'gratora' ) ); } } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ apiParams ] );
@@ -80,9 +80,9 @@ export default function DonationsTab( { donorId, redacted } ) {
     const fields = useMemo( () => [
         {
             id:    'reference',
-            label: __( 'Reference', 'fundraising-toolkit' ),
+            label: __( 'Reference', 'gratora' ),
             render: ( { item } ) => (
-                <span className="fundkit-ref-cell">
+                <span className="gratora-ref-cell">
                     <a
                         href={ donationHref( item.reference ) }
                         style={ { fontFamily: 'ui-monospace, monospace', fontSize: 12.5, color: '#34306b', textDecoration: 'none' } }
@@ -90,14 +90,14 @@ export default function DonationsTab( { donorId, redacted } ) {
                         { item.reference }
                     </a>
                     { item.is_test && (
-                        <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundraising-toolkit' ) }</span>
+                        <span className="gratora-pill gratora-pill--test">{ __( 'Test', 'gratora' ) }</span>
                     ) }
                 </span>
             ),
         },
         {
             id:    'amount',
-            label: __( 'Amount', 'fundraising-toolkit' ),
+            label: __( 'Amount', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontWeight: 500 } }>
@@ -107,7 +107,7 @@ export default function DonationsTab( { donorId, redacted } ) {
         },
         {
             id:    'status',
-            label: __( 'Status', 'fundraising-toolkit' ),
+            label: __( 'Status', 'gratora' ),
             elements: STATUS_OPTIONS,
             enableSorting: false,
             filterBy: { operators: [ 'is' ] },
@@ -118,19 +118,19 @@ export default function DonationsTab( { donorId, redacted } ) {
         },
         {
             id:    'frequency',
-            label: __( 'Frequency', 'fundraising-toolkit' ),
+            label: __( 'Frequency', 'gratora' ),
             render: ( { item } ) => item.frequency === 'one_time'
-                ? __( 'One-time', 'fundraising-toolkit' )
+                ? __( 'One-time', 'gratora' )
                 : <span style={ { textTransform: 'capitalize' } }>{ item.frequency }</span>,
         },
         {
             id:    'campaign',
-            label: __( 'Campaign', 'fundraising-toolkit' ),
+            label: __( 'Campaign', 'gratora' ),
             render: ( { item } ) => item.campaign?.title || '-',
         },
         {
             id:    'created_at',
-            label: __( 'When', 'fundraising-toolkit' ),
+            label: __( 'When', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => {
                 const iso = item.paid_at || item.created_at;
@@ -156,7 +156,7 @@ export default function DonationsTab( { donorId, redacted } ) {
     const actions = useMemo( () => [
         {
             id:           'mark-paid',
-            label:        __( 'Mark as paid', 'fundraising-toolkit' ),
+            label:        __( 'Mark as paid', 'gratora' ),
             icon:         () => <CheckIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             isEligible:   ( item ) => item.status === 'pending' || item.status === 'processing',
@@ -165,28 +165,28 @@ export default function DonationsTab( { donorId, redacted } ) {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'fundraising-toolkit' )
+                    ? __( 'Mark this donation as paid? A receipt will be sent.', 'gratora' )
                     : sprintf(
                         /* translators: %d: number of donations */
                         _n(
                             'Mark %d donation as paid? Receipts will be sent.',
                             'Mark %d donations as paid? Receipts will be sent.',
                             n,
-                            'fundraising-toolkit'
+                            'gratora'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Mark donations as paid', 'fundraising-toolkit' ),
+                    title:        __( 'Mark donations as paid', 'gratora' ),
                     message,
-                    confirmLabel: __( 'Mark as paid', 'fundraising-toolkit' ),
+                    confirmLabel: __( 'Mark as paid', 'gratora' ),
                     onConfirm: async () => {
                         // allSettled and a finally: a partial failure still
                         // confirmed some of them and emailed those donors a
                         // receipt, and skipping the refetch left those rows
                         // reading Pending on screen.
                         const results = await Promise.allSettled( targets.map( ( i ) => apiFetch( {
-                            path:   `/fundkit/v1/admin/donations/${ encodeURIComponent( i.reference ) }/mark-paid`,
+                            path:   `/gratora/v1/admin/donations/${ encodeURIComponent( i.reference ) }/mark-paid`,
                             method: 'POST',
                         } ) ) );
 
@@ -196,14 +196,14 @@ export default function DonationsTab( { donorId, redacted } ) {
                         if ( done > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'fundraising-toolkit' ),
+                                _n( '%d donation marked paid.', '%d donations marked paid.', done, 'gratora' ),
                                 done
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: number of donations */
-                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'fundraising-toolkit' ),
+                                _n( '%d donation could not be marked paid.', '%d donations could not be marked paid.', failed, 'gratora' ),
                                 failed
                             ) );
                         }
@@ -215,7 +215,7 @@ export default function DonationsTab( { donorId, redacted } ) {
         },
         {
             id:           'resend-receipt',
-            label:        __( 'Resend receipt', 'fundraising-toolkit' ),
+            label:        __( 'Resend receipt', 'gratora' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // An erased donor has no address left to send a receipt to.
@@ -229,21 +229,21 @@ export default function DonationsTab( { donorId, redacted } ) {
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Resend the receipt for this donation?', 'fundraising-toolkit' )
+                    ? __( 'Resend the receipt for this donation?', 'gratora' )
                     : sprintf(
                         /* translators: %d: number of donations */
-                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'fundraising-toolkit' ),
+                        _n( 'Resend receipts for %d donation?', 'Resend receipts for %d donations?', n, 'gratora' ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Resend receipts', 'fundraising-toolkit' ),
+                    title:        __( 'Resend receipts', 'gratora' ),
                     message,
-                    confirmLabel: __( 'Resend', 'fundraising-toolkit' ),
+                    confirmLabel: __( 'Resend', 'gratora' ),
                     onConfirm: async () => {
                         // Silence read as nothing happening, so admins pressed
                         // it again and donors got the receipt twice.
                         const results = await Promise.allSettled( targets.map( ( i ) => apiFetch( {
-                            path:   `/fundkit/v1/admin/donations/${ encodeURIComponent( i.reference ) }/resend-receipt`,
+                            path:   `/gratora/v1/admin/donations/${ encodeURIComponent( i.reference ) }/resend-receipt`,
                             method: 'POST',
                         } ) ) );
 
@@ -253,14 +253,14 @@ export default function DonationsTab( { donorId, redacted } ) {
                         if ( sent > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'fundraising-toolkit' ),
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'gratora' ),
                                 sent
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'fundraising-toolkit' ),
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'gratora' ),
                                 failed
                             ) );
                         }
@@ -271,7 +271,7 @@ export default function DonationsTab( { donorId, redacted } ) {
     ], [ refetch, redacted ] );
 
     return (
-        <div className="fundkit-dataviews dp-donations-dv">
+        <div className="gratora-dataviews dp-donations-dv">
             { error && (
                 <Notice status="error" isDismissible={ false }>{ error }</Notice>
             ) }
@@ -285,7 +285,7 @@ export default function DonationsTab( { donorId, redacted } ) {
                 paginationInfo={ paginationInfo }
                 defaultLayouts={ { table: {} } }
                 getItemId={ ( item ) => String( item.id ) }
-                searchLabel={ __( 'Search by reference', 'fundraising-toolkit' ) }
+                searchLabel={ __( 'Search by reference', 'gratora' ) }
             />
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </div>

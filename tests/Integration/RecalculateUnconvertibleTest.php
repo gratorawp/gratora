@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
+use Gratora\Donations\Donation;
 use WP_REST_Request;
 
 /**
@@ -18,19 +18,19 @@ final class RecalculateUnconvertibleTest extends IntegrationTestCase
     {
         parent::setUp();
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
-        delete_option('fundkit_recalculate_cursor');
+        delete_option('gratora_recalculate_cursor');
 
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'JPY'],
         ]);
         // No rate for JPY, which is what makes those donations unconvertible.
-        update_option('fundkit_fx_rates', ['base' => 'USD', 'rates' => []]);
+        update_option('gratora_fx_rates', ['base' => 'USD', 'rates' => []]);
     }
 
     protected function tearDown(): void
     {
-        delete_option('fundkit_recalculate_cursor');
+        delete_option('gratora_recalculate_cursor');
         parent::tearDown();
     }
 
@@ -56,7 +56,7 @@ final class RecalculateUnconvertibleTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function recalculate(): array
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/recalculate');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/tools/recalculate');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['scope' => 'all']));
 

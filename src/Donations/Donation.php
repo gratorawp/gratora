@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donations;
+namespace Gratora\Donations;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Foundation\Database\UpdatesColumns;
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Foundation\Database\UpdatesColumns;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /**
  * Donation intent or completed donation.
@@ -23,7 +23,7 @@ final class Donation extends Model
 {
     use UpdatesColumns;
 
-    protected string $table = 'fundkit_donations';
+    protected string $table = 'gratora_donations';
     protected string $version = '1.0.0';
 
     public int $id;

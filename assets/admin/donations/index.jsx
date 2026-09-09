@@ -1,4 +1,4 @@
-// FundKit admin: Donations. Two views: list + detail, routed via URLSearchParams.
+// Gratora admin: Donations. Two views: list + detail, routed via URLSearchParams.
 
 import { createRoot } from '@wordpress/element';
 
@@ -19,7 +19,7 @@ function App() {
 }
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'fundkit-admin-donations' );
+    const root = document.getElementById( 'gratora-admin-donations' );
     if ( ! root ) return;
     createRoot( root ).render( <><App /><Toaster /></> );
 } );

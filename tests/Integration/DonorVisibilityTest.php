@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorAggregateSyncer;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Exports\DonorExporter;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorAggregateSyncer;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Exports\DonorExporter;
+use Gratora\Foundation\Plugin;
 
 /**
  * Who counts as a donor on the Donors screen.
@@ -86,7 +86,7 @@ final class DonorVisibilityTest extends IntegrationTestCase
         $this->seedDonation($testOnly, true);
 
         $insights = Plugin::instance()->container
-            ->get(\FundKit\Donors\DonorMetricsService::class)
+            ->get(\Gratora\Donors\DonorMetricsService::class)
             ->insights();
 
         $segmentTotal = 0;
@@ -115,7 +115,7 @@ final class DonorVisibilityTest extends IntegrationTestCase
         }
 
         $lifetime = Plugin::instance()->container
-            ->get(\FundKit\Donors\DonorMetricsService::class)
+            ->get(\Gratora\Donors\DonorMetricsService::class)
             ->profile($id)['lifetime'];
 
         $this->assertSame(27, (int) $lifetime['count']);
@@ -131,7 +131,7 @@ final class DonorVisibilityTest extends IntegrationTestCase
         $id = $this->donor('receipts-total@example.com');
 
         $profile = Plugin::instance()->container
-            ->get(\FundKit\Donors\DonorMetricsService::class)
+            ->get(\Gratora\Donors\DonorMetricsService::class)
             ->profile($id);
 
         // The list is capped like the others, so the badge needs its own count.
@@ -148,7 +148,7 @@ final class DonorVisibilityTest extends IntegrationTestCase
         $this->seedDonation($id, true);
 
         $profile = Plugin::instance()->container
-            ->get(\FundKit\Donors\DonorMetricsService::class)
+            ->get(\Gratora\Donors\DonorMetricsService::class)
             ->profile($id);
 
         $this->assertSame(2, (int) $profile['donations_total'], 'both read this');
@@ -166,7 +166,7 @@ final class DonorVisibilityTest extends IntegrationTestCase
         $this->seedDonation($id, true);
 
         $profile = Plugin::instance()->container
-            ->get(\FundKit\Donors\DonorMetricsService::class)
+            ->get(\Gratora\Donors\DonorMetricsService::class)
             ->profile($id);
 
         // The tab lists these rows, so the badge above it has to agree.
@@ -181,7 +181,7 @@ final class DonorVisibilityTest extends IntegrationTestCase
         $this->seedDonation($id, true);
 
         $insights = Plugin::instance()->container
-            ->get(\FundKit\Donors\DonorMetricsService::class)
+            ->get(\Gratora\Donors\DonorMetricsService::class)
             ->insights();
 
         // Insights reads the donor rollup columns, which are live-only by

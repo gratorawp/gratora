@@ -49,12 +49,12 @@ import { PresetEditor } from '../../assets/admin/settings/panels/BrandPanel';
 
 /** Tokens.php, verbatim. */
 const CATALOGUE = {
-    'fundkit-accent':        { group: 'brand',    label: 'Accent',           default: '#211d3f', control: 'color' },
-    'fundkit-accent-soft':   { group: 'brand',    label: 'Accent soft',      default: '#efedf8', control: 'color' },
-    'fundkit-text':          { group: 'brand',    label: 'Body text',        default: '#111827', control: 'color' },
-    'fundkit-radius':        { group: 'radius',   label: 'Corner radius',    default: '10px',    control: 'range' },
-    'fundkit-gap':           { group: 'spacing',  label: 'Block spacing',    default: '20px',    control: 'range' },
-    'fundkit-button-border': { group: 'buttons',  label: 'Button border',    default: '0',       control: 'select', options: { 0: 'None (filled)', '1px solid currentColor': 'Outline thin' } },
+    'gratora-accent':        { group: 'brand',    label: 'Accent',           default: '#211d3f', control: 'color' },
+    'gratora-accent-soft':   { group: 'brand',    label: 'Accent soft',      default: '#efedf8', control: 'color' },
+    'gratora-text':          { group: 'brand',    label: 'Body text',        default: '#111827', control: 'color' },
+    'gratora-radius':        { group: 'radius',   label: 'Corner radius',    default: '10px',    control: 'range' },
+    'gratora-gap':           { group: 'spacing',  label: 'Block spacing',    default: '20px',    control: 'range' },
+    'gratora-button-border': { group: 'buttons',  label: 'Button border',    default: '0',       control: 'select', options: { 0: 'None (filled)', '1px solid currentColor': 'Outline thin' } },
 };
 
 const DEFAULTS = Object.fromEntries(
@@ -65,20 +65,20 @@ const GROUPS = { brand: 'Brand colors', radius: 'Radius + borders', spacing: 'Sp
 
 /** StylePresets::builtins(), the Quiet subset this catalogue covers. */
 const QUIET = {
-    'fundkit-accent':        '#111827',
-    'fundkit-accent-soft':   '#f3f4f6',
-    'fundkit-radius':        '0px',
-    'fundkit-gap':           '28px',
-    'fundkit-button-border': '1px solid currentColor',
+    'gratora-accent':        '#111827',
+    'gratora-accent-soft':   '#f3f4f6',
+    'gratora-radius':        '0px',
+    'gratora-gap':           '28px',
+    'gratora-button-border': '1px solid currentColor',
 };
 
 beforeEach( () => {
     document.body.innerHTML = '<div id="root"></div>';
-    window.fundkit = { styling: { catalogue: CATALOGUE, groups: GROUPS, defaults: DEFAULTS } };
+    window.gratora = { styling: { catalogue: CATALOGUE, groups: GROUPS, defaults: DEFAULTS } };
 } );
 
 afterEach( () => {
-    delete window.fundkit;
+    delete window.gratora;
 } );
 
 /**
@@ -110,16 +110,16 @@ function mountPreset( { edits = {}, builtin = true, shipped = QUIET } = {} ) {
 }
 
 const row = ( host, label ) =>
-    [ ...host.querySelectorAll( '.fundkit-token-editor__row' ) ].find(
-        ( r ) => r.querySelector( '.fundkit-token-editor__label' ).textContent === label
+    [ ...host.querySelectorAll( '.gratora-token-editor__row' ) ].find(
+        ( r ) => r.querySelector( '.gratora-token-editor__label' ).textContent === label
     );
 
 const resettable = ( host ) =>
-    [ ...host.querySelectorAll( '.fundkit-token-editor__row' ) ]
-        .filter( ( r ) => r.querySelector( '.fundkit-token-editor__reset' ) )
-        .map( ( r ) => r.querySelector( '.fundkit-token-editor__label' ).textContent );
+    [ ...host.querySelectorAll( '.gratora-token-editor__row' ) ]
+        .filter( ( r ) => r.querySelector( '.gratora-token-editor__reset' ) )
+        .map( ( r ) => r.querySelector( '.gratora-token-editor__label' ).textContent );
 
-const reset = ( host, label ) => row( host, label ).querySelector( '.fundkit-token-editor__reset' ).click();
+const reset = ( host, label ) => row( host, label ).querySelector( '.gratora-token-editor__reset' ).click();
 
 it( 'offers nothing to reset on a built-in the org has not touched', () => {
     const { host } = mountPreset();
@@ -128,7 +128,7 @@ it( 'offers nothing to reset on a built-in the org has not touched', () => {
 } );
 
 it( 'offers it on the one row the org changed', () => {
-    const { host } = mountPreset( { edits: { 'fundkit-accent': '#c62828', 'fundkit-gap': '32px' } } );
+    const { host } = mountPreset( { edits: { 'gratora-accent': '#c62828', 'gratora-gap': '32px' } } );
 
     expect( resettable( host ) ).toEqual( [ 'Accent', 'Block spacing' ] );
 } );
@@ -139,26 +139,26 @@ it( 'offers it on the one row the org changed', () => {
  * reason: shipped has no entry to match.
  */
 it( 'offers it on a key the built-in does not ship', () => {
-    const { host } = mountPreset( { edits: { 'fundkit-text': '#333333' } } );
+    const { host } = mountPreset( { edits: { 'gratora-text': '#333333' } } );
 
     expect( resettable( host ) ).toEqual( [ 'Body text' ] );
 } );
 
 it( 'restores the value the built-in ships, not the catalogue default', () => {
-    const { host, onTokens } = mountPreset( { edits: { 'fundkit-accent': '#c62828' } } );
+    const { host, onTokens } = mountPreset( { edits: { 'gratora-accent': '#c62828' } } );
 
     reset( host, 'Accent' );
 
     expect( onTokens ).toHaveBeenCalledTimes( 1 );
-    expect( onTokens.mock.calls[ 0 ][ 0 ][ 'fundkit-accent' ] ).toBe( '#111827' );
+    expect( onTokens.mock.calls[ 0 ][ 0 ][ 'gratora-accent' ] ).toBe( '#111827' );
 } );
 
 it( 'leaves the rest of the map alone', () => {
-    const { host, onTokens } = mountPreset( { edits: { 'fundkit-accent': '#c62828', 'fundkit-gap': '32px' } } );
+    const { host, onTokens } = mountPreset( { edits: { 'gratora-accent': '#c62828', 'gratora-gap': '32px' } } );
 
     reset( host, 'Accent' );
 
-    expect( onTokens.mock.calls[ 0 ][ 0 ] ).toEqual( { ...QUIET, 'fundkit-gap': '32px' } );
+    expect( onTokens.mock.calls[ 0 ][ 0 ] ).toEqual( { ...QUIET, 'gratora-gap': '32px' } );
 } );
 
 /**
@@ -166,13 +166,13 @@ it( 'leaves the rest of the map alone', () => {
  * it is the org's and Reset drops the key entirely.
  */
 it( 'drops the key on a custom preset, where the catalogue is the layer beneath', () => {
-    const { host, onTokens } = mountPreset( { builtin: false, edits: { 'fundkit-accent': '#c62828' } } );
+    const { host, onTokens } = mountPreset( { builtin: false, edits: { 'gratora-accent': '#c62828' } } );
 
     expect( resettable( host ) ).toEqual( [ 'Accent' ] );
 
     reset( host, 'Accent' );
 
-    expect( onTokens.mock.calls[ 0 ][ 0 ] ).not.toHaveProperty( 'fundkit-accent' );
+    expect( onTokens.mock.calls[ 0 ][ 0 ] ).not.toHaveProperty( 'gratora-accent' );
 } );
 
 /**
@@ -200,19 +200,19 @@ describe( 'a call site whose value carries overrides only', () => {
     };
 
     it( 'offers Reset on each of them', () => {
-        const { host } = mountInline( { 'fundkit-accent': '#c62828' } );
+        const { host } = mountInline( { 'gratora-accent': '#c62828' } );
 
         expect( resettable( host ) ).toEqual( [ 'Accent' ] );
     } );
 
     it( 'offers it even when the override repeats the preset', () => {
-        const { host } = mountInline( { 'fundkit-accent': '#111827' } );
+        const { host } = mountInline( { 'gratora-accent': '#111827' } );
 
         expect( resettable( host ) ).toEqual( [ 'Accent' ] );
     } );
 
     it( 'drops the key rather than pinning a value', () => {
-        const { host, onChange } = mountInline( { 'fundkit-accent': '#c62828' } );
+        const { host, onChange } = mountInline( { 'gratora-accent': '#c62828' } );
 
         reset( host, 'Accent' );
 
@@ -229,9 +229,9 @@ describe( 'a call site whose value carries overrides only', () => {
  */
 describe( 'a colour typed back in the other case', () => {
     it( 'is not an override', () => {
-        const { host } = mountPreset( { edits: { 'fundkit-accent-soft': QUIET[ 'fundkit-accent-soft' ].toUpperCase() } } );
+        const { host } = mountPreset( { edits: { 'gratora-accent-soft': QUIET[ 'gratora-accent-soft' ].toUpperCase() } } );
 
-        expect( QUIET[ 'fundkit-accent-soft' ] ).toMatch( /[a-f]/ );
+        expect( QUIET[ 'gratora-accent-soft' ] ).toMatch( /[a-f]/ );
         expect( resettable( host ) ).toEqual( [] );
     } );
 
@@ -239,22 +239,22 @@ describe( 'a colour typed back in the other case', () => {
         const { host, onTokens } = mountPreset();
 
         const picker = row( host, 'Accent soft' ).querySelector( '.picker' );
-        picker.value = QUIET[ 'fundkit-accent-soft' ].toUpperCase();
+        picker.value = QUIET[ 'gratora-accent-soft' ].toUpperCase();
         picker.dispatchEvent( new Event( 'input', { bubbles: true } ) );
 
         expect( onTokens ).toHaveBeenCalled();
-        expect( onTokens.mock.calls[ 0 ][ 0 ][ 'fundkit-accent-soft' ] ).toBe( QUIET[ 'fundkit-accent-soft' ] );
+        expect( onTokens.mock.calls[ 0 ][ 0 ][ 'gratora-accent-soft' ] ).toBe( QUIET[ 'gratora-accent-soft' ] );
     } );
 
     it( 'still tells two different colours apart', () => {
-        const { host } = mountPreset( { edits: { 'fundkit-accent': '#C62828' } } );
+        const { host } = mountPreset( { edits: { 'gratora-accent': '#C62828' } } );
 
         expect( resettable( host ) ).toEqual( [ 'Accent' ] );
     } );
 
     /** A font stack is not a colour: its case is the author's. */
     it( 'leaves a non-colour compared as stored', () => {
-        const { host } = mountPreset( { edits: { 'fundkit-gap': '28PX' } } );
+        const { host } = mountPreset( { edits: { 'gratora-gap': '28PX' } } );
 
         expect( resettable( host ) ).toEqual( [ 'Block spacing' ] );
     } );

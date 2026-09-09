@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -44,7 +44,7 @@ final class ChangeIntervalRoutesTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $req = new WP_REST_Request('POST', "/fundkit/v1/admin/recurring/{$id}/action");
+        $req = new WP_REST_Request('POST', "/gratora/v1/admin/recurring/{$id}/action");
         $req->set_body_params($body);
 
         return rest_do_request($req);
@@ -71,7 +71,7 @@ final class ChangeIntervalRoutesTest extends IntegrationTestCase
         ]);
 
         $this->assertNotSame(404, $res->get_status(), 'the route exists');
-        $this->assertNotSame('fundkit_invalid_action', $this->errorCode($res), 'and the action name is known');
+        $this->assertNotSame('gratora_invalid_action', $this->errorCode($res), 'and the action name is known');
     }
 
     public function test_a_schedule_this_site_cannot_name_is_refused(): void
@@ -94,7 +94,7 @@ final class ChangeIntervalRoutesTest extends IntegrationTestCase
         $plan = $this->plan();
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        foreach ((array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/recurring'))->get_data() as $row) {
+        foreach ((array) rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/recurring'))->get_data() as $row) {
             if ((int) ($row['id'] ?? 0) !== (int) $plan->id) {
                 continue;
             }

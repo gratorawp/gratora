@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Receipts\ReceiptContext;
+use Gratora\Receipts\ReceiptContext;
 use WP_REST_Request;
 
 /**
@@ -19,7 +19,7 @@ final class ReceiptOrgVatIdTest extends IntegrationTestCase
     private function orgOnTheReceipt(): array
     {
         $seen = null;
-        add_filter('fundkit.receipt.context', static function (ReceiptContext $ctx) use (&$seen) {
+        add_filter('gratora.receipt.context', static function (ReceiptContext $ctx) use (&$seen) {
             $seen = $ctx->org;
             return $ctx;
         });
@@ -34,7 +34,7 @@ final class ReceiptOrgVatIdTest extends IntegrationTestCase
 
     public function test_the_vat_id_an_org_saved_reaches_the_receipt(): void
     {
-        update_option('fundkit_org_profile', [
+        update_option('gratora_org_profile', [
             'legal_name'    => 'Helping Hands Foundation e.V.',
             'address_lines' => ['1 Market Street'],
             'tax_id'        => 'DE-CHARITY-99',
@@ -50,7 +50,7 @@ final class ReceiptOrgVatIdTest extends IntegrationTestCase
 
     public function test_an_org_with_no_vat_id_carries_an_empty_one_rather_than_nothing(): void
     {
-        update_option('fundkit_org_profile', [
+        update_option('gratora_org_profile', [
             'legal_name'    => 'Helping Hands',
             'address_lines' => ['1 Market Street'],
             'email'         => 'hello@example.org',
@@ -61,7 +61,7 @@ final class ReceiptOrgVatIdTest extends IntegrationTestCase
 
     private function driveDonationToPaid(): string
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'vat-' . uniqid() . '@example.test',
@@ -72,7 +72,7 @@ final class ReceiptOrgVatIdTest extends IntegrationTestCase
         ]));
         $reference = (string) rest_do_request($create)->get_data()['reference'];
 
-        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);
@@ -87,7 +87,7 @@ final class ReceiptOrgVatIdTest extends IntegrationTestCase
      */
     public function test_a_skipped_address_line_is_not_printed_as_a_blank_line(): void
     {
-        update_option('fundkit_org_profile', [
+        update_option('gratora_org_profile', [
             'legal_name'    => 'Helping Hands',
             'address_lines' => ['Kirchweg 3', null, 'Berlin'],
             'email'         => 'hello@example.org',
@@ -98,7 +98,7 @@ final class ReceiptOrgVatIdTest extends IntegrationTestCase
 
     public function test_an_org_with_no_address_still_gets_a_list(): void
     {
-        update_option('fundkit_org_profile', [
+        update_option('gratora_org_profile', [
             'legal_name' => 'Helping Hands',
             'email'      => 'hello@example.org',
         ], false);

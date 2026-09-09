@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\Form;
+use Gratora\Forms\Form;
 use WP_REST_Request;
 
 /**
@@ -20,7 +20,7 @@ final class FormReadinessUnsavedSettingsTest extends IntegrationTestCase
     {
         parent::setUp();
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
-        update_option('fundkit_gateway_config', ['test_mode' => false]);
+        update_option('gratora_gateway_config', ['test_mode' => false]);
     }
 
     /** @param array<string,mixed> $settings */
@@ -44,7 +44,7 @@ final class FormReadinessUnsavedSettingsTest extends IntegrationTestCase
      */
     private function check(Form $form, string $id, ?array $settings = null): ?array
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms/' . (int) $form->id . '/readiness');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms/' . (int) $form->id . '/readiness');
         $req->set_param('id', (int) $form->id);
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(

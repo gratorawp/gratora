@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors\Portal;
+namespace Gratora\Donors\Portal;
 
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\MagicLinkService;
-use FundKit\Donors\MagicLinkToken;
-use FundKit\Donors\PendingSignupRepository;
-use FundKit\Donors\SignupRedemption;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\MagicLinkService;
+use Gratora\Donors\MagicLinkToken;
+use Gratora\Donors\PendingSignupRepository;
+use Gratora\Donors\SignupRedemption;
 
 /**
  * Cookie-backed donor session for the portal, opened by a magic link.
@@ -17,7 +17,7 @@ use FundKit\Donors\SignupRedemption;
  */
 final class PortalSession
 {
-    private const COOKIE = 'fundkit_donor_session';
+    private const COOKIE = 'gratora_donor_session';
 
     /** Purpose of the magic link that opens a session for an existing donor. */
     public const PORTAL_PURPOSE = 'donor_portal';
@@ -159,7 +159,7 @@ final class PortalSession
 
         $index = $this->index($donorId);
         foreach ($index as $hash) {
-            delete_transient('fundkit_portal_' . $hash);
+            delete_transient('gratora_portal_' . $hash);
         }
         delete_transient(self::indexKey($donorId));
 
@@ -218,7 +218,7 @@ final class PortalSession
         $index[] = self::hash($sid);
 
         foreach (array_splice($index, 0, max(0, count($index) - self::MAX_PER_DONOR)) as $evicted) {
-            delete_transient('fundkit_portal_' . $evicted);
+            delete_transient('gratora_portal_' . $evicted);
         }
 
         set_transient(self::indexKey($donorId), $index, self::MAX_SECONDS);
@@ -268,12 +268,12 @@ final class PortalSession
     /** @since 1.0.0 */
     private static function transientKey(string $sid): string
     {
-        return 'fundkit_portal_' . self::hash($sid);
+        return 'gratora_portal_' . self::hash($sid);
     }
 
     /** @since 1.0.0 */
     private static function indexKey(int $donorId): string
     {
-        return 'fundkit_portal_sids_' . $donorId;
+        return 'gratora_portal_sids_' . $donorId;
     }
 }

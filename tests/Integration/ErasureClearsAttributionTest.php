@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\ChannelClassifier;
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\ChannelClassifier;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 
 /**
  * `source_attribution` is filled from the donor's own browser: the page they
@@ -37,7 +37,7 @@ final class ErasureClearsAttributionTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference          = 'FUNDKIT-ATTR-' . uniqid();
+        $d->reference          = 'GRATORA-ATTR-' . uniqid();
         $d->donor_id           = $this->donorId;
         $d->amount_cents       = 4000;
         $d->base_amount_cents  = 4000;
@@ -90,7 +90,7 @@ final class ErasureClearsAttributionTest extends IntegrationTestCase
         global $wpdb;
         $stored = (string) $wpdb->get_var($wpdb->prepare(
             "SELECT CONCAT(COALESCE(source_attribution,''), COALESCE(failure_reason,'')) "
-            . "FROM {$wpdb->prefix}fundkit_donations WHERE id = %d",
+            . "FROM {$wpdb->prefix}gratora_donations WHERE id = %d",
             $this->donationId
         ));
 
@@ -128,7 +128,7 @@ final class ErasureClearsAttributionTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference          = 'FUNDKIT-ATTR-CLEAN-' . uniqid();
+        $d->reference          = 'GRATORA-ATTR-CLEAN-' . uniqid();
         $d->donor_id           = $this->donorId;
         $d->amount_cents       = 1500;
         $d->base_amount_cents  = 1500;

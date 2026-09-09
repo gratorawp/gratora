@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Shortcode;
+namespace Gratora\Forms\Shortcode;
 
 /**
  * Browser-side registry for donor fields that ship outside core: defines
- * window.fundkit.formFields inline and fires an action so an add-on can enqueue
+ * window.gratora.formFields inline and fires an action so an add-on can enqueue
  * the component, validation and payload contribution for its own field kind.
  *
- * The walker (fundkit.form.block_field) puts the field in the runtime config; this
+ * The walker (gratora.form.block_field) puts the field in the runtime config; this
  * is the other half, the code that renders it. An entry may supply any of
  * `component`, `values`, `validate` and `payload`; the runtime reads the
  * registry at render, validation and submit, so a bundle may load in either
@@ -19,16 +19,16 @@ namespace FundKit\Forms\Shortcode;
  */
 final class FormFieldAssets
 {
-    public const HANDLE = 'fundkit-form-fields';
+    public const HANDLE = 'gratora-form-fields';
 
     /** Add-ons hook this to enqueue their field components. */
-    public const ACTION = 'fundkit.form.fields';
+    public const ACTION = 'gratora.form.fields';
 
     /** @since 1.0.0 */
     public static function enqueue(): void
     {
         if (! wp_script_is(self::HANDLE, 'registered')) {
-            wp_register_script(self::HANDLE, false, [], FUNDKIT_VERSION, true);
+            wp_register_script(self::HANDLE, false, [], GRATORA_VERSION, true);
             wp_add_inline_script(self::HANDLE, self::registryJs());
         }
         wp_enqueue_script(self::HANDLE);
@@ -40,8 +40,8 @@ final class FormFieldAssets
     private static function registryJs(): string
     {
         return <<<'JS'
-window.fundkit = window.fundkit || {};
-window.fundkit.formFields = window.fundkit.formFields || (function () {
+window.gratora = window.gratora || {};
+window.gratora.formFields = window.gratora.formFields || (function () {
     var items = {};
     return {
         register: function (kind, entry) {

@@ -32,10 +32,10 @@ jest.mock( '@wordpress/components', () => ( {
     Dropdown: () => null,
 } ) );
 
-import TokenEditor from '@fundkit/ui/styling/TokenEditor';
+import TokenEditor from '@gratora/ui/styling/TokenEditor';
 
 const CATALOGUE = {
-    'fundkit-radius-sm': {
+    'gratora-radius-sm': {
         group: 'radius', label: 'Small corner radius', control: 'range', min: 0, max: 16, step: 1, default: '8px',
     },
 };
@@ -59,7 +59,7 @@ function mount( defaults, onChange = () => {} ) {
 }
 
 it( 'shows a theme rem instead of a slider reading 1', () => {
-    const host = mount( { 'fundkit-radius-sm': '1rem' } );
+    const host = mount( { 'gratora-radius-sm': '1rem' } );
 
     expect( host.querySelector( 'input[type=range]' ) ).toBeNull();
     expect( host.querySelector( 'input[type=text]' ).value ).toBe( '1rem' );
@@ -67,14 +67,14 @@ it( 'shows a theme rem instead of a slider reading 1', () => {
 } );
 
 it( 'shows a pill instead of a slider clamped to the maximum', () => {
-    const host = mount( { 'fundkit-radius-sm': '9999px' } );
+    const host = mount( { 'gratora-radius-sm': '9999px' } );
 
     expect( host.querySelector( 'input[type=range]' ) ).toBeNull();
     expect( host.querySelector( 'input[type=text]' ).value ).toBe( '9999px' );
 } );
 
 it( 'keeps the slider for a size it can hold', () => {
-    const host = mount( { 'fundkit-radius-sm': '8px' } );
+    const host = mount( { 'gratora-radius-sm': '8px' } );
 
     expect( host.querySelector( 'input[type=text]' ) ).toBeNull();
     expect( host.querySelector( 'input[type=range]' ).value ).toBe( '8' );
@@ -86,22 +86,22 @@ it( 'keeps the slider when nothing is set', () => {
 
 it( 'writes what was typed over an unslidable value', () => {
     let out = null;
-    const host = mount( { 'fundkit-radius-sm': '1rem' }, ( v ) => { out = v; } );
+    const host = mount( { 'gratora-radius-sm': '1rem' }, ( v ) => { out = v; } );
 
     const field = host.querySelector( 'input[type=text]' );
     field.value = '0.5rem';
     field.dispatchEvent( new Event( 'input', { bubbles: true } ) );
 
-    expect( out ).toEqual( { 'fundkit-radius-sm': '0.5rem' } );
+    expect( out ).toEqual( { 'gratora-radius-sm': '0.5rem' } );
 } );
 
 it( 'still writes pixels from the slider', () => {
     let out = null;
-    const host = mount( { 'fundkit-radius-sm': '8px' }, ( v ) => { out = v; } );
+    const host = mount( { 'gratora-radius-sm': '8px' }, ( v ) => { out = v; } );
 
     const slider = host.querySelector( 'input[type=range]' );
     slider.value = '6';
     slider.dispatchEvent( new Event( 'input', { bubbles: true } ) );
 
-    expect( out ).toEqual( { 'fundkit-radius-sm': '6px' } );
+    expect( out ).toEqual( { 'gratora-radius-sm': '6px' } );
 } );

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Consent;
-use FundKit\Donors\ConsentService;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Donors\Consent;
+use Gratora\Donors\ConsentService;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 
 /**
  * A consent row is the record of what somebody agreed to. The registry entry
@@ -93,7 +93,7 @@ final class ConsentWordingTest extends IntegrationTestCase
         $this->consents()->record($donorId, 'newsletter', true);
 
         $profile = Plugin::instance()->container
-            ->get(\FundKit\Donors\DonorMetricsService::class)
+            ->get(\Gratora\Donors\DonorMetricsService::class)
             ->profile($donorId);
 
         $history = $profile['consents']['history'] ?? [];

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Assets;
+namespace Gratora\Tests\Unit\Assets;
 
-use FundKit\Settings\SettingsService;
+use Gratora\Settings\SettingsService;
 use PHPUnit\Framework\TestCase;
 
 /**

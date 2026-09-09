@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Currency;
+namespace Gratora\Currency;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationQueries;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
 
 /**
  * Lock the base currency after money is recorded: stored base amounts cannot be reinterpreted

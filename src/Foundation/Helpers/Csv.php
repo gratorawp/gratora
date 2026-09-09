@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Helpers;
+namespace Gratora\Foundation\Helpers;
 
 /**
  * CSV helpers with formula-injection protection.

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Blocks;
+namespace Gratora\Campaigns\Blocks;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Campaigns\Styling\CampaignStyleVars;
-use FundKit\Campaigns\Styling\PageStyle;
-use FundKit\Forms\Blocks\Block;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Campaigns\Styling\CampaignStyleVars;
+use Gratora\Campaigns\Styling\PageStyle;
+use Gratora\Forms\Blocks\Block;
 
 /**
  * Base for campaign-scoped page blocks. Resolves the campaign via an explicit
- * campaignId attribute or, when 0, falls back to the page's `_fundkit_campaign_id`
+ * campaignId attribute or, when 0, falls back to the page's `_gratora_campaign_id`
  * post meta.
  *
  * @since 1.0.0
@@ -93,7 +93,7 @@ abstract class CampaignBlock implements Block
         if ($id === 0) {
             global $post;
             if ($post instanceof \WP_Post) {
-                $id = (int) get_post_meta($post->ID, '_fundkit_campaign_id', true);
+                $id = (int) get_post_meta($post->ID, '_gratora_campaign_id', true);
             }
         }
         return $id > 0 ? $this->campaigns->findRenderable($id) : null;
@@ -119,19 +119,19 @@ abstract class CampaignBlock implements Block
         if ($id === 0) {
             global $post;
             if ($post instanceof \WP_Post) {
-                $id = (int) get_post_meta($post->ID, '_fundkit_campaign_id', true);
+                $id = (int) get_post_meta($post->ID, '_gratora_campaign_id', true);
             }
         }
 
         $bound = $id > 0 ? $this->campaigns->findById($id) : null;
         $message = $bound === null
-            ? __('This block is not bound to a campaign. Pick one in the block sidebar.', 'fundraising-toolkit')
+            ? __('This block is not bound to a campaign. Pick one in the block sidebar.', 'gratora')
             : sprintf(
                 /* translators: %s: the campaign's status, e.g. "draft". */
-                __('This campaign is %s, so this block is hidden from visitors. Publish the campaign to show it.', 'fundraising-toolkit'),
+                __('This campaign is %s, so this block is hidden from visitors. Publish the campaign to show it.', 'gratora'),
                 (string) $bound->status
             );
 
-        return '<div class="fundkit-block-notice">' . esc_html($message) . '</div>';
+        return '<div class="gratora-block-notice">' . esc_html($message) . '</div>';
     }
 }

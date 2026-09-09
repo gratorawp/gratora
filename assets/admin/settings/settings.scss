@@ -1,12 +1,12 @@
 
 @import '../campaigns/campaigns.scss';
 // ConfirmDialog requires CSS in addition to its JS import.
-@import '@fundkit/ui/scss/components/dialog';
+@import '@gratora/ui/scss/components/dialog';
 
 // Aliases for shared token names still used locally.
 $border: $border-mid;
 
-.fundkit-settings-page {
+.gratora-settings-page {
     max-width: 1480px;
     color: $text;
     font-variant-numeric: tabular-nums;
@@ -17,7 +17,7 @@ $border: $border-mid;
     }
 }
 
-.fundkit-crumbs {
+.gratora-crumbs {
     font-size: 13px;
     color: $text-muted;
     margin-bottom: 6px;
@@ -28,7 +28,7 @@ $border: $border-mid;
     .sep { margin: 0 6px; color: #cbd0d5; }
 }
 
-.fundkit-page-head {
+.gratora-page-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -60,7 +60,7 @@ $border: $border-mid;
     }
 }
 
-.fundkit-status-badge {
+.gratora-status-badge {
     font-size: 12px;
     font-weight: 500;
     padding: 3px 10px;
@@ -69,7 +69,7 @@ $border: $border-mid;
     color: $accent-dark;
 }
 
-.fundkit-banner {
+.gratora-banner {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -119,7 +119,7 @@ $border: $border-mid;
 }
 
 
-.fundkit-tabs {
+.gratora-tabs {
     position: relative;
     display: flex;
     align-items: stretch;
@@ -137,7 +137,7 @@ $border: $border-mid;
         row-gap: 2px;
     }
 
-    a, button.fundkit-tab {
+    a, button.gratora-tab {
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -188,14 +188,14 @@ $border: $border-mid;
     }
 }
 
-.fundkit-tab__icon {
+.gratora-tab__icon {
     width: 15px; height: 15px;
     color: currentColor;
     opacity: 0.9;
     flex-shrink: 0;
 }
 
-.fundkit-tab__dot {
+.gratora-tab__dot {
     width: 6px; height: 6px;
     border-radius: 50%;
     background: $accent;
@@ -206,18 +206,18 @@ $border: $border-mid;
     &.is-red   { background: $red; }
 }
 
-.fundkit-settings-page__body {
+.gratora-settings-page__body {
     min-width: 0;
 }
 
-.fundkit-panel { animation: fundkitPanelIn .12s ease-out; }
-.fundkit-panel[hidden] { display: none; }
-@keyframes fundkitPanelIn {
+.gratora-panel { animation: gratoraPanelIn .12s ease-out; }
+.gratora-panel[hidden] { display: none; }
+@keyframes gratoraPanelIn {
     from { opacity: 0; }
     to   { opacity: 1; }
 }
 
-.fundkit-section-bar {
+.gratora-section-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -238,10 +238,10 @@ $border: $border-mid;
     }
 }
 
-.fundkit-section-block { margin-bottom: 28px; }
+.gratora-section-block { margin-bottom: 28px; }
 
 
-.fundkit-pill {
+.gratora-pill {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -266,7 +266,7 @@ $border: $border-mid;
     }
 }
 
-.fundkit-edited-pill {
+.gratora-edited-pill {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -287,10 +287,10 @@ $border: $border-mid;
 
 
 
-.fundkit-stack-12 { display: flex; flex-direction: column; gap: 12px; }
-.fundkit-grid-2-eq { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.gratora-stack-12 { display: flex; flex-direction: column; gap: 12px; }
+.gratora-grid-2-eq { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-.fundkit-toggle-row {
+.gratora-toggle-row {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -316,7 +316,7 @@ $border: $border-mid;
 }
 
 
-.fundkit-brand-mark {
+.gratora-brand-mark {
     width: 28px; height: 28px;
     border-radius: 6px;
     display: inline-flex;
@@ -338,7 +338,7 @@ $border: $border-mid;
     &--razorpay      { background: linear-gradient(135deg, #3395ff 0%, #072654 100%); }
 }
 
-.fundkit-gateway-foot {
+.gratora-gateway-foot {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr auto;
     gap: 16px;
@@ -366,7 +366,7 @@ $border: $border-mid;
     }
 }
 
-.fundkit-connect-p {
+.gratora-connect-p {
     font-size: 13px;
     line-height: 1.6;
     color: $text-muted;
@@ -375,7 +375,7 @@ $border: $border-mid;
     strong { color: $text; }
 }
 
-.fundkit-connect-checks {
+.gratora-connect-checks {
     margin: 0 0 18px;
     padding: 0;
     list-style: none;
@@ -396,7 +396,7 @@ $border: $border-mid;
     }
 }
 
-.fundkit-connect-notice {
+.gratora-connect-notice {
     display: flex;
     gap: 10px;
     border-radius: 10px;
@@ -414,19 +414,19 @@ $border: $border-mid;
     &--accent { background: $accent-soft; color: $accent-dark; }
 }
 
-.fundkit-connect-options {
+.gratora-connect-options {
     margin-top: 18px;
     padding-top: 16px;
     border-top: 1px solid $border-soft;
 }
 
-.fundkit-stripe-modes {
+.gratora-stripe-modes {
     display: grid;
     gap: 14px;
     margin-top: 18px;
 }
 
-.fundkit-stripe-mode {
+.gratora-stripe-mode {
     padding: 16px;
     background: $bg-soft;
     border-radius: 9px;
@@ -459,7 +459,7 @@ $border: $border-mid;
     &__saved &__actions { margin-top: 0; }
 }
 
-.fundkit-readiness {
+.gratora-readiness {
     &__head {
         display: flex;
         align-items: flex-start;
@@ -507,7 +507,7 @@ $border: $border-mid;
     }
 }
 
-.fundkit-readiness-row {
+.gratora-readiness-row {
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -560,14 +560,14 @@ $border: $border-mid;
     }
 }
 
-.fundkit-merge-tags {
+.gratora-merge-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
     margin-bottom: 8px;
 }
 
-.fundkit-merge-tag {
+.gratora-merge-tag {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 11px;
     padding: 3px 7px;
@@ -581,7 +581,7 @@ $border: $border-mid;
     &:hover { background: $accent-soft; border-color: $accent; }
 }
 
-.fundkit-currency-preview {
+.gratora-currency-preview {
     display: inline-flex;
     align-items: baseline;
     gap: 10px;
@@ -606,12 +606,12 @@ $border: $border-mid;
     }
 }
 
-.fundkit-cur-chips {
+.gratora-cur-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
-.fundkit-cur-chip {
+.gratora-cur-chip {
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -643,18 +643,18 @@ $border: $border-mid;
         color: $accent-dark;
         font-weight: 500;
 
-        .fundkit-cur-chip__box { background: $accent; border-color: $accent; }
+        .gratora-cur-chip__box { background: $accent; border-color: $accent; }
     }
     &.is-locked { cursor: default; background: $bg-soft; color: $text-muted; }
 }
 
-.fundkit-fx-head {
+.gratora-fx-head {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.fundkit-fx {
+.gratora-fx {
     width: 100%;
     border-collapse: collapse;
     margin-top: 8px;
@@ -704,7 +704,7 @@ $border: $border-mid;
     &__reset:hover { text-decoration: underline; }
 }
 
-.fundkit-rate-input {
+.gratora-rate-input {
     width: 130px;
     padding: 6px 9px;
     text-align: right;
@@ -724,15 +724,15 @@ $border: $border-mid;
     &:disabled { background: $bg-soft; color: $text-muted; }
 }
 
-.fundkit-muted { color: $text-muted; font-size: 13px; }
+.gratora-muted { color: $text-muted; font-size: 13px; }
 
-.fundkit-roles-table {
+.gratora-roles-table {
     display: grid;
     overflow-x: auto;
 
     &__head {
         display: grid;
-        grid-template-columns: minmax(220px, 1fr) repeat(var(--fundkit-role-count, 4), minmax(120px, 1fr));
+        grid-template-columns: minmax(220px, 1fr) repeat(var(--gratora-role-count, 4), minmax(120px, 1fr));
         gap: 0;
         align-items: end;
         padding-bottom: 12px;
@@ -770,7 +770,7 @@ $border: $border-mid;
     }
     &__row {
         display: grid;
-        grid-template-columns: minmax(220px, 1fr) repeat(var(--fundkit-role-count, 4), minmax(120px, 1fr));
+        grid-template-columns: minmax(220px, 1fr) repeat(var(--gratora-role-count, 4), minmax(120px, 1fr));
         align-items: center;
         padding: 6px 0;
         border-bottom: 1px solid $bg-soft;
@@ -793,7 +793,7 @@ $border: $border-mid;
     }
 }
 
-.fundkit-advanced-info {
+.gratora-advanced-info {
     display: grid;
     grid-template-columns: 200px 1fr;
     gap: 0;
@@ -822,7 +822,7 @@ $border: $border-mid;
         }
     }
 }
-.fundkit-advanced-cron {
+.gratora-advanced-cron {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -834,7 +834,7 @@ $border: $border-mid;
     }
     em { color: $text-muted; font-style: normal; font-size: 12px; }
 }
-.fundkit-consents {
+.gratora-consents {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -845,7 +845,7 @@ $border: $border-mid;
     }
 }
 
-.fundkit-consent-card {
+.gratora-consent-card {
     background: #fff;
     border: 1px solid $border-soft;
     border-radius: 10px;
@@ -927,12 +927,12 @@ $border: $border-mid;
     &__chip-label { user-select: none; }
 }
 
-.fundkit-email-list {
+.gratora-email-list {
     display: flex;
     flex-direction: column;
 }
 
-.fundkit-email-row {
+.gratora-email-row {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -1011,14 +1011,14 @@ $border: $border-mid;
     &:hover &__recipient { background: #fff; }
 }
 
-.fundkit-ref-previews {
+.gratora-ref-previews {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 10px;
     margin-bottom: 20px;
 }
 
-.fundkit-ref-preview {
+.gratora-ref-preview {
     display: flex;
     flex-direction: column;
     gap: 7px;
@@ -1050,7 +1050,7 @@ $border: $border-mid;
     }
 }
 
-.fundkit-save-bar {
+.gratora-save-bar {
     position: fixed;
     left: 50%;
     bottom: 22px;
@@ -1065,7 +1065,7 @@ $border: $border-mid;
     border-radius: 999px;
     box-shadow: 0 10px 28px rgba(15, 23, 42, .25), 0 2px 8px rgba(15, 23, 42, .18);
     font-size: 13px;
-    animation: fundkitSaveBarIn .25s cubic-bezier(.2, .7, 0, 1);
+    animation: gratoraSaveBarIn .25s cubic-bezier(.2, .7, 0, 1);
 
     &__dot {
         width: 8px; height: 8px;
@@ -1112,18 +1112,18 @@ $border: $border-mid;
     }
 }
 
-@keyframes fundkitSaveBarIn {
+@keyframes gratoraSaveBarIn {
     from { transform: translate(-50%, 8px); opacity: 0; }
     to   { transform: translate(-50%, 0);   opacity: 1; }
 }
 
-.fundkit-email-editor-tabs {
+.gratora-email-editor-tabs {
     display: flex;
     gap: 6px;
     margin: 8px 0 16px;
     border-bottom: 1px solid $border-mid;
 }
-.fundkit-email-editor-tab {
+.gratora-email-editor-tab {
     appearance: none;
     background: transparent;
     border: 0;
@@ -1139,7 +1139,7 @@ $border: $border-mid;
     &.is-active { color: $accent; border-bottom-color: $accent; }
 }
 
-.fundkit-email-preview {
+.gratora-email-preview {
     background: #f9fafb;
     border-radius: 8px;
     padding: 18px 20px;
@@ -1173,8 +1173,8 @@ $border: $border-mid;
 }
 
 // Settings cards provide their own frame; remove the inherited panel frame.
-.fundkit-settings-page {
-    .fundkit-panel {
+.gratora-settings-page {
+    .gratora-panel {
         background: transparent;
         border: 0;
         box-shadow: none;
@@ -1191,7 +1191,7 @@ $border: $border-mid;
     *:focus:not(:focus-visible) { outline: none; box-shadow: none; }
 }
 
-.fundkit-brand-layout {
+.gratora-brand-layout {
     display: grid;
     grid-template-columns: 1fr 380px;
     gap: 16px;
@@ -1213,7 +1213,7 @@ $border: $border-mid;
     }
 }
 
-.fundkit-preset-mgr {
+.gratora-preset-mgr {
     display: grid;
     grid-template-columns: 220px 1fr;
     gap: 16px;
@@ -1295,7 +1295,7 @@ $border: $border-mid;
     }
 }
 
-.fundkit-preset-editor {
+.gratora-preset-editor {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -1337,7 +1337,7 @@ $border: $border-mid;
     }
 }
 
-.fundkit-advanced-when {
+.gratora-advanced-when {
     color: $text-muted;
     font-size: 11.5px;
 }

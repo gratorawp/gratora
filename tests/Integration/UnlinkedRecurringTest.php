@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\Stripe\StripeGateway;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\Stripe\StripeGateway;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -58,7 +58,7 @@ final class UnlinkedRecurringTest extends IntegrationTestCase
     {
         $d = Donation::make();
         $d->kind              = 'donation';
-        $d->reference         = 'FUNDKIT-UNLINKED-' . wp_rand(100000, 999999);
+        $d->reference         = 'GRATORA-UNLINKED-' . wp_rand(100000, 999999);
         $d->donor_id          = 1;
         $d->amount_cents      = 2500;
         $d->currency          = 'USD';
@@ -82,7 +82,7 @@ final class UnlinkedRecurringTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function fetch(): array
     {
-        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/recurring/unlinked'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/recurring/unlinked'));
         $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
 
         return (array) $res->get_data();

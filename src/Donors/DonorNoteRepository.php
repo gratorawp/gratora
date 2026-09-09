@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * Repository for DonorNote. Encrypts/decrypts body at the boundary.
@@ -76,7 +76,7 @@ final class DonorNoteRepository
     {
         $note = DonorNote::query()->find('id', $noteId);
         if (! $note) return false;
-        DB::table('fundkit_donor_notes')->where('id', $noteId)->delete();
+        DB::table('gratora_donor_notes')->where('id', $noteId)->delete();
         return true;
     }
 

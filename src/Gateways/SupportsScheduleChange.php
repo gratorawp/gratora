@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways;
+namespace Gratora\Gateways;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * Change amount and cadence atomically: Stripe Prices and PayPal plans bind both, and separate

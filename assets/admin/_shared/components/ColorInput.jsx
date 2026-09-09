@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/ColorInput';
+export { default } from '@gratora/ui/components/ColorInput';

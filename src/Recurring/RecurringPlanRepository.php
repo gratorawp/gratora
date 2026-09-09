@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Recurring;
+namespace Gratora\Recurring;
 
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Vendor\Queryable\DB;
-use FundKit\Vendor\Queryable\QueryBuilder;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Vendor\Queryable\DB;
+use Gratora\Vendor\Queryable\QueryBuilder;
 
 /** @since 1.0.0 */
 final class RecurringPlanRepository
@@ -121,9 +121,9 @@ final class RecurringPlanRepository
         // Atomic increments avoid lost updates from concurrent webhooks; the
         // transaction keeps the three writes consistent if one fails mid-way.
         DB::transaction(function () use ($plan, $amountCents, $update): void {
-            DB::table('fundkit_recurring_plans')->where('id', $plan->id)->update($update);
-            DB::table('fundkit_recurring_plans')->where('id', $plan->id)->increment('payments_count');
-            DB::table('fundkit_recurring_plans')->where('id', $plan->id)->increment('total_paid_cents', $amountCents);
+            DB::table('gratora_recurring_plans')->where('id', $plan->id)->update($update);
+            DB::table('gratora_recurring_plans')->where('id', $plan->id)->increment('payments_count');
+            DB::table('gratora_recurring_plans')->where('id', $plan->id)->increment('total_paid_cents', $amountCents);
         });
 
         $plan->payments_count         = (int) $plan->payments_count + 1;
@@ -149,7 +149,7 @@ final class RecurringPlanRepository
     public function recordFailedRenewal(RecurringPlan $plan, string $occurredAt, string $marker = ''): bool
     {
         if ($marker === '') {
-            DB::table('fundkit_recurring_plans')->where('id', $plan->id)->update(['updated_at' => $occurredAt]);
+            DB::table('gratora_recurring_plans')->where('id', $plan->id)->update(['updated_at' => $occurredAt]);
         } else {
             $seen = $this->recentFailureMarkers($plan);
             if (in_array($marker, $seen, true)) {
@@ -158,7 +158,7 @@ final class RecurringPlanRepository
 
             // Compare and swap on the whole list, so two deliveries racing each
             // other cannot both read the same list and both write over it.
-            $claim = DB::table('fundkit_recurring_plans')
+            $claim = DB::table('gratora_recurring_plans')
                 ->where('id', $plan->id)
                 ->where('last_failed_event_id', implode(' ', $seen))
                 ->update([
@@ -171,7 +171,7 @@ final class RecurringPlanRepository
             }
         }
 
-        DB::table('fundkit_recurring_plans')->where('id', $plan->id)->increment('failed_renewals_count');
+        DB::table('gratora_recurring_plans')->where('id', $plan->id)->increment('failed_renewals_count');
 
         // Read back rather than adding one to what was read before the
         // increment: the attempt number rides on this into the donor's notice,
@@ -286,7 +286,7 @@ final class RecurringPlanRepository
     {
         $mrrExpr = self::mrrExpr();
 
-        $row = DB::table('fundkit_recurring_plans')
+        $row = DB::table('gratora_recurring_plans')
             ->where('campaign_id', $campaignId)
             ->whereIn('status', self::CANCELLABLE_STATUSES)
             ->where('is_test', 0)
@@ -427,7 +427,7 @@ final class RecurringPlanRepository
      */
     public function gatewaysInUse(): array
     {
-        $rows = DB::table('fundkit_recurring_plans')
+        $rows = DB::table('gratora_recurring_plans')
             ->selectRaw('DISTINCT gateway')
             ->orderBy('gateway', 'ASC')
             ->getAll();
@@ -468,7 +468,7 @@ final class RecurringPlanRepository
 
         $out = [];
         foreach (array_chunk($ids, 1000) as $chunk) {
-            $rows = DB::table('fundkit_recurring_plans')
+            $rows = DB::table('gratora_recurring_plans')
                 ->whereIn('donor_id', $chunk)
                 ->where('is_test', 0)
                 ->selectRaw("
@@ -505,7 +505,7 @@ final class RecurringPlanRepository
      */
     private static function statsQuery(bool $includeTest): QueryBuilder
     {
-        $q = DB::table('fundkit_recurring_plans');
+        $q = DB::table('gratora_recurring_plans');
 
         return $includeTest ? $q : $q->where('is_test', 0);
     }

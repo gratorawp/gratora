@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
 /** @since 1.0.0 */
 final class HiddenBlock implements Block
@@ -10,7 +10,7 @@ final class HiddenBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/hidden';
+        return 'gratora/hidden';
     }
 
     /** @since 1.0.0 */

@@ -8,18 +8,18 @@ defined('ABSPATH') || exit;
  * @var bool   $requireFirst
  * @var bool   $requireLast
  */
-$firstLabelText = $firstLabel !== '' ? $firstLabel : __('First name', 'fundraising-toolkit');
-$lastLabelText  = $lastLabel  !== '' ? $lastLabel  : __('Last name', 'fundraising-toolkit');
+$firstLabelText = $firstLabel !== '' ? $firstLabel : __('First name', 'gratora');
+$lastLabelText  = $lastLabel  !== '' ? $lastLabel  : __('Last name', 'gratora');
 ?>
-<div class="fundkit-block fundkit-block--name fundkit-donor__name">
-    <label class="fundkit-donor__field">
-        <span class="fundkit-donor__label"><?php echo esc_html($firstLabelText); ?></span>
+<div class="gratora-block gratora-block--name gratora-donor__name">
+    <label class="gratora-donor__field">
+        <span class="gratora-donor__label"><?php echo esc_html($firstLabelText); ?></span>
         <input type="text" name="profile[first_name]" autocomplete="given-name"
                placeholder="<?php echo esc_attr($firstPlaceholder); ?>"
                <?php echo esc_attr($requireFirst ? 'required' : ''); ?>>
     </label>
-    <label class="fundkit-donor__field">
-        <span class="fundkit-donor__label"><?php echo esc_html($lastLabelText); ?></span>
+    <label class="gratora-donor__field">
+        <span class="gratora-donor__label"><?php echo esc_html($lastLabelText); ?></span>
         <input type="text" name="profile[last_name]" autocomplete="family-name"
                placeholder="<?php echo esc_attr($lastPlaceholder); ?>"
                <?php echo esc_attr($requireLast ? 'required' : ''); ?>>

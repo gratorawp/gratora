@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways;
+namespace Gratora\Gateways;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationService;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\PayPal\PayPalApi;
-use FundKit\Gateways\PayPal\PayPalMoney;
-use FundKit\Vendor\Queryable\ModelQueryBuilder;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationService;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\PayPal\PayPalApi;
+use Gratora\Gateways\PayPal\PayPalMoney;
+use Gratora\Vendor\Queryable\ModelQueryBuilder;
 use Throwable;
 
 /**
@@ -24,7 +24,7 @@ use Throwable;
  */
 final class GatewayReconciler
 {
-    public const HOOK = 'fundkit.cron.gateway_reconcile';
+    public const HOOK = 'gratora.cron.gateway_reconcile';
 
     private const GATEWAY = 'paypal';
 
@@ -66,7 +66,7 @@ final class GatewayReconciler
      * holding matches again on the next read, so without a cursor the same
      * first rows fill every run and anything behind them is never reached.
      */
-    private const CURSOR_OPTION = 'fundkit_gateway_reconcile_cursor';
+    private const CURSOR_OPTION = 'gratora_gateway_reconcile_cursor';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -397,7 +397,7 @@ final class GatewayReconciler
         // Word for word what the DENIED webhook stores, so a donation resolved
         // here reads identically to one the delivery resolved. markFailed()
         // refuses to walk a paid or refunded row backwards.
-        $this->donations->markFailed($donation, __('PayPal declined the payment.', 'fundraising-toolkit'));
+        $this->donations->markFailed($donation, __('PayPal declined the payment.', 'gratora'));
     }
 
     /**

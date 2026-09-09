@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 
 final class RecurringMrrBaseCurrencyTest extends IntegrationTestCase
 {

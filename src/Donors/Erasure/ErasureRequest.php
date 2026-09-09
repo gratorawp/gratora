@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors\Erasure;
+namespace Gratora\Donors\Erasure;
 
 /**
  * Everything a handler needs to find this donor, captured before the wipe.

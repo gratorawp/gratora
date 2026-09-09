@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
 /** @since 1.0.0 */
 final class SectionBlock implements Block
@@ -10,7 +10,7 @@ final class SectionBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/section';
+        return 'gratora/section';
     }
 
     /** @since 1.0.0 */
@@ -32,7 +32,7 @@ final class SectionBlock implements Block
     {
         $style = self::sectionStyle($attrs);
         return sprintf(
-            '<div class="fundkit-block fundkit-block--section"%s>%s</div>',
+            '<div class="gratora-block gratora-block--section"%s>%s</div>',
             $style !== '' ? ' style="' . esc_attr($style) . '"' : '',
             $content
         );

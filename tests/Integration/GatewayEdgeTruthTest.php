@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\DonationRepository;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\PayPal\PayPalApi;
-use FundKit\Gateways\PayPal\PayPalGateway;
-use FundKit\Gateways\PayPal\PayPalPlans;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donations\DonationRepository;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\PayPal\PayPalApi;
+use Gratora\Gateways\PayPal\PayPalGateway;
+use Gratora\Gateways\PayPal\PayPalPlans;
+use Gratora\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -80,11 +80,11 @@ final class GatewayEdgeTruthTest extends IntegrationTestCase
                 $c->get(PayPalApi::class),
                 $account,
                 $c->get(DonationRepository::class),
-                $c->get(\FundKit\Donations\DonationService::class),
+                $c->get(\Gratora\Donations\DonationService::class),
                 $c->get(PayPalPlans::class),
-                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
-                $c->get(\FundKit\Foundation\Time\Clock::class),
-                $c->get(\FundKit\Gateways\PayPal\PayPalPlanRecorder::class),
+                $c->get(\Gratora\Recurring\RecurringPlanRepository::class),
+                $c->get(\Gratora\Foundation\Time\Clock::class),
+                $c->get(\Gratora\Gateways\PayPal\PayPalPlanRecorder::class),
             ));
         }
     }
@@ -125,7 +125,7 @@ final class GatewayEdgeTruthTest extends IntegrationTestCase
     /** @param array<string,mixed> $resource */
     private function postWebhook(string $type, array $resource): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/paypal');
+        $req = new WP_REST_Request('POST', '/gratora/v1/webhooks/paypal');
         $req->set_header('content-type', 'application/json');
         foreach ([
             'paypal_transmission_id'   => 'tx-' . bin2hex(random_bytes(3)),
@@ -243,8 +243,8 @@ final class GatewayEdgeTruthTest extends IntegrationTestCase
         $this->plan('I-FLOOD');
         $this->verifyIsDown = true;
 
-        $spam = Plugin::instance()->container->get(\FundKit\Donations\AntiSpamGuard::class);
-        $key  = $spam->subjectKey('fundkit_wh_fail_paypal') . ':unverifiable';
+        $spam = Plugin::instance()->container->get(\Gratora\Donations\AntiSpamGuard::class);
+        $key  = $spam->subjectKey('gratora_wh_fail_paypal') . ':unverifiable';
         for ($i = 0; $i < 500; $i++) {
             $spam->hit($key, 900);
         }
@@ -271,13 +271,13 @@ final class GatewayEdgeTruthTest extends IntegrationTestCase
      */
     public function test_a_plan_minted_during_the_round_trip_survives(): void
     {
-        update_option('fundkit_paypal_plans', []);
+        update_option('gratora_paypal_plans', []);
 
         // Stands in for the concurrent checkout: it lands while this one is
         // still waiting on PayPal.
         add_filter('pre_http_request', function ($pre, $args, $url) {
             if (is_string($url) && str_contains($url, '/v1/billing/plans')) {
-                update_option('fundkit_paypal_plans', ['other_donor_key' => 'P-CONCURRENT'], false);
+                update_option('gratora_paypal_plans', ['other_donor_key' => 'P-CONCURRENT'], false);
             }
             return $pre;
         }, 1, 3);
@@ -288,7 +288,7 @@ final class GatewayEdgeTruthTest extends IntegrationTestCase
 
         $this->assertSame('P-MINE', $planId);
 
-        $stored = get_option('fundkit_paypal_plans', []);
+        $stored = get_option('gratora_paypal_plans', []);
         $this->assertContains('P-CONCURRENT', $stored, 'the concurrent checkout keeps its plan');
         $this->assertContains('P-MINE', $stored);
     }

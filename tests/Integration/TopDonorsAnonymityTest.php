@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -44,7 +44,7 @@ final class TopDonorsAnonymityTest extends IntegrationTestCase
         $this->seedPaidDonation($campaignId, 'carol@example.com', 'Carol', 'Split', 2000, false);
         $this->seedPaidDonation($campaignId, 'carol@example.com', 'Carol', 'Split', 7000, true);
 
-        $repo  = Plugin::instance()->container->get(\FundKit\Donations\DonationRepository::class);
+        $repo  = Plugin::instance()->container->get(\Gratora\Donations\DonationRepository::class);
         $named = $repo->topPaidDonors(null, null, $campaignId, 10, false);
         $anon  = $repo->anonymousPaidTotal(null, null, $campaignId);
 
@@ -68,7 +68,7 @@ final class TopDonorsAnonymityTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'FUNDKIT-ANON-' . substr(md5($email . $cents . (string) $anonymous), 0, 8);
+        $d->reference         = 'GRATORA-ANON-' . substr(md5($email . $cents . (string) $anonymous), 0, 8);
         $d->donor_id          = (int) $donor->id;
         $d->campaign_id       = $campaignId;
         $d->amount_cents      = $cents;
@@ -90,7 +90,7 @@ final class TopDonorsAnonymityTest extends IntegrationTestCase
     /** @param array<string,mixed> $input */
     private function createCampaign(array $input): array
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) json_encode($input + ['status' => 'published']));
         return rest_do_request($req)->get_data();

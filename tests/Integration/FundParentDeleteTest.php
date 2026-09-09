@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Funds\Fund;
+use Gratora\Funds\Fund;
 use WP_REST_Request;
 
 /**
@@ -24,7 +24,7 @@ final class FundParentDeleteTest extends IntegrationTestCase
     /** @param array<string, mixed> $extra */
     private function createFund(string $code, string $name, array $extra = []): int
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/funds');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/funds');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['code' => $code, 'name' => $name] + $extra));
 
@@ -36,7 +36,7 @@ final class FundParentDeleteTest extends IntegrationTestCase
 
     private function deleteFund(int $id, ?int $reassignTo = null): \WP_REST_Response
     {
-        $req = new WP_REST_Request('DELETE', '/fundkit/v1/admin/funds/' . $id);
+        $req = new WP_REST_Request('DELETE', '/gratora/v1/admin/funds/' . $id);
         if ($reassignTo !== null) {
             $req->set_param('reassign_to', $reassignTo);
         }
@@ -82,7 +82,7 @@ final class FundParentDeleteTest extends IntegrationTestCase
         $this->createFund('water', 'Water', ['parent_fund_id' => $parent]);
         $lone = $this->createFund('general', 'General');
 
-        $rows = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/funds'))->get_data();
+        $rows = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/funds'))->get_data();
         $byId = [];
         foreach ($rows as $row) {
             $byId[(int) $row['id']] = $row;
@@ -94,7 +94,7 @@ final class FundParentDeleteTest extends IntegrationTestCase
 
     public function test_a_fund_window_that_ends_before_it_starts_is_refused_on_create(): void
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/funds');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/funds');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'code'      => 'transposed',
@@ -114,7 +114,7 @@ final class FundParentDeleteTest extends IntegrationTestCase
         $this->createFund('unrestricted-one', 'Unrestricted one', ['is_restricted' => false]);
         $this->createFund('restricted-one', 'Restricted one', ['is_restricted' => true]);
 
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/funds');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/funds');
         $req->set_param('orderby', 'is_restricted');
         $req->set_param('order', 'desc');
 

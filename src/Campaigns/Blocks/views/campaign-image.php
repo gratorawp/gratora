@@ -8,7 +8,7 @@ defined('ABSPATH') || exit;
  * @var bool   $priority
  * @var string $styleVars
  */
-$classes = 'fundkit-block fundkit-block--image is-ratio-' . $ratio . ($rounded ? ' is-rounded' : '');
+$classes = 'gratora-block gratora-block--image is-ratio-' . $ratio . ($rounded ? ' is-rounded' : '');
 ?>
 <figure <?php
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
@@ -17,11 +17,11 @@ echo get_block_wrapper_attributes(array_filter([
     'style' => $styleVars,
 ]));
 // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
-?> data-block="fundkit/campaign-image">
+?> data-block="gratora/campaign-image">
     <?php
     // Attachment IDs supply srcset and sizes.
     echo wp_get_attachment_image($imageId, 'large', false, [
-        'class'         => 'fundkit-block__image',
+        'class'         => 'gratora-block__image',
         'alt'           => $imageAlt,
         'decoding'      => 'async',
         'loading'       => $priority ? 'eager' : 'lazy',

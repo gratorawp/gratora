@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Reports;
+namespace Gratora\Reports;
 
-use FundKit\Campaigns\Styling\Tokens;
-use FundKit\Campaigns\Styling\CampaignStyleResolver;
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignMetricsService;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Helpers\View;
-use FundKit\Receipts\OrgProfile;
-use FundKit\Receipts\PdfBuilder;
+use Gratora\Campaigns\Styling\Tokens;
+use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignMetricsService;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\View;
+use Gratora\Receipts\OrgProfile;
+use Gratora\Receipts\PdfBuilder;
 
 /**
  * Builds a single-page campaign performance PDF: raised vs goal, a progress bar,
@@ -51,25 +51,25 @@ final class CampaignReportBuilder
             'percent'        => $percent,
             'bar_width'      => $barWidth,
             'stats'          => [
-                ['label' => __('Donations', 'fundraising-toolkit'),        'value' => number_format_i18n((int) $summary['donations_count'])],
-                ['label' => __('Unique donors', 'fundraising-toolkit'),    'value' => number_format_i18n((int) $summary['donors_count'])],
-                ['label' => __('Average donation', 'fundraising-toolkit'), 'value' => Money::format((int) $summary['avg_donation_cents'], $currency)],
+                ['label' => __('Donations', 'gratora'),        'value' => number_format_i18n((int) $summary['donations_count'])],
+                ['label' => __('Unique donors', 'gratora'),    'value' => number_format_i18n((int) $summary['donors_count'])],
+                ['label' => __('Average donation', 'gratora'), 'value' => Money::format((int) $summary['avg_donation_cents'], $currency)],
             ],
             'generated_date' => (string) wp_date(get_option('date_format')),
         ]);
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: campaign title. */
-            'title'   => sprintf(__('Campaign report: %s', 'fundraising-toolkit'), (string) $campaign->title),
+            'title'   => sprintf(__('Campaign report: %s', 'gratora'), (string) $campaign->title),
             'author'  => $orgName,
-            'subject' => __('Campaign performance report', 'fundraising-toolkit'),
+            'subject' => __('Campaign performance report', 'gratora'),
         ]);
     }
 
     /** @since 1.0.0 */
     public static function filename(int $campaignId, string $range): string
     {
-        return sprintf('fundkit-campaign-%d-%s.pdf', $campaignId, $range);
+        return sprintf('gratora-campaign-%d-%s.pdf', $campaignId, $range);
     }
 
     /**
@@ -98,11 +98,11 @@ final class CampaignReportBuilder
         if ($type === 'donors') {
             $current = (int) $summary['donors_count'];
             /* translators: %s: donor goal count */
-            $display = sprintf(__('%s donors', 'fundraising-toolkit'), number_format_i18n($goalCount));
+            $display = sprintf(__('%s donors', 'gratora'), number_format_i18n($goalCount));
         } else {
             $current = (int) $summary['donations_count'];
             /* translators: %s: donation goal count */
-            $display = sprintf(__('%s donations', 'fundraising-toolkit'), number_format_i18n($goalCount));
+            $display = sprintf(__('%s donations', 'gratora'), number_format_i18n($goalCount));
         }
 
         $percent = (int) round(($current / $goalCount) * 100);
@@ -119,11 +119,11 @@ final class CampaignReportBuilder
     private function rangeLabel(string $range): string
     {
         return match ($range) {
-            'today'    => __('Today', 'fundraising-toolkit'),
-            'last-7'   => __('Last 7 days', 'fundraising-toolkit'),
-            'last-30'  => __('Last 30 days', 'fundraising-toolkit'),
-            'last-90'  => __('Last 90 days', 'fundraising-toolkit'),
-            'all-time' => __('All time', 'fundraising-toolkit'),
+            'today'    => __('Today', 'gratora'),
+            'last-7'   => __('Last 7 days', 'gratora'),
+            'last-30'  => __('Last 30 days', 'gratora'),
+            'last-90'  => __('Last 90 days', 'gratora'),
+            'all-time' => __('All time', 'gratora'),
             default    => $range,
         };
     }

@@ -162,16 +162,16 @@
             "time": "2026-01-02T16:01:13+00:00"
         },
         {
-            "name": "fundkit/queryable",
+            "name": "gratora/queryable",
             "version": "v1.2.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/fundkitorg/queryable.git",
+                "url": "https://github.com/gratorawp/queryable.git",
                 "reference": "3b3254187b15226a39230ab294f76664a54ba8e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fundkitorg/queryable/zipball/3b3254187b15226a39230ab294f76664a54ba8e0",
+                "url": "https://api.github.com/repos/gratorawp/queryable/zipball/3b3254187b15226a39230ab294f76664a54ba8e0",
                 "reference": "3b3254187b15226a39230ab294f76664a54ba8e0",
                 "shasum": ""
             },
@@ -207,8 +207,8 @@
             ],
             "description": "A fluent SQL query builder for WordPress",
             "support": {
-                "source": "https://github.com/fundkitorg/queryable/tree/v1.2.0",
-                "issues": "https://github.com/fundkitorg/queryable/issues"
+                "source": "https://github.com/gratorawp/queryable/tree/v1.2.0",
+                "issues": "https://github.com/gratorawp/queryable/issues"
             },
             "time": "2026-09-01T06:09:38+00:00"
         },

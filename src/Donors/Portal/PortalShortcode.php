@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors\Portal;
+namespace Gratora\Donors\Portal;
 
-use FundKit\Admin\ExtensionAssets;
-use FundKit\Campaigns\Styling\CampaignStyleResolver;
-use FundKit\Campaigns\Styling\Ink;
-use FundKit\Campaigns\Styling\StylePresets;
-use FundKit\Campaigns\Styling\Tokens;
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Hooks\HookProvider;
+use Gratora\Admin\ExtensionAssets;
+use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Campaigns\Styling\Ink;
+use Gratora\Campaigns\Styling\StylePresets;
+use Gratora\Campaigns\Styling\Tokens;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Hooks\HookProvider;
 
 /**
- * Mounts the donor portal app on the [fundkit_donor_portal] shortcode.
+ * Mounts the donor portal app on the [gratora_donor_portal] shortcode.
  *
  * @since 1.0.0
  */
 final class PortalShortcode extends HookProvider
 {
-    private const TAG    = 'fundkit_donor_portal';
-    private const HANDLE = 'fundkit-donor-portal';
+    private const TAG    = 'gratora_donor_portal';
+    private const HANDLE = 'gratora-donor-portal';
 
     /** @since 1.0.0 */
     public function __construct(private AntiSpamGuard $spam)
@@ -55,52 +55,52 @@ final class PortalShortcode extends HookProvider
     /** @since 1.0.0 */
     private function enqueue(): void
     {
-        $assetPath = FUNDKIT_DIR . 'build/donor-portal/index/index.asset.php';
+        $assetPath = GRATORA_DIR . 'build/donor-portal/index/index.asset.php';
         if (file_exists($assetPath)) {
             $asset = require $assetPath;
 
-            // Extension seam: registers window.fundkit.tabs so add-ons can enqueue
+            // Extension seam: registers window.gratora.tabs so add-ons can enqueue
             // their own portal tabs.
             ExtensionAssets::enqueue('portal');
-            // Org currency config on window.fundkit so formatAmount renders
+            // Org currency config on window.gratora so formatAmount renders
             // money the same on the front end as in admin.
             wp_add_inline_script(
                 ExtensionAssets::HANDLE,
-                'window.fundkit = window.fundkit || {};'
-                . 'window.fundkit.default_currency = ' . wp_json_encode(Money::defaultCurrency()) . ';'
-                . 'window.fundkit.number_format = ' . wp_json_encode(Money::jsNumberFormat()) . ';'
+                'window.gratora = window.gratora || {};'
+                . 'window.gratora.default_currency = ' . wp_json_encode(Money::defaultCurrency()) . ';'
+                . 'window.gratora.number_format = ' . wp_json_encode(Money::jsNumberFormat()) . ';'
             );
             $deps   = $asset['dependencies'] ?? [];
             $deps[] = ExtensionAssets::HANDLE;
 
             wp_enqueue_script(
                 self::HANDLE,
-                FUNDKIT_URL . 'build/donor-portal/index/index.js',
+                GRATORA_URL . 'build/donor-portal/index/index.js',
                 $deps,
-                $asset['version']      ?? FUNDKIT_VERSION,
+                $asset['version']      ?? GRATORA_VERSION,
                 true
             );
-            wp_localize_script(self::HANDLE, 'fundkitPortal', [
-                'rest'  => esc_url_raw($this->restBase(rest_url('fundkit/v1/portal/'))),
+            wp_localize_script(self::HANDLE, 'gratoraPortal', [
+                'rest'  => esc_url_raw($this->restBase(rest_url('gratora/v1/portal/'))),
                 // Only logged-in users get a REST nonce, so a page-cached
                 // portal never carries a stale one that WP's cookie check
-                // would 403. Portal auth is the session cookie + X-FundKit-Csrf.
+                // would 403. Portal auth is the session cookie + X-Gratora-Csrf.
                 'nonce' => is_user_logged_in() ? wp_create_nonce('wp_rest') : '',
                 // Signing up and asking for a link write without any session to
                 // check, and this proves the caller loaded the page.
                 'token' => $this->spam->mintPortalToken(),
                 // So the picture field can refuse an oversized file before
                 // sending it, and name the real limit rather than a guess.
-                'avatarMaxBytes' => \FundKit\Donors\DonorAvatarUploader::maxBytes(),
-                'avatarMaxLabel' => size_format(\FundKit\Donors\DonorAvatarUploader::maxBytes()),
+                'avatarMaxBytes' => \Gratora\Donors\DonorAvatarUploader::maxBytes(),
+                'avatarMaxLabel' => size_format(\Gratora\Donors\DonorAvatarUploader::maxBytes()),
             ]);
-            wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
+            wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
         }
-        $cssPath = FUNDKIT_DIR . 'build/donor-portal/index.css';
+        $cssPath = GRATORA_DIR . 'build/donor-portal/index.css';
         if (file_exists($cssPath)) {
             // Versioned by file mtime, so a rebuilt stylesheet busts the
             // browser cache without a plugin version bump.
-            wp_enqueue_style(self::HANDLE, FUNDKIT_URL . 'build/donor-portal/index.css', [], (string) filemtime($cssPath));
+            wp_enqueue_style(self::HANDLE, GRATORA_URL . 'build/donor-portal/index.css', [], (string) filemtime($cssPath));
             wp_style_add_data(self::HANDLE, 'rtl', 'replace');
             wp_add_inline_style(self::HANDLE, $this->brandCss());
         }
@@ -139,7 +139,7 @@ final class PortalShortcode extends HookProvider
     public function render($atts = []): string
     {
         $this->enqueue();
-        return '<div id="fundkit-donor-portal" class="fundkit-donor-portal"></div>';
+        return '<div id="gratora-donor-portal" class="gratora-donor-portal"></div>';
     }
 
     /**
@@ -164,10 +164,10 @@ final class PortalShortcode extends HookProvider
         }
         if (empty($vars)) return '';
 
-        $derived = Ink::declarationsFor((string) ($tokens['fundkit-accent'] ?? ''))
+        $derived = Ink::declarationsFor((string) ($tokens['gratora-accent'] ?? ''))
             . Ink::softDeclarations($tokens)
             . Ink::fieldDeclarations($tokens);
 
-        return '.fundkit-donor-portal{' . implode(' ', $vars) . $derived . '}';
+        return '.gratora-donor-portal{' . implode(' ', $vars) . $derived . '}';
     }
 }

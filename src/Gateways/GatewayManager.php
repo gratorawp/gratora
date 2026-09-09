@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways;
+namespace Gratora\Gateways;
 
 use RuntimeException;
 
@@ -61,7 +61,7 @@ final class GatewayManager
      */
     public function optionsFor(array $allowed, ?string $country, string $currency, string $frequency = 'one_time', ?bool $test = null): array
     {
-        $cfg = get_option('fundkit_gateway_config', []);
+        $cfg = get_option('gratora_gateway_config', []);
         $cfg = is_array($cfg) ? $cfg : [];
 
         $enabled = [];
@@ -123,7 +123,7 @@ final class GatewayManager
             return false;
         }
 
-        $cfg = get_option('fundkit_gateway_config', []);
+        $cfg = get_option('gratora_gateway_config', []);
         $cfg = is_array($cfg) ? $cfg : [];
 
         $charges = $g instanceof ModeCredentialed

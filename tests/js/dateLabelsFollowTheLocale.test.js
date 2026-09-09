@@ -35,7 +35,7 @@ const mount = ( node ) => render( node, document.getElementById( 'root' ) );
 it( 'names the schedule months the way the rest of the widget names dates', () => {
     mount( <ScheduleTimeline startsAt="2026-03-01T00:00:00Z" endsAt="2026-09-01T00:00:00Z" onChange={ () => {} } /> );
 
-    const axis = [ ...document.querySelectorAll( '.fundkit-schedule__axis span' ) ].map( ( s ) => s.textContent );
+    const axis = [ ...document.querySelectorAll( '.gratora-schedule__axis span' ) ].map( ( s ) => s.textContent );
 
     expect( axis ).toHaveLength( 12 );
     expect( axis[ 0 ] ).toBe( 'MES1' );
@@ -52,7 +52,7 @@ describe( 'the donation heatmap', () => {
     it( 'labels its rows in the reader language', () => {
         // The grid is keyed 0 = Monday, which is UTC day 1.
         // The first row-label span is the empty spacer above the hour axis.
-        const labels = [ ...document.querySelectorAll( '.fundkit-heatmap__row .fundkit-heatmap__row-label' ) ];
+        const labels = [ ...document.querySelectorAll( '.gratora-heatmap__row .gratora-heatmap__row-label' ) ];
 
         expect( labels[ 0 ].textContent ).toBe( 'DIA1' );
         expect( labels ).toHaveLength( 7 );

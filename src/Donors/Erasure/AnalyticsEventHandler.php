@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors\Erasure;
+namespace Gratora\Donors\Erasure;
 
-use FundKit\Analytics\Event;
+use Gratora\Analytics\Event;
 
 /**
  * The analytics event log. Rows survive so campaign and form totals do not move
@@ -49,7 +49,7 @@ final class AnalyticsEventHandler implements ErasureHandler
     /** @since 1.0.0 */
     public function key(): string
     {
-        return 'fundkit.analytics_events';
+        return 'gratora.analytics_events';
     }
 
     /** @since 1.0.0 */

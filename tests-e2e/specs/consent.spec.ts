@@ -1,5 +1,5 @@
 /**
- * `fundkit/consent` block - labelled consent purposes (e.g. marketing,
+ * `gratora/consent` block - labelled consent purposes (e.g. marketing,
  * processing). Required-by-law purposes are pre-checked and locked.
  */
 
@@ -17,7 +17,7 @@ test.describe('consent block', () => {
     test('a required purpose is the donor\'s to give, and the form insists on it', async ({ donor }) => {
         const fs = donor.consentFieldset();
 
-        const requiredLabels = fs.locator('label:has(.fundkit-form__consent-required-pill)');
+        const requiredLabels = fs.locator('label:has(.gratora-form__consent-required-pill)');
         const reqCount = await requiredLabels.count();
         expect(reqCount, 'the seeded form offers a required purpose').toBeGreaterThan(0);
 
@@ -44,7 +44,7 @@ test.describe('consent block', () => {
     test('optional purposes start unchecked and toggle freely', async ({ donor }) => {
         const fs = donor.consentFieldset();
 
-        const optional = fs.locator('label:not(:has(.fundkit-form__consent-required-pill)) input[type="checkbox"]');
+        const optional = fs.locator('label:not(:has(.gratora-form__consent-required-pill)) input[type="checkbox"]');
         const optCount = await optional.count();
         expect(optCount, 'the seeded form offers an optional purpose').toBeGreaterThan(0);
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways;
+namespace Gratora\Gateways;
 
 /**
  * Marks gateways with no checkout to abandon. Their pending transfers must remain visible and

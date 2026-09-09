@@ -3,6 +3,6 @@
  * branding (Stripe, Offline, ...).
  */
 export default function BrandMark( { letter, variant } ) {
-    const cls = `fundkit-brand-mark${ variant ? ` fundkit-brand-mark--${ variant }` : '' }`;
+    const cls = `gratora-brand-mark${ variant ? ` gratora-brand-mark--${ variant }` : '' }`;
     return <span className={ cls } aria-hidden="true">{ letter }</span>;
 }

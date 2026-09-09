@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\CampaignService;
-use FundKit\Forms\FormService;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\CampaignService;
+use Gratora\Forms\FormService;
+use Gratora\Foundation\Plugin;
 
 /**
  * The payment-gateways block is the single writer of
@@ -30,7 +30,7 @@ final class GatewayBlockBridgeTest extends IntegrationTestCase
         $form = $this->forms()->create([
             'title'       => 'Gw bridge',
             'campaign_id' => $this->campaignId(),
-            'blocks'      => '<!-- wp:fundkit/payment-gateways {"allowed":["offline","stripe"]} /-->',
+            'blocks'      => '<!-- wp:gratora/payment-gateways {"allowed":["offline","stripe"]} /-->',
         ]);
 
         $this->assertSame(['offline', 'stripe'], $form->settings['gateways']['allowed']);
@@ -41,13 +41,13 @@ final class GatewayBlockBridgeTest extends IntegrationTestCase
         $form = $this->forms()->create([
             'title'       => 'Nested gw',
             'campaign_id' => $this->campaignId(),
-            'blocks'      => '<!-- wp:fundkit/row --><!-- wp:fundkit/payment-gateways {"allowed":["offline"]} /--><!-- /wp:fundkit/row -->',
+            'blocks'      => '<!-- wp:gratora/row --><!-- wp:gratora/payment-gateways {"allowed":["offline"]} /--><!-- /wp:gratora/row -->',
         ]);
         $this->assertSame(['offline'], $form->settings['gateways']['allowed']);
 
         // No block: the bridge does not touch the list, so the Settings tab
         // (or a prior value) keeps governing rather than being clobbered.
-        $form = $this->forms()->update($form, ['blocks' => '<!-- wp:fundkit/name /-->']);
+        $form = $this->forms()->update($form, ['blocks' => '<!-- wp:gratora/name /-->']);
         $this->assertSame(['offline'], $form->settings['gateways']['allowed']);
     }
 }

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms;
+namespace Gratora\Forms;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /**
  * Every form belongs to a campaign and is deleted with it.
@@ -16,7 +16,7 @@ use FundKit\Vendor\Queryable\Schema\Table;
  */
 final class Form extends Model
 {
-    protected string $table = 'fundkit_forms';
+    protected string $table = 'gratora_forms';
     protected string $version = '1.0.0';
 
     /** @since 1.0.0 */
@@ -25,7 +25,7 @@ final class Form extends Model
         return [
             'donation_stats' => [
                 'type'       => 'hasOne',
-                'table'      => 'fundkit_form_donation_stats',
+                'table'      => 'gratora_form_donation_stats',
                 'primaryKey' => 'id',
                 'foreignKey' => 'form_id',
             ],

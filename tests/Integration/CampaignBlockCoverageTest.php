@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Blocks\CampaignGridBlock;
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\Blocks\SupporterWallBlock;
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Campaigns\CampaignService;
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Blocks\CampaignGridBlock;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\Blocks\SupporterWallBlock;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Campaigns\CampaignService;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 
 /**
  * Two public-facing blocks that showed a slice of the truth: a grid card that
@@ -31,7 +31,7 @@ final class CampaignBlockCoverageTest extends IntegrationTestCase
 
         return new SupporterWallBlock(
             $c->get(CampaignRepository::class),
-            $c->get(\FundKit\Donors\DonorAvatars::class),
+            $c->get(\Gratora\Donors\DonorAvatars::class),
         );
     }
 
@@ -172,7 +172,7 @@ final class CampaignBlockCoverageTest extends IntegrationTestCase
 
         // The counters on the campaign row are maintained by the syncer, not
         // by writing a donation.
-        Plugin::instance()->container->get(\FundKit\Donations\AggregateSyncer::class)->syncCampaign($id);
+        Plugin::instance()->container->get(\Gratora\Donations\AggregateSyncer::class)->syncCampaign($id);
 
         $other = $this->campaigns()->create(['title' => 'Other ' . uniqid(), 'status' => 'published']);
 

@@ -1,1 +1,1 @@
-export { default, Switch, ToggleRow } from '@fundkit/ui/components/Switch';
+export { default, Switch, ToggleRow } from '@gratora/ui/components/Switch';

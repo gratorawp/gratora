@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Async\AsyncDispatcher;
+use Gratora\Async\AsyncDispatcher;
 
 /**
  * Fifteen sweeps register on init between core and the add-ons, and each one
@@ -14,7 +14,7 @@ use FundKit\Async\AsyncDispatcher;
  */
 final class RecurringScheduleCostTest extends IntegrationTestCase
 {
-    private const HOOK = 'fundkit.test.cost';
+    private const HOOK = 'gratora.test.cost';
 
     protected function tearDown(): void
     {

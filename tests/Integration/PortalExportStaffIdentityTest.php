@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorMetricsService;
-use FundKit\Donors\DonorNoteRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\DonorMetricsService;
+use Gratora\Donors\DonorNoteRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -21,7 +21,7 @@ final class PortalExportStaffIdentityTest extends IntegrationTestCase
 {
     protected function tearDown(): void
     {
-        unset($_COOKIE['fundkit_donor_session']);
+        unset($_COOKIE['gratora_donor_session']);
         parent::tearDown();
     }
 
@@ -54,10 +54,10 @@ final class PortalExportStaffIdentityTest extends IntegrationTestCase
      */
     private function download(int $donorId): array
     {
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession($donorId, 'tok');
+        $_COOKIE['gratora_donor_session'] = $this->portalSession($donorId, 'tok');
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/data-export');
-        $req->set_header('X-FundKit-Csrf', 'tok');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/data-export');
+        $req->set_header('X-Gratora-Csrf', 'tok');
         $res = rest_do_request($req);
 
         ob_start();

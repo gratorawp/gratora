@@ -57,7 +57,7 @@ async function mountWithFile() {
 const previewButton = ( root ) =>
     [ ...root.querySelectorAll( 'button' ) ].find( ( b ) => b.textContent.trim() === 'Preview' );
 
-/** The FundKit field cell of a mapping row, by its label. */
+/** The Gratora field cell of a mapping row, by its label. */
 const mappingRow = ( root, label ) =>
     [ ...root.querySelectorAll( 'tr' ) ].find( ( tr ) => tr.querySelector( 'th' )?.textContent.trim().startsWith( label ) );
 
@@ -72,7 +72,7 @@ test( 'a file with amounts cannot be previewed until Date is mapped', async () =
 
     expect( previewButton( root ).disabled ).toBe( true );
     expect( root.textContent ).toContain( 'Date has to be mapped' );
-    expect( mappingRow( root, 'Date' ).querySelector( '.fundkit-csv-map__req' ) ).not.toBeNull();
+    expect( mappingRow( root, 'Date' ).querySelector( '.gratora-csv-map__req' ) ).not.toBeNull();
 } );
 
 test( 'mapping the date column lets the dry run go ahead', async () => {

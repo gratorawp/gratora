@@ -23,7 +23,7 @@ function config( steps ) {
         currency: 'USD',
         gateway:  'stripe',
         layout:   'paged',
-        rest:     'https://example.test/wp-json/fundkit/v1/donations',
+        rest:     'https://example.test/wp-json/gratora/v1/donations',
         stripe:   { publishableKey: 'pk_test_123' },
         gateways: { options: [ { id: 'stripe', label: 'Card' } ] },
         // Non-empty pages is what puts the runtime into PagedView.
@@ -49,12 +49,12 @@ const BLOCK_ON_AN_EARLIER_PAGE = [
 
 function addForm( cfg ) {
     const form = document.createElement( 'form' );
-    form.className = 'fundkit-donation-form';
-    form.id = 'fundkit-form-7';
+    form.className = 'gratora-donation-form';
+    form.id = 'gratora-form-7';
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-fundkit-form-config', '' );
+    json.setAttribute( 'data-gratora-form-config', '' );
     json.textContent = JSON.stringify( cfg );
     form.appendChild( json );
 
@@ -70,12 +70,12 @@ async function boot( cfg ) {
     await settle();
 }
 
-const primary = () => document.querySelector( '.fundkit-form__button--primary' );
-const back    = () => document.querySelector( '.fundkit-form__button--secondary' );
+const primary = () => document.querySelector( '.gratora-form__button--primary' );
+const back    = () => document.querySelector( '.gratora-form__button--secondary' );
 
 beforeEach( () => {
     document.body.innerHTML = '';
-    window.fundkit = {
+    window.gratora = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
@@ -104,7 +104,7 @@ async function submitFromLastPage() {
     throw new Error( 'never reached the submit' );
 }
 
-const paymentPanel = () => document.querySelector( '.fundkit-form--payment' );
+const paymentPanel = () => document.querySelector( '.gratora-form--payment' );
 
 test( 'a block on an earlier page still gets somewhere to draw the payment step', async () => {
     await boot( config( BLOCK_ON_AN_EARLIER_PAGE ) );
@@ -127,7 +127,7 @@ test( 'a block on the submit page is still hosted there, not replaced', async ()
 
     expect( global.fetch ).toHaveBeenCalled();
     // No full-width takeover: the page's own steps are still rendered.
-    expect( document.querySelector( '.fundkit-form--payment' ) ).toBeNull();
+    expect( document.querySelector( '.gratora-form--payment' ) ).toBeNull();
 } );
 
 test( 'Back is disabled while a submit is in flight', async () => {
@@ -188,7 +188,7 @@ describe( 'a stale nonce does not cost the donation', () => {
         await submitFromLastPage();
 
         expect( sent ).toEqual( [ 'dead-nonce', undefined ] );
-        expect( document.querySelector( '.fundkit-form--payment' ) ).toBeTruthy();
+        expect( document.querySelector( '.gratora-form--payment' ) ).toBeTruthy();
     } );
 
     test( 'a 403 that is not about the nonce is not retried', async () => {
@@ -196,7 +196,7 @@ describe( 'a stale nonce does not cost the donation', () => {
             ok:     false,
             status: 403,
             clone() { return this; },
-            json:   () => Promise.resolve( { code: 'fundkit_forbidden', message: 'No.' } ),
+            json:   () => Promise.resolve( { code: 'gratora_forbidden', message: 'No.' } ),
         } ) );
 
         await boot( { ...config( BLOCK_ON_AN_EARLIER_PAGE ), nonce: 'live-nonce' } );

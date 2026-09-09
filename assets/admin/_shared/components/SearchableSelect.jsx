@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/SearchableSelect';
+export { default } from '@gratora/ui/components/SearchableSelect';

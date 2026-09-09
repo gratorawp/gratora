@@ -1,30 +1,30 @@
-@import '@fundkit/ui/scss/admin-base';
+@import '@gratora/ui/scss/admin-base';
 
-.fundkit-inline-toggle {
+.gratora-inline-toggle {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
     font-size: 13px;
-    color: var(--fundkit-color-text-muted, #6b7280);
+    color: var(--gratora-color-text-muted, #6b7280);
     white-space: nowrap;
 }
 
 // Double the class to outrank the later pill-group background rule.
-.fundkit-pill.fundkit-pill--test {
+.gratora-pill.gratora-pill--test {
     background: $amber-soft;
     color: $amber;
     font-weight: 600;
 }
 
 // Keep the badge on the reference baseline in narrow columns.
-.fundkit-ref-cell {
+.gratora-ref-cell {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     min-width: 0;
 
-    .fundkit-mono-link {
+    .gratora-mono-link {
         min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -32,7 +32,7 @@
 }
 
 // Use accent-dark for body-text contrast.
-.fundkit-muted a {
+.gratora-muted a {
     color: $accent-dark;
 
     &:hover,

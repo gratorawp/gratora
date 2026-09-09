@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\WebhookOutcome;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\WebhookOutcome;
 use WP_REST_Request;
 
 /**
@@ -34,14 +34,14 @@ final class GatewayRegistryIsolationTest extends IntegrationTestCase
     {
         $this->registry()->register(new IsolationProbeGateway());
 
-        $this->assertNotNull($this->registry()->get('fundkit-isolation-probe'));
+        $this->assertNotNull($this->registry()->get('gratora-isolation-probe'));
     }
 
     /** Runs after it, and must see the site the product actually ships. */
     public function test_the_next_test_does_not_inherit_it(): void
     {
         $this->assertNull(
-            $this->registry()->get('fundkit-isolation-probe'),
+            $this->registry()->get('gratora-isolation-probe'),
             'a double from an earlier test is still registered, so this test measures a site nobody has'
         );
     }
@@ -49,7 +49,7 @@ final class GatewayRegistryIsolationTest extends IntegrationTestCase
 
 final class IsolationProbeGateway implements PaymentGateway
 {
-    public function id(): string { return 'fundkit-isolation-probe'; }
+    public function id(): string { return 'gratora-isolation-probe'; }
     public function label(): string { return 'Isolation probe'; }
     public function description(): string { return ''; }
     public function frequencies(): array { return ['one_time']; }
@@ -70,7 +70,7 @@ final class IsolationProbeGateway implements PaymentGateway
 
     public function handleWebhook(WP_REST_Request $request): WebhookOutcome
     {
-        return WebhookOutcome::notSupported('fundkit-isolation-probe');
+        return WebhookOutcome::notSupported('gratora-isolation-probe');
     }
 
     public function refund(Donation $donation, int $amountCents, ?string $reason = null): RefundResult

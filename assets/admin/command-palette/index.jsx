@@ -1,5 +1,5 @@
 /**
- * Registers FundKit commands in the WP global command palette (Cmd/Ctrl+K); enqueued
+ * Registers Gratora commands in the WP global command palette (Cmd/Ctrl+K); enqueued
  * on every admin screen so the palette can always reach them.
  */
 import { dispatch } from '@wordpress/data';
@@ -16,12 +16,12 @@ import {
 } from '@wordpress/icons';
 
 const adminUrl = ( page ) =>
-    `${ window.fundkitCommandPalette?.adminUrl ?? '/wp-admin/' }admin.php?page=${ page }`;
+    `${ window.gratoraCommandPalette?.adminUrl ?? '/wp-admin/' }admin.php?page=${ page }`;
 
 // Absent means the localization did not land, not that the reader holds
 // nothing; the server is the real gate. Same stance as _shared/caps.js.
 const mayOpen = ( page ) => {
-    const can = window.fundkitCommandPalette?.can;
+    const can = window.gratoraCommandPalette?.can;
     return can ? !! can[ page ] : true;
 };
 
@@ -32,61 +32,61 @@ const goTo = ( page ) => ( { close } ) => {
 
 const commands = [
     {
-        name:     'fundkit/dashboard',
-        page:     'fundkit',
-        label:    __( 'Fundraising Toolkit: Open dashboard', 'fundraising-toolkit' ),
+        name:     'gratora/dashboard',
+        page:     'gratora',
+        label:    __( 'Gratora: Open dashboard', 'gratora' ),
         icon:     chartBar,
-        callback: goTo( 'fundkit' ),
+        callback: goTo( 'gratora' ),
     },
     {
-        name:     'fundkit/donations',
-        page:     'fundkit-donations',
-        label:    __( 'Fundraising Toolkit: View donations', 'fundraising-toolkit' ),
+        name:     'gratora/donations',
+        page:     'gratora-donations',
+        label:    __( 'Gratora: View donations', 'gratora' ),
         icon:     currencyDollar,
-        callback: goTo( 'fundkit-donations' ),
+        callback: goTo( 'gratora-donations' ),
     },
     {
-        name:     'fundkit/donors',
-        page:     'fundkit-donors',
-        label:    __( 'Fundraising Toolkit: View donors', 'fundraising-toolkit' ),
+        name:     'gratora/donors',
+        page:     'gratora-donors',
+        label:    __( 'Gratora: View donors', 'gratora' ),
         icon:     people,
-        callback: goTo( 'fundkit-donors' ),
+        callback: goTo( 'gratora-donors' ),
     },
     {
-        name:     'fundkit/campaigns',
-        page:     'fundkit-campaigns',
-        label:    __( 'Fundraising Toolkit: View campaigns', 'fundraising-toolkit' ),
+        name:     'gratora/campaigns',
+        page:     'gratora-campaigns',
+        label:    __( 'Gratora: View campaigns', 'gratora' ),
         icon:     megaphone,
-        callback: goTo( 'fundkit-campaigns' ),
+        callback: goTo( 'gratora-campaigns' ),
     },
     {
-        name:     'fundkit/funds',
-        page:     'fundkit-funds',
-        label:    __( 'Fundraising Toolkit: View funds', 'fundraising-toolkit' ),
+        name:     'gratora/funds',
+        page:     'gratora-funds',
+        label:    __( 'Gratora: View funds', 'gratora' ),
         icon:     archive,
-        callback: goTo( 'fundkit-funds' ),
+        callback: goTo( 'gratora-funds' ),
     },
     {
-        name:     'fundkit/settings',
-        page:     'fundkit-settings',
-        label:    __( 'Fundraising Toolkit: Open settings', 'fundraising-toolkit' ),
+        name:     'gratora/settings',
+        page:     'gratora-settings',
+        label:    __( 'Gratora: Open settings', 'gratora' ),
         icon:     cog,
-        callback: goTo( 'fundkit-settings' ),
+        callback: goTo( 'gratora-settings' ),
     },
     {
-        name:     'fundkit/onboarding',
-        page:     'fundkit-onboarding',
-        label:    __( 'Fundraising Toolkit: Open onboarding wizard', 'fundraising-toolkit' ),
+        name:     'gratora/onboarding',
+        page:     'gratora-onboarding',
+        label:    __( 'Gratora: Open onboarding wizard', 'gratora' ),
         icon:     plus,
-        callback: goTo( 'fundkit-onboarding' ),
+        callback: goTo( 'gratora-onboarding' ),
     },
     {
-        name:     'fundkit/new-campaign',
-        page:     'fundkit-campaigns',
-        label:    __( 'Fundraising Toolkit: New campaign', 'fundraising-toolkit' ),
+        name:     'gratora/new-campaign',
+        page:     'gratora-campaigns',
+        label:    __( 'Gratora: New campaign', 'gratora' ),
         icon:     plus,
         callback: ( { close } ) => {
-            window.location.href = adminUrl( 'fundkit-campaigns' ) + '&action=new';
+            window.location.href = adminUrl( 'gratora-campaigns' ) + '&action=new';
             close();
         },
     },

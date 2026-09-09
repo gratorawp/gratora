@@ -69,7 +69,7 @@ function EditPanel( { donor, onCancel, onSaved } ) {
         setError( null );
         try {
             const updated = await apiFetch( {
-                path:   `/fundkit/v1/admin/donors/${ donor.id }`,
+                path:   `/gratora/v1/admin/donors/${ donor.id }`,
                 method: 'PATCH',
                 data:   form,
             } );
@@ -85,18 +85,18 @@ function EditPanel( { donor, onCancel, onSaved } ) {
         // The footer sits outside the form.
         if ( e ) e.preventDefault();
         if ( phoneInvalid ) {
-            setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'fundraising-toolkit' ) );
+            setError( __( 'Phone number looks malformed. Use digits, +, spaces, parentheses, or dashes.', 'gratora' ) );
             return;
         }
         if ( emailInvalid ) {
-            setError( __( 'Email address looks malformed.', 'fundraising-toolkit' ) );
+            setError( __( 'Email address looks malformed.', 'gratora' ) );
             return;
         }
         if ( emailChanged ) {
             setConfirm( {
-                title:        __( 'Change donor email', 'fundraising-toolkit' ),
-                message:      __( 'Change this donor\'s email? Future donations from the new address will link to this record.', 'fundraising-toolkit' ),
-                confirmLabel: __( 'Change email', 'fundraising-toolkit' ),
+                title:        __( 'Change donor email', 'gratora' ),
+                message:      __( 'Change this donor\'s email? Future donations from the new address will link to this record.', 'gratora' ),
+                confirmLabel: __( 'Change email', 'gratora' ),
                 onConfirm:    doSave,
             } );
             return;
@@ -121,13 +121,13 @@ function EditPanel( { donor, onCancel, onSaved } ) {
     return (
         <>
             <Dialog
-                title={ __( 'Edit donor details', 'fundraising-toolkit' ) }
+                title={ __( 'Edit donor details', 'gratora' ) }
                 onClose={ () => ( saving ? null : onCancel() ) }
                 size="wide"
                 foot={
                     <>
                         <Btn variant="secondary" onClick={ onCancel } disabled={ saving }>
-                            { __( 'Cancel', 'fundraising-toolkit' ) }
+                            { __( 'Cancel', 'gratora' ) }
                         </Btn>
                         <Btn
                             variant="primary"
@@ -135,15 +135,15 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                             isBusy={ saving }
                             disabled={ saving || phoneInvalid }
                         >
-                            { saving ? __( 'Saving…', 'fundraising-toolkit' ) : __( 'Save', 'fundraising-toolkit' ) }
+                            { saving ? __( 'Saving…', 'gratora' ) : __( 'Save', 'gratora' ) }
                         </Btn>
                     </>
                 }
             >
                 <form className="dp-edit-form" onSubmit={ submit }>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Email', 'fundraising-toolkit' ) }
-                        <input className="fundkit-input"
+                        { __( 'Email', 'gratora' ) }
+                        <input className="gratora-input"
                             type="email"
                             value={ form.email }
                             onChange={ set( 'email' ) }
@@ -153,25 +153,25 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                         { emailChanged && (
                             <span className="dp-field__hint">
-                                { __( 'Saving rehashes the donor identity. Future donations from this address will link to this record.', 'fundraising-toolkit' ) }
+                                { __( 'Saving rehashes the donor identity. Future donations from this address will link to this record.', 'gratora' ) }
                             </span>
                         ) }
                     </label>
                     <label>
-                        { __( 'First name', 'fundraising-toolkit' ) }
-                        <input className="fundkit-input" type="text" value={ form.first_name } onChange={ set( 'first_name' ) } maxLength={ 100 } />
+                        { __( 'First name', 'gratora' ) }
+                        <input className="gratora-input" type="text" value={ form.first_name } onChange={ set( 'first_name' ) } maxLength={ 100 } />
                     </label>
                     <label>
-                        { __( 'Last name', 'fundraising-toolkit' ) }
-                        <input className="fundkit-input" type="text" value={ form.last_name } onChange={ set( 'last_name' ) } maxLength={ 100 } />
+                        { __( 'Last name', 'gratora' ) }
+                        <input className="gratora-input" type="text" value={ form.last_name } onChange={ set( 'last_name' ) } maxLength={ 100 } />
                     </label>
                     <label className="dp-edit-form__country">
-                        { __( 'Country', 'fundraising-toolkit' ) }
+                        { __( 'Country', 'gratora' ) }
                         <div className="dp-edit-form__country-wrap">
-                            <input className="fundkit-input"
+                            <input className="gratora-input"
                                 type="text"
                                 value={ countryQuery }
-                                placeholder={ __( 'Search country…', 'fundraising-toolkit' ) }
+                                placeholder={ __( 'Search country…', 'gratora' ) }
                                 onFocus={ () => setCountryOpen( true ) }
                                 onBlur={ () => setTimeout( () => setCountryOpen( false ), 150 ) }
                                 onChange={ ( e ) => { setCountryQuery( e.target.value ); setCountryOpen( true ); } }
@@ -191,20 +191,20 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         </div>
                     </label>
                     <label>
-                        { __( 'Type', 'fundraising-toolkit' ) }
-                        <select className="fundkit-select" value={ form.donor_type } onChange={ set( 'donor_type' ) }>
-                            <option value="individual">{ __( 'Individual', 'fundraising-toolkit' ) }</option>
-                            <option value="organization">{ __( 'Organization', 'fundraising-toolkit' ) }</option>
-                            <option value="household">{ __( 'Household', 'fundraising-toolkit' ) }</option>
+                        { __( 'Type', 'gratora' ) }
+                        <select className="gratora-select" value={ form.donor_type } onChange={ set( 'donor_type' ) }>
+                            <option value="individual">{ __( 'Individual', 'gratora' ) }</option>
+                            <option value="organization">{ __( 'Organization', 'gratora' ) }</option>
+                            <option value="household">{ __( 'Household', 'gratora' ) }</option>
                         </select>
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Company', 'fundraising-toolkit' ) }
-                        <input className="fundkit-input" type="text" value={ form.company } onChange={ set( 'company' ) } maxLength={ 150 } />
+                        { __( 'Company', 'gratora' ) }
+                        <input className="gratora-input" type="text" value={ form.company } onChange={ set( 'company' ) } maxLength={ 150 } />
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Phone', 'fundraising-toolkit' ) }
-                        <input className="fundkit-input"
+                        { __( 'Phone', 'gratora' ) }
+                        <input className="gratora-input"
                             type="tel"
                             value={ form.phone }
                             onChange={ set( 'phone' ) }
@@ -214,33 +214,33 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                         { phoneInvalid && (
                             <span className="dp-field__hint dp-field__hint--err">
-                                { __( 'Use digits, +, spaces, parentheses, or dashes.', 'fundraising-toolkit' ) }
+                                { __( 'Use digits, +, spaces, parentheses, or dashes.', 'gratora' ) }
                             </span>
                         ) }
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Address line 1', 'fundraising-toolkit' ) }
-                        <input className="fundkit-input"
+                        { __( 'Address line 1', 'gratora' ) }
+                        <input className="gratora-input"
                             type="text"
                             value={ form.address.line1 }
                             onChange={ setAddr( 'line1' ) }
-                            placeholder={ __( 'Street and number', 'fundraising-toolkit' ) }
+                            placeholder={ __( 'Street and number', 'gratora' ) }
                             maxLength={ 200 }
                         />
                     </label>
                     <label style={ { gridColumn: '1 / -1' } }>
-                        { __( 'Address line 2', 'fundraising-toolkit' ) }
-                        <input className="fundkit-input"
+                        { __( 'Address line 2', 'gratora' ) }
+                        <input className="gratora-input"
                             type="text"
                             value={ form.address.line2 }
                             onChange={ setAddr( 'line2' ) }
-                            placeholder={ __( 'Apartment, suite, etc. (optional)', 'fundraising-toolkit' ) }
+                            placeholder={ __( 'Apartment, suite, etc. (optional)', 'gratora' ) }
                             maxLength={ 200 }
                         />
                     </label>
                     <label>
-                        { __( 'City', 'fundraising-toolkit' ) }
-                        <input className="fundkit-input"
+                        { __( 'City', 'gratora' ) }
+                        <input className="gratora-input"
                             type="text"
                             value={ form.address.city }
                             onChange={ setAddr( 'city' ) }
@@ -248,8 +248,8 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     <label>
-                        { __( 'Region', 'fundraising-toolkit' ) }
-                        <input className="fundkit-input"
+                        { __( 'Region', 'gratora' ) }
+                        <input className="gratora-input"
                             type="text"
                             value={ form.address.region }
                             onChange={ setAddr( 'region' ) }
@@ -257,8 +257,8 @@ function EditPanel( { donor, onCancel, onSaved } ) {
                         />
                     </label>
                     <label>
-                        { __( 'Postal code', 'fundraising-toolkit' ) }
-                        <input className="fundkit-input"
+                        { __( 'Postal code', 'gratora' ) }
+                        <input className="gratora-input"
                             type="text"
                             value={ form.address.postal }
                             onChange={ setAddr( 'postal' ) }
@@ -288,9 +288,9 @@ export default function DonorProfile( { id, onBack } ) {
     const load = () => {
         setLoading( true );
         setError( null );
-        return apiFetch( { path: `/fundkit/v1/admin/donors/${ id }/profile` } )
+        return apiFetch( { path: `/gratora/v1/admin/donors/${ id }/profile` } )
             .then( ( d ) => { setData( d ); setError( null ); } )
-            .catch( ( e ) => setError( e?.message || __( 'Could not load this donor.', 'fundraising-toolkit' ) ) )
+            .catch( ( e ) => setError( e?.message || __( 'Could not load this donor.', 'gratora' ) ) )
             .finally( () => setLoading( false ) );
     };
 
@@ -298,14 +298,14 @@ export default function DonorProfile( { id, onBack } ) {
         let aborted = false;
         setLoading( true );
         setData( null );
-        apiFetch( { path: `/fundkit/v1/admin/donors/${ id }/profile` } )
+        apiFetch( { path: `/gratora/v1/admin/donors/${ id }/profile` } )
             .then( ( d ) => { if ( ! aborted ) { setData( d ); setError( null ); } } )
-            .catch( ( e ) => { if ( ! aborted ) setError( e?.message || __( 'Could not load this donor.', 'fundraising-toolkit' ) ); } )
+            .catch( ( e ) => { if ( ! aborted ) setError( e?.message || __( 'Could not load this donor.', 'gratora' ) ); } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ id ] );
 
-    if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'fundraising-toolkit' ) }</p>;
+    if ( loading && ! data ) return <p className="dp-loading">{ __( 'Loading donor…', 'gratora' ) }</p>;
 
     // Keep loaded data and retry controls after refresh failures.
     if ( error && ! data ) {
@@ -313,9 +313,9 @@ export default function DonorProfile( { id, onBack } ) {
             <div className="dp-shell">
                 <Notice status="error" isDismissible={ false }>{ error }</Notice>
                 <p>
-                    <Btn variant="secondary" onClick={ load }>{ __( 'Try again', 'fundraising-toolkit' ) }</Btn>
+                    <Btn variant="secondary" onClick={ load }>{ __( 'Try again', 'gratora' ) }</Btn>
                     { ' ' }
-                    <Btn onClick={ onBack }>{ __( 'Back to donors', 'fundraising-toolkit' ) }</Btn>
+                    <Btn onClick={ onBack }>{ __( 'Back to donors', 'gratora' ) }</Btn>
                 </p>
             </div>
         );

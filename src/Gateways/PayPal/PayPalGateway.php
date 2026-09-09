@@ -2,32 +2,32 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways\PayPal;
+namespace Gratora\Gateways\PayPal;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\GatewayTransportException;
-use FundKit\Gateways\ModeCredentialed;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\PaymentMethodUpdate;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\SubscriptionAware;
-use FundKit\Gateways\SubscriptionChangeNeedsApproval;
-use FundKit\Gateways\SubscriptionSchedule;
-use FundKit\Gateways\SupportsPaymentMethodUpdate;
-use FundKit\Gateways\SupportsScheduleChange;
-use FundKit\Gateways\SupportsSubscriptionPause;
-use FundKit\Gateways\TestMode;
-use FundKit\Gateways\WebhookOutcome;
-use FundKit\Gateways\WebhookPaymentGuard;
-use FundKit\Recurring\FrequencyMap;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\GatewayTransportException;
+use Gratora\Gateways\ModeCredentialed;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\PaymentMethodUpdate;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\SubscriptionAware;
+use Gratora\Gateways\SubscriptionChangeNeedsApproval;
+use Gratora\Gateways\SubscriptionSchedule;
+use Gratora\Gateways\SupportsPaymentMethodUpdate;
+use Gratora\Gateways\SupportsScheduleChange;
+use Gratora\Gateways\SupportsSubscriptionPause;
+use Gratora\Gateways\TestMode;
+use Gratora\Gateways\WebhookOutcome;
+use Gratora\Gateways\WebhookPaymentGuard;
+use Gratora\Recurring\FrequencyMap;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 use RuntimeException;
 use WP_REST_Request;
 
@@ -35,9 +35,9 @@ use WP_REST_Request;
  * PayPal gateway via Orders v2 (one-time) and Subscriptions v1 (recurring).
  *
  * The donor never leaves the site: the JS SDK renders PayPal's buttons and
- * opens its own popup. For one-time donations FundKit creates the Order up front
+ * opens its own popup. For one-time donations Gratora creates the Order up front
  * so `gateway_intent_id` exists before the donor approves; the browser then
- * approves it and FundKit captures server-side. For recurring, FundKit provisions a
+ * approves it and Gratora captures server-side. For recurring, Gratora provisions a
  * Product + Plan and the button creates the Subscription against that plan.
  *
  * Webhooks are the source of truth for money movement and are idempotent, so a
@@ -75,13 +75,13 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('PayPal', 'fundraising-toolkit');
+        return __('PayPal', 'gratora');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Pay with your PayPal balance, a bank account, or a card. No PayPal account required.', 'fundraising-toolkit');
+        return __('Pay with your PayPal balance, a bank account, or a card. No PayPal account required.', 'gratora');
     }
 
     /** @since 1.0.0 */
@@ -205,7 +205,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                     ],
                 ],
             ],
-        ], ['PayPal-Request-Id' => 'fundkit_order_' . $donation->reference]);
+        ], ['PayPal-Request-Id' => 'gratora_order_' . $donation->reference]);
 
         $orderId = (string) ($order['id'] ?? '');
         if ($orderId === '') {
@@ -275,7 +275,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             $result = $this->api->post(
                 '/v2/checkout/orders/' . rawurlencode($orderId) . '/capture',
                 [],
-                ['PayPal-Request-Id' => 'fundkit_capture_' . $donation->reference]
+                ['PayPal-Request-Id' => 'gratora_capture_' . $donation->reference]
             );
         } catch (RuntimeException $e) {
             if (! $this->isAlreadyCaptured($e)) {
@@ -567,7 +567,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * A refund issued from the PayPal dashboard. Recorded so FundKit's totals
+     * A refund issued from the PayPal dashboard. Recorded so Gratora's totals
      * match PayPal without an admin re-entering it.
      *
      * @param array<string,mixed> $refund
@@ -745,7 +745,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 'recurring.paypal',
                 sprintf(
                     /* translators: 1: PayPal subscription id, 2: the reason it was refused */
-                    __('PayPal subscription %1$s has no recurring plan here, so it cannot be cancelled from this site: %2$s', 'fundraising-toolkit'),
+                    __('PayPal subscription %1$s has no recurring plan here, so it cannot be cancelled from this site: %2$s', 'gratora'),
                     $subId,
                     $e->getMessage()
                 ),
@@ -938,13 +938,13 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
 
             if (isset($patch['amount_cents'])) {
                 $plan->amount_cents = $amount;
-                do_action('fundkit.recurring.plan_amount_changed', $plan);
+                do_action('gratora.recurring.plan_amount_changed', $plan);
             }
 
             if (isset($patch['interval_unit'])) {
                 $plan->interval_unit  = $unit;
                 $plan->interval_count = $count;
-                do_action('fundkit.recurring.plan_interval_changed', $plan);
+                do_action('gratora.recurring.plan_interval_changed', $plan);
             }
         }
 
@@ -1273,7 +1273,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
                 [
                     // Stable per attempt so a timed-out refund that already
                     // processed returns the original instead of issuing a second.
-                    'PayPal-Request-Id' => 'fundkit_refund_' . $donation->id . '_'
+                    'PayPal-Request-Id' => 'gratora_refund_' . $donation->id . '_'
                         . (int) $donation->refunded_cents . '_' . $amountCents,
                 ]
             );
@@ -1388,7 +1388,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
 
         $subId = (string) $plan->gateway_subscription_id;
         if ($subId === '') {
-            throw new RuntimeException(esc_html__('This donation has no PayPal subscription.', 'fundraising-toolkit'));
+            throw new RuntimeException(esc_html__('This donation has no PayPal subscription.', 'gratora'));
         }
 
         // The subscription's own current plan, read back from PayPal, so this
@@ -1403,7 +1403,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
         )['plan_id'] ?? '');
 
         if ($planId === '') {
-            throw new RuntimeException(esc_html__('PayPal did not say which plan this subscription is on.', 'fundraising-toolkit'));
+            throw new RuntimeException(esc_html__('PayPal did not say which plan this subscription is on.', 'gratora'));
         }
 
         $revised = $this->api->post(
@@ -1420,7 +1420,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
             }
         }
 
-        throw new RuntimeException(esc_html__('PayPal did not return a link for changing the payment method.', 'fundraising-toolkit'));
+        throw new RuntimeException(esc_html__('PayPal did not return a link for changing the payment method.', 'gratora'));
     }
 
     /**
@@ -1516,7 +1516,7 @@ final class PayPalGateway implements PaymentGateway, SubscriptionAware, Supports
     }
 
     /**
-     * @return array{0:string,1:int} interval unit + count for a FundKit frequency.
+     * @return array{0:string,1:int} interval unit + count for a Gratora frequency.
      *
      * Delegates to FrequencyMap rather than repeating the table: a local copy
      * with a monthly default silently bills biweekly donors once a month.

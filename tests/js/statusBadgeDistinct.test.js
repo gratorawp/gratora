@@ -13,7 +13,7 @@ const badge = ( status ) => {
 	const cls = el.props.className;
 
 	return {
-		variant: ( cls.match( /fundkit-pill--(\w+)/ ) || [] )[ 1 ],
+		variant: ( cls.match( /gratora-pill--(\w+)/ ) || [] )[ 1 ],
 		label:   el.props.children,
 	};
 };

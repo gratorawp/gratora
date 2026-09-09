@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/EmptyState';
+export { default } from '@gratora/ui/components/EmptyState';

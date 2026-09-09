@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Container\Container;
-use FundKit\Foundation\License\LicenseService;
-use FundKit\Foundation\Modules\FundKitModule;
-use FundKit\Foundation\Modules\ModuleManager;
+use Gratora\Foundation\Container\Container;
+use Gratora\Foundation\License\LicenseService;
+use Gratora\Foundation\Modules\GratoraModule;
+use Gratora\Foundation\Modules\ModuleManager;
 
 /**
  * What entitlement means when nothing has checked.
@@ -26,19 +26,19 @@ final class LicenseEntitlementTest extends IntegrationTestCase
 {
     protected function tearDown(): void
     {
-        remove_all_filters('fundkit.pro.product_status');
+        remove_all_filters('gratora.pro.product_status');
         parent::tearDown();
     }
 
     private function serviceWithAddon(): LicenseService
     {
-        $module = new class () implements FundKitModule {
+        $module = new class () implements GratoraModule {
             public function id(): string { return 'fake'; }
             public function name(): string { return 'Fake Add-on'; }
             public function version(): string { return '1.0.0'; }
             public function requires(): array { return []; }
             public function isLicensed(): bool { return true; }
-            public function tier(): string { return FundKitModule::TIER_PRO; }
+            public function tier(): string { return GratoraModule::TIER_PRO; }
             public function boot(Container $container): void {}
             public function migrations(): array { return []; }
         };
@@ -63,7 +63,7 @@ final class LicenseEntitlementTest extends IntegrationTestCase
 
     public function test_a_revoked_product_is_not_entitled(): void
     {
-        add_filter('fundkit.pro.product_status', static fn (): string => 'revoked');
+        add_filter('gratora.pro.product_status', static fn (): string => 'revoked');
 
         $addons = $this->serviceWithAddon()->entitlements();
 
@@ -74,7 +74,7 @@ final class LicenseEntitlementTest extends IntegrationTestCase
     /** Expired and grace still run: only revoked drops entitlement. */
     public function test_an_expired_product_is_still_entitled(): void
     {
-        add_filter('fundkit.pro.product_status', static fn (): string => 'expired');
+        add_filter('gratora.pro.product_status', static fn (): string => 'expired');
 
         $addons = $this->serviceWithAddon()->entitlements();
 
@@ -87,7 +87,7 @@ final class LicenseEntitlementTest extends IntegrationTestCase
 
     public function test_grace_is_entitled_too(): void
     {
-        add_filter('fundkit.pro.product_status', static fn (): string => 'grace');
+        add_filter('gratora.pro.product_status', static fn (): string => 'grace');
 
         $this->assertTrue($this->serviceWithAddon()->entitlements()[0]['entitled']);
     }

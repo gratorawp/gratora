@@ -1,14 +1,14 @@
 import { defineConfig, devices, type Project } from '@playwright/test';
 
-const baseURL = process.env.FUNDKIT_E2E_URL ?? 'http://localhost:10075';
+const baseURL = process.env.GRATORA_E2E_URL ?? 'http://localhost:10075';
 
-// Opt in with FUNDKIT_E2E_VISUAL=1; screenshot baselines are macOS-specific.
-const runVisual = !! process.env.FUNDKIT_E2E_VISUAL;
+// Opt in with GRATORA_E2E_VISUAL=1; screenshot baselines are macOS-specific.
+const runVisual = !! process.env.GRATORA_E2E_VISUAL;
 
 // wp-admin screenshot capture (specs/screenshots). Writes PNGs instead of
 // asserting, so it is opt-in too: nothing in a normal run wants the minutes it
 // spends walking every admin screen. Run via npm run test:shots.
-const runShots = !! process.env.FUNDKIT_E2E_SHOTS;
+const runShots = !! process.env.GRATORA_E2E_SHOTS;
 
 const projects: Project[] = [
     {

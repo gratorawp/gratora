@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorMetricsService;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donors\DonorMetricsService;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * The donor profile's "Recurring MRR" is rendered with the org's currency

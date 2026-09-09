@@ -1,18 +1,18 @@
-@import '@fundkit/ui/scss/tokens';
+@import '@gratora/ui/scss/tokens';
 @import '../_shared/admin-base';
 @import '../_shared/kpi-strip';
-@import '@fundkit/ui/scss/components/notice';
-@import '@fundkit/ui/scss/components/toast';
-@import '@fundkit/ui/scss/components/empty-state';
-@import '@fundkit/ui/scss/components/buttons';
-@import '@fundkit/ui/scss/components/switch';
-@import '@fundkit/ui/scss/components/dialog';
-@import '@fundkit/ui/scss/components/searchable-select';
-@import '@fundkit/ui/scss/components/form';
-@import '@fundkit/ui/scss/components/date-field';
+@import '@gratora/ui/scss/components/notice';
+@import '@gratora/ui/scss/components/toast';
+@import '@gratora/ui/scss/components/empty-state';
+@import '@gratora/ui/scss/components/buttons';
+@import '@gratora/ui/scss/components/switch';
+@import '@gratora/ui/scss/components/dialog';
+@import '@gratora/ui/scss/components/searchable-select';
+@import '@gratora/ui/scss/components/form';
+@import '@gratora/ui/scss/components/date-field';
 @import '../_shared/schedule-fields';
 
-.fundkit-crumbs {
+.gratora-crumbs {
     font-size: 13px;
     color: $text-muted;
     margin-bottom: 6px;
@@ -23,7 +23,7 @@
     .sep { margin: 0 6px; color: #cbd0d5; }
 }
 
-.fundkit-page-head {
+.gratora-page-head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -44,7 +44,7 @@
     &__meta      { font-size: 12.5px; color: $text-muted; }
 }
 
-.fundkit-funds-intro {
+.gratora-funds-intro {
     margin: 0 0 16px;
     font-size: 13px;
     color: $text-muted;
@@ -53,7 +53,7 @@
 }
 
 
-.fundkit-fund-name {
+.gratora-fund-name {
     position: relative;
 
     &--child::before {
@@ -70,7 +70,7 @@
     }
 }
 
-.fundkit-fund-code {
+.gratora-fund-code {
     font-family: $font-mono;
     font-size: 11px;
     color: $text-muted;
@@ -81,7 +81,7 @@
     display: inline-block;
 }
 
-.fundkit-fund-badge {
+.gratora-fund-badge {
     display: inline-flex;
     align-items: center;
     font-size: 11px;
@@ -96,14 +96,14 @@
     &--pending      { background: $blue-soft; color: $blue; }
 }
 
-.fundkit-fund-status {
+.gratora-fund-status {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-size: 12.5px;
     color: $text;
 }
-.fundkit-fund-dot {
+.gratora-fund-dot {
     width: 7px;
     height: 7px;
     border-radius: 50%;
@@ -114,7 +114,7 @@
 
 @import '../_shared/dataviews';
 
-.fundkit-fset {
+.gratora-fset {
     border: 0;
     padding: 0;
     margin: 0 0 20px;
@@ -130,7 +130,7 @@
     }
 }
 
-.fundkit-fld {
+.gratora-fld {
     margin-bottom: 14px;
 
     label {
@@ -146,7 +146,7 @@
 
 
 // Shared ToggleRow layout; also used in settings and campaigns.
-.fundkit-toggle-row {
+.gratora-toggle-row {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -171,9 +171,9 @@
     }
 }
 
-.fundkit-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.gratora-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-.fundkit-seg2 {
+.gratora-seg2 {
     display: flex;
     background: $bg-soft;
     border-radius: $radius-md;
@@ -202,7 +202,7 @@
     }
 }
 
-.fundkit-toggle {
+.gratora-toggle {
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -225,7 +225,7 @@
     input { margin-top: 3px; accent-color: $accent; width: 16px; height: 16px; }
 }
 
-.fundkit-choice {
+.gratora-choice {
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -260,7 +260,7 @@
     }
 }
 
-.fundkit-fund-raised {
+.gratora-fund-raised {
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }

@@ -2,25 +2,30 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use ReflectionClass;
-use FundKit\Admin\AdminMenu;
+use Gratora\Admin\AdminMenu;
 
 /**
  * The admin menu slug is a `page=` query value, not a text domain.
  *
- * They look identical in source: `{ page: 'fundkit' }` sits on the same line as
- * `__( 'FundKit', 'fundkit' )`, so a sweep that renames the domain takes the slug
- * with it and every "FundKit" breadcrumb 404s. That is exactly what happened, and
- * nothing caught it because no test ever followed the link.
+ * A rename that takes one with the other makes every breadcrumb 404, which is
+ * what happened once because no test followed the link.
+ *
+ * NOT COVERED: a screen hardcoding a page slug instead of reading ADMIN_SLUG.
+ * The check that caught it compared the slug against the text domain, and the
+ * two are the same string, so it can no longer tell a good link from a bad one.
+ * Resolving each link against the registered menu is the test worth having; the
+ * subpages come from a filter that only populates in a full admin bootstrap,
+ * which this suite does not run.
  */
 final class AdminPageSlugTest extends IntegrationTestCase
 {
     private function jsSlug(): string
     {
         $js = (string) file_get_contents(
-            FUNDKIT_DIR . 'assets/admin/_shared/adminPages.js'
+            GRATORA_DIR . 'assets/admin/_shared/adminPages.js'
         );
 
         $this->assertMatchesRegularExpression(
@@ -45,28 +50,5 @@ final class AdminPageSlugTest extends IntegrationTestCase
             $this->jsSlug(),
             'the breadcrumb would link to a page WordPress never registered'
         );
-    }
-
-    public function test_no_screen_hardcodes_the_text_domain_as_a_page_slug(): void
-    {
-        // The specific mistake, pinned by shape rather than by file: any screen
-        // linking page= to the text domain is linking to nothing.
-        $hits = [];
-        $dir  = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator(FUNDKIT_DIR . 'assets/admin')
-        );
-
-        foreach ($dir as $file) {
-            if ($file->getExtension() !== 'jsx' && $file->getExtension() !== 'js') {
-                continue;
-            }
-            $body = (string) file_get_contents($file->getPathname());
-            if (str_contains($body, "page: 'fundraising-toolkit'")
-                || str_contains($body, "page=fundraising-toolkit")) {
-                $hits[] = $file->getPathname();
-            }
-        }
-
-        $this->assertSame([], $hits, 'these link to a page that does not exist');
     }
 }

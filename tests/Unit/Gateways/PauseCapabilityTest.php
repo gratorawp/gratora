@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Gateways;
+namespace Gratora\Tests\Unit\Gateways;
 
-use FundKit\Gateways\SupportsSubscriptionPause;
+use Gratora\Gateways\SupportsSubscriptionPause;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -18,8 +18,8 @@ final class PauseCapabilityTest extends TestCase
     public static function coreSubscriptionGateways(): array
     {
         return [
-            [\FundKit\Gateways\Stripe\StripeGateway::class],
-            [\FundKit\Gateways\PayPal\PayPalGateway::class],
+            [\Gratora\Gateways\Stripe\StripeGateway::class],
+            [\Gratora\Gateways\PayPal\PayPalGateway::class],
         ];
     }
 

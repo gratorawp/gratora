@@ -1,10 +1,10 @@
 // Editor chrome only; blocks.scss also loads on the frontend.
-@import '@fundkit/ui/scss/tokens';
+@import '@gratora/ui/scss/tokens';
 @import '../_shared/components/template-picker';
 
-.fundkit-layout-slot { display: contents; }
+.gratora-layout-slot { display: contents; }
 
-.fundkit-layout-btn.components-button {
+.gratora-layout-btn.components-button {
     display: flex;
     align-items: center;
     gap: 7px;

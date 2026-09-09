@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors\Portal;
+namespace Gratora\Donors\Portal;
 
 use WP_Post;
 
 /**
- * Guarantees the donor-portal WP page (hosts [fundkit_donor_portal]) exists and is
+ * Guarantees the donor-portal WP page (hosts [gratora_donor_portal]) exists and is
  * published: magic-link emails point at its URL, so a missing page silently breaks
- * donor self-service. url() is the single source of truth unless fundkit.portal.url is set.
+ * donor self-service. url() is the single source of truth unless gratora.portal.url is set.
  *
  * @since 1.0.0
  */
 final class PortalPage
 {
-    public const OPTION_PAGE_ID = 'fundkit_portal_page_id';
-    public const OPTION_VERSION = 'fundkit_portal_page_version';
+    public const OPTION_PAGE_ID = 'gratora_portal_page_id';
+    public const OPTION_VERSION = 'gratora_portal_page_version';
     public const SLUG           = 'donor-portal';
-    public const META_MANAGED   = '_fundkit_managed_portal';
-    public const SHORTCODE      = '[fundkit_donor_portal]';
+    public const META_MANAGED   = '_gratora_managed_portal';
+    public const SHORTCODE      = '[gratora_donor_portal]';
 
     /**
      * Idempotent: keeps a stored id that still resolves to a published page, else
@@ -42,7 +42,7 @@ final class PortalPage
 
         $id = wp_insert_post([
             'post_type'    => 'page',
-            'post_title'   => __('Donor portal', 'fundraising-toolkit'),
+            'post_title'   => __('Donor portal', 'gratora'),
             'post_name'    => self::SLUG,
             'post_status'  => 'publish',
             'post_content' => self::SHORTCODE,
@@ -82,7 +82,7 @@ final class PortalPage
     }
 
     /**
-     * Canonical portal URL. The `fundkit.portal.url` filter overrides; otherwise
+     * Canonical portal URL. The `gratora.portal.url` filter overrides; otherwise
      * the URL is the permalink of the stored page, or the slug-based
      * home_url() fallback while the page is being provisioned.
      *
@@ -90,7 +90,7 @@ final class PortalPage
      */
     public function url(): string
     {
-        $filtered = (string) apply_filters('fundkit.portal.url', '');
+        $filtered = (string) apply_filters('gratora.portal.url', '');
         if ($filtered !== '') {
             return $filtered;
         }
@@ -108,17 +108,17 @@ final class PortalPage
 
     /**
      * Heal pass for plugin updates: register_activation_hook does not fire
-     * on updates, so we re-run ensure() once per FUNDKIT_VERSION bump. Steady
+     * on updates, so we re-run ensure() once per GRATORA_VERSION bump. Steady
      * state is a single option read.
      *
      * @since 1.0.0
      */
     public function maybeHeal(): void
     {
-        if (get_option(self::OPTION_VERSION) === FUNDKIT_VERSION) {
+        if (get_option(self::OPTION_VERSION) === GRATORA_VERSION) {
             return;
         }
         $this->ensure();
-        update_option(self::OPTION_VERSION, FUNDKIT_VERSION, false);
+        update_option(self::OPTION_VERSION, GRATORA_VERSION, false);
     }
 }

@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Config;
+namespace Gratora\Foundation\Config;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Vendor\Queryable\DB;
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Vendor\Queryable\DB;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /** @since 1.0.0 */
 final class SystemSetting extends Model
 {
-    protected string $table = 'fundkit_system_settings';
+    protected string $table = 'gratora_system_settings';
     protected string $version = '1.0.0';
     protected string $primaryKey = 'setting_key';
 
@@ -24,7 +24,7 @@ final class SystemSetting extends Model
     /** @since 1.0.0 */
     public static function read(string $key): ?string
     {
-        $row = DB::table('fundkit_system_settings')
+        $row = DB::table('gratora_system_settings')
             ->where('setting_key', $key)
             ->select('setting_value')
             ->get();
@@ -37,7 +37,7 @@ final class SystemSetting extends Model
     public static function write(string $key, string $value): void
     {
         $now = gmdate('Y-m-d H:i:s');
-        DB::table('fundkit_system_settings')->upsert(
+        DB::table('gratora_system_settings')->upsert(
             [
                 'setting_key'   => $key,
                 'setting_value' => $value,
@@ -51,7 +51,7 @@ final class SystemSetting extends Model
     /** @since 1.0.0 */
     public static function exists(string $key): bool
     {
-        return DB::table('fundkit_system_settings')
+        return DB::table('gratora_system_settings')
             ->where('setting_key', $key)
             ->exists();
     }
@@ -59,7 +59,7 @@ final class SystemSetting extends Model
     /** @since 1.0.0 */
     public static function forget(string $key): void
     {
-        DB::table('fundkit_system_settings')
+        DB::table('gratora_system_settings')
             ->where('setting_key', $key)
             ->delete();
     }

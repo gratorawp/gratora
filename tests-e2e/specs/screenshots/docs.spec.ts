@@ -1,6 +1,6 @@
 /**
- * Capture documentation widgets by visible heading on a seeded site. Set FUNDKIT_E2E_SHOTS=1
- * and FUNDKIT_E2E_SHOTS_DIR, then run the screenshots project with this spec.
+ * Capture documentation widgets by visible heading on a seeded site. Set GRATORA_E2E_SHOTS=1
+ * and GRATORA_E2E_SHOTS_DIR, then run the screenshots project with this spec.
  */
 
 import { expect, test, type Locator, type Page } from '@playwright/test';
@@ -15,7 +15,7 @@ const admin = (page: string, extra = ''): string => `/wp-admin/admin.php?page=${
 
 /** One dashboard widget, addressed by the heading a reader sees. */
 function widget(page: Page, heading: string): Locator {
-    return page.locator('.fundkit-widget-slot').filter({ has: page.getByRole('heading', { name: heading, exact: true }) });
+    return page.locator('.gratora-widget-slot').filter({ has: page.getByRole('heading', { name: heading, exact: true }) });
 }
 
 /**
@@ -40,7 +40,7 @@ async function unpinAdminChrome(page: Page): Promise<void> {
 async function shootElement(page: Page, target: Locator, name: string): Promise<void> {
     await expect(target).toBeVisible({ timeout: 15_000 });
     await page.waitForTimeout(600);
-    await target.screenshot({ path: `${process.env.FUNDKIT_E2E_SHOTS_DIR}/${name}.png`, animations: 'disabled', caret: 'hide' });
+    await target.screenshot({ path: `${process.env.GRATORA_E2E_SHOTS_DIR}/${name}.png`, animations: 'disabled', caret: 'hide' });
 }
 
 test.describe('documentation screenshots', () => {
@@ -51,7 +51,7 @@ test.describe('documentation screenshots', () => {
     });
 
     test('dashboard', async ({ page }) => {
-        await page.goto(admin('fundkit'));
+        await page.goto(admin('gratora'));
         await page.waitForLoadState('networkidle');
         // Recharts draws its series from JS, so idle alone still catches the
         // revenue chart mid-sweep.
@@ -71,34 +71,34 @@ test.describe('documentation screenshots', () => {
     test('lists and details', async ({ page }) => {
         // Every full-screen documentation image is viewport sized, not fullPage:
         // 1600x1000 at 2x is the 3200x2000 the existing set uses.
-        await page.goto(admin('fundkit-campaigns'));
+        await page.goto(admin('gratora-campaigns'));
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(1_500);
         await shoot(page, 'campaigns-list');
 
-        await page.goto(admin('fundkit-donations'));
+        await page.goto(admin('gratora-donations'));
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(1_500);
         await shoot(page, 'donations-list');
 
-        await page.goto(admin('fundkit-donors'));
+        await page.goto(admin('gratora-donors'));
         await page.waitForLoadState('networkidle');
         await page.waitForTimeout(1_500);
         await shoot(page, 'donors-list');
 
         // Open the first row of each list rather than addressing an id, so the
         // capture survives a reseed.
-        await page.goto(admin('fundkit-donations'));
+        await page.goto(admin('gratora-donations'));
         await page.waitForLoadState('networkidle');
-        const donation = page.locator('#fundkit-admin-donations a[href^="#donation/"], #fundkit-admin-donations a[href*="view=detail"]').first();
+        const donation = page.locator('#gratora-admin-donations a[href^="#donation/"], #gratora-admin-donations a[href*="view=detail"]').first();
         await expect(donation).toBeVisible({ timeout: 15_000 });
         await donation.click();
         await page.waitForTimeout(2_500);
         await shoot(page, 'donation-detail');
 
-        await page.goto(admin('fundkit-donors'));
+        await page.goto(admin('gratora-donors'));
         await page.waitForLoadState('networkidle');
-        const donor = page.locator('#fundkit-admin-donors a[href^="#donor/"]').first();
+        const donor = page.locator('#gratora-admin-donors a[href^="#donor/"]').first();
         await expect(donor).toBeVisible({ timeout: 15_000 });
         await donor.click();
         await page.waitForTimeout(2_500);

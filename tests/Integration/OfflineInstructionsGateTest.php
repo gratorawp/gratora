@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -26,13 +26,13 @@ final class OfflineInstructionsGateTest extends IntegrationTestCase
     /** @param array<string,mixed> $offline */
     private function configureOffline(array $offline): void
     {
-        update_option('fundkit_gateway_config', ['offline' => $offline]);
+        update_option('gratora_gateway_config', ['offline' => $offline]);
     }
 
     /** @param array<string,mixed> $body */
     private function postDonation(array $body): WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) json_encode($body));
         return rest_do_request($req);
@@ -41,7 +41,7 @@ final class OfflineInstructionsGateTest extends IntegrationTestCase
     private function donationCount(): int
     {
         return (int) self::$wpdb->get_var(
-            'SELECT COUNT(*) FROM ' . self::$prefix . 'fundkit_donations'
+            'SELECT COUNT(*) FROM ' . self::$prefix . 'gratora_donations'
         );
     }
 
@@ -89,7 +89,7 @@ final class OfflineInstructionsGateTest extends IntegrationTestCase
         ]);
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('fundkit_gateway_not_allowed', $res->get_data()['code'] ?? null);
+        $this->assertSame('gratora_gateway_not_allowed', $res->get_data()['code'] ?? null);
         $this->assertSame(0, $this->donationCount(), 'a pending row nobody can ever pay was still written');
     }
 

@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest;
+namespace Gratora\Rest;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Analytics\Event;
-use FundKit\Analytics\EventRecorder;
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\WebhookOutcome;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\Event;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\WebhookOutcome;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * Incoming-webhook dispatcher: POST /fundkit/v1/webhooks/{gateway}; handleWebhook()
+ * Incoming-webhook dispatcher: POST /gratora/v1/webhooks/{gateway}; handleWebhook()
  * verifies the signature. Every delivery is recorded to the log the site owner
  * reads, whether or not anything came of it.
  *
@@ -24,7 +24,7 @@ use WP_REST_Server;
  */
 final class WebhookController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /**
      * Rate-limit signature failures only, preserving verified payment events. PayPal
@@ -42,8 +42,8 @@ final class WebhookController
     private const FAIL_WINDOW = 900;
 
     /** One recorded refusal per gateway per window. */
-    private const FAIL_KEY          = 'fundkit_wh_fail_';
-    private const REJECT_NOTICE_KEY = 'fundkit_webhook_rejected_';
+    private const FAIL_KEY          = 'gratora_wh_fail_';
+    private const REJECT_NOTICE_KEY = 'gratora_webhook_rejected_';
     private const REJECT_NOTICE_TTL = 15 * MINUTE_IN_SECONDS;
 
     /** Log family these rows belong to, one type per gateway beneath it. */
@@ -93,7 +93,7 @@ final class WebhookController
 
         if (! $gateway) {
             /* translators: %s: gateway identifier */
-            return new WP_Error('fundkit_unknown_gateway', sprintf(__('Unknown gateway: %s', 'fundraising-toolkit'), $gatewayId), ['status' => 404]);
+            return new WP_Error('gratora_unknown_gateway', sprintf(__('Unknown gateway: %s', 'gratora'), $gatewayId), ['status' => 404]);
         }
 
         // Asked before the handler, because the handler is the expensive part.
@@ -101,8 +101,8 @@ final class WebhookController
         if ($this->spam->peek($failKey, self::FAIL_WINDOW) >= self::FAIL_MAX
             || $this->spam->peek($failKey . ':unverifiable', self::FAIL_WINDOW) >= self::UNVERIFIABLE_MAX) {
             return new WP_Error(
-                'fundkit_webhook_rejected',
-                __('Too many rejected deliveries. Please try again shortly.', 'fundraising-toolkit'),
+                'gratora_webhook_rejected',
+                __('Too many rejected deliveries. Please try again shortly.', 'gratora'),
                 ['status' => 429]
             );
         }
@@ -146,21 +146,21 @@ final class WebhookController
                 set_transient(self::REJECT_NOTICE_KEY . $gatewayId, 1, self::REJECT_NOTICE_TTL);
                 ErrorLog::record(
                     'webhook.' . $gatewayId,
-                    $outcome->error ?? __('Signature verification failed. The webhook will keep being rejected until the gateway credentials and webhook id match this site.', 'fundraising-toolkit'),
+                    $outcome->error ?? __('Signature verification failed. The webhook will keep being rejected until the gateway credentials and webhook id match this site.', 'gratora'),
                     ['gateway' => $gatewayId, 'event_type' => $outcome->event_type ?? 'unknown']
                 );
             }
 
             return new WP_Error(
-                'fundkit_webhook_rejected',
-                $outcome->error ?? __('Webhook rejected.', 'fundraising-toolkit'),
+                'gratora_webhook_rejected',
+                $outcome->error ?? __('Webhook rejected.', 'gratora'),
                 ['status' => $outcome->http_status]
             );
         }
 
         if ($outcome->error !== null && $outcome->http_status >= 500) {
             return new WP_Error(
-                'fundkit_webhook_error',
+                'gratora_webhook_error',
                 $outcome->error,
                 ['status' => $outcome->http_status]
             );

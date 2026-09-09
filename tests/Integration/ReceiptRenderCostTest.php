@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -20,7 +20,7 @@ final class ReceiptRenderCostTest extends IntegrationTestCase
 {
     private function fetch(): int
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/receipts/1/download');
+        $req = new WP_REST_Request('GET', '/gratora/v1/receipts/1/download');
         $req->set_query_params(['token' => 'token-' . uniqid()]);
 
         return rest_do_request($req)->get_status();
@@ -33,7 +33,7 @@ final class ReceiptRenderCostTest extends IntegrationTestCase
 
         $value = $wpdb->get_var(
             "SELECT option_value FROM {$wpdb->options}
-             WHERE option_name LIKE '_transient_fundkit_receipt_%'
+             WHERE option_name LIKE '_transient_gratora_receipt_%'
              ORDER BY option_id DESC LIMIT 1"
         );
 

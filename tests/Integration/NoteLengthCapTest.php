@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationNote;
-use FundKit\Donations\DonationNoteRepository;
-use FundKit\Donors\DonorNote;
-use FundKit\Donors\DonorNoteRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationNote;
+use Gratora\Donations\DonationNoteRepository;
+use Gratora\Donors\DonorNote;
+use Gratora\Donors\DonorNoteRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -62,7 +62,7 @@ final class NoteLengthCapTest extends IntegrationTestCase
         $this->admin();
         $id = $this->donorId();
 
-        $this->assertSame(400, $this->post("/fundkit/v1/admin/donors/{$id}/notes", str_repeat('a', 60000)));
+        $this->assertSame(400, $this->post("/gratora/v1/admin/donors/{$id}/notes", str_repeat('a', 60000)));
         $this->assertSame(0, DonorNote::query()->where('donor_id', $id)->count());
     }
 
@@ -71,7 +71,7 @@ final class NoteLengthCapTest extends IntegrationTestCase
         $this->admin();
         $donation = $this->donation();
 
-        $this->assertSame(400, $this->post("/fundkit/v1/admin/donations/{$donation->reference}/notes", str_repeat('a', 60000)));
+        $this->assertSame(400, $this->post("/gratora/v1/admin/donations/{$donation->reference}/notes", str_repeat('a', 60000)));
         $this->assertSame(0, DonationNote::query()->where('donation_id', (int) $donation->id)->count());
     }
 
@@ -85,7 +85,7 @@ final class NoteLengthCapTest extends IntegrationTestCase
         $id   = $this->donorId();
         $body = str_repeat('b', 12000);
 
-        $this->assertSame(201, $this->post("/fundkit/v1/admin/donors/{$id}/notes", $body));
+        $this->assertSame(201, $this->post("/gratora/v1/admin/donors/{$id}/notes", $body));
 
         $notes = Plugin::instance()->container->get(DonorNoteRepository::class)->listForDonor($id);
         $this->assertSame($body, (string) $notes[0]['body']);
@@ -97,7 +97,7 @@ final class NoteLengthCapTest extends IntegrationTestCase
         $donation = $this->donation();
         $body     = str_repeat('b', 12000);
 
-        $this->assertSame(201, $this->post("/fundkit/v1/admin/donations/{$donation->reference}/notes", $body));
+        $this->assertSame(201, $this->post("/gratora/v1/admin/donations/{$donation->reference}/notes", $body));
 
         $notes = Plugin::instance()->container->get(DonationNoteRepository::class)->listForDonation((int) $donation->id);
         $this->assertSame($body, (string) $notes[0]['body']);
@@ -109,7 +109,7 @@ final class NoteLengthCapTest extends IntegrationTestCase
         $id   = $this->donorId();
         $body = str_repeat("\u{1F600}", 12000);
 
-        $this->assertSame(201, $this->post("/fundkit/v1/admin/donors/{$id}/notes", $body));
+        $this->assertSame(201, $this->post("/gratora/v1/admin/donors/{$id}/notes", $body));
 
         $notes = Plugin::instance()->container->get(DonorNoteRepository::class)->listForDonor($id);
         $this->assertSame($body, (string) $notes[0]['body']);

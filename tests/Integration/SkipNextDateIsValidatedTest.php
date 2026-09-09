@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanActions;
-use FundKit\Recurring\RecurringPlanChange;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanActions;
+use Gratora\Recurring\RecurringPlanChange;
 use InvalidArgumentException;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * skipNext writes resume_at, which is the one column the resumer keys on, and
@@ -74,7 +74,7 @@ final class SkipNextDateIsValidatedTest extends IntegrationTestCase
     {
         $plan = $this->plan(gmdate('Y-m-d H:i:s', time() + 86400));
 
-        DB::table('fundkit_recurring_plans')
+        DB::table('gratora_recurring_plans')
             ->where('id', (int) $plan->id)
             ->update(['next_payment_at' => 'not-a-date']);
 

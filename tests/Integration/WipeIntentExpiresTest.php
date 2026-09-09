@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Uninstall\DataEraser;
+use Gratora\Foundation\Uninstall\DataEraser;
 
 /**
- * The answer to "delete all FundKit data on deactivation" belongs to the
+ * The answer to "delete all Gratora data on deactivation" belongs to the
  * deactivation it was given for.
  *
  * As a plain flag it outlived one. Tick the box, then close the tab or let the

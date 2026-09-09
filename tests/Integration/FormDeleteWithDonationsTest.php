@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\Donation;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormService;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\Donation;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -56,7 +56,7 @@ final class FormDeleteWithDonationsTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $d   = Donation::make();
-        $d->reference         = 'FUNDKIT-FORMDEL-' . uniqid();
+        $d->reference         = 'GRATORA-FORMDEL-' . uniqid();
         $d->donor_id          = 1;
         $d->form_id           = (int) $form->id;
         $d->campaign_id       = (int) $form->campaign_id;
@@ -113,7 +113,7 @@ final class FormDeleteWithDonationsTest extends IntegrationTestCase
         $form = $this->form();
         $now  = gmdate('Y-m-d H:i:s');
         $d    = Donation::make();
-        $d->reference   = 'FUNDKIT-FORMDEL-T-' . uniqid();
+        $d->reference   = 'GRATORA-FORMDEL-T-' . uniqid();
         $d->donor_id    = 1;
         $d->form_id     = (int) $form->id;
         $d->amount_cents = 100;
@@ -147,11 +147,11 @@ final class FormDeleteWithDonationsTest extends IntegrationTestCase
         $form = $this->form();
         $this->donationOn($form);
 
-        $req = new WP_REST_Request('DELETE', '/fundkit/v1/admin/forms/' . (int) $form->id);
+        $req = new WP_REST_Request('DELETE', '/gratora/v1/admin/forms/' . (int) $form->id);
         $req->set_param('id', (int) $form->id);
         $res = rest_do_request($req);
 
         $this->assertSame(422, $res->get_status());
-        $this->assertSame('fundkit_form_delete_blocked', (string) $res->get_data()['code']);
+        $this->assertSame('gratora_form_delete_blocked', (string) $res->get_data()['code']);
     }
 }

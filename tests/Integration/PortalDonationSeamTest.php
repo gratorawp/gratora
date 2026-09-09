@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Admin\ExtensionAssets;
-use FundKit\Donations\Donation;
+use Gratora\Admin\ExtensionAssets;
+use Gratora\Donations\Donation;
 use WP_REST_Request;
 
 /**
@@ -20,7 +20,7 @@ final class PortalDonationSeamTest extends IntegrationTestCase
     {
         $reference = $this->paidDonation();
 
-        add_filter('fundkit.portal.donation', static function (array $payload, Donation $donation): array {
+        add_filter('gratora.portal.donation', static function (array $payload, Donation $donation): array {
             $payload['keepsake'] = ['reference' => (string) $donation->reference];
 
             return $payload;
@@ -37,7 +37,7 @@ final class PortalDonationSeamTest extends IntegrationTestCase
         $reference = $this->paidDonation();
 
         $seen = null;
-        add_filter('fundkit.portal.donation', static function (array $payload, Donation $donation) use (&$seen): array {
+        add_filter('gratora.portal.donation', static function (array $payload, Donation $donation) use (&$seen): array {
             $seen = $donation;
 
             return $payload;
@@ -57,7 +57,7 @@ final class PortalDonationSeamTest extends IntegrationTestCase
         ExtensionAssets::enqueue('portal');
 
         $inline = implode('', (array) ($wp_scripts->registered[ExtensionAssets::HANDLE]->extra['after'] ?? []));
-        $this->assertStringContainsString('window.fundkit.panels', $inline);
+        $this->assertStringContainsString('window.gratora.panels', $inline);
     }
 
     /** @return array<string,mixed> */
@@ -66,21 +66,21 @@ final class PortalDonationSeamTest extends IntegrationTestCase
         $donation = Donation::query()->find('reference', $reference);
 
         $sid = $this->portalSession((int) $donation->donor_id, bin2hex(random_bytes(8)));
-        $_COOKIE['fundkit_donor_session'] = $sid;
+        $_COOKIE['gratora_donor_session'] = $sid;
 
         try {
-            $res = rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/portal/donations/{$reference}"));
+            $res = rest_do_request(new WP_REST_Request('GET', "/gratora/v1/portal/donations/{$reference}"));
             $this->assertSame(200, $res->get_status());
 
             return (array) $res->get_data();
         } finally {
-            unset($_COOKIE['fundkit_donor_session']);
+            unset($_COOKIE['gratora_donor_session']);
         }
     }
 
     private function paidDonation(): string
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'portal-seam@example.test',
@@ -91,7 +91,7 @@ final class PortalDonationSeamTest extends IntegrationTestCase
         ]));
         $reference = (string) rest_do_request($create)->get_data()['reference'];
 
-        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);

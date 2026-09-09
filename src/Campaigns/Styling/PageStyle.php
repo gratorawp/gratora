@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Styling;
+namespace Gratora\Campaigns\Styling;
 
-use FundKit\Campaigns\Campaign;
+use Gratora\Campaigns\Campaign;
 use WP_Post;
 
 /**
@@ -22,7 +22,7 @@ use WP_Post;
  */
 final class PageStyle
 {
-    private const BODY_CLASS = 'fundkit-campaign-styled';
+    private const BODY_CLASS = 'gratora-campaign-styled';
 
     /**
      * The campaign page foundation, and the campaign's own tokens inlined onto
@@ -33,7 +33,7 @@ final class PageStyle
      * when a campaign block is on the page, and a page holding nothing but an
      * organizer's own headings and paragraphs still belongs to its campaign.
      */
-    public const HANDLE = 'fundkit-campaign-page';
+    public const HANDLE = 'gratora-campaign-page';
 
     private ?Campaign $campaign = null;
 
@@ -56,13 +56,13 @@ final class PageStyle
         if (wp_style_is(self::HANDLE, 'registered')) {
             return;
         }
-        $path = FUNDKIT_DIR . 'assets/campaign-page/page.css';
+        $path = GRATORA_DIR . 'assets/campaign-page/page.css';
         wp_register_style(
             self::HANDLE,
-            FUNDKIT_URL . 'assets/campaign-page/page.css',
+            GRATORA_URL . 'assets/campaign-page/page.css',
             [],
             // Use mtime to invalidate unreleased CSS changes.
-            (string) (@filemtime($path) ?: FUNDKIT_VERSION)
+            (string) (@filemtime($path) ?: GRATORA_VERSION)
         );
     }
 
@@ -101,7 +101,7 @@ final class PageStyle
             return $campaign;
         }
 
-        $campaignId = (int) get_post_meta($postId, '_fundkit_campaign_id', true);
+        $campaignId = (int) get_post_meta($postId, '_gratora_campaign_id', true);
 
         return $campaignId > 0 ? Campaign::query()->find('id', $campaignId) : null;
     }

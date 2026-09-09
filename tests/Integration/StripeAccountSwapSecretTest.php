@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\Stripe\StripeAccount;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\Stripe\StripeAccount;
 use WP_REST_Request;
 
 /**
@@ -26,7 +26,7 @@ final class StripeAccountSwapSecretTest extends IntegrationTestCase
         parent::setUp();
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        update_option('fundkit_gateway_config', ['stripe' => [
+        update_option('gratora_gateway_config', ['stripe' => [
             'webhook_secret_live'   => 'whsec_previous_org',
             'webhook_endpoint_live' => 'we_previous:bond',
         ]]);
@@ -73,7 +73,7 @@ final class StripeAccountSwapSecretTest extends IntegrationTestCase
 
     private function saveKeys(string $secret): int
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/stripe/keys');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/stripe/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'mode'            => 'live',
@@ -86,7 +86,7 @@ final class StripeAccountSwapSecretTest extends IntegrationTestCase
 
     private function storedSecret(): string
     {
-        $opt = get_option('fundkit_gateway_config', []);
+        $opt = get_option('gratora_gateway_config', []);
 
         return (string) ($opt['stripe']['webhook_secret_live'] ?? '');
     }

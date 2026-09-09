@@ -1,10 +1,10 @@
 /**
- * Resolve add-on fields lazily from window.fundkit.formFields. Entries may provide component,
+ * Resolve add-on fields lazily from window.gratora.formFields. Entries may provide component,
  * values, validate, and payload; payload.extra is merged.
  */
 
 function registry() {
-    return ( typeof window !== 'undefined' && window.fundkit && window.fundkit.formFields ) || null;
+    return ( typeof window !== 'undefined' && window.gratora && window.gratora.formFields ) || null;
 }
 
 export function fieldEntry( kind ) {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\Form;
-use FundKit\Forms\FormSubmissionValidator;
-use FundKit\Foundation\Plugin;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormSubmissionValidator;
+use Gratora\Foundation\Plugin;
 
 /**
  * Enforce presets server-side. Currency conversion is allowed only when the form offers a
@@ -21,8 +21,8 @@ final class PresetAmountBypassTest extends IntegrationTestCase
 
     private function form(bool $withSwitcher): Form
     {
-        $amount = '<!-- wp:fundkit/donation-amount {"allowCustom":false,"presets":[2500,5000,10000]} /-->';
-        $switch = $withSwitcher ? '<!-- wp:fundkit/currency-switcher /-->' : '';
+        $amount = '<!-- wp:gratora/donation-amount {"allowCustom":false,"presets":[2500,5000,10000]} /-->';
+        $switch = $withSwitcher ? '<!-- wp:gratora/currency-switcher /-->' : '';
 
         $f = Form::make();
         $f->title      = 'Fixed amounts';

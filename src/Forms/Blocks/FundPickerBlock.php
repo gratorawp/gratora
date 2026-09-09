@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
-use FundKit\Foundation\Helpers\View;
-use FundKit\Funds\FundRepository;
+use Gratora\Foundation\Helpers\View;
+use Gratora\Funds\FundRepository;
 
 /** @since 1.0.0 */
 final class FundPickerBlock implements Block
@@ -16,7 +16,7 @@ final class FundPickerBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/fund-picker';
+        return 'gratora/fund-picker';
     }
 
     /** @since 1.0.0 */

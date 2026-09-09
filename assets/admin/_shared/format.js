@@ -1,6 +1,6 @@
 /**
- * Re-exports @fundkit/ui's generic formatters so call sites importing '_shared/format'
- * stay stable; the FundKit-specific admin routing helpers stay local.
+ * Re-exports @gratora/ui's generic formatters so call sites importing '_shared/format'
+ * stay stable; the Gratora-specific admin routing helpers stay local.
  */
 import { __, sprintf } from '@wordpress/i18n';
 import {
@@ -9,7 +9,7 @@ import {
     formatDate,
     parseTimestamp,
     timeAgo as relativeTimeAgo,
-} from '@fundkit/ui/utils/format';
+} from '@gratora/ui/utils/format';
 
 export { currencyDecimals, groupDigits, formatDate };
 
@@ -40,16 +40,16 @@ export function timeAgo( iso ) {
 
     if ( days < 30 ) {
         /* translators: %d: number of weeks */
-        return sprintf( __( '%dw ago', 'fundraising-toolkit' ), Math.floor( days / 7 ) );
+        return sprintf( __( '%dw ago', 'gratora' ), Math.floor( days / 7 ) );
     }
 
     if ( days < 365 ) {
         /* translators: %d: number of months */
-        return sprintf( __( '%dmo ago', 'fundraising-toolkit' ), Math.max( 1, Math.floor( days / 30.44 ) ) );
+        return sprintf( __( '%dmo ago', 'gratora' ), Math.max( 1, Math.floor( days / 30.44 ) ) );
     }
 
     /* translators: %d: number of years */
-    return sprintf( __( '%dy ago', 'fundraising-toolkit' ), Math.max( 1, Math.floor( days / 365.25 ) ) );
+    return sprintf( __( '%dy ago', 'gratora' ), Math.max( 1, Math.floor( days / 365.25 ) ) );
 }
 // Amounts and the org bridge they read come from the local formatter: the org's
 // "decimal places" preference belongs to the base currency and may only drop
@@ -67,24 +67,24 @@ export { default as StatusBadge } from './components/StatusBadge';
 // list + the detail header). The shared StatusBadge owns its own render map;
 // this is just the campaign-scoped label set for filter dropdowns.
 export const STATUS_LABEL = {
-    draft:     __( 'Draft', 'fundraising-toolkit' ),
-    published: __( 'Active', 'fundraising-toolkit' ),
-    archived:  __( 'Archived', 'fundraising-toolkit' ),
+    draft:     __( 'Draft', 'gratora' ),
+    published: __( 'Active', 'gratora' ),
+    archived:  __( 'Archived', 'gratora' ),
     // Derived on the server, not stored: a published campaign outside its
     // schedule or past a goal it closes on. Filterable because the list shows
     // them, and a badge you cannot filter by is a dead end.
-    scheduled: __( 'Scheduled', 'fundraising-toolkit' ),
-    ended:     __( 'Ended', 'fundraising-toolkit' ),
-    goal_met:  __( 'Goal met', 'fundraising-toolkit' ),
+    scheduled: __( 'Scheduled', 'gratora' ),
+    ended:     __( 'Ended', 'gratora' ),
+    goal_met:  __( 'Goal met', 'gratora' ),
 };
 
 export function listHref() {
-    return `${ window.location.pathname }?page=fundkit-campaigns`;
+    return `${ window.location.pathname }?page=gratora-campaigns`;
 }
 
 export function detailHref( id, tab = 'overview' ) {
     const p = new URLSearchParams();
-    p.set( 'page', 'fundkit-campaigns' );
+    p.set( 'page', 'gratora-campaigns' );
     p.set( 'view', 'detail' );
     p.set( 'id', String( id ) );
     p.set( 'tab', tab );
@@ -93,7 +93,7 @@ export function detailHref( id, tab = 'overview' ) {
 
 export function formEditorHref( formId ) {
     const p = new URLSearchParams();
-    p.set( 'page', 'fundkit-forms' );
+    p.set( 'page', 'gratora-forms' );
     p.set( 'form', String( formId ) );
     return `${ window.location.pathname }?${ p.toString() }`;
 }

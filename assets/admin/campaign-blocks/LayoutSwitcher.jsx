@@ -41,7 +41,7 @@ function useHeaderSlot( enabled ) {
                 return ++tries < 40;
             }
             host = document.createElement( 'div' );
-            host.className = 'fundkit-layout-slot';
+            host.className = 'gratora-layout-slot';
             header.prepend( host );
             setNode( host );
             return false;
@@ -66,7 +66,7 @@ function useHeaderSlot( enabled ) {
 
 function BrandMark() {
     return (
-        <span className="fundkit-layout-btn__mark" aria-hidden="true">
+        <span className="gratora-layout-btn__mark" aria-hidden="true">
             <span /><span /><span />
         </span>
     );
@@ -77,14 +77,14 @@ function CampaignLayoutButton() {
     const [ applying, setApplying ] = useState( false );
 
     const campaignId = useSelect(
-        ( select ) => select( editorStore )?.getEditedPostAttribute( 'meta' )?._fundkit_campaign_id || 0,
+        ( select ) => select( editorStore )?.getEditedPostAttribute( 'meta' )?._gratora_campaign_id || 0,
         []
     );
 
     // A campaign type that lays its own page out owns every block on it, so
     // swapping in a template would delete the thing that type exists for. The
     // server decides, because it is the side that knows the campaign's type.
-    const offered = campaignId > 0 && window.fundkitCampaignBlocks?.pageTemplates !== false;
+    const offered = campaignId > 0 && window.gratoraCampaignBlocks?.pageTemplates !== false;
 
     const { resetBlocks } = useDispatch( blockEditorStore );
     const { editPost } = useDispatch( editorStore );
@@ -99,25 +99,25 @@ function CampaignLayoutButton() {
         setApplying( true );
         try {
             const res = await apiFetch( {
-                path: `/fundkit/v1/admin/campaigns/${ campaignId }/layout?template=${ encodeURIComponent( template.id ) }`,
+                path: `/gratora/v1/admin/campaigns/${ campaignId }/layout?template=${ encodeURIComponent( template.id ) }`,
             } );
 
             resetBlocks( parse( res.blocks || '' ) );
             // Recorded on the post rather than sent to the server now, so it is
             // saved with the blocks it belongs to and an organiser who changes
             // their mind before saving leaves nothing behind.
-            editPost( { meta: { _fundkit_campaign_page_template: res.template } } );
+            editPost( { meta: { _gratora_campaign_page_template: res.template } } );
             setPicking( false );
 
             createNotice(
                 'info',
-                __( 'Campaign template applied. Undo puts the old page back.', 'fundraising-toolkit' ),
+                __( 'Campaign template applied. Undo puts the old page back.', 'gratora' ),
                 { type: 'snackbar' }
             );
         } catch ( err ) {
             createNotice(
                 'error',
-                err?.message || __( 'The campaign template could not be applied.', 'fundraising-toolkit' ),
+                err?.message || __( 'The campaign template could not be applied.', 'gratora' ),
                 { type: 'snackbar' }
             );
         } finally {
@@ -127,13 +127,13 @@ function CampaignLayoutButton() {
 
     const button = (
         <Button
-            className="fundkit-layout-btn"
+            className="gratora-layout-btn"
             onClick={ () => setPicking( true ) }
             disabled={ applying }
         >
             { applying ? <Spinner /> : <BrandMark /> }
-            <span className="fundkit-layout-btn__label">
-                { __( 'Campaign templates', 'fundraising-toolkit' ) }
+            <span className="gratora-layout-btn__label">
+                { __( 'Campaign templates', 'gratora' ) }
             </span>
         </Button>
     );
@@ -143,7 +143,7 @@ function CampaignLayoutButton() {
             { slot ? createPortal( button, slot ) : null }
             { picking && (
                 <CampaignTemplatePicker
-                    campaignType={ window.fundkitCampaignBlocks?.campaignType || '' }
+                    campaignType={ window.gratoraCampaignBlocks?.campaignType || '' }
                     onPick={ apply }
                     onClose={ () => setPicking( false ) }
                 />
@@ -152,4 +152,4 @@ function CampaignLayoutButton() {
     );
 }
 
-registerPlugin( 'fundkit-campaign-layout', { render: CampaignLayoutButton } );
+registerPlugin( 'gratora-campaign-layout', { render: CampaignLayoutButton } );

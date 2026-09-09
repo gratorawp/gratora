@@ -33,7 +33,7 @@ const CONFIG = {
     currency: 'USD',
     gateway:  'stripe',
     layout:   'paged',
-    rest:     'https://example.test/wp-json/fundkit/v1/donations',
+    rest:     'https://example.test/wp-json/gratora/v1/donations',
     stripe:   { publishableKey: 'pk_test_probe' },
     gateways: { options: [ { id: 'stripe', label: 'Card' } ] },
     pages:    [ { title: 'Amount' }, { title: 'Confirm' } ],
@@ -52,24 +52,24 @@ const CONFIG = {
 
 function addForm() {
     const form = document.createElement( 'form' );
-    form.className = 'fundkit-donation-form';
-    form.id = 'fundkit-form-7';
+    form.className = 'gratora-donation-form';
+    form.id = 'gratora-form-7';
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-fundkit-form-config', '' );
+    json.setAttribute( 'data-gratora-form-config', '' );
     json.textContent = JSON.stringify( CONFIG );
     form.appendChild( json );
 
     document.body.appendChild( form );
 }
 
-const primary = () => document.querySelector( '.fundkit-form__button--primary' );
-const backButton = () => document.querySelector( 'button.fundkit-form__bar-back' );
+const primary = () => document.querySelector( '.gratora-form__button--primary' );
+const backButton = () => document.querySelector( 'button.gratora-form__bar-back' );
 
 beforeEach( () => {
     document.body.innerHTML = '';
-    window.fundkit = {
+    window.gratora = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
@@ -81,7 +81,7 @@ beforeEach( () => {
     } ) );
 } );
 
-afterEach( () => { delete window.fundkit; } );
+afterEach( () => { delete window.gratora; } );
 
 async function boot() {
     addForm();
@@ -90,7 +90,7 @@ async function boot() {
 
     // Pick the preset, or the submit is refused for a missing amount and the
     // form walks back to the page the invalid field is on.
-    const preset = document.querySelector( '.fundkit-form__amount-preset' )
+    const preset = document.querySelector( '.gratora-form__amount-preset' )
         || [ ...document.querySelectorAll( 'button' ) ].find( ( b ) => /25/.test( b.textContent ) );
     if ( preset ) {
         preset.click();
@@ -125,12 +125,12 @@ it( 'takes it away once the payment step is up', async () => {
         if ( wasSubmit ) break;
     }
     // formRootClass marks the payment status with --settled.
-    for ( let i = 0; i < 10 && ! document.querySelector( '.fundkit-form--settled' ); i++ ) {
+    for ( let i = 0; i < 10 && ! document.querySelector( '.gratora-form--settled' ); i++ ) {
         await settle();
     }
 
-    expect( document.querySelector( '.fundkit-form--settled' ) ).toBeTruthy();
+    expect( document.querySelector( '.gratora-form--settled' ) ).toBeTruthy();
     expect( backButton() ).toBeNull();
     // The placeholder stays, so the title does not jump.
-    expect( document.querySelector( 'span.fundkit-form__bar-back' ) ).toBeTruthy();
+    expect( document.querySelector( 'span.gratora-form__bar-back' ) ).toBeTruthy();
 } );

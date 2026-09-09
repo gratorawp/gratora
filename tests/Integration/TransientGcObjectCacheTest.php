@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Foundation\Maintenance\TransientGc;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Foundation\Maintenance\TransientGc;
+use Gratora\Foundation\Plugin;
 
 /**
  * Counters live in wp_options for atomic increments; object-cache transient APIs cannot delete
@@ -69,10 +69,10 @@ final class TransientGcObjectCacheTest extends IntegrationTestCase
     {
         $this->wasExternal = wp_using_ext_object_cache(true);
 
-        $key = $this->seedExpiredCounter('fundkit_gcprobe_' . bin2hex(random_bytes(4)));
+        $key = $this->seedExpiredCounter('gratora_gcprobe_' . bin2hex(random_bytes(4)));
         $this->assertSame(2, $this->rowsFor($key), 'both rows exist before the run');
 
-        (new TransientGc(Plugin::instance()->container->get(\FundKit\Async\AsyncDispatcher::class)))->run();
+        (new TransientGc(Plugin::instance()->container->get(\Gratora\Async\AsyncDispatcher::class)))->run();
 
         $this->assertSame(
             0,
@@ -85,9 +85,9 @@ final class TransientGcObjectCacheTest extends IntegrationTestCase
     {
         $this->wasExternal = wp_using_ext_object_cache(false);
 
-        $key = $this->seedExpiredCounter('fundkit_gcprobe_' . bin2hex(random_bytes(4)));
+        $key = $this->seedExpiredCounter('gratora_gcprobe_' . bin2hex(random_bytes(4)));
 
-        (new TransientGc(Plugin::instance()->container->get(\FundKit\Async\AsyncDispatcher::class)))->run();
+        (new TransientGc(Plugin::instance()->container->get(\Gratora\Async\AsyncDispatcher::class)))->run();
 
         $this->assertSame(0, $this->rowsFor($key));
     }
@@ -96,11 +96,11 @@ final class TransientGcObjectCacheTest extends IntegrationTestCase
     {
         $this->wasExternal = wp_using_ext_object_cache(true);
 
-        $base = 'fundkit_gclive_' . bin2hex(random_bytes(4));
+        $base = 'gratora_gclive_' . bin2hex(random_bytes(4));
         $this->guard()->hit($base, 900);
         $key = $base . '_' . (int) floor(time() / 900);
 
-        (new TransientGc(Plugin::instance()->container->get(\FundKit\Async\AsyncDispatcher::class)))->run();
+        (new TransientGc(Plugin::instance()->container->get(\Gratora\Async\AsyncDispatcher::class)))->run();
 
         $this->assertSame(2, $this->rowsFor($key), 'an unexpired limit must survive the sweep');
         $this->assertSame(1, $this->guard()->peek($base, 900), 'and must still read as spent');

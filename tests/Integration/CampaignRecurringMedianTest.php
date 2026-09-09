@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Foundation\Plugin;
 
 final class CampaignRecurringMedianTest extends IntegrationTestCase
 {
@@ -61,7 +61,7 @@ final class CampaignRecurringMedianTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'FUNDKIT-RM-' . $ref;
+        $d->reference         = 'GRATORA-RM-' . $ref;
         $d->donor_id          = $donorId;
         $d->campaign_id       = self::CAMPAIGN;
         $d->amount_cents      = $cents;

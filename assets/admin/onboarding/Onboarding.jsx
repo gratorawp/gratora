@@ -6,7 +6,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { CURRENCIES } from '../_shared/currency';
 import { backGlyph, forwardGlyph } from '../_shared/arrow';
 import CountrySelect from '../_shared/components/CountrySelect';
-import FundKitMark from '../_shared/components/FundKitMark';
+import GratoraMark from '../_shared/components/GratoraMark';
 import LocalIcon from '../_shared/components/Icon';
 import SearchableSelect from '../_shared/components/SearchableSelect';
 
@@ -52,7 +52,7 @@ const STATES_BY_COUNTRY = {
  * different questions, and a Croatian charity raising in USD writes 1,234.56.
  */
 export function formatForCurrency( code ) {
-    const preset = ( typeof window !== 'undefined' ? window.fundkit?.currency_formats : null )
+    const preset = ( typeof window !== 'undefined' ? window.gratora?.currency_formats : null )
         ?.[ String( code || '' ).trim().toUpperCase() ];
 
     if ( ! preset ) {
@@ -73,33 +73,33 @@ const USER_TYPES = [
     {
         id:   'nonprofit',
         icon: 'building',
-        name: __( 'Nonprofit or charity', 'fundraising-toolkit' ),
-        desc: __( 'Registered organization collecting tax-deductible donations.', 'fundraising-toolkit' ),
+        name: __( 'Nonprofit or charity', 'gratora' ),
+        desc: __( 'Registered organization collecting tax-deductible donations.', 'gratora' ),
     },
     {
         id:   'community',
         icon: 'users',
-        name: __( 'Community or faith group', 'fundraising-toolkit' ),
-        desc: __( 'Church, school, club, mutual-aid group.', 'fundraising-toolkit' ),
+        name: __( 'Community or faith group', 'gratora' ),
+        desc: __( 'Church, school, club, mutual-aid group.', 'gratora' ),
     },
     {
         id:   'individual',
         icon: 'heart',
-        name: __( 'Individual fundraiser', 'fundraising-toolkit' ),
-        desc: __( 'Personal cause, crowdfund, or memorial fund.', 'fundraising-toolkit' ),
+        name: __( 'Individual fundraiser', 'gratora' ),
+        desc: __( 'Personal cause, crowdfund, or memorial fund.', 'gratora' ),
     },
     {
         id:   'exploring',
         icon: 'target',
-        name: __( 'Just exploring', 'fundraising-toolkit' ),
-        desc: __( 'Trying Fundraising Toolkit out. Starts in test mode, so nothing takes real money until you switch it off.', 'fundraising-toolkit' ),
+        name: __( 'Just exploring', 'gratora' ),
+        desc: __( 'Trying Gratora out. Starts in test mode, so nothing takes real money until you switch it off.', 'gratora' ),
     },
 ];
 
 export default function Onboarding() {
-    const wp = window.fundkit?.wp || {};
-    const presets   = Array.isArray( window.fundkit?.styling?.presets ) ? window.fundkit.styling.presets : [];
-    const defaultId = String( window.fundkit?.styling?.default_id || 'classic' );
+    const wp = window.gratora?.wp || {};
+    const presets   = Array.isArray( window.gratora?.styling?.presets ) ? window.gratora.styling.presets : [];
+    const defaultId = String( window.gratora?.styling?.default_id || 'classic' );
 
     const [ step, setStep ]     = useState( 0 );
     const [ busy, setBusy ]     = useState( false );
@@ -112,7 +112,7 @@ export default function Onboarding() {
     const stepMounted = useRef( false );
     useEffect( () => {
         if ( ! stepMounted.current ) { stepMounted.current = true; return; }
-        const h = frameRef.current?.querySelector( '.fundkit-onboarding__headline' );
+        const h = frameRef.current?.querySelector( '.gratora-onboarding__headline' );
         if ( h ) { h.setAttribute( 'tabindex', '-1' ); h.focus(); }
     }, [ step ] );
 
@@ -133,7 +133,7 @@ export default function Onboarding() {
 
     // Pre-populate from saved settings so a resumed onboarding starts from prior inputs.
     useEffect( () => {
-        apiFetch( { path: '/fundkit/v1/admin/settings/org-profile' } )
+        apiFetch( { path: '/gratora/v1/admin/settings/org-profile' } )
             .then( ( d ) => {
                 if ( ! d ) return;
                 setOrg( ( prev ) => ( {
@@ -148,7 +148,7 @@ export default function Onboarding() {
                 } ) );
             } )
             .catch( () => {} );
-        apiFetch( { path: '/fundkit/v1/admin/settings/currency-locale' } )
+        apiFetch( { path: '/gratora/v1/admin/settings/currency-locale' } )
             .then( ( d ) => {
                 if ( ! d ) return;
                 // Hydrate the full record so a re-run preserves multi-currency,
@@ -166,8 +166,8 @@ export default function Onboarding() {
             } )
             .catch( () => {} );
         // Reload the saved brand preset id so a resumed wizard reflects the
-        // latest org-brand option, not the page-load snapshot of window.fundkit.
-        apiFetch( { path: '/fundkit/v1/admin/settings/org-brand' } )
+        // latest org-brand option, not the page-load snapshot of window.gratora.
+        apiFetch( { path: '/gratora/v1/admin/settings/org-brand' } )
             .then( ( d ) => {
                 if ( d?.default_id ) setBrand( { preset_id: String( d.default_id ) } );
             } )
@@ -176,7 +176,7 @@ export default function Onboarding() {
 
     const persist = async ( group, payload ) => {
         await apiFetch( {
-            path:   `/fundkit/v1/admin/settings/${ group }`,
+            path:   `/gratora/v1/admin/settings/${ group }`,
             method: 'PUT',
             data:   payload,
         } );
@@ -188,19 +188,19 @@ export default function Onboarding() {
         try {
             if ( step === 0 ) {
                 if ( ! who.user_type ) {
-                    throw new Error( __( 'Pick who is fundraising to continue.', 'fundraising-toolkit' ) );
+                    throw new Error( __( 'Pick who is fundraising to continue.', 'gratora' ) );
                 }
                 await persist( 'org-profile', { user_type: who.user_type } );
             } else if ( step === 1 ) {
                 if ( ! org.country ) {
-                    throw new Error( __( 'Pick a country to continue.', 'fundraising-toolkit' ) );
+                    throw new Error( __( 'Pick a country to continue.', 'gratora' ) );
                 }
                 // A country that subdivides still needs its state: it is part of
                 // where the organization is, and it is one click. The postal
                 // address is not asked for here -- it is optional in Settings,
                 // and the receipt renderer omits the block when it is unset.
                 if ( STATES_BY_COUNTRY[ org.country ] && ! ( org.state || '' ).trim() ) {
-                    throw new Error( __( 'Pick a state or province to continue.', 'fundraising-toolkit' ) );
+                    throw new Error( __( 'Pick a state or province to continue.', 'gratora' ) );
                 }
                 await persist( 'org-profile', {
                     name:           org.name,
@@ -229,21 +229,21 @@ export default function Onboarding() {
             } else if ( step === 2 ) {
                 await persist( 'org-brand', { default_id: brand.preset_id } );
                 const r = await apiFetch( {
-                    path:   '/fundkit/v1/admin/onboarding/finalize',
+                    path:   '/gratora/v1/admin/onboarding/finalize',
                     method: 'POST',
                     data:   {
                         campaign_title: org.name
-                            ? `${ org.name } - ${ __( 'General donations', 'fundraising-toolkit' ) }`
-                            : __( 'General donations', 'fundraising-toolkit' ),
+                            ? `${ org.name } - ${ __( 'General donations', 'gratora' ) }`
+                            : __( 'General donations', 'gratora' ),
                         user_type:      who.user_type,
                     },
                 } );
-                if ( ! r?.ok ) throw new Error( __( 'Could not finalize onboarding.', 'fundraising-toolkit' ) );
+                if ( ! r?.ok ) throw new Error( __( 'Could not finalize onboarding.', 'gratora' ) );
                 setFinalized( r );
             }
             setStep( ( s ) => Math.min( TOTAL - 1, s + 1 ) );
         } catch ( err ) {
-            setError( err?.message || __( 'Could not save. Please try again.', 'fundraising-toolkit' ) );
+            setError( err?.message || __( 'Could not save. Please try again.', 'gratora' ) );
         } finally {
             setBusy( false );
         }
@@ -258,11 +258,11 @@ export default function Onboarding() {
         if ( busy ) return;
         setError( null );
         try {
-            await apiFetch( { path: '/fundkit/v1/admin/onboarding/dismiss', method: 'POST' } );
+            await apiFetch( { path: '/gratora/v1/admin/onboarding/dismiss', method: 'POST' } );
         } catch ( e ) {
             // A failed dismiss leaves onboarding 'pending', so admin_init would
             // bounce us straight back here; surface the error instead of looping.
-            setError( __( 'Could not skip setup. Please try again.', 'fundraising-toolkit' ) );
+            setError( __( 'Could not skip setup. Please try again.', 'gratora' ) );
             return;
         }
         window.location.assign( wp.settings_url || wp.dashboard_url || '' );
@@ -271,29 +271,29 @@ export default function Onboarding() {
     const isChecklist = step === TOTAL - 1;
 
     return (
-        <div className="fundkit-onboarding">
-            <div className={ `fundkit-onboarding__top${ step === 2 ? ' is-wide' : '' }` }>
-                <span className="fundkit-onboarding__brand">
-                    <FundKitMark size={ 28 } />
-                    <span className="fundkit-onboarding__brand-name">Fundraising Toolkit</span>
+        <div className="gratora-onboarding">
+            <div className={ `gratora-onboarding__top${ step === 2 ? ' is-wide' : '' }` }>
+                <span className="gratora-onboarding__brand">
+                    <GratoraMark size={ 28 } />
+                    <span className="gratora-onboarding__brand-name">Gratora</span>
                 </span>
                 { ! isChecklist && (
-                    <button type="button" className="fundkit-onboarding__skip" onClick={ skip }>
-                        { __( 'Skip for now', 'fundraising-toolkit' ) }
+                    <button type="button" className="gratora-onboarding__skip" onClick={ skip }>
+                        { __( 'Skip for now', 'gratora' ) }
                     </button>
                 ) }
             </div>
 
-            <section ref={ frameRef } className={ `fundkit-onboarding__frame${ step === 2 ? ' is-wide' : '' }` }>
-                <div className="fundkit-onboarding__meta">
-                    <span className="fundkit-onboarding__caption">
-                        { sprintf( /* translators: %1$d: current step number. %2$d: total number of steps. */ __( 'Step %1$d of %2$d', 'fundraising-toolkit' ), step + 1, TOTAL ) }
+            <section ref={ frameRef } className={ `gratora-onboarding__frame${ step === 2 ? ' is-wide' : '' }` }>
+                <div className="gratora-onboarding__meta">
+                    <span className="gratora-onboarding__caption">
+                        { sprintf( /* translators: %1$d: current step number. %2$d: total number of steps. */ __( 'Step %1$d of %2$d', 'gratora' ), step + 1, TOTAL ) }
                     </span>
-                    <span className="fundkit-onboarding__dots" aria-hidden="true">
+                    <span className="gratora-onboarding__dots" aria-hidden="true">
                         { Array.from( { length: TOTAL } ).map( ( _, i ) => (
                             <span
                                 key={ i }
-                                className={ `fundkit-onboarding__dot${ i < step ? ' is-done' : '' }${ i === step ? ' is-current' : '' }` }
+                                className={ `gratora-onboarding__dot${ i < step ? ' is-done' : '' }${ i === step ? ' is-current' : '' }` }
                             />
                         ) ) }
                     </span>
@@ -311,26 +311,26 @@ export default function Onboarding() {
                     />
                 ) }
 
-                { error && <div className="fundkit-onboarding__error" role="alert">{ error }</div> }
+                { error && <div className="gratora-onboarding__error" role="alert">{ error }</div> }
 
                 { ! isChecklist && (
                     <footer
-                        className={ `fundkit-onboarding__nav${ step === 0 ? ' fundkit-onboarding__nav--centered' : '' }` }
+                        className={ `gratora-onboarding__nav${ step === 0 ? ' gratora-onboarding__nav--centered' : '' }` }
                     >
                         { step > 0 && (
                             <button
                                 type="button"
-                                className="fundkit-btn fundkit-btn--ghost"
+                                className="gratora-btn gratora-btn--ghost"
                                 onClick={ back }
                                 disabled={ busy }
                             >
-                                { backGlyph() } { __( 'Back', 'fundraising-toolkit' ) }
+                                { backGlyph() } { __( 'Back', 'gratora' ) }
                             </button>
                         ) }
 
                         <button
                             type="button"
-                            className="fundkit-btn fundkit-btn--primary fundkit-btn--lg"
+                            className="gratora-btn gratora-btn--primary gratora-btn--lg"
                             onClick={ next }
                             disabled={ busy }
                         >
@@ -344,43 +344,43 @@ export default function Onboarding() {
 }
 
 function ctaLabel( step, busy ) {
-    if ( busy ) return __( 'Saving…', 'fundraising-toolkit' );
-    if ( step === 0 ) return __( 'Get started', 'fundraising-toolkit' );
-    if ( step === 2 ) return __( 'Finish setup', 'fundraising-toolkit' ) + ' ' + forwardGlyph();
-    return __( 'Next', 'fundraising-toolkit' ) + ' ' + forwardGlyph();
+    if ( busy ) return __( 'Saving…', 'gratora' );
+    if ( step === 0 ) return __( 'Get started', 'gratora' );
+    if ( step === 2 ) return __( 'Finish setup', 'gratora' ) + ' ' + forwardGlyph();
+    return __( 'Next', 'gratora' ) + ' ' + forwardGlyph();
 }
 
 function FundraiserTypeStep( { value, onChange } ) {
     const set = ( patch ) => onChange( { ...value, ...patch } );
     return (
         <div>
-            <h2 className="fundkit-onboarding__headline">
-                { __( "Who's fundraising?", 'fundraising-toolkit' ) }
+            <h2 className="gratora-onboarding__headline">
+                { __( "Who's fundraising?", 'gratora' ) }
             </h2>
-            <p className="fundkit-onboarding__subtitle">
-                { __( 'Pick the one that fits best.', 'fundraising-toolkit' ) }
+            <p className="gratora-onboarding__subtitle">
+                { __( 'Pick the one that fits best.', 'gratora' ) }
             </p>
 
-            <div className="fundkit-onboarding__section">
-                <div className="fundkit-onboarding__usertype">
+            <div className="gratora-onboarding__section">
+                <div className="gratora-onboarding__usertype">
                     { USER_TYPES.map( ( t ) => {
                         const isSel = value.user_type === t.id;
                         return (
                             <button
                                 key={ t.id }
                                 type="button"
-                                className={ `fundkit-onboarding__usertype-tile${ isSel ? ' is-selected' : '' }` }
+                                className={ `gratora-onboarding__usertype-tile${ isSel ? ' is-selected' : '' }` }
                                 onClick={ () => set( { user_type: t.id } ) }
                                 aria-pressed={ isSel }
                             >
-                                <span className="fundkit-onboarding__usertype-check" aria-hidden="true">
+                                <span className="gratora-onboarding__usertype-check" aria-hidden="true">
                                     <LocalIcon name="check" size={ 12 } strokeWidth={ 3 } />
                                 </span>
-                                <span className="fundkit-onboarding__usertype-glyph" aria-hidden="true">
+                                <span className="gratora-onboarding__usertype-glyph" aria-hidden="true">
                                     <LocalIcon name={ t.icon } size={ 22 } strokeWidth={ 1.6 } />
                                 </span>
-                                <strong className="fundkit-onboarding__usertype-name">{ t.name }</strong>
-                                <span className="fundkit-onboarding__usertype-desc">{ t.desc }</span>
+                                <strong className="gratora-onboarding__usertype-name">{ t.name }</strong>
+                                <span className="gratora-onboarding__usertype-desc">{ t.desc }</span>
                             </button>
                         );
                     } ) }
@@ -419,62 +419,62 @@ export function LocationStep( { value, onChange, currency, onCurrencyChange, use
 
     return (
         <div>
-            <h2 className="fundkit-onboarding__headline">{ __( 'Where are you based?', 'fundraising-toolkit' ) }</h2>
-            <p className="fundkit-onboarding__subtitle">
-                { __( "We use this for receipts and your default currency.", 'fundraising-toolkit' ) }
+            <h2 className="gratora-onboarding__headline">{ __( 'Where are you based?', 'gratora' ) }</h2>
+            <p className="gratora-onboarding__subtitle">
+                { __( "We use this for receipts and your default currency.", 'gratora' ) }
             </p>
 
-            <div className="fundkit-onboarding__section">
-                <div className="fundkit-onboarding__section-label">
-                    { isIndividual ? __( 'About you', 'fundraising-toolkit' ) : __( 'Organization', 'fundraising-toolkit' ) }
+            <div className="gratora-onboarding__section">
+                <div className="gratora-onboarding__section-label">
+                    { isIndividual ? __( 'About you', 'gratora' ) : __( 'Organization', 'gratora' ) }
                 </div>
-                <div className="fundkit-onboarding__address">
+                <div className="gratora-onboarding__address">
                     <div className="span-2">
-                        <label className="fundkit-onboarding__field-label" htmlFor="fundkit-onboarding-name">
-                            { isIndividual ? __( 'Your name', 'fundraising-toolkit' ) : __( 'Organization name', 'fundraising-toolkit' ) }
+                        <label className="gratora-onboarding__field-label" htmlFor="gratora-onboarding-name">
+                            { isIndividual ? __( 'Your name', 'gratora' ) : __( 'Organization name', 'gratora' ) }
                         </label>
                         <input
-                            id="fundkit-onboarding-name"
+                            id="gratora-onboarding-name"
                             type="text"
-                            className="fundkit-onboarding__input"
+                            className="gratora-onboarding__input"
                             value={ value.name }
                             onChange={ ( e ) => set( { name: e.target.value } ) }
-                            placeholder={ __( 'Shown on receipts and your campaign', 'fundraising-toolkit' ) }
+                            placeholder={ __( 'Shown on receipts and your campaign', 'gratora' ) }
                         />
                     </div>
                     <div className="span-2">
-                        <label className="fundkit-onboarding__field-label" htmlFor="fundkit-onboarding-email">{ __( 'Contact email', 'fundraising-toolkit' ) }</label>
+                        <label className="gratora-onboarding__field-label" htmlFor="gratora-onboarding-email">{ __( 'Contact email', 'gratora' ) }</label>
                         <input
-                            id="fundkit-onboarding-email"
+                            id="gratora-onboarding-email"
                             type="email"
-                            className="fundkit-onboarding__input"
+                            className="gratora-onboarding__input"
                             value={ value.email }
                             onChange={ ( e ) => set( { email: e.target.value } ) }
-                            placeholder={ __( 'Where donors reply and receipts come from', 'fundraising-toolkit' ) }
+                            placeholder={ __( 'Where donors reply and receipts come from', 'gratora' ) }
                         />
                     </div>
                 </div>
             </div>
 
-            <div className="fundkit-onboarding__section">
-                <div className="fundkit-onboarding__country-row">
+            <div className="gratora-onboarding__section">
+                <div className="gratora-onboarding__country-row">
                     { /* The pickers take no id or aria-label prop, so the name
                          only exists if the label contains the control. */ }
-                    <label className="fundkit-onboarding__control-label">
-                        <span className="fundkit-onboarding__section-label">{ __( 'Country', 'fundraising-toolkit' ) }</span>
+                    <label className="gratora-onboarding__control-label">
+                        <span className="gratora-onboarding__section-label">{ __( 'Country', 'gratora' ) }</span>
                         <CountrySelect
                             value={ value.country }
                             onChange={ onCountryChange }
                         />
                     </label>
                     { states && (
-                        <label className="fundkit-onboarding__control-label">
-                            <span className="fundkit-onboarding__field-label">{ __( 'State', 'fundraising-toolkit' ) }</span>
+                        <label className="gratora-onboarding__control-label">
+                            <span className="gratora-onboarding__field-label">{ __( 'State', 'gratora' ) }</span>
                             <SearchableSelect
                                 value={ value.state }
                                 onChange={ ( v ) => set( { state: v } ) }
                                 options={ states.map( ( s ) => ( { value: s, label: s } ) ) }
-                                placeholder={ __( 'Select state', 'fundraising-toolkit' ) }
+                                placeholder={ __( 'Select state', 'gratora' ) }
                             />
                         </label>
                     ) }
@@ -482,14 +482,14 @@ export function LocationStep( { value, onChange, currency, onCurrencyChange, use
             </div>
 
 
-            <div className="fundkit-onboarding__section">
-                <label className="fundkit-onboarding__control-label">
-                    <span className="fundkit-onboarding__section-label">{ __( 'Currency', 'fundraising-toolkit' ) }</span>
+            <div className="gratora-onboarding__section">
+                <label className="gratora-onboarding__control-label">
+                    <span className="gratora-onboarding__section-label">{ __( 'Currency', 'gratora' ) }</span>
                     <SearchableSelect
                     value={ currency.default_currency }
                     onChange={ ( code ) => onCurrencyChange( ( prev ) => ( { ...prev, default_currency: code } ) ) }
                     options={ currencyOptions }
-                    placeholder={ __( 'Pick a currency', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'Pick a currency', 'gratora' ) }
                     />
                 </label>
             </div>
@@ -504,25 +504,25 @@ const PRESET_CARDS = [
     {
         id:     'classic',
         thumb:  'classic',
-        name:   __( 'Classic', 'fundraising-toolkit' ),
-        desc:   __( 'Friendly, rounded, green. The safe choice.', 'fundraising-toolkit' ),
+        name:   __( 'Classic', 'gratora' ),
+        desc:   __( 'Friendly, rounded, green. The safe choice.', 'gratora' ),
     },
     {
         id:     'bold',
         thumb:  'bold',
-        name:   __( 'Bold', 'fundraising-toolkit' ),
-        desc:   __( 'Deep navy, strong type, dramatic shadow.', 'fundraising-toolkit' ),
+        name:   __( 'Bold', 'gratora' ),
+        desc:   __( 'Deep navy, strong type, dramatic shadow.', 'gratora' ),
     },
     {
         id:     'quiet',
         thumb:  'quiet',
-        name:   __( 'Quiet', 'fundraising-toolkit' ),
-        desc:   __( 'Minimal lines, lots of white space.', 'fundraising-toolkit' ),
+        name:   __( 'Quiet', 'gratora' ),
+        desc:   __( 'Minimal lines, lots of white space.', 'gratora' ),
     },
     {
         id:     'theme',
         thumb:  'theme',
-        name:   __( 'Use my theme', 'fundraising-toolkit' ),
+        name:   __( 'Use my theme', 'gratora' ),
         // desc filled at runtime from theme detection.
     },
 ];
@@ -531,10 +531,10 @@ const PRESET_CARDS = [
 function sampleBlocks( currency ) {
     const cur = ( currency || 'USD' ).toUpperCase();
     return [
-        `<!-- wp:fundkit/donation-amount {"presets":[2500,5000,10000],"allowCustom":true,"currency":"${ cur }"} /-->`,
-        '<!-- wp:fundkit/name {"requireFirst":true} /-->',
-        '<!-- wp:fundkit/email {"required":true} /-->',
-        '<!-- wp:fundkit/submit-button {"label":"Donate {amount}"} /-->',
+        `<!-- wp:gratora/donation-amount {"presets":[2500,5000,10000],"allowCustom":true,"currency":"${ cur }"} /-->`,
+        '<!-- wp:gratora/name {"requireFirst":true} /-->',
+        '<!-- wp:gratora/email {"required":true} /-->',
+        '<!-- wp:gratora/submit-button {"label":"Donate {amount}"} /-->',
     ].join( '\n\n' );
 }
 
@@ -555,7 +555,7 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
         setReady( false );
         setLoadState( 'loading' );
         apiFetch( {
-            path:   '/fundkit/v1/admin/forms/preview',
+            path:   '/gratora/v1/admin/forms/preview',
             method: 'POST',
             data:   { blocks, settings: { container: { width: 460 } }, campaign_id: null },
         } )
@@ -572,14 +572,14 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
         // an opaque origin, so a targeted post is never delivered. The frame is
         // one we built and its HTML is ours, so there is no third party to leak
         // a preset's colours to.
-        win.postMessage( { type: 'fundkit:apply-tokens', tokens: selectedPreset?.tokens || {} }, '*' );
+        win.postMessage( { type: 'gratora:apply-tokens', tokens: selectedPreset?.tokens || {} }, '*' );
     }, [ selectedPreset ] );
 
     useEffect( () => {
         const onMsg = ( e ) => {
             // Same reason: a srcdoc frame announces itself with origin "null".
             if ( e.source !== frameRef.current?.contentWindow ) return;
-            if ( e?.data?.type === 'fundkit:preview-ready' ) {
+            if ( e?.data?.type === 'gratora:preview-ready' ) {
                 setReady( true );
                 pushTokens();
             }
@@ -592,68 +592,68 @@ function BrandStep( { value, onChange, presets, currency = 'USD' } ) {
 
     return (
         <div>
-            <h2 className="fundkit-onboarding__headline">{ __( 'Pick a starting look', 'fundraising-toolkit' ) }</h2>
-            <p className="fundkit-onboarding__subtitle">
-                { __( 'You can edit colors and typography anytime.', 'fundraising-toolkit' ) }
+            <h2 className="gratora-onboarding__headline">{ __( 'Pick a starting look', 'gratora' ) }</h2>
+            <p className="gratora-onboarding__subtitle">
+                { __( 'You can edit colors and typography anytime.', 'gratora' ) }
             </p>
-            <div className="fundkit-onboarding__presets">
+            <div className="gratora-onboarding__presets">
                 { PRESET_CARDS.map( ( card ) => {
                     const isTheme   = card.id === 'theme';
                     const isDisabled = isTheme && ! themePreset;
                     const isSel     = value.preset_id === card.id;
                     const desc      = isTheme
                         ? ( themePreset
-                            ? __( 'Inherits styles from your site theme.', 'fundraising-toolkit' )
-                            : __( 'No theme palette detected.', 'fundraising-toolkit' ) )
+                            ? __( 'Inherits styles from your site theme.', 'gratora' )
+                            : __( 'No theme palette detected.', 'gratora' ) )
                         : card.desc;
                     return (
                         <button
                             key={ card.id }
                             type="button"
-                            className={ `fundkit-onboarding__preset${ isSel ? ' is-selected' : '' }${ isDisabled ? ' is-disabled' : '' }` }
+                            className={ `gratora-onboarding__preset${ isSel ? ' is-selected' : '' }${ isDisabled ? ' is-disabled' : '' }` }
                             onClick={ () => { if ( ! isDisabled ) onChange( { preset_id: card.id } ); } }
                             aria-pressed={ isSel }
                             disabled={ isDisabled }
                         >
                             { isSel && (
-                                <span className="fundkit-onboarding__preset-check" aria-hidden="true">
+                                <span className="gratora-onboarding__preset-check" aria-hidden="true">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                                         <path d="M5 12.5l4 4 10-10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
                                 </span>
                             ) }
-                            <div className={ `fundkit-onboarding__preset-thumb fundkit-onboarding__preset-thumb--${ card.thumb }` }>
-                                <span className="fundkit-onboarding__preset-btn">{ __( 'Donate', 'fundraising-toolkit' ) }</span>
+                            <div className={ `gratora-onboarding__preset-thumb gratora-onboarding__preset-thumb--${ card.thumb }` }>
+                                <span className="gratora-onboarding__preset-btn">{ __( 'Donate', 'gratora' ) }</span>
                             </div>
-                            <strong className="fundkit-onboarding__preset-name">{ card.name }</strong>
-                            <span className="fundkit-onboarding__preset-desc">{ desc }</span>
+                            <strong className="gratora-onboarding__preset-name">{ card.name }</strong>
+                            <span className="gratora-onboarding__preset-desc">{ desc }</span>
                         </button>
                     );
                 } ) }
             </div>
 
-            <div className="fundkit-onboarding__preview">
-                <div className="fundkit-onboarding__preview-label">{ __( 'Live preview', 'fundraising-toolkit' ) }</div>
+            <div className="gratora-onboarding__preview">
+                <div className="gratora-onboarding__preview-label">{ __( 'Live preview', 'gratora' ) }</div>
                 { loadState === 'error' ? (
-                    <div className="fundkit-onboarding__preview-fallback">
-                        <p>{ __( 'Preview unavailable. Your choice is still saved.', 'fundraising-toolkit' ) }</p>
+                    <div className="gratora-onboarding__preview-fallback">
+                        <p>{ __( 'Preview unavailable. Your choice is still saved.', 'gratora' ) }</p>
                         <button
                             type="button"
-                            className="fundkit-btn fundkit-btn--ghost"
+                            className="gratora-btn gratora-btn--ghost"
                             onClick={ () => setReloadKey( ( k ) => k + 1 ) }
                         >
-                            { __( 'Retry', 'fundraising-toolkit' ) }
+                            { __( 'Retry', 'gratora' ) }
                         </button>
                     </div>
                 ) : (
-                    <div className="fundkit-onboarding__preview-stage">
+                    <div className="gratora-onboarding__preview-stage">
                         { loadState === 'loading' && (
-                            <div className="fundkit-onboarding__preview-skeleton" aria-hidden="true" />
+                            <div className="gratora-onboarding__preview-skeleton" aria-hidden="true" />
                         ) }
                         <iframe
                             ref={ frameRef }
-                            className="fundkit-onboarding__preview-frame"
-                            title={ __( 'Donation form preview', 'fundraising-toolkit' ) }
+                            className="gratora-onboarding__preview-frame"
+                            title={ __( 'Donation form preview', 'gratora' ) }
                             // Omit allow-same-origin so preview scripts cannot use admin
                             // credentials. Token messages validate window references.
                             sandbox="allow-scripts"
@@ -679,39 +679,39 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } )
 
     return (
         <div>
-            <h1 className="fundkit-onboarding__headline">{ __( "You're set up", 'fundraising-toolkit' ) }</h1>
-            <p className="fundkit-onboarding__subtitle">
-                { __( 'Your organization details are saved. Here is what is left before you can take a donation.', 'fundraising-toolkit' ) }
+            <h1 className="gratora-onboarding__headline">{ __( "You're set up", 'gratora' ) }</h1>
+            <p className="gratora-onboarding__subtitle">
+                { __( 'Your organization details are saved. Here is what is left before you can take a donation.', 'gratora' ) }
             </p>
 
-            <ul className="fundkit-onboarding__checklist">
+            <ul className="gratora-onboarding__checklist">
                 <ChecklistItem
-                    title={ __( 'Connect a payment gateway', 'fundraising-toolkit' ) }
-                    description={ __( 'Stripe, PayPal, or a manual bank-transfer flow. You can change this any time.', 'fundraising-toolkit' ) }
+                    title={ __( 'Connect a payment gateway', 'gratora' ) }
+                    description={ __( 'Stripe, PayPal, or a manual bank-transfer flow. You can change this any time.', 'gratora' ) }
                     href={ gatewayUrl }
-                    cta={ __( 'Connect', 'fundraising-toolkit' ) }
+                    cta={ __( 'Connect', 'gratora' ) }
                 />
                 { campaignId ? (
                     <ChecklistItem
-                        title={ __( 'Build your first form', 'fundraising-toolkit' ) }
-                        description={ __( 'Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live.', 'fundraising-toolkit' ) }
+                        title={ __( 'Build your first form', 'gratora' ) }
+                        description={ __( 'Pick a layout, set amounts, brand it. Donors can give as soon as a gateway is live.', 'gratora' ) }
                         href={ finalized?.form_edit_url || finalized?.campaign_page || dashboardUrl || '#' }
-                        cta={ __( 'Build', 'fundraising-toolkit' ) }
+                        cta={ __( 'Build', 'gratora' ) }
                     />
                 ) : (
                     <ChecklistItem
-                        title={ __( 'Create your first campaign', 'fundraising-toolkit' ) }
-                        description={ __( 'A campaign holds your donation forms and totals. We can start one from your answers, or you can build your own later.', 'fundraising-toolkit' ) }
+                        title={ __( 'Create your first campaign', 'gratora' ) }
+                        description={ __( 'A campaign holds your donation forms and totals. We can start one from your answers, or you can build your own later.', 'gratora' ) }
                         href={ newCampaignUrl }
-                        cta={ __( 'Create', 'fundraising-toolkit' ) }
+                        cta={ __( 'Create', 'gratora' ) }
                     />
                 ) }
             </ul>
 
 
-            <p className="fundkit-onboarding__checklist-foot">
-                <a className="fundkit-onboarding__checklist-skip" href={ dashboardUrl || '#' }>
-                    { __( 'Skip for now', 'fundraising-toolkit' ) }
+            <p className="gratora-onboarding__checklist-foot">
+                <a className="gratora-onboarding__checklist-skip" href={ dashboardUrl || '#' }>
+                    { __( 'Skip for now', 'gratora' ) }
                 </a>
             </p>
         </div>
@@ -720,24 +720,24 @@ function ChecklistStep( { finalized, settingsUrl, dashboardUrl, campaignsUrl } )
 
 function ChecklistItem( { title, description, href, cta, onClick, busy } ) {
     return (
-        <li className="fundkit-onboarding__checklist-item">
-            <span className="fundkit-onboarding__checklist-bullet" aria-hidden="true" />
-            <div className="fundkit-onboarding__checklist-body">
-                <strong className="fundkit-onboarding__checklist-title">{ title }</strong>
-                <span className="fundkit-onboarding__checklist-desc">{ description }</span>
+        <li className="gratora-onboarding__checklist-item">
+            <span className="gratora-onboarding__checklist-bullet" aria-hidden="true" />
+            <div className="gratora-onboarding__checklist-body">
+                <strong className="gratora-onboarding__checklist-title">{ title }</strong>
+                <span className="gratora-onboarding__checklist-desc">{ description }</span>
             </div>
             { onClick
                 ? (
                     <button
                         type="button"
-                        className="fundkit-btn fundkit-btn--primary"
+                        className="gratora-btn gratora-btn--primary"
                         onClick={ onClick }
                         disabled={ busy }
                     >
                         { cta }
                     </button>
                 )
-                : <a className="fundkit-btn fundkit-btn--primary" href={ href }>{ cta }</a> }
+                : <a className="gratora-btn gratora-btn--primary" href={ href }>{ cta }</a> }
         </li>
     );
 }

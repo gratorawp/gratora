@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Currency;
+namespace Gratora\Currency;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Donations\Donation;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Donations\Donation;
 
 /**
  * Restates donations that had not settled yet when the org changed its base
@@ -33,7 +33,7 @@ final class OutstandingRebase
     {
         // After FxRatesUpdater::rebase, which runs at 10: the snapshot has to
         // be in the new base before a rate into it can be asked for.
-        add_action('fundkit.settings.updated', [$this, 'onSettingsUpdated'], 20, 3);
+        add_action('gratora.settings.updated', [$this, 'onSettingsUpdated'], 20, 3);
     }
 
     /**

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Rename core identifiers, preserving external @fundkit/ui, fundkit/queryable, and fundkitorg
+# Rename core identifiers, preserving external @gratora/ui, gratora/queryable, and gratorawp
 # references.
 # Add-ons require separate matching renames.
 # Usage: bin/rebrand-full.sh slug Namespace "Display Name" [--apply]
@@ -29,7 +29,7 @@ echo "will change:"
 for t in "fundraising-toolkit" "Fundraising Toolkit" "FundKit" "fundkit" "FUNDKIT"; do
   printf "   %-22s %s files\n" "$t" "$(n "$t")"; done
 echo "will be protected:"
-for t in "@fundkit/ui" "fundkit/queryable" "fundkitorg"; do
+for t in "@gratora/ui" "gratora/queryable" "gratorawp"; do
   printf "   %-22s %s files\n" "$t" "$(n "$t")"; done
 
 [ $DRY -eq 1 ] && { echo; echo "(nothing written)"; exit 0; }
@@ -43,9 +43,9 @@ sub() { # sub <find> <replace> - values pass via env so nothing is
 }
 
 # Protect external references before replacement.
-sub '@fundkit/ui'       '@@KEEP_UIPKG@@'
-sub 'fundkit/queryable' '@@KEEP_QBPKG@@'
-sub 'fundkitorg'        '@@KEEP_ORG@@'
+sub '@gratora/ui'       '@@KEEP_UIPKG@@'
+sub 'gratora/queryable' '@@KEEP_QBPKG@@'
+sub 'gratorawp'        '@@KEEP_ORG@@'
 
 
 sub 'fundraising-toolkit' "$SLUG"
@@ -57,9 +57,9 @@ sub 'FUNDKIT' "$UPPER"
 sub 'fundkit' "$TOKEN"
 
 # Restore external references.
-sub '@@KEEP_UIPKG@@' '@fundkit/ui'
-sub '@@KEEP_QBPKG@@' 'fundkit/queryable'
-sub '@@KEEP_ORG@@'   'fundkitorg'
+sub '@@KEEP_UIPKG@@' '@gratora/ui'
+sub '@@KEEP_QBPKG@@' 'gratora/queryable'
+sub '@@KEEP_ORG@@'   'gratorawp'
 
 
 [ -f "${SLUG}.php" ] || { git mv fundkit.php "${SLUG}.php" 2>/dev/null || mv fundkit.php "${SLUG}.php"; }
@@ -72,9 +72,9 @@ fi
 
 echo
 echo "guards (must all be intact):"
-printf "   @fundkit/ui        %s files\n" "$(n '@fundkit/ui')"
-printf "   fundkit/queryable  %s files\n" "$(n 'fundkit/queryable')"
-printf "   fundkitorg         %s files\n" "$(n 'fundkitorg')"
+printf "   @gratora/ui        %s files\n" "$(n '@gratora/ui')"
+printf "   gratora/queryable  %s files\n" "$(n 'gratora/queryable')"
+printf "   gratorawp         %s files\n" "$(n 'gratorawp')"
 printf "   leftover sentinels %s files (must be 0)\n" "$(n '@@KEEP_')"
 echo
 echo "next: composer dump-autoload && npm run i18n && npm run build"

@@ -24,7 +24,7 @@ function mount( node ) {
     render( node, document.getElementById( 'root' ) );
 }
 
-afterEach( () => { document.body.innerHTML = ''; delete window.fundkit; } );
+afterEach( () => { document.body.innerHTML = ''; delete window.gratora; } );
 
 describe( 'the currency preview', () => {
     it( 'writes money the way the renderers write it', () => {
@@ -34,7 +34,7 @@ describe( 'the currency preview', () => {
     } );
 
     it( 'agrees with what a donor is shown', () => {
-        window.fundkit = { number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: "'", symbolPosition: 'before' } };
+        window.gratora = { number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: "'", symbolPosition: 'before' } };
 
         expect( formatAmount( 123456, 'CHF' ) ).toContain( previewSymbol( 'CHF' ) );
     } );
@@ -69,7 +69,7 @@ describe( 'the exchange rate card', () => {
     it( 'is headed with the base the numbers are actually in', () => {
         mount( <CurrencyPanel s={ s } fx={ fx } /> );
 
-        const card = document.querySelector( '.fundkit-fx' ) || document.body;
+        const card = document.querySelector( '.gratora-fx' ) || document.body;
 
         expect( card.textContent ).toContain( '1 USD' );
         expect( card.textContent ).not.toContain( '1 EUR equals' );

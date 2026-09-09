@@ -2,34 +2,34 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Auth;
+namespace Gratora\Foundation\Auth;
 
 /** @since 1.0.0 */
 final class Capabilities
 {
-    /** Umbrella cap: "can reach the FundKit admin area at all" (menu + base gate). */
-    public const MANAGE = 'manage_fundkit';
+    /** Umbrella cap: "can reach the Gratora admin area at all" (menu + base gate). */
+    public const MANAGE = 'manage_gratora';
 
     public const ALL = [
-        'fundkit_view_donors',
-        'fundkit_edit_donors',
-        'fundkit_export_donors',
-        'fundkit_redact_donors',
-        'fundkit_view_donations',
-        'fundkit_edit_donations',
-        'fundkit_refund_donations',
-        'fundkit_resend_receipt',
-        'fundkit_view_reports',
-        'fundkit_manage_campaigns',
-        'fundkit_manage_forms',
-        'fundkit_manage_settings',
+        'gratora_view_donors',
+        'gratora_edit_donors',
+        'gratora_export_donors',
+        'gratora_redact_donors',
+        'gratora_view_donations',
+        'gratora_edit_donations',
+        'gratora_refund_donations',
+        'gratora_resend_receipt',
+        'gratora_view_reports',
+        'gratora_manage_campaigns',
+        'gratora_manage_forms',
+        'gratora_manage_settings',
     ];
 
     public const GROUPS = [
-        'Donors'    => ['fundkit_view_donors', 'fundkit_edit_donors', 'fundkit_export_donors', 'fundkit_redact_donors'],
-        'Donations' => ['fundkit_view_donations', 'fundkit_edit_donations', 'fundkit_refund_donations', 'fundkit_resend_receipt'],
-        'Reports'   => ['fundkit_view_reports'],
-        'Setup'     => ['fundkit_manage_campaigns', 'fundkit_manage_forms', 'fundkit_manage_settings'],
+        'Donors'    => ['gratora_view_donors', 'gratora_edit_donors', 'gratora_export_donors', 'gratora_redact_donors'],
+        'Donations' => ['gratora_view_donations', 'gratora_edit_donations', 'gratora_refund_donations', 'gratora_resend_receipt'],
+        'Reports'   => ['gratora_view_reports'],
+        'Setup'     => ['gratora_manage_campaigns', 'gratora_manage_forms', 'gratora_manage_settings'],
     ];
 
     /**
@@ -44,18 +44,18 @@ final class Capabilities
     private static function coreLabels(): array
     {
         return [
-            'fundkit_view_donors'      => __('View donors', 'fundraising-toolkit'),
-            'fundkit_edit_donors'      => __('Edit donor records', 'fundraising-toolkit'),
-            'fundkit_export_donors'    => __('Export donor list (CSV)', 'fundraising-toolkit'),
-            'fundkit_redact_donors'    => __('Redact donors (GDPR)', 'fundraising-toolkit'),
-            'fundkit_view_donations'   => __('View donations', 'fundraising-toolkit'),
-            'fundkit_edit_donations'   => __('Edit donations (notes)', 'fundraising-toolkit'),
-            'fundkit_refund_donations' => __('Change what is charged (refund, mark paid, record by hand, change a recurring plan)', 'fundraising-toolkit'),
-            'fundkit_resend_receipt'   => __('Resend receipts', 'fundraising-toolkit'),
-            'fundkit_view_reports'     => __('View dashboards & reports', 'fundraising-toolkit'),
-            'fundkit_manage_campaigns' => __('Manage campaigns', 'fundraising-toolkit'),
-            'fundkit_manage_forms'     => __('Manage donation forms', 'fundraising-toolkit'),
-            'fundkit_manage_settings'  => __('Manage settings', 'fundraising-toolkit'),
+            'gratora_view_donors'      => __('View donors', 'gratora'),
+            'gratora_edit_donors'      => __('Edit donor records', 'gratora'),
+            'gratora_export_donors'    => __('Export donor list (CSV)', 'gratora'),
+            'gratora_redact_donors'    => __('Redact donors (GDPR)', 'gratora'),
+            'gratora_view_donations'   => __('View donations', 'gratora'),
+            'gratora_edit_donations'   => __('Edit donations (notes)', 'gratora'),
+            'gratora_refund_donations' => __('Change what is charged (refund, mark paid, record by hand, change a recurring plan)', 'gratora'),
+            'gratora_resend_receipt'   => __('Resend receipts', 'gratora'),
+            'gratora_view_reports'     => __('View dashboards & reports', 'gratora'),
+            'gratora_manage_campaigns' => __('Manage campaigns', 'gratora'),
+            'gratora_manage_forms'     => __('Manage donation forms', 'gratora'),
+            'gratora_manage_settings'  => __('Manage settings', 'gratora'),
         ];
     }
 
@@ -67,7 +67,7 @@ final class Capabilities
      */
     private static function maps(): array
     {
-        $maps = apply_filters('fundkit.capabilities', [
+        $maps = apply_filters('gratora.capabilities', [
             'all'    => self::ALL,
             'groups' => self::GROUPS,
             'labels' => self::coreLabels(),
@@ -123,7 +123,7 @@ final class Capabilities
     }
 
     /**
-     * True for anyone who may reach the FundKit admin area at all (menu/base gate).
+     * True for anyone who may reach the Gratora admin area at all (menu/base gate).
      *
      * @since 1.0.0
      */
@@ -142,14 +142,14 @@ final class Capabilities
 
     /**
      * Virtual menu meta-caps: WP menus take one capability string, so each
-     * fundkit_access_* grants on manage_options or the area's granular cap. REST still
+     * gratora_access_* grants on manage_options or the area's granular cap. REST still
      * enforces the granular caps, so menu visibility never widens actual access.
      *
      * @var array<string,string> menu meta-cap => the granular cap it maps to
      */
     /**
      * The roles the Roles screen can edit, and so the only roles whose absence
-     * from the mapping means revoke. A role granted FundKit capabilities by a
+     * from the mapping means revoke. A role granted Gratora capabilities by a
      * role editor, a theme or an add-on is invisible to that screen, and had
      * them stripped on the next save of it.
      *
@@ -158,12 +158,12 @@ final class Capabilities
     public const MANAGED_ROLES = ['administrator', 'editor', 'author', 'contributor', 'subscriber'];
 
     public const MENU_AREAS = [
-        'fundkit_access_reports'   => 'fundkit_view_reports',
-        'fundkit_access_campaigns' => 'fundkit_manage_campaigns',
-        'fundkit_access_donations' => 'fundkit_view_donations',
-        'fundkit_access_donors'    => 'fundkit_view_donors',
-        'fundkit_access_forms'     => 'fundkit_manage_forms',
-        'fundkit_access_settings'  => 'fundkit_manage_settings',
+        'gratora_access_reports'   => 'gratora_view_reports',
+        'gratora_access_campaigns' => 'gratora_manage_campaigns',
+        'gratora_access_donations' => 'gratora_view_donations',
+        'gratora_access_donors'    => 'gratora_view_donors',
+        'gratora_access_forms'     => 'gratora_manage_forms',
+        'gratora_access_settings'  => 'gratora_manage_settings',
     ];
 
     /**
@@ -196,7 +196,7 @@ final class Capabilities
         // dispatches with the strict granular check, not the lenient userCan).
         // Add-ons keep sensitive caps off this list, so those stay explicit.
         if ($super) {
-            foreach ((array) apply_filters('fundkit.capabilities.admin_caps', []) as $cap) {
+            foreach ((array) apply_filters('gratora.capabilities.admin_caps', []) as $cap) {
                 if (is_string($cap) && $cap !== '') {
                     $allcaps[$cap] = true;
                 }
@@ -204,7 +204,7 @@ final class Capabilities
         }
 
         if ($super || ! empty($allcaps[self::MANAGE]) || $anyArea) {
-            $allcaps['fundkit_access'] = true;
+            $allcaps['gratora_access'] = true;
         }
 
         return $allcaps;
@@ -213,7 +213,7 @@ final class Capabilities
     /**
      * Apply a role-to-caps mapping to the roles the mapping names and the roles
      * the Roles screen edits. A role that receives at least one granular cap
-     * also gets the MANAGE umbrella so it can see the FundKit menu; the
+     * also gets the MANAGE umbrella so it can see the Gratora menu; the
      * administrator always keeps MANAGE. Runs on activation and whenever the
      * roles mapping is saved.
      *
@@ -255,7 +255,7 @@ final class Capabilities
     /** @since 1.0.0 */
     public static function currentMapping(): array
     {
-        $stored = get_option('fundkit_roles', []);
+        $stored = get_option('gratora_roles', []);
         $map    = is_array($stored['mapping'] ?? null) ? $stored['mapping'] : [];
         return $map;
     }

@@ -1,12 +1,12 @@
 /**
- * The public form has no window.fundkit: its number format is seeded from the
+ * The public form has no window.gratora: its number format is seeded from the
  * server config for the currency the form was authored in. That preference is
  * about how whole amounts in that currency look, and the form is where the
  * donor agrees to a figure, so it may neither hide minor units that are being
  * charged nor invent ones the currency does not have.
  *
  * Its own file: setActiveNumberFormat installs a process-wide override in
- * @fundkit/ui, which the host-surface formatter reads too.
+ * @gratora/ui, which the host-surface formatter reads too.
  */
 
 import { setActiveNumberFormat, formatAmount } from '../../assets/donation-form/util/format';

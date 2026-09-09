@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donors\Donor;
-use FundKit\Donors\MagicLinkToken;
-use FundKit\Donors\SignupRedemption;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donors\Donor;
+use Gratora\Donors\MagicLinkToken;
+use Gratora\Donors\SignupRedemption;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -32,7 +32,7 @@ final class PortalClaimNameOwnershipTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function register(array $body): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/register');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/register');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(
             $body + ['token' => $this->c()->get(AntiSpamGuard::class)->mintPortalToken()]

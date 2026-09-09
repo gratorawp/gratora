@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 
 /**
  * The edges of a recurring plan's life, where the gateway and this site are
@@ -116,7 +116,7 @@ final class RecurringLifecycleEdgesTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $req = new \WP_REST_Request('POST', '/fundkit/v1/admin/recurring/' . (int) $plan->id . '/action');
+        $req = new \WP_REST_Request('POST', '/gratora/v1/admin/recurring/' . (int) $plan->id . '/action');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body + ['notify_donor' => false]));
 
@@ -164,7 +164,7 @@ final class RecurringLifecycleEdgesTest extends IntegrationTestCase
             'resume_at'             => gmdate('Y-m-d H:i:s', time() - 3600),
         ]);
 
-        Plugin::instance()->container->get(\FundKit\Recurring\RecurringResumer::class)->run();
+        Plugin::instance()->container->get(\Gratora\Recurring\RecurringResumer::class)->run();
 
         $fresh = $this->reload($plan);
         $this->assertSame('past_due', (string) $fresh->status);

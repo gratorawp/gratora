@@ -32,9 +32,9 @@ jest.mock( '../../assets/admin/_shared/widgets/WidgetGrid', () => ( {
     default: () => <div data-grid="1" />,
 } ) );
 
-jest.mock( '../../assets/admin/_shared/useFundKitRecord', () => ( {
+jest.mock( '../../assets/admin/_shared/useGratoraRecord', () => ( {
     __esModule: true,
-    useFundKitRecord: () => global.__record,
+    useGratoraRecord: () => global.__record,
 } ) );
 
 jest.mock( '../../assets/admin/_shared/extensionTabs', () => ( {
@@ -100,10 +100,10 @@ beforeEach( () => {
     } );
 
     document.body.innerHTML = '<div id="root"></div>';
-    window.fundkit = { can: { manage_campaigns: true, manage_options: true } };
+    window.gratora = { can: { manage_campaigns: true, manage_options: true } };
 } );
 
-afterEach( () => { delete window.fundkit; delete global.__record; } );
+afterEach( () => { delete window.gratora; delete global.__record; } );
 
 async function mount( overrides ) {
     stubRecord( overrides );

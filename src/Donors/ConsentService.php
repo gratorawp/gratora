@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Settings\SettingsService;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Settings\SettingsService;
 
 /** @since 1.0.0 */
 final class ConsentService
@@ -26,7 +26,7 @@ final class ConsentService
     public function purposes(): array
     {
         // Read through SettingsService so the configured defaults (newsletter,
-        // campaign updates) apply even when fundkit_consents was never saved. The
+        // campaign updates) apply even when gratora_consents was never saved. The
         // admin panel reads the same way, so portal and admin stay in sync.
         $stored = (new SettingsService())->get('consents');
         $raw    = is_array($stored['purposes'] ?? null) ? $stored['purposes'] : [];
@@ -123,7 +123,7 @@ final class ConsentService
         $row->occurred_at        = $now;
         $row->save();
 
-        do_action('fundkit.consent.recorded', $row, [
+        do_action('gratora.consent.recorded', $row, [
             'purpose_key' => $purposeKey,
             'version'     => $version,
         ]);

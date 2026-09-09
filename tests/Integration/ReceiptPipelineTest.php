@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -14,13 +14,13 @@ final class ReceiptPipelineTest extends IntegrationTestCase
 
         // After confirm, exactly one issue_receipt job should be pending.
         $pending = self::$wpdb->get_results(
-            "SELECT hook FROM " . self::$prefix . "actionscheduler_actions WHERE hook = 'fundkit.async.issue_receipt' AND status = 'pending'"
+            "SELECT hook FROM " . self::$prefix . "actionscheduler_actions WHERE hook = 'gratora.async.issue_receipt' AND status = 'pending'"
         );
         $this->assertCount(1, $pending);
 
         $this->runPendingAsyncJobs();
 
-        $receipt = self::$wpdb->get_row("SELECT * FROM " . self::$prefix . "fundkit_receipts");
+        $receipt = self::$wpdb->get_row("SELECT * FROM " . self::$prefix . "gratora_receipts");
         $this->assertNotNull($receipt, 'Receipt row should be persisted after async job runs');
         $this->assertSame('generic.v1', $receipt->renderer_id);
         // Generic receipts use the 'receipt' counter scope → 'REC-' prefix.
@@ -56,7 +56,7 @@ final class ReceiptPipelineTest extends IntegrationTestCase
         // donation + carry a re-download URL.
         $this->assertIsString($attachment);
         $this->assertStringContainsString('DON-', $mail['message']);
-        $this->assertMatchesRegularExpression('#/fundkit/v1/receipts/\d+/download\?token=[a-f0-9]+#', $mail['message']);
+        $this->assertMatchesRegularExpression('#/gratora/v1/receipts/\d+/download\?token=[a-f0-9]+#', $mail['message']);
     }
 
     public function test_receipt_issued_event_fires_with_donor_and_receipt_link(): void
@@ -64,7 +64,7 @@ final class ReceiptPipelineTest extends IntegrationTestCase
         $this->driveDonationToPaid();
         $this->runPendingAsyncJobs();
 
-        $event = self::$wpdb->get_row("SELECT * FROM " . self::$prefix . "fundkit_events WHERE type = 'receipt.issued'");
+        $event = self::$wpdb->get_row("SELECT * FROM " . self::$prefix . "gratora_events WHERE type = 'receipt.issued'");
         $this->assertNotNull($event);
         $this->assertNotEmpty($event->donor_id);
         $this->assertNotEmpty($event->donation_id);
@@ -75,15 +75,15 @@ final class ReceiptPipelineTest extends IntegrationTestCase
     {
         $this->driveDonationToPaid();
         $this->runPendingAsyncJobs();
-        $firstCount = (int) self::$wpdb->get_var("SELECT COUNT(*) FROM " . self::$prefix . "fundkit_receipts");
+        $firstCount = (int) self::$wpdb->get_var("SELECT COUNT(*) FROM " . self::$prefix . "gratora_receipts");
         $this->assertSame(1, $firstCount);
 
         // Re-run the same handler manually - should be a no-op (existing receipt with sent_to_email_at).
         // But wp_mail returns false in CLI, so sent_to_email_at may be null and the handler
         // would attempt re-send. Either way: must not insert a duplicate Receipt row.
-        do_action('fundkit.async.issue_receipt', ['donation_id' => 1]);
+        do_action('gratora.async.issue_receipt', ['donation_id' => 1]);
 
-        $secondCount = (int) self::$wpdb->get_var("SELECT COUNT(*) FROM " . self::$prefix . "fundkit_receipts");
+        $secondCount = (int) self::$wpdb->get_var("SELECT COUNT(*) FROM " . self::$prefix . "gratora_receipts");
         $this->assertSame(1, $secondCount, 'Idempotent - no duplicate receipt row per (donation, renderer)');
     }
 
@@ -93,7 +93,7 @@ final class ReceiptPipelineTest extends IntegrationTestCase
      */
     private function driveDonationToPaid(): string
     {
-        $createReq = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/gratora/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body(json_encode([
             'email'        => 'sarah@example.com',
@@ -104,7 +104,7 @@ final class ReceiptPipelineTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($createReq)->get_data()['reference'];
 
-        $confirmReq = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirmReq = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirmReq->set_header('content-type', 'application/json');
         $confirmReq->set_body('{}');
         rest_do_request($confirmReq);

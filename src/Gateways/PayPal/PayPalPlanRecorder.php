@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways\PayPal;
+namespace Gratora\Gateways\PayPal;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Recurring\FrequencyMap;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Recurring\FrequencyMap;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * Writes the local plan row for a PayPal subscription.
  *
  * PayPal charges the moment the donor approves, so by the time anything reaches
- * here the money is already gone. The plan row is what lets FundKit record that
+ * here the money is already gone. The plan row is what lets Gratora record that
  * payment, show the donor their plan, and cancel it later, and every cancel
  * path reads gateway_subscription_id off this row: without it the donor is
  * billed monthly forever with no way for the site to stop it.
@@ -48,20 +48,20 @@ final class PayPalPlanRecorder
     {
         $subId = trim((string) ($sub['id'] ?? ''));
         if ($subId === '') {
-            throw new PayPalPlanRefused('fundkit_paypal_bad_subscription', esc_html__('Missing subscription id.', 'fundraising-toolkit'));
+            throw new PayPalPlanRefused('gratora_paypal_bad_subscription', esc_html__('Missing subscription id.', 'gratora'));
         }
 
         $reference = trim((string) ($sub['custom_id'] ?? ''));
         $donation  = $reference !== '' ? $this->donations->findByReference($reference) : null;
         if (! $donation instanceof Donation) {
-            throw new PayPalPlanRefused('fundkit_paypal_subscription_mismatch',
-                esc_html__('That subscription does not belong to this donation.', 'fundraising-toolkit'),
+            throw new PayPalPlanRefused('gratora_paypal_subscription_mismatch',
+                esc_html__('That subscription does not belong to this donation.', 'gratora'),
                 403
             );
         }
 
         if ((string) $donation->gateway !== 'paypal' || ! FrequencyMap::isRecurring((string) $donation->frequency)) {
-            throw new PayPalPlanRefused('fundkit_paypal_not_recurring', esc_html__('That donation is not recurring.', 'fundraising-toolkit'));
+            throw new PayPalPlanRefused('gratora_paypal_not_recurring', esc_html__('That donation is not recurring.', 'gratora'));
         }
 
         // Already recorded. Same subscription is the ordinary double delivery;
@@ -74,8 +74,8 @@ final class PayPalPlanRecorder
                 if ((string) $existing->gateway_subscription_id === $subId) {
                     return $existing;
                 }
-                throw new PayPalPlanRefused('fundkit_paypal_subscription_conflict',
-                    esc_html__('This donation already has a different PayPal subscription.', 'fundraising-toolkit'),
+                throw new PayPalPlanRefused('gratora_paypal_subscription_conflict',
+                    esc_html__('This donation already has a different PayPal subscription.', 'gratora'),
                     409
                 );
             }
@@ -88,18 +88,18 @@ final class PayPalPlanRecorder
         $meta         = (array) ($donation->gateway_metadata ?? []);
         $expectedPlan = (string) ($meta['paypal_plan_id'] ?? '');
         if ($expectedPlan === '' || (string) ($sub['plan_id'] ?? '') !== $expectedPlan) {
-            throw new PayPalPlanRefused('fundkit_paypal_subscription_plan_mismatch',
-                esc_html__('That subscription is not for this donation amount.', 'fundraising-toolkit'),
+            throw new PayPalPlanRefused('gratora_paypal_subscription_plan_mismatch',
+                esc_html__('That subscription is not for this donation amount.', 'gratora'),
                 403
             );
         }
 
         $status = (string) ($sub['status'] ?? '');
         if (! in_array($status, ['ACTIVE', 'APPROVED', 'APPROVAL_PENDING'], true)) {
-            throw new PayPalPlanRefused('fundkit_paypal_subscription_status',
+            throw new PayPalPlanRefused('gratora_paypal_subscription_status',
                 esc_html(sprintf(
                     /* translators: %s: PayPal subscription status */
-                    __('PayPal reports this subscription as %s.', 'fundraising-toolkit'),
+                    __('PayPal reports this subscription as %s.', 'gratora'),
                     $status
                 ))
             );

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
+namespace Gratora\Rest\Admin;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Gateways\GatewayTransportException;
-use FundKit\Gateways\Stripe\ApplePayDomain;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\Stripe\StripeWebhookProvisioner;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Gateways\GatewayTransportException;
+use Gratora\Gateways\Stripe\ApplePayDomain;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\Stripe\StripeWebhookProvisioner;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -27,7 +27,7 @@ use WP_REST_Server;
  */
 final class StripeKeysController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -99,8 +99,8 @@ final class StripeKeysController
 
         if (! $this->applePay->isFileReady()) {
             return new WP_Error(
-                'fundkit_apple_pay_no_file',
-                __('Paste the domain association file from Stripe first. Apple checks for it before the button can appear.', 'fundraising-toolkit'),
+                'gratora_apple_pay_no_file',
+                __('Paste the domain association file from Stripe first. Apple checks for it before the button can appear.', 'gratora'),
                 ['status' => 400]
             );
         }
@@ -112,7 +112,7 @@ final class StripeKeysController
             try {
                 $result = $this->applePay->refresh($test);
             } catch (RuntimeException $inner) {
-                return new WP_Error('fundkit_apple_pay_failed', $inner->getMessage(), ['status' => 400]);
+                return new WP_Error('gratora_apple_pay_failed', $inner->getMessage(), ['status' => 400]);
             }
         }
 
@@ -125,7 +125,7 @@ final class StripeKeysController
     /** @since 1.0.0 */
     public function canManage(): bool
     {
-        return Capabilities::userCan('fundkit_manage_settings');
+        return Capabilities::userCan('gratora_manage_settings');
     }
 
     /** @since 1.0.0 */
@@ -135,7 +135,7 @@ final class StripeKeysController
             'connected'   => $this->account->isConnected(),
             'can_charge'  => $this->account->canCharge(),
             'account'     => $this->account->get(),
-            'webhook_url' => rest_url('fundkit/v1/webhooks/stripe'),
+            'webhook_url' => rest_url('gratora/v1/webhooks/stripe'),
             'has_webhook_secret' => $this->api->hasWebhookSecret(),
             'apple_pay' => [
                 'domain'    => $this->applePay->domain(),
@@ -183,10 +183,10 @@ final class StripeKeysController
             // the internet.
             $this->account->restore($previous);
             return new WP_Error(
-                'fundkit_stripe_unreachable',
+                'gratora_stripe_unreachable',
                 sprintf(
                     /* translators: %s: transport error, e.g. a DNS failure */
-                    __('This site could not reach Stripe, so the key has not been checked or saved: %s. That is a problem with this server rather than with the key. Payments will not work until it is resolved.', 'fundraising-toolkit'),
+                    __('This site could not reach Stripe, so the key has not been checked or saved: %s. That is a problem with this server rather than with the key. Payments will not work until it is resolved.', 'gratora'),
                     $e->getMessage()
                 ),
                 ['status' => 503]
@@ -194,10 +194,10 @@ final class StripeKeysController
         } catch (RuntimeException $e) {
             $this->account->restore($previous);
             return new WP_Error(
-                'fundkit_stripe_key_rejected',
+                'gratora_stripe_key_rejected',
                 sprintf(
                     /* translators: %s: error message from Stripe */
-                    __('Stripe rejected that secret key: %s', 'fundraising-toolkit'),
+                    __('Stripe rejected that secret key: %s', 'gratora'),
                     $e->getMessage()
                 ),
                 ['status' => 400]
@@ -249,33 +249,33 @@ final class StripeKeysController
      */
     private function validateShape(bool $test, string $secret, string $publishable): ?WP_Error
     {
-        $bad = static fn (string $msg): WP_Error => new WP_Error('fundkit_stripe_bad_key', $msg, ['status' => 400]);
+        $bad = static fn (string $msg): WP_Error => new WP_Error('gratora_stripe_bad_key', $msg, ['status' => 400]);
 
         if (! preg_match('/^(sk|rk)_(test|live)_/', $secret)) {
-            return $bad(__('That does not look like a Stripe secret key. It starts with sk_test_ or sk_live_.', 'fundraising-toolkit'));
+            return $bad(__('That does not look like a Stripe secret key. It starts with sk_test_ or sk_live_.', 'gratora'));
         }
         if (! str_starts_with($publishable, 'pk_')) {
-            return $bad(__('That does not look like a Stripe publishable key. It starts with pk_test_ or pk_live_.', 'fundraising-toolkit'));
+            return $bad(__('That does not look like a Stripe publishable key. It starts with pk_test_ or pk_live_.', 'gratora'));
         }
 
         $secretIsTest      = str_contains($secret, '_test_');
         $publishableIsTest = str_starts_with($publishable, 'pk_test_');
 
         if ($secretIsTest !== $publishableIsTest) {
-            return $bad(__('The secret and publishable keys are from different modes. Use the pair from the same Stripe mode.', 'fundraising-toolkit'));
+            return $bad(__('The secret and publishable keys are from different modes. Use the pair from the same Stripe mode.', 'gratora'));
         }
         if ($secretIsTest !== $test) {
             return $bad(
                 $test
-                    ? __('Those are live keys. Paste your test keys here, or save them under Live.', 'fundraising-toolkit')
-                    : __('Those are test keys. Paste your live keys here, or save them under Test.', 'fundraising-toolkit')
+                    ? __('Those are live keys. Paste your test keys here, or save them under Live.', 'gratora')
+                    : __('Those are test keys. Paste your live keys here, or save them under Test.', 'gratora')
             );
         }
         return null;
     }
 
     /**
-     * Register FundKit's webhook endpoint on the org's own account so paid, refund
+     * Register Gratora's webhook endpoint on the org's own account so paid, refund
      * and renewal events flow without hand-building it in the Stripe dashboard.
      * Best effort: an unreachable (local) site keeps the manual signing-secret
      * path, and a failure must never block saving working keys.

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorService;
-use FundKit\Exports\RevenueExporter;
-use FundKit\Foundation\Plugin;
-use FundKit\Reports\TaxStatementBuilder;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Exports\RevenueExporter;
+use Gratora\Foundation\Plugin;
+use Gratora\Reports\TaxStatementBuilder;
 
 /**
  * The revenue series is what a finance team charts, so a month with nothing in
@@ -142,7 +142,7 @@ final class RevenueExportTest extends IntegrationTestCase
     {
         $this->paid('2026-03-10 12:00:00', 10000);
 
-        $req = new \WP_REST_Request('GET', '/fundkit/v1/admin/exports/options');
+        $req = new \WP_REST_Request('GET', '/gratora/v1/admin/exports/options');
         $opts = rest_do_request($req)->get_data();
 
         $this->assertSame('2026-03', $opts['first_month']);
@@ -151,7 +151,7 @@ final class RevenueExportTest extends IntegrationTestCase
 
     public function test_a_site_with_no_donations_still_offers_this_month(): void
     {
-        $req = new \WP_REST_Request('GET', '/fundkit/v1/admin/exports/options');
+        $req = new \WP_REST_Request('GET', '/gratora/v1/admin/exports/options');
         $opts = rest_do_request($req)->get_data();
 
         $this->assertSame((string) wp_date('Y-m'), $opts['first_month']);

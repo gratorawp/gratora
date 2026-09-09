@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Recurring;
+namespace Gratora\Recurring;
 
-use FundKit\Analytics\EventRecorder;
-use FundKit\Currency\Currency;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\SubscriptionAware;
-use FundKit\Gateways\SupportsPaymentRetry;
-use FundKit\Gateways\SupportsScheduleChange;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Currency\Currency;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\SubscriptionAware;
+use Gratora\Gateways\SupportsPaymentRetry;
+use Gratora\Gateways\SupportsScheduleChange;
 use InvalidArgumentException;
 
 /**
@@ -66,7 +66,7 @@ final class RecurringPlanActions
 
         $change->detail += ['resumes_at' => $resumesAt];
         $this->finish($plan, $change, 'recurring.paused');
-        do_action('fundkit.recurring.plan_paused', $plan, $resumesAt);
+        do_action('gratora.recurring.plan_paused', $plan, $resumesAt);
     }
 
     /**
@@ -89,14 +89,14 @@ final class RecurringPlanActions
         $at = strtotime($resumesAt);
         if ($at === false) {
             throw new InvalidArgumentException(
-                esc_html__('That is not a date this donation can restart on.', 'fundraising-toolkit')
+                esc_html__('That is not a date this donation can restart on.', 'gratora')
             );
         }
 
         $now = time();
         if ($at <= $now) {
             throw new InvalidArgumentException(
-                esc_html__('A donation can only be paused until a date in the future.', 'fundraising-toolkit')
+                esc_html__('A donation can only be paused until a date in the future.', 'gratora')
             );
         }
 
@@ -126,7 +126,7 @@ final class RecurringPlanActions
         $this->assertGatewayReachable($plan, 'resume');
 
         if ((string) $plan->status !== 'paused') {
-            throw new PlanChangeRefused(esc_html__('This donation is not paused.', 'fundraising-toolkit'));
+            throw new PlanChangeRefused(esc_html__('This donation is not paused.', 'gratora'));
         }
 
         $this->subscription($plan)?->resumeSubscription($plan);
@@ -139,7 +139,7 @@ final class RecurringPlanActions
         ]);
 
         $this->finish($plan, $change, 'recurring.resumed');
-        do_action('fundkit.recurring.plan_resumed', $plan);
+        do_action('gratora.recurring.plan_resumed', $plan);
     }
 
     /**
@@ -155,7 +155,7 @@ final class RecurringPlanActions
         $this->assertGatewayReachable($plan, 'skip a payment on');
 
         if (! $plan->next_payment_at) {
-            throw new InvalidArgumentException(esc_html__('This donation has no scheduled payment to skip.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('This donation has no scheduled payment to skip.', 'gratora'));
         }
 
         // The stored date is the base of the arithmetic and the result goes
@@ -167,7 +167,7 @@ final class RecurringPlanActions
         $from = strtotime((string) $plan->next_payment_at);
         if ($from === false) {
             throw new InvalidArgumentException(
-                esc_html__('This donation has no scheduled payment to skip.', 'fundraising-toolkit')
+                esc_html__('This donation has no scheduled payment to skip.', 'gratora')
             );
         }
 
@@ -187,13 +187,13 @@ final class RecurringPlanActions
 
         $change->detail = ['next_payment_at' => $nextAt];
         $this->finish($plan, $change, 'recurring.skipped');
-        do_action('fundkit.recurring.plan_skipped', $plan);
+        do_action('gratora.recurring.plan_skipped', $plan);
     }
 
     /**
      * Change what the card is charged from the next cycle on.
      *
-     * @throws \FundKit\Gateways\SubscriptionChangeNeedsApproval When the processor
+     * @throws \Gratora\Gateways\SubscriptionChangeNeedsApproval When the processor
      *         accepted the change but is waiting on the donor to approve it, in
      *         which case nothing local is written: the plan must not claim an
      *         amount the card is not being charged.
@@ -206,16 +206,16 @@ final class RecurringPlanActions
         $this->assertGatewayReachable($plan, 'change the amount of');
 
         if ($amountCents < 50) {
-            throw new InvalidArgumentException(esc_html__('Amount is too low.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('Amount is too low.', 'gratora'));
         }
         if ($amountCents > 99999999) {
-            throw new InvalidArgumentException(esc_html__('Amount is too high.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('Amount is too high.', 'gratora'));
         }
         // Storage is major units x 100, so a fractional amount in a zero-decimal
         // currency rounds at the gateway and the row keeps a figure nobody is
         // charging, on every renewal.
         if (Currency::minorUnits((string) $plan->currency) === 0 && $amountCents % 100 !== 0) {
-            throw new InvalidArgumentException(esc_html__('This currency does not support fractional amounts.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('This currency does not support fractional amounts.', 'gratora'));
         }
 
         $was = (int) $plan->amount_cents;
@@ -236,7 +236,7 @@ final class RecurringPlanActions
 
         $change->detail = ['from_cents' => $was, 'to_cents' => $amountCents, 'currency' => (string) $plan->currency];
         $this->finish($plan, $change, 'recurring.amount_changed');
-        do_action('fundkit.recurring.plan_amount_changed', $plan);
+        do_action('gratora.recurring.plan_amount_changed', $plan);
     }
 
     /**
@@ -257,7 +257,7 @@ final class RecurringPlanActions
         if (! $gateway instanceof SupportsPaymentRetry) {
             throw new InvalidArgumentException(esc_html(sprintf(
                 /* translators: %s: the payment gateway name, e.g. PayPal. */
-                __('%s does not allow a renewal to be retried on demand. It retries on its own schedule; ask the donor to update their card from the donor portal.', 'fundraising-toolkit'),
+                __('%s does not allow a renewal to be retried on demand. It retries on its own schedule; ask the donor to update their card from the donor portal.', 'gratora'),
                 ucfirst((string) $plan->gateway)
             )));
         }
@@ -285,7 +285,7 @@ final class RecurringPlanActions
         if ($change->isByAdmin()) {
             $this->record($plan, $change, 'recurring.cancelled_by_admin');
         }
-        do_action('fundkit.recurring.plan_changed', $plan, $change);
+        do_action('gratora.recurring.plan_changed', $plan, $change);
     }
 
 
@@ -309,7 +309,7 @@ final class RecurringPlanActions
         // processor is doing, and answering with a gateway error would send an
         // admin looking at the wrong thing.
         if (! in_array($frequency, FrequencyMap::recurringFrequencies(), true)) {
-            throw new InvalidArgumentException(esc_html__('That is not a schedule this site offers.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('That is not a schedule this site offers.', 'gratora'));
         }
 
         $this->assertChangeable($plan);
@@ -325,7 +325,7 @@ final class RecurringPlanActions
 
         $gateway = $this->gateways->get((string) $plan->gateway);
         if (! $gateway instanceof SupportsScheduleChange) {
-            throw new PlanChangeRefused(esc_html__('This payment provider cannot change how often a donation is taken. Cancel it and start a new one.', 'fundraising-toolkit'));
+            throw new PlanChangeRefused(esc_html__('This payment provider cannot change how often a donation is taken. Cancel it and start a new one.', 'gratora'));
         }
 
         $schedule = $gateway->updateSubscriptionSchedule($plan, (int) $plan->amount_cents, $unit, $count);
@@ -350,7 +350,7 @@ final class RecurringPlanActions
             'to'   => $frequency,
         ];
         $this->finish($plan, $change, 'recurring.interval_changed');
-        do_action('fundkit.recurring.plan_interval_changed', $plan);
+        do_action('gratora.recurring.plan_interval_changed', $plan);
     }
 
     /**
@@ -371,7 +371,7 @@ final class RecurringPlanActions
     private function assertChangeable(RecurringPlan $plan): void
     {
         if (in_array((string) $plan->status, self::TERMINAL, true)) {
-            throw new PlanChangeRefused(esc_html__('This donation is no longer active.', 'fundraising-toolkit'));
+            throw new PlanChangeRefused(esc_html__('This donation is no longer active.', 'gratora'));
         }
     }
 
@@ -445,7 +445,7 @@ final class RecurringPlanActions
 
         // Carries the actor and the notify flag, which the plain per-action
         // hooks above cannot: those are a published signature.
-        do_action('fundkit.recurring.plan_changed', $plan, $change);
+        do_action('gratora.recurring.plan_changed', $plan, $change);
     }
 
     /** @since 1.0.0 */

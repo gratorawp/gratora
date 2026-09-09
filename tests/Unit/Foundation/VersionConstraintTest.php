@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Foundation;
+namespace Gratora\Tests\Unit\Foundation;
 
-use FundKit\Foundation\Modules\VersionConstraint;
+use Gratora\Foundation\Modules\VersionConstraint;
 use PHPUnit\Framework\TestCase;
 
 final class VersionConstraintTest extends TestCase

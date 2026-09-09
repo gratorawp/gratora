@@ -17,7 +17,7 @@ const root = path.resolve( path.dirname( fileURLToPath( import.meta.url ) ), '..
  * two have to agree: a zip that unpacks to a different directory than the
  * directory installs to leaves a site running the plugin twice.
  */
-const slug = 'fundraising-toolkit';
+const slug = 'gratora';
 
 function rules() {
     const file = path.join( root, '.distignore' );
@@ -148,7 +148,7 @@ if ( vendor.withDev || vendor.present.length > 0 ) {
  */
 const REQUIRED_PREFIXED = [
     // The vendor directory is the composer package name, not the namespace.
-    [ 'fundkit', 'queryable' ],   // every database call
+    [ 'gratora', 'queryable' ],   // every database call
     [ 'dompdf', 'dompdf' ],    // receipts and annual statements
 ];
 

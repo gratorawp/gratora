@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\Form;
-use FundKit\Forms\FormReadinessService;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Settings\SettingsService;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormReadinessService;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Settings\SettingsService;
 
 final class FormGatewayBlockCheckTest extends IntegrationTestCase
 {
@@ -62,15 +62,15 @@ final class FormGatewayBlockCheckTest extends IntegrationTestCase
 
         $manager = $c->get(GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \FundKit\Gateways\Stripe\StripeGateway(
-                $c->get(\FundKit\Gateways\Stripe\StripeApi::class),
-                $c->get(\FundKit\Donations\DonationRepository::class),
-                $c->get(\FundKit\Donations\DonationService::class),
+            $manager->register(new \Gratora\Gateways\Stripe\StripeGateway(
+                $c->get(\Gratora\Gateways\Stripe\StripeApi::class),
+                $c->get(\Gratora\Donations\DonationRepository::class),
+                $c->get(\Gratora\Donations\DonationService::class),
                 $account,
-                $c->get(\FundKit\Donors\DonorRepository::class),
-                $c->get(\FundKit\Donors\DonorService::class),
-                $c->get(\FundKit\Foundation\Time\Clock::class),
-                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
+                $c->get(\Gratora\Donors\DonorRepository::class),
+                $c->get(\Gratora\Donors\DonorService::class),
+                $c->get(\Gratora\Foundation\Time\Clock::class),
+                $c->get(\Gratora\Recurring\RecurringPlanRepository::class),
             ));
         }
 
@@ -88,7 +88,7 @@ final class FormGatewayBlockCheckTest extends IntegrationTestCase
     public function test_a_form_with_two_gateways_and_no_block_is_flagged(): void
     {
         $this->enableTwoGateways();
-        $check = $this->check($this->form('<!-- wp:fundkit/donation-amount /-->'));
+        $check = $this->check($this->form('<!-- wp:gratora/donation-amount /-->'));
 
         $this->assertSame('warn', $check['status'] ?? null);
         $this->assertArrayHasKey('action_url', $check);
@@ -98,7 +98,7 @@ final class FormGatewayBlockCheckTest extends IntegrationTestCase
     {
         $this->enableTwoGateways();
         $check = $this->check($this->form(
-            '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/payment-gateways {"style":"cards"} /-->'
+            '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/payment-gateways {"style":"cards"} /-->'
         ));
 
         $this->assertSame('pass', $check['status'] ?? null);
@@ -108,7 +108,7 @@ final class FormGatewayBlockCheckTest extends IntegrationTestCase
     {
         $this->enableTwoGateways();
         $check = $this->check($this->form(
-            '<!-- wp:fundkit/step --><!-- wp:fundkit/payment-gateways /--><!-- /wp:fundkit/step -->'
+            '<!-- wp:gratora/step --><!-- wp:gratora/payment-gateways /--><!-- /wp:gratora/step -->'
         ));
 
         $this->assertSame('pass', $check['status'] ?? null);

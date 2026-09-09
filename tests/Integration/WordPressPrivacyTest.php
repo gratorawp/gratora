@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\Privacy\WordPressPrivacy;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\Privacy\WordPressPrivacy;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
 
 /**
  * Tools, Export Personal Data and Erase Personal Data are the screens a site
@@ -23,10 +23,10 @@ final class WordPressPrivacyTest extends IntegrationTestCase
 
         return new WordPressPrivacy(
             $c->get(DonorRepository::class),
-            $c->get(\FundKit\Donors\DonorService::class),
+            $c->get(\Gratora\Donors\DonorService::class),
             $c->get(IdentityHasher::class),
-            $c->get(\FundKit\Donors\DonorMetricsService::class),
-            $c->get(\FundKit\Donors\ConsentService::class),
+            $c->get(\Gratora\Donors\DonorMetricsService::class),
+            $c->get(\Gratora\Donors\ConsentService::class),
         );
     }
 
@@ -38,7 +38,7 @@ final class WordPressPrivacyTest extends IntegrationTestCase
 
         $donor = Donor::make();
         $donor->email_hash      = $hash;
-        $donor->email_encrypted = $c->get(\FundKit\Foundation\Crypto\Crypto::class)->encrypt($email);
+        $donor->email_encrypted = $c->get(\Gratora\Foundation\Crypto\Crypto::class)->encrypt($email);
         $donor->first_name      = 'Ada';
         $donor->last_name       = 'Lovelace';
         $donor->created_at      = $now;
@@ -52,8 +52,8 @@ final class WordPressPrivacyTest extends IntegrationTestCase
     {
         $this->privacy()->register();
 
-        $this->assertArrayHasKey('fundkit', apply_filters('wp_privacy_personal_data_exporters', []));
-        $this->assertArrayHasKey('fundkit', apply_filters('wp_privacy_personal_data_erasers', []));
+        $this->assertArrayHasKey('gratora', apply_filters('wp_privacy_personal_data_exporters', []));
+        $this->assertArrayHasKey('gratora', apply_filters('wp_privacy_personal_data_erasers', []));
     }
 
     public function test_an_export_returns_the_donor_the_email_belongs_to(): void
@@ -124,7 +124,7 @@ final class WordPressPrivacyTest extends IntegrationTestCase
     {
         $email = 'contact-' . uniqid() . '@example.test';
         $donor = $this->makeDonor($email);
-        $svc   = Plugin::instance()->container->get(\FundKit\Donors\DonorService::class);
+        $svc   = Plugin::instance()->container->get(\Gratora\Donors\DonorService::class);
         $svc->setEncryptedField($donor, 'phone_encrypted', '+44 20 7946 0000');
         $svc->setEncryptedField($donor, 'address_encrypted', (string) $svc->addressPayload([
             'line1'  => '12 Hill Road',
@@ -144,13 +144,13 @@ final class WordPressPrivacyTest extends IntegrationTestCase
     {
         $email = 'history-' . uniqid() . '@example.test';
         $donor = $this->makeDonor($email);
-        $this->seedDonation($donor, 'FUNDKIT-DSAR-A', 12_500);
-        $this->seedDonation($donor, 'FUNDKIT-DSAR-B', 4_000);
+        $this->seedDonation($donor, 'GRATORA-DSAR-A', 12_500);
+        $this->seedDonation($donor, 'GRATORA-DSAR-B', 4_000);
 
-        $values = $this->valuesIn($this->privacy()->export($email), 'fundkit-donation');
+        $values = $this->valuesIn($this->privacy()->export($email), 'gratora-donation');
 
-        $this->assertContains('FUNDKIT-DSAR-A', $values, 'a donation the site holds was not in the DSAR answer');
-        $this->assertContains('FUNDKIT-DSAR-B', $values);
+        $this->assertContains('GRATORA-DSAR-A', $values, 'a donation the site holds was not in the DSAR answer');
+        $this->assertContains('GRATORA-DSAR-B', $values);
     }
 
     public function test_the_export_lists_the_recurring_plan_still_charging_the_donor(): void
@@ -158,7 +158,7 @@ final class WordPressPrivacyTest extends IntegrationTestCase
         $email = 'plan-' . uniqid() . '@example.test';
         $donor = $this->makeDonor($email);
 
-        $plan = \FundKit\Recurring\RecurringPlan::make();
+        $plan = \Gratora\Recurring\RecurringPlan::make();
         $plan->donor_id                = (int) $donor->id;
         $plan->gateway                 = 'offline';
         $plan->gateway_subscription_id = 'sub_dsar_' . $donor->id;
@@ -174,14 +174,14 @@ final class WordPressPrivacyTest extends IntegrationTestCase
 
         $groups = array_column($this->privacy()->export($email)['data'], 'group_id');
 
-        $this->assertContains('fundkit-recurring', $groups, 'an active mandate against the donor was not disclosed');
+        $this->assertContains('gratora-recurring', $groups, 'an active mandate against the donor was not disclosed');
     }
 
     public function test_the_export_does_not_hand_over_staff_notes(): void
     {
         $email = 'notes-' . uniqid() . '@example.test';
         $donor = $this->makeDonor($email);
-        Plugin::instance()->container->get(\FundKit\Donors\DonorNoteRepository::class)
+        Plugin::instance()->container->get(\Gratora\Donors\DonorNoteRepository::class)
             ->create((int) $donor->id, 'Never call this donor before noon.', null);
 
         $export = $this->privacy()->export($email);
@@ -208,7 +208,7 @@ final class WordPressPrivacyTest extends IntegrationTestCase
     private function seedDonation(Donor $donor, string $reference, int $cents): void
     {
         $now = gmdate('Y-m-d H:i:s');
-        $d   = \FundKit\Donations\Donation::make();
+        $d   = \Gratora\Donations\Donation::make();
         $d->reference         = $reference;
         $d->donor_id          = (int) $donor->id;
         $d->amount_cents      = $cents;

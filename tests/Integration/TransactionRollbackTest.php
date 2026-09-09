@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorNote;
-use FundKit\Donors\DonorRetention;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\Erasure\ErasureHandler;
-use FundKit\Donors\Erasure\ErasureRequest;
-use FundKit\Foundation\Batch\BatchProcessor;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Settings\SettingsService;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorNote;
+use Gratora\Donors\DonorRetention;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\Erasure\ErasureHandler;
+use Gratora\Donors\Erasure\ErasureRequest;
+use Gratora\Foundation\Batch\BatchProcessor;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\References\ReferenceGenerator;
+use Gratora\Settings\SettingsService;
 use RuntimeException;
 use Throwable;
 
@@ -280,7 +280,7 @@ final class TransactionRollbackTest extends IntegrationTestCase
     public function test_it_leaves_rows_behind_for_the_next_test_to_look_for(): array
     {
         $marker    = 'Rollback' . strtoupper(bin2hex(random_bytes(5)));
-        $transient = 'fundkit_isolation_probe_' . strtolower($marker);
+        $transient = 'gratora_isolation_probe_' . strtolower($marker);
 
         $donor = $this->donorWithHistory('isolation-before@example.test');
         $donor->last_name = $marker;
@@ -351,12 +351,12 @@ final class TransactionRollbackTest extends IntegrationTestCase
         $throw = static function (): void {
             throw new RuntimeException(self::SEAM_FAILURE);
         };
-        add_action('fundkit.donation.creating', $throw);
+        add_action('gratora.donation.creating', $throw);
 
         try {
             $body();
         } finally {
-            remove_action('fundkit.donation.creating', $throw);
+            remove_action('gratora.donation.creating', $throw);
         }
     }
 
@@ -396,12 +396,12 @@ final class TransactionRollbackTest extends IntegrationTestCase
             $h[] = $handler;
             return $h;
         };
-        add_filter('fundkit.donor.erasure_handlers', $add);
+        add_filter('gratora.donor.erasure_handlers', $add);
 
         try {
             $body();
         } finally {
-            remove_filter('fundkit.donor.erasure_handlers', $add);
+            remove_filter('gratora.donor.erasure_handlers', $add);
         }
     }
 
@@ -424,12 +424,12 @@ final class TransactionRollbackTest extends IntegrationTestCase
             $h[] = $handler;
             return $h;
         };
-        add_filter('fundkit.donor.erasure_handlers', $add);
+        add_filter('gratora.donor.erasure_handlers', $add);
 
         try {
             $body();
         } finally {
-            remove_filter('fundkit.donor.erasure_handlers', $add);
+            remove_filter('gratora.donor.erasure_handlers', $add);
         }
     }
 
@@ -496,7 +496,7 @@ final class TransactionRollbackTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('fundkit_privacy');
+        delete_option('gratora_privacy');
         delete_option(DonorRetention::STARTS_AT_OPTION);
         parent::tearDown();
     }

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignStatMetrics;
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignStatMetrics;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -29,7 +29,7 @@ final class CampaignStatMetricsTest extends IntegrationTestCase
     /** @param array<string,mixed> $attrs */
     private function campaign(array $attrs = []): Campaign
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode($attrs + ['title' => 'Metric probe', 'status' => 'published']));
         $created = rest_do_request($req)->get_data();
@@ -122,7 +122,7 @@ final class CampaignStatMetricsTest extends IntegrationTestCase
     {
         $c = $this->campaign(['goal_cents' => 1000000]);
 
-        $req = new WP_REST_Request('PATCH', '/fundkit/v1/admin/campaigns/' . (int) $c->id);
+        $req = new WP_REST_Request('PATCH', '/gratora/v1/admin/campaigns/' . (int) $c->id);
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['goal_type' => 'donors', 'goal_count' => 250]));
         $this->assertSame(200, rest_do_request($req)->get_status());

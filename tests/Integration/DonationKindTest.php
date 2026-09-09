@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 
 /**
  * The donation `kind` discriminator: non-donation money (event ticket orders)
@@ -23,7 +23,7 @@ final class DonationKindTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'FUNDKIT-KD-' . substr(md5($kind . $cents . uniqid()), 0, 8);
+        $d->reference         = 'GRATORA-KD-' . substr(md5($kind . $cents . uniqid()), 0, 8);
         $d->donor_id          = $donorId;
         $d->campaign_id       = $campaignId;
         $d->amount_cents      = $cents;

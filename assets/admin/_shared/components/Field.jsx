@@ -7,7 +7,7 @@ let seq = 0;
  * to avoid nested labels.
  */
 export default function Field( { label, help, footer, htmlFor, group, children } ) {
-    const [ id ] = useState( () => `fundkit-field-${ ++seq }` );
+    const [ id ] = useState( () => `gratora-field-${ ++seq }` );
 
     const wrapInLabel = !! label && ! htmlFor && ! group;
     const Wrapper     = wrapInLabel ? 'label' : 'div';
@@ -18,19 +18,19 @@ export default function Field( { label, help, footer, htmlFor, group, children }
         : {};
 
     return (
-        <Wrapper className="fundkit-field" { ...wrapperProps }>
+        <Wrapper className="gratora-field" { ...wrapperProps }>
             { label && (
                 <Caption
-                    className="fundkit-field__label"
+                    className="gratora-field__label"
                     htmlFor={ htmlFor }
                     id={ group ? id : undefined }
                 >
                     { label }
                 </Caption>
             ) }
-            { help && <div className="fundkit-field__help">{ help }</div> }
+            { help && <div className="gratora-field__help">{ help }</div> }
             { children }
-            { footer && <div className="fundkit-field__footer">{ footer }</div> }
+            { footer && <div className="gratora-field__footer">{ footer }</div> }
         </Wrapper>
     );
 }

@@ -25,7 +25,7 @@ export default function EmailPanel( { s } ) {
         try {
             const data = testTo.trim() ? { to: testTo.trim() } : {};
             const res  = await apiFetch( {
-                path:   '/fundkit/v1/admin/email/test-send',
+                path:   '/gratora/v1/admin/email/test-send',
                 method: 'POST',
                 data,
             } );
@@ -37,16 +37,16 @@ export default function EmailPanel( { s } ) {
                 type: unauthenticated ? 'warning' : 'success',
                 text: sprintf(
                     /* translators: %s: recipient address */
-                    __( 'Test email sent to %s. Check the inbox and the spam folder.', 'fundraising-toolkit' ),
-                    res?.to || __( 'the recipient', 'fundraising-toolkit' )
+                    __( 'Test email sent to %s. Check the inbox and the spam folder.', 'gratora' ),
+                    res?.to || __( 'the recipient', 'gratora' )
                 ) + ( unauthenticated
-                    ? ' ' + __( 'It went out over PHP mail, which does not authenticate your domain. Gmail and Outlook reject unauthenticated mail outright, so this can be accepted here and still never arrive.', 'fundraising-toolkit' )
+                    ? ' ' + __( 'It went out over PHP mail, which does not authenticate your domain. Gmail and Outlook reject unauthenticated mail outright, so this can be accepted here and still never arrive.', 'gratora' )
                     : '' ),
             } );
         } catch ( err ) {
             setTestNotice( {
                 type: 'error',
-                text: err?.message || __( 'Send failed.', 'fundraising-toolkit' ),
+                text: err?.message || __( 'Send failed.', 'gratora' ),
             } );
         } finally {
             setTesting( false );
@@ -54,53 +54,53 @@ export default function EmailPanel( { s } ) {
     };
 
     return (
-        <div className="fundkit-panel">
+        <div className="gratora-panel">
             <Card
-                title={ __( 'Sender identity', 'fundraising-toolkit' ) }
+                title={ __( 'Sender identity', 'gratora' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'From name', 'fundraising-toolkit' ) }
-                    help={ __( 'Shown as the sender in the donor inbox.', 'fundraising-toolkit' ) }
+                    label={ __( 'From name', 'gratora' ) }
+                    help={ __( 'Shown as the sender in the donor inbox.', 'gratora' ) }
                 >
-                    <input type="text" className="fundkit-input" { ...s.bind( 'from_name' ) } />
+                    <input type="text" className="gratora-input" { ...s.bind( 'from_name' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'From email', 'fundraising-toolkit' ) }
-                    help={ __( 'Use an address on a domain you control.', 'fundraising-toolkit' ) }
+                    label={ __( 'From email', 'gratora' ) }
+                    help={ __( 'Use an address on a domain you control.', 'gratora' ) }
                 >
-                    <input type="email" className="fundkit-input" { ...s.bind( 'from_email' ) } />
+                    <input type="email" className="gratora-input" { ...s.bind( 'from_email' ) } />
                 </FormRow>
                 <FormRow
-                    label={ __( 'Reply-to', 'fundraising-toolkit' ) }
-                    help={ __( 'Where donor replies arrive. Defaults to From email.', 'fundraising-toolkit' ) }
+                    label={ __( 'Reply-to', 'gratora' ) }
+                    help={ __( 'Where donor replies arrive. Defaults to From email.', 'gratora' ) }
                 >
-                    <input type="email" className="fundkit-input" { ...s.bind( 'reply_to' ) } />
+                    <input type="email" className="gratora-input" { ...s.bind( 'reply_to' ) } />
                 </FormRow>
                 <ToggleRow
-                    title={ __( 'BCC me on every donor email', 'fundraising-toolkit' ) }
-                    sub={ __( 'Sends the site admin address a copy of every message FundKit sends: receipts, refunds, payment instructions, recurring notices and the test email. Sign-in links are never copied.', 'fundraising-toolkit' ) }
+                    title={ __( 'BCC me on every donor email', 'gratora' ) }
+                    sub={ __( 'Sends the site admin address a copy of every message Gratora sends: receipts, refunds, payment instructions, recurring notices and the test email. Sign-in links are never copied.', 'gratora' ) }
                     checked={ !! s.value( 'bcc_admin', false ) }
                     onChange={ s.setValue( 'bcc_admin' ) }
                 />
             </Card>
 
             <Card
-                title={ __( 'Send a test email', 'fundraising-toolkit' ) }
-                sub={ __( 'Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank.', 'fundraising-toolkit' ) }
+                title={ __( 'Send a test email', 'gratora' ) }
+                sub={ __( 'Checks that your site can hand a message to its mail server. Arriving is a separate question: a message accepted here can still be rejected later by the recipient. Uses your current user email if you leave the recipient blank.', 'gratora' ) }
             >
-                <FormRow label={ __( 'Recipient', 'fundraising-toolkit' ) }>
+                <FormRow label={ __( 'Recipient', 'gratora' ) }>
                     <input
                         type="email"
-                        className="fundkit-input"
+                        className="gratora-input"
                         value={ testTo }
                         onChange={ ( e ) => setTestTo( e.target.value ) }
-                        placeholder={ __( 'Leave blank to send to your WP user email', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Leave blank to send to your WP user email', 'gratora' ) }
                     />
                 </FormRow>
                 <div style={ { display: 'flex', justifyContent: 'flex-end' } }>
                     <Btn variant="secondary" onClick={ sendTest } disabled={ testing } isBusy={ testing }>
-                        { testing ? __( 'Sending…', 'fundraising-toolkit' ) : __( 'Send test email', 'fundraising-toolkit' ) }
+                        { testing ? __( 'Sending…', 'gratora' ) : __( 'Send test email', 'gratora' ) }
                     </Btn>
                 </div>
                 { testNotice && (
@@ -114,45 +114,45 @@ export default function EmailPanel( { s } ) {
                      the first symptom is a donor who never got a receipt for
                      money they gave. Named as a category with a link to the
                      directory, not a recommendation of one vendor. */ }
-                <p className="fundkit-muted" style={ { marginTop: 12 } }>
-                    { __( 'If test emails arrive but donors report nothing, the cause is almost always authentication rather than Fundraising Toolkit. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends.', 'fundraising-toolkit' ) }
+                <p className="gratora-muted" style={ { marginTop: 12 } }>
+                    { __( 'If test emails arrive but donors report nothing, the cause is almost always authentication rather than Gratora. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends.', 'gratora' ) }
                     { ' ' }
                     <a href="https://wordpress.org/plugins/tags/smtp/" target="_blank" rel="noreferrer noopener">
-                        { __( 'SMTP plugins on WordPress.org', 'fundraising-toolkit' ) }
+                        { __( 'SMTP plugins on WordPress.org', 'gratora' ) }
                     </a>
                 </p>
             </Card>
 
             <Card
-                title={ __( 'Donor emails', 'fundraising-toolkit' ) }
-                sub={ __( 'Sent to donors automatically by Fundraising Toolkit', 'fundraising-toolkit' ) }
-                meta={ __( 'Click a row to edit', 'fundraising-toolkit' ) }
+                title={ __( 'Donor emails', 'gratora' ) }
+                sub={ __( 'Sent to donors automatically by Gratora', 'gratora' ) }
+                meta={ __( 'Click a row to edit', 'gratora' ) }
             >
-                <div className="fundkit-email-list">
+                <div className="gratora-email-list">
                     { templates.map( ( t ) => {
                         const enabled = !! s.value( `templates.${ t.id }.enabled`, true );
                         return (
                             <button
                                 key={ t.id }
                                 type="button"
-                                className="fundkit-email-row"
+                                className="gratora-email-row"
                                 onClick={ () => setEditing( t ) }
                             >
                                 <span
-                                    className={ `fundkit-email-row__dot${ enabled ? ' is-on' : '' }` }
+                                    className={ `gratora-email-row__dot${ enabled ? ' is-on' : '' }` }
                                     aria-hidden="true"
                                 />
-                                <span className="fundkit-email-row__body">
-                                    <span className="fundkit-email-row__title">
+                                <span className="gratora-email-row__body">
+                                    <span className="gratora-email-row__title">
                                         { t.label }
                                         <span className="screen-reader-text">
-                                            { enabled ? __( '(enabled)', 'fundraising-toolkit' ) : __( '(disabled)', 'fundraising-toolkit' ) }
+                                            { enabled ? __( '(enabled)', 'gratora' ) : __( '(disabled)', 'gratora' ) }
                                         </span>
                                     </span>
-                                    <span className="fundkit-email-row__desc">{ t.desc }</span>
+                                    <span className="gratora-email-row__desc">{ t.desc }</span>
                                 </span>
-                                <span className="fundkit-email-row__recipient">{ t.recipient }</span>
-                                <span className="fundkit-email-row__edit">{ __( 'Edit', 'fundraising-toolkit' ) }</span>
+                                <span className="gratora-email-row__recipient">{ t.recipient }</span>
+                                <span className="gratora-email-row__edit">{ __( 'Edit', 'gratora' ) }</span>
                             </button>
                         );
                     } ) }
@@ -186,7 +186,7 @@ const SAMPLE_VALUES = {
 export function expandTags( text ) {
     return ( text || '' ).split( /(\{[a-z_]+\})/ ).map( ( part, i ) =>
         /^\{[a-z_]+\}$/.test( part ) && SAMPLE_VALUES[ part ] === undefined
-            ? <span key={ i } className="fundkit-email-preview__tag">{ part }</span>
+            ? <span key={ i } className="gratora-email-preview__tag">{ part }</span>
             : ( SAMPLE_VALUES[ part ] ?? part )
     );
 }
@@ -243,15 +243,15 @@ function TemplateDialog( { t, s, onClose } ) {
             onClose={ onClose }
             foot={ (
                 <>
-                    <Btn onClick={ onClose }>{ __( 'Cancel', 'fundraising-toolkit' ) }</Btn>
-                    <Btn variant="primary" onClick={ done }>{ __( 'Done', 'fundraising-toolkit' ) }</Btn>
+                    <Btn onClick={ onClose }>{ __( 'Cancel', 'gratora' ) }</Btn>
+                    <Btn variant="primary" onClick={ done }>{ __( 'Done', 'gratora' ) }</Btn>
                 </>
             ) }
         >
-            { t.desc && <p className="fundkit-dialog__help">{ t.desc }</p> }
+            { t.desc && <p className="gratora-dialog__help">{ t.desc }</p> }
 
             <div
-                className="fundkit-email-editor-tabs"
+                className="gratora-email-editor-tabs"
                 role="tablist"
                 tabIndex={ -1 }
                 onKeyDown={ ( e ) => tablistKeyDown( e, [ 'edit', 'preview' ], view, setView ) }
@@ -261,66 +261,66 @@ function TemplateDialog( { t, s, onClose } ) {
                     role="tab"
                     aria-selected={ view === 'edit' }
                     tabIndex={ view === 'edit' ? 0 : -1 }
-                    className={ `fundkit-email-editor-tab${ view === 'edit' ? ' is-active' : '' }` }
+                    className={ `gratora-email-editor-tab${ view === 'edit' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'edit' ) }
                 >
-                    { __( 'Edit', 'fundraising-toolkit' ) }
+                    { __( 'Edit', 'gratora' ) }
                 </button>
                 <button
                     type="button"
                     role="tab"
                     aria-selected={ view === 'preview' }
                     tabIndex={ view === 'preview' ? 0 : -1 }
-                    className={ `fundkit-email-editor-tab${ view === 'preview' ? ' is-active' : '' }` }
+                    className={ `gratora-email-editor-tab${ view === 'preview' ? ' is-active' : '' }` }
                     onClick={ () => setView( 'preview' ) }
                 >
-                    { __( 'Preview', 'fundraising-toolkit' ) }
+                    { __( 'Preview', 'gratora' ) }
                 </button>
             </div>
 
             { view === 'preview' ? (
-                <div className="fundkit-email-preview">
-                    <div className="fundkit-email-preview__head">
+                <div className="gratora-email-preview">
+                    <div className="gratora-email-preview__head">
                         <div>
-                            <strong>{ __( 'Subject:', 'fundraising-toolkit' ) }</strong>{ ' ' }
+                            <strong>{ __( 'Subject:', 'gratora' ) }</strong>{ ' ' }
                             { draft.subject.trim()
                                 ? expandTags( draft.subject )
-                                : <em>{ __( '(no subject)', 'fundraising-toolkit' ) }</em> }
+                                : <em>{ __( '(no subject)', 'gratora' ) }</em> }
                         </div>
-                        <div><strong>{ __( 'To:', 'fundraising-toolkit' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
+                        <div><strong>{ __( 'To:', 'gratora' ) }</strong> Jane Doe &lt;jane@example.com&gt;</div>
                     </div>
-                    <pre className="fundkit-email-preview__body">{ expandTags( draft.body ) }</pre>
+                    <pre className="gratora-email-preview__body">{ expandTags( draft.body ) }</pre>
                 </div>
             ) : (
                 <>
                     <ToggleRow
-                        title={ __( 'Send this email', 'fundraising-toolkit' ) }
-                        sub={ __( 'Disable to skip this notification entirely.', 'fundraising-toolkit' ) }
+                        title={ __( 'Send this email', 'gratora' ) }
+                        sub={ __( 'Disable to skip this notification entirely.', 'gratora' ) }
                         checked={ draft.enabled }
                         onChange={ ( v ) => set( { enabled: v } ) }
                     />
 
-                    <FormRow label={ __( 'Subject', 'fundraising-toolkit' ) } wide>
+                    <FormRow label={ __( 'Subject', 'gratora' ) } wide>
                         <input
                             type="text"
-                            className="fundkit-input"
+                            className="gratora-input"
                             value={ draft.subject }
                             onChange={ ( e ) => set( { subject: e.target.value } ) }
                         />
                     </FormRow>
 
                     <FormRow
-                        label={ __( 'Body', 'fundraising-toolkit' ) }
-                        help={ __( 'Plain text. Merge tags expand at send time.', 'fundraising-toolkit' ) }
+                        label={ __( 'Body', 'gratora' ) }
+                        help={ __( 'Plain text. Merge tags expand at send time.', 'gratora' ) }
                         wide
                     >
                         { !! t.tags.length && (
-                            <div className="fundkit-merge-tags">
+                            <div className="gratora-merge-tags">
                                 { t.tags.map( ( tag ) => (
                                     <button
                                         key={ tag }
                                         type="button"
-                                        className="fundkit-merge-tag"
+                                        className="gratora-merge-tag"
                                         onClick={ () => insertTag( tag ) }
                                     >
                                         { tag }
@@ -330,7 +330,7 @@ function TemplateDialog( { t, s, onClose } ) {
                         ) }
                         <textarea
                             ref={ bodyRef }
-                            className="fundkit-textarea"
+                            className="gratora-textarea"
                             rows={ 10 }
                             value={ draft.body }
                             onChange={ ( e ) => set( { body: e.target.value } ) }

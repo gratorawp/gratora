@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Foundation\Commands;
+namespace Gratora\Tests\Unit\Foundation\Commands;
 
-use FundKit\Foundation\Commands\Command;
-use FundKit\Foundation\Commands\CommandContext;
-use FundKit\Foundation\Commands\CommandError;
-use FundKit\Foundation\Commands\CommandResult;
+use Gratora\Foundation\Commands\Command;
+use Gratora\Foundation\Commands\CommandContext;
+use Gratora\Foundation\Commands\CommandError;
+use Gratora\Foundation\Commands\CommandResult;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 

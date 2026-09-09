@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
- * fundkit.donor.updated is what a CRM or ESP syncs on. The admin dialog PATCHes
+ * gratora.donor.updated is what a CRM or ESP syncs on. The admin dialog PATCHes
  * the whole form every time, so a correction to only the phone number leaves
  * the plain-column update empty; firing on that alone meant the one field the
  * admin actually changed was the one nothing downstream ever heard about.
@@ -26,7 +26,7 @@ final class DonorUpdatedEventTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
         $this->fired = [];
-        add_action('fundkit.donor.updated', function ($donor): void {
+        add_action('gratora.donor.updated', function ($donor): void {
             $this->fired[] = (int) $donor->id;
         });
     }
@@ -52,7 +52,7 @@ final class DonorUpdatedEventTest extends IntegrationTestCase
             'address'       => Plugin::instance()->container->get(DonorService::class)->decryptAddressStruct($donor),
         ];
 
-        $req = new WP_REST_Request('PATCH', '/fundkit/v1/admin/donors/' . (int) $donor->id);
+        $req = new WP_REST_Request('PATCH', '/gratora/v1/admin/donors/' . (int) $donor->id);
         $req->set_param('id', (int) $donor->id);
         $req->set_header('content-type', 'application/json');
         $payload = array_merge($body, $overrides);

@@ -5,11 +5,11 @@ defined('ABSPATH') || exit;
  * @var string $placeholder
  * @var bool   $required
  */
-$labelText = $label !== '' ? $label : __('Country', 'fundraising-toolkit');
+$labelText = $label !== '' ? $label : __('Country', 'gratora');
 $placeholderText = $placeholder !== '' ? $placeholder : 'DE';
 ?>
-<label class="fundkit-block fundkit-block--country fundkit-donor__field">
-    <span class="fundkit-donor__label"><?php echo esc_html($labelText); ?></span>
+<label class="gratora-block gratora-block--country gratora-donor__field">
+    <span class="gratora-donor__label"><?php echo esc_html($labelText); ?></span>
     <input type="text" name="profile[country]" autocomplete="country" maxlength="2" pattern="[A-Za-z]{2}"
            placeholder="<?php echo esc_attr($placeholderText); ?>"
            <?php echo esc_attr($required ? 'required' : ''); ?>>

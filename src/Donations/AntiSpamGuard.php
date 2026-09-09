@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donations;
+namespace Gratora\Donations;
 
-use FundKit\Foundation\Config\SystemSetting;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Http\ClientIp;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\SettlesOutOfBand;
-use FundKit\Gateways\TestMode;
+use Gratora\Foundation\Config\SystemSetting;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Http\ClientIp;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\SettlesOutOfBand;
+use Gratora\Gateways\TestMode;
 use WP_Error;
 
 /**
@@ -42,7 +42,7 @@ final class AntiSpamGuard
     // that has not been rebuilt for weeks is a real deployment, and a form
     // whose token has expired refuses the donor with nothing they can do about
     // it. Sites that know their own cache horizon set it through
-    // fundkit.spam.token_window_days.
+    // gratora.spam.token_window_days.
     private const TOKEN_WINDOW_DAYS  = 30;
     private const MIN_AMOUNT_CENTS   = 100;
 
@@ -87,7 +87,7 @@ final class AntiSpamGuard
         if ($this->testMode !== null) {
             return $this->testMode->forForm(null);
         }
-        $cfg = get_option('fundkit_gateway_config', []);
+        $cfg = get_option('gratora_gateway_config', []);
         return is_array($cfg) && ! empty($cfg['test_mode']);
     }
 
@@ -171,8 +171,8 @@ final class AntiSpamGuard
         }
 
         return new WP_Error(
-            'fundkit_invalid_submission',
-            __('Please refresh the page and try again.', 'fundraising-toolkit'),
+            'gratora_invalid_submission',
+            __('Please refresh the page and try again.', 'gratora'),
             ['status' => 403]
         );
     }
@@ -197,7 +197,7 @@ final class AntiSpamGuard
     public function checkHoneypot(string $value): ?WP_Error
     {
         if ($value === '') return null;
-        return new WP_Error('fundkit_invalid_submission', __('Submission rejected.', 'fundraising-toolkit'), ['status' => 400]);
+        return new WP_Error('gratora_invalid_submission', __('Submission rejected.', 'gratora'), ['status' => 400]);
     }
 
     /**
@@ -210,7 +210,7 @@ final class AntiSpamGuard
      */
     public function preCheck(array $submission): ?WP_Error
     {
-        $refusal = apply_filters('fundkit.spam.pre_check', null, $submission);
+        $refusal = apply_filters('gratora.spam.pre_check', null, $submission);
 
         return $refusal instanceof WP_Error ? $refusal : null;
     }
@@ -224,7 +224,7 @@ final class AntiSpamGuard
     /** @since 1.0.0 */
     private function check(string $token, string $scope): ?WP_Error
     {
-        $generic = new WP_Error('fundkit_invalid_submission', __('Please refresh the page and try again.', 'fundraising-toolkit'), ['status' => 400]);
+        $generic = new WP_Error('gratora_invalid_submission', __('Please refresh the page and try again.', 'gratora'), ['status' => 400]);
 
         $parts = explode('.', $token, 2);
         if (count($parts) !== 2) return $generic;
@@ -239,7 +239,7 @@ final class AntiSpamGuard
 
         // A future bucket is a clock game; a past one inside the window is a
         // cached page.
-        $days = max(1, (int) apply_filters('fundkit.spam.token_window_days', self::TOKEN_WINDOW_DAYS));
+        $days = max(1, (int) apply_filters('gratora.spam.token_window_days', self::TOKEN_WINDOW_DAYS));
         if ($bucket > $current || $bucket < $current - $days) {
             return $generic;
         }
@@ -301,7 +301,7 @@ final class AntiSpamGuard
     /** @since 1.0.0 */
     public function consumeIpQuota(): ?WP_Error
     {
-        return $this->consumeIpBudget('fundkit_donate_ip', self::IP_MAX, self::IP_WINDOW);
+        return $this->consumeIpBudget('gratora_donate_ip', self::IP_MAX, self::IP_WINDOW);
     }
 
     /**
@@ -322,8 +322,8 @@ final class AntiSpamGuard
         }
 
         return new WP_Error(
-            'fundkit_rate_limited',
-            __('Too many attempts. Please try again in a few minutes.', 'fundraising-toolkit'),
+            'gratora_rate_limited',
+            __('Too many attempts. Please try again in a few minutes.', 'gratora'),
             ['status' => 429]
         );
     }
@@ -341,14 +341,14 @@ final class AntiSpamGuard
         // the donor table, and collapsing addresses there would merge two
         // people's giving history into one record.
         $hash = $this->hasher->emailHash($this->hasher->rateLimitMailbox($email));
-        $key  = 'fundkit_donate_email_' . substr($hash, 0, 32);
+        $key  = 'gratora_donate_email_' . substr($hash, 0, 32);
         if ($this->hit($key, self::EMAIL_WINDOW) <= $this->relaxed(self::EMAIL_MAX)) {
             return null;
         }
 
         return new WP_Error(
-            'fundkit_rate_limited',
-            __('Too many recent attempts for this email. Please try again later.', 'fundraising-toolkit'),
+            'gratora_rate_limited',
+            __('Too many recent attempts for this email. Please try again later.', 'gratora'),
             ['status' => 429]
         );
     }
@@ -442,7 +442,7 @@ final class AntiSpamGuard
         // Spent last, so a refusal above costs nothing. The bucket is the root's
         // birth, so every member of the tree at any depth and on any branch
         // names one counter that no wall-clock boundary can reset.
-        $key = 'fundkit_donate_retry_' . substr(hash('sha256', $group), 0, 32);
+        $key = 'gratora_donate_retry_' . substr(hash('sha256', $group), 0, 32);
         if ($this->hit($key, self::RETRY_TTL * 2, $born) > self::RETRY_MAX) {
             return null;
         }
@@ -458,7 +458,7 @@ final class AntiSpamGuard
      * Whether the gateway a row was created on takes the money out of band.
      *
      * Asked of the registry rather than of a list kept here, so a gateway
-     * registered through `fundkit.gateways.register` closes the same hole by
+     * registered through `gratora.gateways.register` closes the same hole by
      * implementing SettlesOutOfBand. A gateway that is no longer registered
      * cannot answer and its rows keep the ordinary relief: it can take no
      * further submission either way, and refusing on silence would spend a
@@ -558,12 +558,12 @@ final class AntiSpamGuard
     /** @since 1.0.0 */
     public function checkMinAmount(int $cents): ?WP_Error
     {
-        $min = (int) apply_filters('fundkit.spam.min_amount_cents', self::MIN_AMOUNT_CENTS);
+        $min = (int) apply_filters('gratora.spam.min_amount_cents', self::MIN_AMOUNT_CENTS);
         if ($min > 0 && $cents < $min) {
             return new WP_Error(
-                'fundkit_amount_too_low',
+                'gratora_amount_too_low',
                 /* translators: %s: minimum donation amount formatted */
-                sprintf(__('Minimum donation is %s.', 'fundraising-toolkit'), Money::format($min)),
+                sprintf(__('Minimum donation is %s.', 'gratora'), Money::format($min)),
                 ['status' => 400]
             );
         }

@@ -11,7 +11,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'donations',
             label: sprintf(
-                /* translators: %d: number of donations */ _n( '%d donation', '%d donations', today.donations_count, 'fundraising-toolkit' ),
+                /* translators: %d: number of donations */ _n( '%d donation', '%d donations', today.donations_count, 'gratora' ),
                 today.donations_count
             ),
         } );
@@ -26,7 +26,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'notes',
             label: sprintf(
-                /* translators: %d: number of donations */ _n( '%d note', '%d notes', today.notes_count, 'fundraising-toolkit' ),
+                /* translators: %d: number of donations */ _n( '%d note', '%d notes', today.notes_count, 'gratora' ),
                 today.notes_count
             ),
         } );
@@ -36,7 +36,7 @@ export default function TodayStrip( { today } ) {
         chips.push( {
             key: 'refunds',
             label: sprintf(
-                /* translators: %d: number of donations */ _n( '%d refund', '%d refunds', today.refunds_count, 'fundraising-toolkit' ),
+                /* translators: %d: number of donations */ _n( '%d refund', '%d refunds', today.refunds_count, 'gratora' ),
                 today.refunds_count
             ),
             tone: 'warn',
@@ -45,19 +45,19 @@ export default function TodayStrip( { today } ) {
 
     if ( chips.length === 0 ) {
         return (
-            <p className="fundkit-today__empty">
-                { __( 'Quiet so far today.', 'fundraising-toolkit' ) }
+            <p className="gratora-today__empty">
+                { __( 'Quiet so far today.', 'gratora' ) }
             </p>
         );
     }
 
     return (
-        <div className="fundkit-today">
-            <span className="fundkit-today__pulse" aria-hidden="true" />
-            <span className="fundkit-today__label">{ __( 'Last 24 hours', 'fundraising-toolkit' ) }</span>
-            <ul className="fundkit-today__chips">
+        <div className="gratora-today">
+            <span className="gratora-today__pulse" aria-hidden="true" />
+            <span className="gratora-today__label">{ __( 'Last 24 hours', 'gratora' ) }</span>
+            <ul className="gratora-today__chips">
                 { chips.map( ( c ) => (
-                    <li key={ c.key } className={ `fundkit-today__chip${ c.tone ? ' is-' + c.tone : '' }${ c.strong ? ' is-strong' : '' }` }>
+                    <li key={ c.key } className={ `gratora-today__chip${ c.tone ? ' is-' + c.tone : '' }${ c.strong ? ' is-strong' : '' }` }>
                         { c.label }
                     </li>
                 ) ) }

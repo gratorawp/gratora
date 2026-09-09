@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 
 final class DonorCohortRetentionTest extends IntegrationTestCase
 {
@@ -58,7 +58,7 @@ final class DonorCohortRetentionTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'FUNDKIT-CH-' . bin2hex(random_bytes(4));
+        $d->reference         = 'GRATORA-CH-' . bin2hex(random_bytes(4));
         $d->donor_id          = $donorId;
         $d->amount_cents      = $cents;
         $d->net_cents         = $cents;

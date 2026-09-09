@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\PayPal\PayPalApi;
-use FundKit\Gateways\PayPal\PayPalGateway;
-use FundKit\Gateways\PayPal\PayPalPlanRecorder;
-use FundKit\Gateways\PayPal\PayPalPlans;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Analytics\Event;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\PayPal\PayPalApi;
+use Gratora\Gateways\PayPal\PayPalGateway;
+use Gratora\Gateways\PayPal\PayPalPlanRecorder;
+use Gratora\Gateways\PayPal\PayPalPlans;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -41,8 +41,8 @@ final class PayPalDonorErrorCopyTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('fundkit_gateway_config', ['test_mode' => true]);
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_gateway_config', ['test_mode' => true]);
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
@@ -108,7 +108,7 @@ final class PayPalDonorErrorCopyTest extends IntegrationTestCase
 
     private function newDonation(string $frequency = 'one_time'): string
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => 'copy' . bin2hex(random_bytes(3)) . '@example.test',
@@ -134,7 +134,7 @@ final class PayPalDonorErrorCopyTest extends IntegrationTestCase
     /** @return array{0:int,1:string} */
     private function dispatchCapture(string $reference): array
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,
@@ -148,7 +148,7 @@ final class PayPalDonorErrorCopyTest extends IntegrationTestCase
     /** @return array{0:int,1:string} */
     private function dispatchSubscription(string $reference): array
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/subscription');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/subscription');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'       => $reference,

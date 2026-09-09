@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Currency;
+namespace Gratora\Currency;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationQueries;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * Backfill null base amounts using today’s rate, an approximation because no historical rate

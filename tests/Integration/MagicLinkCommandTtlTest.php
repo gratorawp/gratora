@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorMetricsService;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\Portal\PortalSession;
-use FundKit\Foundation\Plugin;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donors\DonorMetricsService;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\Portal\PortalSession;
+use Gratora\Foundation\Plugin;
+use Gratora\Vendor\Queryable\DB;
 use WP_REST_Request;
 
 /**
@@ -56,7 +56,7 @@ final class MagicLinkCommandTtlTest extends IntegrationTestCase
 
     private function issue(int $donorId, int $ttl): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/commands/donor.magic_link.issue');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/commands/donor.magic_link.issue');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'input' => [
@@ -72,7 +72,7 @@ final class MagicLinkCommandTtlTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function token(int $donorId): array
     {
-        $row = DB::table('fundkit_magic_link_tokens')->where('donor_id', $donorId)->get();
+        $row = DB::table('gratora_magic_link_tokens')->where('donor_id', $donorId)->get();
         $this->assertNotEmpty($row, 'the command must have written a token row');
 
         return (array) $row;
@@ -80,7 +80,7 @@ final class MagicLinkCommandTtlTest extends IntegrationTestCase
 
     private function actAsAdmin(): void
     {
-        get_role('administrator')->add_cap('fundkit_edit_donors');
+        get_role('administrator')->add_cap('gratora_edit_donors');
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
     }
 

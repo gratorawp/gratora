@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Blocks;
+namespace Gratora\Campaigns\Blocks;
 
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Campaigns\CampaignStatMetrics;
-use FundKit\Foundation\Helpers\View;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Campaigns\CampaignStatMetrics;
+use Gratora\Foundation\Helpers\View;
 
 /**
  * One metric per block rather than a group with toggles: a group moves as a
@@ -30,7 +30,7 @@ final class CampaignStatBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/campaign-stat';
+        return 'gratora/campaign-stat';
     }
 
     /** @since 1.0.0 */

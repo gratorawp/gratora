@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Admin\Pages;
+namespace Gratora\Admin\Pages;
 
-use FundKit\Foundation\Hooks\HookProvider;
+use Gratora\Foundation\Hooks\HookProvider;
 
 /** @since 1.0.0 */
 final class ToolsPage extends HookProvider
 {
-    private const PAGE_ID   = 'fundkit-tools';
-    private const HANDLE    = 'fundkit-admin-tools';
+    private const PAGE_ID   = 'gratora-tools';
+    private const HANDLE    = 'gratora-admin-tools';
     private const BUILD_DIR = 'build/admin/tools';
 
     /** @since 1.0.0 */
     protected function filters(): array
     {
-        return ['fundkit.admin.pages' => 'registerPage'];
+        return ['gratora.admin.pages' => 'registerPage'];
     }
 
     /** @since 1.0.0 */
@@ -24,11 +24,11 @@ final class ToolsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Tools', 'fundraising-toolkit'),
-            // Every Tools route wants fundkit_manage_settings; this virtual menu cap
+            'title'      => __('Tools', 'gratora'),
+            // Every Tools route wants gratora_manage_settings; this virtual menu cap
             // is granted on exactly that (or manage_options), so what the menu shows
             // and what the screen can do agree.
-            'capability' => 'fundkit_access_settings',
+            'capability' => 'gratora_access_settings',
             'position'   => 95,
             'render'     => [$this, 'render'],
         ];
@@ -42,7 +42,7 @@ final class ToolsPage extends HookProvider
         ?>
         <div class="wrap">
             <hr class="wp-header-end" />
-            <div id="fundkit-admin-tools"></div>
+            <div id="gratora-admin-tools"></div>
         </div>
         <?php
     }
@@ -50,7 +50,7 @@ final class ToolsPage extends HookProvider
     /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
-        $assetPath = FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
+        $assetPath = GRATORA_DIR . self::BUILD_DIR . '/index.asset.php';
         if (! file_exists($assetPath)) {
             return;
         }
@@ -59,28 +59,28 @@ final class ToolsPage extends HookProvider
 
         wp_enqueue_script(
             self::HANDLE,
-            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
+            GRATORA_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? FUNDKIT_VERSION,
+            $asset['version']      ?? GRATORA_VERSION,
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         // DataViews layout requires its vendor stylesheet.
         wp_enqueue_style(
-            'fundkit-dataviews-vendor-tools',
-            FUNDKIT_URL . self::BUILD_DIR . '/dataviews.css',
+            'gratora-dataviews-vendor-tools',
+            GRATORA_URL . self::BUILD_DIR . '/dataviews.css',
             ['wp-components'],
-            (string) (@filemtime(FUNDKIT_DIR . self::BUILD_DIR . '/dataviews.css') ?: FUNDKIT_VERSION)
+            (string) (@filemtime(GRATORA_DIR . self::BUILD_DIR . '/dataviews.css') ?: GRATORA_VERSION)
         );
         wp_enqueue_style(
-            'fundkit-admin-tools',
-            FUNDKIT_URL . 'build/admin/tools.css',
+            'gratora-admin-tools',
+            GRATORA_URL . 'build/admin/tools.css',
             ['wp-components'],
-            (string) (@filemtime(FUNDKIT_DIR . 'build/admin/tools.css') ?: FUNDKIT_VERSION)
+            (string) (@filemtime(GRATORA_DIR . 'build/admin/tools.css') ?: GRATORA_VERSION)
         );
-        wp_style_add_data('fundkit-admin-tools', 'rtl', 'replace');
+        wp_style_add_data('gratora-admin-tools', 'rtl', 'replace');
     }
 }

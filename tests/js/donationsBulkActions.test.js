@@ -20,7 +20,7 @@ jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 // so the suites that drive real React keep it.
 jest.mock( 'react', () => require( 'preact/compat' ) );
 jest.mock( 'react-dom', () => require( 'preact/compat' ) );
-// @fundkit/ui ships built, so its own JSX arrives already compiled against these.
+// @gratora/ui ships built, so its own JSX arrives already compiled against these.
 jest.mock( 'react/jsx-runtime', () => require( 'preact/compat/jsx-runtime' ) );
 jest.mock( 'react/jsx-dev-runtime', () => require( 'preact/compat/jsx-dev-runtime' ) );
 
@@ -87,11 +87,11 @@ function seedApi( onAction ) {
                 headers: { get: () => '0' },
             } );
         }
-        if ( path.startsWith( '/fundkit/v1/admin/donations/campaign-options' )
-            || path.startsWith( '/fundkit/v1/admin/donations/gateway-options' ) ) {
+        if ( path.startsWith( '/gratora/v1/admin/donations/campaign-options' )
+            || path.startsWith( '/gratora/v1/admin/donations/gateway-options' ) ) {
             return Promise.resolve( [] );
         }
-        if ( path.startsWith( '/fundkit/v1/admin/donations/stats' ) ) {
+        if ( path.startsWith( '/gratora/v1/admin/donations/stats' ) ) {
             return Promise.resolve( null );
         }
         return onAction( path );
@@ -181,7 +181,7 @@ test( 'a selection with nothing eligible in it sends no requests', async () => {
     // The screen also reads this reader's saved view on mount. The claim here
     // is about what the ACTION sends, so that read is not one of these calls.
     seedApi( ( path ) => {
-        if ( ! path.startsWith( '/fundkit/v1/admin/me/' ) ) calls.push( path );
+        if ( ! path.startsWith( '/gratora/v1/admin/me/' ) ) calls.push( path );
         return Promise.resolve( { ok: true } );
     } );
 

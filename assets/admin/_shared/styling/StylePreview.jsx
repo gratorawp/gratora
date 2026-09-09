@@ -1,1 +1,1 @@
-export { default, resolveEffectiveTokens, resolveEffectiveStyle } from '@fundkit/ui/styling/StylePreview';
+export { default, resolveEffectiveTokens, resolveEffectiveStyle } from '@gratora/ui/styling/StylePreview';

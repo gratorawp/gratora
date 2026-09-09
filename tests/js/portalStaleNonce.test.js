@@ -53,7 +53,7 @@ function refuseTheNonce( path, thenReturn ) {
 }
 
 async function boot() {
-    document.body.innerHTML = '<div id="fundkit-donor-portal"></div>';
+    document.body.innerHTML = '<div id="gratora-donor-portal"></div>';
 
     jest.isolateModules( () => {
         require( '../../assets/donor-portal/index.jsx' );
@@ -62,7 +62,7 @@ async function boot() {
     await settle();
 }
 
-const text = () => document.getElementById( 'fundkit-donor-portal' ).textContent;
+const text = () => document.getElementById( 'gratora-donor-portal' ).textContent;
 
 const noncesFor = ( path ) => seen.filter( ( s ) => s.path === path ).map( ( s ) => s.nonce );
 
@@ -96,14 +96,14 @@ beforeEach( () => {
     routes = {};
     seen   = [];
     window.history.replaceState( {}, '', '/portal/' );
-    window.fundkitPortal = { rest: '/wp-json/fundkit/v1/portal/', nonce: STALE, token: 'portal-token' };
-    window.fundkit = {
+    window.gratoraPortal = { rest: '/wp-json/gratora/v1/portal/', nonce: STALE, token: 'portal-token' };
+    window.gratora = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
 
     global.fetch = jest.fn( ( url, init = {} ) => {
-        const path  = String( url ).replace( '/wp-json/fundkit/v1/portal/', '' );
+        const path  = String( url ).replace( '/wp-json/gratora/v1/portal/', '' );
         const nonce = ( init.headers || {} )[ 'X-WP-Nonce' ] || '';
         seen.push( { path, nonce } );
 
@@ -132,7 +132,7 @@ test( 'and the dead nonce is not handed on to the add-on tabs', async () => {
 
     // extContext passes cfg.nonce straight to every add-on panel, which has its
     // own client and would go on paying for a nonce proven dead here.
-    expect( window.fundkitPortal.nonce ).toBe( '' );
+    expect( window.gratoraPortal.nonce ).toBe( '' );
     expect( seen.filter( ( s ) => s.nonce !== '' ) ).toHaveLength( 1 );
 } );
 
@@ -154,7 +154,7 @@ test( 'a nonce that dies mid-session does not bounce the donor to sign-in', asyn
 } );
 
 test( 'a stale nonce does not refuse the sign-in that would recover from it', async () => {
-    routes.me = () => jsonResponse( 401, { code: 'fundkit_no_session', message: 'Not signed in.' } );
+    routes.me = () => jsonResponse( 401, { code: 'gratora_no_session', message: 'Not signed in.' } );
     refuseTheNonce( 'send-link', () => jsonResponse( 200, { ok: true } ) );
 
     await boot();
@@ -198,7 +198,7 @@ test( 'a stale nonce does not refuse a data export', async () => {
 
 test( 'a refusal that is not about the nonce is reported as it stands, not retried', async () => {
     routes.me      = () => jsonResponse( 200, me() );
-    routes.profile = () => jsonResponse( 403, { code: 'fundkit_forbidden', message: 'Not allowed.' } );
+    routes.profile = () => jsonResponse( 403, { code: 'gratora_forbidden', message: 'Not allowed.' } );
 
     await boot();
     await clickButton( 'Profile' );

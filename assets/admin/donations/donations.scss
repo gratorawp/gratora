@@ -1,11 +1,11 @@
-@import '@fundkit/ui/scss/tokens';
+@import '@gratora/ui/scss/tokens';
 @import '../_shared/admin-base';
-@import '@fundkit/ui/scss/components/empty-state';
-@import '@fundkit/ui/scss/components/form';
-@import '@fundkit/ui/scss/components/date-field';
-@import '@fundkit/ui/scss/components/switch';
+@import '@gratora/ui/scss/components/empty-state';
+@import '@gratora/ui/scss/components/form';
+@import '@gratora/ui/scss/components/date-field';
+@import '@gratora/ui/scss/components/switch';
 // The record-donation modal needs shared dialog CSS.
-@import '@fundkit/ui/scss/components/dialog';
+@import '@gratora/ui/scss/components/dialog';
 
 @import '../_shared/kpi-strip';
 
@@ -669,7 +669,7 @@
     font-size: 13px;
 }
 
-.fundkit-amount__base {
+.gratora-amount__base {
     display: block;
     margin-top: 2px;
     color: $text-muted;
@@ -677,7 +677,7 @@
     font-weight: 400;
 }
 
-.fundkit-rd {
+.gratora-rd {
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
@@ -707,15 +707,15 @@
 		font-size: 13px;
 
 		span {
-			color: var(--fundkit-color-text-muted, #6b7280);
+			color: var(--gratora-color-text-muted, #6b7280);
 		}
 	}
 }
 
-.fundkit-list-note {
+.gratora-list-note {
     margin: -4px 0 12px;
     font-size: 13px;
-    color: var(--fundkit-color-text-muted, #6b7280);
+    color: var(--gratora-color-text-muted, #6b7280);
 }
 
 // Double the class to outrank the later pill-group background rule.

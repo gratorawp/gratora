@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Foundation\Plugin;
 use WP_Error;
 
 final class TestModeQuotaReliefTest extends IntegrationTestCase
 {
     protected function tearDown(): void
     {
-        delete_option('fundkit_gateway_config');
+        delete_option('gratora_gateway_config');
         parent::tearDown();
     }
 
@@ -20,14 +20,14 @@ final class TestModeQuotaReliefTest extends IntegrationTestCase
     {
         // Rebuilt per test: TestMode is injected, and it reads the switch.
         return new AntiSpamGuard(
-            Plugin::instance()->container->get(\FundKit\Foundation\Identity\IdentityHasher::class),
-            Plugin::instance()->container->get(\FundKit\Gateways\TestMode::class)
+            Plugin::instance()->container->get(\Gratora\Foundation\Identity\IdentityHasher::class),
+            Plugin::instance()->container->get(\Gratora\Gateways\TestMode::class)
         );
     }
 
     private function testMode(bool $on): void
     {
-        update_option('fundkit_gateway_config', ['test_mode' => $on]);
+        update_option('gratora_gateway_config', ['test_mode' => $on]);
     }
 
     /** Spend the per-IP budget until refused, and answer how many got through. */
@@ -48,14 +48,14 @@ final class TestModeQuotaReliefTest extends IntegrationTestCase
     {
         $this->testMode(false);
 
-        $this->assertSame(5, $this->drain($this->guard(), 'fundkit_relief_' . uniqid(), 5));
+        $this->assertSame(5, $this->drain($this->guard(), 'gratora_relief_' . uniqid(), 5));
     }
 
     public function test_test_mode_raises_the_cap_without_removing_it(): void
     {
         $this->testMode(true);
 
-        $allowed = $this->drain($this->guard(), 'fundkit_relief_' . uniqid(), 5);
+        $allowed = $this->drain($this->guard(), 'gratora_relief_' . uniqid(), 5);
 
         $this->assertGreaterThan(5, $allowed, 'automation must not be held to the production cap');
         $this->assertSame(50, $allowed, 'but there is still a ceiling');

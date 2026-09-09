@@ -6,14 +6,14 @@ import { test, expect } from '@playwright/test';
  * open set is still valid. The portal has to keep the donor signed in on that
  * second open rather than showing the sign-in screen.
  *
- * Needs its own fresh single-use link in FUNDKIT_E2E_PORTAL_REOPEN_URL (the p2p
- * portal spec consumes FUNDKIT_E2E_PORTAL_URL, so the two cannot share one); the
+ * Needs its own fresh single-use link in GRATORA_E2E_PORTAL_REOPEN_URL (the p2p
+ * portal spec consumes GRATORA_E2E_PORTAL_URL, so the two cannot share one); the
  * donor's admin profile shows one.
  */
 test.describe('Donor portal magic link', () => {
     test('re-opening the same link keeps the donor signed in', async ({ page }) => {
-        const link = process.env.FUNDKIT_E2E_PORTAL_REOPEN_URL;
-        test.skip(! link, 'set FUNDKIT_E2E_PORTAL_REOPEN_URL to a fresh single-use portal link');
+        const link = process.env.GRATORA_E2E_PORTAL_REOPEN_URL;
+        test.skip(! link, 'set GRATORA_E2E_PORTAL_REOPEN_URL to a fresh single-use portal link');
 
         await page.goto(link!);
 

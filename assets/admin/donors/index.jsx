@@ -38,21 +38,21 @@ function initials( name ) {
 export function donorKpis( stats ) {
     return [
         {
-            label: __( 'Total donors', 'fundraising-toolkit' ),
+            label: __( 'Total donors', 'gratora' ),
             value: stats ? String( stats.total_count ) : '-',
         },
         {
-            label: __( 'With donations', 'fundraising-toolkit' ),
+            label: __( 'With donations', 'gratora' ),
             value: stats ? String( stats.with_donations ) : '-',
         },
         {
-            label: __( 'Lifetime given', 'fundraising-toolkit' ),
+            label: __( 'Lifetime given', 'gratora' ),
             value: stats && stats.total_donated_cents > 0
                 ? formatAmount( stats.total_donated_cents )
                 : '-',
         },
         {
-            label: __( 'Avg lifetime value', 'fundraising-toolkit' ),
+            label: __( 'Avg lifetime value', 'gratora' ),
             value: stats && stats.avg_ltv_cents > 0
                 ? formatAmount( stats.avg_ltv_cents )
                 : '-',
@@ -119,7 +119,7 @@ export function DonorsApp( { toggleSlot } ) {
         setError( null );
 
         apiFetch( {
-            path: addQueryArgs( '/fundkit/v1/admin/donors', {
+            path: addQueryArgs( '/gratora/v1/admin/donors', {
                 page:       view.page,
                 per_page:   view.perPage,
                 orderby:    view.sort?.field === 'total_donated'
@@ -142,12 +142,12 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( aborted ) return;
                 setData( [] );
                 setTotal( 0 );
-                setError( err?.message || __( 'Failed to load donors.', 'fundraising-toolkit' ) );
+                setError( err?.message || __( 'Failed to load donors.', 'gratora' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
         apiFetch( {
-            path: addQueryArgs( '/fundkit/v1/admin/donors/stats', {
+            path: addQueryArgs( '/gratora/v1/admin/donors/stats', {
                 search:     view.search || undefined,
                 country:    filterValue( 'country' )    || undefined,
                 donor_type: filterValue( 'donor_type' ) || undefined,
@@ -166,10 +166,10 @@ export function DonorsApp( { toggleSlot } ) {
     const fields = useMemo( () => [
         {
             id:    'id',
-            label: __( 'ID', 'fundraising-toolkit' ),
+            label: __( 'ID', 'gratora' ),
             render: ( { item } ) => (
-                <span className="fundkit-ref-cell">
-                    <a className="fundkit-mono-link" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
+                <span className="gratora-ref-cell">
+                    <a className="gratora-mono-link" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
                         { item.id }
                     </a>
                 </span>
@@ -177,30 +177,30 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'name',
-            label: __( 'Name', 'fundraising-toolkit' ),
+            label: __( 'Name', 'gratora' ),
             render: ( { item } ) => {
-                const name = item.name || __( '(no name)', 'fundraising-toolkit' );
+                const name = item.name || __( '(no name)', 'gratora' );
                 return (
-                    <div className="fundkit-row">
+                    <div className="gratora-row">
                         { ! item.redacted && (
-                            <span className="fundkit-row__avatar" aria-hidden="true">
+                            <span className="gratora-row__avatar" aria-hidden="true">
                                 { initials( name ) }
                                 { item.avatar_url && (
-                                    <img className="fundkit-row__avatar-photo" src={ item.avatar_url } alt="" loading="lazy" decoding="async" />
+                                    <img className="gratora-row__avatar-photo" src={ item.avatar_url } alt="" loading="lazy" decoding="async" />
                                 ) }
                             </span>
                         ) }
-                        <div className="fundkit-row__body">
-                            <span className="fundkit-ref-cell">
-                                <a className="fundkit-row__link fundkit-row__link--strong" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
+                        <div className="gratora-row__body">
+                            <span className="gratora-ref-cell">
+                                <a className="gratora-row__link gratora-row__link--strong" href={ `#donor/${ item.id }` } { ...rowLinkProps }>
                                     { name }
                                 </a>
                                 { item.is_test_only && (
-                                    <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundraising-toolkit' ) }</span>
+                                    <span className="gratora-pill gratora-pill--test">{ __( 'Test', 'gratora' ) }</span>
                                 ) }
                             </span>
                             { item.donor_type && item.donor_type !== 'individual' && (
-                                <div className="fundkit-row__sub" style={ { textTransform: 'capitalize' } }>
+                                <div className="gratora-row__sub" style={ { textTransform: 'capitalize' } }>
                                     { item.donor_type }
                                 </div>
                             ) }
@@ -211,75 +211,75 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:    'email',
-            label: __( 'Email', 'fundraising-toolkit' ),
+            label: __( 'Email', 'gratora' ),
             render: ( { item } ) => (
                 item.email
-                    ? <span className="fundkit-mono">{ item.email }</span>
-                    : <span className="fundkit-row__sub">-</span>
+                    ? <span className="gratora-mono">{ item.email }</span>
+                    : <span className="gratora-row__sub">-</span>
             ),
         },
         {
             id:    'country',
-            label: __( 'Country', 'fundraising-toolkit' ),
+            label: __( 'Country', 'gratora' ),
             elements: localizedCountries().map( ( c ) => ( { value: c.code, label: `${ c.code } - ${ c.label }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
                 item.country
                     ? (
-                        <span className="fundkit-country">
-                            <span className="fundkit-country__code">{ item.country }</span>
+                        <span className="gratora-country">
+                            <span className="gratora-country__code">{ item.country }</span>
                         </span>
                     )
-                    : <span className="fundkit-row__sub">-</span>
+                    : <span className="gratora-row__sub">-</span>
             ),
         },
         {
             id:    'donor_type',
-            label: __( 'Donor type', 'fundraising-toolkit' ),
+            label: __( 'Donor type', 'gratora' ),
             elements: [
-                { value: 'individual',   label: __( 'Individual', 'fundraising-toolkit' ) },
-                { value: 'organization', label: __( 'Organization', 'fundraising-toolkit' ) },
-                { value: 'household',    label: __( 'Household', 'fundraising-toolkit' ) },
+                { value: 'individual',   label: __( 'Individual', 'gratora' ) },
+                { value: 'organization', label: __( 'Organization', 'gratora' ) },
+                { value: 'household',    label: __( 'Household', 'gratora' ) },
             ],
             filterBy: { operators: [ 'is' ] },
             getValue: ( { item } ) => item.donor_type || 'individual',
             render:   ( { item } ) => (
-                <span className="fundkit-row__sub" style={ { textTransform: 'capitalize' } }>
+                <span className="gratora-row__sub" style={ { textTransform: 'capitalize' } }>
                     { item.donor_type || 'individual' }
                 </span>
             ),
         },
         {
             id:            'donations_count',
-            label:         __( 'Donations', 'fundraising-toolkit' ),
+            label:         __( 'Donations', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <span className="fundkit-amount fundkit-amount--num">{ item.donations_count }</span>
+                <span className="gratora-amount gratora-amount--num">{ item.donations_count }</span>
             ),
         },
         {
             id:            'total_donated',
-            label:         __( 'Total donated', 'fundraising-toolkit' ),
+            label:         __( 'Total donated', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <span className="fundkit-amount">
+                <span className="gratora-amount">
                     { formatAmount( item.total_donated_cents ) }
                 </span>
             ),
         },
         {
             id:            'last_donation_at',
-            label:         __( 'Last donation', 'fundraising-toolkit' ),
+            label:         __( 'Last donation', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => (
                 item.last_donation_at
                     ? (
-                        <span className="fundkit-time" title={ formatDate( item.last_donation_at ) }>
-                            <span className="fundkit-time__rel">{ timeAgo( item.last_donation_at ) }</span>
-                            <span className="fundkit-time__abs">{ formatDate( item.last_donation_at ) }</span>
+                        <span className="gratora-time" title={ formatDate( item.last_donation_at ) }>
+                            <span className="gratora-time__rel">{ timeAgo( item.last_donation_at ) }</span>
+                            <span className="gratora-time__abs">{ formatDate( item.last_donation_at ) }</span>
                         </span>
                     )
-                    : <span className="fundkit-row__sub">-</span>
+                    : <span className="gratora-row__sub">-</span>
             ),
         },
     ], [] );
@@ -295,7 +295,7 @@ export function DonorsApp( { toggleSlot } ) {
     const actions = useMemo( () => [
         {
             id:            'delete',
-            label:         __( 'Delete', 'fundraising-toolkit' ),
+            label:         __( 'Delete', 'gratora' ),
             icon:          () => <DeleteIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -314,27 +314,27 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( ! items.length ) return;
                 const n = items.length;
                 setConfirm( {
-                    title:        _n( 'Delete donor', 'Delete donors', n, 'fundraising-toolkit' ),
+                    title:        _n( 'Delete donor', 'Delete donors', n, 'gratora' ),
                     message: n === 1
-                        ? __( 'Delete this donor? They have no donations, so nothing is kept: the record and anything describing it go for good.', 'fundraising-toolkit' )
+                        ? __( 'Delete this donor? They have no donations, so nothing is kept: the record and anything describing it go for good.', 'gratora' )
                         : sprintf(
                             /* translators: %d: number of donors to delete */
                             _n(
                                 'Delete %d donor? They have no donations, so nothing is kept.',
                                 'Delete %d donors? They have no donations, so nothing is kept.',
                                 n,
-                                'fundraising-toolkit'
+                                'gratora'
                             ),
                             n
                         ),
-                    confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
+                    confirmLabel: __( 'Delete', 'gratora' ),
                     destructive:  true,
                     onConfirm: async () => {
                         // allSettled, not all: the first rejection abandoned
                         // the rest of the reporting, so a part-done batch
                         // showed nothing at all.
                         const results = await Promise.allSettled( items.map( ( i ) => apiFetch( {
-                            path:   `/fundkit/v1/admin/donors/${ i.id }`,
+                            path:   `/gratora/v1/admin/donors/${ i.id }`,
                             method: 'DELETE',
                         } ) ) );
 
@@ -342,12 +342,12 @@ export function DonorsApp( { toggleSlot } ) {
                             results,
                             ( count ) => sprintf(
                                 /* translators: %d: how many donors were deleted. */
-                                _n( '%d donor deleted.', '%d donors deleted.', count, 'fundraising-toolkit' ),
+                                _n( '%d donor deleted.', '%d donors deleted.', count, 'gratora' ),
                                 count
                             ),
                             ( count ) => sprintf(
                                 /* translators: %d: how many donors could not be deleted. */
-                                _n( '%d donor could not be deleted.', '%d donors could not be deleted.', count, 'fundraising-toolkit' ),
+                                _n( '%d donor could not be deleted.', '%d donors could not be deleted.', count, 'gratora' ),
                                 count
                             )
                         );
@@ -358,7 +358,7 @@ export function DonorsApp( { toggleSlot } ) {
         },
         {
             id:            'redact',
-            label:         __( 'Redact (anonymize)', 'fundraising-toolkit' ),
+            label:         __( 'Redact (anonymize)', 'gratora' ),
             icon:          () => <RedactIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -368,29 +368,29 @@ export function DonorsApp( { toggleSlot } ) {
                 if ( ! items.length ) return;
                 const n = items.length;
                 const message = n === 1
-                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row and any active recurring plan is cancelled at the gateway, but their donations stay attached and counted. This cannot be undone.', 'fundraising-toolkit' )
+                    ? __( 'Redact this donor? Their PII (name, email, address, phone) is wiped from the donor row and any active recurring plan is cancelled at the gateway, but their donations stay attached and counted. This cannot be undone.', 'gratora' )
                     : sprintf(
                         /* translators: %d: number of donors to redact */
                         _n(
                             'Redact %d donor? Their PII is wiped from the donor rows and any active recurring plan is cancelled at the gateway, but donations stay attached and counted. This cannot be undone.',
                             'Redact %d donors? Their PII is wiped from the donor rows and any active recurring plan is cancelled at the gateway, but donations stay attached and counted. This cannot be undone.',
                             n,
-                            'fundraising-toolkit'
+                            'gratora'
                         ),
                         n
                     );
                 setConfirm( {
-                    title:        _n( 'Redact donor', 'Redact donors', n, 'fundraising-toolkit' ),
+                    title:        _n( 'Redact donor', 'Redact donors', n, 'gratora' ),
                     message,
-                    confirmLabel: __( 'Redact', 'fundraising-toolkit' ),
+                    confirmLabel: __( 'Redact', 'gratora' ),
                     destructive:  true,
                     // The callback fills the server's confirmation from each
                     // row, so nothing else stands between one click and erased
                     // PII here.
-                    requireText:  __( 'REDACT', 'fundraising-toolkit' ),
+                    requireText:  __( 'REDACT', 'gratora' ),
                     onConfirm: async () => {
                         const results = await Promise.allSettled( items.map( ( i ) => apiFetch( {
-                            path:   `/fundkit/v1/admin/donors/${ i.id }/redact`,
+                            path:   `/gratora/v1/admin/donors/${ i.id }/redact`,
                             method: 'POST',
                             data:   { confirmation: i.email || `DONOR_${ i.id }` },
                         } ) ) );
@@ -399,12 +399,12 @@ export function DonorsApp( { toggleSlot } ) {
                             results,
                             ( count ) => sprintf(
                                 /* translators: %d: how many donors were redacted. */
-                                _n( '%d donor redacted.', '%d donors redacted.', count, 'fundraising-toolkit' ),
+                                _n( '%d donor redacted.', '%d donors redacted.', count, 'gratora' ),
                                 count
                             ),
                             ( count ) => sprintf(
                                 /* translators: %d: how many donors could not be redacted. */
-                                _n( '%d donor could not be redacted.', '%d donors could not be redacted.', count, 'fundraising-toolkit' ),
+                                _n( '%d donor could not be redacted.', '%d donors could not be redacted.', count, 'gratora' ),
                                 count
                             )
                         );
@@ -417,18 +417,18 @@ export function DonorsApp( { toggleSlot } ) {
 
     return (
         <div>
-            <div className="fundkit-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'fundraising-toolkit' ) }</a>
+            <div className="gratora-crumbs">
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'gratora' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Donors', 'fundraising-toolkit' ) }</span>
+                <span>{ __( 'Donors', 'gratora' ) }</span>
             </div>
-            <div className="fundkit-page-head">
-                <div className="fundkit-page-head__title-row">
-                    <h1>{ __( 'Donors', 'fundraising-toolkit' ) }</h1>
+            <div className="gratora-page-head">
+                <div className="gratora-page-head__title-row">
+                    <h1>{ __( 'Donors', 'gratora' ) }</h1>
                 </div>
-                <div className="fundkit-page-head__right">
-                    <span className="fundkit-page-head__meta">
-                        { sprintf( /* translators: %s: number of donors */ _n( '%s donor', '%s donors', total, 'fundraising-toolkit' ), total.toLocaleString() ) }
+                <div className="gratora-page-head__right">
+                    <span className="gratora-page-head__meta">
+                        { sprintf( /* translators: %s: number of donors */ _n( '%s donor', '%s donors', total, 'gratora' ), total.toLocaleString() ) }
                     </span>
                     { toggleSlot }
                 </div>
@@ -443,11 +443,11 @@ export function DonorsApp( { toggleSlot } ) {
             { ! loading && ! error && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <UsersIcon size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No donors yet', 'fundraising-toolkit' ) }
-                    body={ __( 'Anyone who donates is added here. Publish a form to take the first one.', 'fundraising-toolkit' ) }
+                    title={ __( 'No donors yet', 'gratora' ) }
+                    body={ __( 'Anyone who donates is added here. Publish a form to take the first one.', 'gratora' ) }
                 />
             ) : (
-                <div className={ `fundkit-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
+                <div className={ `gratora-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
                     <DataViews
                         data={ data }
                         isLoading={ loading }
@@ -464,11 +464,11 @@ export function DonorsApp( { toggleSlot } ) {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'fundraising-toolkit' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundraising-toolkit' ) }
+                            title={ __( 'Nothing matches these filters', 'gratora' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'gratora' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'fundraising-toolkit' ) }
+                                    { __( 'Clear filters', 'gratora' ) }
                                 </Btn>
                             }
                         />
@@ -508,10 +508,10 @@ function IconInsights() {
 function ViewToggle( { active, onChange } ) {
     return (
         <div
-            className="fundkit-view-toggle"
+            className="gratora-view-toggle"
             role="tablist"
             tabIndex={ -1 }
-            aria-label={ __( 'Donor sections', 'fundraising-toolkit' ) }
+            aria-label={ __( 'Donor sections', 'gratora' ) }
             onKeyDown={ ( e ) => tablistKeyDown( e, [ 'list', 'insights' ], active, onChange ) }
         >
             <button
@@ -519,22 +519,22 @@ function ViewToggle( { active, onChange } ) {
                 role="tab"
                 aria-selected={ active === 'list' }
                 tabIndex={ active === 'list' ? 0 : -1 }
-                className={ `fundkit-cmp-toggle${ active === 'list' ? ' is-active' : '' }` }
+                className={ `gratora-cmp-toggle${ active === 'list' ? ' is-active' : '' }` }
                 onClick={ () => onChange( 'list' ) }
             >
                 <IconList />
-                { __( 'List', 'fundraising-toolkit' ) }
+                { __( 'List', 'gratora' ) }
             </button>
             <button
                 type="button"
                 role="tab"
                 aria-selected={ active === 'insights' }
                 tabIndex={ active === 'insights' ? 0 : -1 }
-                className={ `fundkit-cmp-toggle${ active === 'insights' ? ' is-active' : '' }` }
+                className={ `gratora-cmp-toggle${ active === 'insights' ? ' is-active' : '' }` }
                 onClick={ () => onChange( 'insights' ) }
             >
                 <IconInsights />
-                { __( 'Insights', 'fundraising-toolkit' ) }
+                { __( 'Insights', 'gratora' ) }
             </button>
         </div>
     );
@@ -572,7 +572,7 @@ function DonorsRoot() {
 }
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'fundkit-admin-donors' );
+    const root = document.getElementById( 'gratora-admin-donors' );
     if ( ! root ) return;
     createRoot( root ).render( <><DonorsRoot /><Toaster /></> );
 } );

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\License;
+namespace Gratora\Foundation\License;
 
 /**
  * Tells an admin their license needs attention, on any screen.
@@ -33,7 +33,7 @@ final class LicenseNotice
             return;
         }
         // Already on the screen that says all of this.
-        if ((isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '') === 'fundkit-settings') {
+        if ((isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '') === 'gratora-settings') {
             return;
         }
 
@@ -56,7 +56,7 @@ final class LicenseNotice
             $this->notice(
                 sprintf(
                     /* translators: %s: comma-separated add-on names */
-                    __('The license for %s has lapsed. Renew to keep receiving updates and security fixes.', 'fundraising-toolkit'),
+                    __('The license for %s has lapsed. Renew to keep receiving updates and security fixes.', 'gratora'),
                     $this->names($lapsing)
                 )
             );
@@ -90,19 +90,19 @@ final class LicenseNotice
 
         // The licence UI belongs to the licensing client vendored into each Pro
         // add-on. Core has no page of its own to send anyone to.
-        $url = apply_filters('fundkit.license.manage_url', '');
+        $url = apply_filters('gratora.license.manage_url', '');
         $link = is_string($url) && $url !== ''
             ? sprintf(
                 ' <a href="%s">%s</a>',
                 esc_url($url),
-                esc_html__('Manage licenses', 'fundraising-toolkit')
+                esc_html__('Manage licenses', 'gratora')
             )
             : '';
 
         printf(
-            '<div class="notice fundkit-admin-notice" role="alert" style="%s"><strong>%s</strong> %s%s</div>',
+            '<div class="notice gratora-admin-notice" role="alert" style="%s"><strong>%s</strong> %s%s</div>',
             esc_attr($style),
-            esc_html__('Fundraising Toolkit:', 'fundraising-toolkit'),
+            esc_html__('Gratora:', 'gratora'),
             esc_html($message),
             wp_kses_post($link)
         );

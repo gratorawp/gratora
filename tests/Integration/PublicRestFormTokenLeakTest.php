@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Forms\Form;
-use FundKit\Funds\Fund;
+use Gratora\Donations\Donation;
+use Gratora\Forms\Form;
+use Gratora\Funds\Fund;
 use WP_REST_Request;
 
 /**
@@ -16,7 +16,7 @@ use WP_REST_Request;
  */
 final class PublicRestFormTokenLeakTest extends IntegrationTestCase
 {
-    private const BLOCK_RENDERER_ROUTE = '/wp/v2/block-renderer/fundkit/donation-form';
+    private const BLOCK_RENDERER_ROUTE = '/wp/v2/block-renderer/gratora/donation-form';
 
     private int $campaignId;
 
@@ -24,7 +24,7 @@ final class PublicRestFormTokenLeakTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Leak probe', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -44,14 +44,14 @@ final class PublicRestFormTokenLeakTest extends IntegrationTestCase
      */
     private function publishedForm(): void
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'title'       => 'Leak probe form',
             'campaign_id' => $this->campaignId,
-            'blocks'      => '<!-- wp:fundkit/donation-amount {"presets":[1000],"currency":"EUR"} /-->'
-                . '<!-- wp:fundkit/email /-->'
-                . '<!-- wp:fundkit/submit-button /-->',
+            'blocks'      => '<!-- wp:gratora/donation-amount {"presets":[1000],"currency":"EUR"} /-->'
+                . '<!-- wp:gratora/email /-->'
+                . '<!-- wp:gratora/submit-button /-->',
         ]));
         $created = rest_do_request($req)->get_data();
 
@@ -69,7 +69,7 @@ final class PublicRestFormTokenLeakTest extends IntegrationTestCase
     {
         $GLOBALS['wp']->query_vars['rest_route'] = $route;
 
-        $html = do_blocks('<!-- wp:fundkit/donation-form {"campaignId":' . $this->campaignId . '} /-->');
+        $html = do_blocks('<!-- wp:gratora/donation-form {"campaignId":' . $this->campaignId . '} /-->');
 
         unset($GLOBALS['wp']->query_vars['rest_route']);
 
@@ -81,7 +81,7 @@ final class PublicRestFormTokenLeakTest extends IntegrationTestCase
         $html = $this->renderBlockOn(self::BLOCK_RENDERER_ROUTE);
 
         $this->assertStringContainsString(
-            'fundkit-donation-form__editor-preview',
+            'gratora-donation-form__editor-preview',
             $html,
             'ServerSideRender asks on this route, and the editor still gets its iframe preview'
         );
@@ -165,7 +165,7 @@ final class PublicRestFormTokenLeakTest extends IntegrationTestCase
     /** The harness signs form-less requests with form ID 0. */
     private function donateWithoutForm(array $extra): ?Donation
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($extra + [
             'email'        => 'leak-' . uniqid() . '@example.test',

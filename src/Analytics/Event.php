@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Analytics;
+namespace Gratora\Analytics;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /**
  * Shared event table for all domains.
@@ -16,7 +16,7 @@ use FundKit\Vendor\Queryable\Schema\Table;
  */
 final class Event extends Model
 {
-    protected string $table = 'fundkit_events';
+    protected string $table = 'gratora_events';
     protected string $version = '1.0.0';
 
     public int $id;

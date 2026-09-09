@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Currency;
+namespace Gratora\Currency;
 
-use FundKit\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\Money;
 
 /**
- * Read access to the daily FX snapshot stored in the fundkit_fx_rates option.
+ * Read access to the daily FX snapshot stored in the gratora_fx_rates option.
  *
  * Option shape: { base, date, fetched_at, rates } - units of CCY per 1 base.
  * Conversion is read-only. FxRatesUpdater owns the writes in product code; the
@@ -17,7 +17,7 @@ use FundKit\Foundation\Helpers\Money;
  */
 final class FxRates
 {
-    public const OPTION = 'fundkit_fx_rates';
+    public const OPTION = 'gratora_fx_rates';
 
     /**
      * Warn after seven days without a current rate, allowing normal ECB holiday gaps. Keep

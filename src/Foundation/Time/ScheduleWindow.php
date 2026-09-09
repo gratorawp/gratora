@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Time;
+namespace Gratora\Foundation\Time;
 
 defined('ABSPATH') || exit;
 
 use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
-use FundKit\Donations\DonationQueries;
+use Gratora\Donations\DonationQueries;
 
 /**
  * Resolve campaign and fund date windows.

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways;
+namespace Gratora\Gateways;
 
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlan;
 use RuntimeException;
 
 /**

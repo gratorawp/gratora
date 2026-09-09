@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Gateways;
+namespace Gratora\Tests\Unit\Gateways;
 
-use FundKit\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeAccount;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 

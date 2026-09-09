@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Uninstall\DataEraser;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Uninstall\DataEraser;
 
 /**
  * A donor's picture is a WordPress attachment on a public uploads URL, and the
- * only thing that says whose it is is a column of fundkit_donors. Dropping the
+ * only thing that says whose it is is a column of gratora_donors. Dropping the
  * table destroys that pointer, so a site that ticked "delete all data" is left
  * serving every supporter photograph forever with nothing left to find them by.
  *

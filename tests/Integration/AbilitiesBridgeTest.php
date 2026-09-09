@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Commands\AbilitiesBridge;
-use FundKit\Foundation\Commands\CommandRegistry;
-use FundKit\Foundation\Plugin;
+use Gratora\Foundation\Commands\AbilitiesBridge;
+use Gratora\Foundation\Commands\CommandRegistry;
+use Gratora\Foundation\Plugin;
 
 /**
- * FundKit over MCP is the Abilities API plus a mapping: whatever adapter the
+ * Gratora over MCP is the Abilities API plus a mapping: whatever adapter the
  * site runs reads core's registry, so every command has to arrive there with
  * its capability and its confirmation gate intact.
  */

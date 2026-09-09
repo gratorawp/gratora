@@ -21,7 +21,7 @@ test( 'the title rule outranks core rather than tying with it', () => {
 } );
 
 test( 'the input still carries the type that selector matches', () => {
-	const el = JSX.match( /<input[\s\S]{0,80}?className="fundkit-editor-header__title"[\s\S]{0,400}?\/>/ );
+	const el = JSX.match( /<input[\s\S]{0,80}?className="gratora-editor-header__title"[\s\S]{0,400}?\/>/ );
 
 	expect( el ).not.toBeNull();
 	expect( el[ 0 ] ).toContain( 'type="text"' );

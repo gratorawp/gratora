@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/widgets/WidgetGrid';
+export { default } from '@gratora/ui/widgets/WidgetGrid';

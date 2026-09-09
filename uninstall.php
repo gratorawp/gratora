@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Foundation\Uninstall\DataEraser;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Foundation\Uninstall\DataEraser;
 
 defined('WP_UNINSTALL_PLUGIN') || exit;
 
-// Both, the way fundkit.php loads them. WordPress includes this file without the
+// Both, the way gratora.php loads them. WordPress includes this file without the
 // plugin, and every model extends a Strauss-prefixed base class that the
 // composer autoloader alone cannot resolve: one require short, the erase
 // fatals on the first query it makes.
@@ -46,7 +46,7 @@ if (! is_multisite()) {
             (new DataEraser())->erase();
         } catch (Throwable $e) {
             // A site the plugin was never active on has no tables to drop, and
-            // an add-on listening on fundkit.uninstall can throw for reasons of
+            // an add-on listening on gratora.uninstall can throw for reasons of
             // its own. Whatever the reason, one site cannot end the wipe: every
             // site after it would silently keep its donors while the owner was
             // told the data was gone.

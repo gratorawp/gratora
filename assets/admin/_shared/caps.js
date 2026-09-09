@@ -3,6 +3,6 @@
  * authoritative.
  */
 export const userCan = ( cap ) => {
-    const can = window.fundkit?.can;
+    const can = window.gratora?.can;
     return can ? !! can[ cap ] : true;
 };

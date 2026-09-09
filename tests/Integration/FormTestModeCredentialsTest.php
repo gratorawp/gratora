@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormReadinessService;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\Stripe\StripeGateway;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormReadinessService;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\Stripe\StripeGateway;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -37,7 +37,7 @@ final class FormTestModeCredentialsTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
         // Live keys only, org switch off: exactly the shape the finding names.
-        update_option('fundkit_gateway_config', ['stripe' => ['enabled' => true]]);
+        update_option('gratora_gateway_config', ['stripe' => ['enabled' => true]]);
 
         $account = Plugin::instance()->container->get(StripeAccount::class);
         $account->forget();
@@ -76,20 +76,20 @@ final class FormTestModeCredentialsTest extends IntegrationTestCase
 
     private function makeForm(bool $testMode): int
     {
-        $campaign = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $campaign = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $campaign->set_header('content-type', 'application/json');
         $campaign->set_body((string) wp_json_encode(['title' => 'Mode campaign', 'status' => 'published']));
         $campaignId = (int) rest_do_request($campaign)->get_data()['id'];
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'title'       => 'Test mode form',
             'campaign_id' => $campaignId,
-            'blocks' => '<!-- wp:fundkit/donation-amount {"presets":[1000]} /-->'
-                . '<!-- wp:fundkit/email {"required":true} /-->'
-                . '<!-- wp:fundkit/payment-gateways /-->'
-                . '<!-- wp:fundkit/submit-button /-->',
+            'blocks' => '<!-- wp:gratora/donation-amount {"presets":[1000]} /-->'
+                . '<!-- wp:gratora/email {"required":true} /-->'
+                . '<!-- wp:gratora/payment-gateways /-->'
+                . '<!-- wp:gratora/submit-button /-->',
             'settings' => ['test_mode' => $testMode],
         ]));
 
@@ -157,7 +157,7 @@ final class FormTestModeCredentialsTest extends IntegrationTestCase
 
     public function test_the_endpoint_refuses_a_gateway_the_form_cannot_run(): void
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'form_id'      => $this->formId,
@@ -170,6 +170,6 @@ final class FormTestModeCredentialsTest extends IntegrationTestCase
         $res = rest_do_request($req);
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('fundkit_gateway_not_allowed', $res->as_error()->get_error_code());
+        $this->assertSame('gratora_gateway_not_allowed', $res->as_error()->get_error_code());
     }
 }

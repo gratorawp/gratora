@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donors\PendingSignup;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donors\PendingSignup;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -35,7 +35,7 @@ final class PortalIpQuotaKeyTest extends IntegrationTestCase
 
     private function register(string $email): int
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/register');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/register');
         $req->set_header('content-type', 'application/json');
         $req->set_header('Sec-Fetch-Site', 'same-origin');
         $req->set_header('Origin', home_url());
@@ -92,8 +92,8 @@ final class PortalIpQuotaKeyTest extends IntegrationTestCase
 
     public function test_donors_behind_a_declared_edge_do_not_share_one_bucket(): void
     {
-        $privacy = (array) get_option('fundkit_privacy', []);
-        update_option('fundkit_privacy', $privacy + ['trusted_proxies' => ['cloudflare']]);
+        $privacy = (array) get_option('gratora_privacy', []);
+        update_option('gratora_privacy', $privacy + ['trusted_proxies' => ['cloudflare']]);
 
         $_SERVER['REMOTE_ADDR'] = self::EDGE;
 

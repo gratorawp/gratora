@@ -18,9 +18,9 @@ test( 'both tables take their health cell from one place', () => {
 	expect( tab ).toContain( 'renderHealth( item )' );
 	// And neither draws its own health pill, which is the part that drifted.
 	// The status column's failure subtitle is a different cell and stays.
-	expect( list ).not.toContain( 'fundkit-pill--amber' );
-	expect( tab ).not.toContain( 'fundkit-pill--amber' );
-	expect( tab ).not.toContain( 'fundkit-pill is-warn' );
+	expect( list ).not.toContain( 'gratora-pill--amber' );
+	expect( tab ).not.toContain( 'gratora-pill--amber' );
+	expect( tab ).not.toContain( 'gratora-pill is-warn' );
 } );
 
 test( 'both offer View details and Copy subscription id from one place', () => {

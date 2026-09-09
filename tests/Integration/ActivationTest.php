@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Core\Activator;
-use FundKit\Core\CoreModule;
-use FundKit\Donors\Portal\PortalPage;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Upgrade\UpgradeRoutine;
-use FundKit\Receipts\OrgProfile;
+use Gratora\Core\Activator;
+use Gratora\Core\CoreModule;
+use Gratora\Donors\Portal\PortalPage;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Upgrade\UpgradeRoutine;
+use Gratora\Receipts\OrgProfile;
 
 final class ActivationTest extends IntegrationTestCase
 {
@@ -17,7 +17,7 @@ final class ActivationTest extends IntegrationTestCase
     {
         parent::setUp();
         delete_option(Activator::OPT_ACTIVATED_AT);
-        delete_option('fundkit_org_profile');
+        delete_option('gratora_org_profile');
 
         $admin = get_role('administrator');
         if ($admin && $admin->has_cap(Activator::CAP_MANAGE)) {
@@ -30,7 +30,7 @@ final class ActivationTest extends IntegrationTestCase
         Plugin::onActivation();
 
         $fund = self::$wpdb->get_row(
-            "SELECT code, name, is_default, is_active FROM " . self::$prefix . "fundkit_funds WHERE code = 'general'"
+            "SELECT code, name, is_default, is_active FROM " . self::$prefix . "gratora_funds WHERE code = 'general'"
         );
 
         $this->assertNotNull($fund);
@@ -41,11 +41,11 @@ final class ActivationTest extends IntegrationTestCase
 
     public function test_activation_stamps_the_schema_version(): void
     {
-        delete_option('fundkit_db_version');
+        delete_option('gratora_db_version');
         Plugin::onActivation();
         $this->assertSame(
-            FUNDKIT_DB_VERSION,
-            get_option('fundkit_db_version'),
+            GRATORA_DB_VERSION,
+            get_option('gratora_db_version'),
             'activation records the schema version so the boot gate skips a redundant migration'
         );
     }
@@ -57,12 +57,12 @@ final class ActivationTest extends IntegrationTestCase
         Plugin::onActivation();
 
         $count = (int) self::$wpdb->get_var(
-            "SELECT COUNT(*) FROM " . self::$prefix . "fundkit_funds WHERE code = 'general'"
+            "SELECT COUNT(*) FROM " . self::$prefix . "gratora_funds WHERE code = 'general'"
         );
         $this->assertSame(1, $count);
     }
 
-    public function test_administrator_role_gains_manage_fundkit_capability(): void
+    public function test_administrator_role_gains_manage_gratora_capability(): void
     {
         Plugin::onActivation();
 
@@ -75,7 +75,7 @@ final class ActivationTest extends IntegrationTestCase
         Plugin::onActivation();
 
         $this->assertFalse(
-            get_option('fundkit_org_profile', false),
+            get_option('gratora_org_profile', false),
             'a name copied out of the site at activation is a name the org never gave'
         );
     }
@@ -97,7 +97,7 @@ final class ActivationTest extends IntegrationTestCase
     public function test_re_activation_does_not_overwrite_a_customised_org_profile(): void
     {
         Plugin::onActivation();
-        update_option('fundkit_org_profile', [
+        update_option('gratora_org_profile', [
             'name'          => 'Custom Org Name',
             'address_lines' => ['Line 1', 'Line 2'],
             'tax_id'        => 'TAX-123',
@@ -106,7 +106,7 @@ final class ActivationTest extends IntegrationTestCase
 
         Plugin::onActivation();
 
-        $profile = get_option('fundkit_org_profile');
+        $profile = get_option('gratora_org_profile');
         $this->assertSame('Custom Org Name', $profile['name'],  'Activator must not overwrite an already-customized profile');
         $this->assertSame(['Line 1', 'Line 2'], $profile['address_lines']);
         $this->assertSame('TAX-123', $profile['tax_id']);
@@ -123,10 +123,10 @@ final class ActivationTest extends IntegrationTestCase
         Plugin::onActivation();
 
         $campaignCount = (int) self::$wpdb->get_var(
-            "SELECT COUNT(*) FROM " . self::$prefix . "fundkit_campaigns"
+            "SELECT COUNT(*) FROM " . self::$prefix . "gratora_campaigns"
         );
         $formCount = (int) self::$wpdb->get_var(
-            "SELECT COUNT(*) FROM " . self::$prefix . "fundkit_forms"
+            "SELECT COUNT(*) FROM " . self::$prefix . "gratora_forms"
         );
 
         $this->assertSame(0, $campaignCount, 'No campaigns should be seeded on activation');
@@ -145,7 +145,7 @@ final class ActivationTest extends IntegrationTestCase
         $post = get_post($id);
         $this->assertSame('publish', $post->post_status);
         $this->assertStringContainsString(PortalPage::SHORTCODE, $post->post_content);
-        $this->assertSame(FUNDKIT_VERSION, get_option(PortalPage::OPTION_VERSION));
+        $this->assertSame(GRATORA_VERSION, get_option(PortalPage::OPTION_VERSION));
     }
 
     /**

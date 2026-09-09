@@ -70,7 +70,7 @@ const labels = () => [ ...document.querySelectorAll( 'button, a' ) ]
 beforeEach( () => {
     apiFetch.mockReset();
     document.body.innerHTML = '';
-    delete window.fundkit;
+    delete window.gratora;
 } );
 
 describe( 'the donor profile', () => {
@@ -104,7 +104,7 @@ describe( 'the donor profile', () => {
     const CONTROLS = [ 'Edit details', 'Create a sign-in link', 'Add note', 'Export personal data', 'Redact donor' ];
 
     it( 'offers nothing a view-only reader cannot do', () => {
-        window.fundkit = { can: { view_donors: true } };
+        window.gratora = { can: { view_donors: true } };
         mount( screens() );
 
         for ( const control of CONTROLS ) {
@@ -113,7 +113,7 @@ describe( 'the donor profile', () => {
     } );
 
     it( 'offers each control to whoever holds its capability', () => {
-        window.fundkit = { can: {
+        window.gratora = { can: {
             view_donors: true, edit_donors: true, export_donors: true, redact_donors: true,
         } };
         mount( screens() );
@@ -139,14 +139,14 @@ describe( 'the donation detail rail', () => {
     );
 
     it( 'offers nothing a view-only reader cannot do', () => {
-        window.fundkit = { can: {} };
+        window.gratora = { can: {} };
         mount( rail() );
 
         expect( labels() ).toEqual( [] );
     } );
 
     it( 'offers each control to whoever holds its capability', () => {
-        window.fundkit = { can: {
+        window.gratora = { can: {
             refund_donations: true,
             resend_receipt:   true,
             edit_donations:   true,
@@ -163,7 +163,7 @@ describe( 'the donation detail rail', () => {
     } );
 
     it( 'offers only the note to a reader who may only annotate', () => {
-        window.fundkit = { can: { edit_donations: true } };
+        window.gratora = { can: { edit_donations: true } };
         mount( rail() );
 
         expect( labels() ).toEqual( [ 'Add note' ] );
@@ -186,7 +186,7 @@ describe( 'the donation detail head', () => {
     );
 
     it( 'offers a view-only reader neither action', () => {
-        window.fundkit = { can: {} };
+        window.gratora = { can: {} };
         mount( head() );
 
         expect( labels() ).not.toContain( 'Refund' );
@@ -194,7 +194,7 @@ describe( 'the donation detail head', () => {
     } );
 
     it( 'offers each to whoever holds its capability', () => {
-        window.fundkit = { can: { refund_donations: true, resend_receipt: true } };
+        window.gratora = { can: { refund_donations: true, resend_receipt: true } };
         mount( head() );
 
         expect( labels() ).toContain( 'Refund' );
@@ -224,7 +224,7 @@ describe( 'the cards beside the rail', () => {
     );
 
     it( 'offers a view-only reader no way to write a note', () => {
-        window.fundkit = { can: {} };
+        window.gratora = { can: {} };
         mount( notes() );
 
         expect( document.querySelector( 'textarea' ) ).toBeNull();
@@ -233,7 +233,7 @@ describe( 'the cards beside the rail', () => {
     } );
 
     it( 'offers the note form to a reader who may annotate', () => {
-        window.fundkit = { can: { edit_donations: true } };
+        window.gratora = { can: { edit_donations: true } };
         mount( notes() );
 
         expect( document.querySelector( 'textarea' ) ).not.toBeNull();
@@ -241,7 +241,7 @@ describe( 'the cards beside the rail', () => {
     } );
 
     it( 'offers a view-only reader neither the resend nor the PDF', () => {
-        window.fundkit = { can: {} };
+        window.gratora = { can: {} };
         mount( receipt() );
 
         expect( labels() ).toEqual( [] );
@@ -249,7 +249,7 @@ describe( 'the cards beside the rail', () => {
     } );
 
     it( 'offers each receipt control to whoever holds its capability', () => {
-        window.fundkit = { can: { resend_receipt: true, view_donors: true } };
+        window.gratora = { can: { resend_receipt: true, view_donors: true } };
         mount( receipt() );
 
         expect( labels() ).toEqual( expect.arrayContaining( [ 'Resend', 'PDF' ] ) );
@@ -273,7 +273,7 @@ describe( 'the maintenance tab', () => {
     );
 
     it( 'keeps the site-wide cards away from a reader who cannot run them', () => {
-        window.fundkit = { can: { view_reports: true } };
+        window.gratora = { can: { view_reports: true } };
         mount( tab() );
 
         expect( document.body.textContent ).not.toContain( 'Data updates are outstanding' );
@@ -281,7 +281,7 @@ describe( 'the maintenance tab', () => {
     } );
 
     it( 'shows them to an administrator', () => {
-        window.fundkit = { can: { manage_options: true } };
+        window.gratora = { can: { manage_options: true } };
         mount( tab() );
 
         expect( document.body.textContent ).toContain( 'Data updates are outstanding' );
@@ -295,7 +295,7 @@ describe( 'the log tab', () => {
     } ) );
 
     it( 'does not offer the clear to a reader who cannot run it', async () => {
-        window.fundkit = { can: { view_reports: true } };
+        window.gratora = { can: { view_reports: true } };
         serveLogs();
         mount( <LogsTab active setNotice={ () => {} } /> );
         await settle();
@@ -305,7 +305,7 @@ describe( 'the log tab', () => {
     } );
 
     it( 'offers it to an administrator', async () => {
-        window.fundkit = { can: { manage_options: true } };
+        window.gratora = { can: { manage_options: true } };
         serveLogs();
         mount( <LogsTab active setNotice={ () => {} } /> );
         await settle();
@@ -334,7 +334,7 @@ describe( 'the export tab', () => {
     );
 
     it( 'shows a donor exporter only the export it holds', async () => {
-        window.fundkit = { can: { export_donors: true } };
+        window.gratora = { can: { export_donors: true } };
         serve();
         mount( exportTab() );
         await waitFor( () => document.body.textContent.includes( 'Columns' ) );
@@ -343,11 +343,11 @@ describe( 'the export tab', () => {
         expect( text ).toContain( 'Columns' );
         expect( text ).not.toContain( 'Revenue report' );
         expect( text ).not.toContain( 'Every donation as a CSV' );
-        expect( text ).not.toContain( 'Every Fundraising Toolkit setting' );
+        expect( text ).not.toContain( 'Every Gratora setting' );
     } );
 
     it( 'will not generate a donor file with no columns picked', async () => {
-        window.fundkit = { can: { export_donors: true } };
+        window.gratora = { can: { export_donors: true } };
         serve();
         mount( exportTab() );
         await waitFor( () => document.body.textContent.includes( 'Columns' ) );
@@ -367,7 +367,7 @@ describe( 'the export tab', () => {
     } );
 
     it( 'shows an administrator everything', async () => {
-        window.fundkit = { can: {
+        window.gratora = { can: {
             manage_options: true,
             export_donors:  true,
             view_reports:   true,
@@ -380,6 +380,6 @@ describe( 'the export tab', () => {
         const text = document.body.textContent;
         expect( text ).toContain( 'Every donation as a CSV' );
         expect( text ).toContain( 'Revenue report' );
-        expect( text ).toContain( 'Every Fundraising Toolkit setting' );
+        expect( text ).toContain( 'Every Gratora setting' );
     } );
 } );

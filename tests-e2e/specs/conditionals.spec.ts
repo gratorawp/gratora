@@ -5,10 +5,10 @@
 
 import { test, expect } from '../fixtures/donor-form';
 
-const CONDITIONAL_FORM_PATH = process.env.FUNDKIT_E2E_CONDITIONAL_FORM_PATH ?? '';
+const CONDITIONAL_FORM_PATH = process.env.GRATORA_E2E_CONDITIONAL_FORM_PATH ?? '';
 
 test.describe('conditional logic', () => {
-    test.skip(! CONDITIONAL_FORM_PATH, 'set FUNDKIT_E2E_CONDITIONAL_FORM_PATH via `wp fundkit e2e-seed`');
+    test.skip(! CONDITIONAL_FORM_PATH, 'set GRATORA_E2E_CONDITIONAL_FORM_PATH via `wp gratora e2e-seed`');
     test.use({ formPath: CONDITIONAL_FORM_PATH });
 
     test('conditionally-shown heading is absent until the trigger matches', async ({ donor }) => {
@@ -36,7 +36,7 @@ test.describe('conditional logic', () => {
 
     test('!= operator: the comment field appears once any choice is made', async ({ donor }) => {
         const conditionalComment = donor.form
-            .locator('.fundkit-form__field')
+            .locator('.gratora-form__field')
             .filter({ hasText: 'CONDITIONAL_COMMENT_ANY' });
 
         // Default (empty): `!=''` is false, hidden.
@@ -56,7 +56,7 @@ test.describe('conditional logic', () => {
         // else, the required field is gone from the DOM and submit must reach
         // thank-you.
         const friendField = donor.form
-            .locator('.fundkit-form__field')
+            .locator('.gratora-form__field')
             .filter({ hasText: 'How did your friend hear about us?' });
 
         await donor.selectPresetAt(0);
@@ -76,7 +76,7 @@ test.describe('conditional logic', () => {
         // Flip side of the previous test: with the condition met, the required
         // field is in the DOM and validation must catch the empty value.
         const friendField = donor.form
-            .locator('.fundkit-form__field')
+            .locator('.gratora-form__field')
             .filter({ hasText: 'How did your friend hear about us?' });
 
         await donor.selectPresetAt(0);
@@ -94,7 +94,7 @@ test.describe('conditional logic', () => {
         // field.
         await expect(donor.successCard()).toHaveCount(0);
         await expect(
-            donor.form.locator('.fundkit-form__field-error').filter({ hasText: /\S/ }).first()
+            donor.form.locator('.gratora-form__field-error').filter({ hasText: /\S/ }).first()
         ).toBeVisible({ timeout: 5_000 });
     });
 });

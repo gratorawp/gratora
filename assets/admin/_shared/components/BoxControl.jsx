@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/BoxControl';
+export { default } from '@gratora/ui/components/BoxControl';

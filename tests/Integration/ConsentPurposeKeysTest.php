@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\ConsentService;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Donors\ConsentService;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 use InvalidArgumentException;
 
 /**

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
-use FundKit\Foundation\Helpers\View;
+use Gratora\Foundation\Helpers\View;
 
 /** @since 1.0.0 */
 final class SubmitButtonBlock implements Block
@@ -12,7 +12,7 @@ final class SubmitButtonBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/submit-button';
+        return 'gratora/submit-button';
     }
 
     /** @since 1.0.0 */
@@ -33,7 +33,7 @@ final class SubmitButtonBlock implements Block
         }
 
         return View::loadRelative(__DIR__, 'views/submit-button', [
-            'label' => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'fundraising-toolkit'),
+            'label' => (string) ($attrs['label'] ?? '') ?: __('Donate now', 'gratora'),
             'align' => $align,
         ]);
     }

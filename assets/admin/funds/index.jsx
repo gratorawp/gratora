@@ -5,7 +5,7 @@ import Toaster from '../_shared/components/Toaster';
 import './funds.scss';
 
 document.addEventListener( 'DOMContentLoaded', () => {
-    const root = document.getElementById( 'fundkit-admin-funds' );
+    const root = document.getElementById( 'gratora-admin-funds' );
     if ( ! root ) return;
     createRoot( root ).render( <><List /><Toaster /></> );
 } );

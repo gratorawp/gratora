@@ -43,18 +43,18 @@ afterEach( () => {
 
 it( 'draws the grid when the metrics arrive after the first render', () => {
     act( () => root.render( <DowHourHeatmap data={ null } /> ) );
-    expect( host.querySelector( '.fundkit-heatmap' ) ).toBeNull();
+    expect( host.querySelector( '.gratora-heatmap' ) ).toBeNull();
 
     act( () => root.render( <DowHourHeatmap data={ DATA } /> ) );
 
-    expect( host.querySelectorAll( '.fundkit-heatmap__cell' ) ).toHaveLength( 7 * 24 );
-    expect( host.querySelectorAll( '.fundkit-heatmap__row-label' ) ).toHaveLength( 8 );
+    expect( host.querySelectorAll( '.gratora-heatmap__cell' ) ).toHaveLength( 7 * 24 );
+    expect( host.querySelectorAll( '.gratora-heatmap__row-label' ) ).toHaveLength( 8 );
 } );
 
 it( 'goes back to the empty state when the range has no activity', () => {
     act( () => root.render( <DowHourHeatmap data={ DATA } /> ) );
     act( () => root.render( <DowHourHeatmap data={ { grid: grid(), max: 0, total: 0 } } /> ) );
 
-    expect( host.querySelector( '.fundkit-heatmap' ) ).toBeNull();
-    expect( host.querySelector( '.fundkit-panel__empty' ) ).not.toBeNull();
+    expect( host.querySelector( '.gratora-heatmap' ) ).toBeNull();
+    expect( host.querySelector( '.gratora-panel__empty' ) ).not.toBeNull();
 } );

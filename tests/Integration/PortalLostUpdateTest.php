@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorAvatarUploader;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorAvatarUploader;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -46,7 +46,7 @@ final class PortalLostUpdateTest extends IntegrationTestCase
 
     private function paidDonation(int $cents = 5000): string
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'lost-update@example.test',
@@ -57,7 +57,7 @@ final class PortalLostUpdateTest extends IntegrationTestCase
         ]));
         $reference = (string) rest_do_request($create)->get_data()['reference'];
 
-        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);
@@ -67,8 +67,8 @@ final class PortalLostUpdateTest extends IntegrationTestCase
 
     private function asDonor(int $donorId, WP_REST_Request $req): array
     {
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession($donorId, 'tok');
-        $req->set_header('X-FundKit-Csrf', 'tok');
+        $_COOKIE['gratora_donor_session'] = $this->portalSession($donorId, 'tok');
+        $req->set_header('X-Gratora-Csrf', 'tok');
 
         try {
             $res = rest_do_request($req);
@@ -76,7 +76,7 @@ final class PortalLostUpdateTest extends IntegrationTestCase
 
             return (array) $res->get_data();
         } finally {
-            unset($_COOKIE['fundkit_donor_session']);
+            unset($_COOKIE['gratora_donor_session']);
         }
     }
 
@@ -88,14 +88,14 @@ final class PortalLostUpdateTest extends IntegrationTestCase
         $donation  = Donation::query()->find('reference', $reference);
 
         // The refund webhook that lands while the donor is on the screen.
-        $this->raceOn('fundkit_donations', static function () use ($wpdb, $donation): void {
+        $this->raceOn('gratora_donations', static function () use ($wpdb, $donation): void {
             $wpdb->query($wpdb->prepare(
-                "UPDATE {$wpdb->prefix}fundkit_donations SET status = 'partial_refund', refunded_cents = 1000 WHERE id = %d",
+                "UPDATE {$wpdb->prefix}gratora_donations SET status = 'partial_refund', refunded_cents = 1000 WHERE id = %d",
                 (int) $donation->id
             ));
         });
 
-        $req = new WP_REST_Request('POST', "/fundkit/v1/portal/donations/{$reference}/anonymity");
+        $req = new WP_REST_Request('POST', "/gratora/v1/portal/donations/{$reference}/anonymity");
         $req->set_header('content-type', 'application/json');
         $req->set_body('{"is_anonymous":true}');
         $this->asDonor((int) $donation->donor_id, $req);
@@ -110,7 +110,7 @@ final class PortalLostUpdateTest extends IntegrationTestCase
         $reference = $this->paidDonation();
         $donation  = Donation::query()->find('reference', $reference);
 
-        $req = new WP_REST_Request('POST', "/fundkit/v1/portal/donations/{$reference}/anonymity");
+        $req = new WP_REST_Request('POST', "/gratora/v1/portal/donations/{$reference}/anonymity");
         $req->set_header('content-type', 'application/json');
         $req->set_body('{"is_anonymous":true}');
         $this->asDonor((int) $donation->donor_id, $req);
@@ -130,9 +130,9 @@ final class PortalLostUpdateTest extends IntegrationTestCase
     private function raceOnDonor(int $donorId): void
     {
         global $wpdb;
-        $this->raceOn('fundkit_donors', static function () use ($wpdb, $donorId): void {
+        $this->raceOn('gratora_donors', static function () use ($wpdb, $donorId): void {
             $wpdb->query($wpdb->prepare(
-                "UPDATE {$wpdb->prefix}fundkit_donors SET total_donated_cents = 26500, donations_count = 4 WHERE id = %d",
+                "UPDATE {$wpdb->prefix}gratora_donors SET total_donated_cents = 26500, donations_count = 4 WHERE id = %d",
                 $donorId
             ));
         });
@@ -150,7 +150,7 @@ final class PortalLostUpdateTest extends IntegrationTestCase
         $donor = $this->donorWithTotals();
         $this->raceOnDonor((int) $donor->id);
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/preferences');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/preferences');
         $req->set_header('content-type', 'application/json');
         $req->set_body('{"always_anonymous":true}');
         $this->asDonor((int) $donor->id, $req);
@@ -162,7 +162,7 @@ final class PortalLostUpdateTest extends IntegrationTestCase
     {
         $donor = $this->donorWithTotals();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/preferences');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/preferences');
         $req->set_header('content-type', 'application/json');
         $req->set_body('{"always_anonymous":true}');
         $this->asDonor((int) $donor->id, $req);
@@ -187,7 +187,7 @@ final class PortalLostUpdateTest extends IntegrationTestCase
     {
         $donor = $this->donorWithTotals();
         $fired = 0;
-        add_action('fundkit.donor.updated', static function () use (&$fired): void {
+        add_action('gratora.donor.updated', static function () use (&$fired): void {
             $fired++;
         });
 

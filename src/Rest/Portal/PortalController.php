@@ -2,45 +2,45 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Portal;
+namespace Gratora\Rest\Portal;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationQueries;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\ConsentService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\MagicLinkService;
-use FundKit\Donors\PendingSignupRepository;
-use FundKit\Donors\Portal\AnnualStatementBuilder;
-use FundKit\Donors\Portal\MagicLinkJob;
-use FundKit\Donors\Portal\PortalSession;
-use FundKit\Donors\SignupRedemption;
-use FundKit\Forms\Form;
-use FundKit\Foundation\Http\ClientIp;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Funds\Fund;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\GatewayTransportException;
-use FundKit\Gateways\SubscriptionChangeNeedsApproval;
-use FundKit\Gateways\SupportsPaymentMethodUpdate;
-use FundKit\Gateways\SupportsScheduleChange;
-use FundKit\Gateways\SupportsSubscriptionPause;
-use FundKit\Mail\Mailer;
-use FundKit\Receipts\OrgProfile;
-use FundKit\Receipts\Receipt;
-use FundKit\Recurring\FrequencyMap;
-use FundKit\Recurring\GatewayUnreachable;
-use FundKit\Recurring\PlanChangeRefused;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanActions;
-use FundKit\Recurring\RecurringPlanChange;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\ConsentService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\MagicLinkService;
+use Gratora\Donors\PendingSignupRepository;
+use Gratora\Donors\Portal\AnnualStatementBuilder;
+use Gratora\Donors\Portal\MagicLinkJob;
+use Gratora\Donors\Portal\PortalSession;
+use Gratora\Donors\SignupRedemption;
+use Gratora\Forms\Form;
+use Gratora\Foundation\Http\ClientIp;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Funds\Fund;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\GatewayTransportException;
+use Gratora\Gateways\SubscriptionChangeNeedsApproval;
+use Gratora\Gateways\SupportsPaymentMethodUpdate;
+use Gratora\Gateways\SupportsScheduleChange;
+use Gratora\Gateways\SupportsSubscriptionPause;
+use Gratora\Mail\Mailer;
+use Gratora\Receipts\OrgProfile;
+use Gratora\Receipts\Receipt;
+use Gratora\Recurring\FrequencyMap;
+use Gratora\Recurring\GatewayUnreachable;
+use Gratora\Recurring\PlanChangeRefused;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanActions;
+use Gratora\Recurring\RecurringPlanChange;
+use Gratora\Vendor\Queryable\DB;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -49,7 +49,7 @@ use WP_REST_Server;
 /** @since 1.0.0 */
 final class PortalController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /** How many donations one portal request returns. */
     private const DONATION_PAGE = 100;
@@ -57,7 +57,7 @@ final class PortalController
     /** How many receipts one portal request returns. */
     private const RECEIPT_PAGE = 200;
 
-    public const SEND_LINK_HOOK          = 'fundkit.async.send_portal_link';
+    public const SEND_LINK_HOOK          = 'gratora.async.send_portal_link';
     private const SEND_LINK_IP_MAX       = 4;
     private const SEND_LINK_IP_WINDOW    = 15 * MINUTE_IN_SECONDS;
     private const SEND_LINK_EMAIL_MAX    = 2;
@@ -99,14 +99,14 @@ final class PortalController
         private ConsentService $consents,
         private Mailer $mailer,
         private AsyncDispatcher $async,
-        private \FundKit\Donors\DonorMetricsService $metrics,
+        private \Gratora\Donors\DonorMetricsService $metrics,
         private RecurringPlanActions $planActions,
         private GatewayManager $gateways,
         private AntiSpamGuard $spam,
         private PendingSignupRepository $pending,
-        private \FundKit\Donors\DonorAvatarUploader $avatarUploader,
-        private \FundKit\Donors\DonorAvatars $avatars,
-        private \FundKit\Foundation\Crypto\Crypto $crypto,
+        private \Gratora\Donors\DonorAvatarUploader $avatarUploader,
+        private \Gratora\Donors\DonorAvatars $avatars,
+        private \Gratora\Foundation\Crypto\Crypto $crypto,
     ) {
     }
 
@@ -181,7 +181,7 @@ final class PortalController
         register_rest_route(self::NAMESPACE, '/portal/logout-everywhere', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'logoutEverywhere'],
-            // The portal JS sends X-FundKit-Csrf on every call, so a cross-site
+            // The portal JS sends X-Gratora-Csrf on every call, so a cross-site
             // forged POST cannot sign the donor out.
             'permission_callback' => [$this, 'sessionWithCsrf'],
         ]);
@@ -324,7 +324,7 @@ final class PortalController
     /** @since 1.0.0 */
     private function privacySetting(string $key, $default)
     {
-        $opt = get_option('fundkit_privacy', []);
+        $opt = get_option('gratora_privacy', []);
         if (! is_array($opt)) return $default;
         return array_key_exists($key, $opt) ? $opt[$key] : $default;
     }
@@ -344,7 +344,7 @@ final class PortalController
     {
         $expected = $this->session->csrfToken();
         if ($expected === null || $expected === '') return false;
-        $provided = (string) $request->get_header('X-FundKit-Csrf');
+        $provided = (string) $request->get_header('X-Gratora-Csrf');
         if ($provided === '') return false;
         return hash_equals($expected, $provided);
     }
@@ -358,8 +358,8 @@ final class PortalController
     public function sameSiteOnly(WP_REST_Request $request): bool|WP_Error
     {
         $refused = new WP_Error(
-            'fundkit_cross_site',
-            __('Sign-in must start from this site.', 'fundraising-toolkit'),
+            'gratora_cross_site',
+            __('Sign-in must start from this site.', 'gratora'),
             ['status' => 403]
         );
 
@@ -422,7 +422,7 @@ final class PortalController
         $token = (string) $request['token'];
         $session = $this->session->startFromToken($token);
         if (! $session) {
-            return new WP_Error('fundkit_invalid_token', __('Sign-in link is invalid or expired.', 'fundraising-toolkit'), ['status' => 401]);
+            return new WP_Error('gratora_invalid_token', __('Sign-in link is invalid or expired.', 'gratora'), ['status' => 401]);
         }
         return new WP_REST_Response([
             'ok'        => true,
@@ -468,7 +468,7 @@ final class PortalController
     /**
      * Self-registration, so somebody who has not donated can get into the
      * portal. Nothing here becomes a donor: anyone can type anyone's address,
-     * so the claim waits in fundkit_pending_signups until the emailed link comes
+     * so the claim waits in gratora_pending_signups until the emailed link comes
      * back, and redeeming it is what creates the donor.
      *
      * The donor table is not read here, for the same reason sendLink() does not
@@ -621,9 +621,9 @@ final class PortalController
      */
     private function consumeIpQuota(): bool
     {
-        $max = (int) apply_filters('fundkit.portal.send_link_ip_max', self::SEND_LINK_IP_MAX);
+        $max = (int) apply_filters('gratora.portal.send_link_ip_max', self::SEND_LINK_IP_MAX);
 
-        return $this->spam->hit($this->spam->subjectKey('fundkit_send_link_ip'), self::SEND_LINK_IP_WINDOW)
+        return $this->spam->hit($this->spam->subjectKey('gratora_send_link_ip'), self::SEND_LINK_IP_WINDOW)
             <= max(1, $max);
     }
 
@@ -641,10 +641,10 @@ final class PortalController
      */
     private function consumeEmailQuota(string $email): bool
     {
-        $key = 'fundkit_send_link_addr_'
+        $key = 'gratora_send_link_addr_'
             . substr($this->hasher->emailHash($this->hasher->normalizeEmail($email)), 0, 32);
 
-        $max = (int) apply_filters('fundkit.portal.send_link_email_max', self::SEND_LINK_EMAIL_MAX);
+        $max = (int) apply_filters('gratora.portal.send_link_email_max', self::SEND_LINK_EMAIL_MAX);
 
         return $this->spam->hit($key, self::SEND_LINK_EMAIL_WINDOW) <= max(1, $max);
     }
@@ -659,7 +659,7 @@ final class PortalController
      */
     private function consumeMailboxQuota(string $email): bool
     {
-        $key = 'fundkit_send_link_mailbox_'
+        $key = 'gratora_send_link_mailbox_'
             . substr($this->hasher->emailHash($this->hasher->rateLimitMailbox($email)), 0, 32);
 
         $count = $this->spam->hit($key, self::SEND_LINK_MAILBOX_WINDOW);
@@ -683,7 +683,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         if ($donorId === null) {
-            return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundraising-toolkit'), ['status' => 401]);
+            return new WP_Error('gratora_unauthorized', __('Session expired.', 'gratora'), ['status' => 401]);
         }
 
         return new WP_REST_Response(['ok' => true, 'ended' => $this->session->destroyAllFor($donorId)], 200);
@@ -697,17 +697,17 @@ final class PortalController
         if (! $donor || $donor->redacted_at !== null) {
             // A redacted donor's session is invalid even when a link was
             // already exchanged: the row no longer represents a real person.
-            return new WP_Error('fundkit_session_invalid', __('Session expired.', 'fundraising-toolkit'), ['status' => 401]);
+            return new WP_Error('gratora_session_invalid', __('Session expired.', 'gratora'), ['status' => 401]);
         }
 
         $name = trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''));
-        $currencyCfg = get_option('fundkit_currency_locale', []);
+        $currencyCfg = get_option('gratora_currency_locale', []);
         $defaultCurrency = is_array($currencyCfg) && ! empty($currencyCfg['default_currency'])
             ? (string) $currencyCfg['default_currency']
             : 'USD';
         return new WP_REST_Response([
             'id'                  => (int) $donor->id,
-            'name'                => $name !== '' ? $name : __('Friend', 'fundraising-toolkit'),
+            'name'                => $name !== '' ? $name : __('Friend', 'gratora'),
             'first_name'          => (string) ($donor->first_name ?? ''),
             'last_name'           => (string) ($donor->last_name ?? ''),
             'country'             => (string) ($donor->country ?? ''),
@@ -731,7 +731,7 @@ final class PortalController
     /** @since 1.0.0 */
     private function unconvertedDonationCount(int $donorId): int
     {
-        $row = DonationQueries::donationsOnly(DB::table('fundkit_donations'))
+        $row = DonationQueries::donationsOnly(DB::table('gratora_donations'))
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('donor_id', $donorId)
             ->selectRaw(DonationQueries::unconvertedExpr() . ' AS n')
@@ -796,7 +796,7 @@ final class PortalController
         // kind, as well as owner: the list excludes ticket orders, so a
         // reference naming one must not open here either.
         if (! $d || $d->donor_id !== $donor->id || (string) $d->kind !== 'donation') {
-            return new WP_Error('fundkit_not_found', '', ['status' => 404]);
+            return new WP_Error('gratora_not_found', '', ['status' => 404]);
         }
 
         $giveAgainUrl = null;
@@ -814,9 +814,9 @@ final class PortalController
                     // comparable across currencies, so a bare 500000 read as the
                     // form's own currency turns 5,000 yen into 5,000 dollars.
                     $giveAgainUrl = add_query_arg([
-                        'fundkit_amount'    => $net,
-                        'fundkit_currency'  => (string) $d->currency,
-                        'fundkit_frequency' => $d->frequency,
+                        'gratora_amount'    => $net,
+                        'gratora_currency'  => (string) $d->currency,
+                        'gratora_frequency' => $d->frequency,
                     ], $perma);
                 }
             }
@@ -837,7 +837,7 @@ final class PortalController
 
         // Add-ons own records that hang off a donation, and the filter is how
         // those reach the portal without core knowing what they are.
-        $payload = (array) apply_filters('fundkit.portal.donation', [
+        $payload = (array) apply_filters('gratora.portal.donation', [
             'id'                => (int) $d->id,
             'reference'         => (string) $d->reference,
             'amount_cents'      => (int) $d->amount_cents,
@@ -869,7 +869,7 @@ final class PortalController
 
         $d = $this->donations->findByReference((string) $request['reference']);
         if (! $d || $d->donor_id !== $donor->id) {
-            return new WP_Error('fundkit_not_found', '', ['status' => 404]);
+            return new WP_Error('gratora_not_found', '', ['status' => 404]);
         }
         $body = (array) ($request->get_json_params() ?? []);
 
@@ -882,7 +882,7 @@ final class PortalController
             'updated_at'   => gmdate('Y-m-d H:i:s'),
         ]);
 
-        do_action('fundkit.donation.updated', $d);
+        do_action('gratora.donation.updated', $d);
         return new WP_REST_Response(['ok' => true, 'is_anonymous' => $d->is_anonymous], 200);
     }
 
@@ -996,7 +996,7 @@ final class PortalController
                     break;
 
                 default:
-                    return new WP_Error('fundkit_invalid_action', '', ['status' => 422]);
+                    return new WP_Error('gratora_invalid_action', '', ['status' => 422]);
             }
         } catch (SubscriptionChangeNeedsApproval $e) {
             // Ahead of the RuntimeException arm below, which is its parent and
@@ -1007,8 +1007,8 @@ final class PortalController
             // amount would tell the donor a change had happened that their card
             // would not agree with.
             return new WP_Error(
-                'fundkit_change_needs_approval',
-                __('Your payment provider needs you to approve this change before it takes effect. Nothing has changed yet.', 'fundraising-toolkit'),
+                'gratora_change_needs_approval',
+                __('Your payment provider needs you to approve this change before it takes effect. Nothing has changed yet.', 'gratora'),
                 ['status' => 409, 'approve_url' => $e->approveUrl]
             );
         } catch (GatewayUnreachable $e) {
@@ -1020,15 +1020,15 @@ final class PortalController
             ]);
 
             return new WP_Error(
-                'fundkit_gateway_error',
-                __('We could not change this donation right now. Please contact the organization and they will sort it out.', 'fundraising-toolkit'),
+                'gratora_gateway_error',
+                __('We could not change this donation right now. Please contact the organization and they will sort it out.', 'gratora'),
                 ['status' => 503]
             );
         } catch (\InvalidArgumentException $e) {
-            return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('gratora_invalid_input', $e->getMessage(), ['status' => 422]);
         } catch (PlanChangeRefused $e) {
             // The only RuntimeException whose message is written for a donor.
-            return new WP_Error('fundkit_plan_terminal', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('gratora_plan_terminal', $e->getMessage(), ['status' => 422]);
         } catch (GatewayTransportException $e) {
             // The request never left this server, so nothing about the plan is
             // settled and the donor should try again. Answering 422 called a
@@ -1040,8 +1040,8 @@ final class PortalController
             ]);
 
             return new WP_Error(
-                'fundkit_gateway_unreachable',
-                __('We could not reach the payment provider just now, so nothing has changed. Please try again in a moment.', 'fundraising-toolkit'),
+                'gratora_gateway_unreachable',
+                __('We could not reach the payment provider just now, so nothing has changed. Please try again in a moment.', 'gratora'),
                 ['status' => 503]
             );
         } catch (\Throwable $e) {
@@ -1052,8 +1052,8 @@ final class PortalController
                 'donor_id'          => (int) $plan->donor_id,
             ]);
             return new WP_Error(
-                'fundkit_gateway_error',
-                __('We could not complete this change with the payment provider. Please try again in a moment.', 'fundraising-toolkit'),
+                'gratora_gateway_error',
+                __('We could not complete this change with the payment provider. Please try again in a moment.', 'gratora'),
                 ['status' => 502]
             );
         }
@@ -1079,8 +1079,8 @@ final class PortalController
         $gateway = $this->gateways->get((string) $plan->gateway);
         if (! $gateway instanceof SupportsPaymentMethodUpdate) {
             return new WP_Error(
-                'fundkit_not_supported',
-                __('This donation\'s payment method cannot be changed here. Please contact us and we will help.', 'fundraising-toolkit'),
+                'gratora_not_supported',
+                __('This donation\'s payment method cannot be changed here. Please contact us and we will help.', 'gratora'),
                 ['status' => 422]
             );
         }
@@ -1090,8 +1090,8 @@ final class PortalController
         } catch (\Throwable $e) {
             ErrorLog::record('portal.payment_method', $e->getMessage());
             return new WP_Error(
-                'fundkit_gateway_error',
-                __('We could not reach the payment provider. Please try again in a moment.', 'fundraising-toolkit'),
+                'gratora_gateway_error',
+                __('We could not reach the payment provider. Please try again in a moment.', 'gratora'),
                 ['status' => 502]
             );
         }
@@ -1118,7 +1118,7 @@ final class PortalController
 
         $gateway = $this->gateways->get((string) $plan->gateway);
         if (! $gateway instanceof SupportsPaymentMethodUpdate) {
-            return new WP_Error('fundkit_not_supported', '', ['status' => 422]);
+            return new WP_Error('gratora_not_supported', '', ['status' => 422]);
         }
 
         try {
@@ -1126,13 +1126,13 @@ final class PortalController
         } catch (\Throwable $e) {
             ErrorLog::record('portal.payment_method', $e->getMessage());
             return new WP_Error(
-                'fundkit_gateway_error',
-                __('The new card could not be saved. Please try again in a moment.', 'fundraising-toolkit'),
+                'gratora_gateway_error',
+                __('The new card could not be saved. Please try again in a moment.', 'gratora'),
                 ['status' => 502]
             );
         }
 
-        do_action('fundkit.recurring.payment_method_updated', $plan);
+        do_action('gratora.recurring.payment_method_updated', $plan);
 
         return new WP_REST_Response(['ok' => true], 200);
     }
@@ -1151,7 +1151,7 @@ final class PortalController
         // Ownership is not the only gate: a test plan is not listed, so it must
         // not be actionable either.
         if (! $plan || (int) $plan->donor_id !== (int) $donor->id || $plan->is_test) {
-            return new WP_Error('fundkit_not_found', '', ['status' => 404]);
+            return new WP_Error('gratora_not_found', '', ['status' => 404]);
         }
 
         return $plan;
@@ -1218,11 +1218,11 @@ final class PortalController
             ->where('voided', 0)
             ->get();
         if (! $receipt) {
-            return new WP_Error('fundkit_receipt_not_found', __('Receipt not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_receipt_not_found', __('Receipt not found.', 'gratora'), ['status' => 404]);
         }
 
         $token = $this->magicLinks->issue($donorId, 'download_receipt', $receiptId, 3600);
-        $url   = add_query_arg('token', $token, rest_url('fundkit/v1/receipts/' . $receiptId . '/download'));
+        $url   = add_query_arg('token', $token, rest_url('gratora/v1/receipts/' . $receiptId . '/download'));
         return new WP_REST_Response(['url' => esc_url_raw($url)], 200);
     }
 
@@ -1234,23 +1234,23 @@ final class PortalController
 
         $year = (int) $request['year'];
         if ($year < 2000 || $year > 2100) {
-            return new WP_Error('fundkit_invalid_year', '', ['status' => 422]);
+            return new WP_Error('gratora_invalid_year', '', ['status' => 422]);
         }
 
         // After requireDonor on purpose, so an unauthenticated caller cannot
         // spend a shared office address's budget.
-        if ($err = $this->spam->consumeIpBudget('fundkit_annual_statement', self::STATEMENT_MAX, self::STATEMENT_WINDOW)) {
+        if ($err = $this->spam->consumeIpBudget('gratora_annual_statement', self::STATEMENT_MAX, self::STATEMENT_WINDOW)) {
             return $err;
         }
 
         $pdf = $this->annualStatements->build($donor, $year);
         if ($pdf === '') {
-            return new WP_Error('fundkit_no_donations', __('No donations found for that year.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_no_donations', __('No donations found for that year.', 'gratora'), ['status' => 404]);
         }
 
         // Streamed directly, so the REST server does not JSON-encode the binary
         // body.
-        $filename = sprintf('fundkit-annual-%d.pdf', $year);
+        $filename = sprintf('gratora-annual-%d.pdf', $year);
         $route    = $request->get_route();
         add_filter('rest_pre_serve_request', function (bool $served, $result, $req, $server) use ($route, $pdf, $filename) {
             if ((string) $req->get_route() !== $route) return $served;
@@ -1275,7 +1275,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor || $donor->redacted_at !== null) return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundraising-toolkit'), ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('gratora_unauthorized', __('Session expired.', 'gratora'), ['status' => 401]);
 
         return new WP_REST_Response([
             'email'      => (string) ($this->donorService->decryptEmail($donor) ?? ''),
@@ -1293,7 +1293,7 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor || $donor->redacted_at !== null) return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundraising-toolkit'), ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('gratora_unauthorized', __('Session expired.', 'gratora'), ['status' => 401]);
 
         $body  = (array) ($request->get_json_params() ?? []);
         $patch = [];
@@ -1308,7 +1308,7 @@ final class PortalController
         try {
             $this->donorService->editProfile($donor, $patch);
         } catch (\InvalidArgumentException $e) {
-            return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('gratora_invalid_input', $e->getMessage(), ['status' => 422]);
         }
 
         return $this->profileShow();
@@ -1328,17 +1328,17 @@ final class PortalController
             $max  = wp_convert_hr_to_bytes((string) ini_get('post_max_size'));
             if ($max > 0 && $sent > $max) {
                 return new WP_Error(
-                    'fundkit_upload_too_large',
+                    'gratora_upload_too_large',
                     sprintf(
                         /* translators: %s: file size, e.g. "2 MB". */
-                        __('That picture is too large. The most this site takes is %s.', 'fundraising-toolkit'),
-                        size_format(\FundKit\Donors\DonorAvatarUploader::maxBytes())
+                        __('That picture is too large. The most this site takes is %s.', 'gratora'),
+                        size_format(\Gratora\Donors\DonorAvatarUploader::maxBytes())
                     ),
                     ['status' => 413]
                 );
             }
 
-            return new WP_Error('fundkit_upload_missing', __('No picture was sent.', 'fundraising-toolkit'), ['status' => 400]);
+            return new WP_Error('gratora_upload_missing', __('No picture was sent.', 'gratora'), ['status' => 400]);
         }
 
         $result = $this->avatarUploader->store($donor, $file);
@@ -1550,14 +1550,14 @@ final class PortalController
     {
         $donorId = $this->session->currentDonorId();
         $donor   = $donorId ? $this->donors->findById($donorId) : null;
-        if (! $donor || $donor->redacted_at !== null) return new WP_Error('fundkit_unauthorized', __('Session expired.', 'fundraising-toolkit'), ['status' => 401]);
+        if (! $donor || $donor->redacted_at !== null) return new WP_Error('gratora_unauthorized', __('Session expired.', 'gratora'), ['status' => 401]);
         return $donor;
     }
 
     /** @since 1.0.0 */
     private function portalUrl(): string
     {
-        return (new \FundKit\Donors\Portal\PortalPage())->url();
+        return (new \Gratora\Donors\Portal\PortalPage())->url();
     }
 
     /** @since 1.0.0 */
@@ -1577,8 +1577,8 @@ final class PortalController
     {
         if (! $this->privacySetting('allow_data_export', true)) {
             return new WP_Error(
-                'fundkit_export_disabled',
-                __('Data export is disabled by the organization.', 'fundraising-toolkit'),
+                'gratora_export_disabled',
+                __('Data export is disabled by the organization.', 'gratora'),
                 ['status' => 403]
             );
         }
@@ -1650,12 +1650,12 @@ final class PortalController
         $bundle['exported_at'] = gmdate('c');
 
         $json     = wp_json_encode($bundle, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $filename = sprintf('fundkit-my-data-%d-%s.json', $donor->id, gmdate('Y-m-d'));
+        $filename = sprintf('gratora-my-data-%d-%s.json', $donor->id, gmdate('Y-m-d'));
 
         // Streamed as an attachment, so the donor's browser saves a file
         // instead of receiving the REST envelope.
         add_filter('rest_pre_serve_request', function (bool $served, $result, $req, $server) use ($json, $filename) {
-            if ((string) $req->get_route() !== '/fundkit/v1/portal/data-export') return $served;
+            if ((string) $req->get_route() !== '/gratora/v1/portal/data-export') return $served;
             $server->send_header('Content-Type', 'application/json; charset=utf-8');
             $server->send_header('Content-Disposition', 'attachment; filename="' . $filename . '"');
             $server->send_header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
@@ -1714,8 +1714,8 @@ final class PortalController
     {
         if (! $this->privacySetting('allow_account_delete', true)) {
             return new WP_Error(
-                'fundkit_delete_disabled',
-                __('Account deletion is disabled by the organization.', 'fundraising-toolkit'),
+                'gratora_delete_disabled',
+                __('Account deletion is disabled by the organization.', 'gratora'),
                 ['status' => 403]
             );
         }
@@ -1724,8 +1724,8 @@ final class PortalController
 
         if (strtoupper((string) $request['confirm']) !== 'DELETE') {
             return new WP_Error(
-                'fundkit_invalid_confirmation',
-                __('Type DELETE to confirm.', 'fundraising-toolkit'),
+                'gratora_invalid_confirmation',
+                __('Type DELETE to confirm.', 'gratora'),
                 ['status' => 422]
             );
         }
@@ -1754,15 +1754,15 @@ final class PortalController
 
             if ($stillBilling) {
                 return new WP_Error(
-                    'fundkit_erasure_blocked',
-                    __('We could not stop your recurring donation with the payment provider, so your account has not been deleted yet. Please contact the organization and they will finish this for you.', 'fundraising-toolkit'),
+                    'gratora_erasure_blocked',
+                    __('We could not stop your recurring donation with the payment provider, so your account has not been deleted yet. Please contact the organization and they will finish this for you.', 'gratora'),
                     ['status' => 409]
                 );
             }
 
             return new WP_Error(
-                'fundkit_erasure_failed',
-                __('Your recurring donations have been stopped, but we could not finish deleting your account. Please contact the organization and they will finish this for you.', 'fundraising-toolkit'),
+                'gratora_erasure_failed',
+                __('Your recurring donations have been stopped, but we could not finish deleting your account. Please contact the organization and they will finish this for you.', 'gratora'),
                 ['status' => 500]
             );
         }

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
+use Gratora\Foundation\Plugin;
 use ReflectionClass;
 use ReflectionProperty;
 

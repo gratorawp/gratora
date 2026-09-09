@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Core\CoreModule;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Upgrade\SchemaGuard;
-use FundKit\Foundation\Upgrade\UpgradeRunner;
+use Gratora\Core\CoreModule;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Upgrade\SchemaGuard;
+use Gratora\Foundation\Upgrade\UpgradeRunner;
 
 /**
  * Activation hooks pass $network_wide, not $fresh. Test the hook path so that flag cannot
@@ -17,9 +17,9 @@ final class ActivationHookSignatureTest extends IntegrationTestCase
 {
     public function test_the_hook_registered_with_wordpress_is_not_the_fresh_flag_one(): void
     {
-        $plugin = dirname(__DIR__, 2) . '/fundkit/fundkit.php';
+        $plugin = dirname(__DIR__, 2) . '/gratora/gratora.php';
         if (! is_file($plugin)) {
-            $plugin = dirname(__DIR__, 2) . '/fundkit.php';
+            $plugin = dirname(__DIR__, 2) . '/gratora.php';
         }
         $source = (string) file_get_contents($plugin);
 

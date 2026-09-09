@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\EventRecorder;
-use FundKit\Campaigns\CampaignTemplates;
-use FundKit\Core\Commands\CoreCommandProvider;
-use FundKit\Foundation\Commands\CommandContext;
-use FundKit\Foundation\Commands\CommandRegistry;
-use FundKit\Foundation\Plugin;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Campaigns\CampaignTemplates;
+use Gratora\Core\Commands\CoreCommandProvider;
+use Gratora\Foundation\Commands\CommandContext;
+use Gratora\Foundation\Commands\CommandRegistry;
+use Gratora\Foundation\Plugin;
 
 final class CampaignTemplateCommandsTest extends IntegrationTestCase
 {
@@ -88,15 +88,15 @@ final class CampaignTemplateCommandsTest extends IntegrationTestCase
 
         $this->assertTrue($res->ok, (string) ($res->error ?? ''));
 
-        $campaign = \FundKit\Campaigns\Campaign::query()->find('id', (int) $res->data['campaign_id']);
+        $campaign = \Gratora\Campaigns\Campaign::query()->find('id', (int) $res->data['campaign_id']);
         $page     = get_post((int) $campaign->page_id);
-        $form     = \FundKit\Forms\Form::query()->find('id', (int) $campaign->default_form_id);
+        $form     = \Gratora\Forms\Form::query()->find('id', (int) $campaign->default_form_id);
 
         $default = $this->registry()->dispatch('campaign.create', [
             'title'  => 'Default layout ' . uniqid(),
             'status' => 'draft',
         ], $this->context());
-        $other = \FundKit\Campaigns\Campaign::query()->find('id', (int) $default->data['campaign_id']);
+        $other = \Gratora\Campaigns\Campaign::query()->find('id', (int) $default->data['campaign_id']);
 
         $this->assertNotNull($page);
         $this->assertNotSame(
@@ -108,7 +108,7 @@ final class CampaignTemplateCommandsTest extends IntegrationTestCase
         // The layout carries the form with it, which is the half of the choice
         // a caller cannot see from the layout's name.
         $this->assertSame(
-            trim((string) \FundKit\Forms\FormTemplates::find(CampaignTemplates::formTemplate('minimal'))['blocks']),
+            trim((string) \Gratora\Forms\FormTemplates::find(CampaignTemplates::formTemplate('minimal'))['blocks']),
             trim((string) $form->blocks)
         );
     }
@@ -123,7 +123,7 @@ final class CampaignTemplateCommandsTest extends IntegrationTestCase
      */
     public function test_a_layout_this_install_does_not_offer_is_refused_rather_than_swapped(): void
     {
-        $before = \FundKit\Campaigns\Campaign::query()->count();
+        $before = \Gratora\Campaigns\Campaign::query()->count();
 
         $res = $this->registry()->dispatch('campaign.create', [
             'title'         => 'Wrong layout ' . uniqid(),
@@ -133,14 +133,14 @@ final class CampaignTemplateCommandsTest extends IntegrationTestCase
         ], $this->context());
 
         $this->assertFalse($res->ok, 'a layout from another campaign type was accepted');
-        $this->assertSame($before, \FundKit\Campaigns\Campaign::query()->count(), 'a campaign was created anyway');
+        $this->assertSame($before, \Gratora\Campaigns\Campaign::query()->count(), 'a campaign was created anyway');
     }
 
     /** Build layout enums from all registered types; validate type/layout pairs in the handler. */
     public function test_the_schema_offers_every_registered_type_s_layouts(): void
     {
         $schema = $this->definition('campaign.create')['inputSchema']['properties']['page_template'];
-        $types  = array_keys((array) apply_filters('fundkit.campaign.types', ['standard' => '']));
+        $types  = array_keys((array) apply_filters('gratora.campaign.types', ['standard' => '']));
 
         $this->assertNotEmpty($types);
 

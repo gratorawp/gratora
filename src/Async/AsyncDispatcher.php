@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Async;
+namespace Gratora\Async;
 
 /**
  * Wrapper over Action Scheduler.
@@ -11,10 +11,10 @@ namespace FundKit\Async;
  */
 final class AsyncDispatcher
 {
-    public const GROUP = 'fundkit';
+    public const GROUP = 'gratora';
 
     /** What is already installed, so init does not ask the scheduler again. */
-    public const INSTALLED_OPTION = 'fundkit_recurring_installed';
+    public const INSTALLED_OPTION = 'gratora_recurring_installed';
 
     private const RECHECK = 86400;
 

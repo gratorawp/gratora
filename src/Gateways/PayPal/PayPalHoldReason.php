@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways\PayPal;
+namespace Gratora\Gateways\PayPal;
 
 /**
  * Turns PayPal's hold codes into what the org has to do about them.
@@ -21,37 +21,37 @@ final class PayPalHoldReason
     {
         switch (strtoupper(trim($code))) {
             case 'ECHECK':
-                return __('The donor paid by eCheck. PayPal will settle it in a few working days, and nothing is needed from you.', 'fundraising-toolkit');
+                return __('The donor paid by eCheck. PayPal will settle it in a few working days, and nothing is needed from you.', 'gratora');
 
             case 'RECEIVING_PREFERENCE_MANDATES_MANUAL_ACTION':
-                return __('Your PayPal account is set to hold payments like this one. It will not complete until you accept it in PayPal.', 'fundraising-toolkit');
+                return __('Your PayPal account is set to hold payments like this one. It will not complete until you accept it in PayPal.', 'gratora');
 
             case 'PENDING_REVIEW':
             case 'PAYMENT_REVIEW':
-                return __('PayPal is reviewing this payment and has not released it yet.', 'fundraising-toolkit');
+                return __('PayPal is reviewing this payment and has not released it yet.', 'gratora');
 
             case 'VERIFICATION_REQUIRED':
-                return __('PayPal is holding this payment until your account is verified.', 'fundraising-toolkit');
+                return __('PayPal is holding this payment until your account is verified.', 'gratora');
 
             case 'TRANSACTION_HOLD':
-                return __('PayPal has placed a hold on this transaction.', 'fundraising-toolkit');
+                return __('PayPal has placed a hold on this transaction.', 'gratora');
 
             case 'UNILATERAL':
-                return __('The payment went to an email address that is not confirmed on your PayPal account.', 'fundraising-toolkit');
+                return __('The payment went to an email address that is not confirmed on your PayPal account.', 'gratora');
 
             case 'BUYER_COMPLAINT':
-                return __('The donor has raised a complaint with PayPal about this payment.', 'fundraising-toolkit');
+                return __('The donor has raised a complaint with PayPal about this payment.', 'gratora');
 
             case 'CHARGEBACK':
-                return __('The donor has charged this payment back through their card issuer.', 'fundraising-toolkit');
+                return __('The donor has charged this payment back through their card issuer.', 'gratora');
 
             case '':
-                return __('PayPal is holding this payment and has not said why.', 'fundraising-toolkit');
+                return __('PayPal is holding this payment and has not said why.', 'gratora');
 
             default:
                 return sprintf(
                     /* translators: %s: PayPal's own reason code, e.g. PENDING_REVIEW */
-                    __('PayPal is holding this payment (%s).', 'fundraising-toolkit'),
+                    __('PayPal is holding this payment (%s).', 'gratora'),
                     $code
                 );
         }

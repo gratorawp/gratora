@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Foundation\Database\UpdatesColumns;
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Foundation\Database\UpdatesColumns;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /**
  * Donor record. PII columns are AES-256-GCM encrypted; email_hash is the
@@ -20,7 +20,7 @@ final class Donor extends Model
 {
     use UpdatesColumns;
 
-    protected string $table = 'fundkit_donors';
+    protected string $table = 'gratora_donors';
     protected string $version = '1.0.0';
 
     public int $id;

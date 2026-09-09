@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit;
+namespace Gratora\Tests\Unit;
 
-use FundKit\Donations\DonationQueries;
+use Gratora\Donations\DonationQueries;
 use PHPUnit\Framework\TestCase;
 use TypeError;
 
@@ -28,10 +28,10 @@ final class PaidBucketsAreLocalTest extends TestCase
     private const RAW_BUCKET = '/\b(?:DATE|DATE_FORMAT|DAYOFWEEK|DAYOFYEAR|DAYOFMONTH|WEEK|WEEKDAY|MONTH|YEAR|HOUR|MINUTE)\s*\(\s*[^()]*paid_at/i';
 
     /** The qualified column, wherever it is named. */
-    private const COLUMN = '/\S*fundkit_donations\.paid_at/';
+    private const COLUMN = '/\S*gratora_donations\.paid_at/';
 
     /** Naming it is only allowed as the thing being converted. */
-    private const CONVERTED = '/DonationQueries::local(?:Date|Stamp)Expr\(\s*[^,]*fundkit_donations\.paid_at/';
+    private const CONVERTED = '/DonationQueries::local(?:Date|Stamp)Expr\(\s*[^,]*gratora_donations\.paid_at/';
 
     /** @return array<string, array{0:string}> */
     public function reportingSources(): array

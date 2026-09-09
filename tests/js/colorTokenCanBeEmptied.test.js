@@ -42,11 +42,11 @@ import ColorInput from '../../assets/admin/_shared/components/ColorInput';
 import TokenEditor from '../../assets/admin/_shared/styling/TokenEditor';
 
 const CATALOGUE = {
-    'fundkit-button-bg': {
+    'gratora-button-bg': {
         group: 'buttons', label: 'Button background', control: 'color', default: '',
         help: 'Leave empty to use the accent color.',
     },
-    'fundkit-button-fg': {
+    'gratora-button-fg': {
         group: 'buttons', label: 'Button text color', control: 'color', default: '',
         help: 'Leave empty to use white on filled buttons.',
     },
@@ -80,7 +80,7 @@ it( 'sets a colour back to empty', () => {
 it( 'offers nothing to clear on a colour that is already empty', () => {
     const host = mount( <ColorInput label="Line colour" value="" onChange={ () => {} } /> );
 
-    expect( host.querySelector( '.fundkit-color__clear' ) ).toBeNull();
+    expect( host.querySelector( '.gratora-color__clear' ) ).toBeNull();
     expect( named( host, 'Line colour' ) ).toBeTruthy();
 } );
 
@@ -99,20 +99,20 @@ it( 'names the colour it clears', () => {
 it( 'clears from a button of its own, beside the swatch', () => {
     const host = mount( <ColorInput label="Line colour" value="#ff0000" onChange={ () => {} } /> );
 
-    const clear = host.querySelector( '.fundkit-color__clear' );
+    const clear = host.querySelector( '.gratora-color__clear' );
 
     expect( clear.tagName ).toBe( 'BUTTON' );
     expect( clear.getAttribute( 'type' ) ).toBe( 'button' );
     expect( clear.disabled ).toBe( false );
-    expect( clear.closest( '.fundkit-color' ) ).toBeNull();
+    expect( clear.closest( '.gratora-color' ) ).toBeNull();
 } );
 
 it( 'drops the token from the map rather than storing an empty one', () => {
     const seen = [];
     const host = mount(
         <TokenEditor
-            value={ { 'fundkit-button-bg': '#ff0000' } }
-            defaults={ { 'fundkit-button-bg': '', 'fundkit-button-fg': '' } }
+            value={ { 'gratora-button-bg': '#ff0000' } }
+            defaults={ { 'gratora-button-bg': '', 'gratora-button-fg': '' } }
             catalogue={ CATALOGUE }
             groups={ GROUPS }
             onChange={ ( v ) => seen.push( v ) }
@@ -122,7 +122,7 @@ it( 'drops the token from the map rather than storing an empty one', () => {
     named( host, 'Clear Button background' ).click();
 
     expect( seen ).toHaveLength( 1 );
-    expect( 'fundkit-button-bg' in seen[ 0 ] ).toBe( false );
+    expect( 'gratora-button-bg' in seen[ 0 ] ).toBe( false );
     expect( seen[ 0 ] ).toEqual( {} );
 } );
 
@@ -130,8 +130,8 @@ it( 'leaves the other tokens where they are', () => {
     const seen = [];
     const host = mount(
         <TokenEditor
-            value={ { 'fundkit-button-bg': '#ff0000', 'fundkit-button-fg': '#ffffff' } }
-            defaults={ { 'fundkit-button-bg': '', 'fundkit-button-fg': '' } }
+            value={ { 'gratora-button-bg': '#ff0000', 'gratora-button-fg': '#ffffff' } }
+            defaults={ { 'gratora-button-bg': '', 'gratora-button-fg': '' } }
             catalogue={ CATALOGUE }
             groups={ GROUPS }
             onChange={ ( v ) => seen.push( v ) }
@@ -140,7 +140,7 @@ it( 'leaves the other tokens where they are', () => {
 
     named( host, 'Clear Button background' ).click();
 
-    expect( seen[ 0 ] ).toEqual( { 'fundkit-button-fg': '#ffffff' } );
+    expect( seen[ 0 ] ).toEqual( { 'gratora-button-fg': '#ffffff' } );
 } );
 
 /**
@@ -152,7 +152,7 @@ it( 'gives each colour row the name of the token it edits', () => {
     const host = mount(
         <TokenEditor
             value={ {} }
-            defaults={ { 'fundkit-button-bg': '', 'fundkit-button-fg': '' } }
+            defaults={ { 'gratora-button-bg': '', 'gratora-button-fg': '' } }
             catalogue={ CATALOGUE }
             groups={ GROUPS }
             onChange={ () => {} }

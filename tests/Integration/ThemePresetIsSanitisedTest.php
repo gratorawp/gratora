@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Styling\StylePresets;
-use FundKit\Campaigns\Styling\Tokens;
+use Gratora\Campaigns\Styling\StylePresets;
+use Gratora\Campaigns\Styling\Tokens;
 use WP_Theme_JSON_Resolver;
 
 /**
@@ -58,8 +58,8 @@ final class ThemePresetIsSanitisedTest extends IntegrationTestCase
             'color'      => ['background' => '#ffd400'],
         ]);
 
-        $this->assertArrayNotHasKey('fundkit-button-weight', $tokens);
-        $this->assertSame('#ffd400', $tokens['fundkit-accent'] ?? null, 'the readable half still arrives');
+        $this->assertArrayNotHasKey('gratora-button-weight', $tokens);
+        $this->assertSame('#ffd400', $tokens['gratora-accent'] ?? null, 'the readable half still arrives');
     }
 
     public function test_a_weight_the_catalogue_accepts_still_arrives(): void
@@ -69,7 +69,7 @@ final class ThemePresetIsSanitisedTest extends IntegrationTestCase
             'color'      => ['background' => '#ffd400'],
         ]);
 
-        $this->assertSame('700', $tokens['fundkit-button-weight'] ?? null);
+        $this->assertSame('700', $tokens['gratora-button-weight'] ?? null);
     }
 
     /** Whatever the active theme happens to supply, both surfaces see the same map. */

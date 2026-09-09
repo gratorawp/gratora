@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use FundKit\Campaigns\Campaign;
+use Gratora\Campaigns\Campaign;
 
 /**
  * A campaign schedule is the org's calendar, and the gate on the money path has

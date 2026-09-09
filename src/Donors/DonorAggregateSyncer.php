@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationQueries;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * Keeps pre-aggregated donor columns in sync when donations are paid, refunded
@@ -19,22 +19,22 @@ final class DonorAggregateSyncer
     /** @since 1.0.0 */
     public function register(): void
     {
-        add_action('fundkit.donation.completed', function (Donation $d): void {
+        add_action('gratora.donation.completed', function (Donation $d): void {
             $this->syncForDonor((int) $d->donor_id);
         });
 
-        add_action('fundkit.donation.refunded', function (Donation $d): void {
+        add_action('gratora.donation.refunded', function (Donation $d): void {
             $this->syncForDonor((int) $d->donor_id);
         });
 
         // A bank taking money back changes what this donor has given just as a
         // refund does. Without these two a charged-back donor keeps the money
         // in their lifetime total and stays in whatever segment it bought them.
-        add_action('fundkit.donation.disputed', function (Donation $d): void {
+        add_action('gratora.donation.disputed', function (Donation $d): void {
             $this->syncForDonor((int) $d->donor_id);
         });
 
-        add_action('fundkit.donation.reversal_reinstated', function (Donation $d): void {
+        add_action('gratora.donation.reversal_reinstated', function (Donation $d): void {
             $this->syncForDonor((int) $d->donor_id);
         });
 
@@ -43,7 +43,7 @@ final class DonorAggregateSyncer
         // donor left out of this keeps a lifetime total and a donation count
         // that are short by the amount they were never actually refunded, and
         // the segment that total buys them is wrong until they give again.
-        add_action('fundkit.donation.refund_reversed', function (Donation $d): void {
+        add_action('gratora.donation.refund_reversed', function (Donation $d): void {
             $this->syncForDonor((int) $d->donor_id);
         });
     }
@@ -61,7 +61,7 @@ final class DonorAggregateSyncer
 
             // donationsOnly, not live: a ticket order is a purchase, not a
             // donation, and counting it would inflate the buyer's lifetime total.
-            $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
+            $row = DonationQueries::donationsOnly(DB::table('gratora_donations')
                 ->whereIn('status', ['paid', 'partial_refund'])
                 ->where('donor_id', $donorId))
                 ->selectRaw("
@@ -79,7 +79,7 @@ final class DonorAggregateSyncer
                 'last_donation_at'    => $row['last_paid']  ?? null,
             ];
 
-            DB::table('fundkit_donors')
+            DB::table('gratora_donors')
                 ->where('id', $donorId)
                 ->update([
                     ...$after,
@@ -105,7 +105,7 @@ final class DonorAggregateSyncer
 
         $result = DB::raw(
             "SELECT total_donated_cents, donations_count, first_donation_at, last_donation_at
-             FROM {$prefix}fundkit_donors
+             FROM {$prefix}gratora_donors
              WHERE id = %d
              FOR UPDATE",
             [$donorId]
@@ -125,20 +125,20 @@ final class DonorAggregateSyncer
     /** @since 1.0.0 */
     private function fireDeltaHooks(int $donorId, array $before, array $after): void
     {
-        do_action('fundkit.donor.aggregates_synced', $donorId, $after, $before);
+        do_action('gratora.donor.aggregates_synced', $donorId, $after, $before);
 
         if ($before['donations_count'] === 0 && $after['donations_count'] > 0) {
-            do_action('fundkit.donor.first_donation_completed', $donorId, $after);
+            do_action('gratora.donor.first_donation_completed', $donorId, $after);
         }
 
-        $lapsedDays = max(1, (int) apply_filters('fundkit.donor.lapsed_threshold_days', 180));
+        $lapsedDays = max(1, (int) apply_filters('gratora.donor.lapsed_threshold_days', 180));
         $prevLast = $before['last_donation_at'];
         $nextLast = $after['last_donation_at'];
         if ($prevLast && $nextLast && $prevLast !== $nextLast) {
             $prevTs = strtotime((string) $prevLast);
             $nextTs = strtotime((string) $nextLast);
             if ($prevTs && $nextTs && ($nextTs - $prevTs) >= $lapsedDays * 86400) {
-                do_action('fundkit.donor.recovered', $donorId, $after, [
+                do_action('gratora.donor.recovered', $donorId, $after, [
                     'previous_last_donation_at' => $prevLast,
                     'lapsed_days_threshold'     => $lapsedDays,
                 ]);

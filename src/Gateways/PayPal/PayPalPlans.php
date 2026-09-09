@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways\PayPal;
+namespace Gratora\Gateways\PayPal;
 
-use FundKit\Gateways\AccountFingerprint;
+use Gratora\Gateways\AccountFingerprint;
 use RuntimeException;
 
 /**
@@ -14,8 +14,8 @@ use RuntimeException;
  */
 final class PayPalPlans
 {
-    private const PRODUCT_OPTION = 'fundkit_paypal_product';
-    private const PLANS_OPTION   = 'fundkit_paypal_plans';
+    private const PRODUCT_OPTION = 'gratora_paypal_product';
+    private const PLANS_OPTION   = 'gratora_paypal_plans';
 
     /** @since 1.0.0 */
     public function __construct(private PayPalApi $api, private PayPalAccount $account)
@@ -44,7 +44,7 @@ final class PayPalPlans
             'product_id' => $this->resolveProduct($test),
             'name'       => sprintf(
                 /* translators: 1: amount, 2: currency, 3: interval */
-                __('Donation %1$s %2$s / %3$s', 'fundraising-toolkit'),
+                __('Donation %1$s %2$s / %3$s', 'gratora'),
                 PayPalMoney::toValue($amountCents, $currency),
                 $currency,
                 $this->intervalLabel($intervalUnit, $intervalCount)
@@ -70,7 +70,7 @@ final class PayPalPlans
                 'setup_fee_failure_action'  => 'CONTINUE',
                 'payment_failure_threshold' => 3,
             ],
-        ], ['PayPal-Request-Id' => 'fundkit_plan_' . $key]);
+        ], ['PayPal-Request-Id' => 'gratora_plan_' . $key]);
 
         $planId = (string) ($plan['id'] ?? '');
         if ($planId === '') {
@@ -99,11 +99,11 @@ final class PayPalPlans
         }
 
         $product = $this->api->post('/v1/catalogs/products', [
-            'name'        => __('Donation', 'fundraising-toolkit'),
-            'description' => __('Recurring donation', 'fundraising-toolkit'),
+            'name'        => __('Donation', 'gratora'),
+            'description' => __('Recurring donation', 'gratora'),
             'type'        => 'SERVICE',
             'category'    => 'NONPROFIT',
-        ], ['PayPal-Request-Id' => 'fundkit_product_' . $key]);
+        ], ['PayPal-Request-Id' => 'gratora_product_' . $key]);
 
         $productId = (string) ($product['id'] ?? '');
         if ($productId === '') {

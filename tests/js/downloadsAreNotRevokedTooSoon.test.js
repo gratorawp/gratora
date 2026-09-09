@@ -29,10 +29,10 @@ afterEach( () => jest.restoreAllMocks() );
 
 describe( 'the shared admin saver', () => {
     it( 'does not free the blob before the browser has fetched it', () => {
-        saveBlob( new Blob( [ '{}' ] ), 'fundkit-export.json' );
+        saveBlob( new Blob( [ '{}' ] ), 'gratora-export.json' );
 
         expect( clicked ).toHaveLength( 1 );
-        expect( clicked[ 0 ].download ).toBe( 'fundkit-export.json' );
+        expect( clicked[ 0 ].download ).toBe( 'gratora-export.json' );
         expect( window.URL.revokeObjectURL ).not.toHaveBeenCalled();
     } );
 
@@ -40,7 +40,7 @@ describe( 'the shared admin saver', () => {
         jest.useFakeTimers();
 
         try {
-            saveBlob( new Blob( [ '{}' ] ), 'fundkit-export.json' );
+            saveBlob( new Blob( [ '{}' ] ), 'gratora-export.json' );
             jest.advanceTimersByTime( 5000 );
         } finally {
             jest.useRealTimers();

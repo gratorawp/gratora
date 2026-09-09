@@ -57,7 +57,7 @@ async function openProfile( country = '' ) {
         primary_currency: 'USD', csrf: 'csrf-token', consents_pending: 0,
     } );
 
-    document.body.innerHTML = '<div id="fundkit-donor-portal"></div>';
+    document.body.innerHTML = '<div id="gratora-donor-portal"></div>';
     jest.isolateModules( () => {
         require( '../../assets/donor-portal/index.jsx' );
     } );
@@ -85,13 +85,13 @@ beforeEach( () => {
     Intl.DisplayNames = GermanNames;
     routes = {};
     window.history.replaceState( {}, '', '/portal/' );
-    window.fundkitPortal = { rest: '/wp-json/fundkit/v1/portal/', nonce: '', token: 'portal-token' };
-    window.fundkit = {
+    window.gratoraPortal = { rest: '/wp-json/gratora/v1/portal/', nonce: '', token: 'portal-token' };
+    window.gratora = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
     global.fetch = jest.fn( ( url ) => {
-        const path = String( url ).replace( '/wp-json/fundkit/v1/portal/', '' );
+        const path = String( url ).replace( '/wp-json/gratora/v1/portal/', '' );
         const route = routes[ path ];
 
         return typeof route === 'function' ? route() : jsonResponse( 200, {} );

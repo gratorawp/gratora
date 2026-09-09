@@ -18,42 +18,42 @@ export default function RecentActivity( { rows = [] } ) {
             <EmptyState
                 compact
                 icon={ <Coins size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donations yet', 'fundraising-toolkit' ) }
-                body={ __( 'Donor activity rolls in here as soon as your first donation is received.', 'fundraising-toolkit' ) }
+                title={ __( 'No donations yet', 'gratora' ) }
+                body={ __( 'Donor activity rolls in here as soon as your first donation is received.', 'gratora' ) }
             />
         );
     }
 
     return (
-        <ul className="fundkit-activity">
+        <ul className="gratora-activity">
             { rows.map( ( r ) => (
-                <li key={ r.id } className="fundkit-activity__row">
-                    <span className={ `fundkit-activity__dot ${ freqDot[ r.frequency ] || 'is-onetime' }` }
+                <li key={ r.id } className="gratora-activity__row">
+                    <span className={ `gratora-activity__dot ${ freqDot[ r.frequency ] || 'is-onetime' }` }
                           title={ r.frequency === 'one_time'
-                              ? __( 'One-time', 'fundraising-toolkit' )
-                              : __( 'Recurring', 'fundraising-toolkit' ) }
+                              ? __( 'One-time', 'gratora' )
+                              : __( 'Recurring', 'gratora' ) }
                           aria-hidden="true" />
-                    <div className="fundkit-activity__body">
-                        <div className="fundkit-activity__top">
-                            <span className="fundkit-activity__donor">
+                    <div className="gratora-activity__body">
+                        <div className="gratora-activity__top">
+                            <span className="gratora-activity__donor">
                                 { r.donor_name }
                                 { r.is_test && (
-                                    <span className="fundkit-pill fundkit-pill--test">{ __( 'Test', 'fundraising-toolkit' ) }</span>
+                                    <span className="gratora-pill gratora-pill--test">{ __( 'Test', 'gratora' ) }</span>
                                 ) }
                             </span>
-                            <span className="fundkit-activity__amount">
+                            <span className="gratora-activity__amount">
                                 { formatAmount( r.amount_cents, r.currency ) }
                             </span>
                         </div>
-                        <div className="fundkit-activity__sub">
+                        <div className="gratora-activity__sub">
                             { r.campaign_id && r.campaign_title ? (
-                                <a href={ detailHref( r.campaign_id ) } className="fundkit-activity__campaign">
+                                <a href={ detailHref( r.campaign_id ) } className="gratora-activity__campaign">
                                     { r.campaign_title }
                                 </a>
                             ) : (
-                                <span className="fundkit-activity__campaign">{ __( 'No campaign', 'fundraising-toolkit' ) }</span>
+                                <span className="gratora-activity__campaign">{ __( 'No campaign', 'gratora' ) }</span>
                             ) }
-                            <span className="fundkit-activity__when">{ timeAgo( r.paid_at ) }</span>
+                            <span className="gratora-activity__when">{ timeAgo( r.paid_at ) }</span>
                         </div>
                     </div>
                 </li>

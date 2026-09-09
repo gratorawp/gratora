@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorNote;
-use FundKit\Donors\DonorNoteRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\DonorNote;
+use Gratora\Donors\DonorNoteRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -45,9 +45,9 @@ final class DonorProfileScreenAgreementTest extends IntegrationTestCase
         wp_set_current_user($mine);
         $this->notes()->create((int) $donor->id, 'Written by me', $mine);
 
-        // An editor holds fundkit_edit_donors but not manage_options.
+        // An editor holds gratora_edit_donors but not manage_options.
         $editor = self::factory()->user->create(['role' => 'editor']);
-        get_user_by('id', $editor)->add_cap('fundkit_edit_donors');
+        get_user_by('id', $editor)->add_cap('gratora_edit_donors');
         wp_set_current_user($editor);
 
         $seen = [];
@@ -81,7 +81,7 @@ final class DonorProfileScreenAgreementTest extends IntegrationTestCase
         $this->assertSame(55, $this->notes()->countForDonor((int) $donor->id));
         $this->assertCount(50, $this->notes()->listForDonor((int) $donor->id), 'the list is still capped');
 
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donors/' . (int) $donor->id . '/profile');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/donors/' . (int) $donor->id . '/profile');
         $res = rest_do_request($req);
         $this->assertSame(200, $res->get_status());
 
@@ -99,13 +99,13 @@ final class DonorProfileScreenAgreementTest extends IntegrationTestCase
         $donor = $this->donors()->findOrCreate('link-' . uniqid() . '@example.test', ['first_name' => 'Alan']);
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $ok = rest_do_request(new WP_REST_Request('POST', '/fundkit/v1/admin/donors/' . (int) $donor->id . '/portal-link'));
+        $ok = rest_do_request(new WP_REST_Request('POST', '/gratora/v1/admin/donors/' . (int) $donor->id . '/portal-link'));
         $this->assertSame(201, $ok->get_status(), 'a live donor gets a link');
 
         $this->donors()->redact($donor);
 
-        $refused = rest_do_request(new WP_REST_Request('POST', '/fundkit/v1/admin/donors/' . (int) $donor->id . '/portal-link'));
+        $refused = rest_do_request(new WP_REST_Request('POST', '/gratora/v1/admin/donors/' . (int) $donor->id . '/portal-link'));
         $this->assertSame(409, $refused->get_status());
-        $this->assertSame('fundkit_portal_link_unavailable', $refused->as_error()->get_error_code());
+        $this->assertSame('gratora_portal_link_unavailable', $refused->as_error()->get_error_code());
     }
 }

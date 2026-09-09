@@ -13,41 +13,41 @@ defined('ABSPATH') || exit;
 <section <?php
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
 echo get_block_wrapper_attributes(array_filter([
-    'class' => 'fundkit-block fundkit-block--recent-donations',
+    'class' => 'gratora-block gratora-block--recent-donations',
     'style' => $styleVars,
 ]));
 // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 ?>
-         data-block="fundkit/recent-donations">
+         data-block="gratora/recent-donations">
     <?php if ($title !== ''): ?>
-        <h3 class="fundkit-block__title"><?php echo esc_html($title);
+        <h3 class="gratora-block__title"><?php echo esc_html($title);
 ?></h3>
     <?php endif; ?>
 
     <?php if (! $entries): ?>
         <?php require __DIR__ . '/empty-cta.php'; ?>
     <?php else: ?>
-        <ul class="fundkit-recent-donations__list">
+        <ul class="gratora-recent-donations__list">
             <?php foreach ($entries as $entry): ?>
-                <li class="fundkit-recent-donations__item">
-                    <?php echo \FundKit\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
-                    <div class="fundkit-recent-donations__content">
-                        <div class="fundkit-recent-donations__header">
-                            <span class="fundkit-recent-donations__name<?php echo esc_attr($entry['is_anonymous'] ? ' is-anonymous' : ''); ?>">
+                <li class="gratora-recent-donations__item">
+                    <?php echo \Gratora\Campaigns\Blocks\BlockAvatar::markup($entry['name'], $entry['is_anonymous'], (string) ($entry['avatar_url'] ?? '')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- BlockAvatar::markup esc_html()s the initial and esc_url()s the image; its only other interpolation is an integer hue. ?>
+                    <div class="gratora-recent-donations__content">
+                        <div class="gratora-recent-donations__header">
+                            <span class="gratora-recent-donations__name<?php echo esc_attr($entry['is_anonymous'] ? ' is-anonymous' : ''); ?>">
                                 <?php echo esc_html($entry['name']);
 ?>
                             </span>
                             <?php if ($showAmount): ?>
-                                <span class="fundkit-recent-donations__amount">
-                                    <?php echo esc_html(\FundKit\Foundation\Helpers\Money::format($entry['amount_cents'], $entry['currency'], true));
+                                <span class="gratora-recent-donations__amount">
+                                    <?php echo esc_html(\Gratora\Foundation\Helpers\Money::format($entry['amount_cents'], $entry['currency'], true));
 ?>
                                 </span>
                             <?php endif; ?>
                         </div>
                         <?php if ($showTime || ($showMessage && $entry['message'] !== '')): ?>
-                            <div class="fundkit-recent-donations__meta">
+                            <div class="gratora-recent-donations__meta">
                                 <?php if ($showTime): ?>
-                                    <time class="fundkit-recent-donations__time"
+                                    <time class="gratora-recent-donations__time"
                                           datetime="<?php echo esc_attr($entry['paid_at_iso']);
 ?>">
                                         <?php echo esc_html($entry['time_ago']);
@@ -55,7 +55,7 @@ echo get_block_wrapper_attributes(array_filter([
                                     </time>
                                 <?php endif; ?>
                                 <?php if ($showMessage && $entry['message'] !== ''): ?>
-                                    <blockquote class="fundkit-recent-donations__message">
+                                    <blockquote class="gratora-recent-donations__message">
                                         <?php echo esc_html($entry['message']);
 ?>
                                     </blockquote>

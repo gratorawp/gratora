@@ -59,10 +59,10 @@ function mount() {
         if ( method === 'DELETE' ) {
             return deleteError ? Promise.reject( deleteError ) : Promise.resolve( { action: 'deactivated' } );
         }
-        if ( path.startsWith( '/fundkit/v1/admin/me/table-view' ) ) {
+        if ( path.startsWith( '/gratora/v1/admin/me/table-view' ) ) {
             return Promise.resolve( { sort: { field: 'type', direction: 'asc' } } );
         }
-        if ( path.startsWith( '/fundkit/v1/admin/funds/stats' ) ) {
+        if ( path.startsWith( '/gratora/v1/admin/funds/stats' ) ) {
             return Promise.resolve( {} );
         }
         if ( parse === false ) {
@@ -101,7 +101,7 @@ async function openDeleteDialog() {
     captured.actions.find( ( a ) => a.id === 'delete' ).callback( [ PARENT ] );
     await settle();
 
-    const dialog = document.querySelector( '.fundkit-dialog' );
+    const dialog = document.querySelector( '.gratora-dialog' );
     expect( dialog ).not.toBeNull();
     return dialog;
 }
@@ -111,11 +111,11 @@ it( 'shows a refused delete inside the dialog, not behind it', async () => {
 
     const dialog = await openDeleteDialog();
 
-    const confirm = [ ...dialog.querySelectorAll( '.fundkit-dialog__foot button' ) ].pop();
+    const confirm = [ ...dialog.querySelectorAll( '.gratora-dialog__foot button' ) ].pop();
     confirm.click();
     await settle();
 
-    const stillOpen = document.querySelector( '.fundkit-dialog' );
+    const stillOpen = document.querySelector( '.gratora-dialog' );
     expect( stillOpen ).not.toBeNull();
     expect( stillOpen.textContent ).toContain( 'Reassign or remove the sub-funds first.' );
 } );
@@ -123,7 +123,7 @@ it( 'shows a refused delete inside the dialog, not behind it', async () => {
 it( 'does not offer to reassign a fund that has sub-funds', async () => {
     const dialog = await openDeleteDialog();
 
-    expect( dialog.querySelector( '#fundkit-fund-delete-reassign' ) ).toBeNull();
+    expect( dialog.querySelector( '#gratora-fund-delete-reassign' ) ).toBeNull();
     expect( dialog.textContent ).toContain( 'sub-funds' );
 } );
 

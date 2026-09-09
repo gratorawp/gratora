@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit;
+namespace Gratora\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
@@ -14,7 +14,7 @@ use RecursiveIteratorIterator;
  */
 final class ScriptTranslationsTest extends TestCase
 {
-    private const DOMAIN = 'fundraising-toolkit';
+    private const DOMAIN = 'gratora';
 
     private function root(): string
     {
@@ -64,7 +64,7 @@ final class ScriptTranslationsTest extends TestCase
         foreach ($this->sources() as $path) {
             $php = (string) file_get_contents($path);
 
-            preg_match_all('/wp_enqueue_script\(\s*([^,]+?),\s*FUNDKIT_URL \. ([^,]+?),/s', $php, $calls, PREG_SET_ORDER);
+            preg_match_all('/wp_enqueue_script\(\s*([^,]+?),\s*GRATORA_URL \. ([^,]+?),/s', $php, $calls, PREG_SET_ORDER);
 
             foreach ($calls as $call) {
                 $handle = trim($call[1]);

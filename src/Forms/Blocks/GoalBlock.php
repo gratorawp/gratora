@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Forms\FormRepository;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Helpers\View;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Forms\FormRepository;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\View;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * Goal progress block. Display only: shows the form's own goal or the
@@ -28,7 +28,7 @@ final class GoalBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/goal';
+        return 'gratora/goal';
     }
 
     /** @since 1.0.0 */
@@ -59,7 +59,7 @@ final class GoalBlock implements Block
         $campaignId = (int) ($attrs['campaignId'] ?? 0);
         $campaign   = $campaignId ? $this->campaigns->findById($campaignId) : null;
         if (! $campaign) {
-            return $this->missing(__('Goal will appear once the form is linked to a campaign.', 'fundraising-toolkit'));
+            return $this->missing(__('Goal will appear once the form is linked to a campaign.', 'gratora'));
         }
 
         $type = (string) ($campaign->goal_type ?: 'amount');
@@ -70,7 +70,7 @@ final class GoalBlock implements Block
             ? (int) ($campaign->goal_cents ?? 0)
             : (int) ($campaign->goal_count ?? 0);
         if ($target <= 0) {
-            return $this->missing(__('The campaign has no goal set yet.', 'fundraising-toolkit'));
+            return $this->missing(__('The campaign has no goal set yet.', 'gratora'));
         }
         $current = match ($type) {
             'donations' => (int) ($campaign->donations_count ?? 0),
@@ -95,23 +95,23 @@ final class GoalBlock implements Block
         $formId = (int) ($attrs['formId'] ?? 0);
         $form   = $formId ? $this->forms->findById($formId) : null;
         if (! $form) {
-            return $this->missing(__('Goal will appear once the form is published.', 'fundraising-toolkit'));
+            return $this->missing(__('Goal will appear once the form is published.', 'gratora'));
         }
 
         $settings = is_array($form->settings) ? $form->settings : [];
         $goal     = is_array($settings['goal'] ?? null) ? $settings['goal'] : [];
         $type     = (string) ($goal['type'] ?? 'none');
         if (! in_array($type, ['amount', 'donations', 'donors'], true)) {
-            return $this->missing(__('This form has no goal set. Add one in the form settings.', 'fundraising-toolkit'));
+            return $this->missing(__('This form has no goal set. Add one in the form settings.', 'gratora'));
         }
         $target = $type === 'amount'
             ? (int) ($goal['amount_cents'] ?? 0)
             : (int) ($goal['count'] ?? 0);
         if ($target <= 0) {
-            return $this->missing(__('This form has no goal set. Add one in the form settings.', 'fundraising-toolkit'));
+            return $this->missing(__('This form has no goal set. Add one in the form settings.', 'gratora'));
         }
 
-        $stats = DB::table('fundkit_form_donation_stats')
+        $stats = DB::table('gratora_form_donation_stats')
             ->where('form_id', $formId)
             ->get();
         $raisedCents    = is_array($stats) ? (int) ($stats['raised_cents'] ?? 0) : 0;
@@ -177,7 +177,7 @@ final class GoalBlock implements Block
         if (! (is_user_logged_in() && current_user_can('edit_posts'))) {
             return '';
         }
-        return '<div class="fundkit-block fundkit-block--goal fundkit-goal fundkit-goal--missing">'
+        return '<div class="gratora-block gratora-block--goal gratora-goal gratora-goal--missing">'
              . esc_html($message)
              . '</div>';
     }

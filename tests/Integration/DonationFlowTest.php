@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Forms\Form;
-use FundKit\Funds\Fund;
+use Gratora\Campaigns\Campaign;
+use Gratora\Forms\Form;
+use Gratora\Funds\Fund;
 use WP_REST_Request;
 
 final class DonationFlowTest extends IntegrationTestCase
@@ -31,7 +31,7 @@ final class DonationFlowTest extends IntegrationTestCase
 
         // Donor row materialized with hashed email + Sarah's profile fields.
         $donor = self::$wpdb->get_row(
-            "SELECT email_hash, first_name, last_name, country FROM " . self::$prefix . "fundkit_donors LIMIT 1"
+            "SELECT email_hash, first_name, last_name, country FROM " . self::$prefix . "gratora_donors LIMIT 1"
         );
         $this->assertSame(64,        strlen($donor->email_hash));
         $this->assertSame('Sarah',   $donor->first_name);
@@ -40,7 +40,7 @@ final class DonationFlowTest extends IntegrationTestCase
 
         // Donation row in pending status with the gateway intent populated.
         $donation = self::$wpdb->get_row(self::$wpdb->prepare(
-            "SELECT status, amount_cents, currency, gateway_intent_id, country FROM " . self::$prefix . "fundkit_donations WHERE reference = %s",
+            "SELECT status, amount_cents, currency, gateway_intent_id, country FROM " . self::$prefix . "gratora_donations WHERE reference = %s",
             $data['reference']
         ));
         $this->assertSame('pending', $donation->status);
@@ -51,7 +51,7 @@ final class DonationFlowTest extends IntegrationTestCase
 
         // Event recorded.
         $events = self::$wpdb->get_results(
-            "SELECT type FROM " . self::$prefix . "fundkit_events ORDER BY id"
+            "SELECT type FROM " . self::$prefix . "gratora_events ORDER BY id"
         );
         $this->assertContains('donation.intent_created', array_column($events, 'type'));
     }
@@ -62,7 +62,7 @@ final class DonationFlowTest extends IntegrationTestCase
             'email' => 'sarah@example.com', 'amount_cents' => 5000, 'currency' => 'EUR', 'gateway' => 'offline',
         ])->get_data()['reference'];
 
-        $req = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $req = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $req->set_header('content-type', 'application/json');
         $req->set_body('{}');
         $res = rest_do_request($req);
@@ -74,7 +74,7 @@ final class DonationFlowTest extends IntegrationTestCase
         $this->assertNotEmpty($data['gateway_txn_id']);
 
         $types = array_column(
-            self::$wpdb->get_results("SELECT type FROM " . self::$prefix . "fundkit_events ORDER BY id"),
+            self::$wpdb->get_results("SELECT type FROM " . self::$prefix . "gratora_events ORDER BY id"),
             'type'
         );
         $this->assertContains('donation.intent_created', $types);
@@ -90,13 +90,13 @@ final class DonationFlowTest extends IntegrationTestCase
         ])->get_data()['reference'];
         $this->assertSame((int) $fund->id, $this->fundIdOf($reference));
 
-        $req = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $req = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $req->set_header('content-type', 'application/json');
         $req->set_body('{}');
         $this->assertSame(200, rest_do_request($req)->get_status());
 
         $raised = (int) self::$wpdb->get_var(self::$wpdb->prepare(
-            "SELECT raised_cents FROM " . self::$prefix . "fundkit_funds WHERE id = %d",
+            "SELECT raised_cents FROM " . self::$prefix . "gratora_funds WHERE id = %d",
             $fund->id
         ));
         $this->assertSame(5000, $raised, 'Fund raised_cents reflects the paid donation');
@@ -107,8 +107,8 @@ final class DonationFlowTest extends IntegrationTestCase
         $this->postDonation(['email' => 's@x.com', 'amount_cents' => 1000, 'currency' => 'EUR', 'gateway' => 'offline']);
         $this->postDonation(['email' => 'S@X.COM', 'amount_cents' => 2500, 'currency' => 'EUR', 'gateway' => 'offline']);
 
-        $donorCount = (int) self::$wpdb->get_var("SELECT COUNT(*) FROM " . self::$prefix . "fundkit_donors");
-        $donationCount = (int) self::$wpdb->get_var("SELECT COUNT(*) FROM " . self::$prefix . "fundkit_donations");
+        $donorCount = (int) self::$wpdb->get_var("SELECT COUNT(*) FROM " . self::$prefix . "gratora_donors");
+        $donationCount = (int) self::$wpdb->get_var("SELECT COUNT(*) FROM " . self::$prefix . "gratora_donations");
 
         $this->assertSame(1, $donorCount, 'Email normalization → same donor for case/whitespace variants');
         $this->assertSame(2, $donationCount);
@@ -128,7 +128,7 @@ final class DonationFlowTest extends IntegrationTestCase
             ['payload' => ['email' => 'x@y.com', 'amount_cents' => 0,    'currency' => 'EUR', 'gateway' => 'offline'], 'code' => 'rest_invalid_param'],
             ['payload' => ['email' => 'x@y.com', 'amount_cents' => 5000, 'currency' => 'EU',  'gateway' => 'offline'], 'code' => 'rest_invalid_param'],
             // Domain-level rejection (gateway list is dynamic).
-            ['payload' => ['email' => 'x@y.com', 'amount_cents' => 5000, 'currency' => 'EUR', 'gateway' => 'nope'],   'code' => 'fundkit_invalid_gateway'],
+            ['payload' => ['email' => 'x@y.com', 'amount_cents' => 5000, 'currency' => 'EUR', 'gateway' => 'nope'],   'code' => 'gratora_invalid_gateway'],
         ];
 
         foreach ($bad as $case) {
@@ -168,7 +168,7 @@ final class DonationFlowTest extends IntegrationTestCase
      * whoever wrote the ad link. Google and Facebook click ids, or a marketing
      * tool's tracking token, push a landing URL well past any limit worth
      * setting, and a donor arriving on one could not give at all: WordPress
-     * rejected the request in core, before FundKit could log or recover from it,
+     * rejected the request in core, before Gratora could log or recover from it,
      * and reloading kept the same URL.
      */
     public function test_an_enormous_landing_url_costs_the_attribution_not_the_donation(): void
@@ -187,7 +187,7 @@ final class DonationFlowTest extends IntegrationTestCase
 
         $ref  = $res->get_data()['reference'];
         $blob = json_decode((string) self::$wpdb->get_var(self::$wpdb->prepare(
-            'SELECT source_attribution FROM ' . self::$prefix . 'fundkit_donations WHERE reference = %s',
+            'SELECT source_attribution FROM ' . self::$prefix . 'gratora_donations WHERE reference = %s',
             $ref
         )), true);
 
@@ -219,7 +219,7 @@ final class DonationFlowTest extends IntegrationTestCase
         // public supporter wall / recent donations when the donor ticks the
         // opt-in, so the stored note_public flag must reflect that choice.
         // Only a form carrying a comment block offers the message at all.
-        $form = $this->publishedFormOffering('<!-- wp:fundkit/comment /-->');
+        $form = $this->publishedFormOffering('<!-- wp:gratora/comment /-->');
 
         $public = $this->postDonation([
             'email'        => 'wall@example.com',
@@ -254,7 +254,7 @@ final class DonationFlowTest extends IntegrationTestCase
             'gateway'      => 'offline',
         ]);
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('fundkit_unsupported_currency', $res->get_data()['code'] ?? null);
+        $this->assertSame('gratora_unsupported_currency', $res->get_data()['code'] ?? null);
     }
 
     public function test_zero_decimal_currency_rejects_fractional_amounts(): void
@@ -263,7 +263,7 @@ final class DonationFlowTest extends IntegrationTestCase
         // amount that is not a whole yen (5050 -> Y50.50) cannot be represented
         // and would mischarge at the gateway. Make JPY the base, then the create
         // endpoint must reject the fractional amount but allow the whole-yen one.
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'JPY',
             'supported_currencies' => ['JPY'],
         ]);
@@ -275,7 +275,7 @@ final class DonationFlowTest extends IntegrationTestCase
             'gateway'      => 'offline',
         ]);
         $this->assertSame(400, $bad->get_status());
-        $this->assertSame('fundkit_invalid_amount', $bad->get_data()['code'] ?? null);
+        $this->assertSame('gratora_invalid_amount', $bad->get_data()['code'] ?? null);
 
         $ok = $this->postDonation([
             'email'        => 'yen2@example.com',
@@ -290,7 +290,7 @@ final class DonationFlowTest extends IntegrationTestCase
     {
         // An org can switch its base currency without re-adding it to the
         // supported list; the base must always be accepted regardless.
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['EUR', 'GBP'],
         ]);
@@ -380,7 +380,7 @@ final class DonationFlowTest extends IntegrationTestCase
         // on the only active fund there is.
         $this->makeFund('general', 'General', true, true);
         $fund = $this->makeFund('arts', 'Arts', true);
-        $form = $this->publishedFormOffering('<!-- wp:fundkit/fund-picker /-->');
+        $form = $this->publishedFormOffering('<!-- wp:gratora/fund-picker /-->');
 
         $ref = $this->postDonation([
             'email' => 'a@x.com', 'amount_cents' => 1000, 'currency' => 'EUR',
@@ -405,7 +405,7 @@ final class DonationFlowTest extends IntegrationTestCase
         // the money lands, not the choice being dropped before it gets there.
         $inactive = $this->makeFund('old', 'Old', false);
         $def      = $this->makeFund('general', 'General', true, true);
-        $form     = $this->publishedFormOffering('<!-- wp:fundkit/fund-picker /-->');
+        $form     = $this->publishedFormOffering('<!-- wp:gratora/fund-picker /-->');
 
         $ref = $this->postDonation([
             'email' => 'c@x.com', 'amount_cents' => 1000, 'currency' => 'EUR',
@@ -418,7 +418,7 @@ final class DonationFlowTest extends IntegrationTestCase
     {
         $this->makeFund('general', 'General', true, true);
         $formFund = $this->makeFund('events', 'Events', true);
-        $form = \FundKit\Forms\Form::make();
+        $form = \Gratora\Forms\Form::make();
         $form->title           = 'Tickets';
         $form->slug            = 'tickets-' . uniqid();
         $form->blocks          = '';
@@ -476,7 +476,7 @@ final class DonationFlowTest extends IntegrationTestCase
         $real->created_at = gmdate('Y-m-d H:i:s'); $real->updated_at = $real->created_at;
         $real->save();
 
-        $form = \FundKit\Forms\Form::make();
+        $form = \Gratora\Forms\Form::make();
         $form->title = 'Bound'; $form->slug = 'bound-' . uniqid();
         $form->blocks = ''; $form->status = 'published';
         $form->campaign_id = (int) $real->id;
@@ -527,9 +527,9 @@ final class DonationFlowTest extends IntegrationTestCase
         $f->title      = 'Flow form';
         $f->slug       = 'flow-' . uniqid();
         $f->status     = 'published';
-        $f->blocks     = '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/email /-->'
+        $f->blocks     = '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/email /-->'
             . $block
-            . '<!-- wp:fundkit/submit-button /-->';
+            . '<!-- wp:gratora/submit-button /-->';
         $f->created_at = gmdate('Y-m-d H:i:s');
         $f->updated_at = $f->created_at;
         $f->save();
@@ -546,7 +546,7 @@ final class DonationFlowTest extends IntegrationTestCase
     {
         // $column is a fixed test-supplied identifier, never user input.
         return (int) self::$wpdb->get_var(self::$wpdb->prepare(
-            "SELECT {$column} FROM " . self::$prefix . "fundkit_donations WHERE reference = %s",
+            "SELECT {$column} FROM " . self::$prefix . "gratora_donations WHERE reference = %s",
             $reference
         ));
     }
@@ -555,7 +555,7 @@ final class DonationFlowTest extends IntegrationTestCase
     {
         // Org-disable offline; with Stripe unconnected nothing is available,
         // so a submit naming offline is rejected by server-side validation.
-        update_option('fundkit_gateway_config', ['offline' => ['enabled' => false]]);
+        update_option('gratora_gateway_config', ['offline' => ['enabled' => false]]);
 
         $res = $this->postDonation([
             'email'        => 'blocked@example.com',
@@ -565,14 +565,14 @@ final class DonationFlowTest extends IntegrationTestCase
         ]);
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('fundkit_gateway_not_allowed', $res->get_data()['code'] ?? null);
+        $this->assertSame('gratora_gateway_not_allowed', $res->get_data()['code'] ?? null);
 
-        delete_option('fundkit_gateway_config');
+        delete_option('gratora_gateway_config');
     }
 
     private function postDonation(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode($body));
         return rest_do_request($req);

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns;
+namespace Gratora\Campaigns;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Campaigns\Styling\CampaignStyleResolver;
-use FundKit\Foundation\Time\ScheduleWindow;
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Foundation\Time\ScheduleWindow;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /**
  * Owns one WP page and zero or more forms.
@@ -18,7 +18,7 @@ use FundKit\Vendor\Queryable\Schema\Table;
  */
 final class Campaign extends Model
 {
-    protected string $table = 'fundkit_campaigns';
+    protected string $table = 'gratora_campaigns';
     protected string $version = '1.0.0';
 
     public int $id;

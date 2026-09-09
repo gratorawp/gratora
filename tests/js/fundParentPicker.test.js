@@ -62,8 +62,8 @@ const settle = () => new Promise( ( resolve ) => setTimeout( resolve, 40 ) );
 
 function mount() {
     apiFetch.mockImplementation( ( { path, parse } ) => {
-        if ( path.startsWith( '/fundkit/v1/admin/me/table-view' ) ) return Promise.resolve( {} );
-        if ( path.startsWith( '/fundkit/v1/admin/funds/stats' ) )    return Promise.resolve( {} );
+        if ( path.startsWith( '/gratora/v1/admin/me/table-view' ) ) return Promise.resolve( {} );
+        if ( path.startsWith( '/gratora/v1/admin/funds/stats' ) )    return Promise.resolve( {} );
         if ( parse === false ) {
             return Promise.resolve( { json: async () => FUNDS, headers: { get: () => '3' } } );
         }

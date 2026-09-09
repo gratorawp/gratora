@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Upgrade;
+namespace Gratora\Foundation\Upgrade;
 
-use FundKit\Funds\Fund;
+use Gratora\Funds\Fund;
 
 /**
  * Makes the default fund open again.
@@ -32,7 +32,7 @@ final class OpenTheDefaultFund implements UpgradeRoutine
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Reopening the default fund. Donations already filed against another fund stay where they are.', 'fundraising-toolkit');
+        return __('Reopening the default fund. Donations already filed against another fund stay where they are.', 'gratora');
     }
 
     /** @since 1.0.0 */

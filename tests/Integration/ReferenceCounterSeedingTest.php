@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\References\ReferenceGenerator;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\References\ReferenceGenerator;
 
 /**
  * Changing the numbering settings moves which option holds the counter, and the
@@ -35,7 +35,7 @@ final class ReferenceCounterSeedingTest extends IntegrationTestCase
     private function alreadyIssued(int $count): void
     {
         $year = (int) gmdate('Y');
-        update_option("fundkit_reference_counter_donation_{$year}", (string) $count, false);
+        update_option("gratora_reference_counter_donation_{$year}", (string) $count, false);
     }
 
     public function test_turning_yearly_reset_off_does_not_restart_the_numbering(): void
@@ -80,15 +80,15 @@ final class ReferenceCounterSeedingTest extends IntegrationTestCase
 
     /**
      * Scopes are free-form strings and one can be a prefix of another:
-     * fundkit-events mints both 'ticket' and 'ticket_order'. Treating any
+     * gratora-events mints both 'ticket' and 'ticket_order'. Treating any
      * longer name as a year suffix drags the shorter sequence up to whatever
      * the longer one has reached.
      */
     public function test_a_sibling_scope_does_not_floor_this_one(): void
     {
         $this->settings(['reset_yearly' => false]);
-        update_option('fundkit_reference_counter_ticket_order', '500', false);
-        update_option('fundkit_reference_counter_ticket', '20', false);
+        update_option('gratora_reference_counter_ticket_order', '500', false);
+        update_option('gratora_reference_counter_ticket', '20', false);
 
         $this->assertSame(21, $this->gen()->peekNext('ticket'), 'a longer scope name is not a year suffix');
         $this->assertStringEndsWith('00021', $this->gen()->next('ticket'));
@@ -97,8 +97,8 @@ final class ReferenceCounterSeedingTest extends IntegrationTestCase
     public function test_a_year_suffix_still_floors_the_continuous_counter(): void
     {
         $this->settings(['reset_yearly' => false]);
-        update_option('fundkit_reference_counter_ticket_2025', '900', false);
-        update_option('fundkit_reference_counter_ticket', '20', false);
+        update_option('gratora_reference_counter_ticket_2025', '900', false);
+        update_option('gratora_reference_counter_ticket', '20', false);
 
         $this->assertSame(901, $this->gen()->peekNext('ticket'));
     }

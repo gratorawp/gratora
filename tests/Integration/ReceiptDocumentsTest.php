@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Receipts\Receipt;
-use FundKit\Receipts\ReceiptContext;
-use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Receipts\ReceiptRenderer;
-use FundKit\Settings\SettingsService;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Receipts\Receipt;
+use Gratora\Receipts\ReceiptContext;
+use Gratora\Receipts\ReceiptIssuer;
+use Gratora\Receipts\ReceiptRenderer;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -31,7 +31,7 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
             $this->rendered[] = $ctx;
         };
 
-        add_filter('fundkit.receipt.renderers', static function () use ($rendererId, $sink): array {
+        add_filter('gratora.receipt.renderers', static function () use ($rendererId, $sink): array {
             return [ new class ($rendererId, $sink) implements ReceiptRenderer {
                 public function __construct(private string $rid, private $sink)
                 {
@@ -59,7 +59,7 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
 
     private function paidDonation(array $custom = []): Donation
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode(array_filter([
             'email'        => 'doc-' . uniqid() . '@example.test',
@@ -71,7 +71,7 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
         ])));
         $reference = (string) rest_do_request($create)->get_data()['reference'];
 
-        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);
@@ -83,7 +83,7 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
 
     public function test_a_thank_you_email_names_the_organisation_not_the_website(): void
     {
-        update_option('fundkit_org_profile', ['name' => 'Acme Foundation']);
+        update_option('gratora_org_profile', ['name' => 'Acme Foundation']);
         update_option('blogname', 'Some WordPress Site');
 
         $mails = $this->captureMails();
@@ -105,7 +105,7 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
     {
         $seen = new \ArrayObject();
 
-        add_filter('fundkit.receipt.renderers', static function () use ($rendererId, $seen): array {
+        add_filter('gratora.receipt.renderers', static function () use ($rendererId, $seen): array {
             return [ new class ($rendererId, $seen) implements ReceiptRenderer {
                 public function __construct(private string $rid, private \ArrayObject $seen)
                 {
@@ -136,16 +136,16 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
         $receipt  = Receipt::query()->where('donation_id', (int) $donation->id)->get();
         $this->assertNotNull($receipt, 'fixture: the donation was receipted');
 
-        $token = Plugin::instance()->container->get(\FundKit\Donors\MagicLinkService::class)
+        $token = Plugin::instance()->container->get(\Gratora\Donors\MagicLinkService::class)
             ->issue((int) $receipt->donor_id, 'download_receipt', (int) $receipt->id);
 
         $seen = $this->captureAndStop((string) $receipt->renderer_id);
 
-        $req = new WP_REST_Request('GET', '/fundkit/v1/receipts/' . (int) $receipt->id . '/download');
+        $req = new WP_REST_Request('GET', '/gratora/v1/receipts/' . (int) $receipt->id . '/download');
         $req->set_param('receipt_id', (int) $receipt->id);
         $req->set_param('token', $token);
 
-        Plugin::instance()->container->get(\FundKit\Rest\ReceiptsController::class)->download($req);
+        Plugin::instance()->container->get(\Gratora\Rest\ReceiptsController::class)->download($req);
 
         $this->assertSame(
             [ 'dietary' => 'Vegetarian' ],
@@ -162,7 +162,7 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         $d   = Donation::make();
-        $d->reference         = 'FUNDKIT-STMT-' . uniqid();
+        $d->reference         = 'GRATORA-STMT-' . uniqid();
         $d->donor_id          = (int) $donor->id;
         $d->amount_cents      = 10_000;
         $d->net_cents         = 10_000;
@@ -179,9 +179,9 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
         $d->save();
 
         $seen = '';
-        add_filter('fundkit.statement.pdf', static function ($pdf) { return $pdf; });
+        add_filter('gratora.statement.pdf', static function ($pdf) { return $pdf; });
 
-        $builder = Plugin::instance()->container->get(\FundKit\Reports\TaxStatementBuilder::class);
+        $builder = Plugin::instance()->container->get(\Gratora\Reports\TaxStatementBuilder::class);
 
         $ref = new \ReflectionMethod($builder, 'orgDisclaimer');
         $ref->setAccessible(true);
@@ -229,7 +229,7 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
 
     private function receiptTemplate(): array
     {
-        $renderer = Plugin::instance()->container->get(\FundKit\Receipts\Renderers\GenericReceiptRenderer::class);
+        $renderer = Plugin::instance()->container->get(\Gratora\Receipts\Renderers\GenericReceiptRenderer::class);
         $ref      = new \ReflectionMethod($renderer, 'loadTemplate');
         $ref->setAccessible(true);
 
@@ -238,7 +238,7 @@ final class ReceiptDocumentsTest extends IntegrationTestCase
 
     public function test_an_untouched_footer_still_shows_the_built_in_text(): void
     {
-        delete_option('fundkit_receipt_settings');
+        delete_option('gratora_receipt_settings');
 
         $this->assertNotSame('', (string) $this->receiptTemplate()['footer_note']);
     }

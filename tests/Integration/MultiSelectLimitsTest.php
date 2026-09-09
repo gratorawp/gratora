@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\Form;
-use FundKit\Forms\FormSubmissionValidator;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormSubmissionValidator;
 
 /**
  * The editor let a minimum be set above the option count, or above the
@@ -25,9 +25,9 @@ final class MultiSelectLimitsTest extends IntegrationTestCase
     /** @param array<string,mixed> $custom */
     private function validate(string $attrs, array $custom): ?string
     {
-        $blocks = '<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500}]} /-->'
-            . '<!-- wp:fundkit/multi-select ' . $attrs . ' /-->'
-            . '<!-- wp:fundkit/submit-button /-->';
+        $blocks = '<!-- wp:gratora/donation-amount {"presets":[{"cents":2500}]} /-->'
+            . '<!-- wp:gratora/multi-select ' . $attrs . ' /-->'
+            . '<!-- wp:gratora/submit-button /-->';
 
         $result = (new FormSubmissionValidator())->validate($this->form($blocks), [
             'amount_cents' => 2500,
@@ -79,7 +79,7 @@ final class MultiSelectLimitsTest extends IntegrationTestCase
 
     public function test_the_rendered_field_carries_the_clamped_limits(): void
     {
-        $html = (new \FundKit\Forms\Blocks\MultiSelectBlock())->render([
+        $html = (new \Gratora\Forms\Blocks\MultiSelectBlock())->render([
             'label'         => 'Extras',
             'options'       => [['label' => 'Tote', 'value' => 'tote']],
             'minSelections' => 5,

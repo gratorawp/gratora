@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Upgrade;
+namespace Gratora\Foundation\Upgrade;
 
-use FundKit\Analytics\ErrorLog;
+use Gratora\Analytics\ErrorLog;
 
 /**
  * Run schema changes before bounded data migrations. Track completion per routine so skipped
@@ -14,10 +14,10 @@ use FundKit\Analytics\ErrorLog;
  */
 final class UpgradeRunner
 {
-    public const OPTION_DONE = 'fundkit_upgrade_routines_done';
+    public const OPTION_DONE = 'gratora_upgrade_routines_done';
 
     /** Last failure per routine id, so a stuck one is distinguishable. */
-    public const OPTION_FAILED = 'fundkit_upgrade_routines_failed';
+    public const OPTION_FAILED = 'gratora_upgrade_routines_failed';
 
     /** @var list<UpgradeRoutine> */
     private array $routines;
@@ -29,7 +29,7 @@ final class UpgradeRunner
     public function __construct(array $routines = [])
     {
         // Add-ons register their own; core's ship in the order they are listed.
-        $filtered = (array) apply_filters('fundkit.upgrade.routines', $routines);
+        $filtered = (array) apply_filters('gratora.upgrade.routines', $routines);
 
         $this->routines = array_values(array_filter(
             $filtered,

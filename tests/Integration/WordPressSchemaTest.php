@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * withMeta() reads its configuration from the registered schema, and WordPress
@@ -18,7 +18,7 @@ final class WordPressSchemaTest extends IntegrationTestCase
     {
         $args = ['post_type' => 'page', 'post_status' => 'publish', 'post_title' => $title];
         if ($layout !== null) {
-            $args['meta_input'] = ['_fundkit_layout' => $layout];
+            $args['meta_input'] = ['_gratora_layout' => $layout];
         }
 
         return (int) wp_insert_post($args);
@@ -36,13 +36,13 @@ final class WordPressSchemaTest extends IntegrationTestCase
 
         $rows = DB::table('posts')
             ->select('post_title')
-            ->withMeta('_fundkit_layout')
+            ->withMeta('_gratora_layout')
             ->where('post_type', 'page')
-            ->whereIsNotNull('_fundkit_layout')
+            ->whereIsNotNull('_gratora_layout')
             ->getAll();
 
         $this->assertCount(1, $rows);
-        $this->assertSame('team', $rows[0]['_fundkit_layout']);
+        $this->assertSame('team', $rows[0]['_gratora_layout']);
     }
 
     public function test_with_meta_works_on_an_aliased_table(): void
@@ -51,12 +51,12 @@ final class WordPressSchemaTest extends IntegrationTestCase
 
         $rows = DB::table('posts', 'p')
             ->select('p.post_title')
-            ->withMeta('_fundkit_layout')
+            ->withMeta('_gratora_layout')
             ->where('p.post_type', 'page')
-            ->whereIsNotNull('_fundkit_layout')
+            ->whereIsNotNull('_gratora_layout')
             ->getAll();
 
-        $this->assertSame('start', $rows[0]['_fundkit_layout']);
+        $this->assertSame('start', $rows[0]['_gratora_layout']);
     }
 
     /**
@@ -69,7 +69,7 @@ final class WordPressSchemaTest extends IntegrationTestCase
 
         $this->assertStringContainsString(
             "LEFT JOIN {$wpdb->postmeta} AS",
-            DB::table('posts')->select('ID')->withMeta('_fundkit_layout')->toSQL()
+            DB::table('posts')->select('ID')->withMeta('_gratora_layout')->toSQL()
         );
     }
 }

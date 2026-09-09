@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Gateways\SubscriptionSchedule;
-use FundKit\Gateways\SupportsScheduleChange;
+use Gratora\Gateways\SubscriptionSchedule;
+use Gratora\Gateways\SupportsScheduleChange;
 
 final class ScheduleChangeSeamTest extends IntegrationTestCase
 {
@@ -16,9 +16,9 @@ final class ScheduleChangeSeamTest extends IntegrationTestCase
     public function test_the_processors_that_can_declare_it(): void
     {
         $can = [
-            \FundKit\Gateways\Stripe\StripeGateway::class,
-            \FundKit\Gateways\PayPal\PayPalGateway::class,
-            \FundKit\Gateways\Sandbox\SandboxGateway::class,
+            \Gratora\Gateways\Stripe\StripeGateway::class,
+            \Gratora\Gateways\PayPal\PayPalGateway::class,
+            \Gratora\Gateways\Sandbox\SandboxGateway::class,
         ];
 
         foreach ($can as $class) {
@@ -33,9 +33,9 @@ final class ScheduleChangeSeamTest extends IntegrationTestCase
     public function test_they_keep_the_amount_only_method(): void
     {
         foreach ([
-            \FundKit\Gateways\Stripe\StripeGateway::class,
-            \FundKit\Gateways\PayPal\PayPalGateway::class,
-            \FundKit\Gateways\Sandbox\SandboxGateway::class,
+            \Gratora\Gateways\Stripe\StripeGateway::class,
+            \Gratora\Gateways\PayPal\PayPalGateway::class,
+            \Gratora\Gateways\Sandbox\SandboxGateway::class,
         ] as $class) {
             $this->assertTrue(method_exists($class, 'updateSubscriptionAmount'), $class);
         }

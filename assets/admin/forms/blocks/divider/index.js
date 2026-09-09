@@ -1,5 +1,5 @@
 /**
- * fundkit/divider: a horizontal rule with author-set spacing and line colour.
+ * gratora/divider: a horizontal rule with author-set spacing and line colour.
  * Mirrors the server render in src/Forms/Blocks/DividerBlock.php.
  */
 
@@ -11,7 +11,7 @@ import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import Slider from '../../../_shared/components/Slider';
 import ColorInput from '../../../_shared/components/ColorInput';
 
-const NAME = 'fundkit/divider';
+const NAME = 'gratora/divider';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -27,9 +27,9 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Divider', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Divider', 'gratora' ) } initialOpen>
                     <Slider
-                        label={ __( 'Space above', 'fundraising-toolkit' ) }
+                        label={ __( 'Space above', 'gratora' ) }
                         value={ marginTop }
                         onChange={ ( v ) => setAttributes( { marginTop: Number( v ) } ) }
                         min={ 0 }
@@ -37,7 +37,7 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <Slider
-                        label={ __( 'Space below', 'fundraising-toolkit' ) }
+                        label={ __( 'Space below', 'gratora' ) }
                         value={ marginBottom }
                         onChange={ ( v ) => setAttributes( { marginBottom: Number( v ) } ) }
                         min={ 0 }
@@ -45,7 +45,7 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <Slider
-                        label={ __( 'Line thickness', 'fundraising-toolkit' ) }
+                        label={ __( 'Line thickness', 'gratora' ) }
                         value={ thickness }
                         onChange={ ( v ) => setAttributes( { thickness: Number( v ) } ) }
                         min={ 1 }
@@ -53,12 +53,12 @@ function Edit( { attributes, setAttributes } ) {
                         unit="px"
                     />
                     <ColorInput
-                        label={ __( 'Line colour', 'fundraising-toolkit' ) }
+                        label={ __( 'Line colour', 'gratora' ) }
                         value={ color }
                         onChange={ ( v ) => setAttributes( { color: v || '' } ) }
                     />
                     <p style={ { fontSize: 12, color: '#6b7280', margin: '8px 0 0' } }>
-                        { __( 'Leave the colour empty to follow the form border colour.', 'fundraising-toolkit' ) }
+                        { __( 'Leave the colour empty to follow the form border colour.', 'gratora' ) }
                     </p>
                 </PanelBody>
                 <ConditionPanel
@@ -71,7 +71,7 @@ function Edit( { attributes, setAttributes } ) {
                     style={ {
                         margin:         `${ marginTop }px 0 ${ marginBottom }px`,
                         border:         0,
-                        borderTop:      `${ thickness }px solid ${ color || 'var(--fundkit-border, #e5e7eb)' }`,
+                        borderTop:      `${ thickness }px solid ${ color || 'var(--gratora-border, #e5e7eb)' }`,
                         width:          '100%',
                     } }
                 />
@@ -83,9 +83,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Divider', 'fundraising-toolkit' ),
-        description: __( 'A horizontal line with adjustable spacing and colour.', 'fundraising-toolkit' ),
-        category:   'fundkit-content',
+        title:      __( 'Divider', 'gratora' ),
+        description: __( 'A horizontal line with adjustable spacing and colour.', 'gratora' ),
+        category:   'gratora-content',
         icon:       BlockIcons.divider,
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

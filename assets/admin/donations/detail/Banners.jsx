@@ -39,25 +39,25 @@ export default function Banners( { donation, onRetrySubscription, retryBusy, ret
         <>
             { isTest && (
                 <Banner variant="warn">
-                    <strong>{ __( 'Test-mode donation.', 'fundraising-toolkit' ) }</strong>{ ' ' }
-                    { __( 'No real money changed hands.', 'fundraising-toolkit' ) }
+                    <strong>{ __( 'Test-mode donation.', 'gratora' ) }</strong>{ ' ' }
+                    { __( 'No real money changed hands.', 'gratora' ) }
                 </Banner>
             ) }
             { replacedBy && (
                 <Banner variant="warn">
-                    <strong>{ __( 'Replaced by a later attempt.', 'fundraising-toolkit' ) }</strong>{ ' ' }
-                    { __( 'The donor backed out here and started again, so this attempt is left out of the donations list, its counts and the CSV export.', 'fundraising-toolkit' ) }
+                    <strong>{ __( 'Replaced by a later attempt.', 'gratora' ) }</strong>{ ' ' }
+                    { __( 'The donor backed out here and started again, so this attempt is left out of the donations list, its counts and the CSV export.', 'gratora' ) }
                     { ' ' }
-                    { __( 'It is still pending, and it can still settle if the payment it is waiting on goes through.', 'fundraising-toolkit' ) }
+                    { __( 'It is still pending, and it can still settle if the payment it is waiting on goes through.', 'gratora' ) }
                     <div style={ { marginTop: 6 } }>
                         <a href={ addQueryArgs( window.location.pathname, {
-                            page:      'fundkit-donations',
+                            page:      'gratora-donations',
                             view:      'detail',
                             reference: replacedBy,
                         } ) }>
                             { sprintf(
                                 /* translators: %s: the replacement donation's reference. */
-                                __( 'Open %s', 'fundraising-toolkit' ),
+                                __( 'Open %s', 'gratora' ),
                                 replacedBy
                             ) }
                         </a>
@@ -66,35 +66,35 @@ export default function Banners( { donation, onRetrySubscription, retryBusy, ret
             ) }
             { isDisputed && (
                 <Banner variant="danger">
-                    <strong>{ __( 'Chargeback in progress.', 'fundraising-toolkit' ) }</strong>{ ' ' }
-                    { __( 'Review the dispute in your gateway dashboard before refunding.', 'fundraising-toolkit' ) }
+                    <strong>{ __( 'Chargeback in progress.', 'gratora' ) }</strong>{ ' ' }
+                    { __( 'Review the dispute in your gateway dashboard before refunding.', 'gratora' ) }
                 </Banner>
             ) }
             { isProcessing && (
                 <Banner variant="warn">
-                    <strong>{ __( 'Payment not settled yet.', 'fundraising-toolkit' ) }</strong>{ ' ' }
+                    <strong>{ __( 'Payment not settled yet.', 'gratora' ) }</strong>{ ' ' }
                     { donation.processing_reason }
                 </Banner>
             ) }
             { isFailed && donation.failure_reason && (
                 <Banner variant="danger">
-                    <strong>{ __( 'Payment failed.', 'fundraising-toolkit' ) }</strong>{ ' ' }
+                    <strong>{ __( 'Payment failed.', 'gratora' ) }</strong>{ ' ' }
                     { donation.failure_reason }
                 </Banner>
             ) }
             { subFailed && (
                 <Banner variant="danger">
-                    <strong>{ __( 'Recurring plan was not created.', 'fundraising-toolkit' ) }</strong>{ ' ' }
-                    { __( 'The donor was charged for this donation, but no recurring plan exists at the gateway. Nothing will renew until this is fixed.', 'fundraising-toolkit' ) }
+                    <strong>{ __( 'Recurring plan was not created.', 'gratora' ) }</strong>{ ' ' }
+                    { __( 'The donor was charged for this donation, but no recurring plan exists at the gateway. Nothing will renew until this is fixed.', 'gratora' ) }
                     { subFailReason && (
                         <div style={ { marginTop: 6 } }>
-                            <strong>{ __( 'Gateway reason:', 'fundraising-toolkit' ) }</strong>{ ' ' }
+                            <strong>{ __( 'Gateway reason:', 'gratora' ) }</strong>{ ' ' }
                             { subFailReason }
                         </div>
                     ) }
                     { retryError && (
                         <div style={ { marginTop: 6 } }>
-                            <strong>{ __( 'Last attempt failed:', 'fundraising-toolkit' ) }</strong>{ ' ' }
+                            <strong>{ __( 'Last attempt failed:', 'gratora' ) }</strong>{ ' ' }
                             { retryError }
                         </div>
                     ) }
@@ -107,8 +107,8 @@ export default function Banners( { donation, onRetrySubscription, retryBusy, ret
                                 disabled={ retryBusy }
                             >
                                 { retryBusy
-                                    ? __( 'Creating plan…', 'fundraising-toolkit' )
-                                    : __( 'Create the recurring plan', 'fundraising-toolkit' ) }
+                                    ? __( 'Creating plan…', 'gratora' )
+                                    : __( 'Create the recurring plan', 'gratora' ) }
                             </button>
                         </div>
                     ) }

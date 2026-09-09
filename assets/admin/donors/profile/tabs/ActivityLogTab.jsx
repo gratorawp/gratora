@@ -9,7 +9,7 @@ import { eventMeta, formatAmount, formatDateTime, timeAgo } from '../helpers';
 import { TimelineDot, eventTitle } from './ActivityTab';
 
 function donationHref( reference ) {
-    return addQueryArgs( window.location.pathname, { page: 'fundkit-donations', view: 'detail', reference } );
+    return addQueryArgs( window.location.pathname, { page: 'gratora-donations', view: 'detail', reference } );
 }
 
 // The full activity log for one donor, paginated server-side. The overview tab
@@ -39,7 +39,7 @@ export default function ActivityLogTab( { donorId } ) {
     useEffect( () => {
         let aborted = false;
         setLoading( true );
-        apiFetch( { path: addQueryArgs( `/fundkit/v1/admin/donors/${ donorId }/events`, apiParams ), parse: false } )
+        apiFetch( { path: addQueryArgs( `/gratora/v1/admin/donors/${ donorId }/events`, apiParams ), parse: false } )
             .then( async ( res ) => {
                 if ( aborted ) return;
                 const items = await res.json();
@@ -47,7 +47,7 @@ export default function ActivityLogTab( { donorId } ) {
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
                 setError( '' );
             } )
-            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load activity. Refresh to try again.', 'fundraising-toolkit' ) ); } } )
+            .catch( () => { if ( ! aborted ) { setData( [] ); setTotal( 0 ); setError( __( 'Could not load activity. Refresh to try again.', 'gratora' ) ); } } )
             .finally( () => { if ( ! aborted ) setLoading( false ); } );
         return () => { aborted = true; };
     }, [ donorId, apiParams ] );
@@ -55,7 +55,7 @@ export default function ActivityLogTab( { donorId } ) {
     const fields = useMemo( () => [
         {
             id:    'event',
-            label: __( 'Event', 'fundraising-toolkit' ),
+            label: __( 'Event', 'gratora' ),
             enableSorting: false,
             render: ( { item } ) => {
                 const meta = eventMeta( item );
@@ -68,7 +68,7 @@ export default function ActivityLogTab( { donorId } ) {
                                  it, and the timeline does not. */ }
                             { eventTitle( item ) }
                             { item.payload?.by === 'admin' && (
-                                <span className="dp-actlog__note">{ __( 'by an admin', 'fundraising-toolkit' ) }</span>
+                                <span className="dp-actlog__note">{ __( 'by an admin', 'gratora' ) }</span>
                             ) }
                             { item.note && (
                                 <span className="dp-actlog__note">“{ item.note }”</span>
@@ -80,7 +80,7 @@ export default function ActivityLogTab( { donorId } ) {
         },
         {
             id:    'reference',
-            label: __( 'Reference', 'fundraising-toolkit' ),
+            label: __( 'Reference', 'gratora' ),
             enableSorting: false,
             // A receipt event carries both a donation and a receipt, so
             // returning on the first would have meant a receipt row never
@@ -88,13 +88,13 @@ export default function ActivityLogTab( { donorId } ) {
             render: ( { item } ) => {
                 if ( ! item.reference && ! item.receipt_number ) return '-';
                 return (
-                    <div className="fundkit-row">
-                        <div className="fundkit-row__body">
+                    <div className="gratora-row">
+                        <div className="gratora-row__body">
                             { item.reference && (
-                                <a className="fundkit-mono-link" href={ donationHref( item.reference ) }>{ item.reference }</a>
+                                <a className="gratora-mono-link" href={ donationHref( item.reference ) }>{ item.reference }</a>
                             ) }
                             { item.receipt_number && (
-                                <div className="fundkit-row__sub fundkit-row__sub--mono">{ item.receipt_number }</div>
+                                <div className="gratora-row__sub gratora-row__sub--mono">{ item.receipt_number }</div>
                             ) }
                         </div>
                     </div>
@@ -103,13 +103,13 @@ export default function ActivityLogTab( { donorId } ) {
         },
         {
             id:    'campaign',
-            label: __( 'Campaign', 'fundraising-toolkit' ),
+            label: __( 'Campaign', 'gratora' ),
             enableSorting: false,
             render: ( { item } ) => item.campaign?.title || '-',
         },
         {
             id:    'amount',
-            label: __( 'Amount', 'fundraising-toolkit' ),
+            label: __( 'Amount', 'gratora' ),
             enableSorting: false,
             render: ( { item } ) => item.amount_cents !== null && item.amount_cents !== undefined
                 ? (
@@ -121,16 +121,16 @@ export default function ActivityLogTab( { donorId } ) {
         },
         {
             id:    'occurred_at',
-            label: __( 'When', 'fundraising-toolkit' ),
+            label: __( 'When', 'gratora' ),
             enableSorting: true,
             // Relative over absolute, the way the overview timeline reads it:
             // a bare "15h ago" with the real moment hidden in a tooltip made
             // the column impossible to scan by date.
             render: ( { item } ) => (
-                <div className="fundkit-row">
-                    <div className="fundkit-row__body">
-                        <div className="fundkit-row__name">{ timeAgo( item.occurred_at ) }</div>
-                        <div className="fundkit-row__sub">{ formatDateTime( item.occurred_at ) }</div>
+                <div className="gratora-row">
+                    <div className="gratora-row__body">
+                        <div className="gratora-row__name">{ timeAgo( item.occurred_at ) }</div>
+                        <div className="gratora-row__sub">{ formatDateTime( item.occurred_at ) }</div>
                     </div>
                 </div>
             ),
@@ -146,7 +146,7 @@ export default function ActivityLogTab( { donorId } ) {
     );
 
     return (
-        <div className="fundkit-dataviews dp-actlog-dv">
+        <div className="gratora-dataviews dp-actlog-dv">
             { error && (
                 <Notice status="error" isDismissible={ false }>{ error }</Notice>
             ) }

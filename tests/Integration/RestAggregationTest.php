@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Rest\ControllerRegistry;
+use Gratora\Rest\ControllerRegistry;
 
 final class RestAggregationTest extends IntegrationTestCase
 {
@@ -13,7 +13,7 @@ final class RestAggregationTest extends IntegrationTestCase
         $fake = new class {
             public function registerRoutes(): void
             {
-                register_rest_route('fundkit-addon/v1', '/ping', [
+                register_rest_route('gratora-addon/v1', '/ping', [
                     'methods'             => 'GET',
                     'callback'            => static fn () => ['pong' => true],
                     'permission_callback' => '__return_true',
@@ -21,16 +21,16 @@ final class RestAggregationTest extends IntegrationTestCase
             }
         };
 
-        add_action('fundkit.rest.register', static function (ControllerRegistry $r) use ($fake): void {
+        add_action('gratora.rest.register', static function (ControllerRegistry $r) use ($fake): void {
             $r->add($fake);
         });
 
         do_action('rest_api_init');
 
         $routes = rest_get_server()->get_routes();
-        $this->assertArrayHasKey('/fundkit-addon/v1/ping', $routes, 'the add-on route resolves');
-        $this->assertArrayHasKey('/fundkit/v1/admin/commands', $routes, 'core route unchanged');
+        $this->assertArrayHasKey('/gratora-addon/v1/ping', $routes, 'the add-on route resolves');
+        $this->assertArrayHasKey('/gratora/v1/admin/commands', $routes, 'core route unchanged');
 
-        remove_all_actions('fundkit.rest.register');
+        remove_all_actions('gratora.rest.register');
     }
 }

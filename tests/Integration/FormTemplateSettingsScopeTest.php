@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\FormTemplates;
+use Gratora\Forms\FormTemplates;
 
 /**
  * A template names the settings it has an opinion about, and applying one
@@ -12,7 +12,7 @@ use FundKit\Forms\FormTemplates;
  * anything a template overwrites without naming is configuration the author
  * cannot get back.
  *
- * @covers \FundKit\Forms\FormTemplates
+ * @covers \Gratora\Forms\FormTemplates
  */
 final class FormTemplateSettingsScopeTest extends IntegrationTestCase
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Time;
+namespace Gratora\Foundation\Time;
 
 use DateTimeImmutable;
 

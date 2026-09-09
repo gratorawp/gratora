@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Currency;
+namespace Gratora\Currency;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 
 /**
- * Daily refresh of fundkit_fx_rates from Frankfurter (ECB reference rates).
+ * Daily refresh of gratora_fx_rates from Frankfurter (ECB reference rates).
  *
  * On any failure the previous snapshot is left intact so conversion never
  * breaks on a bad fetch.
@@ -20,7 +20,7 @@ use FundKit\Recurring\RecurringPlanRepository;
  */
 final class FxRatesUpdater
 {
-    public const HOOK = 'fundkit.cron.fx_rates';
+    public const HOOK = 'gratora.cron.fx_rates';
     private const DAILY = 86400;
     private const ENDPOINT = 'https://api.frankfurter.app/latest';
 
@@ -34,7 +34,7 @@ final class FxRatesUpdater
     {
         add_action(self::HOOK, [$this, 'run']);
         add_action('init', fn () => $this->async->scheduleRecurring(self::HOOK, self::DAILY));
-        add_action('fundkit.settings.updated', [$this, 'onSettingsUpdated'], 10, 2);
+        add_action('gratora.settings.updated', [$this, 'onSettingsUpdated'], 10, 2);
     }
 
     /**
@@ -122,7 +122,7 @@ final class FxRatesUpdater
     {
         $base = strtoupper(Money::defaultCurrency());
 
-        $opt       = get_option('fundkit_currency_locale', []);
+        $opt       = get_option('gratora_currency_locale', []);
         $supported = is_array($opt) ? (array) ($opt['supported_currencies'] ?? []) : [];
 
         foreach ($supported as $code) {

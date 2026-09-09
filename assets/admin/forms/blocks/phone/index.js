@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'fundkit/phone';
+const NAME = 'gratora/phone';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -13,27 +13,27 @@ function Edit( { attributes, setAttributes } ) {
         required = false,
         condition = DEFAULT_CONDITION,
     } = attributes;
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--field' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--field' } );
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Phone', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Phone', 'gratora' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundraising-toolkit' ) }
+                        label={ __( 'Label', 'gratora' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Phone', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Phone', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'fundraising-toolkit' ) }
+                        label={ __( 'Placeholder', 'gratora' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         placeholder="+1 (555) 123 4567"
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundraising-toolkit' ) }
+                        label={ __( 'Required', 'gratora' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -45,11 +45,11 @@ function Edit( { attributes, setAttributes } ) {
                 />
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="fundkit-block-preview__label">
-                    { label || __( 'Phone', 'fundraising-toolkit' ) }
-                    { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
+                <span className="gratora-block-preview__label">
+                    { label || __( 'Phone', 'gratora' ) }
+                    { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
                 </span>
-                <div className="fundkit-block-preview__field">
+                <div className="gratora-block-preview__field">
                     { placeholder || '+1 (555) 123 4567' }
                 </div>
             </div>
@@ -60,8 +60,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Phone', 'fundraising-toolkit' ),
-        category:   'fundkit-donor',
+        title:      __( 'Phone', 'gratora' ),
+        category:   'gratora-donor',
         icon:       BlockIcons[ 'phone' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

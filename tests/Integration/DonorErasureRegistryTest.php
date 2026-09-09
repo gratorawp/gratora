@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\Erasure\ErasureHandler;
-use FundKit\Donors\Erasure\ErasureRequest;
-use FundKit\Foundation\Plugin;
+use Gratora\Analytics\Event;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\Erasure\ErasureHandler;
+use Gratora\Donors\Erasure\ErasureRequest;
+use Gratora\Foundation\Plugin;
 use RuntimeException;
 
 /**
  * The two tables the QA sweep found that erasure could not reach at all.
  *
- * Neither has a donor_id, so the old `fundkit.donor.redacted` action was
+ * Neither has a donor_id, so the old `gratora.donor.redacted` action was
  * structurally unable to help: it fired after email_encrypted was already ''
  * and the names were null, so a listener had nothing left to search for. The
  * registry captures the identifiers first and hands them over.
@@ -38,7 +38,7 @@ final class DonorErasureRegistryTest extends IntegrationTestCase
         $this->donorId = (int) $donor->id;
 
         $d = Donation::make();
-        $d->reference         = 'FUNDKIT-REG-1';
+        $d->reference         = 'GRATORA-REG-1';
         $d->donor_id          = $this->donorId;
         $d->amount_cents      = 5000;
         $d->base_amount_cents = 5000;
@@ -128,12 +128,12 @@ final class DonorErasureRegistryTest extends IntegrationTestCase
 
     /**
      * The strongest form of erasure is never holding the data. A delivery is
-     * recorded as what arrived and what FundKit did about it, and the gateway's own
+     * recorded as what arrived and what Gratora did about it, and the gateway's own
      * copy of the payer is not part of that, so there is nothing here to erase.
      */
     public function test_a_delivery_records_nothing_about_the_payer(): void
     {
-        $req = new \WP_REST_Request('POST', '/fundkit/v1/webhooks/offline');
+        $req = new \WP_REST_Request('POST', '/gratora/v1/webhooks/offline');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'id'   => 'evt_registry_1',
@@ -202,7 +202,7 @@ final class DonorErasureRegistryTest extends IntegrationTestCase
             $h[] = $exploder;
             return $h;
         };
-        add_filter('fundkit.donor.erasure_handlers', $add);
+        add_filter('gratora.donor.erasure_handlers', $add);
 
         try {
             $this->erase();
@@ -210,7 +210,7 @@ final class DonorErasureRegistryTest extends IntegrationTestCase
         } catch (RuntimeException $e) {
             $this->assertStringContainsString('cannot complete', $e->getMessage());
         } finally {
-            remove_filter('fundkit.donor.erasure_handlers', $add);
+            remove_filter('gratora.donor.erasure_handlers', $add);
         }
     }
 }

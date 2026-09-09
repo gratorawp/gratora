@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms;
+namespace Gratora\Forms;
 
-use FundKit\Donors\ConsentService;
-use FundKit\Forms\Blocks\ConsentBlock;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\ModeCredentialed;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\TestMode;
-use FundKit\Settings\SettingsService;
+use Gratora\Donors\ConsentService;
+use Gratora\Forms\Blocks\ConsentBlock;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\ModeCredentialed;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\TestMode;
+use Gratora\Settings\SettingsService;
 
 /** @since 1.0.0 */
 final class FormReadinessService
@@ -66,7 +66,7 @@ final class FormReadinessService
         $pass = [
             'id'     => 'consent-purposes',
             'status' => 'pass',
-            'label'  => __('Every consent this form asks for still exists', 'fundraising-toolkit'),
+            'label'  => __('Every consent this form asks for still exists', 'gratora'),
         ];
 
         $asked = $this->consentKeys(parse_blocks((string) $form->blocks));
@@ -90,14 +90,14 @@ final class FormReadinessService
         return [
             'id'           => 'consent-purposes',
             'status'       => 'fail',
-            'label'        => __('This form asks for consent that no longer exists', 'fundraising-toolkit'),
+            'label'        => __('This form asks for consent that no longer exists', 'gratora'),
             'detail'       => sprintf(
                 /* translators: %s: comma-separated consent purpose keys. */
-                __('%s is not in the consent registry any more, so donors are never asked and nothing is recorded, including where the consent was required. Put the purpose back under the same key, or take the block off this form.', 'fundraising-toolkit'),
+                __('%s is not in the consent registry any more, so donors are never asked and nothing is recorded, including where the consent was required. Put the purpose back under the same key, or take the block off this form.', 'gratora'),
                 implode(', ', $gone)
             ),
-            'action_url'   => admin_url('admin.php?page=fundkit-settings#privacy'),
-            'action_label' => __('Open consent settings', 'fundraising-toolkit'),
+            'action_url'   => admin_url('admin.php?page=gratora-settings#privacy'),
+            'action_label' => __('Open consent settings', 'gratora'),
         ];
     }
 
@@ -114,7 +114,7 @@ final class FormReadinessService
         foreach ($blocks as $b) {
             if (! is_array($b)) continue;
 
-            if (($b['blockName'] ?? null) === 'fundkit/consent') {
+            if (($b['blockName'] ?? null) === 'gratora/consent') {
                 foreach (ConsentBlock::purposeKeys(is_array($b['attrs'] ?? null) ? $b['attrs'] : []) as $key) {
                     $keys[$key] = true;
                 }
@@ -144,7 +144,7 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-toggle-frequencies',
                 'status' => 'pass',
-                'label'  => __('No recurring toggle on this form', 'fundraising-toolkit'),
+                'label'  => __('No recurring toggle on this form', 'gratora'),
             ];
         }
         $freqs = Blocks\RecurringToggleBlock::normalizeFrequencies($stub['frequencies'] ?? Blocks\RecurringToggleBlock::DEFAULT_FREQUENCIES);
@@ -155,14 +155,14 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-toggle-frequencies',
                 'status' => 'pass',
-                'label'  => __('Recurring toggle offers at least two frequencies', 'fundraising-toolkit'),
+                'label'  => __('Recurring toggle offers at least two frequencies', 'gratora'),
             ];
         }
         return [
             'id'           => 'recurring-toggle-frequencies',
             'status'       => 'warn',
-            'label'        => __('Recurring toggle has fewer than two frequencies', 'fundraising-toolkit'),
-            'detail'       => __('The block needs at least two frequencies to render; with one or none, it is silently hidden on the form. Add a frequency in the block settings.', 'fundraising-toolkit'),
+            'label'        => __('Recurring toggle has fewer than two frequencies', 'gratora'),
+            'detail'       => __('The block needs at least two frequencies to render; with one or none, it is silently hidden on the form. Add a frequency in the block settings.', 'gratora'),
         ];
     }
 
@@ -184,25 +184,25 @@ final class FormReadinessService
             }
         }
 
-        if (count($offered) < 2 || $this->hasBlock(parse_blocks((string) $form->blocks), 'fundkit/payment-gateways')) {
+        if (count($offered) < 2 || $this->hasBlock(parse_blocks((string) $form->blocks), 'gratora/payment-gateways')) {
             return [
                 'id'     => 'gateway-block',
                 'status' => 'pass',
-                'label'  => __('Donors can pick how to pay', 'fundraising-toolkit'),
+                'label'  => __('Donors can pick how to pay', 'gratora'),
             ];
         }
 
         return [
             'id'           => 'gateway-block',
             'status'       => 'warn',
-            'label'        => __('This form does not let the donor choose a payment method', 'fundraising-toolkit'),
+            'label'        => __('This form does not let the donor choose a payment method', 'gratora'),
             'detail'       => sprintf(
                 /* translators: %s: comma-separated list of enabled gateway names. */
-                __('%s are available, but the form has no payment methods block, so donors get whichever comes first. Add the block where you want the choice to appear.', 'fundraising-toolkit'),
+                __('%s are available, but the form has no payment methods block, so donors get whichever comes first. Add the block where you want the choice to appear.', 'gratora'),
                 implode(', ', $offered)
             ),
-            'action_url'   => admin_url('admin.php?page=fundkit-forms&form=' . (int) $form->id),
-            'action_label' => __('Edit the form', 'fundraising-toolkit'),
+            'action_url'   => admin_url('admin.php?page=gratora-forms&form=' . (int) $form->id),
+            'action_label' => __('Edit the form', 'gratora'),
         ];
     }
 
@@ -223,7 +223,7 @@ final class FormReadinessService
     {
         foreach ($blocks as $b) {
             if (! is_array($b)) continue;
-            if (($b['blockName'] ?? null) === 'fundkit/recurring-toggle') {
+            if (($b['blockName'] ?? null) === 'gratora/recurring-toggle') {
                 return is_array($b['attrs'] ?? null) ? $b['attrs'] : [];
             }
             $inner = $b['innerBlocks'] ?? null;
@@ -248,10 +248,10 @@ final class FormReadinessService
             return [
                 'id'           => 'gateway',
                 'status'       => 'fail',
-                'label'        => __('Stripe account is not ready to take donations', 'fundraising-toolkit'),
-                'detail'       => __('Finish the remaining Stripe verification steps or donations will fail.', 'fundraising-toolkit'),
-                'action_url'   => admin_url('admin.php?page=fundkit-settings#gateways'),
-                'action_label' => __('Open settings', 'fundraising-toolkit'),
+                'label'        => __('Stripe account is not ready to take donations', 'gratora'),
+                'detail'       => __('Finish the remaining Stripe verification steps or donations will fail.', 'gratora'),
+                'action_url'   => admin_url('admin.php?page=gratora-settings#gateways'),
+                'action_label' => __('Open settings', 'gratora'),
             ];
         }
 
@@ -269,10 +269,10 @@ final class FormReadinessService
             return [
                 'id'           => 'gateway',
                 'status'       => 'fail',
-                'label'        => __('No payment gateway enabled for this form', 'fundraising-toolkit'),
-                'detail'       => __('Donors cannot complete a donation without a gateway. Enable one, or widen the gateways this form allows.', 'fundraising-toolkit'),
-                'action_url'   => admin_url('admin.php?page=fundkit-settings#gateways'),
-                'action_label' => __('Configure gateways', 'fundraising-toolkit'),
+                'label'        => __('No payment gateway enabled for this form', 'gratora'),
+                'detail'       => __('Donors cannot complete a donation without a gateway. Enable one, or widen the gateways this form allows.', 'gratora'),
+                'action_url'   => admin_url('admin.php?page=gratora-settings#gateways'),
+                'action_label' => __('Configure gateways', 'gratora'),
             ];
         }
 
@@ -280,7 +280,7 @@ final class FormReadinessService
             'id'     => 'gateway',
             'status' => 'pass',
             /* translators: %s: comma-separated list of enabled gateway names. */
-            'label'  => sprintf(__('Payment gateways enabled: %s', 'fundraising-toolkit'), implode(', ', $enabled)),
+            'label'  => sprintf(__('Payment gateways enabled: %s', 'gratora'), implode(', ', $enabled)),
         ];
     }
 
@@ -291,7 +291,7 @@ final class FormReadinessService
             return [
                 'id'     => 'test-mode',
                 'status' => 'pass',
-                'label'  => __('Test mode is off', 'fundraising-toolkit'),
+                'label'  => __('Test mode is off', 'gratora'),
             ];
         }
 
@@ -329,32 +329,32 @@ final class FormReadinessService
                 'status' => 'fail',
                 'label'  => sprintf(
                     /* translators: %s: gateway names, comma separated */
-                    __('This form is in test mode, but %s has no test credentials', 'fundraising-toolkit'),
+                    __('This form is in test mode, but %s has no test credentials', 'gratora'),
                     implode(', ', $noTestKeys)
                 ),
-                'detail' => __('Every donation on this form will fail at the payment step. Add the test credentials, or turn test mode off.', 'fundraising-toolkit'),
+                'detail' => __('Every donation on this form will fail at the payment step. Add the test credentials, or turn test mode off.', 'gratora'),
                 'action_url'   => $ownSwitch
-                    ? admin_url('admin.php?page=fundkit-forms&form=' . (int) $form->id)
-                    : admin_url('admin.php?page=fundkit-settings#gateways'),
+                    ? admin_url('admin.php?page=gratora-forms&form=' . (int) $form->id)
+                    : admin_url('admin.php?page=gratora-settings#gateways'),
                 'action_label' => $ownSwitch
-                    ? __('Open this form', 'fundraising-toolkit')
-                    : __('Open settings', 'fundraising-toolkit'),
+                    ? __('Open this form', 'gratora')
+                    : __('Open settings', 'gratora'),
             ];
         }
 
         return [
             'id'           => 'test-mode',
             'status'       => 'warn',
-            'label'        => __('This form is in test mode', 'fundraising-toolkit'),
+            'label'        => __('This form is in test mode', 'gratora'),
             'detail'       => $ownSwitch
-                ? __('Donations will not be charged and are excluded from reporting. Turn test mode off in this form\'s gateway settings before going live.', 'fundraising-toolkit')
-                : __('Donations will not be charged and are excluded from reporting. The whole site is in test mode; turn it off before going live.', 'fundraising-toolkit'),
+                ? __('Donations will not be charged and are excluded from reporting. Turn test mode off in this form\'s gateway settings before going live.', 'gratora')
+                : __('Donations will not be charged and are excluded from reporting. The whole site is in test mode; turn it off before going live.', 'gratora'),
             'action_url'   => $ownSwitch
-                ? admin_url('admin.php?page=fundkit-forms&form=' . (int) $form->id)
-                : admin_url('admin.php?page=fundkit-settings#gateways'),
+                ? admin_url('admin.php?page=gratora-forms&form=' . (int) $form->id)
+                : admin_url('admin.php?page=gratora-settings#gateways'),
             'action_label' => $ownSwitch
-                ? __('Open this form', 'fundraising-toolkit')
-                : __('Open settings', 'fundraising-toolkit'),
+                ? __('Open this form', 'gratora')
+                : __('Open settings', 'gratora'),
         ];
     }
 
@@ -376,22 +376,22 @@ final class FormReadinessService
             return [
                 'id'           => 'receipt-sender',
                 'status'       => 'warn',
-                'label'        => __('Receipt sender uses WordPress fallback', 'fundraising-toolkit'),
-                'detail'       => __('Set a sender on your site domain, for example donations@yoursite.org, so receipts are recognisable. Delivery itself depends on your mail transport: see Settings, Email.', 'fundraising-toolkit'),
-                'action_url'   => admin_url('admin.php?page=fundkit-settings#email'),
-                'action_label' => __('Set sender', 'fundraising-toolkit'),
+                'label'        => __('Receipt sender uses WordPress fallback', 'gratora'),
+                'detail'       => __('Set a sender on your site domain, for example donations@yoursite.org, so receipts are recognisable. Delivery itself depends on your mail transport: see Settings, Email.', 'gratora'),
+                'action_url'   => admin_url('admin.php?page=gratora-settings#email'),
+                'action_label' => __('Set sender', 'gratora'),
             ];
         }
         return [
             'id'     => 'receipt-sender',
             'status' => 'pass',
             /* translators: %s: from-email address used for donation receipts. */
-            'label'  => sprintf(__('Receipts sent from %s', 'fundraising-toolkit'), $from),
+            'label'  => sprintf(__('Receipts sent from %s', 'gratora'), $from),
             // Deliberately not a clean bill of health. This check can only see
             // the address; a receipt sent from a perfectly valid one still
             // bounces when the host has no authenticated transport, which is
             // the usual shape of "no donor ever got a receipt".
-            'detail' => __('This confirms the address only. Whether receipts arrive depends on your mail transport.', 'fundraising-toolkit'),
+            'detail' => __('This confirms the address only. Whether receipts arrive depends on your mail transport.', 'gratora'),
         ];
     }
 
@@ -406,16 +406,16 @@ final class FormReadinessService
             return [
                 'id'           => 'receipt-template',
                 'status'       => 'fail',
-                'label'        => __('Donation receipt email is disabled', 'fundraising-toolkit'),
-                'detail'       => __('Donors will not receive a confirmation after paying.', 'fundraising-toolkit'),
-                'action_url'   => admin_url('admin.php?page=fundkit-settings#email'),
-                'action_label' => __('Enable template', 'fundraising-toolkit'),
+                'label'        => __('Donation receipt email is disabled', 'gratora'),
+                'detail'       => __('Donors will not receive a confirmation after paying.', 'gratora'),
+                'action_url'   => admin_url('admin.php?page=gratora-settings#email'),
+                'action_label' => __('Enable template', 'gratora'),
             ];
         }
         return [
             'id'     => 'receipt-template',
             'status' => 'pass',
-            'label'  => __('Donation receipt email is enabled', 'fundraising-toolkit'),
+            'label'  => __('Donation receipt email is enabled', 'gratora'),
         ];
     }
 
@@ -426,7 +426,7 @@ final class FormReadinessService
             return [
                 'id'     => 'https',
                 'status' => 'pass',
-                'label'  => __('Site is served over HTTPS', 'fundraising-toolkit'),
+                'label'  => __('Site is served over HTTPS', 'gratora'),
             ];
         }
         // Test mode moves no real money, so HTTPS only warns. Live mode fails:
@@ -435,15 +435,15 @@ final class FormReadinessService
             return [
                 'id'     => 'https',
                 'status' => 'warn',
-                'label'  => __('Site is not on HTTPS', 'fundraising-toolkit'),
-                'detail' => __('Fine for test mode, but live Stripe charges will be rejected. Install an SSL certificate before turning test mode off.', 'fundraising-toolkit'),
+                'label'  => __('Site is not on HTTPS', 'gratora'),
+                'detail' => __('Fine for test mode, but live Stripe charges will be rejected. Install an SSL certificate before turning test mode off.', 'gratora'),
             ];
         }
         return [
             'id'     => 'https',
             'status' => 'fail',
-            'label'  => __('Site is not on HTTPS', 'fundraising-toolkit'),
-            'detail' => __('Stripe rejects live charges on non-HTTPS sites. Install an SSL certificate before publishing.', 'fundraising-toolkit'),
+            'label'  => __('Site is not on HTTPS', 'gratora'),
+            'detail' => __('Stripe rejects live charges on non-HTTPS sites. Install an SSL certificate before publishing.', 'gratora'),
         ];
     }
 
@@ -454,7 +454,7 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-gateway',
                 'status' => 'pass',
-                'label'  => __('Form is one-time only', 'fundraising-toolkit'),
+                'label'  => __('Form is one-time only', 'gratora'),
             ];
         }
 
@@ -477,7 +477,7 @@ final class FormReadinessService
             return [
                 'id'     => 'recurring-gateway',
                 'status' => 'pass',
-                'label'  => __('Recurring donations are supported', 'fundraising-toolkit'),
+                'label'  => __('Recurring donations are supported', 'gratora'),
             ];
         }
 
@@ -485,10 +485,10 @@ final class FormReadinessService
             return [
                 'id'           => 'recurring-gateway',
                 'status'       => 'fail',
-                'label'        => __('No gateway supports recurring donations', 'fundraising-toolkit'),
-                'detail'       => __('None of the installed gateways can charge recurring donations. Remove the recurring-toggle block from this form, or install a gateway that supports recurring.', 'fundraising-toolkit'),
-                'action_url'   => admin_url('admin.php?page=fundkit-settings#gateways'),
-                'action_label' => __('Open gateways', 'fundraising-toolkit'),
+                'label'        => __('No gateway supports recurring donations', 'gratora'),
+                'detail'       => __('None of the installed gateways can charge recurring donations. Remove the recurring-toggle block from this form, or install a gateway that supports recurring.', 'gratora'),
+                'action_url'   => admin_url('admin.php?page=gratora-settings#gateways'),
+                'action_label' => __('Open gateways', 'gratora'),
             ];
         }
 
@@ -497,14 +497,14 @@ final class FormReadinessService
         return [
             'id'           => 'recurring-gateway',
             'status'       => 'fail',
-            'label'        => __('None of your enabled gateways supports recurring', 'fundraising-toolkit'),
+            'label'        => __('None of your enabled gateways supports recurring', 'gratora'),
             'detail'       => sprintf(
                 /* translators: %s: comma-separated list of recurring-capable gateway names. */
-                __('Enable one of %s in Settings → Payment gateways, or remove the recurring-toggle block from this form.', 'fundraising-toolkit'),
+                __('Enable one of %s in Settings → Payment gateways, or remove the recurring-toggle block from this form.', 'gratora'),
                 implode(', ', $names)
             ),
-            'action_url'   => admin_url('admin.php?page=fundkit-settings#gateways'),
-            'action_label' => __('Open gateways', 'fundraising-toolkit'),
+            'action_url'   => admin_url('admin.php?page=gratora-settings#gateways'),
+            'action_label' => __('Open gateways', 'gratora'),
         ];
     }
 
@@ -532,7 +532,7 @@ final class FormReadinessService
     {
         foreach ($blocks as $b) {
             if (! is_array($b)) continue;
-            if (($b['blockName'] ?? null) === 'fundkit/recurring-toggle') {
+            if (($b['blockName'] ?? null) === 'gratora/recurring-toggle') {
                 $freqs = Blocks\RecurringToggleBlock::normalizeFrequencies($b['attrs']['frequencies'] ?? Blocks\RecurringToggleBlock::DEFAULT_FREQUENCIES);
                 if (! in_array('one-time', $freqs, true) && ! empty($freqs)) {
                     array_unshift($freqs, 'one-time');

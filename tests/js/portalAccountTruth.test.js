@@ -27,7 +27,7 @@ function me( overrides = {} ) {
 
 function donation( i ) {
     return {
-        id: i, reference: `FUNDKIT-${ i }`, amount_cents: 1000, fee_covered_cents: 0,
+        id: i, reference: `GRATORA-${ i }`, amount_cents: 1000, fee_covered_cents: 0,
         refunded_cents: 0, currency: 'USD', frequency: 'one_time',
         paid_at: '2026-08-19 14:54:06', is_anonymous: false,
     };
@@ -51,11 +51,11 @@ async function settle() {
 const button = ( label ) => [ ...document.querySelectorAll( 'button' ) ]
     .find( ( b ) => b.textContent.trim() === label );
 
-const text = () => document.getElementById( 'fundkit-donor-portal' ).textContent;
+const text = () => document.getElementById( 'gratora-donor-portal' ).textContent;
 
 async function mount( overrides = {} ) {
     routes.me = () => jsonResponse( 200, me( overrides ) );
-    document.body.innerHTML = '<div id="fundkit-donor-portal"></div>';
+    document.body.innerHTML = '<div id="gratora-donor-portal"></div>';
     jest.isolateModules( () => {
         require( '../../assets/donor-portal/index.jsx' );
     } );
@@ -67,13 +67,13 @@ beforeEach( () => {
     routes = {};
     posted = [];
     window.history.replaceState( {}, '', '/portal/' );
-    window.fundkitPortal = { rest: '/wp-json/fundkit/v1/portal/', nonce: '', token: 'portal-token' };
-    window.fundkit = {
+    window.gratoraPortal = { rest: '/wp-json/gratora/v1/portal/', nonce: '', token: 'portal-token' };
+    window.gratora = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
     global.fetch = jest.fn( ( url, init ) => {
-        const path = String( url ).replace( '/wp-json/fundkit/v1/portal/', '' );
+        const path = String( url ).replace( '/wp-json/gratora/v1/portal/', '' );
         if ( init && init.method === 'POST' ) posted.push( { path, body: JSON.parse( init.body ) } );
         const route = routes[ path ];
 

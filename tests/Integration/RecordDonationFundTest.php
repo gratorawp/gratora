@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Funds\Fund;
+use Gratora\Donations\Donation;
+use Gratora\Funds\Fund;
 use WP_REST_Request;
 
 /**
@@ -25,7 +25,7 @@ final class RecordDonationFundTest extends IntegrationTestCase
 
     private function fund(array $body): int
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/funds');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/funds');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
         $res = rest_do_request($req);
@@ -38,7 +38,7 @@ final class RecordDonationFundTest extends IntegrationTestCase
     /** @return list<array<string,mixed>> */
     private function offered(): array
     {
-        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/donations/fund-options'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/donations/fund-options'));
         $this->assertSame(200, $res->get_status());
 
         return (array) $res->get_data();
@@ -46,7 +46,7 @@ final class RecordDonationFundTest extends IntegrationTestCase
 
     private function record(?int $fundId): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(array_filter([
             'email'          => 'cheque-' . uniqid() . '@example.test',
@@ -96,7 +96,7 @@ final class RecordDonationFundTest extends IntegrationTestCase
         $res = $this->record($closed);
 
         $this->assertSame(422, $res->get_status(), 'silently filing it elsewhere is the defect');
-        $this->assertSame('fundkit_invalid_fund', (string) ($res->get_data()['code'] ?? ''));
+        $this->assertSame('gratora_invalid_fund', (string) ($res->get_data()['code'] ?? ''));
         $this->assertSame(0, (int) Donation::query()->where('amount_cents', 500000)->count(), 'and no money was recorded');
     }
 

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Analytics\EventRetention;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Analytics\Event;
+use Gratora\Analytics\EventRetention;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -79,7 +79,7 @@ final class DonorAuditTrailTest extends IntegrationTestCase
         $donor = $this->donor();
         $this->deadDonation((int) $donor->id);
 
-        add_action('fundkit.test_data.purge_donations', static function (): void {
+        add_action('gratora.test_data.purge_donations', static function (): void {
             throw new \RuntimeException('an add-on refused');
         });
 
@@ -150,7 +150,7 @@ final class DonorAuditTrailTest extends IntegrationTestCase
         $noise->occurred_at = gmdate('Y-m-d H:i:s');
         $noise->save();
 
-        $req = new WP_REST_Request('DELETE', '/fundkit/v1/admin/tools/log');
+        $req = new WP_REST_Request('DELETE', '/gratora/v1/admin/tools/log');
         $req->set_param('source', 'donor.');
         $res = rest_do_request($req);
 

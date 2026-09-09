@@ -1,5 +1,5 @@
 /**
- * `fundkit/anonymous-toggle` block - donor opts to publish anonymously.
+ * `gratora/anonymous-toggle` block - donor opts to publish anonymously.
  */
 
 import { test, expect } from '../fixtures/donor-form';

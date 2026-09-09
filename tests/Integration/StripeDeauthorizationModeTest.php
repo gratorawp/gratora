@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\Stripe\StripeAccount;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\Stripe\StripeAccount;
 use WP_REST_Request;
 
 /**
@@ -30,7 +30,7 @@ final class StripeDeauthorizationModeTest extends IntegrationTestCase
 
         $this->testSecret = 'whsec_test_' . bin2hex(random_bytes(8));
         $this->liveSecret = 'whsec_live_' . bin2hex(random_bytes(8));
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'stripe' => [
                 'webhook_secret_test' => $this->testSecret,
                 'webhook_secret_live' => $this->liveSecret,
@@ -43,17 +43,17 @@ final class StripeDeauthorizationModeTest extends IntegrationTestCase
         $acct->refresh(['id' => 'acct_test_123', 'charges_enabled' => true]);
 
         $c       = Plugin::instance()->container;
-        $manager = $c->get(\FundKit\Gateways\GatewayManager::class);
+        $manager = $c->get(\Gratora\Gateways\GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \FundKit\Gateways\Stripe\StripeGateway(
-                $c->get(\FundKit\Gateways\Stripe\StripeApi::class),
-                $c->get(\FundKit\Donations\DonationRepository::class),
-                $c->get(\FundKit\Donations\DonationService::class),
-                $c->get(\FundKit\Gateways\Stripe\StripeAccount::class),
-                $c->get(\FundKit\Donors\DonorRepository::class),
-                $c->get(\FundKit\Donors\DonorService::class),
-                $c->get(\FundKit\Foundation\Time\Clock::class),
-                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
+            $manager->register(new \Gratora\Gateways\Stripe\StripeGateway(
+                $c->get(\Gratora\Gateways\Stripe\StripeApi::class),
+                $c->get(\Gratora\Donations\DonationRepository::class),
+                $c->get(\Gratora\Donations\DonationService::class),
+                $c->get(\Gratora\Gateways\Stripe\StripeAccount::class),
+                $c->get(\Gratora\Donors\DonorRepository::class),
+                $c->get(\Gratora\Donors\DonorService::class),
+                $c->get(\Gratora\Foundation\Time\Clock::class),
+                $c->get(\Gratora\Recurring\RecurringPlanRepository::class),
             ));
         }
     }
@@ -112,7 +112,7 @@ final class StripeDeauthorizationModeTest extends IntegrationTestCase
         $timestamp = (string) time();
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $secret);
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/gratora/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);

@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignMetricsService;
-use FundKit\Dashboard\DashboardMetricsService;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\DonorRepository;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\FrozenClock;
-use FundKit\Recurring\RecurringPlanRepository;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignMetricsService;
+use Gratora\Dashboard\DashboardMetricsService;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\DonorRepository;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\FrozenClock;
+use Gratora\Recurring\RecurringPlanRepository;
+use Gratora\Vendor\Queryable\DB;
 use WP_REST_Request;
 
 /**
@@ -82,7 +82,7 @@ final class AllTimeChartBoundTest extends IntegrationTestCase
     {
         $this->zeroDated($this->paid('2026-01-10 12:00:00', 100));
 
-        $req  = new WP_REST_Request('GET', '/fundkit/v1/admin/exports/options');
+        $req  = new WP_REST_Request('GET', '/gratora/v1/admin/exports/options');
         $opts = rest_do_request($req)->get_data();
 
         $this->assertSame(
@@ -155,7 +155,7 @@ final class AllTimeChartBoundTest extends IntegrationTestCase
     {
         $prefix = DB::getPrefix();
         DB::raw(
-            "UPDATE {$prefix}fundkit_donations SET paid_at = '0000-00-00 00:00:00' WHERE id = %d",
+            "UPDATE {$prefix}gratora_donations SET paid_at = '0000-00-00 00:00:00' WHERE id = %d",
             [(int) $d->id]
         );
     }
@@ -163,7 +163,7 @@ final class AllTimeChartBoundTest extends IntegrationTestCase
     private function paid(string $utc, int $cents, ?int $campaignId = null): Donation
     {
         $d = Donation::make();
-        $d->reference         = 'FUNDKIT-BOUND-' . uniqid();
+        $d->reference         = 'GRATORA-BOUND-' . uniqid();
         if ($campaignId !== null) {
             $d->campaign_id = $campaignId;
         }

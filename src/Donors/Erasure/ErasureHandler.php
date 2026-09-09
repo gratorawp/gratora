@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors\Erasure;
+namespace Gratora\Donors\Erasure;
 
 /**
  * One plugin's share of a donor erasure.

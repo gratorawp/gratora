@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Foundation\Batch\BatchProcessor;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Funds\Fund;
-use FundKit\Receipts\Receipt;
-use FundKit\Receipts\ReceiptContext;
-use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Receipts\ReceiptRenderer;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Foundation\Batch\BatchProcessor;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\References\ReferenceGenerator;
+use Gratora\Funds\Fund;
+use Gratora\Receipts\Receipt;
+use Gratora\Receipts\ReceiptContext;
+use Gratora\Receipts\ReceiptIssuer;
+use Gratora\Receipts\ReceiptRenderer;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 use RuntimeException;
 use Throwable;
 
@@ -127,7 +127,7 @@ final class ReceiptRecurringTransactionRollbackTest extends IntegrationTestCase
         $quiet = self::$wpdb->suppress_errors(true);
         $hidden = self::$wpdb->hide_errors();
         try {
-            do_action('fundkit.async.issue_receipt', ['donation_id' => (int) $donation->id]);
+            do_action('gratora.async.issue_receipt', ['donation_id' => (int) $donation->id]);
             $this->fail('the refused insert did not reach the caller');
         } catch (Throwable $e) {
             $this->assertStringContainsStringIgnoringCase('duplicate', $e->getMessage());
@@ -151,7 +151,7 @@ final class ReceiptRecurringTransactionRollbackTest extends IntegrationTestCase
     {
         $donation = $this->paidDonation('lands@example.test');
 
-        do_action('fundkit.async.issue_receipt', ['donation_id' => (int) $donation->id]);
+        do_action('gratora.async.issue_receipt', ['donation_id' => (int) $donation->id]);
 
         $receipt = Receipt::query()->where('donation_id', (int) $donation->id)->get();
         $this->assertInstanceOf(Receipt::class, $receipt, 'the issuer produced no receipt');
@@ -327,7 +327,7 @@ final class ReceiptRecurringTransactionRollbackTest extends IntegrationTestCase
         $donor->save();
 
         $donation = Donation::make();
-        $donation->reference         = 'FUNDKIT-T-' . bin2hex(random_bytes(4));
+        $donation->reference         = 'GRATORA-T-' . bin2hex(random_bytes(4));
         $donation->donor_id          = (int) $donor->id;
         $donation->amount_cents      = 2500;
         $donation->currency          = 'USD';
@@ -401,7 +401,7 @@ final class ReceiptRecurringTransactionRollbackTest extends IntegrationTestCase
 
     private function renderer(): ReceiptRenderer
     {
-        $renderers = (array) apply_filters('fundkit.receipt.renderers', []);
+        $renderers = (array) apply_filters('gratora.receipt.renderers', []);
         $this->assertNotEmpty($renderers, 'no receipt renderer is registered');
 
         return $renderers[0];

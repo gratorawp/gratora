@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -26,7 +26,7 @@ final class PortalPlanConcurrentRenewalTest extends IntegrationTestCase
         $sid  = bin2hex(random_bytes(32));
         $csrf = bin2hex(random_bytes(16));
         $sid = $this->portalSession($donorId, $csrf);
-        $_COOKIE['fundkit_donor_session'] = $sid;
+        $_COOKIE['gratora_donor_session'] = $sid;
 
         return $csrf;
     }
@@ -56,9 +56,9 @@ final class PortalPlanConcurrentRenewalTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function act(int $planId, string $csrf, array $body): int
     {
-        $req = new WP_REST_Request('POST', "/fundkit/v1/portal/recurring/{$planId}/action");
+        $req = new WP_REST_Request('POST', "/gratora/v1/portal/recurring/{$planId}/action");
         $req->set_header('content-type', 'application/json');
-        $req->set_header('X-FundKit-Csrf', $csrf);
+        $req->set_header('X-Gratora-Csrf', $csrf);
         $req->set_body((string) wp_json_encode($body));
 
         return rest_do_request($req)->get_status();

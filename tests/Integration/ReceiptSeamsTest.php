@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\Portal\AnnualStatementBuilder;
-use FundKit\Receipts\PdfBuilder;
-use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Reports\TaxStatementBuilder;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\Portal\AnnualStatementBuilder;
+use Gratora\Receipts\PdfBuilder;
+use Gratora\Receipts\ReceiptIssuer;
+use Gratora\Reports\TaxStatementBuilder;
 
 /**
  * The three seams an add-on issuing jurisdiction-correct documents needs.
@@ -20,7 +20,7 @@ use FundKit\Reports\TaxStatementBuilder;
  */
 final class ReceiptSeamsTest extends IntegrationTestCase
 {
-    // -- fundkit.statement.pdf --------------------------------------------------
+    // -- gratora.statement.pdf --------------------------------------------------
 
     /**
      * Both builders, because the portal route calls one and the admin route
@@ -33,7 +33,7 @@ final class ReceiptSeamsTest extends IntegrationTestCase
         $donor = $this->makeDonor();
         $seen  = [];
 
-        add_filter('fundkit.statement.pdf', static function ($pdf, $d, $year, $kind) use (&$seen) {
+        add_filter('gratora.statement.pdf', static function ($pdf, $d, $year, $kind) use (&$seen) {
             $seen[] = $kind;
             return 'PDF-' . $kind;
         }, 10, 4);
@@ -48,7 +48,7 @@ final class ReceiptSeamsTest extends IntegrationTestCase
         $donor = $this->makeDonor();
         $got   = null;
 
-        add_filter('fundkit.statement.pdf', static function ($pdf, $d, $year) use (&$got) {
+        add_filter('gratora.statement.pdf', static function ($pdf, $d, $year) use (&$got) {
             $got = ['donor_id' => (int) $d->id, 'year' => $year];
             return 'PDF';
         }, 10, 4);
@@ -63,11 +63,11 @@ final class ReceiptSeamsTest extends IntegrationTestCase
         $donor = $this->makeDonor();
 
         foreach ([null, '', false, 123, []] as $decline) {
-            add_filter('fundkit.statement.pdf', static fn () => $decline, 10, 4);
+            add_filter('gratora.statement.pdf', static fn () => $decline, 10, 4);
             // No donations, so core's own answer is the empty string. The point
             // is that it got as far as core rather than returning the value.
             $this->assertSame('', (new AnnualStatementBuilder(new PdfBuilder()))->build($donor, 2026));
-            remove_all_filters('fundkit.statement.pdf');
+            remove_all_filters('gratora.statement.pdf');
         }
     }
 
@@ -79,7 +79,7 @@ final class ReceiptSeamsTest extends IntegrationTestCase
         $this->assertSame('', $this->taxBuilder()->build($donor, 2026));
     }
 
-    // -- fundkit.receipt.should_issue -------------------------------------------
+    // -- gratora.receipt.should_issue -------------------------------------------
 
     public function test_the_issuance_default_is_unchanged(): void
     {
@@ -90,7 +90,7 @@ final class ReceiptSeamsTest extends IntegrationTestCase
     public function test_an_add_on_can_turn_issuance_on_for_its_own_kind(): void
     {
         add_filter(
-            'fundkit.receipt.should_issue',
+            'gratora.receipt.should_issue',
             static fn (bool $should, $donation): bool => $should || (string) $donation->kind === 'order',
             10,
             2
@@ -101,7 +101,7 @@ final class ReceiptSeamsTest extends IntegrationTestCase
 
     public function test_an_add_on_can_also_turn_issuance_off(): void
     {
-        add_filter('fundkit.receipt.should_issue', static fn (): bool => false, 10, 2);
+        add_filter('gratora.receipt.should_issue', static fn (): bool => false, 10, 2);
 
         $this->assertFalse($this->wouldIssue($this->makeDonation('donation')));
     }
@@ -111,7 +111,7 @@ final class ReceiptSeamsTest extends IntegrationTestCase
         $donation = $this->makeDonation('order');
         $got      = null;
 
-        add_filter('fundkit.receipt.should_issue', static function (bool $should, $d) use (&$got): bool {
+        add_filter('gratora.receipt.should_issue', static function (bool $should, $d) use (&$got): bool {
             $got = (string) $d->reference;
             return $should;
         }, 10, 2);
@@ -143,14 +143,14 @@ final class ReceiptSeamsTest extends IntegrationTestCase
         );
 
         $before = $count();
-        do_action('fundkit.donation.completed', $donation);
+        do_action('gratora.donation.completed', $donation);
 
         return $count() > $before;
     }
 
     private function taxBuilder(): TaxStatementBuilder
     {
-        return \FundKit\Foundation\Plugin::instance()->container->get(TaxStatementBuilder::class);
+        return \Gratora\Foundation\Plugin::instance()->container->get(TaxStatementBuilder::class);
     }
 
     private function makeDonor(): Donor

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignService;
-use FundKit\Donations\Donation;
-use FundKit\Donors\Consent;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignService;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Consent;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use InvalidArgumentException;
 use WP_REST_Request;
 
@@ -87,7 +87,7 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
     {
         $donor = $this->erasedDonor();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/donors/' . (int) $donor->id . '/notes');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/donors/' . (int) $donor->id . '/notes');
         $req->set_param('id', (int) $donor->id);
         $req->set_header('content-type', 'application/json');
         $req->set_body('{"body":"Called her about the refund, number is 07700 900222"}');
@@ -97,7 +97,7 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
         $this->assertSame(422, $res->get_status(), 'that text could never be erased again');
         $this->assertSame(
             0,
-            (int) \FundKit\Donors\DonorNote::query()->where('donor_id', (int) $donor->id)->count()
+            (int) \Gratora\Donors\DonorNote::query()->where('donor_id', (int) $donor->id)->count()
         );
     }
 
@@ -106,7 +106,7 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
         $donor = Plugin::instance()->container->get(DonorService::class)
             ->findOrCreate('living-' . uniqid() . '@example.test', ['first_name' => 'Grace']);
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/donors/' . (int) $donor->id . '/notes');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/donors/' . (int) $donor->id . '/notes');
         $req->set_param('id', (int) $donor->id);
         $req->set_header('content-type', 'application/json');
         $req->set_body('{"body":"Prefers a call before noon."}');
@@ -117,7 +117,7 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
 
     public function test_a_repeated_consent_key_writes_one_row_not_many(): void
     {
-        update_option('fundkit_consents', ['purposes' => [
+        update_option('gratora_consents', ['purposes' => [
             ['key' => 'newsletter', 'label' => 'Newsletter', 'required' => false, 'default' => false, 'version' => 1],
         ]]);
 
@@ -126,15 +126,15 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
 
         $items = array_fill(0, 200, ['key' => 'newsletter', 'granted' => true]);
 
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession((int) $donor->id, 'tok');
+        $_COOKIE['gratora_donor_session'] = $this->portalSession((int) $donor->id, 'tok');
         try {
-            $req = new WP_REST_Request('POST', '/fundkit/v1/portal/consents');
+            $req = new WP_REST_Request('POST', '/gratora/v1/portal/consents');
             $req->set_header('content-type', 'application/json');
-            $req->set_header('X-FundKit-Csrf', 'tok');
+            $req->set_header('X-Gratora-Csrf', 'tok');
             $req->set_body((string) wp_json_encode(['items' => $items]));
             $this->assertSame(200, rest_do_request($req)->get_status());
         } finally {
-            unset($_COOKIE['fundkit_donor_session']);
+            unset($_COOKIE['gratora_donor_session']);
         }
 
         $this->assertSame(
@@ -148,11 +148,11 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
     /** A handler that fails after the plans have already been cancelled. */
     private function breakTheErasure(): void
     {
-        add_filter('fundkit.donor.erasure_handlers', static function (array $handlers): array {
-            $handlers[] = new class implements \FundKit\Donors\Erasure\ErasureHandler {
+        add_filter('gratora.donor.erasure_handlers', static function (array $handlers): array {
+            $handlers[] = new class implements \Gratora\Donors\Erasure\ErasureHandler {
                 public function key(): string { return 'test.explodes'; }
 
-                public function erase(\FundKit\Donors\Erasure\ErasureRequest $request): void
+                public function erase(\Gratora\Donors\Erasure\ErasureRequest $request): void
                 {
                     throw new \RuntimeException('the erasure itself failed');
                 }
@@ -165,12 +165,12 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
     /** @return array{status:int, code:string, message:string} */
     private function portalForget(int $donorId): array
     {
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession($donorId, 'tok');
+        $_COOKIE['gratora_donor_session'] = $this->portalSession($donorId, 'tok');
 
         try {
-            $req = new WP_REST_Request('POST', '/fundkit/v1/portal/forget');
+            $req = new WP_REST_Request('POST', '/gratora/v1/portal/forget');
             $req->set_header('content-type', 'application/json');
-            $req->set_header('X-FundKit-Csrf', 'tok');
+            $req->set_header('X-Gratora-Csrf', 'tok');
             $req->set_body('{"confirm":"DELETE"}');
 
             $res  = rest_do_request($req);
@@ -182,7 +182,7 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
                 'message' => (string) ($data['message'] ?? ''),
             ];
         } finally {
-            unset($_COOKIE['fundkit_donor_session']);
+            unset($_COOKIE['gratora_donor_session']);
         }
     }
 
@@ -192,7 +192,7 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
             ->findOrCreate('forget-' . uniqid() . '@example.test', ['first_name' => 'Ada']);
 
         $now  = gmdate('Y-m-d H:i:s');
-        $plan = \FundKit\Recurring\RecurringPlan::make();
+        $plan = \Gratora\Recurring\RecurringPlan::make();
         $plan->donor_id                = (int) $donor->id;
         $plan->gateway                 = 'offline';
         $plan->gateway_subscription_id = 'sub_forget_' . uniqid();
@@ -211,11 +211,11 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
 
         $this->assertSame(
             'cancelled',
-            (string) \FundKit\Recurring\RecurringPlan::query()->where('id', (int) $plan->id)->get()->status,
+            (string) \Gratora\Recurring\RecurringPlan::query()->where('id', (int) $plan->id)->get()->status,
             'fixture: the plan is stopped before the erasure runs'
         );
         $this->assertSame(
-            'fundkit_erasure_failed',
+            'gratora_erasure_failed',
             $out['code'],
             'the donor was told their subscription was still running after it had been stopped'
         );
@@ -228,7 +228,7 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
             ->findOrCreate('forget-blocked-' . uniqid() . '@example.test', ['first_name' => 'Ada']);
 
         $now  = gmdate('Y-m-d H:i:s');
-        $plan = \FundKit\Recurring\RecurringPlan::make();
+        $plan = \Gratora\Recurring\RecurringPlan::make();
         $plan->donor_id                = (int) $donor->id;
         $plan->gateway                 = 'nowhere';
         $plan->gateway_subscription_id = 'sub_blocked_' . uniqid();
@@ -244,18 +244,18 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
 
         $out = $this->portalForget((int) $donor->id);
 
-        $this->assertSame('fundkit_erasure_blocked', $out['code']);
+        $this->assertSame('gratora_erasure_blocked', $out['code']);
         $this->assertSame(409, $out['status']);
     }
 
 
-    private function wall(): \FundKit\Campaigns\Blocks\SupporterWallBlock
+    private function wall(): \Gratora\Campaigns\Blocks\SupporterWallBlock
     {
         $c = Plugin::instance()->container;
 
-        return new \FundKit\Campaigns\Blocks\SupporterWallBlock(
-            $c->get(\FundKit\Campaigns\CampaignRepository::class),
-            $c->get(\FundKit\Donors\DonorAvatars::class),
+        return new \Gratora\Campaigns\Blocks\SupporterWallBlock(
+            $c->get(\Gratora\Campaigns\CampaignRepository::class),
+            $c->get(\Gratora\Donors\DonorAvatars::class),
         );
     }
 
@@ -268,7 +268,7 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         $d   = Donation::make();
-        $d->reference         = 'FUNDKIT-ORDER-' . uniqid();
+        $d->reference         = 'GRATORA-ORDER-' . uniqid();
         $d->donor_id          = (int) $donor->id;
         $d->campaign_id       = (int) $campaign->id;
         $d->kind              = 'order';
@@ -307,7 +307,7 @@ final class ConfirmedMediumFixesTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         $d   = Donation::make();
-        $d->reference         = 'FUNDKIT-DON-' . uniqid();
+        $d->reference         = 'GRATORA-DON-' . uniqid();
         $d->donor_id          = (int) $donor->id;
         $d->campaign_id       = (int) $campaign->id;
         $d->kind              = 'donation';

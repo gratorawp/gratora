@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from '@wordpress/element';
 
-const EVENT = 'fundkit:accordion:changed';
+const EVENT = 'gratora:accordion:changed';
 
 function registry() {
-    return ( typeof window !== 'undefined' && window.fundkit && window.fundkit.accordion ) || null;
+    return ( typeof window !== 'undefined' && window.gratora && window.gratora.accordion ) || null;
 }
 
 function subscribe( onChange ) {

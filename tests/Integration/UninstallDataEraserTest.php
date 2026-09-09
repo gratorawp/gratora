@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Core\Activator;
-use FundKit\Core\CoreModule;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Uninstall\DataEraser;
+use Gratora\Core\Activator;
+use Gratora\Core\CoreModule;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Uninstall\DataEraser;
 
 /**
  * Inspect the wipe plan without calling erase(), which would destroy the shared test database.
@@ -55,7 +55,7 @@ final class UninstallDataEraserTest extends IntegrationTestCase
      */
     public function test_page_ids_are_readable_before_anything_is_dropped(): void
     {
-        $req = new \WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new \WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Erase probe', 'status' => 'published']));
         $created = rest_do_request($req)->get_data();
@@ -70,24 +70,24 @@ final class UninstallDataEraserTest extends IntegrationTestCase
     {
         $tables = (new DataEraser())->plan()['tables'];
 
-        $this->assertContains('fundkit_donations', $tables);
-        $this->assertContains('fundkit_donors', $tables);
-        $this->assertContains('fundkit_system_settings', $tables);
+        $this->assertContains('gratora_donations', $tables);
+        $this->assertContains('gratora_donors', $tables);
+        $this->assertContains('gratora_system_settings', $tables);
 
         // Each of these exists on a site running the add-ons.
         foreach ([
-            'fundkit_ticket_orders',
-            'fundkit_ticket_events',
-            'fundkit_event_attendees',
-            'fundkit_fundraisers',
-            'fundkit_fundraiser_teams',
-            'fundkit_p2p_sponsors',
-            'fundkit_gift_aid_claims',
-            'fundkit_gift_aid_declarations',
-            'fundkit_ai_conversations',
-            'fundkit_connect_events',
-            'fundkit_donation_tributes',
-            'fundkit_give_import_map',
+            'gratora_ticket_orders',
+            'gratora_ticket_events',
+            'gratora_event_attendees',
+            'gratora_fundraisers',
+            'gratora_fundraiser_teams',
+            'gratora_p2p_sponsors',
+            'gratora_gift_aid_claims',
+            'gratora_gift_aid_declarations',
+            'gratora_ai_conversations',
+            'gratora_connect_events',
+            'gratora_donation_tributes',
+            'gratora_give_import_map',
         ] as $foreign) {
             $this->assertNotContains(
                 $foreign,
@@ -107,18 +107,18 @@ final class UninstallDataEraserTest extends IntegrationTestCase
 
     public function test_only_options_core_owns_are_planned(): void
     {
-        update_option('fundkit_gift_aid_db_version', '9.9.9', false);
-        update_option('fundkit_p2p_rules_version', '1', false);
+        update_option('gratora_gift_aid_db_version', '9.9.9', false);
+        update_option('gratora_p2p_rules_version', '1', false);
 
         $options = (new DataEraser())->plan()['options'];
 
-        $this->assertContains('fundkit_org_profile', $options);
-        $this->assertContains('fundkit_db_version', $options);
-        $this->assertNotContains('fundkit_gift_aid_db_version', $options);
-        $this->assertNotContains('fundkit_p2p_rules_version', $options);
+        $this->assertContains('gratora_org_profile', $options);
+        $this->assertContains('gratora_db_version', $options);
+        $this->assertNotContains('gratora_gift_aid_db_version', $options);
+        $this->assertNotContains('gratora_p2p_rules_version', $options);
 
-        delete_option('fundkit_gift_aid_db_version');
-        delete_option('fundkit_p2p_rules_version');
+        delete_option('gratora_gift_aid_db_version');
+        delete_option('gratora_p2p_rules_version');
     }
 
     /**
@@ -133,18 +133,18 @@ final class UninstallDataEraserTest extends IntegrationTestCase
         $options = (new DataEraser())->plan()['options'];
 
         foreach ([
-            'fundkit_campaign_cancel_recurring',
-            'fundkit_fund_reassignments',
-            'fundkit_donor_rehash_pending',
-            'fundkit_donor_rehash_after_id',
-            'fundkit_retention_starts_at',
-            'fundkit_retention_cursor',
-            'fundkit_gateway_reconcile_cursor',
-            'fundkit_upgrade_routines_failed',
-            'fundkit_consents',
-            'fundkit_email_settings',
-            'fundkit_paypal_product',
-            'fundkit_paypal_plans',
+            'gratora_campaign_cancel_recurring',
+            'gratora_fund_reassignments',
+            'gratora_donor_rehash_pending',
+            'gratora_donor_rehash_after_id',
+            'gratora_retention_starts_at',
+            'gratora_retention_cursor',
+            'gratora_gateway_reconcile_cursor',
+            'gratora_upgrade_routines_failed',
+            'gratora_consents',
+            'gratora_email_settings',
+            'gratora_paypal_product',
+            'gratora_paypal_plans',
         ] as $option) {
             $this->assertContains(
                 $option,
@@ -155,7 +155,7 @@ final class UninstallDataEraserTest extends IntegrationTestCase
     }
 
     /**
-     * These two names belong to fundkit/fundkit-licensing, which every paid
+     * These two names belong to gratora/gratora-licensing, which every paid
      * add-on vendors and which has no uninstall of its own. Core is the only
      * thing that erases them, so a name that drifts apart from the client's
      * leaves the licence key, a bearer credential, on the site after uninstall.
@@ -169,20 +169,20 @@ final class UninstallDataEraserTest extends IntegrationTestCase
         $options = (new DataEraser())->plan()['options'];
 
         $this->assertContains(
-            'fundkit_pro_license_key',
+            'gratora_pro_license_key',
             $options,
             'the licence key must not outlive an opt-in wipe'
         );
-        $this->assertContains('fundkit_licensing_status', $options);
+        $this->assertContains('gratora_licensing_status', $options);
     }
 
     public function test_reference_counters_are_planned_whatever_year_they_name(): void
     {
-        update_option('fundkit_reference_counter_donation_2031', 7, false);
+        update_option('gratora_reference_counter_donation_2031', 7, false);
 
-        $this->assertContains('fundkit_reference_counter_donation_2031', (new DataEraser())->plan()['options']);
+        $this->assertContains('gratora_reference_counter_donation_2031', (new DataEraser())->plan()['options']);
 
-        delete_option('fundkit_reference_counter_donation_2031');
+        delete_option('gratora_reference_counter_donation_2031');
     }
 
     public function test_the_opt_in_erases_itself(): void
@@ -194,19 +194,19 @@ final class UninstallDataEraserTest extends IntegrationTestCase
     {
         $caps = [...Capabilities::ALL, Capabilities::MANAGE];
 
-        foreach (['fundkit_manage_fundraisers', 'fundkit_manage_connect'] as $foreign) {
+        foreach (['gratora_manage_fundraisers', 'gratora_manage_connect'] as $foreign) {
             $this->assertNotContains($foreign, $caps, "{$foreign} belongs to an add-on");
         }
-        $this->assertContains('fundkit_view_donations', $caps);
+        $this->assertContains('gratora_view_donations', $caps);
     }
 
     public function test_planning_reads_nothing_destructive(): void
     {
-        update_option('fundkit_org_profile', ['name' => 'Acme Foundation'], false);
+        update_option('gratora_org_profile', ['name' => 'Acme Foundation'], false);
 
         (new DataEraser())->plan();
         (new DataEraser())->plan();
 
-        $this->assertNotEmpty(get_option('fundkit_org_profile', []), 'planning must not delete anything');
+        $this->assertNotEmpty(get_option('gratora_org_profile', []), 'planning must not delete anything');
     }
 }

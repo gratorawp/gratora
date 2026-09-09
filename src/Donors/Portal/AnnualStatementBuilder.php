@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors\Portal;
+namespace Gratora\Donors\Portal;
 
-use FundKit\Campaigns\Styling\Tokens;
-use FundKit\Campaigns\Styling\CampaignStyleResolver;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationQueries;
-use FundKit\Donations\Refund;
-use FundKit\Donors\Donor;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Helpers\View;
-use FundKit\Receipts\OrgProfile;
-use FundKit\Receipts\PdfBuilder;
+use Gratora\Campaigns\Styling\Tokens;
+use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
+use Gratora\Donations\Refund;
+use Gratora\Donors\Donor;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\View;
+use Gratora\Receipts\OrgProfile;
+use Gratora\Receipts\PdfBuilder;
 
 /** @since 1.0.0 */
 final class AnnualStatementBuilder
 {
-    /** Names this builder to the fundkit.statement.pdf filter. */
+    /** Names this builder to the gratora.statement.pdf filter. */
     public const KIND = 'portal';
 
     /** @since 1.0.0 */
@@ -33,7 +33,7 @@ final class AnnualStatementBuilder
         // this one outright. Without the seam a donor can reach two different
         // annual statements for the same year from the same portal, only one
         // of which satisfies their tax authority.
-        $override = apply_filters('fundkit.statement.pdf', null, $donor, $year, self::KIND);
+        $override = apply_filters('gratora.statement.pdf', null, $donor, $year, self::KIND);
         if (is_string($override) && $override !== '') {
             return $override;
         }
@@ -93,7 +93,7 @@ final class AnnualStatementBuilder
         $org      = OrgProfile::load();
         $orgName  = (string) $org['name'];
         $donorName = trim(($donor->first_name ?? '') . ' ' . ($donor->last_name ?? ''));
-        if ($donorName === '') $donorName = __('Friend', 'fundraising-toolkit');
+        if ($donorName === '') $donorName = __('Friend', 'gratora');
 
         $html = View::loadRelative(__DIR__, 'views/annual-statement', [
             'accent' => Tokens::printColor((new CampaignStyleResolver())->accentFor(null), '#211d3f'),
@@ -105,9 +105,9 @@ final class AnnualStatementBuilder
         ]);
 
         return $this->pdf->fromHtml($html, [
-            'title'   => sprintf(/* translators: %d: year */ __('Annual statement %d', 'fundraising-toolkit'), $year),
+            'title'   => sprintf(/* translators: %d: year */ __('Annual statement %d', 'gratora'), $year),
             'author'  => $orgName,
-            'subject' => __('Annual donation statement', 'fundraising-toolkit'),
+            'subject' => __('Annual donation statement', 'gratora'),
         ]);
     }
 }

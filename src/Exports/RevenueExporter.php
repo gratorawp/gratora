@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Exports;
+namespace Gratora\Exports;
 
 use DateTimeImmutable;
-use FundKit\Donations\DonationRepository;
-use FundKit\Foundation\Helpers\Csv;
-use FundKit\Foundation\Helpers\Money;
+use Gratora\Donations\DonationRepository;
+use Gratora\Foundation\Helpers\Csv;
+use Gratora\Foundation\Helpers\Money;
 
 /**
  * Month-by-month revenue and donation counts as CSV.
@@ -83,12 +83,12 @@ final class RevenueExporter
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- php://temp stream, not a filesystem path; WP_Filesystem has no streaming equivalent.
         fwrite($out, "\xEF\xBB\xBF");
         Csv::writeRow($out, [
-            __('Month', 'fundraising-toolkit'),
-            __('Donations', 'fundraising-toolkit'),
+            __('Month', 'gratora'),
+            __('Donations', 'gratora'),
             /* translators: %s: currency code, e.g. EUR. */
-            sprintf(__('Revenue (%s)', 'fundraising-toolkit'), $currency),
+            sprintf(__('Revenue (%s)', 'gratora'), $currency),
             /* translators: %s: currency code, e.g. EUR. */
-            sprintf(__('Average donation (%s)', 'fundraising-toolkit'), $currency),
+            sprintf(__('Average donation (%s)', 'gratora'), $currency),
         ]);
 
         foreach ($this->series($fromMonth, $toMonth) as $row) {

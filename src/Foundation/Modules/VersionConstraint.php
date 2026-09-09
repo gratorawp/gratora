@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Modules;
+namespace Gratora\Foundation\Modules;
 
 /**
  * Minimal semver constraint matcher (no Composer dependency).

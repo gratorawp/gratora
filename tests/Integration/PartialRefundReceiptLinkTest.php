@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\Donor;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Helpers\View;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
-use FundKit\Receipts\Receipt;
-use FundKit\Receipts\ReceiptContext;
-use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Receipts\ReceiptRenderer;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\Donor;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\View;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Upgrade\RestoreReceiptsRetainingMoney;
+use Gratora\Receipts\Receipt;
+use Gratora\Receipts\ReceiptContext;
+use Gratora\Receipts\ReceiptIssuer;
+use Gratora\Receipts\ReceiptRenderer;
 use RuntimeException;
 use WP_REST_Request;
 
@@ -48,7 +48,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
         $res = $this->requestDownload($receiptId, $token);
 
         $this->assertSame(410, $res->get_status());
-        $this->assertSame('fundkit_receipt_voided', $res->get_data()['code']);
+        $this->assertSame('gratora_receipt_voided', $res->get_data()['code']);
         $this->assertStringContainsString('refunded', (string) $res->get_data()['message']);
     }
 
@@ -125,7 +125,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
     private function renderReceiptView(int $amountCents, int $refundedCents): string
     {
         $donation = Donation::make();
-        $donation->reference    = 'FUNDKIT-VIEW-' . strtoupper(bin2hex(random_bytes(3)));
+        $donation->reference    = 'GRATORA-VIEW-' . strtoupper(bin2hex(random_bytes(3)));
         $donation->donor_id     = 0;
         $donation->amount_cents = $amountCents;
         $donation->net_cents    = $amountCents;
@@ -193,7 +193,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
         };
 
         $swap = static fn (): array => [$spy];
-        add_filter('fundkit.receipt.renderers', $swap, 99);
+        add_filter('gratora.receipt.renderers', $swap, 99);
         try {
             $this->requestDownload($receiptId, $token);
         } catch (RuntimeException $e) {
@@ -201,7 +201,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
                 throw $e;
             }
         } finally {
-            remove_filter('fundkit.receipt.renderers', $swap, 99);
+            remove_filter('gratora.receipt.renderers', $swap, 99);
         }
 
         return $spy->seen;
@@ -209,7 +209,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
 
     private function requestDownload(int $receiptId, string $token): \WP_REST_Response
     {
-        $req = new WP_REST_Request('GET', "/fundkit/v1/receipts/{$receiptId}/download");
+        $req = new WP_REST_Request('GET', "/gratora/v1/receipts/{$receiptId}/download");
         $req->set_query_params(['token' => $token]);
 
         return rest_do_request($req);
@@ -222,7 +222,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
     {
         $mails = $this->captureMails();
 
-        $createReq = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/gratora/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body(json_encode([
             'email'        => 'sarah@example.com',
@@ -233,7 +233,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($createReq)->get_data()['reference'];
 
-        $confirmReq = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirmReq = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirmReq->set_header('content-type', 'application/json');
         $confirmReq->set_body('{}');
         rest_do_request($confirmReq);
@@ -242,7 +242,7 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
 
         $link = null;
         foreach ($mails as $mail) {
-            if (preg_match('#/fundkit/v1/receipts/(\d+)/download\?token=([a-f0-9]+)#', (string) $mail['message'], $m)) {
+            if (preg_match('#/gratora/v1/receipts/(\d+)/download\?token=([a-f0-9]+)#', (string) $mail['message'], $m)) {
                 $link = $m;
             }
         }
@@ -256,8 +256,8 @@ final class PartialRefundReceiptLinkTest extends IntegrationTestCase
         return Plugin::instance()->container->get(DonationService::class);
     }
 
-    private function donations(): \FundKit\Donations\DonationRepository
+    private function donations(): \Gratora\Donations\DonationRepository
     {
-        return Plugin::instance()->container->get(\FundKit\Donations\DonationRepository::class);
+        return Plugin::instance()->container->get(\Gratora\Donations\DonationRepository::class);
     }
 }

@@ -33,12 +33,12 @@ const I18N = {
 
 function addForm() {
     const form = document.createElement( 'form' );
-    form.className = 'fundkit-donation-form';
-    form.id = 'fundkit-form-7';
+    form.className = 'gratora-donation-form';
+    form.id = 'gratora-form-7';
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-fundkit-form-config', '' );
+    json.setAttribute( 'data-gratora-form-config', '' );
     json.textContent = JSON.stringify( {
         slug:     'probe',
         form_id:  7,
@@ -57,12 +57,12 @@ function addForm() {
 }
 
 function returningFrom( frequency ) {
-    window.history.replaceState( {}, '', '/campaign/?fundkit_return=1&fundkit_ref=FUNDKIT-2026-00050'
+    window.history.replaceState( {}, '', '/campaign/?gratora_return=1&gratora_ref=GRATORA-2026-00050'
         + '&payment_intent_client_secret=pi_probe_secret' );
-    window.sessionStorage.setItem( 'fundkit:pending-donation', JSON.stringify( {
-        reference:   'FUNDKIT-2026-00050',
+    window.sessionStorage.setItem( 'gratora:pending-donation', JSON.stringify( {
+        reference:   'GRATORA-2026-00050',
         statusToken: 'tok',
-        formKey:     'fundkit-form-7',
+        formKey:     'gratora-form-7',
         amountCents: 5230,
         currency:    'USD',
         frequency,
@@ -76,19 +76,19 @@ async function boot() {
 }
 
 const receiptLabel = () =>
-    document.querySelector( '.fundkit-form__summary--receipt dt' )?.textContent.trim() ?? null;
+    document.querySelector( '.gratora-form__summary--receipt dt' )?.textContent.trim() ?? null;
 
 beforeEach( () => {
     document.body.innerHTML = '';
     window.sessionStorage.clear();
     mockStatus = 'succeeded';
-    window.fundkit = {
+    window.gratora = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
 } );
 
-afterEach( () => { delete window.fundkit; } );
+afterEach( () => { delete window.gratora; } );
 
 it( 'calls the charged figure a total on a recurring donation', async () => {
     returningFrom( 'monthly' );

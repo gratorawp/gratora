@@ -10,7 +10,7 @@ import { intervalLabel } from './List';
 
 function donationHref( reference ) {
     return addQueryArgs( window.location.pathname, {
-        page: 'fundkit-donations',
+        page: 'gratora-donations',
         view: 'detail',
         reference,
     } );
@@ -37,28 +37,28 @@ function Section( { title, rows } ) {
 }
 
 export default function PlanDetailDialog( { plan, onClose, onAction } ) {
-    const donorHref = addQueryArgs( window.location.pathname, { page: 'fundkit-donors' } )
+    const donorHref = addQueryArgs( window.location.pathname, { page: 'gratora-donors' } )
         + `#donor/${ plan.donor?.id }`;
 
     // Named after the provider, because the dialog title is also a subscription
     // id and the two never match.
     const gatewayName = plan.gateway ? plan.gateway.charAt( 0 ).toUpperCase() + plan.gateway.slice( 1 ) : '';
-    let providerIdLabel = __( 'Provider ID', 'fundraising-toolkit' );
+    let providerIdLabel = __( 'Provider ID', 'gratora' );
     if ( gatewayName ) {
         /* translators: %s: payment gateway name, e.g. Stripe. */
-        providerIdLabel = sprintf( __( '%s ID', 'fundraising-toolkit' ), gatewayName );
+        providerIdLabel = sprintf( __( '%s ID', 'gratora' ), gatewayName );
     }
 
     return (
         <Dialog
             /* translators: %d: subscription id */
-            title={ sprintf( __( 'Subscription #%d', 'fundraising-toolkit' ), plan.id ) }
+            title={ sprintf( __( 'Subscription #%d', 'gratora' ), plan.id ) }
             onClose={ onClose }
             size="wide"
             foot={
                 <>
                     <Btn className="sd-foot__close" variant="secondary" onClick={ onClose }>
-                        { __( 'Close', 'fundraising-toolkit' ) }
+                        { __( 'Close', 'gratora' ) }
                     </Btn>
                     { actionsFor( plan ).map( ( a ) => (
                         <Btn
@@ -91,7 +91,7 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
             { plan.last_failure && (
                 <div className="sd-failure">
                     <div className="sd-failure__reason">
-                        { plan.last_failure.reason || __( 'The gateway gave no reason.', 'fundraising-toolkit' ) }
+                        { plan.last_failure.reason || __( 'The gateway gave no reason.', 'gratora' ) }
                     </div>
                     <a href={ donationHref( plan.last_failure.reference ) }>
                         { plan.last_failure.reference }
@@ -100,29 +100,29 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
             ) }
 
             <Section
-                title={ __( 'Schedule', 'fundraising-toolkit' ) }
+                title={ __( 'Schedule', 'gratora' ) }
                 rows={ [
-                    { label: __( 'Next payment', 'fundraising-toolkit' ), value: plan.next_payment_at && formatDate( plan.next_payment_at ) },
-                    { label: __( 'Last payment', 'fundraising-toolkit' ), value: plan.last_payment_at && formatDate( plan.last_payment_at ) },
-                    { label: __( 'Started', 'fundraising-toolkit' ), value: plan.started_at && formatDate( plan.started_at ) },
-                    { label: __( 'Resumes', 'fundraising-toolkit' ), value: plan.resume_at && formatDate( plan.resume_at ) },
-                    { label: __( 'Cancelled', 'fundraising-toolkit' ), value: plan.cancelled_at && formatDate( plan.cancelled_at ) },
-                    { label: __( 'Reason', 'fundraising-toolkit' ), value: plan.cancellation_reason },
+                    { label: __( 'Next payment', 'gratora' ), value: plan.next_payment_at && formatDate( plan.next_payment_at ) },
+                    { label: __( 'Last payment', 'gratora' ), value: plan.last_payment_at && formatDate( plan.last_payment_at ) },
+                    { label: __( 'Started', 'gratora' ), value: plan.started_at && formatDate( plan.started_at ) },
+                    { label: __( 'Resumes', 'gratora' ), value: plan.resume_at && formatDate( plan.resume_at ) },
+                    { label: __( 'Cancelled', 'gratora' ), value: plan.cancelled_at && formatDate( plan.cancelled_at ) },
+                    { label: __( 'Reason', 'gratora' ), value: plan.cancellation_reason },
                 ] }
             />
 
             <Section
-                title={ __( 'Giving', 'fundraising-toolkit' ) }
+                title={ __( 'Giving', 'gratora' ) }
                 rows={ [
-                    { label: __( 'Payments', 'fundraising-toolkit' ), value: plan.payments_count || null },
-                    { label: __( 'Lifetime', 'fundraising-toolkit' ), value: formatAmount( plan.total_paid_cents, plan.currency ) },
-                    { label: __( 'Failed renewals', 'fundraising-toolkit' ), value: plan.failed_renewals_count || null },
+                    { label: __( 'Payments', 'gratora' ), value: plan.payments_count || null },
+                    { label: __( 'Lifetime', 'gratora' ), value: formatAmount( plan.total_paid_cents, plan.currency ) },
+                    { label: __( 'Failed renewals', 'gratora' ), value: plan.failed_renewals_count || null },
                 ] }
             />
 
             { plan.errors?.length > 0 && (
                 <div className="sd-group">
-                    <h4 className="sd-group__title">{ __( 'Problems', 'fundraising-toolkit' ) }</h4>
+                    <h4 className="sd-group__title">{ __( 'Problems', 'gratora' ) }</h4>
                     <ul className="sd-errors">
                         { plan.errors.map( ( e, i ) => (
                             <li className="sd-errors__row" key={ `${ e.at }-${ i }` }>
@@ -136,14 +136,14 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
             ) }
 
             <Section
-                title={ __( 'Payment provider', 'fundraising-toolkit' ) }
+                title={ __( 'Payment provider', 'gratora' ) }
                 rows={ [
-                    { label: __( 'Gateway', 'fundraising-toolkit' ), value: <span className="sd-cap">{ plan.gateway }</span> },
+                    { label: __( 'Gateway', 'gratora' ), value: <span className="sd-cap">{ plan.gateway }</span> },
                     {
                         label: providerIdLabel,
                         value: plan.gateway_subscription_id
                             ? <code className="sd-mono">{ plan.gateway_subscription_id }</code>
-                            : <span className="sd-muted">{ __( 'Not linked', 'fundraising-toolkit' ) }</span>,
+                            : <span className="sd-muted">{ __( 'Not linked', 'gratora' ) }</span>,
                     },
                 ] }
             />

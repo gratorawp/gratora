@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
-use FundKit\Foundation\Helpers\View;
+use Gratora\Foundation\Helpers\View;
 
 /** @since 1.0.0 */
 final class CommentBlock implements Block
@@ -12,7 +12,7 @@ final class CommentBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/comment';
+        return 'gratora/comment';
     }
 
     /** @since 1.0.0 */
@@ -29,8 +29,8 @@ final class CommentBlock implements Block
     public function render(array $attrs, string $content): string
     {
         return View::loadRelative(__DIR__, 'views/comment', [
-            'label'       => (string) ($attrs['label']       ?? '') ?: __('Add a message', 'fundraising-toolkit'),
-            'placeholder' => (string) ($attrs['placeholder'] ?? '') ?: __('Anything you want to share?', 'fundraising-toolkit'),
+            'label'       => (string) ($attrs['label']       ?? '') ?: __('Add a message', 'gratora'),
+            'placeholder' => (string) ($attrs['placeholder'] ?? '') ?: __('Anything you want to share?', 'gratora'),
             'required'    => (bool)   ($attrs['required']    ?? false),
         ]);
     }

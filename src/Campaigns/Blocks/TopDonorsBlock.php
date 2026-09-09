@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Blocks;
+namespace Gratora\Campaigns\Blocks;
 
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorAvatars;
-use FundKit\Donors\PublicDonorNames;
-use FundKit\Foundation\Helpers\View;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorAvatars;
+use Gratora\Donors\PublicDonorNames;
+use Gratora\Foundation\Helpers\View;
 
 /** @since 1.0.0 */
 final class TopDonorsBlock extends CampaignBlock
@@ -26,7 +26,7 @@ final class TopDonorsBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/top-donors';
+        return 'gratora/top-donors';
     }
 
     /** @since 1.0.0 */
@@ -81,7 +81,7 @@ final class TopDonorsBlock extends CampaignBlock
                 // a hidden donor has one, and printing it is the whole thing
                 // hiding was meant to stop. It also keeps the real initial out
                 // of the avatar, which is built from this string.
-                'name'            => $isAnonymousAggregate ? __('Anonymous', 'fundraising-toolkit') : $name,
+                'name'            => $isAnonymousAggregate ? __('Anonymous', 'gratora') : $name,
                 'amount_cents'    => (int) $row['amount_cents'],
                 'donations_count' => (int) $row['donations_count'],
                 'is_anonymous'    => $isAnonymousAggregate,
@@ -93,7 +93,7 @@ final class TopDonorsBlock extends CampaignBlock
             $anon = $this->donations->anonymousPaidTotal(null, null, (int) $campaign->id);
             if ($anon['donations_count'] > 0) {
                 $entries[] = [
-                    'name'            => __('Anonymous', 'fundraising-toolkit'),
+                    'name'            => __('Anonymous', 'gratora'),
                     'amount_cents'    => $anon['amount_cents'],
                     'donations_count' => $anon['donations_count'],
                     'is_anonymous'    => true,
@@ -106,8 +106,8 @@ final class TopDonorsBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/top-donors', [
             'title'          => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donors to rank yet.', 'fundraising-toolkit'),
-            'emptySubText' => __('The first donation starts the list.', 'fundraising-toolkit'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('No donors to rank yet.', 'gratora'),
+            'emptySubText' => __('The first donation starts the list.', 'gratora'),
             'emptyIcon'    => 'donor',
             'entries'        => $entries,
             'currency'       => $campaign->currency,

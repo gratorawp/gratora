@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/Segmented';
+export { default } from '@gratora/ui/components/Segmented';

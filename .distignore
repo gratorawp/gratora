@@ -55,7 +55,7 @@ composer.lock
 /bin
 
 /vendor/dompdf
-/vendor/fundkit
+/vendor/gratora
 /vendor/masterminds
 /vendor/sabberworm
 /vendor/phpunit
@@ -88,9 +88,9 @@ tests
 .gitignore
 .php-cs-fixer.php
 
-/vendor/vendor-prefixed/fundkit/queryable/bin
-/vendor/vendor-prefixed/fundkit/queryable/tests
-/vendor/vendor-prefixed/fundkit/queryable/phpunit.xml
+/vendor/vendor-prefixed/gratora/queryable/bin
+/vendor/vendor-prefixed/gratora/queryable/tests
+/vendor/vendor-prefixed/gratora/queryable/phpunit.xml
 /vendor/vendor-prefixed/dompdf/dompdf/tests
 /vendor/vendor-prefixed/dompdf/php-font-lib/tests
 /vendor/vendor-prefixed/dompdf/php-svg-lib/tests

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Settings\SettingsService;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Settings\SettingsService;
 
 /**
  * Resolves Gravatar URLs for the donor-activity blocks.
  *
  * Off unless the org turns it on. Asking Gravatar for a picture sends a hash of
  * the donor's address to a third party from every visitor's browser, on a page
- * that is public, and FundKit encrypts those addresses at rest precisely so they
+ * that is public, and Gratora encrypts those addresses at rest precisely so they
  * are not casually exposed. That trade is the org's to make.
  *
  * Resolves to a URL rather than handing an address to the caller: the blocks

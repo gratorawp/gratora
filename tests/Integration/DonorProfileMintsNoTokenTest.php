@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorMetricsService;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\Portal\PortalSession;
-use FundKit\Foundation\Plugin;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donors\DonorMetricsService;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\Portal\PortalSession;
+use Gratora\Foundation\Plugin;
+use Gratora\Vendor\Queryable\DB;
 use WP_REST_Request;
 
 final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
@@ -20,7 +20,7 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
 
     private function tokenCount(int $donorId): int
     {
-        return (int) DB::table('fundkit_magic_link_tokens')
+        return (int) DB::table('gratora_magic_link_tokens')
             ->where('donor_id', $donorId)
             ->where('purpose', PortalSession::PORTAL_PURPOSE)
             ->count();
@@ -37,9 +37,9 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         $this->admin();
         $id = $this->donorId();
 
-        rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/admin/donors/{$id}/profile"));
-        rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/admin/donors/{$id}/profile"));
-        rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/admin/donors/{$id}/profile"));
+        rest_do_request(new WP_REST_Request('GET', "/gratora/v1/admin/donors/{$id}/profile"));
+        rest_do_request(new WP_REST_Request('GET', "/gratora/v1/admin/donors/{$id}/profile"));
+        rest_do_request(new WP_REST_Request('GET', "/gratora/v1/admin/donors/{$id}/profile"));
 
         $this->assertSame(0, $this->tokenCount($id), 'three reads, no credentials');
     }
@@ -49,7 +49,7 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         $this->admin();
         $id = $this->donorId();
 
-        $data = rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/admin/donors/{$id}/profile"))->get_data();
+        $data = rest_do_request(new WP_REST_Request('GET', "/gratora/v1/admin/donors/{$id}/profile"))->get_data();
 
         $this->assertNull($data['donor']['magic_link_url'] ?? null);
     }
@@ -59,7 +59,7 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         $this->admin();
         $id = $this->donorId();
 
-        $res = rest_do_request(new WP_REST_Request('POST', "/fundkit/v1/admin/donors/{$id}/portal-link"));
+        $res = rest_do_request(new WP_REST_Request('POST', "/gratora/v1/admin/donors/{$id}/portal-link"));
 
         $this->assertSame(201, $res->get_status());
         $this->assertStringContainsString('token=', (string) ($res->get_data()['magic_link_url'] ?? ''));
@@ -71,7 +71,7 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
         $id = $this->donorId();
 
-        $res = rest_do_request(new WP_REST_Request('POST', "/fundkit/v1/admin/donors/{$id}/portal-link"));
+        $res = rest_do_request(new WP_REST_Request('POST', "/gratora/v1/admin/donors/{$id}/portal-link"));
 
         $this->assertGreaterThanOrEqual(400, $res->get_status());
         $this->assertSame(0, $this->tokenCount($id));
@@ -86,9 +86,9 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         $this->admin();
         $id = $this->donorId();
 
-        rest_do_request(new WP_REST_Request('POST', "/fundkit/v1/admin/donors/{$id}/portal-link"));
+        rest_do_request(new WP_REST_Request('POST', "/gratora/v1/admin/donors/{$id}/portal-link"));
 
-        $rows = DB::table('fundkit_magic_link_tokens')->where('donor_id', $id)->getAll();
+        $rows = DB::table('gratora_magic_link_tokens')->where('donor_id', $id)->getAll();
 
         $this->assertCount(1, $rows);
         $this->assertSame(PortalSession::PORTAL_PURPOSE, (string) $rows[0]['purpose']);
@@ -99,8 +99,8 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         $this->admin();
         $id = $this->donorId();
 
-        $data  = rest_do_request(new WP_REST_Request('POST', "/fundkit/v1/admin/donors/{$id}/portal-link"))->get_data();
-        $token = DB::table('fundkit_magic_link_tokens')->where('donor_id', $id)->get();
+        $data  = rest_do_request(new WP_REST_Request('POST', "/gratora/v1/admin/donors/{$id}/portal-link"))->get_data();
+        $token = DB::table('gratora_magic_link_tokens')->where('donor_id', $id)->get();
 
         $this->assertNotEmpty($data['expires_at'] ?? null);
         $this->assertLessThanOrEqual(
@@ -125,7 +125,7 @@ final class DonorProfileMintsNoTokenTest extends IntegrationTestCase
         $this->admin();
         $id = $this->donorId();
 
-        rest_do_request(new WP_REST_Request('POST', "/fundkit/v1/admin/donors/{$id}/portal-link"));
+        rest_do_request(new WP_REST_Request('POST', "/gratora/v1/admin/donors/{$id}/portal-link"));
         $this->assertSame(1, $this->tokenCount($id));
 
         Plugin::instance()->container->get(PortalSession::class)->destroyAllFor($id);

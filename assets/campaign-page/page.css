@@ -4,61 +4,61 @@
 
 body,
 .editor-styles-wrapper,
-.fundkit-p2p-layout,
-.fundkit-p2p-thermo,
-.fundkit-p2p-grid-section,
-.fundkit-p2p-fundraiser,
-.fundkit-p2p-team,
-.fundkit-p2p-leaderboard,
-.fundkit-p2p-donors,
-.fundkit-p2p-sponsors,
-.fundkit-p2p-welcome,
+.gratora-p2p-layout,
+.gratora-p2p-thermo,
+.gratora-p2p-grid-section,
+.gratora-p2p-fundraiser,
+.gratora-p2p-team,
+.gratora-p2p-leaderboard,
+.gratora-p2p-donors,
+.gratora-p2p-sponsors,
+.gratora-p2p-welcome,
 .dp-layout{
     --dp-measure: 1200px;
 
-    --dp-accent:      var(--fundkit-accent, #211d3f);
+    --dp-accent:      var(--gratora-accent, #211d3f);
     --dp-accent-dark: color-mix(in srgb, var(--dp-accent) 78%, #000);
     /* Derive accent-soft unless explicitly paired by the preset. */
-    --dp-accent-soft: var(--fundkit-accent-soft, color-mix(in srgb, var(--dp-accent) 12%, #fff));
+    --dp-accent-soft: var(--gratora-accent-soft, color-mix(in srgb, var(--dp-accent) 12%, #fff));
 
     /* Use server-resolved contrast ink from AccentInk. */
-    --dp-cover-image:     var(--fundkit-cover-image, none);
+    --dp-cover-image:     var(--gratora-cover-image, none);
 
-    --dp-on-accent:       var(--fundkit-on-accent, #ffffff);
-    --dp-on-accent-muted: var(--fundkit-on-accent-muted, rgba(255, 255, 255, .72));
-    --dp-on-accent-line:  var(--fundkit-on-accent-line, rgba(255, 255, 255, .26));
+    --dp-on-accent:       var(--gratora-on-accent, #ffffff);
+    --dp-on-accent-muted: var(--gratora-on-accent-muted, rgba(255, 255, 255, .72));
+    --dp-on-accent-line:  var(--gratora-on-accent-line, rgba(255, 255, 255, .26));
 
-    --dp-text:        var(--fundkit-text, #141821);
+    --dp-text:        var(--gratora-text, #141821);
     /* Mix body and muted tokens for intermediate text contrast. */
     --dp-text-2:      color-mix(in srgb, var(--dp-text) 70%, var(--dp-muted) 30%);
-    --dp-muted:       var(--fundkit-text-muted, #7a8398);
+    --dp-muted:       var(--gratora-text-muted, #7a8398);
 
-    --dp-border:      var(--fundkit-border, #e8ebf0);
+    --dp-border:      var(--gratora-border, #e8ebf0);
     --dp-rule:        color-mix(in srgb, var(--dp-border) 55%, var(--dp-card));
-    --dp-card:        var(--fundkit-bg, #ffffff);
-    --dp-page:        var(--fundkit-bg-soft, #fafbfc);
+    --dp-card:        var(--gratora-bg, #ffffff);
+    --dp-page:        var(--gratora-bg-soft, #fafbfc);
 
-    --dp-radius:      var(--fundkit-radius, 14px);
-    --dp-radius-sm:   var(--fundkit-radius-sm, 10px);
-    --dp-font:        var(--fundkit-typeface, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-    --dp-shadow:      var(--fundkit-card-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 2px 6px rgba(15, 23, 42, .06));
+    --dp-radius:      var(--gratora-radius, 14px);
+    --dp-radius-sm:   var(--gratora-radius-sm, 10px);
+    --dp-font:        var(--gratora-typeface, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+    --dp-shadow:      var(--gratora-card-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 2px 6px rgba(15, 23, 42, .06));
 
-    --dp-btn-bg:             var(--fundkit-button-bg, var(--dp-accent));
+    --dp-btn-bg:             var(--gratora-button-bg, var(--dp-accent));
     /* Through the measured ink, not a literal: a pale accent takes dark. */
-    --dp-btn-fg:             var(--fundkit-button-fg, var(--dp-on-accent));
-    --dp-btn-hover-bg:       var(--fundkit-button-hover-bg, var(--dp-accent-dark));
-    --dp-btn-radius:         var(--fundkit-button-radius, var(--dp-radius-sm));
-    --dp-btn-border:         var(--fundkit-button-border, 0);
-    --dp-btn-shadow:         var(--fundkit-button-shadow, none);
+    --dp-btn-fg:             var(--gratora-button-fg, var(--dp-on-accent));
+    --dp-btn-hover-bg:       var(--gratora-button-hover-bg, var(--dp-accent-dark));
+    --dp-btn-radius:         var(--gratora-button-radius, var(--dp-radius-sm));
+    --dp-btn-border:         var(--gratora-button-border, 0);
+    --dp-btn-shadow:         var(--gratora-button-shadow, none);
     --dp-btn-padding-block:  12px;
     --dp-btn-padding-inline: 24px;
     --dp-btn-font-size:      15px;
-    --dp-btn-font-weight:    var(--fundkit-button-weight, 500);
+    --dp-btn-font-weight:    var(--gratora-button-weight, 500);
 }
 
 /* WordPress columns own display and stacking; override only measure and sticky positioning. */
 
-.fundkit-p2p-layout,
+.gratora-p2p-layout,
 .dp-layout{
     box-sizing: border-box;
     max-width: var(--dp-measure, 1200px);
@@ -67,19 +67,19 @@ body,
     padding-inline: 24px;
 }
 
-.fundkit-p2p-layout .dp-band,
-.fundkit-p2p-layout .dp-rail,
+.gratora-p2p-layout .dp-band,
+.gratora-p2p-layout .dp-rail,
 .dp-layout .dp-band,
 .dp-layout .dp-rail{ padding-inline: 0; }
 
 /* Allow shrinking below intrinsic content width. */
 
-.fundkit-p2p-layout > .wp-block-column,
+.gratora-p2p-layout > .wp-block-column,
 .dp-layout > .wp-block-column{
     min-width: 0;
 }
 
-.fundkit-p2p-layout__side,
+.gratora-p2p-layout__side,
 .dp-layout__side{
     position: sticky;
     top: 32px;
@@ -101,12 +101,12 @@ body,
 /* Disable sticky positioning at WordPress’s column breakpoint. */
 @media (max-width: 781px) {
     .dp-layout__side,
-    .fundkit-p2p-layout__side {
+    .gratora-p2p-layout__side {
         position: static;
     }
 }
 
-#fundkit-form {
+#gratora-form {
     scroll-margin-top: 24px;
 }
 
@@ -115,8 +115,8 @@ body,
     color: var(--dp-text);
     background: var(--dp-card);
     font-family: var(--dp-font);
-    font-size: calc(var(--fundkit-type-size, 15px) + 1px);
-    font-weight: var(--fundkit-body-weight, 400);
+    font-size: calc(var(--gratora-type-size, 15px) + 1px);
+    font-weight: var(--gratora-body-weight, 400);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
 
@@ -143,11 +143,11 @@ body,
 
 .dp-top { padding-top: 64px; }
 
-.dp-display { margin: 0; font-size: 44px; line-height: 1.08; font-weight: var(--fundkit-heading-weight, 650); letter-spacing: -.022em; text-wrap: balance; }
+.dp-display { margin: 0; font-size: 44px; line-height: 1.08; font-weight: var(--gratora-heading-weight, 650); letter-spacing: -.022em; text-wrap: balance; }
 
-.dp-h2 { margin: 0 0 18px; font-size: 26px; line-height: 1.25; font-weight: var(--fundkit-heading-weight, 650); letter-spacing: -.015em; }
+.dp-h2 { margin: 0 0 18px; font-size: 26px; line-height: 1.25; font-weight: var(--gratora-heading-weight, 650); letter-spacing: -.015em; }
 
-.dp-h3 { margin: 0 0 8px; font-size: 17px; line-height: 1.35; font-weight: var(--fundkit-heading-weight, 650); }
+.dp-h3 { margin: 0 0 8px; font-size: 17px; line-height: 1.35; font-weight: var(--gratora-heading-weight, 650); }
 
 .dp-lede { margin: 14px 0 0; font-size: 18px; line-height: 1.55; color: var(--dp-text-2); }
 
@@ -310,7 +310,7 @@ body,
 .dp-profile__amount {
     margin: 0;
     font-size: clamp(22px, 2.4vw, 26px);
-    font-weight: var(--fundkit-heading-weight, 650);
+    font-weight: var(--gratora-heading-weight, 650);
     letter-spacing: -.015em;
     font-variant-numeric: tabular-nums;
     line-height: 1.15;
@@ -357,7 +357,7 @@ body,
 .dp-profile__stat b {
     display: block;
     font-size: 15px;
-    font-weight: var(--fundkit-heading-weight, 650);
+    font-weight: var(--gratora-heading-weight, 650);
     font-variant-numeric: tabular-nums;
     line-height: 1.2;
     color: var(--dp-text);
@@ -382,7 +382,7 @@ body,
 
 .dp-money { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: 28px; font-variant-numeric: tabular-nums; }
 
-.dp-raised { font-size: 36px; font-weight: var(--fundkit-heading-weight, 650); letter-spacing: -.022em; color: var(--dp-accent); }
+.dp-raised { font-size: 36px; font-weight: var(--gratora-heading-weight, 650); letter-spacing: -.022em; color: var(--dp-accent); }
 
 .dp-goal { font-size: 15px; color: var(--dp-muted); }
 
@@ -396,7 +396,7 @@ body,
 
 .dp-stat + .dp-stat { border-left: 1px solid var(--dp-border); padding-left: 18px; }
 
-.dp-stat b { display: block; font-size: 22px; font-weight: var(--fundkit-heading-weight, 650); letter-spacing: -.018em; font-variant-numeric: tabular-nums; }
+.dp-stat b { display: block; font-size: 22px; font-weight: var(--gratora-heading-weight, 650); letter-spacing: -.018em; font-variant-numeric: tabular-nums; }
 
 .dp-stat span { display: block; margin-top: 3px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--dp-muted); }
 
@@ -406,7 +406,7 @@ body,
     display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px;
     border: var(--dp-btn-border); border-radius: var(--dp-btn-radius);
     background: var(--dp-btn-bg); color: var(--dp-btn-fg); box-shadow: var(--dp-btn-shadow);
-    font: inherit; font-size: 15px; font-weight: var(--fundkit-button-weight, 650); cursor: pointer; text-decoration: none;
+    font: inherit; font-size: 15px; font-weight: var(--gratora-button-weight, 650); cursor: pointer; text-decoration: none;
 }
 
 .dp-btn:hover { background: var(--dp-btn-hover-bg); color: var(--dp-btn-fg); }
@@ -562,18 +562,18 @@ body,
 
 /* The form’s own Frame/Plain setting controls its card. */
 
-.fundkit-p2p-form-band,
-.fundkit-form-band{
+.gratora-p2p-form-band,
+.gratora-form-band{
     max-width: var(--dp-measure, 1200px);
     margin: 0 auto;
     padding: 0 24px 72px;
 }
 
 
-.fundkit-p2p-layout__side .fundkit-p2p-form-band,
-.fundkit-p2p-layout__side .fundkit-form-band,
-.dp-layout__side .fundkit-p2p-form-band,
-.dp-layout__side .fundkit-form-band{ padding: 0; max-width: none; }
+.gratora-p2p-layout__side .gratora-p2p-form-band,
+.gratora-p2p-layout__side .gratora-form-band,
+.dp-layout__side .gratora-p2p-form-band,
+.dp-layout__side .gratora-form-band{ padding: 0; max-width: none; }
 /* Match campaign width inside the editor canvas only. */
 .editor-styles-wrapper .alignwide.dp-wide,
 .editor-styles-wrapper .alignwide.dp-panel,
@@ -600,11 +600,11 @@ body,
     background: var(--dp-accent);
     color: var(--dp-on-accent);
 
-    /* Set panel ink without overriding --fundkit-accent, which also controls the background. */
-    --fundkit-text:       var(--dp-on-accent);
-    --fundkit-text-muted: var(--dp-on-accent-muted);
-    --fundkit-bg-soft:    var(--dp-on-accent-line);
-    --fundkit-border:     var(--dp-on-accent-line);
+    /* Set panel ink without overriding --gratora-accent, which also controls the background. */
+    --gratora-text:       var(--dp-on-accent);
+    --gratora-text-muted: var(--dp-on-accent-muted);
+    --gratora-bg-soft:    var(--dp-on-accent-line);
+    --gratora-border:     var(--dp-on-accent-line);
 }
 .dp-panel--accent .dp-money,
 .dp-panel--accent .dp-raised,
@@ -616,19 +616,19 @@ body,
 .dp-panel--accent .dp-bar > * { background: var(--dp-on-accent); }
 
 /* Outrank block selectors so accent-colored text contrasts with the accent panel. */
-.dp-panel--accent .fundkit-block--progress .fundkit-progress__value {
+.dp-panel--accent .gratora-block--progress .gratora-progress__value {
     color: var(--dp-on-accent);
 }
-.dp-panel--accent .fundkit-block--progress .fundkit-progress__bar-fill {
+.dp-panel--accent .gratora-block--progress .gratora-progress__bar-fill {
     background: var(--dp-on-accent);
 }
 
 /* Set color directly because editor previews carry higher-priority inline text tokens. */
-.dp-panel--accent .fundkit-stat__label,
-.dp-panel--accent .fundkit-progress__caption,
-.dp-panel--accent .fundkit-progress__target { color: var(--dp-on-accent-muted); }
-.dp-panel--accent .fundkit-stat__value { color: var(--dp-on-accent); }
-.dp-panel--accent .fundkit-progress__bar { background: var(--dp-on-accent-line); }
+.dp-panel--accent .gratora-stat__label,
+.dp-panel--accent .gratora-progress__caption,
+.dp-panel--accent .gratora-progress__target { color: var(--dp-on-accent-muted); }
+.dp-panel--accent .gratora-stat__value { color: var(--dp-on-accent); }
+.dp-panel--accent .gratora-progress__bar { background: var(--dp-on-accent-line); }
 
 /* Use a background image to avoid editor image-wrapper layout differences. */
 .dp-cover {
@@ -649,10 +649,10 @@ body,
 
     /* Use light ink against the photo scrim independently of the accent. */
     color: #fff;
-    --fundkit-text:       #fff;
-    --fundkit-text-muted: rgba(255, 255, 255, .76);
-    --fundkit-bg-soft:    rgba(255, 255, 255, .28);
-    --fundkit-border:     rgba(255, 255, 255, .28);
+    --gratora-text:       #fff;
+    --gratora-text-muted: rgba(255, 255, 255, .76);
+    --gratora-bg-soft:    rgba(255, 255, 255, .28);
+    --gratora-border:     rgba(255, 255, 255, .28);
 }
 .dp-cover::after {
     content: '';
@@ -672,13 +672,13 @@ body,
     letter-spacing: -.02em;
 }
 /* Set color directly to override editor preview tokens. */
-.dp-cover .fundkit-block--progress .fundkit-progress__value { color: #fff; }
-.dp-cover .fundkit-block--progress .fundkit-progress__bar-fill { background: #fff; }
-.dp-cover .fundkit-stat__value { color: #fff; }
-.dp-cover .fundkit-stat__label,
-.dp-cover .fundkit-progress__caption,
-.dp-cover .fundkit-progress__target { color: rgba(255, 255, 255, .76); }
-.dp-cover .fundkit-progress__bar { background: rgba(255, 255, 255, .28); }
+.dp-cover .gratora-block--progress .gratora-progress__value { color: #fff; }
+.dp-cover .gratora-block--progress .gratora-progress__bar-fill { background: #fff; }
+.dp-cover .gratora-stat__value { color: #fff; }
+.dp-cover .gratora-stat__label,
+.dp-cover .gratora-progress__caption,
+.dp-cover .gratora-progress__target { color: rgba(255, 255, 255, .76); }
+.dp-cover .gratora-progress__bar { background: rgba(255, 255, 255, .28); }
 
 .dp-panel--soft { background: var(--dp-accent-soft); }
 

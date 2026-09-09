@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/widgets/RevenueChart';
+export { default } from '@gratora/ui/widgets/RevenueChart';

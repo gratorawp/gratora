@@ -1,7 +1,7 @@
 // Money in minor units; REST dates are MySQL strings in UTC with no zone
 // marker, which a browser reads as local time. parseTimestamp marks them.
 import { __ } from '@wordpress/i18n';
-import { parseTimestamp } from '@fundkit/ui/utils/format';
+import { parseTimestamp } from '@gratora/ui/utils/format';
 import { userCan } from '../../_shared/caps';
 
 export { formatAmount, formatAmountCompact, currencyDecimals, amountEntry, timeAgo } from '../../_shared/format';
@@ -39,38 +39,38 @@ export function initials( name ) {
 
 export function donationStatusPill( status ) {
     switch ( status ) {
-        case 'paid':           return { cls: 'is-ok',     label: __( 'Paid',     'fundraising-toolkit' ) };
-        case 'pending':        return { cls: 'is-warn',   label: __( 'Pending',  'fundraising-toolkit' ) };
-        case 'processing':     return { cls: 'is-info',   label: __( 'Processing', 'fundraising-toolkit' ) };
-        case 'failed':         return { cls: 'is-error',  label: __( 'Failed',   'fundraising-toolkit' ) };
-        case 'refunded':       return { cls: 'is-muted',  label: __( 'Refunded', 'fundraising-toolkit' ) };
-        case 'partial_refund': return { cls: 'is-warn',   label: __( 'Partial',  'fundraising-toolkit' ) };
-        case 'disputed':       return { cls: 'is-error',  label: __( 'Disputed', 'fundraising-toolkit' ) };
+        case 'paid':           return { cls: 'is-ok',     label: __( 'Paid',     'gratora' ) };
+        case 'pending':        return { cls: 'is-warn',   label: __( 'Pending',  'gratora' ) };
+        case 'processing':     return { cls: 'is-info',   label: __( 'Processing', 'gratora' ) };
+        case 'failed':         return { cls: 'is-error',  label: __( 'Failed',   'gratora' ) };
+        case 'refunded':       return { cls: 'is-muted',  label: __( 'Refunded', 'gratora' ) };
+        case 'partial_refund': return { cls: 'is-warn',   label: __( 'Partial',  'gratora' ) };
+        case 'disputed':       return { cls: 'is-error',  label: __( 'Disputed', 'gratora' ) };
         default:               return { cls: 'is-muted',  label: status };
     }
 }
 
 export function refundStatusPill( status ) {
     switch ( status ) {
-        case 'succeeded': return { cls: 'is-ok',    label: __( 'Issued',          'fundraising-toolkit' ) };
-        case 'pending':   return { cls: 'is-warn',  label: __( 'Not settled yet', 'fundraising-toolkit' ) };
-        case 'failed':    return { cls: 'is-error', label: __( 'Failed',          'fundraising-toolkit' ) };
-        case 'reversed':  return { cls: 'is-muted', label: __( 'Reversed',        'fundraising-toolkit' ) };
+        case 'succeeded': return { cls: 'is-ok',    label: __( 'Issued',          'gratora' ) };
+        case 'pending':   return { cls: 'is-warn',  label: __( 'Not settled yet', 'gratora' ) };
+        case 'failed':    return { cls: 'is-error', label: __( 'Failed',          'gratora' ) };
+        case 'reversed':  return { cls: 'is-muted', label: __( 'Reversed',        'gratora' ) };
         default:          return { cls: 'is-muted', label: status };
     }
 }
 
 export const CHANNEL_LABEL = {
-    direct:        __( 'Direct',         'fundraising-toolkit' ),
-    email:         __( 'Email',          'fundraising-toolkit' ),
-    social:        __( 'Social',         'fundraising-toolkit' ),
-    'paid-social': __( 'Paid social',    'fundraising-toolkit' ),
-    organic:       __( 'Organic search', 'fundraising-toolkit' ),
-    cpc:           __( 'Paid search',    'fundraising-toolkit' ),
-    referral:      __( 'Referral',       'fundraising-toolkit' ),
-    qr:            __( 'QR code',        'fundraising-toolkit' ),
-    peer:          __( 'Peer-to-peer',   'fundraising-toolkit' ),
-    manual:        __( 'Manual',         'fundraising-toolkit' ),
+    direct:        __( 'Direct',         'gratora' ),
+    email:         __( 'Email',          'gratora' ),
+    social:        __( 'Social',         'gratora' ),
+    'paid-social': __( 'Paid social',    'gratora' ),
+    organic:       __( 'Organic search', 'gratora' ),
+    cpc:           __( 'Paid search',    'gratora' ),
+    referral:      __( 'Referral',       'gratora' ),
+    qr:            __( 'QR code',        'gratora' ),
+    peer:          __( 'Peer-to-peer',   'gratora' ),
+    manual:        __( 'Manual',         'gratora' ),
 };
 
 /**

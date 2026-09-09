@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
+use Gratora\Donations\Donation;
 use WP_REST_Request;
 
 /**
- * Assert is_test inside fundkit.donation.creating, before listeners create donation-dependent
+ * Assert is_test inside gratora.donation.creating, before listeners create donation-dependent
  * records.
  */
 final class ManualDonationTestModeWindowTest extends IntegrationTestCase
 {
     public function test_no_listener_ever_sees_a_recorded_cheque_as_a_test_donation(): void
     {
-        update_option('fundkit_gateway_config', array_merge(
-            (array) get_option('fundkit_gateway_config', []),
+        update_option('gratora_gateway_config', array_merge(
+            (array) get_option('gratora_gateway_config', []),
             ['test_mode' => true]
         ));
 
         $seen = [];
-        add_action('fundkit.donation.creating', static function ($donation) use (&$seen): void {
+        add_action('gratora.donation.creating', static function ($donation) use (&$seen): void {
             $seen[] = (bool) $donation->is_test;
         }, 1);
 
-        $request = new WP_REST_Request('POST', '/fundkit/v1/admin/donations');
+        $request = new WP_REST_Request('POST', '/gratora/v1/admin/donations');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode([
             'email'          => 'margit@example.com',

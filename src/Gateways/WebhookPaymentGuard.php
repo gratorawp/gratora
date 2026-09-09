@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways;
+namespace Gratora\Gateways;
 
-use FundKit\Donations\Donation;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donations\Donation;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * The check every webhook must pass before it is allowed to mark a donation paid.
@@ -31,7 +31,7 @@ final class WebhookPaymentGuard
      *                                     the event claims. Null means unknown,
      *                                     which is refused.
      * @param int|null    $observedCents   what the processor says was paid, in
-     *                                     FundKit's storage units. Null is refused:
+     *                                     Gratora's storage units. Null is refused:
      *                                     an unknown amount cannot be checked.
      * @param string|null $observedCurrency ISO code, or null to skip.
      *

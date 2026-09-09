@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms;
+namespace Gratora\Forms;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Currency\Currency;
-use FundKit\Currency\FxRates;
-use FundKit\Donors\ConsentService;
-use FundKit\Forms\Blocks\ConsentBlock;
-use FundKit\Forms\Blocks\DateBlock;
-use FundKit\Forms\Blocks\DonationAmountBlock;
-use FundKit\Forms\Blocks\DropdownBlock;
-use FundKit\Forms\Blocks\MultiSelectBlock;
-use FundKit\Forms\Blocks\RecurringToggleBlock;
-use FundKit\Forms\Blocks\TermsBlock;
-use FundKit\Foundation\Helpers\Money;
+use Gratora\Campaigns\Campaign;
+use Gratora\Currency\Currency;
+use Gratora\Currency\FxRates;
+use Gratora\Donors\ConsentService;
+use Gratora\Forms\Blocks\ConsentBlock;
+use Gratora\Forms\Blocks\DateBlock;
+use Gratora\Forms\Blocks\DonationAmountBlock;
+use Gratora\Forms\Blocks\DropdownBlock;
+use Gratora\Forms\Blocks\MultiSelectBlock;
+use Gratora\Forms\Blocks\RecurringToggleBlock;
+use Gratora\Forms\Blocks\TermsBlock;
+use Gratora\Foundation\Helpers\Money;
 use WP_Error;
 
 /**
@@ -39,7 +39,7 @@ final class FormSubmissionValidator
     {
         $this->form = $form;
         $blocks = parse_blocks((string) ($form->blocks ?? ''));
-        $this->offersCurrencyChoice = self::treeHasBlock($blocks, 'fundkit/currency-switcher');
+        $this->offersCurrencyChoice = self::treeHasBlock($blocks, 'gratora/currency-switcher');
 
         // The rendered amount step falls back to the campaign's presets when the
         // block omits its own (see DonationFormShortcode::buildSteps). The
@@ -63,7 +63,7 @@ final class FormSubmissionValidator
         $freq = (string) ($body['frequency'] ?? 'one_time');
         if ($freq === '') $freq = 'one_time';
         if (! in_array($freq, $offered, true)) {
-            return $this->reject(__('That donation frequency is not available for this form.', 'fundraising-toolkit'));
+            return $this->reject(__('That donation frequency is not available for this form.', 'gratora'));
         }
 
         return null;
@@ -108,7 +108,7 @@ final class FormSubmissionValidator
     private static function findTermsWording(array $blocks): ?array
     {
         foreach ($blocks as $block) {
-            if (($block['blockName'] ?? '') === 'fundkit/terms') {
+            if (($block['blockName'] ?? '') === 'gratora/terms') {
                 $attrs = is_array($block['attrs'] ?? null) ? $block['attrs'] : [];
                 if (TermsBlock::isConfigured($attrs)) {
                     return [
@@ -130,7 +130,7 @@ final class FormSubmissionValidator
     private static function findTermsRevision(array $blocks): ?int
     {
         foreach ($blocks as $block) {
-            if (($block['blockName'] ?? '') === 'fundkit/terms') {
+            if (($block['blockName'] ?? '') === 'gratora/terms') {
                 $attrs = is_array($block['attrs'] ?? null) ? $block['attrs'] : [];
                 if (TermsBlock::isConfigured($attrs)) {
                     return TermsBlock::revisionOf(
@@ -239,54 +239,54 @@ final class FormSubmissionValidator
         $custom  = is_array($body['custom'] ?? null) ? $body['custom'] : [];
 
         switch ($name) {
-            case 'fundkit/name':
+            case 'gratora/name':
                 // requireFirst/requireLast default true (NameBlock); the editor
                 // omits an attr equal to its default, so absent means required.
                 if ((bool) ($attrs['requireFirst'] ?? true) && ! $this->filled($profile['first_name'] ?? null)) {
-                    return $this->requiredError(__('First name', 'fundraising-toolkit'));
+                    return $this->requiredError(__('First name', 'gratora'));
                 }
                 if ((bool) ($attrs['requireLast'] ?? true) && ! $this->filled($profile['last_name'] ?? null)) {
-                    return $this->requiredError(__('Last name', 'fundraising-toolkit'));
+                    return $this->requiredError(__('Last name', 'gratora'));
                 }
                 break;
 
-            case 'fundkit/terms':
+            case 'gratora/terms':
                 // The consent record is only worth keeping if agreement was
                 // actually required, and this is the only side the donor cannot edit.
                 if (TermsBlock::isConfigured($attrs)) {
                     $consents = is_array($body['consents'] ?? null) ? $body['consents'] : [];
                     if (empty($consents[TermsBlock::PURPOSE])) {
-                        return $this->reject(__('Please agree to the terms to continue.', 'fundraising-toolkit'));
+                        return $this->reject(__('Please agree to the terms to continue.', 'gratora'));
                     }
                 }
                 break;
 
-            case 'fundkit/phone':
+            case 'gratora/phone':
                 if (! empty($attrs['required']) && ! $this->filled($profile['phone'] ?? null)) {
-                    return $this->requiredError($this->label($attrs, __('Phone', 'fundraising-toolkit')));
+                    return $this->requiredError($this->label($attrs, __('Phone', 'gratora')));
                 }
                 break;
 
-            case 'fundkit/country':
+            case 'gratora/country':
                 if (! empty($attrs['required']) && ! $this->filled($profile['country'] ?? null)) {
-                    return $this->requiredError($this->label($attrs, __('Country', 'fundraising-toolkit')));
+                    return $this->requiredError($this->label($attrs, __('Country', 'gratora')));
                 }
                 break;
 
-            case 'fundkit/comment':
+            case 'gratora/comment':
                 $note = (string) ($body['note_to_org'] ?? '');
                 if (! empty($attrs['required']) && ! $this->filled($note)) {
-                    return $this->requiredError($this->label($attrs, __('Comment', 'fundraising-toolkit')));
+                    return $this->requiredError($this->label($attrs, __('Comment', 'gratora')));
                 }
                 // Cap length server-side: the note can surface publicly, and the
                 // client's maxlength is bypassable by a crafted POST.
                 $noteMax = (int) ($attrs['maxLength'] ?? 5000);
                 if ($noteMax > 0 && mb_strlen($note) > $noteMax) {
-                    return $this->reject(__('Your message is too long.', 'fundraising-toolkit'));
+                    return $this->reject(__('Your message is too long.', 'gratora'));
                 }
                 break;
 
-            case 'fundkit/donation-amount':
+            case 'gratora/donation-amount':
                 // A presets-only form (custom amounts disabled) must only accept
                 // a listed preset; a crafted POST can otherwise send any amount.
                 // 'fixed' donation type is a single custom input, so it's exempt.
@@ -307,7 +307,7 @@ final class FormSubmissionValidator
                     if ($bar !== null && $net < $bar) {
                         return $this->reject(sprintf(
                             /* translators: %s: minimum donation amount, formatted. */
-                            __('The smallest donation this form accepts is %s.', 'fundraising-toolkit'),
+                            __('The smallest donation this form accepts is %s.', 'gratora'),
                             Money::format($bar, $paying)
                         ));
                     }
@@ -321,7 +321,7 @@ final class FormSubmissionValidator
                     // through the same filter (variant/visitor context is
                     // render-only and unavailable at submit time).
                     $presets = (array) apply_filters(
-                        'fundkit.form.amounts',
+                        'gratora.form.amounts',
                         DonationAmountBlock::normalizePresets($raw),
                         $this->form,
                         null,
@@ -348,7 +348,7 @@ final class FormSubmissionValidator
 
                     if (! $convertedByDonor) {
                         if (! in_array($net, $allowedCents, true)) {
-                            return $this->reject(__('Choose one of the listed donation amounts.', 'fundraising-toolkit'));
+                            return $this->reject(__('Choose one of the listed donation amounts.', 'gratora'));
                         }
                         break;
                     }
@@ -356,12 +356,12 @@ final class FormSubmissionValidator
                     // Allow FX drift between render and submission, but require proximity to an
                     // authored preset.
                     if (! self::nearAnyPreset($net, $allowedCents, $presetCurrency, $submittedCurrency)) {
-                        return $this->reject(__('Choose one of the listed donation amounts.', 'fundraising-toolkit'));
+                        return $this->reject(__('Choose one of the listed donation amounts.', 'gratora'));
                     }
                 }
                 break;
 
-            case 'fundkit/fund-picker':
+            case 'gratora/fund-picker':
                 // When the picker restricts to a set of funds, a chosen fund
                 // must be one of them; a crafted POST can otherwise route to any
                 // fund in the org. A cleared choice (0) falls back to the form's
@@ -369,18 +369,18 @@ final class FormSubmissionValidator
                 $allowedFunds = array_values(array_filter(array_map('intval', (array) ($attrs['fundIds'] ?? []))));
                 $chosenFund   = (int) ($body['fund_id'] ?? 0);
                 if ($allowedFunds !== [] && $chosenFund !== 0 && ! in_array($chosenFund, $allowedFunds, true)) {
-                    return $this->reject(__('That fund is not available for this form.', 'fundraising-toolkit'));
+                    return $this->reject(__('That fund is not available for this form.', 'gratora'));
                 }
                 break;
 
-            case 'fundkit/address':
+            case 'gratora/address':
                 $addr = is_array($profile['address'] ?? null) ? $profile['address'] : [];
                 $sub  = [
-                    'line1'   => ['showLine1',   'requireLine1',   true,  __('Address', 'fundraising-toolkit')],
-                    'city'    => ['showCity',    'requireCity',    true,  __('City', 'fundraising-toolkit')],
-                    'region'  => ['showRegion',  'requireRegion',  false, __('Region', 'fundraising-toolkit')],
-                    'postal'  => ['showPostal',  'requirePostal',  true,  __('Postal code', 'fundraising-toolkit')],
-                    'country' => ['showCountry', 'requireCountry', true,  __('Country', 'fundraising-toolkit')],
+                    'line1'   => ['showLine1',   'requireLine1',   true,  __('Address', 'gratora')],
+                    'city'    => ['showCity',    'requireCity',    true,  __('City', 'gratora')],
+                    'region'  => ['showRegion',  'requireRegion',  false, __('Region', 'gratora')],
+                    'postal'  => ['showPostal',  'requirePostal',  true,  __('Postal code', 'gratora')],
+                    'country' => ['showCountry', 'requireCountry', true,  __('Country', 'gratora')],
                 ];
                 foreach ($sub as $key => [$showAttr, $reqAttr, $reqDefault, $sLabel]) {
                     $shown    = (bool) ($attrs[$showAttr] ?? true);
@@ -391,7 +391,7 @@ final class FormSubmissionValidator
                 }
                 break;
 
-            case 'fundkit/text-input':
+            case 'gratora/text-input':
                 $key = $this->customKey($attrs);
                 $val = $custom[$key] ?? null;
                 if (! empty($attrs['required']) && ! $this->filled($val)) {
@@ -400,16 +400,16 @@ final class FormSubmissionValidator
                 if ($this->filled($val)) {
                     $max = (int) ($attrs['maxLength'] ?? 0);
                     if ($max > 0 && mb_strlen((string) $val) > $max) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is too long.', 'fundraising-toolkit'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is too long.', 'gratora'), $this->label($attrs, $key)));
                     }
                     $pattern = (string) ($attrs['pattern'] ?? '');
                     if ($pattern !== '' && ! $this->matchesPattern($pattern, (string) $val)) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is not in the expected format.', 'fundraising-toolkit'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is not in the expected format.', 'gratora'), $this->label($attrs, $key)));
                     }
                 }
                 break;
 
-            case 'fundkit/number-input':
+            case 'gratora/number-input':
                 $key = $this->customKey($attrs);
                 $val = $custom[$key] ?? null;
                 if (! empty($attrs['required']) && ! $this->filled($val)) {
@@ -417,19 +417,19 @@ final class FormSubmissionValidator
                 }
                 if ($this->filled($val)) {
                     if (! is_numeric($val)) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s must be a number.', 'fundraising-toolkit'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s must be a number.', 'gratora'), $this->label($attrs, $key)));
                     }
                     $n = (float) $val;
                     if (isset($attrs['min']) && is_numeric($attrs['min']) && $n < (float) $attrs['min']) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is below the minimum.', 'fundraising-toolkit'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is below the minimum.', 'gratora'), $this->label($attrs, $key)));
                     }
                     if (isset($attrs['max']) && is_numeric($attrs['max']) && $n > (float) $attrs['max']) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is above the maximum.', 'fundraising-toolkit'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is above the maximum.', 'gratora'), $this->label($attrs, $key)));
                     }
                 }
                 break;
 
-            case 'fundkit/date':
+            case 'gratora/date':
                 $key = $this->customKey($attrs);
                 $val = $custom[$key] ?? null;
                 if (! empty($attrs['required']) && ! $this->filled($val)) {
@@ -440,27 +440,27 @@ final class FormSubmissionValidator
                     $min = DateBlock::normalizeDate((string) ($attrs['minDate'] ?? ''));
                     $max = DateBlock::normalizeDate((string) ($attrs['maxDate'] ?? ''));
                     if (($min !== '' && $d < $min) || ($max !== '' && $d > $max)) {
-                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is outside the allowed range.', 'fundraising-toolkit'), $this->label($attrs, $key)));
+                        return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('%s is outside the allowed range.', 'gratora'), $this->label($attrs, $key)));
                     }
                 }
                 break;
 
-            case 'fundkit/dropdown':
-            case 'fundkit/radio':
+            case 'gratora/dropdown':
+            case 'gratora/radio':
                 $key = $this->customKey($attrs);
                 if (! empty($attrs['required']) && ! $this->filled($custom[$key] ?? null)) {
                     return $this->requiredError($this->label($attrs, $key));
                 }
                 break;
 
-            case 'fundkit/checkbox':
+            case 'gratora/checkbox':
                 $key = $this->customKey($attrs);
                 if (! empty($attrs['required']) && empty($custom[$key])) {
-                    return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('Please check %s.', 'fundraising-toolkit'), $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %s: the label of the form field. */ __('Please check %s.', 'gratora'), $this->label($attrs, $key)));
                 }
                 break;
 
-            case 'fundkit/multi-select':
+            case 'gratora/multi-select':
                 $key   = $this->customKey($attrs);
                 $sel   = is_array($custom[$key] ?? null) ? $custom[$key] : [];
                 $count = count($sel);
@@ -469,34 +469,34 @@ final class FormSubmissionValidator
                 }
                 [$min, $max] = MultiSelectBlock::limits($attrs, count(DropdownBlock::normalizeOptions($attrs['options'] ?? null)));
                 if ($count > 0 && $min > 0 && $count < $min) {
-                    return $this->reject(sprintf(/* translators: %1$d: smallest number of options allowed. %2$s: the label of the form field. */ __('Select at least %1$d for %2$s.', 'fundraising-toolkit'), $min, $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %1$d: smallest number of options allowed. %2$s: the label of the form field. */ __('Select at least %1$d for %2$s.', 'gratora'), $min, $this->label($attrs, $key)));
                 }
                 if ($max > 0 && $count > $max) {
-                    return $this->reject(sprintf(/* translators: %1$d: largest number of options allowed. %2$s: the label of the form field. */ __('Select at most %1$d for %2$s.', 'fundraising-toolkit'), $max, $this->label($attrs, $key)));
+                    return $this->reject(sprintf(/* translators: %1$d: largest number of options allowed. %2$s: the label of the form field. */ __('Select at most %1$d for %2$s.', 'gratora'), $max, $this->label($attrs, $key)));
                 }
                 break;
 
-            case 'fundkit/consent':
+            case 'gratora/consent':
                 $consents = is_array($body['consents'] ?? null) ? $body['consents'] : [];
                 // Required lives on the org's purpose, not on the block, so a
                 // form cannot make something mandatory the registry does not.
                 // Resolved rather than injected: this validator is constructed
                 // inline at the one call site and takes no dependencies.
-                $registry = \FundKit\Foundation\Plugin::instance()->container->get(ConsentService::class);
+                $registry = \Gratora\Foundation\Plugin::instance()->container->get(ConsentService::class);
                 foreach (ConsentBlock::purposeKeys($attrs) as $key) {
                     $p = $registry->findPurpose($key);
                     if ($p === null) continue;
                     if (! empty($p['required']) && empty($consents[$key])) {
                         return $this->reject(sprintf(
                             /* translators: %s: consent purpose label */
-                            __('Please agree to: %s', 'fundraising-toolkit'),
+                            __('Please agree to: %s', 'gratora'),
                             (string) ($p['label'] ?? '')
                         ));
                     }
                 }
                 break;
 
-            case 'fundkit/recurring-toggle':
+            case 'gratora/recurring-toggle':
                 // Gutenberg omits an attribute equal to its registered default,
                 // so an absent frequencies key means the default set, not none.
                 // Must match the renderer's fallback or offered frequencies are
@@ -634,7 +634,7 @@ final class FormSubmissionValidator
     private static function collectConsentIds(array $blocks, array &$ids): void
     {
         foreach ($blocks as $block) {
-            if (($block['blockName'] ?? '') === 'fundkit/consent') {
+            if (($block['blockName'] ?? '') === 'gratora/consent') {
                 $attrs = is_array($block['attrs'] ?? null) ? $block['attrs'] : [];
                 foreach (ConsentBlock::purposeKeys($attrs) as $key) {
                     $ids[$key] = true;
@@ -684,7 +684,7 @@ final class FormSubmissionValidator
     {
         return $this->reject(sprintf(
             /* translators: %s: form field label */
-            __('Please complete the %s field.', 'fundraising-toolkit'),
+            __('Please complete the %s field.', 'gratora'),
             $label
         ));
     }
@@ -692,6 +692,6 @@ final class FormSubmissionValidator
     /** @since 1.0.0 */
     private function reject(string $message): WP_Error
     {
-        return new WP_Error('fundkit_form_validation', $message, ['status' => 400]);
+        return new WP_Error('gratora_form_validation', $message, ['status' => 400]);
     }
 }

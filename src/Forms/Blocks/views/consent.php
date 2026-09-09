@@ -5,14 +5,14 @@ defined('ABSPATH') || exit;
  * @var string                                                                            $helpText
  * @var list<array{key:string,label:string,description:string,required:bool,default:bool}> $purposes
  */
-$labelText = $label !== '' ? $label : __('How can we stay in touch?', 'fundraising-toolkit');
+$labelText = $label !== '' ? $label : __('How can we stay in touch?', 'gratora');
 ?>
-<fieldset class="fundkit-block fundkit-block--consent fundkit-consent">
-    <legend class="fundkit-consent__legend"><?php echo esc_html($labelText); ?></legend>
+<fieldset class="gratora-block gratora-block--consent gratora-consent">
+    <legend class="gratora-consent__legend"><?php echo esc_html($labelText); ?></legend>
     <?php if ($helpText !== ''): ?>
-        <p class="fundkit-consent__help"><?php echo esc_html($helpText); ?></p>
+        <p class="gratora-consent__help"><?php echo esc_html($helpText); ?></p>
     <?php endif; ?>
-    <div class="fundkit-consent__purposes">
+    <div class="gratora-consent__purposes">
         <?php foreach ($purposes as $p):
             $id          = (string) $p['key'];
             $pLabel      = (string) $p['label'];
@@ -23,21 +23,21 @@ $labelText = $label !== '' ? $label : __('How can we stay in touch?', 'fundraisi
             // move is not it. The registry decides the rest.
             $checked     = ! $required && (bool) $p['default'];
             ?>
-            <label class="fundkit-consent__purpose">
+            <label class="gratora-consent__purpose">
                 <input type="checkbox"
                        name="consents[<?php echo esc_attr($id); ?>]"
                        value="1"
                        <?php echo esc_attr($checked ? 'checked' : ''); ?>
                        <?php echo esc_attr($required ? 'required' : ''); ?>>
-                <span class="fundkit-consent__purpose-body">
-                    <span class="fundkit-consent__purpose-label">
+                <span class="gratora-consent__purpose-body">
+                    <span class="gratora-consent__purpose-label">
                         <?php echo esc_html($pLabel !== '' ? $pLabel : $id); ?>
                         <?php if ($required): ?>
-                            <span class="fundkit-consent__required-pill"><?php esc_html_e('Required', 'fundraising-toolkit'); ?></span>
+                            <span class="gratora-consent__required-pill"><?php esc_html_e('Required', 'gratora'); ?></span>
                         <?php endif; ?>
                     </span>
                     <?php if ($desc !== ''): ?>
-                        <span class="fundkit-consent__purpose-desc"><?php echo esc_html($desc); ?></span>
+                        <span class="gratora-consent__purpose-desc"><?php echo esc_html($desc); ?></span>
                     <?php endif; ?>
                 </span>
             </label>

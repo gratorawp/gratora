@@ -32,7 +32,7 @@ describe( 'the goal card on the campaign overview', () => {
 		const host = mount( AMOUNT );
 
 		expect( host.textContent ).toContain( '25%' );
-		expect( host.querySelector( '.fundkit-metric__bar-fill' ).style.width ).toBe( '25%' );
+		expect( host.querySelector( '.gratora-metric__bar-fill' ).style.width ).toBe( '25%' );
 	} );
 
 	it( 'counts donations and donors the same way', () => {

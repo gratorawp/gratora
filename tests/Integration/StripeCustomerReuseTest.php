@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\Stripe\StripeGateway;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\Stripe\StripeGateway;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -34,11 +34,11 @@ final class StripeCustomerReuseTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'test_mode' => true,
             'stripe'    => ['webhook_secret_test' => 'whsec_reuse'],
         ]);
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
@@ -91,7 +91,7 @@ final class StripeCustomerReuseTest extends IntegrationTestCase
 
     private function donate(string $frequency = 'weekly'): string
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'reuse@example.test',
@@ -126,8 +126,8 @@ final class StripeCustomerReuseTest extends IntegrationTestCase
         // A Customer outlives the donation that prompted it, so stamping a
         // donation id on it is wrong on its own terms, and it is also what makes
         // the body differ between two donations by the same donor.
-        $this->assertStringNotContainsString('fundkit_donation_id', $calls[0]['body']);
-        $this->assertStringContainsString('fundkit_donor_id', $calls[0]['body']);
+        $this->assertStringNotContainsString('gratora_donation_id', $calls[0]['body']);
+        $this->assertStringContainsString('gratora_donor_id', $calls[0]['body']);
     }
 
     public function test_a_second_donation_by_the_same_donor_does_not_reuse_a_key_with_a_different_body(): void

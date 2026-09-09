@@ -6,15 +6,15 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'fundkit/recurring-toggle';
+const NAME = 'gratora/recurring-toggle';
 
 const FREQ_OPTIONS = [
-    { value: 'one-time',  label: __( 'One-time', 'fundraising-toolkit' ) },
-    { value: 'weekly',    label: __( 'Weekly', 'fundraising-toolkit' ) },
-    { value: 'biweekly',  label: __( 'Every 2 weeks', 'fundraising-toolkit' ) },
-    { value: 'monthly',   label: __( 'Monthly', 'fundraising-toolkit' ) },
-    { value: 'quarterly', label: __( 'Quarterly', 'fundraising-toolkit' ) },
-    { value: 'yearly',    label: __( 'Yearly', 'fundraising-toolkit' ) },
+    { value: 'one-time',  label: __( 'One-time', 'gratora' ) },
+    { value: 'weekly',    label: __( 'Weekly', 'gratora' ) },
+    { value: 'biweekly',  label: __( 'Every 2 weeks', 'gratora' ) },
+    { value: 'monthly',   label: __( 'Monthly', 'gratora' ) },
+    { value: 'quarterly', label: __( 'Quarterly', 'gratora' ) },
+    { value: 'yearly',    label: __( 'Yearly', 'gratora' ) },
 ];
 
 // One-time is not listed: every form accepts a single donation, so the server
@@ -33,7 +33,7 @@ function Edit( { attributes, setAttributes } ) {
         condition        = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--recurring' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--recurring' } );
 
     const toggleFrequency = ( freq ) => {
         const current = Array.isArray( frequencies ) ? frequencies : [];
@@ -61,37 +61,37 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Recurring toggle', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Recurring toggle', 'gratora' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundraising-toolkit' ) }
+                        label={ __( 'Label', 'gratora' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundraising-toolkit' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'fundraising-toolkit' ) }
+                        label={ __( 'Help text', 'gratora' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Style', 'fundraising-toolkit' ) }
+                        label={ __( 'Style', 'gratora' ) }
                         value={ style }
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         options={ [
-                            { value: 'pills', label: __( 'Pills', 'fundraising-toolkit' ) },
-                            { value: 'tabs',  label: __( 'Tabs',  'fundraising-toolkit' ) },
+                            { value: 'pills', label: __( 'Pills', 'gratora' ) },
+                            { value: 'tabs',  label: __( 'Tabs',  'gratora' ) },
                         ] }
                     />
                     <Field
                         group
-                        label={ __( 'Recurring options', 'fundraising-toolkit' ) }
-                        help={ __( 'Donors can always give once. Pick the recurring options to offer alongside it.', 'fundraising-toolkit' ) }
+                        label={ __( 'Recurring options', 'gratora' ) }
+                        help={ __( 'Donors can always give once. Pick the recurring options to offer alongside it.', 'gratora' ) }
                     >
-                        <div className="fundkit-sidebar-list">
+                        <div className="gratora-sidebar-list">
                             { RECURRING_OPTIONS.map( ( f ) => (
-                                <label key={ f.value } className="fundkit-sidebar-check">
+                                <label key={ f.value } className="gratora-sidebar-check">
                                     <input
                                         type="checkbox"
                                         checked={ safeFreqs.includes( f.value ) }
@@ -104,11 +104,11 @@ function Edit( { attributes, setAttributes } ) {
                     </Field>
                     { willHide && (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'Pick at least one recurring option, or this block will not appear on the form.', 'fundraising-toolkit' ) }
+                            { __( 'Pick at least one recurring option, or this block will not appear on the form.', 'gratora' ) }
                         </Notice>
                     ) }
                     <SelectControl
-                        label={ __( 'Default selection', 'fundraising-toolkit' ) }
+                        label={ __( 'Default selection', 'gratora' ) }
                         value={ defaultFrequency }
                         options={ FREQ_OPTIONS.filter( ( f ) => effectiveFreqs.includes( f.value ) ) }
                         onChange={ ( v ) => setAttributes( { defaultFrequency: v } ) }
@@ -123,10 +123,10 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="div"
-                    className="fundkit-block-preview__title"
+                    className="gratora-block-preview__title"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Make this recurring', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'Make this recurring', 'gratora' ) }
                     allowedFormats={ [] }
                     style={ { fontSize: 13, fontWeight: 500, marginBottom: 6 } }
                 />
@@ -134,7 +134,7 @@ function Edit( { attributes, setAttributes } ) {
                     style={ {
                         display:       'flex',
                         gap:           style === 'tabs' ? 0 : 6,
-                        borderBottom:  style === 'tabs' ? '1px solid var(--fundkit-border, #e5e7eb)' : 'none',
+                        borderBottom:  style === 'tabs' ? '1px solid var(--gratora-border, #e5e7eb)' : 'none',
                     } }
                 >
                     { previewKeys.map( ( key ) => {
@@ -150,8 +150,8 @@ function Edit( { attributes, setAttributes } ) {
                                         padding:      '8px 14px',
                                         fontSize:     12,
                                         fontWeight:   selected ? 600 : 400,
-                                        color:        selected ? 'var(--fundkit-accent, #211d3f)' : 'var(--fundkit-text-muted, #555)',
-                                        borderBottom: selected ? '2px solid var(--fundkit-accent, #211d3f)' : '2px solid transparent',
+                                        color:        selected ? 'var(--gratora-accent, #211d3f)' : 'var(--gratora-text-muted, #555)',
+                                        borderBottom: selected ? '2px solid var(--gratora-accent, #211d3f)' : '2px solid transparent',
                                         marginBottom: -1,
                                     } }
                                 >
@@ -166,9 +166,9 @@ function Edit( { attributes, setAttributes } ) {
                                     padding:      '6px 14px',
                                     fontSize:     12,
                                     fontWeight:   500,
-                                    borderRadius: 'var(--fundkit-radius-sm, 8px)',
-                                    background:   selected ? 'var(--fundkit-accent, #211d3f)' : 'var(--fundkit-bg-soft, #f0f0f1)',
-                                    color:        selected ? 'var(--fundkit-on-accent, #fff)' : 'var(--fundkit-text-muted, #333)',
+                                    borderRadius: 'var(--gratora-radius-sm, 8px)',
+                                    background:   selected ? 'var(--gratora-accent, #211d3f)' : 'var(--gratora-bg-soft, #f0f0f1)',
+                                    color:        selected ? 'var(--gratora-on-accent, #fff)' : 'var(--gratora-text-muted, #333)',
                                 } }
                             >
                                 { opt.label }
@@ -181,7 +181,7 @@ function Edit( { attributes, setAttributes } ) {
                         tagName="p"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Help text', 'gratora' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', margin: '6px 0 0', lineHeight: 1.4 } }
                     />
@@ -194,9 +194,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Recurring toggle', 'fundraising-toolkit' ),
-        description: __( 'Frequency selector (one-time / monthly / yearly / etc).', 'fundraising-toolkit' ),
-        category:   'fundkit-amount',
+        title:      __( 'Recurring toggle', 'gratora' ),
+        description: __( 'Frequency selector (one-time / monthly / yearly / etc).', 'gratora' ),
+        category:   'gratora-amount',
         icon:       BlockIcons[ 'recurring-toggle' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

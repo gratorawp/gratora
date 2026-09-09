@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\Erasure\ErasureHandler;
-use FundKit\Donors\Erasure\ErasureRequest;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\Erasure\ErasureHandler;
+use Gratora\Donors\Erasure\ErasureRequest;
+use Gratora\Foundation\Plugin;
 use InvalidArgumentException;
 use RuntimeException;
 use WP_REST_Request;
 
 /**
- * Redaction runs every handler registered on fundkit.donor.erasure_handlers,
+ * Redaction runs every handler registered on gratora.donor.erasure_handlers,
  * which is how an add-on clears the copy it holds. Deletion destroys strictly
  * more than redaction does, so it cannot erase less.
  *
@@ -87,10 +87,10 @@ final class DeleteRunsErasureHandlersTest extends IntegrationTestCase
 
             return $handlers;
         };
-        add_filter('fundkit.donor.erasure_handlers', $filter);
+        add_filter('gratora.donor.erasure_handlers', $filter);
 
         return static function () use ($filter): void {
-            remove_filter('fundkit.donor.erasure_handlers', $filter);
+            remove_filter('gratora.donor.erasure_handlers', $filter);
         };
     }
 
@@ -209,7 +209,7 @@ final class DeleteRunsErasureHandlersTest extends IntegrationTestCase
             $id = (int) $this->donor()->id;
             $this->deadDonation($id);
 
-            $res = rest_do_request(new WP_REST_Request('DELETE', '/fundkit/v1/admin/donors/' . $id));
+            $res = rest_do_request(new WP_REST_Request('DELETE', '/gratora/v1/admin/donors/' . $id));
 
             $this->assertSame(500, $res->get_status());
             $this->assertSame(1, Donor::query()->where('id', $id)->count());
@@ -228,7 +228,7 @@ final class DeleteRunsErasureHandlersTest extends IntegrationTestCase
             $id = (int) $this->donor()->id;
             $this->deadDonation($id);
 
-            $res = rest_do_request(new WP_REST_Request('DELETE', '/fundkit/v1/admin/donors/' . $id));
+            $res = rest_do_request(new WP_REST_Request('DELETE', '/gratora/v1/admin/donors/' . $id));
 
             $this->assertSame(409, $res->get_status());
             $this->assertSame('this donor is on a legal hold', (string) $res->as_error()->get_error_message());

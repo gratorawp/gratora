@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 
 /**
  * The donations list has three scopes, not two.
@@ -35,22 +35,22 @@ final class DonationListTestScopeTest extends IntegrationTestCase
 
         $this->campaignId = (int) $campaign->id;
 
-        $this->seed('FUNDKIT-TS-LIVE-1', false, 5000);
-        $this->seed('FUNDKIT-TS-LIVE-2', false, 3000);
-        $this->seed('FUNDKIT-TS-TEST-1', true, 9900);
+        $this->seed('GRATORA-TS-LIVE-1', false, 5000);
+        $this->seed('GRATORA-TS-LIVE-2', false, 3000);
+        $this->seed('GRATORA-TS-TEST-1', true, 9900);
 
         // A ticket order rides this table too: a 2000 seat with a 3000 top-up,
         // banked as the single 5000 charge the gateway took. Every assertion
         // in this file is written as though it is not here, because to
         // donation reporting it is not.
-        $this->seed('FUNDKIT-TS-ORDER-1', false, 5000, 'order');
+        $this->seed('GRATORA-TS-ORDER-1', false, 5000, 'order');
     }
 
     public function test_live_only_by_default(): void
     {
         $refs = $this->references([]);
 
-        $this->assertSame(['FUNDKIT-TS-LIVE-1', 'FUNDKIT-TS-LIVE-2'], $refs);
+        $this->assertSame(['GRATORA-TS-LIVE-1', 'GRATORA-TS-LIVE-2'], $refs);
     }
 
     public function test_include_test_shows_both_kinds(): void
@@ -58,7 +58,7 @@ final class DonationListTestScopeTest extends IntegrationTestCase
         $refs = $this->references(['include_test' => true]);
 
         $this->assertSame(
-            ['FUNDKIT-TS-LIVE-1', 'FUNDKIT-TS-LIVE-2', 'FUNDKIT-TS-TEST-1'],
+            ['GRATORA-TS-LIVE-1', 'GRATORA-TS-LIVE-2', 'GRATORA-TS-TEST-1'],
             $refs,
             'the whole run, in one list'
         );
@@ -67,13 +67,13 @@ final class DonationListTestScopeTest extends IntegrationTestCase
     public function test_an_explicit_filter_still_wins_over_the_scope(): void
     {
         $this->assertSame(
-            ['FUNDKIT-TS-TEST-1'],
+            ['GRATORA-TS-TEST-1'],
             $this->references(['include_test' => true, 'is_test' => true]),
             'Test only means only test, whatever the scope is set to'
         );
 
         $this->assertSame(
-            ['FUNDKIT-TS-LIVE-1', 'FUNDKIT-TS-LIVE-2'],
+            ['GRATORA-TS-LIVE-1', 'GRATORA-TS-LIVE-2'],
             $this->references(['include_test' => true, 'is_test' => false]),
             'and Live only means only live'
         );
@@ -173,9 +173,9 @@ final class DonationListTestScopeTest extends IntegrationTestCase
     {
         $repo = new DonationRepository();
 
-        $this->assertNotContains('FUNDKIT-TS-ORDER-1', $this->references([]));
-        $this->assertNotContains('FUNDKIT-TS-ORDER-1', $this->references(['include_test' => true]));
-        $this->assertNotContains('FUNDKIT-TS-ORDER-1', $this->references(['is_test' => false]));
+        $this->assertNotContains('GRATORA-TS-ORDER-1', $this->references([]));
+        $this->assertNotContains('GRATORA-TS-ORDER-1', $this->references(['include_test' => true]));
+        $this->assertNotContains('GRATORA-TS-ORDER-1', $this->references(['is_test' => false]));
 
         // The charge was 5000, so a leak shows up as the raised figure moving.
         $stats = $repo->aggregateAdmin(['campaign_id' => $this->campaignId]);
@@ -183,7 +183,7 @@ final class DonationListTestScopeTest extends IntegrationTestCase
         $this->assertSame(2, (int) $stats['paid_count']);
 
         $ids = $repo->listIdsForExport(['campaign_id' => $this->campaignId, 'include_test' => true]);
-        $orderId = (int) Donation::query()->where('reference', 'FUNDKIT-TS-ORDER-1')->get()->id;
+        $orderId = (int) Donation::query()->where('reference', 'GRATORA-TS-ORDER-1')->get()->id;
         $this->assertNotContains($orderId, array_map('intval', $ids), 'and it is not in the CSV either');
     }
 }

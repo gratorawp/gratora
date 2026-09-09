@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\Stripe\StripeWebhookProvisioner;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\Stripe\StripeWebhookProvisioner;
 use ReflectionClass;
 
 /**
@@ -29,9 +29,9 @@ final class StripeWebhookDuplicateEndpointTest extends IntegrationTestCase
         parent::setUp();
 
         $this->calls = [];
-        $this->url   = rest_url('fundkit/v1/webhooks/stripe');
+        $this->url   = rest_url('gratora/v1/webhooks/stripe');
 
-        update_option('fundkit_gateway_config', ['stripe' => []]);
+        update_option('gratora_gateway_config', ['stripe' => []]);
 
         $account = Plugin::instance()->container->get(StripeAccount::class);
         $account->saveKeys(false, 'sk_live_connected', 'pk_live_seed');
@@ -151,7 +151,7 @@ final class StripeWebhookDuplicateEndpointTest extends IntegrationTestCase
 
     private function storedSecret(): string
     {
-        $opt = get_option('fundkit_gateway_config', []);
+        $opt = get_option('gratora_gateway_config', []);
 
         return (string) ($opt['stripe']['webhook_secret_live'] ?? '');
     }

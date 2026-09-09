@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Blocks;
+namespace Gratora\Campaigns\Blocks;
 
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationQueries;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorAvatars;
-use FundKit\Donors\PublicDonorNames;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Helpers\View;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorAvatars;
+use Gratora\Donors\PublicDonorNames;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\View;
+use Gratora\Vendor\Queryable\DB;
 
 /** @since 1.0.0 */
 final class SupporterWallBlock extends CampaignBlock
@@ -28,7 +28,7 @@ final class SupporterWallBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/supporter-wall';
+        return 'gratora/supporter-wall';
     }
 
     /** @since 1.0.0 */
@@ -60,8 +60,8 @@ final class SupporterWallBlock extends CampaignBlock
             ? (string) $attrs['columns'] : 'auto';
 
         $prefix   = DB::getPrefix();
-        $donations = $prefix . 'fundkit_donations';
-        $donors    = $prefix . 'fundkit_donors';
+        $donations = $prefix . 'gratora_donations';
+        $donors    = $prefix . 'gratora_donors';
 
         // Grouped and limited by DONOR, not by donation. Reading a slice of
         // recent donations and collapsing it left every earlier supporter off
@@ -134,8 +134,8 @@ final class SupporterWallBlock extends CampaignBlock
         if (! $byDonor) {
             return View::loadRelative(__DIR__, 'views/supporter-wall', [
                 'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'fundraising-toolkit'),
-            'emptySubText' => __('Add the first name to it.', 'fundraising-toolkit'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'gratora'),
+            'emptySubText' => __('Add the first name to it.', 'gratora'),
             'emptyIcon'    => 'supporters',
                 'entries'      => [],
                 'showMessage'  => $showMessage,
@@ -179,8 +179,8 @@ final class SupporterWallBlock extends CampaignBlock
 
         return View::loadRelative(__DIR__, 'views/supporter-wall', [
             'title'        => (string) ($attrs['title'] ?? ''),
-            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'fundraising-toolkit'),
-            'emptySubText' => __('Add the first name to it.', 'fundraising-toolkit'),
+            'emptyText'    => (string) ($attrs['emptyText'] ?? '') ?: __('The supporter wall is empty.', 'gratora'),
+            'emptySubText' => __('Add the first name to it.', 'gratora'),
             'emptyIcon'    => 'supporters',
             'entries'      => $entries,
             'showMessage'  => $showMessage,

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns;
+namespace Gratora\Campaigns;
 
-use FundKit\Donations\DonationRepository;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Time\Clock;
+use Gratora\Donations\DonationRepository;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Time\Clock;
 
 /**
  * A metric answers null when the campaign cannot support it, so a stat block
@@ -31,15 +31,15 @@ final class CampaignStatMetrics
     public static function labels(): array
     {
         return [
-            'raised'    => __('Amount raised', 'fundraising-toolkit'),
-            'goal'      => __('Our goal', 'fundraising-toolkit'),
-            'remaining' => __('Still needed', 'fundraising-toolkit'),
-            'percent'   => __('Of goal reached', 'fundraising-toolkit'),
-            'donations' => __('Donations', 'fundraising-toolkit'),
-            'donors'    => __('Donors', 'fundraising-toolkit'),
-            'average'   => __('Average donation', 'fundraising-toolkit'),
-            'top'       => __('Top donation', 'fundraising-toolkit'),
-            'days_left' => __('Days left', 'fundraising-toolkit'),
+            'raised'    => __('Amount raised', 'gratora'),
+            'goal'      => __('Our goal', 'gratora'),
+            'remaining' => __('Still needed', 'gratora'),
+            'percent'   => __('Of goal reached', 'gratora'),
+            'donations' => __('Donations', 'gratora'),
+            'donors'    => __('Donors', 'gratora'),
+            'average'   => __('Average donation', 'gratora'),
+            'top'       => __('Top donation', 'gratora'),
+            'days_left' => __('Days left', 'gratora'),
         ];
     }
 

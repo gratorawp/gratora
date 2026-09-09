@@ -7,7 +7,7 @@ import { OptionsEditor, normalizeOptions, slugify } from '../_shared/OptionsEdit
 import { BlockIcons } from '../_shared/block-icons';
 import { SlugTextControl } from '../_shared/SlugTextControl';
 
-const NAME = 'fundkit/multi-select';
+const NAME = 'gratora/multi-select';
 
 const DEFAULT_OPTIONS = [
     { label: 'Option one', value: 'option-one', isDefault: false },
@@ -40,7 +40,7 @@ function Edit( { attributes, setAttributes } ) {
         setAttributes( { maxSelections: max === 0 ? 0 : Math.max( max, minSelections ) } );
     };
 
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--multi-select' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--multi-select' } );
 
     const updateOptionLabel = ( i, v ) => {
         const row     = options[ i ];
@@ -58,42 +58,42 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Multi-select', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Multi-select', 'gratora' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundraising-toolkit' ) }
+                        label={ __( 'Label', 'gratora' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label or any option to edit inline.', 'fundraising-toolkit' ) }
+                        help={ __( 'Click the label or any option to edit inline.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Field name', 'fundraising-toolkit' ) }
+                        label={ __( 'Field name', 'gratora' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v } ) }
-                        help={ __( 'Key the array is stored under. Auto-derived from label if empty.', 'fundraising-toolkit' ) }
+                        help={ __( 'Key the array is stored under. Auto-derived from label if empty.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundraising-toolkit' ) }
+                        label={ __( 'Required', 'gratora' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
-                        help={ __( 'At least one option must be selected.', 'fundraising-toolkit' ) }
+                        help={ __( 'At least one option must be selected.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <Slider
-                        label={ __( 'Minimum selections', 'fundraising-toolkit' ) }
+                        label={ __( 'Minimum selections', 'gratora' ) }
                         value={ minSelections }
                         onChange={ setMin }
                         min={ 0 }
                         max={ count }
                     />
                     <Slider
-                        label={ __( 'Maximum selections', 'fundraising-toolkit' ) }
+                        label={ __( 'Maximum selections', 'gratora' ) }
                         value={ maxSelections }
                         onChange={ setMax }
                         min={ 0 }
                         max={ count }
-                        help={ __( 'Set to 0 for no upper limit.', 'fundraising-toolkit' ) }
+                        help={ __( 'Set to 0 for no upper limit.', 'gratora' ) }
                     />
                     <OptionsEditor
                         options={ options }
@@ -112,13 +112,13 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="fundkit-block-preview__label"
+                    className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Pick any that apply', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'Pick any that apply', 'gratora' ) }
                     allowedFormats={ [] }
                 />
-                { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
+                { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
                 <div
                     style={ {
                         marginTop: 8,
@@ -142,7 +142,7 @@ function Edit( { attributes, setAttributes } ) {
                                     height:       14,
                                     borderRadius: 3,
                                     border:       '1px solid #888',
-                                    background:   o.isDefault ? 'var(--fundkit-accent, #211d3f)' : '#fff',
+                                    background:   o.isDefault ? 'var(--gratora-accent, #211d3f)' : '#fff',
                                     flexShrink:   0,
                                 } }
                             />
@@ -150,7 +150,7 @@ function Edit( { attributes, setAttributes } ) {
                                 tagName="span"
                                 value={ o.label }
                                 onChange={ ( v ) => updateOptionLabel( i, v ) }
-                                placeholder={ __( 'Option label', 'fundraising-toolkit' ) }
+                                placeholder={ __( 'Option label', 'gratora' ) }
                                 allowedFormats={ [] }
                                 style={ { fontSize: 13, color: '#111827' } }
                             />
@@ -165,9 +165,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Multi-select', 'fundraising-toolkit' ),
-        description: __( 'Donor picks any number of options from a checkbox list.', 'fundraising-toolkit' ),
-        category:    'fundkit-fields',
+        title:       __( 'Multi-select', 'gratora' ),
+        description: __( 'Donor picks any number of options from a checkbox list.', 'gratora' ),
+        category:    'gratora-fields',
         icon:        BlockIcons[ 'multi-select' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

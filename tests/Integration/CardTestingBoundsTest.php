@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\Stripe\StripeGateway;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\Stripe\StripeGateway;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -44,7 +44,7 @@ final class CardTestingBoundsTest extends IntegrationTestCase
         // Test mode throughout, so a livemode:false event matches the rows this
         // seeds. The ceiling is unaffected either way: hit() is the raw counter
         // and never consults test mode, only the two quota wrappers do.
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'stripe'    => ['webhook_secret_test' => $this->secret],
             'test_mode' => true,
         ]);
@@ -120,7 +120,7 @@ final class CardTestingBoundsTest extends IntegrationTestCase
         $timestamp = (string) time();
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $this->secret);
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/gratora/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);

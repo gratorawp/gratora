@@ -12,24 +12,24 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     env:
-      FUNDKIT_E2E_URL: http://localhost:8888
+      GRATORA_E2E_URL: http://localhost:8888
     steps:
       - name: Checkout core
         uses: actions/checkout@v4
 
       # The peer-to-peer add-on lives in a separate (private) repo. When it is
-      # configured (repo var FUNDKIT_P2P_REPO + token secret FUNDKIT_P2P_TOKEN), pull
+      # configured (repo var GRATORA_P2P_REPO + token secret GRATORA_P2P_TOKEN), pull
       # it in as a sibling so the P2P suite runs too; otherwise the run covers
       # core only.
-      - name: Checkout fundkit-p2p (optional)
+      - name: Checkout gratora-p2p (optional)
         id: p2p
-        if: vars.FUNDKIT_P2P_REPO != ''
+        if: vars.GRATORA_P2P_REPO != ''
         uses: actions/checkout@v4
         with:
-          repository: ${{ vars.FUNDKIT_P2P_REPO }}
-          token: ${{ secrets.FUNDKIT_P2P_TOKEN }}
-          ref: ${{ vars.FUNDKIT_P2P_REF || 'main' }}
-          path: fundkit-p2p
+          repository: ${{ vars.GRATORA_P2P_REPO }}
+          token: ${{ secrets.GRATORA_P2P_TOKEN }}
+          ref: ${{ vars.GRATORA_P2P_REF || 'main' }}
+          path: gratora-p2p
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -42,7 +42,7 @@ jobs:
         with:
           node-version: '24'
 
-      # @fundkit/ui is a public git dependency, but npm locks it as
+      # @gratora/ui is a public git dependency, but npm locks it as
       # ssh://git@github.com, which a runner has no key for: the install
       # then dies on "Permission denied (publickey)" before anything runs.
       # Rewrite it to https, which needs no credentials.
@@ -55,9 +55,9 @@ jobs:
           npm ci
           npm run build
 
-      - name: Build fundkit-p2p
-        if: vars.FUNDKIT_P2P_REPO != ''
-        working-directory: fundkit-p2p
+      - name: Build gratora-p2p
+        if: vars.GRATORA_P2P_REPO != ''
+        working-directory: gratora-p2p
         run: |
           composer install --no-interaction --prefer-dist --no-progress
           npm ci
@@ -66,9 +66,9 @@ jobs:
       # wp-env reads .wp-env.override.json on top of the committed core-only
       # .wp-env.json, so adding the add-on here keeps the default config clean.
       - name: Compose wp-env plugins
-        if: vars.FUNDKIT_P2P_REPO != ''
+        if: vars.GRATORA_P2P_REPO != ''
         run: |
-          printf '{ "plugins": [ ".", "%s/fundkit-p2p" ] }\n' "$GITHUB_WORKSPACE" > .wp-env.override.json
+          printf '{ "plugins": [ ".", "%s/gratora-p2p" ] }\n' "$GITHUB_WORKSPACE" > .wp-env.override.json
           cat .wp-env.override.json
 
       - name: Start wp-env
@@ -82,7 +82,7 @@ jobs:
           # The step runs under `bash -e`, so a failing seed would abort the
           # assignment before the echo and take its own explanation with it.
           set +e
-          OUT="$(npx wp-env run cli wp fundkit e2e-seed --yes 2>&1)"
+          OUT="$(npx wp-env run cli wp gratora e2e-seed --yes 2>&1)"
           CODE=$?
           set -e
           echo "$OUT"
@@ -90,20 +90,20 @@ jobs:
             echo "::error::the seed failed (exit $CODE). Its output is above."
             exit 1
           fi
-          VARS="$(echo "$OUT" | grep -oE 'FUNDKIT_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' || true)"
+          VARS="$(echo "$OUT" | grep -oE 'GRATORA_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' || true)"
           if [ -z "$VARS" ]; then
-            echo "::error::the seed printed no FUNDKIT_E2E_* variables, so every spec would open / instead of the seeded form and time out waiting for it. See the seed output above."
+            echo "::error::the seed printed no GRATORA_E2E_* variables, so every spec would open / instead of the seeded form and time out waiting for it. See the seed output above."
             exit 1
           fi
           echo "$VARS" >> "$GITHUB_ENV"
 
       - name: Seed P2P fixtures
-        if: vars.FUNDKIT_P2P_REPO != ''
+        if: vars.GRATORA_P2P_REPO != ''
         run: |
           # The step runs under `bash -e`, so a failing seed would abort the
           # assignment before the echo and take its own explanation with it.
           set +e
-          OUT="$(npx wp-env run cli wp fundkit-p2p e2e-seed 2>&1)"
+          OUT="$(npx wp-env run cli wp gratora-p2p e2e-seed 2>&1)"
           CODE=$?
           set -e
           echo "$OUT"
@@ -111,9 +111,9 @@ jobs:
             echo "::error::the P2P seed failed (exit $CODE). Its output is above."
             exit 1
           fi
-          VARS="$(echo "$OUT" | grep -oE 'FUNDKIT_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' || true)"
+          VARS="$(echo "$OUT" | grep -oE 'GRATORA_E2E_[A-Z_]+="[^"]*"' | sed -E 's/"//g' || true)"
           if [ -z "$VARS" ]; then
-            echo "::error::the P2P seed printed no FUNDKIT_E2E_* variables. See the seed output above."
+            echo "::error::the P2P seed printed no GRATORA_E2E_* variables. See the seed output above."
             exit 1
           fi
           echo "$VARS" >> "$GITHUB_ENV"

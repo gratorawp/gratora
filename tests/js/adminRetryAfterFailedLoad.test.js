@@ -44,10 +44,10 @@ const buttons = () => [ ...document.querySelectorAll( 'button' ) ].map( ( b ) =>
 beforeEach( () => {
     apiFetch.mockReset();
     document.body.innerHTML = '<div id="root"></div>';
-    window.fundkit = { can: { view_donations: true, refund_donations: true, edit_donations: true, resend_receipt: true } };
+    window.gratora = { can: { view_donations: true, refund_donations: true, edit_donations: true, resend_receipt: true } };
 } );
 
-afterEach( () => { delete window.fundkit; } );
+afterEach( () => { delete window.gratora; } );
 
 it( 'offers a retry when the donation cannot be loaded at all', async () => {
     apiFetch.mockRejectedValue( new Error( 'Request failed' ) );

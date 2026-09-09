@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -16,7 +16,7 @@ use WP_REST_Request;
  * used esc_url(); the hydrated path that replaces it did not, and that is the
  * one a donor clicks.
  *
- * fundkit_manage_forms is a granular capability an admin can hand to any role,
+ * gratora_manage_forms is a granular capability an admin can hand to any role,
  * and it does not imply unfiltered_html, so this was reachable by someone who
  * was never trusted with script.
  */
@@ -28,7 +28,7 @@ final class TermsLinkSchemeTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Terms campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -36,13 +36,13 @@ final class TermsLinkSchemeTest extends IntegrationTestCase
 
     private function configForLink(string $linkUrl): string
     {
-        $blocks = '<!-- wp:fundkit/terms ' . json_encode([
+        $blocks = '<!-- wp:gratora/terms ' . json_encode([
             'terms'    => 'Please read these.',
             'linkUrl'  => $linkUrl,
             'linkText' => 'Read the terms',
         ]) . ' /-->';
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'title'       => 'Terms form',
@@ -51,12 +51,12 @@ final class TermsLinkSchemeTest extends IntegrationTestCase
         ]));
         $created = rest_do_request($req)->get_data();
 
-        $form = \FundKit\Forms\Form::query()->find('id', (int) $created['id']);
+        $form = \Gratora\Forms\Form::query()->find('id', (int) $created['id']);
         $form->status = 'published';
         $form->save();
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
-        preg_match('/data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
+        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
 
         return (string) ($m[1] ?? '');
     }

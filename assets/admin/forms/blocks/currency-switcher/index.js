@@ -6,13 +6,13 @@ import { __ } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 import Segmented from '../../../_shared/components/Segmented';
 
-const NAME = 'fundkit/currency-switcher';
+const NAME = 'gratora/currency-switcher';
 
-const SETTINGS_URL = 'admin.php?page=fundkit-settings#currency';
+const SETTINGS_URL = 'admin.php?page=gratora-settings#currency';
 
 function Edit( { attributes, setAttributes } ) {
     const { currencies = [], label = '', style = 'dropdown', align = 'left' } = attributes;
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview' } );
 
     // org = { base, currencies: [codes] } enabled under Settings → Currency.
     const [ org, setOrg ] = useState( null );
@@ -27,7 +27,7 @@ function Edit( { attributes, setAttributes } ) {
     const load = useCallback( () => {
         setOrg( null );
         setFailed( false );
-        apiFetch( { path: '/fundkit/v1/admin/forms/currencies' } )
+        apiFetch( { path: '/gratora/v1/admin/forms/currencies' } )
             .then( ( r ) => { if ( alive.current ) setOrg( r && Array.isArray( r.currencies ) ? r : { base: '', currencies: [] } ); } )
             .catch( () => { if ( alive.current ) setFailed( true ); } );
     }, [] );
@@ -54,7 +54,7 @@ function Edit( { attributes, setAttributes } ) {
     const manageLink = (
         <p style={ { margin: '10px 0 0' } }>
             <ExternalLink href={ SETTINGS_URL }>
-                { __( 'Manage currencies', 'fundraising-toolkit' ) }
+                { __( 'Manage currencies', 'gratora' ) }
             </ExternalLink>
         </p>
     );
@@ -64,11 +64,11 @@ function Edit( { attributes, setAttributes } ) {
         panelBody = (
             <>
                 <Notice status="error" isDismissible={ false }>
-                    { __( 'The currencies this site offers could not be loaded, so this block cannot say which ones it will show.', 'fundraising-toolkit' ) }
+                    { __( 'The currencies this site offers could not be loaded, so this block cannot say which ones it will show.', 'gratora' ) }
                 </Notice>
                 <p style={ { margin: '10px 0 0' } }>
                     <Button variant="secondary" onClick={ load }>
-                        { __( 'Try again', 'fundraising-toolkit' ) }
+                        { __( 'Try again', 'gratora' ) }
                     </Button>
                 </p>
             </>
@@ -79,7 +79,7 @@ function Edit( { attributes, setAttributes } ) {
         panelBody = (
             <>
                 <Notice status="warning" isDismissible={ false }>
-                    { __( 'No currencies are enabled yet.', 'fundraising-toolkit' ) }
+                    { __( 'No currencies are enabled yet.', 'gratora' ) }
                 </Notice>
                 { manageLink }
             </>
@@ -88,7 +88,7 @@ function Edit( { attributes, setAttributes } ) {
         panelBody = (
             <>
                 <Notice status="warning" isDismissible={ false }>
-                    { __( 'Only one currency is enabled, so there is nothing for donors to switch between.', 'fundraising-toolkit' ) }
+                    { __( 'Only one currency is enabled, so there is nothing for donors to switch between.', 'gratora' ) }
                 </Notice>
                 { manageLink }
             </>
@@ -97,7 +97,7 @@ function Edit( { attributes, setAttributes } ) {
         panelBody = (
             <>
                 <p style={ { margin: '0 0 8px', fontSize: 12, color: '#6b7280' } }>
-                    { __( 'Choose which of your enabled currencies donors can switch between on this form.', 'fundraising-toolkit' ) }
+                    { __( 'Choose which of your enabled currencies donors can switch between on this form.', 'gratora' ) }
                 </p>
                 <div style={ { display: 'flex', flexWrap: 'wrap', gap: 8 } }>
                     { available.map( ( code ) => {
@@ -142,7 +142,7 @@ function Edit( { attributes, setAttributes } ) {
                                 { code }
                                 { locked && (
                                     <span style={ { fontSize: 10, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '.04em' } }>
-                                        { __( 'base', 'fundraising-toolkit' ) }
+                                        { __( 'base', 'gratora' ) }
                                     </span>
                                 ) }
                             </button>
@@ -159,30 +159,30 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Currency switcher', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Currency switcher', 'gratora' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundraising-toolkit' ) }
+                        label={ __( 'Label', 'gratora' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Currency', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Currency', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <Segmented
-                        label={ __( 'Style', 'fundraising-toolkit' ) }
+                        label={ __( 'Style', 'gratora' ) }
                         value={ style }
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         options={ [
-                            { value: 'dropdown', label: __( 'Dropdown', 'fundraising-toolkit' ) },
-                            { value: 'pills',    label: __( 'Pills', 'fundraising-toolkit' ) },
+                            { value: 'dropdown', label: __( 'Dropdown', 'gratora' ) },
+                            { value: 'pills',    label: __( 'Pills', 'gratora' ) },
                         ] }
                     />
                     <Segmented
-                        label={ __( 'Alignment', 'fundraising-toolkit' ) }
+                        label={ __( 'Alignment', 'gratora' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ [
-                            { value: 'left',  label: __( 'Left', 'fundraising-toolkit' ) },
-                            { value: 'right', label: __( 'Right', 'fundraising-toolkit' ) },
+                            { value: 'left',  label: __( 'Left', 'gratora' ) },
+                            { value: 'right', label: __( 'Right', 'gratora' ) },
                         ] }
                     />
                     { panelBody }
@@ -198,10 +198,10 @@ function Edit( { attributes, setAttributes } ) {
                 } }
             >
                 { label && (
-                    <span className="fundkit-block-preview__label">{ label }</span>
+                    <span className="gratora-block-preview__label">{ label }</span>
                 ) }
                 { style === 'pills' ? (
-                    // Mirror the runtime .fundkit-form__currency-pills look so
+                    // Mirror the runtime .gratora-form__currency-pills look so
                     // Develop matches Preview.
                     <span
                         style={ {
@@ -209,8 +209,8 @@ function Edit( { attributes, setAttributes } ) {
                             gap:          6,
                             flexWrap:     'wrap',
                             padding:      4,
-                            background:   'var(--fundkit-bg-soft, #f8fafb)',
-                            borderRadius: 'var(--fundkit-switcher-radius, var(--fundkit-radius-sm, 8px))',
+                            background:   'var(--gratora-bg-soft, #f8fafb)',
+                            borderRadius: 'var(--gratora-switcher-radius, var(--gratora-radius-sm, 8px))',
                         } }
                     >
                         { previewCodes.map( ( c, i ) => {
@@ -220,11 +220,11 @@ function Edit( { attributes, setAttributes } ) {
                                     key={ c }
                                     style={ {
                                         padding:      '6px 14px',
-                                        borderRadius: 'var(--fundkit-switcher-radius, var(--fundkit-radius-sm, 8px))',
+                                        borderRadius: 'var(--gratora-switcher-radius, var(--gratora-radius-sm, 8px))',
                                         fontSize:     13,
                                         fontWeight:   500,
-                                        background:   on ? 'var(--fundkit-accent, #211d3f)' : 'transparent',
-                                        color:        on ? 'var(--fundkit-on-accent, #fff)' : '#6b7280',
+                                        background:   on ? 'var(--gratora-accent, #211d3f)' : 'transparent',
+                                        color:        on ? 'var(--gratora-on-accent, #fff)' : '#6b7280',
                                     } }
                                 >
                                     { c }
@@ -239,10 +239,10 @@ function Edit( { attributes, setAttributes } ) {
                             alignItems:   'center',
                             gap:          8,
                             padding:      '6px 10px',
-                            border:       '1px solid var(--fundkit-border, #e5e7eb)',
-                            borderRadius: 'var(--fundkit-switcher-radius, var(--fundkit-radius-sm, 8px))',
+                            border:       '1px solid var(--gratora-border, #e5e7eb)',
+                            borderRadius: 'var(--gratora-switcher-radius, var(--gratora-radius-sm, 8px))',
                             fontSize:     13,
-                            background:   'var(--fundkit-bg, #fff)',
+                            background:   'var(--gratora-bg, #fff)',
                         } }
                     >
                         { previewCodes[ 0 ] || '-' }
@@ -257,9 +257,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Currency switcher', 'fundraising-toolkit' ),
-        description: __( 'Lets the donor pick which currency to donate in.', 'fundraising-toolkit' ),
-        category:   'fundkit-amount',
+        title:      __( 'Currency switcher', 'gratora' ),
+        description: __( 'Lets the donor pick which currency to donate in.', 'gratora' ),
+        category:   'gratora-amount',
         icon:       BlockIcons[ 'currency-switcher' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

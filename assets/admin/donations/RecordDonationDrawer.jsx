@@ -14,10 +14,10 @@ import Btn from '../_shared/components/Btn';
 
 // The offline gateway's own list. Anything else is rejected server-side.
 const METHODS = [
-    { value: 'cheque',        label: __( 'Check', 'fundraising-toolkit' ) },
-    { value: 'cash',          label: __( 'Cash', 'fundraising-toolkit' ) },
-    { value: 'bank_transfer', label: __( 'Bank transfer', 'fundraising-toolkit' ) },
-    { value: 'other',         label: __( 'Other', 'fundraising-toolkit' ) },
+    { value: 'cheque',        label: __( 'Check', 'gratora' ) },
+    { value: 'cash',          label: __( 'Cash', 'gratora' ) },
+    { value: 'bank_transfer', label: __( 'Bank transfer', 'gratora' ) },
+    { value: 'other',         label: __( 'Other', 'gratora' ) },
 ];
 
 function today() {
@@ -28,7 +28,7 @@ function today() {
 }
 
 export default function RecordDonationDrawer( { onClose, onRecorded } ) {
-    const currency = window.fundkit?.default_currency || 'USD';
+    const currency = window.gratora?.default_currency || 'USD';
 
     const [ email, setEmail ]         = useState( '' );
     const [ firstName, setFirstName ] = useState( '' );
@@ -56,13 +56,13 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
 
     useEffect( () => {
         let aborted = false;
-        // Not /admin/campaigns: that needs fundkit_manage_campaigns, which a role
+        // Not /admin/campaigns: that needs gratora_manage_campaigns, which a role
         // created just to enter checks will not have, and the picker rendered
         // blank so every donation they recorded went uncategorised.
-        apiFetch( { path: '/fundkit/v1/admin/donations/fund-options' } )
+        apiFetch( { path: '/gratora/v1/admin/donations/fund-options' } )
             .then( ( res ) => setFunds( ( Array.isArray( res ) ? res : [] ).map( ( f ) => {
                 /* translators: %s: fund name. */
-                const isDefault = __( '%s (default)', 'fundraising-toolkit' );
+                const isDefault = __( '%s (default)', 'gratora' );
                 const name = f.depth ? `- ${ f.name }` : f.name;
                 return {
                     value: String( f.id ),
@@ -73,7 +73,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
             // which is what happens when nobody picks a fund anyway.
             .catch( () => setFunds( [] ) );
 
-        apiFetch( { path: '/fundkit/v1/admin/donations/campaign-options' } )
+        apiFetch( { path: '/gratora/v1/admin/donations/campaign-options' } )
             .then( ( res ) => {
                 if ( aborted ) return;
                 setCampaigns( ( Array.isArray( res ) ? res : [] ).map( ( c ) => ( {
@@ -81,7 +81,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     label: c.archived
                         ? sprintf(
                             /* translators: %s: campaign title. */
-                            __( '%s (archived)', 'fundraising-toolkit' ),
+                            __( '%s (archived)', 'gratora' ),
                             c.title
                         )
                         : c.title,
@@ -105,7 +105,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
         }
 
         let aborted = false;
-        apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/donations/attribution-options', { campaign_id: Number( campaignId ) } ) } )
+        apiFetch( { path: addQueryArgs( '/gratora/v1/admin/donations/attribution-options', { campaign_id: Number( campaignId ) } ) } )
             .then( ( res ) => {
                 if ( aborted ) return;
                 setAttributions( ( Array.isArray( res ) ? res : [] ).map( ( o ) => ( {
@@ -137,7 +137,7 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
         setError( '' );
         try {
             const created = await apiFetch( {
-                path: '/fundkit/v1/admin/donations',
+                path: '/gratora/v1/admin/donations',
                 method: 'POST',
                 data: {
                     email: email.trim(),
@@ -157,17 +157,17 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
             } );
             onRecorded( created );
         } catch ( e ) {
-            if ( e?.code === 'fundkit_duplicate_donation' ) {
+            if ( e?.code === 'gratora_duplicate_donation' ) {
                 setDuplicate( e?.data?.reference || '?' );
             } else {
-                setError( e?.message || __( 'Could not record this donation.', 'fundraising-toolkit' ) );
+                setError( e?.message || __( 'Could not record this donation.', 'gratora' ) );
             }
             setSaving( false );
         }
     };
 
     const foot = (
-        <div className="fundkit-rd__foot">
+        <div className="gratora-rd__foot">
             <Btn
                 variant="primary"
                 onClick={ () => submit( duplicate !== '' ) }
@@ -175,27 +175,27 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 isBusy={ saving }
             >
                 { saving
-                    ? __( 'Recording…', 'fundraising-toolkit' )
+                    ? __( 'Recording…', 'gratora' )
                     : duplicate !== ''
-                        ? __( 'Record it anyway', 'fundraising-toolkit' )
-                        : __( 'Record donation', 'fundraising-toolkit' ) }
+                        ? __( 'Record it anyway', 'gratora' )
+                        : __( 'Record donation', 'gratora' ) }
             </Btn>
             <Btn variant="ghost" onClick={ onClose } disabled={ saving }>
-                { __( 'Cancel', 'fundraising-toolkit' ) }
+                { __( 'Cancel', 'gratora' ) }
             </Btn>
         </div>
     );
 
     return (
         <Dialog
-            title={ __( 'Record a donation', 'fundraising-toolkit' ) }
+            title={ __( 'Record a donation', 'gratora' ) }
             onClose={ saving ? undefined : onClose }
             foot={ foot }
         >
-            <p className="fundkit-dialog__help">
-                { __( 'Money that arrived off the site: a check, cash at an event, a bank transfer.', 'fundraising-toolkit' ) }
+            <p className="gratora-dialog__help">
+                { __( 'Money that arrived off the site: a check, cash at an event, a bank transfer.', 'gratora' ) }
             </p>
-            <div className="fundkit-rd">
+            <div className="gratora-rd">
                 { error !== '' && (
                     <Notice status="error" isDismissible={ false }>{ error }</Notice>
                 ) }
@@ -204,15 +204,15 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     <Notice status="warning" isDismissible={ false }>
                         { sprintf(
                             /* translators: %s: the reference of the donation already on the books. */
-                            __( '%s is already down for this donor, this amount and this date. If they really gave twice, record it anyway. Otherwise change something above.', 'fundraising-toolkit' ),
+                            __( '%s is already down for this donor, this amount and this date. If they really gave twice, record it anyway. Otherwise change something above.', 'gratora' ),
                             duplicate
                         ) }
                     </Notice>
                 ) }
 
-                <Field label={ __( 'Donor email', 'fundraising-toolkit' ) } help={ __( 'Matches an existing donor, or creates one.', 'fundraising-toolkit' ) }>
+                <Field label={ __( 'Donor email', 'gratora' ) } help={ __( 'Matches an existing donor, or creates one.', 'gratora' ) }>
                     <input
-                        className="fundkit-input"
+                        className="gratora-input"
                         type="email"
                         value={ email }
                         autoFocus
@@ -220,32 +220,32 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                     />
                 </Field>
 
-                <div className="fundkit-rd__row">
-                    <Field label={ __( 'First name', 'fundraising-toolkit' ) }>
-                        <input className="fundkit-input" type="text" value={ firstName } onChange={ ( e ) => setFirstName( e.target.value ) } />
+                <div className="gratora-rd__row">
+                    <Field label={ __( 'First name', 'gratora' ) }>
+                        <input className="gratora-input" type="text" value={ firstName } onChange={ ( e ) => setFirstName( e.target.value ) } />
                     </Field>
-                    <Field label={ __( 'Last name', 'fundraising-toolkit' ) }>
-                        <input className="fundkit-input" type="text" value={ lastName } onChange={ ( e ) => setLastName( e.target.value ) } />
+                    <Field label={ __( 'Last name', 'gratora' ) }>
+                        <input className="gratora-input" type="text" value={ lastName } onChange={ ( e ) => setLastName( e.target.value ) } />
                     </Field>
                 </div>
 
-                <Field label={ __( 'Amount', 'fundraising-toolkit' ) }>
+                <Field label={ __( 'Amount', 'gratora' ) }>
                     <AmountInput value={ amount } onChange={ edited( setAmount ) } currency={ currency } placeholder="0" />
                 </Field>
 
                 <Field
-                    label={ __( 'Date received', 'fundraising-toolkit' ) }
-                    help={ __( 'When the money arrived, which is not always today. A check banked last month belongs to last month, and the totals for that month depend on this.', 'fundraising-toolkit' ) }
+                    label={ __( 'Date received', 'gratora' ) }
+                    help={ __( 'When the money arrived, which is not always today. A check banked last month belongs to last month, and the totals for that month depend on this.', 'gratora' ) }
                 >
                     <DateField
                         value={ receivedAt }
                         onChange={ ( next ) => edited( setReceived )( next || '' ) }
-                        ariaLabel={ __( 'Date received', 'fundraising-toolkit' ) }
+                        ariaLabel={ __( 'Date received', 'gratora' ) }
                     />
                 </Field>
 
-                <Field label={ __( 'How it arrived', 'fundraising-toolkit' ) }>
-                    <select className="fundkit-select" value={ method } onChange={ ( e ) => setMethod( e.target.value ) }>
+                <Field label={ __( 'How it arrived', 'gratora' ) }>
+                    <select className="gratora-select" value={ method } onChange={ ( e ) => setMethod( e.target.value ) }>
                         { METHODS.map( ( m ) => (
                             <option key={ m.value } value={ m.value }>{ m.label }</option>
                         ) ) }
@@ -253,63 +253,63 @@ export default function RecordDonationDrawer( { onClose, onRecorded } ) {
                 </Field>
 
                 <Field
-                    label={ __( 'Campaign', 'fundraising-toolkit' ) }
+                    label={ __( 'Campaign', 'gratora' ) }
                     help={ campaignsFailed
-                        ? __( 'Campaigns could not be loaded, so this will be recorded without one. Someone with campaign access can set it afterwards.', 'fundraising-toolkit' )
-                        : __( 'Optional. Leave empty for a general donation.', 'fundraising-toolkit' ) }
+                        ? __( 'Campaigns could not be loaded, so this will be recorded without one. Someone with campaign access can set it afterwards.', 'gratora' )
+                        : __( 'Optional. Leave empty for a general donation.', 'gratora' ) }
                 >
                     <SearchableSelect
                         value={ campaignId }
                         onChange={ ( next ) => { setCampaign( next ); setAttributedTo( '' ); } }
                         options={ campaigns }
                         placeholder={ campaignsFailed
-                            ? __( 'Unavailable', 'fundraising-toolkit' )
-                            : __( 'No campaign', 'fundraising-toolkit' ) }
+                            ? __( 'Unavailable', 'gratora' )
+                            : __( 'No campaign', 'gratora' ) }
                     />
                 </Field>
 
                 { attributions.length > 0 && (
                     <Field
-                        label={ __( 'Credit to', 'fundraising-toolkit' ) }
-                        help={ __( 'Optional. A check handed to somebody raising for this campaign counts towards their total as well as the campaign\'s.', 'fundraising-toolkit' ) }
+                        label={ __( 'Credit to', 'gratora' ) }
+                        help={ __( 'Optional. A check handed to somebody raising for this campaign counts towards their total as well as the campaign\'s.', 'gratora' ) }
                     >
                         <SearchableSelect
                             value={ attributedTo }
                             onChange={ setAttributedTo }
                             options={ attributions }
-                            placeholder={ __( 'The campaign itself', 'fundraising-toolkit' ) }
+                            placeholder={ __( 'The campaign itself', 'gratora' ) }
                         />
                     </Field>
                 ) }
 
                 { funds.length > 0 && (
                     <Field
-                        label={ __( 'Fund', 'fundraising-toolkit' ) }
-                        help={ __( 'Optional. Leave empty to use the default fund.', 'fundraising-toolkit' ) }
+                        label={ __( 'Fund', 'gratora' ) }
+                        help={ __( 'Optional. Leave empty to use the default fund.', 'gratora' ) }
                     >
                         <SearchableSelect
                             value={ fundId }
                             onChange={ setFund }
                             options={ funds }
-                            placeholder={ __( 'Default fund', 'fundraising-toolkit' ) }
+                            placeholder={ __( 'Default fund', 'gratora' ) }
                         />
                     </Field>
                 ) }
 
-                <Field label={ __( 'Note', 'fundraising-toolkit' ) } help={ __( 'Only your team sees this.', 'fundraising-toolkit' ) }>
-                    <textarea className="fundkit-input" rows={ 2 } value={ note } onChange={ ( e ) => setNote( e.target.value ) } />
+                <Field label={ __( 'Note', 'gratora' ) } help={ __( 'Only your team sees this.', 'gratora' ) }>
+                    <textarea className="gratora-input" rows={ 2 } value={ note } onChange={ ( e ) => setNote( e.target.value ) } />
                 </Field>
 
                 { /* eslint-disable-next-line jsx-a11y/label-has-associated-control -- Switch is self-labeled via its label prop */ }
-                <label className="fundkit-rd__receipt">
-                    <Switch checked={ sendReceipt } onChange={ setReceipt } label={ __( 'Email the donor a receipt', 'fundraising-toolkit' ) } />
-                    <span className="fundkit-rd__receipt-txt">
+                <label className="gratora-rd__receipt">
+                    <Switch checked={ sendReceipt } onChange={ setReceipt } label={ __( 'Email the donor a receipt', 'gratora' ) } />
+                    <span className="gratora-rd__receipt-txt">
                         <strong>{ sendReceipt
-                            ? __( 'Email a receipt', 'fundraising-toolkit' )
-                            : __( 'Do not email the donor', 'fundraising-toolkit' ) }</strong>
+                            ? __( 'Email a receipt', 'gratora' )
+                            : __( 'Do not email the donor', 'gratora' ) }</strong>
                         <span>{ sendReceipt
-                            ? __( 'The donor gets a receipt for this donation.', 'fundraising-toolkit' )
-                            : __( 'Nothing is sent, not even a receipt.', 'fundraising-toolkit' ) }</span>
+                            ? __( 'The donor gets a receipt for this donation.', 'gratora' )
+                            : __( 'Nothing is sent, not even a receipt.', 'gratora' ) }</span>
                     </span>
                 </label>
             </div>

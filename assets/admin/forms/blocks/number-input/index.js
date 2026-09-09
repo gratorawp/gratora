@@ -5,7 +5,7 @@ import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 import { SlugTextControl } from '../_shared/SlugTextControl';
 
-const NAME = 'fundkit/number-input';
+const NAME = 'gratora/number-input';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -20,59 +20,59 @@ function Edit( { attributes, setAttributes } ) {
         condition   = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--field' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--field' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Number input', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Number input', 'gratora' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundraising-toolkit' ) }
+                        label={ __( 'Label', 'gratora' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundraising-toolkit' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'fundraising-toolkit' ) }
+                        label={ __( 'Placeholder', 'gratora' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'fundraising-toolkit' ) }
+                        label={ __( 'Help text', 'gratora' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        help={ __( 'For non-currency numbers (quantity, age, etc.). Use a donation-amount block for money.', 'fundraising-toolkit' ) }
+                        help={ __( 'For non-currency numbers (quantity, age, etc.). Use a donation-amount block for money.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Field name', 'fundraising-toolkit' ) }
+                        label={ __( 'Field name', 'gratora' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v } ) }
-                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'fundraising-toolkit' ) }
+                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundraising-toolkit' ) }
+                        label={ __( 'Required', 'gratora' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <NumberControl
-                        label={ __( 'Minimum', 'fundraising-toolkit' ) }
+                        label={ __( 'Minimum', 'gratora' ) }
                         value={ min === null ? '' : min }
                         onChange={ ( v ) => setAttributes( { min: v === '' || v === undefined ? null : Number( v ) } ) }
                         __nextHasNoMarginBottom
                     />
                     <NumberControl
-                        label={ __( 'Maximum', 'fundraising-toolkit' ) }
+                        label={ __( 'Maximum', 'gratora' ) }
                         value={ max === null ? '' : max }
                         onChange={ ( v ) => setAttributes( { max: v === '' || v === undefined ? null : Number( v ) } ) }
                         __nextHasNoMarginBottom
                     />
                     <NumberControl
-                        label={ __( 'Step', 'fundraising-toolkit' ) }
+                        label={ __( 'Step', 'gratora' ) }
                         value={ step }
                         min={ 0 }
                         onChange={ ( v ) => setAttributes( { step: Number( v ) || 1 } ) }
@@ -87,24 +87,24 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="fundkit-block-preview__label"
+                    className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Label', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'Label', 'gratora' ) }
                     allowedFormats={ [] }
                 />
-                { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
+                { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
                 { helpText !== '' && (
                     <RichText
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Help text', 'gratora' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', display: 'block', marginTop: 2 } }
                     />
                 ) }
-                <div className="fundkit-block-preview__field">{ placeholder || '0' }</div>
+                <div className="gratora-block-preview__field">{ placeholder || '0' }</div>
             </div>
         </>
     );
@@ -113,9 +113,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Number input', 'fundraising-toolkit' ),
-        description: __( 'Generic numeric field for non-currency values (quantity, age, etc.).', 'fundraising-toolkit' ),
-        category:   'fundkit-fields',
+        title:      __( 'Number input', 'gratora' ),
+        description: __( 'Generic numeric field for non-currency values (quantity, age, etc.).', 'gratora' ),
+        category:   'gratora-fields',
         icon:       BlockIcons[ 'number-input' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Helpers;
+namespace Gratora\Foundation\Helpers;
 
-use FundKit\Currency\Currency;
+use Gratora\Currency\Currency;
 
 /**
  * Canonical money formatter for human-facing cents values.
@@ -101,7 +101,7 @@ final class Money
         static $cached = null;
         if ($cached !== null) return $cached;
 
-        $opt = get_option('fundkit_currency_locale', []);
+        $opt = get_option('gratora_currency_locale', []);
         $f   = is_array($opt['format'] ?? null) ? $opt['format'] : [];
 
         return $cached = [
@@ -120,7 +120,7 @@ final class Money
 
     /**
      * Org number format in the JS shape consumed by formatAmount
-     * (window.fundkit.number_format). Symbol is the org default currency's;
+     * (window.gratora.number_format). Symbol is the org default currency's;
      * formatAmount falls back to its own table for other currencies.
      *
      * @return array{decimalPlaces:int, decimalSep:string, thousandSep:string, symbolPosition:string, symbol:string}
@@ -171,7 +171,7 @@ final class Money
      */
     public static function defaultCurrency(): string
     {
-        $opt = get_option('fundkit_currency_locale');
+        $opt = get_option('gratora_currency_locale');
 
         return is_array($opt) && ! empty($opt['default_currency'])
             ? strtoupper((string) $opt['default_currency'])

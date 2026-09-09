@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
+use Gratora\Donations\Donation;
 use WP_REST_Request;
 
 /**
@@ -48,7 +48,7 @@ final class DashboardNoCampaignTest extends IntegrationTestCase
 
     private function dashboard(): \WP_REST_Response
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/dashboard');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/dashboard');
         $req->set_param('include', 'top-campaigns');
 
         return rest_do_request($req);
@@ -67,7 +67,7 @@ final class DashboardNoCampaignTest extends IntegrationTestCase
 
     public function test_money_with_no_campaign_is_not_listed_as_a_campaign(): void
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Winter', 'status' => 'published']));
         $campaignId = (int) rest_do_request($req)->get_data()['id'];

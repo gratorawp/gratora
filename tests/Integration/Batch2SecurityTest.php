@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Mail\Mailer;
-use FundKit\Settings\SettingsService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Mail\Mailer;
+use Gratora\Settings\SettingsService;
 
 final class Batch2SecurityTest extends IntegrationTestCase
 {
     public function test_magic_link_email_is_never_bcc_to_admin(): void
     {
-        $c = \FundKit\Foundation\Plugin::instance()->container;
+        $c = \Gratora\Foundation\Plugin::instance()->container;
         // Admin opted into BCC copies of donor mail.
         $c->get(SettingsService::class)->update('email', ['bcc_admin' => true]);
         update_option('admin_email', 'org-admin@example.com');
@@ -49,7 +49,7 @@ final class Batch2SecurityTest extends IntegrationTestCase
 
     public function test_redacted_donor_redonating_reactivates_the_same_row(): void
     {
-        $svc = \FundKit\Foundation\Plugin::instance()->container->get(DonorService::class);
+        $svc = \Gratora\Foundation\Plugin::instance()->container->get(DonorService::class);
 
         $donor = $svc->findOrCreate('repeat@example.com', ['first_name' => 'Reed']);
         $id    = (int) $donor->id;
@@ -69,7 +69,7 @@ final class Batch2SecurityTest extends IntegrationTestCase
 
     public function test_bare_lookup_does_not_reactivate_or_repopulate_a_redacted_donor(): void
     {
-        $svc = \FundKit\Foundation\Plugin::instance()->container->get(DonorService::class);
+        $svc = \Gratora\Foundation\Plugin::instance()->container->get(DonorService::class);
 
         $donor = $svc->findOrCreate('erased@example.com', ['first_name' => 'Ann']);
         $id    = (int) $donor->id;
@@ -87,7 +87,7 @@ final class Batch2SecurityTest extends IntegrationTestCase
 
     public function test_editing_a_redacted_donor_is_rejected(): void
     {
-        $svc   = \FundKit\Foundation\Plugin::instance()->container->get(DonorService::class);
+        $svc   = \Gratora\Foundation\Plugin::instance()->container->get(DonorService::class);
         $donor = $svc->findOrCreate('noedit@example.com', ['first_name' => 'Nia']);
         $svc->redact($donor);
 
@@ -100,18 +100,18 @@ final class Batch2SecurityTest extends IntegrationTestCase
         // The admin PATCH handler writes name/company via a direct UPDATE and
         // phone/address via setEncryptedField, bypassing editProfile - so the
         // redacted guard has to live on that path too.
-        $svc   = \FundKit\Foundation\Plugin::instance()->container->get(DonorService::class);
+        $svc   = \Gratora\Foundation\Plugin::instance()->container->get(DonorService::class);
         $donor = $svc->findOrCreate('adminedit@example.com', ['first_name' => 'Ada']);
         $id    = (int) $donor->id;
         $svc->redact($donor);
 
-        $req = new \WP_REST_Request('PATCH', "/fundkit/v1/admin/donors/{$id}");
+        $req = new \WP_REST_Request('PATCH', "/gratora/v1/admin/donors/{$id}");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['first_name' => 'Hacker', 'phone' => '+15550001234']));
         $res = rest_do_request($req);
 
         $this->assertSame(422, $res->get_status());
-        $this->assertSame('fundkit_donor_redacted', $res->get_data()['code'] ?? null);
+        $this->assertSame('gratora_donor_redacted', $res->get_data()['code'] ?? null);
 
         $fresh = Donor::query()->where('id', $id)->get();
         $this->assertNull($fresh->first_name, 'the erased row was not re-populated');
@@ -120,15 +120,15 @@ final class Batch2SecurityTest extends IntegrationTestCase
 
     public function test_redaction_revokes_outstanding_magic_link_tokens(): void
     {
-        $c     = \FundKit\Foundation\Plugin::instance()->container;
+        $c     = \Gratora\Foundation\Plugin::instance()->container;
         $svc   = $c->get(DonorService::class);
-        $magic = $c->get(\FundKit\Donors\MagicLinkService::class);
+        $magic = $c->get(\Gratora\Donors\MagicLinkService::class);
 
         $donor = $svc->findOrCreate('revoke@example.com', ['first_name' => 'Rev']);
         $magic->issue((int) $donor->id, 'donor_portal');
         $this->assertGreaterThan(
             0,
-            (int) \FundKit\Donors\MagicLinkToken::query()->where('donor_id', (int) $donor->id)->count(),
+            (int) \Gratora\Donors\MagicLinkToken::query()->where('donor_id', (int) $donor->id)->count(),
             'a token exists before redaction'
         );
 
@@ -136,22 +136,22 @@ final class Batch2SecurityTest extends IntegrationTestCase
 
         $this->assertSame(
             0,
-            (int) \FundKit\Donors\MagicLinkToken::query()->where('donor_id', (int) $donor->id)->count(),
+            (int) \Gratora\Donors\MagicLinkToken::query()->where('donor_id', (int) $donor->id)->count(),
             'redaction revokes the donor\'s magic-link tokens'
         );
     }
 
     public function test_redaction_erases_staff_notes(): void
     {
-        $c     = \FundKit\Foundation\Plugin::instance()->container;
+        $c     = \Gratora\Foundation\Plugin::instance()->container;
         $svc   = $c->get(DonorService::class);
-        $notes = $c->get(\FundKit\Donors\DonorNoteRepository::class);
+        $notes = $c->get(\Gratora\Donors\DonorNoteRepository::class);
 
         $donor = $svc->findOrCreate('noted@example.com', ['first_name' => 'Nora']);
         $notes->create((int) $donor->id, 'Prefers phone contact; lives at 12 Elm St.', 1);
         $this->assertGreaterThan(
             0,
-            (int) \FundKit\Donors\DonorNote::query()->where('donor_id', (int) $donor->id)->count(),
+            (int) \Gratora\Donors\DonorNote::query()->where('donor_id', (int) $donor->id)->count(),
             'a staff note exists before redaction'
         );
 
@@ -159,7 +159,7 @@ final class Batch2SecurityTest extends IntegrationTestCase
 
         $this->assertSame(
             0,
-            (int) \FundKit\Donors\DonorNote::query()->where('donor_id', (int) $donor->id)->count(),
+            (int) \Gratora\Donors\DonorNote::query()->where('donor_id', (int) $donor->id)->count(),
             'redaction removes free-text staff notes (DSAR-scope PII)'
         );
     }

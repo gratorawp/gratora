@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Currency\FxRates;
-use FundKit\Currency\FxRatesUpdater;
+use Gratora\Analytics\Event;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Currency\FxRates;
+use Gratora\Currency\FxRatesUpdater;
 use WP_Error;
 use WP_REST_Request;
 
@@ -76,7 +76,7 @@ final class FxSnapshotFreshnessTest extends IntegrationTestCase
         delete_option(FxRates::OPTION);
         $this->updater()->saveSettings(true, []);
 
-        $state = (array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/currency/fx'))->get_data();
+        $state = (array) rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/currency/fx'))->get_data();
 
         $this->assertNull($state['date']);
         $this->assertTrue($state['stale']);
@@ -104,7 +104,7 @@ final class FxSnapshotFreshnessTest extends IntegrationTestCase
             'rates'      => ['EUR' => 0.9],
         ], false);
 
-        $fx = \FundKit\Foundation\Plugin::instance()->container->get(FxRates::class);
+        $fx = \Gratora\Foundation\Plugin::instance()->container->get(FxRates::class);
 
         $this->assertFalse($fx->fetchHasStopped(), 'the fetch ran an hour ago');
         $this->assertFalse(
@@ -132,7 +132,7 @@ final class FxSnapshotFreshnessTest extends IntegrationTestCase
 
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $res = rest_do_request(new \WP_REST_Request('GET', '/fundkit/v1/admin/currency/fx'));
+        $res = rest_do_request(new \WP_REST_Request('GET', '/gratora/v1/admin/currency/fx'));
         $this->assertSame(200, $res->get_status());
 
         $this->assertFalse(
@@ -154,7 +154,7 @@ final class FxSnapshotFreshnessTest extends IntegrationTestCase
 
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $res = rest_do_request(new \WP_REST_Request('GET', '/fundkit/v1/admin/currency/fx'));
+        $res = rest_do_request(new \WP_REST_Request('GET', '/gratora/v1/admin/currency/fx'));
 
         $this->assertTrue((bool) ((array) $res->get_data())['stale']);
     }
@@ -170,7 +170,7 @@ final class FxSnapshotFreshnessTest extends IntegrationTestCase
         ], false);
 
         $this->assertTrue(
-            \FundKit\Foundation\Plugin::instance()->container->get(FxRates::class)->fetchHasStopped(),
+            \Gratora\Foundation\Plugin::instance()->container->get(FxRates::class)->fetchHasStopped(),
             'four days with no successful fetch is the thing worth saying'
         );
     }
@@ -181,7 +181,7 @@ final class FxSnapshotFreshnessTest extends IntegrationTestCase
         update_option(FxRates::OPTION, ['base' => 'USD', 'auto' => true, 'rates' => []], false);
 
         $this->assertTrue(
-            \FundKit\Foundation\Plugin::instance()->container->get(FxRates::class)->fetchHasStopped(),
+            \Gratora\Foundation\Plugin::instance()->container->get(FxRates::class)->fetchHasStopped(),
             'no fetched_at is not a fresh fetch'
         );
     }
@@ -237,7 +237,7 @@ final class FxSnapshotFreshnessTest extends IntegrationTestCase
     private function runFailingFetch(): void
     {
         // A second supported currency, or the daily run declines to fetch at all.
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'EUR'],
         ]);

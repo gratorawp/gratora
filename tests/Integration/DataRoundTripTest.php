@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationNote;
-use FundKit\Donations\Refund;
-use FundKit\Donors\Consent;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Exports\DonorExporter;
-use FundKit\Forms\Form;
-use FundKit\Funds\Fund;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Transfer\DataExporter;
-use FundKit\Foundation\Transfer\DataImporter;
-use FundKit\Receipts\Receipt;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationNote;
+use Gratora\Donations\Refund;
+use Gratora\Donors\Consent;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Exports\DonorExporter;
+use Gratora\Forms\Form;
+use Gratora\Funds\Fund;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Transfer\DataExporter;
+use Gratora\Foundation\Transfer\DataImporter;
+use Gratora\Receipts\Receipt;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * Export then import, which is the only way to know either works.
@@ -59,16 +59,16 @@ final class DataRoundTripTest extends IntegrationTestCase
         // A fresh importer per run: the id map belongs to one import, and
         // reusing it would hide a failure to match on the natural key.
         return (new DataImporter(
-            Plugin::instance()->container->get(\FundKit\Foundation\Crypto\Crypto::class),
-            Plugin::instance()->container->get(\FundKit\Foundation\Identity\IdentityHasher::class),
+            Plugin::instance()->container->get(\Gratora\Foundation\Crypto\Crypto::class),
+            Plugin::instance()->container->get(\Gratora\Foundation\Identity\IdentityHasher::class),
         ))->import($export);
     }
 
     private function wipeDonors(): void
     {
         $prefix = DB::getPrefix();
-        DB::raw("DELETE FROM {$prefix}fundkit_donations");
-        DB::raw("DELETE FROM {$prefix}fundkit_donors");
+        DB::raw("DELETE FROM {$prefix}gratora_donations");
+        DB::raw("DELETE FROM {$prefix}gratora_donors");
     }
 
     private function seedDonor(string $email, string $first = 'Round', string $last = 'Trip'): Donor
@@ -81,16 +81,16 @@ final class DataRoundTripTest extends IntegrationTestCase
     {
         $prefix = DB::getPrefix();
         foreach ([
-            'fundkit_receipts',
-            'fundkit_refunds',
-            'fundkit_consents',
-            'fundkit_donation_notes',
-            'fundkit_donor_notes',
-            'fundkit_donations',
-            'fundkit_donors',
-            'fundkit_form_donation_stats',
-            'fundkit_forms',
-            'fundkit_campaigns',
+            'gratora_receipts',
+            'gratora_refunds',
+            'gratora_consents',
+            'gratora_donation_notes',
+            'gratora_donor_notes',
+            'gratora_donations',
+            'gratora_donors',
+            'gratora_form_donation_stats',
+            'gratora_forms',
+            'gratora_campaigns',
         ] as $table) {
             DB::raw("DELETE FROM {$prefix}{$table}");
         }
@@ -199,9 +199,9 @@ final class DataRoundTripTest extends IntegrationTestCase
         $second = $this->import($export);
         $after  = Donor::query()->count();
 
-        $this->assertGreaterThan(0, $first['created']['fundkit_donors'] ?? 0, 'the first run creates');
-        $this->assertSame(0, $second['created']['fundkit_donors'] ?? 0, 'the second creates nothing');
-        $this->assertGreaterThan(0, $second['existing']['fundkit_donors'] ?? 0, 'and reports them as already here');
+        $this->assertGreaterThan(0, $first['created']['gratora_donors'] ?? 0, 'the first run creates');
+        $this->assertSame(0, $second['created']['gratora_donors'] ?? 0, 'the second creates nothing');
+        $this->assertGreaterThan(0, $second['existing']['gratora_donors'] ?? 0, 'and reports them as already here');
         $this->assertSame($before, $after, 'no duplicate rows');
     }
 
@@ -349,8 +349,8 @@ final class DataRoundTripTest extends IntegrationTestCase
         $second = $this->import($export);
 
         $this->assertSame(1, Donor::query()->count(), 'one donor, not two');
-        $this->assertSame(0, $second['created']['fundkit_donors'] ?? 0, 'the second run created none');
-        $this->assertSame(1, $second['existing']['fundkit_donors'] ?? 0, 'and reported them as already here');
+        $this->assertSame(0, $second['created']['gratora_donors'] ?? 0, 'the second run created none');
+        $this->assertSame(1, $second['existing']['gratora_donors'] ?? 0, 'and reported them as already here');
         $this->assertSame(
             1,
             Consent::query()->count(),
@@ -374,8 +374,8 @@ final class DataRoundTripTest extends IntegrationTestCase
 
         $this->assertSame(1, Donor::query()->count(), 'no second anonymous donor beside them');
         $this->assertSame((int) $donor->id, (int) Donor::query()->get()->id, 'and it is the row already here');
-        $this->assertSame(1, $result['existing']['fundkit_donors'] ?? 0, 'reported as already here, not created');
-        $this->assertSame(0, $result['skipped']['fundkit_donors'] ?? 0, 'matched, not passed over');
+        $this->assertSame(1, $result['existing']['gratora_donors'] ?? 0, 'reported as already here, not created');
+        $this->assertSame(0, $result['skipped']['gratora_donors'] ?? 0, 'matched, not passed over');
         $this->assertSame([], $result['dropped'], 'and nothing was dropped');
     }
 
@@ -392,7 +392,7 @@ final class DataRoundTripTest extends IntegrationTestCase
      */
     public function test_a_donation_number_that_belongs_to_someone_else_here_is_not_taken_as_the_erased_donor(): void
     {
-        $reference = 'FUNDKIT-2026-00001';
+        $reference = 'GRATORA-2026-00001';
 
         $jane = $this->seedDonor('jane@example.test', 'Jane', 'Regular');
         $this->seedDonation((int) $jane->id, $reference);
@@ -404,13 +404,13 @@ final class DataRoundTripTest extends IntegrationTestCase
         $result = $this->import([
             'site_url' => 'https://another-charity.example',
             'tables'   => [
-                'fundkit_donors' => [[
+                'gratora_donors' => [[
                     'id'          => 5,
                     'redacted_at' => $now,
                     'created_at'  => $now,
                     'updated_at'  => $now,
                 ]],
-                'fundkit_donations' => [[
+                'gratora_donations' => [[
                     'id'           => 9,
                     'donor_id'     => 5,
                     'reference'    => $reference,
@@ -422,7 +422,7 @@ final class DataRoundTripTest extends IntegrationTestCase
                     'created_at'   => '2026-01-02 03:04:05',
                     'updated_at'   => '2026-01-02 03:04:05',
                 ]],
-                'fundkit_consents' => [[
+                'gratora_consents' => [[
                     'id'          => 3,
                     'donor_id'    => 5,
                     'purpose'     => 'marketing',
@@ -459,10 +459,10 @@ final class DataRoundTripTest extends IntegrationTestCase
         );
 
         // Report cross-donor reference collisions instead of merging their dependent records.
-        $this->assertSame(0, $result['existing']['fundkit_donations'] ?? 0, 'not read as the donation already here');
+        $this->assertSame(0, $result['existing']['gratora_donations'] ?? 0, 'not read as the donation already here');
         $this->assertSame(
             1,
-            $result['dropped']['fundkit_donations']['reference_collision'] ?? 0,
+            $result['dropped']['gratora_donations']['reference_collision'] ?? 0,
             'the operator is told, instead of it vanishing into the existing count'
         );
         $this->assertSame(1, Donation::query()->count(), 'so it did not land as its own row');
@@ -485,7 +485,7 @@ final class DataRoundTripTest extends IntegrationTestCase
         $note = DonationNote::make();
         $note->donation_id    = (int) Donation::query()->where('donor_id', (int) $donor->id)->get()->id;
         $note->body_encrypted = Plugin::instance()->container
-            ->get(\FundKit\Foundation\Crypto\Crypto::class)
+            ->get(\Gratora\Foundation\Crypto\Crypto::class)
             ->encrypt('Rang to say the address on the receipt is wrong.');
         $note->created_at     = gmdate('Y-m-d H:i:s');
         $note->updated_at     = $note->created_at;
@@ -498,8 +498,8 @@ final class DataRoundTripTest extends IntegrationTestCase
         $second = $this->import($export);
 
         $this->assertSame(1, DonationNote::query()->count(), 'one note, not the same one twice');
-        $this->assertSame(0, $second['created']['fundkit_donation_notes'] ?? 0, 'the second run created none');
-        $this->assertSame(1, $second['existing']['fundkit_donation_notes'] ?? 0, 'it recognised the one it wrote');
+        $this->assertSame(0, $second['created']['gratora_donation_notes'] ?? 0, 'the second run created none');
+        $this->assertSame(1, $second['existing']['gratora_donation_notes'] ?? 0, 'it recognised the one it wrote');
     }
 
     /**
@@ -543,7 +543,7 @@ final class DataRoundTripTest extends IntegrationTestCase
      */
     public function test_a_receipt_for_a_donation_already_here_is_matched_not_inserted(): void
     {
-        $reference = 'FUNDKIT-2026-00002';
+        $reference = 'GRATORA-2026-00002';
 
         $jane     = $this->seedDonor('janereceipt@example.test', 'Jane', 'Regular');
         $donation = $this->seedDonation((int) $jane->id, $reference);
@@ -560,7 +560,7 @@ final class DataRoundTripTest extends IntegrationTestCase
         $result = $this->import([
             'site_url' => 'https://another-charity.example',
             'tables'   => [
-                'fundkit_donors' => [[
+                'gratora_donors' => [[
                     'id'         => 5,
                     'email'      => 'stranger@example.test',
                     'first_name' => 'Stranger',
@@ -571,7 +571,7 @@ final class DataRoundTripTest extends IntegrationTestCase
                 // currency and created_at all match the row seeded above. A
                 // colliding reference on a DIFFERENT donation is now reported
                 // rather than matched, and that is not what this test is about.
-                'fundkit_donations' => [[
+                'gratora_donations' => [[
                     'id'           => 9,
                     'donor_id'     => 5,
                     'reference'    => $reference,
@@ -583,7 +583,7 @@ final class DataRoundTripTest extends IntegrationTestCase
                     'created_at'   => (string) $donation->created_at,
                     'updated_at'   => (string) $donation->updated_at,
                 ]],
-                'fundkit_receipts' => [[
+                'gratora_receipts' => [[
                     'id'             => 4,
                     'donation_id'    => 9,
                     'donor_id'       => 5,
@@ -596,8 +596,8 @@ final class DataRoundTripTest extends IntegrationTestCase
         ]);
 
         $this->assertSame(1, Receipt::query()->count(), 'the donation keeps the one receipt it is allowed');
-        $this->assertSame(1, $result['existing']['fundkit_receipts'] ?? 0, 'the incoming one was matched onto it');
-        $this->assertSame(0, $result['created']['fundkit_receipts'] ?? 0, 'and none was inserted');
+        $this->assertSame(1, $result['existing']['gratora_receipts'] ?? 0, 'the incoming one was matched onto it');
+        $this->assertSame(0, $result['created']['gratora_receipts'] ?? 0, 'and none was inserted');
     }
 
     /**
@@ -632,8 +632,8 @@ final class DataRoundTripTest extends IntegrationTestCase
         $second = $this->import($export);
 
         $this->assertSame(1, Refund::query()->count(), 'one refund, not the same money given back twice');
-        $this->assertSame(0, $second['created']['fundkit_refunds'] ?? 0, 'the second run created none');
-        $this->assertSame(1, $second['existing']['fundkit_refunds'] ?? 0, 'it recognised the one it wrote');
+        $this->assertSame(0, $second['created']['gratora_refunds'] ?? 0, 'the second run created none');
+        $this->assertSame(1, $second['existing']['gratora_refunds'] ?? 0, 'it recognised the one it wrote');
     }
 
     /**
@@ -666,8 +666,8 @@ final class DataRoundTripTest extends IntegrationTestCase
         $result = $this->import($export);
 
         $this->assertSame(2, Refund::query()->count(), 'both halves of the refund came back');
-        $this->assertSame(2, $result['created']['fundkit_refunds'] ?? 0, 'and both were inserted');
-        $this->assertSame(0, $result['existing']['fundkit_refunds'] ?? 0, 'neither was read as the other');
+        $this->assertSame(2, $result['created']['gratora_refunds'] ?? 0, 'and both were inserted');
+        $this->assertSame(0, $result['existing']['gratora_refunds'] ?? 0, 'neither was read as the other');
     }
 
     /**
@@ -684,7 +684,7 @@ final class DataRoundTripTest extends IntegrationTestCase
             return [
                 'exported_at' => $exportedAt,
                 'tables'      => [
-                    'fundkit_donors' => [[
+                    'gratora_donors' => [[
                         'id'          => 5,
                         'redacted_at' => $now,
                         'created_at'  => $now,
@@ -765,14 +765,14 @@ final class DataRoundTripTest extends IntegrationTestCase
         $donor = $this->seedDonorWithHistory($email, $reference);
 
         // What key loss leaves behind: ciphertext the current key cannot open.
-        DB::table('fundkit_donors')
+        DB::table('gratora_donors')
             ->where('id', (int) $donor->id)
             ->update(['email_encrypted' => base64_encode(random_bytes(64))]);
 
         $export = $this->export();
         $this->assertArrayNotHasKey(
             'email',
-            $export['tables']['fundkit_donors'][0],
+            $export['tables']['gratora_donors'][0],
             'precondition: no address travelled in the file'
         );
 
@@ -819,7 +819,7 @@ final class DataRoundTripTest extends IntegrationTestCase
         $restored = Form::query()->where('slug', $f->slug)->get();
         $this->assertNotNull($restored, 'precondition: the form came back');
 
-        $stats = DB::table('fundkit_form_donation_stats')->where('form_id', (int) $restored->id)->get();
+        $stats = DB::table('gratora_form_donation_stats')->where('form_id', (int) $restored->id)->get();
         $this->assertNotNull($stats, 'the form has statistics again');
         $this->assertSame(4200, (int) ($stats['raised_cents'] ?? 0), 'counting what actually landed');
         $this->assertSame(1, (int) ($stats['donations_count'] ?? 0), 'and how many donations landed');
@@ -827,14 +827,14 @@ final class DataRoundTripTest extends IntegrationTestCase
 
     /**
      * An add-on contributes its tables to the export through
-     * fundkit.export.tables, and the importer has no contract for restoring one.
+     * gratora.export.tables, and the importer has no contract for restoring one.
      * Being told is the difference between a partial restore and a silent one.
      */
     public function test_a_table_the_importer_does_not_know_is_reported_not_ignored(): void
     {
         $result = $this->import([
             'tables' => [
-                'fundkit_ticket_orders' => [
+                'gratora_ticket_orders' => [
                     ['id' => 1, 'reference' => 'TCK-1'],
                     ['id' => 2, 'reference' => 'TCK-2'],
                 ],
@@ -843,10 +843,10 @@ final class DataRoundTripTest extends IntegrationTestCase
 
         $this->assertSame(
             2,
-            $result['dropped']['fundkit_ticket_orders']['unsupported_table'] ?? 0,
+            $result['dropped']['gratora_ticket_orders']['unsupported_table'] ?? 0,
             'both rows are named as not restored'
         );
-        $this->assertSame(2, $result['skipped']['fundkit_ticket_orders'] ?? 0, 'and counted with the rest');
+        $this->assertSame(2, $result['skipped']['gratora_ticket_orders'] ?? 0, 'and counted with the rest');
     }
 
     /** A campaign keeps its slug, which is what the import matches it by. */
@@ -867,9 +867,9 @@ final class DataRoundTripTest extends IntegrationTestCase
 
         // The file's form arrives as a stranger rather than as this one, which
         // is what a merge from another site looks like.
-        foreach ($export['tables']['fundkit_forms'] as $i => $row) {
+        foreach ($export['tables']['gratora_forms'] as $i => $row) {
             if ((int) ($row['id'] ?? 0) === $localFormId) {
-                $export['tables']['fundkit_forms'][$i]['slug'] = 'incoming-form-' . uniqid();
+                $export['tables']['gratora_forms'][$i]['slug'] = 'incoming-form-' . uniqid();
             }
         }
 
@@ -877,7 +877,7 @@ final class DataRoundTripTest extends IntegrationTestCase
 
         $this->assertGreaterThan(
             0,
-            $result['existing']['fundkit_campaigns'] ?? 0,
+            $result['existing']['gratora_campaigns'] ?? 0,
             'precondition: the campaign was matched rather than created'
         );
         $this->assertSame(
@@ -1010,8 +1010,8 @@ final class DataRoundTripTest extends IntegrationTestCase
     private function wipeForms(): void
     {
         $prefix = DB::getPrefix();
-        DB::raw("DELETE FROM {$prefix}fundkit_form_donation_stats");
-        DB::raw("DELETE FROM {$prefix}fundkit_forms");
+        DB::raw("DELETE FROM {$prefix}gratora_form_donation_stats");
+        DB::raw("DELETE FROM {$prefix}gratora_forms");
     }
 
     private function seedFund(string $code): Fund
@@ -1046,9 +1046,9 @@ final class DataRoundTripTest extends IntegrationTestCase
         $form->slug        = 'picker-form-' . uniqid();
         $form->status      = 'published';
         $form->campaign_id = (int) $campaign->id;
-        $form->blocks     = '<!-- wp:fundkit/columns -->'
-            . '<!-- wp:fundkit/fund-picker ' . $attrs . ' /-->'
-            . '<!-- /wp:fundkit/columns -->';
+        $form->blocks     = '<!-- wp:gratora/columns -->'
+            . '<!-- wp:gratora/fund-picker ' . $attrs . ' /-->'
+            . '<!-- /wp:gratora/columns -->';
         $form->created_at = gmdate('Y-m-d H:i:s');
         $form->updated_at = $form->created_at;
         $form->save();
@@ -1064,9 +1064,9 @@ final class DataRoundTripTest extends IntegrationTestCase
      */
     private function retargetFundInExport(array &$export, int $realId, int $sourceId): void
     {
-        foreach ($export['tables']['fundkit_funds'] as $i => $row) {
+        foreach ($export['tables']['gratora_funds'] as $i => $row) {
             if ((int) ($row['id'] ?? 0) === $realId) {
-                $export['tables']['fundkit_funds'][$i]['id'] = $sourceId;
+                $export['tables']['gratora_funds'][$i]['id'] = $sourceId;
             }
         }
     }
@@ -1076,7 +1076,7 @@ final class DataRoundTripTest extends IntegrationTestCase
     {
         foreach (parse_blocks($markup) as $block) {
             foreach ($block['innerBlocks'] ?? [] as $inner) {
-                if (($inner['blockName'] ?? '') === 'fundkit/fund-picker') {
+                if (($inner['blockName'] ?? '') === 'gratora/fund-picker') {
                     return (array) ($inner['attrs'] ?? []);
                 }
             }
@@ -1101,7 +1101,7 @@ final class DataRoundTripTest extends IntegrationTestCase
 
         $this->assertGreaterThan(
             0,
-            $result['existing']['fundkit_campaigns'] ?? 0,
+            $result['existing']['gratora_campaigns'] ?? 0,
             'the campaign is already here, matched on its slug'
         );
         $this->assertSame(

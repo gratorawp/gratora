@@ -29,12 +29,12 @@ const CONFIG = {
 
 function addForm() {
     const form = document.createElement( 'form' );
-    form.className = 'fundkit-donation-form';
-    form.id = 'fundkit-form-1';
+    form.className = 'gratora-donation-form';
+    form.id = 'gratora-form-1';
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-fundkit-form-config', '' );
+    json.setAttribute( 'data-gratora-form-config', '' );
     json.textContent = JSON.stringify( CONFIG );
     form.appendChild( json );
 
@@ -77,7 +77,7 @@ beforeEach( () => {
 
 afterEach( () => {
     delete window.top;
-    delete window.fundkitFormPreview;
+    delete window.gratoraFormPreview;
 } );
 
 it( 'renders normally when the page is not framed', async () => {
@@ -85,7 +85,7 @@ it( 'renders normally when the page is not framed', async () => {
     const form = addForm();
     await boot();
 
-    expect( form.dataset.fundkitFramed ).toBeUndefined();
+    expect( form.dataset.gratoraFramed ).toBeUndefined();
     expect( form.textContent ).not.toContain( 'inside another website' );
 } );
 
@@ -94,7 +94,7 @@ it( 'renders normally inside a same-origin frame, which is the editor canvas', a
     const form = addForm();
     await boot();
 
-    expect( form.dataset.fundkitFramed ).toBeUndefined();
+    expect( form.dataset.gratoraFramed ).toBeUndefined();
     expect( form.textContent ).not.toContain( 'inside another website' );
 } );
 
@@ -106,11 +106,11 @@ it( 'renders normally inside a same-origin frame, which is the editor canvas', a
  */
 it( 'renders inside the admin preview, which is sandboxed and so has no origin', async () => {
     frameAs( 'cross-origin' );
-    window.fundkitFormPreview = true;
+    window.gratoraFormPreview = true;
     const form = addForm();
     await boot();
 
-    expect( form.dataset.fundkitFramed ).toBeUndefined();
+    expect( form.dataset.gratoraFramed ).toBeUndefined();
     expect( form.textContent ).not.toContain( 'inside another website' );
 } );
 
@@ -119,7 +119,7 @@ it( 'refuses to render inside another site, and offers the real page', async () 
     const form = addForm();
     await boot();
 
-    expect( form.dataset.fundkitFramed ).toBe( 'true' );
+    expect( form.dataset.gratoraFramed ).toBe( 'true' );
     expect( form.textContent ).toContain( 'inside another website' );
 
     const out = form.querySelector( 'a' );
@@ -137,5 +137,5 @@ it( 'still reveals the form, so the cloak never leaves a blank space', async () 
     const form = addForm();
     await boot();
 
-    expect( form.dataset.fundkitReady ).toBe( 'true' );
+    expect( form.dataset.gratoraReady ).toBe( 'true' );
 } );

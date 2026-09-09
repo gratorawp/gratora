@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Currency\FxRates;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Plugin;
+use Gratora\Currency\FxRates;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -59,11 +59,11 @@ final class UnconvertibleCurrencyTest extends IntegrationTestCase
      */
     public function test_the_fx_status_names_unconvertible_supported_currencies(): void
     {
-        $cur = (array) get_option('fundkit_currency_locale', []);
+        $cur = (array) get_option('gratora_currency_locale', []);
         $cur['supported_currencies'] = [Money::defaultCurrency(), 'ZZZ'];
-        update_option('fundkit_currency_locale', $cur);
+        update_option('gratora_currency_locale', $cur);
 
-        $data = (array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/currency/fx'))->get_data();
+        $data = (array) rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/currency/fx'))->get_data();
 
         $this->assertArrayHasKey('unconvertible', $data);
         $this->assertContains('ZZZ', $data['unconvertible']);
@@ -72,11 +72,11 @@ final class UnconvertibleCurrencyTest extends IntegrationTestCase
 
     public function test_a_fully_convertible_setup_reports_nothing_missing(): void
     {
-        $cur = (array) get_option('fundkit_currency_locale', []);
+        $cur = (array) get_option('gratora_currency_locale', []);
         $cur['supported_currencies'] = [Money::defaultCurrency()];
-        update_option('fundkit_currency_locale', $cur);
+        update_option('gratora_currency_locale', $cur);
 
-        $data = (array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/currency/fx'))->get_data();
+        $data = (array) rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/currency/fx'))->get_data();
 
         $this->assertSame([], $data['unconvertible']);
     }

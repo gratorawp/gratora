@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Gateways;
+namespace Gratora\Tests\Unit\Gateways;
 
-use FundKit\Gateways\PayPal\PayPalApiException;
+use Gratora\Gateways\PayPal\PayPalApiException;
 use PHPUnit\Framework\TestCase;
 
 final class PayPalApiExceptionTest extends TestCase

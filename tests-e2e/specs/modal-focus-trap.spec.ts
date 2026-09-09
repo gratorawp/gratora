@@ -9,9 +9,9 @@ import { test, expect } from '@playwright/test';
  */
 test.describe('modal form focus trap', () => {
     test('Tab stays inside the panel after focus falls to the body', async ({ page }) => {
-        await page.goto(process.env.FUNDKIT_E2E_FORM_PATH ?? '/');
+        await page.goto(process.env.GRATORA_E2E_FORM_PATH ?? '/');
 
-        const panel = page.locator('.fundkit-donation-form');
+        const panel = page.locator('.gratora-donation-form');
         await expect(panel.first()).toBeVisible();
 
         // What the browser does when the focused control is disabled mid-flight.
@@ -21,7 +21,7 @@ test.describe('modal form focus trap', () => {
         await page.keyboard.press('Tab');
 
         const inside = await page.evaluate(() => {
-            const form = document.querySelector('.fundkit-donation-form');
+            const form = document.querySelector('.gratora-donation-form');
 
             return !! form && form.contains(document.activeElement);
         });

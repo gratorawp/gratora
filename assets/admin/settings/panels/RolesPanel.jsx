@@ -11,7 +11,7 @@ export default function RolesPanel( { s } ) {
 
     const load = () => {
         setLoadError( false );
-        apiFetch( { path: '/fundkit/v1/admin/roles' } )
+        apiFetch( { path: '/gratora/v1/admin/roles' } )
             .then( setData )
             .catch( () => setLoadError( true ) );
     };
@@ -25,20 +25,20 @@ export default function RolesPanel( { s } ) {
 
     if ( loadError ) {
         return (
-            <div className="fundkit-panel">
+            <div className="gratora-panel">
                 <Card>
                     <p style={ { color: '#b42318', margin: '0 0 12px' } }>
-                        { __( 'Could not load roles.', 'fundraising-toolkit' ) }
+                        { __( 'Could not load roles.', 'gratora' ) }
                     </p>
-                    <Btn variant="secondary" onClick={ load }>{ __( 'Retry', 'fundraising-toolkit' ) }</Btn>
+                    <Btn variant="secondary" onClick={ load }>{ __( 'Retry', 'gratora' ) }</Btn>
                 </Card>
             </div>
         );
     }
-    if ( ! data ) return <p>{ __( 'Loading…', 'fundraising-toolkit' ) }</p>;
+    if ( ! data ) return <p>{ __( 'Loading…', 'gratora' ) }</p>;
 
     // Both come from the server: an add-on registers capabilities through the
-    // fundkit.capabilities filter, so a list kept here could never include them.
+    // gratora.capabilities filter, so a list kept here could never include them.
     const roles    = data.roles || [];
     const capGroups = data.capabilities || [];
     const allCaps  = capGroups.flatMap( ( g ) => g.caps.map( ( c ) => c.cap ) );
@@ -62,22 +62,22 @@ export default function RolesPanel( { s } ) {
     const setAll = ( slug, on ) => setRoleCaps( slug, on ? allCaps : [] );
 
     return (
-        <div className="fundkit-panel">
+        <div className="gratora-panel">
             <Card edited={ s.isDirty }>
-                <div className="fundkit-roles-table" style={ { '--fundkit-role-count': roles.length } }>
-                    <div className="fundkit-roles-table__head">
-                        <div className="fundkit-roles-table__role-cell">{ __( 'Capability', 'fundraising-toolkit' ) }</div>
+                <div className="gratora-roles-table" style={ { '--gratora-role-count': roles.length } }>
+                    <div className="gratora-roles-table__head">
+                        <div className="gratora-roles-table__role-cell">{ __( 'Capability', 'gratora' ) }</div>
                         { roles.map( ( r ) => (
-                            <div key={ r.slug } className="fundkit-roles-table__role">
+                            <div key={ r.slug } className="gratora-roles-table__role">
                                 <strong>{ r.name }</strong>
-                                <div className="fundkit-roles-table__role-actions">
+                                <div className="gratora-roles-table__role-actions">
                                     <Btn
                                         variant="ghost"
                                         size="sm"
                                         onClick={ () => setAll( r.slug, true ) }
                                         disabled={ r.slug === 'administrator' }
                                     >
-                                        { __( 'All', 'fundraising-toolkit' ) }
+                                        { __( 'All', 'gratora' ) }
                                     </Btn>
                                     <Btn
                                         variant="ghost"
@@ -85,7 +85,7 @@ export default function RolesPanel( { s } ) {
                                         onClick={ () => setAll( r.slug, false ) }
                                         disabled={ r.slug === 'administrator' }
                                     >
-                                        { __( 'None', 'fundraising-toolkit' ) }
+                                        { __( 'None', 'gratora' ) }
                                     </Btn>
                                 </div>
                             </div>
@@ -93,16 +93,16 @@ export default function RolesPanel( { s } ) {
                     </div>
 
                     { capGroups.map( ( group ) => (
-                        <div key={ group.label } className="fundkit-roles-table__group">
-                            <div className="fundkit-roles-table__group-label">{ group.label }</div>
+                        <div key={ group.label } className="gratora-roles-table__group">
+                            <div className="gratora-roles-table__group-label">{ group.label }</div>
                             { group.caps.map( ( { cap, label } ) => (
-                                <div key={ cap } className="fundkit-roles-table__row">
-                                    <div className="fundkit-roles-table__cap">{ label }</div>
+                                <div key={ cap } className="gratora-roles-table__row">
+                                    <div className="gratora-roles-table__cap">{ label }</div>
                                     { roles.map( ( r ) => {
                                         const has  = ( mapping[ r.slug ] || [] ).includes( cap );
                                         const lock = r.slug === 'administrator';
                                         return (
-                                            <div key={ r.slug } className="fundkit-roles-table__cell">
+                                            <div key={ r.slug } className="gratora-roles-table__cell">
                                                 <input
                                                     type="checkbox"
                                                     checked={ has || lock }

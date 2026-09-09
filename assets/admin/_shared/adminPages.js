@@ -6,8 +6,8 @@
  * means a slug change is one edit rather than a hunt through every screen, and
  * a stale one is caught by AdminPageSlugTest rather than by a 404.
  */
-export const ADMIN_SLUG = 'fundkit';
+export const ADMIN_SLUG = 'gratora';
 
-/** The FundKit dashboard, the target of every screen's "FundKit" breadcrumb. */
+/** The Gratora dashboard, the target of every screen's "Gratora" breadcrumb. */
 export const dashboardHref = ( pathname ) =>
     `${ pathname }?page=${ encodeURIComponent( ADMIN_SLUG ) }`;

@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Campaigns\Styling\CampaignStyleResolver;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormRepository;
-use FundKit\Forms\FormService;
-use FundKit\Forms\FormTemplates;
-use FundKit\Forms\Shortcode\DonationFormShortcode;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Funds\FundRepository;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Rest\Paging;
-use FundKit\Rest\Schemas\FormSchemas;
-use FundKit\Settings\SettingsService;
-use FundKit\Vendor\Queryable\DB;
+namespace Gratora\Rest\Admin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormRepository;
+use Gratora\Forms\FormService;
+use Gratora\Forms\FormTemplates;
+use Gratora\Forms\Shortcode\DonationFormShortcode;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Funds\FundRepository;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Rest\Paging;
+use Gratora\Rest\Schemas\FormSchemas;
+use Gratora\Settings\SettingsService;
+use Gratora\Vendor\Queryable\DB;
 use InvalidArgumentException;
 use RuntimeException;
 use WP_Error;
@@ -29,7 +29,7 @@ use WP_REST_Server;
 /** @since 1.0.0 */
 final class FormsController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -38,7 +38,7 @@ final class FormsController
         private CampaignRepository $campaigns,
         private GatewayManager $gateways,
         private CampaignStyleResolver $styles,
-        private \FundKit\Forms\FormReadinessService $readiness,
+        private \Gratora\Forms\FormReadinessService $readiness,
         private FundRepository $funds,
     ) {
     }
@@ -148,7 +148,7 @@ final class FormsController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('fundkit_manage_forms');
+        return Capabilities::userCan('gratora_manage_forms');
     }
 
     /** @since 1.0.0 */
@@ -271,7 +271,7 @@ final class FormsController
     {
         $form = $this->forms->findById((int) $request['id']);
         if (! $form) {
-            return new WP_Error('fundkit_not_found', __('Form not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora'), ['status' => 404]);
         }
 
         // A POST carries the live editor blocks and settings so the checks
@@ -327,7 +327,7 @@ final class FormsController
     {
         $form = $this->forms->findById((int) $request['id']);
         if (! $form) {
-            return new WP_Error('fundkit_not_found', __('Form not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora'), ['status' => 404]);
         }
         $campaign = $form->campaign_id ? $this->campaigns->findById((int) $form->campaign_id) : null;
         return new WP_REST_Response($this->shapeFormFull($form, $campaign), 200);
@@ -338,12 +338,12 @@ final class FormsController
     {
         $source = $this->forms->findById((int) $request['id']);
         if (! $source) {
-            return new WP_Error('fundkit_not_found', __('Form not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora'), ['status' => 404]);
         }
         try {
             $copy = $this->formService->duplicate($source);
         } catch (RuntimeException $e) {
-            return new WP_Error('fundkit_form_duplicate_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('gratora_form_duplicate_failed', $e->getMessage(), ['status' => 500]);
         }
         $campaign = $copy->campaign_id ? $this->campaigns->findById((int) $copy->campaign_id) : null;
         return new WP_REST_Response($this->shapeFormFull($copy, $campaign), 201);
@@ -356,9 +356,9 @@ final class FormsController
         try {
             $form = $this->formService->create($body);
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('gratora_invalid_input', $e->getMessage(), ['status' => 422]);
         } catch (RuntimeException $e) {
-            return new WP_Error('fundkit_form_create_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('gratora_form_create_failed', $e->getMessage(), ['status' => 500]);
         }
 
         $campaign = $form->campaign_id ? $this->campaigns->findById((int) $form->campaign_id) : null;
@@ -370,14 +370,14 @@ final class FormsController
     {
         $form = $this->forms->findById((int) $request['id']);
         if (! $form) {
-            return new WP_Error('fundkit_not_found', __('Form not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora'), ['status' => 404]);
         }
 
         $body = (array) ($request->get_json_params() ?? []);
         try {
             $form = $this->formService->update($form, $body);
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('gratora_invalid_input', $e->getMessage(), ['status' => 422]);
         }
 
         $campaign = $form->campaign_id ? $this->campaigns->findById((int) $form->campaign_id) : null;
@@ -389,14 +389,14 @@ final class FormsController
     {
         $form = $this->forms->findById((int) $request['id']);
         if (! $form) {
-            return new WP_Error('fundkit_not_found', __('Form not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Form not found.', 'gratora'), ['status' => 404]);
         }
         try {
             $this->formService->delete($form);
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('fundkit_form_delete_blocked', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('gratora_form_delete_blocked', $e->getMessage(), ['status' => 422]);
         } catch (RuntimeException $e) {
-            return new WP_Error('fundkit_form_delete_blocked', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('gratora_form_delete_blocked', $e->getMessage(), ['status' => 422]);
         }
         return new WP_REST_Response(['deleted' => true, 'id' => $form->id], 200);
     }
@@ -417,7 +417,7 @@ final class FormsController
             return [];
         }
 
-        $rows = DB::table('fundkit_form_donation_stats')
+        $rows = DB::table('gratora_form_donation_stats')
             ->whereIn('form_id', array_values(array_unique($formIds)))
             ->getAll();
 

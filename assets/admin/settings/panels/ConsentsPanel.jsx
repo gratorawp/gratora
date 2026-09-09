@@ -50,9 +50,9 @@ export default function ConsentsPanel( { s } ) {
 
     const remove = ( i ) => {
         setConfirm( {
-            title:        __( 'Delete consent purpose', 'fundraising-toolkit' ),
-            message:      __( 'Delete this consent purpose? Donor consent history stays in the audit log.', 'fundraising-toolkit' ),
-            confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
+            title:        __( 'Delete consent purpose', 'gratora' ),
+            message:      __( 'Delete this consent purpose? Donor consent history stays in the audit log.', 'gratora' ),
+            confirmLabel: __( 'Delete', 'gratora' ),
             destructive:  true,
             onConfirm: async () => {
                 setList( list.filter( ( _, idx ) => idx !== i ) );
@@ -68,33 +68,33 @@ export default function ConsentsPanel( { s } ) {
     return (
         <>
         <Card
-            title={ __( 'Consent purposes', 'fundraising-toolkit' ) }
-            sub={ __( 'What donors can opt into. Each toggle is logged in an append-only audit trail. Bump the version when you change a description so existing donors are prompted to re-consent.', 'fundraising-toolkit' ) }
+            title={ __( 'Consent purposes', 'gratora' ) }
+            sub={ __( 'What donors can opt into. Each toggle is logged in an append-only audit trail. Bump the version when you change a description so existing donors are prompted to re-consent.', 'gratora' ) }
             edited={ s.isDirty }
         >
-            <div className="fundkit-consents">
+            <div className="gratora-consents">
                 { list.length === 0 && (
                     <EmptyState
                         compact
                         icon={ <ShieldCheck size={ 22 } strokeWidth={ 1.75 } /> }
-                        title={ __( 'No consent purposes yet', 'fundraising-toolkit' ) }
-                        body={ __( 'Add the first purpose below. Each toggle becomes an opt-in on every donation form.', 'fundraising-toolkit' ) }
+                        title={ __( 'No consent purposes yet', 'gratora' ) }
+                        body={ __( 'Add the first purpose below. Each toggle becomes an opt-in on every donation form.', 'gratora' ) }
                         action={
                             <Btn variant="secondary" onClick={ add }>
-                                { __( 'Add a purpose', 'fundraising-toolkit' ) }
+                                { __( 'Add a purpose', 'gratora' ) }
                             </Btn>
                         }
                     />
                 ) }
 
                 { list.map( ( p, i ) => (
-                    <div key={ i } className="fundkit-consent-card">
-                        <header className="fundkit-consent-card__head">
+                    <div key={ i } className="gratora-consent-card">
+                        <header className="gratora-consent-card__head">
                             <input
-                                className="fundkit-input fundkit-consent-card__label"
+                                className="gratora-input gratora-consent-card__label"
                                 type="text"
                                 value={ p.label }
-                                placeholder={ __( 'Purpose name', 'fundraising-toolkit' ) }
+                                placeholder={ __( 'Purpose name', 'gratora' ) }
                                 onChange={ ( e ) => update( i, {
                                     label: e.target.value,
                                     key:   p.key || slugify( e.target.value ),
@@ -102,37 +102,37 @@ export default function ConsentsPanel( { s } ) {
                             />
                             <button
                                 type="button"
-                                className="fundkit-consent-card__delete"
+                                className="gratora-consent-card__delete"
                                 onClick={ () => remove( i ) }
-                                aria-label={ __( 'Delete purpose', 'fundraising-toolkit' ) }
+                                aria-label={ __( 'Delete purpose', 'gratora' ) }
                             >
-                                { __( 'Delete', 'fundraising-toolkit' ) }
+                                { __( 'Delete', 'gratora' ) }
                             </button>
                         </header>
 
                         <textarea
-                            className="fundkit-textarea fundkit-consent-card__desc"
+                            className="gratora-textarea gratora-consent-card__desc"
                             rows={ 3 }
                             value={ p.description }
-                            placeholder={ __( 'Enter a donor-facing description', 'fundraising-toolkit' ) }
+                            placeholder={ __( 'Enter a donor-facing description', 'gratora' ) }
                             onChange={ ( e ) => update( i, { description: e.target.value } ) }
                         />
 
-                        <footer className="fundkit-consent-card__foot">
-                            <label className="fundkit-consent-card__meta-field">
-                                <span>{ __( 'Key', 'fundraising-toolkit' ) }</span>
+                        <footer className="gratora-consent-card__foot">
+                            <label className="gratora-consent-card__meta-field">
+                                <span>{ __( 'Key', 'gratora' ) }</span>
                                 <input
-                                    className="fundkit-input fundkit-input--mono"
+                                    className="gratora-input gratora-input--mono"
                                     type="text"
                                     value={ p.key }
                                     onChange={ ( e ) => update( i, { key: slugify( e.target.value ) } ) }
                                     pattern="^[a-z0-9_]+$"
                                 />
                             </label>
-                            <label className="fundkit-consent-card__meta-field fundkit-consent-card__meta-field--narrow">
-                                <span>{ __( 'Version', 'fundraising-toolkit' ) }</span>
+                            <label className="gratora-consent-card__meta-field gratora-consent-card__meta-field--narrow">
+                                <span>{ __( 'Version', 'gratora' ) }</span>
                                 <input
-                                    className="fundkit-input"
+                                    className="gratora-input"
                                     type="number"
                                     min={ 1 }
                                     value={ p.version || 1 }
@@ -140,14 +140,14 @@ export default function ConsentsPanel( { s } ) {
                                 />
                             </label>
 
-                            <div className="fundkit-consent-card__toggles">
+                            <div className="gratora-consent-card__toggles">
                                 <SwitchChip
-                                    label={ __( 'Required to donate', 'fundraising-toolkit' ) }
+                                    label={ __( 'Required to donate', 'gratora' ) }
                                     checked={ !! p.required }
                                     onChange={ ( v ) => update( i, { required: v } ) }
                                 />
                                 <SwitchChip
-                                    label={ __( 'Pre-selected', 'fundraising-toolkit' ) }
+                                    label={ __( 'Pre-selected', 'gratora' ) }
                                     checked={ !! p.default }
                                     onChange={ ( v ) => update( i, { default: v } ) }
                                 />
@@ -156,8 +156,8 @@ export default function ConsentsPanel( { s } ) {
                     </div>
                 ) ) }
 
-                <Btn variant="ghost" onClick={ add } className="fundkit-consents__add">
-                    + { __( 'Add consent purpose', 'fundraising-toolkit' ) }
+                <Btn variant="ghost" onClick={ add } className="gratora-consents__add">
+                    + { __( 'Add consent purpose', 'gratora' ) }
                 </Btn>
             </div>
         </Card>
@@ -168,9 +168,9 @@ export default function ConsentsPanel( { s } ) {
 
 function SwitchChip( { label, checked, onChange } ) {
     return (
-        <label className="fundkit-consent-card__chip">
+        <label className="gratora-consent-card__chip">
             <Switch checked={ !! checked } onChange={ onChange } />
-            <span className="fundkit-consent-card__chip-label">{ label }</span>
+            <span className="gratora-consent-card__chip-label">{ label }</span>
         </label>
     );
 }

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Consent;
-use FundKit\Forms\Blocks\TermsBlock;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormSubmissionValidator;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\Consent;
+use Gratora\Forms\Blocks\TermsBlock;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormSubmissionValidator;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -26,7 +26,7 @@ final class TermsAgreementTest extends IntegrationTestCase
 
     private function campaignId(): int
     {
-        $service  = Plugin::instance()->container->get(\FundKit\Campaigns\CampaignService::class);
+        $service  = Plugin::instance()->container->get(\Gratora\Campaigns\CampaignService::class);
         $campaign = $service->create([
             'title'      => 'Terms probe campaign',
             'goal_type'  => 'amount',
@@ -47,8 +47,8 @@ final class TermsAgreementTest extends IntegrationTestCase
         $form->slug        = 'terms-' . bin2hex(random_bytes(3));
         $form->title       = 'Terms probe';
         $form->status      = 'published';
-        $form->blocks      = '<!-- wp:fundkit/donation-amount /-->'
-            . '<!-- wp:fundkit/terms ' . wp_json_encode($attrs) . ' /-->';
+        $form->blocks      = '<!-- wp:gratora/donation-amount /-->'
+            . '<!-- wp:gratora/terms ' . wp_json_encode($attrs) . ' /-->';
         $form->settings    = [];
         $form->save();
 
@@ -58,17 +58,17 @@ final class TermsAgreementTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function donate(Form $form, array $body): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body + [
             'email'        => 'terms-' . uniqid() . '@example.test',
             'amount_cents' => 5000,
             'gateway'      => 'offline',
-            'currency'     => (string) \FundKit\Campaigns\Campaign::query()->find('id', (int) $form->campaign_id)->currency,
+            'currency'     => (string) \Gratora\Campaigns\Campaign::query()->find('id', (int) $form->campaign_id)->currency,
             'campaign_id'  => (int) $form->campaign_id,
             'form_id'      => (int) $form->id,
             '_ft'          => Plugin::instance()->container
-                ->get(\FundKit\Donations\AntiSpamGuard::class)
+                ->get(\Gratora\Donations\AntiSpamGuard::class)
                 ->mintFormToken((int) $form->id),
         ]));
 
@@ -170,7 +170,7 @@ final class TermsAgreementTest extends IntegrationTestCase
         $form->slug        = 'no-terms-' . bin2hex(random_bytes(3));
         $form->title       = 'No terms';
         $form->status      = 'published';
-        $form->blocks      = '<!-- wp:fundkit/donation-amount /-->';
+        $form->blocks      = '<!-- wp:gratora/donation-amount /-->';
         $form->settings    = [];
         $form->save();
 
@@ -188,7 +188,7 @@ final class TermsAgreementTest extends IntegrationTestCase
         $form->slug        = 'unasked-' . bin2hex(random_bytes(3));
         $form->title       = 'Unasked';
         $form->status      = 'published';
-        $form->blocks      = '<!-- wp:fundkit/donation-amount /-->';
+        $form->blocks      = '<!-- wp:gratora/donation-amount /-->';
         $form->settings    = [];
         $form->save();
 

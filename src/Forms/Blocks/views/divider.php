@@ -4,9 +4,9 @@ defined('ABSPATH') || exit;
  * @var int    $marginTop
  * @var int    $marginBottom
  * @var int    $thickness
- * @var string $color  hex or '' (inherit --fundkit-border)
+ * @var string $color  hex or '' (inherit --gratora-border)
  */
-$line = $color !== '' ? $color : 'var(--fundkit-border, #e5e7eb)';
+$line = $color !== '' ? $color : 'var(--gratora-border, #e5e7eb)';
 $style = sprintf(
     'margin:%dpx 0 %dpx;border:0;border-top:%dpx solid %s;width:100%%;',
     (int) $marginTop,
@@ -15,4 +15,4 @@ $style = sprintf(
     $line
 );
 ?>
-<hr class="fundkit-block fundkit-block--divider fundkit-divider" style="<?php echo esc_attr($style); ?>">
+<hr class="gratora-block gratora-block--divider gratora-divider" style="<?php echo esc_attr($style); ?>">

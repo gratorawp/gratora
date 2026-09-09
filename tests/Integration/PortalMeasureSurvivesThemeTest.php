@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 /**
  * A block theme's constrained layout caps its children with
  * `.is-layout-constrained > :where(...)`. The :where() contributes no
- * specificity, so that rule ties with a bare `.fundkit-donor-portal` and the
+ * specificity, so that rule ties with a bare `.gratora-donor-portal` and the
  * theme wins on source order alone, its global styles being printed after the
  * plugin's stylesheet.
  *
@@ -19,7 +19,7 @@ final class PortalMeasureSurvivesThemeTest extends IntegrationTestCase
 {
     private function stylesheet(): string
     {
-        $path = FUNDKIT_DIR . 'assets/donor-portal/portal.scss';
+        $path = GRATORA_DIR . 'assets/donor-portal/portal.scss';
 
         $this->assertFileExists($path);
 
@@ -29,7 +29,7 @@ final class PortalMeasureSurvivesThemeTest extends IntegrationTestCase
     public function test_the_portal_outranks_a_constrained_layout(): void
     {
         $this->assertMatchesRegularExpression(
-            '/\.is-layout-constrained\s*>\s*\.fundkit-donor-portal\s*\{[^}]*max-width/s',
+            '/\.is-layout-constrained\s*>\s*\.gratora-donor-portal\s*\{[^}]*max-width/s',
             $this->stylesheet(),
             'the portal no longer beats a block theme, so it renders at the theme measure'
         );
@@ -53,7 +53,7 @@ final class PortalMeasureSurvivesThemeTest extends IntegrationTestCase
         $this->assertNotEmpty($m[1]);
         foreach ($m[1] as $fallback) {
             $this->assertSame(
-                \FundKit\Campaigns\CampaignPageTemplate::MEASURE,
+                \Gratora\Campaigns\CampaignPageTemplate::MEASURE,
                 $fallback,
                 'the portal and the campaign pages have drifted apart'
             );

@@ -1,7 +1,7 @@
 /**
  * The template thumbnail read its own preset out of the styling globals and
  * fell to the bare catalogue for an id nothing answers to, where the server
- * hands a form the org default. fundkit.form.templates lets a site add a
+ * hands a form the org default. gratora.form.templates lets a site add a
  * template naming any preset, including one it later deleted.
  */
 
@@ -21,25 +21,25 @@ jest.mock( '@wordpress/components', () => ( {
 
 import { FormTemplateThumb } from '../../assets/admin/_shared/components/FormTemplatePicker';
 
-const HOUSE = { 'fundkit-accent': '#7c1d1d', 'fundkit-radius': '2px' };
+const HOUSE = { 'gratora-accent': '#7c1d1d', 'gratora-radius': '2px' };
 
 beforeEach( () => {
-    window.fundkit = {
+    window.gratora = {
         styling: {
-            defaults:   { 'fundkit-accent': '#211d3f', 'fundkit-radius': '10px' },
+            defaults:   { 'gratora-accent': '#211d3f', 'gratora-radius': '10px' },
             presets:    [
                 { id: 'house', tokens: HOUSE },
-                { id: 'bold',  tokens: { 'fundkit-accent': '#0F3D5C', 'fundkit-radius': '6px' } },
+                { id: 'bold',  tokens: { 'gratora-accent': '#0F3D5C', 'gratora-radius': '6px' } },
             ],
-            builtins:   [ { id: 'bold', tokens: { 'fundkit-accent': '#0F3D5C', 'fundkit-radius': '6px' } } ],
+            builtins:   [ { id: 'bold', tokens: { 'gratora-accent': '#0F3D5C', 'gratora-radius': '6px' } } ],
             default_id: 'house',
         },
     };
 } );
 
-afterEach( () => { delete window.fundkit; } );
+afterEach( () => { delete window.gratora; } );
 
-const BLOCKS = '<!-- wp:fundkit/donation-amount {"presets":[1000]} /--><!-- wp:fundkit/submit-button /-->';
+const BLOCKS = '<!-- wp:gratora/donation-amount {"presets":[1000]} /--><!-- wp:gratora/submit-button /-->';
 
 function paint( settings ) {
     const template = { blocks: BLOCKS, settings };
@@ -47,7 +47,7 @@ function paint( settings ) {
     const host = document.getElementById( 'root' );
     render( <FormTemplateThumb template={ template } />, host );
 
-    return host.querySelector( '.fundkit-template-thumb' ).style.getPropertyValue( '--thumb-accent' ).trim();
+    return host.querySelector( '.gratora-template-thumb' ).style.getPropertyValue( '--thumb-accent' ).trim();
 }
 
 it( 'paints a template that names no preset in the org default', () => {
@@ -63,7 +63,7 @@ it( 'falls back to the org default for a preset nothing answers to', () => {
 } );
 
 it( 'survives a page that never shipped the styling globals', () => {
-    delete window.fundkit;
+    delete window.gratora;
 
     expect( () => paint( {} ) ).not.toThrow();
 } );

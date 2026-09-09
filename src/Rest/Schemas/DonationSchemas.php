@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Schemas;
+namespace Gratora\Rest\Schemas;
 
 /**
  * WordPress validates REST args; retain service-level guards.
@@ -80,7 +80,7 @@ final class DonationSchemas
             // validates additionalProperties in core, before the callback, so a
             // cap here rejects the whole donation: a donor arriving on an ad
             // link with click ids past the limit could never give, and the
-            // refusal happens too early for FundKit to log it. Attribution is
+            // refusal happens too early for Gratora to log it. Attribution is
             // telemetry. It is bounded by truncation in the controller instead,
             // where being too long costs the org a landing URL rather than the
             // donation.

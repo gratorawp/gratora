@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns;
+namespace Gratora\Campaigns;
 
-use FundKit\Donations\Donation;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormService;
-use FundKit\Forms\FormTemplates;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donations\Donation;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormService;
+use Gratora\Forms\FormTemplates;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Vendor\Queryable\DB;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -46,7 +46,7 @@ final class CampaignService
 
         $title = trim((string) ($input['title'] ?? ''));
         if ($title === '') {
-            $title = __('Untitled campaign', 'fundraising-toolkit');
+            $title = __('Untitled campaign', 'gratora');
         }
 
         $campaign = Campaign::make();
@@ -62,13 +62,13 @@ final class CampaignService
         $campaign->goal_count  = isset($input['goal_count']) ? (int) $input['goal_count'] : null;
         $this->clearUnusedGoalTarget($campaign);
         $type = sanitize_key((string) ($input['campaign_type'] ?? 'standard'));
-        $allowedTypes = array_keys((array) apply_filters('fundkit.campaign.types', ['standard' => '']));
+        $allowedTypes = array_keys((array) apply_filters('gratora.campaign.types', ['standard' => '']));
         $campaign->campaign_type = in_array($type, $allowedTypes, true) ? $type : 'standard';
         $campaign->default_fund_id     = isset($input['default_fund_id']) && $input['default_fund_id'] !== '' && $input['default_fund_id'] !== null
             ? (int) $input['default_fund_id'] : null;
         $campaign->image_attachment_id = $this->validateImageAttachment($input['image_attachment_id'] ?? null);
-        $campaign->starts_at   = self::campaignDate($input['starts_at'] ?? null, __('start date', 'fundraising-toolkit'));
-        $campaign->ends_at     = self::campaignDate($input['ends_at'] ?? null, __('end date', 'fundraising-toolkit'));
+        $campaign->starts_at   = self::campaignDate($input['starts_at'] ?? null, __('start date', 'gratora'));
+        $campaign->ends_at     = self::campaignDate($input['ends_at'] ?? null, __('end date', 'gratora'));
         self::assertWindowOrder($campaign->starts_at, $campaign->ends_at);
         $campaign->created_at  = $now;
         $campaign->updated_at  = $now;
@@ -99,7 +99,7 @@ final class CampaignService
             $campaign->save();
         });
 
-        do_action('fundkit.campaign.created', $campaign);
+        do_action('gratora.campaign.created', $campaign);
         return $campaign;
     }
 
@@ -127,10 +127,10 @@ final class CampaignService
             if ($raw !== '') {
                 $next = sanitize_title($raw);
                 if ($next === '') {
-                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'fundraising-toolkit'));
+                    throw new InvalidArgumentException(esc_html__('Invalid slug.', 'gratora'));
                 }
                 if ($next !== $campaign->slug && $this->campaigns->slugExists($next, $campaign->id)) {
-                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'fundraising-toolkit'));
+                    throw new InvalidArgumentException(esc_html__('Slug is already in use.', 'gratora'));
                 }
                 $campaign->slug = $next;
             }
@@ -152,8 +152,8 @@ final class CampaignService
             $campaign->$field = self::campaignDate(
                 $value,
                 $field === 'starts_at'
-                    ? __('start date', 'fundraising-toolkit')
-                    : __('end date', 'fundraising-toolkit')
+                    ? __('start date', 'gratora')
+                    : __('end date', 'gratora')
             );
         }
 
@@ -188,7 +188,7 @@ final class CampaignService
             // campaigns keep their type, so a save never silently strands the
             // fundraisers/attribution a peer_to_peer campaign accumulated.
             $next    = sanitize_key((string) $input['campaign_type']);
-            $allowed = array_keys((array) apply_filters('fundkit.campaign.types', ['standard' => '']));
+            $allowed = array_keys((array) apply_filters('gratora.campaign.types', ['standard' => '']));
             if ($campaign->campaign_type === 'standard' && $next !== 'standard' && in_array($next, $allowed, true)) {
                 $campaign->campaign_type = $next;
             }
@@ -212,7 +212,7 @@ final class CampaignService
                 $formId = (int) $value;
                 $form = Form::query()->find('id', $formId);
                 if (! $form || $form->campaign_id !== $campaign->id) {
-                    throw new InvalidArgumentException(esc_html__('Selected form is not part of this campaign.', 'fundraising-toolkit'));
+                    throw new InvalidArgumentException(esc_html__('Selected form is not part of this campaign.', 'gratora'));
                 }
                 $campaign->default_form_id = $formId;
             }
@@ -241,13 +241,13 @@ final class CampaignService
             'status' => $prevStatus !== $campaign->status,
         ]);
 
-        do_action('fundkit.campaign.updated', $campaign);
+        do_action('gratora.campaign.updated', $campaign);
         if ($campaign->campaign_type !== $prevType) {
             // A one-way type conversion just happened. `updated` alone can't
             // distinguish it from an ordinary edit, so fire a dedicated event
             // add-ons can hook to seed the new type's sidecar and re-lay-out the
             // page (which still carries the standard starter blocks).
-            do_action('fundkit.campaign.converted', $campaign, $prevType);
+            do_action('gratora.campaign.converted', $campaign, $prevType);
         }
         return $campaign;
     }
@@ -275,7 +275,7 @@ final class CampaignService
         if ($at === false) {
             throw new InvalidArgumentException(esc_html(sprintf(
                 /* translators: %s: the name of the date field, e.g. "start date". */
-                __('That is not a date the campaign %s can be set to.', 'fundraising-toolkit'),
+                __('That is not a date the campaign %s can be set to.', 'gratora'),
                 $label
             )));
         }
@@ -298,7 +298,7 @@ final class CampaignService
         }
 
         throw new InvalidArgumentException(
-            esc_html__('The campaign end date cannot be before its start date.', 'fundraising-toolkit')
+            esc_html__('The campaign end date cannot be before its start date.', 'gratora')
         );
     }
 
@@ -315,7 +315,7 @@ final class CampaignService
         $plans     = (int) RecurringPlan::query()->where('campaign_id', $campaign->id)->count();
 
         if ($donations > 0 || $plans > 0) {
-            return __('This campaign has donations and cannot be deleted. Archive it instead to keep its records.', 'fundraising-toolkit');
+            return __('This campaign has donations and cannot be deleted. Archive it instead to keep its records.', 'gratora');
         }
 
         return null;
@@ -332,11 +332,11 @@ final class CampaignService
         // Form delete and campaign delete must commit together. Forms live
         // under a campaign; there is no orphan state.
         DB::transaction(function () use ($campaign) {
-            // Fire fundkit.form.deleted per form: the bulk delete below bypasses
+            // Fire gratora.form.deleted per form: the bulk delete below bypasses
             // FormService::delete's hook, so add-on cleanup (sidecars, stats,
             // event log) would otherwise never run and leave latent orphans.
             foreach (Form::query()->where('campaign_id', $campaign->id)->getAll() as $form) {
-                do_action('fundkit.form.deleted', $form);
+                do_action('gratora.form.deleted', $form);
             }
             Form::query()->where('campaign_id', $campaign->id)->delete();
             Campaign::query()->where('id', $campaign->id)->delete();
@@ -358,7 +358,7 @@ final class CampaignService
             }
         }
 
-        do_action('fundkit.campaign.deleted', $campaign);
+        do_action('gratora.campaign.deleted', $campaign);
     }
 
     /**
@@ -375,7 +375,7 @@ final class CampaignService
         }
         $attachmentId = (int) $value;
         if (! wp_attachment_is_image($attachmentId)) {
-            throw new InvalidArgumentException(esc_html__('Selected file is not an image.', 'fundraising-toolkit'));
+            throw new InvalidArgumentException(esc_html__('Selected file is not an image.', 'gratora'));
         }
         return $attachmentId;
     }
@@ -396,7 +396,7 @@ final class CampaignService
         }
         if (array_key_exists('tokens', $style) && is_array($style['tokens'])) {
             // Preserve empty tokens so Customize stays expanded.
-            $out['tokens'] = \FundKit\Campaigns\Styling\Tokens::sanitize($style['tokens']);
+            $out['tokens'] = \Gratora\Campaigns\Styling\Tokens::sanitize($style['tokens']);
         }
         return $out === [] ? null : $out;
     }
@@ -412,7 +412,7 @@ final class CampaignService
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
         /* translators: %s: original campaign title */
-        $newTitle = sprintf(__('Copy of %s', 'fundraising-toolkit'), $source->title);
+        $newTitle = sprintf(__('Copy of %s', 'gratora'), $source->title);
 
         $copy = Campaign::make();
         $copy->title       = $newTitle;
@@ -448,7 +448,7 @@ final class CampaignService
             $copy->save();
         });
 
-        do_action('fundkit.campaign.duplicated', $copy, $source);
+        do_action('gratora.campaign.duplicated', $copy, $source);
         return $copy;
     }
 
@@ -468,7 +468,7 @@ final class CampaignService
         // The campaign deletion event already covers this page.
         if (isset($this->deletingPageIds[$postId])) return;
 
-        $campaignId = (int) get_post_meta($postId, '_fundkit_campaign_id', true);
+        $campaignId = (int) get_post_meta($postId, '_gratora_campaign_id', true);
         if ($campaignId <= 0) return;
 
         $campaign = $this->campaigns->findById($campaignId);
@@ -479,7 +479,7 @@ final class CampaignService
         $campaign->page_id  = null;
         $campaign->save();
 
-        do_action('fundkit.campaign.page_lost', $campaign);
+        do_action('gratora.campaign.page_lost', $campaign);
     }
 
     /**
@@ -495,7 +495,7 @@ final class CampaignService
     {
         if ($postId <= 0) return;
 
-        $campaignId = (int) get_post_meta($postId, '_fundkit_campaign_id', true);
+        $campaignId = (int) get_post_meta($postId, '_gratora_campaign_id', true);
         if ($campaignId <= 0) return;
 
         $campaign = $this->campaigns->findById($campaignId);
@@ -504,7 +504,7 @@ final class CampaignService
 
         $campaign->page_id = $postId;
         $campaign->save();
-        do_action('fundkit.campaign.page_restored', $campaign);
+        do_action('gratora.campaign.page_restored', $campaign);
 
         if (get_post_status($postId) === 'publish' && (string) $campaign->status !== 'published') {
             $this->update($campaign, ['status' => 'published']);
@@ -525,7 +525,7 @@ final class CampaignService
         if ($newStatus !== 'publish' || $newStatus === $oldStatus) return;
         if (wp_is_post_revision($post) || wp_is_post_autosave($post)) return;
 
-        $campaignId = (int) get_post_meta($post->ID, '_fundkit_campaign_id', true);
+        $campaignId = (int) get_post_meta($post->ID, '_gratora_campaign_id', true);
         if ($campaignId <= 0) return;
 
         $campaign = $this->campaigns->findById($campaignId);
@@ -538,7 +538,7 @@ final class CampaignService
     }
 
     /**
-     * WP action listener for `fundkit.form.updated`. When a campaign's default
+     * WP action listener for `gratora.form.updated`. When a campaign's default
      * form changes status, re-sync the campaign page so its visibility
      * always tracks the combined campaign + form state. Public only when
      * both are published.
@@ -600,7 +600,7 @@ final class CampaignService
             'post_status'  => $postStatus,
             'post_type'    => 'page',
             'post_author'  => get_current_user_id() ?: 1,
-            'meta_input'   => ['_fundkit_campaign_id' => $campaign->id],
+            'meta_input'   => ['_gratora_campaign_id' => $campaign->id],
         ], true);
 
         if (is_wp_error($pageId)) {
@@ -644,20 +644,20 @@ final class CampaignService
         // so the editor rewrites dp-band--tight on its first save and the
         // revision shows a change nobody made. Cosmetic, and P2P's LayoutBlocks
         // writes it the same way.
-        $t0 = __('Campaign name', 'fundraising-toolkit');
+        $t0 = __('Campaign name', 'gratora');
         // Bound, so this is only what an organizer who has written no
         // description sees in the editor. Nothing else is seeded as prose:
         // seeded words read to a donor as the campaign's own.
-        $t2 = __('What this campaign is raising for.', 'fundraising-toolkit');
-        $t5 = __('Recent donations', 'fundraising-toolkit');
-        $t6 = __('Top donors', 'fundraising-toolkit');
-        $t7 = __('Our supporters', 'fundraising-toolkit');
+        $t2 = __('What this campaign is raising for.', 'gratora');
+        $t5 = __('Recent donations', 'gratora');
+        $t6 = __('Top donors', 'gratora');
+        $t7 = __('Our supporters', 'gratora');
         // Section headings, so a starter page reads as a page rather than a
         // stack of blocks. Above the prose and above the form, which are the
         // two things no block titles for itself.
-        $t8 = __('About this campaign', 'fundraising-toolkit');
-        $t9  = __('Donate', 'fundraising-toolkit');
-        $t10 = __('Other campaigns', 'fundraising-toolkit');
+        $t8 = __('About this campaign', 'gratora');
+        $t9  = __('Donate', 'gratora');
+        $t10 = __('Other campaigns', 'gratora');
 
         // These two sections are titled by the block itself rather than a
         // Heading above it, which would render the words twice. json_encode so
@@ -685,7 +685,7 @@ final class CampaignService
         // The chosen template goes with it: an add-on that replaces the layout
         // wholesale still has to honour which one the organiser picked, and
         // the campaign row does not record it.
-        return (string) apply_filters('fundkit.campaign.starter_blocks', $default, $campaign, $template);
+        return (string) apply_filters('gratora.campaign.starter_blocks', $default, $campaign, $template);
     }
 
     /** @since 1.0.0 */
@@ -697,7 +697,7 @@ final class CampaignService
 
         $form = $this->forms->create([
             /* translators: %s: campaign title */
-            'title'       => sprintf(__('%s donation form', 'fundraising-toolkit'), $campaign->title),
+            'title'       => sprintf(__('%s donation form', 'gratora'), $campaign->title),
             // Keep forms without a template in draft; required donor fields are missing.
             'status'      => $skipTemplate ? 'draft' : 'published',
             'campaign_id' => $campaign->id,
@@ -723,7 +723,7 @@ final class CampaignService
         $id = CampaignTemplates::formTemplate($pageTemplate, (string) $campaign->campaign_type);
 
         // Add-on page templates can name add-on form templates.
-        $id = (string) apply_filters('fundkit.campaign.starter_form_template', $id, $campaign, $pageTemplate);
+        $id = (string) apply_filters('gratora.campaign.starter_form_template', $id, $campaign, $pageTemplate);
 
         $template = FormTemplates::find($id);
         $blocks   = is_array($template) ? trim((string) ($template['blocks'] ?? '')) : '';
@@ -741,17 +741,17 @@ final class CampaignService
     {
         $currency = esc_attr(strtoupper($currency));
         $blocks = <<<'BLOCKS'
-<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"%%CURRENCY%%"} /-->
+<!-- wp:gratora/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"%%CURRENCY%%"} /-->
 
-<!-- wp:fundkit/name {"requireFirst":true,"requireLast":true} /-->
+<!-- wp:gratora/name {"requireFirst":true,"requireLast":true} /-->
 
-<!-- wp:fundkit/email {"required":true} /-->
+<!-- wp:gratora/email {"required":true} /-->
 
-<!-- wp:fundkit/payment-gateways {"style":"cards"} /-->
+<!-- wp:gratora/payment-gateways {"style":"cards"} /-->
 
-<!-- wp:fundkit/donation-summary /-->
+<!-- wp:gratora/donation-summary /-->
 
-<!-- wp:fundkit/submit-button {"label":"Donate","align":"left"} /-->
+<!-- wp:gratora/submit-button {"label":"Donate","align":"left"} /-->
 BLOCKS;
 
         return strtr($blocks, ['%%CURRENCY%%' => $currency]);

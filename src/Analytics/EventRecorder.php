@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Analytics;
+namespace Gratora\Analytics;
 
-use FundKit\Foundation\Http\ClientIp;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Settings\SettingsService;
+use Gratora\Foundation\Http\ClientIp;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Settings\SettingsService;
 
 /** @since 1.0.0 */
 final class EventRecorder
@@ -41,7 +41,7 @@ final class EventRecorder
     /** @since 1.0.0 */
     private function write(string $type, array $ctx): void
     {
-        $ctx = apply_filters('fundkit.event.recording', $ctx, $type);
+        $ctx = apply_filters('gratora.event.recording', $ctx, $type);
 
         // A donor.* row is the audit trail of what was done TO a donor, and
         // erasure keeps it on purpose while clearing everything else. It must
@@ -75,6 +75,6 @@ final class EventRecorder
 
         $event->save();
 
-        do_action('fundkit.event.recorded', $event);
+        do_action('gratora.event.recorded', $event);
     }
 }

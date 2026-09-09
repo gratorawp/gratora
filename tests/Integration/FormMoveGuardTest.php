@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormService;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormService;
+use Gratora\Foundation\Plugin;
 use InvalidArgumentException;
 
 /** A campaign's default form cannot walk off to another campaign. */

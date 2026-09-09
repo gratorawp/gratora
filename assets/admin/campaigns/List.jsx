@@ -34,14 +34,14 @@ export function campaignsDeleteMessage( items ) {
     const withPages = items.filter( ( i ) => i.page_id ).length;
 
     const parts = [ n === 1
-        ? __( 'Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted.', 'fundraising-toolkit' )
+        ? __( 'Permanently delete this campaign? Its forms will be deleted too. A campaign that has donations cannot be deleted.', 'gratora' )
         : sprintf(
             /* translators: %d: number of campaigns to delete */
             _n(
                 'Permanently delete %d campaign? Forms attached to it will be deleted too. Any campaign that has donations cannot be deleted.',
                 'Permanently delete %d campaigns? Forms attached to them will be deleted too. Any campaign that has donations cannot be deleted.',
                 n,
-                'fundraising-toolkit'
+                'gratora'
             ),
             n
         ) ];
@@ -50,7 +50,7 @@ export function campaignsDeleteMessage( items ) {
     // several campaigns selected and one page between them, "the page it
     // created" leaves the admin guessing which campaign "it" is.
     if ( withPages > 0 && n === 1 ) {
-        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'fundraising-toolkit' ) );
+        parts.push( __( 'The WordPress page it created is deleted with it, and it does not go to the trash, so any content you built on that page is gone for good.', 'gratora' ) );
     } else if ( withPages > 0 ) {
         parts.push( sprintf(
             /* translators: %d: how many of the selected campaigns have a WordPress page */
@@ -58,13 +58,13 @@ export function campaignsDeleteMessage( items ) {
                 '%d of them has a WordPress page, which is deleted with it rather than sent to the trash, so any content you built on it is gone for good.',
                 '%d of them have WordPress pages, which are deleted with them rather than sent to the trash, so any content you built on those pages is gone for good.',
                 withPages,
-                'fundraising-toolkit'
+                'gratora'
             ),
             withPages
         ) );
     }
 
-    parts.push( __( 'This cannot be undone.', 'fundraising-toolkit' ) );
+    parts.push( __( 'This cannot be undone.', 'gratora' ) );
 
     return parts.join( ' ' );
 }
@@ -88,7 +88,7 @@ export default function List() {
     const [ stats, setStats ]     = useState( null );
     const [ confirm, setConfirm ] = useState( null );
     // Opens straight into the create drawer when reached via the command
-    // palette's "New campaign" (admin.php?page=fundkit-campaigns&action=new).
+    // palette's "New campaign" (admin.php?page=gratora-campaigns&action=new).
     const [ drawerOpen, setDrawerOpen ] = useState(
         () => new URLSearchParams( window.location.search ).get( 'action' ) === 'new'
     );
@@ -114,7 +114,7 @@ export default function List() {
         setError( null );
 
         apiFetch( {
-            path:  addQueryArgs( '/fundkit/v1/admin/campaigns', {
+            path:  addQueryArgs( '/gratora/v1/admin/campaigns', {
                 page:     view.page,
                 per_page: view.perPage,
                 orderby:  view.sort?.field === 'raised' ? 'raised_cents' : ( view.sort?.field || 'updated_at' ),
@@ -129,18 +129,18 @@ export default function List() {
                 const items = await res.json();
                 setData( Array.isArray( items ) ? items : [] );
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
-                setTestHidden( parseInt( res.headers.get( 'X-FundKit-Test-Hidden' ) || '0', 10 ) );
+                setTestHidden( parseInt( res.headers.get( 'X-Gratora-Test-Hidden' ) || '0', 10 ) );
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load campaigns.', 'fundraising-toolkit' ) );
+                setError( err?.message || __( 'Failed to load campaigns.', 'gratora' ) );
             } )
             .finally( () => ! aborted && setLoading( false ) );
 
         // Filter-aware aggregates for the KPI strip. Same filter shape as the
         // list but no pagination / sort - the totals are over the matched set.
         apiFetch( {
-            path: addQueryArgs( '/fundkit/v1/admin/campaigns/stats', {
+            path: addQueryArgs( '/gratora/v1/admin/campaigns/stats', {
                 search: view.search || undefined,
                 status: statusFilter?.value || undefined,
             } ),
@@ -157,38 +157,38 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:            'title',
-            label:         __( 'Title', 'fundraising-toolkit' ),
+            label:         __( 'Title', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <div className="fundkit-row__body">
+                <div className="gratora-row__body">
                     <span style={ { display: 'inline-flex', alignItems: 'center', gap: 8 } }>
                         <a
-                            className="fundkit-row__link fundkit-row__link--strong"
+                            className="gratora-row__link gratora-row__link--strong"
                             href={ detailHref( item.id ) }
                             { ...rowLinkProps }
                         >
                             { item.title }
                         </a>
                         { item.campaign_type && item.campaign_type !== 'standard' && item.campaign_type_label && (
-                            <span className="fundkit-pill fundkit-pill--type">
+                            <span className="gratora-pill gratora-pill--type">
                                 { item.campaign_type_label }
                             </span>
                         ) }
                     </span>
-                    <div className="fundkit-row__sub fundkit-row__sub--mono">{ item.slug }</div>
+                    <div className="gratora-row__sub gratora-row__sub--mono">{ item.slug }</div>
                 </div>
             ),
         },
         {
             id:       'status',
-            label:    __( 'Status', 'fundraising-toolkit' ),
+            label:    __( 'Status', 'gratora' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             render:   ( { item } ) => <StatusBadge status={ item.not_accepting || item.status } />,
         },
         {
             id:            'raised',
-            label:         __( 'Raised', 'fundraising-toolkit' ),
+            label:         __( 'Raised', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums' } }>
@@ -198,7 +198,7 @@ export default function List() {
         },
         {
             id:    'goal',
-            label: __( 'Goal', 'fundraising-toolkit' ),
+            label: __( 'Goal', 'gratora' ),
             // DataViews offers sorting on every field that does not opt out,
             // and the server has no orderby for these, so the indicator moved
             // and the rows came back in the same order.
@@ -207,7 +207,7 @@ export default function List() {
         },
         {
             id:            'donations_count',
-            label:         __( 'Donations', 'fundraising-toolkit' ),
+            label:         __( 'Donations', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -217,7 +217,7 @@ export default function List() {
         },
         {
             id:            'donors_count',
-            label:         __( 'Donors', 'fundraising-toolkit' ),
+            label:         __( 'Donors', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -227,7 +227,7 @@ export default function List() {
         },
         {
             id:    'forms_count',
-            label: __( 'Forms', 'fundraising-toolkit' ),
+            label: __( 'Forms', 'gratora' ),
             enableSorting: false,
             render: ( { item } ) => (
                 <span style={ { fontVariantNumeric: 'tabular-nums', fontSize: '13px' } }>
@@ -237,12 +237,12 @@ export default function List() {
         },
         {
             id:            'updated_at',
-            label:         __( 'Updated', 'fundraising-toolkit' ),
+            label:         __( 'Updated', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <span className="fundkit-time" title={ formatDate( item.updated_at ) }>
-                    <span className="fundkit-time__rel">{ timeAgo( item.updated_at ) }</span>
-                    <span className="fundkit-time__abs">{ formatDate( item.updated_at ) }</span>
+                <span className="gratora-time" title={ formatDate( item.updated_at ) }>
+                    <span className="gratora-time__rel">{ timeAgo( item.updated_at ) }</span>
+                    <span className="gratora-time__abs">{ formatDate( item.updated_at ) }</span>
                 </span>
             ),
         },
@@ -256,7 +256,7 @@ export default function List() {
     const actions = useMemo( () => [
         {
             id:    'view',
-            label: __( 'View campaign', 'fundraising-toolkit' ),
+            label: __( 'View campaign', 'gratora' ),
             icon:  () => <ViewIcon size={ 16 } strokeWidth={ 1.75 } />,
             // One page per invocation, so no bulk: opening six tabs at once is
             // not what anyone meant by selecting six campaigns.
@@ -272,25 +272,25 @@ export default function List() {
         },
         {
             id:           'duplicate',
-            label:        __( 'Duplicate', 'fundraising-toolkit' ),
+            label:        __( 'Duplicate', 'gratora' ),
             icon:         () => <CopyIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             callback: async ( items ) => {
                 if ( ! items.length ) return;
                 try {
                     await Promise.all( items.map( ( i ) => apiFetch( {
-                        path:   `/fundkit/v1/admin/campaigns/${ i.id }/duplicate`,
+                        path:   `/gratora/v1/admin/campaigns/${ i.id }/duplicate`,
                         method: 'POST',
                     } ) ) );
                     load();
                 } catch ( err ) {
-                    setError( err?.message || __( 'Could not duplicate one or more campaigns.', 'fundraising-toolkit' ) );
+                    setError( err?.message || __( 'Could not duplicate one or more campaigns.', 'gratora' ) );
                 }
             },
         },
         {
             id:            'delete',
-            label:         __( 'Delete', 'fundraising-toolkit' ),
+            label:         __( 'Delete', 'gratora' ),
             icon:          () => <TrashIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
@@ -304,16 +304,16 @@ export default function List() {
                 const n = items.length;
                 const message = campaignsDeleteMessage( items );
                 setConfirm( {
-                    title:        _n( 'Delete campaign', 'Delete campaigns', n, 'fundraising-toolkit' ),
+                    title:        _n( 'Delete campaign', 'Delete campaigns', n, 'gratora' ),
                     message,
-                    confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
+                    confirmLabel: __( 'Delete', 'gratora' ),
                     destructive:  true,
                     onConfirm: async () => {
                         // allSettled, not all: one refusal must not reject the
                         // whole batch, or campaigns that really were deleted
                         // stay on screen under a single error with no refetch.
                         const results = await Promise.allSettled( items.map( ( i ) => apiFetch( {
-                            path:   `/fundkit/v1/admin/campaigns/${ i.id }`,
+                            path:   `/gratora/v1/admin/campaigns/${ i.id }`,
                             method: 'DELETE',
                         } ) ) );
 
@@ -323,14 +323,14 @@ export default function List() {
                         if ( deleted > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: number of campaigns deleted */
-                                _n( '%d campaign deleted.', '%d campaigns deleted.', deleted, 'fundraising-toolkit' ),
+                                _n( '%d campaign deleted.', '%d campaigns deleted.', deleted, 'gratora' ),
                                 deleted
                             ) );
                         }
                         if ( refused.length > 0 ) {
                             setError( sprintf(
                                 /* translators: %s: comma separated campaign titles */
-                                __( 'These campaigns were not deleted, because they have donations: %s', 'fundraising-toolkit' ),
+                                __( 'These campaigns were not deleted, because they have donations: %s', 'gratora' ),
                                 refused.map( ( c ) => c.title || `#${ c.id }` ).join( ', ' )
                             ) );
                         }
@@ -344,22 +344,22 @@ export default function List() {
 
     return (
         <div>
-            <div className="fundkit-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'fundraising-toolkit' ) }</a>
+            <div className="gratora-crumbs">
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'gratora' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Campaigns', 'fundraising-toolkit' ) }</span>
+                <span>{ __( 'Campaigns', 'gratora' ) }</span>
             </div>
-            <div className="fundkit-page-head">
-                <div className="fundkit-page-head__title-row">
-                    <h1>{ __( 'Campaigns', 'fundraising-toolkit' ) }</h1>
+            <div className="gratora-page-head">
+                <div className="gratora-page-head__title-row">
+                    <h1>{ __( 'Campaigns', 'gratora' ) }</h1>
                 </div>
-                <div className="fundkit-page-head__right">
-                    <span className="fundkit-page-head__meta">
-                        { sprintf( /* translators: %s: number of campaigns */ _n( '%s campaign', '%s campaigns', total, 'fundraising-toolkit' ), total.toLocaleString() ) }
+                <div className="gratora-page-head__right">
+                    <span className="gratora-page-head__meta">
+                        { sprintf( /* translators: %s: number of campaigns */ _n( '%s campaign', '%s campaigns', total, 'gratora' ), total.toLocaleString() ) }
                     </span>
                     <Btn variant="primary" onClick={ () => setDrawerOpen( true ) }>
                         <Plus size={ 16 } strokeWidth={ 1.75 } />
-                        { __( 'Add new campaign', 'fundraising-toolkit' ) }
+                        { __( 'Add new campaign', 'gratora' ) }
                     </Btn>
                 </div>
             </div>
@@ -381,7 +381,7 @@ export default function List() {
                             '%d test donation is not counted in these figures.',
                             '%d test donations are not counted in these figures.',
                             testHidden,
-                            'fundraising-toolkit'
+                            'gratora'
                         ),
                         testHidden
                     ) }
@@ -392,16 +392,16 @@ export default function List() {
             { ! loading && total === 0 && ! filtered ? (
                 <EmptyState
                     icon={ <Target size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No campaigns yet', 'fundraising-toolkit' ) }
-                    body={ __( 'A campaign groups one or more donation forms around a single fundraising goal. Create one to get started.', 'fundraising-toolkit' ) }
+                    title={ __( 'No campaigns yet', 'gratora' ) }
+                    body={ __( 'A campaign groups one or more donation forms around a single fundraising goal. Create one to get started.', 'gratora' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setDrawerOpen( true ) }>
-                            { __( 'Create your first campaign', 'fundraising-toolkit' ) }
+                            { __( 'Create your first campaign', 'gratora' ) }
                         </Btn>
                     }
                 />
             ) : (
-                <div className={ `fundkit-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
+                <div className={ `gratora-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
                     <DataViews
                         data={ data }
                         isLoading={ loading }
@@ -418,11 +418,11 @@ export default function List() {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'fundraising-toolkit' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundraising-toolkit' ) }
+                            title={ __( 'Nothing matches these filters', 'gratora' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'gratora' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'fundraising-toolkit' ) }
+                                    { __( 'Clear filters', 'gratora' ) }
                                 </Btn>
                             }
                         />
@@ -442,24 +442,24 @@ export default function List() {
 export function campaignKpis( stats ) {
     return [
         {
-            label: __( 'Total', 'fundraising-toolkit' ),
+            label: __( 'Total', 'gratora' ),
             value: stats ? String( stats.total_count ) : '-',
         },
         {
-            label: __( 'Active', 'fundraising-toolkit' ),
+            label: __( 'Active', 'gratora' ),
             value: stats ? String( stats.active_count ) : '-',
         },
         {
-            label: __( 'Raised', 'fundraising-toolkit' ),
+            label: __( 'Raised', 'gratora' ),
             value: stats && stats.raised_cents > 0
                 ? formatAmount( stats.raised_cents, stats.currency || undefined )
                 : '-',
             sub: stats?.currency
-                ? sprintf( /* translators: %s: currency code */ __( 'in %s', 'fundraising-toolkit' ), stats.currency )
+                ? sprintf( /* translators: %s: currency code */ __( 'in %s', 'gratora' ), stats.currency )
                 : null,
         },
         {
-            label: __( 'Donations', 'fundraising-toolkit' ),
+            label: __( 'Donations', 'gratora' ),
             value: stats ? String( stats.donations_count ) : '-',
         },
     ];

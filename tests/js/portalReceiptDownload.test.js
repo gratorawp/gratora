@@ -9,8 +9,8 @@
  * clicks a synthesized anchor, which is not popup-gated.
  */
 
-const PORTAL_REST = 'https://example.test/wp-json/fundkit/v1/portal/';
-const RECEIPT_URL = 'https://example.test/wp-json/fundkit/v1/receipts/9/download?token=fresh';
+const PORTAL_REST = 'https://example.test/wp-json/gratora/v1/portal/';
+const RECEIPT_URL = 'https://example.test/wp-json/gratora/v1/receipts/9/download?token=fresh';
 
 let routes = {};
 let clickedAnchors = [];
@@ -48,7 +48,7 @@ function me() {
 }
 
 async function boot() {
-    document.body.innerHTML = '<div id="fundkit-donor-portal"></div>';
+    document.body.innerHTML = '<div id="gratora-donor-portal"></div>';
 
     jest.isolateModules( () => {
         require( '../../assets/donor-portal/index.jsx' );
@@ -58,7 +58,7 @@ async function boot() {
 }
 
 function text() {
-    return document.getElementById( 'fundkit-donor-portal' ).textContent;
+    return document.getElementById( 'gratora-donor-portal' ).textContent;
 }
 
 const tick = () => new Promise( ( r ) => setTimeout( r, 10 ) );
@@ -88,8 +88,8 @@ beforeEach( () => {
     routes = {};
     clickedAnchors = [];
     window.history.replaceState( {}, '', '/portal/' );
-    window.fundkitPortal = { rest: PORTAL_REST, nonce: '', token: 'portal-token' };
-    window.fundkit = {
+    window.gratoraPortal = { rest: PORTAL_REST, nonce: '', token: 'portal-token' };
+    window.gratora = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
@@ -194,7 +194,7 @@ test( 'the annual statement saves through the same anchor', async () => {
 
     expect( clickedAnchors ).toHaveLength( 1 );
     expect( clickedAnchors[ 0 ].getAttribute( 'download' ) )
-        .toBe( `fundkit-annual-${ new Date().getFullYear() }.pdf` );
+        .toBe( `gratora-annual-${ new Date().getFullYear() }.pdf` );
 } );
 
 /**
@@ -204,7 +204,7 @@ test( 'the annual statement saves through the same anchor', async () => {
  */
 test( 'the document is fetched on the origin the portal itself talks to', async () => {
     routes[ 'receipts/9/download-url' ] = () => jsonResponse( 200, {
-        url: 'https://www.example.test/wp-json/fundkit/v1/receipts/9/download?token=fresh',
+        url: 'https://www.example.test/wp-json/gratora/v1/receipts/9/download?token=fresh',
     } );
 
     await openReceipts();
@@ -228,7 +228,7 @@ test( 'the reason the server wrote reaches the donor', async () => {
     global.fetch.mockImplementation( ( url ) => {
         const raw = String( url );
         if ( raw.startsWith( RECEIPT_URL ) ) {
-            return jsonResponse( 410, { code: 'fundkit_renderer_missing', message: written } );
+            return jsonResponse( 410, { code: 'gratora_renderer_missing', message: written } );
         }
         const route = routes[ raw.replace( PORTAL_REST, '' ) ];
         return typeof route === 'function' ? route() : jsonResponse( 200, {} );
@@ -251,7 +251,7 @@ test( 'a refused document does not sign the donor out', async () => {
     global.fetch.mockImplementation( ( url ) => {
         const raw = String( url );
         if ( raw.startsWith( RECEIPT_URL ) ) {
-            return jsonResponse( 403, { code: 'fundkit_invalid_token', message: 'Link is invalid or expired.' } );
+            return jsonResponse( 403, { code: 'gratora_invalid_token', message: 'Link is invalid or expired.' } );
         }
         const route = routes[ raw.replace( PORTAL_REST, '' ) ];
         return typeof route === 'function' ? route() : jsonResponse( 200, {} );
@@ -273,7 +273,7 @@ test( 'a refused document does not sign the donor out', async () => {
 test( 'a receipt that will not download says so on the receipt', async () => {
     const written = 'This receipt was withdrawn because the donation it covers was refunded in full.';
 
-    routes[ 'receipts/9/download-url' ] = () => jsonResponse( 410, { code: 'fundkit_receipt_voided', message: written } );
+    routes[ 'receipts/9/download-url' ] = () => jsonResponse( 410, { code: 'gratora_receipt_voided', message: written } );
 
     await openReceipts();
     await clickButton( 'Download' );

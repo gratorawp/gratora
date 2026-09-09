@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Cli;
+namespace Gratora\Cli;
 
 use Closure;
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignService;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Forms\Form;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Funds\Fund;
-use FundKit\Funds\FundService;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignService;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Forms\Form;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Funds\Fund;
+use Gratora\Funds\FundService;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * Builds a year of plausible fundraising history so admin screenshots show an
@@ -140,7 +140,7 @@ final class DemoSeeder
         $noMail    = static fn () => true;
         $noReceipt = static fn () => false;
         add_filter('pre_wp_mail', $noMail, 99);
-        add_filter('fundkit.receipt.should_issue', $noReceipt, 99);
+        add_filter('gratora.receipt.should_issue', $noReceipt, 99);
 
         try {
             $this->seedFunds();
@@ -157,7 +157,7 @@ final class DemoSeeder
             $this->recompute();
         } finally {
             remove_filter('pre_wp_mail', $noMail, 99);
-            remove_filter('fundkit.receipt.should_issue', $noReceipt, 99);
+            remove_filter('gratora.receipt.should_issue', $noReceipt, 99);
         }
 
         return $this->counts;
@@ -211,21 +211,21 @@ final class DemoSeeder
 
         foreach (array_chunk($donationIds, self::CHUNK) as $chunk) {
             // Let add-ons delete their dependent donation rows.
-            do_action('fundkit.test_data.purge_donations', $chunk);
+            do_action('gratora.test_data.purge_donations', $chunk);
 
-            DB::table('fundkit_receipts')->whereIn('donation_id', $chunk)->delete();
-            DB::table('fundkit_refunds')->whereIn('donation_id', $chunk)->delete();
-            DB::table('fundkit_donation_notes')->whereIn('donation_id', $chunk)->delete();
-            DB::table('fundkit_events')->whereIn('donation_id', $chunk)->delete();
+            DB::table('gratora_receipts')->whereIn('donation_id', $chunk)->delete();
+            DB::table('gratora_refunds')->whereIn('donation_id', $chunk)->delete();
+            DB::table('gratora_donation_notes')->whereIn('donation_id', $chunk)->delete();
+            DB::table('gratora_events')->whereIn('donation_id', $chunk)->delete();
 
             $removed['donations'] += (int) Donation::query()->whereIn('id', $chunk)->delete()->affectedRows;
         }
         $this->say("demo donations removed: {$removed['donations']}");
 
         foreach (array_chunk($planIds, self::CHUNK) as $chunk) {
-            do_action('fundkit.test_data.purge_plans', $chunk);
+            do_action('gratora.test_data.purge_plans', $chunk);
 
-            DB::table('fundkit_events')->whereIn('recurring_plan_id', $chunk)->delete();
+            DB::table('gratora_events')->whereIn('recurring_plan_id', $chunk)->delete();
             $removed['recurring_plans'] += (int) RecurringPlan::query()->whereIn('id', $chunk)->delete()->affectedRows;
         }
         $this->say("demo recurring plans removed: {$removed['recurring_plans']}");
@@ -975,7 +975,7 @@ final class DemoSeeder
                 break;
         }
 
-        DB::table('fundkit_recurring_plans')->where('id', $plan->id)->update($patch);
+        DB::table('gratora_recurring_plans')->where('id', $plan->id)->update($patch);
     }
 
 
@@ -988,8 +988,8 @@ final class DemoSeeder
     {
         $prefix = DB::getPrefix();
         $result = DB::raw(
-            "UPDATE {$prefix}fundkit_events e
-             JOIN {$prefix}fundkit_donations d ON d.id = e.donation_id
+            "UPDATE {$prefix}gratora_events e
+             JOIN {$prefix}gratora_donations d ON d.id = e.donation_id
              SET e.occurred_at = COALESCE(d.paid_at, d.created_at)
              WHERE d.gateway_intent_id LIKE %s",
             [self::KEY_PREFIX . '%']

@@ -1,16 +1,16 @@
 /**
  * Consumer side of the extension-tab seam. Core React apps call
  * useExtensionTabs(surface) to read add-on-registered tabs from the
- * window.fundkit.tabs registry (defined by ExtensionAssets), and render each via
+ * window.gratora.tabs registry (defined by ExtensionAssets), and render each via
  * ExtensionTabPanel, which hands the add-on a DOM node + context to mount into.
  */
 import { useState, useEffect, useRef } from '@wordpress/element';
 
-const EVENT       = 'fundkit:tabs:changed';
-const PANEL_EVENT = 'fundkit:panels:changed';
+const EVENT       = 'gratora:tabs:changed';
+const PANEL_EVENT = 'gratora:panels:changed';
 
 function readTabs( surface ) {
-    const reg = ( typeof window !== 'undefined' && window.fundkit && window.fundkit.tabs ) || null;
+    const reg = ( typeof window !== 'undefined' && window.gratora && window.gratora.tabs ) || null;
     return reg && typeof reg.get === 'function' ? reg.get( surface ) : [];
 }
 
@@ -33,7 +33,7 @@ export function useExtensionTabs( surface ) {
 }
 
 function readPanels( surface ) {
-    const reg = ( typeof window !== 'undefined' && window.fundkit && window.fundkit.panels ) || null;
+    const reg = ( typeof window !== 'undefined' && window.gratora && window.gratora.panels ) || null;
     return reg && typeof reg.get === 'function' ? reg.get( surface ) : [];
 }
 
@@ -77,7 +77,7 @@ export function ExtensionSection( { panel, context, token } ) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ panel && panel.id, token ] );
 
-    return <div ref={ ref } className="fundkit-ext-panel" />;
+    return <div ref={ ref } className="gratora-ext-panel" />;
 }
 
 export function ExtensionTabPanel( { tab, context } ) {
@@ -95,5 +95,5 @@ export function ExtensionTabPanel( { tab, context } ) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ tab && tab.id ] );
 
-    return <div ref={ ref } className="fundkit-ext-tab-panel" />;
+    return <div ref={ ref } className="gratora-ext-tab-panel" />;
 }

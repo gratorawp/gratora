@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\PayPal\PayPalApi;
-use FundKit\Gateways\PayPal\PayPalGateway;
-use FundKit\Gateways\PayPal\PayPalPlanRecorder;
-use FundKit\Gateways\PayPal\PayPalPlans;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\PayPal\PayPalApi;
+use Gratora\Gateways\PayPal\PayPalGateway;
+use Gratora\Gateways\PayPal\PayPalPlanRecorder;
+use Gratora\Gateways\PayPal\PayPalPlans;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -39,14 +39,14 @@ final class PayPalAmountChangeTest extends IntegrationTestCase
         parent::setUp();
 
         $this->calls = [];
-        update_option('fundkit_gateway_config', ['test_mode' => true]);
+        update_option('gratora_gateway_config', ['test_mode' => true]);
 
         $account = Plugin::instance()->container->get(PayPalAccount::class);
         $account->forget();
         $account->saveKeys(true, 'AeA1QIZ_client', 'EO422dn3_secret');
         $account->saveWebhookId(true, 'WH-TEST-1');
 
-        $manager = Plugin::instance()->container->get(\FundKit\Gateways\GatewayManager::class);
+        $manager = Plugin::instance()->container->get(\Gratora\Gateways\GatewayManager::class);
         if (! $manager->get('paypal')) {
             $manager->register($this->gateway());
         }
@@ -140,7 +140,7 @@ final class PayPalAmountChangeTest extends IntegrationTestCase
     /** @param array<string,mixed> $resource */
     private function postWebhook(string $type, array $resource): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/paypal');
+        $req = new WP_REST_Request('POST', '/gratora/v1/webhooks/paypal');
         $req->set_header('content-type', 'application/json');
         foreach ([
             'paypal_transmission_id'   => 'tx-' . bin2hex(random_bytes(3)),

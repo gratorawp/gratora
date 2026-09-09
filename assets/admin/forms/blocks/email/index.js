@@ -3,27 +3,27 @@ import { PanelBody, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'fundkit/email';
+const NAME = 'gratora/email';
 
 function Edit( { attributes, setAttributes } ) {
     const {
         label = '',
         placeholder = '',
     } = attributes;
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--field' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--field' } );
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Email', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Email', 'gratora' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundraising-toolkit' ) }
+                        label={ __( 'Label', 'gratora' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Email', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Email', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'fundraising-toolkit' ) }
+                        label={ __( 'Placeholder', 'gratora' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         placeholder="you@example.com"
@@ -34,11 +34,11 @@ function Edit( { attributes, setAttributes } ) {
                 </PanelBody>
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="fundkit-block-preview__label">
-                    { label || __( 'Email', 'fundraising-toolkit' ) }
-                    <em className="fundkit-block-preview__req" aria-hidden="true">*</em>
+                <span className="gratora-block-preview__label">
+                    { label || __( 'Email', 'gratora' ) }
+                    <em className="gratora-block-preview__req" aria-hidden="true">*</em>
                 </span>
-                <div className="fundkit-block-preview__field">
+                <div className="gratora-block-preview__field">
                     { placeholder || 'you@example.com' }
                 </div>
             </div>
@@ -49,8 +49,8 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Email', 'fundraising-toolkit' ),
-        category:   'fundkit-donor',
+        title:      __( 'Email', 'gratora' ),
+        category:   'gratora-donor',
         icon:       BlockIcons[ 'email' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

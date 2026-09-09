@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways\PayPal;
+namespace Gratora\Gateways\PayPal;
 
-use FundKit\Gateways\GatewayTransportException;
+use Gratora\Gateways\GatewayTransportException;
 use RuntimeException;
 
 /**

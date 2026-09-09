@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Container\Container;
-use FundKit\Foundation\Modules\FundKitModule;
-use FundKit\Foundation\Modules\ModuleManager;
+use Gratora\Foundation\Container\Container;
+use Gratora\Foundation\Modules\GratoraModule;
+use Gratora\Foundation\Modules\ModuleManager;
 
 /**
  * The compat *state* is unit-tested (ModuleManagerCompatTest in tests/Unit);
- * this exercises the real WP `fundkit.module.incompatible` action firing, which
+ * this exercises the real WP `gratora.module.incompatible` action firing, which
  * the unit bootstrap stubs to a no-op by design.
  */
 final class ModuleManagerCompatTest extends IntegrationTestCase
@@ -18,7 +18,7 @@ final class ModuleManagerCompatTest extends IntegrationTestCase
     public function test_incompatible_action_fires_once_with_version_and_constraint(): void
     {
         $calls = [];
-        add_action('fundkit.module.incompatible', static function (string $id, string $core, string $constraint) use (&$calls): void {
+        add_action('gratora.module.incompatible', static function (string $id, string $core, string $constraint) use (&$calls): void {
             $calls[] = [$id, $core, $constraint];
         }, 10, 3);
 
@@ -32,10 +32,10 @@ final class ModuleManagerCompatTest extends IntegrationTestCase
 
         $this->assertFalse($booted);
         $this->assertCount(1, $calls);
-        $this->assertSame(['paid', FUNDKIT_VERSION, '^99'], $calls[0]);
-        $this->assertSame([FUNDKIT_VERSION, '^99'], $mm->incompatible()['paid']);
+        $this->assertSame(['paid', GRATORA_VERSION, '^99'], $calls[0]);
+        $this->assertSame([GRATORA_VERSION, '^99'], $mm->incompatible()['paid']);
 
-        remove_all_actions('fundkit.module.incompatible');
+        remove_all_actions('gratora.module.incompatible');
     }
 
     public function test_module_without_core_constraint_still_boots(): void
@@ -53,9 +53,9 @@ final class ModuleManagerCompatTest extends IntegrationTestCase
     }
 
     /** @param array<string,mixed> $requires */
-    private function module(string $id, array $requires, \Closure $onBoot): FundKitModule
+    private function module(string $id, array $requires, \Closure $onBoot): GratoraModule
     {
-        return new class($id, $requires, $onBoot) implements FundKitModule {
+        return new class($id, $requires, $onBoot) implements GratoraModule {
             /** @param array<string,mixed> $requires */
             public function __construct(
                 private string $idValue,
@@ -91,7 +91,7 @@ final class ModuleManagerCompatTest extends IntegrationTestCase
 
             public function tier(): string
             {
-                return FundKitModule::TIER_PRO;
+                return GratoraModule::TIER_PRO;
             }
 
             public function boot(Container $container): void

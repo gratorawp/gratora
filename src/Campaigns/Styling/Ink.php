@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Styling;
+namespace Gratora\Campaigns\Styling;
 
 /**
  * Ink for anything drawn on a ground the org chose.
@@ -83,15 +83,15 @@ final class Ink
             return '';
         }
 
-        return '--fundkit-on-accent:' . $on[0] . ';'
-            . '--fundkit-on-accent-muted:' . $on[1] . ';'
-            . '--fundkit-on-accent-line:' . $on[2] . ';';
+        return '--gratora-on-accent:' . $on[0] . ';'
+            . '--gratora-on-accent-muted:' . $on[1] . ';'
+            . '--gratora-on-accent-line:' . $on[2] . ';';
     }
 
     /**
      * The soft ground carries the amount tiles, the order summary and the
      * secondary buttons, so what sits on it needs ink of its own: the page ink
-     * is chosen against --fundkit-bg and knows nothing about this one.
+     * is chosen against --gratora-bg and knows nothing about this one.
      *
      * @param array<string,string> $tokens
      *
@@ -99,21 +99,21 @@ final class Ink
      */
     public static function softDeclarations(array $tokens): string
     {
-        $on = self::on((string) ($tokens['fundkit-bg-soft'] ?? ''));
+        $on = self::on((string) ($tokens['gratora-bg-soft'] ?? ''));
         if ($on === null) {
             return '';
         }
 
-        $css = '--fundkit-on-soft:' . $on[0] . ';'
-            . '--fundkit-on-soft-muted:' . $on[1] . ';';
+        $css = '--gratora-on-soft:' . $on[0] . ';'
+            . '--gratora-on-soft-muted:' . $on[1] . ';';
 
         // The total on the order summary is drawn in the accent, which reads on
         // the shipped near-white ground and can vanish on a chosen one. Keeping
         // the accent where it carries and standing it down where it does not is
         // what leaves the shipped look untouched.
-        $accent = (string) ($tokens['fundkit-accent'] ?? '');
-        $css .= '--fundkit-on-soft-accent:'
-            . (self::carries($accent, (string) ($tokens['fundkit-bg-soft'] ?? '')) ? $accent : $on[0])
+        $accent = (string) ($tokens['gratora-accent'] ?? '');
+        $css .= '--gratora-on-soft-accent:'
+            . (self::carries($accent, (string) ($tokens['gratora-bg-soft'] ?? '')) ? $accent : $on[0])
             . ';';
 
         return $css;
@@ -121,7 +121,7 @@ final class Ink
 
     /**
      * The fields keep a ground of their own so a coloured page does not paint
-     * the boxes a donor types in. The page ink is chosen against --fundkit-bg
+     * the boxes a donor types in. The page ink is chosen against --gratora-bg
      * and knows nothing about that one, so on a dark page it is white and the
      * fields are still white.
      *
@@ -131,13 +131,13 @@ final class Ink
      */
     public static function fieldDeclarations(array $tokens): string
     {
-        $on = self::on((string) ($tokens['fundkit-field-bg'] ?? ''));
+        $on = self::on((string) ($tokens['gratora-field-bg'] ?? ''));
         if ($on === null) {
             return '';
         }
 
-        return '--fundkit-on-field:' . $on[0] . ';'
-            . '--fundkit-on-field-muted:' . $on[1] . ';';
+        return '--gratora-on-field:' . $on[0] . ';'
+            . '--gratora-on-field-muted:' . $on[1] . ';';
     }
 
     /**

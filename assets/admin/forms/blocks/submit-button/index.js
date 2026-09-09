@@ -6,13 +6,13 @@ import { __ } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 import Segmented from '../../../_shared/components/Segmented';
 
-const NAME = 'fundkit/submit-button';
+const NAME = 'gratora/submit-button';
 
 const ALIGN_OPTIONS = [
-    { value: 'left',   label: __( 'Left',   'fundraising-toolkit' ) },
-    { value: 'center', label: __( 'Center', 'fundraising-toolkit' ) },
-    { value: 'right',  label: __( 'Right',  'fundraising-toolkit' ) },
-    { value: 'full',   label: __( 'Full width', 'fundraising-toolkit' ) },
+    { value: 'left',   label: __( 'Left',   'gratora' ) },
+    { value: 'center', label: __( 'Center', 'gratora' ) },
+    { value: 'right',  label: __( 'Right',  'gratora' ) },
+    { value: 'full',   label: __( 'Full width', 'gratora' ) },
 ];
 
 function Edit( { attributes, setAttributes } ) {
@@ -36,15 +36,15 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Button', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Button', 'gratora' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Alignment', 'fundraising-toolkit' ) }
+                        label={ __( 'Alignment', 'gratora' ) }
                         value={ align }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         options={ ALIGN_OPTIONS }
                     />
                     <p style={ { fontSize: 12, color: '#6b7280', margin: '12px 0 0' } }>
-                        { __( 'Use {amount} and {frequency} in the label to insert the live values at runtime, e.g. "Donate {amount} {frequency}".', 'fundraising-toolkit' ) }
+                        { __( 'Use {amount} and {frequency} in the label to insert the live values at runtime, e.g. "Donate {amount} {frequency}".', 'gratora' ) }
                     </p>
                 </PanelBody>
             </InspectorControls>
@@ -53,14 +53,14 @@ function Edit( { attributes, setAttributes } ) {
                     tagName="span"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Donate now', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'Donate now', 'gratora' ) }
                     allowedFormats={ [] }
                     style={ {
                         display:       'inline-block',
                         padding:       '10px 20px',
-                        background:    'var(--fundkit-button-bg, var(--fundkit-accent, #211d3f))',
-                        color:         'var(--fundkit-button-fg, var(--fundkit-on-accent, #fff))',
-                        borderRadius:  'var(--fundkit-radius-sm, 4px)',
+                        background:    'var(--gratora-button-bg, var(--gratora-accent, #211d3f))',
+                        color:         'var(--gratora-button-fg, var(--gratora-on-accent, #fff))',
+                        borderRadius:  'var(--gratora-radius-sm, 4px)',
                         fontWeight:    500,
                         fontSize:      '14px',
                         width:         align === 'full' ? '100%' : 'auto',
@@ -75,9 +75,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Donate button', 'fundraising-toolkit' ),
-        description: __( 'The button that completes the donation.', 'fundraising-toolkit' ),
-        category:   'fundkit-extras',
+        title:      __( 'Donate button', 'gratora' ),
+        description: __( 'The button that completes the donation.', 'gratora' ),
+        category:   'gratora-extras',
         icon:       BlockIcons[ 'submit-button' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donations;
+namespace Gratora\Donations;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Analytics\EventRecorder;
-use FundKit\Currency\FxRates;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Forms\FormTypeRegistry;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Funds\FundResolver;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\TestMode;
-use FundKit\Receipts\Receipt;
-use FundKit\Recurring\FrequencyMap;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Currency\FxRates;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Forms\FormTypeRegistry;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\References\ReferenceGenerator;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Funds\FundResolver;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\TestMode;
+use Gratora\Receipts\Receipt;
+use Gratora\Recurring\FrequencyMap;
+use Gratora\Vendor\Queryable\DB;
 use RuntimeException;
 use Throwable;
 
@@ -74,7 +74,7 @@ final class DonationService
         // to declare a live donor's submission already collected.
         $alreadyCollected = $intent->already_collected;
 
-        $intent = apply_filters('fundkit.donation.intent_creating', $intent);
+        $intent = apply_filters('gratora.donation.intent_creating', $intent);
 
         $typeHandler = $this->formTypes->handlerFor($intent);
         $intent      = $typeHandler->prepareIntent($intent, $intent->extra);
@@ -231,9 +231,9 @@ final class DonationService
             $donation->save();
 
             // Add-on rows that belong to this donation are written here, not on
-            // fundkit.donation.intent_created: that one fires after the commit, so
+            // gratora.donation.intent_created: that one fires after the commit, so
             // a row it wrote could outlive a donation that rolled back.
-            do_action('fundkit.donation.creating', $donation, $intent, $donor);
+            do_action('gratora.donation.creating', $donation, $intent, $donor);
 
             $this->events->record('donation.intent_created', [
                 'donor_id'     => $donor->id,
@@ -247,7 +247,7 @@ final class DonationService
             ]);
         });
 
-        do_action('fundkit.donation.intent_created', $donation, $intent);
+        do_action('gratora.donation.intent_created', $donation, $intent);
         $typeHandler->onDonationCreated($donation, $intent->extra);
 
         return ['donation' => $donation, 'status_token' => $rawStatusToken];
@@ -328,7 +328,7 @@ final class DonationService
             ] + $metadata,
         ]);
 
-        do_action('fundkit.donation.pending', $donation, $reason, $metadata);
+        do_action('gratora.donation.pending', $donation, $reason, $metadata);
     }
 
     /**
@@ -383,7 +383,7 @@ final class DonationService
             ] + $metadata,
         ]);
 
-        do_action('fundkit.donation.processing', $donation, $reason, $metadata);
+        do_action('gratora.donation.processing', $donation, $reason, $metadata);
 
         return $donation;
     }
@@ -523,14 +523,14 @@ final class DonationService
         // deferred to the post-commit listener.
         $this->resyncAggregatesFor($donation);
 
-        do_action('fundkit.donation.completed', $donation);
+        do_action('gratora.donation.completed', $donation);
 
         return $donation;
     }
 
     /**
      * Create + confirm a renewal donation under an existing recurring plan; fires
-     * fundkit.donation.completed plus fundkit.recurring.renewed. Idempotent per (gateway,
+     * gratora.donation.completed plus gratora.recurring.renewed. Idempotent per (gateway,
      * intent): an existing donation is returned without a second renewal event.
      *
      * @param array<string,mixed> $confirmResult Same shape DonationService::confirm() consumes.
@@ -542,7 +542,7 @@ final class DonationService
      * @since 1.0.0
      */
     public function createRenewal(
-        \FundKit\Recurring\RecurringPlan $plan,
+        \Gratora\Recurring\RecurringPlan $plan,
         int $amountCents,
         string $currency,
         string $gateway,
@@ -625,7 +625,7 @@ final class DonationService
         $donation->updated_at     = $now;
         try {
             $donation->save();
-        } catch (\FundKit\Vendor\Queryable\QueryException $e) {
+        } catch (\Gratora\Vendor\Queryable\QueryException $e) {
             // Lost the race to a concurrent redelivery of the same invoice: the
             // other call already inserted the row (UNIQUE gateway_intent_id).
             // Return the winner idempotently instead of throwing a 500.
@@ -643,12 +643,12 @@ final class DonationService
         // The renewal's own creation seam, fired before confirm() so an add-on
         // row exists by the time the donation counts.
         //
-        // Separate from fundkit.donation.creating: a renewal has no
+        // Separate from gratora.donation.creating: a renewal has no
         // DonationIntent and no form submission behind it, so the listeners
         // that read those would be handed a lie. What carries over is the plan
         // and the donor's standing record.
         do_action(
-            'fundkit.donation.renewal_creating',
+            'gratora.donation.renewal_creating',
             $donation,
             $plan,
             Donor::query()->where('id', (int) $plan->donor_id)->get()
@@ -673,7 +673,7 @@ final class DonationService
             ],
         ]);
 
-        do_action('fundkit.recurring.renewed', $donation, $plan);
+        do_action('gratora.recurring.renewed', $donation, $plan);
 
         return ['donation' => $donation, 'created' => true];
     }
@@ -707,7 +707,7 @@ final class DonationService
             'recurring.' . $donation->gateway,
             sprintf(
                 /* translators: 1: donation reference, 2: the gateway's own message */
-                __('No recurring plan was created for %1$s, so nothing will renew: %2$s', 'fundraising-toolkit'),
+                __('No recurring plan was created for %1$s, so nothing will renew: %2$s', 'gratora'),
                 (string) $donation->reference,
                 $e->getMessage()
             ),
@@ -727,7 +727,7 @@ final class DonationService
             ],
         ]);
 
-        do_action('fundkit.recurring.subscription_creation_failed', $donation, $e);
+        do_action('gratora.recurring.subscription_creation_failed', $donation, $e);
     }
 
     /** @since 1.0.0 */
@@ -756,7 +756,7 @@ final class DonationService
      *
      * @since 1.0.0
      */
-    public function recordRecurringFailure(\FundKit\Recurring\RecurringPlan $plan, ?string $reason = null): void
+    public function recordRecurringFailure(\Gratora\Recurring\RecurringPlan $plan, ?string $reason = null): void
     {
         $attempt = (int) $plan->failed_renewals_count;
 
@@ -775,7 +775,7 @@ final class DonationService
             ],
         ]);
 
-        do_action('fundkit.recurring.renewal_failed', $plan, [
+        do_action('gratora.recurring.renewal_failed', $plan, [
             'gateway' => (string) $plan->gateway,
             'reason'  => $reason,
             'attempt' => $attempt,
@@ -783,7 +783,7 @@ final class DonationService
     }
 
     /** @since 1.0.0 */
-    public function recordRecurringCancellation(\FundKit\Recurring\RecurringPlan $plan, ?string $reason = null): void
+    public function recordRecurringCancellation(\Gratora\Recurring\RecurringPlan $plan, ?string $reason = null): void
     {
         $this->events->record('recurring.cancelled', [
             'donor_id'     => $plan->donor_id,
@@ -799,13 +799,13 @@ final class DonationService
             ],
         ]);
 
-        do_action('fundkit.recurring.cancelled', $plan, $reason);
+        do_action('gratora.recurring.cancelled', $plan, $reason);
     }
 
     /** @since 1.0.0 */
-    private function frequencyFromPlan(\FundKit\Recurring\RecurringPlan $plan): string
+    private function frequencyFromPlan(\Gratora\Recurring\RecurringPlan $plan): string
     {
-        // Plan stores Stripe-shaped interval; donations carry the FundKit label.
+        // Plan stores Stripe-shaped interval; donations carry the Gratora label.
         return match ([$plan->interval_unit, $plan->interval_count]) {
             ['week',  1] => 'weekly',
             ['week',  2] => 'biweekly',
@@ -840,7 +840,7 @@ final class DonationService
         // carries many events, so the same reversal arrives more than once as a
         // matter of course. Only money still counted can be taken back:
         // `refunded` is settled and `disputed` is already done.
-        $applied = DB::table('fundkit_donations')
+        $applied = DB::table('gratora_donations')
             ->where('id', $donation->id)
             ->whereIn('status', ['paid', 'partial_refund'])
             ->update([
@@ -875,7 +875,7 @@ final class DonationService
 
         $this->resyncAggregatesFor($donation);
 
-        do_action('fundkit.donation.disputed', $donation, $kind);
+        do_action('gratora.donation.disputed', $donation, $kind);
 
         return $donation;
     }
@@ -891,7 +891,7 @@ final class DonationService
     {
         $now = $this->clock->now()->format('Y-m-d H:i:s');
 
-        $applied = DB::table('fundkit_donations')
+        $applied = DB::table('gratora_donations')
             ->where('id', $donation->id)
             ->where('status', 'disputed')
             ->update([
@@ -925,7 +925,7 @@ final class DonationService
 
         $this->resyncAggregatesFor($donation);
 
-        do_action('fundkit.donation.reversal_reinstated', $donation);
+        do_action('gratora.donation.reversal_reinstated', $donation);
 
         return $donation;
     }
@@ -971,7 +971,7 @@ final class DonationService
         // Conditional transition: a webhook may have moved the row to a terminal
         // (paid/refunded) state since this object loaded. Only fail it while it
         // is still non-terminal so we never clobber real money back to failed.
-        $applied = DB::table('fundkit_donations')
+        $applied = DB::table('gratora_donations')
             ->where('id', $donation->id)
             // Exclude 'failed' too: a redelivered payment_intent.payment_failed
             // must not re-run the transition (fresh updated_at would count as a
@@ -1001,7 +1001,7 @@ final class DonationService
             'payload'     => ['gateway' => $donation->gateway, 'reason' => $reason],
         ]);
 
-        do_action('fundkit.donation.failed', $donation);
+        do_action('gratora.donation.failed', $donation);
 
         return $donation;
     }
@@ -1106,7 +1106,7 @@ final class DonationService
             // consumed the balance since the SUM was read makes this match zero
             // rows; the increment's row lock then serialises the rest of this
             // transaction so the check-then-act clamp above cannot be outrun.
-            $reserved = DB::table('fundkit_donations')
+            $reserved = DB::table('gratora_donations')
                 ->whereRaw('id = ' . (int) $donation->id . ' AND refunded_cents + ' . (int) $amountCents . ' <= amount_cents')
                 ->increment('refunded_cents', (int) $amountCents);
             if ($reserved->affectedRows < 1) {
@@ -1114,7 +1114,7 @@ final class DonationService
                     esc_html("External refund for {$donation->reference} exceeds the refundable balance.")
                 );
             }
-            $newTotal = (int) (DB::table('fundkit_donations')
+            $newTotal = (int) (DB::table('gratora_donations')
                 ->where('id', $donation->id)
                 ->selectRaw('refunded_cents AS total')
                 ->get()['total'] ?? 0);
@@ -1164,7 +1164,7 @@ final class DonationService
             ]);
 
         });
-        } catch (\FundKit\Vendor\Queryable\QueryException $e) {
+        } catch (\Gratora\Vendor\Queryable\QueryException $e) {
             // Reuse only the recorded winner of the refund-ID race. Awaited or reversal-spent
             // rows still need settlement.
             $dup = Refund::query()->where('gateway_refund_id', $gatewayRefundId)->get();
@@ -1176,7 +1176,7 @@ final class DonationService
 
         $this->resyncAggregatesFor($donation);
 
-        do_action('fundkit.donation.refunded', $donation, $refund);
+        do_action('gratora.donation.refunded', $donation, $refund);
 
         return $refund;
     }
@@ -1267,7 +1267,7 @@ final class DonationService
     /**
      * Undo an external refund the gateway has reversed.
      *
-     * A dispute FundKit lost is recorded as a refund, which drops the money out of
+     * A dispute Gratora lost is recorded as a refund, which drops the money out of
      * every total and voids the receipt. Winning it later puts the money back
      * on the balance, so leaving the refund standing keeps the donation missing
      * from the org's own reporting for good.
@@ -1299,7 +1299,7 @@ final class DonationService
             // Guarded decrement, mirroring the reservation on the way in, so
             // two reinstatements for one dispute cannot drive the counter
             // below zero.
-            $released = DB::table('fundkit_donations')
+            $released = DB::table('gratora_donations')
                 ->whereRaw('id = ' . (int) $donation->id . ' AND refunded_cents >= ' . $amount)
                 ->increment('refunded_cents', -$amount);
             if ($released->affectedRows < 1) {
@@ -1311,7 +1311,7 @@ final class DonationService
             $refund->status     = 'reversed';
             $refund->save();
 
-            $newTotal = (int) (DB::table('fundkit_donations')
+            $newTotal = (int) (DB::table('gratora_donations')
                 ->where('id', $donation->id)
                 ->selectRaw('refunded_cents AS total')
                 ->get()['total'] ?? 0);
@@ -1351,7 +1351,7 @@ final class DonationService
 
         $this->resyncAggregatesFor($donation);
 
-        do_action('fundkit.donation.refund_reversed', $donation, $refund);
+        do_action('gratora.donation.refund_reversed', $donation, $refund);
 
         return $refund;
     }
@@ -1379,7 +1379,7 @@ final class DonationService
         // refuses here and says where to go instead. Absence of a transaction
         // id cannot stand in for this: an offline donation has none and is
         // refundable all the same.
-        $refusal = apply_filters('fundkit.donation.refund_refusal', null, $donation, $amountCents);
+        $refusal = apply_filters('gratora.donation.refund_refusal', null, $donation, $amountCents);
         if (is_string($refusal) && $refusal !== '') {
             throw new RuntimeException(esc_html($refusal));
         }
@@ -1476,7 +1476,7 @@ final class DonationService
             // Atomic over-refund guard (see recordExternalRefund): the counter
             // bump applies only while the new total fits the principal, and its
             // row lock serialises concurrent refunds on this donation.
-            $reserved = DB::table('fundkit_donations')
+            $reserved = DB::table('gratora_donations')
                 ->whereRaw('id = ' . (int) $donation->id . ' AND refunded_cents + ' . $recordedCents . ' <= amount_cents')
                 ->increment('refunded_cents', $recordedCents);
             if ($reserved->affectedRows < 1) {
@@ -1484,7 +1484,7 @@ final class DonationService
                     esc_html("Refund for {$donation->reference} exceeds the refundable balance.")
                 );
             }
-            $newTotal = (int) (DB::table('fundkit_donations')
+            $newTotal = (int) (DB::table('gratora_donations')
                 ->where('id', $donation->id)
                 ->selectRaw('refunded_cents AS total')
                 ->get()['total'] ?? 0);
@@ -1531,10 +1531,10 @@ final class DonationService
 
         // Outside the money transaction: a counter that cannot be recomputed
         // must not undo a refund the gateway has already made. Donor counters
-        // run from the post-commit fundkit.donation.refunded listener.
+        // run from the post-commit gratora.donation.refunded listener.
         $this->resyncAggregatesFor($donation);
 
-        do_action('fundkit.donation.refunded', $donation, $refund);
+        do_action('gratora.donation.refunded', $donation, $refund);
 
         return $refund;
     }

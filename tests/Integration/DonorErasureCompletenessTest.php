@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationNote;
-use FundKit\Donations\Refund;
-use FundKit\Donors\Consent;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationNote;
+use Gratora\Donations\Refund;
+use Gratora\Donors\Consent;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * Erasure must reach every table that holds the donor, not just the obvious
@@ -44,7 +44,7 @@ final class DonorErasureCompletenessTest extends IntegrationTestCase
         $this->donorId = (int) $d->id;
 
         $x = Donation::make();
-        $x->reference         = 'FUNDKIT-ERASE-1';
+        $x->reference         = 'GRATORA-ERASE-1';
         $x->donor_id          = $this->donorId;
         $x->amount_cents      = 5000;
         $x->base_amount_cents = 5000;
@@ -181,10 +181,10 @@ final class DonorErasureCompletenessTest extends IntegrationTestCase
 
         global $wpdb;
         foreach ([
-            "SELECT gateway_metadata FROM {$wpdb->prefix}fundkit_donations WHERE donor_id = %d",
-            "SELECT body_encrypted FROM {$wpdb->prefix}fundkit_donation_notes WHERE donation_id = %d",
-            "SELECT CONCAT(COALESCE(reason,''), COALESCE(metadata,'')) FROM {$wpdb->prefix}fundkit_refunds WHERE donation_id = %d",
-            "SELECT gateway_customer_id FROM {$wpdb->prefix}fundkit_recurring_plans WHERE donor_id = %d",
+            "SELECT gateway_metadata FROM {$wpdb->prefix}gratora_donations WHERE donor_id = %d",
+            "SELECT body_encrypted FROM {$wpdb->prefix}gratora_donation_notes WHERE donation_id = %d",
+            "SELECT CONCAT(COALESCE(reason,''), COALESCE(metadata,'')) FROM {$wpdb->prefix}gratora_refunds WHERE donation_id = %d",
+            "SELECT gateway_customer_id FROM {$wpdb->prefix}gratora_recurring_plans WHERE donor_id = %d",
         ] as $i => $sql) {
             $id  = $i === 0 || $i === 3 ? $this->donorId : $this->donationId;
             $val = (string) implode('', (array) $wpdb->get_col($wpdb->prepare($sql, $id)));
@@ -199,7 +199,7 @@ final class DonorErasureCompletenessTest extends IntegrationTestCase
 
         $donation = Donation::query()->find('id', $this->donationId);
         $this->assertSame(5000, (int) $donation->amount_cents);
-        $this->assertSame('FUNDKIT-ERASE-1', $donation->reference);
+        $this->assertSame('GRATORA-ERASE-1', $donation->reference);
         $this->assertSame('paid', $donation->status);
     }
 
@@ -217,7 +217,7 @@ final class DonorErasureCompletenessTest extends IntegrationTestCase
         $uid  = self::factory()->user->create(['role' => 'administrator']);
         wp_set_current_user($uid);
 
-        $rows = rest_do_request(new \WP_REST_Request('GET', '/fundkit/v1/admin/donors'))->get_data();
+        $rows = rest_do_request(new \WP_REST_Request('GET', '/gratora/v1/admin/donors'))->get_data();
         $row  = null;
         foreach ((array) ($rows['items'] ?? $rows) as $item) {
             if ((int) ($item['id'] ?? 0) === $this->donorId) {

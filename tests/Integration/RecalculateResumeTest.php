@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
+use Gratora\Donors\Donor;
 use WP_REST_Request;
 
 /**
@@ -23,11 +23,11 @@ final class RecalculateResumeTest extends IntegrationTestCase
     {
         parent::setUp();
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
-        delete_option('fundkit_recalculate_cursor');
+        delete_option('gratora_recalculate_cursor');
 
         // A budget too small to hold the whole walk, which is the shape of the
         // real failure: a table that outlasts the request.
-        add_filter('fundkit.recalculate.budget_seconds', static fn (): float => 0.0);
+        add_filter('gratora.recalculate.budget_seconds', static fn (): float => 0.0);
 
         $this->seeded = [];
         for ($i = 0; $i < 6; $i++) {
@@ -42,14 +42,14 @@ final class RecalculateResumeTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('fundkit_recalculate_cursor');
+        delete_option('gratora_recalculate_cursor');
         parent::tearDown();
     }
 
     /** @return array<string,mixed> */
     private function post(string $scope = 'donors'): array
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/recalculate');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/tools/recalculate');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['scope' => $scope]));
 
@@ -64,7 +64,7 @@ final class RecalculateResumeTest extends IntegrationTestCase
         $first = $this->post();
 
         $this->assertFalse($first['done'], 'an unfinished rebuild reported as finished');
-        $this->assertIsArray(get_option('fundkit_recalculate_cursor'), 'and left nothing to resume from');
+        $this->assertIsArray(get_option('gratora_recalculate_cursor'), 'and left nothing to resume from');
     }
 
     public function test_pressing_on_finishes_the_walk_instead_of_restarting_it(): void
@@ -94,17 +94,17 @@ final class RecalculateResumeTest extends IntegrationTestCase
             $rounds++;
         } while (! $res['done'] && $rounds < 200);
 
-        $this->assertFalse(get_option('fundkit_recalculate_cursor'), 'the next run would resume a finished one');
+        $this->assertFalse(get_option('gratora_recalculate_cursor'), 'the next run would resume a finished one');
     }
 
     public function test_changing_the_scope_starts_over(): void
     {
         $this->post('donors');
-        $this->assertSame('donors', get_option('fundkit_recalculate_cursor')['scope']);
+        $this->assertSame('donors', get_option('gratora_recalculate_cursor')['scope']);
 
         $this->post('campaigns');
 
-        $stored = get_option('fundkit_recalculate_cursor');
+        $stored = get_option('gratora_recalculate_cursor');
         $this->assertTrue($stored === false || $stored['scope'] === 'campaigns');
     }
 }

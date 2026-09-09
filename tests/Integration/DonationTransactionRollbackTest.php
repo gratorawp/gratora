@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donations\Refund;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\WebhookOutcome;
-use FundKit\Vendor\Queryable\DB;
-use FundKit\Vendor\Queryable\QueryException;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donations\Refund;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\WebhookOutcome;
+use Gratora\Vendor\Queryable\DB;
+use Gratora\Vendor\Queryable\QueryException;
 use Throwable;
 use WP_REST_Request;
 
@@ -45,7 +45,7 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
         parent::setUp();
 
         // Snapshots the registry so tearDown puts it back without the probe.
-        $this->deregisterGateway('fundkit_no_such_gateway');
+        $this->deregisterGateway('gratora_no_such_gateway');
 
         $manager = Plugin::instance()->container->get(GatewayManager::class);
         if (! $manager->get('refundprobe')) {
@@ -71,7 +71,7 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
         // The row refuses after the reservation has already been taken, which
         // is what a lock-wait timeout or a lost connection produces on a write
         // this path has locked.
-        $stop = $this->breakFirstQueryMatching('INSERT INTO ' . self::$prefix . 'fundkit_refunds');
+        $stop = $this->breakFirstQueryMatching('INSERT INTO ' . self::$prefix . 'gratora_refunds');
 
         try {
             Plugin::instance()->container->get(DonationService::class)->refund($donation, 4000, 'donor asked');
@@ -182,7 +182,7 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
         $donation = $this->seedPaidDonation(10000);
         $awaited  = $this->seedRefundRow($donation, 'settle_me', 'pending', 4000);
 
-        $stop   = $this->breakFirstQueryMatching('INSERT INTO ' . self::$prefix . 'fundkit_refunds');
+        $stop   = $this->breakFirstQueryMatching('INSERT INTO ' . self::$prefix . 'gratora_refunds');
         $thrown = null;
         $returned = null;
 
@@ -332,7 +332,7 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
     {
         $donation = $this->seedPaidDonation(5000);
         $this->seedRefundRow($donation, self::REFUND_ID, 'succeeded', 1000);
-        DB::table('fundkit_donations')->where('id', (int) $donation->id)->update([
+        DB::table('gratora_donations')->where('id', (int) $donation->id)->update([
             'refunded_cents' => 1000,
             'status'         => 'partial_refund',
         ]);
@@ -369,7 +369,7 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         $d   = Donation::make();
-        $d->reference         = 'FUNDKIT-TXR-' . substr(md5(uniqid('', true)), 0, 10);
+        $d->reference         = 'GRATORA-TXR-' . substr(md5(uniqid('', true)), 0, 10);
         $d->donor_id          = (int) $donor->id;
         $d->amount_cents      = $cents;
         $d->net_cents         = $cents;
@@ -417,7 +417,7 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
             if (! $fired && str_contains($sql, $needle)) {
                 $fired = true;
 
-                return 'UPDATE ' . self::$prefix . 'fundkit_donations SET fundkit_no_such_column = 1 WHERE id = 0';
+                return 'UPDATE ' . self::$prefix . 'gratora_donations SET gratora_no_such_column = 1 WHERE id = 0';
             }
 
             return $sql;
@@ -436,7 +436,7 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
 
     private function eventCount(string $type, int $donationId): int
     {
-        return (int) DB::table('fundkit_events')
+        return (int) DB::table('gratora_events')
             ->where('type', $type)
             ->where('donation_id', $donationId)
             ->count();
@@ -445,7 +445,7 @@ final class DonationTransactionRollbackTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function donationRow(int $id): array
     {
-        return (array) DB::table('fundkit_donations')
+        return (array) DB::table('gratora_donations')
             ->where('id', $id)
             ->selectRaw('status, refunded_cents, refunded_at, paid_at')
             ->get();

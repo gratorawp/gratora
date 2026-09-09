@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Foundation\Maintenance\AbandonedPendingReaper;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Foundation\Maintenance\AbandonedPendingReaper;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
 
 /**
  * Closing checkouts that were begun and never paid.
@@ -114,11 +114,11 @@ final class AbandonedPendingReaperTest extends IntegrationTestCase
     {
         $donation = $this->seed('stripe', 5);
 
-        add_filter('fundkit.donations.abandon_after_days', static fn (): int => 2);
+        add_filter('gratora.donations.abandon_after_days', static fn (): int => 2);
         try {
             $this->reaper()->run();
         } finally {
-            remove_all_filters('fundkit.donations.abandon_after_days');
+            remove_all_filters('gratora.donations.abandon_after_days');
         }
 
         $this->assertSame('failed', $this->statusOf($donation));

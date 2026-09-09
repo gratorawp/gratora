@@ -17,19 +17,19 @@ async function download( path, setNotice, setBusy, fallbackName ) {
         const blob = await res.blob();
 
         if ( blob.size === 0 ) {
-            setNotice( { type: 'error', text: __( 'That export came back empty.', 'fundraising-toolkit' ) } );
+            setNotice( { type: 'error', text: __( 'That export came back empty.', 'gratora' ) } );
             return;
         }
 
         // A truncated export downloads exactly like a complete one, and it is
         // what a bookkeeper reconciles against, so say it on the way out.
-        const cap = res.headers.get( 'x-fundkit-export-truncated' );
+        const cap = res.headers.get( 'x-gratora-export-truncated' );
         if ( cap ) {
             setNotice( {
                 type: 'warning',
                 text: sprintf(
                     /* translators: %s: maximum number of rows an export can hold. */
-                    __( 'This export holds the most recent %s rows and stops there. Narrow the date range to get the rest.', 'fundraising-toolkit' ),
+                    __( 'This export holds the most recent %s rows and stops there. Narrow the date range to get the rest.', 'gratora' ),
                     Number( cap ).toLocaleString()
                 ),
             } );
@@ -38,7 +38,7 @@ async function download( path, setNotice, setBusy, fallbackName ) {
         const match = ( res.headers.get( 'content-disposition' ) || '' ).match( /filename="([^"]+)"/ );
         saveBlob( blob, match ? match[ 1 ] : fallbackName );
     } catch ( err ) {
-        setNotice( { type: 'error', text: err?.message || __( 'That export could not be generated.', 'fundraising-toolkit' ) } );
+        setNotice( { type: 'error', text: err?.message || __( 'That export could not be generated.', 'gratora' ) } );
     } finally {
         setBusy( false );
     }
@@ -75,7 +75,7 @@ export default function ExportTab( { setNotice } ) {
     const [ columns, setColumns ]         = useState( [] );
 
     useEffect( () => {
-        apiFetch( { path: '/fundkit/v1/admin/exports/options' } )
+        apiFetch( { path: '/gratora/v1/admin/exports/options' } )
             .then( ( o ) => {
                 setOpts( o );
                 setPdfYear( o.current_year );
@@ -96,7 +96,7 @@ export default function ExportTab( { setNotice } ) {
                 setOpts( { donor_columns: [], campaigns: [], years: [ new Date().getFullYear() ] } );
                 setNotice( {
                     type: 'error',
-                    text: __( 'The export options could not be loaded, so the choices below are incomplete. Reload the page to try again.', 'fundraising-toolkit' ),
+                    text: __( 'The export options could not be loaded, so the choices below are incomplete. Reload the page to try again.', 'gratora' ),
                 } );
             } );
     }, [] );
@@ -113,7 +113,7 @@ export default function ExportTab( { setNotice } ) {
         if ( donationsTo )   q.set( 'created_to', donationsTo );
         if ( includeTest )   q.set( 'include_test', '1' );
         const s = q.toString();
-        return '/fundkit/v1/admin/donations/export.csv' + ( s ? `?${ s }` : '' );
+        return '/gratora/v1/admin/donations/export.csv' + ( s ? `?${ s }` : '' );
     }, [ donationsFrom, donationsTo, includeTest ] );
 
     const donorsPath = useMemo( () => {
@@ -122,10 +122,10 @@ export default function ExportTab( { setNotice } ) {
         if ( donorsTo )   q.set( 'to', donorsTo );
         if ( donorsCampaign ) q.set( 'campaign_id', String( donorsCampaign ) );
         if ( columns.length ) q.set( 'columns', columns.join( ',' ) );
-        return `/fundkit/v1/admin/exports/donors.csv?${ q.toString() }`;
+        return `/gratora/v1/admin/exports/donors.csv?${ q.toString() }`;
     }, [ donorsFrom, donorsTo, donorsCampaign, columns ] );
 
-    const statsPath = `/fundkit/v1/admin/exports/revenue.csv?from=${ statsFrom }&to=${ statsTo }`;
+    const statsPath = `/gratora/v1/admin/exports/revenue.csv?from=${ statsFrom }&to=${ statsTo }`;
 
     // From the server-rendered capability snapshot, not from the options
     // payload: that payload is absent for exactly the reader the options route
@@ -143,48 +143,48 @@ export default function ExportTab( { setNotice } ) {
         setBusy( 'settings' );
         setNotice( null );
         try {
-            const data = await apiFetch( { path: '/fundkit/v1/admin/tools/export' } );
+            const data = await apiFetch( { path: '/gratora/v1/admin/tools/export' } );
             const blob = new Blob( [ JSON.stringify( data, null, 2 ) ], { type: 'application/json' } );
-            saveBlob( blob, `fundkit-settings-${ new Date().toISOString().slice( 0, 10 ) }.json` );
+            saveBlob( blob, `gratora-settings-${ new Date().toISOString().slice( 0, 10 ) }.json` );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Export failed.', 'fundraising-toolkit' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Export failed.', 'gratora' ) } );
         } finally {
             setBusy( '' );
         }
     };
 
     return (
-        <div className="fundkit-panel">
-            <table className="fundkit-exports">
+        <div className="gratora-panel">
+            <table className="gratora-exports">
                 <thead>
                     <tr>
-                        <th scope="col">{ __( 'Export type', 'fundraising-toolkit' ) }</th>
-                        <th scope="col">{ __( 'Options', 'fundraising-toolkit' ) }</th>
+                        <th scope="col">{ __( 'Export type', 'gratora' ) }</th>
+                        <th scope="col">{ __( 'Options', 'gratora' ) }</th>
                     </tr>
                 </thead>
                 <tbody>
                     { canDonations && (
                     <Row
-                        title={ __( 'Donations', 'fundraising-toolkit' ) }
-                        description={ __( 'Every donation as a CSV: reference, donor, amount, status, campaign and gateway.', 'fundraising-toolkit' ) }
+                        title={ __( 'Donations', 'gratora' ) }
+                        description={ __( 'Every donation as a CSV: reference, donor, amount, status, campaign and gateway.', 'gratora' ) }
                     >
-                        <div className="fundkit-exports__controls">
-                            <span className="fundkit-tools-field">
-                                { __( 'From', 'fundraising-toolkit' ) }
+                        <div className="gratora-exports__controls">
+                            <span className="gratora-tools-field">
+                                { __( 'From', 'gratora' ) }
                                 <DateField
                                     value={ donationsFrom }
                                     onChange={ ( v ) => setDonationsFrom( v || '' ) }
-                                    ariaLabel={ __( 'Export donations from', 'fundraising-toolkit' ) }
-                                    placeholder={ __( 'Any', 'fundraising-toolkit' ) }
+                                    ariaLabel={ __( 'Export donations from', 'gratora' ) }
+                                    placeholder={ __( 'Any', 'gratora' ) }
                                 />
                             </span>
-                            <span className="fundkit-tools-field">
-                                { __( 'To', 'fundraising-toolkit' ) }
+                            <span className="gratora-tools-field">
+                                { __( 'To', 'gratora' ) }
                                 <DateField
                                     value={ donationsTo }
                                     onChange={ ( v ) => setDonationsTo( v || '' ) }
-                                    ariaLabel={ __( 'Export donations to', 'fundraising-toolkit' ) }
-                                    placeholder={ __( 'Any', 'fundraising-toolkit' ) }
+                                    ariaLabel={ __( 'Export donations to', 'gratora' ) }
+                                    placeholder={ __( 'Any', 'gratora' ) }
                                 />
                             </span>
                             <Btn
@@ -193,25 +193,25 @@ export default function ExportTab( { setNotice } ) {
                                 isBusy={ busy === 'donations' }
                                 onClick={ () => download( donationsPath, setNotice, ( b ) => setBusy( b ? 'donations' : '' ), 'donations.csv' ) }
                             >
-                                { __( 'Generate CSV', 'fundraising-toolkit' ) }
+                                { __( 'Generate CSV', 'gratora' ) }
                             </Btn>
                         </div>
-                        <label className="fundkit-exports__check">
+                        <label className="gratora-exports__check">
                             <input type="checkbox" checked={ includeTest } onChange={ ( e ) => setIncludeTest( e.target.checked ) } />
-                            { __( 'Include test donations', 'fundraising-toolkit' ) }
+                            { __( 'Include test donations', 'gratora' ) }
                         </label>
                     </Row>
                     ) }
 
                     { canReports && (
                         <Row
-                            title={ __( 'Revenue report (PDF)', 'fundraising-toolkit' ) }
-                            description={ __( 'A one-page summary of a year: total raised, month by month, and the best month. No donor details, so it can go straight to a board.', 'fundraising-toolkit' ) }
+                            title={ __( 'Revenue report (PDF)', 'gratora' ) }
+                            description={ __( 'A one-page summary of a year: total raised, month by month, and the best month. No donor details, so it can go straight to a board.', 'gratora' ) }
                         >
-                            <div className="fundkit-exports__controls">
-                                <label className="fundkit-tools-field">
-                                    { __( 'Year', 'fundraising-toolkit' ) }
-                                    <select className="fundkit-select" value={ pdfYear } onChange={ ( e ) => setPdfYear( Number( e.target.value ) ) }>
+                            <div className="gratora-exports__controls">
+                                <label className="gratora-tools-field">
+                                    { __( 'Year', 'gratora' ) }
+                                    <select className="gratora-select" value={ pdfYear } onChange={ ( e ) => setPdfYear( Number( e.target.value ) ) }>
                                         { years.map( ( y ) => <option key={ y } value={ y }>{ y }</option> ) }
                                     </select>
                                 </label>
@@ -219,9 +219,9 @@ export default function ExportTab( { setNotice } ) {
                                     variant="secondary"
                                     disabled={ busy === 'pdf' }
                                     isBusy={ busy === 'pdf' }
-                                    onClick={ () => download( `/fundkit/v1/admin/exports/revenue.pdf?year=${ pdfYear }`, setNotice, ( b ) => setBusy( b ? 'pdf' : '' ), 'revenue.pdf' ) }
+                                    onClick={ () => download( `/gratora/v1/admin/exports/revenue.pdf?year=${ pdfYear }`, setNotice, ( b ) => setBusy( b ? 'pdf' : '' ), 'revenue.pdf' ) }
                                 >
-                                    { __( 'Generate PDF', 'fundraising-toolkit' ) }
+                                    { __( 'Generate PDF', 'gratora' ) }
                                 </Btn>
                             </div>
                         </Row>
@@ -229,28 +229,28 @@ export default function ExportTab( { setNotice } ) {
 
                     { canReports && (
                         <Row
-                            title={ __( 'Revenue by month', 'fundraising-toolkit' ) }
-                            description={ __( 'Revenue, donation count and average donation for every month in the range. Quiet months are written as zero rows, so the file charts as a continuous series.', 'fundraising-toolkit' ) }
+                            title={ __( 'Revenue by month', 'gratora' ) }
+                            description={ __( 'Revenue, donation count and average donation for every month in the range. Quiet months are written as zero rows, so the file charts as a continuous series.', 'gratora' ) }
                         >
-                            <div className="fundkit-exports__controls">
-                                <span className="fundkit-tools-field">
-                                    { __( 'From', 'fundraising-toolkit' ) }
+                            <div className="gratora-exports__controls">
+                                <span className="gratora-tools-field">
+                                    { __( 'From', 'gratora' ) }
                                     <MonthField
                                         value={ statsFrom }
                                         onChange={ setStatsFrom }
                                         min={ opts?.first_month }
                                         max={ opts?.current_month }
-                                        ariaLabel={ __( 'Revenue from month', 'fundraising-toolkit' ) }
+                                        ariaLabel={ __( 'Revenue from month', 'gratora' ) }
                                     />
                                 </span>
-                                <span className="fundkit-tools-field">
-                                    { __( 'To', 'fundraising-toolkit' ) }
+                                <span className="gratora-tools-field">
+                                    { __( 'To', 'gratora' ) }
                                     <MonthField
                                         value={ statsTo }
                                         onChange={ setStatsTo }
                                         min={ opts?.first_month }
                                         max={ opts?.current_month }
-                                        ariaLabel={ __( 'Revenue to month', 'fundraising-toolkit' ) }
+                                        ariaLabel={ __( 'Revenue to month', 'gratora' ) }
                                     />
                                 </span>
                                 <Btn
@@ -259,7 +259,7 @@ export default function ExportTab( { setNotice } ) {
                                     isBusy={ busy === 'stats' }
                                     onClick={ () => download( statsPath, setNotice, ( b ) => setBusy( b ? 'stats' : '' ), 'revenue.csv' ) }
                                 >
-                                    { __( 'Generate CSV', 'fundraising-toolkit' ) }
+                                    { __( 'Generate CSV', 'gratora' ) }
                                 </Btn>
                             </div>
                         </Row>
@@ -267,32 +267,32 @@ export default function ExportTab( { setNotice } ) {
 
                     { canDonors && (
                         <Row
-                            title={ __( 'Donors', 'fundraising-toolkit' ) }
-                            description={ __( 'The donor list as a CSV, by when each donor record was created. Take only the columns you need: names, emails, phone numbers and addresses are personal data, and this file is not encrypted once it leaves the site.', 'fundraising-toolkit' ) }
+                            title={ __( 'Donors', 'gratora' ) }
+                            description={ __( 'The donor list as a CSV, by when each donor record was created. Take only the columns you need: names, emails, phone numbers and addresses are personal data, and this file is not encrypted once it leaves the site.', 'gratora' ) }
                         >
-                            <div className="fundkit-exports__controls">
-                                <span className="fundkit-tools-field">
-                                    { __( 'From', 'fundraising-toolkit' ) }
+                            <div className="gratora-exports__controls">
+                                <span className="gratora-tools-field">
+                                    { __( 'From', 'gratora' ) }
                                     <DateField
                                         value={ donorsFrom }
                                         onChange={ ( v ) => setDonorsFrom( v || '' ) }
-                                        ariaLabel={ __( 'Export donors from', 'fundraising-toolkit' ) }
-                                        placeholder={ __( 'Any', 'fundraising-toolkit' ) }
+                                        ariaLabel={ __( 'Export donors from', 'gratora' ) }
+                                        placeholder={ __( 'Any', 'gratora' ) }
                                     />
                                 </span>
-                                <span className="fundkit-tools-field">
-                                    { __( 'To', 'fundraising-toolkit' ) }
+                                <span className="gratora-tools-field">
+                                    { __( 'To', 'gratora' ) }
                                     <DateField
                                         value={ donorsTo }
                                         onChange={ ( v ) => setDonorsTo( v || '' ) }
-                                        ariaLabel={ __( 'Export donors to', 'fundraising-toolkit' ) }
-                                        placeholder={ __( 'Any', 'fundraising-toolkit' ) }
+                                        ariaLabel={ __( 'Export donors to', 'gratora' ) }
+                                        placeholder={ __( 'Any', 'gratora' ) }
                                     />
                                 </span>
-                                <label className="fundkit-tools-field">
-                                    { __( 'Campaign', 'fundraising-toolkit' ) }
-                                    <select className="fundkit-select" value={ donorsCampaign } onChange={ ( e ) => setDonorsCampaign( Number( e.target.value ) ) }>
-                                        <option value={ 0 }>{ __( 'All campaigns', 'fundraising-toolkit' ) }</option>
+                                <label className="gratora-tools-field">
+                                    { __( 'Campaign', 'gratora' ) }
+                                    <select className="gratora-select" value={ donorsCampaign } onChange={ ( e ) => setDonorsCampaign( Number( e.target.value ) ) }>
+                                        <option value={ 0 }>{ __( 'All campaigns', 'gratora' ) }</option>
                                         { ( opts?.campaigns || [] ).map( ( c ) => (
                                             <option key={ c.id } value={ c.id }>{ c.title || `#${ c.id }` }</option>
                                         ) ) }
@@ -304,13 +304,13 @@ export default function ExportTab( { setNotice } ) {
                                     isBusy={ busy === 'donors' }
                                     onClick={ () => download( donorsPath, setNotice, ( b ) => setBusy( b ? 'donors' : '' ), 'donors.csv' ) }
                                 >
-                                    { __( 'Generate CSV', 'fundraising-toolkit' ) }
+                                    { __( 'Generate CSV', 'gratora' ) }
                                 </Btn>
                             </div>
 
-                            <div className="fundkit-exports__columns">
-                                <p className="fundkit-exports__columns-head">{ __( 'Columns', 'fundraising-toolkit' ) }</p>
-                                <div className="fundkit-exports__grid">
+                            <div className="gratora-exports__columns">
+                                <p className="gratora-exports__columns-head">{ __( 'Columns', 'gratora' ) }</p>
+                                <div className="gratora-exports__grid">
                                     { ( opts?.donor_columns || [] ).map( ( c ) => (
                                         <label key={ c.key }>
                                             <input
@@ -323,8 +323,8 @@ export default function ExportTab( { setNotice } ) {
                                     ) ) }
                                 </div>
                                 { noColumns && (
-                                    <p className="fundkit-tools-note">
-                                        { __( 'Pick at least one column. With none selected the file would still carry names and email addresses.', 'fundraising-toolkit' ) }
+                                    <p className="gratora-tools-note">
+                                        { __( 'Pick at least one column. With none selected the file would still carry names and email addresses.', 'gratora' ) }
                                     </p>
                                 ) }
                             </div>
@@ -333,42 +333,42 @@ export default function ExportTab( { setNotice } ) {
 
                     { canEverything && (
                     <Row
-                        title={ __( 'Everything', 'fundraising-toolkit' ) }
-                        description={ __( 'Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another Fundraising Toolkit site.', 'fundraising-toolkit' ) }
+                        title={ __( 'Everything', 'gratora' ) }
+                        description={ __( 'Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another Gratora site.', 'gratora' ) }
                     >
-                        <div className="fundkit-exports__controls">
+                        <div className="gratora-exports__controls">
                             <Btn
                                 variant="secondary"
                                 disabled={ busy === 'everything' }
                                 isBusy={ busy === 'everything' }
-                                onClick={ () => download( '/fundkit/v1/admin/tools/export-all', setNotice, ( b ) => setBusy( b ? 'everything' : '' ), 'fundkit-export.json' ) }
+                                onClick={ () => download( '/gratora/v1/admin/tools/export-all', setNotice, ( b ) => setBusy( b ? 'everything' : '' ), 'gratora-export.json' ) }
                             >
-                                { __( 'Export JSON', 'fundraising-toolkit' ) }
+                                { __( 'Export JSON', 'gratora' ) }
                             </Btn>
                         </div>
-                        <p className="fundkit-tools-note">
-                            { __( 'Donor names, email addresses and postal addresses are readable in this file. They have to be, or it could only ever be restored onto the site it came from. Treat it like the donor database it is.', 'fundraising-toolkit' ) }
+                        <p className="gratora-tools-note">
+                            { __( 'Donor names, email addresses and postal addresses are readable in this file. They have to be, or it could only ever be restored onto the site it came from. Treat it like the donor database it is.', 'gratora' ) }
                         </p>
                     </Row>
                     ) }
 
                     { canEverything && (
                     <Row
-                        title={ __( 'Settings', 'fundraising-toolkit' ) }
-                        description={ __( 'Every Fundraising Toolkit setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included.', 'fundraising-toolkit' ) }
+                        title={ __( 'Settings', 'gratora' ) }
+                        description={ __( 'Every Gratora setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included.', 'gratora' ) }
                     >
-                        <div className="fundkit-exports__controls">
+                        <div className="gratora-exports__controls">
                             <Btn
                                 variant="secondary"
                                 disabled={ busy === 'settings' }
                                 isBusy={ busy === 'settings' }
                                 onClick={ exportSettings }
                             >
-                                { __( 'Export JSON', 'fundraising-toolkit' ) }
+                                { __( 'Export JSON', 'gratora' ) }
                             </Btn>
                         </div>
-                        <p className="fundkit-tools-note">
-                            { __( 'Secrets are masked. A gateway key never leaves the site in an export, so an imported file cannot restore one.', 'fundraising-toolkit' ) }
+                        <p className="gratora-tools-note">
+                            { __( 'Secrets are masked. A gateway key never leaves the site in an export, so an imported file cannot restore one.', 'gratora' ) }
                         </p>
                     </Row>
                     ) }

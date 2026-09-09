@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Uninstall;
+namespace Gratora\Foundation\Uninstall;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Core\CoreModule;
-use FundKit\Donors\Donor;
-use FundKit\Foundation\Auth\Capabilities;
+use Gratora\Campaigns\Campaign;
+use Gratora\Core\CoreModule;
+use Gratora\Donors\Donor;
+use Gratora\Foundation\Auth\Capabilities;
 use ReflectionClass;
 
 /**
  * Removes everything core owns, when the site owner has asked for it.
  *
- * Tables come from CoreModule::migrations() rather than a `fundkit_%` glob. The
+ * Tables come from CoreModule::migrations() rather than a `gratora_%` glob. The
  * add-ons share that prefix, so a glob run from core would drop the tickets,
  * gift aid and peer-to-peer tables of add-ons that are still installed.
  *
@@ -21,11 +21,11 @@ use ReflectionClass;
  */
 final class DataEraser
 {
-    public const OPT_IN = 'fundkit_delete_data';
+    public const OPT_IN = 'gratora_delete_data';
 
     /**
      * Options core writes. Listed rather than matched on a prefix for the same
-     * reason as the tables: fundkit_gift_aid_db_version and its siblings belong to
+     * reason as the tables: gratora_gift_aid_db_version and its siblings belong to
      * other plugins.
      *
      * The queued-work maps and cursors belong here as much as the settings do.
@@ -33,48 +33,48 @@ final class DataEraser
      * one left behind is an instruction aimed at whatever now holds the id.
      */
     private const OPTIONS = [
-        'fundkit_activated_at',
-        'fundkit_campaign_cancel_recurring',
-        'fundkit_consents',
-        'fundkit_currency_locale',
-        'fundkit_db_version',
-        'fundkit_delete_data',
-        'fundkit_donor_rehash_after_id',
-        'fundkit_donor_rehash_pending',
-        'fundkit_email_settings',
-        'fundkit_fund_reassignments',
-        'fundkit_fx_rates',
-        'fundkit_gateway_config',
-        'fundkit_gateway_reconcile_cursor',
-        'fundkit_licensing_status',
-        'fundkit_onboarding_campaign_id',
-        'fundkit_onboarding_status',
-        'fundkit_org_brand',
-        'fundkit_org_profile',
-        'fundkit_paypal_plans',
-        'fundkit_paypal_product',
-        'fundkit_portal_page_id',
-        'fundkit_portal_page_version',
-        'fundkit_privacy',
+        'gratora_activated_at',
+        'gratora_campaign_cancel_recurring',
+        'gratora_consents',
+        'gratora_currency_locale',
+        'gratora_db_version',
+        'gratora_delete_data',
+        'gratora_donor_rehash_after_id',
+        'gratora_donor_rehash_pending',
+        'gratora_email_settings',
+        'gratora_fund_reassignments',
+        'gratora_fx_rates',
+        'gratora_gateway_config',
+        'gratora_gateway_reconcile_cursor',
+        'gratora_licensing_status',
+        'gratora_onboarding_campaign_id',
+        'gratora_onboarding_status',
+        'gratora_org_brand',
+        'gratora_org_profile',
+        'gratora_paypal_plans',
+        'gratora_paypal_product',
+        'gratora_portal_page_id',
+        'gratora_portal_page_version',
+        'gratora_privacy',
         // The key itself, not just the status cache beside it. It is a bearer
         // credential for the charity's paid entitlement, and it outlived every
-        // FundKit file on the site: through a handover, a database export, a
+        // Gratora file on the site: through a handover, a database export, a
         // backup handed to a contractor. Written by the licensing client
         // vendored into each paid add-on, which has no uninstall of its own.
-        'fundkit_pro_license_key',
-        'fundkit_receipt_settings',
-        'fundkit_recurring_installed',
-        'fundkit_reference_settings',
-        'fundkit_retention_cursor',
-        'fundkit_retention_starts_at',
-        'fundkit_roles',
-        'fundkit_upgrade_routines_done',
-        'fundkit_upgrade_routines_failed',
+        'gratora_pro_license_key',
+        'gratora_receipt_settings',
+        'gratora_recurring_installed',
+        'gratora_reference_settings',
+        'gratora_retention_cursor',
+        'gratora_retention_starts_at',
+        'gratora_roles',
+        'gratora_upgrade_routines_done',
+        'gratora_upgrade_routines_failed',
     ];
 
     /** Reference counters carry the year, so they are the one keyspace to match. */
     private const OPTION_PREFIXES = [
-        'fundkit_reference_counter_',
+        'gratora_reference_counter_',
     ];
 
     /**
@@ -149,7 +149,7 @@ final class DataEraser
     {
         // Before the tables go, so an add-on can still read what it needs to
         // clean up rows of its own that point at core.
-        do_action('fundkit.uninstall');
+        do_action('gratora.uninstall');
 
         $plan = $this->plan();
 
@@ -161,7 +161,7 @@ final class DataEraser
         $this->deletePages($this->pageIds());
 
         // Also while the tables are there: the only pointer to a donor's
-        // picture is a column of fundkit_donors, and the file outlives the row.
+        // picture is a column of gratora_donors, and the file outlives the row.
         $this->deleteAttachments($this->avatarAttachmentIds());
 
         $this->dropTables($plan['tables']);
@@ -245,7 +245,7 @@ final class DataEraser
 
     /**
      * Pages core created and still names in a row of its own: the portal, and
-     * each campaign's own page. Not every page carrying _fundkit_campaign_id,
+     * each campaign's own page. Not every page carrying _gratora_campaign_id,
      * because the peer-to-peer add-on puts that meta on its fundraiser and team
      * subpages too, and those are its to remove.
      *
@@ -254,7 +254,7 @@ final class DataEraser
      */
     public function pageIds(): array
     {
-        $ids = [(int) get_option('fundkit_portal_page_id', 0)];
+        $ids = [(int) get_option('gratora_portal_page_id', 0)];
 
         foreach (Campaign::query()->getAll() as $campaign) {
             $ids[] = (int) ($campaign->page_id ?? 0);

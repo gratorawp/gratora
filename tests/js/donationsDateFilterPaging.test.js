@@ -63,7 +63,7 @@ beforeEach( () => {
         if ( parse === false ) {
             return Promise.resolve( { json: async () => rows, headers: { get: () => '400' } } );
         }
-        if ( path.startsWith( '/fundkit/v1/admin/donations/stats' ) ) return Promise.resolve( null );
+        if ( path.startsWith( '/gratora/v1/admin/donations/stats' ) ) return Promise.resolve( null );
         return Promise.resolve( [] );
     } );
 } );

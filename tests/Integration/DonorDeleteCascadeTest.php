@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Analytics\Event;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Vendor\Queryable\DB;
 use InvalidArgumentException;
 
 /**
@@ -92,15 +92,15 @@ final class DonorDeleteCascadeTest extends IntegrationTestCase
             'campaign_id' => $campaignId,
         ]);
 
-        Plugin::instance()->container->get(\FundKit\Donations\AggregateSyncer::class)->syncCampaign($campaignId);
-        $before = (array) DB::table('fundkit_campaigns')->where('id', $campaignId)->get();
+        Plugin::instance()->container->get(\Gratora\Donations\AggregateSyncer::class)->syncCampaign($campaignId);
+        $before = (array) DB::table('gratora_campaigns')->where('id', $campaignId)->get();
 
         $doomed = $this->donor();
         $this->donation((int) $doomed->id, ['campaign_id' => $campaignId]);
         $this->service()->delete($doomed);
 
-        Plugin::instance()->container->get(\FundKit\Donations\AggregateSyncer::class)->syncCampaign($campaignId);
-        $after = (array) DB::table('fundkit_campaigns')->where('id', $campaignId)->get();
+        Plugin::instance()->container->get(\Gratora\Donations\AggregateSyncer::class)->syncCampaign($campaignId);
+        $after = (array) DB::table('gratora_campaigns')->where('id', $campaignId)->get();
 
         foreach (['raised_cents', 'donations_count', 'donors_count'] as $col) {
             $this->assertSame(
@@ -119,7 +119,7 @@ final class DonorDeleteCascadeTest extends IntegrationTestCase
         $did   = (int) $this->donation((int) $donor->id)->id;
 
         $seen = [];
-        add_action('fundkit.test_data.purge_donations', static function (array $ids) use (&$seen): void {
+        add_action('gratora.test_data.purge_donations', static function (array $ids) use (&$seen): void {
             $seen = $ids;
         });
 
@@ -133,7 +133,7 @@ final class DonorDeleteCascadeTest extends IntegrationTestCase
         $donor = $this->donor();
         $did   = (int) $this->donation((int) $donor->id)->id;
 
-        DB::table('fundkit_receipts')->insert([
+        DB::table('gratora_receipts')->insert([
             'donation_id'    => $did,
             'donor_id'       => (int) $donor->id,
             'renderer_id'    => 'default',

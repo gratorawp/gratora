@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\Stripe\StripeAccount;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\Stripe\StripeAccount;
 use WP_REST_Request;
 
 /**
@@ -59,7 +59,7 @@ final class GatewayUnreachableTest extends IntegrationTestCase
     {
         $this->unreachable = true;
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/stripe/keys');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/stripe/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'mode'            => 'test',
@@ -70,7 +70,7 @@ final class GatewayUnreachableTest extends IntegrationTestCase
 
         // 503, not 400: nothing was wrong with what the admin typed.
         $this->assertSame(503, $res->get_status(), (string) wp_json_encode($res->get_data()));
-        $this->assertSame('fundkit_stripe_unreachable', $res->as_error()->get_error_code());
+        $this->assertSame('gratora_stripe_unreachable', $res->as_error()->get_error_code());
         $this->assertStringNotContainsStringIgnoringCase(
             'rejected',
             (string) $res->as_error()->get_error_message()
@@ -81,7 +81,7 @@ final class GatewayUnreachableTest extends IntegrationTestCase
     {
         $this->unreachable = true;
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/keys');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'mode'          => 'test',
@@ -91,7 +91,7 @@ final class GatewayUnreachableTest extends IntegrationTestCase
         $res = rest_do_request($req);
 
         $this->assertSame(503, $res->get_status(), (string) wp_json_encode($res->get_data()));
-        $this->assertSame('fundkit_paypal_unreachable', $res->as_error()->get_error_code());
+        $this->assertSame('gratora_paypal_unreachable', $res->as_error()->get_error_code());
         $this->assertStringNotContainsStringIgnoringCase(
             'rejected',
             (string) $res->as_error()->get_error_message()
@@ -100,7 +100,7 @@ final class GatewayUnreachableTest extends IntegrationTestCase
 
     public function test_a_reachable_gateway_still_saves_normally(): void
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/keys');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/keys');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'mode'          => 'test',

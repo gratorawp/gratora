@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Donors\ConsentService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Rest\Portal\PortalController;
+use Gratora\Analytics\Event;
+use Gratora\Donors\ConsentService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Rest\Portal\PortalController;
 use WP_REST_Request;
 
 /**
@@ -35,7 +35,7 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
 
     private function paidDonation(string $email, array $consents = []): string
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode(array_filter([
             'email'        => $email,
@@ -47,7 +47,7 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
         ])));
         $reference = (string) rest_do_request($create)->get_data()['reference'];
 
-        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);
@@ -64,7 +64,7 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
     /** @return array<string,string> */
     private function portalHeaders(int $donorId, string $route): array
     {
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession($donorId, 'tok');
+        $_COOKIE['gratora_donor_session'] = $this->portalSession($donorId, 'tok');
 
         try {
             $res = rest_do_request(new WP_REST_Request('GET', $route));
@@ -72,7 +72,7 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
 
             return (array) $res->get_headers();
         } finally {
-            unset($_COOKIE['fundkit_donor_session']);
+            unset($_COOKIE['gratora_donor_session']);
         }
     }
 
@@ -82,7 +82,7 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
         $this->paidDonation($email);
         $donor = $this->donorFor($email);
 
-        $headers = $this->portalHeaders((int) $donor->id, '/fundkit/v1/portal/profile');
+        $headers = $this->portalHeaders((int) $donor->id, '/gratora/v1/portal/profile');
 
         $this->assertArrayHasKey('Cache-Control', $headers, 'a CDN may store the decrypted email and serve it to the next visitor');
         $this->assertStringContainsString('no-store', (string) $headers['Cache-Control']);
@@ -96,7 +96,7 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
         $this->paidDonation($email);
         $donor = $this->donorFor($email);
 
-        $headers = $this->portalHeaders((int) $donor->id, '/fundkit/v1/portal/donations');
+        $headers = $this->portalHeaders((int) $donor->id, '/gratora/v1/portal/donations');
 
         $this->assertStringContainsString('no-store', (string) ($headers['Cache-Control'] ?? ''));
     }
@@ -107,7 +107,7 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
             'rest_request_after_callbacks',
             new \WP_REST_Response([], 200),
             [],
-            new WP_REST_Request('GET', '/fundkit/v1/campaigns')
+            new WP_REST_Request('GET', '/gratora/v1/campaigns')
         );
 
         $this->assertArrayNotHasKey('Cache-Control', $res->get_headers());
@@ -116,7 +116,7 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
 
     private function setPurposes(array $purposes): void
     {
-        update_option('fundkit_consents', ['purposes' => $purposes]);
+        update_option('gratora_consents', ['purposes' => $purposes]);
     }
 
     private function grantedNow(int $donorId, string $key): ?bool
@@ -191,7 +191,7 @@ final class PortalPrivacyLeaksTest extends IntegrationTestCase
     {
         $_SERVER['REMOTE_ADDR']     = '198.51.100.7';
         $_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (the erased donor)';
-        update_option('fundkit_privacy_settings', ['anonymize_ips' => true]);
+        update_option('gratora_privacy_settings', ['anonymize_ips' => true]);
 
         $email = 'erased-' . uniqid() . '@example.test';
         $this->paidDonation($email);

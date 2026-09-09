@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Assets;
+namespace Gratora\Tests\Unit\Assets;
 
 use PHPUnit\Framework\TestCase;
 
 /**
  * Locks in the donor-form styling-hardening work:
  *
- *  - every colour goes through a --fundkit-* token (raw hex only allowed in the
- *    token-default definitions or as a var(--fundkit-…, #fallback)), so a dev can
+ *  - every colour goes through a --gratora-* token (raw hex only allowed in the
+ *    token-default definitions or as a var(--gratora-…, #fallback)), so a dev can
  *    theme every part via CSS variables;
- *  - the host-theme isolation boundary (:where(.fundkit-form)) stays present;
- *  - component rules keep the raised specificity (.fundkit-donation-form prefix)
+ *  - the host-theme isolation boundary (:where(.gratora-form)) stays present;
+ *  - component rules keep the raised specificity (.gratora-donation-form prefix)
  *    so theme element selectors don't out-rank them.
  *
  * If this fails, you reintroduced a hardcoded colour or removed a guard.
@@ -35,12 +35,12 @@ final class RuntimeStylesGuardTest extends TestCase
             $line = preg_replace('#//.*$#', '', $rawLine);
             $line = preg_replace('#/\*.*?\*/#', '', (string) $line);
 
-            // (a) token-default definitions: `--fundkit-x: #hex;`
-            if (preg_match('/^\s*--fundkit-[a-z0-9-]+\s*:/', (string) $line)) {
+            // (a) token-default definitions: `--gratora-x: #hex;`
+            if (preg_match('/^\s*--gratora-[a-z0-9-]+\s*:/', (string) $line)) {
                 continue;
             }
-            // (b) var(--fundkit-…, #fallback) - drop the whole var() expression.
-            $line = preg_replace('/var\(\s*--fundkit-[^)]*\)/', '', (string) $line);
+            // (b) var(--gratora-…, #fallback) - drop the whole var() expression.
+            $line = preg_replace('/var\(\s*--gratora-[^)]*\)/', '', (string) $line);
 
             if (preg_match('/#[0-9a-fA-F]{3,8}\b/', (string) $line)) {
                 $offenders[] = ($i + 1) . ': ' . trim($rawLine);
@@ -50,8 +50,8 @@ final class RuntimeStylesGuardTest extends TestCase
         $this->assertSame(
             [],
             $offenders,
-            "Hardcoded colour(s) in runtime.scss must use a --fundkit-* token "
-            . "or a var(--fundkit-…, #fallback):\n" . implode("\n", $offenders)
+            "Hardcoded colour(s) in runtime.scss must use a --gratora-* token "
+            . "or a var(--gratora-…, #fallback):\n" . implode("\n", $offenders)
         );
     }
 
@@ -59,12 +59,12 @@ final class RuntimeStylesGuardTest extends TestCase
     {
         $css = $this->css();
         $this->assertStringContainsString(
-            ':where(.fundkit-form)',
+            ':where(.gratora-form)',
             $css,
             'The zero-specificity host-theme isolation boundary was removed.'
         );
         $this->assertStringContainsString(
-            '.fundkit-donation-form .fundkit-form',
+            '.gratora-donation-form .gratora-form',
             $css,
             'Component rules lost the wrapper-prefixed specificity bump.'
         );

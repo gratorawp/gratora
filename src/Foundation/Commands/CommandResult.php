@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Commands;
+namespace Gratora\Foundation\Commands;
 
 /** @since 1.0.0 */
 final class CommandResult

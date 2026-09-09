@@ -1,22 +1,22 @@
 <?php
 /**
- * Plugin Name: Fundraising Toolkit - Donation & Fundraising Platform
- * Plugin URI: https://fundkit.net
+ * Plugin Name: Gratora - Donation Platform
+ * Plugin URI: https://gratora.net
  * Description: Donation & Fundraising Platform for WordPress
  * Version: 1.0.0
  * Requires at least: 7.0
  * Requires PHP: 8.1
- * Author: Fundraising Toolkit
+ * Author: Gratora
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: fundraising-toolkit
+ * Text Domain: gratora
  * Domain Path: /languages
  */
 
 /**
- * FundKit, a fundraising platform for WordPress.
+ * Gratora, a fundraising platform for WordPress.
  *
- * Copyright (C) 2026 FundKit
+ * Copyright (C) 2026 Gratora
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -35,9 +35,9 @@
 
 declare(strict_types=1);
 
-use FundKit\Cli\CliCommands;
-use FundKit\Foundation\Database\WordPressSchema;
-use FundKit\Foundation\Plugin;
+use Gratora\Cli\CliCommands;
+use Gratora\Foundation\Database\WordPressSchema;
+use Gratora\Foundation\Plugin;
 
 if (! defined('ABSPATH')) {
     exit;
@@ -49,11 +49,11 @@ require_once __DIR__ . '/vendor/woocommerce/action-scheduler/action-scheduler.ph
 
 WordPressSchema::register();
 
-define('FUNDKIT_VERSION', '1.0.0');
-define('FUNDKIT_DB_VERSION', '1.1.3');
-define('FUNDKIT_FILE', __FILE__);
-define('FUNDKIT_DIR', plugin_dir_path(__FILE__));
-define('FUNDKIT_URL', plugin_dir_url(__FILE__));
+define('GRATORA_VERSION', '1.0.0');
+define('GRATORA_DB_VERSION', '1.1.4');
+define('GRATORA_FILE', __FILE__);
+define('GRATORA_DIR', plugin_dir_path(__FILE__));
+define('GRATORA_URL', plugin_dir_url(__FILE__));
 
 register_activation_hook(__FILE__, [ Plugin::class, 'onPluginActivated']);
 register_deactivation_hook(__FILE__, [ Plugin::class, 'onDeactivation']);
@@ -63,10 +63,10 @@ add_action('plugins_loaded', static function (): void {
 
     if (defined('WP_CLI') && WP_CLI) {
         $cli = new CliCommands();
-        WP_CLI::add_command('fundkit migrate', [$cli, 'migrate']);
-        WP_CLI::add_command('fundkit recompute-aggregates', [$cli, 'recompute_aggregates']);
-        WP_CLI::add_command('fundkit seed', [$cli, 'seed']);
-        WP_CLI::add_command('fundkit demo-seed', [$cli, 'demo_seed']);
-        WP_CLI::add_command('fundkit e2e-seed', [$cli, 'e2e_seed']);
+        WP_CLI::add_command('gratora migrate', [$cli, 'migrate']);
+        WP_CLI::add_command('gratora recompute-aggregates', [$cli, 'recompute_aggregates']);
+        WP_CLI::add_command('gratora seed', [$cli, 'seed']);
+        WP_CLI::add_command('gratora demo-seed', [$cli, 'demo_seed']);
+        WP_CLI::add_command('gratora e2e-seed', [$cli, 'e2e_seed']);
     }
 });

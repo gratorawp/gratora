@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\Form;
-use FundKit\Forms\FormSubmissionValidator;
-use FundKit\Forms\Shortcode\DonationFormShortcode;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormSubmissionValidator;
+use Gratora\Forms\Shortcode\DonationFormShortcode;
 use ReflectionMethod;
 
 /**
@@ -23,8 +23,8 @@ final class DonationMinimumOrphanedTest extends IntegrationTestCase
         $form->title      = 'Orphaned minimum ' . uniqid();
         $form->slug       = 'orphan-min-' . uniqid();
         $form->status     = 'published';
-        $form->blocks     = '<!-- wp:fundkit/donation-amount ' . $attrs . ' /-->'
-            . '<!-- wp:fundkit/submit-button {"label":"Give"} /-->';
+        $form->blocks     = '<!-- wp:gratora/donation-amount ' . $attrs . ' /-->'
+            . '<!-- wp:gratora/submit-button {"label":"Give"} /-->';
         $form->created_at = gmdate('Y-m-d H:i:s');
         $form->updated_at = $form->created_at;
         $form->save();

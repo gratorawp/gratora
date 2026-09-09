@@ -23,7 +23,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
         setError( null );
         try {
             const note = await apiFetch( {
-                path:   `/fundkit/v1/admin/donors/${ donorId }/notes`,
+                path:   `/gratora/v1/admin/donors/${ donorId }/notes`,
                 method: 'POST',
                 data:   { body: body.trim() },
             } );
@@ -39,14 +39,14 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
 
     const remove = ( noteId ) => {
         setConfirm( {
-            title:        __( 'Delete note', 'fundraising-toolkit' ),
-            message:      __( 'Delete this note?', 'fundraising-toolkit' ),
-            confirmLabel: __( 'Delete', 'fundraising-toolkit' ),
+            title:        __( 'Delete note', 'gratora' ),
+            message:      __( 'Delete this note?', 'gratora' ),
+            confirmLabel: __( 'Delete', 'gratora' ),
             destructive:  true,
             onConfirm: async () => {
                 try {
                     await apiFetch( {
-                        path:   `/fundkit/v1/admin/donors/notes/${ noteId }`,
+                        path:   `/gratora/v1/admin/donors/notes/${ noteId }`,
                         method: 'DELETE',
                     } );
                     setNotes( ( ns ) => ns.filter( ( n ) => n.id !== noteId ) );
@@ -68,7 +68,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                 <p className="dp-tab-note">
                     { sprintf(
                         /* translators: 1: notes shown, 2: notes in total */
-                        __( 'Showing the %1$d most recent of %2$d notes.', 'fundraising-toolkit' ),
+                        __( 'Showing the %1$d most recent of %2$d notes.', 'gratora' ),
                         notes.length,
                         total
                     ) }
@@ -81,14 +81,14 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                             <EmptyState
                                 compact
                                 icon={ <StickyNote size={ 22 } strokeWidth={ 1.75 } /> }
-                                title={ __( 'No notes yet', 'fundraising-toolkit' ) }
-                                body={ __( 'Add a note to capture context about this donor (preferred contact, stewardship plan, etc.).', 'fundraising-toolkit' ) }
+                                title={ __( 'No notes yet', 'gratora' ) }
+                                body={ __( 'Add a note to capture context about this donor (preferred contact, stewardship plan, etc.).', 'gratora' ) }
                             />
                         )
                         : (
                             <div className="dp-notes-list">
                                 { notes.map( ( n ) => {
-                                    const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'fundraising-toolkit' ) : __( 'System', 'fundraising-toolkit' ) );
+                                    const author = n.author_display_name || ( n.author_user_id ? __( 'Unknown user', 'gratora' ) : __( 'System', 'gratora' ) );
                                     return (
                                         <div key={ n.id } className="dp-note">
                                             <span className="dp-note__avatar" aria-hidden="true">{ initials( author ) }</span>
@@ -106,7 +106,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                                                 <button
                                                     type="button"
                                                     className="dp-note__delete"
-                                                    aria-label={ __( 'Delete note', 'fundraising-toolkit' ) }
+                                                    aria-label={ __( 'Delete note', 'gratora' ) }
                                                     onClick={ () => remove( n.id ) }
                                                 >
                                                     <IconTrash width="14" height="14" />
@@ -120,10 +120,10 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
 
                     { userCan( 'edit_donors' ) && (
                     <form className="dp-note-form" onSubmit={ submit }>
-                        <textarea className="fundkit-textarea"
+                        <textarea className="gratora-textarea"
                             value={ body }
                             onChange={ ( e ) => setBody( e.target.value ) }
-                            placeholder={ __( 'Add a note about this donor…', 'fundraising-toolkit' ) }
+                            placeholder={ __( 'Add a note about this donor…', 'gratora' ) }
                             rows={ 3 }
                         />
                         { error && <div className="dp-note-form__error">{ error }</div> }
@@ -133,7 +133,7 @@ export default function NotesTab( { donorId, notes: initialNotes, total, onChang
                                 className="btn btn--primary"
                                 disabled={ saving || ! body.trim() }
                             >
-                                { saving ? __( 'Saving…', 'fundraising-toolkit' ) : __( 'Add note', 'fundraising-toolkit' ) }
+                                { saving ? __( 'Saving…', 'gratora' ) : __( 'Add note', 'gratora' ) }
                             </button>
                         </div>
                     </form>

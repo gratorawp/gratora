@@ -7,13 +7,13 @@ import Segmented from '../../../_shared/components/Segmented';
 import { BlockIcons } from '../_shared/block-icons';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 
-const NAME = 'fundkit/goal';
+const NAME = 'gratora/goal';
 
 const EMPTY_GOAL = { type: 'none', amount_cents: 0, count: 0 };
 
 function readContext() {
-    return typeof window !== 'undefined' && window.fundkitFormEditor
-        ? window.fundkitFormEditor
+    return typeof window !== 'undefined' && window.gratoraFormEditor
+        ? window.gratoraFormEditor
         : { formCampaignId: 0, formGoal: EMPTY_GOAL, campaigns: [] };
 }
 
@@ -91,49 +91,49 @@ function Edit( { attributes, setAttributes } ) {
 
     const hasGoal = goalType !== 'none' && target > 0;
 
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--goal' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--goal' } );
 
     const fmtValue = ( v ) =>
         isAmount ? formatAmount( v, currency, { compact: true } ) : String( v.toLocaleString() );
 
     const missingHint = isFormSource
-        ? __( 'No goal set for this form. Set one in Settings, Goal.', 'fundraising-toolkit' )
+        ? __( 'No goal set for this form. Set one in Settings, Goal.', 'gratora' )
         : ( campaign
-            ? __( 'The parent campaign has no goal set.', 'fundraising-toolkit' )
-            : __( 'Link this form to a campaign to show its goal.', 'fundraising-toolkit' ) );
+            ? __( 'The parent campaign has no goal set.', 'gratora' )
+            : __( 'Link this form to a campaign to show its goal.', 'gratora' ) );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Goal', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Goal', 'gratora' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Show', 'fundraising-toolkit' ) }
+                        label={ __( 'Show', 'gratora' ) }
                         value={ source }
                         onChange={ ( v ) => setAttributes( { source: v } ) }
                         options={ [
-                            { value: 'campaign', label: __( 'Campaign goal', 'fundraising-toolkit' ) },
-                            { value: 'form',     label: __( 'Form goal', 'fundraising-toolkit' ) },
+                            { value: 'campaign', label: __( 'Campaign goal', 'gratora' ) },
+                            { value: 'form',     label: __( 'Form goal', 'gratora' ) },
                         ] }
                         help={ isFormSource
-                            ? __( 'Tracks this form’s own donations against the form goal set in Settings, Goal.', 'fundraising-toolkit' )
-                            : __( 'Tracks the parent campaign total against the campaign goal.', 'fundraising-toolkit' ) }
+                            ? __( 'Tracks this form’s own donations against the form goal set in Settings, Goal.', 'gratora' )
+                            : __( 'Tracks the parent campaign total against the campaign goal.', 'gratora' ) }
                     />
 
                     <ToggleControl
-                        label={ __( 'Show amount raised vs goal', 'fundraising-toolkit' ) }
+                        label={ __( 'Show amount raised vs goal', 'gratora' ) }
                         checked={ showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donor count', 'fundraising-toolkit' ) }
+                        label={ __( 'Show donor count', 'gratora' ) }
                         checked={ showDonors }
                         onChange={ ( v ) => setAttributes( { showDonors: v } ) }
                         __nextHasNoMarginBottom
                     />
                     { ! isFormSource && (
                         <ToggleControl
-                            label={ __( 'Show deadline', 'fundraising-toolkit' ) }
+                            label={ __( 'Show deadline', 'gratora' ) }
                             checked={ showDeadline }
                             onChange={ ( v ) => setAttributes( { showDeadline: v } ) }
                             __nextHasNoMarginBottom
@@ -141,8 +141,8 @@ function Edit( { attributes, setAttributes } ) {
                     ) }
                     { ! isFormSource && campaign && ! hasGoal && (
                         <p style={ { margin: '16px 0 0' } }>
-                            <ExternalLink href={ `admin.php?page=fundkit-campaigns&view=detail&id=${ campaign.id }&tab=settings#goal` }>
-                                { __( 'Set the campaign goal', 'fundraising-toolkit' ) }
+                            <ExternalLink href={ `admin.php?page=gratora-campaigns&view=detail&id=${ campaign.id }&tab=settings#goal` }>
+                                { __( 'Set the campaign goal', 'gratora' ) }
                             </ExternalLink>
                         </p>
                     ) }
@@ -154,28 +154,28 @@ function Edit( { attributes, setAttributes } ) {
             </InspectorControls>
             <div { ...blockProps }>
                 { ! hasGoal ? (
-                    <div className="fundkit-block-preview__hint">{ missingHint }</div>
+                    <div className="gratora-block-preview__hint">{ missingHint }</div>
                 ) : (
                     <>
                         { showAmount && (
-                            <div className="fundkit-block-preview__goal-top">
+                            <div className="gratora-block-preview__goal-top">
                                 <strong>{ fmtValue( current ) }</strong>
-                                <span>{ __( 'of', 'fundraising-toolkit' ) } { fmtValue( target ) }</span>
+                                <span>{ __( 'of', 'gratora' ) } { fmtValue( target ) }</span>
                             </div>
                         ) }
-                        <div className="fundkit-block-preview__goal-bar">
+                        <div className="gratora-block-preview__goal-bar">
                             <div
-                                className="fundkit-block-preview__goal-fill"
+                                className="gratora-block-preview__goal-fill"
                                 style={ { width: `${ percent }%` } }
                             />
                         </div>
-                        <div className="fundkit-block-preview__goal-meta">
+                        <div className="gratora-block-preview__goal-meta">
                             <span>{ percent }%</span>
                             { showDonors && ! isFormSource && (
                                 <span>
                                     { sprintf(
                                         /* translators: %d: number of donors */
-                                        _n( '%d donor', '%d donors', donors, 'fundraising-toolkit' ),
+                                        _n( '%d donor', '%d donors', donors, 'gratora' ),
                                         donors
                                     ) }
                                 </span>
@@ -183,18 +183,18 @@ function Edit( { attributes, setAttributes } ) {
                             { showDeadline && ! isFormSource && days !== null && (
                                 <span>
                                     { days === 0
-                                        ? __( 'Last day', 'fundraising-toolkit' )
+                                        ? __( 'Last day', 'gratora' )
                                         : sprintf(
                                             /* translators: %d: days remaining */
-                                            _n( '%d day left', '%d days left', days, 'fundraising-toolkit' ),
+                                            _n( '%d day left', '%d days left', days, 'gratora' ),
                                             days
                                         ) }
                                 </span>
                             ) }
                         </div>
                         { isFormSource && (
-                            <p className="fundkit-block-preview__note">
-                                { __( 'Live progress appears on the published form.', 'fundraising-toolkit' ) }
+                            <p className="gratora-block-preview__note">
+                                { __( 'Live progress appears on the published form.', 'gratora' ) }
                             </p>
                         ) }
                     </>
@@ -207,9 +207,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Goal', 'fundraising-toolkit' ),
-        description: __( 'Progress bar for this form’s goal or its parent campaign’s goal.', 'fundraising-toolkit' ),
-        category:   'fundkit-extras',
+        title:      __( 'Goal', 'gratora' ),
+        description: __( 'Progress bar for this form’s goal or its parent campaign’s goal.', 'gratora' ),
+        category:   'gratora-extras',
         icon:       BlockIcons[ 'goal' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

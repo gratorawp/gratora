@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Transfer\DataExporter;
-use FundKit\Foundation\Transfer\DataImporter;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Transfer\DataExporter;
+use Gratora\Foundation\Transfer\DataImporter;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * An export carries no media, so a WordPress attachment id in it means nothing
@@ -43,8 +43,8 @@ final class ImportClearsAttachmentIdsTest extends IntegrationTestCase
     private function import(array $export): void
     {
         (new DataImporter(
-            Plugin::instance()->container->get(\FundKit\Foundation\Crypto\Crypto::class),
-            Plugin::instance()->container->get(\FundKit\Foundation\Identity\IdentityHasher::class),
+            Plugin::instance()->container->get(\Gratora\Foundation\Crypto\Crypto::class),
+            Plugin::instance()->container->get(\Gratora\Foundation\Identity\IdentityHasher::class),
         ))->import($export);
     }
 
@@ -63,8 +63,8 @@ final class ImportClearsAttachmentIdsTest extends IntegrationTestCase
 
         // Wipe the row so the import creates it rather than matching it.
         $prefix = DB::getPrefix();
-        DB::raw("DELETE FROM {$prefix}fundkit_donations");
-        DB::raw("DELETE FROM {$prefix}fundkit_donors");
+        DB::raw("DELETE FROM {$prefix}gratora_donations");
+        DB::raw("DELETE FROM {$prefix}gratora_donors");
 
         $this->import($export);
 

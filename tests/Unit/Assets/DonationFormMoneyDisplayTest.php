@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Assets;
+namespace Gratora\Tests\Unit\Assets;
 
-use FundKit\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\Money;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -89,7 +89,7 @@ final class DonationFormMoneyDisplayTest extends TestCase
     /**
      * A form may be authored in a currency the org does not keep its books in,
      * and the number format the server hands it is the one it resolved for that
-     * currency. The public form has no window.fundkit to fall back on, so reading
+     * currency. The public form has no window.gratora to fall back on, so reading
      * the preference against a default instead would apply it to whichever
      * currency the donor happened to switch to and withhold it from the one the
      * form is actually in.
@@ -130,7 +130,7 @@ final class DonationFormMoneyDisplayTest extends TestCase
             '__SERVER_CODES__',
             (string) json_encode(array_keys($symbols)),
             <<<'JS'
-            const { CURRENCIES } = await import( '@fundkit/ui/utils/currency' );
+            const { CURRENCIES } = await import( '@gratora/ui/utils/currency' );
             mod.setActiveNumberFormat(
                 { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '' },
                 ''

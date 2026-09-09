@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
 use RuntimeException;
 

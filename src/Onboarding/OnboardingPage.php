@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Onboarding;
+namespace Gratora\Onboarding;
 
-use FundKit\Foundation\Hooks\HookProvider;
+use Gratora\Foundation\Hooks\HookProvider;
 
 /** @since 1.0.0 */
 final class OnboardingPage extends HookProvider
 {
-    public const PAGE_ID   = 'fundkit-onboarding';
-    private const HANDLE   = 'fundkit-admin-onboarding';
+    public const PAGE_ID   = 'gratora-onboarding';
+    private const HANDLE   = 'gratora-admin-onboarding';
     private const BUILD_DIR = 'build/admin/onboarding';
 
     /** @since 1.0.0 */
     protected function filters(): array
     {
         return [
-            'fundkit.admin.pages' => 'registerPage',
+            'gratora.admin.pages' => 'registerPage',
             'admin_body_class' => 'maybeAddBodyClass',
         ];
     }
@@ -27,7 +27,7 @@ final class OnboardingPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Onboarding', 'fundraising-toolkit'),
+            'title'      => __('Onboarding', 'gratora'),
             'capability' => 'manage_options',
             'position'   => 999,
             'hidden'     => true,
@@ -40,7 +40,7 @@ final class OnboardingPage extends HookProvider
     public function maybeAddBodyClass(string $classes): string
     {
         if ($this->isCurrentPage()) {
-            $classes .= ' fundkit-onboarding-fullscreen';
+            $classes .= ' gratora-onboarding-fullscreen';
         }
         return $classes;
     }
@@ -50,7 +50,7 @@ final class OnboardingPage extends HookProvider
     {
         $this->enqueueAssets();
         ?>
-        <div id="fundkit-admin-onboarding"></div>
+        <div id="gratora-admin-onboarding"></div>
         <?php
     }
 
@@ -64,25 +64,25 @@ final class OnboardingPage extends HookProvider
     /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
-        $assetPath = FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
+        $assetPath = GRATORA_DIR . self::BUILD_DIR . '/index.asset.php';
         if (! file_exists($assetPath)) return;
         $asset = require $assetPath;
 
         wp_enqueue_script(
             self::HANDLE,
-            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
+            GRATORA_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? FUNDKIT_VERSION,
+            $asset['version']      ?? GRATORA_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
             self::HANDLE,
-            FUNDKIT_URL . 'build/admin/onboarding.css',
+            GRATORA_URL . 'build/admin/onboarding.css',
             ['wp-components'],
-            (string) (@filemtime(FUNDKIT_DIR . 'build/admin/onboarding.css') ?: FUNDKIT_VERSION)
+            (string) (@filemtime(GRATORA_DIR . 'build/admin/onboarding.css') ?: GRATORA_VERSION)
         );
         wp_style_add_data(self::HANDLE, 'rtl', 'replace');
     }

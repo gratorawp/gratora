@@ -14,7 +14,7 @@ export function useFocusTrap( ref ) {
         const prev = doc.activeElement;
 
         const panel = () => ( ref.current
-            ? ref.current.querySelector( '.fundkit-dialog' ) || ref.current
+            ? ref.current.querySelector( '.gratora-dialog' ) || ref.current
             : null );
 
         const first = panel() && panel().querySelector( FOCUSABLE );

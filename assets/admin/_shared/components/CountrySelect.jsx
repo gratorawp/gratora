@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/CountrySelect';
+export { default } from '@gratora/ui/components/CountrySelect';

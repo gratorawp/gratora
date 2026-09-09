@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Rest\Admin\UserPrefsController;
+use Gratora\Rest\Admin\UserPrefsController;
 use WP_REST_Request;
 
 /**
@@ -16,7 +16,7 @@ use WP_REST_Request;
  */
 final class WidgetLayoutPrefsTest extends IntegrationTestCase
 {
-    private const META = 'fundkit_widget_layout';
+    private const META = 'gratora_widget_layout';
 
     private function admin(): int
     {
@@ -29,7 +29,7 @@ final class WidgetLayoutPrefsTest extends IntegrationTestCase
     /** @param array<string, mixed> $body */
     private function save(string $scope, array $body): array
     {
-        $request = new WP_REST_Request('PUT', '/fundkit/v1/admin/me/layout');
+        $request = new WP_REST_Request('PUT', '/gratora/v1/admin/me/layout');
         $request->set_param('scope', $scope);
         $request->set_body(wp_json_encode($body));
         $request->set_header('content-type', 'application/json');
@@ -39,7 +39,7 @@ final class WidgetLayoutPrefsTest extends IntegrationTestCase
 
     private function read(string $scope): array
     {
-        $request = new WP_REST_Request('GET', '/fundkit/v1/admin/me/layout');
+        $request = new WP_REST_Request('GET', '/gratora/v1/admin/me/layout');
         $request->set_param('scope', $scope);
 
         return (array) (new UserPrefsController())->show($request)->get_data();

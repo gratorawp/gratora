@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donations;
+namespace Gratora\Donations;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /**
  * One row per refund operation on a donation.
@@ -20,7 +20,7 @@ use FundKit\Vendor\Queryable\Schema\Table;
  */
 final class Refund extends Model
 {
-    protected string $table = 'fundkit_refunds';
+    protected string $table = 'gratora_refunds';
     protected string $version = '1.0.0';
 
     public int $id;

@@ -6,7 +6,7 @@ import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 import { SlugTextControl } from '../_shared/SlugTextControl';
 
-const NAME = 'fundkit/text-input';
+const NAME = 'gratora/text-input';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -20,57 +20,57 @@ function Edit( { attributes, setAttributes } ) {
         condition   = DEFAULT_CONDITION,
     } = attributes;
 
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--field' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--field' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Text input', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Text input', 'gratora' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundraising-toolkit' ) }
+                        label={ __( 'Label', 'gratora' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        help={ __( 'Click the label in the canvas to edit it inline.', 'fundraising-toolkit' ) }
+                        help={ __( 'Click the label in the canvas to edit it inline.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'fundraising-toolkit' ) }
+                        label={ __( 'Placeholder', 'gratora' ) }
                         value={ placeholder }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Help text', 'fundraising-toolkit' ) }
+                        label={ __( 'Help text', 'gratora' ) }
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Field name', 'fundraising-toolkit' ) }
+                        label={ __( 'Field name', 'gratora' ) }
                         value={ field }
                         onChange={ ( v ) => setAttributes( { field: v } ) }
-                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'fundraising-toolkit' ) }
+                        help={ __( 'Stored under values.custom[field]. Lowercase, snake_case.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundraising-toolkit' ) }
+                        label={ __( 'Required', 'gratora' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <Slider
-                        label={ __( 'Maximum length', 'fundraising-toolkit' ) }
+                        label={ __( 'Maximum length', 'gratora' ) }
                         value={ maxLength }
                         onChange={ ( v ) => setAttributes( { maxLength: Math.max( 0, v ) } ) }
                         min={ 0 }
                         max={ 500 }
-                        help={ __( '0 = no limit.', 'fundraising-toolkit' ) }
+                        help={ __( '0 = no limit.', 'gratora' ) }
                     />
                     <TextControl
-                        label={ __( 'Pattern (regex)', 'fundraising-toolkit' ) }
+                        label={ __( 'Pattern (regex)', 'gratora' ) }
                         value={ pattern }
                         onChange={ ( v ) => setAttributes( { pattern: v } ) }
-                        help={ __( 'HTML5 pattern attribute. Leave empty to skip.', 'fundraising-toolkit' ) }
+                        help={ __( 'HTML5 pattern attribute. Leave empty to skip.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -82,24 +82,24 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="fundkit-block-preview__label"
+                    className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Label', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'Label', 'gratora' ) }
                     allowedFormats={ [] }
                 />
-                { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
+                { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
                 { helpText !== '' && (
                     <RichText
                         tagName="span"
                         value={ helpText }
                         onChange={ ( v ) => setAttributes( { helpText: v } ) }
-                        placeholder={ __( 'Help text', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Help text', 'gratora' ) }
                         allowedFormats={ [] }
                         style={ { fontSize: 11, color: '#6b7280', display: 'block', marginTop: 2 } }
                     />
                 ) }
-                <div className="fundkit-block-preview__field">{ placeholder || __( 'Text', 'fundraising-toolkit' ) }</div>
+                <div className="gratora-block-preview__field">{ placeholder || __( 'Text', 'gratora' ) }</div>
             </div>
         </>
     );
@@ -108,9 +108,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Text input', 'fundraising-toolkit' ),
-        description: __( 'Single-line free text. For employer, dedication name, custom questions, etc.', 'fundraising-toolkit' ),
-        category:   'fundkit-fields',
+        title:      __( 'Text input', 'gratora' ),
+        description: __( 'Single-line free text. For employer, dedication name, custom questions, etc.', 'gratora' ),
+        category:   'gratora-fields',
         icon:       BlockIcons[ 'text-input' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

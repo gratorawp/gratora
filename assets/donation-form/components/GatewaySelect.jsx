@@ -16,8 +16,8 @@ export default function GatewaySelect( { state, dispatch, config } ) {
     // empty set.
     if ( ! opts.length ) {
         return (
-            <div class="fundkit-form__payment">
-                <div class="fundkit-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
+            <div class="gratora-form__payment">
+                <div class="gratora-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
             </div>
         );
     }
@@ -25,35 +25,35 @@ export default function GatewaySelect( { state, dispatch, config } ) {
     if ( ! testMode && opts.length <= 1 ) return null;
 
     return (
-        <div class="fundkit-form__payment">
+        <div class="gratora-form__payment">
             { testMode && (
-                <div class="fundkit-form__test-banner" role="status">
+                <div class="gratora-form__test-banner" role="status">
                     { config.i18n.testModeNotice }
                 </div>
             ) }
 
             { opts.length > 1 && (
-                <fieldset class={ `fundkit-form__gateways fundkit-form__gateways--${ style }` }>
-                    <legend class="fundkit-form__gateways-legend">{ config.i18n.paymentMethod }</legend>
-                    <div class="fundkit-form__gateways-list" role="radiogroup" aria-label={ config.i18n.paymentMethod || 'Payment method' }>
+                <fieldset class={ `gratora-form__gateways gratora-form__gateways--${ style }` }>
+                    <legend class="gratora-form__gateways-legend">{ config.i18n.paymentMethod }</legend>
+                    <div class="gratora-form__gateways-list" role="radiogroup" aria-label={ config.i18n.paymentMethod || 'Payment method' }>
                         { opts.map( ( o ) => {
                             const selected = o.id === current;
                             return (
                                 <label
                                     key={ o.id }
-                                    class={ `fundkit-form__gateway${ selected ? ' is-selected' : '' }` }
+                                    class={ `gratora-form__gateway${ selected ? ' is-selected' : '' }` }
                                 >
                                     <input
                                         type="radio"
-                                        name="fundkit-gateway"
+                                        name="gratora-gateway"
                                         value={ o.id }
                                         checked={ selected }
                                         onChange={ () => dispatch( { type: 'SET_GATEWAY', gateway: o.id } ) }
                                     />
-                                    <span class="fundkit-form__gateway-body">
-                                        <span class="fundkit-form__gateway-label">{ o.label }</span>
+                                    <span class="gratora-form__gateway-body">
+                                        <span class="gratora-form__gateway-label">{ o.label }</span>
                                         { o.description && (
-                                            <span class="fundkit-form__gateway-desc">{ o.description }</span>
+                                            <span class="gratora-form__gateway-desc">{ o.description }</span>
                                         ) }
                                     </span>
                                 </label>

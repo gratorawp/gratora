@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Admin\Pages\FormsPage;
+use Gratora\Admin\Pages\FormsPage;
 
 /**
  * The form editor is fullscreen. The screen's stylesheet hides the admin bar,
@@ -18,7 +18,7 @@ final class FormEditorAdminBarTest extends IntegrationTestCase
         parent::setUp();
 
         // isFormEditView() gates on is_admin(), which the suite is not.
-        set_current_screen('toplevel_page_fundkit-forms');
+        set_current_screen('toplevel_page_gratora-forms');
     }
 
     protected function tearDown(): void
@@ -35,7 +35,7 @@ final class FormEditorAdminBarTest extends IntegrationTestCase
 
     public function test_the_bar_is_refused_on_the_editor(): void
     {
-        $_GET['page'] = 'fundkit-forms';
+        $_GET['page'] = 'gratora-forms';
         $_GET['form'] = '7';
 
         $this->assertFalse($this->page()->hideAdminBar(true));
@@ -43,21 +43,21 @@ final class FormEditorAdminBarTest extends IntegrationTestCase
 
     public function test_the_bar_is_left_alone_on_the_list(): void
     {
-        $_GET['page'] = 'fundkit-forms';
+        $_GET['page'] = 'gratora-forms';
 
         $this->assertTrue($this->page()->hideAdminBar(true));
     }
 
     public function test_the_bar_is_left_alone_elsewhere_in_wp_admin(): void
     {
-        $_GET['page'] = 'fundkit-campaigns';
+        $_GET['page'] = 'gratora-campaigns';
 
         $this->assertTrue($this->page()->hideAdminBar(true));
     }
 
     public function test_an_existing_refusal_is_not_overturned(): void
     {
-        $_GET['page'] = 'fundkit-campaigns';
+        $_GET['page'] = 'gratora-campaigns';
 
         $this->assertFalse($this->page()->hideAdminBar(false));
     }
@@ -76,7 +76,7 @@ final class FormEditorAdminBarTest extends IntegrationTestCase
 
     public function test_wordpress_gets_the_refusal_through_the_filter(): void
     {
-        $_GET['page'] = 'fundkit-forms';
+        $_GET['page'] = 'gratora-forms';
         $_GET['form'] = '7';
 
         $page = $this->page();

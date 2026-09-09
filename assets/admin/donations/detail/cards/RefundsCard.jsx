@@ -13,17 +13,17 @@ export default function RefundsCard( { donation, refunds, onIssue, onRelease } )
                 <div style={ { padding: '0 18px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }>
                     <span style={ { display: 'flex', gap: 8, alignItems: 'center' } }>
                         <span className="dd-pill is-info">
-                            { formatAmount( donation.refunded_cents, donation.currency ) } { __( 'refunded', 'fundraising-toolkit' ) }
+                            { formatAmount( donation.refunded_cents, donation.currency ) } { __( 'refunded', 'gratora' ) }
                         </span>
                         { donation.refund_pending_cents > 0 && (
                             <span className="dd-pill is-warn">
-                                { formatAmount( donation.refund_pending_cents, donation.currency ) } { __( 'awaiting settlement', 'fundraising-toolkit' ) }
+                                { formatAmount( donation.refund_pending_cents, donation.currency ) } { __( 'awaiting settlement', 'gratora' ) }
                             </span>
                         ) }
                     </span>
                     { donation.refundable_cents > 0 && (
                         <button type="button" className="btn--link" onClick={ onIssue }>
-                            { __( 'Issue another refund →', 'fundraising-toolkit' ) }
+                            { __( 'Issue another refund →', 'gratora' ) }
                         </button>
                     ) }
                 </div>
@@ -31,11 +31,11 @@ export default function RefundsCard( { donation, refunds, onIssue, onRelease } )
                     <table className="dd-table">
                         <thead>
                             <tr>
-                                <th>{ __( 'When', 'fundraising-toolkit' ) }</th>
-                                <th style={ { textAlign: 'right' } }>{ __( 'Amount', 'fundraising-toolkit' ) }</th>
-                                <th>{ __( 'Reason', 'fundraising-toolkit' ) }</th>
-                                <th>{ __( 'Gateway ID', 'fundraising-toolkit' ) }</th>
-                                <th>{ __( 'Status', 'fundraising-toolkit' ) }</th>
+                                <th>{ __( 'When', 'gratora' ) }</th>
+                                <th style={ { textAlign: 'right' } }>{ __( 'Amount', 'gratora' ) }</th>
+                                <th>{ __( 'Reason', 'gratora' ) }</th>
+                                <th>{ __( 'Gateway ID', 'gratora' ) }</th>
+                                <th>{ __( 'Status', 'gratora' ) }</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -59,7 +59,7 @@ export default function RefundsCard( { donation, refunds, onIssue, onRelease } )
                                                 style={ { marginLeft: 8 } }
                                                 onClick={ () => onRelease( r ) }
                                             >
-                                                { __( 'Never arrived', 'fundraising-toolkit' ) }
+                                                { __( 'Never arrived', 'gratora' ) }
                                             </button>
                                         ) }
                                     </td>

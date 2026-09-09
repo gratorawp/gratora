@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
+namespace Gratora\Rest\Admin;
 
-use FundKit\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Auth\Capabilities;
 use WP_REST_Response;
 use WP_REST_Server;
 
@@ -12,16 +12,16 @@ use WP_REST_Server;
  * The roles available for capability mapping, and the capabilities to map.
  *
  * The capability list belongs here rather than in the panel's own source:
- * add-ons register their caps through the `fundkit.capabilities` filter, which
+ * add-ons register their caps through the `gratora.capabilities` filter, which
  * `Capabilities::maps()` applies and `applyMapping()` honors. A hardcoded copy
  * in the screen would enforce an add-on's capability on every route while
- * leaving it ungrantable (fundkit-p2p's `fundkit_manage_fundraisers`).
+ * leaving it ungrantable (gratora-p2p's `gratora_manage_fundraisers`).
  *
  * @since 1.0.0
  */
 final class RolesController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /** @since 1.0.0 */
     public function registerRoutes(): void
@@ -80,10 +80,10 @@ final class RolesController
     private static function groupLabel(string $key): string
     {
         $labels = [
-            'Donors'    => __('Donors', 'fundraising-toolkit'),
-            'Donations' => __('Donations', 'fundraising-toolkit'),
-            'Reports'   => __('Reports', 'fundraising-toolkit'),
-            'Setup'     => __('Setup', 'fundraising-toolkit'),
+            'Donors'    => __('Donors', 'gratora'),
+            'Donations' => __('Donations', 'gratora'),
+            'Reports'   => __('Reports', 'gratora'),
+            'Setup'     => __('Setup', 'gratora'),
         ];
 
         return $labels[$key] ?? $key;
@@ -121,7 +121,7 @@ final class RolesController
             $ungrouped[] = ['cap' => $cap, 'label' => (string) ($labels[$cap] ?? $cap)];
         }
         if ($ungrouped !== []) {
-            $out[] = ['label' => __('Other', 'fundraising-toolkit'), 'caps' => $ungrouped];
+            $out[] = ['label' => __('Other', 'gratora'), 'caps' => $ungrouped];
         }
 
         return $out;

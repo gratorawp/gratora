@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Forms\Form;
-use FundKit\Funds\Fund;
+use Gratora\Donations\Donation;
+use Gratora\Forms\Form;
+use Gratora\Funds\Fund;
 use WP_REST_Request;
 
 /**
@@ -54,9 +54,9 @@ final class ConditionalBlockGateTest extends IntegrationTestCase
         $f = Form::make();
         $f->title      = 'Conditional picker';
         $f->status     = 'published';
-        $f->blocks     = '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/email /-->'
-            . '<!-- wp:fundkit/fund-picker ' . $picker . ' /-->'
-            . '<!-- wp:fundkit/submit-button /-->';
+        $f->blocks     = '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/email /-->'
+            . '<!-- wp:gratora/fund-picker ' . $picker . ' /-->'
+            . '<!-- wp:gratora/submit-button /-->';
         $f->created_at = gmdate('Y-m-d H:i:s');
         $f->updated_at = gmdate('Y-m-d H:i:s');
         $f->save();
@@ -67,7 +67,7 @@ final class ConditionalBlockGateTest extends IntegrationTestCase
     /** @return array{status:int, donation:?Donation} */
     private function donate(Form $form, array $extra): array
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($extra + [
             'email'        => 'gate-' . uniqid() . '@example.test',
@@ -129,9 +129,9 @@ final class ConditionalBlockGateTest extends IntegrationTestCase
         $f = Form::make();
         $f->title      = 'Conditional comment';
         $f->status     = 'published';
-        $f->blocks     = '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/email /-->'
-            . '<!-- wp:fundkit/comment ' . $comment . ' /-->'
-            . '<!-- wp:fundkit/submit-button /-->';
+        $f->blocks     = '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/email /-->'
+            . '<!-- wp:gratora/comment ' . $comment . ' /-->'
+            . '<!-- wp:gratora/submit-button /-->';
         $f->created_at = gmdate('Y-m-d H:i:s');
         $f->updated_at = gmdate('Y-m-d H:i:s');
         $f->save();
@@ -152,9 +152,9 @@ final class ConditionalBlockGateTest extends IntegrationTestCase
         $f = Form::make();
         $f->title      = 'Plain picker';
         $f->status     = 'published';
-        $f->blocks     = '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/email /-->'
-            . '<!-- wp:fundkit/fund-picker ' . $picker . ' /-->'
-            . '<!-- wp:fundkit/submit-button /-->';
+        $f->blocks     = '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/email /-->'
+            . '<!-- wp:gratora/fund-picker ' . $picker . ' /-->'
+            . '<!-- wp:gratora/submit-button /-->';
         $f->created_at = gmdate('Y-m-d H:i:s');
         $f->updated_at = gmdate('Y-m-d H:i:s');
         $f->save();

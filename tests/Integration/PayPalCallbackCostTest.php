@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -31,8 +31,8 @@ final class PayPalCallbackCostTest extends IntegrationTestCase
         // The ceiling is relaxed tenfold while the site is in test mode, which
         // is deliberate and not what this measures: left to whatever an earlier
         // test left behind, 40 calls sit under a 300 cap and no refusal comes.
-        $cfg = get_option('fundkit_gateway_config', []);
-        update_option('fundkit_gateway_config', array_merge(is_array($cfg) ? $cfg : [], ['test_mode' => false]));
+        $cfg = get_option('gratora_gateway_config', []);
+        update_option('gratora_gateway_config', array_merge(is_array($cfg) ? $cfg : [], ['test_mode' => false]));
 
         add_filter('pre_http_request', function ($pre, $args, $url) {
             if (is_string($url) && str_contains($url, 'paypal.com')) {
@@ -52,7 +52,7 @@ final class PayPalCallbackCostTest extends IntegrationTestCase
     /** @return array{0:string,1:string} reference and raw status token */
     private function donation(): array
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => 'paypal-cost-' . uniqid() . '@example.test',
@@ -74,7 +74,7 @@ final class PayPalCallbackCostTest extends IntegrationTestCase
 
     private function capture(string $reference, string $token): int
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,

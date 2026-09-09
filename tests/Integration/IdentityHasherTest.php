@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Foundation\Config\SystemSetting;
-use FundKit\Foundation\Identity\IdentityHasher;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Foundation\Config\SystemSetting;
+use Gratora\Foundation\Identity\IdentityHasher;
 
 /**
  * IdentityHasher takes an AsyncDispatcher and reads its pepper/salt from
- * fundkit_system_settings, so it needs the real DB. Relocated from the pure-unit
+ * gratora_system_settings, so it needs the real DB. Relocated from the pure-unit
  * suite for that reason.
  */
 final class IdentityHasherTest extends IntegrationTestCase

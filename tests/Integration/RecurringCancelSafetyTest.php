@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Recurring\GatewayUnreachable;
-use FundKit\Recurring\RecurringCanceller;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Recurring\GatewayUnreachable;
+use Gratora\Recurring\RecurringCanceller;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * A cancellation that never reached the processor must not report success.

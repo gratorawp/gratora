@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Foundation;
+namespace Gratora\Tests\Unit\Foundation;
 
-use FundKit\Foundation\Container\Container;
-use FundKit\Foundation\Modules\FundKitModule;
-use FundKit\Foundation\Modules\ModuleManager;
+use Gratora\Foundation\Container\Container;
+use Gratora\Foundation\Modules\GratoraModule;
+use Gratora\Foundation\Modules\ModuleManager;
 use PHPUnit\Framework\TestCase;
 
 final class ModuleManagerStatusTest extends TestCase
 {
     protected function setUp(): void
     {
-        if (! defined('FUNDKIT_VERSION')) {
-            define('FUNDKIT_VERSION', '0.1.0');
+        if (! defined('GRATORA_VERSION')) {
+            define('GRATORA_VERSION', '0.1.0');
         }
     }
 
@@ -37,9 +37,9 @@ final class ModuleManagerStatusTest extends TestCase
     }
 
     /** @param array<string,mixed> $requires */
-    private function module(string $id, array $requires = [], bool $licensed = true): FundKitModule
+    private function module(string $id, array $requires = [], bool $licensed = true): GratoraModule
     {
-        return new class($id, $requires, $licensed) implements FundKitModule {
+        return new class($id, $requires, $licensed) implements GratoraModule {
             /** @param array<string,mixed> $requires */
             public function __construct(
                 private string $idValue,
@@ -75,7 +75,7 @@ final class ModuleManagerStatusTest extends TestCase
 
             public function tier(): string
             {
-                return FundKitModule::TIER_PRO;
+                return GratoraModule::TIER_PRO;
             }
 
             public function boot(Container $container): void

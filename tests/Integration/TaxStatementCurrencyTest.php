@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Reports\TaxStatementBuilder;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Reports\TaxStatementBuilder;
 
 /**
  * summary() is the tax-relevant figure a caller states without opening the PDF,

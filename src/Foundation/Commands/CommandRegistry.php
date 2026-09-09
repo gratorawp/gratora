@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Commands;
+namespace Gratora\Foundation\Commands;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Analytics\EventRecorder;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\EventRecorder;
 use RuntimeException;
 
 /** @since 1.0.0 */
@@ -289,7 +289,7 @@ final class CommandRegistry
         }
         $bucket = (string) ($command->meta['rate_limit_key'] ?? $command->id);
         $window = (int) floor(time() / 60);
-        $key    = 'fundkit_cmd_rl_' . md5($bucket . '|' . $ctx->source . '|' . $window);
+        $key    = 'gratora_cmd_rl_' . md5($bucket . '|' . $ctx->source . '|' . $window);
 
         $count = (int) get_transient($key);
         if ($count >= $limit) {
@@ -300,7 +300,7 @@ final class CommandRegistry
     }
 
     /**
-     * Record to the fundkit_events firehose. Input is hashed, PII never stored raw.
+     * Record to the gratora_events firehose. Input is hashed, PII never stored raw.
      *
      * @param array<string,mixed> $input
      * @since 1.0.0

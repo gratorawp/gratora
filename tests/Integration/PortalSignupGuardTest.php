@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donors\Donor;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Donors\PendingSignupRepository;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donors\Donor;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Donors\PendingSignupRepository;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -31,7 +31,7 @@ final class PortalSignupGuardTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function post(string $route, array $body): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/' . $route);
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/' . $route);
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -118,7 +118,7 @@ final class PortalSignupGuardTest extends IntegrationTestCase
     public function test_the_refusal_says_nothing_about_the_address(): void
     {
         $known = 'known-' . uniqid() . '@example.test';
-        Plugin::instance()->container->get(\FundKit\Donors\DonorService::class)->findOrCreate($known);
+        Plugin::instance()->container->get(\Gratora\Donors\DonorService::class)->findOrCreate($known);
         $this->assertTrue($this->donorExists($known));
 
         $a = $this->post('send-link', ['email' => $known]);

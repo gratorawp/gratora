@@ -38,11 +38,11 @@ export default function DonorStep( { fields: fieldsProp, step, state, dispatch, 
     );
 
     return (
-        <div class="fundkit-form__donor">
+        <div class="gratora-form__donor">
             { groups.map( ( g, gi ) => g.row ? (
                 <div
                     key={ `r${ g.row.id }-${ gi }` }
-                    class="fundkit-form__grid"
+                    class="gratora-form__grid"
                     style={ {
                         gridTemplateColumns: `repeat(${ g.row.columns }, minmax(0, 1fr))`,
                         gap: `${ g.row.gap ?? 12 }${ g.row.gapUnit || 'px' }`,
@@ -81,7 +81,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
     switch ( f.kind ) {
         case 'name':
             return (
-                <div key={ key } class="fundkit-form__row fundkit-form__row--two-up">
+                <div key={ key } class="gratora-form__row gratora-form__row--two-up">
                     <Field
                         label={ f.firstLabel || config.i18n.firstName }
                         required={ f.requireFirst }
@@ -144,7 +144,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     error={ err[ 'profile.country' ] }
                 >
                     <CountrySelect
-                        id={ `fundkit-country-${ key }` }
+                        id={ `gratora-country-${ key }` }
                         value={ v.profile.country }
                         onChange={ setField( 'profile.country' ) }
                         placeholder={ decodeEntities( f.placeholder || '' ) || config.i18n.searchCountry || 'Search country…' }
@@ -178,13 +178,13 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             return (
                 <Field
                     key={ key }
-                    htmlFor={ `fundkit-comment-${ key }` }
+                    htmlFor={ `gratora-comment-${ key }` }
                     label={ f.label || config.i18n.comment }
                     required={ f.required }
                     error={ err[ 'note_to_org' ] }
                 >
                     <textarea
-                        id={ `fundkit-comment-${ key }` }
+                        id={ `gratora-comment-${ key }` }
                         rows={ 3 }
                         maxLength={ 5000 }
                         placeholder={ decodeEntities( f.placeholder || '' ) }
@@ -193,7 +193,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         aria-invalid={ !! err[ 'note_to_org' ] }
                         required={ !! f.required }
                     />
-                    <label class="fundkit-form__check">
+                    <label class="gratora-form__check">
                         <input
                             type="checkbox"
                             checked={ !! v.note_public }
@@ -206,7 +206,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
 
         case 'anonymous':
             return (
-                <label key={ key } class="fundkit-form__check">
+                <label key={ key } class="gratora-form__check">
                     <input
                         type="checkbox"
                         checked={ !! v.is_anonymous }
@@ -219,7 +219,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
         case 'cover_fees': {
             const fee = computeFees( state, v.amount_cents || 0 );
             return (
-                <label key={ key } class="fundkit-form__check fundkit-form__cover-fees">
+                <label key={ key } class="gratora-form__check gratora-form__cover-fees">
                     <input
                         type="checkbox"
                         checked={ !! v.cover_fees }
@@ -228,7 +228,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     <span>
                         { decodeEntities( f.label || '' ) || config.i18n.coverFees }
                         { fee > 0 && (
-                            <em class="fundkit-form__cover-fees-math">
+                            <em class="gratora-form__cover-fees-math">
                                 { ` (${ formatAmount( fee, state.currency ) })` }
                             </em>
                         ) }
@@ -243,20 +243,20 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             const current    = v.fund_id || '';
             const setId      = ( id ) => onText( 'fund_id' )( { target: { value: id } } );
             return (
-                <fieldset key={ key } class="fundkit-form__fund">
+                <fieldset key={ key } class="gratora-form__fund">
                     <legend>{ decodeEntities( f.label || '' ) }</legend>
-                    <div class="fundkit-form__fund-options" role="radiogroup" aria-label={ decodeEntities( f.label || '' ) }>
+                    <div class="gratora-form__fund-options" role="radiogroup" aria-label={ decodeEntities( f.label || '' ) }>
                         { allowEmpty && (
-                            <label class={ `fundkit-form__fund-option${ current === '' ? ' is-selected' : '' }` }>
+                            <label class={ `gratora-form__fund-option${ current === '' ? ' is-selected' : '' }` }>
                                 <input
                                     type="radio"
                                     name={ `fund-${ key }` }
                                     checked={ current === '' }
                                     onChange={ () => setId( '' ) }
                                 />
-                                <span class="fundkit-form__fund-option-label">{ decodeEntities( f.empty_label || '' ) || config.i18n.noSpecificFund || 'No specific fund' }</span>
+                                <span class="gratora-form__fund-option-label">{ decodeEntities( f.empty_label || '' ) || config.i18n.noSpecificFund || 'No specific fund' }</span>
                                 { f.empty_description && (
-                                    <span class="fundkit-form__fund-option-desc">{ f.empty_description }</span>
+                                    <span class="gratora-form__fund-option-desc">{ f.empty_description }</span>
                                 ) }
                             </label>
                         ) }
@@ -266,7 +266,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                             // choice: donors pick a specific sub-fund.
                             if ( o.selectable === false ) {
                                 return (
-                                    <div key={ `g-${ id }` } class="fundkit-form__fund-group">
+                                    <div key={ `g-${ id }` } class="gratora-form__fund-group">
                                         { decodeEntities( o.label || '' ) || id }
                                     </div>
                                 );
@@ -275,7 +275,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                             return (
                                 <label
                                     key={ id }
-                                    class={ `fundkit-form__fund-option${ checked ? ' is-selected' : '' }${ o.depth ? ' is-child' : '' }` }
+                                    class={ `gratora-form__fund-option${ checked ? ' is-selected' : '' }${ o.depth ? ' is-child' : '' }` }
                                 >
                                     <input
                                         type="radio"
@@ -283,9 +283,9 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                         checked={ checked }
                                         onChange={ () => setId( id ) }
                                     />
-                                    <span class="fundkit-form__fund-option-label">{ decodeEntities( o.label || '' ) || id }</span>
+                                    <span class="gratora-form__fund-option-label">{ decodeEntities( o.label || '' ) || id }</span>
                                     { o.description && (
-                                        <span class="fundkit-form__fund-option-desc">{ o.description }</span>
+                                        <span class="gratora-form__fund-option-desc">{ o.description }</span>
                                     ) }
                                 </label>
                             );
@@ -306,7 +306,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                 country: f.countryLabel || config.i18n.addressCountry || 'Country',
             };
             return (
-                <fieldset key={ key } class="fundkit-form__address">
+                <fieldset key={ key } class="gratora-form__address">
                     { f.label && <legend>{ decodeEntities( f.label ) }</legend> }
                     { f.showLine1 && (
                         <Field
@@ -335,7 +335,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         </Field>
                     ) }
                     { ( f.showCity || f.showRegion ) && (
-                        <div class="fundkit-form__row fundkit-form__row--two-up">
+                        <div class="gratora-form__row gratora-form__row--two-up">
                             { f.showCity && (
                                 <Field
                                     label={ i18.city }
@@ -371,7 +371,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         </div>
                     ) }
                     { ( f.showPostal || f.showCountry ) && (
-                        <div class="fundkit-form__row fundkit-form__row--two-up">
+                        <div class="gratora-form__row gratora-form__row--two-up">
                             { f.showPostal && (
                                 <Field
                                     label={ i18.postal }
@@ -395,7 +395,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                     error={ err[ 'profile.address.country' ] }
                                 >
                                     <CountrySelect
-                                        id={ `fundkit-address-country-${ key }` }
+                                        id={ `gratora-address-country-${ key }` }
                                         value={ a.country || '' }
                                         onChange={ setField( 'profile.address.country' ) }
                                         required={ !! f.requireCountry }
@@ -415,31 +415,31 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             const agreed  = !! ( v.consents || {} )[ id ];
             const label   = decodeEntities( f.label || '' ) || ( config.i18n.agreeToTerms || 'I agree to the terms' );
             return (
-                <div key={ key } class="fundkit-form__terms">
-                    <label class="fundkit-form__terms-agree">
+                <div key={ key } class="gratora-form__terms">
+                    <label class="gratora-form__terms-agree">
                         <input
                             type="checkbox"
                             checked={ agreed }
                             onChange={ onCheck( errKey ) }
                             aria-invalid={ !! err[ errKey ] }
                         />
-                        <span class="fundkit-form__terms-label">{ label }</span>
+                        <span class="gratora-form__terms-label">{ label }</span>
                     </label>
                     { f.terms && (
                         // Scrolls rather than grows: long terms would push the
                         // submit button off the screen.
-                        <div class="fundkit-form__terms-text" tabindex="0" role="region" aria-label={ label }>
+                        <div class="gratora-form__terms-text" tabindex="0" role="region" aria-label={ label }>
                             { decodeEntities( f.terms ) }
                         </div>
                     ) }
                     { f.linkUrl && (
-                        <p class="fundkit-form__terms-link">
+                        <p class="gratora-form__terms-link">
                             <a href={ safeUrl( f.linkUrl ) } target="_blank" rel="noopener noreferrer">
                                 { decodeEntities( f.linkText || '' ) || ( config.i18n.readTerms || 'Read the terms' ) }
                             </a>
                         </p>
                     ) }
-                    { err[ errKey ] && <span class="fundkit-form__error">{ err[ errKey ] }</span> }
+                    { err[ errKey ] && <span class="gratora-form__error">{ err[ errKey ] }</span> }
                 </div>
             );
         }
@@ -448,17 +448,17 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             const purposes = Array.isArray( f.purposes ) ? f.purposes : [];
             const consents = v.consents || {};
             return (
-                <fieldset key={ key } class="fundkit-form__consent">
+                <fieldset key={ key } class="gratora-form__consent">
                     { f.label && <legend>{ decodeEntities( f.label ) }</legend> }
-                    { f.helpText && <p class="fundkit-form__consent-help">{ f.helpText }</p> }
-                    <div class="fundkit-form__consent-purposes">
+                    { f.helpText && <p class="gratora-form__consent-help">{ f.helpText }</p> }
+                    <div class="gratora-form__consent-purposes">
                         { purposes.map( ( p ) => {
                             const id       = String( p.id || '' );
                             const required = !! p.required;
                             const checked  = !! consents[ id ];
                             const errKey   = `consents.${ id }`;
                             return (
-                                <label key={ id } class="fundkit-form__consent-purpose">
+                                <label key={ id } class="gratora-form__consent-purpose">
                                     <input
                                         type="checkbox"
                                         checked={ checked }
@@ -466,18 +466,18 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                         onChange={ onCheck( `consents.${ id }` ) }
                                         aria-invalid={ !! err[ errKey ] }
                                     />
-                                    <span class="fundkit-form__consent-body">
-                                        <span class="fundkit-form__consent-label">
+                                    <span class="gratora-form__consent-body">
+                                        <span class="gratora-form__consent-label">
                                             { decodeEntities( p.label || '' ) || id }
                                             { required && (
-                                                <span class="fundkit-form__consent-required-pill">{ config.i18n.required || 'Required' }</span>
+                                                <span class="gratora-form__consent-required-pill">{ config.i18n.required || 'Required' }</span>
                                             ) }
                                         </span>
                                         { p.description && (
-                                            <span class="fundkit-form__consent-desc">{ p.description }</span>
+                                            <span class="gratora-form__consent-desc">{ p.description }</span>
                                         ) }
                                         { err[ errKey ] && (
-                                            <span class="fundkit-form__field-error" role="alert">{ err[ errKey ] }</span>
+                                            <span class="gratora-form__field-error" role="alert">{ err[ errKey ] }</span>
                                         ) }
                                     </span>
                                 </label>
@@ -499,7 +499,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     required={ !! f.required }
                     error={ err[ errKey ] }
                 >
-                    { f.helpText && <span class="fundkit-form__field-help">{ f.helpText }</span> }
+                    { f.helpText && <span class="gratora-form__field-help">{ f.helpText }</span> }
                     <input
                         type="date"
                         value={ cur }
@@ -524,7 +524,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     required={ !! f.required }
                     error={ err[ errKey ] }
                 >
-                    { f.helpText && <span class="fundkit-form__field-help">{ f.helpText }</span> }
+                    { f.helpText && <span class="gratora-form__field-help">{ f.helpText }</span> }
                     <input
                         type="text"
                         placeholder={ decodeEntities( f.placeholder || '' ) }
@@ -550,7 +550,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                     required={ !! f.required }
                     error={ err[ errKey ] }
                 >
-                    { f.helpText && <span class="fundkit-form__field-help">{ f.helpText }</span> }
+                    { f.helpText && <span class="gratora-form__field-help">{ f.helpText }</span> }
                     <input
                         type="number"
                         placeholder={ decodeEntities( f.placeholder || '' ) }
@@ -580,9 +580,9 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             };
             const style = f.style === 'tabs' ? 'tabs' : 'pills';
             return (
-                <fieldset key={ key } class={ `fundkit-form__frequency fundkit-form__frequency--${ style }` }>
+                <fieldset key={ key } class={ `gratora-form__frequency gratora-form__frequency--${ style }` }>
                     { f.label && <legend>{ decodeEntities( f.label ) }</legend> }
-                    <div class="fundkit-form__frequency-options" role="radiogroup" aria-label={ decodeEntities( f.label || '' ) || config.i18n.frequency || 'Frequency' }>
+                    <div class="gratora-form__frequency-options" role="radiogroup" aria-label={ decodeEntities( f.label || '' ) || config.i18n.frequency || 'Frequency' }>
                         { freqs.map( ( freq ) => {
                             const selected = current === freq;
                             return (
@@ -590,7 +590,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                     type="button"
                                     key={ freq }
                                     role="radio"
-                                    class={ `fundkit-form__frequency-option${ selected ? ' is-selected' : '' }` }
+                                    class={ `gratora-form__frequency-option${ selected ? ' is-selected' : '' }` }
                                     aria-checked={ selected }
                                     onClick={ () => dispatch( { type: 'SET_FREQUENCY', frequency: freq } ) }
                                 >
@@ -599,7 +599,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                             );
                         } ) }
                     </div>
-                    { f.helpText && <p class="fundkit-form__frequency-help">{ f.helpText }</p> }
+                    { f.helpText && <p class="gratora-form__frequency-help">{ f.helpText }</p> }
                 </fieldset>
             );
         }
@@ -647,18 +647,18 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             const errKey  = `custom.${ fname }`;
             const layout  = f.layout === 'horizontal' ? 'horizontal' : 'vertical';
             return (
-                <fieldset key={ key } class={ `fundkit-form__radio fundkit-form__radio--${ layout }` }>
+                <fieldset key={ key } class={ `gratora-form__radio gratora-form__radio--${ layout }` }>
                     { f.label && (
                         <legend>
                             { decodeEntities( f.label ) }
-                            { f.required && <span class="fundkit-form__required" aria-hidden="true">*</span> }
+                            { f.required && <span class="gratora-form__required" aria-hidden="true">*</span> }
                         </legend>
                     ) }
                     {/* aria-invalid belongs to the group, not to a radio, and
                         the submit button scrolls to the first field carrying
                         it, so the group has to be able to take focus. */}
                     <div
-                        class="fundkit-form__radio-options"
+                        class="gratora-form__radio-options"
                         role="radiogroup"
                         aria-label={ decodeEntities( f.label || '' ) }
                         aria-invalid={ !! err[ errKey ] }
@@ -669,7 +669,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                             return (
                                 <label
                                     key={ o.value }
-                                    class={ `fundkit-form__radio-option${ checked ? ' is-selected' : '' }` }
+                                    class={ `gratora-form__radio-option${ checked ? ' is-selected' : '' }` }
                                 >
                                     <input
                                         type="radio"
@@ -679,7 +679,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                         onChange={ () => onText( `custom.${ fname }` )( { target: { value: o.value } } ) }
                                         required={ !! f.required }
                                     />
-                                    <span class="fundkit-form__radio-option-label">
+                                    <span class="gratora-form__radio-option-label">
                                         { decodeEntities( o.label || '' ) || o.value }
                                     </span>
                                 </label>
@@ -687,7 +687,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         } ) }
                     </div>
                     { err[ errKey ] && (
-                        <span class="fundkit-form__field-error" role="alert">{ err[ errKey ] }</span>
+                        <span class="gratora-form__field-error" role="alert">{ err[ errKey ] }</span>
                     ) }
                 </fieldset>
             );
@@ -698,7 +698,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             const cur      = ( v.custom && fname in v.custom ) ? !! v.custom[ fname ] : !! f.defaultOn;
             const errKey   = `custom.${ fname }`;
             return (
-                <label key={ key } class="fundkit-form__check fundkit-form__check--single">
+                <label key={ key } class="gratora-form__check gratora-form__check--single">
                     <input
                         type="checkbox"
                         checked={ cur }
@@ -706,16 +706,16 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         aria-invalid={ !! err[ errKey ] }
                         required={ !! f.required }
                     />
-                    <span class="fundkit-form__check-body">
-                        <span class="fundkit-form__check-label">
+                    <span class="gratora-form__check-body">
+                        <span class="gratora-form__check-label">
                             { decodeEntities( f.label || '' ) }
-                            { f.required && <span class="fundkit-form__required" aria-hidden="true">*</span> }
+                            { f.required && <span class="gratora-form__required" aria-hidden="true">*</span> }
                         </span>
                         { f.helpText && (
-                            <span class="fundkit-form__check-help">{ f.helpText }</span>
+                            <span class="gratora-form__check-help">{ f.helpText }</span>
                         ) }
                         { err[ errKey ] && (
-                            <span class="fundkit-form__field-error" role="alert">{ err[ errKey ] }</span>
+                            <span class="gratora-form__field-error" role="alert">{ err[ errKey ] }</span>
                         ) }
                     </span>
                 </label>
@@ -739,21 +739,21 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
             };
 
             return (
-                <fieldset key={ key } class="fundkit-form__multi-select">
+                <fieldset key={ key } class="gratora-form__multi-select">
                     { f.label && (
                         <legend>
                             { decodeEntities( f.label ) }
-                            { f.required && <span class="fundkit-form__required" aria-hidden="true">*</span> }
+                            { f.required && <span class="gratora-form__required" aria-hidden="true">*</span> }
                         </legend>
                     ) }
-                    <div class="fundkit-form__multi-select-options">
+                    <div class="gratora-form__multi-select-options">
                         { options.map( ( o ) => {
                             const val     = String( o.value );
                             const checked = selection.includes( val );
                             return (
                                 <label
                                     key={ val }
-                                    class={ `fundkit-form__multi-select-option${ checked ? ' is-selected' : '' }` }
+                                    class={ `gratora-form__multi-select-option${ checked ? ' is-selected' : '' }` }
                                 >
                                     <input
                                         type="checkbox"
@@ -761,7 +761,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                                         onChange={ () => toggle( val ) }
                                         aria-invalid={ !! err[ errKey ] }
                                     />
-                                    <span class="fundkit-form__multi-select-option-label">
+                                    <span class="gratora-form__multi-select-option-label">
                                         { decodeEntities( o.label || '' ) || o.value }
                                     </span>
                                 </label>
@@ -769,7 +769,7 @@ function renderField( f, key, { v, err, onText, onCheck, setField, config, dispa
                         } ) }
                     </div>
                     { err[ errKey ] && (
-                        <span class="fundkit-form__field-error" role="alert">{ err[ errKey ] }</span>
+                        <span class="gratora-form__field-error" role="alert">{ err[ errKey ] }</span>
                     ) }
                 </fieldset>
             );
@@ -801,13 +801,13 @@ function Field( { label, required, error, htmlFor, children } ) {
     const Caption = htmlFor ? 'label' : 'span';
 
     return (
-        <Wrapper class="fundkit-form__field">
-            <Caption class="fundkit-form__label" for={ htmlFor }>
+        <Wrapper class="gratora-form__field">
+            <Caption class="gratora-form__label" for={ htmlFor }>
                 { decodeEntities( label ) }
-                { required && <span class="fundkit-form__required" aria-hidden="true">*</span> }
+                { required && <span class="gratora-form__required" aria-hidden="true">*</span> }
             </Caption>
             { children }
-            { error && <span class="fundkit-form__field-error" role="alert">{ error }</span> }
+            { error && <span class="gratora-form__field-error" role="alert">{ error }</span> }
         </Wrapper>
     );
 }

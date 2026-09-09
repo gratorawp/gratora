@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -29,7 +29,7 @@ final class AdminMarkPaidIdentityTest extends IntegrationTestCase
     /** @param array<string,mixed> $extra */
     private function createDonation(string $gateway, array $extra = []): Donation
     {
-        $request = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $request = new WP_REST_Request('POST', '/gratora/v1/donations');
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode(array_merge([
             'email'        => 'sarah@example.com',
@@ -46,7 +46,7 @@ final class AdminMarkPaidIdentityTest extends IntegrationTestCase
     {
         rest_do_request(new WP_REST_Request(
             'POST',
-            '/fundkit/v1/admin/donations/' . $donation->reference . '/mark-paid'
+            '/gratora/v1/admin/donations/' . $donation->reference . '/mark-paid'
         ));
     }
 

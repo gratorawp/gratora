@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Settings;
+namespace Gratora\Settings;
 
 use ActionScheduler;
 use ActionScheduler_Store;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Campaigns\Campaign;
-use FundKit\Donors\Portal\PortalPage;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormReadinessService;
-use FundKit\Foundation\License\LicenseRefusals;
-use FundKit\Foundation\License\LicenseService;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\Stripe\ApplePayDomain;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donors\Portal\PortalPage;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormReadinessService;
+use Gratora\Foundation\License\LicenseRefusals;
+use Gratora\Foundation\License\LicenseService;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\Stripe\ApplePayDomain;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
 
 /**
  * Answers "can this site take a donation today, and will the donor hear back?"
@@ -143,10 +143,10 @@ final class ReadinessService
             return $this->fail(
                 'gateway',
                 'money',
-                __('No way to take a donation', 'fundraising-toolkit'),
-                __('Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow.', 'fundraising-toolkit'),
+                __('No way to take a donation', 'gratora'),
+                __('Add keys for a payment gateway, or switch on offline donations and write the instructions donors will follow.', 'gratora'),
                 'gateways',
-                __('Set up payments', 'fundraising-toolkit'),
+                __('Set up payments', 'gratora'),
                 true
             );
         }
@@ -157,10 +157,10 @@ final class ReadinessService
             return $this->warn(
                 'gateway',
                 'money',
-                __('Stripe has keys but cannot charge yet', 'fundraising-toolkit'),
-                __('Stripe has not enabled charges on this account. Finish the remaining verification steps in your Stripe dashboard.', 'fundraising-toolkit'),
+                __('Stripe has keys but cannot charge yet', 'gratora'),
+                __('Stripe has not enabled charges on this account. Finish the remaining verification steps in your Stripe dashboard.', 'gratora'),
                 'gateways',
-                __('Open payments', 'fundraising-toolkit')
+                __('Open payments', 'gratora')
             );
         }
 
@@ -169,7 +169,7 @@ final class ReadinessService
             'money',
             sprintf(
                 /* translators: %s: comma-separated list of payment methods that can take a donation. */
-                __('Donations can be taken through %s', 'fundraising-toolkit'),
+                __('Donations can be taken through %s', 'gratora'),
                 implode(', ', $ready)
             )
         );
@@ -183,8 +183,8 @@ final class ReadinessService
     private function modeGaps(bool $test): array
     {
         $missing = [];
-        if ($this->switchedOn('stripe') && $this->stripe->isConnected() && ! $this->stripe->hasKeysFor($test)) $missing[] = __('Stripe', 'fundraising-toolkit');
-        if ($this->switchedOn('paypal') && $this->payPal->isConnected() && ! $this->payPal->hasKeysFor($test)) $missing[] = __('PayPal', 'fundraising-toolkit');
+        if ($this->switchedOn('stripe') && $this->stripe->isConnected() && ! $this->stripe->hasKeysFor($test)) $missing[] = __('Stripe', 'gratora');
+        if ($this->switchedOn('paypal') && $this->payPal->isConnected() && ! $this->payPal->hasKeysFor($test)) $missing[] = __('PayPal', 'gratora');
 
         /**
          * A gateway that ships in an add-on owns its own credentials, so it
@@ -198,7 +198,7 @@ final class ReadinessService
          * @since 1.0.0
          */
         $missing = (array) apply_filters(
-            $test ? 'fundkit.readiness.test_mode_gaps' : 'fundkit.readiness.live_mode_gaps',
+            $test ? 'gratora.readiness.test_mode_gaps' : 'gratora.readiness.live_mode_gaps',
             $missing
         );
 
@@ -228,12 +228,12 @@ final class ReadinessService
                     'money',
                     sprintf(
                         /* translators: %s: comma-separated list of gateway names holding no test keys. */
-                        __('Test mode is on, but %s has no test keys', 'fundraising-toolkit'),
+                        __('Test mode is on, but %s has no test keys', 'gratora'),
                         implode(', ', $noSandbox)
                     ),
-                    __('Every donation will fail while this is on. Add the test key pair, or turn test mode off.', 'fundraising-toolkit'),
+                    __('Every donation will fail while this is on. Add the test key pair, or turn test mode off.', 'gratora'),
                     'gateways',
-                    __('Add test keys', 'fundraising-toolkit'),
+                    __('Add test keys', 'gratora'),
                     true
                 );
             }
@@ -241,10 +241,10 @@ final class ReadinessService
             return $this->warn(
                 'mode',
                 'money',
-                __('Test mode is on for every form', 'fundraising-toolkit'),
-                __('No real payment is taken and these donations are excluded from reporting. Turn it off when you are ready to go live.', 'fundraising-toolkit'),
+                __('Test mode is on for every form', 'gratora'),
+                __('No real payment is taken and these donations are excluded from reporting. Turn it off when you are ready to go live.', 'gratora'),
                 'gateways',
-                __('Open payments', 'fundraising-toolkit')
+                __('Open payments', 'gratora')
             );
         }
 
@@ -258,12 +258,12 @@ final class ReadinessService
                 'money',
                 sprintf(
                     /* translators: %s: comma-separated list of gateway names holding only test keys. */
-                    __('Live mode, but %s only has test keys', 'fundraising-toolkit'),
+                    __('Live mode, but %s only has test keys', 'gratora'),
                     implode(', ', $missing)
                 ),
-                __('Donations through it will fail. Add the live key pair, or turn test mode back on.', 'fundraising-toolkit'),
+                __('Donations through it will fail. Add the live key pair, or turn test mode back on.', 'gratora'),
                 'gateways',
-                __('Add live keys', 'fundraising-toolkit'),
+                __('Add live keys', 'gratora'),
                 true
             );
         }
@@ -279,10 +279,10 @@ final class ReadinessService
         if ($this->switchedOn('paypal') && $this->payPal->hasKeysFor(false)) $live[] = 'paypal';
 
         if ($live === []) {
-            return $this->pass('mode', 'money', __('Live mode is on', 'fundraising-toolkit'));
+            return $this->pass('mode', 'money', __('Live mode is on', 'gratora'));
         }
 
-        return $this->pass('mode', 'money', __('Live mode, with live keys on file', 'fundraising-toolkit'));
+        return $this->pass('mode', 'money', __('Live mode, with live keys on file', 'gratora'));
     }
 
     /**
@@ -293,23 +293,23 @@ final class ReadinessService
     private function httpsCheck(): array
     {
         if (is_ssl()) {
-            return $this->pass('https', 'money', __('The site is served over HTTPS', 'fundraising-toolkit'));
+            return $this->pass('https', 'money', __('The site is served over HTTPS', 'gratora'));
         }
 
         if ($this->testMode()) {
             return $this->warn(
                 'https',
                 'money',
-                __('The site is not on HTTPS', 'fundraising-toolkit'),
-                __('Fine while you are rehearsing, but live card charges are rejected without it.', 'fundraising-toolkit')
+                __('The site is not on HTTPS', 'gratora'),
+                __('Fine while you are rehearsing, but live card charges are rejected without it.', 'gratora')
             );
         }
 
         return $this->fail(
             'https',
             'money',
-            __('The site is not on HTTPS', 'fundraising-toolkit'),
-            __('Card gateways reject live charges on plain HTTP. Install a certificate before taking donations.', 'fundraising-toolkit'),
+            __('The site is not on HTTPS', 'gratora'),
+            __('Card gateways reject live charges on plain HTTP. Install a certificate before taking donations.', 'gratora'),
             null,
             null,
             true
@@ -327,16 +327,16 @@ final class ReadinessService
             return null;
         }
         if ($this->stripeApi->hasWebhookSecret()) {
-            return $this->pass('stripe-webhook', 'money', __('Stripe webhooks are signed', 'fundraising-toolkit'));
+            return $this->pass('stripe-webhook', 'money', __('Stripe webhooks are signed', 'gratora'));
         }
 
         return $this->warn(
             'stripe-webhook',
             'money',
-            __('Stripe has no webhook signing secret', 'fundraising-toolkit'),
-            __('Without it Fundraising Toolkit cannot trust what Stripe reports, so renewals, refunds and cancellations made in Stripe never reach this site.', 'fundraising-toolkit'),
+            __('Stripe has no webhook signing secret', 'gratora'),
+            __('Without it Gratora cannot trust what Stripe reports, so renewals, refunds and cancellations made in Stripe never reach this site.', 'gratora'),
             'gateways',
-            __('Add the secret', 'fundraising-toolkit')
+            __('Add the secret', 'gratora')
         );
     }
 
@@ -351,16 +351,16 @@ final class ReadinessService
             return null;
         }
         if ($this->payPal->webhookId($this->testMode()) !== '') {
-            return $this->pass('paypal-webhook', 'money', __('PayPal webhooks are registered', 'fundraising-toolkit'));
+            return $this->pass('paypal-webhook', 'money', __('PayPal webhooks are registered', 'gratora'));
         }
 
         return $this->warn(
             'paypal-webhook',
             'money',
-            __('PayPal has no webhook registered', 'fundraising-toolkit'),
-            __('Every PayPal notification will be rejected. Donations PayPal settles after checkout will stay unpaid, and refunds, disputes and renewals will not reach this site.', 'fundraising-toolkit'),
+            __('PayPal has no webhook registered', 'gratora'),
+            __('Every PayPal notification will be rejected. Donations PayPal settles after checkout will stay unpaid, and refunds, disputes and renewals will not reach this site.', 'gratora'),
             'gateways',
-            __('Register the webhook', 'fundraising-toolkit')
+            __('Register the webhook', 'gratora')
         );
     }
 
@@ -375,16 +375,16 @@ final class ReadinessService
             return null;
         }
         if ($this->applePay->isFileReady()) {
-            return $this->pass('apple-pay', 'money', __('Apple Pay is verified for this domain', 'fundraising-toolkit'));
+            return $this->pass('apple-pay', 'money', __('Apple Pay is verified for this domain', 'gratora'));
         }
 
         return $this->warn(
             'apple-pay',
             'money',
-            __('Apple Pay is not verified for this domain', 'fundraising-toolkit'),
-            __('The Apple Pay button simply does not appear until the domain association file is in place. Everything else keeps working.', 'fundraising-toolkit'),
+            __('Apple Pay is not verified for this domain', 'gratora'),
+            __('The Apple Pay button simply does not appear until the domain association file is in place. Everything else keeps working.', 'gratora'),
             'gateways',
-            __('Verify the domain', 'fundraising-toolkit')
+            __('Verify the domain', 'gratora')
         );
     }
 
@@ -417,7 +417,7 @@ final class ReadinessService
                 'page',
                 sprintf(
                     /* translators: %d: number of campaigns with a published donation form. */
-                    _n('%d campaign is live and can take donations', '%d campaigns are live and can take donations', count($live), 'fundraising-toolkit'),
+                    _n('%d campaign is live and can take donations', '%d campaigns are live and can take donations', count($live), 'gratora'),
                     count($live)
                 )
             );
@@ -426,17 +426,17 @@ final class ReadinessService
         // Publishing a campaign whose form is still a draft leaves its page as a
         // draft too, so the operator sees "published" and the public sees a 404.
         $detail = $campaigns === []
-            ? __('Create a campaign, then publish it together with its donation form.', 'fundraising-toolkit')
-            : __('Your published campaigns have no published donation form, so their pages stay drafts and donors see nothing.', 'fundraising-toolkit');
+            ? __('Create a campaign, then publish it together with its donation form.', 'gratora')
+            : __('Your published campaigns have no published donation form, so their pages stay drafts and donors see nothing.', 'gratora');
 
         return [
             'id'           => 'donation-page',
             'group'        => 'page',
             'status'       => self::FAIL,
-            'label'        => __('No campaign a donor can reach', 'fundraising-toolkit'),
+            'label'        => __('No campaign a donor can reach', 'gratora'),
             'detail'       => $detail,
-            'action_url'   => admin_url('admin.php?page=fundkit-campaigns'),
-            'action_label' => __('Open campaigns', 'fundraising-toolkit'),
+            'action_url'   => admin_url('admin.php?page=gratora-campaigns'),
+            'action_label' => __('Open campaigns', 'gratora'),
             'blocker'      => true,
         ];
     }
@@ -477,25 +477,25 @@ final class ReadinessService
         // puts between two clauses, and in what order, is the translator's to
         // decide and cannot be expressed as ', ' plus an isolated "and".
         $missing = [];
-        if ($name === '')  $missing[] = __('Receipts do not carry your organization name.', 'fundraising-toolkit');
-        if ($lines === []) $missing[] = __('Receipts do not carry a postal address.', 'fundraising-toolkit');
+        if ($name === '')  $missing[] = __('Receipts do not carry your organization name.', 'gratora');
+        if ($lines === []) $missing[] = __('Receipts do not carry a postal address.', 'gratora');
 
         if ($this->showTaxId() && trim((string) ($org['tax_id'] ?? '')) === '') {
-            $missing[] = __('Receipts do not carry a tax number.', 'fundraising-toolkit');
+            $missing[] = __('Receipts do not carry a tax number.', 'gratora');
         }
 
         if ($missing === []) {
-            return $this->pass('org-identity', 'receipts', __('Receipts carry your name and address', 'fundraising-toolkit'));
+            return $this->pass('org-identity', 'receipts', __('Receipts carry your name and address', 'gratora'));
         }
 
         return $this->warn(
             'org-identity',
             'receipts',
-            __('Receipts are missing details donors may need', 'fundraising-toolkit'),
+            __('Receipts are missing details donors may need', 'gratora'),
             implode(' ', $missing) . ' '
-                . __('Receipts print your organization details at the top. Donors claiming tax relief usually need them.', 'fundraising-toolkit'),
+                . __('Receipts print your organization details at the top. Donors claiming tax relief usually need them.', 'gratora'),
             'organization',
-            __('Add the details', 'fundraising-toolkit')
+            __('Add the details', 'gratora')
         );
     }
 
@@ -515,14 +515,14 @@ final class ReadinessService
             return $this->warn(
                 'background-jobs',
                 'jobs',
-                __('Cannot tell whether background jobs are running', 'fundraising-toolkit'),
-                __('Action Scheduler is not available, so receipts and other queued work cannot be checked from here.', 'fundraising-toolkit')
+                __('Cannot tell whether background jobs are running', 'gratora'),
+                __('Action Scheduler is not available, so receipts and other queued work cannot be checked from here.', 'gratora')
             );
         }
 
         $oldest = $this->oldestPendingJob();
         if ($oldest === null) {
-            return $this->pass('background-jobs', 'jobs', __('No background work is waiting', 'fundraising-toolkit'));
+            return $this->pass('background-jobs', 'jobs', __('No background work is waiting', 'gratora'));
         }
 
         [$count, $ageSeconds] = $oldest;
@@ -532,7 +532,7 @@ final class ReadinessService
                 'jobs',
                 sprintf(
                     /* translators: %d: number of queued background jobs. */
-                    _n('%d job is queued and moving', '%d jobs are queued and moving', $count, 'fundraising-toolkit'),
+                    _n('%d job is queued and moving', '%d jobs are queued and moving', $count, 'gratora'),
                     $count
                 )
             );
@@ -543,10 +543,10 @@ final class ReadinessService
             'jobs',
             sprintf(
                 /* translators: %s: human-readable duration, e.g. "3 hours". */
-                __('Background jobs have been waiting %s', 'fundraising-toolkit'),
+                __('Background jobs have been waiting %s', 'gratora'),
                 human_time_diff(time() - $ageSeconds)
             ),
-            __('Queued receipts and emails are not going out. WP-Cron is usually the cause: check that it is not disabled, or run it from a real cron job.', 'fundraising-toolkit'),
+            __('Queued receipts and emails are not going out. WP-Cron is usually the cause: check that it is not disabled, or run it from a real cron job.', 'gratora'),
             null,
             null
         );
@@ -597,17 +597,17 @@ final class ReadinessService
     private function donorPortalCheck(): array
     {
         if ($this->portal->resolve() !== 0) {
-            return $this->pass('donor-portal', 'portal', __('The donor portal page is published', 'fundraising-toolkit'));
+            return $this->pass('donor-portal', 'portal', __('The donor portal page is published', 'gratora'));
         }
 
         return [
             'id'           => 'donor-portal',
             'group'        => 'portal',
             'status'       => self::FAIL,
-            'label'        => __('The donor portal page is missing', 'fundraising-toolkit'),
-            'detail'       => __('Receipt and sign-in emails link to it. Until it is published, every one of those links leads to a 404.', 'fundraising-toolkit'),
+            'label'        => __('The donor portal page is missing', 'gratora'),
+            'detail'       => __('Receipt and sign-in emails link to it. Until it is published, every one of those links leads to a 404.', 'gratora'),
             'action_url'   => admin_url('edit.php?post_type=page'),
-            'action_label' => __('Open pages', 'fundraising-toolkit'),
+            'action_label' => __('Open pages', 'gratora'),
             'blocker'      => true,
         ];
     }
@@ -637,7 +637,7 @@ final class ReadinessService
                         $group['headline'],
                         $group['detail']
                     ),
-                    __('Manage licenses', 'fundraising-toolkit')
+                    __('Manage licenses', 'gratora')
                 );
             }
 
@@ -652,12 +652,12 @@ final class ReadinessService
                     'licenses',
                     sprintf(
                         /* translators: %s: comma-separated add-on names. */
-                        __('The license for %s has lapsed', 'fundraising-toolkit'),
+                        __('The license for %s has lapsed', 'gratora'),
                         $this->names($lapsing)
                     ),
-                    __('Renew to keep receiving updates and security fixes.', 'fundraising-toolkit')
+                    __('Renew to keep receiving updates and security fixes.', 'gratora')
                 ),
-                __('Manage licenses', 'fundraising-toolkit')
+                __('Manage licenses', 'gratora')
             )];
         }
 
@@ -669,10 +669,10 @@ final class ReadinessService
                 $this->warn(
                     'licenses',
                     'licenses',
-                    __('Your add-ons are not linked to a license key', 'fundraising-toolkit'),
-                    __('They keep running, but they will not receive updates or security fixes.', 'fundraising-toolkit')
+                    __('Your add-ons are not linked to a license key', 'gratora'),
+                    __('They keep running, but they will not receive updates or security fixes.', 'gratora')
                 ),
-                __('Add a key', 'fundraising-toolkit')
+                __('Add a key', 'gratora')
             )];
         }
 
@@ -681,7 +681,7 @@ final class ReadinessService
             'licenses',
             sprintf(
                 /* translators: %d: number of licensed add-ons. */
-                _n('%d add-on is licensed', '%d add-ons are licensed', count($addons), 'fundraising-toolkit'),
+                _n('%d add-on is licensed', '%d add-ons are licensed', count($addons), 'gratora'),
                 count($addons)
             )
         )];
@@ -700,7 +700,7 @@ final class ReadinessService
      */
     private function licenseAction(array $row, string $label): array
     {
-        $url = apply_filters('fundkit.license.manage_url', '');
+        $url = apply_filters('gratora.license.manage_url', '');
         if (! is_string($url) || $url === '') {
             return $row;
         }
@@ -716,7 +716,7 @@ final class ReadinessService
     /** @since 1.0.0 */
     private function testMode(): bool
     {
-        $cfg = get_option('fundkit_gateway_config', []);
+        $cfg = get_option('gratora_gateway_config', []);
 
         return is_array($cfg) && ! empty($cfg['test_mode']);
     }
@@ -738,7 +738,7 @@ final class ReadinessService
      */
     private function switchedOn(string $id): bool
     {
-        $cfg = get_option('fundkit_gateway_config', []);
+        $cfg = get_option('gratora_gateway_config', []);
         $cfg = is_array($cfg) ? $cfg : [];
 
         return (bool) ($cfg[$id]['enabled'] ?? true);
@@ -804,8 +804,8 @@ final class ReadinessService
             $row['detail'] = $detail;
         }
         if ($tab !== null) {
-            $row['action_url']   = admin_url('admin.php?page=fundkit-settings#' . $tab);
-            $row['action_label'] = $actionLabel ?? __('Open settings', 'fundraising-toolkit');
+            $row['action_url']   = admin_url('admin.php?page=gratora-settings#' . $tab);
+            $row['action_label'] = $actionLabel ?? __('Open settings', 'gratora');
         }
         if ($blocker) {
             $row['blocker'] = true;

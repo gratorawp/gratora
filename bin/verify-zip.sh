@@ -6,7 +6,7 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-SLUG=fundraising-toolkit
+SLUG=gratora
 
 ZIP="dist/$SLUG.zip"
 OUT="dist/$SLUG"
@@ -19,7 +19,7 @@ rm -rf "$OUT"
 unzip -q "$ZIP" -d dist
 
 
-for f in fundkit.php vendor/autoload.php vendor/woocommerce/action-scheduler/action-scheduler.php build; do
+for f in gratora.php vendor/autoload.php vendor/woocommerce/action-scheduler/action-scheduler.php build; do
     test -e "$OUT/$f" || fail "$f missing from the zip; the plugin would fatal on activation"
 done
 
@@ -30,17 +30,17 @@ do
     test ! -e "$OUT/$leak" || fail "$leak is in the zip"
 done
 
-# Load both autoloaders as fundkit.php does; production Composer installs remove Strauss’s
+# Load both autoloaders as gratora.php does; production Composer installs remove Strauss’s
 # autoload edit.
 OUT="$OUT" php -r '
     $out = getenv("OUT");
     require "$out/vendor/autoload.php";
     require "$out/vendor/vendor-prefixed/autoload.php";
     $need = [
-      "FundKit\\Vendor\\Queryable\\Model",
-      "FundKit\\Vendor\\Dompdf\\Dompdf",
-      "FundKit\\Foundation\\Plugin",
-      "FundKit\\Receipts\\PdfBuilder",
+      "Gratora\\Vendor\\Queryable\\Model",
+      "Gratora\\Vendor\\Dompdf\\Dompdf",
+      "Gratora\\Foundation\\Plugin",
+      "Gratora\\Receipts\\PdfBuilder",
     ];
     foreach ($need as $c) {
       if (! class_exists($c)) { fwrite(STDERR, "::error::$c does not resolve from the packaged tree\n"); exit(1); }
@@ -81,7 +81,7 @@ do
 done
 
 # Keep the source-repository link required for compiled assets.
-grep -q 'github.com/fundkitorg/fundkit' "$OUT/readme.txt" \
+grep -q 'github.com/gratorawp/gratora' "$OUT/readme.txt" \
     || fail "readme.txt does not name the repository, so nothing says where build/ came from"
 
 

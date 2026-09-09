@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use ArrayObject;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Foundation\Plugin;
 
 /**
  * An add-on can move money through the donation rails that is not a donation:
@@ -75,7 +75,7 @@ final class NonDonationPaymentEmailsTest extends IntegrationTestCase
 
     public function test_an_addon_can_answer_in_its_own_words(): void
     {
-        update_option('fundkit_email_settings', [
+        update_option('gratora_email_settings', [
             'templates' => [
                 'ticket_order_refunded' => [
                     'enabled' => true,
@@ -84,7 +84,7 @@ final class NonDonationPaymentEmailsTest extends IntegrationTestCase
                 ],
             ],
         ]);
-        add_filter('fundkit.email.donation_template', static function (string $template, string $base, Donation $donation): string {
+        add_filter('gratora.email.donation_template', static function (string $template, string $base, Donation $donation): string {
             return $base === 'donation_refunded' && (string) $donation->kind === 'order'
                 ? 'ticket_order_refunded'
                 : $template;
@@ -98,7 +98,7 @@ final class NonDonationPaymentEmailsTest extends IntegrationTestCase
         $body = $this->onlyMailMatching($mails, 'tickets have been refunded');
         $this->assertStringContainsString('for your tickets', $body);
 
-        delete_option('fundkit_email_settings');
+        delete_option('gratora_email_settings');
     }
 
     private function paidDonationOfKind(string $kind): Donation

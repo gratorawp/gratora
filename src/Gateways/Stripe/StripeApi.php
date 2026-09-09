@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways\Stripe;
+namespace Gratora\Gateways\Stripe;
 
-use FundKit\Gateways\GatewayTransportException;
+use Gratora\Gateways\GatewayTransportException;
 use RuntimeException;
 
 /** @since 1.0.0 */
@@ -77,7 +77,7 @@ final class StripeApi
 
     private function orgTestMode(): bool
     {
-        $opt = get_option('fundkit_gateway_config', []);
+        $opt = get_option('gratora_gateway_config', []);
 
         return is_array($opt) && ! empty($opt['test_mode']);
     }
@@ -97,7 +97,7 @@ final class StripeApi
     /** @since 1.0.0 */
     private function gatewayConfig(string $key): string
     {
-        $opt = get_option('fundkit_gateway_config', []);
+        $opt = get_option('gratora_gateway_config', []);
         if (! is_array($opt)) return '';
         $stripe = is_array($opt['stripe'] ?? null) ? $opt['stripe'] : [];
         return (string) ($stripe[$key] ?? '');

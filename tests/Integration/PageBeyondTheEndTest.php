@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Analytics\Event;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\Event;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -42,7 +42,7 @@ final class PageBeyondTheEndTest extends IntegrationTestCase
         $e->occurred_at = gmdate('Y-m-d H:i:s');
         $e->save();
 
-        $res = $this->get('/fundkit/v1/admin/donors/' . (int) $donor->id . '/events', [
+        $res = $this->get('/gratora/v1/admin/donors/' . (int) $donor->id . '/events', [
             'page' => self::HUGE, 'per_page' => 100,
         ]);
 
@@ -53,7 +53,7 @@ final class PageBeyondTheEndTest extends IntegrationTestCase
     {
         ErrorLog::record('gateway.intent', 'PayPal has no live credentials.');
 
-        $res = $this->get('/fundkit/v1/admin/tools/log', ['page' => self::HUGE, 'per_page' => 100]);
+        $res = $this->get('/gratora/v1/admin/tools/log', ['page' => self::HUGE, 'per_page' => 100]);
 
         $this->assertSame(200, $res->get_status());
         $this->assertSame([], (array) ($res->get_data()['items'] ?? null));
@@ -76,7 +76,7 @@ final class PageBeyondTheEndTest extends IntegrationTestCase
         $p->updated_at     = $now;
         $p->save();
 
-        $res = $this->get('/fundkit/v1/admin/recurring', ['page' => self::HUGE, 'per_page' => 100]);
+        $res = $this->get('/gratora/v1/admin/recurring', ['page' => self::HUGE, 'per_page' => 100]);
 
         $this->assertSame(200, $res->get_status());
     }

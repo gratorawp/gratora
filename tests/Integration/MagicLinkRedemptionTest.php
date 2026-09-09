@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorService;
-use FundKit\Donors\MagicLinkService;
-use FundKit\Donors\MagicLinkToken;
-use FundKit\Donors\Portal\PortalSession;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\MagicLinkService;
+use Gratora\Donors\MagicLinkToken;
+use Gratora\Donors\Portal\PortalSession;
+use Gratora\Foundation\Plugin;
 
 final class MagicLinkRedemptionTest extends IntegrationTestCase
 {
@@ -136,7 +136,7 @@ final class MagicLinkRedemptionTest extends IntegrationTestCase
         return Plugin::instance()->container->get(MagicLinkService::class);
     }
 
-    private function makeDonor(): \FundKit\Donors\Donor
+    private function makeDonor(): \Gratora\Donors\Donor
     {
         return Plugin::instance()->container
             ->get(DonorService::class)

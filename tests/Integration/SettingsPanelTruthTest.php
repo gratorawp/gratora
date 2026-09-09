@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Styling\StylePresets;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Campaigns\Styling\StylePresets;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 use InvalidArgumentException;
 use WP_REST_Request;
 
@@ -52,7 +52,7 @@ final class SettingsPanelTruthTest extends IntegrationTestCase
 
     private function saveCurrency(): array
     {
-        $req = new WP_REST_Request('PUT', '/fundkit/v1/admin/settings/currency-locale');
+        $req = new WP_REST_Request('PUT', '/gratora/v1/admin/settings/currency-locale');
         $req->set_param('group', 'currency-locale');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['format' => ['decimal_places' => 2]]));
@@ -79,7 +79,7 @@ final class SettingsPanelTruthTest extends IntegrationTestCase
     {
         $this->settings()->update('org-brand', [
             'presets'    => [
-                ['id' => 'house', 'name' => 'House', 'tokens' => ['fundkit-accent' => '#123456']],
+                ['id' => 'house', 'name' => 'House', 'tokens' => ['gratora-accent' => '#123456']],
             ],
             'default_id' => 'house',
         ]);
@@ -88,7 +88,7 @@ final class SettingsPanelTruthTest extends IntegrationTestCase
 
         $this->assertSame(
             '#123456',
-            (string) ($gone['fundkit-accent'] ?? ''),
+            (string) ($gone['gratora-accent'] ?? ''),
             'a deleted preset dropped every form that used it to the bare catalogue defaults'
         );
     }
@@ -97,13 +97,13 @@ final class SettingsPanelTruthTest extends IntegrationTestCase
     {
         $this->settings()->update('org-brand', [
             'presets'    => [
-                ['id' => 'house', 'name' => 'House', 'tokens' => ['fundkit-accent' => '#123456']],
-                ['id' => 'other', 'name' => 'Other', 'tokens' => ['fundkit-accent' => '#abcdef']],
+                ['id' => 'house', 'name' => 'House', 'tokens' => ['gratora-accent' => '#123456']],
+                ['id' => 'other', 'name' => 'Other', 'tokens' => ['gratora-accent' => '#abcdef']],
             ],
             'default_id' => 'house',
         ]);
 
-        $this->assertSame('#abcdef', (string) (StylePresets::tokensFor('other')['fundkit-accent'] ?? ''));
+        $this->assertSame('#abcdef', (string) (StylePresets::tokensFor('other')['gratora-accent'] ?? ''));
     }
 
 
@@ -115,7 +115,7 @@ final class SettingsPanelTruthTest extends IntegrationTestCase
             'default_id' => 'classic',
         ]);
 
-        $stored = (array) get_option('fundkit_org_brand', []);
+        $stored = (array) get_option('gratora_org_brand', []);
 
         $this->assertSame(
             [],
@@ -127,11 +127,11 @@ final class SettingsPanelTruthTest extends IntegrationTestCase
     public function test_a_builtin_the_admin_actually_edited_is_kept(): void
     {
         $edited = StylePresets::builtinsWithTheme();
-        $edited[0]['tokens']['fundkit-accent'] = '#ff0000';
+        $edited[0]['tokens']['gratora-accent'] = '#ff0000';
 
         $this->settings()->update('org-brand', ['presets' => $edited, 'default_id' => 'classic']);
 
-        $stored = (array) get_option('fundkit_org_brand', []);
+        $stored = (array) get_option('gratora_org_brand', []);
         $ids    = array_map(static fn ($p): string => (string) ($p['id'] ?? ''), (array) $stored['presets']);
 
         $this->assertSame([ (string) $edited[0]['id'] ], $ids);
@@ -141,12 +141,12 @@ final class SettingsPanelTruthTest extends IntegrationTestCase
     {
         $this->settings()->update('org-brand', [
             'presets'    => array_merge(StylePresets::builtinsWithTheme(), [
-                ['id' => 'house', 'name' => 'House', 'tokens' => ['fundkit-accent' => '#123456']],
+                ['id' => 'house', 'name' => 'House', 'tokens' => ['gratora-accent' => '#123456']],
             ]),
             'default_id' => 'house',
         ]);
 
-        $stored = (array) get_option('fundkit_org_brand', []);
+        $stored = (array) get_option('gratora_org_brand', []);
         $ids    = array_map(static fn ($p): string => (string) ($p['id'] ?? ''), (array) $stored['presets']);
 
         $this->assertSame(['house'], $ids);

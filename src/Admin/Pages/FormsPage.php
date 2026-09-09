@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Admin\Pages;
+namespace Gratora\Admin\Pages;
 
-use FundKit\Donors\ConsentService;
-use FundKit\Foundation\Hooks\HookProvider;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
+use Gratora\Donors\ConsentService;
+use Gratora\Foundation\Hooks\HookProvider;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
 
 /** @since 1.0.0 */
 final class FormsPage extends HookProvider
 {
-    private const PAGE_ID   = 'fundkit-forms';
-    private const HANDLE    = 'fundkit-admin-forms';
+    private const PAGE_ID   = 'gratora-forms';
+    private const HANDLE    = 'gratora-admin-forms';
     private const BUILD_DIR = 'build/admin/forms';
 
     /** @since 1.0.0 */
     protected function filters(): array
     {
         return [
-            'fundkit.admin.pages' => 'registerPage',
+            'gratora.admin.pages' => 'registerPage',
             'show_admin_bar'      => 'hideAdminBar',
         ];
     }
@@ -60,16 +60,16 @@ final class FormsPage extends HookProvider
         . 'html.wp-toolbar{padding-top:0!important}'
         . 'html,body{height:100%;margin:0;padding:0;background:#fff}'
         . '#wpwrap,#wpcontent,#wpbody,#wpbody-content{margin-left:0!important;padding:0!important;float:none!important;width:100%!important;background:#fff}'
-        . '.wrap,.fundkit-forms-wrap{margin:0!important;padding:0!important}'
-        . '#fundkit-admin-forms{height:100vh;overflow:hidden;background:#fff}';
+        . '.wrap,.gratora-forms-wrap{margin:0!important;padding:0!important}'
+        . '#gratora-admin-forms{height:100vh;overflow:hidden;background:#fff}';
 
     /** @since 1.0.0 */
     public function registerPage(array $pages): array
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Forms', 'fundraising-toolkit'),
-            'capability' => 'fundkit_access_forms',
+            'title'      => __('Forms', 'gratora'),
+            'capability' => 'gratora_access_forms',
             'position'   => 15,
             'hidden'     => true,
             'render'     => [$this, 'render'],
@@ -83,8 +83,8 @@ final class FormsPage extends HookProvider
         $this->bootBlockEditorContext();
         $this->enqueueAssets();
         ?>
-        <div class="wrap fundkit-forms-wrap">
-            <div id="fundkit-admin-forms"></div>
+        <div class="wrap gratora-forms-wrap">
+            <div id="gratora-admin-forms"></div>
         </div>
         <?php
     }
@@ -131,16 +131,16 @@ final class FormsPage extends HookProvider
         do_action('enqueue_block_editor_assets');
         add_action('admin_print_footer_scripts', ['_WP_Editors', 'print_default_editor_scripts'], 45);
 
-        $asset = require FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
+        $asset = require GRATORA_DIR . self::BUILD_DIR . '/index.asset.php';
         wp_enqueue_script(
             self::HANDLE,
-            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
+            GRATORA_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? FUNDKIT_VERSION,
+            $asset['version']      ?? GRATORA_VERSION,
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
 
         // Include disabled gateways so saved block choices remain visible.
         $manager  = Plugin::instance()->container->get(GatewayManager::class);
@@ -163,31 +163,31 @@ final class FormsPage extends HookProvider
             Plugin::instance()->container->get(ConsentService::class)->purposes()
         );
 
-        wp_localize_script(self::HANDLE, 'fundkitFormsEditor', [
+        wp_localize_script(self::HANDLE, 'gratoraFormsEditor', [
             'gateways' => $gateways,
             'consents' => $consents,
-            'consentsSettingsUrl' => admin_url('admin.php?page=fundkit-settings&tab=consents'),
+            'consentsSettingsUrl' => admin_url('admin.php?page=gratora-settings&tab=consents'),
         ]);
 
-        do_action('fundkit.editor.assets', self::HANDLE);
+        do_action('gratora.editor.assets', self::HANDLE);
 
         wp_enqueue_style(
-            'fundkit-dataviews-vendor-forms',
-            FUNDKIT_URL . self::BUILD_DIR . '/dataviews.css',
+            'gratora-dataviews-vendor-forms',
+            GRATORA_URL . self::BUILD_DIR . '/dataviews.css',
             ['wp-components'],
-            (string) (@filemtime(FUNDKIT_DIR . self::BUILD_DIR . '/dataviews.css') ?: FUNDKIT_VERSION)
+            (string) (@filemtime(GRATORA_DIR . self::BUILD_DIR . '/dataviews.css') ?: GRATORA_VERSION)
         );
 
         wp_enqueue_style(
-            'fundkit-admin-forms',
-            FUNDKIT_URL . 'build/admin/forms.css',
+            'gratora-admin-forms',
+            GRATORA_URL . 'build/admin/forms.css',
             ['wp-edit-post', 'wp-block-editor', 'wp-components'],
-            (string) (@filemtime(FUNDKIT_DIR . 'build/admin/forms.css') ?: FUNDKIT_VERSION)
+            (string) (@filemtime(GRATORA_DIR . 'build/admin/forms.css') ?: GRATORA_VERSION)
         );
-        wp_style_add_data('fundkit-admin-forms', 'rtl', 'replace');
+        wp_style_add_data('gratora-admin-forms', 'rtl', 'replace');
 
         if (self::isFormEditView()) {
-            wp_add_inline_style('fundkit-admin-forms', self::FULLSCREEN_CSS);
+            wp_add_inline_style('gratora-admin-forms', self::FULLSCREEN_CSS);
         }
     }
 }

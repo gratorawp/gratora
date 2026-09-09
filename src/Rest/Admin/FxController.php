@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
-use FundKit\Currency\FxBackfill;
-use FundKit\Currency\FxRates;
-use FundKit\Currency\FxRatesUpdater;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Settings\SettingsService;
+namespace Gratora\Rest\Admin;
+use Gratora\Currency\FxBackfill;
+use Gratora\Currency\FxRates;
+use Gratora\Currency\FxRatesUpdater;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -21,7 +21,7 @@ use WP_REST_Server;
  */
 final class FxController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -58,7 +58,7 @@ final class FxController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('fundkit_manage_settings');
+        return Capabilities::userCan('gratora_manage_settings');
     }
 
     /** @since 1.0.0 */
@@ -90,8 +90,8 @@ final class FxController
 
         if (! $this->updater->saveSettings((bool) ($body['auto'] ?? true), $manual, $frame)) {
             return new WP_REST_Response([
-                'code'    => 'fundkit_fx_frame_moved',
-                'message' => __('The base currency changed while this screen was open, so the rates shown are no longer in the currency they were entered against. Reload the page and set them again.', 'fundraising-toolkit'),
+                'code'    => 'gratora_fx_frame_moved',
+                'message' => __('The base currency changed while this screen was open, so the rates shown are no longer in the currency they were entered against. Reload the page and set them again.', 'gratora'),
             ], 409);
         }
 

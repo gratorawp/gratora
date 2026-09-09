@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Reports;
+namespace Gratora\Reports;
 
-use FundKit\Campaigns\Styling\Tokens;
-use FundKit\Campaigns\Styling\CampaignStyleResolver;
-use FundKit\Exports\RevenueExporter;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Helpers\View;
-use FundKit\Receipts\OrgProfile;
-use FundKit\Receipts\PdfBuilder;
+use Gratora\Campaigns\Styling\Tokens;
+use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Exports\RevenueExporter;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\View;
+use Gratora\Receipts\OrgProfile;
+use Gratora\Receipts\PdfBuilder;
 
 /**
  * Builds a one-page revenue summary for a calendar year: the year's total, a
@@ -63,25 +63,25 @@ final class RevenueReportBuilder
             'total'          => Money::format($totalCents, $currency),
             'months'         => $months,
             'stats'          => [
-                ['label' => __('Donations', 'fundraising-toolkit'),        'value' => number_format_i18n($totalCount)],
-                ['label' => __('Average donation', 'fundraising-toolkit'), 'value' => Money::format($totalCount > 0 ? intdiv($totalCents, $totalCount) : 0, $currency)],
-                ['label' => __('Best month', 'fundraising-toolkit'),       'value' => $best !== null && $best['amount_cents'] > 0 ? $this->monthLabel($best['month']) : '-'],
+                ['label' => __('Donations', 'gratora'),        'value' => number_format_i18n($totalCount)],
+                ['label' => __('Average donation', 'gratora'), 'value' => Money::format($totalCount > 0 ? intdiv($totalCents, $totalCount) : 0, $currency)],
+                ['label' => __('Best month', 'gratora'),       'value' => $best !== null && $best['amount_cents'] > 0 ? $this->monthLabel($best['month']) : '-'],
             ],
             'generated_date' => (string) wp_date(get_option('date_format')),
         ]);
 
         return $this->pdf->fromHtml($html, [
             /* translators: %s: four-digit year. */
-            'title'   => sprintf(__('Revenue report %s', 'fundraising-toolkit'), (string) $year),
+            'title'   => sprintf(__('Revenue report %s', 'gratora'), (string) $year),
             'author'  => $orgName,
-            'subject' => __('Revenue and donations report', 'fundraising-toolkit'),
+            'subject' => __('Revenue and donations report', 'gratora'),
         ]);
     }
 
     /** @since 1.0.0 */
     public static function filename(int $year): string
     {
-        return sprintf('fundkit-revenue-%d.pdf', $year);
+        return sprintf('gratora-revenue-%d.pdf', $year);
     }
 
     /**

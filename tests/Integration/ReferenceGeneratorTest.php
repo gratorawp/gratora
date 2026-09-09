@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Foundation\Time\FrozenClock;
+use Gratora\Foundation\References\ReferenceGenerator;
+use Gratora\Foundation\Time\FrozenClock;
 
 final class ReferenceGeneratorTest extends IntegrationTestCase
 {
@@ -15,7 +15,7 @@ final class ReferenceGeneratorTest extends IntegrationTestCase
         delete_option(ReferenceGenerator::OPTION_SETTINGS);
         // Wipe any counter rows lingering across tests.
         self::$wpdb->query(
-            "DELETE FROM " . self::$prefix . "options WHERE option_name LIKE 'fundkit_reference_counter_%'"
+            "DELETE FROM " . self::$prefix . "options WHERE option_name LIKE 'gratora_reference_counter_%'"
         );
     }
 

@@ -5,17 +5,17 @@ defined('ABSPATH') || exit;
  * @var bool $showGateway
  */
 ?>
-<div class="fundkit-block fundkit-block--summary fundkit-form__confirm" data-block="fundkit/donation-summary"
+<div class="gratora-block gratora-block--summary gratora-form__confirm" data-block="gratora/donation-summary"
      data-show-donor="<?php echo esc_attr($showDonor ? '1' : '0'); ?>"
      data-show-gateway="<?php echo esc_attr($showGateway ? '1' : '0'); ?>">
-    <dl class="fundkit-form__summary">
-        <div class="fundkit-form__summary-row">
-            <dt><?php esc_html_e('Amount', 'fundraising-toolkit'); ?></dt>
-            <dd class="fundkit-form__summary-amount"></dd>
+    <dl class="gratora-form__summary">
+        <div class="gratora-form__summary-row">
+            <dt><?php esc_html_e('Amount', 'gratora'); ?></dt>
+            <dd class="gratora-form__summary-amount"></dd>
         </div>
-        <div class="fundkit-form__summary-row fundkit-form__summary-row--total">
-            <dt><?php esc_html_e('Total', 'fundraising-toolkit'); ?></dt>
-            <dd class="fundkit-form__summary-amount"></dd>
+        <div class="gratora-form__summary-row gratora-form__summary-row--total">
+            <dt><?php esc_html_e('Total', 'gratora'); ?></dt>
+            <dd class="gratora-form__summary-amount"></dd>
         </div>
     </dl>
 </div>

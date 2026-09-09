@@ -1,9 +1,9 @@
-# Copyright (C) 2026 Fundraising Toolkit
+# Copyright (C) 2026 Gratora
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Fundraising Toolkit - Donation & Fundraising Platform 1.0.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/fundraising-toolkit\n"
+"Project-Id-Version: Gratora - Donation & Fundraising Platform 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/gratora\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -12,7 +12,7 @@ msgstr ""
 "POT-Creation-Date: 2026-09-08T23:10:45+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
-"X-Domain: fundraising-toolkit\n"
+"X-Domain: gratora\n"
 
 #. translators: %d: number of edited fields in this card
 #: components/Card.js:57
@@ -485,28 +485,28 @@ msgid "Hide widget"
 msgstr ""
 
 #. Plugin Name of the plugin
-#: fundkit.php
-msgid "Fundraising Toolkit - Donation & Fundraising Platform"
+#: gratora.php
+msgid "Gratora - Donation & Fundraising Platform"
 msgstr ""
 
 #. Plugin URI of the plugin
-#: fundkit.php
-msgid "https://fundkit.net"
+#: gratora.php
+msgid "https://gratora.net"
 msgstr ""
 
 #. Description of the plugin
-#: fundkit.php
+#: gratora.php
 msgid "Donation & Fundraising Platform for WordPress"
 msgstr ""
 
 #. Author of the plugin
-#: fundkit.php
+#: gratora.php
 #: src/Admin/AdminFooter.php:43
 #: src/Admin/AdminMenu.php:30
 #: src/Admin/SystemReport.php:53
 #: src/Campaigns/Blocks/BlockEditorIntegration.php:205
 #: src/Foundation/Commands/AbilitiesBridge.php:48
-msgid "Fundraising Toolkit"
+msgid "Gratora"
 msgstr ""
 
 #: src/Admin/AdminFooter.php:33
@@ -546,11 +546,11 @@ msgid "Dashboard"
 msgstr ""
 
 #: src/Admin/ManagedPageStates.php:37
-msgid "Fundraising Toolkit Campaign"
+msgid "Gratora Campaign"
 msgstr ""
 
 #: src/Admin/ManagedPageStates.php:42
-msgid "Fundraising Toolkit Donor Portal"
+msgid "Gratora Donor Portal"
 msgstr ""
 
 #: src/Admin/Pages/CampaignsPage.php:28
@@ -656,7 +656,7 @@ msgid "Tools"
 msgstr ""
 
 #: src/Admin/ProxyNotice.php:52
-msgid "Fundraising Toolkit: every visitor looks like one address."
+msgid "Gratora: every visitor looks like one address."
 msgstr ""
 
 #: src/Admin/ProxyNotice.php:53
@@ -923,14 +923,14 @@ msgid "not set"
 msgstr ""
 
 #: src/Admin/TestModeBadge.php:54
-msgid "Fundraising Toolkit Test Mode Active"
+msgid "Gratora Test Mode Active"
 msgstr ""
 
 #. translators: %d: how many published forms are in test mode.
 #: src/Admin/TestModeBadge.php:57
 #, php-format
-msgid "%d Fundraising Toolkit Form in Test Mode"
-msgid_plural "%d Fundraising Toolkit Forms in Test Mode"
+msgid "%d Gratora Form in Test Mode"
+msgid_plural "%d Gratora Forms in Test Mode"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -943,15 +943,15 @@ msgid "These forms take no real money. Every other form on the site does."
 msgstr ""
 
 #: src/Admin/views/deactivation-dialog.php:12
-msgid "Deactivate Fundraising Toolkit"
+msgid "Deactivate Gratora"
 msgstr ""
 
 #: src/Admin/views/deactivation-dialog.php:16
-msgid "Your donations, donors, campaigns and settings stay as they are. Switching Fundraising Toolkit back on picks up where you left off."
+msgid "Your donations, donors, campaigns and settings stay as they are. Switching Gratora back on picks up where you left off."
 msgstr ""
 
 #: src/Admin/views/deactivation-dialog.php:22
-msgid "Delete all Fundraising Toolkit data as well"
+msgid "Delete all Gratora data as well"
 msgstr ""
 
 #: src/Admin/views/deactivation-dialog.php:27
@@ -1081,7 +1081,7 @@ msgstr ""
 
 #: src/Campaigns/Blocks/CampaignBindings.php:85
 #: assets/admin/campaign-blocks/bindings.js:47
-msgid "Fundraising Toolkit campaign"
+msgid "Gratora campaign"
 msgstr ""
 
 #: src/Campaigns/Blocks/CampaignBlock.php:128
@@ -1631,7 +1631,7 @@ msgid "Classic"
 msgstr ""
 
 #: src/Campaigns/Styling/StylePresets.php:37
-msgid "Balanced, friendly, accent green. The Fundraising Toolkit default."
+msgid "Balanced, friendly, accent green. The Gratora default."
 msgstr ""
 
 #: src/Campaigns/Styling/StylePresets.php:48
@@ -1922,13 +1922,13 @@ msgid "Link is time-limited to your login session (about %s); regenerate it if i
 msgstr ""
 
 #: src/Core/CoreModule.php:250
-msgid "Fundraising Toolkit Core"
+msgid "Gratora Core"
 msgstr ""
 
 #. translators: %s: timestamp the key loss was detected
 #: src/Core/CoreModule.php:1251
 #, php-format
-msgid "Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore fundkit_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key."
+msgid "Encryption key missing since %s. Donor PII written before this point cannot be decrypted. Restore gratora_system_settings from a backup, or accept that historical PII is gone. New donations are encrypting against a freshly generated key."
 msgstr ""
 
 #. translators: 1: current base currency, 2: number of donations.
@@ -2286,7 +2286,7 @@ msgstr ""
 
 #: src/Donors/Privacy/WordPressPrivacy.php:52
 #: src/Donors/Privacy/WordPressPrivacy.php:68
-msgid "Fundraising Toolkit donations"
+msgid "Gratora donations"
 msgstr ""
 
 #: src/Donors/Privacy/WordPressPrivacy.php:93
@@ -3517,7 +3517,7 @@ msgid "For a public campaign with a goal and a supporter wall. Carries a progres
 msgstr ""
 
 #: src/Forms/Shortcode/DonationFormShortcode.php:139
-msgid "Specify a form slug: [fundkit_donation_form slug=\"...\"]."
+msgid "Specify a form slug: [gratora_donation_form slug=\"...\"]."
 msgstr ""
 
 #. translators: %s: form slug
@@ -3924,7 +3924,7 @@ msgid "Manage licenses"
 msgstr ""
 
 #: src/Foundation/License/LicenseNotice.php:105
-msgid "Fundraising Toolkit:"
+msgid "Gratora:"
 msgstr ""
 
 #: src/Foundation/License/LicenseRefusals.php:61
@@ -4021,11 +4021,11 @@ msgid "Restoring receipts that a partial refund withdrew."
 msgstr ""
 
 #: src/Foundation/Upgrade/SchemaGuard.php:167
-msgid "Fundraising Toolkit could not create its database tables."
+msgid "Gratora could not create its database tables."
 msgstr ""
 
 #: src/Foundation/Upgrade/SchemaGuard.php:168
-msgid "The plugin cannot run until they exist. This usually means the database user is not allowed to create tables, or the host caps how many a site may have. Ask your host to grant CREATE, then reload this page: Fundraising Toolkit retries on every request."
+msgid "The plugin cannot run until they exist. This usually means the database user is not allowed to create tables, or the host caps how many a site may have. Ask your host to grant CREATE, then reload this page: Gratora retries on every request."
 msgstr ""
 
 #: src/Foundation/Upgrade/UnautoloadGatewayConfig.php:32
@@ -4037,7 +4037,7 @@ msgid "Letting the sender name and organisation name follow the site again."
 msgstr ""
 
 #: src/Foundation/Upgrade/UpgradeNotice.php:79
-msgid "Fundraising Toolkit could not finish a data update."
+msgid "Gratora could not finish a data update."
 msgstr ""
 
 #: src/Foundation/Upgrade/UpgradeNotice.php:80
@@ -4049,7 +4049,7 @@ msgid "See what failed"
 msgstr ""
 
 #: src/Foundation/Upgrade/UpgradeNotice.php:90
-msgid "Fundraising Toolkit is finishing a data update."
+msgid "Gratora is finishing a data update."
 msgstr ""
 
 #: src/Foundation/Upgrade/UpgradeNotice.php:92
@@ -4362,7 +4362,7 @@ msgid "unavailable"
 msgstr ""
 
 #: src/Gateways/Stripe/StripeWebhookNotice.php:92
-msgid "Stripe is connected but its webhook signing secret is missing. Recurring renewals, payment confirmations, and account updates will not process until you add it under Fundraising Toolkit, Settings, Payment gateways."
+msgid "Stripe is connected but its webhook signing secret is missing. Recurring renewals, payment confirmations, and account updates will not process until you add it under Gratora, Settings, Payment gateways."
 msgstr ""
 
 #: src/Onboarding/OnboardingPage.php:30
@@ -5224,11 +5224,11 @@ msgid "Provide a valid recipient email."
 msgstr ""
 
 #: src/Rest/Admin/ToolsController.php:495
-msgid "Fundraising Toolkit test email"
+msgid "Gratora test email"
 msgstr ""
 
 #: src/Rest/Admin/ToolsController.php:496
-msgid "This is a test email from Fundraising Toolkit."
+msgid "This is a test email from Gratora."
 msgstr ""
 
 #: src/Rest/Admin/ToolsController.php:497
@@ -5595,7 +5595,7 @@ msgid "Stripe has no webhook signing secret"
 msgstr ""
 
 #: src/Settings/ReadinessService.php:337
-msgid "Without it Fundraising Toolkit cannot trust what Stripe reports, so renewals, refunds and cancellations made in Stripe never reach this site."
+msgid "Without it Gratora cannot trust what Stripe reports, so renewals, refunds and cancellations made in Stripe never reach this site."
 msgstr ""
 
 #: src/Settings/ReadinessService.php:339
@@ -6089,7 +6089,7 @@ msgid "Every accepted currency is a three-letter code, like USD or EUR."
 msgstr ""
 
 #: assets/admin/campaign-blocks/bindings.js:24
-msgid "Fundraising Toolkit campaign binding preview"
+msgid "Gratora campaign binding preview"
 msgstr ""
 
 #: assets/admin/campaign-blocks/campaign-field.jsx:64
@@ -6121,7 +6121,7 @@ msgid "You do not have permission to list campaigns, so this block can only use 
 msgstr ""
 
 #: assets/admin/campaign-blocks/index.jsx:85
-msgid "Fundraising Toolkit campaign block"
+msgid "Gratora campaign block"
 msgstr ""
 
 #: assets/admin/campaign-blocks/index.jsx:86
@@ -7901,35 +7901,35 @@ msgid "anonymous publicly"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:37
-msgid "Fundraising Toolkit: Open dashboard"
+msgid "Gratora: Open dashboard"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:44
-msgid "Fundraising Toolkit: View donations"
+msgid "Gratora: View donations"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:51
-msgid "Fundraising Toolkit: View donors"
+msgid "Gratora: View donors"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:58
-msgid "Fundraising Toolkit: View campaigns"
+msgid "Gratora: View campaigns"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:65
-msgid "Fundraising Toolkit: View funds"
+msgid "Gratora: View funds"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:72
-msgid "Fundraising Toolkit: Open settings"
+msgid "Gratora: Open settings"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:79
-msgid "Fundraising Toolkit: Open onboarding wizard"
+msgid "Gratora: Open onboarding wizard"
 msgstr ""
 
 #: assets/admin/command-palette/index.jsx:86
-msgid "Fundraising Toolkit: New campaign"
+msgid "Gratora: New campaign"
 msgstr ""
 
 #: assets/admin/dashboard/Dashboard.jsx:121
@@ -12248,7 +12248,7 @@ msgid "Just exploring"
 msgstr ""
 
 #: assets/admin/onboarding/Onboarding.jsx:95
-msgid "Trying Fundraising Toolkit out. Starts in test mode, so nothing takes real money until you switch it off."
+msgid "Trying Gratora out. Starts in test mode, so nothing takes real money until you switch it off."
 msgstr ""
 
 #: assets/admin/onboarding/Onboarding.jsx:191
@@ -12795,7 +12795,7 @@ msgid "BCC me on every donor email"
 msgstr ""
 
 #: assets/admin/settings/panels/EmailPanel.jsx:82
-msgid "Sends the site admin address a copy of every message FundKit sends: receipts, refunds, payment instructions, recurring notices and the test email. Sign-in links are never copied."
+msgid "Sends the site admin address a copy of every message Gratora sends: receipts, refunds, payment instructions, recurring notices and the test email. Sign-in links are never copied."
 msgstr ""
 
 #: assets/admin/settings/panels/EmailPanel.jsx:89
@@ -12824,7 +12824,7 @@ msgid "Send test email"
 msgstr ""
 
 #: assets/admin/settings/panels/EmailPanel.jsx:118
-msgid "If test emails arrive but donors report nothing, the cause is almost always authentication rather than Fundraising Toolkit. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends."
+msgid "If test emails arrive but donors report nothing, the cause is almost always authentication rather than Gratora. Mailboxes such as Gmail reject mail that is not signed for your domain, and PHP mail on shared hosting is not. An SMTP plugin pointed at an authenticated provider fixes it for every email your site sends."
 msgstr ""
 
 #: assets/admin/settings/panels/EmailPanel.jsx:121
@@ -12836,7 +12836,7 @@ msgid "Donor emails"
 msgstr ""
 
 #: assets/admin/settings/panels/EmailPanel.jsx:128
-msgid "Sent to donors automatically by Fundraising Toolkit"
+msgid "Sent to donors automatically by Gratora"
 msgstr ""
 
 #: assets/admin/settings/panels/EmailPanel.jsx:129
@@ -13181,7 +13181,7 @@ msgid "Webhook id"
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:161
-msgid "From the webhook you created in the PayPal dashboard. Fundraising Toolkit checks it against this app, and the credentials on file stay as they are."
+msgid "From the webhook you created in the PayPal dashboard. Gratora checks it against this app, and the credentials on file stay as they are."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:167
@@ -13217,11 +13217,11 @@ msgid "Secret"
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:204
-msgid "Stored encrypted and never shown again. Fundraising Toolkit verifies it with PayPal before saving."
+msgid "Stored encrypted and never shown again. Gratora verifies it with PayPal before saving."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:210
-msgid "From the webhook you created in the PayPal dashboard. Without it PayPal cannot prove an event came from PayPal, so every notification is rejected and donations PayPal settles after checkout stay unpaid. You can add it after these credentials, but PayPal will not work properly until you do. Fundraising Toolkit checks it against your app and only saves an id PayPal confirms."
+msgid "From the webhook you created in the PayPal dashboard. Without it PayPal cannot prove an event came from PayPal, so every notification is rejected and donations PayPal settles after checkout stay unpaid. You can add it after these credentials, but PayPal will not work properly until you do. Gratora checks it against your app and only saves an id PayPal confirms."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:219
@@ -13279,7 +13279,7 @@ msgid "Not set up"
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:315
-msgid "Add the credentials from your own PayPal REST app. Donations are paid straight into your PayPal account, and Fundraising Toolkit never takes a cut."
+msgid "Add the credentials from your own PayPal REST app. Donations are paid straight into your PayPal account, and Gratora never takes a cut."
 msgstr ""
 
 #: assets/admin/settings/panels/PayPalKeysCard.jsx:318
@@ -13745,7 +13745,7 @@ msgid "Secret key"
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:124
-msgid "Stored encrypted and never shown again. Fundraising Toolkit verifies it with Stripe before saving."
+msgid "Stored encrypted and never shown again. Gratora verifies it with Stripe before saving."
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:165
@@ -13860,7 +13860,7 @@ msgid "Action needed"
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:381
-msgid "Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and Fundraising Toolkit never takes a cut."
+msgid "Add the API keys from your own Stripe account. Donations are charged directly on your account and pay out to your bank, and Gratora never takes a cut."
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:384
@@ -13892,7 +13892,7 @@ msgid "Donations are charged on your Stripe account and paid out to your bank."
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:434
-msgid "Webhooks tell Fundraising Toolkit when a payment succeeds, fails or is refunded. Fundraising Toolkit registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below."
+msgid "Webhooks tell Gratora when a payment succeeds, fails or is refunded. Gratora registers this endpoint on your account automatically when you save keys. On a local site Stripe cannot reach it, so add the endpoint yourself and paste its signing secret below."
 msgstr ""
 
 #: assets/admin/settings/panels/StripeKeysCard.jsx:443
@@ -14373,7 +14373,7 @@ msgid "The donor"
 msgstr ""
 
 #: assets/admin/tools/tabs/CsvImportCard.jsx:195
-msgid "Fundraising Toolkit field"
+msgid "Gratora field"
 msgstr ""
 
 #: assets/admin/tools/tabs/CsvImportCard.jsx:196
@@ -14561,7 +14561,7 @@ msgid "Pick at least one column. With none selected the file would still carry n
 msgstr ""
 
 #: assets/admin/tools/tabs/ExportTab.jsx:337
-msgid "Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another Fundraising Toolkit site."
+msgid "Campaigns, funds, forms, donors, donations, recurring plans and receipts as one JSON file, which the Import tab can restore onto another Gratora site."
 msgstr ""
 
 #: assets/admin/tools/tabs/ExportTab.jsx:346
@@ -14574,7 +14574,7 @@ msgid "Donor names, email addresses and postal addresses are readable in this fi
 msgstr ""
 
 #: assets/admin/tools/tabs/ExportTab.jsx:358
-msgid "Every Fundraising Toolkit setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included."
+msgid "Every Gratora setting as JSON, to lift a configured site onto another install. Donations, donors and campaigns are not included."
 msgstr ""
 
 #: assets/admin/tools/tabs/ExportTab.jsx:371
@@ -14606,7 +14606,7 @@ msgstr ""
 #. translators: %s: the chosen file name.
 #: assets/admin/tools/tabs/ImportTab.jsx:51
 #, js-format
-msgid "%s will write its gateway, email, receipt, numbering and role settings over yours. A setting the file does not carry keeps the value it has here, except the role mapping, which is replaced whole: a role the file does not name loses its Fundraising Toolkit capabilities. Donations, donors and campaigns are untouched. This cannot be undone."
+msgid "%s will write its gateway, email, receipt, numbering and role settings over yours. A setting the file does not carry keeps the value it has here, except the role mapping, which is replaced whole: a role the file does not name loses its Gratora capabilities. Donations, donors and campaigns are untouched. This cannot be undone."
 msgstr ""
 
 #: assets/admin/tools/tabs/ImportTab.jsx:54
@@ -14654,11 +14654,11 @@ msgid "Reload the page to see it."
 msgstr ""
 
 #: assets/admin/tools/tabs/ImportTab.jsx:125
-msgid "Nothing in that file matched a Fundraising Toolkit setting or record."
+msgid "Nothing in that file matched a Gratora setting or record."
 msgstr ""
 
 #: assets/admin/tools/tabs/ImportTab.jsx:128
-msgid "Import failed. Check that the file is a Fundraising Toolkit settings export."
+msgid "Import failed. Check that the file is a Gratora settings export."
 msgstr ""
 
 #: assets/admin/tools/tabs/ImportTab.jsx:136
@@ -14674,7 +14674,7 @@ msgid "Import settings"
 msgstr ""
 
 #: assets/admin/tools/tabs/ImportTab.jsx:152
-msgid "Reads a Fundraising Toolkit settings export and replaces the settings it carries. Anything it does not carry keeps the value it has here. Donations, donors and campaigns are left alone."
+msgid "Reads a Gratora settings export and replaces the settings it carries. Anything it does not carry keeps the value it has here. Donations, donors and campaigns are left alone."
 msgstr ""
 
 #: assets/admin/tools/tabs/ImportTab.jsx:161
@@ -14732,7 +14732,7 @@ msgid "Deletes every entry recorded under %s. Nothing else is touched."
 msgstr ""
 
 #: assets/admin/tools/tabs/LogsTab.jsx:167
-msgid "Deletes every entry: the failures Fundraising Toolkit recorded and the history of what your gateways sent. The log fills again as things happen."
+msgid "Deletes every entry: the failures Gratora recorded and the history of what your gateways sent. The log fills again as things happen."
 msgstr ""
 
 #: assets/admin/tools/tabs/LogsTab.jsx:168
@@ -14984,7 +14984,7 @@ msgid "Scheduled tasks"
 msgstr ""
 
 #: assets/admin/tools/tabs/SystemInfoTab.jsx:73
-msgid "Fundraising Toolkit jobs queued with Action Scheduler, and when each is due."
+msgid "Gratora jobs queued with Action Scheduler, and when each is due."
 msgstr ""
 
 #: assets/admin/tools/tabs/SystemInfoTab.jsx:85
@@ -15413,11 +15413,11 @@ msgstr ""
 msgid "%1$s is %2$s, which is outside what its slider offers. Its row takes the value as text."
 msgstr ""
 
-#: assets/admin/_shared/useFundKitSettings.js:32
+#: assets/admin/_shared/useGratoraSettings.js:32
 msgid "Could not load these settings."
 msgstr ""
 
-#: assets/admin/_shared/useFundKitSettings.js:67
+#: assets/admin/_shared/useGratoraSettings.js:67
 msgid "Settings have not loaded yet. Refresh and try again."
 msgstr ""
 

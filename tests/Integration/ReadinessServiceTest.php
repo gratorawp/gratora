@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Donors\Portal\PortalPage;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormReadinessService;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\License\LicenseService;
-use FundKit\Foundation\Time\SystemClock;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\Offline\OfflineGateway;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\Stripe\ApplePayDomain;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\TestMode;
-use FundKit\Forms\FormRepository;
-use FundKit\Settings\ReadinessService;
-use FundKit\Settings\SettingsService;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donors\Portal\PortalPage;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormReadinessService;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\License\LicenseService;
+use Gratora\Foundation\Time\SystemClock;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\Offline\OfflineGateway;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\Stripe\ApplePayDomain;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\TestMode;
+use Gratora\Forms\FormRepository;
+use Gratora\Settings\ReadinessService;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -32,7 +32,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        delete_option('fundkit_gateway_config');
+        delete_option('gratora_gateway_config');
         delete_option(PortalPage::OPTION_PAGE_ID);
     }
 
@@ -53,7 +53,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
         return new ReadinessService(
             $settings,
-            new FormReadinessService($settings, new GatewayManager(), $stripe, new TestMode(new FormRepository()), \FundKit\Foundation\Plugin::instance()->container->get(\FundKit\Donors\ConsentService::class)),
+            new FormReadinessService($settings, new GatewayManager(), $stripe, new TestMode(new FormRepository()), \Gratora\Foundation\Plugin::instance()->container->get(\Gratora\Donors\ConsentService::class)),
             $stripe,
             $api,
             new ApplePayDomain($api, $stripe),
@@ -81,7 +81,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
     private function enableOffline(string $instructions = 'Transfer within 7 days.'): void
     {
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'offline' => ['enabled' => true, 'instructions' => $instructions],
         ]);
     }
@@ -110,7 +110,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
     public function test_test_mode_is_reported_as_a_warning_not_a_pass(): void
     {
-        update_option('fundkit_gateway_config', ['test_mode' => true]);
+        update_option('gratora_gateway_config', ['test_mode' => true]);
 
         $check = $this->checks()['mode'];
         $this->assertSame(ReadinessService::WARN, $check['status']);
@@ -141,7 +141,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
     public function test_live_mode_says_keys_are_on_file_once_they_are(): void
     {
-        update_option('fundkit_gateway_config', ['stripe' => ['enabled' => true]]);
+        update_option('gratora_gateway_config', ['stripe' => ['enabled' => true]]);
         (new StripeAccount(new Crypto()))->saveKeys(false, 'sk_live_x', 'pk_live_x');
 
         $this->assertStringContainsString('live keys on file', (string) $this->checks()['mode']['label']);
@@ -184,8 +184,8 @@ final class ReadinessServiceTest extends IntegrationTestCase
     {
         (new StripeAccount(new Crypto()))->saveKeys(true, 'sk_test_x', 'pk_test_x');
         $this->enableOffline();
-        update_option('fundkit_gateway_config', array_merge(
-            (array) get_option('fundkit_gateway_config', []),
+        update_option('gratora_gateway_config', array_merge(
+            (array) get_option('gratora_gateway_config', []),
             ['stripe' => ['enabled' => false]]
         ));
 
@@ -208,7 +208,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
     public function test_a_switched_on_gateway_still_raises_its_gaps(): void
     {
         (new StripeAccount(new Crypto()))->saveKeys(true, 'sk_test_x', 'pk_test_x');
-        update_option('fundkit_gateway_config', ['stripe' => ['enabled' => true]]);
+        update_option('gratora_gateway_config', ['stripe' => ['enabled' => true]]);
 
         $checks = $this->checks();
 
@@ -249,14 +249,14 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
     public function test_an_org_with_no_address_is_flagged_on_receipts(): void
     {
-        update_option('fundkit_org_profile', ['name' => 'Test Org', 'address_lines' => [], 'tax_id' => '']);
+        update_option('gratora_org_profile', ['name' => 'Test Org', 'address_lines' => [], 'tax_id' => '']);
 
         $this->assertSame(ReadinessService::WARN, $this->checks()['org-identity']['status']);
     }
 
     public function test_the_missing_details_are_whole_sentences(): void
     {
-        update_option('fundkit_org_profile', [
+        update_option('gratora_org_profile', [
             'name'          => '',
             'legal_name'    => '',
             'address_lines' => ['1 Example Street'],
@@ -264,7 +264,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
         ]);
 
         add_filter('gettext', static function ($translated, $text, $domain) {
-            if ($domain !== 'fundraising-toolkit') return $translated;
+            if ($domain !== 'gratora') return $translated;
 
             return match ($text) {
                 'Receipts do not carry your organization name.' => 'S1',
@@ -285,7 +285,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
     public function test_a_complete_org_passes(): void
     {
-        update_option('fundkit_org_profile', [
+        update_option('gratora_org_profile', [
             'name'          => 'Test Org',
             'legal_name'    => 'Test Org e.V.',
             'address_lines' => ['1 Example Street', 'Berlin'],
@@ -316,7 +316,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
     public function test_the_endpoint_reports_the_blocker_count(): void
     {
-        $data = (array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/readiness'))->get_data();
+        $data = (array) rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/readiness'))->get_data();
 
         $this->assertArrayHasKey('checks', $data);
         $this->assertGreaterThan(0, $data['blockers']);
@@ -325,17 +325,17 @@ final class ReadinessServiceTest extends IntegrationTestCase
 
     private function publishedCampaign(bool $publishForm): void
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Readiness campaign', 'status' => 'published']));
         $campaignId = (int) rest_do_request($req)->get_data()['id'];
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'title'       => 'Readiness form',
             'campaign_id' => $campaignId,
-            'blocks'      => '<!-- wp:fundkit/donation-amount /-->',
+            'blocks'      => '<!-- wp:gratora/donation-amount /-->',
         ]));
         $formId = (int) rest_do_request($req)->get_data()['id'];
 
@@ -372,7 +372,7 @@ final class ReadinessServiceTest extends IntegrationTestCase
      */
     public function test_bank_details_alone_are_a_way_to_charge(): void
     {
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'offline' => ['enabled' => true, 'instructions' => '', 'bank_details' => 'IBAN NL00 BANK 0123 4567 89'],
         ]);
 

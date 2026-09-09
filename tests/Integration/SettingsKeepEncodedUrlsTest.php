@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Settings\SettingsService;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -17,7 +17,7 @@ final class SettingsKeepEncodedUrlsTest extends IntegrationTestCase
 {
     private function save(string $group, array $body): void
     {
-        $request = new WP_REST_Request('POST', '/fundkit/v1/admin/settings/' . $group);
+        $request = new WP_REST_Request('POST', '/gratora/v1/admin/settings/' . $group);
         $request->set_header('content-type', 'application/json');
         $request->set_body((string) wp_json_encode($body));
 

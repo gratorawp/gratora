@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Multisite;
+namespace Gratora\Tests\Multisite;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Uninstall\DataEraser;
-use FundKit\Tests\Integration\IntegrationTestCase;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Uninstall\DataEraser;
+use Gratora\Tests\Integration\IntegrationTestCase;
 
 /**
  * Network deactivation fires once in the main-site context. Observe per-site announcements and
@@ -30,7 +30,7 @@ final class NetworkDeactivationWipeTest extends IntegrationTestCase
         $this->otherSite = (int) self::factory()->blog->create();
         $this->erased    = [];
 
-        add_action('fundkit.uninstall', function (): void {
+        add_action('gratora.uninstall', function (): void {
             $this->erased[] = get_current_blog_id();
         });
 
@@ -43,7 +43,7 @@ final class NetworkDeactivationWipeTest extends IntegrationTestCase
 
         foreach ([get_current_blog_id(), $this->otherSite] as $siteId) {
             $this->onSite($siteId, static function (): void {
-                update_option('fundkit_org_profile', ['name' => 'Local charity']);
+                update_option('gratora_org_profile', ['name' => 'Local charity']);
             });
         }
     }
@@ -60,7 +60,7 @@ final class NetworkDeactivationWipeTest extends IntegrationTestCase
 
     private function stillHasSettings(int $siteId): bool
     {
-        return $this->onSite($siteId, static fn (): bool => get_option('fundkit_org_profile') !== false);
+        return $this->onSite($siteId, static fn (): bool => get_option('gratora_org_profile') !== false);
     }
 
     private function askForTheWipe(): void
@@ -109,7 +109,7 @@ final class NetworkDeactivationWipeTest extends IntegrationTestCase
     public function test_a_site_that_cannot_be_erased_does_not_stop_the_others(): void
     {
         $first = true;
-        add_action('fundkit.uninstall', static function () use (&$first): void {
+        add_action('gratora.uninstall', static function () use (&$first): void {
             if ($first) {
                 $first = false;
                 throw new \RuntimeException('no tables on this site');
@@ -130,7 +130,7 @@ final class NetworkDeactivationWipeTest extends IntegrationTestCase
      */
     public function test_an_unfinished_wipe_leaves_the_answer_for_the_plugin_delete(): void
     {
-        add_action('fundkit.uninstall', static function (): void {
+        add_action('gratora.uninstall', static function (): void {
             if (get_current_blog_id() !== 1) {
                 throw new \RuntimeException('no tables on this site');
             }

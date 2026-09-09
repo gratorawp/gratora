@@ -18,17 +18,17 @@ const BUILTINS = [
 const ids = ( list ) => list.map( ( p ) => p.id );
 
 it( 'keeps every built-in after one of them is edited', () => {
-    const stored = [ { id: 'classic', name: 'Classic', tokens: { 'fundkit-accent': '#f00' } } ];
+    const stored = [ { id: 'classic', name: 'Classic', tokens: { 'gratora-accent': '#f00' } } ];
 
     const out = mergePresets( stored, BUILTINS );
 
     expect( ids( out ) ).toEqual( [ 'classic', 'bold', 'quiet', 'theme' ] );
-    expect( out[ 0 ].tokens[ 'fundkit-accent' ] ).toBe( '#f00' );
+    expect( out[ 0 ].tokens[ 'gratora-accent' ] ).toBe( '#f00' );
 } );
 
 it( 'shows a custom beside them', () => {
     const stored = [
-        { id: 'classic', name: 'Classic', tokens: { 'fundkit-accent': '#f00' } },
+        { id: 'classic', name: 'Classic', tokens: { 'gratora-accent': '#f00' } },
         { id: 'house',   name: 'House',   tokens: {} },
     ];
 
@@ -43,7 +43,7 @@ it( 'shows a custom beside them', () => {
 it( 'does not resurrect a custom the admin just deleted', () => {
     // The page-load snapshot still carries the custom, because the delete has
     // not been saved yet. Seeding from it would put the row straight back.
-    window.fundkit = { styling: {
+    window.gratora = { styling: {
         builtins: BUILTINS,
         presets:  [ ...BUILTINS, { id: 'house', name: 'House', tokens: {} } ],
     } };
@@ -53,7 +53,7 @@ it( 'does not resurrect a custom the admin just deleted', () => {
     try {
         expect( ids( presetsForPanel( afterDelete ) ) ).not.toContain( 'house' );
     } finally {
-        delete window.fundkit;
+        delete window.gratora;
     }
 } );
 
@@ -72,7 +72,7 @@ it( 'survives a page that lost its globals', () => {
  * all, hands the editor a blank name field, and clones it as " (copy)".
  */
 it( 'keeps an edited built-in labelled', () => {
-    const stored = [ { id: 'classic', tokens: { 'fundkit-accent': '#f00' } } ];
+    const stored = [ { id: 'classic', tokens: { 'gratora-accent': '#f00' } } ];
 
     const classic = mergePresets( stored, BUILTINS )[ 0 ];
 
@@ -91,13 +91,13 @@ it( 'still prefers a name the admin typed', () => {
  * built-in's own values for every key the admin did not touch.
  */
 it( 'keeps the shipped tokens an edit did not touch', () => {
-    const ships = [ { id: 'quiet', name: 'Quiet', tokens: { 'fundkit-accent': '#000', 'fundkit-button-border': '1px' }, builtin: true } ];
-    const stored = [ { id: 'quiet', tokens: { 'fundkit-accent': '#f00' } } ];
+    const ships = [ { id: 'quiet', name: 'Quiet', tokens: { 'gratora-accent': '#000', 'gratora-button-border': '1px' }, builtin: true } ];
+    const stored = [ { id: 'quiet', tokens: { 'gratora-accent': '#f00' } } ];
 
     const quiet = mergePresets( stored, ships )[ 0 ];
 
-    expect( quiet.tokens[ 'fundkit-accent' ] ).toBe( '#f00' );
-    expect( quiet.tokens[ 'fundkit-button-border' ] ).toBe( '1px' );
+    expect( quiet.tokens[ 'gratora-accent' ] ).toBe( '#f00' );
+    expect( quiet.tokens[ 'gratora-button-border' ] ).toBe( '1px' );
 } );
 
 /**

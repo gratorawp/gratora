@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Upgrade;
+namespace Gratora\Foundation\Upgrade;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Foundation\Plugin;
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Foundation\Plugin;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 use ReflectionClass;
 use ReflectionProperty;
 
@@ -19,7 +19,7 @@ use ReflectionProperty;
  */
 final class SchemaGuard
 {
-    public const OPTION = 'fundkit_db_version';
+    public const OPTION = 'gratora_db_version';
 
     /**
      * Unprefixed names of the tables a migration should have created and did not.
@@ -93,7 +93,7 @@ final class SchemaGuard
      * Stamp the schema version, unless a table is missing.
      *
      * Leaving the option alone is the whole recovery path: the wp_loaded gate
-     * sees a version behind FUNDKIT_DB_VERSION and migrates again next request.
+     * sees a version behind GRATORA_DB_VERSION and migrates again next request.
      *
      * @return bool true when the stamp was written
      * @since 1.0.0
@@ -125,7 +125,7 @@ final class SchemaGuard
             return false;
         }
 
-        update_option(self::OPTION, FUNDKIT_DB_VERSION, false);
+        update_option(self::OPTION, GRATORA_DB_VERSION, false);
 
         return true;
     }
@@ -145,12 +145,12 @@ final class SchemaGuard
     public static function renderNotice(): void
     {
         // Whoever switched the plugin on is who has to ask the host for the
-        // grant, and manage_fundkit may never have been applied.
+        // grant, and manage_gratora may never have been applied.
         if (! current_user_can('manage_options')) {
             return;
         }
 
-        if (get_option(self::OPTION) === FUNDKIT_DB_VERSION) {
+        if (get_option(self::OPTION) === GRATORA_DB_VERSION) {
             return;
         }
 
@@ -164,8 +164,8 @@ final class SchemaGuard
 
         printf(
             '<div class="notice notice-error"><p><strong>%s</strong> %s</p><p><code>%s</code></p></div>',
-            esc_html__('Fundraising Toolkit could not create its database tables.', 'fundraising-toolkit'),
-            esc_html__('The plugin cannot run until they exist. This usually means the database user is not allowed to create tables, or the host caps how many a site may have. Ask your host to grant CREATE, then reload this page: Fundraising Toolkit retries on every request.', 'fundraising-toolkit'),
+            esc_html__('Gratora could not create its database tables.', 'gratora'),
+            esc_html__('The plugin cannot run until they exist. This usually means the database user is not allowed to create tables, or the host caps how many a site may have. Ask your host to grant CREATE, then reload this page: Gratora retries on every request.', 'gratora'),
             esc_html($names)
         );
     }
@@ -190,7 +190,7 @@ final class SchemaGuard
 
             // A model this cannot read is skipped rather than thrown out of.
             // The registry is open to third-party modules through
-            // fundkit.modules.register, and the callers are a gate that has to
+            // gratora.modules.register, and the callers are a gate that has to
             // survive a schema it cannot trust and an admin notice: neither is
             // worth white-screening a site over.
             try {

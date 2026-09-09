@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 /**
  * What an update does to a site that already has data.
@@ -18,7 +18,7 @@ namespace FundKit\Tests\Integration;
  */
 final class SchemaUpgradeTest extends UpgradeTestCase
 {
-    private const TABLE = 'fundkit_donations';
+    private const TABLE = 'gratora_donations';
 
     private function seedDonation(string $reference): void
     {
@@ -54,7 +54,7 @@ final class SchemaUpgradeTest extends UpgradeTestCase
     public function test_a_missing_column_is_added_and_the_rows_survive(): void
     {
         $this->installCurrentSchema();
-        $this->seedDonation('FUNDKIT-UP-COL');
+        $this->seedDonation('GRATORA-UP-COL');
 
         // An older release did not have this column.
         $this->alterScratch('ALTER TABLE `' . $this->scratch(self::TABLE) . '` DROP COLUMN `base_amount_cents`');
@@ -63,7 +63,7 @@ final class SchemaUpgradeTest extends UpgradeTestCase
         $this->runTheRealUpdate();
 
         $this->assertContains('base_amount_cents', $this->columns(self::TABLE), 'the column is added on update');
-        $this->assertDonationSurvived('FUNDKIT-UP-COL');
+        $this->assertDonationSurvived('GRATORA-UP-COL');
     }
 
     public function test_a_missing_index_is_added(): void
@@ -87,12 +87,12 @@ final class SchemaUpgradeTest extends UpgradeTestCase
         $this->installCurrentSchema();
 
         $this->alterScratch('ALTER TABLE `' . $this->scratch(self::TABLE) . '` MODIFY `gateway` VARCHAR(8) NOT NULL');
-        $this->seedDonation('FUNDKIT-UP-WIDE');
+        $this->seedDonation('GRATORA-UP-WIDE');
 
         $this->runTheRealUpdate();
 
         $this->assertStringContainsString('32', $this->columnType(self::TABLE, 'gateway'), 'widened to the declared size');
-        $this->assertDonationSurvived('FUNDKIT-UP-WIDE');
+        $this->assertDonationSurvived('GRATORA-UP-WIDE');
     }
 
     public function test_a_dropped_table_is_rebuilt(): void

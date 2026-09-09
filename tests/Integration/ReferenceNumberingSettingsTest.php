@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use DateTimeImmutable;
-use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Foundation\Time\FrozenClock;
-use FundKit\Foundation\Plugin;
+use Gratora\Foundation\References\ReferenceGenerator;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Foundation\Time\FrozenClock;
+use Gratora\Foundation\Plugin;
 
 /**
  * Changing a numbering setting must never hand back a reference already in use.
@@ -29,7 +29,7 @@ final class ReferenceNumberingSettingsTest extends IntegrationTestCase
         delete_option(ReferenceGenerator::OPTION_SETTINGS);
         foreach (['', '_' . gmdate('Y')] as $suffix) {
             foreach (['donation', 'receipt'] as $scope) {
-                delete_option("fundkit_reference_counter_{$scope}{$suffix}");
+                delete_option("gratora_reference_counter_{$scope}{$suffix}");
             }
         }
     }
@@ -121,11 +121,11 @@ final class ReferenceNumberingSettingsTest extends IntegrationTestCase
         // The counter really is year-scoped here, so January starts a fresh one
         // and the year in the reference keeps the two sequences apart.
         $this->assertNotFalse(
-            get_option('fundkit_reference_counter_donation_' . gmdate('Y'), false),
+            get_option('gratora_reference_counter_donation_' . gmdate('Y'), false),
             'the year-scoped counter is the one being used'
         );
         $this->assertFalse(
-            get_option('fundkit_reference_counter_donation', false),
+            get_option('gratora_reference_counter_donation', false),
             'and the continuous counter is untouched'
         );
     }

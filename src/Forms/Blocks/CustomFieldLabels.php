@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
 /**
  * Resolve custom-field slug => human label for a form's blocks.
@@ -43,19 +43,19 @@ final class CustomFieldLabels
 
             $slug = '';
             switch ($name) {
-                case 'fundkit/text-input':
-                case 'fundkit/number-input':
-                case 'fundkit/date':
-                case 'fundkit/dropdown':
-                case 'fundkit/radio':
-                case 'fundkit/checkbox':
-                case 'fundkit/multi-select':
+                case 'gratora/text-input':
+                case 'gratora/number-input':
+                case 'gratora/date':
+                case 'gratora/dropdown':
+                case 'gratora/radio':
+                case 'gratora/checkbox':
+                case 'gratora/multi-select':
                     $slug = DropdownBlock::deriveField(
                         (string) ($attrs['field'] ?? ''),
                         (string) ($attrs['label'] ?? '')
                     );
                     break;
-                case 'fundkit/hidden':
+                case 'gratora/hidden':
                     $slug = (string) ($attrs['field'] ?? '');
                     break;
             }

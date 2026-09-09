@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
-use FundKit\Foundation\Helpers\View;
+use Gratora\Foundation\Helpers\View;
 
 /**
- * Acceptance is recorded in fundkit_consents under the `terms` purpose along with
+ * Acceptance is recorded in gratora_consents under the `terms` purpose along with
  * the text revision, so what a donor agreed to survives later edits to the
  * wording. The block ships no default wording: terms are the org's to write.
  *
@@ -20,7 +20,7 @@ final class TermsBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/terms';
+        return 'gratora/terms';
     }
 
     /** @since 1.0.0 */

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
+use Gratora\Donations\Donation;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -12,7 +12,7 @@ final class DonationAmountCeilingTest extends IntegrationTestCase
 {
     private function post(int $cents): WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => 'whale@example.test',
@@ -46,6 +46,6 @@ final class DonationAmountCeilingTest extends IntegrationTestCase
         $res = $this->post(1);
 
         $this->assertSame(400, $res->get_status());
-        $this->assertSame('fundkit_amount_too_low', $res->get_data()['code'] ?? null);
+        $this->assertSame('gratora_amount_too_low', $res->get_data()['code'] ?? null);
     }
 }

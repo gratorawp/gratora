@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorPurge;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorPurge;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 
 /**
  * `retention_days_after_redaction` was a dead control: it saved, round-tripped,
@@ -35,7 +35,7 @@ final class DonorPurgeTest extends IntegrationTestCase
 
     private function window(int $days): void
     {
-        update_option('fundkit_privacy', ['retention_days_after_redaction' => $days]);
+        update_option('gratora_privacy', ['retention_days_after_redaction' => $days]);
     }
 
     private function redactedDonor(string $email = self::EMAIL): Donor
@@ -54,7 +54,7 @@ final class DonorPurgeTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('fundkit_privacy');
+        delete_option('gratora_privacy');
         parent::tearDown();
     }
 
@@ -152,7 +152,7 @@ final class DonorPurgeTest extends IntegrationTestCase
      */
     public function test_the_window_still_governs_a_hand_redaction_while_automatic_erasure_is_off(): void
     {
-        update_option('fundkit_privacy', [
+        update_option('gratora_privacy', [
             'erase_inactive_donors'          => false,
             'retention_days_after_redaction' => 30,
         ]);

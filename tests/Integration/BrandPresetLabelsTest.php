@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Styling\StylePresets;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Campaigns\Styling\StylePresets;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 
 /**
  * A built-in preset's name and description are __() calls, so they read in
@@ -20,10 +20,10 @@ final class BrandPresetLabelsTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        delete_option('fundkit_org_brand');
+        delete_option('gratora_org_brand');
 
         add_filter('gettext', function ($translated, $text, $domain) {
-            if (! $this->french || $domain !== 'fundraising-toolkit') return $translated;
+            if (! $this->french || $domain !== 'gratora') return $translated;
 
             return $text === 'Classic' ? 'Classique' : $translated;
         }, 10, 3);
@@ -32,7 +32,7 @@ final class BrandPresetLabelsTest extends IntegrationTestCase
     protected function tearDown(): void
     {
         remove_all_filters('gettext');
-        delete_option('fundkit_org_brand');
+        delete_option('gratora_org_brand');
         parent::tearDown();
     }
 
@@ -48,7 +48,7 @@ final class BrandPresetLabelsTest extends IntegrationTestCase
     public function test_an_edited_builtin_still_reads_in_the_readers_language(): void
     {
         $edited = $this->classic();
-        $edited['tokens']['fundkit-accent'] = '#123456';
+        $edited['tokens']['gratora-accent'] = '#123456';
 
         Plugin::instance()->container->get(SettingsService::class)
             ->update('org-brand', ['presets' => [$edited], 'default_id' => 'classic']);
@@ -57,7 +57,7 @@ final class BrandPresetLabelsTest extends IntegrationTestCase
         $read = $this->classic();
 
         $this->assertSame('Classique', (string) $read['name']);
-        $this->assertSame('#123456', (string) ($read['tokens']['fundkit-accent'] ?? ''), 'the edit itself has to survive');
+        $this->assertSame('#123456', (string) ($read['tokens']['gratora-accent'] ?? ''), 'the edit itself has to survive');
     }
 
     public function test_a_name_the_admin_typed_is_kept(): void
@@ -81,7 +81,7 @@ final class BrandPresetLabelsTest extends IntegrationTestCase
                 'id'          => 'house',
                 'name'        => '   ',
                 'description' => '',
-                'tokens'      => ['fundkit-accent' => '#abcdef'],
+                'tokens'      => ['gratora-accent' => '#abcdef'],
             ]],
         ]);
 

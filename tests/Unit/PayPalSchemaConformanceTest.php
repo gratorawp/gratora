@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit;
+namespace Gratora\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 

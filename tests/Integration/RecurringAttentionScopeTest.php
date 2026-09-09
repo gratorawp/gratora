@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -45,7 +45,7 @@ final class RecurringAttentionScopeTest extends IntegrationTestCase
 
     public function test_the_card_publishes_both_counts(): void
     {
-        $stats = (array) rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/recurring/stats'))->get_data();
+        $stats = (array) rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/recurring/stats'))->get_data();
 
         $this->assertSame(2, (int) ($stats['failing_count'] ?? -1), 'plans still running');
         $this->assertSame(12, (int) ($stats['failing_ever_count'] ?? -1), 'plans that ever failed');
@@ -53,7 +53,7 @@ final class RecurringAttentionScopeTest extends IntegrationTestCase
 
     public function test_the_filter_returns_what_the_wider_count_promised(): void
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/recurring');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/recurring');
         $req->set_param('failing', 1);
 
         $res = rest_do_request($req);

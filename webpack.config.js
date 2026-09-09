@@ -30,8 +30,8 @@ module.exports = {
         rules: [
             {
                 enforce: 'pre',
-                test: /node_modules[\\/]@fundkit[\\/]ui[\\/]dist[\\/].+\.js$/,
-                loader: path.resolve( __dirname, 'build-tools/fundkitUiDomain.cjs' ),
+                test: /node_modules[\\/]@gratora[\\/]ui[\\/]dist[\\/].+\.js$/,
+                loader: path.resolve( __dirname, 'build-tools/gratoraUiDomain.cjs' ),
             },
             ...( ( defaultConfig.module && defaultConfig.module.rules ) || [] ),
         ],

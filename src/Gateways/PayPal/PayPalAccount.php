@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways\PayPal;
+namespace Gratora\Gateways\PayPal;
 
-use FundKit\Foundation\Config\SystemSetting;
-use FundKit\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Config\SystemSetting;
+use Gratora\Foundation\Crypto\Crypto;
 
 /**
  * The organization's own PayPal REST app credentials, stored per mode.
@@ -275,7 +275,7 @@ final class PayPalAccount
     /** @since 1.0.0 */
     private function tokenKey(bool $test): string
     {
-        return 'fundkit_paypal_token_' . ($test ? 'test' : 'live');
+        return 'gratora_paypal_token_' . ($test ? 'test' : 'live');
     }
 
     /** @since 1.0.0 */

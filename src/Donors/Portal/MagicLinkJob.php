@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors\Portal;
+namespace Gratora\Donors\Portal;
 
-use FundKit\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Crypto\Crypto;
 
 /**
  * The args a queued sign-in job carries.

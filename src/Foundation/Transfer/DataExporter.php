@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Transfer;
+namespace Gratora\Foundation\Transfer;
 
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Settings\SecretRedactor;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Settings\SecretRedactor;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * Writes everything an organization owns to a file they can take elsewhere.
@@ -37,17 +37,17 @@ final class DataExporter
      * needs its donation. The importer walks this list as written.
      */
     private const TABLES = [
-        'fundkit_campaigns',
-        'fundkit_funds',
-        'fundkit_forms',
-        'fundkit_donors',
-        'fundkit_consents',
-        'fundkit_donor_notes',
-        'fundkit_donations',
-        'fundkit_donation_notes',
-        'fundkit_refunds',
-        'fundkit_recurring_plans',
-        'fundkit_receipts',
+        'gratora_campaigns',
+        'gratora_funds',
+        'gratora_forms',
+        'gratora_donors',
+        'gratora_consents',
+        'gratora_donor_notes',
+        'gratora_donations',
+        'gratora_donation_notes',
+        'gratora_refunds',
+        'gratora_recurring_plans',
+        'gratora_receipts',
     ];
 
     /**
@@ -55,11 +55,11 @@ final class DataExporter
      * import; event logs remain site-local.
      */
     private const SKIP = [
-        'fundkit_system_settings',
-        'fundkit_magic_link_tokens',
-        'fundkit_pending_signups',
-        'fundkit_form_donation_stats',
-        'fundkit_events',
+        'gratora_system_settings',
+        'gratora_magic_link_tokens',
+        'gratora_pending_signups',
+        'gratora_form_donation_stats',
+        'gratora_events',
     ];
 
     /**
@@ -76,29 +76,29 @@ final class DataExporter
      * @var array<string, array<string,bool>>
      */
     private const ENCRYPTED = [
-        'fundkit_donors' => [
+        'gratora_donors' => [
             'email'   => true,
             'address' => false,
             'phone'   => false,
             'tax_id'  => false,
             'notes'   => false,
         ],
-        'fundkit_donor_notes'    => ['body' => true],
-        'fundkit_donation_notes' => ['body' => true],
-        'fundkit_donations'      => ['custom_data' => false],
+        'gratora_donor_notes'    => ['body' => true],
+        'gratora_donation_notes' => ['body' => true],
+        'gratora_donations'      => ['custom_data' => false],
     ];
 
     private const SETTINGS_OPTIONS = [
-        'fundkit_org_profile',
-        'fundkit_currency_locale',
-        'fundkit_org_brand',
-        'fundkit_gateway_config',
-        'fundkit_privacy',
-        'fundkit_roles',
-        'fundkit_consents',
-        'fundkit_receipt_settings',
-        'fundkit_email_settings',
-        'fundkit_reference_settings',
+        'gratora_org_profile',
+        'gratora_currency_locale',
+        'gratora_org_brand',
+        'gratora_gateway_config',
+        'gratora_privacy',
+        'gratora_roles',
+        'gratora_consents',
+        'gratora_receipt_settings',
+        'gratora_email_settings',
+        'gratora_reference_settings',
     ];
 
     /** @since 1.0.0 */
@@ -123,7 +123,7 @@ final class DataExporter
         fwrite($out, '"format":' . self::FORMAT_VERSION);
         fwrite($out, ',"exported_at":' . wp_json_encode(gmdate('c')));
         fwrite($out, ',"site_url":' . wp_json_encode(site_url()));
-        fwrite($out, ',"version":' . wp_json_encode(defined('FUNDKIT_VERSION') ? FUNDKIT_VERSION : 'unknown'));
+        fwrite($out, ',"version":' . wp_json_encode(defined('GRATORA_VERSION') ? GRATORA_VERSION : 'unknown'));
         fwrite($out, ',"settings":' . wp_json_encode($this->settings()));
         fwrite($out, ',"tables":{');
 
@@ -254,7 +254,7 @@ final class DataExporter
      */
     public static function tables(): array
     {
-        $tables = (array) apply_filters('fundkit.export.tables', self::TABLES);
+        $tables = (array) apply_filters('gratora.export.tables', self::TABLES);
 
         // Nothing an add-on adds can reopen what SKIP closed.
         return array_values(array_diff(
@@ -266,7 +266,7 @@ final class DataExporter
     /**
      * The sealed columns of every exported table, importer included.
      *
-     * An add-on that contributes a table through fundkit.export.tables declares
+     * An add-on that contributes a table through gratora.export.tables declares
      * its sealed columns here, or they cross as ciphertext this site's key is
      * the only one that opens.
      *
@@ -275,7 +275,7 @@ final class DataExporter
      */
     public static function encryptedColumns(): array
     {
-        $map = (array) apply_filters('fundkit.export.encrypted_columns', self::ENCRYPTED);
+        $map = (array) apply_filters('gratora.export.encrypted_columns', self::ENCRYPTED);
 
         return array_filter($map, 'is_array');
     }

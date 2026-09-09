@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanChange;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanChange;
 
 /**
  * The receipt already goes out in the language the donor filled the form in.
@@ -38,7 +38,7 @@ final class DonorLocaleDrivesDonationEmailsTest extends IntegrationTestCase
 
         // Marks anything translated while the switch is active, without a .mo.
         add_filter('gettext', static function ($translated, $text, $domain) {
-            return $domain === 'fundraising-toolkit' && get_locale() === 'fr_FR'
+            return $domain === 'gratora' && get_locale() === 'fr_FR'
                 ? '[fr] ' . $translated
                 : $translated;
         }, 10, 3);
@@ -65,7 +65,7 @@ final class DonorLocaleDrivesDonationEmailsTest extends IntegrationTestCase
     {
         $donation = $this->donation('fr');
 
-        do_action('fundkit.donation.pending', $donation, 'awaiting_bank', []);
+        do_action('gratora.donation.pending', $donation, 'awaiting_bank', []);
 
         $this->assertNotNull($this->sent, 'no mail was sent');
         $this->assertStringStartsWith('[fr] ', (string) $this->sent['subject']);
@@ -95,7 +95,7 @@ final class DonorLocaleDrivesDonationEmailsTest extends IntegrationTestCase
         $change = RecurringPlanChange::byAdmin('change_interval', true);
         $change->detail = ['from' => 'weekly'];
 
-        do_action('fundkit.recurring.plan_changed', $plan, $change);
+        do_action('gratora.recurring.plan_changed', $plan, $change);
 
         $this->assertNotNull($this->sent, 'no mail was sent');
         // The word itself, not the template around it: only a switch that also
@@ -114,7 +114,7 @@ final class DonorLocaleDrivesDonationEmailsTest extends IntegrationTestCase
         $donor->save();
 
         Plugin::instance()->container->get(AsyncDispatcher::class)
-            ->enqueue('fundkit.async.send_portal_link', ['email' => $email]);
+            ->enqueue('gratora.async.send_portal_link', ['email' => $email]);
         $this->runPendingAsyncJobs();
 
         $this->assertNotNull($this->sent, 'no mail was sent');

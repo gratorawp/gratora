@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\Blocks\BlockRegistry;
-use FundKit\Forms\FormSubmissionValidator;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Forms\Blocks\BlockRegistry;
+use Gratora\Forms\FormSubmissionValidator;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 
 /**
  * The consent block names purposes the organization defined; it does not invent
@@ -38,10 +38,10 @@ final class ConsentBlockRegistryTest extends IntegrationTestCase
         ]);
     }
 
-    private function block(): \FundKit\Forms\Blocks\Block
+    private function block(): \Gratora\Forms\Blocks\Block
     {
         foreach (Plugin::instance()->container->get(BlockRegistry::class)->all() as $b) {
-            if ($b->name() === 'fundkit/consent') return $b;
+            if ($b->name() === 'gratora/consent') return $b;
         }
 
         $this->fail('the consent block is not registered');
@@ -49,7 +49,7 @@ final class ConsentBlockRegistryTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('fundkit_consents');
+        delete_option('gratora_consents');
         parent::tearDown();
     }
 
@@ -106,11 +106,11 @@ final class ConsentBlockRegistryTest extends IntegrationTestCase
     {
         $this->register(true);
 
-        $blocks = '<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500}]} /-->'
-            . '<!-- wp:fundkit/consent {"purposeKeys":["newsletter"]} /-->'
-            . '<!-- wp:fundkit/submit-button /-->';
+        $blocks = '<!-- wp:gratora/donation-amount {"presets":[{"cents":2500}]} /-->'
+            . '<!-- wp:gratora/consent {"purposeKeys":["newsletter"]} /-->'
+            . '<!-- wp:gratora/submit-button /-->';
 
-        $form = \FundKit\Forms\Form::make();
+        $form = \Gratora\Forms\Form::make();
         $form->blocks = $blocks;
         $form->settings = [];
 
@@ -125,7 +125,7 @@ final class ConsentBlockRegistryTest extends IntegrationTestCase
     public function test_the_validator_reads_the_picked_keys(): void
     {
         $ids = FormSubmissionValidator::consentPurposeIds(
-            '<!-- wp:fundkit/consent {"purposeKeys":["newsletter","other"]} /-->'
+            '<!-- wp:gratora/consent {"purposeKeys":["newsletter","other"]} /-->'
         );
 
         $this->assertArrayHasKey('newsletter', $ids);

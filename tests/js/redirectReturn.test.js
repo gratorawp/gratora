@@ -63,12 +63,12 @@ function config( overrides = {} ) {
 
 function addForm( id, cfg ) {
     const form = document.createElement( 'form' );
-    form.className = 'fundkit-donation-form';
+    form.className = 'gratora-donation-form';
     form.id = id;
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-fundkit-form-config', '' );
+    json.setAttribute( 'data-gratora-form-config', '' );
     json.textContent = JSON.stringify( cfg );
     form.appendChild( json );
 
@@ -78,9 +78,9 @@ function addForm( id, cfg ) {
 }
 
 function returningFrom( reference, formKey ) {
-    window.history.replaceState( {}, '', '/campaign/?fundkit_return=1&fundkit_ref=' + reference
+    window.history.replaceState( {}, '', '/campaign/?gratora_return=1&gratora_ref=' + reference
         + '&payment_intent_client_secret=pi_probe_secret' );
-    window.sessionStorage.setItem( 'fundkit:pending-donation', JSON.stringify( {
+    window.sessionStorage.setItem( 'gratora:pending-donation', JSON.stringify( {
         reference,
         statusToken: 'tok',
         formKey,
@@ -109,8 +109,8 @@ beforeEach( () => {
 
 describe( 'a redirect that did not end in a payment', () => {
     test( 'a donor who cancelled at their bank is told nothing was charged', async () => {
-        returningFrom( 'FUNDKIT-2026-00042', 'fundkit-form-1' );
-        const form = addForm( 'fundkit-form-1', config() );
+        returningFrom( 'GRATORA-2026-00042', 'gratora-form-1' );
+        const form = addForm( 'gratora-form-1', config() );
 
         mockStatus = 'requires_payment_method';
         await boot();
@@ -120,8 +120,8 @@ describe( 'a redirect that did not end in a payment', () => {
     } );
 
     test( 'a completed payment clears the markers behind it', async () => {
-        returningFrom( 'FUNDKIT-2026-00047', 'fundkit-form-1' );
-        addForm( 'fundkit-form-1', config() );
+        returningFrom( 'GRATORA-2026-00047', 'gratora-form-1' );
+        addForm( 'gratora-form-1', config() );
 
         await boot();
 
@@ -133,8 +133,8 @@ describe( 'a return the browser could not resolve', () => {
     const { settle } = require( './support/waitFor' );
 
     test( 'an intent parked mid-authentication is not answered with try again', async () => {
-        returningFrom( 'FUNDKIT-2026-00043', 'fundkit-form-1' );
-        const form = addForm( 'fundkit-form-1', config() );
+        returningFrom( 'GRATORA-2026-00043', 'gratora-form-1' );
+        const form = addForm( 'gratora-form-1', config() );
 
         mockStatus = 'requires_action';
         await boot();
@@ -145,8 +145,8 @@ describe( 'a return the browser could not resolve', () => {
     } );
 
     test( 'Stripe being unreachable on the way back is not answered with try again', async () => {
-        returningFrom( 'FUNDKIT-2026-00048', 'fundkit-form-1' );
-        const form = addForm( 'fundkit-form-1', config() );
+        returningFrom( 'GRATORA-2026-00048', 'gratora-form-1' );
+        const form = addForm( 'gratora-form-1', config() );
 
         mockStatus = UNREACHABLE;
         await boot();
@@ -156,18 +156,18 @@ describe( 'a return the browser could not resolve', () => {
     } );
 
     test( 'the markers survive, so reloading the page runs the check again', async () => {
-        returningFrom( 'FUNDKIT-2026-00049', 'fundkit-form-1' );
-        addForm( 'fundkit-form-1', config() );
+        returningFrom( 'GRATORA-2026-00049', 'gratora-form-1' );
+        addForm( 'gratora-form-1', config() );
 
         mockStatus = UNREACHABLE;
         await boot();
 
         expect( window.location.search ).toContain( 'payment_intent_client_secret=pi_probe_secret' );
-        expect( window.location.search ).toContain( 'fundkit_return=1' );
+        expect( window.location.search ).toContain( 'gratora_return=1' );
 
         // The reload a donor would do, on the same URL they were left with.
         document.body.innerHTML = '';
-        const reloaded = addForm( 'fundkit-form-1', config() );
+        const reloaded = addForm( 'gratora-form-1', config() );
         mockStatus = 'succeeded';
         await boot();
 
@@ -175,8 +175,8 @@ describe( 'a return the browser could not resolve', () => {
     } );
 
     test( 'checking again from the screen settles a payment that has since gone through', async () => {
-        returningFrom( 'FUNDKIT-2026-00050', 'fundkit-form-1' );
-        const form = addForm( 'fundkit-form-1', config() );
+        returningFrom( 'GRATORA-2026-00050', 'gratora-form-1' );
+        const form = addForm( 'gratora-form-1', config() );
 
         mockStatus = 'requires_action';
         await boot();
@@ -197,9 +197,9 @@ describe( 'a return the browser could not resolve', () => {
 
 describe( 'two forms on one page', () => {
     test( 'the form the donor submitted from claims the return, not the first one', async () => {
-        returningFrom( 'FUNDKIT-2026-00044', 'fundkit-form-2' );
-        const first  = addForm( 'fundkit-form-1', config() );
-        const second = addForm( 'fundkit-form-2', config() );
+        returningFrom( 'GRATORA-2026-00044', 'gratora-form-2' );
+        const first  = addForm( 'gratora-form-1', config() );
+        const second = addForm( 'gratora-form-2', config() );
 
         await boot();
 
@@ -208,8 +208,8 @@ describe( 'two forms on one page', () => {
     } );
 
     test( 'a stash naming a form that is no longer on the page still reaches the donor', async () => {
-        returningFrom( 'FUNDKIT-2026-00045', 'fundkit-form-9' );
-        const only = addForm( 'fundkit-form-1', config() );
+        returningFrom( 'GRATORA-2026-00045', 'gratora-form-9' );
+        const only = addForm( 'gratora-form-1', config() );
 
         await boot();
 
@@ -222,16 +222,16 @@ describe( 'two forms on one page', () => {
         // second modal springing open beside it holds a blank form and no
         // account of the payment, which reads as a second donation being asked
         // for.
-        window.history.replaceState( {}, '', '/campaign/?fundkit_return=1&fundkit_ref=FUNDKIT-2026-00046'
+        window.history.replaceState( {}, '', '/campaign/?gratora_return=1&gratora_ref=GRATORA-2026-00046'
             + '&payment_intent_client_secret=pi_probe_secret' );
 
-        const first  = addForm( 'fundkit-form-1', config( { layout: 'modal' } ) );
-        const second = addForm( 'fundkit-form-2', config( { layout: 'modal' } ) );
+        const first  = addForm( 'gratora-form-1', config( { layout: 'modal' } ) );
+        const second = addForm( 'gratora-form-2', config( { layout: 'modal' } ) );
 
         await boot();
 
-        expect( first.querySelector( '.fundkit-modal' ) ).not.toBeNull();
+        expect( first.querySelector( '.gratora-modal' ) ).not.toBeNull();
         expect( first.textContent ).toContain( THANKS );
-        expect( second.querySelector( '.fundkit-modal' ) ).toBeNull();
+        expect( second.querySelector( '.gratora-modal' ) ).toBeNull();
     } );
 } );

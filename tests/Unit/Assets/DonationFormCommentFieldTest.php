@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Assets;
+namespace Gratora\Tests\Unit\Assets;
 
 use PHPUnit\Framework\TestCase;
 
@@ -89,7 +89,7 @@ final class DonationFormCommentFieldTest extends TestCase
     public function test_the_public_message_checkbox_keeps_its_own_label(): void
     {
         $this->assertMatchesRegularExpression(
-            '/<label class="fundkit-form__check">\s*<input\s+type="checkbox"/s',
+            '/<label class="gratora-form__check">\s*<input\s+type="checkbox"/s',
             $this->commentBlock(),
             'the supporter-wall checkbox lost the label that names it.'
         );
@@ -102,7 +102,7 @@ final class DonationFormCommentFieldTest extends TestCase
         $this->assertSame(1, $matched, 'Field is no longer a function in the donor step.');
 
         $this->assertStringNotContainsString(
-            '<label class="fundkit-form__field">',
+            '<label class="gratora-form__field">',
             (string) $m[0],
             'Field wraps every field in a label again, so a field with two controls nests them.'
         );
@@ -123,7 +123,7 @@ final class DonationFormCommentFieldTest extends TestCase
             $this->assertMatchesRegularExpression(
                 '/&' . $suffix . '\s*\{/',
                 $css,
-                "fundkit-form{$suffix} has no rule in runtime.scss."
+                "gratora-form{$suffix} has no rule in runtime.scss."
             );
         }
     }

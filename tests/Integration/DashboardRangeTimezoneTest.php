@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignMetricsService;
-use FundKit\Dashboard\DashboardMetricsService;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\FrozenClock;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignMetricsService;
+use Gratora\Dashboard\DashboardMetricsService;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\FrozenClock;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -179,7 +179,7 @@ final class DashboardRangeTimezoneTest extends IntegrationTestCase
 
     private function campaign(): Campaign
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Range probe', 'status' => 'published']));
 
@@ -189,7 +189,7 @@ final class DashboardRangeTimezoneTest extends IntegrationTestCase
     private function paid(string $utc, int $cents, ?int $campaignId = null, ?int $donorId = null): Donation
     {
         $d = Donation::make();
-        $d->reference         = 'FUNDKIT-TZ-' . uniqid();
+        $d->reference         = 'GRATORA-TZ-' . uniqid();
         if ($campaignId !== null) {
             $d->campaign_id = $campaignId;
         }

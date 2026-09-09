@@ -38,7 +38,7 @@ function mount( onClose = () => {}, onAction = () => {} ) {
 }
 
 test( 'no button says only Cancel, which reads as dismissing the dialog', () => {
-	const labels = [ ...mount().querySelectorAll( '.fundkit-dialog__foot button' ) ]
+	const labels = [ ...mount().querySelectorAll( '.gratora-dialog__foot button' ) ]
 		.map( ( b ) => b.textContent.trim() );
 
 	expect( labels ).toContain( 'Close' );
@@ -48,8 +48,8 @@ test( 'no button says only Cancel, which reads as dismissing the dialog', () => 
 
 test( 'the destructive action does not look like the rest', () => {
 	const body = mount();
-	const danger = [ ...body.querySelectorAll( '.fundkit-dialog__foot button' ) ]
-		.filter( ( b ) => b.className.includes( 'fundkit-btn--danger' ) );
+	const danger = [ ...body.querySelectorAll( '.gratora-dialog__foot button' ) ]
+		.filter( ( b ) => b.className.includes( 'gratora-btn--danger' ) );
 
 	expect( danger ).toHaveLength( 1 );
 	expect( danger[ 0 ].textContent.trim() ).toBe( 'Cancel subscription' );
@@ -60,7 +60,7 @@ test( 'Close closes and starts no action', () => {
 	let acted = null;
 	const body = mount( () => { closed++; }, ( a ) => { acted = a; } );
 
-	const close = [ ...body.querySelectorAll( '.fundkit-dialog__foot button' ) ]
+	const close = [ ...body.querySelectorAll( '.gratora-dialog__foot button' ) ]
 		.find( ( b ) => b.textContent.trim() === 'Close' );
 	close.click();
 
@@ -73,5 +73,5 @@ test( 'the title names the plan as an identifier', () => {
 } );
 
 test( 'the dialog takes the wide size, which the shared styles define', () => {
-	expect( mount().querySelector( '.fundkit-dialog--wide' ) ).not.toBeNull();
+	expect( mount().querySelector( '.gratora-dialog--wide' ) ).not.toBeNull();
 } );

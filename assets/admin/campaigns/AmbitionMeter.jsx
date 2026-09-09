@@ -10,7 +10,7 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
     useEffect( () => {
         if ( ! campaignId ) return undefined;
         let cancelled = false;
-        apiFetch( { path: `/fundkit/v1/admin/campaigns/${ campaignId }/goal-context` } )
+        apiFetch( { path: `/gratora/v1/admin/campaigns/${ campaignId }/goal-context` } )
             .then( ( res ) => { if ( ! cancelled ) setCtx( res ); } )
             .catch( () => { if ( ! cancelled ) setCtx( null ); } );
         return () => { cancelled = true; };
@@ -21,10 +21,10 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
     if ( ! ctx ) return null;
     if ( ctx.historical_count === 0 ) {
         return (
-            <div className="fundkit-ambition fundkit-ambition--info">
-                <div className="fundkit-ambition__title">{ __( 'Your first campaign', 'fundraising-toolkit' ) }</div>
-                <div className="fundkit-ambition__desc">
-                    { __( "We'll show you how this target compares to your other campaigns once you have a few finished ones.", 'fundraising-toolkit' ) }
+            <div className="gratora-ambition gratora-ambition--info">
+                <div className="gratora-ambition__title">{ __( 'Your first campaign', 'gratora' ) }</div>
+                <div className="gratora-ambition__desc">
+                    { __( "We'll show you how this target compares to your other campaigns once you have a few finished ones.", 'gratora' ) }
                 </div>
             </div>
         );
@@ -43,44 +43,44 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
     const maxPct = clamp( ( max / upper ) * 100 );
 
     return (
-        <div className={ `fundkit-ambition fundkit-ambition--${ verdict.tone }` }>
-            <div className="fundkit-ambition__head">
+        <div className={ `gratora-ambition gratora-ambition--${ verdict.tone }` }>
+            <div className="gratora-ambition__head">
                 <div>
-                    <div className="fundkit-ambition__title">{ verdict.title }</div>
-                    <div className="fundkit-ambition__desc">{ verdict.desc }</div>
+                    <div className="gratora-ambition__title">{ verdict.title }</div>
+                    <div className="gratora-ambition__desc">{ verdict.desc }</div>
                 </div>
-                <div className="fundkit-ambition__ratio num">
+                <div className="gratora-ambition__ratio num">
                     { avg > 0 && cur > 0 && sprintf(
                         /* translators: %s: multiplier of historical average, e.g. "1.4×" */
-                        __( '%s× avg', 'fundraising-toolkit' ),
+                        __( '%s× avg', 'gratora' ),
                         ( cur / avg ).toFixed( cur / avg < 10 ? 1 : 0 ),
                     ) }
                 </div>
             </div>
 
-            <div className="fundkit-ambition__bar">
-                <div className="fundkit-ambition__bar-fill" style={ { width: `${ curPct }%` } } />
+            <div className="gratora-ambition__bar">
+                <div className="gratora-ambition__bar-fill" style={ { width: `${ curPct }%` } } />
                 { avg > 0 && (
-                    <div className="fundkit-ambition__bar-mark fundkit-ambition__bar-mark--avg" style={ { left: `${ avgPct }%` } } />
+                    <div className="gratora-ambition__bar-mark gratora-ambition__bar-mark--avg" style={ { left: `${ avgPct }%` } } />
                 ) }
                 { max > 0 && max !== avg && (
-                    <div className="fundkit-ambition__bar-mark fundkit-ambition__bar-mark--max" style={ { left: `${ maxPct }%` } } />
+                    <div className="gratora-ambition__bar-mark gratora-ambition__bar-mark--max" style={ { left: `${ maxPct }%` } } />
                 ) }
             </div>
 
-            <div className="fundkit-ambition__legend">
+            <div className="gratora-ambition__legend">
                 <span>
-                    <span className="fundkit-ambition__legend-dot fundkit-ambition__legend-dot--current" />
-                    { __( 'Your target', 'fundraising-toolkit' ) }: <strong>{ formatAmount( cur, cy ) }</strong>
+                    <span className="gratora-ambition__legend-dot gratora-ambition__legend-dot--current" />
+                    { __( 'Your target', 'gratora' ) }: <strong>{ formatAmount( cur, cy ) }</strong>
                 </span>
                 <span>
-                    <span className="fundkit-ambition__legend-dot fundkit-ambition__legend-dot--avg" />
-                    { __( 'Past average', 'fundraising-toolkit' ) }: <strong>{ formatAmount( avg, cy ) }</strong>
+                    <span className="gratora-ambition__legend-dot gratora-ambition__legend-dot--avg" />
+                    { __( 'Past average', 'gratora' ) }: <strong>{ formatAmount( avg, cy ) }</strong>
                 </span>
                 { max > 0 && max !== avg && (
                     <span>
-                        <span className="fundkit-ambition__legend-dot fundkit-ambition__legend-dot--max" />
-                        { __( 'Past best', 'fundraising-toolkit' ) }: <strong>{ formatAmount( max, cy ) }</strong>
+                        <span className="gratora-ambition__legend-dot gratora-ambition__legend-dot--max" />
+                        { __( 'Past best', 'gratora' ) }: <strong>{ formatAmount( max, cy ) }</strong>
                     </span>
                 ) }
             </div>
@@ -89,15 +89,15 @@ export default function AmbitionMeter( { campaignId, goalType, goalCents, curren
 }
 
 function localVerdict( cur, avg, count ) {
-    if ( count === 0 ) return { tone: 'info', title: __( 'No historical data', 'fundraising-toolkit' ), desc: '' };
-    if ( cur <= 0 )    return { tone: 'info', title: __( 'No target set', 'fundraising-toolkit' ), desc: __( 'Add a target above to see how it compares.', 'fundraising-toolkit' ) };
-    if ( avg <= 0 )    return { tone: 'info', title: __( 'Limited history', 'fundraising-toolkit' ), desc: '' };
+    if ( count === 0 ) return { tone: 'info', title: __( 'No historical data', 'gratora' ), desc: '' };
+    if ( cur <= 0 )    return { tone: 'info', title: __( 'No target set', 'gratora' ), desc: __( 'Add a target above to see how it compares.', 'gratora' ) };
+    if ( avg <= 0 )    return { tone: 'info', title: __( 'Limited history', 'gratora' ), desc: '' };
 
     const r = cur / avg;
-    if ( r < 0.5 )  return { tone: 'modest',         title: __( 'Modest target', 'fundraising-toolkit' ),         desc: __( "You've raised more than this in past campaigns. Consider aiming higher.", 'fundraising-toolkit' ) };
-    if ( r < 1.5 )  return { tone: 'in-line',        title: __( 'In line with past campaigns', 'fundraising-toolkit' ), desc: __( 'Right around your historical average.', 'fundraising-toolkit' ) };
-    if ( r < 3.0 )  return { tone: 'ambitious',      title: __( 'Ambitious target', 'fundraising-toolkit' ),       desc: __( 'About double your average. Realistic for a strong campaign.', 'fundraising-toolkit' ) };
-    return                  { tone: 'very-ambitious', title: __( 'Very ambitious', 'fundraising-toolkit' ),         desc: __( "Substantially above what you've raised before. Make sure outreach plans match.", 'fundraising-toolkit' ) };
+    if ( r < 0.5 )  return { tone: 'modest',         title: __( 'Modest target', 'gratora' ),         desc: __( "You've raised more than this in past campaigns. Consider aiming higher.", 'gratora' ) };
+    if ( r < 1.5 )  return { tone: 'in-line',        title: __( 'In line with past campaigns', 'gratora' ), desc: __( 'Right around your historical average.', 'gratora' ) };
+    if ( r < 3.0 )  return { tone: 'ambitious',      title: __( 'Ambitious target', 'gratora' ),       desc: __( 'About double your average. Realistic for a strong campaign.', 'gratora' ) };
+    return                  { tone: 'very-ambitious', title: __( 'Very ambitious', 'gratora' ),         desc: __( "Substantially above what you've raised before. Make sure outreach plans match.", 'gratora' ) };
 }
 
 function clamp( n, lo = 0, hi = 100 ) {

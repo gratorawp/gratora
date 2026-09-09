@@ -2,35 +2,35 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Receipts;
+namespace Gratora\Receipts;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Campaigns\Styling\Tokens;
-use FundKit\Campaigns\Styling\CampaignStyleResolver;
-use FundKit\Analytics\EventRecorder;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\MagicLinkService;
-use FundKit\Forms\Blocks\CustomFieldLabels;
-use FundKit\Forms\Form;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Helpers\View;
-use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Mail\Mailer;
-use FundKit\Settings\SettingsService;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Campaigns\Styling\Tokens;
+use Gratora\Campaigns\Styling\CampaignStyleResolver;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\MagicLinkService;
+use Gratora\Forms\Blocks\CustomFieldLabels;
+use Gratora\Forms\Form;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\View;
+use Gratora\Foundation\References\ReferenceGenerator;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Mail\Mailer;
+use Gratora\Settings\SettingsService;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * Issues and emails receipts when donations are paid.
  *
- * On `fundkit.donation.completed` an async job runs each applicable renderer,
+ * On `gratora.donation.completed` an async job runs each applicable renderer,
  * persists a Receipt row, renders the PDF in memory, and emails the donor.
  * No file storage; re-sends regenerate from the same context.
  *
@@ -38,7 +38,7 @@ use FundKit\Vendor\Queryable\DB;
  */
 final class ReceiptIssuer
 {
-    private const HOOK = 'fundkit.async.issue_receipt';
+    private const HOOK = 'gratora.async.issue_receipt';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -63,7 +63,7 @@ final class ReceiptIssuer
     /** @since 1.0.0 */
     public function register(): void
     {
-        add_action('fundkit.donation.completed', [$this, 'onDonationCompleted']);
+        add_action('gratora.donation.completed', [$this, 'onDonationCompleted']);
         add_action(self::HOOK, [$this, 'issueForDonation']);
     }
 
@@ -91,7 +91,7 @@ final class ReceiptIssuer
     {
         $shouldIssue = (string) ($donation->kind ?? 'donation') === 'donation';
 
-        return (bool) apply_filters('fundkit.receipt.should_issue', $shouldIssue, $donation);
+        return (bool) apply_filters('gratora.receipt.should_issue', $shouldIssue, $donation);
     }
 
     /**
@@ -151,7 +151,7 @@ final class ReceiptIssuer
             campaign:      $this->loadCampaign($donation),
         );
 
-        $ctx = apply_filters('fundkit.receipt.context', $ctx);
+        $ctx = apply_filters('gratora.receipt.context', $ctx);
 
         foreach ($this->collectRenderers() as $renderer) {
             if (! $renderer->appliesTo($ctx)) continue;
@@ -269,7 +269,7 @@ final class ReceiptIssuer
             // Only the runner that actually inserted the row announces issuance;
             // a concurrent issue that found the existing row must not re-fire.
             if ($created) {
-                do_action('fundkit.receipt.issued', $receipt, $ctx);
+                do_action('gratora.receipt.issued', $receipt, $ctx);
                 // Campaign and amount come from the donation being receipted.
                 // Without them the donor timeline shows a receipt against no
                 // campaign and no figure.
@@ -305,7 +305,7 @@ final class ReceiptIssuer
                             ->where('id', $receipt->id)
                             ->update(['sent_to_email_at' => $now]);
                         $receipt->sent_to_email_at = $now;
-                        do_action('fundkit.receipt.email_sent', $receipt);
+                        do_action('gratora.receipt.email_sent', $receipt);
                     } else {
                         // Only the lock goes. Whatever sent_to_email_at holds is
                         // the record of a send that did happen.
@@ -313,7 +313,7 @@ final class ReceiptIssuer
                             ->where('id', $receipt->id)
                             ->update(['send_claimed_at' => null]);
                         $receipt->send_claimed_at = null;
-                        do_action('fundkit.receipt.email_failed', $receipt);
+                        do_action('gratora.receipt.email_failed', $receipt);
                     }
                 }
             }
@@ -420,7 +420,7 @@ final class ReceiptIssuer
 
         // 30-day magic-link token for the re-download URL.
         $rawToken    = $this->magicLinks->issue($ctx->donor->id, 'download_receipt', $receipt->id);
-        $downloadUrl = rest_url("fundkit/v1/receipts/{$receipt->id}/download")
+        $downloadUrl = rest_url("gratora/v1/receipts/{$receipt->id}/download")
                      . '?token=' . rawurlencode($rawToken);
 
         $fullName  = (string) $ctx->donor_name;
@@ -448,7 +448,7 @@ final class ReceiptIssuer
         $subject = strtr($subject, $tags);
         if (trim($subject) === '') {
             /* translators: %s: donation reference number */
-            $subject = sprintf(__('Your donation receipt - %s', 'fundraising-toolkit'), $ctx->donation->reference);
+            $subject = sprintf(__('Your donation receipt - %s', 'gratora'), $ctx->donation->reference);
         }
 
         // Honor the user-edited body when non-empty; otherwise fall back to
@@ -462,7 +462,7 @@ final class ReceiptIssuer
             // donations whatever the body content is.
             if (! empty($ctx->donation->is_test)) {
                 $body = '<p style="background:#fef2f2;border:1px solid #b91c1c;color:#b91c1c;font-weight:700;text-align:center;padding:10px;border-radius:6px;margin:0 0 20px;">'
-                      . esc_html__('Test donation. No real payment was made.', 'fundraising-toolkit')
+                      . esc_html__('Test donation. No real payment was made.', 'gratora')
                       . '</p>'
                       . $body;
             }
@@ -473,7 +473,7 @@ final class ReceiptIssuer
                 '<p><a href="%s" style="color:%s">%s</a></p>',
                 esc_url($downloadUrl),
                 esc_attr($accent),
-                esc_html__('Download receipt', 'fundraising-toolkit')
+                esc_html__('Download receipt', 'gratora')
             );
         } else {
             $body = View::load('Receipts.email', [
@@ -525,7 +525,7 @@ final class ReceiptIssuer
     /** @since 1.0.0 */
     private function writeTempPdf(string $bytes, string $reference): string
     {
-        $tmp = get_temp_dir() . 'fundkit-receipt-' . $reference . '-' . bin2hex(random_bytes(4)) . '.pdf';
+        $tmp = get_temp_dir() . 'gratora-receipt-' . $reference . '-' . bin2hex(random_bytes(4)) . '.pdf';
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- get_temp_dir() scratch file that lives only for the wp_mail call that attaches it; WP_Filesystem needs credentials this path has no way to ask for.
         file_put_contents($tmp, $bytes);
         return $tmp;
@@ -576,7 +576,7 @@ final class ReceiptIssuer
 
         $ctx = $this->withCustomFields($ctx, $donation);
 
-        $ctx = apply_filters('fundkit.receipt.context', $ctx);
+        $ctx = apply_filters('gratora.receipt.context', $ctx);
 
         // The donor's locale, the way processRenderer renders it. Without the
         // switch, a re-download hands back a receipt written in whatever
@@ -609,7 +609,7 @@ final class ReceiptIssuer
      */
     private function collectRenderers(): array
     {
-        return (array) apply_filters('fundkit.receipt.renderers', []);
+        return (array) apply_filters('gratora.receipt.renderers', []);
     }
 
     /**

@@ -16,7 +16,7 @@ function Sparkline( { points = [], color = '#6f5ce6' } ) {
     } ).join( ' ' );
 
     return (
-        <svg viewBox={ `0 0 ${ w } ${ h }` } width={ w } height={ h } aria-hidden="true" className="fundkit-spark">
+        <svg viewBox={ `0 0 ${ w } ${ h }` } width={ w } height={ h } aria-hidden="true" className="gratora-spark">
             <path d={ path } fill="none" stroke={ color } strokeWidth="1.5" />
         </svg>
     );
@@ -28,8 +28,8 @@ export default function TopCampaigns( { rows = [] } ) {
             <EmptyState
                 compact
                 icon={ <TrendingUp size={ 22 } strokeWidth={ 1.75 } /> }
-                title={ __( 'No donations in this range', 'fundraising-toolkit' ) }
-                body={ __( 'Pick a wider date range or wait for new donations to come in.', 'fundraising-toolkit' ) }
+                title={ __( 'No donations in this range', 'gratora' ) }
+                body={ __( 'Pick a wider date range or wait for new donations to come in.', 'gratora' ) }
             />
         );
     }
@@ -37,30 +37,30 @@ export default function TopCampaigns( { rows = [] } ) {
     const max = rows[ 0 ].amount_cents;
 
     return (
-        <table className="fundkit-table fundkit-top-campaigns">
+        <table className="gratora-table gratora-top-campaigns">
             <tbody>
                 { rows.map( ( c ) => {
                     const pct = max > 0 ? Math.round( ( c.amount_cents / max ) * 100 ) : 0;
                     return (
                         <tr key={ c.id }>
                             <td>
-                                <div className="fundkit-table__primary">
+                                <div className="gratora-table__primary">
                                     <a href={ detailHref( c.id ) }>{ c.title }</a>
                                 </div>
-                                <div className="fundkit-table__bar">
-                                    <div className="fundkit-table__bar-fill" style={ { width: `${ pct }%` } } />
+                                <div className="gratora-table__bar">
+                                    <div className="gratora-table__bar-fill" style={ { width: `${ pct }%` } } />
                                 </div>
                             </td>
-                            <td className="fundkit-top-campaigns__spark">
+                            <td className="gratora-top-campaigns__spark">
                                 <Sparkline points={ c.sparkline } />
                             </td>
-                            <td className="fundkit-table__right">
-                                <div className="fundkit-table__primary">
+                            <td className="gratora-table__right">
+                                <div className="gratora-table__primary">
                                     { formatAmount( c.amount_cents, c.currency ) }
                                 </div>
-                                <div className="fundkit-table__sub">
+                                <div className="gratora-table__sub">
                                     { sprintf(
-                                        /* translators: %d: number of donations */ _n( '%d donation', '%d donations', c.donations_count, 'fundraising-toolkit' ),
+                                        /* translators: %d: number of donations */ _n( '%d donation', '%d donations', c.donations_count, 'gratora' ),
                                         c.donations_count
                                     ) }
                                 </div>

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 /**
  * Every route this plugin registers, checked against the live registry rather
@@ -18,7 +18,7 @@ namespace FundKit\Tests\Integration;
  */
 final class RestRouteGuardMatrixTest extends IntegrationTestCase
 {
-    private const NAMESPACE_ROOT = '/fundkit/v1';
+    private const NAMESPACE_ROOT = '/gratora/v1';
 
     /**
      * Deliberately reachable without authentication, and why. Adding to this
@@ -26,13 +26,13 @@ final class RestRouteGuardMatrixTest extends IntegrationTestCase
      * to say who can reach it and what stops them abusing it.
      */
     private const PUBLIC_ROUTES = [
-        '/fundkit/v1'                                              => 'the namespace index, registered by WordPress itself',
-        '/fundkit/v1/donations'                                    => 'the donation form posts here; honeypot, form token and IP/email quotas gate it',
-        '/fundkit/v1/donations/(?P<reference>[A-Za-z0-9_\-]+)'     => 'donation status; the per-donation status_token is the auth, and the body carries no PII',
-        '/fundkit/v1/webhooks/(?P<gateway>[a-z0-9_-]+)'            => 'gateways cannot authenticate to WordPress; the signature is the auth layer',
-        '/fundkit/v1/receipts/(?P<receipt_id>\d+)/download'        => 'a magic-link token scoped to purpose and receipt id, cross-checked against the donor',
-        '/fundkit/v1/gateways/paypal/capture'                      => 'the browser finishes the payment here; the per-donation status_token is the auth',
-        '/fundkit/v1/gateways/paypal/subscription'                 => 'as above, for the subscription the buyer just approved',
+        '/gratora/v1'                                              => 'the namespace index, registered by WordPress itself',
+        '/gratora/v1/donations'                                    => 'the donation form posts here; honeypot, form token and IP/email quotas gate it',
+        '/gratora/v1/donations/(?P<reference>[A-Za-z0-9_\-]+)'     => 'donation status; the per-donation status_token is the auth, and the body carries no PII',
+        '/gratora/v1/webhooks/(?P<gateway>[a-z0-9_-]+)'            => 'gateways cannot authenticate to WordPress; the signature is the auth layer',
+        '/gratora/v1/receipts/(?P<receipt_id>\d+)/download'        => 'a magic-link token scoped to purpose and receipt id, cross-checked against the donor',
+        '/gratora/v1/gateways/paypal/capture'                      => 'the browser finishes the payment here; the per-donation status_token is the auth',
+        '/gratora/v1/gateways/paypal/subscription'                 => 'as above, for the subscription the buyer just approved',
     ];
 
     /** @return array<string, array<int, array<string, mixed>>> */
@@ -42,7 +42,7 @@ final class RestRouteGuardMatrixTest extends IntegrationTestCase
         do_action('rest_api_init', $server);
 
         // The namespace exactly, not a prefix: another suite registers a
-        // /fundkit-addon/v1 double to exercise the extension seam, and a
+        // /gratora-addon/v1 double to exercise the extension seam, and a
         // prefix match adopts it as one of ours.
         return array_filter(
             $server->get_routes(),

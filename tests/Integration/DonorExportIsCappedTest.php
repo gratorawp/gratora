@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Exports\DonorExporter;
-use FundKit\Foundation\Plugin;
+use Gratora\Exports\DonorExporter;
+use Gratora\Foundation\Plugin;
 
 /**
  * Every other export in the plugin bounds itself: donations at 50000 with a
@@ -27,7 +27,7 @@ final class DonorExportIsCappedTest extends IntegrationTestCase
         }
 
         $wpdb->query(
-            'INSERT INTO ' . $wpdb->prefix . 'fundkit_donors (email_hash, email_encrypted, created_at, updated_at) VALUES '
+            'INSERT INTO ' . $wpdb->prefix . 'gratora_donors (email_hash, email_encrypted, created_at, updated_at) VALUES '
             . implode(',', $tuples)
         );
     }
@@ -44,12 +44,12 @@ final class DonorExportIsCappedTest extends IntegrationTestCase
         $this->seedDonors(12);
 
         $cap = static fn (): int => 5;
-        add_filter('fundkit.export.donors_max_rows', $cap);
+        add_filter('gratora.export.donors_max_rows', $cap);
 
         try {
             $csv = Plugin::instance()->container->get(DonorExporter::class)->toCsv([]);
         } finally {
-            remove_filter('fundkit.export.donors_max_rows', $cap);
+            remove_filter('gratora.export.donors_max_rows', $cap);
         }
 
         $this->assertSame(5, $this->dataRows($csv));
@@ -71,12 +71,12 @@ final class DonorExportIsCappedTest extends IntegrationTestCase
         $this->seedDonors(4);
 
         $raise = static fn (): int => 1;
-        add_filter('fundkit.export.max_rows', $raise);
+        add_filter('gratora.export.max_rows', $raise);
 
         try {
             $csv = Plugin::instance()->container->get(DonorExporter::class)->toCsv([]);
         } finally {
-            remove_filter('fundkit.export.max_rows', $raise);
+            remove_filter('gratora.export.max_rows', $raise);
         }
 
         $this->assertSame(4, $this->dataRows($csv));

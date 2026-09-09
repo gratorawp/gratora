@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Settings\SettingsService;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
- * `[fundkit_donation_form slug="..."]` running through the block-render pipeline:
+ * `[gratora_donation_form slug="..."]` running through the block-render pipeline:
  *   shortcode → resolve form by slug → do_blocks(form.blocks) → wrap in <form>.
  */
 final class BlockFormRenderTest extends IntegrationTestCase
@@ -23,18 +23,18 @@ final class BlockFormRenderTest extends IntegrationTestCase
 
     public function test_bare_shortcode_without_slug_renders_admin_diagnostic(): void
     {
-        $html = do_shortcode('[fundkit_donation_form]');
-        $this->assertStringContainsString('class="fundkit-donation-form__error"', $html);
+        $html = do_shortcode('[gratora_donation_form]');
+        $this->assertStringContainsString('class="gratora-donation-form__error"', $html);
     }
 
     public function test_explicit_slug_renders_matching_form(): void
     {
         $created = $this->createForm([
             'title'  => 'Tiny',
-            'blocks' => '<!-- wp:fundkit/submit-button {"label":"Give now"} /-->',
+            'blocks' => '<!-- wp:gratora/submit-button {"label":"Give now"} /-->',
         ]);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
 
         $this->assertStringContainsString('data-form-slug="' . $created['slug'] . '"', $html);
         $this->assertStringContainsString('Give now', $html);
@@ -44,10 +44,10 @@ final class BlockFormRenderTest extends IntegrationTestCase
     {
         $created = $this->createForm([
             'title'  => 'Amounts',
-            'blocks' => '<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"currency":"EUR"} /-->',
+            'blocks' => '<!-- wp:gratora/donation-amount {"presets":[1000,2500,5000,10000],"currency":"EUR"} /-->',
         ]);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
 
         $this->assertMatchesRegularExpression('/<input type="hidden"\s+name="amount_cents"\s+value="\d+"/', $html);
         $this->assertMatchesRegularExpression('/<input type="hidden"\s+name="currency"\s+value="EUR"/', $html);
@@ -61,10 +61,10 @@ final class BlockFormRenderTest extends IntegrationTestCase
     {
         $created = $this->createForm([
             'title'  => 'Donor',
-            'blocks' => '<!-- wp:fundkit/email /--><!-- wp:fundkit/name /-->',
+            'blocks' => '<!-- wp:gratora/email /--><!-- wp:gratora/name /-->',
         ]);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
 
         $this->assertMatchesRegularExpression('/name="email"[^>]*required/', $html);
         $this->assertMatchesRegularExpression('/name="profile\[first_name\]"[^>]*required/', $html);
@@ -76,32 +76,32 @@ final class BlockFormRenderTest extends IntegrationTestCase
     {
         $created = $this->createForm([
             'title'  => 'Submit',
-            'blocks' => '<!-- wp:fundkit/submit-button /-->',
+            'blocks' => '<!-- wp:gratora/submit-button /-->',
         ]);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
 
         // The SSR fallback (shown only without JS) must not submit: the form has
         // no action/method, so a real submit would GET the donor's inputs into
         // the URL. The Preact runtime swaps this out on mount.
-        $this->assertMatchesRegularExpression('/<button\s+type="button"\s+class="fundkit-submit"\s+disabled>/', $html);
+        $this->assertMatchesRegularExpression('/<button\s+type="button"\s+class="gratora-submit"\s+disabled>/', $html);
         $this->assertStringContainsString('Donate', $html);
     }
 
     public function test_unknown_slug_renders_admin_visible_error(): void
     {
-        $html = do_shortcode('[fundkit_donation_form slug="does-not-exist"]');
+        $html = do_shortcode('[gratora_donation_form slug="does-not-exist"]');
 
-        $this->assertStringContainsString('class="fundkit-donation-form__error"', $html);
+        $this->assertStringContainsString('class="gratora-donation-form__error"', $html);
         $this->assertStringContainsString('does-not-exist', $html);
-        $this->assertStringNotContainsString('fundkit-donation-form--blocks', $html);
+        $this->assertStringNotContainsString('gratora-donation-form--blocks', $html);
     }
 
     public function test_unknown_slug_renders_empty_string_for_visitors(): void
     {
         wp_set_current_user(0);
 
-        $html = do_shortcode('[fundkit_donation_form slug="does-not-exist"]');
+        $html = do_shortcode('[gratora_donation_form slug="does-not-exist"]');
 
         $this->assertSame('', $html);
     }
@@ -110,16 +110,16 @@ final class BlockFormRenderTest extends IntegrationTestCase
     {
         $created = $this->createForm(['title' => 'Empty', 'blocks' => '']);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
 
-        $this->assertStringContainsString('fundkit-donation-form--blocks', $html);
+        $this->assertStringContainsString('gratora-donation-form--blocks', $html);
     }
 
     public function test_shortcode_default_gateway_is_offline_when_settings_empty(): void
     {
         $created = $this->createForm(['title' => 'Default gateway']);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
 
         $this->assertStringContainsString('data-gateway="offline"', $html);
     }
@@ -128,7 +128,7 @@ final class BlockFormRenderTest extends IntegrationTestCase
     {
         $created = $this->createForm(['title' => 'Mode default']);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
 
         $this->assertStringContainsString('"testMode":false', $html);
     }
@@ -144,7 +144,7 @@ final class BlockFormRenderTest extends IntegrationTestCase
             'settings' => ['gateways' => ['allowed' => ['stripe']]],
         ]);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
 
         $this->assertStringContainsString('data-gateway="offline"', $html);
     }
@@ -157,9 +157,9 @@ final class BlockFormRenderTest extends IntegrationTestCase
         // throw into the render path.
         $created = $this->createForm(['title' => 'No stripe']);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
 
-        preg_match('/<script type="application\/json" data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
         $config = json_decode($m[1], true);
 
         $this->assertIsArray($config);
@@ -172,24 +172,24 @@ final class BlockFormRenderTest extends IntegrationTestCase
         $created = $this->createForm([
             'title'  => 'Multi step',
             'blocks' => <<<BLOCKS
-<!-- wp:fundkit/donation-amount {"presets":[1500,3000,7500],"currency":"USD","allowCustom":false} /-->
+<!-- wp:gratora/donation-amount {"presets":[1500,3000,7500],"currency":"USD","allowCustom":false} /-->
 
-<!-- wp:fundkit/name {"requireFirst":true} /-->
-<!-- wp:fundkit/country /-->
+<!-- wp:gratora/name {"requireFirst":true} /-->
+<!-- wp:gratora/country /-->
 
-<!-- wp:fundkit/submit-button {"label":"Give USD"} /-->
+<!-- wp:gratora/submit-button {"label":"Give USD"} /-->
 BLOCKS,
         ]);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
 
         // Extract the config JSON the runtime will read.
         $this->assertMatchesRegularExpression(
-            '/<script type="application\/json" data-fundkit-form-config>(.+?)<\/script>/s',
+            '/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s',
             $html,
             'Form should emit a config script tag for the Preact runtime.'
         );
-        preg_match('/<script type="application\/json" data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
         $config = json_decode($m[1], true);
 
         $this->assertIsArray($config);
@@ -221,11 +221,11 @@ BLOCKS,
     {
         $created = $this->createForm([
             'title'  => 'No submit',
-            'blocks' => '<!-- wp:fundkit/donation-amount {"presets":[500]} /-->',
+            'blocks' => '<!-- wp:gratora/donation-amount {"presets":[500]} /-->',
         ]);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
-        preg_match('/<script type="application\/json" data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
+        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
         $config = json_decode($m[1], true);
 
         $types = array_column($config['steps'], 'type');
@@ -245,16 +245,16 @@ BLOCKS,
         $created = $this->createForm([
             'title'  => 'Switcher',
             'blocks' => <<<BLOCKS
-<!-- wp:fundkit/donation-amount {"presets":[1000],"currency":"USD"} /-->
+<!-- wp:gratora/donation-amount {"presets":[1000],"currency":"USD"} /-->
 
-<!-- wp:fundkit/currency-switcher {"currencies":["EUR","JPY"]} /-->
+<!-- wp:gratora/currency-switcher {"currencies":["EUR","JPY"]} /-->
 
-<!-- wp:fundkit/submit-button {"label":"Give"} /-->
+<!-- wp:gratora/submit-button {"label":"Give"} /-->
 BLOCKS,
         ]);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
-        preg_match('/<script type="application\/json" data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
+        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
         $config = json_decode($m[1], true);
 
         $this->assertSame(['USD', 'EUR'], $config['currencies'], 'base first, JPY (not enabled) dropped');
@@ -267,7 +267,7 @@ BLOCKS,
             'supported_currencies' => ['USD', 'EUR'],
         ]);
 
-        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/forms/currencies'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/forms/currencies'));
         $this->assertSame(200, $res->get_status());
         $data = $res->get_data();
         $this->assertSame('USD', $data['base']);
@@ -281,7 +281,7 @@ BLOCKS,
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'EUR'],
         ]);
-        update_option('fundkit_fx_rates', [
+        update_option('gratora_fx_rates', [
             'base'  => 'USD',
             'date'  => gmdate('Y-m-d'),
             'rates' => ['EUR' => 0.9],
@@ -290,16 +290,16 @@ BLOCKS,
         $created = $this->createForm([
             'title'  => 'Fx form',
             'blocks' => <<<BLOCKS
-<!-- wp:fundkit/donation-amount {"presets":[1000],"currency":"USD"} /-->
+<!-- wp:gratora/donation-amount {"presets":[1000],"currency":"USD"} /-->
 
-<!-- wp:fundkit/currency-switcher {"currencies":["EUR"]} /-->
+<!-- wp:gratora/currency-switcher {"currencies":["EUR"]} /-->
 
-<!-- wp:fundkit/submit-button {"label":"Give"} /-->
+<!-- wp:gratora/submit-button {"label":"Give"} /-->
 BLOCKS,
         ]);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
-        preg_match('/<script type="application\/json" data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
+        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
         $config = json_decode($m[1], true);
 
         $this->assertSame('USD', $config['fx']['base']);
@@ -317,16 +317,16 @@ BLOCKS,
         $created = $this->createForm([
             'title'  => 'Switcher style',
             'blocks' => <<<BLOCKS
-<!-- wp:fundkit/donation-amount {"presets":[1000],"currency":"USD"} /-->
+<!-- wp:gratora/donation-amount {"presets":[1000],"currency":"USD"} /-->
 
-<!-- wp:fundkit/currency-switcher {"currencies":["EUR"],"label":"Pick currency","style":"pills","align":"right"} /-->
+<!-- wp:gratora/currency-switcher {"currencies":["EUR"],"label":"Pick currency","style":"pills","align":"right"} /-->
 
-<!-- wp:fundkit/submit-button {"label":"Give"} /-->
+<!-- wp:gratora/submit-button {"label":"Give"} /-->
 BLOCKS,
         ]);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
-        preg_match('/<script type="application\/json" data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
+        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
         $config = json_decode($m[1], true);
 
         $this->assertSame('pills', $config['currencySwitcher']['style']);
@@ -337,15 +337,15 @@ BLOCKS,
         $bad = $this->createForm([
             'title'  => 'Switcher bad',
             'blocks' => <<<BLOCKS
-<!-- wp:fundkit/donation-amount {"presets":[1000],"currency":"USD"} /-->
+<!-- wp:gratora/donation-amount {"presets":[1000],"currency":"USD"} /-->
 
-<!-- wp:fundkit/currency-switcher {"currencies":["EUR"],"style":"nope","align":"sideways"} /-->
+<!-- wp:gratora/currency-switcher {"currencies":["EUR"],"style":"nope","align":"sideways"} /-->
 
-<!-- wp:fundkit/submit-button /-->
+<!-- wp:gratora/submit-button /-->
 BLOCKS,
         ]);
-        $html2 = do_shortcode('[fundkit_donation_form slug="' . $bad['slug'] . '"]');
-        preg_match('/<script type="application\/json" data-fundkit-form-config>(.+?)<\/script>/s', $html2, $m2);
+        $html2 = do_shortcode('[gratora_donation_form slug="' . $bad['slug'] . '"]');
+        preg_match('/<script type="application\/json" data-gratora-form-config>(.+?)<\/script>/s', $html2, $m2);
         $config2 = json_decode($m2[1], true);
         $this->assertSame('dropdown', $config2['currencySwitcher']['style']);
         $this->assertSame('left', $config2['currencySwitcher']['align']);
@@ -360,18 +360,18 @@ BLOCKS,
 
         $withLabel = $this->createForm([
             'title'  => 'Labelled',
-            'blocks' => '<!-- wp:fundkit/currency-switcher {"currencies":["EUR"],"label":"Pick one"} /-->',
+            'blocks' => '<!-- wp:gratora/currency-switcher {"currencies":["EUR"],"label":"Pick one"} /-->',
         ]);
-        $html = do_shortcode('[fundkit_donation_form slug="' . $withLabel['slug'] . '"]');
-        $this->assertStringContainsString('fundkit-currency__label', $html);
+        $html = do_shortcode('[gratora_donation_form slug="' . $withLabel['slug'] . '"]');
+        $this->assertStringContainsString('gratora-currency__label', $html);
         $this->assertStringContainsString('Pick one', $html);
 
         $noLabel = $this->createForm([
             'title'  => 'Unlabelled',
-            'blocks' => '<!-- wp:fundkit/currency-switcher {"currencies":["EUR"]} /-->',
+            'blocks' => '<!-- wp:gratora/currency-switcher {"currencies":["EUR"]} /-->',
         ]);
-        $html2 = do_shortcode('[fundkit_donation_form slug="' . $noLabel['slug'] . '"]');
-        $this->assertStringNotContainsString('fundkit-currency__label', $html2, 'No label span when empty');
+        $html2 = do_shortcode('[gratora_donation_form slug="' . $noLabel['slug'] . '"]');
+        $this->assertStringNotContainsString('gratora-currency__label', $html2, 'No label span when empty');
         // Accessible name still present on the control.
         $this->assertStringContainsString('aria-label="Currency"', $html2);
     }
@@ -380,22 +380,22 @@ BLOCKS,
     {
         $plain = $this->createForm([
             'title'    => 'Plain wide',
-            'blocks'   => '<!-- wp:fundkit/donation-amount {"presets":[1000]} /-->',
+            'blocks'   => '<!-- wp:gratora/donation-amount {"presets":[1000]} /-->',
             'settings' => ['container' => ['style' => 'plain', 'width' => 900]],
         ]);
-        $html = do_shortcode('[fundkit_donation_form slug="' . $plain['slug'] . '"]');
-        $this->assertStringContainsString('fundkit-donation-form--plain', $html);
-        $this->assertStringNotContainsString('fundkit-donation-form--framed', $html);
-        $this->assertStringContainsString('--fundkit-form-max-width:900px', $html);
+        $html = do_shortcode('[gratora_donation_form slug="' . $plain['slug'] . '"]');
+        $this->assertStringContainsString('gratora-donation-form--plain', $html);
+        $this->assertStringNotContainsString('gratora-donation-form--framed', $html);
+        $this->assertStringContainsString('--gratora-form-max-width:900px', $html);
         $this->assertStringContainsString('max-width:900px', $html, 'inline max-width beats theme overrides');
 
         $framed = $this->createForm([
             'title'    => 'Framed wide',
-            'blocks'   => '<!-- wp:fundkit/donation-amount {"presets":[1000]} /-->',
+            'blocks'   => '<!-- wp:gratora/donation-amount {"presets":[1000]} /-->',
             'settings' => ['container' => ['style' => 'frame', 'width' => 1000]],
         ]);
-        $html2 = do_shortcode('[fundkit_donation_form slug="' . $framed['slug'] . '"]');
-        $this->assertStringContainsString('fundkit-donation-form--framed', $html2);
+        $html2 = do_shortcode('[gratora_donation_form slug="' . $framed['slug'] . '"]');
+        $this->assertStringContainsString('gratora-donation-form--framed', $html2);
         $this->assertStringContainsString('max-width:1000px', $html2, 'width applies regardless of frame/plain');
     }
 
@@ -403,11 +403,11 @@ BLOCKS,
     {
         $f = $this->createForm([
             'title'  => 'Aligned',
-            'blocks' => "<!-- wp:fundkit/donation-amount {\"presets\":[1000]} /-->\n\n"
-                . '<!-- wp:fundkit/submit-button {"label":"Give","align":"center"} /-->',
+            'blocks' => "<!-- wp:gratora/donation-amount {\"presets\":[1000]} /-->\n\n"
+                . '<!-- wp:gratora/submit-button {"label":"Give","align":"center"} /-->',
         ]);
-        $html = do_shortcode('[fundkit_donation_form slug="' . $f['slug'] . '"]');
-        preg_match('/data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[gratora_donation_form slug="' . $f['slug'] . '"]');
+        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
         $cfg = json_decode($m[1], true);
         $submit = null;
         foreach ($cfg['steps'] as $s) {
@@ -417,10 +417,10 @@ BLOCKS,
 
         $bad = $this->createForm([
             'title'  => 'Bad align',
-            'blocks' => '<!-- wp:fundkit/submit-button {"align":"sideways"} /-->',
+            'blocks' => '<!-- wp:gratora/submit-button {"align":"sideways"} /-->',
         ]);
-        $html2 = do_shortcode('[fundkit_donation_form slug="' . $bad['slug'] . '"]');
-        preg_match('/data-fundkit-form-config>(.+?)<\/script>/s', $html2, $m2);
+        $html2 = do_shortcode('[gratora_donation_form slug="' . $bad['slug'] . '"]');
+        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html2, $m2);
         $cfg2 = json_decode($m2[1], true);
         $sb = null;
         foreach ($cfg2['steps'] as $s) {
@@ -433,18 +433,18 @@ BLOCKS,
     {
         $f = $this->createForm([
             'title'  => 'With divider',
-            'blocks' => "<!-- wp:fundkit/donation-amount {\"presets\":[1000]} /-->\n\n"
-                . '<!-- wp:fundkit/divider {"marginTop":40,"marginBottom":8,"thickness":3,"color":"#cccccc"} /-->'
-                . "\n\n<!-- wp:fundkit/submit-button {\"label\":\"Give\"} /-->",
+            'blocks' => "<!-- wp:gratora/donation-amount {\"presets\":[1000]} /-->\n\n"
+                . '<!-- wp:gratora/divider {"marginTop":40,"marginBottom":8,"thickness":3,"color":"#cccccc"} /-->'
+                . "\n\n<!-- wp:gratora/submit-button {\"label\":\"Give\"} /-->",
         ]);
-        $html = do_shortcode('[fundkit_donation_form slug="' . $f['slug'] . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $f['slug'] . '"]');
 
         // No-JS server render.
-        $this->assertStringContainsString('fundkit-divider', $html);
+        $this->assertStringContainsString('gratora-divider', $html);
         $this->assertStringContainsString('border-top:3px solid #cccccc', $html);
 
         // Runtime config decoration.
-        preg_match('/data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
         $cfg = json_decode($m[1], true);
         $divider = null;
         foreach ($cfg['steps'] as $s) {
@@ -463,17 +463,17 @@ BLOCKS,
         $f = $this->createForm([
             'title'  => 'Row gap',
             'blocks' => <<<BLOCKS
-<!-- wp:fundkit/row {"columns":2,"gap":24,"gapUnit":"rem"} -->
-<!-- wp:fundkit/name /-->
-<!-- wp:fundkit/email /-->
-<!-- /wp:fundkit/row -->
+<!-- wp:gratora/row {"columns":2,"gap":24,"gapUnit":"rem"} -->
+<!-- wp:gratora/name /-->
+<!-- wp:gratora/email /-->
+<!-- /wp:gratora/row -->
 
-<!-- wp:fundkit/submit-button {"label":"Give"} /-->
+<!-- wp:gratora/submit-button {"label":"Give"} /-->
 BLOCKS,
         ]);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $f['slug'] . '"]');
-        preg_match('/data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[gratora_donation_form slug="' . $f['slug'] . '"]');
+        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
         $cfg = json_decode($m[1], true);
 
         $donor = null;
@@ -502,15 +502,15 @@ BLOCKS,
         $f = $this->createForm([
             'title'  => 'Row gap clamp',
             'blocks' => <<<BLOCKS
-<!-- wp:fundkit/row {"columns":2,"gap":999,"gapUnit":"parsecs"} -->
-<!-- wp:fundkit/name /-->
-<!-- wp:fundkit/email /-->
-<!-- /wp:fundkit/row -->
+<!-- wp:gratora/row {"columns":2,"gap":999,"gapUnit":"parsecs"} -->
+<!-- wp:gratora/name /-->
+<!-- wp:gratora/email /-->
+<!-- /wp:gratora/row -->
 BLOCKS,
         ]);
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $f['slug'] . '"]');
-        preg_match('/data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[gratora_donation_form slug="' . $f['slug'] . '"]');
+        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
         $cfg = json_decode($m[1], true);
 
         $donor = null;
@@ -534,7 +534,7 @@ BLOCKS,
 
     private function createCampaign(): int
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Test campaign', 'status' => 'published']));
         return (int) rest_do_request($req)->get_data()['id'];
@@ -551,19 +551,19 @@ BLOCKS,
     {
         $created = $this->createForm([
             'title'  => 'XSS probe',
-            'blocks' => '<!-- wp:fundkit/submit-button {"label":"Give"} /-->',
+            'blocks' => '<!-- wp:gratora/submit-button {"label":"Give"} /-->',
         ]);
 
         // Store a hostile thank-you message directly (simulating any author or
         // stored value that reaches the inline config JSON).
-        $form = \FundKit\Forms\Form::query()->find('id', (int) $created['id']);
+        $form = \Gratora\Forms\Form::query()->find('id', (int) $created['id']);
         $form->settings = array_merge(
             is_array($form->settings) ? $form->settings : [],
             [ 'thank_you_message' => '</script><img src=x onerror=alert(1)>' ]
         );
         $form->save();
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
 
         // Exactly one </script> (the legit config-block closer); the payload's
         // </script> and < are hex-escaped, so no breakout and no raw <img.
@@ -574,12 +574,12 @@ BLOCKS,
 
     private function createForm(array $input): array
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode($input + ['campaign_id' => $this->campaignId]));
         $created = rest_do_request($req)->get_data();
 
-        $form = \FundKit\Forms\Form::query()->find('id', (int) $created['id']);
+        $form = \Gratora\Forms\Form::query()->find('id', (int) $created['id']);
         $form->status = 'published';
         $form->save();
 

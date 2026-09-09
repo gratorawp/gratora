@@ -22,8 +22,8 @@ export default function DistributionHistogram( { distribution, currency } ) {
 
     if ( ! distribution || distribution.total_count === 0 ) {
         return (
-            <p className="fundkit-panel__empty">
-                { __( 'Not enough donations yet to plot a distribution.', 'fundraising-toolkit' ) }
+            <p className="gratora-panel__empty">
+                { __( 'Not enough donations yet to plot a distribution.', 'gratora' ) }
             </p>
         );
     }
@@ -40,22 +40,22 @@ export default function DistributionHistogram( { distribution, currency } ) {
         .reduce( ( s, b ) => s + b.count, 0 );
 
     return (
-        <div className="fundkit-histogram">
-            <div className="fundkit-histogram__caption">
+        <div className="gratora-histogram">
+            <div className="gratora-histogram__caption">
                 <span>
                     <strong>
                         { sprintf(
                             /* translators: %s: median donation amount */
-                            __( 'Median: %s', 'fundraising-toolkit' ),
+                            __( 'Median: %s', 'gratora' ),
                             formatAmount( median_cents, currency )
                         ) }
                     </strong>
                 </span>
                 { longTailCount > 0 && (
-                    <span className="fundkit-histogram__tail">
+                    <span className="gratora-histogram__tail">
                         { sprintf(
                             /* translators: 1: donation count, 2: amount threshold (e.g. $100) */
-                            _n( '%1$d donation over %2$s', '%1$d donations over %2$s', longTailCount, 'fundraising-toolkit' ),
+                            _n( '%1$d donation over %2$s', '%1$d donations over %2$s', longTailCount, 'gratora' ),
                             longTailCount,
                             formatAmountCompact( 10000, currency )
                         ) }
@@ -97,11 +97,11 @@ export default function DistributionHistogram( { distribution, currency } ) {
                         formatter={ ( value, _name, props ) => [
                             sprintf(
                                 /* translators: 1: donation count, 2: total amount in that bucket */
-                                __( '%1$d × %2$s', 'fundraising-toolkit' ),
+                                __( '%1$d × %2$s', 'gratora' ),
                                 value,
                                 formatAmount( props.payload.amount_cents, currency )
                             ),
-                            __( 'Donations', 'fundraising-toolkit' ),
+                            __( 'Donations', 'gratora' ),
                         ] }
                     />
                     <Bar dataKey="count" fill="#8a7bff" radius={ [ 4, 4, 0, 0 ] } isAnimationActive={ false } />
@@ -111,7 +111,7 @@ export default function DistributionHistogram( { distribution, currency } ) {
                             stroke="#6b7280"
                             strokeDasharray="4 4"
                             label={ {
-                                value:     __( 'median', 'fundraising-toolkit' ),
+                                value:     __( 'median', 'gratora' ),
                                 position:  'top',
                                 fill:      '#6b7280',
                                 fontSize:  10,
@@ -121,10 +121,10 @@ export default function DistributionHistogram( { distribution, currency } ) {
                 </BarChart>
             </ResponsiveContainer>
 
-            <p className="fundkit-histogram__total">
+            <p className="gratora-histogram__total">
                 { sprintf(
                     /* translators: %d: total donation count */
-                    _n( '%d donation in this period', '%d donations in this period', total_count, 'fundraising-toolkit' ),
+                    _n( '%d donation in this period', '%d donations in this period', total_count, 'gratora' ),
                     total_count
                 ) }
             </p>

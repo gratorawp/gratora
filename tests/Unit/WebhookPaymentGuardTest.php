@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit;
+namespace Gratora\Tests\Unit;
 
-use FundKit\Donations\Donation;
-use FundKit\Gateways\WebhookPaymentGuard;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donations\Donation;
+use Gratora\Gateways\WebhookPaymentGuard;
+use Gratora\Recurring\RecurringPlan;
 use PHPUnit\Framework\TestCase;
 
 /**

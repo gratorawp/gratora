@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\SubscriptionAware;
-use FundKit\Gateways\WebhookOutcome;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringResumer;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\SubscriptionAware;
+use Gratora\Gateways\WebhookOutcome;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringResumer;
 use RuntimeException;
 use WP_REST_Request;
 

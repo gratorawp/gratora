@@ -6,20 +6,20 @@ import { test, expect } from '../fixtures/donor-form';
  */
 // Its own seeded form: the canonical one offers only gateways that settle
 // server-side, so this suite could never reach the payment phase from it.
-test.use({ formPath: process.env.FUNDKIT_E2E_PAYMENT_FORM_PATH ?? '' });
+test.use({ formPath: process.env.GRATORA_E2E_PAYMENT_FORM_PATH ?? '' });
 
 test.describe('payment step placement', () => {
     const CLIENT_SECRET = 'pi_e2e_placement_secret_not_real';
 
     /** Answer the donation POST the way a Stripe form's server would. */
     async function stubStripeIntent(page, amountCents = 2500) {
-        await page.route('**/fundkit/v1/donations', async (route) => {
+        await page.route('**/gratora/v1/donations', async (route) => {
             if (route.request().method() !== 'POST') return route.fallback();
             await route.fulfill({
                 status: 201,
                 contentType: 'application/json',
                 body: JSON.stringify({
-                    reference:     'FUNDKIT-E2E-PLACEMENT',
+                    reference:     'GRATORA-E2E-PLACEMENT',
                     status:        'pending',
                     status_token:  'e2e-token',
                     amount_cents:  amountCents,
@@ -65,7 +65,7 @@ test.describe('payment step placement', () => {
             }
             if (gateway) await donor.selectGateway(gateway);
 
-            const next = donor.form.locator('.fundkit-form__button--primary');
+            const next = donor.form.locator('.gratora-form__button--primary');
             const label = (await next.first().innerText()).trim();
             if (! /continue|next/i.test(label)) break;
             await next.first().click();
@@ -96,8 +96,8 @@ test.describe('payment step placement', () => {
         // Read from the served HTML rather than the DOM, because the runtime
         // consumes this script at boot and removes it.
         const html = await (await page.request.get(page.url())).text();
-        const raw  = /data-fundkit-form-config[^>]*>([\s\S]*?)<\/script>/.exec(html);
-        if (! raw) return blocked = 'no FundKit form config on the page under test';
+        const raw  = /data-gratora-form-config[^>]*>([\s\S]*?)<\/script>/.exec(html);
+        if (! raw) return blocked = 'no Gratora form config on the page under test';
         const cfg = JSON.parse(raw[1]);
 
         const ids   = ((cfg.gateways?.options ?? []) as Array<{ id: string }>).map((o) => o.id);
@@ -127,8 +127,8 @@ test.describe('payment step placement', () => {
         await stubStripeIntent(page);
         await fillAndSubmit(donor, page, 'stripe');
 
-        await expect(donor.form.locator('.fundkit-form__payment-mount')).toHaveCount(1, { timeout: 10_000 });
-        await expect(donor.form.locator('.fundkit-form--settled')).toHaveCount(1, { timeout: 10_000 });
+        await expect(donor.form.locator('.gratora-form__payment-mount')).toHaveCount(1, { timeout: 10_000 });
+        await expect(donor.form.locator('.gratora-form--settled')).toHaveCount(1, { timeout: 10_000 });
     }
 
     /** Skips naming the real reason, so a skipped run is never mistaken for a passing one. */
@@ -142,10 +142,10 @@ test.describe('payment step placement', () => {
     test('payment mounts at the gateway block, not over the whole form', async ({ donor, page }) => {
         await requirePayment(donor, page);
 
-        await expect(donor.form.locator('.fundkit-form__payment-mount')).toHaveCount(1);
+        await expect(donor.form.locator('.gratora-form__payment-mount')).toHaveCount(1);
         // The selector it replaces is gone, so the donor is not offered a
         // choice they have already made and can no longer change.
-        await expect(donor.form.locator('.fundkit-form__gateways')).toHaveCount(0);
+        await expect(donor.form.locator('.gratora-form__gateways')).toHaveCount(0);
     });
 
     /**
@@ -156,13 +156,13 @@ test.describe('payment step placement', () => {
     test('the pay screen carries nothing but the gateway', async ({ donor, page }) => {
         await requirePayment(donor, page);
 
-        await expect(donor.form.locator('.fundkit-form__donor').first()).toBeHidden();
-        await expect(donor.form.locator('.fundkit-form__amount').first()).toBeHidden();
-        await expect(donor.form.locator('.fundkit-form__payment-mount')).toBeVisible();
+        await expect(donor.form.locator('.gratora-form__donor').first()).toBeHidden();
+        await expect(donor.form.locator('.gratora-form__amount').first()).toBeHidden();
+        await expect(donor.form.locator('.gratora-form__payment-mount')).toBeVisible();
 
         // The recap is a block the author places, so a form may not have one.
         // Present or absent it must not be on screen while paying.
-        const recap = donor.form.locator('.fundkit-form__confirm');
+        const recap = donor.form.locator('.gratora-form__confirm');
         if (await recap.count() > 0) await expect(recap.first()).toBeHidden();
     });
 
@@ -175,14 +175,14 @@ test.describe('payment step placement', () => {
     test('the form settles whichever layout it is', async ({ donor, page }) => {
         await requirePayment(donor, page);
 
-        const root = donor.form.locator('.fundkit-form--settled');
+        const root = donor.form.locator('.gratora-form--settled');
         await expect(root).toHaveCount(1);
 
         const variant = await root.evaluate((el) =>
-            [...el.classList].find((c) => c.startsWith('fundkit-form--') && c !== 'fundkit-form--settled') || 'dots',
+            [...el.classList].find((c) => c.startsWith('gratora-form--') && c !== 'gratora-form--settled') || 'dots',
         );
         // Named so a failure says which shape stopped settling.
-        expect(['fundkit-form--inline', 'fundkit-form--paged-bar', 'dots']).toContain(variant);
+        expect(['gratora-form--inline', 'gratora-form--paged-bar', 'dots']).toContain(variant);
     });
 
     /**
@@ -199,8 +199,8 @@ test.describe('payment step placement', () => {
         const totalBefore = await donor.form.innerText();
 
         await page.evaluate(() => {
-            const form = document.querySelector('form.fundkit-donation-form');
-            form?.querySelectorAll<HTMLElement>('.fundkit-form__preset').forEach((el) => el.click());
+            const form = document.querySelector('form.gratora-donation-form');
+            form?.querySelectorAll<HTMLElement>('.gratora-form__preset').forEach((el) => el.click());
             form?.querySelectorAll<HTMLInputElement>('input[type="checkbox"]').forEach((el) => el.click());
         });
 
@@ -217,9 +217,9 @@ test.describe('payment step placement', () => {
 
         // The gateway's own Pay lives in a nav of the same name, so this is
         // about which navs survive, not about hiding the class.
-        await expect(donor.form.locator('.fundkit-form__payment-mount .fundkit-form__nav')).toBeVisible();
+        await expect(donor.form.locator('.gratora-form__payment-mount .gratora-form__nav')).toBeVisible();
 
-        const visibleNavs = await donor.form.locator('.fundkit-form__nav:visible').count();
+        const visibleNavs = await donor.form.locator('.gratora-form__nav:visible').count();
         expect(visibleNavs, 'exactly one set of buttons while paying').toBe(1);
     });
 
@@ -236,14 +236,14 @@ test.describe('payment step placement', () => {
         // reports the element ready, which it never does against an invented
         // secret, so enabled-ness is not this spec's to assert.
         await expect(
-            donor.form.locator('.fundkit-form__payment-mount .fundkit-form__button--primary'),
+            donor.form.locator('.gratora-form__payment-mount .gratora-form__button--primary'),
         ).toBeVisible();
 
         // Nothing between the mount and the form root may be faded, or the
         // card fields are unreadable however the mount itself is styled.
-        const faded = await donor.form.locator('.fundkit-form__payment-mount').evaluate((el) => {
+        const faded = await donor.form.locator('.gratora-form__payment-mount').evaluate((el) => {
             for (let n = el as HTMLElement | null; n; n = n.parentElement) {
-                if (n.classList?.contains('fundkit-form')) break;
+                if (n.classList?.contains('gratora-form')) break;
                 if (parseFloat(getComputedStyle(n).opacity) < 1) return n.className;
             }
             return null;
@@ -256,13 +256,13 @@ test.describe('payment step placement', () => {
         await requirePayment(donor, page);
 
         const reachable = await donor.form.evaluate((form) => {
-            const mount = form.querySelector('.fundkit-form__payment-mount');
+            const mount = form.querySelector('.gratora-form__payment-mount');
             return [...form.querySelectorAll('input, select, textarea, button')]
                 .filter((el) => ! mount?.contains(el))
                 // The honeypot stays: it is parked off-screen rather than
                 // hidden precisely so a bot fills it in, which means it is
                 // laid out and would count as reachable here.
-                .filter((el) => ! el.closest('.fundkit-form__hp'))
+                .filter((el) => ! el.closest('.gratora-form__hp'))
                 .filter((el) => (el as HTMLElement).offsetParent !== null)
                 .map((el) => `${el.tagName}.${(el as HTMLElement).className}`);
         });
@@ -277,7 +277,7 @@ test.describe('payment step placement', () => {
         await fillAndSubmit(donor, page, 'offline');
         await donor.expectThankYou();
 
-        const receipt = donor.form.locator('.fundkit-form__summary--receipt');
+        const receipt = donor.form.locator('.gratora-form__summary--receipt');
         await expect(receipt).toBeVisible();
         // The amount the server settled on, not one the client recomputed.
         await expect(receipt).toContainText(/\d/);
@@ -289,7 +289,7 @@ test.describe('payment step placement', () => {
      */
     test('the thank-you card offers a way into the portal', async ({ donor, page }) => {
         let sentTo: string | null = null;
-        await page.route('**/fundkit/v1/portal/send-link', async (route) => {
+        await page.route('**/gratora/v1/portal/send-link', async (route) => {
             sentTo = JSON.parse(route.request().postData() || '{}').email ?? null;
             await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
         });
@@ -297,14 +297,14 @@ test.describe('payment step placement', () => {
         await fillAndSubmit(donor, page, 'offline');
         await donor.expectThankYou();
 
-        const button = donor.form.locator('.fundkit-form__portal-link');
+        const button = donor.form.locator('.gratora-form__portal-link');
         await expect(button).toBeVisible();
         await button.click();
 
         // The button stays where it was and says what happened, rather than
         // vanishing and leaving a line of grey text that reads as a failure.
-        await expect(donor.form.locator('.fundkit-form__portal-link.is-sent')).toBeVisible();
-        await expect(donor.form.locator('.fundkit-form__portal-link')).toBeDisabled();
+        await expect(donor.form.locator('.gratora-form__portal-link.is-sent')).toBeVisible();
+        await expect(donor.form.locator('.gratora-form__portal-link')).toBeDisabled();
         expect(sentTo, 'the link goes to the address that just donated').toContain('@');
     });
 
@@ -317,6 +317,6 @@ test.describe('payment step placement', () => {
         await fillAndSubmit(donor, page, 'offline');
 
         await donor.expectThankYou();
-        await expect(donor.form.locator('.fundkit-form__payment-mount')).toHaveCount(0);
+        await expect(donor.form.locator('.gratora-form__payment-mount')).toHaveCount(0);
     });
 });

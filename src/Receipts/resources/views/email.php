@@ -1,12 +1,12 @@
 <?php
 
-use FundKit\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\Money;
 
 defined('ABSPATH') || exit;
 /**
- * @var \FundKit\Donors\Donor       $donor
+ * @var \Gratora\Donors\Donor       $donor
  * @var string                   $donor_name   name given for this donation (resolved)
- * @var \FundKit\Donations\Donation $donation
+ * @var \Gratora\Donations\Donation $donation
  * @var string                   $org_name
  * @var string                   $download_url
  * @var string                   $accent       the campaign's accent, print-safe
@@ -18,8 +18,8 @@ $amountWithCurrency = Money::format((int) $donation->amount_cents, (string) $don
 
 $greeting = $donorFirst !== ''
     /* translators: %s: donor's first name. */
-    ? sprintf(__('Hi %s,', 'fundraising-toolkit'), $donorFirst)
-    : __('Hi,', 'fundraising-toolkit');
+    ? sprintf(__('Hi %s,', 'gratora'), $donorFirst)
+    : __('Hi,', 'gratora');
 ?>
 <!doctype html>
 <html>
@@ -27,7 +27,7 @@ $greeting = $donorFirst !== ''
 
 <?php if (! empty($donation->is_test)): ?>
 <p style="background:#fef2f2; border:1px solid #b91c1c; color:#b91c1c; font-weight:700; text-align:center; padding:10px; border-radius:6px; margin:0 0 20px;">
-    <?php esc_html_e('Test donation. No real payment was made.', 'fundraising-toolkit'); ?>
+    <?php esc_html_e('Test donation. No real payment was made.', 'gratora'); ?>
 </p>
 <?php endif; ?>
 
@@ -38,7 +38,7 @@ $greeting = $donorFirst !== ''
     printf(
         wp_kses(
             /* translators: 1: amount with currency (e.g. "50,00 EUR"), 2: organization name */
-            __('Thank you for your <strong>%1$s</strong> donation to <strong>%2$s</strong>.', 'fundraising-toolkit'),
+            __('Thank you for your <strong>%1$s</strong> donation to <strong>%2$s</strong>.', 'gratora'),
             ['strong' => []]
         ),
         esc_html($amountWithCurrency),
@@ -49,23 +49,23 @@ $greeting = $donorFirst !== ''
 <p>
     <?php esc_html_e(
         'Your receipt is attached as a PDF. Keep it for your records. If your local jurisdiction allows tax deductions on charitable donations, you may need it at filing time.',
-        'fundraising-toolkit'
+        'gratora'
     ); ?>
 </p>
 
 <p>
-    <?php esc_html_e('Reference:', 'fundraising-toolkit'); ?>
+    <?php esc_html_e('Reference:', 'gratora'); ?>
     <code style="background:#f5f3ef; padding:2px 6px; border-radius:3px"><?php echo esc_html($donation->reference); ?></code>
 </p>
 
 <p style="margin-top:24px; font-size:13px; color:#555">
-    <?php esc_html_e('Lost the attachment?', 'fundraising-toolkit'); ?>
-    <a href="<?php echo esc_url($download_url); ?>" style="color:<?php echo esc_attr($accent); ?>"><?php esc_html_e('Re-download your receipt', 'fundraising-toolkit'); ?></a>
-    <?php esc_html_e('(link expires in 30 days).', 'fundraising-toolkit'); ?>
+    <?php esc_html_e('Lost the attachment?', 'gratora'); ?>
+    <a href="<?php echo esc_url($download_url); ?>" style="color:<?php echo esc_attr($accent); ?>"><?php esc_html_e('Re-download your receipt', 'gratora'); ?></a>
+    <?php esc_html_e('(link expires in 30 days).', 'gratora'); ?>
 </p>
 
 <p style="margin-top:32px; color:#777; font-size:13px">
-    <?php esc_html_e('With gratitude,', 'fundraising-toolkit'); ?><br>
+    <?php esc_html_e('With gratitude,', 'gratora'); ?><br>
     <?php echo esc_html($org_name); ?>
 </p>
 

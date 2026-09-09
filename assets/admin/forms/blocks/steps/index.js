@@ -1,5 +1,5 @@
 /**
- * fundkit/steps: multi-page wizard container. Children are fundkit/step blocks, one
+ * gratora/steps: multi-page wizard container. Children are gratora/step blocks, one
  * wizard page each; without this block the form is single-page. progressStyle
  * picks the navigation treatment: dots, bar, or none.
  */
@@ -12,30 +12,30 @@ import { __, sprintf } from '@wordpress/i18n';
 import { createBlock } from '@wordpress/blocks';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'fundkit/steps';
-const ALLOWED = [ 'fundkit/step' ];
+const NAME = 'gratora/steps';
+const ALLOWED = [ 'gratora/step' ];
 
 const TEMPLATE = [
-    [ 'fundkit/step', { title: __( 'Your donation', 'fundraising-toolkit' ) } ],
-    [ 'fundkit/step', { title: __( 'Your info', 'fundraising-toolkit' ) } ],
+    [ 'gratora/step', { title: __( 'Your donation', 'gratora' ) } ],
+    [ 'gratora/step', { title: __( 'Your info', 'gratora' ) } ],
 ];
 
 const PROGRESS_STYLES = [
-    { value: 'dots', label: __( 'Dots',   'fundraising-toolkit' ) },
-    { value: 'bar',  label: __( 'Bar',    'fundraising-toolkit' ) },
-    { value: 'none', label: __( 'None',   'fundraising-toolkit' ) },
+    { value: 'dots', label: __( 'Dots',   'gratora' ) },
+    { value: 'bar',  label: __( 'Bar',    'gratora' ) },
+    { value: 'none', label: __( 'None',   'gratora' ) },
 ];
 
 const PROGRESS_HELP = {
-    dots: __( 'Centered dots beneath the form.', 'fundraising-toolkit' ),
-    bar:  __( 'Header bar with back arrow + title + progress fill.', 'fundraising-toolkit' ),
-    none: __( 'No progress indicator.', 'fundraising-toolkit' ),
+    dots: __( 'Centered dots beneath the form.', 'gratora' ),
+    bar:  __( 'Header bar with back arrow + title + progress fill.', 'gratora' ),
+    none: __( 'No progress indicator.', 'gratora' ),
 };
 
 function Edit( { attributes, setAttributes, clientId } ) {
     const { prevLabel = '', nextLabel = '', progressStyle = 'dots' } = attributes;
     const blockProps = useBlockProps( {
-        className: `fundkit-block-preview fundkit-block-preview--steps fundkit-block-preview--steps-${ progressStyle }`,
+        className: `gratora-block-preview gratora-block-preview--steps gratora-block-preview--steps-${ progressStyle }`,
     } );
 
     const { insertBlock } = useDispatch( 'core/block-editor' );
@@ -45,10 +45,10 @@ function Edit( { attributes, setAttributes, clientId } ) {
     );
 
     const addStep = () => {
-        const next = createBlock( 'fundkit/step', {
+        const next = createBlock( 'gratora/step', {
             title: sprintf(
                 /* translators: %d: new step number. */
-                __( 'Step %d', 'fundraising-toolkit' ),
+                __( 'Step %d', 'gratora' ),
                 childCount + 1
             ),
         } );
@@ -58,30 +58,30 @@ function Edit( { attributes, setAttributes, clientId } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Wizard navigation', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Wizard navigation', 'gratora' ) } initialOpen>
                     <Segmented
-                        label={ __( 'Progress style', 'fundraising-toolkit' ) }
+                        label={ __( 'Progress style', 'gratora' ) }
                         value={ progressStyle }
                         onChange={ ( v ) => setAttributes( { progressStyle: v } ) }
                         options={ PROGRESS_STYLES }
                         help={ PROGRESS_HELP[ progressStyle ] }
                     />
                     <TextControl
-                        label={ __( 'Back-button label', 'fundraising-toolkit' ) }
+                        label={ __( 'Back-button label', 'gratora' ) }
                         value={ prevLabel }
                         onChange={ ( v ) => setAttributes( { prevLabel: v } ) }
-                        placeholder={ __( 'Back', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Back', 'gratora' ) }
                         help={ progressStyle === 'bar'
-                            ? __( 'Used as the aria-label on the back arrow.', 'fundraising-toolkit' )
+                            ? __( 'Used as the aria-label on the back arrow.', 'gratora' )
                             : undefined
                         }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Next-button label', 'fundraising-toolkit' ) }
+                        label={ __( 'Next-button label', 'gratora' ) }
                         value={ nextLabel }
                         onChange={ ( v ) => setAttributes( { nextLabel: v } ) }
-                        placeholder={ __( 'Continue', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Continue', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -93,9 +93,9 @@ function Edit( { attributes, setAttributes, clientId } ) {
                     templateInsertUpdatesSelection={ false }
                     renderAppender={ false }
                 />
-                <div className="fundkit-block-preview__steps-add">
+                <div className="gratora-block-preview__steps-add">
                     <Button variant="secondary" onClick={ addStep }>
-                        { __( '+ Add step', 'fundraising-toolkit' ) }
+                        { __( '+ Add step', 'gratora' ) }
                     </Button>
                 </div>
             </div>
@@ -106,9 +106,9 @@ function Edit( { attributes, setAttributes, clientId } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Steps', 'fundraising-toolkit' ),
-        description: __( 'Split the form into pages a donor clicks through. Add a Step inside to make a new page.', 'fundraising-toolkit' ),
-        category:    'fundkit-content',
+        title:       __( 'Steps', 'gratora' ),
+        description: __( 'Split the form into pages a donor clicks through. Add a Step inside to make a new page.', 'gratora' ),
+        category:    'gratora-content',
         icon:        BlockIcons[ 'steps' ],
         supports:    { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

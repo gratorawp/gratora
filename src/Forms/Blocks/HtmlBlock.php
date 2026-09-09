@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
 /** @since 1.0.0 */
 final class HtmlBlock implements Block
@@ -10,7 +10,7 @@ final class HtmlBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/html';
+        return 'gratora/html';
     }
 
     /** @since 1.0.0 */
@@ -26,7 +26,7 @@ final class HtmlBlock implements Block
     {
         $raw = (string) ($attrs['content'] ?? '');
         if ($raw === '') return '';
-        return sprintf('<div class="fundkit-block fundkit-block--html">%s</div>', self::sanitize($raw));
+        return sprintf('<div class="gratora-block gratora-block--html">%s</div>', self::sanitize($raw));
     }
 
     /** @since 1.0.0 */

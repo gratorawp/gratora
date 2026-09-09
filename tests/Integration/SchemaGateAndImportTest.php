@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\MagicLinkToken;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Transfer\CsvImporter;
-use FundKit\Foundation\Upgrade\MigrationLock;
-use FundKit\Foundation\Upgrade\SchemaGuard;
-use FundKit\Funds\Fund;
-use FundKit\Funds\FundRepository;
+use Gratora\Donations\Donation;
+use Gratora\Donors\MagicLinkToken;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Transfer\CsvImporter;
+use Gratora\Foundation\Upgrade\MigrationLock;
+use Gratora\Foundation\Upgrade\SchemaGuard;
+use Gratora\Funds\Fund;
+use Gratora\Funds\FundRepository;
 
 /**
  * Three things that decide whether a site's data is what it says it is: the
@@ -36,7 +36,7 @@ final class SchemaGateAndImportTest extends IntegrationTestCase
 
     private function tokenTable(): string
     {
-        return self::$wpdb->prefix . 'fundkit_magic_link_tokens';
+        return self::$wpdb->prefix . 'gratora_magic_link_tokens';
     }
 
     /**
@@ -51,7 +51,7 @@ final class SchemaGateAndImportTest extends IntegrationTestCase
         try {
             $this->assertContains(
                 'first_name',
-                SchemaGuard::missingColumns()['fundkit_magic_link_tokens'] ?? [],
+                SchemaGuard::missingColumns()['gratora_magic_link_tokens'] ?? [],
                 'the guard notices a column its own schema declares'
             );
             $this->assertFalse(SchemaGuard::stampWhenComplete());

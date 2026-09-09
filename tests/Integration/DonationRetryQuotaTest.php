@@ -2,28 +2,28 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Forms\Form;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\GatewayReconciler;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\PayPal\PayPalApi;
-use FundKit\Gateways\PayPal\PayPalGateway;
-use FundKit\Gateways\PayPal\PayPalPlanRecorder;
-use FundKit\Gateways\PayPal\PayPalPlans;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\SettlesOutOfBand;
-use FundKit\Gateways\WebhookOutcome;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Forms\Form;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\GatewayReconciler;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\PayPal\PayPalApi;
+use Gratora\Gateways\PayPal\PayPalGateway;
+use Gratora\Gateways\PayPal\PayPalPlanRecorder;
+use Gratora\Gateways\PayPal\PayPalPlans;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\SettlesOutOfBand;
+use Gratora\Gateways\WebhookOutcome;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -59,7 +59,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function post(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -95,7 +95,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $claim = $this->claimAsPosted($res);
 
         self::$wpdb->query(self::$wpdb->prepare(
-            'UPDATE ' . self::$prefix . 'fundkit_donations SET gateway = %s WHERE reference = %s',
+            'UPDATE ' . self::$prefix . 'gratora_donations SET gateway = %s WHERE reference = %s',
             'stripe',
             $claim['reference']
         ));
@@ -139,7 +139,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
     private function flagsOf(string $reference): array
     {
         $raw = self::$wpdb->get_var(self::$wpdb->prepare(
-            'SELECT flags FROM ' . self::$prefix . 'fundkit_donations WHERE reference = %s',
+            'SELECT flags FROM ' . self::$prefix . 'gratora_donations WHERE reference = %s',
             $reference
         ));
 
@@ -169,7 +169,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         }
 
         self::$wpdb->query(self::$wpdb->prepare(
-            'UPDATE ' . self::$prefix . 'fundkit_donations SET flags = %s WHERE reference = %s',
+            'UPDATE ' . self::$prefix . 'gratora_donations SET flags = %s WHERE reference = %s',
             $flags === [] ? null : (string) wp_json_encode($flags),
             $reference
         ));
@@ -179,7 +179,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
     {
         // $column is a fixed test-supplied identifier, never user input.
         self::$wpdb->query(self::$wpdb->prepare(
-            'UPDATE ' . self::$prefix . "fundkit_donations SET {$column} = %s WHERE reference = %s",
+            'UPDATE ' . self::$prefix . "gratora_donations SET {$column} = %s WHERE reference = %s",
             $value,
             $reference
         ));
@@ -189,7 +189,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
     {
         return (int) self::$wpdb->get_var(
             "SELECT option_value FROM " . self::$wpdb->options . "
-             WHERE option_name LIKE '_transient_fundkit_donate_email_%'
+             WHERE option_name LIKE '_transient_gratora_donate_email_%'
              ORDER BY option_id DESC LIMIT 1"
         );
     }
@@ -197,7 +197,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
     private function assertRateLimited(\WP_REST_Response $res, string $because): void
     {
         $this->assertSame(429, $res->get_status(), $because . ': ' . (string) wp_json_encode($res->get_data()));
-        $this->assertSame('fundkit_rate_limited', $res->get_data()['code'] ?? null, $because);
+        $this->assertSame('gratora_rate_limited', $res->get_data()['code'] ?? null, $because);
     }
 
 
@@ -213,7 +213,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $this->assertNotSame($again['reference'], $third['reference']);
 
         $rows = (int) self::$wpdb->get_var(
-            'SELECT COUNT(*) FROM ' . self::$prefix . 'fundkit_donations'
+            'SELECT COUNT(*) FROM ' . self::$prefix . 'gratora_donations'
         );
         $this->assertSame(3, $rows, 'each attempt is still its own row');
 
@@ -254,10 +254,10 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
                 if ($name === 'retry') continue;
                 $args[$name] = $intent->$name;
             }
-            return new \FundKit\Donations\DonationIntent(...$args);
+            return new \Gratora\Donations\DonationIntent(...$args);
         };
 
-        add_filter('fundkit.donation.intent_creating', $rebuild, 10, 1);
+        add_filter('gratora.donation.intent_creating', $rebuild, 10, 1);
 
         try {
             $root = $this->exhaustEmailQuota($email);
@@ -269,7 +269,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
                 'a rebuilt intent must not mint a fresh tree budget'
             );
         } finally {
-            remove_filter('fundkit.donation.intent_creating', $rebuild, 10);
+            remove_filter('gratora.donation.intent_creating', $rebuild, 10);
         }
     }
 
@@ -304,7 +304,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         ]);
 
         $fresh = (string) self::$wpdb->get_var(self::$wpdb->prepare(
-            'SELECT created_at FROM ' . self::$prefix . 'fundkit_donations WHERE reference = %s',
+            'SELECT created_at FROM ' . self::$prefix . 'gratora_donations WHERE reference = %s',
             $hop['reference']
         ));
         $this->assertGreaterThan(
@@ -334,7 +334,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         self::$wpdb->query(self::$wpdb->prepare(
             'DELETE FROM ' . self::$wpdb->options . '
              WHERE option_name LIKE %s AND option_name NOT LIKE %s',
-            self::$wpdb->esc_like('_transient_fundkit_donate_retry_') . '%',
+            self::$wpdb->esc_like('_transient_gratora_donate_retry_') . '%',
             '%' . self::$wpdb->esc_like('_' . $born)
         ));
 
@@ -578,7 +578,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $this->assertIsArray($rootFlags['retry'] ?? null, 'the breadcrumb write must not destroy the column');
 
         $after = self::$wpdb->get_row(self::$wpdb->prepare(
-            'SELECT status, gateway_intent_id FROM ' . self::$prefix . 'fundkit_donations WHERE reference = %s',
+            'SELECT status, gateway_intent_id FROM ' . self::$prefix . 'gratora_donations WHERE reference = %s',
             $root['reference']
         ));
         $this->assertSame('pending', $after->status, 'no status is moved');
@@ -599,7 +599,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $donation = $this->paypalPending();
 
         Plugin::instance()->container->get(DonationService::class)
-            ->recordRetriedBy($donation, 'FUNDKIT-2026-99999');
+            ->recordRetriedBy($donation, 'GRATORA-2026-99999');
 
         Plugin::instance()->container->get(GatewayReconciler::class)->run();
 
@@ -608,7 +608,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
 
         $this->assertSame('paid', $after->status, 'a retried parent is still reachable by the sweep');
         $this->assertSame('CAPTURE-RETRY-1', $after->gateway_txn_id);
-        $this->assertSame('FUNDKIT-2026-99999', (string) ($after->flags['retried_by'] ?? ''));
+        $this->assertSame('GRATORA-2026-99999', (string) ($after->flags['retried_by'] ?? ''));
     }
 
 
@@ -661,7 +661,7 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
         $f->title      = 'Retry form';
         $f->slug       = 'retry-' . uniqid();
         $f->status     = 'published';
-        $f->blocks     = '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/email /--><!-- wp:fundkit/submit-button /-->';
+        $f->blocks     = '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/email /--><!-- wp:gratora/submit-button /-->';
         $f->created_at = gmdate('Y-m-d H:i:s');
         $f->updated_at = $f->created_at;
         $f->save();
@@ -671,12 +671,12 @@ final class DonationRetryQuotaTest extends IntegrationTestCase
 
     private function withPayPal(): void
     {
-        update_option('fundkit_gateway_config', ['test_mode' => true]);
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_gateway_config', ['test_mode' => true]);
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
-        delete_option('fundkit_gateway_reconcile_cursor');
+        delete_option('gratora_gateway_reconcile_cursor');
 
         $account = Plugin::instance()->container->get(PayPalAccount::class);
         $account->forget();

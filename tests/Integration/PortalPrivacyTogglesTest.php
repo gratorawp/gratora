@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Analytics\Event;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -19,8 +19,8 @@ final class PortalPrivacyTogglesTest extends IntegrationTestCase
 {
     protected function tearDown(): void
     {
-        unset($_COOKIE['fundkit_donor_session']);
-        delete_option('fundkit_privacy');
+        unset($_COOKIE['gratora_donor_session']);
+        delete_option('gratora_privacy');
         parent::tearDown();
     }
 
@@ -32,7 +32,7 @@ final class PortalPrivacyTogglesTest extends IntegrationTestCase
             ->findOrCreate('toggle-' . uniqid() . '@example.test', ['first_name' => 'Sam']);
 
         $this->csrf = bin2hex(random_bytes(8));
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession((int) $donor->id, $this->csrf);
+        $_COOKIE['gratora_donor_session'] = $this->portalSession((int) $donor->id, $this->csrf);
 
         return $donor;
     }
@@ -41,7 +41,7 @@ final class PortalPrivacyTogglesTest extends IntegrationTestCase
     private function write(string $route, array $body = []): int
     {
         $req = new WP_REST_Request('POST', $route);
-        $req->set_header('X-FundKit-Csrf', $this->csrf);
+        $req->set_header('X-Gratora-Csrf', $this->csrf);
         $req->set_body_params($body);
 
         return rest_do_request($req)->get_status();
@@ -49,7 +49,7 @@ final class PortalPrivacyTogglesTest extends IntegrationTestCase
 
     private function forget(): int
     {
-        return $this->write('/fundkit/v1/portal/forget', ['confirm' => 'DELETE']);
+        return $this->write('/gratora/v1/portal/forget', ['confirm' => 'DELETE']);
     }
 
     /**
@@ -78,7 +78,7 @@ final class PortalPrivacyTogglesTest extends IntegrationTestCase
     public function test_deletion_is_refused_when_the_org_turned_it_off(): void
     {
         $donor = $this->signedInDonor();
-        update_option('fundkit_privacy', ['allow_account_delete' => false]);
+        update_option('gratora_privacy', ['allow_account_delete' => false]);
 
         $this->assertSame(403, $this->forget());
         $this->assertNull(
@@ -90,9 +90,9 @@ final class PortalPrivacyTogglesTest extends IntegrationTestCase
     public function test_export_is_refused_when_the_org_turned_it_off(): void
     {
         $this->signedInDonor();
-        update_option('fundkit_privacy', ['allow_data_export' => false]);
+        update_option('gratora_privacy', ['allow_data_export' => false]);
 
-        $this->assertSame(403, $this->write('/fundkit/v1/portal/data-export'));
+        $this->assertSame(403, $this->write('/gratora/v1/portal/data-export'));
     }
 
     public function test_deletion_still_works_when_it_is_left_on(): void
@@ -106,9 +106,9 @@ final class PortalPrivacyTogglesTest extends IntegrationTestCase
     public function test_the_session_response_carries_both_toggles(): void
     {
         $this->signedInDonor();
-        update_option('fundkit_privacy', ['allow_account_delete' => false, 'allow_data_export' => true]);
+        update_option('gratora_privacy', ['allow_account_delete' => false, 'allow_data_export' => true]);
 
-        $me = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/portal/me'))->get_data();
+        $me = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/portal/me'))->get_data();
 
         $this->assertFalse($me['allow_account_delete']);
         $this->assertTrue($me['allow_data_export']);

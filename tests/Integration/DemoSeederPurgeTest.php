@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Cli\CliCommands;
-use FundKit\Cli\DemoSeeder;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\Donor;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
-use FundKitCliHalt;
+use Gratora\Cli\CliCommands;
+use Gratora\Cli\DemoSeeder;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\Donor;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
+use GratoraCliHalt;
 
 /**
  * Demo data is written live on purpose, so every screen that hides test rows
@@ -46,12 +46,12 @@ final class DemoSeederPurgeTest extends IntegrationTestCase
 
         return new DemoSeeder(
             $c->get(DonationService::class),
-            $c->get(\FundKit\Donors\DonorService::class),
-            $c->get(\FundKit\Campaigns\CampaignService::class),
-            $c->get(\FundKit\Funds\FundService::class),
-            $c->get(\FundKit\Donations\AggregateSyncer::class),
-            $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
-            $c->get(\FundKit\Foundation\Time\Clock::class),
+            $c->get(\Gratora\Donors\DonorService::class),
+            $c->get(\Gratora\Campaigns\CampaignService::class),
+            $c->get(\Gratora\Funds\FundService::class),
+            $c->get(\Gratora\Donations\AggregateSyncer::class),
+            $c->get(\Gratora\Recurring\RecurringPlanRepository::class),
+            $c->get(\Gratora\Foundation\Time\Clock::class),
         );
     }
 
@@ -200,7 +200,7 @@ final class DemoSeederPurgeTest extends IntegrationTestCase
         try {
             (new CliCommands())->demo_seed([], ['purge' => true]);
             $this->fail('the purge deleted without asking');
-        } catch (FundKitCliHalt $halt) {
+        } catch (GratoraCliHalt $halt) {
             $this->assertStringStartsWith('confirm:', $halt->getMessage());
             $this->assertStringContainsString('1 demo donations', $halt->getMessage());
         }

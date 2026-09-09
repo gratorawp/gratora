@@ -1,7 +1,7 @@
 /**
- * Exchange-rate state for the Currency panel, shaped like useFundKitSettings so
+ * Exchange-rate state for the Currency panel, shaped like useGratoraSettings so
  * Settings.jsx folds it into the single Save bar. Backed by
- * /fundkit/v1/admin/currency/fx (GET state, PUT auto+manual, POST /fetch).
+ * /gratora/v1/admin/currency/fx (GET state, PUT auto+manual, POST /fetch).
  */
 
 import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
@@ -10,7 +10,7 @@ import apiFetch from '@wordpress/api-fetch';
 
 import { notify } from './notify';
 
-const PATH = '/fundkit/v1/admin/currency/fx';
+const PATH = '/gratora/v1/admin/currency/fx';
 
 export function useFxRates() {
     const [ server, setServer ]           = useState( null );
@@ -33,7 +33,7 @@ export function useFxRates() {
             // Swallowed, this card simply vanished: the panel reads a missing
             // rate table as a site with one currency, which is a different
             // fact about the org than "the rates could not be loaded".
-            setError( e?.message || __( 'Could not load exchange rates.', 'fundraising-toolkit' ) );
+            setError( e?.message || __( 'Could not load exchange rates.', 'gratora' ) );
         } finally {
             setLoading( false );
         }
@@ -85,7 +85,7 @@ export function useFxRates() {
             // carry that across: they meant one of the two currencies and the
             // form does not know which.
             if ( moved && Object.values( manualEdits ).some( ( v ) => v !== null ) ) {
-                throw new Error( __( 'The base currency changed in this save, so the exchange rates you entered are in the currency you left. Reload the page and set them again.', 'fundraising-toolkit' ) );
+                throw new Error( __( 'The base currency changed in this save, so the exchange rates you entered are in the currency you left. Reload the page and set them again.', 'gratora' ) );
             }
 
             const updated = await apiFetch( {
@@ -115,13 +115,13 @@ export function useFxRates() {
             // A 200 can still report a failed provider fetch in the body; don't
             // claim success when the rates did not actually refresh.
             if ( updated?.fetch_ok === false ) {
-                notify.error( __( 'Could not fetch exchange rates. Please try again.', 'fundraising-toolkit' ) );
+                notify.error( __( 'Could not fetch exchange rates. Please try again.', 'gratora' ) );
             } else {
-                notify.success( __( 'Exchange rates updated.', 'fundraising-toolkit' ) );
+                notify.success( __( 'Exchange rates updated.', 'gratora' ) );
             }
             return updated;
         } catch ( err ) {
-            notify.error( err?.message || __( 'Could not fetch exchange rates. Please try again.', 'fundraising-toolkit' ) );
+            notify.error( err?.message || __( 'Could not fetch exchange rates. Please try again.', 'gratora' ) );
             return null;
         } finally {
             setFetching( false );

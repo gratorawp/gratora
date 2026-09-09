@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Funds;
+namespace Gratora\Funds;
 
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Vendor\Queryable\DB;
 
 /** @since 1.0.0 */
 final class FundRepository
@@ -256,7 +256,7 @@ final class FundRepository
             return;
         }
 
-        $rows = DB::table('fundkit_funds')
+        $rows = DB::table('gratora_funds')
             ->whereIn('parent_fund_id', array_keys($parentIds))
             ->selectRaw('parent_fund_id, SUM(raised_cents) AS r, SUM(donations_count) AS dc')
             ->groupBy('parent_fund_id')

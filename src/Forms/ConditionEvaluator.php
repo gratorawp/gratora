@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms;
+namespace Gratora\Forms;
 
 /**
  * Mirror client conditions for server validation; see assets/donation-form/state/conditions.js.

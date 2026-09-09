@@ -1,5 +1,5 @@
 /**
- * FundKit entity registration for @wordpress/core-data. Call once on boot.
+ * Gratora entity registration for @wordpress/core-data. Call once on boot.
  */
 
 import { dispatch } from '@wordpress/data';
@@ -7,22 +7,22 @@ import { __ } from '@wordpress/i18n';
 
 let registered = false;
 
-export function registerFundKitEntities() {
+export function registerGratoraEntities() {
     if ( registered ) return;
     registered = true;
 
     dispatch( 'core' ).addEntities( [
         {
-            kind:    'fundkit/v1',
+            kind:    'gratora/v1',
             name:    'campaign',
-            baseURL: '/fundkit/v1/admin/campaigns',
-            label:   __( 'Campaign', 'fundraising-toolkit' ),
+            baseURL: '/gratora/v1/admin/campaigns',
+            label:   __( 'Campaign', 'gratora' ),
         },
         {
-            kind:    'fundkit/v1',
+            kind:    'gratora/v1',
             name:    'form',
-            baseURL: '/fundkit/v1/admin/forms',
-            label:   __( 'Donation form', 'fundraising-toolkit' ),
+            baseURL: '/gratora/v1/admin/forms',
+            label:   __( 'Donation form', 'gratora' ),
         },
     ] );
 }

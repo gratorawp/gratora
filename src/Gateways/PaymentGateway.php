@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways;
+namespace Gratora\Gateways;
 
-use FundKit\Donations\Donation;
+use Gratora\Donations\Donation;
 use WP_REST_Request;
 
 /**
  * Payment gateway abstraction. Concrete gateways register themselves at boot
- * via the `fundkit.gateways.register` hook.
+ * via the `gratora.gateways.register` hook.
  *
  * Lifecycle: createIntent, then either handleWebhook (typical) or confirm
  * (synchronous, Offline only); refund and the subscription methods as needed.

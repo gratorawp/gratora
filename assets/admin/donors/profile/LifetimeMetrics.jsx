@@ -48,21 +48,21 @@ export default function LifetimeMetrics( { lifetime } ) {
     if ( plan_counts?.past_due > 0 ) {
         dormant.push( sprintf(
             /* translators: %d: number of plans the gateway could not collect. */
-            _n( '%d past due', '%d past due', plan_counts.past_due, 'fundraising-toolkit' ),
+            _n( '%d past due', '%d past due', plan_counts.past_due, 'gratora' ),
             plan_counts.past_due
         ) );
     }
     if ( plan_counts?.paused > 0 ) {
         dormant.push( sprintf(
             /* translators: %d: number of paused plans. */
-            _n( '%d paused', '%d paused', plan_counts.paused, 'fundraising-toolkit' ),
+            _n( '%d paused', '%d paused', plan_counts.paused, 'gratora' ),
             plan_counts.paused
         ) );
     }
 
     const activePart = active_plan_count > 0
-        ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'fundraising-toolkit' ), active_plan_count, formatDate( next_payment_at ) )
-        : __( 'No active plans', 'fundraising-toolkit' );
+        ? sprintf( /* translators: 1: active plan count, 2: next payment date */ __( '%1$d active · next %2$s', 'gratora' ), active_plan_count, formatDate( next_payment_at ) )
+        : __( 'No active plans', 'gratora' );
 
     const mrrSub = mrr_unconverted > 0
         ? sprintf(
@@ -71,7 +71,7 @@ export default function LifetimeMetrics( { lifetime } ) {
                 '%d plan has no exchange rate and is not counted',
                 '%d plans have no exchange rate and are not counted',
                 mrr_unconverted,
-                'fundraising-toolkit'
+                'gratora'
             ),
             mrr_unconverted
         )
@@ -81,30 +81,30 @@ export default function LifetimeMetrics( { lifetime } ) {
         <div className="dp-metrics">
             <Card
                 icon={ <IconCoin width="16" height="16" /> }
-                label={ __( 'Lifetime given', 'fundraising-toolkit' ) }
+                label={ __( 'Lifetime given', 'gratora' ) }
                 value={ <span className="num">{ formatAmount( total_cents ) }</span> }
                 spark={ sparkline }
-                sub={ count > 0 ? sprintf( /* translators: %s: amount */ __( 'Largest donation %s', 'fundraising-toolkit' ), formatAmountCompact( largest_cents ) ) : null }
+                sub={ count > 0 ? sprintf( /* translators: %s: amount */ __( 'Largest donation %s', 'gratora' ), formatAmountCompact( largest_cents ) ) : null }
             />
             <Card
                 icon={ <IconHeart width="16" height="16" /> }
                 // Lifetime metrics count paid donations; the Donations tab includes pending and
                 // failed rows.
-                label={ __( 'Donations received', 'fundraising-toolkit' ) }
+                label={ __( 'Donations received', 'gratora' ) }
                 value={ <span className="num">{ count }</span> }
                 sub={ count > 0
-                    ? sprintf( /* translators: 1: one-time donation count, 2: recurring donation count */ __( '%1$d one-time, %2$d recurring', 'fundraising-toolkit' ), one_time_count, recurring_count )
-                    : __( 'No donations yet', 'fundraising-toolkit' ) }
+                    ? sprintf( /* translators: 1: one-time donation count, 2: recurring donation count */ __( '%1$d one-time, %2$d recurring', 'gratora' ), one_time_count, recurring_count )
+                    : __( 'No donations yet', 'gratora' ) }
             />
             <Card
                 icon={ <IconActivity width="16" height="16" /> }
-                label={ __( 'Avg. donation', 'fundraising-toolkit' ) }
+                label={ __( 'Avg. donation', 'gratora' ) }
                 value={ <span className="num">{ formatAmount( avg_cents ) }</span> }
-                sub={ count > 0 ? __( 'Per donation', 'fundraising-toolkit' ) : null }
+                sub={ count > 0 ? __( 'Per donation', 'gratora' ) : null }
             />
             <Card
                 icon={ <IconRotate width="16" height="16" /> }
-                label={ __( 'Recurring MRR', 'fundraising-toolkit' ) }
+                label={ __( 'Recurring MRR', 'gratora' ) }
                 value={ <span className="num">{ formatAmount( mrr_cents ) }<small> /mo</small></span> }
                 sub={ mrrSub }
             />

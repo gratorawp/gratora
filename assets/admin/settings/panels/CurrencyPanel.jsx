@@ -43,7 +43,7 @@ function RateInput( { value, manual, onChange } ) {
     return (
         <>
             <input
-                className={ `fundkit-input fundkit-rate-input${ manual ? ' is-manual' : '' }` }
+                className={ `gratora-input gratora-rate-input${ manual ? ' is-manual' : '' }` }
                 inputMode="decimal"
                 aria-invalid={ invalid || undefined }
                 value={ shown }
@@ -55,8 +55,8 @@ function RateInput( { value, manual, onChange } ) {
                 onBlur={ () => setText( null ) }
             />
             { invalid && (
-                <div className="fundkit-fx__hint">
-                    <span>{ __( 'Not a rate. Enter a number like 1.09; the current rate stands until you do.', 'fundraising-toolkit' ) }</span>
+                <div className="gratora-fx__hint">
+                    <span>{ __( 'Not a rate. Enter a number like 1.09; the current rate stands until you do.', 'gratora' ) }</span>
                 </div>
             ) }
         </>
@@ -65,100 +65,100 @@ function RateInput( { value, manual, onChange } ) {
 
 function freshnessPill( fx ) {
     if ( ! fx.auto ) {
-        return <span className="fundkit-pill fundkit-pill--amber">{ __( 'Manual updates only', 'fundraising-toolkit' ) }</span>;
+        return <span className="gratora-pill gratora-pill--amber">{ __( 'Manual updates only', 'gratora' ) }</span>;
     }
     if ( fx.stale ) {
-        return <span className="fundkit-pill fundkit-pill--amber">{ __( 'Rates are stale', 'fundraising-toolkit' ) }</span>;
+        return <span className="gratora-pill gratora-pill--amber">{ __( 'Rates are stale', 'gratora' ) }</span>;
     }
     return (
-        <span className="fundkit-pill fundkit-pill--green">
+        <span className="gratora-pill gratora-pill--green">
             { fx.date
-                ? sprintf( /* translators: %s: date */ __( 'Updated %s', 'fundraising-toolkit' ), fx.date )
-                : __( 'Up to date', 'fundraising-toolkit' ) }
+                ? sprintf( /* translators: %s: date */ __( 'Updated %s', 'gratora' ), fx.date )
+                : __( 'Up to date', 'gratora' ) }
         </span>
     );
 }
 
 function ExchangeRatesCard( { fx, base } ) {
     if ( fx.loading ) {
-        return <Card title={ __( 'Exchange rates', 'fundraising-toolkit' ) }><p className="fundkit-muted">{ __( 'Loading rates…', 'fundraising-toolkit' ) }</p></Card>;
+        return <Card title={ __( 'Exchange rates', 'gratora' ) }><p className="gratora-muted">{ __( 'Loading rates…', 'gratora' ) }</p></Card>;
     }
 
     const head = (
-        <div className="fundkit-fx-head">
+        <div className="gratora-fx-head">
             { freshnessPill( fx ) }
             <Btn size="sm" onClick={ fx.fetchNow } disabled={ fx.fetching }>
                 <svg viewBox="0 0 16 16" fill="none" width="13" height="13" aria-hidden="true">
                     <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2v3h-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                { fx.fetching ? __( 'Fetching…', 'fundraising-toolkit' ) : __( 'Fetch rates now', 'fundraising-toolkit' ) }
+                { fx.fetching ? __( 'Fetching…', 'gratora' ) : __( 'Fetch rates now', 'gratora' ) }
             </Btn>
         </div>
     );
 
     const foot = fx.auto
-        ? __( 'Rates are snapshotted onto each donation when it is made. Editing a rate only affects donations created afterwards; existing donations and their totals never change.', 'fundraising-toolkit' )
-        : __( 'Automatic updates are off. New donations use whatever rate is set here at the moment they are made.', 'fundraising-toolkit' );
+        ? __( 'Rates are snapshotted onto each donation when it is made. Editing a rate only affects donations created afterwards; existing donations and their totals never change.', 'gratora' )
+        : __( 'Automatic updates are off. New donations use whatever rate is set here at the moment they are made.', 'gratora' );
 
     return (
         <Card
-            title={ __( 'Exchange rates', 'fundraising-toolkit' ) }
-            sub={ sprintf( /* translators: %s: base currency code */ __( '1 %s equals the amounts below. Used to value non-base donations for reporting.', 'fundraising-toolkit' ), base ) }
+            title={ __( 'Exchange rates', 'gratora' ) }
+            sub={ sprintf( /* translators: %s: base currency code */ __( '1 %s equals the amounts below. Used to value non-base donations for reporting.', 'gratora' ), base ) }
             meta={ head }
             foot={ foot }
             edited={ fx.isDirty }
         >
             { ( fx.unconvertible || [] ).length > 0 && (
-                <div className="fundkit-connect-notice fundkit-connect-notice--amber">
-                    <span className="fundkit-connect-notice__icon" aria-hidden="true">!</span>
+                <div className="gratora-connect-notice gratora-connect-notice--amber">
+                    <span className="gratora-connect-notice__icon" aria-hidden="true">!</span>
                     <div>
                         <strong>
                             { sprintf(
                                 /* translators: %s: comma-separated currency codes */
-                                __( 'No exchange rate for %s.', 'fundraising-toolkit' ),
+                                __( 'No exchange rate for %s.', 'gratora' ),
                                 ( fx.unconvertible || [] ).join( ', ' )
                             ) }
                         </strong>{ ' ' }
-                        { __( 'Donations in these currencies are still accepted, but nothing about them converts. A donor who switches is offered your preset amounts at face value, so a preset authored as 100 asks for 100 of that currency however little that is worth, and the donation counts as zero in campaign, fund and donor totals. Add a rate below, or stop offering the currency.', 'fundraising-toolkit' ) }
+                        { __( 'Donations in these currencies are still accepted, but nothing about them converts. A donor who switches is offered your preset amounts at face value, so a preset authored as 100 asks for 100 of that currency however little that is worth, and the donation counts as zero in campaign, fund and donor totals. Add a rate below, or stop offering the currency.', 'gratora' ) }
                     </div>
                 </div>
             ) }
 
             { ( fx.no_gateway || [] ).length > 0 && (
-                <div className="fundkit-connect-notice fundkit-connect-notice--amber">
-                    <span className="fundkit-connect-notice__icon" aria-hidden="true">!</span>
+                <div className="gratora-connect-notice gratora-connect-notice--amber">
+                    <span className="gratora-connect-notice__icon" aria-hidden="true">!</span>
                     <div>
                         <strong>
                             { sprintf(
                                 /* translators: %s: comma-separated currency codes */
-                                __( 'No payment method accepts %s.', 'fundraising-toolkit' ),
+                                __( 'No payment method accepts %s.', 'gratora' ),
                                 ( fx.no_gateway || [] ).join( ', ' )
                             ) }
                         </strong>{ ' ' }
-                        { __( 'A donor who picks one of these gets as far as the payment step and can go no further. Enable a gateway that takes the currency, or stop offering it.', 'fundraising-toolkit' ) }
+                        { __( 'A donor who picks one of these gets as far as the payment step and can go no further. Enable a gateway that takes the currency, or stop offering it.', 'gratora' ) }
                     </div>
                 </div>
             ) }
 
             <ToggleRow
-                title={ __( 'Update rates automatically every day', 'fundraising-toolkit' ) }
+                title={ __( 'Update rates automatically every day', 'gratora' ) }
                 sub={ sprintf(
                     /* translators: %s: rate source */
-                    __( 'Pulled from %s (free, no key). When off, rates only change when you fetch or edit them here.', 'fundraising-toolkit' ),
-                    fx.source || __( 'the European Central Bank', 'fundraising-toolkit' )
+                    __( 'Pulled from %s (free, no key). When off, rates only change when you fetch or edit them here.', 'gratora' ),
+                    fx.source || __( 'the European Central Bank', 'gratora' )
                 ) }
                 checked={ fx.auto }
                 onChange={ fx.setAuto }
             />
 
-            <table className="fundkit-fx">
+            <table className="gratora-fx">
                 <thead>
                     <tr>
-                        <th>{ __( 'Currency', 'fundraising-toolkit' ) }</th>
-                        <th className="fundkit-fx__num">
-                            { sprintf( /* translators: %s: base currency code */ __( 'Rate (1 %s =)', 'fundraising-toolkit' ), base ) }
+                        <th>{ __( 'Currency', 'gratora' ) }</th>
+                        <th className="gratora-fx__num">
+                            { sprintf( /* translators: %s: base currency code */ __( 'Rate (1 %s =)', 'gratora' ), base ) }
                         </th>
-                        <th>{ __( 'Source', 'fundraising-toolkit' ) }</th>
+                        <th>{ __( 'Source', 'gratora' ) }</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -167,17 +167,17 @@ function ExchangeRatesCard( { fx, base } ) {
                         return (
                             <tr key={ row.code }>
                                 <td>
-                                    <div className="fundkit-fx__ccy">
-                                        <span className="fundkit-fx__flag">{ meta?.symbol || row.code }</span>
+                                    <div className="gratora-fx__ccy">
+                                        <span className="gratora-fx__flag">{ meta?.symbol || row.code }</span>
                                         <span>
                                             <strong>{ row.code }</strong>{ ' ' }
-                                            <span className="fundkit-fx__name">{ meta?.label || '' }</span>
+                                            <span className="gratora-fx__name">{ meta?.label || '' }</span>
                                         </span>
                                     </div>
                                 </td>
-                                <td className="fundkit-fx__num">
+                                <td className="gratora-fx__num">
                                     { row.is_base ? (
-                                        <input className="fundkit-rate-input" value="1.00000000" disabled />
+                                        <input className="gratora-rate-input" value="1.00000000" disabled />
                                     ) : (
                                         <>
                                             <RateInput
@@ -186,14 +186,14 @@ function ExchangeRatesCard( { fx, base } ) {
                                                 onChange={ ( n ) => fx.setManual( row.code, n ) }
                                             />
                                             { row.is_manual && row.auto_rate != null && (
-                                                <div className="fundkit-fx__hint">
-                                                    <span>{ sprintf( /* translators: %s: rate */ __( 'auto: %s', 'fundraising-toolkit' ), fmtRate( row.auto_rate ) ) }</span>
+                                                <div className="gratora-fx__hint">
+                                                    <span>{ sprintf( /* translators: %s: rate */ __( 'auto: %s', 'gratora' ), fmtRate( row.auto_rate ) ) }</span>
                                                     <a
                                                         href="#reset"
-                                                        className="fundkit-fx__reset"
+                                                        className="gratora-fx__reset"
                                                         onClick={ ( e ) => { e.preventDefault(); fx.resetManual( row.code ); } }
                                                     >
-                                                        { __( 'Reset', 'fundraising-toolkit' ) }
+                                                        { __( 'Reset', 'gratora' ) }
                                                     </a>
                                                 </div>
                                             ) }
@@ -202,11 +202,11 @@ function ExchangeRatesCard( { fx, base } ) {
                                 </td>
                                 <td>
                                     { row.is_base ? (
-                                        <span className="fundkit-pill fundkit-pill--gray">{ __( 'Base currency', 'fundraising-toolkit' ) }</span>
+                                        <span className="gratora-pill gratora-pill--gray">{ __( 'Base currency', 'gratora' ) }</span>
                                     ) : row.is_manual ? (
-                                        <span className="fundkit-fx__src">{ __( 'Set by you', 'fundraising-toolkit' ) }</span>
+                                        <span className="gratora-fx__src">{ __( 'Set by you', 'gratora' ) }</span>
                                     ) : (
-                                        <span className="fundkit-fx__src">{ __( 'Auto', 'fundraising-toolkit' ) }</span>
+                                        <span className="gratora-fx__src">{ __( 'Auto', 'gratora' ) }</span>
                                     ) }
                                 </td>
                             </tr>
@@ -241,7 +241,7 @@ export default function CurrencyPanel( { s, fx } ) {
 
     // Presets come from the server so PHP stays the one place a currency's
     // conventions are written down.
-    const presetFor = ( code ) => window.fundkit?.currency_formats?.[ code ] || null;
+    const presetFor = ( code ) => window.gratora?.currency_formats?.[ code ] || null;
 
     const applyCurrency = ( code ) => {
         // Always persist the base currency. Treat the default lone USD as unconfigured,
@@ -270,20 +270,20 @@ export default function CurrencyPanel( { s, fx } ) {
     };
 
     return (
-        <div className="fundkit-panel">
-            <Card title={ __( 'Currencies', 'fundraising-toolkit' ) } edited={ s.isDirty }>
+        <div className="gratora-panel">
+            <Card title={ __( 'Currencies', 'gratora' ) } edited={ s.isDirty }>
                 <FormRow
-                    label={ __( 'Base currency', 'fundraising-toolkit' ) }
+                    label={ __( 'Base currency', 'gratora' ) }
                     help={ baseLocked
                         ? sprintf(
                             /* translators: %s: base currency code */
-                            __( 'Locked to %s: donations are already recorded against it, and their stored totals would be reread as the new currency.', 'fundraising-toolkit' ),
+                            __( 'Locked to %s: donations are already recorded against it, and their stored totals would be reread as the new currency.', 'gratora' ),
                             defaultCurrency
                         )
-                        : __( 'All reporting and totals roll up to this, and it cannot be changed once donations come in. Every campaign reports in it, so changing it relabels their goals and totals without restating the figures.', 'fundraising-toolkit' ) }
+                        : __( 'All reporting and totals roll up to this, and it cannot be changed once donations come in. Every campaign reports in it, so changing it relabels their goals and totals without restating the figures.', 'gratora' ) }
                 >
                     <select
-                        className="fundkit-select"
+                        className="gratora-select"
                         disabled={ baseLocked }
                         value={ defaultCurrency }
                         onChange={ ( e ) => applyCurrency( e.target.value ) }
@@ -295,15 +295,15 @@ export default function CurrencyPanel( { s, fx } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Currencies donors can use', 'fundraising-toolkit' ) }
+                    label={ __( 'Currencies donors can use', 'gratora' ) }
                     help={ sprintf(
                         /* translators: %s: base currency code */
-                        __( '%s is always on as the base. Enable more to accept donations in other currencies.', 'fundraising-toolkit' ),
+                        __( '%s is always on as the base. Enable more to accept donations in other currencies.', 'gratora' ),
                         defaultCurrency
                     ) }
                     wide
                 >
-                    <div className="fundkit-cur-chips">
+                    <div className="gratora-cur-chips">
                         { CURRENCIES.map( ( c ) => {
                             const on     = supported.includes( c.code ) || c.code === defaultCurrency;
                             const locked = c.code === defaultCurrency;
@@ -311,11 +311,11 @@ export default function CurrencyPanel( { s, fx } ) {
                                 <button
                                     type="button"
                                     key={ c.code }
-                                    className={ `fundkit-cur-chip${ on ? ' is-on' : '' }${ locked ? ' is-locked' : '' }` }
+                                    className={ `gratora-cur-chip${ on ? ' is-on' : '' }${ locked ? ' is-locked' : '' }` }
                                     onClick={ () => toggleSupported( c.code ) }
                                     aria-pressed={ on }
                                 >
-                                    <span className="fundkit-cur-chip__box">
+                                    <span className="gratora-cur-chip__box">
                                         { on && (
                                             <svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true">
                                                 <path d="M2 6l3 3 5-6" fill="none" stroke="currentColor" strokeWidth="2" />
@@ -323,7 +323,7 @@ export default function CurrencyPanel( { s, fx } ) {
                                         ) }
                                     </span>
                                     { c.code }
-                                    { locked && <span className="fundkit-cur-chip__tag">{ __( 'base', 'fundraising-toolkit' ) }</span> }
+                                    { locked && <span className="gratora-cur-chip__tag">{ __( 'base', 'gratora' ) }</span> }
                                 </button>
                             );
                         } ) }
@@ -341,63 +341,63 @@ export default function CurrencyPanel( { s, fx } ) {
             ) }
 
             <Card
-                title={ __( 'Currency settings', 'fundraising-toolkit' ) }
-                meta={ __( 'Receipts, exports, donation form', 'fundraising-toolkit' ) }
+                title={ __( 'Currency settings', 'gratora' ) }
+                meta={ __( 'Receipts, exports, donation form', 'gratora' ) }
                 edited={ s.isDirty }
             >
                 { presetApplied && (
-                    <p className="fundkit-muted" style={ { marginTop: 0 } }>
+                    <p className="gratora-muted" style={ { marginTop: 0 } }>
                         { sprintf(
                             /* translators: %s: currency code */
-                            __( 'Set to how %s is usually written. Change anything below if your organisation writes it differently.', 'fundraising-toolkit' ),
+                            __( 'Set to how %s is usually written. Change anything below if your organisation writes it differently.', 'gratora' ),
                             presetApplied
                         ) }
                     </p>
                 ) }
-                <div className="fundkit-currency-preview">
-                    <span className="fundkit-currency-preview__label">{ __( 'Preview', 'fundraising-toolkit' ) }</span>
-                    <span className="fundkit-currency-preview__value num">{ preview }</span>
+                <div className="gratora-currency-preview">
+                    <span className="gratora-currency-preview__label">{ __( 'Preview', 'gratora' ) }</span>
+                    <span className="gratora-currency-preview__value num">{ preview }</span>
                 </div>
 
-                <FormRow label={ __( 'Decimal places', 'fundraising-toolkit' ) }>
+                <FormRow label={ __( 'Decimal places', 'gratora' ) }>
                     <select
-                        className="fundkit-select"
+                        className="gratora-select"
                         value={ String( decimalPlaces ) }
                         onChange={ ( e ) => s.edit( { format: { decimal_places: Number( e.target.value ) } } ) }
                     >
-                        <option value="0">{ __( '0 (no cents)', 'fundraising-toolkit' ) }</option>
-                        <option value="2">{ __( '2 (standard)', 'fundraising-toolkit' ) }</option>
+                        <option value="0">{ __( '0 (no cents)', 'gratora' ) }</option>
+                        <option value="2">{ __( '2 (standard)', 'gratora' ) }</option>
                     </select>
                 </FormRow>
 
-                <FormRow label={ __( 'Decimal separator', 'fundraising-toolkit' ) }>
+                <FormRow label={ __( 'Decimal separator', 'gratora' ) }>
                     <select
-                        className="fundkit-select"
+                        className="gratora-select"
                         value={ decimalSep }
                         onChange={ ( e ) => s.edit( { format: { decimal_sep: e.target.value } } ) }
                     >
-                        <option value=",">{ __( 'Comma (1.234,56)', 'fundraising-toolkit' ) }</option>
-                        <option value=".">{ __( 'Period (1,234.56)', 'fundraising-toolkit' ) }</option>
+                        <option value=",">{ __( 'Comma (1.234,56)', 'gratora' ) }</option>
+                        <option value=".">{ __( 'Period (1,234.56)', 'gratora' ) }</option>
                     </select>
                 </FormRow>
 
-                <FormRow label={ __( 'Thousands separator', 'fundraising-toolkit' ) }>
+                <FormRow label={ __( 'Thousands separator', 'gratora' ) }>
                     <select
-                        className="fundkit-select"
+                        className="gratora-select"
                         value={ thousandSep }
                         onChange={ ( e ) => s.edit( { format: { thousand_sep: e.target.value } } ) }
                     >
-                        <option value=".">{ __( 'Period (1.234,56)', 'fundraising-toolkit' ) }</option>
-                        <option value=",">{ __( 'Comma (1,234.56)', 'fundraising-toolkit' ) }</option>
-                        <option value=" ">{ __( 'Space (1 234,56)', 'fundraising-toolkit' ) }</option>
-                        <option value="'">{ __( "Apostrophe (1'234.56)", 'fundraising-toolkit' ) }</option>
-                        <option value="">{ __( 'None (1234,56)', 'fundraising-toolkit' ) }</option>
+                        <option value=".">{ __( 'Period (1.234,56)', 'gratora' ) }</option>
+                        <option value=",">{ __( 'Comma (1,234.56)', 'gratora' ) }</option>
+                        <option value=" ">{ __( 'Space (1 234,56)', 'gratora' ) }</option>
+                        <option value="'">{ __( "Apostrophe (1'234.56)", 'gratora' ) }</option>
+                        <option value="">{ __( 'None (1234,56)', 'gratora' ) }</option>
                     </select>
                 </FormRow>
 
-                <FormRow label={ __( 'Symbol position', 'fundraising-toolkit' ) }>
+                <FormRow label={ __( 'Symbol position', 'gratora' ) }>
                     <select
-                        className="fundkit-select"
+                        className="gratora-select"
                         value={ symbolPosition }
                         onChange={ ( e ) => s.edit( { format: { symbol_position: e.target.value } } ) }
                     >
@@ -406,14 +406,14 @@ export default function CurrencyPanel( { s, fx } ) {
                         <option value="before">
                             { sprintf(
                                 /* translators: %s: an example amount, e.g. $10.00 */
-                                __( 'Before amount (%s)', 'fundraising-toolkit' ),
+                                __( 'Before amount (%s)', 'gratora' ),
                                 previewAmount( 10, { decimalPlaces, decimalSep, thousandSep, symbol, symbolPosition: 'before' } )
                             ) }
                         </option>
                         <option value="after">
                             { sprintf(
                                 /* translators: %s: an example amount, e.g. 10.00 $ */
-                                __( 'After amount (%s)', 'fundraising-toolkit' ),
+                                __( 'After amount (%s)', 'gratora' ),
                                 previewAmount( 10, { decimalPlaces, decimalSep, thousandSep, symbol, symbolPosition: 'after' } )
                             ) }
                         </option>

@@ -1,11 +1,11 @@
 {
-    "name": "fundkit/fundkit",
+    "name": "gratora/gratora",
     "description": "Donation platform for WordPress",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "FundKit"
+            "name": "Gratora"
         }
     ],
     "require": {
@@ -14,7 +14,7 @@
         "dompdf/dompdf": "^3.1",
         "sabberworm/php-css-parser": "^8.4",
         "woocommerce/action-scheduler": "^4.1",
-        "fundkit/queryable": "^1.1"
+        "gratora/queryable": "^1.1"
     },
     "require-dev": {
         "brianhenryie/strauss": "^0.27.2",
@@ -27,12 +27,12 @@
     },
     "autoload": {
         "psr-4": {
-            "FundKit\\": "src/"
+            "Gratora\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "FundKit\\Tests\\": "tests/"
+            "Gratora\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -64,16 +64,16 @@
     "extra": {
         "strauss": {
             "target_directory": "vendor/vendor-prefixed",
-            "namespace_prefix": "FundKit\\Vendor\\",
-            "classmap_prefix": "FundKit_Vendor_",
-            "constant_prefix": "FUNDKIT_VENDOR_",
+            "namespace_prefix": "Gratora\\Vendor\\",
+            "classmap_prefix": "Gratora_Vendor_",
+            "constant_prefix": "GRATORA_VENDOR_",
             "packages": [
                 "dompdf/dompdf",
                 "dompdf/php-font-lib",
                 "dompdf/php-svg-lib",
                 "masterminds/html5",
                 "sabberworm/php-css-parser",
-                "fundkit/queryable"
+                "gratora/queryable"
             ],
             "update_call_sites": false,
             "delete_vendor_packages": true
@@ -91,7 +91,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/fundkitorg/queryable.git"
+            "url": "https://github.com/gratorawp/queryable.git"
         }
     ]
 }

@@ -20,7 +20,7 @@ export const presetLabel = ( p, shipped ) =>
  * custom presets.
  *
  * @param {Array} stored   the presets on the record
- * @param {Array} builtins window.fundkit.styling.builtins
+ * @param {Array} builtins window.gratora.styling.builtins
  */
 export function mergePresets( stored, builtins ) {
     const saved = Array.isArray( stored ) ? stored : [];
@@ -57,5 +57,5 @@ export function mergePresets( stored, builtins ) {
  * from the page-load snapshot, in the same tab, before any save.
  */
 export function presetsForPanel( stored ) {
-    return mergePresets( stored, window.fundkit?.styling?.builtins );
+    return mergePresets( stored, window.gratora?.styling?.builtins );
 }

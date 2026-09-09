@@ -2,32 +2,32 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest;
+namespace Gratora\Rest;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Campaigns\Campaign;
-use FundKit\Currency\Currency;
-use FundKit\Currency\SupportedCurrencies;
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donations\ChannelClassifier;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\ConsentService;
-use FundKit\Donors\Donor;
-use FundKit\Forms\Blocks\TermsBlock;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormSubmissionValidator;
-use FundKit\Foundation\Http\ClientIp;
-use FundKit\Gateways\BrowserAware;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\SubscriptionCreator;
-use FundKit\Gateways\TestMode;
-use FundKit\Recurring\FrequencyMap;
-use FundKit\Rest\Schemas\DonationSchemas;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Campaigns\Campaign;
+use Gratora\Currency\Currency;
+use Gratora\Currency\SupportedCurrencies;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donations\ChannelClassifier;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\ConsentService;
+use Gratora\Donors\Donor;
+use Gratora\Forms\Blocks\TermsBlock;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormSubmissionValidator;
+use Gratora\Foundation\Http\ClientIp;
+use Gratora\Gateways\BrowserAware;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\SubscriptionCreator;
+use Gratora\Gateways\TestMode;
+use Gratora\Recurring\FrequencyMap;
+use Gratora\Rest\Schemas\DonationSchemas;
 use Throwable;
 use WP_Error;
 use WP_REST_Request;
@@ -37,7 +37,7 @@ use WP_REST_Server;
 /** @since 1.0.0 */
 final class DonationsController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -98,40 +98,40 @@ final class DonationsController
         $gatewayId  = (string) ($body['gateway'] ?? '');
 
         if ($email === '' || ! is_email($email)) {
-            return new WP_Error('fundkit_invalid_email', __('A valid email is required.', 'fundraising-toolkit'), ['status' => 400]);
+            return new WP_Error('gratora_invalid_email', __('A valid email is required.', 'gratora'), ['status' => 400]);
         }
         if ($amount <= 0) {
-            return new WP_Error('fundkit_invalid_amount', __('Amount must be a positive integer (in cents).', 'fundraising-toolkit'), ['status' => 400]);
+            return new WP_Error('gratora_invalid_amount', __('Amount must be a positive integer (in cents).', 'gratora'), ['status' => 400]);
         }
         if ($err = $this->spam->checkMinAmount($amount)) return $err;
         if (strlen($currency) !== 3) {
-            return new WP_Error('fundkit_invalid_currency', __('Currency must be a 3-letter ISO code.', 'fundraising-toolkit'), ['status' => 400]);
+            return new WP_Error('gratora_invalid_currency', __('Currency must be a 3-letter ISO code.', 'gratora'), ['status' => 400]);
         }
         // The switcher only offers accepted currencies, but a crafted payload
         // could submit any code, and a donation in an unsupported currency has
         // no base conversion and so would be an unreportable row.
         if (! $this->isSupportedCurrency($currency)) {
-            return new WP_Error('fundkit_unsupported_currency', __('This currency is not accepted.', 'fundraising-toolkit'), ['status' => 400]);
+            return new WP_Error('gratora_unsupported_currency', __('This currency is not accepted.', 'gratora'), ['status' => 400]);
         }
         // Zero-decimal currencies (JPY, KRW, ...) have no sub-unit. Storage is
         // always major x 100, so the amount must land on a whole major unit or
         // the gateway conversion rounds and mischarges.
         if (Currency::minorUnits($currency) === 0 && $amount % 100 !== 0) {
-            return new WP_Error('fundkit_invalid_amount', __('This currency does not support fractional amounts.', 'fundraising-toolkit'), ['status' => 400]);
+            return new WP_Error('gratora_invalid_amount', __('This currency does not support fractional amounts.', 'gratora'), ['status' => 400]);
         }
         if ($gatewayId === '' || ! $this->gateways->get($gatewayId)) {
             /* translators: %s: gateway identifier */
-            return new WP_Error('fundkit_invalid_gateway', sprintf(__('Unknown gateway: %s', 'fundraising-toolkit'), $gatewayId), ['status' => 400]);
+            return new WP_Error('gratora_invalid_gateway', sprintf(__('Unknown gateway: %s', 'gratora'), $gatewayId), ['status' => 400]);
         }
         // A crafted payload could name a gateway that does not take this
         // currency. Refusing here says so, rather than failing at the gateway
         // with whatever wording it chooses.
         if (! $this->gateways->acceptsCurrency($gatewayId, $currency)) {
             return new WP_Error(
-                'fundkit_gateway_currency',
+                'gratora_gateway_currency',
                 sprintf(
                     /* translators: 1: gateway identifier, 2: currency code */
-                    __('%1$s cannot take payments in %2$s.', 'fundraising-toolkit'),
+                    __('%1$s cannot take payments in %2$s.', 'gratora'),
                     $gatewayId,
                     $currency
                 ),
@@ -151,8 +151,8 @@ final class DonationsController
             // otherwise bypass the status gates and the block-level validator.
             if (! $form) {
                 return new WP_Error(
-                    'fundkit_form_not_available',
-                    __('This form is not accepting donations.', 'fundraising-toolkit'),
+                    'gratora_form_not_available',
+                    __('This form is not accepting donations.', 'gratora'),
                     ['status' => 403]
                 );
             }
@@ -160,8 +160,8 @@ final class DonationsController
                 // Mirror the public render gate: only published forms take donations.
                 if ($form->status !== 'published') {
                     return new WP_Error(
-                        'fundkit_form_not_available',
-                        __('This form is not accepting donations.', 'fundraising-toolkit'),
+                        'gratora_form_not_available',
+                        __('This form is not accepting donations.', 'gratora'),
                         ['status' => 403]
                     );
                 }
@@ -173,8 +173,8 @@ final class DonationsController
                     $campaign = Campaign::query()->find('id', (int) $form->campaign_id);
                     if (! $campaign || ! $campaign->acceptsDonations()) {
                         return new WP_Error(
-                            'fundkit_campaign_not_available',
-                            __('This campaign is not accepting donations.', 'fundraising-toolkit'),
+                            'gratora_campaign_not_available',
+                            __('This campaign is not accepting donations.', 'gratora'),
                             ['status' => 403]
                         );
                     }
@@ -194,14 +194,14 @@ final class DonationsController
                 // condition the submission does not meet is a picker the donor
                 // never saw, and the browser suppresses the value for exactly
                 // that case.
-                if (! FormSubmissionValidator::offersBlock((string) ($form->blocks ?? ''), 'fundkit/fund-picker', $body)) {
+                if (! FormSubmissionValidator::offersBlock((string) ($form->blocks ?? ''), 'gratora/fund-picker', $body)) {
                     unset($body['fund_id']);
                 }
 
                 // Same rule for the donor's message. note_public puts text on
                 // the campaign's supporter wall, so a form with no comment
                 // block accepting one is an unmoderated publish route.
-                if (! FormSubmissionValidator::offersBlock((string) ($form->blocks ?? ''), 'fundkit/comment', $body)) {
+                if (! FormSubmissionValidator::offersBlock((string) ($form->blocks ?? ''), 'gratora/comment', $body)) {
                     unset($body['note_to_org'], $body['note_public']);
                 }
             }
@@ -234,8 +234,8 @@ final class DonationsController
         );
         if (! in_array($gatewayId, $allowedGateways, true)) {
             return new WP_Error(
-                'fundkit_gateway_not_allowed',
-                __('That payment method is not available for this form.', 'fundraising-toolkit'),
+                'gratora_gateway_not_allowed',
+                __('That payment method is not available for this form.', 'gratora'),
                 ['status' => 400]
             );
         }
@@ -263,7 +263,7 @@ final class DonationsController
             unset($sourceAttribution['utm_medium']);
         }
         if ($custom !== [] && strlen((string) wp_json_encode($custom)) > 16384) {
-            return new WP_Error('fundkit_custom_too_large', __('Submitted form data is too large.', 'fundraising-toolkit'), ['status' => 400]);
+            return new WP_Error('gratora_custom_too_large', __('Submitted form data is too large.', 'gratora'), ['status' => 400]);
         }
 
         // Spend email quota only after payload and configuration checks, so invalid requests
@@ -341,8 +341,8 @@ final class DonationsController
                 'gateway' => $gatewayId,
             ]);
             return new WP_Error(
-                'fundkit_create_failed',
-                __('We could not process your donation just now. Please try again.', 'fundraising-toolkit'),
+                'gratora_create_failed',
+                __('We could not process your donation just now. Please try again.', 'gratora'),
                 ['status' => 500]
             );
         }
@@ -428,7 +428,7 @@ final class DonationsController
                 'gateway'     => $gatewayId,
             ]);
             $this->donations->markFailed($donation, 'Gateway createIntent threw: ' . $e->getMessage());
-            return new WP_Error('fundkit_gateway_intent_failed', __('We could not start your payment. Please try again in a moment.', 'fundraising-toolkit'), ['status' => 502]);
+            return new WP_Error('gratora_gateway_intent_failed', __('We could not start your payment. Please try again in a moment.', 'gratora'), ['status' => 502]);
         }
 
         try {
@@ -439,7 +439,7 @@ final class DonationsController
             );
         } catch (Throwable $e) {
             $this->donations->markFailed($donation, 'setGatewayIntent failed: ' . $e->getMessage());
-            return new WP_Error('fundkit_intent_persist_failed', __('Something went wrong saving your donation. Please try again.', 'fundraising-toolkit'), ['status' => 500]);
+            return new WP_Error('gratora_intent_persist_failed', __('Something went wrong saving your donation. Please try again.', 'gratora'), ['status' => 500]);
         }
 
         if ($gatewayResult->requires_action) {
@@ -605,7 +605,7 @@ final class DonationsController
     {
         $reference  = (string) $request['reference'];
         $rawToken   = trim((string) ($request['status_token'] ?? ''));
-        $notFound   = new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
+        $notFound   = new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
 
         if ($rawToken === '') return $notFound;
 
@@ -636,7 +636,7 @@ final class DonationsController
     {
         $donation = $this->repository->findByReference((string) $request['reference']);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
         }
 
         if ($donation->status === 'paid') {
@@ -651,10 +651,10 @@ final class DonationsController
         }
         if (! in_array($donation->status, ['pending', 'processing', 'failed'], true)) {
             return new WP_Error(
-                'fundkit_invalid_transition',
+                'gratora_invalid_transition',
                 sprintf(
                     /* translators: %s: current donation status. */
-                    __('Cannot confirm a %s donation.', 'fundraising-toolkit'),
+                    __('Cannot confirm a %s donation.', 'gratora'),
                     $donation->status
                 ),
                 ['status' => 422]
@@ -664,7 +664,7 @@ final class DonationsController
         $gateway = $this->gateways->get($donation->gateway);
         if (! $gateway) {
             /* translators: %s: gateway identifier. */
-            return new WP_Error('fundkit_unknown_gateway', sprintf(__('Gateway "%s" is no longer registered.', 'fundraising-toolkit'), $donation->gateway), ['status' => 500]);
+            return new WP_Error('gratora_unknown_gateway', sprintf(__('Gateway "%s" is no longer registered.', 'gratora'), $donation->gateway), ['status' => 500]);
         }
 
         $payload = (array) ($request->get_json_params() ?? []);
@@ -673,7 +673,7 @@ final class DonationsController
         try {
             $result = $gateway->confirm($donation, $payload);
         } catch ( Throwable $e) {
-            return new WP_Error('fundkit_gateway_confirm_failed', __('We could not confirm your payment. Please try again in a moment.', 'fundraising-toolkit'), ['status' => 502]);
+            return new WP_Error('gratora_gateway_confirm_failed', __('We could not confirm your payment. Please try again in a moment.', 'gratora'), ['status' => 502]);
         }
 
         // A held capture is not a failure: the gateway has the money and will
@@ -703,19 +703,19 @@ final class DonationsController
 
         // Money that reached the gateway and went back is not a decline. Failing
         // the donation here would write 'failed' over a donor who was charged,
-        // fire fundkit.donation.failed with it, and send the payment-failed notice.
+        // fire gratora.donation.failed with it, and send the payment-failed notice.
         // The row is left where it stands for the refund path to reconcile.
         if (! $result->success && $result->reversed) {
             return new WP_Error(
-                'fundkit_confirm_reversed',
-                __('This payment has been returned to the donor, so it cannot be confirmed as paid.', 'fundraising-toolkit'),
+                'gratora_confirm_reversed',
+                __('This payment has been returned to the donor, so it cannot be confirmed as paid.', 'gratora'),
                 ['status' => 409]
             );
         }
 
         if (! $result->success) {
-            $this->donations->markFailed($donation, $result->error ?? __('Gateway returned failure.', 'fundraising-toolkit'));
-            return new WP_Error('fundkit_confirm_failed', $result->error ?? __('Confirmation failed.', 'fundraising-toolkit'), ['status' => 402]);
+            $this->donations->markFailed($donation, $result->error ?? __('Gateway returned failure.', 'gratora'));
+            return new WP_Error('gratora_confirm_failed', $result->error ?? __('Confirmation failed.', 'gratora'), ['status' => 402]);
         }
 
         $donation = $this->donations->confirm($donation, $result->toArray());

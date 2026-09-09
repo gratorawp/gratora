@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Gateways;
+namespace Gratora\Tests\Unit\Gateways;
 
 use DateTimeImmutable;
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Time\FrozenClock;
-use FundKit\Gateways\Sandbox\SandboxGateway;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Time\FrozenClock;
+use Gratora\Gateways\Sandbox\SandboxGateway;
+use Gratora\Recurring\RecurringPlanRepository;
 use PHPUnit\Framework\TestCase;
 
 final class SandboxGatewayTest extends TestCase

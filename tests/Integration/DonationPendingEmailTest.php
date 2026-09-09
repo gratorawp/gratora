@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\DonationService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\DonationService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
- * Verifies the `fundkit.donation.pending` event fires the `donation_pending`
+ * Verifies the `gratora.donation.pending` event fires the `donation_pending`
  * email template once and only when the gateway leaves the donation in
  * pending status (Stripe `requires_action`, SEPA, etc.).
  */
@@ -35,7 +35,7 @@ final class DonationPendingEmailTest extends IntegrationTestCase
     public function test_offline_donation_emails_payment_instructions(): void
     {
         $mails = $this->captureMails();
-        $this->driveOfflineDonation(); // fires fundkit.donation.intent_created → offline_instructions
+        $this->driveOfflineDonation(); // fires gratora.donation.intent_created → offline_instructions
 
         $instructions = $this->mailsBySubject($mails, 'instructions');
         $this->assertCount(1, $instructions, 'offline donors are emailed how to pay');
@@ -46,7 +46,7 @@ final class DonationPendingEmailTest extends IntegrationTestCase
         // Admins may reference donor-specific placeholders inside the offline
         // instructions / bank details; the email must fill them and never leak
         // a literal {token}.
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'offline' => [
                 'enabled'      => true,
                 'instructions' => 'Hi {donor_name}, please send {amount} quoting {reference}.',
@@ -69,7 +69,7 @@ final class DonationPendingEmailTest extends IntegrationTestCase
         $this->assertStringContainsString($donation->reference, $body, 'reference fills both instructions and bank details');
         $this->assertStringContainsString('DE89 3704 0044 0532 0130 00', $body, 'configured bank details are surfaced');
 
-        delete_option('fundkit_gateway_config');
+        delete_option('gratora_gateway_config');
     }
 
     public function test_mark_pending_is_noop_when_donation_already_paid(): void
@@ -78,14 +78,14 @@ final class DonationPendingEmailTest extends IntegrationTestCase
         $donation = $this->driveOfflineDonation();
 
         // Confirm first → status flips to paid.
-        $confirmReq = new WP_REST_Request('POST', "/fundkit/v1/donations/{$donation->reference}/confirm");
+        $confirmReq = new WP_REST_Request('POST', "/gratora/v1/donations/{$donation->reference}/confirm");
         $confirmReq->set_header('content-type', 'application/json');
         $confirmReq->set_body('{}');
         rest_do_request($confirmReq);
         $this->runPendingAsyncJobs();
 
         // Re-read to reflect the post-confirm state on disk.
-        $repo  = Plugin::instance()->container->get(\FundKit\Donations\DonationRepository::class);
+        $repo  = Plugin::instance()->container->get(\Gratora\Donations\DonationRepository::class);
         $fresh = $repo->findByReference($donation->reference);
 
         $service = Plugin::instance()->container->get(DonationService::class);
@@ -97,7 +97,7 @@ final class DonationPendingEmailTest extends IntegrationTestCase
 
     public function test_template_disabled_skips_send(): void
     {
-        update_option('fundkit_email_settings', [
+        update_option('gratora_email_settings', [
             'templates' => [
                 'donation_pending' => ['enabled' => false],
             ],
@@ -112,12 +112,12 @@ final class DonationPendingEmailTest extends IntegrationTestCase
         $pending = $this->mailsBySubject($mails, 'processing');
         $this->assertCount(0, $pending, 'Disabled template suppresses send');
 
-        delete_option('fundkit_email_settings');
+        delete_option('gratora_email_settings');
     }
 
-    private function driveOfflineDonation(): \FundKit\Donations\Donation
+    private function driveOfflineDonation(): \Gratora\Donations\Donation
     {
-        $createReq = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/gratora/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body((string) wp_json_encode([
             'email'        => 'sarah@example.com',
@@ -128,7 +128,7 @@ final class DonationPendingEmailTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($createReq)->get_data()['reference'];
 
-        $repo = Plugin::instance()->container->get(\FundKit\Donations\DonationRepository::class);
+        $repo = Plugin::instance()->container->get(\Gratora\Donations\DonationRepository::class);
         return $repo->findByReference($reference);
     }
 

@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Donations\Donation;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\SubscriptionAware;
-use FundKit\Gateways\WebhookOutcome;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Commands\CommandContext;
-use FundKit\Foundation\Commands\CommandRegistry;
-use FundKit\Foundation\Plugin;
-use FundKit\Funds\Fund;
-use FundKit\Gateways\GatewayTransportException;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Analytics\Event;
+use Gratora\Donations\Donation;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\SubscriptionAware;
+use Gratora\Gateways\WebhookOutcome;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Commands\CommandContext;
+use Gratora\Foundation\Commands\CommandRegistry;
+use Gratora\Foundation\Plugin;
+use Gratora\Funds\Fund;
+use Gratora\Gateways\GatewayTransportException;
+use Gratora\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 final class AdminAndPortalGuardsTest extends IntegrationTestCase
@@ -92,13 +92,13 @@ final class AdminAndPortalGuardsTest extends IntegrationTestCase
     /** @return array{status:int, code:string, message:string} */
     private function portalCancel(RecurringPlan $plan): array
     {
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession((int) $plan->donor_id, 'tok');
+        $_COOKIE['gratora_donor_session'] = $this->portalSession((int) $plan->donor_id, 'tok');
 
         try {
-            $req = new WP_REST_Request('POST', '/fundkit/v1/portal/recurring/' . (int) $plan->id . '/action');
+            $req = new WP_REST_Request('POST', '/gratora/v1/portal/recurring/' . (int) $plan->id . '/action');
             $req->set_param('id', (int) $plan->id);
             $req->set_header('content-type', 'application/json');
-            $req->set_header('X-FundKit-Csrf', 'tok');
+            $req->set_header('X-Gratora-Csrf', 'tok');
             $req->set_body('{"action":"cancel"}');
 
             $res  = rest_do_request($req);
@@ -110,7 +110,7 @@ final class AdminAndPortalGuardsTest extends IntegrationTestCase
                 'message' => (string) ($data['message'] ?? ''),
             ];
         } finally {
-            unset($_COOKIE['fundkit_donor_session']);
+            unset($_COOKIE['gratora_donor_session']);
         }
     }
 
@@ -145,7 +145,7 @@ final class AdminAndPortalGuardsTest extends IntegrationTestCase
         $res = $this->portalCancel($plan);
 
         $this->assertSame(422, $res['status']);
-        $this->assertSame('fundkit_plan_terminal', $res['code']);
+        $this->assertSame('gratora_plan_terminal', $res['code']);
         $this->assertStringContainsString('no longer active', $res['message']);
     }
 
@@ -168,7 +168,7 @@ final class AdminAndPortalGuardsTest extends IntegrationTestCase
         $userId = self::factory()->user->create(['role' => 'subscriber']);
         $user   = new \WP_User($userId);
         $user->add_cap($capability);
-        $user->add_cap('manage_fundkit');
+        $user->add_cap('manage_gratora');
         wp_set_current_user($userId);
         Capabilities::applyMapping(Capabilities::currentMapping());
 
@@ -181,7 +181,7 @@ final class AdminAndPortalGuardsTest extends IntegrationTestCase
     {
         $fund = $this->fund();
 
-        $res = $this->dispatchAs('fundkit_manage_settings', 'fund.delete', ['fund_id' => (int) $fund->id]);
+        $res = $this->dispatchAs('gratora_manage_settings', 'fund.delete', ['fund_id' => (int) $fund->id]);
 
         $this->assertFalse($res->ok, 'branding and email templates is not a licence to destroy a designation');
         $this->assertNotNull(Fund::query()->where('id', (int) $fund->id)->get());
@@ -191,7 +191,7 @@ final class AdminAndPortalGuardsTest extends IntegrationTestCase
     {
         $fund = $this->fund();
 
-        $res = $this->dispatchAs('fundkit_manage_campaigns', 'fund.update', [
+        $res = $this->dispatchAs('gratora_manage_campaigns', 'fund.update', [
             'fund_id' => (int) $fund->id,
             'name'    => 'Renamed fund',
         ]);
@@ -207,7 +207,7 @@ final class AdminAndPortalGuardsTest extends IntegrationTestCase
         wp_set_current_user($admin);
 
         $donor = $this->donor();
-        $req   = new WP_REST_Request('POST', '/fundkit/v1/admin/donors/' . (int) $donor->id . '/portal-link');
+        $req   = new WP_REST_Request('POST', '/gratora/v1/admin/donors/' . (int) $donor->id . '/portal-link');
         $req->set_param('id', (int) $donor->id);
 
         $this->assertSame(201, rest_do_request($req)->get_status());
@@ -228,7 +228,7 @@ final class AdminAndPortalGuardsTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
         $donor = $this->donor();
-        $req   = new WP_REST_Request('POST', '/fundkit/v1/admin/donors/' . (int) $donor->id . '/portal-link');
+        $req   = new WP_REST_Request('POST', '/gratora/v1/admin/donors/' . (int) $donor->id . '/portal-link');
         $req->set_param('id', (int) $donor->id);
         rest_do_request($req);
 

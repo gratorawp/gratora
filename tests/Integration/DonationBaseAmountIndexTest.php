@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Currency\FxBackfill;
-use FundKit\Donations\Donation;
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Currency\FxBackfill;
+use Gratora\Donations\Donation;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 use ReflectionProperty;
 
 /**
@@ -35,7 +35,7 @@ final class DonationBaseAmountIndexTest extends IntegrationTestCase
         $table = new Table('utf8mb4', 'utf8mb4_unicode_ci', []);
         $schemas[Donation::class]($table);
 
-        return $table->compile('fundkit_donations');
+        return $table->compile('gratora_donations');
     }
 
     public function test_the_column_leads_an_index_a_fresh_install_would_get(): void
@@ -49,7 +49,7 @@ final class DonationBaseAmountIndexTest extends IntegrationTestCase
 
     public function test_the_migrated_table_carries_it(): void
     {
-        $table   = self::$prefix . 'fundkit_donations';
+        $table   = self::$prefix . 'gratora_donations';
         $indexed = self::$wpdb->get_col(
             self::$wpdb->prepare(
                 'SHOW INDEX FROM `' . $table . '` WHERE Seq_in_index = 1 AND Column_name = %s',

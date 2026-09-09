@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * Rehashes all donor email_hash values after a pepper rotation.
@@ -20,7 +20,7 @@ use FundKit\Vendor\Queryable\DB;
  */
 final class DonorEmailRehasher
 {
-    public const HOOK  = 'fundkit.async.rehash_donor_email_hashes';
+    public const HOOK  = 'gratora.async.rehash_donor_email_hashes';
 
     /**
      * Set when a rehash is owed and cleared when it finishes.
@@ -32,7 +32,7 @@ final class DonorEmailRehasher
      * pepper is generated at plugins_loaded and Action Scheduler's data store
      * only exists from init.
      */
-    public const PENDING_OPTION = 'fundkit_donor_rehash_pending';
+    public const PENDING_OPTION = 'gratora_donor_rehash_pending';
 
     /**
      * How far the walk has got.
@@ -43,7 +43,7 @@ final class DonorEmailRehasher
      * tick already in flight and fork a second walk from the top of the table
      * on the next request, and the one after that.
      */
-    private const CURSOR_OPTION = 'fundkit_donor_rehash_after_id';
+    private const CURSOR_OPTION = 'gratora_donor_rehash_after_id';
 
     private const BATCH = 200;
 
@@ -101,7 +101,7 @@ final class DonorEmailRehasher
     {
         $afterId = (int) get_option(self::CURSOR_OPTION, 0);
 
-        $rows = DB::table('fundkit_donors')
+        $rows = DB::table('gratora_donors')
             ->where('id', $afterId, '>')
             ->where('email_encrypted', '', '!=')
             ->orderBy('id', 'ASC')
@@ -134,7 +134,7 @@ final class DonorEmailRehasher
             $suppressed = $wpdb->suppress_errors(true);
 
             try {
-                DB::table('fundkit_donors')
+                DB::table('gratora_donors')
                     ->where('id', $id)
                     ->update(['email_hash' => $newHash]);
             } catch (\Throwable $e) {
@@ -165,7 +165,7 @@ final class DonorEmailRehasher
      */
     private function recordCollision(int $id, string $hash): void
     {
-        $existing = DB::table('fundkit_donors')
+        $existing = DB::table('gratora_donors')
             ->where('email_hash', $hash)
             ->select('id')
             ->get();

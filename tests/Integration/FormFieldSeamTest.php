@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\Form;
-use FundKit\Forms\Shortcode\FormFieldAssets;
+use Gratora\Forms\Form;
+use Gratora\Forms\Shortcode\FormFieldAssets;
 use WP_REST_Request;
 
 /**
@@ -22,7 +22,7 @@ final class FormFieldSeamTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Seam campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -30,7 +30,7 @@ final class FormFieldSeamTest extends IntegrationTestCase
 
     public function test_an_add_on_block_becomes_a_runtime_field(): void
     {
-        add_filter('fundkit.form.block_field', static function ($item, string $name, array $attrs) {
+        add_filter('gratora.form.block_field', static function ($item, string $name, array $attrs) {
             if ($name !== 'acme/keepsake') return $item;
 
             return ['kind' => 'keepsake', 'label' => (string) ($attrs['label'] ?? '')];
@@ -48,7 +48,7 @@ final class FormFieldSeamTest extends IntegrationTestCase
 
     public function test_an_add_on_field_carries_its_conditional_visibility(): void
     {
-        add_filter('fundkit.form.block_field', static function ($item, string $name) {
+        add_filter('gratora.form.block_field', static function ($item, string $name) {
             return $name === 'acme/keepsake' ? ['kind' => 'keepsake'] : $item;
         }, 10, 2);
 
@@ -88,10 +88,10 @@ final class FormFieldSeamTest extends IntegrationTestCase
     {
         global $wp_scripts;
 
-        $slug = $this->publishedForm('<!-- wp:fundkit/submit-button /-->');
-        do_shortcode('[fundkit_donation_form slug="' . $slug . '"]');
+        $slug = $this->publishedForm('<!-- wp:gratora/submit-button /-->');
+        do_shortcode('[gratora_donation_form slug="' . $slug . '"]');
 
-        $runtime = $wp_scripts->registered['fundkit-donation-form-runtime'] ?? null;
+        $runtime = $wp_scripts->registered['gratora-donation-form-runtime'] ?? null;
         $this->assertNotNull($runtime);
         $this->assertContains(FormFieldAssets::HANDLE, $runtime->deps);
     }
@@ -110,15 +110,15 @@ final class FormFieldSeamTest extends IntegrationTestCase
 
     private function configFor(string $blocks): string
     {
-        $html = do_shortcode('[fundkit_donation_form slug="' . $this->publishedForm($blocks) . '"]');
-        preg_match('/data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[gratora_donation_form slug="' . $this->publishedForm($blocks) . '"]');
+        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
 
         return (string) ($m[1] ?? '');
     }
 
     private function publishedForm(string $blocks): string
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'title'       => 'Seam form',
@@ -143,9 +143,9 @@ final class FormFieldSeamTest extends IntegrationTestCase
     public function test_the_summary_reaches_the_runtime_where_it_was_dropped(): void
     {
         $config = $this->configFor(
-            '<!-- wp:fundkit/donation-amount /-->'
-            . '<!-- wp:fundkit/donation-summary /-->'
-            . '<!-- wp:fundkit/submit-button /-->'
+            '<!-- wp:gratora/donation-amount /-->'
+            . '<!-- wp:gratora/donation-summary /-->'
+            . '<!-- wp:gratora/submit-button /-->'
         );
 
         $this->assertStringContainsString('"kind":"summary"', $config);
@@ -164,7 +164,7 @@ final class FormFieldSeamTest extends IntegrationTestCase
     public function test_a_form_without_the_block_gets_no_summary(): void
     {
         $config = $this->configFor(
-            '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/submit-button /-->'
+            '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/submit-button /-->'
         );
 
         $this->assertStringNotContainsString('"kind":"summary"', $config);

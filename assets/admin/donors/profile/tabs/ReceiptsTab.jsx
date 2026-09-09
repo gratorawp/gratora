@@ -13,16 +13,16 @@ import { downloadFile } from '../../../_shared/download';
 import { notify } from '../../../_shared/notify';
 
 function donationHref( reference ) {
-    return addQueryArgs( window.location.pathname, { page: 'fundkit-donations', view: 'detail', reference } );
+    return addQueryArgs( window.location.pathname, { page: 'gratora-donations', view: 'detail', reference } );
 }
 
 function StackedDate( { iso } ) {
     if ( ! iso ) return '-';
     return (
-        <div className="fundkit-row">
-            <div className="fundkit-row__body">
-                <div className="fundkit-row__name">{ timeAgo( iso ) }</div>
-                <div className="fundkit-row__sub">{ formatDateTime( iso ) }</div>
+        <div className="gratora-row">
+            <div className="gratora-row__body">
+                <div className="gratora-row__name">{ timeAgo( iso ) }</div>
+                <div className="gratora-row__sub">{ formatDateTime( iso ) }</div>
             </div>
         </div>
     );
@@ -75,14 +75,14 @@ function TaxStatement( { donor, donations } ) {
     return (
         <div className="dp-tax-statement">
             <div className="dp-tax-statement__text">
-                <strong>{ __( 'Annual tax statement', 'fundraising-toolkit' ) }</strong>
-                <span>{ __( 'Every paid donation for the year on one document, net of refunds.', 'fundraising-toolkit' ) }</span>
+                <strong>{ __( 'Annual tax statement', 'gratora' ) }</strong>
+                <span>{ __( 'Every paid donation for the year on one document, net of refunds.', 'gratora' ) }</span>
             </div>
             <select
-                className="fundkit-input dp-tax-statement__year"
+                className="gratora-input dp-tax-statement__year"
                 value={ chosen }
                 onChange={ ( e ) => setYear( Number( e.target.value ) ) }
-                aria-label={ __( 'Statement year', 'fundraising-toolkit' ) }
+                aria-label={ __( 'Statement year', 'gratora' ) }
             >
                 { years.map( ( y ) => <option key={ y } value={ y }>{ y }</option> ) }
             </select>
@@ -95,17 +95,17 @@ function TaxStatement( { donor, donations } ) {
                     setBusy( true );
                     try {
                         await downloadFile(
-                            `/fundkit/v1/reports/donor/${ donorId }/tax-statement/${ chosen }`,
+                            `/gratora/v1/reports/donor/${ donorId }/tax-statement/${ chosen }`,
                             `tax-statement-${ chosen }.pdf`
                         );
                     } catch ( err ) {
-                        notify.error( err?.message || __( 'Could not build the statement.', 'fundraising-toolkit' ) );
+                        notify.error( err?.message || __( 'Could not build the statement.', 'gratora' ) );
                     } finally {
                         setBusy( false );
                     }
                 } }
             >
-                { __( 'Download statement', 'fundraising-toolkit' ) }
+                { __( 'Download statement', 'gratora' ) }
             </Btn>
         </div>
     );
@@ -126,21 +126,21 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
     const fields = useMemo( () => [
         {
             id:    'receipt_number',
-            label: __( 'Receipt', 'fundraising-toolkit' ),
+            label: __( 'Receipt', 'gratora' ),
             enableSorting: true,
             enableGlobalSearch: true,
             // Plain mono, not a link: a receipt has no page of its own, and the
             // PDF is behind the row menu.
-            render: ( { item } ) => <span className="fundkit-mono">{ item.receipt_number }</span>,
+            render: ( { item } ) => <span className="gratora-mono">{ item.receipt_number }</span>,
         },
         {
             id:    'donation_reference',
-            label: __( 'Donation', 'fundraising-toolkit' ),
+            label: __( 'Donation', 'gratora' ),
             enableSorting: true,
             enableGlobalSearch: true,
             render: ( { item } ) => item.donation_reference
                 ? (
-                    <a className="fundkit-mono-link" href={ donationHref( item.donation_reference ) }>
+                    <a className="gratora-mono-link" href={ donationHref( item.donation_reference ) }>
                         { item.donation_reference }
                     </a>
                 )
@@ -148,24 +148,24 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
         },
         {
             id:    'issued_at',
-            label: __( 'Issued', 'fundraising-toolkit' ),
+            label: __( 'Issued', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => <StackedDate iso={ item.issued_at } />,
         },
         {
             id:    'sent_to_email_at',
-            label: __( 'Sent', 'fundraising-toolkit' ),
+            label: __( 'Sent', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => <StackedDate iso={ item.sent_to_email_at } />,
         },
         {
             id:    'status',
-            label: __( 'Status', 'fundraising-toolkit' ),
+            label: __( 'Status', 'gratora' ),
             enableSorting: false,
             getValue: ( { item } ) => item.voided ? 'voided' : 'issued',
             render: ( { item } ) => item.voided
-                ? <span className="dp-pill is-muted">{ __( 'Voided', 'fundraising-toolkit' ) }</span>
-                : <span className="dp-pill is-ok">{ __( 'Issued', 'fundraising-toolkit' ) }</span>,
+                ? <span className="dp-pill is-muted">{ __( 'Voided', 'gratora' ) }</span>
+                : <span className="dp-pill is-ok">{ __( 'Issued', 'gratora' ) }</span>,
         },
     ], [] );
 
@@ -177,18 +177,18 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
     const actions = useMemo( () => [
         {
             id:       'download-pdf',
-            label:    __( 'Download PDF', 'fundraising-toolkit' ),
+            label:    __( 'Download PDF', 'gratora' ),
             icon:     () => <DownloadIcon size={ 16 } strokeWidth={ 1.75 } />,
             callback: ( items ) => {
                 items.forEach( ( r ) => downloadFile(
-                    `/fundkit/v1/admin/receipts/${ r.id }/pdf`,
+                    `/gratora/v1/admin/receipts/${ r.id }/pdf`,
                     `${ r.receipt_number }.pdf`
-                ).catch( ( e ) => notify.error( e?.message || __( 'Could not download a receipt.', 'fundraising-toolkit' ) ) ) );
+                ).catch( ( e ) => notify.error( e?.message || __( 'Could not download a receipt.', 'gratora' ) ) ) );
             },
         },
         {
             id:           'resend',
-            label:        __( 'Resend receipt', 'fundraising-toolkit' ),
+            label:        __( 'Resend receipt', 'gratora' ),
             icon:         () => <MailIcon size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Resend goes out over the donation, so a receipt with no reference
@@ -202,21 +202,21 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 if ( ! targets.length ) return;
                 const n = targets.length;
                 const message = n === 1
-                    ? __( 'Resend this receipt to the donor?', 'fundraising-toolkit' )
+                    ? __( 'Resend this receipt to the donor?', 'gratora' )
                     : sprintf(
                         /* translators: %d: receipt count */
-                        _n( 'Resend %d receipt to the donor?', 'Resend %d receipts to the donor?', n, 'fundraising-toolkit' ),
+                        _n( 'Resend %d receipt to the donor?', 'Resend %d receipts to the donor?', n, 'gratora' ),
                         n
                     );
                 setConfirm( {
-                    title:        __( 'Resend receipts', 'fundraising-toolkit' ),
+                    title:        __( 'Resend receipts', 'gratora' ),
                     message,
-                    confirmLabel: __( 'Resend', 'fundraising-toolkit' ),
+                    confirmLabel: __( 'Resend', 'gratora' ),
                     onConfirm: async () => {
                         // Silence reads as nothing happening, so admins press it
                         // again and the donor gets the receipt twice.
                         const results = await Promise.allSettled( targets.map( ( r ) => apiFetch( {
-                            path:   `/fundkit/v1/admin/donations/${ encodeURIComponent( r.donation_reference ) }/resend-receipt`,
+                            path:   `/gratora/v1/admin/donations/${ encodeURIComponent( r.donation_reference ) }/resend-receipt`,
                             method: 'POST',
                         } ) ) );
 
@@ -226,14 +226,14 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                         if ( sent > 0 ) {
                             notify.success( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'fundraising-toolkit' ),
+                                _n( '%d receipt resent.', '%d receipts resent.', sent, 'gratora' ),
                                 sent
                             ) );
                         }
                         if ( failed > 0 ) {
                             notify.error( sprintf(
                                 /* translators: %d: receipt count */
-                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'fundraising-toolkit' ),
+                                _n( '%d receipt could not be resent.', '%d receipts could not be resent.', failed, 'gratora' ),
                                 failed
                             ) );
                         }
@@ -255,8 +255,8 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 <EmptyState
                     compact
                     icon={ <Receipt size={ 22 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'No receipts yet', 'fundraising-toolkit' ) }
-                    body={ __( 'Receipts are issued automatically once a donation lands as paid.', 'fundraising-toolkit' ) }
+                    title={ __( 'No receipts yet', 'gratora' ) }
+                    body={ __( 'Receipts are issued automatically once a donation lands as paid.', 'gratora' ) }
                     />
                 </div>
             </>
@@ -269,13 +269,13 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
     const withheld = Math.max( 0, ( total ?? receipts.length ) - receipts.length );
 
     return (
-        <div className="fundkit-dataviews dp-receipts-dv">
+        <div className="gratora-dataviews dp-receipts-dv">
             { statement }
             { withheld > 0 && (
                 <p className="dp-tab-note">
                     { sprintf(
                         /* translators: 1: receipts shown, 2: receipts in total */
-                        __( 'Showing the %1$d most recent of %2$d receipts.', 'fundraising-toolkit' ),
+                        __( 'Showing the %1$d most recent of %2$d receipts.', 'gratora' ),
                         receipts.length,
                         total
                     ) }
@@ -291,7 +291,7 @@ export default function ReceiptsTab( { receipts, total, donations, donor, redact
                 paginationInfo={ paginationInfo }
                 defaultLayouts={ { table: {} } }
                 getItemId={ ( item ) => String( item.id ) }
-                searchLabel={ __( 'Search receipts', 'fundraising-toolkit' ) }
+                searchLabel={ __( 'Search receipts', 'gratora' ) }
             />
             <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </div>

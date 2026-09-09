@@ -20,13 +20,13 @@ test( 'a form without one goes to the forms list, not to campaign zero', () => {
 	for ( const empty of [ 0, null, undefined, '', NaN ] ) {
 		const href = formsBackHref( empty );
 
-		expect( href ).toContain( 'page=fundkit-forms' );
+		expect( href ).toContain( 'page=gratora-forms' );
 		expect( href ).not.toContain( 'id=0' );
-		expect( href ).not.toContain( 'fundkit-campaigns' );
+		expect( href ).not.toContain( 'gratora-campaigns' );
 	}
 } );
 
 test( 'both destinations are a list of forms, so one label fits', () => {
 	expect( formsBackHref( 12 ) ).toContain( 'tab=forms' );
-	expect( formsBackHref( 0 ) ).toContain( 'page=fundkit-forms' );
+	expect( formsBackHref( 0 ) ).toContain( 'page=gratora-forms' );
 } );

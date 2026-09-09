@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
+namespace Gratora\Rest\Admin;
 
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Donors\DonorRepository;
-use FundKit\Reports\CampaignReportBuilder;
-use FundKit\Reports\TaxStatementBuilder;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Donors\DonorRepository;
+use Gratora\Reports\CampaignReportBuilder;
+use Gratora\Reports\TaxStatementBuilder;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -16,8 +16,8 @@ use WP_REST_Server;
 /**
  * Capability-gated report PDFs, regenerated and streamed on demand. Nothing is
  * written to a public URL: the donor tax statement carries PII and is gated on
- * fundkit_view_donors; the campaign one-pager is aggregate-only and gated on
- * fundkit_view_reports.
+ * gratora_view_donors; the campaign one-pager is aggregate-only and gated on
+ * gratora_view_reports.
  *
  * A clicked download link carries the operator's auth cookie but not a REST
  * nonce, so the command that builds the link appends ?_wpnonce=wp_create_nonce
@@ -28,7 +28,7 @@ use WP_REST_Server;
  */
 final class ReportsController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /** Reporting windows, matching report.dashboard / CampaignMetricsService. */
     private const RANGES = ['today', 'last-7', 'last-30', 'last-90', 'all-time'];
@@ -69,13 +69,13 @@ final class ReportsController
     /** @since 1.0.0 */
     public function canViewReports(): bool
     {
-        return current_user_can('fundkit_view_reports');
+        return current_user_can('gratora_view_reports');
     }
 
     /** @since 1.0.0 */
     public function canViewDonors(): bool
     {
-        return current_user_can('fundkit_view_donors');
+        return current_user_can('gratora_view_donors');
     }
 
     /** @since 1.0.0 */
@@ -83,7 +83,7 @@ final class ReportsController
     {
         $campaign = $this->campaigns->findById((int) $request['id']);
         if (! $campaign) {
-            return new WP_Error('fundkit_campaign_not_found', __('Campaign not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_campaign_not_found', __('Campaign not found.', 'gratora'), ['status' => 404]);
         }
 
         $range = (string) ($request['range'] ?? 'last-30');
@@ -101,17 +101,17 @@ final class ReportsController
     {
         $year = (int) $request['year'];
         if ($year < 2000 || $year > (int) wp_date('Y')) {
-            return new WP_Error('fundkit_invalid_year', __('Unsupported statement year.', 'fundraising-toolkit'), ['status' => 422]);
+            return new WP_Error('gratora_invalid_year', __('Unsupported statement year.', 'gratora'), ['status' => 422]);
         }
 
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor || $donor->redacted_at !== null) {
-            return new WP_Error('fundkit_donor_not_found', __('Donor not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_donor_not_found', __('Donor not found.', 'gratora'), ['status' => 404]);
         }
 
         $pdf = $this->taxStatement->build($donor, $year);
         if ($pdf === '') {
-            return new WP_Error('fundkit_no_donations', __('No donations found for that year.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_no_donations', __('No donations found for that year.', 'gratora'), ['status' => 404]);
         }
 
         return $this->stream($request, $pdf, TaxStatementBuilder::filename((int) $donor->id, $year));

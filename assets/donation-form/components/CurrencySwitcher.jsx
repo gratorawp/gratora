@@ -9,18 +9,18 @@ export default function CurrencySwitcher( { currencies, currency, onChange, vari
     const aria      = swLabel || ariaLabel || 'Currency';
 
     return (
-        <div class={ `fundkit-form__currency-switcher fundkit-form__currency-switcher--${ swVariant } fundkit-form__currency-switcher--${ swAlign }` }>
+        <div class={ `gratora-form__currency-switcher gratora-form__currency-switcher--${ swVariant } gratora-form__currency-switcher--${ swAlign }` }>
             { swLabel && (
-                <span class="fundkit-form__currency-switcher-label">{ swLabel }</span>
+                <span class="gratora-form__currency-switcher-label">{ swLabel }</span>
             ) }
             { swVariant === 'pills' ? (
-                <div class="fundkit-form__currency-pills" role="radiogroup" aria-label={ aria }>
+                <div class="gratora-form__currency-pills" role="radiogroup" aria-label={ aria }>
                     { currencies.map( ( c ) => (
                         <button
                             type="button"
                             key={ c }
                             role="radio"
-                            class={ `fundkit-form__currency-pill${ currency === c ? ' is-selected' : '' }` }
+                            class={ `gratora-form__currency-pill${ currency === c ? ' is-selected' : '' }` }
                             aria-checked={ currency === c }
                             onClick={ () => onChange( c ) }
                         >

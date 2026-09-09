@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Campaigns;
+namespace Gratora\Tests\Unit\Campaigns;
 
-use FundKit\Campaigns\CampaignTypeHandler;
-use FundKit\Campaigns\CampaignTypeRegistry;
-use FundKit\Campaigns\DefaultCampaignTypeHandler;
+use Gratora\Campaigns\CampaignTypeHandler;
+use Gratora\Campaigns\CampaignTypeRegistry;
+use Gratora\Campaigns\DefaultCampaignTypeHandler;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 

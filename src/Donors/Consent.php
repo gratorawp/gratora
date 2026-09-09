@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /**
  * Append-only consent record. Revocation inserts a new row with granted=false;
@@ -22,7 +22,7 @@ use FundKit\Vendor\Queryable\Schema\Table;
  */
 final class Consent extends Model
 {
-    protected string $table = 'fundkit_consents';
+    protected string $table = 'gratora_consents';
     protected string $version = '1.0.1';
 
     public int $id;

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Donations;
+namespace Gratora\Tests\Unit\Donations;
 
-use FundKit\Donations\DonationIntent;
+use Gratora\Donations\DonationIntent;
 use Error;
 use PHPUnit\Framework\TestCase;
 

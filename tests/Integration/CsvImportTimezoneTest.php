@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\Donor;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Transfer\CsvImporter;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\Donor;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Transfer\CsvImporter;
 
 /**
  * The date column of someone else's export is the org's calendar, not UTC.
  *
- * Importing the donation history is the normal first day of FundKit, and paid_at is
+ * Importing the donation history is the normal first day of Gratora, and paid_at is
  * read back through the site timezone everywhere it is shown: the donations list,
  * the revenue report, the receipt and the year-end statement. A cell taken as a
  * UTC instant therefore dates every imported donation a day early anywhere west

@@ -27,9 +27,9 @@ const README_KEEPS = 3;
 
 /** Version from the plugin header, so the changelog cannot name one that was never shipped. */
 function pluginVersion() {
-    const header = readFileSync( path.join( root, 'fundkit.php' ), 'utf8' );
+    const header = readFileSync( path.join( root, 'gratora.php' ), 'utf8' );
     const m = /^\s*\*\s*Version:\s*(.+)$/m.exec( header );
-    if ( ! m ) throw new Error( 'No Version header in fundkit.php' );
+    if ( ! m ) throw new Error( 'No Version header in gratora.php' );
     return m[ 1 ].trim();
 }
 
@@ -161,7 +161,7 @@ const existing = existsSync( CHANGELOG )
 
 if ( existing.some( ( e ) => e.startsWith( `= ${ version } =` ) ) ) {
     console.error( `changelog.txt already has an entry for ${ version }.` );
-    console.error( 'Bump the Version header in fundkit.php, or pass --version.' );
+    console.error( 'Bump the Version header in gratora.php, or pass --version.' );
     process.exit( 1 );
 }
 

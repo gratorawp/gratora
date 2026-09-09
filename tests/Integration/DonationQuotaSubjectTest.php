@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Foundation\Plugin;
 use WP_Error;
 
 /**
@@ -34,7 +34,7 @@ final class DonationQuotaSubjectTest extends IntegrationTestCase
             $_SERVER['REMOTE_ADDR'] = $this->remoteAddr;
         }
 
-        remove_all_filters('fundkit.spam.pre_check');
+        remove_all_filters('gratora.spam.pre_check');
         parent::tearDown();
     }
 
@@ -147,7 +147,7 @@ final class DonationQuotaSubjectTest extends IntegrationTestCase
     {
         $this->assertNull($this->guard()->preCheck(['email' => 'a@example.test']));
 
-        add_filter('fundkit.spam.pre_check', static function ($refusal, array $submission) {
+        add_filter('gratora.spam.pre_check', static function ($refusal, array $submission) {
             return ($submission['email'] ?? '') === 'bot@example.test'
                 ? new WP_Error('site_captcha_failed', 'Please try again.', ['status' => 400])
                 : $refusal;
@@ -174,11 +174,11 @@ final class DonationQuotaSubjectTest extends IntegrationTestCase
 
         $this->assertNull($guard->verifyFormToken($aged, 0), 'the shipped window keeps a cached form working');
 
-        add_filter('fundkit.spam.token_window_days', static fn (): int => 7);
+        add_filter('gratora.spam.token_window_days', static fn (): int => 7);
         try {
             $this->assertNotNull($guard->verifyFormToken($aged, 0), 'and a site under attack can cut it');
         } finally {
-            remove_all_filters('fundkit.spam.token_window_days');
+            remove_all_filters('gratora.spam.token_window_days');
         }
     }
 
@@ -190,11 +190,11 @@ final class DonationQuotaSubjectTest extends IntegrationTestCase
 
         $this->assertNotNull($guard->verifyFormToken($stale, 0));
 
-        add_filter('fundkit.spam.token_window_days', static fn (): int => 60);
+        add_filter('gratora.spam.token_window_days', static fn (): int => 60);
         try {
             $this->assertNull($guard->verifyFormToken($stale, 0));
         } finally {
-            remove_all_filters('fundkit.spam.token_window_days');
+            remove_all_filters('gratora.spam.token_window_days');
         }
     }
 
@@ -211,7 +211,7 @@ final class DonationQuotaSubjectTest extends IntegrationTestCase
     /** A filter that returns junk must not be read as a refusal, or as a pass it cannot express. */
     public function test_pre_check_ignores_a_non_error_return(): void
     {
-        add_filter('fundkit.spam.pre_check', static fn () => 'no', 10, 2);
+        add_filter('gratora.spam.pre_check', static fn () => 'no', 10, 2);
 
         $this->assertNull($this->guard()->preCheck(['email' => 'donor@example.test']));
     }

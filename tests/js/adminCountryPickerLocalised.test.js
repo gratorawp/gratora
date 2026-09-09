@@ -75,7 +75,7 @@ const options = () => [ ...root.querySelectorAll( '.dp-edit-form__country-list b
 
 beforeEach( () => {
     Intl.DisplayNames = GermanNames;
-    window.fundkit = { can: { view_donors: true, edit_donors: true, manage_options: true } };
+    window.gratora = { can: { view_donors: true, edit_donors: true, manage_options: true } };
     document.body.innerHTML = '';
 } );
 

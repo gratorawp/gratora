@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Foundation\Batch\BatchProcessor;
-use FundKit\Foundation\Time\Clock;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Foundation\Batch\BatchProcessor;
+use Gratora\Foundation\Time\Clock;
 
 /**
  * Replace email_hash after the redaction retention window, ending donor re-identification. Use
@@ -17,7 +17,7 @@ use FundKit\Foundation\Time\Clock;
  */
 final class DonorPurge
 {
-    public const HOOK = 'fundkit.cron.donor_purge';
+    public const HOOK = 'gratora.cron.donor_purge';
     private const DAILY = 86400;
     private const BATCH = 200;
 
@@ -43,7 +43,7 @@ final class DonorPurge
      */
     public static function severedHash(int $donorId): string
     {
-        return hash('sha256', 'fundkit-purged:' . $donorId);
+        return hash('sha256', 'gratora-purged:' . $donorId);
     }
 
     /** @since 1.0.0 */
@@ -120,9 +120,9 @@ final class DonorPurge
     /** @since 1.0.0 */
     private function retentionDays(): int
     {
-        $opt    = get_option('fundkit_privacy', []);
+        $opt    = get_option('gratora_privacy', []);
         $stored = is_array($opt) ? (int) ($opt['retention_days_after_redaction'] ?? 90) : 90;
 
-        return max(0, (int) apply_filters('fundkit.donor.retention_days_after_redaction', $stored));
+        return max(0, (int) apply_filters('gratora.donor.retention_days_after_redaction', $stored));
     }
 }

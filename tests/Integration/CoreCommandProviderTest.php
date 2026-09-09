@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\EventRecorder;
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Core\Commands\CoreCommandProvider;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\Refund;
-use FundKit\Foundation\Commands\CommandContext;
-use FundKit\Foundation\Commands\CommandRegistry;
-use FundKit\Foundation\Plugin;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Core\Commands\CoreCommandProvider;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\Refund;
+use Gratora\Foundation\Commands\CommandContext;
+use Gratora\Foundation\Commands\CommandRegistry;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -72,7 +72,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
             $this->assertFalse($byId[$id]['mutating'], "{$id} must be read-only");
         }
 
-        $this->assertSame('fundkit_refund_donations', $byId['donation.refund']['capability']);
+        $this->assertSame('gratora_refund_donations', $byId['donation.refund']['capability']);
         $this->assertSame('core', $byId['donation.refund']['meta']['add_on']);
     }
 
@@ -108,7 +108,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     public function test_preview_for_campaign_update_shows_the_status_change(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_manage_campaigns');
+        get_role('administrator')->add_cap('gratora_manage_campaigns');
         wp_set_current_user($admin);
 
         $r          = $this->registry();
@@ -132,7 +132,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     public function test_reverse_for_campaign_update_covers_every_changed_field(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_manage_campaigns');
+        get_role('administrator')->add_cap('gratora_manage_campaigns');
         wp_set_current_user($admin);
 
         $r          = $this->registry();
@@ -155,7 +155,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     public function test_a_single_field_change_is_still_reversible(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_manage_campaigns');
+        get_role('administrator')->add_cap('gratora_manage_campaigns');
         wp_set_current_user($admin);
 
         $r          = $this->registry();
@@ -176,9 +176,9 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     public function test_a_change_with_an_irreversible_field_offers_no_undo(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_manage_campaigns');
+        get_role('administrator')->add_cap('gratora_manage_campaigns');
         wp_set_current_user($admin);
-        add_filter('fundkit.campaign.types', static fn (array $t): array => $t + ['squad' => 'Squad']);
+        add_filter('gratora.campaign.types', static fn (array $t): array => $t + ['squad' => 'Squad']);
 
         $r          = $this->registry();
         $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
@@ -194,7 +194,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     public function test_a_no_op_or_unknown_command_yields_no_inverse(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_manage_campaigns');
+        get_role('administrator')->add_cap('gratora_manage_campaigns');
         wp_set_current_user($admin);
 
         $r          = $this->registry();
@@ -209,7 +209,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     public function test_preview_for_unknown_invalid_or_previewless_command_returns_empty(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_manage_campaigns');
+        get_role('administrator')->add_cap('gratora_manage_campaigns');
         wp_set_current_user($admin);
 
         $r   = $this->registry();
@@ -229,7 +229,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     public function test_donation_refund_dispatches_through_the_real_service(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_refund_donations');
+        get_role('administrator')->add_cap('gratora_refund_donations');
         wp_set_current_user($admin);
 
         $reference = $this->driveDonationToPaid();
@@ -255,7 +255,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
         $this->assertSame('refunded', $reloaded->status);
 
         $eventTypes = array_column(
-            self::$wpdb->get_results('SELECT type FROM ' . self::$prefix . 'fundkit_events ORDER BY id'),
+            self::$wpdb->get_results('SELECT type FROM ' . self::$prefix . 'gratora_events ORDER BY id'),
             'type'
         );
         $this->assertContains('donation.refunded', $eventTypes);
@@ -265,11 +265,11 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     public function test_campaign_create_honors_campaign_type_from_the_registry(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_manage_campaigns');
+        get_role('administrator')->add_cap('gratora_manage_campaigns');
         wp_set_current_user($admin);
 
-        // An add-on contributes its type to the live filter, as fundkit-p2p does.
-        add_filter('fundkit.campaign.types', static function (array $types): array {
+        // An add-on contributes its type to the live filter, as gratora-p2p does.
+        add_filter('gratora.campaign.types', static function (array $types): array {
             $types['peer_to_peer'] = 'Peer-to-peer';
             return $types;
         });
@@ -290,13 +290,13 @@ final class CoreCommandProviderTest extends IntegrationTestCase
             'campaign_type must survive dispatch; additionalProperties:false was stripping it'
         );
 
-        remove_all_filters('fundkit.campaign.types');
+        remove_all_filters('gratora.campaign.types');
     }
 
     public function test_campaign_create_rejects_a_type_whose_add_on_is_inactive(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_manage_campaigns');
+        get_role('administrator')->add_cap('gratora_manage_campaigns');
         wp_set_current_user($admin);
 
         // No add-on registered peer_to_peer, so it is not an available type and
@@ -317,7 +317,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     public function test_campaign_update_sets_the_image_attachment(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_manage_campaigns');
+        get_role('administrator')->add_cap('gratora_manage_campaigns');
         wp_set_current_user($admin);
 
         $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
@@ -337,8 +337,8 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     public function test_form_get_reads_structure_and_form_update_rejects_fantasy_settings(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_manage_campaigns');
-        get_role('administrator')->add_cap('fundkit_manage_forms');
+        get_role('administrator')->add_cap('gratora_manage_campaigns');
+        get_role('administrator')->add_cap('gratora_manage_forms');
         wp_set_current_user($admin);
 
         $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
@@ -372,8 +372,8 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     public function test_form_update_merges_settings_without_dropping_keys(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_manage_campaigns');
-        get_role('administrator')->add_cap('fundkit_manage_forms');
+        get_role('administrator')->add_cap('gratora_manage_campaigns');
+        get_role('administrator')->add_cap('gratora_manage_forms');
         wp_set_current_user($admin);
 
         $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
@@ -392,8 +392,8 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     public function test_form_create_seeds_a_template_and_rejects_fantasy_input(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_manage_campaigns');
-        get_role('administrator')->add_cap('fundkit_manage_forms');
+        get_role('administrator')->add_cap('gratora_manage_campaigns');
+        get_role('administrator')->add_cap('gratora_manage_forms');
         wp_set_current_user($admin);
 
         $ctx        = new CommandContext($admin, 'rest', 'req-' . uniqid());
@@ -407,7 +407,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
         ], $ctx);
         $this->assertTrue($created->ok, $created->error ?? '');
         $get = $this->registry()->dispatch('form.get', ['form_id' => (int) $created->data['form_id']], $ctx);
-        $this->assertContains('fundkit/donation-amount', $get->data['blocks'], 'template field blocks should be seeded');
+        $this->assertContains('gratora/donation-amount', $get->data['blocks'], 'template field blocks should be seeded');
 
         // An unknown template id is rejected by the enum.
         $badTpl = $this->registry()->dispatch('form.create', ['template' => 'no-such-template', 'campaign_id' => $campaignId], $ctx);
@@ -427,7 +427,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     public function test_donor_profile_is_typed_and_rejects_fantasy_keys(): void
     {
         $admin = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_edit_donors');
+        get_role('administrator')->add_cap('gratora_edit_donors');
         wp_set_current_user($admin);
 
         $ctx = new CommandContext($admin, 'rest', 'req-' . uniqid());
@@ -451,7 +451,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
     private function makeImageAttachment(): int
     {
         $png    = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
-        $upload = wp_upload_bits('fundkit-cmd-test.png', null, $png);
+        $upload = wp_upload_bits('gratora-cmd-test.png', null, $png);
         return (int) wp_insert_attachment([
             'post_mime_type' => 'image/png',
             'post_title'     => 'test',
@@ -461,7 +461,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
 
     private function driveDonationToPaid(): string
     {
-        $createReq = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/gratora/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body(json_encode([
             'email'        => 'refund-cmd@example.com',
@@ -472,7 +472,7 @@ final class CoreCommandProviderTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($createReq)->get_data()['reference'];
 
-        $confirmReq = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirmReq = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirmReq->set_header('content-type', 'application/json');
         $confirmReq->set_body('{}');
         rest_do_request($confirmReq);

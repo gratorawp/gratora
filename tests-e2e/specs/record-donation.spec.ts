@@ -13,11 +13,11 @@ import { AdminPage } from '../helpers/AdminPage';
  * nothing happen.
  */
 
-const LIST = '/wp-admin/admin.php?page=fundkit-donations';
+const LIST = '/wp-admin/admin.php?page=gratora-donations';
 
 /** A donor nobody else in the suite uses, so the duplicate check is about us. */
 function uniqueEmail(): string {
-    return `cheque-${ process.env.FUNDKIT_E2E_RUN_ID ?? 'local' }-${ Date.now() }@example.org`;
+    return `cheque-${ process.env.GRATORA_E2E_RUN_ID ?? 'local' }-${ Date.now() }@example.org`;
 }
 
 async function openDrawer(page: Page): Promise<void> {
@@ -26,10 +26,10 @@ async function openDrawer(page: Page): Promise<void> {
 }
 
 async function fill(page: Page, email: string, amount: string): Promise<void> {
-    await page.locator('.fundkit-rd input[type="email"]').fill(email);
+    await page.locator('.gratora-rd input[type="email"]').fill(email);
     // Field renders its label as a div, not a <label for>, so the amount input
     // is reached through its own field wrapper rather than by label.
-    await page.locator('.fundkit-field:has(.fundkit-field__label:text-is("Amount")) input').fill(amount);
+    await page.locator('.gratora-field:has(.gratora-field__label:text-is("Amount")) input').fill(amount);
 }
 
 test.describe('record a donation', () => {
@@ -65,7 +65,7 @@ test.describe('record a donation', () => {
         await fill(page, email, '125');
         await page.getByRole('button', { name: 'Record donation' }).click();
 
-        const warning = page.locator('.fundkit-notice--warning');
+        const warning = page.locator('.gratora-notice--warning');
         await expect(warning).toBeVisible();
         await expect(warning).toContainText('already down for this donor');
         // It names what it matched, so the admin can go and look. Matched by
@@ -88,17 +88,17 @@ test.describe('record a donation', () => {
         await openDrawer(page);
         await fill(page, email, '125');
         await page.getByRole('button', { name: 'Record donation' }).click();
-        await expect(page.locator('.fundkit-notice--warning')).toBeVisible();
+        await expect(page.locator('.gratora-notice--warning')).toBeVisible();
 
-        await page.locator('.fundkit-field:has(.fundkit-field__label:text-is("Amount")) input').fill('126');
+        await page.locator('.gratora-field:has(.gratora-field__label:text-is("Amount")) input').fill('126');
 
-        await expect(page.locator('.fundkit-notice--warning')).toHaveCount(0);
+        await expect(page.locator('.gratora-notice--warning')).toHaveCount(0);
         await expect(page.getByRole('button', { name: 'Record donation' })).toBeVisible();
     });
 
     test('a campaign list that cannot be read says so', async ({ page }) => {
         // Mock the picker request failure directly; reproducing the role is unnecessary.
-        await page.route('**/fundkit/v1/admin/donations/campaign-options*', (route) =>
+        await page.route('**/gratora/v1/admin/donations/campaign-options*', (route) =>
             route.fulfill({ status: 403, contentType: 'application/json', body: '{"code":"forbidden"}' })
         );
 
@@ -107,7 +107,7 @@ test.describe('record a donation', () => {
         await expect(page.getByText('Campaigns could not be loaded')).toBeVisible();
         // SearchableSelect puts its placeholder on the input, not in the text.
         await expect(
-            page.locator('.fundkit-field:has(.fundkit-field__label:text-is("Campaign")) input')
+            page.locator('.gratora-field:has(.gratora-field__label:text-is("Campaign")) input')
         ).toHaveAttribute('placeholder', 'Unavailable');
     });
 });

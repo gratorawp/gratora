@@ -20,7 +20,7 @@ const CONFIG = {
     currency: 'USD',
     gateway:  'offline',
     layout:   'paged',
-    rest:     'https://example.test/wp-json/fundkit/v1/donations',
+    rest:     'https://example.test/wp-json/gratora/v1/donations',
     gateways: { options: [ { id: 'offline', label: 'Offline' } ] },
     pages:    [ { title: 'Amount' }, { title: 'Details' } ],
     pageNav:  { progressStyle: 'bar' },
@@ -33,12 +33,12 @@ const CONFIG = {
 
 function addForm() {
     const form = document.createElement( 'form' );
-    form.className = 'fundkit-donation-form';
-    form.id = 'fundkit-form-7';
+    form.className = 'gratora-donation-form';
+    form.id = 'gratora-form-7';
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-fundkit-form-config', '' );
+    json.setAttribute( 'data-gratora-form-config', '' );
     json.textContent = JSON.stringify( CONFIG );
     form.appendChild( json );
 
@@ -50,15 +50,15 @@ async function bootAndAdvance() {
     jest.isolateModules( () => { require( '../../assets/donation-form/runtime.jsx' ); } );
     await settle();
 
-    document.querySelector( '.fundkit-form__button--primary' ).click();
+    document.querySelector( '.gratora-form__button--primary' ).click();
     await settle();
 
-    return document.querySelector( '.fundkit-form__bar-back span' );
+    return document.querySelector( '.gratora-form__bar-back span' );
 }
 
 beforeEach( () => {
     document.body.innerHTML = '';
-    window.fundkit = {
+    window.gratora = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
@@ -66,7 +66,7 @@ beforeEach( () => {
 
 afterEach( () => {
     document.documentElement.dir = '';
-    delete window.fundkit;
+    delete window.gratora;
 } );
 
 it( 'points the donation form back control left when the page reads left to right', async () => {

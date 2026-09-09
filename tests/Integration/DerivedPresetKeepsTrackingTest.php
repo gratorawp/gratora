@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Styling\StylePresets;
-use FundKit\Settings\SettingsService;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Styling\StylePresets;
+use Gratora\Settings\SettingsService;
+use Gratora\Foundation\Plugin;
 use WP_Theme_JSON_Resolver;
 
 /**
@@ -66,7 +66,7 @@ final class DerivedPresetKeepsTrackingTest extends IntegrationTestCase
 
         // The admin nudges one colour and leaves the rest alone.
         $edited = $this->tokensOfTheme();
-        $edited['fundkit-bg'] = '#fafafa';
+        $edited['gratora-bg'] = '#fafafa';
 
         Plugin::instance()->container->get(SettingsService::class)->update('org-brand', [
             'presets'    => [['id' => 'theme', 'name' => 'Site theme', 'tokens' => $edited]],
@@ -78,7 +78,7 @@ final class DerivedPresetKeepsTrackingTest extends IntegrationTestCase
 
         $now = $this->tokensOfTheme();
 
-        $this->assertSame('#c62828', $now['fundkit-accent'] ?? null, 'the untouched key still follows the theme');
-        $this->assertSame('#fafafa', $now['fundkit-bg'] ?? null, 'and the edited one is still the admin\'s');
+        $this->assertSame('#c62828', $now['gratora-accent'] ?? null, 'the untouched key still follows the theme');
+        $this->assertSame('#fafafa', $now['gratora-bg'] ?? null, 'and the edited one is still the admin\'s');
     }
 }

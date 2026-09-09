@@ -66,7 +66,7 @@ async function until( predicate, what ) {
 }
 
 function text() {
-    return document.getElementById( 'fundkit-donor-portal' ).textContent;
+    return document.getElementById( 'gratora-donor-portal' ).textContent;
 }
 
 function button( label ) {
@@ -77,7 +77,7 @@ async function openSheet( row = plan() ) {
     routes.me = () => jsonResponse( 200, me() );
     routes.recurring = () => jsonResponse( 200, [ row ] );
 
-    document.body.innerHTML = '<div id="fundkit-donor-portal"></div>';
+    document.body.innerHTML = '<div id="gratora-donor-portal"></div>';
     jest.isolateModules( () => {
         require( '../../assets/donor-portal/index.jsx' );
     } );
@@ -94,13 +94,13 @@ beforeEach( () => {
     routes = {};
     posted  = [];
     window.history.replaceState( {}, '', '/portal/' );
-    window.fundkitPortal = { rest: '/wp-json/fundkit/v1/portal/', nonce: '', token: 'portal-token' };
-    window.fundkit = {
+    window.gratoraPortal = { rest: '/wp-json/gratora/v1/portal/', nonce: '', token: 'portal-token' };
+    window.gratora = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
     global.fetch = jest.fn( ( url, init ) => {
-        const path = String( url ).replace( '/wp-json/fundkit/v1/portal/', '' );
+        const path = String( url ).replace( '/wp-json/gratora/v1/portal/', '' );
         if ( init && init.method === 'POST' ) {
             posted.push( { path, body: JSON.parse( init.body ) } );
         }
@@ -159,7 +159,7 @@ test( 'picking the cadence they already have sends nothing', async () => {
 
 test( 'PayPal answering with an approval link puts that link on screen', async () => {
     routes[ 'recurring/38/action' ] = () => jsonResponse( 409, {
-        code:    'fundkit_change_needs_approval',
+        code:    'gratora_change_needs_approval',
         message: 'Your payment provider needs you to approve this change before it takes effect.',
         // The shape WP_Error puts on the wire: the route's own payload sits
         // inside data, under the status.

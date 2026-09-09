@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\Portal\PortalPage;
-use FundKit\Foundation\Plugin;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\Portal\PortalPage;
+use Gratora\Foundation\Plugin;
 
 /**
  * Invoke the email job with positional arguments, matching Action Scheduler’s array_values
@@ -19,13 +19,13 @@ final class PortalSignInLinkTest extends IntegrationTestCase
     private function portalToken(): string
     {
         return Plugin::instance()->container
-            ->get(\FundKit\Donations\AntiSpamGuard::class)
+            ->get(\Gratora\Donations\AntiSpamGuard::class)
             ->mintPortalToken();
     }
 
     private function requestLink(string $email): void
     {
-        $req = new \WP_REST_Request('POST', '/fundkit/v1/portal/send-link');
+        $req = new \WP_REST_Request('POST', '/gratora/v1/portal/send-link');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['email' => $email, 'token' => $this->portalToken()]));
 
@@ -55,7 +55,7 @@ final class PortalSignInLinkTest extends IntegrationTestCase
         // The shape /portal/send-link enqueues: one named value, which AS
         // spreads into a single positional string.
         Plugin::instance()->container->get(AsyncDispatcher::class)
-            ->enqueue('fundkit.async.send_portal_link', ['email' => $email]);
+            ->enqueue('gratora.async.send_portal_link', ['email' => $email]);
 
         // runPendingAsyncJobs() mirrors AS: do_action_ref_array($hook, array_values($args)).
         $this->runPendingAsyncJobs();
@@ -75,7 +75,7 @@ final class PortalSignInLinkTest extends IntegrationTestCase
         $this->captureMail($sent);
 
         Plugin::instance()->container->get(AsyncDispatcher::class)
-            ->enqueue('fundkit.async.send_portal_link', [
+            ->enqueue('gratora.async.send_portal_link', [
                 'email'      => 'newcomer-' . uniqid() . '@example.test',
                 'first_name' => 'Ada',
                 'last_name'  => 'Lovelace',
@@ -93,7 +93,7 @@ final class PortalSignInLinkTest extends IntegrationTestCase
             ->findOrCreate('known-' . ($id = uniqid()) . '@example.test');
 
         Plugin::instance()->container->get(AsyncDispatcher::class)
-            ->enqueue('fundkit.async.send_portal_link', [
+            ->enqueue('gratora.async.send_portal_link', [
                 'email'      => 'known-' . $id . '@example.test',
                 'first_name' => 'Ada',
                 'last_name'  => 'Lovelace',
@@ -120,7 +120,7 @@ final class PortalSignInLinkTest extends IntegrationTestCase
 
         $args = $wpdb->get_col(
             "SELECT COALESCE(extended_args, args) FROM {$wpdb->prefix}actionscheduler_actions
-             WHERE hook = 'fundkit.async.send_portal_link'"
+             WHERE hook = 'gratora.async.send_portal_link'"
         );
 
         $this->assertNotSame([], $args, 'the job was queued');
@@ -161,7 +161,7 @@ final class PortalSignInLinkTest extends IntegrationTestCase
         Plugin::instance()->container->get(DonorService::class)->findOrCreate($email);
 
         Plugin::instance()->container->get(AsyncDispatcher::class)
-            ->enqueue('fundkit.async.send_portal_link', ['email' => $email]);
+            ->enqueue('gratora.async.send_portal_link', ['email' => $email]);
         $this->runPendingAsyncJobs();
 
         $this->assertCount(1, $sent);

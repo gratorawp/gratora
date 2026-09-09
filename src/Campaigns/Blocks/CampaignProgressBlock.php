@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Blocks;
+namespace Gratora\Campaigns\Blocks;
 
-use FundKit\Foundation\Helpers\View;
+use Gratora\Foundation\Helpers\View;
 
 /** @since 1.0.0 */
 final class CampaignProgressBlock extends CampaignBlock
@@ -12,7 +12,7 @@ final class CampaignProgressBlock extends CampaignBlock
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/campaign-progress';
+        return 'gratora/campaign-progress';
     }
 
     /** @since 1.0.0 */

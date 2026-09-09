@@ -30,7 +30,7 @@ export default function ActionsCard( {
     return (
         <div className="dd-rail-card">
             <div className="dd-rail-card__head">
-                <span className="dd-rail-card__title">{ __( 'Actions', 'fundraising-toolkit' ) }</span>
+                <span className="dd-rail-card__title">{ __( 'Actions', 'gratora' ) }</span>
             </div>
             <div className="dd-rail-card__body">
                 <div className="dd-rail-actions">
@@ -41,7 +41,7 @@ export default function ActionsCard( {
                             onClick={ onMarkPaid }
                         >
                             <IconCheck className="ic" />
-                            { __( 'Mark as paid', 'fundraising-toolkit' ) }
+                            { __( 'Mark as paid', 'gratora' ) }
                         </button>
                     ) }
                     { canMarkFailed && (
@@ -51,7 +51,7 @@ export default function ActionsCard( {
                             onClick={ onMarkFailed }
                         >
                             <IconAlert className="ic" />
-                            { __( 'Mark as failed', 'fundraising-toolkit' ) }
+                            { __( 'Mark as failed', 'gratora' ) }
                         </button>
                     ) }
                     { mayChange && (
@@ -62,7 +62,7 @@ export default function ActionsCard( {
                             onClick={ onRefund }
                         >
                             <IconRefund className="ic" />
-                            { __( 'Refund donation', 'fundraising-toolkit' ) }
+                            { __( 'Refund donation', 'gratora' ) }
                         </button>
                     ) }
                     { mayResendReceipt && (
@@ -74,8 +74,8 @@ export default function ActionsCard( {
                         >
                             <IconMail className="ic" />
                             { isRedacted
-                                ? __( 'Donor erased, cannot email', 'fundraising-toolkit' )
-                                : __( 'Resend receipt', 'fundraising-toolkit' ) }
+                                ? __( 'Donor erased, cannot email', 'gratora' )
+                                : __( 'Resend receipt', 'gratora' ) }
                         </button>
                     ) }
                     { mayReadPii && ( primaryReceipt
@@ -83,16 +83,16 @@ export default function ActionsCard( {
                             <button
                                 type="button"
                                 className="btn btn--block"
-                                onClick={ () => downloadFile( `/fundkit/v1/admin/receipts/${ primaryReceipt.id }/pdf`, `${ primaryReceipt.receipt_number }.pdf` ).catch( ( e ) => notify.error( e?.message || __( 'Could not download the receipt.', 'fundraising-toolkit' ) ) ) }
+                                onClick={ () => downloadFile( `/gratora/v1/admin/receipts/${ primaryReceipt.id }/pdf`, `${ primaryReceipt.receipt_number }.pdf` ).catch( ( e ) => notify.error( e?.message || __( 'Could not download the receipt.', 'gratora' ) ) ) }
                             >
                                 <IconDownload className="ic" />
-                                { __( 'Download receipt PDF', 'fundraising-toolkit' ) }
+                                { __( 'Download receipt PDF', 'gratora' ) }
                             </button>
                         )
                         : (
                             <button type="button" className="btn btn--block" disabled>
                                 <IconDownload className="ic" />
-                                { __( 'No receipt yet', 'fundraising-toolkit' ) }
+                                { __( 'No receipt yet', 'gratora' ) }
                             </button>
                         ) ) }
                     { mayNote && (
@@ -102,14 +102,14 @@ export default function ActionsCard( {
                             onClick={ onAddNote }
                         >
                             <IconNote className="ic" />
-                            { __( 'Add note', 'fundraising-toolkit' ) }
+                            { __( 'Add note', 'gratora' ) }
                         </button>
                     ) }
                 </div>
                 { canRefund && (
                     <div className="dd-rail-actions__hint">
                         { /* translators: %s: max refund amount */ }
-                        { __( 'Refunds capped at', 'fundraising-toolkit' ) }{ ' ' }
+                        { __( 'Refunds capped at', 'gratora' ) }{ ' ' }
                         <strong>{ formatAmount( donation.refundable_cents, donation.currency ) }</strong>.
                     </div>
                 ) }

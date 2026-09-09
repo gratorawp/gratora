@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest;
+namespace Gratora\Rest;
 
-use FundKit\Foundation\Hooks\HookProvider;
-use FundKit\Rest\Admin\CampaignsController as AdminCampaignsController;
-use FundKit\Rest\Admin\CommandsController as AdminCommandsController;
-use FundKit\Rest\Admin\DashboardController as AdminDashboardController;
-use FundKit\Rest\Admin\DonationsController as AdminDonationsController;
-use FundKit\Rest\Admin\DonorsController as AdminDonorsController;
-use FundKit\Rest\Admin\ExportsController as AdminExportsController;
-use FundKit\Rest\Admin\FormsController as AdminFormsController;
-use FundKit\Rest\Admin\FundsController as AdminFundsController;
-use FundKit\Rest\Admin\FxController;
-use FundKit\Rest\Admin\NumberingController as AdminNumberingController;
-use FundKit\Rest\Admin\OnboardingController as AdminOnboardingController;
-use FundKit\Rest\Admin\PayPalKeysController;
-use FundKit\Rest\Admin\ReadinessController as AdminReadinessController;
-use FundKit\Rest\Admin\RecurringController as AdminRecurringController;
-use FundKit\Rest\Admin\ReportsController as AdminReportsController;
-use FundKit\Rest\Admin\RolesController as AdminRolesController;
-use FundKit\Rest\Admin\SettingsController as AdminSettingsController;
-use FundKit\Rest\Admin\StripeKeysController;
-use FundKit\Rest\Admin\ToolsController as AdminToolsController;
-use FundKit\Rest\Admin\UserPrefsController as AdminUserPrefsController;
-use FundKit\Rest\Portal\PortalController;
+use Gratora\Foundation\Hooks\HookProvider;
+use Gratora\Rest\Admin\CampaignsController as AdminCampaignsController;
+use Gratora\Rest\Admin\CommandsController as AdminCommandsController;
+use Gratora\Rest\Admin\DashboardController as AdminDashboardController;
+use Gratora\Rest\Admin\DonationsController as AdminDonationsController;
+use Gratora\Rest\Admin\DonorsController as AdminDonorsController;
+use Gratora\Rest\Admin\ExportsController as AdminExportsController;
+use Gratora\Rest\Admin\FormsController as AdminFormsController;
+use Gratora\Rest\Admin\FundsController as AdminFundsController;
+use Gratora\Rest\Admin\FxController;
+use Gratora\Rest\Admin\NumberingController as AdminNumberingController;
+use Gratora\Rest\Admin\OnboardingController as AdminOnboardingController;
+use Gratora\Rest\Admin\PayPalKeysController;
+use Gratora\Rest\Admin\ReadinessController as AdminReadinessController;
+use Gratora\Rest\Admin\RecurringController as AdminRecurringController;
+use Gratora\Rest\Admin\ReportsController as AdminReportsController;
+use Gratora\Rest\Admin\RolesController as AdminRolesController;
+use Gratora\Rest\Admin\SettingsController as AdminSettingsController;
+use Gratora\Rest\Admin\StripeKeysController;
+use Gratora\Rest\Admin\ToolsController as AdminToolsController;
+use Gratora\Rest\Admin\UserPrefsController as AdminUserPrefsController;
+use Gratora\Rest\Portal\PortalController;
 
 /** @since 1.0.0 */
 final class RestProvider extends HookProvider
@@ -96,7 +96,7 @@ final class RestProvider extends HookProvider
         $this->readiness->registerRoutes();
 
         $registry = new ControllerRegistry();
-        do_action('fundkit.rest.register', $registry);
+        do_action('gratora.rest.register', $registry);
         foreach ($registry->all() as $controller) {
             $controller->registerRoutes();
         }

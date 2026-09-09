@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Settings\SettingsService;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Settings\SettingsService;
+use Gratora\Foundation\Plugin;
 
 /**
  * Campaigns report in the single org currency, so the relabel on a base change
@@ -46,7 +46,7 @@ final class CampaignCurrencyFollowsBaseOnlyTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        update_option('fundkit_currency_locale', ['default_currency' => 'USD', 'supported_currencies' => ['USD']], false);
+        update_option('gratora_currency_locale', ['default_currency' => 'USD', 'supported_currencies' => ['USD']], false);
     }
 
     public function test_an_unrelated_save_leaves_a_restored_campaign_alone(): void

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Recurring;
+namespace Gratora\Recurring;
 
 /**
  * Who asked for a change to a plan, and whether the donor should be told.

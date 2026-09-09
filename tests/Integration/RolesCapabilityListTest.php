@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Auth\Capabilities;
 use WP_REST_Request;
 
 /**
  * The roles screen is the one place capabilities are granted, so it has to know
  * about all of them, including the ones add-ons register through the
- * `fundkit.capabilities` filter: `applyMapping()` honours those, and a screen
+ * `gratora.capabilities` filter: `applyMapping()` honours those, and a screen
  * that does not show them gates real routes nobody can be granted.
  *
  * Everything it renders is wording, so it also has to be translatable.
@@ -26,7 +26,7 @@ final class RolesCapabilityListTest extends IntegrationTestCase
 
     public function test_a_capability_label_is_translated(): void
     {
-        add_filter('gettext', static fn ($translated, $text, $domain) => $domain === 'fundraising-toolkit' && $text === 'View donors'
+        add_filter('gettext', static fn ($translated, $text, $domain) => $domain === 'gratora' && $text === 'View donors'
             ? 'Voir les donateurs'
             : $translated, 10, 3);
 
@@ -37,12 +37,12 @@ final class RolesCapabilityListTest extends IntegrationTestCase
             }
         }
 
-        $this->assertSame('Voir les donateurs', $labels['fundkit_view_donors'] ?? '');
+        $this->assertSame('Voir les donateurs', $labels['gratora_view_donors'] ?? '');
     }
 
     public function test_a_group_heading_is_translated(): void
     {
-        add_filter('gettext', static fn ($translated, $text, $domain) => $domain === 'fundraising-toolkit' && $text === 'Donors'
+        add_filter('gettext', static fn ($translated, $text, $domain) => $domain === 'gratora' && $text === 'Donors'
             ? 'Donateurs'
             : $translated, 10, 3);
 
@@ -74,7 +74,7 @@ final class RolesCapabilityListTest extends IntegrationTestCase
         $admin = self::factory()->user->create(['role' => 'administrator']);
         wp_set_current_user($admin);
 
-        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/roles'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/roles'));
         $this->assertSame(200, $res->get_status());
 
         return (array) $res->get_data();
@@ -116,21 +116,21 @@ final class RolesCapabilityListTest extends IntegrationTestCase
     public function test_an_add_on_capability_reaches_the_screen(): void
     {
         $register = static function (array $maps): array {
-            $maps['all'][]                 = 'fundkit_manage_fundraisers';
-            $maps['groups']['Fundraising'] = ['fundkit_manage_fundraisers'];
-            $maps['labels']['fundkit_manage_fundraisers'] = 'Manage fundraisers';
+            $maps['all'][]                 = 'gratora_manage_fundraisers';
+            $maps['groups']['Fundraising'] = ['gratora_manage_fundraisers'];
+            $maps['labels']['gratora_manage_fundraisers'] = 'Manage fundraisers';
             return $maps;
         };
-        add_filter('fundkit.capabilities', $register);
+        add_filter('gratora.capabilities', $register);
 
         try {
             $data = $this->fetch();
-            $this->assertContains('fundkit_manage_fundraisers', $this->capsIn($data));
+            $this->assertContains('gratora_manage_fundraisers', $this->capsIn($data));
 
             $labels = array_column((array) $data['capabilities'], 'label');
             $this->assertContains('Fundraising', $labels, 'and under its own heading');
         } finally {
-            remove_filter('fundkit.capabilities', $register);
+            remove_filter('gratora.capabilities', $register);
         }
     }
 
@@ -141,24 +141,24 @@ final class RolesCapabilityListTest extends IntegrationTestCase
     public function test_an_ungrouped_capability_is_gathered_rather_than_dropped(): void
     {
         $register = static function (array $maps): array {
-            $maps['all'][] = 'fundkit_loose_cap';
+            $maps['all'][] = 'gratora_loose_cap';
             return $maps;
         };
-        add_filter('fundkit.capabilities', $register);
+        add_filter('gratora.capabilities', $register);
 
         try {
-            $this->assertContains('fundkit_loose_cap', $this->capsIn($this->fetch()));
+            $this->assertContains('gratora_loose_cap', $this->capsIn($this->fetch()));
         } finally {
-            remove_filter('fundkit.capabilities', $register);
+            remove_filter('gratora.capabilities', $register);
         }
     }
 
     public function test_a_non_admin_cannot_read_the_capability_map(): void
     {
         $viewer = self::factory()->user->create(['role' => 'subscriber']);
-        get_user_by('id', $viewer)->add_cap('fundkit_view_donors');
+        get_user_by('id', $viewer)->add_cap('gratora_view_donors');
         wp_set_current_user($viewer);
 
-        $this->assertSame(403, rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/roles'))->get_status());
+        $this->assertSame(403, rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/roles'))->get_status());
     }
 }

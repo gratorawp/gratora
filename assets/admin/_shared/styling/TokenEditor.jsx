@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/styling/TokenEditor';
+export { default } from '@gratora/ui/styling/TokenEditor';

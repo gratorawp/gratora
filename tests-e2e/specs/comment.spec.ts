@@ -1,5 +1,5 @@
 /**
- * `fundkit/comment` block - note-to-org textarea.
+ * `gratora/comment` block - note-to-org textarea.
  */
 
 import { test, expect } from '../fixtures/donor-form';

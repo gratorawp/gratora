@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Gateways;
+namespace Gratora\Tests\Unit\Gateways;
 
-use FundKit\Gateways\PayPal\PayPalMoney;
+use Gratora\Gateways\PayPal\PayPalMoney;
 use PHPUnit\Framework\TestCase;
 
 /**
  * PayPal takes a decimal string carrying exactly the currency's own number of
- * decimal places, and rejects the amount otherwise. FundKit stores major x 100 for
+ * decimal places, and rejects the amount otherwise. Gratora stores major x 100 for
  * every currency, so the conversion has to vary by currency, not by a constant.
  */
 final class PayPalMoneyTest extends TestCase

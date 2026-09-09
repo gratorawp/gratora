@@ -36,7 +36,7 @@ jest.mock( '@wordpress/data', () => ( {
     } ),
 } ) );
 
-const { useFundKitRecord } = require( '../../assets/admin/_shared/useFundKitRecord' );
+const { useGratoraRecord } = require( '../../assets/admin/_shared/useGratoraRecord' );
 
 beforeEach( () => {
     mockEntity.record = null;
@@ -47,7 +47,7 @@ beforeEach( () => {
 it( 'reads a 404 as a record that is gone', () => {
     mockEntity.thrown = { code: 'rest_post_invalid_id', message: 'Invalid ID.', data: { status: 404 } };
 
-    const r = useFundKitRecord( 'form', 12 );
+    const r = useGratoraRecord( 'form', 12 );
 
     expect( r.notFound ).toBe( true );
     expect( r.loadError ).toBeNull();
@@ -56,7 +56,7 @@ it( 'reads a 404 as a record that is gone', () => {
 it( 'reads a server failure as a failure to ask, and keeps its words', () => {
     mockEntity.thrown = { code: 'internal_server_error', message: 'gateway timeout', data: { status: 500 } };
 
-    const r = useFundKitRecord( 'form', 12 );
+    const r = useGratoraRecord( 'form', 12 );
 
     expect( r.notFound ).toBe( false );
     expect( r.loadError ).toEqual( { status: 500, message: 'gateway timeout' } );
@@ -65,7 +65,7 @@ it( 'reads a server failure as a failure to ask, and keeps its words', () => {
 it( 'reads a dropped connection, which carries no status, as a failure to ask', () => {
     mockEntity.thrown = { message: 'Failed to fetch' };
 
-    const r = useFundKitRecord( 'form', 12 );
+    const r = useGratoraRecord( 'form', 12 );
 
     expect( r.notFound ).toBe( false );
     expect( r.loadError ).toEqual( { status: 0, message: 'Failed to fetch' } );
@@ -74,14 +74,14 @@ it( 'reads a dropped connection, which carries no status, as a failure to ask', 
 it( 'says neither when the record is simply there', () => {
     mockEntity.record = { id: 12, title: 'Donate' };
 
-    const r = useFundKitRecord( 'form', 12 );
+    const r = useGratoraRecord( 'form', 12 );
 
     expect( r.notFound ).toBe( false );
     expect( r.loadError ).toBeNull();
 } );
 
 it( 'still says not found when the resolution ended with no record and no error', () => {
-    const r = useFundKitRecord( 'form', 12 );
+    const r = useGratoraRecord( 'form', 12 );
 
     expect( r.notFound ).toBe( true );
     expect( r.loadError ).toBeNull();

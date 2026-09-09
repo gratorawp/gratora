@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
+use Gratora\Foundation\Plugin;
 
 /**
  * An add-on extends core's classes, and core's autoloader goes with core. Left
@@ -25,7 +25,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
         }
 
         update_option('active_plugins', []);
-        remove_all_filters('fundkit.dependent_plugins');
+        remove_all_filters('gratora.dependent_plugins');
 
         parent::tearDown();
     }
@@ -47,7 +47,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
         file_put_contents($this->fixtureDir . '/' . $slug . '.php', $header);
 
         $basename = $slug . '/' . $slug . '.php';
-        update_option('active_plugins', [plugin_basename(FUNDKIT_FILE), $basename]);
+        update_option('active_plugins', [plugin_basename(GRATORA_FILE), $basename]);
 
         return $basename;
     }
@@ -66,7 +66,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
 
     public function test_an_addon_that_declares_core_is_switched_off_with_it(): void
     {
-        $addon = $this->givenActivePlugin('fundkit-test-addon', 'fundraising-toolkit');
+        $addon = $this->givenActivePlugin('gratora-test-addon', 'gratora');
 
         $this->deactivateCore();
 
@@ -75,7 +75,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
 
     public function test_an_unrelated_plugin_is_left_alone(): void
     {
-        $other = $this->givenActivePlugin('fundkit-test-addon', 'some-other-plugin');
+        $other = $this->givenActivePlugin('gratora-test-addon', 'some-other-plugin');
 
         $this->deactivateCore();
 
@@ -84,7 +84,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
 
     public function test_a_plugin_declaring_nothing_is_left_alone(): void
     {
-        $other = $this->givenActivePlugin('fundkit-test-addon');
+        $other = $this->givenActivePlugin('gratora-test-addon');
 
         $this->deactivateCore();
 
@@ -93,7 +93,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
 
     public function test_core_is_found_among_several_declared_dependencies(): void
     {
-        $addon = $this->givenActivePlugin('fundkit-test-addon', 'woocommerce, fundraising-toolkit');
+        $addon = $this->givenActivePlugin('gratora-test-addon', 'woocommerce, gratora');
 
         $this->deactivateCore();
 
@@ -102,20 +102,20 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
 
     public function test_core_does_not_deactivate_itself(): void
     {
-        $this->givenActivePlugin('fundkit-test-addon', 'fundraising-toolkit');
+        $this->givenActivePlugin('gratora-test-addon', 'gratora');
 
         $this->deactivateCore();
 
         // WordPress writes active_plugins after the hook returns, so core
         // removing itself here would corrupt what it then writes.
-        $this->assertContains(plugin_basename(FUNDKIT_FILE), $this->activePlugins());
+        $this->assertContains(plugin_basename(GRATORA_FILE), $this->activePlugins());
     }
 
     public function test_the_filter_can_name_a_plugin_the_header_missed(): void
     {
-        $other = $this->givenActivePlugin('fundkit-test-addon');
+        $other = $this->givenActivePlugin('gratora-test-addon');
 
-        add_filter('fundkit.dependent_plugins', static function (array $list) use ($other): array {
+        add_filter('gratora.dependent_plugins', static function (array $list) use ($other): array {
             $list[] = $other;
             return $list;
         });
@@ -133,7 +133,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
      */
     public function test_the_addons_own_deactivation_hook_runs(): void
     {
-        $addon = $this->givenActivePlugin('fundkit-test-addon', 'fundraising-toolkit');
+        $addon = $this->givenActivePlugin('gratora-test-addon', 'gratora');
 
         $ran = false;
         add_action('deactivate_' . $addon, static function () use (&$ran): void {
@@ -155,7 +155,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
      */
     public function test_the_removal_survives_the_write_that_follows_it(): void
     {
-        $addon = $this->givenActivePlugin('fundkit-test-addon', 'fundraising-toolkit');
+        $addon = $this->givenActivePlugin('gratora-test-addon', 'gratora');
 
         $this->deactivateCore();
 

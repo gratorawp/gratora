@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/AmountInput';
+export { default } from '@gratora/ui/components/AmountInput';

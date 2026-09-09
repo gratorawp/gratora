@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Admin;
+namespace Gratora\Admin;
 
-use FundKit\Foundation\Hooks\HookProvider;
+use Gratora\Foundation\Hooks\HookProvider;
 
 /** @since 1.0.0 */
 final class AdminMenu extends HookProvider
 {
-    private const CAPABILITY = 'fundkit_access';
-    private const SLUG       = 'fundkit';
-    private const HANDLE     = 'fundkit-admin-dashboard';
+    private const CAPABILITY = 'gratora_access';
+    private const SLUG       = 'gratora';
+    private const HANDLE     = 'gratora-admin-dashboard';
     private const BUILD_DIR  = 'build/admin/dashboard';
 
     /** @since 1.0.0 */
@@ -27,8 +27,8 @@ final class AdminMenu extends HookProvider
     public function registerMenu(): void
     {
         $hook = add_menu_page(
-            __('Fundraising Toolkit', 'fundraising-toolkit'),
-            __('Fundraising', 'fundraising-toolkit'),
+            __('Gratora', 'gratora'),
+            __('Fundraising', 'gratora'),
             self::CAPABILITY,
             self::SLUG,
             [$this, 'renderDashboard'],
@@ -44,8 +44,8 @@ final class AdminMenu extends HookProvider
         // Replace WordPress’s duplicate parent submenu label.
         add_submenu_page(
             self::SLUG,
-            __('Dashboard', 'fundraising-toolkit'),
-            __('Dashboard', 'fundraising-toolkit'),
+            __('Dashboard', 'gratora'),
+            __('Dashboard', 'gratora'),
             self::CAPABILITY,
             self::SLUG,
             [$this, 'renderDashboard']
@@ -65,7 +65,7 @@ final class AdminMenu extends HookProvider
 
         // Remove the default submenu after registration so WordPress cannot recreate it under
         // the parent capability.
-        if (! current_user_can('fundkit_access_reports')) {
+        if (! current_user_can('gratora_access_reports')) {
             remove_submenu_page(self::SLUG, self::SLUG);
         }
     }
@@ -79,7 +79,7 @@ final class AdminMenu extends HookProvider
      */
     private function pages(): array
     {
-        $pages = apply_filters('fundkit.admin.pages', []);
+        $pages = apply_filters('gratora.admin.pages', []);
         usort($pages, fn ($a, $b) => ($a['position'] ?? 50) <=> ($b['position'] ?? 50));
 
         return $pages;
@@ -92,7 +92,7 @@ final class AdminMenu extends HookProvider
      */
     public function redirectToFirstReachablePage(): void
     {
-        if (current_user_can('fundkit_access_reports')) {
+        if (current_user_can('gratora_access_reports')) {
             return;
         }
 
@@ -109,7 +109,7 @@ final class AdminMenu extends HookProvider
     }
 
     /**
-     * Adds FundKit actions (go to donations, new campaign, ...) to the WP 7.0
+     * Adds Gratora actions (go to donations, new campaign, ...) to the WP 7.0
      * global command palette (Cmd/Ctrl+K). Loads on every admin screen so the
      * commands are available from anywhere.
      *
@@ -119,19 +119,19 @@ final class AdminMenu extends HookProvider
     {
         if (! current_user_can(self::CAPABILITY)) return;
 
-        $assetPath = FUNDKIT_DIR . 'build/admin/command-palette/index.asset.php';
+        $assetPath = GRATORA_DIR . 'build/admin/command-palette/index.asset.php';
         if (! file_exists($assetPath)) return;
 
         $asset = require $assetPath;
 
         wp_enqueue_script(
-            'fundkit-admin-command-palette',
-            FUNDKIT_URL . 'build/admin/command-palette/index.js',
+            'gratora-admin-command-palette',
+            GRATORA_URL . 'build/admin/command-palette/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? FUNDKIT_VERSION,
+            $asset['version']      ?? GRATORA_VERSION,
             true
         );
-        wp_set_script_translations('fundkit-admin-command-palette', 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations('gratora-admin-command-palette', 'gratora', GRATORA_DIR . 'languages');
         // Check each destination separately; the umbrella capability grants only menu access.
         $can = [self::SLUG => true];
         foreach ($this->pages() as $page) {
@@ -143,7 +143,7 @@ final class AdminMenu extends HookProvider
             $can[$id] = current_user_can((string) ($page['capability'] ?? self::CAPABILITY));
         }
 
-        wp_localize_script('fundkit-admin-command-palette', 'fundkitCommandPalette', [
+        wp_localize_script('gratora-admin-command-palette', 'gratoraCommandPalette', [
             'adminUrl' => admin_url(),
             'can'      => $can,
         ]);
@@ -157,7 +157,7 @@ final class AdminMenu extends HookProvider
         <div class="wrap">
             <?php // Keep WordPress notices above the React header.?>
             <hr class="wp-header-end" />
-            <div id="fundkit-admin-dashboard"></div>
+            <div id="gratora-admin-dashboard"></div>
         </div>
         <?php
     }
@@ -165,26 +165,26 @@ final class AdminMenu extends HookProvider
     /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
-        $assetPath = FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
+        $assetPath = GRATORA_DIR . self::BUILD_DIR . '/index.asset.php';
         if (! file_exists($assetPath)) return;
 
         $asset = require $assetPath;
 
         wp_enqueue_script(
             self::HANDLE,
-            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
+            GRATORA_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? FUNDKIT_VERSION,
+            $asset['version']      ?? GRATORA_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
             self::HANDLE,
-            FUNDKIT_URL . 'build/admin/dashboard.css',
+            GRATORA_URL . 'build/admin/dashboard.css',
             ['wp-components'],
-            (string) (@filemtime(FUNDKIT_DIR . 'build/admin/dashboard.css') ?: FUNDKIT_VERSION)
+            (string) (@filemtime(GRATORA_DIR . 'build/admin/dashboard.css') ?: GRATORA_VERSION)
         );
         wp_style_add_data(self::HANDLE, 'rtl', 'replace');
     }

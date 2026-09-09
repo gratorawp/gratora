@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -19,7 +19,7 @@ final class BaseCurrencyLockTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        update_option('fundkit_currency_locale', ['default_currency' => 'EUR', 'supported_currencies' => ['EUR']], false);
+        update_option('gratora_currency_locale', ['default_currency' => 'EUR', 'supported_currencies' => ['EUR']], false);
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
     }
 
@@ -43,7 +43,7 @@ final class BaseCurrencyLockTest extends IntegrationTestCase
 
     private function save(array $body)
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/settings/currency-locale');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/settings/currency-locale');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -52,7 +52,7 @@ final class BaseCurrencyLockTest extends IntegrationTestCase
 
     private function stored(): string
     {
-        $opt = get_option('fundkit_currency_locale');
+        $opt = get_option('gratora_currency_locale');
 
         return (string) ($opt['default_currency'] ?? '');
     }
@@ -127,14 +127,14 @@ final class BaseCurrencyLockTest extends IntegrationTestCase
 
         $res = $this->save(['default_currency' => 'EUR', 'supported_currencies' => ['EUR', 'USD']]);
         $this->assertSame(200, $res->get_status(), 'resending the same base is not a change');
-        $this->assertSame(['EUR', 'USD'], get_option('fundkit_currency_locale')['supported_currencies']);
+        $this->assertSame(['EUR', 'USD'], get_option('gratora_currency_locale')['supported_currencies']);
     }
 
     public function test_the_screen_is_told_it_is_locked(): void
     {
         $this->donation(false);
 
-        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/settings/currency-locale'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/settings/currency-locale'));
         $this->assertTrue($res->get_data()['base_currency_locked']);
     }
 }

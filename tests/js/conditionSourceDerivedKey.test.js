@@ -53,8 +53,8 @@ beforeEach( () => {
 
 it( 'offers a field that is named only by its label', () => {
     editorBlocks.list = [
-        { clientId: 'a', name: 'fundkit/dropdown', attributes: { label: 'T-shirt size' } },
-        { clientId: 'self', name: 'fundkit/text-input', attributes: {} },
+        { clientId: 'a', name: 'gratora/dropdown', attributes: { label: 'T-shirt size' } },
+        { clientId: 'self', name: 'gratora/text-input', attributes: {} },
     ];
 
     mount();
@@ -65,8 +65,8 @@ it( 'offers a field that is named only by its label', () => {
 
 it( 'prefers an explicit key over the label, as the server does', () => {
     editorBlocks.list = [
-        { clientId: 'a', name: 'fundkit/dropdown', attributes: { field: 'tee', label: 'T-shirt size' } },
-        { clientId: 'self', name: 'fundkit/text-input', attributes: {} },
+        { clientId: 'a', name: 'gratora/dropdown', attributes: { field: 'tee', label: 'T-shirt size' } },
+        { clientId: 'self', name: 'gratora/text-input', attributes: {} },
     ];
 
     mount();
@@ -82,8 +82,8 @@ it( 'prefers an explicit key over the label, as the server does', () => {
  */
 it( 'offers the hidden field under the key it actually answers to', () => {
     editorBlocks.list = [
-        { clientId: 'a', name: 'fundkit/hidden', attributes: { field: 'utm_source', label: 'Where from' } },
-        { clientId: 'self', name: 'fundkit/text-input', attributes: {} },
+        { clientId: 'a', name: 'gratora/hidden', attributes: { field: 'utm_source', label: 'Where from' } },
+        { clientId: 'self', name: 'gratora/text-input', attributes: {} },
     ];
 
     mount();
@@ -94,8 +94,8 @@ it( 'offers the hidden field under the key it actually answers to', () => {
 
 it( 'leaves out a hidden field with no key, because a label gives it none', () => {
     editorBlocks.list = [
-        { clientId: 'a', name: 'fundkit/hidden', attributes: { label: 'Where from' } },
-        { clientId: 'self', name: 'fundkit/text-input', attributes: {} },
+        { clientId: 'a', name: 'gratora/hidden', attributes: { label: 'Where from' } },
+        { clientId: 'self', name: 'gratora/text-input', attributes: {} },
     ];
 
     mount();
@@ -105,8 +105,8 @@ it( 'leaves out a hidden field with no key, because a label gives it none', () =
 
 it( 'leaves out a block with neither a key nor a label', () => {
     editorBlocks.list = [
-        { clientId: 'a', name: 'fundkit/dropdown', attributes: {} },
-        { clientId: 'self', name: 'fundkit/text-input', attributes: {} },
+        { clientId: 'a', name: 'gratora/dropdown', attributes: {} },
+        { clientId: 'self', name: 'gratora/text-input', attributes: {} },
     ];
 
     mount();

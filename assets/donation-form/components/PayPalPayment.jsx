@@ -205,19 +205,19 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
         // The form's own shell, the same one StripePayment declares, so the
         // reset and the themed typography reach this component on the path
         // where a form has no gateway block and nothing else supplies them.
-        <div className="fundkit-form fundkit-form--payment">
+        <div className="gratora-form gratora-form--payment">
             { payment?.amountCents ? (
-                <p className="fundkit-form__payment-amount">
+                <p className="gratora-form__payment-amount">
                     { formatAmount( payment.amountCents, payment.currency, config ) }
                 </p>
             ) : null }
 
             { error ? (
-                <div className="fundkit-form__error" role="alert">{ error }</div>
+                <div className="gratora-form__error" role="alert">{ error }</div>
             ) : null }
 
             { ! ready && ! error ? (
-                <p className="fundkit-form__payment-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
+                <p className="gratora-form__payment-loading">{ i18n.paymentLoading || 'Loading secure payment…' }</p>
             ) : null }
 
             { /*
@@ -226,12 +226,12 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
              */ }
             <div
                 ref={ mountRef }
-                className="fundkit-form__paypal-buttons"
+                className="gratora-form__paypal-buttons"
                 hidden={ approved }
             />
 
             { approved && ! error ? (
-                <p className="fundkit-form__payment-loading" role="status">
+                <p className="gratora-form__payment-loading" role="status">
                     { i18n.processing || i18n.paymentLoading }
                 </p>
             ) : null }
@@ -239,10 +239,10 @@ export default function PayPalPayment( { config, payment, dispatch } ) {
             { /* An approval whose round trip failed is not progress, so the way
                out is offered again even though the approval stands. */ }
             { ! approved || error ? (
-                <div className="fundkit-form__nav fundkit-form__nav--align-left">
+                <div className="gratora-form__nav gratora-form__nav--align-left">
                     <button
                         type="button"
-                        className="fundkit-form__button fundkit-form__button--secondary"
+                        className="gratora-form__button gratora-form__button--secondary"
                         disabled={ popupOpen }
                         onClick={ () => dispatch( { type: 'CANCEL_PAYMENT' } ) }
                     >

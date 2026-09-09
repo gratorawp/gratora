@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Onboarding\Onboarding;
-use FundKit\Onboarding\OnboardingPage;
+use Gratora\Onboarding\Onboarding;
+use Gratora\Onboarding\OnboardingPage;
 
 /**
  * The wizard greets an admin once and then gets out of the way.
@@ -29,7 +29,7 @@ final class OnboardingRedirectTest extends IntegrationTestCase
         $this->onboarding = new Onboarding();
 
         update_option(Onboarding::OPTION, 'pending', false);
-        set_transient('fundkit_onboarding_greet', 1, 300);
+        set_transient('gratora_onboarding_greet', 1, 300);
 
         $GLOBALS['pagenow'] = 'index.php';
         $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -40,7 +40,7 @@ final class OnboardingRedirectTest extends IntegrationTestCase
     {
         unset($GLOBALS['pagenow'], $_GET['page']);
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        delete_transient('fundkit_onboarding_greet');
+        delete_transient('gratora_onboarding_greet');
 
         parent::tearDown();
     }
@@ -56,7 +56,7 @@ final class OnboardingRedirectTest extends IntegrationTestCase
 
         // What maybeRedirect() does before sending. The send itself is followed
         // by exit, so the greeting being spent is the observable half.
-        delete_transient('fundkit_onboarding_greet');
+        delete_transient('gratora_onboarding_greet');
 
         $this->assertFalse(
             $this->onboarding->shouldRedirect(),

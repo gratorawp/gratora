@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Funds;
+namespace Gratora\Funds;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Campaigns\Campaign;
-use FundKit\Forms\Form;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Campaigns\Campaign;
+use Gratora\Forms\Form;
 
 /**
  * Resolves which fund a donation belongs to.

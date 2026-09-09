@@ -6,21 +6,21 @@ defined('ABSPATH') || exit;
  * @var string       $style  'dropdown' | 'pills'
  * @var string       $align  'left' | 'right'
  */
-$wrapClasses = 'fundkit-block fundkit-block--currency-switcher fundkit-currency'
-    . ' fundkit-currency--' . esc_attr($style)
-    . ' fundkit-currency--' . esc_attr($align);
+$wrapClasses = 'gratora-block gratora-block--currency-switcher gratora-currency'
+    . ' gratora-currency--' . esc_attr($style)
+    . ' gratora-currency--' . esc_attr($align);
 ?>
 <?php
-$ariaName = $label !== '' ? $label : __('Currency', 'fundraising-toolkit');
+$ariaName = $label !== '' ? $label : __('Currency', 'gratora');
 ?>
 <div class="<?php echo esc_attr($wrapClasses); ?>">
     <?php if ($label !== ''): ?>
-        <span class="fundkit-currency__label"><?php echo esc_html((string) $label); ?></span>
+        <span class="gratora-currency__label"><?php echo esc_html((string) $label); ?></span>
     <?php endif; ?>
     <?php if ($style === 'pills'): ?>
-        <span class="fundkit-currency__pills" role="radiogroup" aria-label="<?php echo esc_attr((string) $ariaName); ?>">
+        <span class="gratora-currency__pills" role="radiogroup" aria-label="<?php echo esc_attr((string) $ariaName); ?>">
             <?php foreach ($currencies as $i => $code): ?>
-                <label class="fundkit-currency__pill">
+                <label class="gratora-currency__pill">
                     <input
                         type="radio"
                         name="currency"
@@ -32,7 +32,7 @@ $ariaName = $label !== '' ? $label : __('Currency', 'fundraising-toolkit');
             <?php endforeach; ?>
         </span>
     <?php else: ?>
-        <select name="currency" class="fundkit-currency__select" aria-label="<?php echo esc_attr((string) $ariaName); ?>">
+        <select name="currency" class="gratora-currency__select" aria-label="<?php echo esc_attr((string) $ariaName); ?>">
             <?php foreach ($currencies as $code): ?>
                 <option value="<?php echo esc_attr($code); ?>"><?php echo esc_html($code); ?></option>
             <?php endforeach; ?>

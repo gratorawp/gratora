@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways\Sandbox;
+namespace Gratora\Gateways\Sandbox;
 
 use DateTimeImmutable;
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\SubscriptionAware;
-use FundKit\Gateways\SubscriptionCreator;
-use FundKit\Gateways\SubscriptionSchedule;
-use FundKit\Gateways\SupportsScheduleChange;
-use FundKit\Gateways\WebhookOutcome;
-use FundKit\Recurring\FrequencyMap;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\SubscriptionAware;
+use Gratora\Gateways\SubscriptionCreator;
+use Gratora\Gateways\SubscriptionSchedule;
+use Gratora\Gateways\SupportsScheduleChange;
+use Gratora\Gateways\WebhookOutcome;
+use Gratora\Recurring\FrequencyMap;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 use WP_REST_Request;
 
 /**
@@ -71,13 +71,13 @@ final class SandboxGateway implements PaymentGateway, SubscriptionAware, Subscri
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Test donation', 'fundraising-toolkit');
+        return __('Test donation', 'gratora');
     }
 
     /** @since 1.0.0 */
     public function description(): string
     {
-        return __('Simulated payment for testing. No real money moves and the form is in test mode.', 'fundraising-toolkit');
+        return __('Simulated payment for testing. No real money moves and the form is in test mode.', 'gratora');
     }
 
     /** @since 1.0.0 */

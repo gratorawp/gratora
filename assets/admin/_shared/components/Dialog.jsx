@@ -1,5 +1,5 @@
 import { useRef } from '@wordpress/element';
-import BaseDialog from '@fundkit/ui/components/Dialog';
+import BaseDialog from '@gratora/ui/components/Dialog';
 
 import { useFocusTrap } from '../useFocusTrap';
 

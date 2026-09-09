@@ -10,7 +10,7 @@ name: Build plugin zip
 # for on most pushes.
 #
 # The artefact is NOT the git checkout. vendor/ and build/ are both gitignored
-# and fundkit.php requires them at boot, so a zip cut from a checkout installs and
+# and gratora.php requires them at boot, so a zip cut from a checkout installs and
 # then fatals on activation.
 
 on:
@@ -36,7 +36,7 @@ jobs:
         with:
           node-version: '24'
 
-      # @fundkit/ui is a public git dependency, but npm locks it as
+      # @gratora/ui is a public git dependency, but npm locks it as
       # ssh://git@github.com, which a runner has no key for: the install
       # dies on "Permission denied (publickey)" before anything runs.
       - name: Fetch git dependencies over https
@@ -67,12 +67,12 @@ jobs:
         run: bash bin/verify-zip.sh
 
       # The packager names the zip after the Text Domain, so this is
-      # dist/fundraising-toolkit.zip and not the folder name.
+      # dist/gratora.zip and not the folder name.
       - name: Upload the artefact
         uses: actions/upload-artifact@v4
         with:
-          name: fundkit-plugin-${{ github.sha }}
-          path: dist/fundraising-toolkit.zip
+          name: gratora-plugin-${{ github.sha }}
+          path: dist/gratora.zip
           # Default is a warning, so a run that uploads nothing still reports
           # success.
           if-no-files-found: error

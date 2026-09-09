@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Settings\SettingsService;
+use Gratora\Settings\SettingsService;
 
 final class SettingsInputTest extends IntegrationTestCase
 {
@@ -23,7 +23,7 @@ final class SettingsInputTest extends IntegrationTestCase
     public function test_a_rejected_key_is_announced_rather_than_dropped_in_silence(): void
     {
         $seen = [];
-        add_action('fundkit.settings.rejected', static function ($group, $keys) use (&$seen): void {
+        add_action('gratora.settings.rejected', static function ($group, $keys) use (&$seen): void {
             $seen = array_merge($seen, $keys);
         }, 10, 2);
 
@@ -93,19 +93,19 @@ final class SettingsInputTest extends IntegrationTestCase
         // exactly who would.
         $register = static function (array $groups): array {
             $groups['test_null_default'] = [
-                'option'   => 'fundkit_test_null_default',
+                'option'   => 'gratora_test_null_default',
                 'defaults' => ['seen_at' => null],
             ];
             return $groups;
         };
-        add_filter('fundkit.settings.groups', $register);
+        add_filter('gratora.settings.groups', $register);
 
         try {
             $after = $this->service()->update('test_null_default', ['seen_at' => 1735689600]);
             $this->assertSame(1735689600, $after['seen_at']);
         } finally {
-            remove_filter('fundkit.settings.groups', $register);
-            delete_option('fundkit_test_null_default');
+            remove_filter('gratora.settings.groups', $register);
+            delete_option('gratora_test_null_default');
         }
     }
 

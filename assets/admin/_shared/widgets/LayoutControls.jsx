@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/widgets/LayoutControls';
+export { default } from '@gratora/ui/widgets/LayoutControls';

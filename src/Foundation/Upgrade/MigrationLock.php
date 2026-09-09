@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Upgrade;
+namespace Gratora\Foundation\Upgrade;
 
 /**
  * One request migrates; the rest of the burst carry on serving.
@@ -16,7 +16,7 @@ namespace FundKit\Foundation\Upgrade;
  */
 final class MigrationLock
 {
-    public const OPTION = 'fundkit_migration_lock';
+    public const OPTION = 'gratora_migration_lock';
 
     /** Long enough for a schema pass, short enough that a fatal is not fatal. */
     private const TTL = 60;

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Exports\DonorExporter;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Exports\DonorExporter;
+use Gratora\Foundation\Plugin;
 
 /**
  * The donor CSV carries decrypted PII, so what it contains has to be exactly
@@ -141,7 +141,7 @@ final class DonorExportTest extends IntegrationTestCase
 
         $onlyTest = $this->makeDonor('tester@example.test', [], false);
         $t = $this->gave((int) $onlyTest->id, gmdate('Y-m-d H:i:s'));
-        \FundKit\Donations\Donation::query()->where('id', (int) $t->id)->update(['is_test' => 1]);
+        \Gratora\Donations\Donation::query()->where('id', (int) $t->id)->update(['is_test' => 1]);
 
         $csv = $this->exporter()->toCsv(['columns' => ['email']]);
 
@@ -180,12 +180,12 @@ final class DonorExportTest extends IntegrationTestCase
         // A long-standing supporter who gave inside the window is still outside
         // it: the range is about when the record was created.
         $old = $this->makeDonor('long-standing@example.test');
-        \FundKit\Donors\Donor::query()->where('id', (int) $old->id)
+        \Gratora\Donors\Donor::query()->where('id', (int) $old->id)
             ->update(['created_at' => '2024-02-01 09:00:00']);
         $this->gave((int) $old->id, '2026-06-15 09:00:00');
 
         $new = $this->makeDonor('brand-new@example.test');
-        \FundKit\Donors\Donor::query()->where('id', (int) $new->id)
+        \Gratora\Donors\Donor::query()->where('id', (int) $new->id)
             ->update(['created_at' => '2026-06-02 09:00:00']);
 
         $csv = $this->exporter()->toCsv([
@@ -233,7 +233,7 @@ final class DonorExportTest extends IntegrationTestCase
 
     public function test_a_campaign_filter_narrows_to_that_campaign_s_donors(): void
     {
-        $campaign = \FundKit\Campaigns\Campaign::make();
+        $campaign = \Gratora\Campaigns\Campaign::make();
         $campaign->title      = 'Winter appeal';
         $campaign->slug       = 'winter-appeal-' . uniqid();
         $campaign->status     = 'published';
@@ -244,7 +244,7 @@ final class DonorExportTest extends IntegrationTestCase
 
         $backer = $this->makeDonor('backer@example.test');
         $given  = $this->gave((int) $backer->id, gmdate('Y-m-d H:i:s'));
-        \FundKit\Donations\Donation::query()->where('id', (int) $given->id)
+        \Gratora\Donations\Donation::query()->where('id', (int) $given->id)
             ->update(['campaign_id' => (int) $campaign->id]);
 
         $stranger = $this->makeDonor('stranger@example.test');
@@ -276,7 +276,7 @@ final class DonorExportTest extends IntegrationTestCase
     public function test_totals_are_written_as_a_bare_number(): void
     {
         $donor = $this->makeDonor('total@example.test');
-        \FundKit\Donors\Donor::query()->where('id', (int) $donor->id)
+        \Gratora\Donors\Donor::query()->where('id', (int) $donor->id)
             ->update(['total_donated_cents' => 123456]);
 
         $rows = $this->parse($this->exporter()->toCsv(['columns' => ['total_donated']]));

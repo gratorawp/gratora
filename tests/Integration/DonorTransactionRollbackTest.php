@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Consent;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorNote;
-use FundKit\Donors\DonorNoteRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\Erasure\ErasureHandler;
-use FundKit\Donors\Erasure\ErasureRequest;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Donors\MagicLinkService;
-use FundKit\Donors\MagicLinkToken;
-use FundKit\Donors\PendingSignup;
-use FundKit\Donors\PendingSignupRepository;
-use FundKit\Donors\SignupRedemption;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Donors\DonorAggregateSyncer;
-use FundKit\Foundation\Plugin;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Consent;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorNote;
+use Gratora\Donors\DonorNoteRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\Erasure\ErasureHandler;
+use Gratora\Donors\Erasure\ErasureRequest;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Donors\MagicLinkService;
+use Gratora\Donors\MagicLinkToken;
+use Gratora\Donors\PendingSignup;
+use Gratora\Donors\PendingSignupRepository;
+use Gratora\Donors\SignupRedemption;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Donors\DonorAggregateSyncer;
+use Gratora\Foundation\Plugin;
+use Gratora\Vendor\Queryable\DB;
 use RuntimeException;
 use Throwable;
 use WP_REST_Request;
@@ -93,12 +93,12 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         $throw = static function (): void {
             throw new RuntimeException(self::CREATE_FAILURE);
         };
-        add_action('fundkit.donor.created', $throw);
+        add_action('gratora.donor.created', $throw);
 
         try {
             $body();
         } finally {
-            remove_action('fundkit.donor.created', $throw);
+            remove_action('gratora.donor.created', $throw);
         }
     }
 
@@ -230,7 +230,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         $throw = static function (): void {
             throw new RuntimeException(self::DELETE_FAILURE);
         };
-        add_action('fundkit.donor.deleted', $throw);
+        add_action('gratora.donor.deleted', $throw);
 
         try {
             $this->container()->get(DonorService::class)->delete($rows['donor']);
@@ -238,7 +238,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         } catch (Throwable $e) {
             $this->assertSame(self::DELETE_FAILURE, $e->getMessage());
         } finally {
-            remove_action('fundkit.donor.deleted', $throw);
+            remove_action('gratora.donor.deleted', $throw);
         }
 
         $this->assertDeletionRowsPresent($rows, true);
@@ -271,7 +271,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         $throw = static function (): void {
             throw new RuntimeException(self::DELETE_FAILURE);
         };
-        add_action('fundkit.donor.deleted', $throw);
+        add_action('gratora.donor.deleted', $throw);
 
         try {
             $this->container()->get(DonorService::class)->delete($donor);
@@ -279,7 +279,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         } catch (Throwable $e) {
             $this->assertSame(self::DELETE_FAILURE, $e->getMessage());
         } finally {
-            remove_action('fundkit.donor.deleted', $throw);
+            remove_action('gratora.donor.deleted', $throw);
         }
 
         $this->assertNotNull(get_post($attachmentId), 'the failed deletion destroyed the picture');
@@ -297,7 +297,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
     /** PATCH the admin donor profile the way the Donors screen does. */
     private function patchDonor(int $donorId, array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('PATCH', "/fundkit/v1/admin/donors/{$donorId}");
+        $req = new WP_REST_Request('PATCH', "/gratora/v1/admin/donors/{$donorId}");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -332,7 +332,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         ]);
 
         $this->assertSame(409, $refused->get_status(), 'the collision was not refused');
-        $this->assertSame('fundkit_email_collision', $refused->get_data()['code'] ?? null);
+        $this->assertSame('gratora_email_collision', $refused->get_data()['code'] ?? null);
 
         $after = Donor::query()->where('id', (int) $donor->id)->get();
 
@@ -379,7 +379,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function donorRow(int $donorId): array
     {
-        return (array) DB::table('fundkit_donors')->where('id', $donorId)->get();
+        return (array) DB::table('gratora_donors')->where('id', $donorId)->get();
     }
 
     /**
@@ -454,7 +454,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
             $handlers[] = $handler;
             return $handlers;
         };
-        add_filter('fundkit.donor.erasure_handlers', $add);
+        add_filter('gratora.donor.erasure_handlers', $add);
 
         try {
             $this->container()->get(DonorService::class)->redact($donor);
@@ -462,7 +462,7 @@ final class DonorTransactionRollbackTest extends IntegrationTestCase
         } catch (Throwable $e) {
             $this->assertSame(self::ERASURE_FAILURE, $e->getMessage());
         } finally {
-            remove_filter('fundkit.donor.erasure_handlers', $add);
+            remove_filter('gratora.donor.erasure_handlers', $add);
         }
 
         $after = Donor::query()->where('id', (int) $donor->id)->get();

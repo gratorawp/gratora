@@ -9,9 +9,9 @@ defined('ABSPATH') || exit;
  * @var string                                                          $defaultValue
  */
 ?>
-<label class="fundkit-block fundkit-block--dropdown fundkit-dropdown">
+<label class="gratora-block gratora-block--dropdown gratora-dropdown">
     <?php if ($label !== ''): ?>
-        <span class="fundkit-dropdown__label"><?php echo esc_html($label); ?></span>
+        <span class="gratora-dropdown__label"><?php echo esc_html($label); ?></span>
     <?php endif; ?>
     <select
         name="custom[<?php echo esc_attr($field); ?>]"

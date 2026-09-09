@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
-use FundKit\Dashboard\AttentionDismissals;
-use FundKit\Foundation\Auth\Capabilities;
+namespace Gratora\Rest\Admin;
+use Gratora\Dashboard\AttentionDismissals;
+use Gratora\Foundation\Auth\Capabilities;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -21,9 +21,9 @@ use WP_REST_Server;
  */
 final class UserPrefsController
 {
-    private const NAMESPACE  = 'fundkit/v1';
-    private const META_KEY   = 'fundkit_widget_layout';
-    private const VIEWS_META = 'fundkit_table_views';
+    private const NAMESPACE  = 'gratora/v1';
+    private const META_KEY   = 'gratora_widget_layout';
+    private const VIEWS_META = 'gratora_table_views';
 
     /**
      * A saved view is a convenience, not a document. The cap is per scope and

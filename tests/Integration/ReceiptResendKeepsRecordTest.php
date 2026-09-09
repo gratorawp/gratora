@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Foundation\Plugin;
-use FundKit\Receipts\Receipt;
-use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Settings\SettingsService;
+use Gratora\Donations\Donation;
+use Gratora\Foundation\Plugin;
+use Gratora\Receipts\Receipt;
+use Gratora\Receipts\ReceiptIssuer;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -23,7 +23,7 @@ final class ReceiptResendKeepsRecordTest extends IntegrationTestCase
 {
     private function paidDonation(): Donation
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'receipt-' . uniqid() . '@example.test',
@@ -34,7 +34,7 @@ final class ReceiptResendKeepsRecordTest extends IntegrationTestCase
         ]));
         $reference = (string) rest_do_request($create)->get_data()['reference'];
 
-        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);
@@ -87,7 +87,7 @@ final class ReceiptResendKeepsRecordTest extends IntegrationTestCase
         $this->runPendingAsyncJobs();
 
         $missing = Plugin::instance()->container
-            ->get(\FundKit\Donations\DonationRepository::class)
+            ->get(\Gratora\Donations\DonationRepository::class)
             ->paidWithoutReceipt();
 
         $ids = array_map(static fn ($d): int => (int) $d->id, (array) $missing['items']);

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
+namespace Gratora\Rest\Admin;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Gateways\GatewayTransportException;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\PayPal\PayPalApi;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Gateways\GatewayTransportException;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\PayPal\PayPalApi;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Request;
@@ -30,7 +30,7 @@ use WP_REST_Server;
  */
 final class PayPalKeysController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     private const TIMEOUT     = 8;
     private const MIN_TIMEOUT = 3;
@@ -120,7 +120,7 @@ final class PayPalKeysController
     /** @since 1.0.0 */
     public function canManage(): bool
     {
-        return Capabilities::userCan('fundkit_manage_settings');
+        return Capabilities::userCan('gratora_manage_settings');
     }
 
     /** @since 1.0.0 */
@@ -130,7 +130,7 @@ final class PayPalKeysController
             'connected'   => $this->account->isConnected(),
             'can_charge'  => $this->account->isConnected(),
             'account'     => $this->account->get(),
-            'webhook_url' => rest_url('fundkit/v1/webhooks/paypal'),
+            'webhook_url' => rest_url('gratora/v1/webhooks/paypal'),
         ], 200);
     }
 
@@ -152,8 +152,8 @@ final class PayPalKeysController
 
         if ($clientId === '' || $secret === '') {
             return new WP_Error(
-                'fundkit_paypal_bad_key',
-                __('Enter both the client id and the secret.', 'fundraising-toolkit'),
+                'gratora_paypal_bad_key',
+                __('Enter both the client id and the secret.', 'gratora'),
                 ['status' => 400]
             );
         }
@@ -179,10 +179,10 @@ final class PayPalKeysController
             // never the problem.
             $this->account->restore($previous);
             return new WP_Error(
-                'fundkit_paypal_unreachable',
+                'gratora_paypal_unreachable',
                 sprintf(
                     /* translators: 1: sandbox or live, 2: transport error, e.g. a DNS failure */
-                    __('This site could not reach PayPal, so the %1$s credentials have not been checked or saved: %2$s. That is a problem with this server rather than with the credentials.', 'fundraising-toolkit'),
+                    __('This site could not reach PayPal, so the %1$s credentials have not been checked or saved: %2$s. That is a problem with this server rather than with the credentials.', 'gratora'),
                     $this->modeLabel($test),
                     $e->getMessage()
                 ),
@@ -191,10 +191,10 @@ final class PayPalKeysController
         } catch (RuntimeException $e) {
             $this->account->restore($previous);
             return new WP_Error(
-                'fundkit_paypal_key_rejected',
+                'gratora_paypal_key_rejected',
                 sprintf(
                     /* translators: 1: sandbox or live, 2: error from PayPal */
-                    __('PayPal rejected those %1$s credentials: %2$s', 'fundraising-toolkit'),
+                    __('PayPal rejected those %1$s credentials: %2$s', 'gratora'),
                     $this->modeLabel($test),
                     $e->getMessage()
                 ),
@@ -245,10 +245,10 @@ final class PayPalKeysController
     {
         if (! $this->account->hasKeysFor($test)) {
             return new WP_Error(
-                'fundkit_paypal_bad_key',
+                'gratora_paypal_bad_key',
                 sprintf(
                     /* translators: %s: sandbox or live */
-                    __('Save the %s client id and secret first. A webhook id can only be checked against the app it belongs to.', 'fundraising-toolkit'),
+                    __('Save the %s client id and secret first. A webhook id can only be checked against the app it belongs to.', 'gratora'),
                     $this->modeLabel($test)
                 ),
                 ['status' => 400]
@@ -272,10 +272,10 @@ final class PayPalKeysController
         // outright rather than parked on file under a screen that would then
         // read as though the webhook were set up.
         return new WP_Error(
-            'fundkit_paypal_webhook_unchecked',
+            'gratora_paypal_webhook_unchecked',
             sprintf(
                 /* translators: %s: reason PayPal could not be asked */
-                __('PayPal could not be asked whether that webhook id is right: %s. It has not been saved, because an id PayPal does not know rejects every notification. Try again in a moment.', 'fundraising-toolkit'),
+                __('PayPal could not be asked whether that webhook id is right: %s. It has not been saved, because an id PayPal does not know rejects every notification. Try again in a moment.', 'gratora'),
                 $check['message']
             ),
             ['status' => 503]
@@ -391,7 +391,7 @@ final class PayPalKeysController
             if (! is_array($found) || ! isset($found['id'])) {
                 return [
                     'status'  => self::HOOK_UNKNOWN,
-                    'message' => __('PayPal did not return that webhook.', 'fundraising-toolkit'),
+                    'message' => __('PayPal did not return that webhook.', 'gratora'),
                 ];
             }
 
@@ -399,14 +399,14 @@ final class PayPalKeysController
 
             // A webhook that exists is not a webhook that delivers anything
             // this reads. Reported as checked, an org can save an id subscribed
-            // to nothing FundKit handles and be told it is fine, and then every
+            // to nothing Gratora handles and be told it is fine, and then every
             // recurring donation is charged with no event to bank it.
             if ($missing !== []) {
                 return [
                     'status'  => self::HOOK_INCOMPLETE,
                     'message' => sprintf(
                         /* translators: %s: comma-separated PayPal event names */
-                        __('That webhook does not send: %s', 'fundraising-toolkit'),
+                        __('That webhook does not send: %s', 'gratora'),
                         implode(', ', $missing)
                     ),
                 ];
@@ -445,14 +445,14 @@ final class PayPalKeysController
         $warning = $check['status'] === self::HOOK_MISSING
             ? sprintf(
                 /* translators: 1: the webhook id that was entered, 2: sandbox or live, 3: error from PayPal */
-                __('The credentials are saved, but the webhook id %1$s is not: your %2$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %3$s', 'fundraising-toolkit'),
+                __('The credentials are saved, but the webhook id %1$s is not: your %2$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %3$s', 'gratora'),
                 $webhookId,
                 $this->modeLabel($test),
                 $check['message']
             )
             : sprintf(
                 /* translators: 1: the webhook id that was entered, 2: reason PayPal could not be asked */
-                __('The credentials are saved, but the webhook id %1$s is not: PayPal could not be asked whether it is right (%2$s). Add it again once PayPal answers.', 'fundraising-toolkit'),
+                __('The credentials are saved, but the webhook id %1$s is not: PayPal could not be asked whether it is right (%2$s). Add it again once PayPal answers.', 'gratora'),
                 $webhookId,
                 $check['message']
             );
@@ -468,10 +468,10 @@ final class PayPalKeysController
     private function missingWebhookError(bool $test, string $reason): WP_Error
     {
         return new WP_Error(
-            'fundkit_paypal_webhook_rejected',
+            'gratora_paypal_webhook_rejected',
             sprintf(
                 /* translators: 1: sandbox or live, 2: error from PayPal */
-                __('Your %1$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %2$s', 'fundraising-toolkit'),
+                __('Your %1$s PayPal app has no webhook with that id. Sandbox and live webhooks have separate ids, and the webhook id is not the WH- event id beside it in the dashboard. PayPal said: %2$s', 'gratora'),
                 $this->modeLabel($test),
                 $reason
             ),
@@ -501,7 +501,7 @@ final class PayPalKeysController
     /** @since 1.0.0 */
     private function modeLabel(bool $test): string
     {
-        return $test ? __('sandbox', 'fundraising-toolkit') : __('live', 'fundraising-toolkit');
+        return $test ? __('sandbox', 'gratora') : __('live', 'gratora');
     }
 
     /** @since 1.0.0 */

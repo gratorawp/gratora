@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Upgrade\UnpinSiteIdentity;
-use FundKit\Receipts\OrgProfile;
-use FundKit\Reports\TaxStatementBuilder;
-use FundKit\Settings\SettingsService;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Upgrade\UnpinSiteIdentity;
+use Gratora\Receipts\OrgProfile;
+use Gratora\Reports\TaxStatementBuilder;
+use Gratora\Settings\SettingsService;
 
 /**
  * Two ways the org's own words leaked out of a screen and into what a donor
@@ -18,8 +18,8 @@ use FundKit\Settings\SettingsService;
  */
 final class OrgIdentityAndLocaleTest extends IntegrationTestCase
 {
-    private const ADDON_TEMPLATE = 'fundkit_h08_addon_note';
-    private const ADDON_DOMAIN   = 'fundkit-addon-h08';
+    private const ADDON_TEMPLATE = 'gratora_h08_addon_note';
+    private const ADDON_DOMAIN   = 'gratora-addon-h08';
 
     private function settings(): SettingsService
     {
@@ -37,7 +37,7 @@ final class OrgIdentityAndLocaleTest extends IntegrationTestCase
     {
         // The settings screen asks for the legal name and calls the display
         // name optional, so this is a filled-in profile.
-        update_option('fundkit_org_profile', ['name' => '', 'legal_name' => 'Acme Foundation e.V.']);
+        update_option('gratora_org_profile', ['name' => '', 'legal_name' => 'Acme Foundation e.V.']);
 
         $author = $this->authorOf($this->buildStatement());
 
@@ -47,14 +47,14 @@ final class OrgIdentityAndLocaleTest extends IntegrationTestCase
 
     public function test_a_display_name_still_heads_the_statement_when_the_org_sets_one(): void
     {
-        update_option('fundkit_org_profile', ['name' => 'Acme', 'legal_name' => 'Acme Foundation e.V.']);
+        update_option('gratora_org_profile', ['name' => 'Acme', 'legal_name' => 'Acme Foundation e.V.']);
 
         $this->assertSame('Acme', $this->authorOf($this->buildStatement()));
     }
 
     public function test_an_org_that_filled_in_nothing_still_gets_the_site_name(): void
     {
-        delete_option('fundkit_org_profile');
+        delete_option('gratora_org_profile');
 
         $this->assertSame((string) get_bloginfo('name'), $this->authorOf($this->buildStatement()));
     }
@@ -70,7 +70,7 @@ final class OrgIdentityAndLocaleTest extends IntegrationTestCase
             'templates' => $current['templates'],
         ]);
 
-        $stored = get_option('fundkit_email_settings', []);
+        $stored = get_option('gratora_email_settings', []);
         $storedTemplates = is_array($stored['templates'] ?? null) ? $stored['templates'] : [];
 
         $this->assertTrue((bool) $stored['bcc_admin'], 'the setting the admin moved is saved');
@@ -124,7 +124,7 @@ final class OrgIdentityAndLocaleTest extends IntegrationTestCase
 
         update_option('blogname', 'Renamed Foundation');
 
-        $this->assertTrue((bool) get_option('fundkit_email_settings')['bcc_admin'], 'the setting the admin moved is saved');
+        $this->assertTrue((bool) get_option('gratora_email_settings')['bcc_admin'], 'the setting the admin moved is saved');
         $this->assertSame(
             'Renamed Foundation',
             (string) ($this->settings()->get('email')['from_name'] ?? ''),
@@ -171,7 +171,7 @@ final class OrgIdentityAndLocaleTest extends IntegrationTestCase
         );
         $this->assertArrayNotHasKey(
             'body',
-            get_option('fundkit_email_settings')['templates'][self::ADDON_TEMPLATE] ?? []
+            get_option('gratora_email_settings')['templates'][self::ADDON_TEMPLATE] ?? []
         );
     }
 
@@ -191,12 +191,12 @@ final class OrgIdentityAndLocaleTest extends IntegrationTestCase
 
     public function test_a_site_already_frozen_is_unpinned_by_the_upgrade(): void
     {
-        update_option('fundkit_email_settings', [
+        update_option('gratora_email_settings', [
             'from_name'  => (string) get_bloginfo('name'),
             'from_email' => (string) get_option('admin_email'),
             'bcc_admin'  => true,
         ], false);
-        update_option('fundkit_org_profile', [
+        update_option('gratora_org_profile', [
             'name'   => (string) get_bloginfo('name'),
             'tax_id' => 'TAX-9',
         ], false);
@@ -207,8 +207,8 @@ final class OrgIdentityAndLocaleTest extends IntegrationTestCase
 
         $this->assertSame('Renamed Foundation', (string) ($this->settings()->get('email')['from_name'] ?? ''));
         $this->assertSame('Renamed Foundation', OrgProfile::load()['name']);
-        $this->assertTrue((bool) get_option('fundkit_email_settings')['bcc_admin'], 'the scrub only drops what a read resolves anyway');
-        $this->assertSame('TAX-9', (string) (get_option('fundkit_org_profile')['tax_id'] ?? ''));
+        $this->assertTrue((bool) get_option('gratora_email_settings')['bcc_admin'], 'the scrub only drops what a read resolves anyway');
+        $this->assertSame('TAX-9', (string) (get_option('gratora_org_profile')['tax_id'] ?? ''));
     }
 
 
@@ -221,7 +221,7 @@ final class OrgIdentityAndLocaleTest extends IntegrationTestCase
             return $domain === self::ADDON_DOMAIN && $text === 'Addon body' ? $translated : $t;
         }, 10, 3);
 
-        add_filter('fundkit.settings.groups', static function (array $g): array {
+        add_filter('gratora.settings.groups', static function (array $g): array {
             $g['email']['defaults']['templates'][self::ADDON_TEMPLATE] = [
                 'enabled' => true,
                 'subject' => 'Addon subject',
@@ -257,7 +257,7 @@ final class OrgIdentityAndLocaleTest extends IntegrationTestCase
 
         $at  = '2024-03-04 09:00:00';
         $don = Donation::make();
-        $don->reference         = 'FUNDKIT-STMT-' . $donorId;
+        $don->reference         = 'GRATORA-STMT-' . $donorId;
         $don->donor_id          = $donorId;
         $don->amount_cents      = 10_000;
         $don->net_cents         = 10_000;

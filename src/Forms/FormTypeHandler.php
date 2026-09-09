@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms;
+namespace Gratora\Forms;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
 
 /**
  * Behaviour a non-default form_type plugs in.
@@ -38,7 +38,7 @@ interface FormTypeHandler
     public function onDonationCreated(Donation $donation, array $body): void;
 
     /**
-     * @return class-string<\FundKit\Vendor\Queryable\Model>|null sidecar PK = parent id, or null
+     * @return class-string<\Gratora\Vendor\Queryable\Model>|null sidecar PK = parent id, or null
      *
      * @since 1.0.0
      */

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Receipts;
+namespace Gratora\Receipts;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /**
  * Receipt audit record: proof a receipt was issued and emailed.
@@ -19,7 +19,7 @@ use FundKit\Vendor\Queryable\Schema\Table;
  */
 final class Receipt extends Model
 {
-    protected string $table = 'fundkit_receipts';
+    protected string $table = 'gratora_receipts';
     protected string $version = '1.0.1';
 
     public int $id;

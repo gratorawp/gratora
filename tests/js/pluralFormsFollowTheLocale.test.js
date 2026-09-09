@@ -20,9 +20,9 @@ beforeEach( () => {
     // '%d active plans' is deliberately left untranslated: it is the msgid the
     // ternary reaches for, so leaving it out is what makes the difference show.
     setLocaleData( {
-        '': { domain: 'fundraising-toolkit', lang: 'ru', plural_forms: RUSSIAN },
+        '': { domain: 'gratora', lang: 'ru', plural_forms: RUSSIAN },
         '%d active plan': [ '%d active plan', 'PLAN_FEW_%d', 'PLAN_MANY_%d' ],
-    }, 'fundraising-toolkit' );
+    }, 'gratora' );
 
     document.body.innerHTML = '<div id="root"></div>';
 } );

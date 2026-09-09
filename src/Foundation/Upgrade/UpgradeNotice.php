@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Upgrade;
+namespace Gratora\Foundation\Upgrade;
 
 /**
  * Says so while a data migration is outstanding.
@@ -35,8 +35,8 @@ final class UpgradeNotice
     public function render(): void
     {
         // Its only call to action is the Tools screen, so it addresses whoever
-        // can open that screen rather than everyone holding a FundKit cap.
-        if (! current_user_can('fundkit_access_settings')) {
+        // can open that screen rather than everyone holding a Gratora cap.
+        if (! current_user_can('gratora_access_settings')) {
             return;
         }
 
@@ -49,18 +49,18 @@ final class UpgradeNotice
         //
         // That screen is Tools > Maintenance, which lists every pending routine
         // with what it stopped on and how many times, and offers the retry.
-        // This suppressed itself on fundkit-settings and linked there too, to a
+        // This suppressed itself on gratora-settings and linked there too, to a
         // tab=advanced that does not exist: Settings has no such tab, so the
         // link fell back to Setup and the notice hid itself on arrival. An
         // operator following the only warning about a half-finished data
         // migration landed on a page with nothing about it at all.
         $screen = function_exists('get_current_screen') ? get_current_screen() : null;
-        if ($screen && str_contains((string) $screen->id, 'fundkit-tools')) {
+        if ($screen && str_contains((string) $screen->id, 'gratora-tools')) {
             return;
         }
 
         // Tools reads its tab from the fragment, not a query argument.
-        $url = admin_url('admin.php?page=fundkit-tools#maintenance');
+        $url = admin_url('admin.php?page=gratora-tools#maintenance');
 
         // A routine that keeps failing reads exactly like one working through a
         // large table, and the difference is the whole point of saying anything.
@@ -76,10 +76,10 @@ final class UpgradeNotice
         if ($stuck) {
             printf(
                 '<div class="notice notice-error"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
-                esc_html__('Fundraising Toolkit could not finish a data update.', 'fundraising-toolkit'),
-                esc_html__('It stopped with an error and will be retried. Until it finishes, some records are only partly updated.', 'fundraising-toolkit'),
+                esc_html__('Gratora could not finish a data update.', 'gratora'),
+                esc_html__('It stopped with an error and will be retried. Until it finishes, some records are only partly updated.', 'gratora'),
                 esc_url($url),
-                esc_html__('See what failed', 'fundraising-toolkit')
+                esc_html__('See what failed', 'gratora')
             );
 
             return;
@@ -87,17 +87,17 @@ final class UpgradeNotice
 
         printf(
             '<div class="notice notice-warning"><p><strong>%s</strong> %s <a href="%s">%s</a></p></div>',
-            esc_html__('Fundraising Toolkit is finishing a data update.', 'fundraising-toolkit'),
+            esc_html__('Gratora is finishing a data update.', 'gratora'),
             esc_html(
                 _n(
                     'One job is still outstanding. It runs in the background; if it is still here in a few minutes, this site\'s scheduled tasks are not running.',
                     'Some jobs are still outstanding. They run in the background; if they are still here in a few minutes, this site\'s scheduled tasks are not running.',
                     count($pending),
-                    'fundraising-toolkit'
+                    'gratora'
                 )
             ),
             esc_url($url),
-            esc_html__('Finish them now', 'fundraising-toolkit')
+            esc_html__('Finish them now', 'gratora')
         );
     }
 }

@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Currency\FxBackfill;
-use FundKit\Currency\FxRates;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Transfer\CsvImporter;
+use Gratora\Currency\FxBackfill;
+use Gratora\Currency\FxRates;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Transfer\CsvImporter;
 
 /**
  * Someone else's spreadsheet, which is the only thing this can assume about it.
@@ -581,7 +581,7 @@ final class CsvImporterTest extends IntegrationTestCase
 
     private function donorId(string $email): int
     {
-        $hasher = Plugin::instance()->container->get(\FundKit\Foundation\Identity\IdentityHasher::class);
+        $hasher = Plugin::instance()->container->get(\Gratora\Foundation\Identity\IdentityHasher::class);
         $donor  = Donor::query()->where('email_hash', $hasher->emailHash($email))->get();
 
         return is_array($donor) ? (int) $donor['id'] : (int) ($donor->id ?? 0);

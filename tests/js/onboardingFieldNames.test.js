@@ -55,7 +55,7 @@ it( 'names the organisation name and contact email fields', () => {
 it( 'names every picker on the step', () => {
     const host = mount( 'US' );
 
-    const pickers = host.querySelectorAll( '.fundkit-onboarding__control-label' );
+    const pickers = host.querySelectorAll( '.gratora-onboarding__control-label' );
 
     expect( pickers.length ).toBeGreaterThanOrEqual( 2 );
     pickers.forEach( ( label ) => {

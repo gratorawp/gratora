@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Transfer\DataImporter;
-use FundKit\Foundation\Upgrade\OpenTheDefaultFund;
-use FundKit\Funds\Fund;
-use FundKit\Funds\FundRepository;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Transfer\DataImporter;
+use Gratora\Foundation\Upgrade\OpenTheDefaultFund;
+use Gratora\Funds\Fund;
+use Gratora\Funds\FundRepository;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * A restore writes fund rows column for column, past the service that holds the
@@ -25,7 +25,7 @@ final class ImportedDefaultFundTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        DB::table('fundkit_funds')->where('id', 0, '>')->delete();
+        DB::table('gratora_funds')->where('id', 0, '>')->delete();
     }
 
     public function test_an_imported_default_arrives_as_an_ordinary_fund_when_this_site_has_one(): void
@@ -135,7 +135,7 @@ final class ImportedDefaultFundTest extends IntegrationTestCase
         (new DataImporter(
             Plugin::instance()->container->get(Crypto::class),
             Plugin::instance()->container->get(IdentityHasher::class),
-        ))->import(['tables' => ['fundkit_funds' => [array_merge([
+        ))->import(['tables' => ['gratora_funds' => [array_merge([
             'id'         => 900,
             'is_default' => 0,
             'is_active'  => 1,

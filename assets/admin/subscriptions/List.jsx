@@ -1,4 +1,4 @@
-// Subscriptions list: paginated DataViews against /fundkit/v1/admin/recurring.
+// Subscriptions list: paginated DataViews against /gratora/v1/admin/recurring.
 
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import { DataViews } from '@wordpress/dataviews';
@@ -25,37 +25,37 @@ import { rowLinkProps } from '../_shared/rowLink';
 import { formatAmount, formatDate } from '../donations/format';
 
 const STATUS_OPTIONS = [
-    { value: 'active',    label: __( 'Active', 'fundraising-toolkit' ) },
-    { value: 'past_due',  label: __( 'Past due', 'fundraising-toolkit' ) },
-    { value: 'paused',    label: __( 'Paused', 'fundraising-toolkit' ) },
-    { value: 'cancelled', label: __( 'Cancelled', 'fundraising-toolkit' ) },
-    { value: 'expired',   label: __( 'Expired', 'fundraising-toolkit' ) },
+    { value: 'active',    label: __( 'Active', 'gratora' ) },
+    { value: 'past_due',  label: __( 'Past due', 'gratora' ) },
+    { value: 'paused',    label: __( 'Paused', 'gratora' ) },
+    { value: 'cancelled', label: __( 'Cancelled', 'gratora' ) },
+    { value: 'expired',   label: __( 'Expired', 'gratora' ) },
 ];
 
 // A cadence, not an interval unit: quarterly is three months and biweekly is
 // two weeks, so filtering on the unit filed both under a chip they are not.
 const INTERVAL_OPTIONS = [
-    { value: 'weekly',    label: __( 'Weekly', 'fundraising-toolkit' ) },
-    { value: 'biweekly',  label: __( 'Every 2 weeks', 'fundraising-toolkit' ) },
-    { value: 'monthly',   label: __( 'Monthly', 'fundraising-toolkit' ) },
-    { value: 'quarterly', label: __( 'Quarterly', 'fundraising-toolkit' ) },
-    { value: 'yearly',    label: __( 'Yearly', 'fundraising-toolkit' ) },
+    { value: 'weekly',    label: __( 'Weekly', 'gratora' ) },
+    { value: 'biweekly',  label: __( 'Every 2 weeks', 'gratora' ) },
+    { value: 'monthly',   label: __( 'Monthly', 'gratora' ) },
+    { value: 'quarterly', label: __( 'Quarterly', 'gratora' ) },
+    { value: 'yearly',    label: __( 'Yearly', 'gratora' ) },
 ];
 
 // A donation carries the cadence the donor chose on the form, not the plan's
 // interval pair, so it reads from its own labels.
 const FREQUENCY_LABEL = {
-    weekly:    __( 'Weekly', 'fundraising-toolkit' ),
-    biweekly:  __( 'Every 2 weeks', 'fundraising-toolkit' ),
-    monthly:   __( 'Monthly', 'fundraising-toolkit' ),
-    quarterly: __( 'Quarterly', 'fundraising-toolkit' ),
-    yearly:    __( 'Yearly', 'fundraising-toolkit' ),
+    weekly:    __( 'Weekly', 'gratora' ),
+    biweekly:  __( 'Every 2 weeks', 'gratora' ),
+    monthly:   __( 'Monthly', 'gratora' ),
+    quarterly: __( 'Quarterly', 'gratora' ),
+    yearly:    __( 'Yearly', 'gratora' ),
 };
 
 // A view preference, not a setting: it belongs to the person looking at the
 // screen, and having it reset on every page load would make it useless for the
 // thing it is for, which is watching test plans appear while you make them.
-const TEST_PREF = 'fundkit.subscriptions.includeTest';
+const TEST_PREF = 'gratora.subscriptions.includeTest';
 
 const readTestPref = () => {
     try {
@@ -83,25 +83,25 @@ export function intervalLabel( unit, count ) {
     switch ( unit ) {
         case 'week':
             /* translators: %d: number of weeks between charges. */
-            return sprintf( _n( '%d week', '%d weeks', n, 'fundraising-toolkit' ), n );
+            return sprintf( _n( '%d week', '%d weeks', n, 'gratora' ), n );
         case 'year':
             /* translators: %d: number of years between charges. */
-            return sprintf( _n( '%d year', '%d years', n, 'fundraising-toolkit' ), n );
+            return sprintf( _n( '%d year', '%d years', n, 'gratora' ), n );
         case 'month':
             /* translators: %d: number of months */
-            return sprintf( _n( '%d month', '%d months', n, 'fundraising-toolkit' ), n );
+            return sprintf( _n( '%d month', '%d months', n, 'gratora' ), n );
         default:
             return n > 1 ? `${ n } ${ unit }` : String( unit );
     }
 }
 
 function donorHref( donorId ) {
-    return addQueryArgs( window.location.pathname, { page: 'fundkit-donors' } ) + `#donor/${ donorId }`;
+    return addQueryArgs( window.location.pathname, { page: 'gratora-donors' } ) + `#donor/${ donorId }`;
 }
 
 function donationHref( reference ) {
     return addQueryArgs( window.location.pathname, {
-        page: 'fundkit-donations',
+        page: 'gratora-donations',
         view: 'detail',
         reference,
     } );
@@ -117,7 +117,7 @@ function attentionSub( failing, unlinked, failingEver = 0 ) {
             '%d plan still running that the gateway could not collect from',
             '%d plans still running that the gateway could not collect from',
             failing,
-            'fundraising-toolkit'
+            'gratora'
         ),
         failing
     );
@@ -129,7 +129,7 @@ function attentionSub( failing, unlinked, failingEver = 0 ) {
                 '%d plan has ever failed a renewal, including ended ones',
                 '%d plans have ever failed a renewal, including ended ones',
                 failingEver,
-                'fundraising-toolkit'
+                'gratora'
             ),
             failingEver
         )
@@ -141,7 +141,7 @@ function attentionSub( failing, unlinked, failingEver = 0 ) {
             '%d paid recurring donation has no plan and is listed above',
             '%d paid recurring donations have no plan and are listed above',
             unlinked.total,
-            'fundraising-toolkit'
+            'gratora'
         ),
         unlinked.total
     );
@@ -150,7 +150,7 @@ function attentionSub( failing, unlinked, failingEver = 0 ) {
     // resolving the unknown half in the org's favour.
     let second = null;
     if ( unlinked.error ) {
-        second = __( 'Donations charged with no plan could not be checked', 'fundraising-toolkit' );
+        second = __( 'Donations charged with no plan could not be checked', 'gratora' );
     } else if ( unlinked.total > 0 ) {
         second = noPlan;
     }
@@ -161,7 +161,7 @@ function attentionSub( failing, unlinked, failingEver = 0 ) {
         second,
     ].filter( Boolean );
 
-    if ( lines.length === 0 ) return __( 'Nothing to chase', 'fundraising-toolkit' );
+    if ( lines.length === 0 ) return __( 'Nothing to chase', 'gratora' );
     if ( lines.length === 1 ) return lines[ 0 ];
 
     return <>{ lines.map( ( line, i ) => <div key={ i }>{ line }</div> ) }</>;
@@ -172,7 +172,7 @@ function attentionSub( failing, unlinked, failingEver = 0 ) {
 function withTestNote( sub, includeTest ) {
     if ( ! includeTest ) return sub;
 
-    const note = __( 'Includes test subscriptions', 'fundraising-toolkit' );
+    const note = __( 'Includes test subscriptions', 'gratora' );
     if ( ! sub ) return note;
 
     return (
@@ -189,7 +189,7 @@ export function subscriptionKpis( stats, unlinked, includeTest ) {
     return [
         {
             id:    'mrr',
-            label: __( 'Monthly recurring revenue', 'fundraising-toolkit' ),
+            label: __( 'Monthly recurring revenue', 'gratora' ),
             value: formatAmount( stats.mrr_cents ),
             sub:   withTestNote(
                 stats.unconverted > 0
@@ -199,34 +199,34 @@ export function subscriptionKpis( stats, unlinked, includeTest ) {
                             '%d plan could not be converted and is not counted',
                             '%d plans could not be converted and are not counted',
                             stats.unconverted,
-                            'fundraising-toolkit'
+                            'gratora'
                         ),
                         stats.unconverted
                     )
-                    : __( 'Active plans, normalised', 'fundraising-toolkit' ),
+                    : __( 'Active plans, normalised', 'gratora' ),
                 includeTest
             ),
         },
         {
             id:    'active',
-            label: __( 'Active plans', 'fundraising-toolkit' ),
+            label: __( 'Active plans', 'gratora' ),
             value: String( stats.active_count ),
             sub:   withTestNote( null, includeTest ),
         },
         {
             id:    'failing',
-            label: __( 'Needs attention', 'fundraising-toolkit' ),
+            label: __( 'Needs attention', 'gratora' ),
             value: String( failing ),
             sub:   withTestNote( attentionSub( failing, unlinked, Number( stats.failing_ever_count ) || 0 ), includeTest ),
         },
         {
             id:    'churn',
-            label: __( 'Churn this month', 'fundraising-toolkit' ),
+            label: __( 'Churn this month', 'gratora' ),
             value: `${ stats.churn_pct }%`,
             sub:   withTestNote(
                 sprintf(
                     /* translators: %d: number of plans cancelled this month. */
-                    _n( '%d cancelled', '%d cancelled', stats.churned_this_month, 'fundraising-toolkit' ),
+                    _n( '%d cancelled', '%d cancelled', stats.churned_this_month, 'gratora' ),
                     stats.churned_this_month
                 ),
                 includeTest
@@ -246,12 +246,12 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                 <div>
                     { __(
                         'Recurring donations charged with no plan behind them could not be checked, so nothing on this screen rules them out.',
-                        'fundraising-toolkit'
+                        'gratora'
                     ) }
                 </div>
-                <div className="fundkit-row__sub">{ error }</div>
+                <div className="gratora-row__sub">{ error }</div>
                 <Btn variant="ghost" size="sm" onClick={ onReload }>
-                    { __( 'Check again', 'fundraising-toolkit' ) }
+                    { __( 'Check again', 'gratora' ) }
                 </Btn>
             </Notice>
         );
@@ -274,20 +274,20 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                         '%d recurring donation was charged, but no plan was created for it. Nothing will collect the next payment.',
                         '%d recurring donations were charged, but no plans were created for them. Nothing will collect their next payments.',
                         total,
-                        'fundraising-toolkit'
+                        'gratora'
                     ),
                     total
                 ) }
             </div>
             { windowDays > 0 && (
-                <div className="fundkit-row__sub">
+                <div className="gratora-row__sub">
                     { sprintf(
                         /* translators: %d: number of days the check looks back over. */
                         _n(
                             'Covers donations paid in the last %d day.',
                             'Covers donations paid in the last %d days.',
                             windowDays,
-                            'fundraising-toolkit'
+                            'gratora'
                         ),
                         windowDays
                     ) }
@@ -301,10 +301,10 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                     { ' ' }
                     { FREQUENCY_LABEL[ it.frequency ] || it.frequency }
                     { ' ' }
-                    <span className="fundkit-row__sub">
+                    <span className="gratora-row__sub">
                         { it.failure_recorded
-                            ? __( 'failure recorded', 'fundraising-toolkit' )
-                            : __( 'no failure recorded', 'fundraising-toolkit' ) }
+                            ? __( 'failure recorded', 'gratora' )
+                            : __( 'no failure recorded', 'gratora' ) }
                     </span>
                 </div>
             ) ) }
@@ -312,7 +312,7 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                 <Btn variant="ghost" size="sm" onClick={ onShowAll }>
                     { sprintf(
                         /* translators: %d: number of donations not yet listed. */
-                        _n( 'Show %d more', 'Show %d more', hidden, 'fundraising-toolkit' ),
+                        _n( 'Show %d more', 'Show %d more', hidden, 'gratora' ),
                         hidden
                     ) }
                 </Btn>
@@ -325,20 +325,20 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                             '%d more is not listed here.',
                             '%d more are not listed here.',
                             beyond,
-                            'fundraising-toolkit'
+                            'gratora'
                         ),
                         beyond
                     ) }
                 </div>
             ) }
             { canRetry && anyRecorded && (
-                <div>{ __( 'Open a donation with a recorded failure to create its plan.', 'fundraising-toolkit' ) }</div>
+                <div>{ __( 'Open a donation with a recorded failure to create its plan.', 'gratora' ) }</div>
             ) }
             { ! canRetry && (
                 <div>
                     { __(
                         'Creating a plan needs permission to issue refunds, so pass these references to someone who has it.',
-                        'fundraising-toolkit'
+                        'gratora'
                     ) }
                 </div>
             ) }
@@ -346,7 +346,7 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                 <div>
                     { __(
                         'Where no failure was recorded, check the payment provider for a subscription before asking the donor to set one up again.',
-                        'fundraising-toolkit'
+                        'gratora'
                     ) }
                 </div>
             ) }
@@ -360,35 +360,35 @@ function emptyStateCopy( unlinked, testHidden ) {
     // debug an integration that worked.
     if ( testHidden > 0 ) {
         return {
-            title: __( 'No live subscriptions', 'fundraising-toolkit' ),
+            title: __( 'No live subscriptions', 'gratora' ),
             // The count and the way to reveal them are in the notice above, so
             // this says what the empty table means rather than repeating them.
-            body:  __( 'Nothing here is charging real money yet.', 'fundraising-toolkit' ),
+            body:  __( 'Nothing here is charging real money yet.', 'gratora' ),
         };
     }
 
     if ( unlinked.error ) {
         return {
-            title: __( 'No subscriptions to show', 'fundraising-toolkit' ),
+            title: __( 'No subscriptions to show', 'gratora' ),
             body:  __(
                 'Whether a recurring donation was charged with no plan behind it is unknown, so this is not the whole picture.',
-                'fundraising-toolkit'
+                'gratora'
             ),
         };
     }
 
     if ( unlinked.total > 0 ) {
         return {
-            title: __( 'No subscriptions were created', 'fundraising-toolkit' ),
+            title: __( 'No subscriptions were created', 'gratora' ),
             body:  unlinked.canRetry
-                ? __( 'The recurring donations above were charged, but no plan was ever created for them. Open one with a recorded failure to create its plan.', 'fundraising-toolkit' )
-                : __( 'The recurring donations above were charged, but no plan was ever created for them. Creating a plan needs permission to issue refunds.', 'fundraising-toolkit' ),
+                ? __( 'The recurring donations above were charged, but no plan was ever created for them. Open one with a recorded failure to create its plan.', 'gratora' )
+                : __( 'The recurring donations above were charged, but no plan was ever created for them. Creating a plan needs permission to issue refunds.', 'gratora' ),
         };
     }
 
     return {
-        title: __( 'No subscriptions yet', 'fundraising-toolkit' ),
-        body:  __( 'Recurring plans appear here once a donor sets one up on a form that offers it.', 'fundraising-toolkit' ),
+        title: __( 'No subscriptions yet', 'gratora' ),
+        body:  __( 'Recurring plans appear here once a donor sets one up on a form that offers it.', 'gratora' ),
     };
 }
 
@@ -428,12 +428,12 @@ export default function List() {
 
     useEffect( () => {
         let aborted = false;
-        apiFetch( { path: '/fundkit/v1/admin/recurring/gateway-options' } )
+        apiFetch( { path: '/gratora/v1/admin/recurring/gateway-options' } )
             .then( ( r ) => { if ( ! aborted ) setGateways( Array.isArray( r ) ? r : [] ); } )
             .catch( () => { if ( ! aborted ) setGateways( [] ); } );
         // Same route the donations list uses: /admin/campaigns needs a
         // capability this screen does not, and would 403 into an empty filter.
-        apiFetch( { path: '/fundkit/v1/admin/donations/campaign-options' } )
+        apiFetch( { path: '/gratora/v1/admin/donations/campaign-options' } )
             .then( ( r ) => { if ( ! aborted ) setCampaigns( Array.isArray( r ) ? r : [] ); } )
             .catch( () => { if ( ! aborted ) setCampaigns( [] ); } );
         return () => { aborted = true; };
@@ -475,16 +475,16 @@ export default function List() {
 
     const load = () => {
         setLoading( true );
-        return apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/recurring', apiParams ), parse: false } )
+        return apiFetch( { path: addQueryArgs( '/gratora/v1/admin/recurring', apiParams ), parse: false } )
             .then( async ( res ) => {
                 const items = await res.json();
                 setData( Array.isArray( items ) ? items : [] );
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
-                setTestHidden( parseInt( res.headers.get( 'X-FundKit-Test-Hidden' ) || '0', 10 ) );
+                setTestHidden( parseInt( res.headers.get( 'X-Gratora-Test-Hidden' ) || '0', 10 ) );
                 setError( null );
             } )
             .catch( ( err ) => {
-                setError( err?.message || __( 'Failed to load subscriptions.', 'fundraising-toolkit' ) );
+                setError( err?.message || __( 'Failed to load subscriptions.', 'gratora' ) );
                 setData( [] );
                 setTotal( 0 );
                 setTestHidden( 0 );
@@ -502,18 +502,18 @@ export default function List() {
 
         let aborted = false;
         setLoading( true );
-        apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/recurring', apiParams ), parse: false } )
+        apiFetch( { path: addQueryArgs( '/gratora/v1/admin/recurring', apiParams ), parse: false } )
             .then( async ( res ) => {
                 if ( aborted ) return;
                 const items = await res.json();
                 setData( Array.isArray( items ) ? items : [] );
                 setTotal( parseInt( res.headers.get( 'X-WP-Total' ) || '0', 10 ) );
-                setTestHidden( parseInt( res.headers.get( 'X-FundKit-Test-Hidden' ) || '0', 10 ) );
+                setTestHidden( parseInt( res.headers.get( 'X-Gratora-Test-Hidden' ) || '0', 10 ) );
                 setError( null );
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load subscriptions.', 'fundraising-toolkit' ) );
+                setError( err?.message || __( 'Failed to load subscriptions.', 'gratora' ) );
                 setData( [] );
                 setTotal( 0 );
                 setTestHidden( 0 );
@@ -527,10 +527,10 @@ export default function List() {
     // book, and figures that disagreed with the rows under them would read as a
     // broken integration to an org whose plans are all still in test mode.
     const fetchStats = ( test ) => apiFetch( {
-        path: addQueryArgs( '/fundkit/v1/admin/recurring/stats', { include_test: test || undefined } ),
+        path: addQueryArgs( '/gratora/v1/admin/recurring/stats', { include_test: test || undefined } ),
     } );
 
-    const statsMessage = ( e ) => e?.message || __( 'The recurring totals could not be loaded.', 'fundraising-toolkit' );
+    const statsMessage = ( e ) => e?.message || __( 'The recurring totals could not be loaded.', 'gratora' );
 
     const loadStats = () => fetchStats( includeTest )
         .then( ( r ) => {
@@ -543,7 +543,7 @@ export default function List() {
     // them; they are fetched on their own and read out above the table. A
     // failure here is kept on screen: a count nobody could take is not a zero.
     const loadUnlinked = () => apiFetch( {
-        path: addQueryArgs( '/fundkit/v1/admin/recurring/unlinked', { limit: 50 } ),
+        path: addQueryArgs( '/gratora/v1/admin/recurring/unlinked', { limit: 50 } ),
     } )
         .then( ( r ) => setUnlinked( {
             total:      Number( r?.total ) || 0,
@@ -557,7 +557,7 @@ export default function List() {
             items:      [],
             windowDays: 0,
             canRetry:   false,
-            error:      err?.message || __( 'The check could not be run.', 'fundraising-toolkit' ),
+            error:      err?.message || __( 'The check could not be run.', 'gratora' ),
         } ) );
 
     // Two flips of the toggle land in whatever order the network decides, and
@@ -575,11 +575,11 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:    'id',
-            label: __( 'ID', 'fundraising-toolkit' ),
+            label: __( 'ID', 'gratora' ),
             render: ( { item } ) => (
-                <span className="fundkit-ref-cell">
+                <span className="gratora-ref-cell">
                     <a
-                        className="fundkit-mono-link"
+                        className="gratora-mono-link"
                         href={ `#subscription/${ item.id }` }
                         onClick={ ( e ) => { e.preventDefault(); setDetail( item ); } }
                     >
@@ -590,31 +590,31 @@ export default function List() {
         },
         {
             id:    'donor',
-            label: __( 'Donor', 'fundraising-toolkit' ),
+            label: __( 'Donor', 'gratora' ),
             render: ( { item } ) => {
                 const d = item.donor;
-                if ( ! d ) return <span className="fundkit-row__sub">-</span>;
+                if ( ! d ) return <span className="gratora-row__sub">-</span>;
                 return (
-                    <div className="fundkit-row">
-                        <div className="fundkit-row__body">
-                            <span className="fundkit-ref-cell">
-                                <a className="fundkit-row__link fundkit-row__link--strong" href={ donorHref( d.id ) } { ...rowLinkProps }>
-                                    { d.name || __( '(no name)', 'fundraising-toolkit' ) }
+                    <div className="gratora-row">
+                        <div className="gratora-row__body">
+                            <span className="gratora-ref-cell">
+                                <a className="gratora-row__link gratora-row__link--strong" href={ donorHref( d.id ) } { ...rowLinkProps }>
+                                    { d.name || __( '(no name)', 'gratora' ) }
                                 </a>
                                 { item.simulated && (
                                     <span
-                                        className="fundkit-pill fundkit-pill--test"
+                                        className="gratora-pill gratora-pill--test"
                                         title={ sprintf(
                                             /* translators: %d: minutes between simulated renewals. */
-                                            __( 'Test plan. It renews every %d minutes so a full cycle can be watched, and no money moves.', 'fundraising-toolkit' ),
+                                            __( 'Test plan. It renews every %d minutes so a full cycle can be watched, and no money moves.', 'gratora' ),
                                             item.simulated_cycle_minutes || 0
                                         ) }
                                     >
-                                        { __( 'Simulated', 'fundraising-toolkit' ) }
+                                        { __( 'Simulated', 'gratora' ) }
                                     </span>
                                 ) }
                             </span>
-                            { d.email && <div className="fundkit-row__sub fundkit-row__sub--mono">{ d.email }</div> }
+                            { d.email && <div className="gratora-row__sub gratora-row__sub--mono">{ d.email }</div> }
                         </div>
                     </div>
                 );
@@ -622,20 +622,20 @@ export default function List() {
         },
         {
             id:            'amount',
-            label:         __( 'Amount / interval', 'fundraising-toolkit' ),
+            label:         __( 'Amount / interval', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => (
                 // Muted once the plan has ended: it describes a charge that will
                 // not happen again, and Lifetime beside it says what was taken.
-                <span className={ isTerminal( item.status ) ? 'fundkit-row__sub' : undefined }>
+                <span className={ isTerminal( item.status ) ? 'gratora-row__sub' : undefined }>
                     { formatAmount( item.amount_cents, item.currency ) }
-                    <span className="fundkit-row__sub"> / { intervalLabel( item.interval_unit, item.interval_count ) }</span>
+                    <span className="gratora-row__sub"> / { intervalLabel( item.interval_unit, item.interval_count ) }</span>
                 </span>
             ),
         },
         {
             id:       'status',
-            label:    __( 'Status', 'fundraising-toolkit' ),
+            label:    __( 'Status', 'gratora' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             enableSorting: true,
@@ -643,10 +643,10 @@ export default function List() {
                 <>
                     <StatusBadge status={ item.status } />
                     { item.failed_renewals_count > 0 && (
-                        <span className="fundkit-row__sub" style={ { marginLeft: 6 } }>
+                        <span className="gratora-row__sub" style={ { marginLeft: 6 } }>
                             { sprintf(
                                 /* translators: %d: consecutive failed renewals. */
-                                _n( '%d failure', '%d failures', item.failed_renewals_count, 'fundraising-toolkit' ),
+                                _n( '%d failure', '%d failures', item.failed_renewals_count, 'gratora' ),
                                 item.failed_renewals_count
                             ) }
                         </span>
@@ -656,35 +656,35 @@ export default function List() {
         },
         {
             id:            'next_payment_at',
-            label:         __( 'Next charge', 'fundraising-toolkit' ),
+            label:         __( 'Next charge', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => (
                 isTerminal( item.status )
                     ? (
-                        <span className="fundkit-row__sub">
+                        <span className="gratora-row__sub">
                             { item.cancelled_at
                                 ? sprintf(
                                     /* translators: %s: date the plan ended. */
-                                    __( 'Ended %s', 'fundraising-toolkit' ),
+                                    __( 'Ended %s', 'gratora' ),
                                     formatDate( item.cancelled_at )
                                 )
-                                : __( 'Ended', 'fundraising-toolkit' ) }
+                                : __( 'Ended', 'gratora' ) }
                         </span>
                     )
                     : item.status === 'paused' && item.resume_at
                         ? (
-                            <div className="fundkit-row">
-                                <div className="fundkit-row__body">
-                                    <div className="fundkit-row__name">{ formatDate( item.resume_at ) }</div>
-                                    <div className="fundkit-row__sub">{ __( 'when it resumes', 'fundraising-toolkit' ) }</div>
+                            <div className="gratora-row">
+                                <div className="gratora-row__body">
+                                    <div className="gratora-row__name">{ formatDate( item.resume_at ) }</div>
+                                    <div className="gratora-row__sub">{ __( 'when it resumes', 'gratora' ) }</div>
                                 </div>
                             </div>
                         )
                     : (
-                        <div className="fundkit-row">
-                            <div className="fundkit-row__body">
-                                <div className="fundkit-row__name">{ formatDate( item.next_payment_at ) }</div>
-                                { item.next_payment_at && <div className="fundkit-row__sub">{ dueIn( item.next_payment_at ) }</div> }
+                        <div className="gratora-row">
+                            <div className="gratora-row__body">
+                                <div className="gratora-row__name">{ formatDate( item.next_payment_at ) }</div>
+                                { item.next_payment_at && <div className="gratora-row__sub">{ dueIn( item.next_payment_at ) }</div> }
                             </div>
                         </div>
                     )
@@ -692,50 +692,50 @@ export default function List() {
         },
         {
             id:            'started_at',
-            label:         __( 'Giving since', 'fundraising-toolkit' ),
+            label:         __( 'Giving since', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => (
                 item.started_at
                     ? <span>{ formatDate( item.started_at ) }</span>
-                    : <span className="fundkit-row__sub">-</span>
+                    : <span className="gratora-row__sub">-</span>
             ),
         },
         {            id:       'campaign',
-            label:    __( 'Campaign', 'fundraising-toolkit' ),
+            label:    __( 'Campaign', 'gratora' ),
             elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
                 item.campaign
                     ? <span>{ item.campaign.title }</span>
-                    : <span className="fundkit-row__sub">-</span>
+                    : <span className="gratora-row__sub">-</span>
             ),
         },
         {
             id:       'gateway',
-            label:    __( 'Gateway', 'fundraising-toolkit' ),
+            label:    __( 'Gateway', 'gratora' ),
             elements: gateways,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
                 <div>
                     <div style={ { textTransform: 'capitalize' } }>{ item.gateway }</div>
                     { item.gateway_subscription_id
-                        ? <code className="fundkit-row__sub fundkit-row__sub--mono">{ item.gateway_subscription_id }</code>
-                        : <span className="fundkit-row__sub">{ __( 'Not linked', 'fundraising-toolkit' ) }</span> }
+                        ? <code className="gratora-row__sub gratora-row__sub--mono">{ item.gateway_subscription_id }</code>
+                        : <span className="gratora-row__sub">{ __( 'Not linked', 'gratora' ) }</span> }
                 </div>
             ),
         },
         {
             id:       'failing',
-            label:    __( 'Health', 'fundraising-toolkit' ),
+            label:    __( 'Health', 'gratora' ),
             elements: [
-                { value: 'yes', label: __( 'Has ever failed a renewal', 'fundraising-toolkit' ) },
+                { value: 'yes', label: __( 'Has ever failed a renewal', 'gratora' ) },
             ],
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => renderHealth( item ),
         },
         {
             id:       'interval',
-            label:    __( 'Interval', 'fundraising-toolkit' ),
+            label:    __( 'Interval', 'gratora' ),
             elements: INTERVAL_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             // Filter only. The amount cell already reads "25.00 / month", so a
@@ -745,16 +745,16 @@ export default function List() {
         },
         {
             id:            'lifetime',
-            label:         __( 'Lifetime', 'fundraising-toolkit' ),
+            label:         __( 'Lifetime', 'gratora' ),
             enableSorting: true,
             render: ( { item } ) => (
-                <div className="fundkit-row">
-                    <div className="fundkit-row__body">
-                        <div className="fundkit-row__name">{ formatAmount( item.total_paid_cents, item.currency ) }</div>
-                        <div className="fundkit-row__sub">
+                <div className="gratora-row">
+                    <div className="gratora-row__body">
+                        <div className="gratora-row__name">{ formatAmount( item.total_paid_cents, item.currency ) }</div>
+                        <div className="gratora-row__sub">
                             { sprintf(
                                 /* translators: %d: number of payments taken so far. */
-                                _n( '%d payment', '%d payments', item.payments_count, 'fundraising-toolkit' ),
+                                _n( '%d payment', '%d payments', item.payments_count, 'gratora' ),
                                 item.payments_count
                             ) }
                         </div>
@@ -769,7 +769,7 @@ export default function List() {
         copySubscriptionIdAction(),
         {
             id:    'retry',
-            label: __( 'Retry payment', 'fundraising-toolkit' ),
+            label: __( 'Retry payment', 'gratora' ),
             // DataViews draws a primary action as an icon button, so one with
             // no icon renders as nothing at all -- and being primary, it is
             // left out of the row menu too, taking the action out of reach.
@@ -780,31 +780,31 @@ export default function List() {
         },
         {
             id:       'pause',
-            label:    __( 'Pause', 'fundraising-toolkit' ),
+            label:    __( 'Pause', 'gratora' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'pause' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'pause' } ),
         },
         {
             id:       'resume',
-            label:    __( 'Resume', 'fundraising-toolkit' ),
+            label:    __( 'Resume', 'gratora' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'resume' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'resume' } ),
         },
         {
             id:       'skip_next',
-            label:    __( 'Skip next', 'fundraising-toolkit' ),
+            label:    __( 'Skip next', 'gratora' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'skip_next' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'skip_next' } ),
         },
         {
             id:       'change_amount',
-            label:    __( 'Change amount', 'fundraising-toolkit' ),
+            label:    __( 'Change amount', 'gratora' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'change_amount' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'change_amount' } ),
         },
         {
             id:            'cancel',
-            label:         __( 'Cancel', 'fundraising-toolkit' ),
+            label:         __( 'Cancel', 'gratora' ),
             isDestructive: true,
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'cancel' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'cancel' } ),
@@ -817,35 +817,35 @@ export default function List() {
     );
 
     return (
-        <div className="fundkit-admin">
-            <div className="fundkit-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'fundraising-toolkit' ) }</a>
+        <div className="gratora-admin">
+            <div className="gratora-crumbs">
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'gratora' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Subscriptions', 'fundraising-toolkit' ) }</span>
+                <span>{ __( 'Subscriptions', 'gratora' ) }</span>
             </div>
-            <div className="fundkit-page-head">
-                <div className="fundkit-page-head__title-row">
-                    <h1>{ __( 'Subscriptions', 'fundraising-toolkit' ) }</h1>
+            <div className="gratora-page-head">
+                <div className="gratora-page-head__title-row">
+                    <h1>{ __( 'Subscriptions', 'gratora' ) }</h1>
                 </div>
-                <div className="fundkit-page-head__right">
+                <div className="gratora-page-head__right">
                     { /* Offered once there is something to reveal, or while it
                          is on and needs turning off. An org sets recurring up
                          entirely in test mode, and a screen that hides every
                          plan it made reads as a broken integration. */ }
                     { ( testHidden > 0 || includeTest ) && (
-                        <label className="fundkit-inline-toggle">
+                        <label className="gratora-inline-toggle">
                             <Switch
                                 checked={ includeTest }
                                 onChange={ () => toggleTest( ! includeTest ) }
-                                label={ __( 'Show test subscriptions', 'fundraising-toolkit' ) }
+                                label={ __( 'Show test subscriptions', 'gratora' ) }
                             />
-                            <span>{ __( 'Show test subscriptions', 'fundraising-toolkit' ) }</span>
+                            <span>{ __( 'Show test subscriptions', 'gratora' ) }</span>
                         </label>
                     ) }
-                    <span className="fundkit-page-head__meta">
+                    <span className="gratora-page-head__meta">
                         { sprintf(
                             /* translators: %s: number of recurring plans. */
-                            _n( '%s plan', '%s plans', total, 'fundraising-toolkit' ),
+                            _n( '%s plan', '%s plans', total, 'gratora' ),
                             total.toLocaleString()
                         ) }
                     </span>
@@ -860,13 +860,13 @@ export default function List() {
                             '%d test subscription is hidden.',
                             '%d test subscriptions are hidden.',
                             testHidden,
-                            'fundraising-toolkit'
+                            'gratora'
                         ),
                         testHidden
                     ) }
                     { ' ' }
                     <Btn variant="link" onClick={ () => toggleTest( true ) }>
-                        { __( 'Show them', 'fundraising-toolkit' ) }
+                        { __( 'Show them', 'gratora' ) }
                     </Btn>
                 </Notice>
             ) }
@@ -879,15 +879,15 @@ export default function List() {
 
             { statsFailed && ! stats ? (
                 <Notice status="error" isDismissible={ false }>
-                    <div>{ __( 'The recurring totals could not be loaded, so nothing on this screen totals the book.', 'fundraising-toolkit' ) }</div>
-                    <div className="fundkit-row__sub">{ statsFailed }</div>
-                    <Btn variant="ghost" size="sm" onClick={ loadStats }>{ __( 'Try again', 'fundraising-toolkit' ) }</Btn>
+                    <div>{ __( 'The recurring totals could not be loaded, so nothing on this screen totals the book.', 'gratora' ) }</div>
+                    <div className="gratora-row__sub">{ statsFailed }</div>
+                    <Btn variant="ghost" size="sm" onClick={ loadStats }>{ __( 'Try again', 'gratora' ) }</Btn>
                 </Notice>
             ) : (
                 <>
                     { statsFailed && (
                         <Notice status="error" onRemove={ () => setStatsFailed( null ) }>
-                            { __( 'These totals are from before your last change. They could not be refreshed.', 'fundraising-toolkit' ) }
+                            { __( 'These totals are from before your last change. They could not be refreshed.', 'gratora' ) }
                         </Notice>
                     ) }
                     <KpiStrip items={ subscriptionKpis( stats, unlinked, includeTest ) } loading={ ! stats && ! statsFailed } />
@@ -903,7 +903,7 @@ export default function List() {
             ) : (
                 // The card chrome the other list screens sit in lives on this
                 // wrapper, so without it the table renders bare on the page.
-                <div className={ `fundkit-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
+                <div className={ `gratora-dataviews${ ! loading && data.length === 0 && filtered ? ' is-no-results' : '' }` }>
                     <DataViews
                         data={ data }
                         fields={ fields }
@@ -920,11 +920,11 @@ export default function List() {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'fundraising-toolkit' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'fundraising-toolkit' ) }
+                            title={ __( 'Nothing matches these filters', 'gratora' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'gratora' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'fundraising-toolkit' ) }
+                                    { __( 'Clear filters', 'gratora' ) }
                                 </Btn>
                             }
                         />

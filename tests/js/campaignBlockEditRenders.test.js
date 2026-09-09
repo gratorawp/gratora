@@ -64,10 +64,10 @@ jest.mock( '../../assets/admin/campaign-blocks/bindings.js', () => ( {
     registerCampaignBindingSource: () => {},
 } ) );
 jest.mock( '../../assets/admin/_shared/entities', () => ( {
-    registerFundKitEntities: () => {},
+    registerGratoraEntities: () => {},
 } ) );
 
-window.fundkitCampaignBlocks = { canManageCampaigns: true, bindingFields: {} };
+window.gratoraCampaignBlocks = { canManageCampaigns: true, bindingFields: {} };
 
 require( '../../assets/admin/campaign-blocks/index.jsx' );
 
@@ -116,7 +116,7 @@ test( 'every campaign block renders its editor without throwing', () => {
 } );
 
 test( 'an unbound block offers the campaign picker', () => {
-    const block = registered.find( ( b ) => b.name === 'fundkit/campaign-progress' );
+    const block = registered.find( ( b ) => b.name === 'gratora/campaign-progress' );
     renderEdit( block.settings );
 
     expect( root.querySelector( '[data-picker="campaign"]' ) ).not.toBeNull();

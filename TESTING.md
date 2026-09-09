@@ -4,11 +4,11 @@
 
 ```
 composer install
-composer test:setup fundkit_tests root '' 127.0.0.1 latest
+composer test:setup gratora_tests root '' 127.0.0.1 latest
 ```
 
 `test:setup` downloads WordPress and its test library into
-`~/.fundkit-wp-tests`, then creates the test database. Every FundKit repo on the
+`~/.gratora-wp-tests`, then creates the test database. Every Gratora repo on the
 machine finds it there, so you only do this once.
 
 It needs a MySQL/MariaDB you can create databases on. The arguments are

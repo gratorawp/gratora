@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\Blocks\FundPickerBlock;
+use Gratora\Forms\Blocks\FundPickerBlock;
 use WP_REST_Request;
 
 /**
@@ -29,7 +29,7 @@ final class FundDescriptionToggleTest extends IntegrationTestCase
 
     private function createCampaign(): int
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Description campaign', 'status' => 'published']));
 
@@ -38,7 +38,7 @@ final class FundDescriptionToggleTest extends IntegrationTestCase
 
     private function createFund(): void
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/funds');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/funds');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'code'        => 'water-sanitation',
@@ -53,22 +53,22 @@ final class FundDescriptionToggleTest extends IntegrationTestCase
 
     private function formConfig(string $attrs): string
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'title'       => 'Pick a fund',
             'campaign_id' => $this->campaignId,
-            'blocks'      => '<!-- wp:fundkit/fund-picker ' . $attrs . ' /-->'
-                . '<!-- wp:fundkit/submit-button {"label":"Give"} /-->',
+            'blocks'      => '<!-- wp:gratora/fund-picker ' . $attrs . ' /-->'
+                . '<!-- wp:gratora/submit-button {"label":"Give"} /-->',
         ]));
         $created = rest_do_request($req)->get_data();
 
-        $form = \FundKit\Forms\Form::query()->find('id', (int) $created['id']);
+        $form = \Gratora\Forms\Form::query()->find('id', (int) $created['id']);
         $form->status = 'published';
         $form->save();
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $created['slug'] . '"]');
-        preg_match('/data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[gratora_donation_form slug="' . $created['slug'] . '"]');
+        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
         $config = (string) ($m[1] ?? '');
 
         $this->assertNotSame('', $config, 'the form rendered no runtime config, so nothing below is being tested');
@@ -122,7 +122,7 @@ final class FundDescriptionToggleTest extends IntegrationTestCase
 
     public function test_the_editor_keeps_its_copy_so_the_switch_can_be_turned_back_on(): void
     {
-        $options = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/forms/funds'))->get_data();
+        $options = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/forms/funds'))->get_data();
         $water   = null;
         foreach ((array) $options as $o) {
             if (($o['label'] ?? '') === 'Water and Sanitation') {

@@ -79,7 +79,7 @@ export function OptionsEditor( {
     const remove = ( i ) => onChange( rows.filter( ( _, idx ) => idx !== i ) );
 
     return (
-        <div className="fundkit-options-editor">
+        <div className="gratora-options-editor">
             { rows.map( ( o, i ) => (
                 <div
                     key={ i }
@@ -90,23 +90,23 @@ export function OptionsEditor( {
                     } }
                 >
                     <TextControl
-                        label={ __( 'Label', 'fundraising-toolkit' ) }
+                        label={ __( 'Label', 'gratora' ) }
                         value={ o.label }
                         onChange={ ( v ) => updateLabel( i, v ) }
                         __nextHasNoMarginBottom
                     />
                     <SlugTextControl
-                        label={ __( 'Value', 'fundraising-toolkit' ) }
+                        label={ __( 'Value', 'gratora' ) }
                         value={ o.value }
                         separator="-"
                         fallback={ `option-${ i + 1 }` }
                         onChange={ ( v ) => update( i, { value: v } ) }
-                        help={ __( 'Stored when this option is picked. Auto-derived from the label.', 'fundraising-toolkit' ) }
+                        help={ __( 'Stored when this option is picked. Auto-derived from the label.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     { allowDefault && (
                         <ToggleControl
-                            label={ __( 'Default', 'fundraising-toolkit' ) }
+                            label={ __( 'Default', 'gratora' ) }
                             checked={ !! o.isDefault }
                             onChange={ ( v ) => update( i, { isDefault: v } ) }
                             __nextHasNoMarginBottom
@@ -119,12 +119,12 @@ export function OptionsEditor( {
                         disabled={ rows.length <= 1 }
                         style={ { marginTop: 4 } }
                     >
-                        { __( 'Remove option', 'fundraising-toolkit' ) }
+                        { __( 'Remove option', 'gratora' ) }
                     </Button>
                 </div>
             ) ) }
             <Button variant="secondary" onClick={ add }>
-                { addLabel || __( 'Add option', 'fundraising-toolkit' ) }
+                { addLabel || __( 'Add option', 'gratora' ) }
             </Button>
         </div>
     );

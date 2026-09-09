@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Analytics\Event;
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorMetricsService;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\MagicLinkService;
-use FundKit\Donors\MagicLinkToken;
-use FundKit\Donors\PendingSignup;
-use FundKit\Donors\PendingSignupRepository;
-use FundKit\Donors\Portal\PortalSession;
-use FundKit\Donors\SignupRedemption;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\Event;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorMetricsService;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\MagicLinkService;
+use Gratora\Donors\MagicLinkToken;
+use Gratora\Donors\PendingSignup;
+use Gratora\Donors\PendingSignupRepository;
+use Gratora\Donors\Portal\PortalSession;
+use Gratora\Donors\SignupRedemption;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -49,7 +49,7 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
      */
     private function post(string $route, array $body, array $headers = []): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/' . $route);
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/' . $route);
         $req->set_header('content-type', 'application/json');
         foreach ($headers as $name => $value) {
             $req->set_header($name, $value);
@@ -178,7 +178,7 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
 
         $stored = (int) $wpdb->get_var(
             "SELECT option_value FROM {$wpdb->options}
-             WHERE option_name LIKE '\_transient\_fundkit\_send\_link\_addr\_%'
+             WHERE option_name LIKE '\_transient\_gratora\_send\_link\_addr\_%'
              ORDER BY option_id DESC LIMIT 1"
         );
 
@@ -219,7 +219,7 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
 
         $stored = (int) $wpdb->get_var(
             "SELECT option_value FROM {$wpdb->options}
-             WHERE option_name LIKE '\_transient\_fundkit\_send\_link\_ip\_%'
+             WHERE option_name LIKE '\_transient\_gratora\_send\_link\_ip\_%'
              ORDER BY option_id DESC LIMIT 1"
         );
 
@@ -339,17 +339,17 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         $session->open((int) $donor->id);
 
         $csrf = bin2hex(random_bytes(8));
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession((int) $donor->id, $csrf);
+        $_COOKIE['gratora_donor_session'] = $this->portalSession((int) $donor->id, $csrf);
 
         try {
-            $req = new WP_REST_Request('POST', '/fundkit/v1/portal/logout-everywhere');
-            $req->set_header('X-FundKit-Csrf', $csrf);
+            $req = new WP_REST_Request('POST', '/gratora/v1/portal/logout-everywhere');
+            $req->set_header('X-Gratora-Csrf', $csrf);
             $res = rest_do_request($req);
 
             $this->assertSame(200, $res->get_status());
             $this->assertSame(1, ((array) $res->get_data())['ended'], 'the session on the other device is ended');
         } finally {
-            unset($_COOKIE['fundkit_donor_session']);
+            unset($_COOKIE['gratora_donor_session']);
         }
 
         $this->assertNull($session->startFromToken($raw), 'the unclicked link is dead too');
@@ -424,7 +424,7 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         try {
             $email = 'link-attack-' . uniqid() . '@example.test';
 
-            $req = new WP_REST_Request('POST', '/fundkit/v1/portal/register');
+            $req = new WP_REST_Request('POST', '/gratora/v1/portal/register');
             $req->set_query_params([
                 '_method'    => 'POST',
                 'email'      => $email,
@@ -482,17 +482,17 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
         $this->assertGreaterThan(0, $donorId, 'the link redeems');
 
         $csrf = bin2hex(random_bytes(8));
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession($donorId, $csrf);
+        $_COOKIE['gratora_donor_session'] = $this->portalSession($donorId, $csrf);
 
         try {
-            $req = new WP_REST_Request('POST', '/fundkit/v1/portal/profile');
+            $req = new WP_REST_Request('POST', '/gratora/v1/portal/profile');
             $req->set_header('content-type', 'application/json');
-            $req->set_header('X-FundKit-Csrf', $csrf);
+            $req->set_header('X-Gratora-Csrf', $csrf);
             $req->set_body((string) wp_json_encode(['first_name' => 'Alice', 'last_name' => 'Okafor']));
 
             $this->assertSame(200, rest_do_request($req)->get_status());
         } finally {
-            unset($_COOKIE['fundkit_donor_session']);
+            unset($_COOKIE['gratora_donor_session']);
         }
 
         $donor = Donor::query()->where('id', $donorId)->get();
@@ -503,7 +503,7 @@ final class PortalUnauthenticatedWritesTest extends IntegrationTestCase
     /** @return \WP_REST_Response|\WP_Error */
     private function exchange(string $rawToken, array $headers = [], array $query = [])
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/exchange');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/exchange');
         $req->set_header('content-type', 'application/json');
         foreach ($headers as $name => $value) {
             $req->set_header($name, $value);

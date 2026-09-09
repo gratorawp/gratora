@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Foundation;
+namespace Gratora\Tests\Unit\Foundation;
 
 use DateTimeImmutable;
-use FundKit\Foundation\Time\FrozenClock;
-use FundKit\Foundation\Time\SystemClock;
+use Gratora\Foundation\Time\FrozenClock;
+use Gratora\Foundation\Time\SystemClock;
 use PHPUnit\Framework\TestCase;
 
 final class ClockTest extends TestCase

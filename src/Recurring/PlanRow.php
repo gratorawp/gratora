@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Recurring;
+namespace Gratora\Recurring;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Analytics\Event;
-use FundKit\Donations\Donation;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\Sandbox\SandboxGateway;
-use FundKit\Gateways\SupportsPaymentRetry;
-use FundKit\Gateways\SupportsScheduleChange;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\Event;
+use Gratora\Donations\Donation;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\Sandbox\SandboxGateway;
+use Gratora\Gateways\SupportsPaymentRetry;
+use Gratora\Gateways\SupportsScheduleChange;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * The one shape a plan takes on a screen.
@@ -205,7 +205,7 @@ final class PlanRow
                 SELECT id, ROW_NUMBER() OVER (
                     PARTITION BY recurring_plan_id ORDER BY created_at DESC, id DESC
                 ) AS rn
-                FROM {$prefix}fundkit_donations
+                FROM {$prefix}gratora_donations
                 WHERE recurring_plan_id IN ({$in}) AND status = 'failed'
              ) ranked WHERE rn = 1"
         )['rows'] ?? [];
@@ -245,7 +245,7 @@ final class PlanRow
                 SELECT id, ROW_NUMBER() OVER (
                     PARTITION BY recurring_plan_id ORDER BY occurred_at DESC, id DESC
                 ) AS rn
-                FROM {$prefix}fundkit_events
+                FROM {$prefix}gratora_events
                 WHERE recurring_plan_id IN ({$in}) AND type LIKE %s
              ) ranked WHERE rn <= %d",
             [ErrorLog::PREFIX . '%', self::MAX_ERRORS]
@@ -278,15 +278,15 @@ final class PlanRow
             $name = (string) preg_replace('/\..*$/', '', $name);
 
             // A gateway's own name, which is not ours to translate.
-            return $name !== '' ? ucfirst($name) : __('Payment provider', 'fundraising-toolkit');
+            return $name !== '' ? ucfirst($name) : __('Payment provider', 'gratora');
         }
 
         return match ($source) {
-            'portal.recurring' => __('Donor portal', 'fundraising-toolkit'),
-            'admin.recurring'  => __('Admin', 'fundraising-toolkit'),
-            'recurring'        => __('Scheduled run', 'fundraising-toolkit'),
-            'command'          => __('WP-CLI', 'fundraising-toolkit'),
-            default            => __('Site', 'fundraising-toolkit'),
+            'portal.recurring' => __('Donor portal', 'gratora'),
+            'admin.recurring'  => __('Admin', 'gratora'),
+            'recurring'        => __('Scheduled run', 'gratora'),
+            'command'          => __('WP-CLI', 'gratora'),
+            default            => __('Site', 'gratora'),
         };
     }
 }

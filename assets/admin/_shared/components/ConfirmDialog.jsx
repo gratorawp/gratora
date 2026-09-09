@@ -26,7 +26,7 @@ export default function ConfirmDialog( { confirm, onClose } ) {
             foot={
                 <>
                     <Btn variant="secondary" onClick={ onClose }>
-                        { __( 'Cancel', 'fundraising-toolkit' ) }
+                        { __( 'Cancel', 'gratora' ) }
                     </Btn>
                     <Btn
                         variant={ confirm.destructive ? 'danger' : 'primary' }
@@ -37,17 +37,17 @@ export default function ConfirmDialog( { confirm, onClose } ) {
                             if ( action ) await action();
                         } }
                     >
-                        { confirm.confirmLabel || __( 'Confirm', 'fundraising-toolkit' ) }
+                        { confirm.confirmLabel || __( 'Confirm', 'gratora' ) }
                     </Btn>
                 </>
             }
         >
             <p style={ { margin: 0 } }>{ confirm.message }</p>
             { required !== '' && (
-                <label className="fundkit-fld" style={ { marginTop: 16, display: 'block' } }>
-                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'fundraising-toolkit' ), required ) }
+                <label className="gratora-fld" style={ { marginTop: 16, display: 'block' } }>
+                    { sprintf( /* translators: %s: confirmation word */ __( 'Type %s to confirm', 'gratora' ), required ) }
                     <input
-                        className="fundkit-input"
+                        className="gratora-input"
                         type="text"
                         value={ typed }
                         onChange={ ( e ) => setTyped( e.target.value ) }

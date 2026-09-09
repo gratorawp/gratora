@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Maintenance;
+namespace Gratora\Foundation\Maintenance;
 
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Foundation\Batch\BatchProcessor;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\SettlesOutOfBand;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Foundation\Batch\BatchProcessor;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\SettlesOutOfBand;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * Retire donations that were begun and never paid.
@@ -29,7 +29,7 @@ use FundKit\Vendor\Queryable\DB;
  */
 final class AbandonedPendingReaper
 {
-    public const HOOK = 'fundkit.cron.abandon_pending';
+    public const HOOK = 'gratora.cron.abandon_pending';
 
     private const DAILY = 86400;
     private const BATCH = 500;
@@ -57,7 +57,7 @@ final class AbandonedPendingReaper
      * reference. Closing one would strand a bank transfer that is simply
      * slower than this window, so they are never swept. Asked of the registry
      * rather than a list kept here, so a gateway registered through
-     * fundkit.gateways.register is covered by implementing the interface.
+     * gratora.gateways.register is covered by implementing the interface.
      *
      * @return list<string>
      *
@@ -82,7 +82,7 @@ final class AbandonedPendingReaper
      */
     public static function abandonAfterDays(): int
     {
-        return max(1, (int) apply_filters('fundkit.donations.abandon_after_days', self::AFTER_DAYS));
+        return max(1, (int) apply_filters('gratora.donations.abandon_after_days', self::AFTER_DAYS));
     }
 
     /** @since 1.0.0 */
@@ -94,7 +94,7 @@ final class AbandonedPendingReaper
 
         $more = BatchProcessor::step(
             function (int $n) use ($before, $skip): array {
-                $query = DB::table('fundkit_donations')
+                $query = DB::table('gratora_donations')
                     ->select('id')
                     ->where('status', 'pending')
                     ->where('created_at', $before, '<')
@@ -125,7 +125,7 @@ final class AbandonedPendingReaper
                 // checkouts had just failed together. The status condition is
                 // repeated here so a row that reached paid between the read and
                 // this write is never overwritten.
-                DB::table('fundkit_donations')
+                DB::table('gratora_donations')
                     ->whereIn('id', $ids)
                     ->where('status', 'pending')
                     ->update([

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Receipts;
+namespace Gratora\Receipts;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
 
 /**
  * Data bundle passed to a ReceiptRenderer.
  *
- * Modules extend context via `fundkit.receipt.context`. Keys in `extras` must
+ * Modules extend context via `gratora.receipt.context`. Keys in `extras` must
  * be namespaced by the module to avoid collisions.
  *
  * @since 1.0.0

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\Stripe\StripeAccount;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\Stripe\StripeAccount;
 use WP_REST_Request;
 
 /**
@@ -33,7 +33,7 @@ final class StripeWebhookMetadataFallbackTest extends IntegrationTestCase
     {
         parent::setUp();
         $this->secret = 'whsec_test_' . bin2hex(random_bytes(8));
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'stripe' => ['webhook_secret_live' => $this->secret, 'test_mode' => true],
         ]);
 
@@ -43,17 +43,17 @@ final class StripeWebhookMetadataFallbackTest extends IntegrationTestCase
         $account->refresh(['id' => 'acct_test_123', 'charges_enabled' => true]);
 
         $c       = Plugin::instance()->container;
-        $manager = $c->get(\FundKit\Gateways\GatewayManager::class);
+        $manager = $c->get(\Gratora\Gateways\GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \FundKit\Gateways\Stripe\StripeGateway(
-                $c->get(\FundKit\Gateways\Stripe\StripeApi::class),
-                $c->get(\FundKit\Donations\DonationRepository::class),
-                $c->get(\FundKit\Donations\DonationService::class),
-                $c->get(\FundKit\Gateways\Stripe\StripeAccount::class),
-                $c->get(\FundKit\Donors\DonorRepository::class),
-                $c->get(\FundKit\Donors\DonorService::class),
-                $c->get(\FundKit\Foundation\Time\Clock::class),
-                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
+            $manager->register(new \Gratora\Gateways\Stripe\StripeGateway(
+                $c->get(\Gratora\Gateways\Stripe\StripeApi::class),
+                $c->get(\Gratora\Donations\DonationRepository::class),
+                $c->get(\Gratora\Donations\DonationService::class),
+                $c->get(\Gratora\Gateways\Stripe\StripeAccount::class),
+                $c->get(\Gratora\Donors\DonorRepository::class),
+                $c->get(\Gratora\Donors\DonorService::class),
+                $c->get(\Gratora\Foundation\Time\Clock::class),
+                $c->get(\Gratora\Recurring\RecurringPlanRepository::class),
             ));
         }
     }
@@ -94,7 +94,7 @@ final class StripeWebhookMetadataFallbackTest extends IntegrationTestCase
         $timestamp = (string) time();
         $sig       = hash_hmac('sha256', "{$timestamp}.{$payload}", $this->secret);
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/stripe');
+        $req = new WP_REST_Request('POST', '/gratora/v1/webhooks/stripe');
         $req->set_header('content-type', 'application/json');
         $req->set_header('stripe_signature', "t={$timestamp},v1={$sig}");
         $req->set_body($payload);
@@ -128,7 +128,7 @@ final class StripeWebhookMetadataFallbackTest extends IntegrationTestCase
         $this->postWebhook('payment_intent.succeeded', $this->succeededIntent(
             $donation,
             $intentId,
-            ['fundkit_reference' => $donation->reference]
+            ['gratora_reference' => $donation->reference]
         ));
 
         $this->assertSame('paid', $this->reload($donation)->status, 'the money is on the donation it paid for');
@@ -142,7 +142,7 @@ final class StripeWebhookMetadataFallbackTest extends IntegrationTestCase
         $this->postWebhook('payment_intent.succeeded', $this->succeededIntent(
             $donation,
             $intentId,
-            ['fundkit_reference' => $donation->reference]
+            ['gratora_reference' => $donation->reference]
         ));
 
         $this->assertSame($intentId, (string) $this->reload($donation)->gateway_intent_id);
@@ -160,7 +160,7 @@ final class StripeWebhookMetadataFallbackTest extends IntegrationTestCase
         $intent = $this->succeededIntent(
             $donation,
             'pi_orphan_' . bin2hex(random_bytes(6)),
-            ['fundkit_reference' => $donation->reference]
+            ['gratora_reference' => $donation->reference]
         );
         $intent['amount']          = 100;
         $intent['amount_received'] = 100;
@@ -190,7 +190,7 @@ final class StripeWebhookMetadataFallbackTest extends IntegrationTestCase
         $this->postWebhook('payment_intent.succeeded', $this->succeededIntent(
             $donation,
             'pi_stranger_' . bin2hex(random_bytes(6)),
-            ['fundkit_reference' => 'NOT-A-REAL-REFERENCE']
+            ['gratora_reference' => 'NOT-A-REAL-REFERENCE']
         ));
 
         $this->assertSame('pending', $this->reload($donation)->status);

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * Turns a proven claim into a donor. The emailed link coming back is the only

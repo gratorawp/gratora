@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit;
+namespace Gratora\Tests\Unit;
 
-use FundKit\Campaigns\Campaign;
+use Gratora\Campaigns\Campaign;
 use PHPUnit\Framework\TestCase;
 
 /**

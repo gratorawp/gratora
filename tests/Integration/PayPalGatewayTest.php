@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\Refund;
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\PayPal\PayPalApi;
-use FundKit\Gateways\PayPal\PayPalGateway;
-use FundKit\Gateways\PayPal\PayPalPlans;
-use FundKit\Gateways\SubscriptionChangeNeedsApproval;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\Refund;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\PayPal\PayPalApi;
+use Gratora\Gateways\PayPal\PayPalGateway;
+use Gratora\Gateways\PayPal\PayPalPlans;
+use Gratora\Gateways\SubscriptionChangeNeedsApproval;
+use Gratora\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -38,8 +38,8 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('fundkit_gateway_config', ['test_mode' => true]);
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_gateway_config', ['test_mode' => true]);
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'JPY'],
         ]);
@@ -60,11 +60,11 @@ final class PayPalGatewayTest extends IntegrationTestCase
                 $c->get(PayPalApi::class),
                 $account,
                 $c->get(DonationRepository::class),
-                $c->get(\FundKit\Donations\DonationService::class),
+                $c->get(\Gratora\Donations\DonationService::class),
                 $c->get(PayPalPlans::class),
-                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
-                $c->get(\FundKit\Foundation\Time\Clock::class),
-                $c->get(\FundKit\Gateways\PayPal\PayPalPlanRecorder::class),
+                $c->get(\Gratora\Recurring\RecurringPlanRepository::class),
+                $c->get(\Gratora\Foundation\Time\Clock::class),
+                $c->get(\Gratora\Gateways\PayPal\PayPalPlanRecorder::class),
             ));
         }
     }
@@ -151,7 +151,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
 
     private function createDonation(string $currency = 'USD', int $amount = 2500, string $email = 'pp@example.test'): string
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'        => $email,
@@ -222,7 +222,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         $reference = $this->createDonation();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,
@@ -246,7 +246,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         $reference = $this->createDonation();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference' => $reference,
@@ -263,9 +263,9 @@ final class PayPalGatewayTest extends IntegrationTestCase
 
     public function test_unknown_reference_is_refused(): void
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
-        $req->set_body((string) wp_json_encode(['reference' => 'FUNDKIT-NOPE', 'status_token' => 'anything']));
+        $req->set_body((string) wp_json_encode(['reference' => 'GRATORA-NOPE', 'status_token' => 'anything']));
         $res = rest_do_request($req);
 
         $this->assertSame(404, $res->get_status());
@@ -275,7 +275,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         $reference = $this->createDonation('JPY', 100000, 'jpy-refund@example.test');
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,
@@ -307,7 +307,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         $reference = $this->createDonation('JPY', 100000, 'jpy-partial@example.test');
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,
@@ -332,7 +332,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     /** @param array<string,mixed> $resource */
     private function postWebhook(string $type, array $resource): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/paypal');
+        $req = new WP_REST_Request('POST', '/gratora/v1/webhooks/paypal');
         $req->set_header('content-type', 'application/json');
         foreach ([
             'paypal_transmission_id'   => 'tx-1',
@@ -402,7 +402,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
     {
         $res = $this->postWebhook('PAYMENT.CAPTURE.COMPLETED', [
             'id'        => 'CAPTURE-STRANGER',
-            'custom_id' => 'FUNDKIT-NOT-OURS',
+            'custom_id' => 'GRATORA-NOT-OURS',
         ]);
 
         $this->assertSame(200, $res->get_status());
@@ -418,7 +418,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
         $this->pendingCapture = true;
         $reference = $this->createDonation();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,
@@ -439,7 +439,7 @@ final class PayPalGatewayTest extends IntegrationTestCase
         $this->pendingCapture = true;
         $reference = $this->createDonation();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/gateways/paypal/capture');
+        $req = new WP_REST_Request('POST', '/gratora/v1/gateways/paypal/capture');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'reference'    => $reference,

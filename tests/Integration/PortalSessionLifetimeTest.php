@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorService;
-use FundKit\Donors\Portal\PortalSession;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\Portal\PortalSession;
+use Gratora\Foundation\Plugin;
 
 /**
  * Two clocks. Idle kills a session left open on a borrowed device; the absolute
@@ -14,7 +14,7 @@ use FundKit\Foundation\Plugin;
  */
 final class PortalSessionLifetimeTest extends IntegrationTestCase
 {
-    private const COOKIE = 'fundkit_donor_session';
+    private const COOKIE = 'gratora_donor_session';
 
     private function session(): PortalSession
     {
@@ -47,7 +47,7 @@ final class PortalSessionLifetimeTest extends IntegrationTestCase
         $sid = $this->portalSession($id);
         $_COOKIE[self::COOKIE] = $sid;
 
-        delete_transient('fundkit_portal_' . hash('sha256', $sid));
+        delete_transient('gratora_portal_' . hash('sha256', $sid));
 
         $this->assertNull($this->session()->currentDonorId());
     }
@@ -60,7 +60,7 @@ final class PortalSessionLifetimeTest extends IntegrationTestCase
 
         $this->assertNull($this->session()->currentDonorId(), 'past the absolute cap');
         $this->assertFalse(
-            get_transient('fundkit_portal_' . hash('sha256', $sid)),
+            get_transient('gratora_portal_' . hash('sha256', $sid)),
             'and the expired session is cleared rather than left to be read again'
         );
     }
@@ -128,8 +128,8 @@ final class PortalSessionLifetimeTest extends IntegrationTestCase
         $this->session()->open($id);
         $_COOKIE[self::COOKIE] = $this->portalSession($id, $opened['csrf']);
 
-        $req = new \WP_REST_Request('POST', '/fundkit/v1/portal/logout-everywhere');
-        $req->set_header('X-FundKit-Csrf', $opened['csrf']);
+        $req = new \WP_REST_Request('POST', '/gratora/v1/portal/logout-everywhere');
+        $req->set_header('X-Gratora-Csrf', $opened['csrf']);
         $res = rest_do_request($req);
 
         $this->assertSame(200, $res->get_status());
@@ -138,7 +138,7 @@ final class PortalSessionLifetimeTest extends IntegrationTestCase
         unset($_COOKIE[self::COOKIE]);
         $this->assertSame(
             403,
-            rest_do_request(new \WP_REST_Request('POST', '/fundkit/v1/portal/logout-everywhere'))->get_status(),
+            rest_do_request(new \WP_REST_Request('POST', '/gratora/v1/portal/logout-everywhere'))->get_status(),
             'the permission callback refuses before the route runs'
         );
     }
@@ -147,7 +147,7 @@ final class PortalSessionLifetimeTest extends IntegrationTestCase
     {
         $id  = $this->donorId('sliding');
         $sid = $this->portalSession($id);
-        $key = 'fundkit_portal_' . hash('sha256', $sid);
+        $key = 'gratora_portal_' . hash('sha256', $sid);
 
         $stored = get_transient($key);
         $stored['seen'] = time() - 400;

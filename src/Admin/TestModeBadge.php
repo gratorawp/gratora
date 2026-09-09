@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Admin;
+namespace Gratora\Admin;
 
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Hooks\HookProvider;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Hooks\HookProvider;
+use Gratora\Vendor\Queryable\DB;
 use WP_Admin_Bar;
 
 /**
@@ -16,7 +16,7 @@ use WP_Admin_Bar;
  * with rows, the totals move, and nothing says the card was never charged. The
  * expensive version of finding out is a launched campaign that took nothing.
  *
- * Two states, because FundKit has two switches. The org-wide flag is loud. A
+ * Two states, because Gratora has two switches. The org-wide flag is loud. A
  * single form left behind after a launch is quieter and worse, so it is called
  * out separately rather than folded into the same message.
  *
@@ -49,24 +49,24 @@ final class TestModeBadge extends HookProvider
             return;
         }
 
-        // Name FundKit to distinguish other plugins’ test badges.
+        // Name Gratora to distinguish other plugins’ test badges.
         $title = $orgWide
-            ? __('Fundraising Toolkit Test Mode Active', 'fundraising-toolkit')
+            ? __('Gratora Test Mode Active', 'gratora')
             : sprintf(
                 /* translators: %d: how many published forms are in test mode. */
-                _n('%d Fundraising Toolkit Form in Test Mode', '%d Fundraising Toolkit Forms in Test Mode', $forms, 'fundraising-toolkit'),
+                _n('%d Gratora Form in Test Mode', '%d Gratora Forms in Test Mode', $forms, 'gratora'),
                 $forms
             );
 
         $bar->add_node([
-            'id' => 'fundkit-test-mode',
+            'id' => 'gratora-test-mode',
             'parent' => 'top-secondary',
-            'title'  => '<span class="fundkit-test-mode-badge">' . $this->icon() . esc_html($title) . '</span>',
-            'href'   => esc_url(admin_url('admin.php?page=fundkit-settings&tab=gateways')),
+            'title'  => '<span class="gratora-test-mode-badge">' . $this->icon() . esc_html($title) . '</span>',
+            'href'   => esc_url(admin_url('admin.php?page=gratora-settings&tab=gateways')),
             'meta'  => [
                 'title' => $orgWide
-                    ? __('No card is charged and these donations stay out of your reporting. Turn this off before you go live.', 'fundraising-toolkit')
-                    : __('These forms take no real money. Every other form on the site does.', 'fundraising-toolkit'),
+                    ? __('No card is charged and these donations stay out of your reporting. Turn this off before you go live.', 'gratora')
+                    : __('These forms take no real money. Every other form on the site does.', 'gratora'),
             ],
         ]);
     }
@@ -78,7 +78,7 @@ final class TestModeBadge extends HookProvider
      */
     private function icon(): string
     {
-        return '<svg class="fundkit-test-mode-badge__icon" viewBox="0 0 24 24" fill="none"'
+        return '<svg class="gratora-test-mode-badge__icon" viewBox="0 0 24 24" fill="none"'
             . ' stroke="currentColor" stroke-width="2" stroke-linecap="round"'
             . ' stroke-linejoin="round" aria-hidden="true" focusable="false">'
             . '<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0'
@@ -92,7 +92,7 @@ final class TestModeBadge extends HookProvider
     /* Sized and coloured to sit alongside the other fundraising
        plugins' test badges rather than compete with them: a chip inset
        from the bar, not a full-height block. */
-    #wpadminbar #wp-admin-bar-fundkit-test-mode .fundkit-test-mode-badge {
+    #wpadminbar #wp-admin-bar-gratora-test-mode .gratora-test-mode-badge {
         display: inline-flex;
         align-items: center;
         gap: 4px;
@@ -106,13 +106,13 @@ final class TestModeBadge extends HookProvider
         line-height: 25px;
         white-space: nowrap;
     }
-    #wpadminbar #wp-admin-bar-fundkit-test-mode .fundkit-test-mode-badge__icon {
+    #wpadminbar #wp-admin-bar-gratora-test-mode .gratora-test-mode-badge__icon {
         width: 13px;
         height: 13px;
         flex: none;
     }
-    #wpadminbar #wp-admin-bar-fundkit-test-mode:hover .fundkit-test-mode-badge { background: #d68a37; }
-    #wpadminbar #wp-admin-bar-fundkit-test-mode > .ab-item { padding: 0; }
+    #wpadminbar #wp-admin-bar-gratora-test-mode:hover .gratora-test-mode-badge { background: #d68a37; }
+    #wpadminbar #wp-admin-bar-gratora-test-mode > .ab-item { padding: 0; }
 CSS;
 
     /** @since 1.0.0 */
@@ -126,15 +126,15 @@ CSS;
         }
 
         // Use a registered handle for inline CSS.
-        wp_register_style('fundkit-test-mode-badge', false, [], FUNDKIT_VERSION);
-        wp_enqueue_style('fundkit-test-mode-badge');
-        wp_add_inline_style('fundkit-test-mode-badge', self::BADGE_CSS);
+        wp_register_style('gratora-test-mode-badge', false, [], GRATORA_VERSION);
+        wp_enqueue_style('gratora-test-mode-badge');
+        wp_add_inline_style('gratora-test-mode-badge', self::BADGE_CSS);
     }
 
     /** @since 1.0.0 */
     private function orgWide(): bool
     {
-        $cfg = get_option('fundkit_gateway_config', []);
+        $cfg = get_option('gratora_gateway_config', []);
 
         return is_array($cfg) && ! empty($cfg['test_mode']);
     }
@@ -151,7 +151,7 @@ CSS;
         // Put whereRaw first; it adds no AND connector. Guard LONGTEXT with JSON_VALID and
         // compare unquoted text for MySQL/MariaDB compatibility. Accept boolean and numeric
         // test flags.
-        return (int) DB::table('fundkit_forms')
+        return (int) DB::table('gratora_forms')
             ->whereRaw(
                 "JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(settings), settings, NULL), "
                 . "'\$.test_mode')) IN ('true', '1')"
@@ -163,6 +163,6 @@ CSS;
     /** @since 1.0.0 */
     private function visibleToCurrentUser(): bool
     {
-        return is_user_logged_in() && Capabilities::userCan('fundkit_view_donations');
+        return is_user_logged_in() && Capabilities::userCan('gratora_view_donations');
     }
 }

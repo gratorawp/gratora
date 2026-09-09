@@ -28,8 +28,8 @@ export default function DowHourHeatmap( { data } ) {
 
     if ( ! data || ( data.total ?? 0 ) === 0 ) {
         return (
-            <p className="fundkit-panel__empty">
-                { __( 'No donation activity yet to plot timing.', 'fundraising-toolkit' ) }
+            <p className="gratora-panel__empty">
+                { __( 'No donation activity yet to plot timing.', 'gratora' ) }
             </p>
         );
     }
@@ -44,13 +44,13 @@ export default function DowHourHeatmap( { data } ) {
     } );
 
     return (
-        <div className="fundkit-heatmap">
-            <div className="fundkit-heatmap__hours">
-                <span className="fundkit-heatmap__row-label" />
+        <div className="gratora-heatmap">
+            <div className="gratora-heatmap__hours">
+                <span className="gratora-heatmap__row-label" />
                 { Array.from( { length: 24 }, ( _, h ) => (
                     <span
                         key={ h }
-                        className={ `fundkit-heatmap__hour-tick${ HOUR_LABELS.includes( h ) ? ' is-labelled' : '' }` }
+                        className={ `gratora-heatmap__hour-tick${ HOUR_LABELS.includes( h ) ? ' is-labelled' : '' }` }
                         aria-hidden="true"
                     >
                         { HOUR_LABELS.includes( h ) ? h : '' }
@@ -59,8 +59,8 @@ export default function DowHourHeatmap( { data } ) {
             </div>
 
             { grid.map( ( row, day ) => (
-                <div key={ day } className="fundkit-heatmap__row">
-                    <span className="fundkit-heatmap__row-label">{ days[ day ].short }</span>
+                <div key={ day } className="gratora-heatmap__row">
+                    <span className="gratora-heatmap__row-label">{ days[ day ].short }</span>
                     { row.map( ( count, hour ) => {
                         const intensity = max > 0 ? count / max : 0;
                         const isPeak = peak.day === day && peak.hour === hour && count > 0;
@@ -68,7 +68,7 @@ export default function DowHourHeatmap( { data } ) {
                             <button
                                 key={ hour }
                                 type="button"
-                                className={ `fundkit-heatmap__cell${ isPeak ? ' is-peak' : '' }` }
+                                className={ `gratora-heatmap__cell${ isPeak ? ' is-peak' : '' }` }
                                 style={ {
                                     background: count > 0
                                         ? `rgba(${ RAMP }, ${ 0.15 + intensity * 0.75 })`
@@ -84,7 +84,7 @@ export default function DowHourHeatmap( { data } ) {
                                         '%1$s at %2$d:00, %3$d donation',
                                         '%1$s at %2$d:00, %3$d donations',
                                         count,
-                                        'fundraising-toolkit'
+                                        'gratora'
                                     ),
                                     days[ day ].long,
                                     hour,
@@ -96,27 +96,27 @@ export default function DowHourHeatmap( { data } ) {
                 </div>
             ) ) }
 
-            <div className="fundkit-heatmap__legend">
-                <span className="fundkit-heatmap__legend-label">{ __( 'Fewer', 'fundraising-toolkit' ) }</span>
+            <div className="gratora-heatmap__legend">
+                <span className="gratora-heatmap__legend-label">{ __( 'Fewer', 'gratora' ) }</span>
                 { [ 0.15, 0.35, 0.55, 0.75, 0.9 ].map( ( a ) => (
                     <span
                         key={ a }
-                        className="fundkit-heatmap__legend-cell"
+                        className="gratora-heatmap__legend-cell"
                         style={ { background: `rgba(${ RAMP }, ${ a })` } }
                     />
                 ) ) }
-                <span className="fundkit-heatmap__legend-label">{ __( 'More', 'fundraising-toolkit' ) }</span>
+                <span className="gratora-heatmap__legend-label">{ __( 'More', 'gratora' ) }</span>
             </div>
 
             { hovered && (
-                <div className="fundkit-heatmap__tip" aria-live="polite">
+                <div className="gratora-heatmap__tip" aria-live="polite">
                     <strong>
                         { days[ hovered.day ].long } · { hovered.hour.toString().padStart( 2, '0' ) }:00
                     </strong>
                     { ' - ' }
                     { sprintf(
                         /* translators: %d: number of donations */
-                        _n( '%d donation', '%d donations', hovered.count, 'fundraising-toolkit' ),
+                        _n( '%d donation', '%d donations', hovered.count, 'gratora' ),
                         hovered.count
                     ) }
                 </div>

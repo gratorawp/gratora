@@ -1,32 +1,32 @@
-@import '@fundkit/ui/scss/tokens';
+@import '@gratora/ui/scss/tokens';
 @import '../_shared/admin-base';
 @import '../_shared/style-notice';
-@import '@fundkit/ui/scss/components/skeleton';
-@import '@fundkit/ui/scss/components/buttons';
-@import '@fundkit/ui/scss/components/card';
-@import '@fundkit/ui/scss/components/switch';
-@import '@fundkit/ui/scss/components/form';
-@import '@fundkit/ui/scss/components/color-input';
-@import '@fundkit/ui/scss/components/field';
-@import '@fundkit/ui/scss/components/segmented';
-@import '@fundkit/ui/scss/components/amount-input';
-@import '@fundkit/ui/scss/components/searchable-select';
-@import '@fundkit/ui/scss/components/dialog';
-@import '@fundkit/ui/scss/components/notice';
-@import '@fundkit/ui/scss/components/toast';
-@import '@fundkit/ui/scss/components/empty-state';
-@import '@fundkit/ui/scss/components/date-field';
+@import '@gratora/ui/scss/components/skeleton';
+@import '@gratora/ui/scss/components/buttons';
+@import '@gratora/ui/scss/components/card';
+@import '@gratora/ui/scss/components/switch';
+@import '@gratora/ui/scss/components/form';
+@import '@gratora/ui/scss/components/color-input';
+@import '@gratora/ui/scss/components/field';
+@import '@gratora/ui/scss/components/segmented';
+@import '@gratora/ui/scss/components/amount-input';
+@import '@gratora/ui/scss/components/searchable-select';
+@import '@gratora/ui/scss/components/dialog';
+@import '@gratora/ui/scss/components/notice';
+@import '@gratora/ui/scss/components/toast';
+@import '@gratora/ui/scss/components/empty-state';
+@import '@gratora/ui/scss/components/date-field';
 @import '../_shared/schedule-fields';
-@import '@fundkit/ui/scss/components/style-preview';
+@import '@gratora/ui/scss/components/style-preview';
 
-// Bind shadow until @fundkit/ui supports the token. Absolute-size tokens would distort the
+// Bind shadow until @gratora/ui supports the token. Absolute-size tokens would distort the
 // scaled preview.
-.fundkit-style-preview__frame {
-    box-shadow: var(--fundkit-card-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .06));
+.gratora-style-preview__frame {
+    box-shadow: var(--gratora-card-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .06));
 }
 
 // Use a full-width footer for the publish toggle and action buttons.
-.fundkit-dialog__foot > .fundkit-cc__foot {
+.gratora-dialog__foot > .gratora-cc__foot {
     flex: 0 0 100%;
 }
 
@@ -34,7 +34,7 @@
 $card-shadow:   $shadow-md;
 $card-radius:   $radius-lg;
 
-.fundkit-campaign-detail {
+.gratora-campaign-detail {
     // WordPress components read --wp-admin-theme-color.
     --wp-admin-theme-color:           #{$accent};
     --wp-admin-theme-color--rgb:      33, 29, 63;
@@ -90,7 +90,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-overview {
+.gratora-overview {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -101,13 +101,13 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-section-block {
+.gratora-section-block {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-.fundkit-section-bar {
+.gratora-section-bar {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -127,17 +127,17 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-detail-nav {
+.gratora-detail-nav {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
     margin: 0 0 14px;
 
-    .fundkit-section-bar & { margin: 0; }
+    .gratora-section-bar & { margin: 0; }
 }
 
-.fundkit-cmp-toggle {
+.gratora-cmp-toggle {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -175,13 +175,13 @@ $card-radius:   $radius-lg;
     &.is-active svg { color: $accent-dark; }
 }
 
-.fundkit-overview__metrics {
+.gratora-overview__metrics {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 16px;
 }
 
-.fundkit-metric {
+.gratora-metric {
     background: #fff;
     border-radius: $card-radius;
     box-shadow: $card-shadow;
@@ -262,7 +262,7 @@ $card-radius:   $radius-lg;
         transition: width .25s ease;
     }
 }
-.fundkit-cmp {
+.gratora-cmp {
     display: inline-flex;
     align-items: center;
     gap: 3px;
@@ -279,27 +279,27 @@ $card-radius:   $radius-lg;
     &.is-flat { color: $text-muted; background: $bg-soft; }
 }
 
-.fundkit-panel {
+.gratora-panel {
     background: #fff;
     border-radius: $card-radius;
     box-shadow: $card-shadow;
     padding: 24px 26px;
 }
 
-.fundkit-panel__title {
+.gratora-panel__title {
     margin: 0 0 4px;
     font-size: 15px;
     font-weight: 600;
     color: $text;
 }
 
-.fundkit-panel__sub {
+.gratora-panel__sub {
     margin: 0 0 14px;
     font-size: 13px;
     color: $text-muted;
 }
 
-.fundkit-panel__empty {
+.gratora-panel__empty {
     margin: 0;
     padding: 24px 0;
     text-align: center;
@@ -307,40 +307,40 @@ $card-radius:   $radius-lg;
     font-size: 13px;
 }
 
-.fundkit-overview__grid {
+.gratora-overview__grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 16px;
     align-items: start;
 }
 
-.fundkit-overview__side {
+.gratora-overview__side {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-.fundkit-chart-wrap {
+.gratora-chart-wrap {
     position: relative;
 }
 
-.fundkit-chart {
+.gratora-chart {
     width: 100%;
     height: 280px;
     display: block;
     overflow: visible;
 
-    .fundkit-chart__grid    { stroke: $border-soft; stroke-dasharray: 2 4; }
-    .fundkit-chart__axis    { fill: $text-soft; font-size: 10px; }
-    .fundkit-chart__area    { fill: url(#fundkit-rev-grad); }
-    .fundkit-chart__line    { fill: none; stroke: $accent; stroke-width: 2; }
-    .fundkit-chart__cmp     { fill: none; stroke: $text-soft; stroke-width: 1.5; stroke-dasharray: 4 4; }
-    .fundkit-chart__crosshair { stroke: #d1d5db; stroke-width: 1; pointer-events: none; }
-    .fundkit-chart__dot     { fill: #fff; stroke: $accent; stroke-width: 2; pointer-events: none; }
-    .fundkit-chart__hit     { fill: transparent; cursor: crosshair; }
+    .gratora-chart__grid    { stroke: $border-soft; stroke-dasharray: 2 4; }
+    .gratora-chart__axis    { fill: $text-soft; font-size: 10px; }
+    .gratora-chart__area    { fill: url(#gratora-rev-grad); }
+    .gratora-chart__line    { fill: none; stroke: $accent; stroke-width: 2; }
+    .gratora-chart__cmp     { fill: none; stroke: $text-soft; stroke-width: 1.5; stroke-dasharray: 4 4; }
+    .gratora-chart__crosshair { stroke: #d1d5db; stroke-width: 1; pointer-events: none; }
+    .gratora-chart__dot     { fill: #fff; stroke: $accent; stroke-width: 2; pointer-events: none; }
+    .gratora-chart__hit     { fill: transparent; cursor: crosshair; }
 }
 
-.fundkit-chart-tip {
+.gratora-chart-tip {
     position: absolute;
     transform: translate(-50%, -100%);
     background: $text;
@@ -380,7 +380,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-chart-empty {
+.gratora-chart-empty {
     height: 220px;
     display: flex;
     align-items: center;
@@ -389,7 +389,7 @@ $card-radius:   $radius-lg;
     font-size: 13px;
 }
 
-.fundkit-chart-legend {
+.gratora-chart-legend {
     display: flex;
     gap: 16px;
     justify-content: center;
@@ -418,7 +418,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-timeline {
+.gratora-timeline {
     &__label {
         font-size: 11px;
         text-transform: uppercase;
@@ -454,7 +454,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-table {
+.gratora-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
@@ -496,7 +496,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-gateway {
+.gratora-gateway {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -529,7 +529,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-stackbar {
+.gratora-stackbar {
     display: flex;
     height: 12px;
     border-radius: 6px;
@@ -539,15 +539,15 @@ $card-radius:   $radius-lg;
     &__seg + &__seg { margin-left: 1px; }
 }
 
-.fundkit-goal {
+.gratora-goal {
     display: flex;
     align-items: center;
     gap: 24px;
 }
 
-.fundkit-donut { flex-shrink: 0; }
+.gratora-donut { flex-shrink: 0; }
 
-.fundkit-goal__legend {
+.gratora-goal__legend {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -570,15 +570,15 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-input-with-link {
+.gratora-input-with-link {
     display: flex;
     align-items: center;
     gap: 12px;
 
-    .fundkit-input { flex: 1; }
+    .gratora-input { flex: 1; }
 }
 
-.fundkit-input-link {
+.gratora-input-link {
     font-size: 13px;
     color: $accent;
     text-decoration: none;
@@ -587,7 +587,7 @@ $card-radius:   $radius-lg;
     &:hover { color: $accent-dark; text-decoration: underline; }
 }
 
-.fundkit-default-pill {
+.gratora-default-pill {
     display: inline-block;
     margin-left: 8px;
     padding: 1px 8px;
@@ -600,7 +600,7 @@ $card-radius:   $radius-lg;
     border-radius: 10px;
 }
 
-.fundkit-settings {
+.gratora-settings {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -660,7 +660,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-pill-group {
+.gratora-pill-group {
     display: inline-flex;
     background: #f8fafb;
     border-radius: 10px;
@@ -668,7 +668,7 @@ $card-radius:   $radius-lg;
     gap: 2px;
 }
 
-.fundkit-pill {
+.gratora-pill {
     appearance: none;
     background: transparent;
     border: 0;
@@ -690,22 +690,22 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-color-row {
+.gratora-color-row {
     display: flex;
     align-items: center;
     gap: 16px;
 }
 
-.fundkit-custom-style-toggle {
+.gratora-custom-style-toggle {
     padding: 14px 16px;
     background: $accent-soft;
     border-radius: 8px;
     margin-bottom: 16px;
 }
 
-.fundkit-custom-style-body { margin-top: 8px; }
+.gratora-custom-style-body { margin-top: 8px; }
 
-.fundkit-preset-picker {
+.gratora-preset-picker {
     margin: 0 0 20px;
 
     &__label {
@@ -790,7 +790,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-styling-layout {
+.gratora-styling-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
     gap: 24px;
@@ -810,7 +810,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-live-preview {
+.gratora-live-preview {
     border: 1px solid $border-soft;
     border-radius: 8px;
     overflow: hidden;
@@ -850,7 +850,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-token-editor {
+.gratora-token-editor {
     .components-panel__body {
         border: 1px solid $border-soft;
         border-radius: 8px;
@@ -899,7 +899,7 @@ $card-radius:   $radius-lg;
     .components-range-control__wrapper { padding: 0; }
 }
 
-.fundkit-theme-preview {
+.gratora-theme-preview {
     display: inline-block;
     padding: 8px 18px;
     border-radius: 999px;
@@ -911,7 +911,7 @@ $card-radius:   $radius-lg;
     box-shadow: 0 1px 2px rgba(15, 23, 42, .08);
 }
 
-.fundkit-danger {
+.gratora-danger {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -937,7 +937,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-section {
+.gratora-section {
     display: grid;
     grid-template-columns: 320px 1fr;
     gap: 64px;
@@ -971,19 +971,19 @@ $card-radius:   $radius-lg;
 }
 
 
-.fundkit-input-group {
+.gratora-input-group {
     display: flex;
     gap: 8px;
     align-items: stretch;
 
-    .fundkit-input--prefix {
+    .gratora-input--prefix {
         text-align: center;
         font-weight: 500;
         background: #f8fafb;
     }
 }
 
-.fundkit-cover {
+.gratora-cover {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1019,13 +1019,13 @@ $card-radius:   $radius-lg;
 }
 
 // Independent half-width columns prevent tall cards from shifting neighboring items.
-.fundkit-widget-grid {
+.gratora-widget-grid {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-.fundkit-widget-grid__halves {
+.gratora-widget-grid__halves {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
@@ -1036,14 +1036,14 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-widget-grid__col {
+.gratora-widget-grid__col {
     display: flex;
     flex-direction: column;
     gap: 16px;
     min-width: 0;
 }
 
-.fundkit-widget-slot {
+.gratora-widget-slot {
     width: 100%;
     min-width: 0;
 
@@ -1055,7 +1055,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-widget {
+.gratora-widget {
     background: #fff;
     border-radius: $card-radius;
     box-shadow: $card-shadow;
@@ -1075,19 +1075,19 @@ $card-radius:   $radius-lg;
         background: transparent;
         box-shadow: none;
 
-        .fundkit-widget__chrome {
+        .gratora-widget__chrome {
             border-bottom: 0;
             padding: 2px 0 10px 0;
             min-height: 0;
         }
-        .fundkit-widget__body {
+        .gratora-widget__body {
             padding: 0;
         }
     }
 
     &--split &__body {
         display: grid;
-        grid-template-columns: repeat(var(--fundkit-split, 2), minmax(0, 1fr));
+        grid-template-columns: repeat(var(--gratora-split, 2), minmax(0, 1fr));
         gap: 0;
 
         > * {
@@ -1169,7 +1169,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-layout-toggle {
+.gratora-layout-toggle {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -1188,13 +1188,13 @@ $card-radius:   $radius-lg;
     svg { display: block; color: $text-muted; }
 }
 
-.fundkit-stories {
+.gratora-stories {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-.fundkit-story {
+.gratora-story {
     margin: 0;
     padding: 0;
 
@@ -1226,7 +1226,7 @@ $card-radius:   $radius-lg;
     &__sep    { color: $text-soft; }
 }
 
-.fundkit-cohort {
+.gratora-cohort {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     gap: 16px;
@@ -1289,11 +1289,11 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-recharts {
+.gratora-recharts {
     .recharts-cartesian-axis-tick text { fill: $text-muted; }
 }
 
-.fundkit-histogram {
+.gratora-histogram {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -1322,7 +1322,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-heatmap {
+.gratora-heatmap {
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -1419,7 +1419,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-crumbs {
+.gratora-crumbs {
     font-size: 13px;
     color: $text-muted;
     margin-bottom: 6px;
@@ -1430,7 +1430,7 @@ $card-radius:   $radius-lg;
     .sep { margin: 0 6px; color: #cbd0d5; }
 }
 
-.fundkit-page-head {
+.gratora-page-head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -1497,18 +1497,18 @@ $card-radius:   $radius-lg;
 }
 
 // Scope view-nav overrides to preserve dashboard pill shadows.
-.fundkit-view-toggle {
+.gratora-view-toggle {
     display: inline-flex;
     align-items: center;
     gap: 6px;
 
-    .fundkit-cmp-toggle {
+    .gratora-cmp-toggle {
         text-decoration: none;
         font-weight: 500;
         box-shadow: none;
         border-color: $border-mid;
     }
-    .fundkit-cmp-toggle.is-active {
+    .gratora-cmp-toggle.is-active {
         background: $accent-soft;
         border-color: $accent;
         color: $accent-dark;
@@ -1516,7 +1516,7 @@ $card-radius:   $radius-lg;
         svg { color: $accent-dark; }
     }
 
-    .fundkit-cmp-toggle__badge {
+    .gratora-cmp-toggle__badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -1533,7 +1533,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-pill {
+.gratora-pill {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 2px 9px;
     border-radius: 999px;
@@ -1544,7 +1544,7 @@ $card-radius:   $radius-lg;
     &::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
     // Suppress the pseudo-dot when markup supplies one.
-    &:has(.fundkit-pill__dot)::before { display: none; }
+    &:has(.gratora-pill__dot)::before { display: none; }
 
     &--lg     { padding: 4px 12px; font-size: 12.5px; }
 
@@ -1563,7 +1563,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-banner {
+.gratora-banner {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1589,7 +1589,7 @@ $card-radius:   $radius-lg;
 }
 
 
-.fundkit-tabs {
+.gratora-tabs {
     position: relative;
     display: flex;
     align-items: stretch;
@@ -1607,7 +1607,7 @@ $card-radius:   $radius-lg;
         &::-webkit-scrollbar { display: none; }
     }
 
-    a, button.fundkit-tab {
+    a, button.gratora-tab {
         display: inline-flex;
         align-items: center;
         gap: 8px;
@@ -1654,14 +1654,14 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-tab__icon {
+.gratora-tab__icon {
     width: 15px; height: 15px;
     color: currentColor;
     opacity: 0.9;
     flex-shrink: 0;
 }
 
-.fundkit-tab__dot {
+.gratora-tab__dot {
     width: 6px; height: 6px;
     border-radius: 50%;
     background: $accent;
@@ -1672,7 +1672,7 @@ $card-radius:   $radius-lg;
     &.is-red   { background: $red; }
 }
 
-.fundkit-subtabs {
+.gratora-subtabs {
     display: flex;
     gap: 0;
     margin: 0 0 20px;
@@ -1725,7 +1725,7 @@ $card-radius:   $radius-lg;
 }
 
 
-.fundkit-section-bar {
+.gratora-section-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1746,9 +1746,9 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-section-block { margin-bottom: 28px; }
+.gratora-section-block { margin-bottom: 28px; }
 
-.fundkit-pill {
+.gratora-pill {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -1772,7 +1772,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-edited-pill {
+.gratora-edited-pill {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -1792,7 +1792,7 @@ $card-radius:   $radius-lg;
 }
 
 
-.fundkit-input-prefixed {
+.gratora-input-prefixed {
     display: flex;
     align-items: stretch;
     border: 1px solid $border-mid;
@@ -1822,7 +1822,7 @@ $card-radius:   $radius-lg;
         align-items: center;
     }
 
-    .fundkit-input {
+    .gratora-input {
         border: 0;
         border-radius: 0 $radius-md $radius-md 0;
         background: transparent;
@@ -1831,7 +1831,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-url-preview {
+.gratora-url-preview {
     margin-top: 8px;
     display: inline-flex;
     align-items: center;
@@ -1860,7 +1860,7 @@ $card-radius:   $radius-lg;
     a { color: $accent-dark; text-decoration: none; font-weight: 500; &:hover { color: $accent; } }
 }
 
-.fundkit-input-counter {
+.gratora-input-counter {
     position: relative;
 
     &__count {
@@ -1878,7 +1878,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-status-pills {
+.gratora-status-pills {
     display: inline-flex;
     gap: 6px;
     background: $bg-soft;
@@ -1886,7 +1886,7 @@ $card-radius:   $radius-lg;
     padding: 3px;
 }
 
-.fundkit-status-pill {
+.gratora-status-pill {
     appearance: none;
     background: transparent;
     border: 0;
@@ -1914,14 +1914,14 @@ $card-radius:   $radius-lg;
         color: $text;
         box-shadow: 0 1px 2px rgba(15, 23, 42, .08);
 
-        .fundkit-status-pill__dot { background: $accent; box-shadow: 0 0 0 3px rgba(33, 29, 63, .18); }
+        .gratora-status-pill__dot { background: $accent; box-shadow: 0 0 0 3px rgba(33, 29, 63, .18); }
     }
 
-    &[data-state="draft"].is-active   .fundkit-status-pill__dot { background: $text-soft; box-shadow: 0 0 0 3px rgba(156, 163, 175, .25); }
-    &[data-state="archived"].is-active .fundkit-status-pill__dot { background: $amber; box-shadow: 0 0 0 3px rgba(185, 122, 5, .18); }
+    &[data-state="draft"].is-active   .gratora-status-pill__dot { background: $text-soft; box-shadow: 0 0 0 3px rgba(156, 163, 175, .25); }
+    &[data-state="archived"].is-active .gratora-status-pill__dot { background: $amber; box-shadow: 0 0 0 3px rgba(185, 122, 5, .18); }
 }
 
-.fundkit-toggle-row {
+.gratora-toggle-row {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -1936,7 +1936,7 @@ $card-radius:   $radius-lg;
 }
 
 
-.fundkit-brand-mark {
+.gratora-brand-mark {
     width: 28px; height: 28px;
     border-radius: 6px;
     display: inline-flex;
@@ -1951,10 +1951,10 @@ $card-radius:   $radius-lg;
     &--offline { background: linear-gradient(135deg, #475569 0%, #334155 100%); }
 }
 
-.fundkit-stack-12  { display: flex; flex-direction: column; gap: 12px; }
-.fundkit-grid-2-eq { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.gratora-stack-12  { display: flex; flex-direction: column; gap: 12px; }
+.gratora-grid-2-eq { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-.fundkit-settings-layout {
+.gratora-settings-layout {
     display: grid;
     grid-template-columns: 1fr 360px;
     gap: 32px;
@@ -1975,7 +1975,7 @@ $card-radius:   $radius-lg;
 }
 
 
-.fundkit-schedule {
+.gratora-schedule {
     margin-top: 10px;
 
     &__lane {
@@ -2103,7 +2103,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-cover-card {
+.gratora-cover-card {
     display: grid;
     grid-template-columns: 200px 1fr;
     gap: 16px;
@@ -2163,7 +2163,7 @@ $card-radius:   $radius-lg;
 }
 
 
-.fundkit-ambition {
+.gratora-ambition {
     background: #fff;
     border: 1px solid $border-soft;
     border-radius: $card-radius;
@@ -2255,7 +2255,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-danger {
+.gratora-danger {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2277,7 +2277,7 @@ $card-radius:   $radius-lg;
     }
 }
 
-.fundkit-menu {
+.gratora-menu {
     position: relative;
     display: inline-block;
 
@@ -2329,7 +2329,7 @@ $card-radius:   $radius-lg;
 
 @import '../_shared/components/template-picker';
 
-.fundkit-cc__layout {
+.gratora-cc__layout {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2359,7 +2359,7 @@ $card-radius:   $radius-lg;
 @import '../_shared/kpi-strip';
 @import '../_shared/dataviews';
 
-.fundkit-gateway-cell {
+.gratora-gateway-cell {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -2384,7 +2384,7 @@ $card-radius:   $radius-lg;
     &__mark--unknown { background: linear-gradient(135deg, $text-soft 0%, $text-muted 100%); }
 }
 
-.fundkit-save-bar {
+.gratora-save-bar {
     position: fixed;
     left: 50%;
     bottom: 22px;
@@ -2399,7 +2399,7 @@ $card-radius:   $radius-lg;
     border-radius: 999px;
     box-shadow: 0 10px 28px rgba(15, 23, 42, .25), 0 2px 8px rgba(15, 23, 42, .18);
     font-size: 13px;
-    animation: fundkitSaveBarIn .25s cubic-bezier(.2, .7, 0, 1);
+    animation: gratoraSaveBarIn .25s cubic-bezier(.2, .7, 0, 1);
 
     &__dot {
         width: 8px; height: 8px;
@@ -2441,37 +2441,37 @@ $card-radius:   $radius-lg;
     }
 }
 
-@keyframes fundkitSaveBarIn {
+@keyframes gratoraSaveBarIn {
     from { transform: translate(-50%, 8px); opacity: 0; }
     to   { transform: translate(-50%, 0);   opacity: 1; }
 }
 
-.fundkit-cc {
-    .fundkit-field + .fundkit-field { margin-top: 18px; }
+.gratora-cc {
+    .gratora-field + .gratora-field { margin-top: 18px; }
 }
-.fundkit-cc__error {
+.gratora-cc__error {
     margin-bottom: 14px;
     padding: 10px 12px;
     border-radius: 8px;
     font-size: 13px;
-    background: var(--fundkit-color-red-soft, $red-soft);
-    color: var(--fundkit-color-red, $red);
+    background: var(--gratora-color-red-soft, $red-soft);
+    color: var(--gratora-color-red, $red);
 }
-.fundkit-cc__goal-input { margin-top: 10px; }
-.fundkit-cc__goal-desc {
+.gratora-cc__goal-input { margin-top: 10px; }
+.gratora-cc__goal-desc {
     margin-top: 8px;
     font-size: 12px;
     line-height: 1.45;
-    color: var(--fundkit-color-text-muted, $text-muted);
+    color: var(--gratora-color-text-muted, $text-muted);
 }
-.fundkit-cc__cover-pick {
+.gratora-cc__cover-pick {
     display: flex;
     align-items: center;
     gap: 12px;
     width: 100%;
     padding: 14px;
-    background: var(--fundkit-color-bg-page, $bg-page);
-    border: 1px dashed var(--fundkit-color-border, $border-mid);
+    background: var(--gratora-color-bg-page, $bg-page);
+    border: 1px dashed var(--gratora-color-border, $border-mid);
     border-radius: 8px;
     font-family: inherit;
     text-align: left;
@@ -2479,11 +2479,11 @@ $card-radius:   $radius-lg;
     transition: border-color .12s, background .12s;
 
     &:hover {
-        border-color: var(--fundkit-color-accent, $accent);
-        background: var(--fundkit-color-accent-tint, #f5f4fa);
+        border-color: var(--gratora-color-accent, $accent);
+        background: var(--gratora-color-accent-tint, #f5f4fa);
     }
 }
-.fundkit-cc__cover-icon {
+.gratora-cc__cover-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2492,84 +2492,84 @@ $card-radius:   $radius-lg;
     height: 40px;
     border-radius: 8px;
     background: #fff;
-    border: 1px solid var(--fundkit-color-border, $border-mid);
-    color: var(--fundkit-color-text-muted, $text-muted);
+    border: 1px solid var(--gratora-color-border, $border-mid);
+    color: var(--gratora-color-text-muted, $text-muted);
 
     svg {
         width: 18px;
         height: 18px;
     }
 }
-.fundkit-cc__cover-txt {
+.gratora-cc__cover-txt {
     min-width: 0;
 }
-.fundkit-cc__cover-title {
+.gratora-cc__cover-title {
     font-size: 13px;
     font-weight: 500;
-    color: var(--fundkit-color-text, $text);
+    color: var(--gratora-color-text, $text);
 }
-.fundkit-cc__cover-sel {
+.gratora-cc__cover-sel {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
     background: #fff;
-    border: 1px solid var(--fundkit-color-border, $border-mid);
+    border: 1px solid var(--gratora-color-border, $border-mid);
     border-radius: 8px;
 }
-.fundkit-cc__cover-thumb {
+.gratora-cc__cover-thumb {
     flex-shrink: 0;
     width: 48px;
     height: 48px;
     border-radius: 6px;
     object-fit: cover;
-    background: var(--fundkit-color-bg-soft, $bg-soft);
+    background: var(--gratora-color-bg-soft, $bg-soft);
 }
-.fundkit-cc__cover-name {
+.gratora-cc__cover-name {
     flex: 1;
     min-width: 0;
     overflow: hidden;
     font-size: 13px;
-    color: var(--fundkit-color-text, $text);
+    color: var(--gratora-color-text, $text);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.fundkit-cc__slug {
+.gratora-cc__slug {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 8px 12px;
-    background: var(--fundkit-color-bg-page, $bg-page);
-    border: 1px dashed var(--fundkit-color-border, $border-mid);
+    background: var(--gratora-color-bg-page, $bg-page);
+    border: 1px dashed var(--gratora-color-border, $border-mid);
     border-radius: 8px;
     font-size: 12.5px;
-    color: var(--fundkit-color-text-muted, $text-muted);
+    color: var(--gratora-color-text-muted, $text-muted);
 }
-.fundkit-cc__slug-lbl {
+.gratora-cc__slug-lbl {
     flex-shrink: 0;
     font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--fundkit-color-text-soft, $text-soft);
+    color: var(--gratora-color-text-soft, $text-soft);
 }
-.fundkit-cc__slug-url {
+.gratora-cc__slug-url {
     flex: 1;
     min-width: 0;
     overflow: hidden;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 12px;
-    color: var(--fundkit-color-text, $text);
+    color: var(--gratora-color-text, $text);
     text-overflow: ellipsis;
     white-space: nowrap;
 
     em {
         font-style: normal;
         font-weight: 500;
-        color: var(--fundkit-color-accent-dark, $accent-dark);
+        color: var(--gratora-color-accent-dark, $accent-dark);
     }
 }
-.fundkit-cc__slug-btn {
+.gratora-cc__slug-btn {
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -2580,39 +2580,39 @@ $card-radius:   $radius-lg;
     border-radius: 6px;
     font-size: 12px;
     font-weight: 500;
-    color: var(--fundkit-color-accent, $accent);
+    color: var(--gratora-color-accent, $accent);
     cursor: pointer;
 
     &:hover {
-        color: var(--fundkit-color-accent-dark, $accent-dark);
-        background: var(--fundkit-color-accent-soft, $accent-soft);
+        color: var(--gratora-color-accent-dark, $accent-dark);
+        background: var(--gratora-color-accent-soft, $accent-soft);
     }
 }
-.fundkit-cc__slug-edit {
+.gratora-cc__slug-edit {
     display: flex;
     align-items: stretch;
     overflow: hidden;
-    border: 1px solid var(--fundkit-color-border, $border-mid);
+    border: 1px solid var(--gratora-color-border, $border-mid);
     border-radius: 8px;
     transition: border-color .12s, box-shadow .12s;
 
     &:focus-within {
-        border-color: var(--fundkit-color-accent, $accent);
+        border-color: var(--gratora-color-accent, $accent);
         box-shadow: 0 0 0 3px rgba(33, 29, 63, .12);
     }
 }
-.fundkit-cc__slug-prefix {
+.gratora-cc__slug-prefix {
     display: inline-flex;
     align-items: center;
     padding: 0 10px;
-    background: var(--fundkit-color-bg-soft, $bg-soft);
-    border-right: 1px solid var(--fundkit-color-border-soft, $border-soft);
+    background: var(--gratora-color-bg-soft, $bg-soft);
+    border-right: 1px solid var(--gratora-color-border-soft, $border-soft);
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 12px;
-    color: var(--fundkit-color-text-muted, $text-muted);
+    color: var(--gratora-color-text-muted, $text-muted);
     white-space: nowrap;
 }
-.fundkit-cc__slug-input {
+.gratora-cc__slug-input {
     flex: 1;
     min-width: 0;
     padding: 9px 11px;
@@ -2621,61 +2621,61 @@ $card-radius:   $radius-lg;
     outline: 0;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 13px;
-    color: var(--fundkit-color-text, $text);
+    color: var(--gratora-color-text, $text);
 }
-.fundkit-cc__slug-help {
+.gratora-cc__slug-help {
     margin-top: 6px;
     font-size: 11.5px;
     line-height: 1.4;
-    color: var(--fundkit-color-text-muted, $text-muted);
+    color: var(--gratora-color-text-muted, $text-muted);
 }
-.fundkit-cc__foot {
+.gratora-cc__foot {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
     width: 100%;
 }
-.fundkit-cc__publish {
+.gratora-cc__publish {
     display: inline-flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
     user-select: none;
 }
-.fundkit-cc__publish-txt {
+.gratora-cc__publish-txt {
     strong {
         display: block;
         font-size: 12.5px;
         font-weight: 600;
-        color: var(--fundkit-color-text, $text);
+        color: var(--gratora-color-text, $text);
     }
 
     span {
         font-size: 11px;
-        color: var(--fundkit-color-text-muted, $text-muted);
+        color: var(--gratora-color-text-muted, $text-muted);
     }
 }
-.fundkit-cc__foot-actions {
+.gratora-cc__foot-actions {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.fundkit-shortcode-copy {
+.gratora-shortcode-copy {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     max-width: 100%;
     padding: 3px 8px;
-    border: 1px solid var(--fundkit-color-border, #dcdcde);
+    border: 1px solid var(--gratora-color-border, #dcdcde);
     border-radius: 6px;
-    background: var(--fundkit-color-bg-soft, #f6f7f7);
+    background: var(--gratora-color-bg-soft, #f6f7f7);
     cursor: pointer;
     font: inherit;
     color: inherit;
 
-    &:hover { border-color: var(--fundkit-color-accent, #211d3f); }
+    &:hover { border-color: var(--gratora-color-accent, #211d3f); }
 
     &__code {
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -2690,11 +2690,11 @@ $card-radius:   $radius-lg;
         align-items: center;
         flex-shrink: 0;
         font-size: 11px;
-        color: var(--fundkit-color-text-muted, #6b7280);
+        color: var(--gratora-color-text-muted, #6b7280);
     }
 }
 
-.fundkit-story__anon {
+.gratora-story__anon {
     margin-inline-start: 6px;
     font-size: 11px;
     color: $text-muted;

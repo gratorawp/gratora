@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\EventRecorder;
-use FundKit\Core\Commands\CoreCommandProvider;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Foundation\Commands\CommandContext;
-use FundKit\Foundation\Commands\CommandRegistry;
-use FundKit\Foundation\Plugin;
-use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Receipts\ReceiptRepository;
-use FundKit\Settings\SettingsService;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Core\Commands\CoreCommandProvider;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Foundation\Commands\CommandContext;
+use Gratora\Foundation\Commands\CommandRegistry;
+use Gratora\Foundation\Plugin;
+use Gratora\Receipts\ReceiptIssuer;
+use Gratora\Receipts\ReceiptRepository;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
  * A receipt PDF is a donor record in another wrapper: it carries the donor's
  * postal address wherever the org turned that on, and their email wherever the
- * merge tag sits in the template. fundkit_view_donors is what gates those fields
+ * merge tag sits in the template. gratora_view_donors is what gates those fields
  * on the donations list, the detail payload and the CSV export, so the download
  * that reproduces them has to ask for the same thing. Otherwise a bookkeeper
  * role deliberately given donations but not donors walks the receipt ids and
@@ -40,7 +40,7 @@ final class ReceiptPdfCapabilityTest extends IntegrationTestCase
 
     private function paidDonation(): Donation
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'receipt.pdf@example.test',
@@ -61,7 +61,7 @@ final class ReceiptPdfCapabilityTest extends IntegrationTestCase
         ]));
         $reference = (string) (rest_do_request($create)->get_data()['reference'] ?? '');
 
-        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);
@@ -93,14 +93,14 @@ final class ReceiptPdfCapabilityTest extends IntegrationTestCase
     private function downloadStatus(int $receiptId): int
     {
         return rest_do_request(
-            new WP_REST_Request('GET', "/fundkit/v1/admin/receipts/{$receiptId}/pdf")
+            new WP_REST_Request('GET', "/gratora/v1/admin/receipts/{$receiptId}/pdf")
         )->get_status();
     }
 
     public function test_the_receipt_pdf_is_refused_without_view_donors(): void
     {
         $receiptId = $this->issuedReceiptId();
-        $this->actAs(['fundkit_view_donations']);
+        $this->actAs(['gratora_view_donations']);
 
         $this->assertContains(
             $this->downloadStatus($receiptId),
@@ -112,7 +112,7 @@ final class ReceiptPdfCapabilityTest extends IntegrationTestCase
     public function test_view_donors_still_downloads_the_receipt_pdf(): void
     {
         $receiptId = $this->issuedReceiptId();
-        $this->actAs(['fundkit_view_donations', 'fundkit_view_donors']);
+        $this->actAs(['gratora_view_donations', 'gratora_view_donors']);
 
         $this->assertSame(
             200,
@@ -129,7 +129,7 @@ final class ReceiptPdfCapabilityTest extends IntegrationTestCase
     public function test_view_donors_alone_does_not_reach_the_receipt_pdf(): void
     {
         $receiptId = $this->issuedReceiptId();
-        $this->actAs(['fundkit_view_donors']);
+        $this->actAs(['gratora_view_donors']);
 
         $this->assertContains(
             $this->downloadStatus($receiptId),
@@ -141,7 +141,7 @@ final class ReceiptPdfCapabilityTest extends IntegrationTestCase
     public function test_the_render_pdf_command_refuses_without_view_donors(): void
     {
         $receiptId = $this->issuedReceiptId();
-        $this->actAs(['fundkit_resend_receipt']);
+        $this->actAs(['gratora_resend_receipt']);
 
         $container = Plugin::instance()->container;
         $registry  = new CommandRegistry($container->get(EventRecorder::class));
@@ -154,6 +154,6 @@ final class ReceiptPdfCapabilityTest extends IntegrationTestCase
         );
 
         $this->assertFalse($result->ok, 'the command hands back a receipt full of donor details');
-        $this->assertStringContainsString('fundkit_view_donors', (string) $result->error);
+        $this->assertStringContainsString('gratora_view_donors', (string) $result->error);
     }
 }

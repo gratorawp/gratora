@@ -4,4 +4,4 @@
  * editor canvas all read one copy of it.
  */
 
-export * from '@fundkit/ui/styling/ink';
+export * from '@gratora/ui/styling/ink';

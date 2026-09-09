@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Admin\AdminFooter;
+use Gratora\Admin\AdminFooter;
 
 /**
  * admin_footer_text is global: every plugin that hooks it is fighting for one
@@ -30,14 +30,14 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
 
     public function test_the_dashboard_gets_the_prompt(): void
     {
-        // The dashboard slug is the bare "fundkit", so a prefix-only match
+        // The dashboard slug is the bare "gratora", so a prefix-only match
         // would skip the first screen a new install opens.
-        $this->assertStringContainsString('wordpress.org', $this->footerOn('fundkit'));
+        $this->assertStringContainsString('wordpress.org', $this->footerOn('gratora'));
     }
 
-    public function test_every_other_fundkit_screen_gets_it(): void
+    public function test_every_other_gratora_screen_gets_it(): void
     {
-        foreach (['fundkit-campaigns', 'fundkit-donations', 'fundkit-donors', 'fundkit-forms', 'fundkit-funds', 'fundkit-settings', 'fundkit-tools'] as $page) {
+        foreach (['gratora-campaigns', 'gratora-donations', 'gratora-donors', 'gratora-forms', 'gratora-funds', 'gratora-settings', 'gratora-tools'] as $page) {
             $this->assertStringContainsString('wordpress.org', $this->footerOn($page), "{$page} should carry the prompt");
         }
     }
@@ -51,7 +51,7 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
 
     public function test_the_prompt_asks_for_five_stars(): void
     {
-        $out = $this->footerOn('fundkit');
+        $out = $this->footerOn('gratora');
 
         $this->assertSame(5, substr_count($out, 'dashicons-star-filled'));
         $this->assertStringContainsString('rate=5', $out);
@@ -60,8 +60,8 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
     public function test_the_link_points_at_the_assigned_permalink(): void
     {
         $this->assertStringContainsString(
-            'https://wordpress.org/support/plugin/fundraising-toolkit/reviews/?rate=5#new-post',
-            $this->footerOn('fundkit')
+            'https://wordpress.org/support/plugin/gratora/reviews/?rate=5#new-post',
+            $this->footerOn('gratora')
         );
     }
 
@@ -72,11 +72,11 @@ final class AdminFooterReviewPromptTest extends IntegrationTestCase
      */
     public function test_the_slug_matches_the_plugins_text_domain(): void
     {
-        $header = get_file_data(FUNDKIT_FILE, ['TextDomain' => 'Text Domain']);
+        $header = get_file_data(GRATORA_FILE, ['TextDomain' => 'Text Domain']);
 
         $this->assertSame(
             $header['TextDomain'],
-            'fundraising-toolkit',
+            'gratora',
             'the review link slug and the Text Domain header have drifted apart'
         );
     }

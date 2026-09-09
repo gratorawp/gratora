@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors\Privacy;
+namespace Gratora\Donors\Privacy;
 
-use FundKit\Donors\ConsentService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorMetricsService;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Identity\IdentityHasher;
+use Gratora\Donors\ConsentService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorMetricsService;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Identity\IdentityHasher;
 
 /**
  * Connect WordPress privacy tools to the existing export and erasure services, including add-on
@@ -21,7 +21,7 @@ use FundKit\Foundation\Identity\IdentityHasher;
 final class WordPressPrivacy
 {
     /** WordPress pages these; a donor is one subject, so one page is enough. */
-    public const GROUP = 'fundkit-donor';
+    public const GROUP = 'gratora-donor';
 
     /** @since 1.0.0 */
     public function __construct(
@@ -48,8 +48,8 @@ final class WordPressPrivacy
      */
     public function registerExporter(array $exporters): array
     {
-        $exporters['fundkit'] = [
-            'exporter_friendly_name' => __('Fundraising Toolkit donations', 'fundraising-toolkit'),
+        $exporters['gratora'] = [
+            'exporter_friendly_name' => __('Gratora donations', 'gratora'),
             'callback'               => [$this, 'export'],
         ];
 
@@ -64,8 +64,8 @@ final class WordPressPrivacy
      */
     public function registerEraser(array $erasers): array
     {
-        $erasers['fundkit'] = [
-            'eraser_friendly_name' => __('Fundraising Toolkit donations', 'fundraising-toolkit'),
+        $erasers['gratora'] = [
+            'eraser_friendly_name' => __('Gratora donations', 'gratora'),
             'callback'             => [$this, 'erase'],
         ];
 
@@ -90,52 +90,52 @@ final class WordPressPrivacy
 
         $groups = [[
             'group_id'    => self::GROUP,
-            'group_label' => __('Donor record', 'fundraising-toolkit'),
-            'item_id'     => 'fundkit-donor-' . (int) $donor->id,
+            'group_label' => __('Donor record', 'gratora'),
+            'item_id'     => 'gratora-donor-' . (int) $donor->id,
             'data'        => $this->donorFields($donor, $bundle['donor'] ?? []),
         ]];
 
         foreach ($this->rows($bundle, 'donations') as $i => $row) {
             $groups[] = $this->group(
-                'fundkit-donation',
-                __('Donations', 'fundraising-toolkit'),
-                'fundkit-donation-' . ($row['id'] ?? $i),
+                'gratora-donation',
+                __('Donations', 'gratora'),
+                'gratora-donation-' . ($row['id'] ?? $i),
                 $this->donationFields($row)
             );
         }
 
         foreach ($this->rows($bundle['recurring'] ?? [], 'plans') as $i => $row) {
             $groups[] = $this->group(
-                'fundkit-recurring',
-                __('Recurring plans', 'fundraising-toolkit'),
-                'fundkit-plan-' . ($row['id'] ?? $i),
+                'gratora-recurring',
+                __('Recurring plans', 'gratora'),
+                'gratora-plan-' . ($row['id'] ?? $i),
                 $this->planFields($row)
             );
         }
 
         foreach ($this->rows($bundle, 'receipts') as $i => $row) {
             $groups[] = $this->group(
-                'fundkit-receipt',
-                __('Receipts', 'fundraising-toolkit'),
-                'fundkit-receipt-' . ($row['id'] ?? $i),
+                'gratora-receipt',
+                __('Receipts', 'gratora'),
+                'gratora-receipt-' . ($row['id'] ?? $i),
                 $this->receiptFields($row)
             );
         }
 
         foreach ($this->rows($bundle, 'events') as $i => $row) {
             $groups[] = $this->group(
-                'fundkit-activity',
-                __('Activity', 'fundraising-toolkit'),
-                'fundkit-event-' . ($row['id'] ?? $i),
+                'gratora-activity',
+                __('Activity', 'gratora'),
+                'gratora-event-' . ($row['id'] ?? $i),
                 $this->eventFields($row)
             );
         }
 
         foreach ($this->rows($bundle['consents'] ?? [], 'history') as $i => $row) {
             $groups[] = $this->group(
-                'fundkit-consent',
-                __('Consents', 'fundraising-toolkit'),
-                'fundkit-consent-' . ($row['id'] ?? $i),
+                'gratora-consent',
+                __('Consents', 'gratora'),
+                'gratora-consent-' . ($row['id'] ?? $i),
                 $this->consentFields($row)
             );
         }
@@ -164,7 +164,7 @@ final class WordPressPrivacy
             return [
                 'items_removed'  => false,
                 'items_retained' => false,
-                'messages'       => [__('This donor was already erased.', 'fundraising-toolkit')],
+                'messages'       => [__('This donor was already erased.', 'gratora')],
                 'done'           => true,
             ];
         }
@@ -178,7 +178,7 @@ final class WordPressPrivacy
             // charity's books have to still add up after an erasure.
             'items_retained' => true,
             'messages'       => [
-                __('The donor record was erased. Their donations were kept as anonymous records, because the amounts are part of the accounts.', 'fundraising-toolkit'),
+                __('The donor record was erased. Their donations were kept as anonymous records, because the amounts are part of the accounts.', 'gratora'),
             ],
             'done'           => true,
         ];
@@ -205,16 +205,16 @@ final class WordPressPrivacy
     private function donorFields(Donor $donor, array $exported): array
     {
         return $this->fields([
-            [__('First name', 'fundraising-toolkit'), $donor->first_name ?? ''],
-            [__('Last name', 'fundraising-toolkit'), $donor->last_name ?? ''],
-            [__('Company', 'fundraising-toolkit'), $donor->company ?? ''],
-            [__('Email', 'fundraising-toolkit'), $exported['email'] ?? ''],
-            [__('Phone', 'fundraising-toolkit'), $exported['phone'] ?? ''],
-            [__('Address', 'fundraising-toolkit'), $exported['address'] ?? ''],
-            [__('Country', 'fundraising-toolkit'), $donor->country ?? ''],
-            [__('First seen', 'fundraising-toolkit'), $donor->created_at ?? ''],
-            [__('First donation', 'fundraising-toolkit'), $donor->first_donation_at ?? ''],
-            [__('Last donation', 'fundraising-toolkit'), $donor->last_donation_at ?? ''],
+            [__('First name', 'gratora'), $donor->first_name ?? ''],
+            [__('Last name', 'gratora'), $donor->last_name ?? ''],
+            [__('Company', 'gratora'), $donor->company ?? ''],
+            [__('Email', 'gratora'), $exported['email'] ?? ''],
+            [__('Phone', 'gratora'), $exported['phone'] ?? ''],
+            [__('Address', 'gratora'), $exported['address'] ?? ''],
+            [__('Country', 'gratora'), $donor->country ?? ''],
+            [__('First seen', 'gratora'), $donor->created_at ?? ''],
+            [__('First donation', 'gratora'), $donor->first_donation_at ?? ''],
+            [__('Last donation', 'gratora'), $donor->last_donation_at ?? ''],
         ]);
     }
 
@@ -222,14 +222,14 @@ final class WordPressPrivacy
     private function donationFields(array $row): array
     {
         return $this->fields([
-            [__('Reference', 'fundraising-toolkit'), $row['reference'] ?? ''],
-            [__('Amount', 'fundraising-toolkit'), $this->money($row)],
-            [__('Frequency', 'fundraising-toolkit'), $row['frequency'] ?? ''],
-            [__('Status', 'fundraising-toolkit'), $row['status'] ?? ''],
-            [__('Payment method', 'fundraising-toolkit'), $row['gateway'] ?? ''],
-            [__('Paid', 'fundraising-toolkit'), $row['paid_at'] ?? ''],
-            [__('Created', 'fundraising-toolkit'), $row['created_at'] ?? ''],
-            [__('Test donation', 'fundraising-toolkit'), ! empty($row['is_test']) ? __('Yes', 'fundraising-toolkit') : ''],
+            [__('Reference', 'gratora'), $row['reference'] ?? ''],
+            [__('Amount', 'gratora'), $this->money($row)],
+            [__('Frequency', 'gratora'), $row['frequency'] ?? ''],
+            [__('Status', 'gratora'), $row['status'] ?? ''],
+            [__('Payment method', 'gratora'), $row['gateway'] ?? ''],
+            [__('Paid', 'gratora'), $row['paid_at'] ?? ''],
+            [__('Created', 'gratora'), $row['created_at'] ?? ''],
+            [__('Test donation', 'gratora'), ! empty($row['is_test']) ? __('Yes', 'gratora') : ''],
         ]);
     }
 
@@ -237,15 +237,15 @@ final class WordPressPrivacy
     private function planFields(array $row): array
     {
         return $this->fields([
-            [__('Amount', 'fundraising-toolkit'), $this->money($row)],
-            [__('Frequency', 'fundraising-toolkit'), $row['frequency'] ?? ''],
-            [__('Status', 'fundraising-toolkit'), $row['status'] ?? ''],
-            [__('Payment method', 'fundraising-toolkit'), $row['gateway'] ?? ''],
-            [__('Started', 'fundraising-toolkit'), $row['started_at'] ?? ''],
-            [__('Next payment', 'fundraising-toolkit'), $row['next_payment_at'] ?? ''],
-            [__('Last payment', 'fundraising-toolkit'), $row['last_payment_at'] ?? ''],
-            [__('Cancelled', 'fundraising-toolkit'), $row['cancelled_at'] ?? ''],
-            [__('Payments made', 'fundraising-toolkit'), (int) ($row['payments_count'] ?? 0) ?: ''],
+            [__('Amount', 'gratora'), $this->money($row)],
+            [__('Frequency', 'gratora'), $row['frequency'] ?? ''],
+            [__('Status', 'gratora'), $row['status'] ?? ''],
+            [__('Payment method', 'gratora'), $row['gateway'] ?? ''],
+            [__('Started', 'gratora'), $row['started_at'] ?? ''],
+            [__('Next payment', 'gratora'), $row['next_payment_at'] ?? ''],
+            [__('Last payment', 'gratora'), $row['last_payment_at'] ?? ''],
+            [__('Cancelled', 'gratora'), $row['cancelled_at'] ?? ''],
+            [__('Payments made', 'gratora'), (int) ($row['payments_count'] ?? 0) ?: ''],
         ]);
     }
 
@@ -253,11 +253,11 @@ final class WordPressPrivacy
     private function receiptFields(array $row): array
     {
         return $this->fields([
-            [__('Receipt number', 'fundraising-toolkit'), $row['receipt_number'] ?? ''],
-            [__('Donation', 'fundraising-toolkit'), $row['donation_reference'] ?? ''],
-            [__('Issued', 'fundraising-toolkit'), $row['issued_at'] ?? ''],
-            [__('Emailed', 'fundraising-toolkit'), $row['sent_to_email_at'] ?? ''],
-            [__('Voided', 'fundraising-toolkit'), ! empty($row['voided']) ? __('Yes', 'fundraising-toolkit') : ''],
+            [__('Receipt number', 'gratora'), $row['receipt_number'] ?? ''],
+            [__('Donation', 'gratora'), $row['donation_reference'] ?? ''],
+            [__('Issued', 'gratora'), $row['issued_at'] ?? ''],
+            [__('Emailed', 'gratora'), $row['sent_to_email_at'] ?? ''],
+            [__('Voided', 'gratora'), ! empty($row['voided']) ? __('Yes', 'gratora') : ''],
         ]);
     }
 
@@ -268,15 +268,15 @@ final class WordPressPrivacy
         $purpose = $this->consents->findPurpose($key);
 
         return $this->fields([
-            [__('Purpose', 'fundraising-toolkit'), $purpose['label'] ?? $key],
+            [__('Purpose', 'gratora'), $purpose['label'] ?? $key],
             [
-                __('Consent', 'fundraising-toolkit'),
+                __('Consent', 'gratora'),
                 ! empty($row['granted'])
-                    ? __('Given', 'fundraising-toolkit')
-                    : __('Withdrawn', 'fundraising-toolkit'),
+                    ? __('Given', 'gratora')
+                    : __('Withdrawn', 'gratora'),
             ],
-            [__('Recorded from', 'fundraising-toolkit'), $row['source'] ?? ''],
-            [__('Recorded', 'fundraising-toolkit'), $row['occurred_at'] ?? ''],
+            [__('Recorded from', 'gratora'), $row['source'] ?? ''],
+            [__('Recorded', 'gratora'), $row['occurred_at'] ?? ''],
         ]);
     }
 
@@ -289,9 +289,9 @@ final class WordPressPrivacy
     private function eventFields(array $row): array
     {
         return $this->fields([
-            [__('Event', 'fundraising-toolkit'), $row['type'] ?? ''],
-            [__('Amount', 'fundraising-toolkit'), $this->money($row)],
-            [__('Recorded', 'fundraising-toolkit'), $row['occurred_at'] ?? ''],
+            [__('Event', 'gratora'), $row['type'] ?? ''],
+            [__('Amount', 'gratora'), $this->money($row)],
+            [__('Recorded', 'gratora'), $row['occurred_at'] ?? ''],
         ]);
     }
 

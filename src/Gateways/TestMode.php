@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways;
+namespace Gratora\Gateways;
 
-use FundKit\Forms\Form;
-use FundKit\Forms\FormRepository;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormRepository;
 
 /**
  * Single resolver for "is this donation a test". A donation is test when its
  * form opts in (form.settings.test_mode) or the org flips the global kill switch
- * (fundkit_gateway_config.test_mode). Once created, a donation carries its own
+ * (gratora_gateway_config.test_mode). Once created, a donation carries its own
  * is_test; every later step reads that, never re-resolves.
  *
  * @since 1.0.0
@@ -47,7 +47,7 @@ final class TestMode
      */
     public static function siteWide(): bool
     {
-        $cfg = get_option('fundkit_gateway_config', []);
+        $cfg = get_option('gratora_gateway_config', []);
 
         return is_array($cfg) && ! empty($cfg['test_mode']);
     }

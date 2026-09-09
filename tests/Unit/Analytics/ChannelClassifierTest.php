@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Analytics;
+namespace Gratora\Tests\Unit\Analytics;
 
-use FundKit\Donations\ChannelClassifier;
+use Gratora\Donations\ChannelClassifier;
 use PHPUnit\Framework\TestCase;
 
 final class ChannelClassifierTest extends TestCase

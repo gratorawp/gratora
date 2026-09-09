@@ -1,5 +1,5 @@
 /**
- * Convenience wrapper over @wordpress/core-data's useEntityRecord for fundkit/v1
+ * Convenience wrapper over @wordpress/core-data's useEntityRecord for gratora/v1
  * entities (campaign, form, ...). Returns the merged record (saved + pending
  * edits) plus bind/bindNumber/setValue helpers for plain inputs.
  */
@@ -7,9 +7,9 @@
 import { useEntityRecord, store as coreDataStore } from '@wordpress/core-data';
 import { useSelect, useDispatch } from '@wordpress/data';
 
-const KIND = 'fundkit/v1';
+const KIND = 'gratora/v1';
 
-export function useFundKitRecord( name, id ) {
+export function useGratoraRecord( name, id ) {
     const {
         record,
         editedRecord,
@@ -57,7 +57,7 @@ export function useFundKitRecord( name, id ) {
     // apiFetch rejects with the parsed REST error, so a deleted record arrives
     // as a 404 and still means "not found". Anything else is a failure to ask.
     const status    = Number( thrown?.data?.status || thrown?.status || 0 );
-    const missing   = status === 404 || thrown?.code === 'fundkit_not_found';
+    const missing   = status === 404 || thrown?.code === 'gratora_not_found';
     const loadError = thrown && ! missing
         ? { status, message: thrown.message || '' }
         : null;

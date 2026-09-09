@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -14,7 +14,7 @@ final class BlockPipelineCoverageTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode(['title' => 'Coverage campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -22,7 +22,7 @@ final class BlockPipelineCoverageTest extends IntegrationTestCase
 
     private function configFor(string $blocks): string
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body(json_encode([
             'title'       => 'Coverage form',
@@ -34,12 +34,12 @@ final class BlockPipelineCoverageTest extends IntegrationTestCase
 
         // Test blocks are minimal and would fail the publish-readiness check
         // (Name + Email required). Bypass via a direct model save.
-        $form = \FundKit\Forms\Form::query()->find('id', (int) $created['id']);
+        $form = \Gratora\Forms\Form::query()->find('id', (int) $created['id']);
         $form->status = 'published';
         $form->save();
 
-        $html = do_shortcode('[fundkit_donation_form slug="' . $slug . '"]');
-        preg_match('/data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[gratora_donation_form slug="' . $slug . '"]');
+        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
         return (string) ($m[1] ?? '');
     }
 
@@ -47,35 +47,35 @@ final class BlockPipelineCoverageTest extends IntegrationTestCase
     {
         // One unique marker per block; each must reach the runtime config.
         $blocks = <<<BLOCKS
-<!-- wp:fundkit/heading {"text":"MK_HEADING"} /-->
-<!-- wp:fundkit/paragraph {"text":"MK_PARAGRAPH"} /-->
-<!-- wp:fundkit/html {"content":"<span>MK_HTML</span>"} /-->
-<!-- wp:fundkit/donation-amount {"presets":[91234],"currency":"EUR"} /-->
-<!-- wp:fundkit/name /-->
-<!-- wp:fundkit/email {"label":"MK_EMAIL"} /-->
-<!-- wp:fundkit/country {"label":"MK_COUNTRY"} /-->
-<!-- wp:fundkit/phone {"label":"MK_PHONE"} /-->
-<!-- wp:fundkit/comment {"label":"MK_COMMENT"} /-->
-<!-- wp:fundkit/address {"label":"MK_ADDRESS"} /-->
-<!-- wp:fundkit/anonymous-toggle {"label":"MK_ANON"} /-->
-<!-- wp:fundkit/cover-fees {"label":"MK_COVERFEES"} /-->
-<!-- wp:fundkit/recurring-toggle {"label":"MK_RECURRING","frequencies":["one-time","monthly"]} /-->
-<!-- wp:fundkit/fund-picker {"label":"MK_FUND","allowEmpty":true} /-->
-<!-- wp:fundkit/text-input {"field":"mk_text","label":"MK_TEXT"} /-->
-<!-- wp:fundkit/number-input {"field":"mk_num","label":"MK_NUMBER"} /-->
-<!-- wp:fundkit/date {"field":"mk_date","label":"MK_DATE"} /-->
-<!-- wp:fundkit/dropdown {"field":"mk_dd","label":"MK_DROPDOWN","options":["a"]} /-->
-<!-- wp:fundkit/radio {"field":"mk_radio","label":"MK_RADIO","options":["a"]} /-->
-<!-- wp:fundkit/checkbox {"field":"mk_check","label":"MK_CHECKBOX"} /-->
-<!-- wp:fundkit/multi-select {"field":"mk_ms","label":"MK_MULTISELECT","options":["a"]} /-->
-<!-- wp:fundkit/hidden {"field":"mk_hidden","defaultValue":"MK_HIDDEN"} /-->
-<!-- wp:fundkit/submit-button {"label":"MK_SUBMIT"} /-->
+<!-- wp:gratora/heading {"text":"MK_HEADING"} /-->
+<!-- wp:gratora/paragraph {"text":"MK_PARAGRAPH"} /-->
+<!-- wp:gratora/html {"content":"<span>MK_HTML</span>"} /-->
+<!-- wp:gratora/donation-amount {"presets":[91234],"currency":"EUR"} /-->
+<!-- wp:gratora/name /-->
+<!-- wp:gratora/email {"label":"MK_EMAIL"} /-->
+<!-- wp:gratora/country {"label":"MK_COUNTRY"} /-->
+<!-- wp:gratora/phone {"label":"MK_PHONE"} /-->
+<!-- wp:gratora/comment {"label":"MK_COMMENT"} /-->
+<!-- wp:gratora/address {"label":"MK_ADDRESS"} /-->
+<!-- wp:gratora/anonymous-toggle {"label":"MK_ANON"} /-->
+<!-- wp:gratora/cover-fees {"label":"MK_COVERFEES"} /-->
+<!-- wp:gratora/recurring-toggle {"label":"MK_RECURRING","frequencies":["one-time","monthly"]} /-->
+<!-- wp:gratora/fund-picker {"label":"MK_FUND","allowEmpty":true} /-->
+<!-- wp:gratora/text-input {"field":"mk_text","label":"MK_TEXT"} /-->
+<!-- wp:gratora/number-input {"field":"mk_num","label":"MK_NUMBER"} /-->
+<!-- wp:gratora/date {"field":"mk_date","label":"MK_DATE"} /-->
+<!-- wp:gratora/dropdown {"field":"mk_dd","label":"MK_DROPDOWN","options":["a"]} /-->
+<!-- wp:gratora/radio {"field":"mk_radio","label":"MK_RADIO","options":["a"]} /-->
+<!-- wp:gratora/checkbox {"field":"mk_check","label":"MK_CHECKBOX"} /-->
+<!-- wp:gratora/multi-select {"field":"mk_ms","label":"MK_MULTISELECT","options":["a"]} /-->
+<!-- wp:gratora/hidden {"field":"mk_hidden","defaultValue":"MK_HIDDEN"} /-->
+<!-- wp:gratora/submit-button {"label":"MK_SUBMIT"} /-->
 BLOCKS;
 
         $config = $this->configFor($blocks);
         $this->assertNotSame('', $config, 'form must emit a runtime config');
 
-        // fundkit/name is a two-part field (firstLabel/lastLabel), no single
+        // gratora/name is a two-part field (firstLabel/lastLabel), no single
         // label; assert it survived structurally instead of via a marker.
         $this->assertStringContainsString( '"kind":"name"', $config );
 
@@ -99,22 +99,22 @@ BLOCKS;
     public function test_layout_containers_and_multi_step_survive(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:fundkit/steps -->
-<!-- wp:fundkit/step {"label":"MK_STEP_ONE"} -->
-<!-- wp:fundkit/donation-amount {"presets":[500]} /-->
-<!-- /wp:fundkit/step -->
-<!-- wp:fundkit/step {"label":"MK_STEP_TWO"} -->
-<!-- wp:fundkit/columns {"columns":2,"gap":20,"gapUnit":"px"} -->
-<!-- wp:fundkit/heading {"text":"MK_IN_COLUMNS"} /-->
-<!-- /wp:fundkit/columns -->
-<!-- wp:fundkit/row {"columns":2,"gap":14,"gapUnit":"px"} -->
-<!-- wp:fundkit/name /-->
-<!-- wp:fundkit/email /-->
-<!-- /wp:fundkit/row -->
-<!-- /wp:fundkit/step -->
-<!-- /wp:fundkit/steps -->
+<!-- wp:gratora/steps -->
+<!-- wp:gratora/step {"label":"MK_STEP_ONE"} -->
+<!-- wp:gratora/donation-amount {"presets":[500]} /-->
+<!-- /wp:gratora/step -->
+<!-- wp:gratora/step {"label":"MK_STEP_TWO"} -->
+<!-- wp:gratora/columns {"columns":2,"gap":20,"gapUnit":"px"} -->
+<!-- wp:gratora/heading {"text":"MK_IN_COLUMNS"} /-->
+<!-- /wp:gratora/columns -->
+<!-- wp:gratora/row {"columns":2,"gap":14,"gapUnit":"px"} -->
+<!-- wp:gratora/name /-->
+<!-- wp:gratora/email /-->
+<!-- /wp:gratora/row -->
+<!-- /wp:gratora/step -->
+<!-- /wp:gratora/steps -->
 
-<!-- wp:fundkit/submit-button {"label":"MK_SUBMIT2"} /-->
+<!-- wp:gratora/submit-button {"label":"MK_SUBMIT2"} /-->
 BLOCKS;
 
         $config = $this->configFor($blocks);
@@ -126,10 +126,10 @@ BLOCKS;
             static fn ($s) => $s['page'] ?? 0,
             $cfg['steps'] ?? []
         ));
-        $this->assertGreaterThan(1, count($pages), 'fundkit/steps must yield multiple pages');
+        $this->assertGreaterThan(1, count($pages), 'gratora/steps must yield multiple pages');
 
         // Columns container and its nested child both survived.
-        $this->assertStringContainsString('fundkit-block--columns', $config);
+        $this->assertStringContainsString('gratora-block--columns', $config);
         $this->assertStringContainsString('MK_IN_COLUMNS', $config);
 
         // Row gap reached the config (the audit's row gap/gapUnit fix).
@@ -142,8 +142,8 @@ BLOCKS;
         // With no selectable funds and no explicit no-fund tile, the picker
         // would be an orphaned empty field, so the walker omits it entirely.
         $config = $this->configFor(
-            '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/name /--><!-- wp:fundkit/email /-->'
-            . '<!-- wp:fundkit/fund-picker {"label":"MK_ORPHAN_FUND"} /-->'
+            '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/name /--><!-- wp:gratora/email /-->'
+            . '<!-- wp:gratora/fund-picker {"label":"MK_ORPHAN_FUND"} /-->'
         );
 
         $this->assertNotSame('', $config);
@@ -154,16 +154,16 @@ BLOCKS;
     public function test_content_only_wizard_step_keeps_its_content_on_its_own_page(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:fundkit/steps -->
-<!-- wp:fundkit/step {"title":"Intro"} -->
-<!-- wp:fundkit/heading {"text":"MK_INTRO"} /-->
-<!-- /wp:fundkit/step -->
-<!-- wp:fundkit/step {"title":"Give"} -->
-<!-- wp:fundkit/donation-amount /-->
-<!-- wp:fundkit/email /-->
-<!-- wp:fundkit/submit-button /-->
-<!-- /wp:fundkit/step -->
-<!-- /wp:fundkit/steps -->
+<!-- wp:gratora/steps -->
+<!-- wp:gratora/step {"title":"Intro"} -->
+<!-- wp:gratora/heading {"text":"MK_INTRO"} /-->
+<!-- /wp:gratora/step -->
+<!-- wp:gratora/step {"title":"Give"} -->
+<!-- wp:gratora/donation-amount /-->
+<!-- wp:gratora/email /-->
+<!-- wp:gratora/submit-button /-->
+<!-- /wp:gratora/step -->
+<!-- /wp:gratora/steps -->
 BLOCKS;
 
         $cfg = json_decode($this->configFor($blocks), true);
@@ -195,17 +195,17 @@ BLOCKS;
     public function test_a_step_left_empty_in_the_builder_is_dropped(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:fundkit/steps -->
-<!-- wp:fundkit/step {"title":"Give"} -->
-<!-- wp:fundkit/donation-amount /-->
-<!-- wp:fundkit/email /-->
-<!-- /wp:fundkit/step -->
-<!-- wp:fundkit/step {"title":"MK_EMPTY_STEP"} -->
-<!-- /wp:fundkit/step -->
-<!-- wp:fundkit/step {"title":"Finish"} -->
-<!-- wp:fundkit/submit-button /-->
-<!-- /wp:fundkit/step -->
-<!-- /wp:fundkit/steps -->
+<!-- wp:gratora/steps -->
+<!-- wp:gratora/step {"title":"Give"} -->
+<!-- wp:gratora/donation-amount /-->
+<!-- wp:gratora/email /-->
+<!-- /wp:gratora/step -->
+<!-- wp:gratora/step {"title":"MK_EMPTY_STEP"} -->
+<!-- /wp:gratora/step -->
+<!-- wp:gratora/step {"title":"Finish"} -->
+<!-- wp:gratora/submit-button /-->
+<!-- /wp:gratora/step -->
+<!-- /wp:gratora/steps -->
 BLOCKS;
 
         $raw = $this->configFor($blocks);
@@ -242,10 +242,10 @@ BLOCKS;
     public function test_fields_and_content_interleave_in_authored_order(): void
     {
         $cfg = json_decode($this->configFor(
-            '<!-- wp:fundkit/paragraph {"text":"MK_ALPHA"} /-->'
-            . '<!-- wp:fundkit/name /-->'
-            . '<!-- wp:fundkit/paragraph {"text":"MK_BETA"} /-->'
-            . '<!-- wp:fundkit/email /-->'
+            '<!-- wp:gratora/paragraph {"text":"MK_ALPHA"} /-->'
+            . '<!-- wp:gratora/name /-->'
+            . '<!-- wp:gratora/paragraph {"text":"MK_BETA"} /-->'
+            . '<!-- wp:gratora/email /-->'
         ), true);
         $this->assertIsArray($cfg);
 
@@ -272,8 +272,8 @@ BLOCKS;
         // default, so an untouched toggle serializes with no attrs. The walker
         // must still emit a frequency picker (otherwise recurring is silently off).
         $cfg = json_decode($this->configFor(
-            '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/recurring-toggle /-->'
-            . '<!-- wp:fundkit/name /--><!-- wp:fundkit/email /--><!-- wp:fundkit/submit-button /-->'
+            '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/recurring-toggle /-->'
+            . '<!-- wp:gratora/name /--><!-- wp:gratora/email /--><!-- wp:gratora/submit-button /-->'
         ), true);
         $this->assertIsArray($cfg);
 
@@ -286,12 +286,12 @@ BLOCKS;
         // Empty attrs must encode as {} not []; [] leaves the block comment
         // unparsed and the notice silently disappears from the mounted form.
         $config = $this->configFor(
-            '<!-- wp:fundkit/donation-amount /--><!-- wp:fundkit/name /--><!-- wp:fundkit/email /-->'
-            . '<!-- wp:fundkit/privacy-notice /--><!-- wp:fundkit/submit-button /-->'
+            '<!-- wp:gratora/donation-amount /--><!-- wp:gratora/name /--><!-- wp:gratora/email /-->'
+            . '<!-- wp:gratora/privacy-notice /--><!-- wp:gratora/submit-button /-->'
         );
         $this->assertNotSame('', $config);
         $this->assertStringNotContainsString(
-            'wp:fundkit/privacy-notice',
+            'wp:gratora/privacy-notice',
             $config,
             'a bare privacy notice must render, not leak an unparsed block comment'
         );
@@ -300,12 +300,12 @@ BLOCKS;
     public function test_a_field_row_stays_grouped_between_content(): void
     {
         $cfg = json_decode($this->configFor(
-            '<!-- wp:fundkit/row {"columns":2} -->'
-            . '<!-- wp:fundkit/name /-->'
-            . '<!-- wp:fundkit/email /-->'
-            . '<!-- /wp:fundkit/row -->'
-            . '<!-- wp:fundkit/divider /-->'
-            . '<!-- wp:fundkit/phone /-->'
+            '<!-- wp:gratora/row {"columns":2} -->'
+            . '<!-- wp:gratora/name /-->'
+            . '<!-- wp:gratora/email /-->'
+            . '<!-- /wp:gratora/row -->'
+            . '<!-- wp:gratora/divider /-->'
+            . '<!-- wp:gratora/phone /-->'
         ), true);
 
         $items = $this->donorItems($cfg);
@@ -325,16 +325,16 @@ BLOCKS;
     public function test_root_content_before_a_wizard_is_lifted_into_the_preamble(): void
     {
         $blocks = <<<BLOCKS
-<!-- wp:fundkit/heading {"text":"MK_PREAMBLE"} /-->
-<!-- wp:fundkit/steps -->
-<!-- wp:fundkit/step {"title":"Give"} -->
-<!-- wp:fundkit/donation-amount /-->
-<!-- /wp:fundkit/step -->
-<!-- wp:fundkit/step {"title":"You"} -->
-<!-- wp:fundkit/email /-->
-<!-- wp:fundkit/submit-button /-->
-<!-- /wp:fundkit/step -->
-<!-- /wp:fundkit/steps -->
+<!-- wp:gratora/heading {"text":"MK_PREAMBLE"} /-->
+<!-- wp:gratora/steps -->
+<!-- wp:gratora/step {"title":"Give"} -->
+<!-- wp:gratora/donation-amount /-->
+<!-- /wp:gratora/step -->
+<!-- wp:gratora/step {"title":"You"} -->
+<!-- wp:gratora/email /-->
+<!-- wp:gratora/submit-button /-->
+<!-- /wp:gratora/step -->
+<!-- /wp:gratora/steps -->
 BLOCKS;
 
         $cfg = json_decode($this->configFor($blocks), true);

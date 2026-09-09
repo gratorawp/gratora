@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Mail;
+namespace Gratora\Mail;
 
-use FundKit\Settings\SettingsService;
+use Gratora\Settings\SettingsService;
 
 /**
  * Apply configured mail headers and per-template text.

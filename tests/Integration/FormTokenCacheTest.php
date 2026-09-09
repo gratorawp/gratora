@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Foundation\Config\SystemSetting;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Foundation\Config\SystemSetting;
+use Gratora\Foundation\Plugin;
 
 /**
  * Full-codebase QA Batch 3: the anti-spam form token is a coarse day bucket so

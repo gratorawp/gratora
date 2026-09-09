@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Admin\Pages;
+namespace Gratora\Admin\Pages;
 
-use FundKit\Foundation\Hooks\HookProvider;
+use Gratora\Foundation\Hooks\HookProvider;
 
 /** @since 1.0.0 */
 final class SubscriptionsPage extends HookProvider
 {
-    private const PAGE_ID   = 'fundkit-subscriptions';
-    private const HANDLE    = 'fundkit-admin-subscriptions';
+    private const PAGE_ID   = 'gratora-subscriptions';
+    private const HANDLE    = 'gratora-admin-subscriptions';
     private const BUILD_DIR = 'build/admin/subscriptions';
 
     /** @since 1.0.0 */
     protected function filters(): array
     {
-        return ['fundkit.admin.pages' => 'registerPage'];
+        return ['gratora.admin.pages' => 'registerPage'];
     }
 
     /** @since 1.0.0 */
@@ -24,9 +24,9 @@ final class SubscriptionsPage extends HookProvider
     {
         $pages[] = [
             'id'    => self::PAGE_ID,
-            'title' => __('Subscriptions', 'fundraising-toolkit'),
+            'title' => __('Subscriptions', 'gratora'),
             // Listing needs donations access; mutations check their own permissions.
-            'capability' => 'fundkit_access_donations',
+            'capability' => 'gratora_access_donations',
             'position'   => 15,
             'render'     => [$this, 'render'],
         ];
@@ -41,7 +41,7 @@ final class SubscriptionsPage extends HookProvider
         <div class="wrap">
             <?php // Keep WordPress notices above the React header.?>
             <hr class="wp-header-end" />
-            <div id="fundkit-admin-subscriptions"></div>
+            <div id="gratora-admin-subscriptions"></div>
         </div>
         <?php
     }
@@ -49,31 +49,31 @@ final class SubscriptionsPage extends HookProvider
     /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
-        $asset = require FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
+        $asset = require GRATORA_DIR . self::BUILD_DIR . '/index.asset.php';
 
         wp_enqueue_script(
             self::HANDLE,
-            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
+            GRATORA_URL . self::BUILD_DIR . '/index.js',
             $asset['dependencies'] ?? [],
-            $asset['version']      ?? FUNDKIT_VERSION,
+            $asset['version']      ?? GRATORA_VERSION,
             true
         );
 
-        wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
-            'fundkit-dataviews-vendor-subscriptions',
-            FUNDKIT_URL . self::BUILD_DIR . '/dataviews.css',
+            'gratora-dataviews-vendor-subscriptions',
+            GRATORA_URL . self::BUILD_DIR . '/dataviews.css',
             ['wp-components'],
-            (string) (@filemtime(FUNDKIT_DIR . self::BUILD_DIR . '/dataviews.css') ?: FUNDKIT_VERSION)
+            (string) (@filemtime(GRATORA_DIR . self::BUILD_DIR . '/dataviews.css') ?: GRATORA_VERSION)
         );
         wp_enqueue_style(
-            'fundkit-admin-subscriptions',
-            FUNDKIT_URL . 'build/admin/subscriptions.css',
+            'gratora-admin-subscriptions',
+            GRATORA_URL . 'build/admin/subscriptions.css',
             ['wp-components'],
-            (string) (@filemtime(FUNDKIT_DIR . 'build/admin/subscriptions.css') ?: FUNDKIT_VERSION)
+            (string) (@filemtime(GRATORA_DIR . 'build/admin/subscriptions.css') ?: GRATORA_VERSION)
         );
-        wp_style_add_data('fundkit-admin-subscriptions', 'rtl', 'replace');
+        wp_style_add_data('gratora-admin-subscriptions', 'rtl', 'replace');
     }
 }

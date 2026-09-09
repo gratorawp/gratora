@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways\Stripe;
+namespace Gratora\Gateways\Stripe;
 
-use FundKit\Foundation\Config\SystemSetting;
-use FundKit\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Config\SystemSetting;
+use Gratora\Foundation\Crypto\Crypto;
 
 /**
  * The organization's own Stripe API keys, stored per mode.
  *
- * FundKit is not a Stripe platform: the org pastes the keys from their own Stripe
+ * Gratora is not a Stripe platform: the org pastes the keys from their own Stripe
  * dashboard and every call is made directly as that account. Secret keys are
  * encrypted at rest and never leave the server; publishable keys are public by
  * design and are handed to the browser to mount the Payment Element.

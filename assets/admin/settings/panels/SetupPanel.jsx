@@ -10,12 +10,12 @@ import useCardOpen from '../../_shared/useCardOpen';
 // Order: money first, then whether a donor can reach you, then whether they
 // hear back, then the machinery underneath.
 const GROUPS = [
-    { id: 'money',    title: __( 'Taking money', 'fundraising-toolkit' ),          sub: __( 'What has to be true before a card is charged', 'fundraising-toolkit' ) },
-    { id: 'page',     title: __( 'A live donation page', 'fundraising-toolkit' ),  sub: __( 'Somewhere for a donor to land', 'fundraising-toolkit' ) },
-    { id: 'receipts', title: __( 'Receipts and email', 'fundraising-toolkit' ),    sub: __( 'What the donor gets back', 'fundraising-toolkit' ) },
-    { id: 'jobs',     title: __( 'Background jobs', 'fundraising-toolkit' ),       sub: __( 'Receipts and emails are queued, not sent inline', 'fundraising-toolkit' ) },
-    { id: 'portal',   title: __( 'Donor portal', 'fundraising-toolkit' ),          sub: __( 'Where sign-in and receipt links point', 'fundraising-toolkit' ) },
-    { id: 'licenses', title: __( 'Add-ons and licenses', 'fundraising-toolkit' ),  sub: __( 'Updates and security fixes for what you installed', 'fundraising-toolkit' ) },
+    { id: 'money',    title: __( 'Taking money', 'gratora' ),          sub: __( 'What has to be true before a card is charged', 'gratora' ) },
+    { id: 'page',     title: __( 'A live donation page', 'gratora' ),  sub: __( 'Somewhere for a donor to land', 'gratora' ) },
+    { id: 'receipts', title: __( 'Receipts and email', 'gratora' ),    sub: __( 'What the donor gets back', 'gratora' ) },
+    { id: 'jobs',     title: __( 'Background jobs', 'gratora' ),       sub: __( 'Receipts and emails are queued, not sent inline', 'gratora' ) },
+    { id: 'portal',   title: __( 'Donor portal', 'gratora' ),          sub: __( 'Where sign-in and receipt links point', 'gratora' ) },
+    { id: 'licenses', title: __( 'Add-ons and licenses', 'gratora' ),  sub: __( 'Updates and security fixes for what you installed', 'gratora' ) },
 ];
 
 export default function SetupPanel( { onJumpTo, active } ) {
@@ -24,7 +24,7 @@ export default function SetupPanel( { onJumpTo, active } ) {
 
     const load = useCallback( () => {
         setError( false );
-        apiFetch( { path: '/fundkit/v1/admin/readiness' } )
+        apiFetch( { path: '/gratora/v1/admin/readiness' } )
             .then( setReport )
             .catch( () => setError( true ) );
     }, [] );
@@ -37,12 +37,12 @@ export default function SetupPanel( { onJumpTo, active } ) {
 
     if ( error ) {
         return (
-            <div className="fundkit-panel">
-                <Card title={ __( 'Could not check your setup', 'fundraising-toolkit' ) }>
-                    <p className="fundkit-connect-p">
-                        { __( 'Something went wrong reading the readiness report. Nothing is broken by this on its own.', 'fundraising-toolkit' ) }
+            <div className="gratora-panel">
+                <Card title={ __( 'Could not check your setup', 'gratora' ) }>
+                    <p className="gratora-connect-p">
+                        { __( 'Something went wrong reading the readiness report. Nothing is broken by this on its own.', 'gratora' ) }
                     </p>
-                    <Btn variant="primary" onClick={ load }>{ __( 'Try again', 'fundraising-toolkit' ) }</Btn>
+                    <Btn variant="primary" onClick={ load }>{ __( 'Try again', 'gratora' ) }</Btn>
                 </Card>
             </div>
         );
@@ -50,9 +50,9 @@ export default function SetupPanel( { onJumpTo, active } ) {
 
     if ( ! report ) {
         return (
-            <div className="fundkit-panel">
-                <div className="fundkit-readiness__head">
-                    <div className="fundkit-readiness__title">{ __( 'Checking your setup…', 'fundraising-toolkit' ) }</div>
+            <div className="gratora-panel">
+                <div className="gratora-readiness__head">
+                    <div className="gratora-readiness__title">{ __( 'Checking your setup…', 'gratora' ) }</div>
                 </div>
             </div>
         );
@@ -61,7 +61,7 @@ export default function SetupPanel( { onJumpTo, active } ) {
     const checks = report.checks || [];
 
     return (
-        <div className="fundkit-panel">
+        <div className="gratora-panel">
             <Summary report={ report } />
 
             { GROUPS.map( ( group ) => {
@@ -80,33 +80,33 @@ function Summary( { report } ) {
     const blockers = report.blockers || 0;
     const warnings = report.warnings || 0;
 
-    let title = __( 'Ready to accept donations', 'fundraising-toolkit' );
-    let sub   = __( 'Nothing on this page is standing in a donor’s way.', 'fundraising-toolkit' );
+    let title = __( 'Ready to accept donations', 'gratora' );
+    let sub   = __( 'Nothing on this page is standing in a donor’s way.', 'gratora' );
     let tone  = 'green';
 
     if ( blockers > 0 ) {
         tone  = 'red';
         title = sprintf(
             /* translators: %d: number of things preventing donations. */
-            _n( '%d thing is stopping donations', '%d things are stopping donations', blockers, 'fundraising-toolkit' ),
+            _n( '%d thing is stopping donations', '%d things are stopping donations', blockers, 'gratora' ),
             blockers
         );
-        sub = __( 'Until these are fixed, a donor cannot complete a donation.', 'fundraising-toolkit' );
+        sub = __( 'Until these are fixed, a donor cannot complete a donation.', 'gratora' );
     } else if ( warnings > 0 ) {
         tone = 'amber';
         sub  = sprintf(
             /* translators: %d: number of non-blocking issues. */
-            _n( '%d thing is worth a look, but donations work.', '%d things are worth a look, but donations work.', warnings, 'fundraising-toolkit' ),
+            _n( '%d thing is worth a look, but donations work.', '%d things are worth a look, but donations work.', warnings, 'gratora' ),
             warnings
         );
     }
 
     return (
-        <div className={ `fundkit-readiness__head is-${ tone }` }>
-            <span className={ `fundkit-readiness__dot is-${ tone }` } />
+        <div className={ `gratora-readiness__head is-${ tone }` }>
+            <span className={ `gratora-readiness__dot is-${ tone }` } />
             <div>
-                <div className="fundkit-readiness__title">{ title }</div>
-                <div className="fundkit-readiness__sub">{ sub }</div>
+                <div className="gratora-readiness__title">{ title }</div>
+                <div className="gratora-readiness__sub">{ sub }</div>
             </div>
         </div>
     );
@@ -119,13 +119,13 @@ function Group( { group, rows, onJumpTo } ) {
     const [ open, setOpen ] = useCardOpen( trouble > 0 );
 
     const pill = trouble === 0
-        ? <span className="fundkit-pill fundkit-pill--green"><span className="fundkit-pill__dot" />{ __( 'All good', 'fundraising-toolkit' ) }</span>
+        ? <span className="gratora-pill gratora-pill--green"><span className="gratora-pill__dot" />{ __( 'All good', 'gratora' ) }</span>
         : (
-            <span className="fundkit-pill fundkit-pill--amber">
-                <span className="fundkit-pill__dot" />
+            <span className="gratora-pill gratora-pill--amber">
+                <span className="gratora-pill__dot" />
                 { sprintf(
                     /* translators: %d: number of checks in this group needing attention. */
-                    _n( '%d needs attention', '%d need attention', trouble, 'fundraising-toolkit' ),
+                    _n( '%d needs attention', '%d need attention', trouble, 'gratora' ),
                     trouble
                 ) }
             </span>
@@ -140,7 +140,7 @@ function Group( { group, rows, onJumpTo } ) {
             open={ open }
             onToggle={ setOpen }
         >
-            <ul className="fundkit-readiness__rows">
+            <ul className="gratora-readiness__rows">
                 { rows.map( ( row ) => <Row key={ row.id } row={ row } onJumpTo={ onJumpTo } /> ) }
             </ul>
         </Card>
@@ -152,7 +152,7 @@ function Row( { row, onJumpTo } ) {
     // load, but it stays a real link so it can still be opened in a new tab.
     const jump = ( e ) => {
         const url = row.action_url || '';
-        if ( ! url.includes( 'page=fundkit-settings' ) || ! url.includes( '#' ) ) {
+        if ( ! url.includes( 'page=gratora-settings' ) || ! url.includes( '#' ) ) {
             return;
         }
         e.preventDefault();
@@ -160,15 +160,15 @@ function Row( { row, onJumpTo } ) {
     };
 
     return (
-        <li className="fundkit-readiness-row" data-status={ row.status }>
-            <span className="fundkit-readiness-row__dot" />
-            <div className="fundkit-readiness-row__body">
-                <div className="fundkit-readiness-row__label">{ row.label }</div>
-                { row.detail && <div className="fundkit-readiness-row__detail">{ row.detail }</div> }
+        <li className="gratora-readiness-row" data-status={ row.status }>
+            <span className="gratora-readiness-row__dot" />
+            <div className="gratora-readiness-row__body">
+                <div className="gratora-readiness-row__label">{ row.label }</div>
+                { row.detail && <div className="gratora-readiness-row__detail">{ row.detail }</div> }
             </div>
             { row.action_url && (
-                <a className="fundkit-readiness-row__action" href={ row.action_url } onClick={ jump }>
-                    { row.action_label || __( 'Fix', 'fundraising-toolkit' ) } { forwardGlyph() }
+                <a className="gratora-readiness-row__action" href={ row.action_url } onClick={ jump }>
+                    { row.action_label || __( 'Fix', 'gratora' ) } { forwardGlyph() }
                 </a>
             ) }
         </li>

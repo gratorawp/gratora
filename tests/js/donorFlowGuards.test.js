@@ -21,9 +21,9 @@ function mount( node ) {
 	render( node, document.getElementById( 'root' ) );
 }
 
-const input = () => document.querySelector( '.fundkit-form__country-select-input' );
-const list  = () => document.querySelector( '.fundkit-form__country-select-list' );
-const options = () => [ ...document.querySelectorAll( '.fundkit-form__country-select-label' ) ]
+const input = () => document.querySelector( '.gratora-form__country-select-input' );
+const list  = () => document.querySelector( '.gratora-form__country-select-list' );
+const options = () => [ ...document.querySelectorAll( '.gratora-form__country-select-label' ) ]
 	.map( ( el ) => el.textContent );
 
 // Plain preact listens for blur; compat delegates to focusout. Both, so the
@@ -109,7 +109,7 @@ describe( 'the country picker gets out of the way', () => {
 		await type( 'Germ' );
 		expect( list() ).toBeTruthy();
 
-		document.querySelector( '.fundkit-form__country-select-option' ).click();
+		document.querySelector( '.gratora-form__country-select-option' ).click();
 		await tick();
 
 		expect( picked ).toEqual( [ 'DE' ] );

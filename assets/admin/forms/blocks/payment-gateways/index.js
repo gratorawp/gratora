@@ -4,9 +4,9 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 import { gatewayIsOn, gatewayOnCount, toggleGatewayAllowed } from '../../../_shared/gatewayAllowList';
 
-const NAME = 'fundkit/payment-gateways';
+const NAME = 'gratora/payment-gateways';
 
-const SETTINGS_URL = 'admin.php?page=fundkit-settings#gateways';
+const SETTINGS_URL = 'admin.php?page=gratora-settings#gateways';
 
 /**
  * Why the count is lower than the switches suggest. Without this the hint reads
@@ -20,14 +20,14 @@ function settingsReason( offInSettings ) {
         '%s is allowed here but switched off in Settings.',
         '%s are allowed here but switched off in Settings.',
         offInSettings.length,
-        'fundraising-toolkit'
+        'gratora'
     );
 
     return sprintf( template, names );
 }
 
 function registeredGateways() {
-    const g = typeof window !== 'undefined' && window.fundkitFormsEditor && window.fundkitFormsEditor.gateways;
+    const g = typeof window !== 'undefined' && window.gratoraFormsEditor && window.gratoraFormsEditor.gateways;
     return Array.isArray( g ) ? g : [];
 }
 
@@ -43,7 +43,7 @@ function Edit( { attributes, setAttributes } ) {
     const setDesc = ( id, text ) =>
         setAttributes( { descriptions: { ...descriptions, [ id ]: text } } );
 
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--gateways' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--gateways' } );
     // Off in Settings means no donor sees it, whatever this form allows, so
     // it is left out of the preview and cannot be preselected.
     const live  = gateways.filter( ( g ) => g.enabled !== false );
@@ -55,29 +55,29 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Payment gateways', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Payment gateways', 'gratora' ) } initialOpen>
                     { gateways.length === 0 && (
                         <Notice status="warning" isDismissible={ false }>
-                            { __( 'No gateways are connected yet.', 'fundraising-toolkit' ) }
+                            { __( 'No gateways are connected yet.', 'gratora' ) }
                         </Notice>
                     ) }
                     { gateways.map( ( g ) => (
                         <div key={ g.id } style={ { marginBottom: 12 } }>
                             <ToggleControl
                                 label={ g.enabled === false
-                                    ? `${ g.label } ${ __( '(off in Settings)', 'fundraising-toolkit' ) }`
+                                    ? `${ g.label } ${ __( '(off in Settings)', 'gratora' ) }`
                                     : g.label }
                                 checked={ isOn( g.id ) }
                                 disabled={ isOn( g.id ) && onCount <= 1 }
                                 help={ isOn( g.id ) && onCount <= 1
-                                    ? __( 'A form needs at least one gateway.', 'fundraising-toolkit' )
+                                    ? __( 'A form needs at least one gateway.', 'gratora' )
                                     : undefined }
                                 onChange={ () => toggle( g.id ) }
                                 __nextHasNoMarginBottom
                             />
                             { isOn( g.id ) && (
                                 <TextControl
-                                    label={ __( 'Description (optional)', 'fundraising-toolkit' ) }
+                                    label={ __( 'Description (optional)', 'gratora' ) }
                                     value={ descriptions[ g.id ] || '' }
                                     onChange={ ( v ) => setDesc( g.id, v ) }
                                     __nextHasNoMarginBottom
@@ -86,48 +86,48 @@ function Edit( { attributes, setAttributes } ) {
                         </div>
                     ) ) }
                     <SelectControl
-                        label={ __( 'Preselected', 'fundraising-toolkit' ) }
-                        help={ __( 'Skipped for a donor whose currency or frequency it cannot take, who then gets the first one that works.', 'fundraising-toolkit' ) }
+                        label={ __( 'Preselected', 'gratora' ) }
+                        help={ __( 'Skipped for a donor whose currency or frequency it cannot take, who then gets the first one that works.', 'gratora' ) }
                         value={ shown.some( ( g ) => g.id === preselected ) ? preselected : '' }
                         options={ [
-                            { value: '', label: __( 'First one that applies', 'fundraising-toolkit' ) },
+                            { value: '', label: __( 'First one that applies', 'gratora' ) },
                             ...shown.map( ( g ) => ( { value: g.id, label: g.label } ) ),
                         ] }
                         onChange={ ( v ) => setAttributes( { preselected: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Style', 'fundraising-toolkit' ) }
+                        label={ __( 'Style', 'gratora' ) }
                         value={ style }
                         options={ [
-                            { value: 'cards', label: __( 'Cards', 'fundraising-toolkit' ) },
-                            { value: 'list',  label: __( 'Compact list', 'fundraising-toolkit' ) },
+                            { value: 'cards', label: __( 'Cards', 'gratora' ) },
+                            { value: 'list',  label: __( 'Compact list', 'gratora' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { style: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <p style={ { margin: '16px 0 0' } }>
                         <ExternalLink href={ SETTINGS_URL }>
-                            { __( 'Manage payment gateways', 'fundraising-toolkit' ) }
+                            { __( 'Manage payment gateways', 'gratora' ) }
                         </ExternalLink>
                     </p>
                 </PanelBody>
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="fundkit-block-preview__label">{ __( 'Payment method', 'fundraising-toolkit' ) }</span>
+                <span className="gratora-block-preview__label">{ __( 'Payment method', 'gratora' ) }</span>
                 { shown.length === 0
-                    ? <div className="fundkit-block-preview__field">{ __( 'Gateways appear here for the donor.', 'fundraising-toolkit' ) }</div>
+                    ? <div className="gratora-block-preview__field">{ __( 'Gateways appear here for the donor.', 'gratora' ) }</div>
                     : shown.map( ( g ) => (
-                        <div key={ g.id } className="fundkit-block-preview__field">
+                        <div key={ g.id } className="gratora-block-preview__field">
                             { g.label }
                             { descriptions[ g.id ] ? ' - ' + descriptions[ g.id ] : '' }
                         </div>
                     ) ) }
                 { shown.length <= 1 && (
-                    <em className="fundkit-block-preview__hint">
+                    <em className="gratora-block-preview__hint">
                         { shown.length === 1
-                            ? __( 'One gateway is live, so the selector is hidden for donors.', 'fundraising-toolkit' )
-                            : __( 'No gateway is live, so donors see nothing here.', 'fundraising-toolkit' ) }
+                            ? __( 'One gateway is live, so the selector is hidden for donors.', 'gratora' )
+                            : __( 'No gateway is live, so donors see nothing here.', 'gratora' ) }
                         { offInSettings.length > 0 && ' ' + settingsReason( offInSettings ) }
                     </em>
                 ) }
@@ -139,9 +139,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Payment gateways', 'fundraising-toolkit' ),
-        description: __( 'Lets the donor choose how to pay. Hidden automatically when only one applies.', 'fundraising-toolkit' ),
-        category:   'fundkit-amount',
+        title:      __( 'Payment gateways', 'gratora' ),
+        description: __( 'Lets the donor choose how to pay. Hidden automatically when only one applies.', 'gratora' ),
+        category:   'gratora-amount',
         icon:       BlockIcons[ 'payment-gateways' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

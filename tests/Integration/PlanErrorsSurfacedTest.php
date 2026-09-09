@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Recurring\RecurringPlan;
 use WP_REST_Request;
 
 /**
@@ -39,7 +39,7 @@ final class PlanErrorsSurfacedTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/recurring'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/recurring'));
         foreach ((array) ($res->get_data()['items'] ?? $res->get_data()) as $row) {
             if ((int) ($row['id'] ?? 0) === $id) {
                 return (array) $row;
@@ -107,7 +107,7 @@ final class PlanErrorsSurfacedTest extends IntegrationTestCase
 
         ErrorLog::record('recurring', 'resume failed', ['recurring_plan_id' => (int) $plan->id]);
 
-        $row = \FundKit\Analytics\Event::query()
+        $row = \Gratora\Analytics\Event::query()
             ->where('recurring_plan_id', (int) $plan->id)
             ->get();
 

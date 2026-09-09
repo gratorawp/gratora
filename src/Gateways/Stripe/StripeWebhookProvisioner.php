@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Gateways\Stripe;
+namespace Gratora\Gateways\Stripe;
 
 use RuntimeException;
 
 /**
- * Registers FundKit's webhook endpoint on the organization's own Stripe account
+ * Registers Gratora's webhook endpoint on the organization's own Stripe account
  * after a successful connect, so paid / refund / renewal / dispute events flow
  * without the org hand-building a webhook in Stripe. Charges fire on the
  * account, so the endpoint is created with the account's own secret key.
@@ -19,7 +19,7 @@ use RuntimeException;
  */
 final class StripeWebhookProvisioner
 {
-    /** Connected-account events FundKit's webhook handler acts on. */
+    /** Connected-account events Gratora's webhook handler acts on. */
     private const EVENTS = [
         'payment_intent.succeeded',
         'payment_intent.processing',
@@ -29,7 +29,7 @@ final class StripeWebhookProvisioner
         // the money to the org while the donor keeps waiting for it.
         'charge.refund.updated',
         'charge.dispute.funds_withdrawn',
-        // Won on appeal: Stripe puts the money back, so FundKit has to as well.
+        // Won on appeal: Stripe puts the money back, so Gratora has to as well.
         'charge.dispute.funds_reinstated',
         'invoice.payment_succeeded',
         'invoice.payment_failed',
@@ -59,7 +59,7 @@ final class StripeWebhookProvisioner
         // Route token-bearing calls to the mode that was just connected.
         $this->account->useTestMode($isTest);
 
-        $url = rest_url('fundkit/v1/webhooks/stripe');
+        $url = rest_url('gratora/v1/webhooks/stripe');
         if (! self::stripeCanReach($url)) {
             // Stripe can't deliver to a local / unresolvable host; provisioning
             // would store a dead endpoint's secret over the manual (Stripe CLI)
@@ -104,7 +104,7 @@ final class StripeWebhookProvisioner
         $created = $this->api->post('/webhook_endpoints', [
             'url'            => $url,
             'enabled_events' => self::EVENTS,
-            'description'    => 'Fundraising Toolkit',
+            'description'    => 'Gratora',
             // Without this the endpoint renders events at whatever the account
             // defaults to, which on any account created since March 2025 is a
             // version that moved fields the handlers read.
@@ -185,7 +185,7 @@ final class StripeWebhookProvisioner
      */
     private function secretBelongsTo(bool $isTest, string $endpointId): bool
     {
-        $opt    = get_option('fundkit_gateway_config', []);
+        $opt    = get_option('gratora_gateway_config', []);
         $stripe = is_array($opt) && is_array($opt['stripe'] ?? null) ? $opt['stripe'] : [];
 
         $secret = (string) ($stripe[self::secretKey($isTest)] ?? '');
@@ -267,20 +267,20 @@ final class StripeWebhookProvisioner
      */
     public function forgetSecret(bool $isTest): void
     {
-        $opt = get_option('fundkit_gateway_config', []);
+        $opt = get_option('gratora_gateway_config', []);
         if (! is_array($opt) || ! is_array($opt['stripe'] ?? null)) {
             return;
         }
 
         $opt['stripe'][self::secretKey($isTest)]   = '';
         $opt['stripe'][self::endpointKey($isTest)] = '';
-        update_option('fundkit_gateway_config', $opt, false);
+        update_option('gratora_gateway_config', $opt, false);
     }
 
     /** @since 1.0.0 */
     private function storeSecret(bool $isTest, string $secret, string $endpointId): void
     {
-        $opt = get_option('fundkit_gateway_config', []);
+        $opt = get_option('gratora_gateway_config', []);
         if (! is_array($opt)) {
             $opt = [];
         }
@@ -293,6 +293,6 @@ final class StripeWebhookProvisioner
         $opt['stripe'][self::endpointKey($isTest)] = $endpointId === ''
             ? ''
             : self::bond($endpointId, $secret);
-        update_option('fundkit_gateway_config', $opt, false);
+        update_option('gratora_gateway_config', $opt, false);
     }
 }

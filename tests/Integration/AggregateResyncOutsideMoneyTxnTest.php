@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationService;
-use FundKit\Foundation\Plugin;
+use Gratora\Analytics\Event;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationService;
+use Gratora\Foundation\Plugin;
 use RuntimeException;
 
 /**
@@ -32,7 +32,7 @@ final class AggregateResyncOutsideMoneyTxnTest extends IntegrationTestCase
 
         $this->whileQueryThrows(
             static fn (string $sql): bool => str_contains($sql, 'UPDATE')
-                && str_contains($sql, 'fundkit_campaigns'),
+                && str_contains($sql, 'gratora_campaigns'),
             fn () => $this->service()->confirm($donation, ['gateway_txn_id' => 'txn_counter_fails'])
         );
 
@@ -80,7 +80,7 @@ final class AggregateResyncOutsideMoneyTxnTest extends IntegrationTestCase
         $paid = $this->firstMatch(
             $statements,
             static fn (string $sql): bool => str_contains($sql, 'UPDATE')
-                && str_contains($sql, 'fundkit_donations')
+                && str_contains($sql, 'gratora_donations')
                 && str_contains($sql, "'paid'")
         );
         $this->assertNotNull($paid, 'the donation was flipped to paid');
@@ -97,7 +97,7 @@ final class AggregateResyncOutsideMoneyTxnTest extends IntegrationTestCase
         $counted = $this->firstMatch(
             $statements,
             static fn (string $sql): bool => str_contains($sql, 'UPDATE')
-                && str_contains($sql, 'fundkit_campaigns')
+                && str_contains($sql, 'gratora_campaigns')
                 && str_contains($sql, 'raised_cents')
         );
         $this->assertNotNull($counted, 'the campaign counter was written');
@@ -166,7 +166,7 @@ final class AggregateResyncOutsideMoneyTxnTest extends IntegrationTestCase
     private function donationRow(int $id): object
     {
         return self::$wpdb->get_row(
-            self::$wpdb->prepare('SELECT status, paid_at FROM ' . self::$prefix . 'fundkit_donations WHERE id = %d', $id)
+            self::$wpdb->prepare('SELECT status, paid_at FROM ' . self::$prefix . 'gratora_donations WHERE id = %d', $id)
         );
     }
 

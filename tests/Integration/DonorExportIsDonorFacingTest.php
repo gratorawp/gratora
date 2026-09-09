@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -27,14 +27,14 @@ final class DonorExportIsDonorFacingTest extends IntegrationTestCase
             ->findOrCreate('export-' . uniqid() . '@example.test', ['first_name' => 'Nadia']);
 
         $this->csrf = bin2hex(random_bytes(8));
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession((int) $donor->id, $this->csrf);
+        $_COOKIE['gratora_donor_session'] = $this->portalSession((int) $donor->id, $this->csrf);
 
         return $donor;
     }
 
     protected function tearDown(): void
     {
-        unset($_COOKIE['fundkit_donor_session']);
+        unset($_COOKIE['gratora_donor_session']);
         parent::tearDown();
     }
 
@@ -48,8 +48,8 @@ final class DonorExportIsDonorFacingTest extends IntegrationTestCase
     {
         remove_all_filters('rest_pre_serve_request');
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/data-export');
-        $req->set_header('X-FundKit-Csrf', $this->csrf);
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/data-export');
+        $req->set_header('X-Gratora-Csrf', $this->csrf);
 
         $res = rest_do_request($req);
         $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
@@ -68,7 +68,7 @@ final class DonorExportIsDonorFacingTest extends IntegrationTestCase
     public function test_the_error_log_message_is_not_in_the_donors_file(): void
     {
         $donor  = $this->signedInDonor();
-        $secret = 'SQLSTATE[42S02] wptests_fundkit_recurring_plans does not exist';
+        $secret = 'SQLSTATE[42S02] wptests_gratora_recurring_plans does not exist';
 
         ErrorLog::record('portal.recurring', $secret, ['donor_id' => (int) $donor->id]);
 

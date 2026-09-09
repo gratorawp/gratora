@@ -12,7 +12,7 @@ import LayoutControls from '../_shared/widgets/LayoutControls';
 import SectionBar from '../_shared/widgets/SectionBar';
 import RevenueChart from '../_shared/widgets/RevenueChart';
 import ChannelBreakdown from '../_shared/widgets/ChannelBreakdown';
-import { useFundKitLayout } from '../_shared/widgets/useFundKitLayout';
+import { useGratoraLayout } from '../_shared/widgets/useGratoraLayout';
 import { defaultCurrency } from '../_shared/format';
 
 import KpiRow from './widgets/KpiRow';
@@ -68,7 +68,7 @@ export default function Dashboard() {
     const [ fetchError, setFetchError ]     = useState( false );
     const [ reloadKey, setReloadKey ]       = useState( 0 );
 
-    const layout = useFundKitLayout( SCOPE, WIDGET_KEYS );
+    const layout = useGratoraLayout( SCOPE, WIDGET_KEYS );
 
     // Only fetch sections for visible widgets; include= changes on hide/unhide.
     //
@@ -86,7 +86,7 @@ export default function Dashboard() {
         setLoading( true );
         setFetchError( false );
         apiFetch( {
-            path: addQueryArgs( '/fundkit/v1/admin/dashboard', { range, compare: compareMode, include: includeKey, include_test: includeTest } ),
+            path: addQueryArgs( '/gratora/v1/admin/dashboard', { range, compare: compareMode, include: includeKey, include_test: includeTest } ),
         } )
             .then( ( m ) => { if ( ! aborted ) setMetrics( ( prev ) => ( { ...( prev || {} ), ...m } ) ); } )
             .catch( () => { if ( ! aborted ) setFetchError( true ); } )
@@ -113,26 +113,26 @@ export default function Dashboard() {
     // The KPI row takes its own skeleton; the rest render whatever they are
     // handed, and an empty array is indistinguishable from a real empty state.
     const pending = ( render ) => ( firstLoad
-        ? () => <div className="fundkit-widget-skeleton" aria-hidden="true" />
+        ? () => <div className="gratora-widget-skeleton" aria-hidden="true" />
         : render );
 
     const registry = {
         today: {
-            title:  __( 'Activity (last 24h)', 'fundraising-toolkit' ),
+            title:  __( 'Activity (last 24h)', 'gratora' ),
             render: pending( () => <TodayStrip today={ m.today } /> ),
         },
         kpis: {
-            title:  __( 'Key metrics', 'fundraising-toolkit' ),
+            title:  __( 'Key metrics', 'gratora' ),
             span:   'full',
             bare:   true,
             render: () => <KpiRow kpi={ m.kpi } compareOn={ compareOn } range={ range } includesTest={ !! m.test?.includes_test } loading={ metrics === null && loading } />,
         },
         attention: {
-            title:  __( 'Needs attention', 'fundraising-toolkit' ),
+            title:  __( 'Needs attention', 'gratora' ),
             render: pending( () => <NeedsAttention items={ m.attention } /> ),
         },
         revenue: {
-            title:  __( 'Revenue', 'fundraising-toolkit' ),
+            title:  __( 'Revenue', 'gratora' ),
             span:   'full',
             render: pending( () => (
                 <RevenueChart
@@ -144,38 +144,38 @@ export default function Dashboard() {
             ) ),
         },
         'active-campaigns': {
-            title:  __( 'Active campaigns', 'fundraising-toolkit' ),
+            title:  __( 'Active campaigns', 'gratora' ),
             render: pending( () => <ActiveCampaigns rows={ m.active_campaigns } /> ),
         },
         recurring: {
-            title:  __( 'Recurring revenue', 'fundraising-toolkit' ),
+            title:  __( 'Recurring revenue', 'gratora' ),
             render: pending( () => <RecurringForecast recurring={ m.recurring } /> ),
         },
         'top-campaigns': {
-            title:  __( 'Top campaigns', 'fundraising-toolkit' ),
+            title:  __( 'Top campaigns', 'gratora' ),
             render: pending( () => <TopCampaigns rows={ m.top_campaigns } /> ),
         },
         channel: {
-            title:  __( 'Channels', 'fundraising-toolkit' ),
+            title:  __( 'Channels', 'gratora' ),
             render: pending( () => <ChannelBreakdown rows={ m.by_channel } currency={ currency } /> ),
         },
         'recent-activity': {
-            title:  __( 'Recent donations', 'fundraising-toolkit' ),
+            title:  __( 'Recent donations', 'gratora' ),
             render: pending( () => <RecentActivity rows={ m.recent_activity } /> ),
         },
         'quick-actions': {
-            title:  __( 'Quick actions', 'fundraising-toolkit' ),
+            title:  __( 'Quick actions', 'gratora' ),
             render: () => <QuickActions />,
         },
     };
 
     return (
-        <div className="fundkit-dashboard" data-loading={ loading ? 'true' : undefined }>
-            <div className="fundkit-page-head">
-                <div className="fundkit-page-head__title-row">
-                    <h1>{ __( 'Dashboard', 'fundraising-toolkit' ) }</h1>
+        <div className="gratora-dashboard" data-loading={ loading ? 'true' : undefined }>
+            <div className="gratora-page-head">
+                <div className="gratora-page-head__title-row">
+                    <h1>{ __( 'Dashboard', 'gratora' ) }</h1>
                 </div>
-                <div className="fundkit-page-head__right">
+                <div className="gratora-page-head__right">
                     <SectionBar
                         range={ range } onRangeChange={ setRange }
                         compareMode={ compareMode } onCompareModeChange={ setCompareMode }
@@ -203,23 +203,23 @@ export default function Dashboard() {
                             '%d test record is not counted here.',
                             '%d test records are not counted here.',
                             hiddenTotal,
-                            'fundraising-toolkit'
+                            'gratora'
                         ),
                         hiddenTotal
                     ) }
                     { ' ' }
                     <Button variant="link" onClick={ () => setIncludeTest( true ) }>
-                        { __( 'Show them', 'fundraising-toolkit' ) }
+                        { __( 'Show them', 'gratora' ) }
                     </Button>
                 </Notice>
             ) }
 
             { metrics?.test?.includes_test && (
                 <Notice status="warning" isDismissible={ false }>
-                    { __( 'These figures include test records. They contain money that was never actually taken, so they cannot be quoted as income.', 'fundraising-toolkit' ) }
+                    { __( 'These figures include test records. They contain money that was never actually taken, so they cannot be quoted as income.', 'gratora' ) }
                     { ' ' }
                     <Button variant="link" onClick={ () => setIncludeTest( false ) }>
-                        { __( 'Hide them', 'fundraising-toolkit' ) }
+                        { __( 'Hide them', 'gratora' ) }
                     </Button>
                 </Notice>
             ) }
@@ -229,13 +229,13 @@ export default function Dashboard() {
                  the range now selected. */ }
             { metrics !== null && fetchError && (
                 <Notice status="error" onRemove={ () => setFetchError( false ) }>
-                    { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'fundraising-toolkit' ) }
+                    { __( 'These numbers are from the previous range. The one you picked could not be loaded.', 'gratora' ) }
                     { ' ' }
                     { /* Every other way back into the fetch is a setter called
                          with the value the state already holds, so nothing is
                          asked again unless the reader changes the question. */ }
                     <Btn variant="link" onClick={ () => setReloadKey( ( k ) => k + 1 ) }>
-                        { __( 'Try again', 'fundraising-toolkit' ) }
+                        { __( 'Try again', 'gratora' ) }
                     </Btn>
                 </Notice>
             ) }
@@ -243,11 +243,11 @@ export default function Dashboard() {
             { metrics === null && fetchError ? (
                 <EmptyState
                     icon={ <AlertTriangle size={ 24 } strokeWidth={ 1.75 } /> }
-                    title={ __( 'Could not load your dashboard', 'fundraising-toolkit' ) }
-                    body={ __( 'Something went wrong fetching your metrics. Check your connection and try again.', 'fundraising-toolkit' ) }
+                    title={ __( 'Could not load your dashboard', 'gratora' ) }
+                    body={ __( 'Something went wrong fetching your metrics. Check your connection and try again.', 'gratora' ) }
                     action={
                         <Btn variant="primary" onClick={ () => setReloadKey( ( k ) => k + 1 ) }>
-                            { __( 'Retry', 'fundraising-toolkit' ) }
+                            { __( 'Retry', 'gratora' ) }
                         </Btn>
                     }
                 />

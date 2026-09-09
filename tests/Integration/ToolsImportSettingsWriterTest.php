@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
  * Tools > Import is a settings writer, so everything that guards a settings
  * write has to hold there too: the base-currency lock, the per-group type
- * whitelist, and the fundkit.settings.updated broadcast the FX snapshot and the
+ * whitelist, and the gratora.settings.updated broadcast the FX snapshot and the
  * campaign currency sync hang off.
  */
 final class ToolsImportSettingsWriterTest extends IntegrationTestCase
@@ -23,7 +23,7 @@ final class ToolsImportSettingsWriterTest extends IntegrationTestCase
     {
         parent::setUp();
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD', 'EUR'],
         ], false);
@@ -50,7 +50,7 @@ final class ToolsImportSettingsWriterTest extends IntegrationTestCase
     /** @param array<string,mixed> $body */
     private function post(array $body): \WP_REST_Response
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/import');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/tools/import');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
 
@@ -59,7 +59,7 @@ final class ToolsImportSettingsWriterTest extends IntegrationTestCase
 
     private function base(): string
     {
-        $opt = get_option('fundkit_currency_locale');
+        $opt = get_option('gratora_currency_locale');
 
         return (string) (is_array($opt) ? ($opt['default_currency'] ?? '') : '');
     }
@@ -68,13 +68,13 @@ final class ToolsImportSettingsWriterTest extends IntegrationTestCase
     {
         $this->liveDonation();
 
-        $res = $this->post(['settings' => ['fundkit_currency_locale' => [
+        $res = $this->post(['settings' => ['gratora_currency_locale' => [
             'default_currency'     => 'EUR',
             'supported_currencies' => ['EUR'],
         ]]]);
 
         $this->assertSame(409, $res->get_status(), 'the import must refuse the write the settings screen refuses');
-        $this->assertSame('fundkit_base_currency_locked', $res->as_error()->get_error_code());
+        $this->assertSame('gratora_base_currency_locked', $res->as_error()->get_error_code());
         $this->assertSame('USD', $this->base(), 'the stored base is untouched');
     }
 
@@ -83,26 +83,26 @@ final class ToolsImportSettingsWriterTest extends IntegrationTestCase
         $this->liveDonation();
 
         $res = $this->post(['settings' => [
-            'fundkit_currency_locale' => ['default_currency' => 'EUR'],
-            'fundkit_receipt_settings' => ['header_title' => 'Imported receipt'],
+            'gratora_currency_locale' => ['default_currency' => 'EUR'],
+            'gratora_receipt_settings' => ['header_title' => 'Imported receipt'],
         ]]);
 
         $this->assertSame(409, $res->get_status());
         $this->assertSame('USD', $this->base());
         $this->assertSame(
             'Imported receipt',
-            (string) (get_option('fundkit_receipt_settings')['header_title'] ?? ''),
+            (string) (get_option('gratora_receipt_settings')['header_title'] ?? ''),
             'the groups that were allowed still landed'
         );
 
         $data = $res->as_error()->get_error_data();
-        $this->assertSame(['fundkit_currency_locale'], array_keys((array) ($data['refused'] ?? [])));
+        $this->assertSame(['gratora_currency_locale'], array_keys((array) ($data['refused'] ?? [])));
         $this->assertSame(1, (int) ($data['applied'] ?? 0));
     }
 
     public function test_a_scalar_settings_payload_cannot_blank_the_base_currency(): void
     {
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'EUR',
             'supported_currencies' => ['EUR'],
         ], false);
@@ -111,7 +111,7 @@ final class ToolsImportSettingsWriterTest extends IntegrationTestCase
         // Every reader merges over the group defaults, so a scalar in the option
         // reads as default_currency USD: the same re-denomination by another
         // route.
-        $res = $this->post(['settings' => ['fundkit_currency_locale' => 'EUR']]);
+        $res = $this->post(['settings' => ['gratora_currency_locale' => 'EUR']]);
 
         $this->assertSame(422, $res->get_status());
         $this->assertSame(
@@ -131,7 +131,7 @@ final class ToolsImportSettingsWriterTest extends IntegrationTestCase
         $c->currency = 'USD';
         $c->save();
 
-        $res = $this->post(['settings' => ['fundkit_currency_locale' => [
+        $res = $this->post(['settings' => ['gratora_currency_locale' => [
             'default_currency'     => 'EUR',
             'supported_currencies' => ['EUR'],
         ]]]);
@@ -139,7 +139,7 @@ final class ToolsImportSettingsWriterTest extends IntegrationTestCase
         $this->assertSame(200, $res->get_status());
         $this->assertSame('EUR', $this->base());
 
-        $fx = get_option('fundkit_fx_rates');
+        $fx = get_option('gratora_fx_rates');
         $this->assertSame('EUR', (string) ($fx['base'] ?? ''), 'the FX snapshot follows the base');
 
         $this->assertSame(
@@ -151,14 +151,14 @@ final class ToolsImportSettingsWriterTest extends IntegrationTestCase
 
     public function test_an_undeclared_key_does_not_reach_the_stored_option(): void
     {
-        $res = $this->post(['settings' => ['fundkit_privacy' => [
+        $res = $this->post(['settings' => ['gratora_privacy' => [
             'anonymize_ips' => false,
             'evil_key'      => 'planted',
         ]]]);
 
         $this->assertSame(200, $res->get_status());
 
-        $privacy = get_option('fundkit_privacy');
+        $privacy = get_option('gratora_privacy');
         $this->assertArrayNotHasKey('evil_key', (array) $privacy);
         $this->assertFalse((bool) ($privacy['anonymize_ips'] ?? true));
     }
@@ -166,38 +166,38 @@ final class ToolsImportSettingsWriterTest extends IntegrationTestCase
     public function test_a_role_mapping_import_replaces_wholesale_and_reaches_the_roles(): void
     {
         Plugin::instance()->container->get(SettingsService::class)
-            ->update('roles', ['mapping' => ['author' => ['fundkit_view_donations']]]);
-        $this->assertTrue(get_role('author')->has_cap('fundkit_view_donations'));
+            ->update('roles', ['mapping' => ['author' => ['gratora_view_donations']]]);
+        $this->assertTrue(get_role('author')->has_cap('gratora_view_donations'));
 
-        $res = $this->post(['settings' => ['fundkit_roles' => [
-            'mapping' => ['editor' => ['fundkit_view_donations']],
+        $res = $this->post(['settings' => ['gratora_roles' => [
+            'mapping' => ['editor' => ['gratora_view_donations']],
         ]]]);
 
         $this->assertSame(200, $res->get_status());
         $this->assertSame(
-            ['editor' => ['fundkit_view_donations']],
-            (array) (get_option('fundkit_roles')['mapping'] ?? []),
+            ['editor' => ['gratora_view_donations']],
+            (array) (get_option('gratora_roles')['mapping'] ?? []),
             'the mapping is replaced, not merged, or a role can never be taken off it'
         );
-        $this->assertTrue(get_role('editor')->has_cap('fundkit_view_donations'));
-        $this->assertFalse(get_role('author')->has_cap('fundkit_view_donations'));
+        $this->assertTrue(get_role('editor')->has_cap('gratora_view_donations'));
+        $this->assertFalse(get_role('author')->has_cap('gratora_view_donations'));
     }
 
     public function test_an_option_no_group_declares_is_refused_rather_than_written(): void
     {
-        add_filter('fundkit.settings.groups', static function (array $groups): array {
+        add_filter('gratora.settings.groups', static function (array $groups): array {
             unset($groups['consents']);
 
             return $groups;
         });
 
-        $res = $this->post(['settings' => ['fundkit_consents' => ['purposes' => [['key' => 'planted']]]]]);
+        $res = $this->post(['settings' => ['gratora_consents' => ['purposes' => [['key' => 'planted']]]]]);
 
         $this->assertSame(422, $res->get_status());
         // The planted value, not the option's existence: the integration
         // database is shared, so asserting the option was never created only
         // holds until something else in the suite writes one.
-        $stored = get_option('fundkit_consents');
+        $stored = get_option('gratora_consents');
         $keys   = array_column((array) (is_array($stored) ? ($stored['purposes'] ?? []) : []), 'key');
         $this->assertNotContains('planted', $keys, 'nothing is written past the writer');
     }
@@ -216,17 +216,17 @@ final class ToolsImportSettingsWriterTest extends IntegrationTestCase
         // The registry is process-wide, and a PayPal suite earlier in the run
         // leaves it registered, which would hide the very drop under test.
         $this->deregisterGateway('paypal');
-        $manager = Plugin::instance()->container->get(\FundKit\Gateways\GatewayManager::class);
+        $manager = Plugin::instance()->container->get(\Gratora\Gateways\GatewayManager::class);
         $this->assertNull($manager->get('paypal'), 'unregistered here, as on a fresh restore target');
 
-        $res = $this->post(['settings' => ['fundkit_gateway_config' => [
+        $res = $this->post(['settings' => ['gratora_gateway_config' => [
             'test_mode' => false,
             'paypal'    => ['enabled' => false],
             'offline'   => ['enabled' => true],
         ]]]);
         $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
 
-        $stored = (array) get_option('fundkit_gateway_config', []);
+        $stored = (array) get_option('gratora_gateway_config', []);
         $this->assertSame(
             ['enabled' => false],
             $stored['paypal'] ?? null,

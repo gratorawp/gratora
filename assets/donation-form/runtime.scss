@@ -1,12 +1,12 @@
 // Scope to the form; themes override through custom properties.
 
-.fundkit-donation-form .fundkit-modal-host {
+.gratora-donation-form .gratora-modal-host {
     display: inline-block;
 }
-.fundkit-donation-form .fundkit-modal-trigger {
+.gratora-donation-form .gratora-modal-trigger {
     cursor: pointer;
 }
-.fundkit-donation-form .fundkit-modal {
+.gratora-donation-form .gratora-modal {
     position: fixed;
     inset: 0;
     z-index: 99999;
@@ -21,16 +21,16 @@
     }
     &__panel {
         position: relative;
-        background: var(--fundkit-bg, #fff);
+        background: var(--gratora-bg, #fff);
         // Keep modals on a card surface even when the embedded form is Plain.
-        color: var(--fundkit-text, #111827);
-        border-radius: var(--fundkit-radius, 12px);
+        color: var(--gratora-text, #111827);
+        border-radius: var(--gratora-radius, 12px);
         max-width: 560px;
         width: calc(100% - 32px);
         max-height: calc(100vh - 64px);
         overflow: auto;
         padding: 28px 24px 24px;
-        box-shadow: var(--fundkit-card-shadow, 0 30px 60px rgba(0, 0, 0, 0.25));
+        box-shadow: var(--gratora-card-shadow, 0 30px 60px rgba(0, 0, 0, 0.25));
     }
     &__close {
         position: absolute;
@@ -41,70 +41,70 @@
         font-size: 24px;
         line-height: 1;
         cursor: pointer;
-        color: var(--fundkit-text-muted, #6b7280);
+        color: var(--gratora-text-muted, #6b7280);
 
-        &:hover { color: var(--fundkit-text, #111827); }
+        &:hover { color: var(--gratora-text, #111827); }
     }
 }
 
 // Declare defaults on the wrapper so inline theme tokens win instead of being shadowed by
 // descendants.
-.fundkit-donation-form {
+.gratora-donation-form {
     border: 0;
     padding: 0;
     margin: 0 auto;
 
-    max-width: var(--fundkit-form-max-width, 720px);
+    max-width: var(--gratora-form-max-width, 720px);
     width: 100%;
     box-sizing: border-box;
 
-    --fundkit-accent:         #211d3f;
+    --gratora-accent:         #211d3f;
     // Place literal fallback before color-mix for unsupported browsers.
-    --fundkit-accent-soft:    #efedf8;
-    --fundkit-accent-soft:    color-mix(in srgb, var(--fundkit-accent) 12%, var(--fundkit-bg, #fff));
-    --fundkit-text:           #111827;
-    --fundkit-text-muted:     #6b7280;
-    --fundkit-border:         #e5e7eb;
-    --fundkit-bg:             #ffffff;
+    --gratora-accent-soft:    #efedf8;
+    --gratora-accent-soft:    color-mix(in srgb, var(--gratora-accent) 12%, var(--gratora-bg, #fff));
+    --gratora-text:           #111827;
+    --gratora-text-muted:     #6b7280;
+    --gratora-border:         #e5e7eb;
+    --gratora-bg:             #ffffff;
     // Keep field backgrounds separate from the form surface.
-    --fundkit-field-bg:       #ffffff;
-    --fundkit-bg-soft:        #f8fafb;
-    --fundkit-error-bg:       #fde8e8;
-    --fundkit-error-fg:       #9b1c1c;
-    --fundkit-warning-bg:     #fef3c7;
-    --fundkit-warning-fg:     #92400e;
-    --fundkit-on-accent:      #ffffff;
-    --fundkit-required:       #d63384;
-    --fundkit-typeface:    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --fundkit-type-size:      15px;
-    --fundkit-heading-weight: 600;
-    --fundkit-body-weight:    400;
-    --fundkit-radius:         10px;
-    --fundkit-radius-sm:      8px;
+    --gratora-field-bg:       #ffffff;
+    --gratora-bg-soft:        #f8fafb;
+    --gratora-error-bg:       #fde8e8;
+    --gratora-error-fg:       #9b1c1c;
+    --gratora-warning-bg:     #fef3c7;
+    --gratora-warning-fg:     #92400e;
+    --gratora-on-accent:      #ffffff;
+    --gratora-required:       #d63384;
+    --gratora-typeface:    system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --gratora-type-size:      15px;
+    --gratora-heading-weight: 600;
+    --gratora-body-weight:    400;
+    --gratora-radius:         10px;
+    --gratora-radius-sm:      8px;
     // Leave button and switcher radii unset to inherit radius-sm unless overridden.
-    --fundkit-pill-radius:    999px;
-    --fundkit-preset-hover:   color-mix(in srgb, var(--fundkit-on-soft, #000) 8%, var(--fundkit-bg-soft));
-    --fundkit-stroke:   1px;
-    --fundkit-gap:            20px;
-    --fundkit-field-gap:      6px;
-    --fundkit-button-size:  48px;
-    --fundkit-button-weight:  600;
-    --fundkit-button-shadow:  0 1px 2px rgba(0, 0, 0, .08);
+    --gratora-pill-radius:    999px;
+    --gratora-preset-hover:   color-mix(in srgb, var(--gratora-on-soft, #000) 8%, var(--gratora-bg-soft));
+    --gratora-stroke:   1px;
+    --gratora-gap:            20px;
+    --gratora-field-gap:      6px;
+    --gratora-button-size:  48px;
+    --gratora-button-weight:  600;
+    --gratora-button-shadow:  0 1px 2px rgba(0, 0, 0, .08);
     // Derived, so a dropped ring tracks the accent instead of this literal.
-    --fundkit-focus-ring:     var(--fundkit-accent, #211d3f);
-    --fundkit-card-shadow:    0 12px 32px rgba(15, 23, 42, .06);
+    --gratora-focus-ring:     var(--gratora-accent, #211d3f);
+    --gratora-card-shadow:    0 12px 32px rgba(15, 23, 42, .06);
 
     &--framed {
-        background: var(--fundkit-form-bg, #fff);
+        background: var(--gratora-form-bg, #fff);
         // Default the form radius to the campaign radius.
-        border-radius: var(--fundkit-form-radius, var(--fundkit-radius, 14px));
-        box-shadow: var(--fundkit-form-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px rgba(15, 23, 42, .06));
-        padding: var(--fundkit-form-padding, 36px 40px 44px);
+        border-radius: var(--gratora-form-radius, var(--gratora-radius, 14px));
+        box-shadow: var(--gratora-form-shadow, 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px rgba(15, 23, 42, .06));
+        padding: var(--gratora-form-padding, 36px 40px 44px);
     }
 }
 
 // Use zero-specificity resets; preserve authored rich-text links and lists.
-:where(.fundkit-form) {
+:where(.gratora-form) {
     :where(button, input, select, textarea) {
         margin: 0;
         font: inherit;
@@ -121,20 +121,20 @@
 }
 
 // Double the wrapper class so Plain overrides the base container independent of order.
-.fundkit-donation-form.fundkit-donation-form--plain .fundkit-form {
-    background: var(--fundkit-form-bg, transparent);
+.gratora-donation-form.gratora-donation-form--plain .gratora-form {
+    background: var(--gratora-form-bg, transparent);
     color: inherit;
 }
 
-.fundkit-donation-form .fundkit-form {
+.gratora-donation-form .gratora-form {
     display: flex;
     flex-direction: column;
-    gap: var(--fundkit-gap);
-    background: var(--fundkit-bg);
-    color: var(--fundkit-text);
-    font-family: var(--fundkit-typeface);
-    font-size: var(--fundkit-type-size);
-    font-weight: var(--fundkit-body-weight);
+    gap: var(--gratora-gap);
+    background: var(--gratora-bg);
+    color: var(--gratora-text);
+    font-family: var(--gratora-typeface);
+    font-size: var(--gratora-type-size);
+    font-weight: var(--gratora-body-weight);
     line-height: 1.5;
     // Reset inherited typography beyond font, color, and line-height.
     text-align: start;
@@ -144,16 +144,16 @@
 
     * { box-sizing: border-box; }
 
-    .fundkit-form__step {
+    .gratora-form__step {
         display: flex;
         flex-direction: column;
-        gap: var(--fundkit-gap);
+        gap: var(--gratora-gap);
     }
 
     &--inline {
         gap: 24px;
 
-        .fundkit-form__nav {
+        .gratora-form__nav {
             display: flex;
             padding-top: 8px;
         }
@@ -166,8 +166,8 @@
     &__step-title {
         margin: 0 0 16px;
         font-size: 18px;
-        font-weight: var(--fundkit-heading-weight, 600);
-        color: var(--fundkit-text);
+        font-weight: var(--gratora-heading-weight, 600);
+        color: var(--gratora-text);
     }
 
     &__nav {
@@ -183,13 +183,13 @@
         &--align-right  { justify-content: flex-end; }
         &--align-full {
             justify-content: stretch;
-            .fundkit-form__button { width: 100%; }
+            .gratora-form__button { width: 100%; }
         }
     }
 
     &__step-count {
         font-size: 12px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         font-variant-numeric: tabular-nums;
     }
 
@@ -197,40 +197,40 @@
     &__divider {
         margin: 0;
         border: 0;
-        border-top: 1px solid var(--fundkit-border);
+        border-top: 1px solid var(--gratora-border);
         width: 100%;
     }
 
     &__button {
         appearance: none;
-        border: var(--fundkit-button-border, 0);
-        min-height: var(--fundkit-button-size, 48px);
+        border: var(--gratora-button-border, 0);
+        min-height: var(--gratora-button-size, 48px);
         padding: 0 22px;
         font-size: 14px;
-        font-weight: var(--fundkit-button-weight, 600);
-        border-radius: var(--fundkit-button-radius, var(--fundkit-radius-sm, 8px));
+        font-weight: var(--gratora-button-weight, 600);
+        border-radius: var(--gratora-button-radius, var(--gratora-radius-sm, 8px));
         cursor: pointer;
         transition: filter .15s, background .15s, box-shadow .15s;
         font-family: inherit;
-        box-shadow: var(--fundkit-button-shadow, 0 1px 2px rgba(0, 0, 0, .08));
+        box-shadow: var(--gratora-button-shadow, 0 1px 2px rgba(0, 0, 0, .08));
 
         &:disabled { opacity: .5; cursor: not-allowed; }
 
         &--primary {
-            background: var(--fundkit-button-bg, var(--fundkit-accent));
-            color: var(--fundkit-button-fg, var(--fundkit-on-accent, #fff));
+            background: var(--gratora-button-bg, var(--gratora-accent));
+            color: var(--gratora-button-fg, var(--gratora-on-accent, #fff));
 
             &:hover:not(:disabled) {
                 filter: brightness(.92);
-                background: var(--fundkit-button-hover-bg, var(--fundkit-button-bg, var(--fundkit-accent)));
+                background: var(--gratora-button-hover-bg, var(--gratora-button-bg, var(--gratora-accent)));
             }
         }
 
         &--secondary {
-            background: var(--fundkit-bg-soft);
-            color: var(--fundkit-on-soft, var(--fundkit-text));
+            background: var(--gratora-bg-soft);
+            color: var(--gratora-on-soft, var(--gratora-text));
 
-            &:hover:not(:disabled) { background: color-mix(in srgb, var(--fundkit-border) 45%, var(--fundkit-bg-soft)); }
+            &:hover:not(:disabled) { background: color-mix(in srgb, var(--gratora-border) 45%, var(--gratora-bg-soft)); }
         }
     }
 
@@ -245,10 +245,10 @@
         position: relative;
         appearance: none;
         border: 0;
-        background: var(--fundkit-bg-soft, #f8fafb);
-        color: var(--fundkit-on-soft, var(--fundkit-text));
+        background: var(--gratora-bg-soft, #f8fafb);
+        color: var(--gratora-on-soft, var(--gratora-text));
         padding: 12px 12px;
-        border-radius: var(--fundkit-radius-sm);
+        border-radius: var(--gratora-radius-sm);
         cursor: pointer;
         transition: background .15s, outline-color .15s;
         font-family: inherit;
@@ -260,17 +260,17 @@
         outline: 2px solid transparent;
         outline-offset: -2px;
 
-        &:hover { background: var(--fundkit-preset-hover, rgba(0, 0, 0, .04)); }
+        &:hover { background: var(--gratora-preset-hover, rgba(0, 0, 0, .04)); }
 
         &:focus-visible {
-            outline-color: var(--fundkit-focus-ring, var(--fundkit-accent));
+            outline-color: var(--gratora-focus-ring, var(--gratora-accent));
             outline-offset: 2px;
         }
 
         &.is-selected {
-            outline-color: var(--fundkit-accent);
-            background: var(--fundkit-accent-soft);
-            color: var(--fundkit-accent);
+            outline-color: var(--gratora-accent);
+            background: var(--gratora-accent-soft);
+            color: var(--gratora-accent);
         }
     }
     &__preset-amount {
@@ -281,7 +281,7 @@
     &__preset-impact {
         font-size: 11px;
         font-weight: 500;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         line-height: 1.3;
     }
 
@@ -294,7 +294,7 @@
             padding: 0 0 6px;
             font-size: 13px;
             font-weight: 500;
-            color: var(--fundkit-text);
+            color: var(--gratora-text);
         }
     }
     &__frequency-options {
@@ -311,41 +311,41 @@
         font-weight: 500;
         font-family: inherit;
         cursor: pointer;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         transition: background .15s, color .15s, border-color .15s;
     }
 
     &__frequency--pills {
-        .fundkit-form__frequency-options {
+        .gratora-form__frequency-options {
             padding: 4px;
-            background: var(--fundkit-bg-soft, #f8fafb);
-            border-radius: var(--fundkit-radius-sm, 8px);
+            background: var(--gratora-bg-soft, #f8fafb);
+            border-radius: var(--gratora-radius-sm, 8px);
         }
-        .fundkit-form__frequency-option {
-            border-radius: var(--fundkit-radius-sm, 8px);
-            color: var(--fundkit-on-soft, var(--fundkit-text));
+        .gratora-form__frequency-option {
+            border-radius: var(--gratora-radius-sm, 8px);
+            color: var(--gratora-on-soft, var(--gratora-text));
 
-            &:hover { color: var(--fundkit-on-soft, var(--fundkit-text)); }
+            &:hover { color: var(--gratora-on-soft, var(--gratora-text)); }
             &.is-selected {
-                background: var(--fundkit-accent);
-                color: var(--fundkit-on-accent, #fff);
+                background: var(--gratora-accent);
+                color: var(--gratora-on-accent, #fff);
             }
         }
     }
 
     &__frequency--tabs {
-        border-bottom: 1px solid var(--fundkit-border);
+        border-bottom: 1px solid var(--gratora-border);
 
-        .fundkit-form__frequency-options { gap: 0; }
-        .fundkit-form__frequency-option {
+        .gratora-form__frequency-options { gap: 0; }
+        .gratora-form__frequency-option {
             margin-bottom: -1px;
             border-bottom: 2px solid transparent;
             border-radius: 0;
 
-            &:hover { color: var(--fundkit-text); }
+            &:hover { color: var(--gratora-text); }
             &.is-selected {
-                color: var(--fundkit-accent);
-                border-bottom-color: var(--fundkit-accent);
+                color: var(--gratora-accent);
+                border-bottom-color: var(--gratora-accent);
                 font-weight: 600;
             }
         }
@@ -353,7 +353,7 @@
     &__frequency-help {
         margin: 6px 0 0;
         font-size: 12px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         line-height: 1.4;
     }
 
@@ -363,27 +363,27 @@
     &__custom-label {
         display: block;
         font-size: 13px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         margin-bottom: 6px;
     }
     &__custom-input-wrap {
         display: flex;
         align-items: center;
         gap: 8px;
-        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
-        border-radius: var(--fundkit-radius-sm);
+        border: var(--gratora-stroke, 1px) solid var(--gratora-border);
+        border-radius: var(--gratora-radius-sm);
         padding: 0 12px;
-        background: var(--fundkit-field-bg);
-        color: var(--fundkit-on-field, var(--fundkit-text));
+        background: var(--gratora-field-bg);
+        color: var(--gratora-on-field, var(--gratora-text));
 
         &:focus-within {
-            border-color: var(--fundkit-focus-ring, var(--fundkit-accent));
-            box-shadow: 0 0 0 3px var(--fundkit-accent-soft);
+            border-color: var(--gratora-focus-ring, var(--gratora-accent));
+            box-shadow: 0 0 0 3px var(--gratora-accent-soft);
         }
     }
     &__currency {
         font-size: 13px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         font-weight: 500;
     }
     &__custom-input {
@@ -394,14 +394,14 @@
         padding: 10px 0;
         font-size: 16px;
         background: transparent;
-        color: var(--fundkit-on-field, var(--fundkit-text));
+        color: var(--gratora-on-field, var(--gratora-text));
         font-variant-numeric: tabular-nums;
         font-family: inherit;
     }
 }
 
 // Position offscreen; some bots skip display:none honeypots.
-.fundkit-donation-form .fundkit-form__hp {
+.gratora-donation-form .gratora-form__hp {
     position: absolute;
     left: -10000px;
     top: auto;
@@ -411,17 +411,17 @@
     opacity: 0;
     pointer-events: none;
 }
-.fundkit-donation-form .fundkit-privacy {
+.gratora-donation-form .gratora-privacy {
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
-    color: var(--fundkit-text-muted);
+    color: var(--gratora-text-muted);
 
     &--center { text-align: center; }
     &--right  { text-align: right;  }
 
     &__link {
-        color: var(--fundkit-accent);
+        color: var(--gratora-accent);
         text-decoration: underline;
 
         &:hover, &:focus-visible {
@@ -430,19 +430,19 @@
     }
 }
 
-.fundkit-donation-form .fundkit-amount {
+.gratora-donation-form .gratora-amount {
     display: flex;
     align-items: center;
     gap: 8px;
-    border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
-    border-radius: var(--fundkit-radius-sm);
+    border: var(--gratora-stroke, 1px) solid var(--gratora-border);
+    border-radius: var(--gratora-radius-sm);
     padding: 0 12px;
-    background: var(--fundkit-field-bg);
-    color: var(--fundkit-on-field, var(--fundkit-text));
+    background: var(--gratora-field-bg);
+    color: var(--gratora-on-field, var(--gratora-text));
 
     &:focus-within {
-        border-color: var(--fundkit-focus-ring, var(--fundkit-accent));
-        box-shadow: 0 0 0 3px var(--fundkit-accent-soft);
+        border-color: var(--gratora-focus-ring, var(--gratora-accent));
+        box-shadow: 0 0 0 3px var(--gratora-accent-soft);
     }
 
     &__prefix {
@@ -452,7 +452,7 @@
 
     &__code {
         font-size: 13px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         font-weight: 500;
     }
 
@@ -464,14 +464,14 @@
         padding: 10px 0;
         font-size: 16px;
         background: transparent;
-        color: var(--fundkit-on-field, var(--fundkit-text));
+        color: var(--gratora-on-field, var(--gratora-text));
         font-variant-numeric: tabular-nums;
         font-family: inherit;
         min-width: 0;
     }
 }
 
-.fundkit-donation-form .fundkit-form {
+.gratora-donation-form .gratora-form {
 
     &__donor {
         display: flex;
@@ -493,39 +493,39 @@
     &__field {
         display: flex;
         flex-direction: column;
-        gap: var(--fundkit-field-gap, 4px);
+        gap: var(--gratora-field-gap, 4px);
     }
 
     &__label {
         font-size: 13px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         font-weight: 500;
     }
 
     &__required {
-        color: var(--fundkit-required, #d63384);
+        color: var(--gratora-required, #d63384);
         margin-left: 2px;
     }
 
     &__field input {
         appearance: none;
-        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
-        border-radius: var(--fundkit-radius-sm);
+        border: var(--gratora-stroke, 1px) solid var(--gratora-border);
+        border-radius: var(--gratora-radius-sm);
         padding: 10px 12px;
-        font-size: var(--fundkit-type-size, 15px);
-        background: var(--fundkit-field-bg);
-        color: var(--fundkit-on-field, var(--fundkit-text));
+        font-size: var(--gratora-type-size, 15px);
+        background: var(--gratora-field-bg);
+        color: var(--gratora-on-field, var(--gratora-text));
         font-family: inherit;
         line-height: 1.4;
 
         &:focus {
             outline: 0;
-            border-color: var(--fundkit-focus-ring, var(--fundkit-accent));
-            box-shadow: 0 0 0 3px var(--fundkit-accent-soft);
+            border-color: var(--gratora-focus-ring, var(--gratora-accent));
+            box-shadow: 0 0 0 3px var(--gratora-accent-soft);
         }
 
         &[aria-invalid="true"] {
-            border-color: var(--fundkit-error-fg);
+            border-color: var(--gratora-error-fg);
         }
     }
 
@@ -535,14 +535,14 @@
         // Drawn straight on the form's ground rather than in a panel of its
         // own, so it is carried toward the page ink far enough to stay red and
         // stay readable on a ground the org chose.
-        color: color-mix(in srgb, var(--fundkit-error-fg, #9b1c1c) 72%, var(--fundkit-text));
+        color: color-mix(in srgb, var(--gratora-error-fg, #9b1c1c) 72%, var(--gratora-text));
     }
 
     &__summary {
         margin: 0;
         padding: 16px;
-        background: var(--fundkit-bg-soft);
-        border-radius: var(--fundkit-radius);
+        background: var(--gratora-bg-soft);
+        border-radius: var(--gratora-radius);
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -553,20 +553,20 @@
         justify-content: space-between;
         gap: 12px;
 
-        dt { color: var(--fundkit-on-soft-muted, var(--fundkit-text-muted)); font-size: 13px; margin: 0; }
+        dt { color: var(--gratora-on-soft-muted, var(--gratora-text-muted)); font-size: 13px; margin: 0; }
         dd { margin: 0; font-weight: 500; }
     }
     &__summary-row--total {
         margin-top: 4px;
         padding-top: 12px;
-        border-top: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
+        border-top: var(--gratora-stroke, 1px) solid var(--gratora-border);
 
-        dt { color: var(--fundkit-on-soft, var(--fundkit-text)); font-size: 15px; font-weight: 600; }
+        dt { color: var(--gratora-on-soft, var(--gratora-text)); font-size: 15px; font-weight: 600; }
     }
     &__summary-amount {
         font-size: 22px;
         font-weight: 700;
-        color: var(--fundkit-on-soft-accent, var(--fundkit-accent));
+        color: var(--gratora-on-soft-accent, var(--gratora-accent));
         font-variant-numeric: tabular-nums;
     }
 
@@ -578,20 +578,20 @@
 
     &__test-banner {
         padding: 10px 14px;
-        border-radius: var(--fundkit-radius-sm);
-        border: var(--fundkit-stroke, 1px) solid var(--fundkit-warning-fg, #92400e);
-        background: var(--fundkit-warning-bg, #fef3c7);
-        color: var(--fundkit-warning-fg, #92400e);
+        border-radius: var(--gratora-radius-sm);
+        border: var(--gratora-stroke, 1px) solid var(--gratora-warning-fg, #92400e);
+        background: var(--gratora-warning-bg, #fef3c7);
+        color: var(--gratora-warning-fg, #92400e);
         font-size: 13px;
         font-weight: 600;
     }
 
     &__gateways-empty {
         padding: 10px 14px;
-        border-radius: var(--fundkit-radius-sm);
-        border: var(--fundkit-stroke, 1px) solid var(--fundkit-warning-fg, #92400e);
-        background: var(--fundkit-warning-bg, #fef3c7);
-        color: var(--fundkit-warning-fg, #92400e);
+        border-radius: var(--gratora-radius-sm);
+        border: var(--gratora-stroke, 1px) solid var(--gratora-warning-fg, #92400e);
+        background: var(--gratora-warning-bg, #fef3c7);
+        color: var(--gratora-warning-fg, #92400e);
         font-size: 13px;
         font-weight: 600;
     }
@@ -604,7 +604,7 @@
     &__gateways-legend {
         padding: 0;
         margin: 0 0 8px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         font-size: 13px;
     }
     &__gateways-list {
@@ -617,18 +617,18 @@
         align-items: flex-start;
         gap: 10px;
         padding: 12px 14px;
-        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
-        border-radius: var(--fundkit-radius-sm);
+        border: var(--gratora-stroke, 1px) solid var(--gratora-border);
+        border-radius: var(--gratora-radius-sm);
         cursor: pointer;
 
         input[type="radio"] {
             margin: 2px 0 0;
-            accent-color: var(--fundkit-accent);
+            accent-color: var(--gratora-accent);
             flex-shrink: 0;
         }
         &.is-selected {
-            border-color: var(--fundkit-accent);
-            box-shadow: inset 0 0 0 1px var(--fundkit-accent);
+            border-color: var(--gratora-accent);
+            box-shadow: inset 0 0 0 1px var(--gratora-accent);
         }
     }
     &__gateway-body {
@@ -638,15 +638,15 @@
     }
     &__gateway-label { font-weight: 600; }
     &__gateway-desc {
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         font-size: 13px;
     }
 
     // Write descendants explicitly; nested & repeats the compound wrapper selector.
     &__gateways--list {
-        .fundkit-form__gateways-list { gap: 4px; }
+        .gratora-form__gateways-list { gap: 4px; }
 
-        .fundkit-form__gateway {
+        .gratora-form__gateway {
             padding: 6px 0;
             border: 0;
             border-radius: 0;
@@ -660,7 +660,7 @@
         gap: 12px;
 
         // Stack rows containing a two-column name field to avoid narrow nested inputs.
-        &:has(> .fundkit-form__row--two-up) > * {
+        &:has(> .gratora-form__row--two-up) > * {
             grid-column: 1 / -1;
         }
 
@@ -674,20 +674,20 @@
         align-items: center;
         gap: 10px;
         font-size: 14px;
-        color: var(--fundkit-text);
+        color: var(--gratora-text);
         cursor: pointer;
         margin-top: 4px;
 
         // Restore native checkboxes with enough specificity to beat theme appearance resets.
         input[type="checkbox"],
-        .fundkit-donation-form.fundkit-donation-form & input[type="checkbox"] {
+        .gratora-donation-form.gratora-donation-form & input[type="checkbox"] {
             appearance: auto;
             -webkit-appearance: checkbox;
             width: 16px;
             height: 16px;
             min-width: 16px;
             min-height: 16px;
-            accent-color: var(--fundkit-accent);
+            accent-color: var(--gratora-accent);
             margin: 0;
         }
 
@@ -704,17 +704,17 @@
 
     &__check-label {
         font-size: 14px;
-        color: var(--fundkit-text);
+        color: var(--gratora-text);
     }
 
     &__check-help {
         font-size: 12px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
     }
 
     &__field-help {
         font-size: 12px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         margin-bottom: 4px;
     }
 
@@ -726,7 +726,7 @@
         legend {
             font-size: 14px;
             font-weight: 500;
-            color: var(--fundkit-text);
+            color: var(--gratora-text);
             margin-bottom: 6px;
         }
     }
@@ -739,9 +739,9 @@
 
     // Show focus on programmatically focused error groups.
     &__radio-options[aria-invalid="true"] {
-        outline: 2px solid var(--fundkit-error-fg);
+        outline: 2px solid var(--gratora-error-fg);
         outline-offset: 4px;
-        border-radius: var(--fundkit-radius-sm, 8px);
+        border-radius: var(--gratora-radius-sm, 8px);
     }
 
     &__radio--horizontal &__radio-options {
@@ -755,13 +755,13 @@
         align-items: center;
         gap: 8px;
         font-size: 14px;
-        color: var(--fundkit-text);
+        color: var(--gratora-text);
         cursor: pointer;
 
         input[type="radio"] {
             width: 16px;
             height: 16px;
-            accent-color: var(--fundkit-accent);
+            accent-color: var(--gratora-accent);
             margin: 0;
         }
     }
@@ -778,7 +778,7 @@
         legend {
             font-size: 14px;
             font-weight: 500;
-            color: var(--fundkit-text);
+            color: var(--gratora-text);
             margin-bottom: 6px;
         }
     }
@@ -794,13 +794,13 @@
         align-items: center;
         gap: 8px;
         font-size: 14px;
-        color: var(--fundkit-text);
+        color: var(--gratora-text);
         cursor: pointer;
 
         input[type="checkbox"] {
             width: 16px;
             height: 16px;
-            accent-color: var(--fundkit-accent);
+            accent-color: var(--gratora-accent);
             margin: 0;
         }
     }
@@ -812,7 +812,7 @@
     &__cover-fees-math {
         font-style: normal;
         margin-left: 6px;
-        color: var(--fundkit-accent);
+        color: var(--gratora-accent);
         font-weight: 500;
         font-variant-numeric: tabular-nums;
     }
@@ -829,7 +829,7 @@
             padding: 0;
             font-weight: 500;
             font-size: 13px;
-            color: var(--fundkit-text-muted);
+            color: var(--gratora-text-muted);
         }
     }
     &__fund-options {
@@ -844,7 +844,7 @@
         font-weight: 700;
         letter-spacing: .04em;
         text-transform: uppercase;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
     }
     &__fund-option {
         position: relative;
@@ -856,22 +856,22 @@
         flex-direction: column;
         gap: 2px;
         padding: 12px;
-        border: calc(var(--fundkit-stroke, 1px) * 2) solid var(--fundkit-border);
-        border-radius: var(--fundkit-radius-sm);
-        background: var(--fundkit-field-bg);
-        color: var(--fundkit-on-field, var(--fundkit-text));
+        border: calc(var(--gratora-stroke, 1px) * 2) solid var(--gratora-border);
+        border-radius: var(--gratora-radius-sm);
+        background: var(--gratora-field-bg);
+        color: var(--gratora-on-field, var(--gratora-text));
         cursor: pointer;
         transition: border-color .15s, background .15s;
 
-        &:hover { border-color: var(--fundkit-text-muted); }
+        &:hover { border-color: var(--gratora-text-muted); }
         // Expose hidden-radio keyboard focus on its label.
         &:focus-within {
-            border-color: var(--fundkit-focus-ring, var(--fundkit-accent));
-            box-shadow: 0 0 0 3px var(--fundkit-accent-soft);
+            border-color: var(--gratora-focus-ring, var(--gratora-accent));
+            box-shadow: 0 0 0 3px var(--gratora-accent-soft);
         }
         &.is-selected {
-            border-color: var(--fundkit-accent);
-            background: var(--fundkit-accent-soft);
+            border-color: var(--gratora-accent);
+            background: var(--gratora-accent-soft);
         }
 
         input[type="radio"] {
@@ -883,11 +883,11 @@
     &__fund-option-label {
         font-size: 13px;
         font-weight: 600;
-        color: var(--fundkit-text);
+        color: var(--gratora-text);
     }
     &__fund-option-desc {
         font-size: 11px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         line-height: 1.3;
     }
 
@@ -901,30 +901,30 @@
 
         legend {
             padding: 0;
-            font-weight: var(--fundkit-heading-weight, 600);
+            font-weight: var(--gratora-heading-weight, 600);
             font-size: 14px;
-            color: var(--fundkit-text);
+            color: var(--gratora-text);
         }
     }
 
     // Disable form controls while paying, excluding the gateway mount.
     &--settled {
-        .fundkit-form__donor,
-        .fundkit-form__amount,
-        .fundkit-form__confirm {
+        .gratora-form__donor,
+        .gratora-form__amount,
+        .gratora-form__confirm {
             display: none;
         }
 
         // Hide form navigation while retaining gateway Pay and Cancel controls.
-        .fundkit-form__nav {
+        .gratora-form__nav {
             display: none;
         }
 
-        .fundkit-form__payment-mount .fundkit-form__nav {
+        .gratora-form__payment-mount .gratora-form__nav {
             display: flex;
         }
 
-        .fundkit-form__payment-mount {
+        .gratora-form__payment-mount {
             pointer-events: auto;
         }
     }
@@ -969,7 +969,7 @@
         gap: 10px;
         align-items: flex-start;
         font-size: 14px;
-        color: var(--fundkit-text);
+        color: var(--gratora-text);
         cursor: pointer;
 
         input { margin-top: 3px; flex: 0 0 auto; }
@@ -978,11 +978,11 @@
         max-height: 180px;
         overflow-y: auto;
         padding: 12px 14px;
-        border: 1px solid var(--fundkit-border);
-        border-radius: var(--fundkit-radius, 8px);
+        border: 1px solid var(--gratora-border);
+        border-radius: var(--gratora-radius, 8px);
         font-size: 13px;
         line-height: 1.5;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         white-space: pre-wrap;
     }
     &__terms-link {
@@ -1000,15 +1000,15 @@
 
         legend {
             padding: 0;
-            font-weight: var(--fundkit-heading-weight, 600);
+            font-weight: var(--gratora-heading-weight, 600);
             font-size: 14px;
-            color: var(--fundkit-text);
+            color: var(--gratora-text);
         }
     }
     &__consent-help {
         margin: 0;
         font-size: 13px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         line-height: 1.4;
     }
     &__consent-purposes {
@@ -1021,15 +1021,15 @@
         gap: 10px;
         align-items: flex-start;
         padding: 10px 12px;
-        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
-        border-radius: var(--fundkit-radius-sm);
-        background: var(--fundkit-field-bg);
-        color: var(--fundkit-on-field, var(--fundkit-text));
+        border: var(--gratora-stroke, 1px) solid var(--gratora-border);
+        border-radius: var(--gratora-radius-sm);
+        background: var(--gratora-field-bg);
+        color: var(--gratora-on-field, var(--gratora-text));
         cursor: pointer;
 
         input[type="checkbox"] {
             margin-top: 2px;
-            accent-color: var(--fundkit-accent);
+            accent-color: var(--gratora-accent);
             flex-shrink: 0;
         }
         input[type="checkbox"]:disabled {
@@ -1047,7 +1047,7 @@
     &__consent-label {
         font-size: 13px;
         font-weight: 500;
-        color: var(--fundkit-text);
+        color: var(--gratora-text);
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -1055,7 +1055,7 @@
     }
     &__consent-desc {
         font-size: 12px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         line-height: 1.4;
     }
     &__consent-required-pill {
@@ -1065,8 +1065,8 @@
         letter-spacing: .04em;
         padding: 1px 6px;
         border-radius: 999px;
-        background: var(--fundkit-warning-bg, #fef3c7);
-        color: var(--fundkit-warning-fg, #92400e);
+        background: var(--gratora-warning-bg, #fef3c7);
+        color: var(--gratora-warning-fg, #92400e);
     }
 
     &__currency-switcher {
@@ -1075,16 +1075,16 @@
         gap: 10px;
         width: 100%;
         font-size: 13px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         margin-bottom: 12px;
 
         select {
             padding: 6px 10px;
-            border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
-            border-radius: var(--fundkit-switcher-radius, var(--fundkit-radius-sm, 8px));
+            border: var(--gratora-stroke, 1px) solid var(--gratora-border);
+            border-radius: var(--gratora-switcher-radius, var(--gratora-radius-sm, 8px));
             font: inherit;
-            background: var(--fundkit-field-bg);
-            color: var(--fundkit-on-field, var(--fundkit-text));
+            background: var(--gratora-field-bg);
+            color: var(--gratora-on-field, var(--gratora-text));
             cursor: pointer;
         }
 
@@ -1098,26 +1098,26 @@
         gap: 6px;
         flex-wrap: wrap;
         padding: 4px;
-        background: var(--fundkit-bg-soft, #f8fafb);
-        border-radius: var(--fundkit-switcher-radius, var(--fundkit-radius-sm, 8px));
+        background: var(--gratora-bg-soft, #f8fafb);
+        border-radius: var(--gratora-switcher-radius, var(--gratora-radius-sm, 8px));
     }
     &__currency-pill {
         appearance: none;
         border: 0;
         background: transparent;
         padding: 6px 14px;
-        border-radius: var(--fundkit-switcher-radius, var(--fundkit-radius-sm, 8px));
+        border-radius: var(--gratora-switcher-radius, var(--gratora-radius-sm, 8px));
         font: inherit;
         font-size: 13px;
         font-weight: 500;
-        color: var(--fundkit-on-soft-muted, var(--fundkit-text-muted));
+        color: var(--gratora-on-soft-muted, var(--gratora-text-muted));
         cursor: pointer;
         transition: background .15s, color .15s;
 
-        &:hover { color: var(--fundkit-on-soft, var(--fundkit-text)); }
+        &:hover { color: var(--gratora-on-soft, var(--gratora-text)); }
         &.is-selected {
-            background: var(--fundkit-accent);
-            color: var(--fundkit-on-accent, #fff);
+            background: var(--gratora-accent);
+            color: var(--gratora-on-accent, #fff);
         }
     }
 
@@ -1126,10 +1126,10 @@
         padding: 10px 12px;
         // No fill of its own left it on the user agent's white while the ink
         // followed the page, so a dark brand wrote white on white.
-        background: var(--fundkit-field-bg);
-        color: var(--fundkit-on-field, var(--fundkit-text));
-        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
-        border-radius: var(--fundkit-radius-sm);
+        background: var(--gratora-field-bg);
+        color: var(--gratora-on-field, var(--gratora-text));
+        border: var(--gratora-stroke, 1px) solid var(--gratora-border);
+        border-radius: var(--gratora-radius-sm);
         font: inherit;
         line-height: 1.5;
         resize: vertical;
@@ -1137,8 +1137,8 @@
 
         &:focus {
             outline: none;
-            border-color: var(--fundkit-focus-ring, var(--fundkit-accent));
-            box-shadow: 0 0 0 3px var(--fundkit-accent-soft);
+            border-color: var(--gratora-focus-ring, var(--gratora-accent));
+            box-shadow: 0 0 0 3px var(--gratora-accent-soft);
         }
     }
 
@@ -1150,49 +1150,49 @@
     }
     &__html { display: contents; }
 
-    .fundkit-goal {
+    .gratora-goal {
         display: flex;
         flex-direction: column;
         gap: 6px;
     }
-    .fundkit-goal__amount {
+    .gratora-goal__amount {
         display: flex;
         justify-content: space-between;
         font-size: 13px;
-        color: var(--fundkit-text);
+        color: var(--gratora-text);
 
         strong { font-weight: 600; }
-        span   { color: var(--fundkit-text-muted); }
+        span   { color: var(--gratora-text-muted); }
     }
-    .fundkit-goal__bar {
+    .gratora-goal__bar {
         height: 8px;
-        background: var(--fundkit-track, color-mix(in srgb, var(--fundkit-border, #e5e7eb) 55%, var(--fundkit-bg, #fff)));
-        border-radius: var(--fundkit-radius-sm, 4px);
+        background: var(--gratora-track, color-mix(in srgb, var(--gratora-border, #e5e7eb) 55%, var(--gratora-bg, #fff)));
+        border-radius: var(--gratora-radius-sm, 4px);
         overflow: hidden;
     }
-    .fundkit-goal__fill {
+    .gratora-goal__fill {
         height: 100%;
-        background: var(--fundkit-accent);
+        background: var(--gratora-accent);
         transition: width .3s ease;
     }
-    .fundkit-goal__meta {
+    .gratora-goal__meta {
         display: flex;
         justify-content: space-between;
         font-size: 12px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
     }
-    .fundkit-goal--missing {
+    .gratora-goal--missing {
         font-size: 12px;
-        color: var(--fundkit-on-soft-muted, var(--fundkit-text-muted));
+        color: var(--gratora-on-soft-muted, var(--gratora-text-muted));
         padding: 8px 10px;
-        background: var(--fundkit-bg-soft);
-        border-radius: var(--fundkit-radius-sm);
+        background: var(--gratora-bg-soft);
+        border-radius: var(--gratora-radius-sm);
     }
     &__heading {
         margin: 0;
-        font-weight: var(--fundkit-heading-weight, 600);
+        font-weight: var(--gratora-heading-weight, 600);
         line-height: 1.25;
-        color: var(--fundkit-text);
+        color: var(--gratora-text);
 
         &--left   { text-align: left; }
         &--center { text-align: center; }
@@ -1201,14 +1201,14 @@
     &__paragraph {
         margin: 0;
         line-height: 1.5;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         font-size: 14px;
 
         &--left   { text-align: left; }
         &--center { text-align: center; }
         &--right  { text-align: right; }
 
-        a { color: var(--fundkit-accent); }
+        a { color: var(--gratora-accent); }
     }
 
     &__progress {
@@ -1221,8 +1221,8 @@
     &__page-title {
         margin: 0 0 8px;
         font-size: 18px;
-        font-weight: var(--fundkit-heading-weight, 600);
-        color: var(--fundkit-text);
+        font-weight: var(--gratora-heading-weight, 600);
+        color: var(--gratora-text);
         line-height: 1.3;
     }
 
@@ -1247,43 +1247,43 @@
         justify-content: center;
         border-radius: 999px;
         cursor: pointer;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         font-size: 18px;
         line-height: 1;
         transition: background .12s, color .12s;
 
         &:hover {
-            background: var(--fundkit-bg-soft);
-            color: var(--fundkit-on-soft, var(--fundkit-text));
+            background: var(--gratora-bg-soft);
+            color: var(--gratora-on-soft, var(--gratora-text));
         }
         &[aria-hidden="true"] { pointer-events: none; }
     }
     &__bar-title {
         margin: 0;
         font-size: 15px;
-        font-weight: var(--fundkit-heading-weight, 600);
+        font-weight: var(--gratora-heading-weight, 600);
         text-align: center;
-        color: var(--fundkit-text);
+        color: var(--gratora-text);
         line-height: 1.3;
     }
     &__bar-spacer { width: 32px; }
 
     &__bar-track {
         height: 4px;
-        background: var(--fundkit-track, color-mix(in srgb, var(--fundkit-border, #e5e7eb) 55%, var(--fundkit-bg, #fff)));
+        background: var(--gratora-track, color-mix(in srgb, var(--gratora-border, #e5e7eb) 55%, var(--gratora-bg, #fff)));
         border-radius: 0;
         overflow: hidden;
         margin: 0 0 20px;
     }
     &__bar-fill {
         height: 100%;
-        background: var(--fundkit-accent);
+        background: var(--gratora-accent);
         transition: width .25s ease;
     }
     &__body {
         display: flex;
         flex-direction: column;
-        gap: var(--fundkit-gap, 20px);
+        gap: var(--gratora-gap, 20px);
     }
     &__nav--end,
     &__nav--align-end,
@@ -1291,7 +1291,7 @@
     &__nav--align-start,
     &__nav--align-left     { justify-content: flex-start; }
     &__nav--align-center   { justify-content: center; }
-    &__nav--align-stretch  { > .fundkit-form__button { flex: 1; } }
+    &__nav--align-stretch  { > .gratora-form__button { flex: 1; } }
 
     &__framed {
         display: flex;
@@ -1300,38 +1300,38 @@
         align-items: flex-start;
         padding: 24px;
 
-        p { margin: 0; color: var(--fundkit-text-muted); }
+        p { margin: 0; color: var(--gratora-text-muted); }
     }
     &__progress-dot {
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background: var(--fundkit-track, color-mix(in srgb, var(--fundkit-border, #e5e7eb) 55%, var(--fundkit-bg, #fff)));
+        background: var(--gratora-track, color-mix(in srgb, var(--gratora-border, #e5e7eb) 55%, var(--gratora-bg, #fff)));
         transition: background .15s ease, transform .15s ease;
 
-        &.is-done    { background: var(--fundkit-accent, #211d3f); }
+        &.is-done    { background: var(--gratora-accent, #211d3f); }
         &.is-current {
-            background: var(--fundkit-accent, #211d3f);
+            background: var(--gratora-accent, #211d3f);
             transform: scale(1.25);
         }
     }
     &__page-title {
         margin: 0 0 12px;
         font-size: 16px;
-        font-weight: var(--fundkit-heading-weight, 600);
-        color: var(--fundkit-text);
+        font-weight: var(--gratora-heading-weight, 600);
+        color: var(--gratora-text);
     }
 
     // WordPress block supports own authored inline styles.
-    .fundkit-block--section {
-        > .fundkit-form__decorations { margin-bottom: 0; }
+    .gratora-block--section {
+        > .gratora-form__decorations { margin-bottom: 0; }
     }
 
     &__error {
         padding: 10px 14px;
-        background: var(--fundkit-error-bg);
-        color: var(--fundkit-error-fg);
-        border-radius: var(--fundkit-radius-sm);
+        background: var(--gratora-error-bg);
+        color: var(--gratora-error-fg);
+        border-radius: var(--gratora-radius-sm);
         font-size: 13px;
     }
 
@@ -1342,7 +1342,7 @@
         h3 {
             margin: 12px 0 6px;
             font-size: 20px;
-            font-weight: var(--fundkit-heading-weight, 600);
+            font-weight: var(--gratora-heading-weight, 600);
         }
     }
     &__success-icon {
@@ -1350,8 +1350,8 @@
         height: 56px;
         margin: 0 auto;
         border-radius: 50%;
-        background: var(--fundkit-accent);
-        color: var(--fundkit-on-accent, #fff);
+        background: var(--gratora-accent);
+        color: var(--gratora-on-accent, #fff);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1361,20 +1361,20 @@
     &__reference {
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-size: 13px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         margin: 0 0 18px;
     }
 
     &__payment-title {
         margin: 0 0 4px;
         font-size: 18px;
-        font-weight: var(--fundkit-heading-weight, 600);
+        font-weight: var(--gratora-heading-weight, 600);
     }
     &__payment-amount {
         margin: 0 0 16px;
         font-size: 22px;
         font-weight: 700;
-        color: var(--fundkit-accent);
+        color: var(--gratora-accent);
     }
     &__payment-element {
         min-height: 44px;
@@ -1387,14 +1387,14 @@
     }
     &__payment-loading {
         font-size: 13px;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         margin: 0 0 12px;
     }
 
     &__confirming {
         text-align: center;
         padding: 32px 0;
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         font-size: 14px;
     }
     &__spinner {
@@ -1402,37 +1402,37 @@
         width: 28px;
         height: 28px;
         margin-bottom: 12px;
-        border: 3px solid var(--fundkit-border);
-        border-top-color: var(--fundkit-accent);
+        border: 3px solid var(--gratora-border);
+        border-top-color: var(--gratora-accent);
         border-radius: 50%;
-        animation: fundkit-form-spin 0.7s linear infinite;
+        animation: gratora-form-spin 0.7s linear infinite;
     }
 }
 
-@keyframes fundkit-form-spin {
+@keyframes gratora-form-spin {
     to { transform: rotate(360deg); }
 }
 
-.fundkit-form__country-select {
+.gratora-form__country-select {
     position: relative;
 
     &-input {
         width: 100%;
         padding: 9px 32px 9px 12px;
-        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
-        border-radius: var(--fundkit-radius-sm, 8px);
-        background: var(--fundkit-field-bg);
-        color: var(--fundkit-on-field, var(--fundkit-text));
+        border: var(--gratora-stroke, 1px) solid var(--gratora-border);
+        border-radius: var(--gratora-radius-sm, 8px);
+        background: var(--gratora-field-bg);
+        color: var(--gratora-on-field, var(--gratora-text));
         font: inherit;
         line-height: 1.4;
         cursor: pointer;
 
         &:focus {
-            outline: 2px solid var(--fundkit-accent);
+            outline: 2px solid var(--gratora-accent);
             outline-offset: -1px;
         }
 
-        &[aria-invalid="true"] { border-color: var(--fundkit-error-fg); }
+        &[aria-invalid="true"] { border-color: var(--gratora-error-fg); }
     }
 
     &-chevron {
@@ -1440,7 +1440,7 @@
         right: 10px;
         top: 50%;
         transform: translateY(-50%);
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         pointer-events: none;
         transition: transform .15s ease;
     }
@@ -1458,10 +1458,10 @@
         margin: 0;
         padding: 4px;
         list-style: none;
-        background: var(--fundkit-field-bg);
-        color: var(--fundkit-on-field, var(--fundkit-text));
-        border: var(--fundkit-stroke, 1px) solid var(--fundkit-border);
-        border-radius: var(--fundkit-radius-sm, 8px);
+        background: var(--gratora-field-bg);
+        color: var(--gratora-on-field, var(--gratora-text));
+        border: var(--gratora-stroke, 1px) solid var(--gratora-border);
+        border-radius: var(--gratora-radius-sm, 8px);
         box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
     }
 
@@ -1473,18 +1473,18 @@
         padding: 7px 10px;
         border-radius: 6px;
         cursor: pointer;
-        color: var(--fundkit-text);
+        color: var(--gratora-text);
         font-size: 14px;
         line-height: 1.3;
 
         &.is-active,
-        &:hover { background: var(--fundkit-accent-soft, #efedf8); }
+        &:hover { background: var(--gratora-accent-soft, #efedf8); }
 
         &.is-current { font-weight: 600; }
     }
 
     &-hint {
-        color: var(--fundkit-text-muted);
+        color: var(--gratora-text-muted);
         font-size: 12px;
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }

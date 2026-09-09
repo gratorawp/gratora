@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Blocks\CampaignBindings;
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Blocks\CampaignBindings;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Foundation\Plugin;
 
 /**
- * Verifies the `fundkit/campaign` Block Bindings source resolves campaign stats
- * for keys the bindings docs cover, and falls back to `_fundkit_campaign_id`
+ * Verifies the `gratora/campaign` Block Bindings source resolves campaign stats
+ * for keys the bindings docs cover, and falls back to `_gratora_campaign_id`
  * post meta when no `campaign_id` arg is supplied.
  */
 final class CampaignBindingsTest extends IntegrationTestCase
@@ -65,7 +65,7 @@ final class CampaignBindingsTest extends IntegrationTestCase
     {
         $campaign = $this->seedCampaign();
         $postId   = self::factory()->post->create();
-        update_post_meta($postId, '_fundkit_campaign_id', $campaign->id);
+        update_post_meta($postId, '_gratora_campaign_id', $campaign->id);
 
         // Fake block context with postId.
         $block = (object) ['context' => ['postId' => $postId]];

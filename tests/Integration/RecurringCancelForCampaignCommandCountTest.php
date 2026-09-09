@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\EventRecorder;
-use FundKit\Campaigns\Campaign;
-use FundKit\Core\Commands\CoreCommandProvider;
-use FundKit\Foundation\Commands\CommandContext;
-use FundKit\Foundation\Commands\CommandRegistry;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\CampaignCancelRecurringJob;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Campaigns\Campaign;
+use Gratora\Core\Commands\CoreCommandProvider;
+use Gratora\Foundation\Commands\CommandContext;
+use Gratora\Foundation\Commands\CommandRegistry;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\CampaignCancelRecurringJob;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanRepository;
 
 /**
  * recurring.cancel_for_campaign starts the sweep that cancels every live plan,
@@ -34,7 +34,7 @@ final class RecurringCancelForCampaignCommandCountTest extends IntegrationTestCa
     private function ctx(): CommandContext
     {
         $user = self::factory()->user->create(['role' => 'administrator']);
-        get_role('administrator')->add_cap('fundkit_view_donations');
+        get_role('administrator')->add_cap('gratora_view_donations');
         wp_set_current_user($user);
 
         return new CommandContext($user, 'rest', 'test-' . uniqid());

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\Styling\CampaignStyleVars;
-use FundKit\Forms\Blocks\SectionBlock;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\Styling\CampaignStyleVars;
+use Gratora\Forms\Blocks\SectionBlock;
 
 /**
  * A campaign page is an ordinary page, so its blocks answer to the editor's own
@@ -20,14 +20,14 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
     public function campaignBlockNames(): array
     {
         return [
-            ['fundkit/campaign-image'],
-            ['fundkit/campaign-progress'],
-            ['fundkit/campaign-stat'],
-            ['fundkit/donate-button'],
-            ['fundkit/top-donors'],
-            ['fundkit/recent-donations'],
-            ['fundkit/supporter-wall'],
-            ['fundkit/campaign-grid'],
+            ['gratora/campaign-image'],
+            ['gratora/campaign-progress'],
+            ['gratora/campaign-stat'],
+            ['gratora/donate-button'],
+            ['gratora/top-donors'],
+            ['gratora/recent-donations'],
+            ['gratora/supporter-wall'],
+            ['gratora/campaign-grid'],
         ];
     }
 
@@ -67,7 +67,7 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
         $id = (int) $this->campaign()->id;
 
         $html = do_blocks(
-            '<!-- wp:fundkit/campaign-progress {"campaignId":' . $id
+            '<!-- wp:gratora/campaign-progress {"campaignId":' . $id
             . ',"style":{"color":{"background":"#ff0000","text":"#0000ff"}}} /-->'
         );
 
@@ -80,7 +80,7 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
         $id = (int) $this->campaign()->id;
 
         $html = do_blocks(
-            '<!-- wp:fundkit/campaign-progress {"campaignId":' . $id
+            '<!-- wp:gratora/campaign-progress {"campaignId":' . $id
             . ',"style":{"spacing":{"padding":{"top":"40px"}}}} /-->'
         );
 
@@ -96,28 +96,28 @@ final class CampaignBlocksStyleSupportTest extends IntegrationTestCase
         $id = (int) $this->campaign()->id;
 
         $html = do_blocks(
-            '<!-- wp:fundkit/campaign-progress {"campaignId":' . $id
+            '<!-- wp:gratora/campaign-progress {"campaignId":' . $id
             . ',"style":{"color":{"background":"#ff0000"}}} /-->'
         );
 
-        $this->assertStringContainsString('fundkit-block--progress', $html);
-        $this->assertStringContainsString('data-block="fundkit/campaign-progress"', $html);
+        $this->assertStringContainsString('gratora-block--progress', $html);
+        $this->assertStringContainsString('data-block="gratora/campaign-progress"', $html);
     }
 
     public function test_a_chosen_shadow_reaches_a_block_for_another_campaign(): void
     {
         $c = $this->campaign();
         $c->style = ['tokens' => [
-            'fundkit-accent'      => '#7c3aed',
-            'fundkit-card-shadow' => '0 1px 2px rgba(15, 23, 42, .04)',
+            'gratora-accent'      => '#7c3aed',
+            'gratora-card-shadow' => '0 1px 2px rgba(15, 23, 42, .04)',
         ]];
         $c->save();
         CampaignStyleVars::flush();
 
-        $html = do_blocks('<!-- wp:fundkit/campaign-progress {"campaignId":' . (int) $c->id . '} /-->');
+        $html = do_blocks('<!-- wp:gratora/campaign-progress {"campaignId":' . (int) $c->id . '} /-->');
 
-        $this->assertStringContainsString('--fundkit-accent:#7c3aed', $html);
-        $this->assertStringContainsString('--fundkit-card-shadow:0 1px 2px rgba(15, 23, 42, .04)', $html);
+        $this->assertStringContainsString('--gratora-accent:#7c3aed', $html);
+        $this->assertStringContainsString('--gratora-card-shadow:0 1px 2px rgba(15, 23, 42, .04)', $html);
     }
 
     public function test_a_section_keeps_the_shadow_and_the_panel_colour_its_author_picked(): void

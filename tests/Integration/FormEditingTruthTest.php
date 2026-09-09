@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Forms\Form;
-use FundKit\Forms\FormService;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormService;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -23,16 +23,16 @@ final class FormEditingTruthTest extends IntegrationTestCase
         parent::setUp();
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Forms ' . uniqid(), 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
     }
 
-    private const REQUIRED_BLOCKS = '<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500}]} /-->'
-        . '<!-- wp:fundkit/name /-->'
-        . '<!-- wp:fundkit/email /-->'
-        . '<!-- wp:fundkit/submit-button /-->';
+    private const REQUIRED_BLOCKS = '<!-- wp:gratora/donation-amount {"presets":[{"cents":2500}]} /-->'
+        . '<!-- wp:gratora/name /-->'
+        . '<!-- wp:gratora/email /-->'
+        . '<!-- wp:gratora/submit-button /-->';
 
     private function forms(): FormService
     {
@@ -52,7 +52,7 @@ final class FormEditingTruthTest extends IntegrationTestCase
     /** @return list<array<string,mixed>> */
     private function readiness(Form $form, string $blocks): array
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms/' . (int) $form->id . '/readiness');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms/' . (int) $form->id . '/readiness');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['blocks' => $blocks]));
 
@@ -76,7 +76,7 @@ final class FormEditingTruthTest extends IntegrationTestCase
         // no money, and the check has to say so about the blocks in front of
         // the author rather than the ones last saved.
         $edited = self::REQUIRED_BLOCKS
-            . '<!-- wp:fundkit/payment-gateways {"allowed":["stripe"]} /-->';
+            . '<!-- wp:gratora/payment-gateways {"allowed":["stripe"]} /-->';
 
         $this->assertSame(
             'fail',
@@ -85,7 +85,7 @@ final class FormEditingTruthTest extends IntegrationTestCase
         );
 
         $widened = self::REQUIRED_BLOCKS
-            . '<!-- wp:fundkit/payment-gateways {"allowed":["offline"]} /-->';
+            . '<!-- wp:gratora/payment-gateways {"allowed":["offline"]} /-->';
 
         $this->assertSame(
             'pass',
@@ -107,7 +107,7 @@ final class FormEditingTruthTest extends IntegrationTestCase
             ]],
         ]);
 
-        $form = $this->form(self::REQUIRED_BLOCKS . '<!-- wp:fundkit/consent {"purposeKeys":["terms"]} /-->');
+        $form = $this->form(self::REQUIRED_BLOCKS . '<!-- wp:gratora/consent {"purposeKeys":["terms"]} /-->');
 
         $ok = $this->check($this->readiness($form, (string) $form->blocks), 'consent-purposes');
         $this->assertSame('pass', $ok['status'] ?? null);
@@ -149,7 +149,7 @@ final class FormEditingTruthTest extends IntegrationTestCase
 
         try {
             $this->forms()->update($form, [
-                'blocks' => '<!-- wp:fundkit/name /--><!-- wp:fundkit/email /--><!-- wp:fundkit/submit-button /-->',
+                'blocks' => '<!-- wp:gratora/name /--><!-- wp:gratora/email /--><!-- wp:gratora/submit-button /-->',
             ]);
             $this->fail('a live form cannot lose its amount block');
         } catch (\InvalidArgumentException $e) {
@@ -159,7 +159,7 @@ final class FormEditingTruthTest extends IntegrationTestCase
 
     public function test_publishing_a_draft_still_says_what_is_needed(): void
     {
-        $form = $this->form('<!-- wp:fundkit/email /--><!-- wp:fundkit/submit-button /-->');
+        $form = $this->form('<!-- wp:gratora/email /--><!-- wp:gratora/submit-button /-->');
 
         try {
             $this->forms()->update($form, ['status' => 'published']);

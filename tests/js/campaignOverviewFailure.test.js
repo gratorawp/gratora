@@ -33,9 +33,9 @@ jest.mock( '../../assets/admin/_shared/widgets/WidgetGrid', () => ( {
 
 // The record arrives through @wordpress/core-data's entity store, which is not
 // what any of this is about.
-jest.mock( '../../assets/admin/_shared/useFundKitRecord', () => ( {
+jest.mock( '../../assets/admin/_shared/useGratoraRecord', () => ( {
     __esModule: true,
-    useFundKitRecord: () => ( {
+    useGratoraRecord: () => ( {
         record:      global.__campaign,
         savedRecord: global.__campaign,
         edits:       {},

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -68,19 +68,19 @@ final class DonationFirstEmailTest extends IntegrationTestCase
 
     public function test_disabled_template_skips_the_welcome(): void
     {
-        update_option('fundkit_email_settings', ['templates' => ['donation_first' => ['enabled' => false]]]);
+        update_option('gratora_email_settings', ['templates' => ['donation_first' => ['enabled' => false]]]);
 
         $mails = $this->captureMails();
         $this->completeOfflineDonation('optout@example.com', 'Omar');
 
         $this->assertCount(0, $this->mailsBySubject($mails, 'first'), 'a disabled welcome never sends');
 
-        delete_option('fundkit_email_settings');
+        delete_option('gratora_email_settings');
     }
 
     private function recordDonationByHand(string $email, string $firstName): void
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'email'          => $email,
@@ -97,7 +97,7 @@ final class DonationFirstEmailTest extends IntegrationTestCase
 
     private function completeOfflineDonation(string $email, string $firstName): void
     {
-        $createReq = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $createReq = new WP_REST_Request('POST', '/gratora/v1/donations');
         $createReq->set_header('content-type', 'application/json');
         $createReq->set_body((string) wp_json_encode([
             'email'        => $email,
@@ -108,7 +108,7 @@ final class DonationFirstEmailTest extends IntegrationTestCase
         ]));
         $reference = rest_do_request($createReq)->get_data()['reference'];
 
-        $confirmReq = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirmReq = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirmReq->set_header('content-type', 'application/json');
         $confirmReq->set_body('{}');
         rest_do_request($confirmReq);

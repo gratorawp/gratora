@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Portal\PortalPage;
-use FundKit\Forms\FormReadinessService;
-use FundKit\Forms\FormRepository;
-use FundKit\Foundation\Container\Container;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\License\LicenseService;
-use FundKit\Foundation\Modules\FundKitModule;
-use FundKit\Foundation\Modules\ModuleManager;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\Stripe\ApplePayDomain;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\TestMode;
-use FundKit\Settings\ReadinessService;
-use FundKit\Settings\SettingsService;
+use Gratora\Donors\Portal\PortalPage;
+use Gratora\Forms\FormReadinessService;
+use Gratora\Forms\FormRepository;
+use Gratora\Foundation\Container\Container;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\License\LicenseService;
+use Gratora\Foundation\Modules\GratoraModule;
+use Gratora\Foundation\Modules\ModuleManager;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\Stripe\ApplePayDomain;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\TestMode;
+use Gratora\Settings\ReadinessService;
+use Gratora\Settings\SettingsService;
 
 /**
  * The licences row on Setup sent the operator to a settings tab that does not
@@ -38,12 +38,12 @@ final class LicenseRowActionTest extends IntegrationTestCase
         $api      = new StripeApi($stripe);
 
         $modules = new ModuleManager(new Container());
-        $modules->register($this->proModule('fundkit-p2p', 'Peer to peer'));
+        $modules->register($this->proModule('gratora-p2p', 'Peer to peer'));
         $modules->bootAll();
 
         return new ReadinessService(
             $settings,
-            new FormReadinessService($settings, new GatewayManager(), $stripe, new TestMode(new FormRepository()), \FundKit\Foundation\Plugin::instance()->container->get(\FundKit\Donors\ConsentService::class)),
+            new FormReadinessService($settings, new GatewayManager(), $stripe, new TestMode(new FormRepository()), \Gratora\Foundation\Plugin::instance()->container->get(\Gratora\Donors\ConsentService::class)),
             $stripe,
             $api,
             new ApplePayDomain($api, $stripe),
@@ -77,17 +77,17 @@ final class LicenseRowActionTest extends IntegrationTestCase
 
     public function test_the_row_links_where_the_licensing_client_says(): void
     {
-        add_filter('fundkit.license.manage_url', static fn (): string => admin_url('admin.php?page=fundkit-licenses'));
+        add_filter('gratora.license.manage_url', static fn (): string => admin_url('admin.php?page=gratora-licenses'));
 
         $row = $this->licenseRow();
 
-        $this->assertSame(admin_url('admin.php?page=fundkit-licenses'), $row['action_url']);
+        $this->assertSame(admin_url('admin.php?page=gratora-licenses'), $row['action_url']);
         $this->assertSame('Add a key', $row['action_label']);
     }
 
-    private function proModule(string $id, string $name): FundKitModule
+    private function proModule(string $id, string $name): GratoraModule
     {
-        return new class($id, $name) implements FundKitModule {
+        return new class($id, $name) implements GratoraModule {
             public function __construct(private string $id, private string $name)
             {
             }
@@ -119,7 +119,7 @@ final class LicenseRowActionTest extends IntegrationTestCase
 
             public function tier(): string
             {
-                return FundKitModule::TIER_PRO;
+                return GratoraModule::TIER_PRO;
             }
 
             public function boot(Container $c): void

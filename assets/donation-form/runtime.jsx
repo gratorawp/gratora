@@ -30,7 +30,7 @@ const STEP_RENDERERS = {
     donor:  DonorStep,
     // The submit step draws nothing of its own: it carries the button's label
     // and alignment, which FormBody reads directly, and the recap is the
-    // fundkit/donation-summary block. Mapped rather than omitted so the step does
+    // gratora/donation-summary block. Mapped rather than omitted so the step does
     // not fall through to the unknown-step message.
     submit: () => null,
 };
@@ -39,7 +39,7 @@ const STEP_RENDERERS = {
 // moved. It carries the reference and its status token and nothing else: a
 // listener that needs the amount reads it back from the status endpoint, which
 // is server-authoritative and returns no donor data.
-export const COMPLETED_EVENT = 'fundkit:donation:completed';
+export const COMPLETED_EVENT = 'gratora:donation:completed';
 
 // How long a thank-you redirect waits for listeners that asked to be waited
 // for. Long enough for a same-origin round trip to the status endpoint, short
@@ -49,7 +49,7 @@ export const COMPLETED_HOLD_MS = 2000;
 
 // Announce the runtime’s return claim so modal code reveals its outcome without repeating
 // ownership checks.
-export const RETURN_CLAIMED_EVENT = 'fundkit:donation:return-claimed';
+export const RETURN_CLAIMED_EVENT = 'gratora:donation:return-claimed';
 
 // The token lands in a different place on each payment path: the submit
 // response for auto-confirmed gateways, the payment step for the ones that
@@ -128,7 +128,7 @@ function PortalLink( { email, config } ) {
         return (
             <button
                 type="button"
-                class="fundkit-form__button fundkit-form__button--secondary fundkit-form__portal-link is-sent"
+                class="gratora-form__button gratora-form__button--secondary gratora-form__portal-link is-sent"
                 disabled
             >
                 { config.i18n.portalLinkSent }
@@ -140,7 +140,7 @@ function PortalLink( { email, config } ) {
     // for something nobody sent, so the portal is offered plainly instead.
     if ( failed ) {
         return (
-            <a class="fundkit-form__button fundkit-form__button--secondary" href={ portal.url }>
+            <a class="gratora-form__button gratora-form__button--secondary" href={ portal.url }>
                 { config.i18n.manageGiving }
             </a>
         );
@@ -164,7 +164,7 @@ function PortalLink( { email, config } ) {
     return (
         <button
             type="button"
-            class="fundkit-form__button fundkit-form__button--secondary fundkit-form__portal-link"
+            class="gratora-form__button gratora-form__button--secondary gratora-form__portal-link"
             disabled={ busy }
             onClick={ send }
         >
@@ -182,23 +182,23 @@ function DonationReceipt( { receipt, config } ) {
     const freq = frequencyLabel( receipt.frequency, i18n );
 
     return (
-        <dl class="fundkit-form__summary fundkit-form__summary--receipt">
+        <dl class="gratora-form__summary gratora-form__summary--receipt">
             { known && (
-                <div class="fundkit-form__summary-row">
+                <div class="gratora-form__summary-row">
                     <dt>{ i18n.total }</dt>
-                    <dd class="fundkit-form__summary-amount">
+                    <dd class="gratora-form__summary-amount">
                         { formatAmount( receipt.amountCents, receipt.currency ) }
                     </dd>
                 </div>
             ) }
             { freq && (
-                <div class="fundkit-form__summary-row">
+                <div class="gratora-form__summary-row">
                     <dt>{ i18n.frequency }</dt>
                     <dd>{ freq }</dd>
                 </div>
             ) }
             { receipt.email && (
-                <div class="fundkit-form__summary-row">
+                <div class="gratora-form__summary-row">
                     <dt>{ i18n.email }</dt>
                     <dd>{ receipt.email }</dd>
                 </div>
@@ -217,18 +217,18 @@ function PendingScreen( { state, dispatch, config } ) {
     }, [] );
 
     return (
-        <div class="fundkit-form__success fundkit-form__success--pending" role="status">
-            <div class="fundkit-form__success-icon fundkit-form__success-icon--pending" aria-hidden="true">⏳</div>
+        <div class="gratora-form__success gratora-form__success--pending" role="status">
+            <div class="gratora-form__success-icon gratora-form__success-icon--pending" aria-hidden="true">⏳</div>
             <h3>{ config.i18n.pendingTitle }</h3>
-            <p class="fundkit-form__thank-you">{ config.i18n.pendingMessage }</p>
+            <p class="gratora-form__thank-you">{ config.i18n.pendingMessage }</p>
             <DonationReceipt receipt={ receipt } config={ config } />
             { state.submission?.reference && (
-                <p class="fundkit-form__reference">{ state.submission.reference }</p>
+                <p class="gratora-form__reference">{ state.submission.reference }</p>
             ) }
-            <div class="fundkit-form__success-actions">
+            <div class="gratora-form__success-actions">
                 <button
                     type="button"
-                    class="fundkit-form__button fundkit-form__button--secondary"
+                    class="gratora-form__button gratora-form__button--secondary"
                     onClick={ () => { clearPending(); dispatch( { type: 'RESET' } ); } }
                 >
                     { config.i18n.donateAgain }
@@ -252,18 +252,18 @@ function UnresolvedScreen( { state, dispatch, config } ) {
     const ret       = detectStripeReturn( reference || null );
 
     return (
-        <div class="fundkit-form__success fundkit-form__success--pending" role="alert">
-            <div class="fundkit-form__success-icon fundkit-form__success-icon--pending" aria-hidden="true">⏳</div>
+        <div class="gratora-form__success gratora-form__success--pending" role="alert">
+            <div class="gratora-form__success-icon gratora-form__success-icon--pending" aria-hidden="true">⏳</div>
             <h3>{ config.i18n.unresolvedTitle || config.i18n.pendingTitle }</h3>
-            <p class="fundkit-form__thank-you">{ state.message || config.i18n.returnUnresolved || config.i18n.error }</p>
+            <p class="gratora-form__thank-you">{ state.message || config.i18n.returnUnresolved || config.i18n.error }</p>
             { reference && (
-                <p class="fundkit-form__reference">{ reference }</p>
+                <p class="gratora-form__reference">{ reference }</p>
             ) }
             { ret && config.stripe?.publishableKey && (
-                <div class="fundkit-form__success-actions">
+                <div class="gratora-form__success-actions">
                     <button
                         type="button"
-                        class="fundkit-form__button fundkit-form__button--primary"
+                        class="gratora-form__button gratora-form__button--primary"
                         onClick={ () => resolveReturn( config, ret, dispatch ) }
                     >
                         { config.i18n.checkAgain }
@@ -275,12 +275,12 @@ function UnresolvedScreen( { state, dispatch, config } ) {
 }
 
 // A gateway shipped outside core registers with
-// window.fundkit.formGateways.register( id, { component, ready } ) before the
+// window.gratora.formGateways.register( id, { component, ready } ) before the
 // runtime mounts; `ready` gets that gateway's slice of the form config and
 // answers whether it can actually collect a payment.
 function registeredGateway( id ) {
     if ( ! id ) return null;
-    const reg = typeof window !== 'undefined' ? window.fundkit?.formGateways : null;
+    const reg = typeof window !== 'undefined' ? window.gratora?.formGateways : null;
     const entry = reg && typeof reg.get === 'function' ? reg.get( id ) : null;
 
     return entry && typeof entry.component === 'function' ? entry : null;
@@ -300,7 +300,7 @@ function focusFirstInvalid( hostId ) {
         const root = formRoot( hostId );
         const el   = root
             ? root.querySelector( '[aria-invalid="true"]' )
-            : document.querySelector( '.fundkit-donation-form [aria-invalid="true"]' );
+            : document.querySelector( '.gratora-donation-form [aria-invalid="true"]' );
         if ( el && typeof el.focus === 'function' ) {
             el.focus( { preventScroll: true } );
             el.scrollIntoView( { behavior: 'smooth', block: 'center' } );
@@ -309,7 +309,7 @@ function focusFirstInvalid( hostId ) {
 }
 
 function readConfig( form ) {
-    const node = form.querySelector( 'script[type="application/json"][data-fundkit-form-config]' );
+    const node = form.querySelector( 'script[type="application/json"][data-gratora-form-config]' );
     if ( ! node ) return null;
     try {
         return JSON.parse( node.textContent || '{}' );
@@ -352,14 +352,14 @@ function StepView( { step, state, dispatch, config } ) {
     const type = step?.type;
     if ( type === 'donor' ) {
         return (
-            <div class="fundkit-form__step" data-step="donor">
+            <div class="gratora-form__step" data-step="donor">
                 <StepItems items={ step?.items } state={ state } dispatch={ dispatch } config={ config } />
             </div>
         );
     }
     const StepComp = STEP_RENDERERS[ type ];
     return (
-        <div class="fundkit-form__step" data-step={ type }>
+        <div class="gratora-form__step" data-step={ type }>
             { StepComp ? (
                 <ErrorBoundary>
                     <StepComp step={ step } state={ state } dispatch={ dispatch } config={ config } />
@@ -618,8 +618,8 @@ function FormBody( { state, dispatch, config } ) {
 
     if ( state.status === 'confirming' ) {
         return (
-            <div class="fundkit-form__confirming" role="status">
-                <span class="fundkit-form__spinner" aria-hidden="true" />
+            <div class="gratora-form__confirming" role="status">
+                <span class="gratora-form__spinner" aria-hidden="true" />
                 <p>{ config.i18n.confirming || config.i18n.processing }</p>
             </div>
         );
@@ -630,18 +630,18 @@ function FormBody( { state, dispatch, config } ) {
     // not ask them for anything.
     if ( state.status === 'processing' ) {
         return (
-            <div class="fundkit-form__success fundkit-form__success--pending" role="status">
-                <div class="fundkit-form__success-icon fundkit-form__success-icon--pending" aria-hidden="true">⏳</div>
+            <div class="gratora-form__success gratora-form__success--pending" role="status">
+                <div class="gratora-form__success-icon gratora-form__success-icon--pending" aria-hidden="true">⏳</div>
                 <h3>{ config.i18n.processingTitle || config.i18n.pendingTitle }</h3>
-                <p class="fundkit-form__thank-you">{ config.i18n.processingMessage || config.i18n.pendingMessage }</p>
+                <p class="gratora-form__thank-you">{ config.i18n.processingMessage || config.i18n.pendingMessage }</p>
                 <DonationReceipt receipt={ receiptOf( state ) } config={ config } />
                 { state.submission?.reference && (
-                    <p class="fundkit-form__reference">{ state.submission.reference }</p>
+                    <p class="gratora-form__reference">{ state.submission.reference }</p>
                 ) }
-                <div class="fundkit-form__success-actions">
+                <div class="gratora-form__success-actions">
                     <button
                         type="button"
-                        class="fundkit-form__button fundkit-form__button--secondary"
+                        class="gratora-form__button gratora-form__button--secondary"
                         onClick={ () => { clearPending(); dispatch( { type: 'RESET' } ); } }
                     >
                         { config.i18n.donateAgain }
@@ -669,20 +669,20 @@ function FormBody( { state, dispatch, config } ) {
         // listening for the donation runs first.
         const message = config.thanks?.message || '';
         return (
-            <div class="fundkit-form__success" role="status">
-                <div class="fundkit-form__success-icon" aria-hidden="true">✓</div>
+            <div class="gratora-form__success" role="status">
+                <div class="gratora-form__success-icon" aria-hidden="true">✓</div>
                 <h3>{ config.i18n.thanks }</h3>
                 { message && (
-                    <p class="fundkit-form__thank-you">{ message }</p>
+                    <p class="gratora-form__thank-you">{ message }</p>
                 ) }
                 <DonationReceipt receipt={ receiptOf( state ) } config={ config } />
                 { state.submission?.reference && (
-                    <p class="fundkit-form__reference">{ state.submission.reference }</p>
+                    <p class="gratora-form__reference">{ state.submission.reference }</p>
                 ) }
-                <div class="fundkit-form__success-actions">
+                <div class="gratora-form__success-actions">
                     <button
                         type="button"
-                        class="fundkit-form__button fundkit-form__button--secondary"
+                        class="gratora-form__button gratora-form__button--secondary"
                         onClick={ () => { clearPending(); dispatch( { type: 'RESET' } ); } }
                     >
                         { config.i18n.donateAgain }
@@ -694,7 +694,7 @@ function FormBody( { state, dispatch, config } ) {
     }
 
     const honeypotInput = (
-        <div class="fundkit-form__hp" aria-hidden="true">
+        <div class="gratora-form__hp" aria-hidden="true">
             <label>
                 Leave this field empty
                 <input
@@ -709,7 +709,7 @@ function FormBody( { state, dispatch, config } ) {
         </div>
     );
 
-    // Root content authored before a fundkit/steps wizard, rendered once above the
+    // Root content authored before a gratora/steps wizard, rendered once above the
     // form so it does not collapse onto the first page.
     const preamble = ( Array.isArray( config.preamble ) && config.preamble.length ) ? (
         <StepItems items={ config.preamble } state={ state } dispatch={ dispatch } config={ config } />
@@ -739,9 +739,9 @@ function FormBody( { state, dispatch, config } ) {
 // than in each layout, where one could omit it and leave two buttons competing
 // for the same money.
 const formRootClass = ( state, variant ) => [
-    'fundkit-form',
+    'gratora-form',
     variant,
-    state.status === 'payment' && 'fundkit-form--settled',
+    state.status === 'payment' && 'gratora-form--settled',
 ].filter( Boolean ).join( ' ' );
 
 function SinglePageView( { state, dispatch, config, onSubmit } ) {
@@ -763,20 +763,20 @@ function SinglePageView( { state, dispatch, config, onSubmit } ) {
         config
     );
     return (
-        <div class={ formRootClass( state, 'fundkit-form--inline' ) }>
+        <div class={ formRootClass( state, 'gratora-form--inline' ) }>
             { state.steps.map( ( s, i ) => (
                 <StepView key={ i } step={ s } state={ state } dispatch={ dispatch } config={ config } />
             ) ) }
             { state.status === 'error' && state.message && (
-                <div class="fundkit-form__error" role="alert">{ state.message }</div>
+                <div class="gratora-form__error" role="alert">{ state.message }</div>
             ) }
             { unexplained && (
-                <div class="fundkit-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
+                <div class="gratora-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
             ) }
-            <div class={ `fundkit-form__nav fundkit-form__nav--align-${ submitStep?.align || 'left' }` }>
+            <div class={ `gratora-form__nav gratora-form__nav--align-${ submitStep?.align || 'left' }` }>
                 <button
                     type="button"
-                    class="fundkit-form__button fundkit-form__button--primary"
+                    class="gratora-form__button gratora-form__button--primary"
                     disabled={ state.status === 'submitting' || noGateway }
                     onClick={ () => { if ( ! noGateway ) onSubmit(); } }
                 >
@@ -808,8 +808,8 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     const pageMounted = useRef( false );
     useEffect( () => {
         if ( ! pageMounted.current ) { pageMounted.current = true; return; }
-        const root = formRoot( config.hostId ) || document.querySelector( '.fundkit-donation-form' );
-        const h    = root?.querySelector( '.fundkit-form__page-title, .fundkit-form__bar-title' );
+        const root = formRoot( config.hostId ) || document.querySelector( '.gratora-donation-form' );
+        const h    = root?.querySelector( '.gratora-form__page-title, .gratora-form__bar-title' );
         if ( h ) {
             h.setAttribute( 'tabindex', '-1' );
             h.focus();
@@ -867,7 +867,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     const primary = (
         <button
             type="button"
-            class="fundkit-form__button fundkit-form__button--primary"
+            class="gratora-form__button gratora-form__button--primary"
             disabled={ state.status === 'submitting' || ( isLast && noGateway ) }
             onClick={ isLast ? submit : onNext }
         >
@@ -878,7 +878,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     );
 
     const error = state.status === 'error' && state.message && (
-        <div class="fundkit-form__error" role="alert">{ state.message }</div>
+        <div class="gratora-form__error" role="alert">{ state.message }</div>
     );
 
     // Not a selector: the payment-gateways block owns where that goes and
@@ -886,7 +886,7 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     // author removed. This is only the reason the button below cannot work, on
     // the pages where the section that would have said it is not on screen.
     const emptyNotice = unexplained && (
-        <div class="fundkit-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
+        <div class="gratora-form__gateways-empty" role="alert">{ emptyMessage( config, state ) }</div>
     );
 
     if ( progressStyle === 'bar' ) {
@@ -894,12 +894,12 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
             ? Math.round( ( ( current + 1 ) / pages.length ) * 100 )
             : 100;
         return (
-            <div class={ formRootClass( state, 'fundkit-form--paged-bar' ) }>
-                <header class="fundkit-form__bar-header">
+            <div class={ formRootClass( state, 'gratora-form--paged-bar' ) }>
+                <header class="gratora-form__bar-header">
                     { current > 0 && state.status !== 'payment' ? (
                         <button
                             type="button"
-                            class="fundkit-form__bar-back"
+                            class="gratora-form__bar-back"
                             aria-label={ prevLabel }
                             // The primary button is disabled while a submit is
                             // in flight; leaving Back live let a donor walk off
@@ -910,29 +910,29 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
                             <span aria-hidden="true">{ backGlyph() }</span>
                         </button>
                     ) : (
-                        <span class="fundkit-form__bar-back" aria-hidden="true" />
+                        <span class="gratora-form__bar-back" aria-hidden="true" />
                     ) }
                     { showPageTitle && (
-                        <h3 class="fundkit-form__bar-title">{ pageTitle }</h3>
+                        <h3 class="gratora-form__bar-title">{ pageTitle }</h3>
                     ) }
-                    <span class="fundkit-form__bar-spacer" aria-hidden="true" />
+                    <span class="gratora-form__bar-spacer" aria-hidden="true" />
                 </header>
                 <div
-                    class="fundkit-form__bar-track"
+                    class="gratora-form__bar-track"
                     role="progressbar"
                     aria-valuemin="0"
                     aria-valuemax={ pages.length }
                     aria-valuenow={ current + 1 }
                 >
-                    <div class="fundkit-form__bar-fill" style={ { width: `${ pct }%` } } />
+                    <div class="gratora-form__bar-fill" style={ { width: `${ pct }%` } } />
                 </div>
-                <div class="fundkit-form__body">
+                <div class="gratora-form__body">
                     { pageSteps.map( ( s, i ) => (
                         <StepView key={ i } step={ s } state={ state } dispatch={ dispatch } config={ config } />
                     ) ) }
                     { error }
                     { emptyNotice }
-                    <div class={ `fundkit-form__nav fundkit-form__nav--align-${ ( isLast ? submitStep?.align : null ) || 'end' }` }>{ primary }</div>
+                    <div class={ `gratora-form__nav gratora-form__nav--align-${ ( isLast ? submitStep?.align : null ) || 'end' }` }>{ primary }</div>
                 </div>
             </div>
         );
@@ -941,18 +941,18 @@ function PagedView( { pages, state, dispatch, config, onSubmit } ) {
     return (
         <div class={ formRootClass( state ) }>
             { showPageTitle && (
-                <h3 class="fundkit-form__page-title">{ pageTitle }</h3>
+                <h3 class="gratora-form__page-title">{ pageTitle }</h3>
             ) }
             { pageSteps.map( ( s, i ) => (
                 <StepView key={ i } step={ s } state={ state } dispatch={ dispatch } config={ config } />
             ) ) }
             { error }
             { emptyNotice }
-            <div class={ `fundkit-form__nav${ isLast && submitStep?.align ? ` fundkit-form__nav--align-${ submitStep.align }` : '' }` }>
+            <div class={ `gratora-form__nav${ isLast && submitStep?.align ? ` gratora-form__nav--align-${ submitStep.align }` : '' }` }>
                 { current > 0 ? (
                     <button
                         type="button"
-                        class="fundkit-form__button fundkit-form__button--secondary"
+                        class="gratora-form__button gratora-form__button--secondary"
                         disabled={ state.status === 'submitting' }
                         onClick={ onPrev }
                     >
@@ -1032,22 +1032,22 @@ function ModalShell( { children, openLabel, config, initiallyOpen = false } ) {
     }, [ open ] );
 
     return (
-        <div class="fundkit-modal-host">
+        <div class="gratora-modal-host">
             <button
                 type="button"
-                class="fundkit-form__button fundkit-form__button--primary fundkit-modal-trigger"
+                class="gratora-form__button gratora-form__button--primary gratora-modal-trigger"
                 onClick={ () => setOpen( true ) }
             >
                 { openLabel }
             </button>
             { open && (
-                <div class="fundkit-modal" role="dialog" aria-modal="true" aria-label={ config.i18n.formTitle || '' }>
+                <div class="gratora-modal" role="dialog" aria-modal="true" aria-label={ config.i18n.formTitle || '' }>
                     { /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- decorative overlay; Escape and the close button provide keyboard dismissal */ }
-                    <div class="fundkit-modal__backdrop" aria-hidden="true" onClick={ () => setOpen( false ) } />
-                    <div class="fundkit-modal__panel" ref={ panelRef }>
+                    <div class="gratora-modal__backdrop" aria-hidden="true" onClick={ () => setOpen( false ) } />
+                    <div class="gratora-modal__panel" ref={ panelRef }>
                         <button
                             type="button"
-                            class="fundkit-modal__close"
+                            class="gratora-modal__close"
                             aria-label={ config.i18n.close || 'Close' }
                             onClick={ () => setOpen( false ) }
                         >×</button>
@@ -1116,13 +1116,13 @@ function App( { config, host } ) {
         const ret = claimReturn();
         if ( ! ret || ! config.stripe?.publishableKey ) return false;
 
-        const marked = document.querySelector( '.fundkit-donation-form[data-fundkit-returning]' );
+        const marked = document.querySelector( '.gratora-donation-form[data-gratora-returning]' );
         if ( marked && marked !== host ) return false;
 
         // The element this instance rendered into, never a lookup by id: a form
         // the shortcode gave no id still shows its donor an outcome, and the
         // modal around it still has to open.
-        host.dataset.fundkitReturning = '1';
+        host.dataset.gratoraReturning = '1';
         window.dispatchEvent( new CustomEvent( RETURN_CLAIMED_EVENT, { detail: { host } } ) );
 
         return true;
@@ -1159,7 +1159,7 @@ function renderDecorationItem( d, i, values, ctx ) {
         return (
             <Tag
                 key={ i }
-                class={ `fundkit-form__heading fundkit-form__heading--${ d.align || 'left' }` }
+                class={ `gratora-form__heading gratora-form__heading--${ d.align || 'left' }` }
             >
                 { decodeEntities( d.text ) }
             </Tag>
@@ -1169,7 +1169,7 @@ function renderDecorationItem( d, i, values, ctx ) {
         return (
             <p
                 key={ i }
-                class={ `fundkit-form__paragraph fundkit-form__paragraph--${ d.align || 'left' }` }
+                class={ `gratora-form__paragraph gratora-form__paragraph--${ d.align || 'left' }` }
                 dangerouslySetInnerHTML={ { __html: d.html || '' } }
             />
         );
@@ -1178,7 +1178,7 @@ function renderDecorationItem( d, i, values, ctx ) {
         return (
             <hr
                 key={ i }
-                class="fundkit-form__divider"
+                class="gratora-form__divider"
                 style={ {
                     marginTop:      `${ d.marginTop ?? 16 }px`,
                     marginBottom:   `${ d.marginBottom ?? 16 }px`,
@@ -1192,7 +1192,7 @@ function renderDecorationItem( d, i, values, ctx ) {
         return (
             <div
                 key={ i }
-                class="fundkit-form__html"
+                class="gratora-form__html"
                 dangerouslySetInnerHTML={ { __html: d.html || '' } }
             />
         );
@@ -1229,7 +1229,7 @@ function renderDecorationItem( d, i, values, ctx ) {
             const PaymentStep = paymentComponentFor( st.payment );
             return (
                 <ErrorBoundary key={ i }>
-                    <div class="fundkit-form__payment-mount">
+                    <div class="gratora-form__payment-mount">
                         <PaymentStep
                             config={ ctx?.config }
                             payment={ st.payment }
@@ -1279,7 +1279,7 @@ function Decorations( { items, values, ctx } ) {
     );
     if ( ! visible.length ) return null;
     return (
-        <div class="fundkit-form__decorations">
+        <div class="gratora-form__decorations">
             { visible.map( ( d, i ) => renderDecorationItem( d, i, values, ctx ) ) }
         </div>
     );
@@ -1287,9 +1287,9 @@ function Decorations( { items, values, ctx } ) {
 
 function applyUrlPrefills( config ) {
     const params = new URLSearchParams( window.location.search );
-    const raw    = parseInt( params.get( 'fundkit_amount' ) || '', 10 );
-    const freq   = params.get( 'fundkit_frequency' );
-    const asked  = String( params.get( 'fundkit_currency' ) || '' ).trim().toUpperCase();
+    const raw    = parseInt( params.get( 'gratora_amount' ) || '', 10 );
+    const freq   = params.get( 'gratora_frequency' );
+    const asked  = String( params.get( 'gratora_currency' ) || '' ).trim().toUpperCase();
 
     const formCurrency = String( config.currency || '' ).toUpperCase();
     const offered      = Array.isArray( config.currencies ) ? config.currencies : [];
@@ -1347,13 +1347,13 @@ function applyThemeTokens( form, theme ) {
  * @param {Record<string,string>} tokens
  */
 export function applyPreviewTokens( form, tokens ) {
-    // Existing --fundkit-* inline vars go first, so a preset that omits a token
+    // Existing --gratora-* inline vars go first, so a preset that omits a token
     // reverts to the stylesheet default, not a stale value.
     const st = form.style;
     const drop = [];
     for ( let i = 0; i < st.length; i++ ) {
         const n = st[ i ];
-        if ( n && n.indexOf( '--fundkit-' ) === 0 ) drop.push( n );
+        if ( n && n.indexOf( '--gratora-' ) === 0 ) drop.push( n );
     }
     drop.forEach( ( n ) => st.removeProperty( n ) );
 
@@ -1370,7 +1370,7 @@ export function applyPreviewTokens( form, tokens ) {
  * admin previews.
  */
 function framedByAnotherSite() {
-    if ( window.fundkitFormPreview ) return false;
+    if ( window.gratoraFormPreview ) return false;
     if ( window.top === window.self ) return false;
     try {
         return window.top.location.origin !== window.self.location.origin;
@@ -1387,10 +1387,10 @@ function framedByAnotherSite() {
  */
 function FramedElsewhere( { i18n } ) {
     return (
-        <div class="fundkit-form__framed">
+        <div class="gratora-form__framed">
             <p>{ i18n.framedTitle || 'This donation form is being shown inside another website.' }</p>
             <a
-                class="fundkit-form__button fundkit-form__button--primary"
+                class="gratora-form__button gratora-form__button--primary"
                 href={ window.location.href }
                 target="_top"
                 rel="noopener"
@@ -1402,19 +1402,19 @@ function FramedElsewhere( { i18n } ) {
 }
 
 function mount( form ) {
-    if ( form.dataset.fundkitMounted === 'true' ) return;
+    if ( form.dataset.gratoraMounted === 'true' ) return;
 
     // Called on every exit path, or the JS-gated cloak can leave the form
     // permanently hidden.
-    const reveal = () => { form.dataset.fundkitReady = 'true'; };
+    const reveal = () => { form.dataset.gratoraReady = 'true'; };
 
     const config = readConfig( form );
     if ( ! config ) { reveal(); return; }
 
     if ( framedByAnotherSite() ) {
         form.innerHTML = '';
-        form.dataset.fundkitMounted = 'true';
-        form.dataset.fundkitFramed  = 'true';
+        form.dataset.gratoraMounted = 'true';
+        form.dataset.gratoraFramed  = 'true';
         render( <FramedElsewhere i18n={ config.i18n || {} } />, form );
         reveal();
         return;
@@ -1440,7 +1440,7 @@ function mount( form ) {
 
     const snapshot = form.innerHTML;
     form.innerHTML = '';
-    form.dataset.fundkitMounted = 'true';
+    form.dataset.gratoraMounted = 'true';
 
     // The host element is a real <form>, so a native submit (Enter on a
     // single-field step) would reload the page and wipe in-progress state.
@@ -1453,15 +1453,15 @@ function mount( form ) {
     } catch ( err ) {
         // Restore the static HTML so the form is at least visible.
         // eslint-disable-next-line no-console
-        console.error( '[fundkit] mount failed', err );
+        console.error( '[gratora] mount failed', err );
         form.innerHTML = snapshot;
-        delete form.dataset.fundkitMounted;
+        delete form.dataset.gratoraMounted;
     }
     reveal();
 }
 
 function bootAll() {
-    document.querySelectorAll( '.fundkit-donation-form' ).forEach( mount );
+    document.querySelectorAll( '.gratora-donation-form' ).forEach( mount );
 
     const inIframe = window.parent && window.parent !== window;
 
@@ -1478,14 +1478,14 @@ function bootAll() {
             if ( isSrcdocPreview && event.source !== window.parent ) return;
             const data = event.data;
             if ( ! data || typeof data !== 'object' ) return;
-            if ( data.type !== 'fundkit:apply-tokens' || ! data.tokens ) return;
-            document.querySelectorAll( '.fundkit-donation-form' ).forEach( ( form ) => {
+            if ( data.type !== 'gratora:apply-tokens' || ! data.tokens ) return;
+            document.querySelectorAll( '.gratora-donation-form' ).forEach( ( form ) => {
                 applyPreviewTokens( form, data.tokens );
             } );
         } );
 
         try {
-            window.parent.postMessage( { type: 'fundkit:preview-ready' }, '*' );
+            window.parent.postMessage( { type: 'gratora:preview-ready' }, '*' );
         } catch ( e ) {
             // Cross-origin parent: postMessage can throw. Safe to ignore.
         }
@@ -1502,9 +1502,9 @@ function bootAll() {
             for ( const rec of records ) {
                 rec.addedNodes.forEach( ( node ) => {
                     if ( node.nodeType !== 1 ) return;
-                    if ( node.matches && node.matches( '.fundkit-donation-form' ) ) mount( node );
+                    if ( node.matches && node.matches( '.gratora-donation-form' ) ) mount( node );
                     if ( node.querySelectorAll ) {
-                        node.querySelectorAll( '.fundkit-donation-form' ).forEach( mount );
+                        node.querySelectorAll( '.gratora-donation-form' ).forEach( mount );
                     }
                 } );
             }

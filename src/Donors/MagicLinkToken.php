@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /**
  * One-time token for donor self-service.
@@ -21,7 +21,7 @@ use FundKit\Vendor\Queryable\Schema\Table;
  */
 final class MagicLinkToken extends Model
 {
-    protected string $table = 'fundkit_magic_link_tokens';
+    protected string $table = 'gratora_magic_link_tokens';
     protected string $version = '1.0.0';
 
     public int $id;

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationQueries;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationQueries;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 
 /**
  * A year-end statement is a document the donor files with a tax office, so the
@@ -104,9 +104,9 @@ final class StatementYearBoundaryTest extends IntegrationTestCase
         $donorId = $this->donor();
         $this->paidAtUtc($donorId, '2025-06-02 12:00:00', 'order');
 
-        $donor = \FundKit\Donors\Donor::query()->where('id', $donorId)->get();
+        $donor = \Gratora\Donors\Donor::query()->where('id', $donorId)->get();
         $pdf   = Plugin::instance()->container
-            ->get(\FundKit\Donors\Portal\AnnualStatementBuilder::class)
+            ->get(\Gratora\Donors\Portal\AnnualStatementBuilder::class)
             ->build($donor, 2025);
 
         $this->assertSame('', $pdf, 'a year with nothing but a ticket purchase is not a statement');

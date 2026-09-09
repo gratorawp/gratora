@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -10,8 +10,8 @@ use WP_REST_Request;
  * Two authenticated-surface P2s from the QA sweep.
  *
  * A huge `page` 500'd every admin list route through an uncaught TypeError, and
- * the licence routes were gated on "can this person see the FundKit admin", which
- * is true for anyone holding any single fundkit_* cap.
+ * the licence routes were gated on "can this person see the Gratora admin", which
+ * is true for anyone holding any single gratora_* cap.
  */
 final class AdminListHardeningTest extends IntegrationTestCase
 {
@@ -19,11 +19,11 @@ final class AdminListHardeningTest extends IntegrationTestCase
     private function listRoutes(): array
     {
         return [
-            '/fundkit/v1/admin/donations',
-            '/fundkit/v1/admin/donors',
-            '/fundkit/v1/admin/campaigns',
-            '/fundkit/v1/admin/forms',
-            '/fundkit/v1/admin/funds',
+            '/gratora/v1/admin/donations',
+            '/gratora/v1/admin/donors',
+            '/gratora/v1/admin/campaigns',
+            '/gratora/v1/admin/forms',
+            '/gratora/v1/admin/funds',
         ];
     }
 

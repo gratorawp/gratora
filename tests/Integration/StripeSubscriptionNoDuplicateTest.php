@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\Stripe\StripeGateway;
-use FundKit\Recurring\RecurringPlanRepository;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\Stripe\StripeGateway;
+use Gratora\Recurring\RecurringPlanRepository;
 
 /**
  * The only defence against opening a second live subscription was Stripe's
@@ -44,11 +44,11 @@ final class StripeSubscriptionNoDuplicateTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'test_mode' => true,
             'stripe'    => ['webhook_secret_test' => 'whsec_dup'],
         ]);
-        update_option('fundkit_currency_locale', [
+        update_option('gratora_currency_locale', [
             'default_currency'     => 'USD',
             'supported_currencies' => ['USD'],
         ]);
@@ -163,7 +163,7 @@ final class StripeSubscriptionNoDuplicateTest extends IntegrationTestCase
         $this->remoteSubscriptions = [[
             'id'       => self::EXISTING,
             'status'   => 'active',
-            'metadata' => ['fundkit_initial_donation_id' => (string) $donation->id],
+            'metadata' => ['gratora_initial_donation_id' => (string) $donation->id],
         ]];
 
         $plan = $this->gateway()->retrySubscriptionCreation($donation);
@@ -194,7 +194,7 @@ final class StripeSubscriptionNoDuplicateTest extends IntegrationTestCase
         $this->remoteSubscriptions = [[
             'id'       => 'sub_another_donation',
             'status'   => 'active',
-            'metadata' => ['fundkit_initial_donation_id' => (string) ((int) $donation->id + 1000)],
+            'metadata' => ['gratora_initial_donation_id' => (string) ((int) $donation->id + 1000)],
         ]];
 
         $plan = $this->gateway()->retrySubscriptionCreation($donation);

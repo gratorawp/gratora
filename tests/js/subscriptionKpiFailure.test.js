@@ -31,8 +31,8 @@ const settle = async () => {
 
 async function mount( statsResult ) {
     apiFetch.mockImplementation( ( { path, parse } ) => {
-        if ( path.startsWith( '/fundkit/v1/admin/recurring/stats' ) ) return statsResult();
-        if ( path.startsWith( '/fundkit/v1/admin/me/table-view' ) ) return Promise.resolve( {} );
+        if ( path.startsWith( '/gratora/v1/admin/recurring/stats' ) ) return statsResult();
+        if ( path.startsWith( '/gratora/v1/admin/me/table-view' ) ) return Promise.resolve( {} );
         if ( parse === false ) {
             return Promise.resolve( { json: async () => [], headers: { get: () => '0' } } );
         }

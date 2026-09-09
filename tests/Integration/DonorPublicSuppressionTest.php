@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorAvatars;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorAvatars;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 
 /**
  * Hiding a donor is the answer to a bad picture or an unwanted name. Before it
@@ -40,7 +40,7 @@ final class DonorPublicSuppressionTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('fundkit_privacy');
+        delete_option('gratora_privacy');
         parent::tearDown();
     }
 

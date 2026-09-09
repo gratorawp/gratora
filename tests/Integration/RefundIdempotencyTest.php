@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donations\Refund;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Vendor\Queryable\DB;
-use FundKit\Vendor\Queryable\QueryException;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donations\Refund;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Vendor\Queryable\DB;
+use Gratora\Vendor\Queryable\QueryException;
 
 /**
  * A redelivered or concurrent gateway refund webhook must record the refund
@@ -94,7 +94,7 @@ final class RefundIdempotencyTest extends IntegrationTestCase
         // this caller still holds a copy that believes 3000 is refundable. The
         // SUM-of-refund-rows pre-clamp cannot see it, but the counter can.
         $stale = $repo->findByReference($donation->reference);
-        DB::table('fundkit_donations')
+        DB::table('gratora_donations')
             ->whereRaw('id = ' . (int) $donation->id)
             ->update(['refunded_cents' => 5000, 'status' => 'refunded']);
 
@@ -141,7 +141,7 @@ final class RefundIdempotencyTest extends IntegrationTestCase
 
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'FUNDKIT-RF-' . substr(md5((string) $cents . uniqid()), 0, 8);
+        $d->reference         = 'GRATORA-RF-' . substr(md5((string) $cents . uniqid()), 0, 8);
         $d->donor_id          = (int) $donor->id;
         $d->amount_cents      = $cents;
         $d->net_cents         = $cents;

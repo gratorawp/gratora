@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Recurring\RecurringCanceller;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Foundation\Plugin;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Recurring\RecurringCanceller;
+use Gratora\Recurring\RecurringPlan;
 use RuntimeException;
 
 /**
@@ -32,7 +32,7 @@ final class StripeCancelConfirmationTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        update_option('fundkit_gateway_config', [
+        update_option('gratora_gateway_config', [
             'test_mode' => true,
             'stripe'    => ['webhook_secret_test' => 'whsec_cancel'],
         ]);
@@ -42,17 +42,17 @@ final class StripeCancelConfirmationTest extends IntegrationTestCase
         $acct->saveKeys(true, 'sk_test_cancel', 'pk_test_seed');
         $acct->refresh(['id' => 'acct_cancel', 'charges_enabled' => true]);
 
-        $manager = $c->get(\FundKit\Gateways\GatewayManager::class);
+        $manager = $c->get(\Gratora\Gateways\GatewayManager::class);
         if (! $manager->get('stripe')) {
-            $manager->register(new \FundKit\Gateways\Stripe\StripeGateway(
-                $c->get(\FundKit\Gateways\Stripe\StripeApi::class),
-                $c->get(\FundKit\Donations\DonationRepository::class),
-                $c->get(\FundKit\Donations\DonationService::class),
-                $c->get(\FundKit\Gateways\Stripe\StripeAccount::class),
-                $c->get(\FundKit\Donors\DonorRepository::class),
-                $c->get(\FundKit\Donors\DonorService::class),
-                $c->get(\FundKit\Foundation\Time\Clock::class),
-                $c->get(\FundKit\Recurring\RecurringPlanRepository::class),
+            $manager->register(new \Gratora\Gateways\Stripe\StripeGateway(
+                $c->get(\Gratora\Gateways\Stripe\StripeApi::class),
+                $c->get(\Gratora\Donations\DonationRepository::class),
+                $c->get(\Gratora\Donations\DonationService::class),
+                $c->get(\Gratora\Gateways\Stripe\StripeAccount::class),
+                $c->get(\Gratora\Donors\DonorRepository::class),
+                $c->get(\Gratora\Donors\DonorService::class),
+                $c->get(\Gratora\Foundation\Time\Clock::class),
+                $c->get(\Gratora\Recurring\RecurringPlanRepository::class),
             ));
         }
 
@@ -158,7 +158,7 @@ final class StripeCancelConfirmationTest extends IntegrationTestCase
     private function seedPlan(?string $subscriptionId = null): RecurringPlan
     {
         $donor = Plugin::instance()->container
-            ->get(\FundKit\Donors\DonorService::class)
+            ->get(\Gratora\Donors\DonorService::class)
             ->findOrCreate('cancel-' . uniqid() . '@example.test', [
                 'first_name' => 'Cancel',
                 'last_name'  => 'Donor',

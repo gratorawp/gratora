@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\Consent;
-use FundKit\Forms\Blocks\Block;
-use FundKit\Forms\Blocks\BlockRegistry;
-use FundKit\Forms\Form;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Donors\Consent;
+use Gratora\Forms\Blocks\Block;
+use Gratora\Forms\Blocks\BlockRegistry;
+use Gratora\Forms\Form;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -27,7 +27,7 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['title' => 'Consent campaign', 'status' => 'published']));
         $this->campaignId = (int) rest_do_request($req)->get_data()['id'];
@@ -35,7 +35,7 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
 
     protected function tearDown(): void
     {
-        delete_option('fundkit_consents');
+        delete_option('gratora_consents');
         parent::tearDown();
     }
 
@@ -56,7 +56,7 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
     private function consentBlock(): Block
     {
         foreach (Plugin::instance()->container->get(BlockRegistry::class)->all() as $b) {
-            if ($b->name() === 'fundkit/consent') return $b;
+            if ($b->name() === 'gratora/consent') return $b;
         }
 
         $this->fail('the consent block is not registered');
@@ -65,8 +65,8 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function runtimePurpose(): array
     {
-        $html = do_shortcode('[fundkit_donation_form slug="' . $this->publishedForm() . '"]');
-        preg_match('/data-fundkit-form-config>(.+?)<\/script>/s', $html, $m);
+        $html = do_shortcode('[gratora_donation_form slug="' . $this->publishedForm() . '"]');
+        preg_match('/data-gratora-form-config>(.+?)<\/script>/s', $html, $m);
         $config = json_decode((string) ($m[1] ?? ''), true);
 
         foreach ((array) ($config['steps'] ?? []) as $step) {
@@ -83,15 +83,15 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
 
     private function publishedForm(): string
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/forms');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/forms');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'title'       => 'Consent form',
             'campaign_id' => $this->campaignId,
-            'blocks'      => '<!-- wp:fundkit/donation-amount {"presets":[{"cents":2500}]} /-->'
-                . '<!-- wp:fundkit/email /-->'
-                . '<!-- wp:fundkit/consent {"purposeKeys":["campaign_news"]} /-->'
-                . '<!-- wp:fundkit/submit-button /-->',
+            'blocks'      => '<!-- wp:gratora/donation-amount {"presets":[{"cents":2500}]} /-->'
+                . '<!-- wp:gratora/email /-->'
+                . '<!-- wp:gratora/consent {"purposeKeys":["campaign_news"]} /-->'
+                . '<!-- wp:gratora/submit-button /-->',
         ]));
         $created = rest_do_request($req)->get_data();
 
@@ -153,7 +153,7 @@ final class RequiredConsentIsAGestureTest extends IntegrationTestCase
         $purpose = $this->runtimePurpose();
         $form    = Form::query()->find('slug', $this->publishedForm());
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode([
             'form_id'      => (int) $form->id,

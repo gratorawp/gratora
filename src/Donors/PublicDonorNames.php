@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
 /**
  * Return an empty name for hidden donors so public surfaces display Anonymous. Callers may

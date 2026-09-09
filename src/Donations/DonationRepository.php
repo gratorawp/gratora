@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donations;
+namespace Gratora\Donations;
 
-use FundKit\Receipts\Receipt;
-use FundKit\Vendor\Queryable\DB;
-use FundKit\Vendor\Queryable\QueryBuilder;
+use Gratora\Receipts\Receipt;
+use Gratora\Vendor\Queryable\DB;
+use Gratora\Vendor\Queryable\QueryBuilder;
 
 /** @since 1.0.0 */
 final class DonationRepository
@@ -170,8 +170,8 @@ final class DonationRepository
         // receipt before it renders the PDF and before it attempts the send,
         // and skips the send outright when the donor has no address, so a
         // numbered receipt is not a delivered one.
-        $noReceipt = "NOT EXISTS (SELECT 1 FROM {$prefix}fundkit_receipts rc "
-            . "WHERE rc.donation_id = {$prefix}fundkit_donations.id "
+        $noReceipt = "NOT EXISTS (SELECT 1 FROM {$prefix}gratora_receipts rc "
+            . "WHERE rc.donation_id = {$prefix}gratora_donations.id "
             . "AND rc.voided = 0 AND rc.sent_to_email_at IS NOT NULL)";
 
         // A hand-recorded donation with no receipt is not one that went
@@ -227,7 +227,7 @@ final class DonationRepository
             : 'created_at';
         $order = strtoupper((string) ($args['order'] ?? 'desc')) === 'ASC' ? 'ASC' : 'DESC';
 
-        $rows = $this->applyAdminFilters(DB::table('fundkit_donations')->selectRaw('id'), $args)
+        $rows = $this->applyAdminFilters(DB::table('gratora_donations')->selectRaw('id'), $args)
             ->orderBy($orderBy, $order)
             ->orderBy('id', $order)
             ->limit((int) ($args['limit'] ?? 50000))
@@ -266,9 +266,9 @@ final class DonationRepository
         $prefix = DB::getPrefix();
         $row = $this->netPaidQuery($from, $to, $campaignId, $includeTest)
             ->selectRaw(
-                "COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount,
+                "COALESCE(SUM(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount,
                  COUNT(*) AS cnt,
-                 COUNT(DISTINCT {$prefix}fundkit_donations.donor_id) AS donors"
+                 COUNT(DISTINCT {$prefix}gratora_donations.donor_id) AS donors"
             )
             ->get();
 
@@ -295,7 +295,7 @@ final class DonationRepository
         $day    = $this->localPaidDayExpr($from, $to);
 
         $rows = $this->netPaidQuery($from, $to, $campaignId, $includeTest)
-            ->selectRaw("{$day} AS day, COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
+            ->selectRaw("{$day} AS day, COALESCE(SUM(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
             ->groupByRaw($day)
             ->getAll();
 
@@ -317,7 +317,7 @@ final class DonationRepository
         $prefix = DB::getPrefix();
         $row = $this->netPaidQuery(null, null, $campaignId)
             ->selectRaw(
-                "COALESCE(MAX(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS top"
+                "COALESCE(MAX(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS top"
             )
             ->get();
 
@@ -333,7 +333,7 @@ final class DonationRepository
      */
     public function firstPaidDate(?int $campaignId = null): ?string
     {
-        $q = DonationQueries::donationsOnly(DB::table('fundkit_donations')
+        $q = DonationQueries::donationsOnly(DB::table('gratora_donations')
             ->selectRaw('MIN(paid_at) AS first_paid')
             ->whereIn('status', ['paid', 'partial_refund']));
 
@@ -388,14 +388,14 @@ final class DonationRepository
         $prefix = DB::getPrefix();
         $rows = $this->netPaidQuery($from, $to, $campaignId, $includeTest)
             ->selectRaw("
-                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}fundkit_donations.source_attribution), {$prefix}fundkit_donations.source_attribution, NULL), '$.utm_source')) AS utm_source,
-                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}fundkit_donations.source_attribution), {$prefix}fundkit_donations.source_attribution, NULL), '$.utm_medium')) AS utm_medium,
-                COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount,
+                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}gratora_donations.source_attribution), {$prefix}gratora_donations.source_attribution, NULL), '$.utm_source')) AS utm_source,
+                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}gratora_donations.source_attribution), {$prefix}gratora_donations.source_attribution, NULL), '$.utm_medium')) AS utm_medium,
+                COALESCE(SUM(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount,
                 COUNT(*) AS cnt
             ")
             ->groupByRaw("
-                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}fundkit_donations.source_attribution), {$prefix}fundkit_donations.source_attribution, NULL), '$.utm_source')),
-                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}fundkit_donations.source_attribution), {$prefix}fundkit_donations.source_attribution, NULL), '$.utm_medium'))
+                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}gratora_donations.source_attribution), {$prefix}gratora_donations.source_attribution, NULL), '$.utm_source')),
+                JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID({$prefix}gratora_donations.source_attribution), {$prefix}gratora_donations.source_attribution, NULL), '$.utm_medium'))
             ")
             ->getAll();
 
@@ -420,8 +420,8 @@ final class DonationRepository
             // cannot render as one, and a hand-recorded cheque is allowed to
             // have no campaign, so this is ordinary data rather than an edge.
             ->whereIsNotNull('campaign_id')
-            ->selectRaw("{$prefix}fundkit_donations.campaign_id AS campaign_id, COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
-            ->groupByRaw("{$prefix}fundkit_donations.campaign_id")
+            ->selectRaw("{$prefix}gratora_donations.campaign_id AS campaign_id, COALESCE(SUM(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
+            ->groupByRaw("{$prefix}gratora_donations.campaign_id")
             ->orderByRaw('amount DESC')
             ->limit($limit)
             ->getAll();
@@ -446,7 +446,7 @@ final class DonationRepository
         $day    = $this->localPaidDayExpr($from, $to);
 
         $rows = $this->netPaidQuery($from, $to, $campaignId)
-            ->selectRaw("{$day} AS day, COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount")
+            ->selectRaw("{$day} AS day, COALESCE(SUM(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount")
             ->groupByRaw($day)
             ->getAll();
 
@@ -473,8 +473,8 @@ final class DonationRepository
 
         $rows = $this->netPaidQuery($from, $to, null, $includeTest)
             ->whereIn('campaign_id', $campaignIds)
-            ->selectRaw("{$prefix}fundkit_donations.campaign_id AS campaign_id, {$day} AS day, COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount")
-            ->groupByRaw("{$prefix}fundkit_donations.campaign_id, {$day}")
+            ->selectRaw("{$prefix}gratora_donations.campaign_id AS campaign_id, {$day} AS day, COALESCE(SUM(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount")
+            ->groupByRaw("{$prefix}gratora_donations.campaign_id, {$day}")
             ->getAll();
 
         $out = [];
@@ -496,8 +496,8 @@ final class DonationRepository
     {
         $prefix = DB::getPrefix();
         $rows = $this->netPaidQuery($from, $to, $campaignId)
-            ->selectRaw("{$prefix}fundkit_donations.gateway AS gateway, COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
-            ->groupByRaw("{$prefix}fundkit_donations.gateway")
+            ->selectRaw("{$prefix}gratora_donations.gateway AS gateway, COALESCE(SUM(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
+            ->groupByRaw("{$prefix}gratora_donations.gateway")
             ->orderByRaw('amount DESC')
             ->getAll();
 
@@ -517,8 +517,8 @@ final class DonationRepository
     {
         $prefix = DB::getPrefix();
         $rows = $this->netPaidQuery($from, $to, $campaignId)
-            ->selectRaw("{$prefix}fundkit_donations.frequency AS frequency, COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
-            ->groupByRaw("{$prefix}fundkit_donations.frequency")
+            ->selectRaw("{$prefix}gratora_donations.frequency AS frequency, COALESCE(SUM(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
+            ->groupByRaw("{$prefix}gratora_donations.frequency")
             ->orderByRaw('amount DESC')
             ->getAll();
 
@@ -538,8 +538,8 @@ final class DonationRepository
     {
         $prefix = DB::getPrefix();
         $rows = $this->netPaidQuery($from, $to, $campaignId)
-            ->selectRaw("{$prefix}fundkit_donations.form_id AS form_id, COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
-            ->groupByRaw("{$prefix}fundkit_donations.form_id")
+            ->selectRaw("{$prefix}gratora_donations.form_id AS form_id, COALESCE(SUM(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
+            ->groupByRaw("{$prefix}gratora_donations.form_id")
             ->orderByRaw('amount DESC')
             ->limit($limit)
             ->getAll();
@@ -577,11 +577,11 @@ final class DonationRepository
         if (! $includeAnonymous) {
             // Per-donation anonymity: a donor who chose to hide must not be
             // named publicly, even though their Donor record keeps the name.
-            $q = $q->where("{$prefix}fundkit_donations.is_anonymous", false);
+            $q = $q->where("{$prefix}gratora_donations.is_anonymous", false);
         }
         $rows = $q
-            ->selectRaw("{$prefix}fundkit_donations.donor_id AS donor_id, COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
-            ->groupByRaw("{$prefix}fundkit_donations.donor_id")
+            ->selectRaw("{$prefix}gratora_donations.donor_id AS donor_id, COALESCE(SUM(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
+            ->groupByRaw("{$prefix}gratora_donations.donor_id")
             ->orderByRaw('amount DESC')
             ->limit($limit)
             ->getAll();
@@ -602,8 +602,8 @@ final class DonationRepository
     {
         $prefix = DB::getPrefix();
         $row = $this->netPaidQuery($from, $to, $campaignId)
-            ->where("{$prefix}fundkit_donations.is_anonymous", true)
-            ->selectRaw("COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
+            ->where("{$prefix}gratora_donations.is_anonymous", true)
+            ->selectRaw("COALESCE(SUM(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
             ->get();
 
         return [
@@ -630,12 +630,12 @@ final class DonationRepository
         // wrong bar.
         $cases = [];
         foreach ($thresholdsCents as $t) {
-            $cases[] = "WHEN COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) <= {$t} THEN {$t}";
+            $cases[] = "WHEN COALESCE({$prefix}gratora_donations.base_amount_cents, 0) <= {$t} THEN {$t}";
         }
         $bucketExpr = 'CASE ' . implode(' ', $cases) . ' ELSE NULL END';
 
         $rows = $this->netPaidQuery($from, $to, $campaignId)
-            ->selectRaw("{$bucketExpr} AS bucket, COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
+            ->selectRaw("{$bucketExpr} AS bucket, COALESCE(SUM(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
             ->groupByRaw($bucketExpr)
             ->getAll();
 
@@ -683,7 +683,7 @@ final class DonationRepository
         $stamp  = $this->localPaidStampExpr($from, $to, $campaignId);
 
         $rows = $this->netPaidQuery($from, $to, $campaignId)
-            ->selectRaw("DAYOFWEEK({$stamp}) AS dow_mysql, HOUR({$stamp}) AS hour, COALESCE(SUM(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
+            ->selectRaw("DAYOFWEEK({$stamp}) AS dow_mysql, HOUR({$stamp}) AS hour, COALESCE(SUM(COALESCE({$prefix}gratora_donations.base_amount_cents, 0) - COALESCE(r.refunded, 0)), 0) AS amount, COUNT(*) AS cnt")
             ->groupByRaw("DAYOFWEEK({$stamp}), HOUR({$stamp})")
             ->getAll();
 
@@ -713,7 +713,7 @@ final class DonationRepository
     {
         $prefix = DB::getPrefix();
         $row = $this->netPaidQuery($from, $to, $campaignId)
-            ->selectRaw("COALESCE(AVG(COALESCE({$prefix}fundkit_donations.base_amount_cents, 0)), 0) AS avg_cents")
+            ->selectRaw("COALESCE(AVG(COALESCE({$prefix}gratora_donations.base_amount_cents, 0)), 0) AS avg_cents")
             ->get();
 
         return (int) round((float) ($row['avg_cents'] ?? 0));
@@ -729,7 +729,7 @@ final class DonationRepository
         // overshoot, and donor-currency amount_cents would rank foreign donations
         // against org-currency ones.
         $q = DonationQueries::donationsOnly(
-            DB::table('fundkit_donations')->whereIn('status', ['paid', 'partial_refund'])
+            DB::table('gratora_donations')->whereIn('status', ['paid', 'partial_refund'])
         );
         [$start, $end] = DonationQueries::dayBoundsUtc($from, $to);
         if ($start !== null)      $q = $q->where('paid_at', $start, '>=');
@@ -769,7 +769,7 @@ final class DonationRepository
 
         $netExpr = DonationQueries::netBaseExpr();
 
-        $rows = DonationQueries::donationsOnly(DB::table('fundkit_donations')
+        $rows = DonationQueries::donationsOnly(DB::table('gratora_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('campaign_id', $campaignId))
             ->selectRaw("
@@ -806,7 +806,7 @@ final class DonationRepository
      */
     public function countActiveRecurringForCampaign(int $campaignId): int
     {
-        $row = DonationQueries::donationsOnly(DB::table('fundkit_donations')
+        $row = DonationQueries::donationsOnly(DB::table('gratora_donations')
             ->whereIn('status', ['paid', 'partial_refund'])
             ->where('campaign_id', $campaignId))
             ->where('frequency', 'one_time', '<>')
@@ -829,7 +829,7 @@ final class DonationRepository
     {
         [$startUtc, $endUtc] = DonationQueries::dayBoundsUtc($from, $to);
 
-        return DonationQueries::localDateExpr(DB::getPrefix() . 'fundkit_donations.paid_at', $startUtc, $endUtc);
+        return DonationQueries::localDateExpr(DB::getPrefix() . 'gratora_donations.paid_at', $startUtc, $endUtc);
     }
 
     /**
@@ -859,7 +859,7 @@ final class DonationRepository
         $now = gmdate('Y-m-d H:i:s');
 
         return DonationQueries::localStampExpr(
-            DB::getPrefix() . 'fundkit_donations.paid_at',
+            DB::getPrefix() . 'gratora_donations.paid_at',
             $startUtc ?? $now,
             $endUtc   ?? $now
         );
@@ -884,7 +884,7 @@ final class DonationRepository
     private function paidSpanUtc(?int $campaignId): array
     {
         $q = DonationQueries::donationsOnly(
-            DB::table('fundkit_donations')->whereIn('status', ['paid', 'partial_refund'])
+            DB::table('gratora_donations')->whereIn('status', ['paid', 'partial_refund'])
         )->where('paid_at', '1970-01-02 00:00:00', '>=');
 
         if ($campaignId !== null) {
@@ -914,7 +914,7 @@ final class DonationRepository
         // and a ticket order is a purchase riding the same table. The flag
         // only ever admits test rows; it never admits orders.
         $q = DonationQueries::donationRows(
-            DB::table('fundkit_donations')->whereIn('status', ['paid', 'partial_refund']),
+            DB::table('gratora_donations')->whereIn('status', ['paid', 'partial_refund']),
             $includeTest
         );
 
@@ -938,11 +938,11 @@ final class DonationRepository
         return $q->joinRaw(
             "LEFT JOIN (
                 SELECT rf.donation_id, ROUND(SUM(rf.amount_cents) * COALESCE(d.fx_rate, 0)) AS refunded
-                FROM {$prefix}fundkit_refunds rf
-                JOIN {$prefix}fundkit_donations d ON d.id = rf.donation_id
+                FROM {$prefix}gratora_refunds rf
+                JOIN {$prefix}gratora_donations d ON d.id = rf.donation_id
                 WHERE rf.status = 'succeeded'
                 GROUP BY rf.donation_id, d.fx_rate
-            ) r ON r.donation_id = {$prefix}fundkit_donations.id"
+            ) r ON r.donation_id = {$prefix}gratora_donations.id"
         );
     }
 
@@ -979,7 +979,7 @@ final class DonationRepository
 
         // DB::table, so selectRaw/get() return arrays rather than hydrated
         // Donation models.
-        $base = fn () => DB::table('fundkit_donations');
+        $base = fn () => DB::table('gratora_donations');
 
         $totalCount = (int) $applyFilters($base())->count();
 
@@ -1001,7 +1001,7 @@ final class DonationRepository
             'raised_cents'  => (int) ($paidRow['amount'] ?? 0),
             // raised_cents sums the base currency, so it is labelled as such,
             // not as the most-common donation currency.
-            'currency'      => \FundKit\Foundation\Helpers\Money::defaultCurrency(),
+            'currency'      => \Gratora\Foundation\Helpers\Money::defaultCurrency(),
             'donors_count'  => (int) ($paidRow['donors'] ?? 0),
             'includes_test' => self::countsTestDonations($args),
         ];

@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Transfer\DataExporter;
-use FundKit\Foundation\Transfer\DataImporter;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Transfer\DataExporter;
+use Gratora\Foundation\Transfer\DataImporter;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * A reference identifies a donation within ONE site. The counter behind it
  * starts at one on every install and the default prefix is the same
- * everywhere, so FUNDKIT-2026-00007 exists on most of them and belongs to a
+ * everywhere, so GRATORA-2026-00007 exists on most of them and belongs to a
  * different person on each.
  *
  * DataImporter::hashOfDonorBehind() already refuses to trust a reference on its
  * own and says so at length. findExisting() matched on it alone, so any target
- * that had taken donations of its own, an org that set FundKit up on a new host
+ * that had taken donations of its own, an org that set Gratora up on a new host
  * and took a few before restoring their history, two chapters merging, a
  * production site topped up from staging, counted the file's donation as
  * already present and discarded it, then mapped its children onto a stranger's
@@ -45,8 +45,8 @@ final class ImportReferenceCollisionTest extends IntegrationTestCase
     private function import(array $export): array
     {
         return (new DataImporter(
-            Plugin::instance()->container->get(\FundKit\Foundation\Crypto\Crypto::class),
-            Plugin::instance()->container->get(\FundKit\Foundation\Identity\IdentityHasher::class),
+            Plugin::instance()->container->get(\Gratora\Foundation\Crypto\Crypto::class),
+            Plugin::instance()->container->get(\Gratora\Foundation\Identity\IdentityHasher::class),
         ))->import($export);
     }
 
@@ -75,7 +75,7 @@ final class ImportReferenceCollisionTest extends IntegrationTestCase
 
     public function test_two_unrelated_donations_sharing_a_reference_are_not_merged(): void
     {
-        $reference = 'FUNDKIT-2026-09' . random_int(100, 999);
+        $reference = 'GRATORA-2026-09' . random_int(100, 999);
 
         // The source site: Jane gave 500.
         $this->seedDonation('jane-' . uniqid() . '@example.test', $reference, 50000);
@@ -83,8 +83,8 @@ final class ImportReferenceCollisionTest extends IntegrationTestCase
 
         // The target site: the same number belongs to Bob, who gave 25.
         $prefix = DB::getPrefix();
-        DB::raw("DELETE FROM {$prefix}fundkit_donations");
-        DB::raw("DELETE FROM {$prefix}fundkit_donors");
+        DB::raw("DELETE FROM {$prefix}gratora_donations");
+        DB::raw("DELETE FROM {$prefix}gratora_donors");
         $bob = $this->seedDonation('bob-' . uniqid() . '@example.test', $reference, 2500);
 
         $result = $this->import($export);
@@ -97,31 +97,31 @@ final class ImportReferenceCollisionTest extends IntegrationTestCase
 
         $this->assertSame(
             0,
-            (int) ($result['existing']['fundkit_donations'] ?? 0),
+            (int) ($result['existing']['gratora_donations'] ?? 0),
             'a different donation with the same number is not "already there"'
         );
         $this->assertSame(
             1,
-            (int) ($result['dropped']['fundkit_donations']['reference_collision'] ?? 0),
+            (int) ($result['dropped']['gratora_donations']['reference_collision'] ?? 0),
             'it is reported to the operator instead of vanishing into the existing count'
         );
     }
 
     public function test_a_genuine_re_run_still_recognises_its_own_rows(): void
     {
-        $this->seedDonation('rerun-' . uniqid() . '@example.test', 'FUNDKIT-2026-08' . random_int(100, 999), 1500);
+        $this->seedDonation('rerun-' . uniqid() . '@example.test', 'GRATORA-2026-08' . random_int(100, 999), 1500);
 
         $export = $this->export();
         $result = $this->import($export);
 
         $this->assertGreaterThan(
             0,
-            (int) ($result['existing']['fundkit_donations'] ?? 0),
+            (int) ($result['existing']['gratora_donations'] ?? 0),
             'importing a file onto the site it came from finds its own donations'
         );
         $this->assertSame(
             0,
-            (int) ($result['dropped']['fundkit_donations']['reference_collision'] ?? 0),
+            (int) ($result['dropped']['gratora_donations']['reference_collision'] ?? 0),
             'and nothing is mistaken for a collision'
         );
     }

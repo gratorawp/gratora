@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Modules;
+namespace Gratora\Foundation\Modules;
 
-use FundKit\Foundation\Container\Container;
+use Gratora\Foundation\Container\Container;
 
 /** @since 1.0.0 */
-interface FundKitModule
+interface GratoraModule
 {
     /** Distribution tier returned by tier(). */
     public const TIER_CORE = 'core';
@@ -56,7 +56,7 @@ interface FundKitModule
     public function boot(Container $container): void;
 
     /**
-     * @return array<class-string<\FundKit\Vendor\Queryable\Model>>
+     * @return array<class-string<\Gratora\Vendor\Queryable\Model>>
      * @since 1.0.0
      */
     public function migrations(): array;

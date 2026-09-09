@@ -1,4 +1,4 @@
-=== Fundraising Toolkit - Donation & Fundraising Platform ===
+=== Gratora - Donation Platform ===
 Contributors: donodp
 Tags: donations, donation form, fundraising, recurring donations, nonprofit
 Requires at least: 7.0
@@ -12,7 +12,7 @@ Donation forms, campaigns, recurring giving, donor management, receipts and repo
 
 == Description ==
 
-**Fundraising Toolkit is a fundraising platform for WordPress.**
+**Gratora is a fundraising platform for WordPress.**
 
 Build a campaign, add a donation form, and start taking one-time and recurring donations today.
 
@@ -35,7 +35,7 @@ Create beautiful, fully customizable donation forms in the WordPress editor.
 
 = Campaigns =
 
-* Fundraising Toolkit builds the campaign page for you, form included
+* Gratora builds the campaign page for you, form included
 * Progress bars, stats, recent donations, top donors and a supporter wall
 * Goals by amount raised, donations or donors, with an optional end date
 * Brand presets you reuse across campaigns and forms
@@ -115,13 +115,13 @@ Terms and privacy: https://frankfurter.dev
 The JavaScript and CSS in `build/` are compiled. The sources they are built
 from, and the tooling that builds them, are in the public repository:
 
-https://github.com/fundkitorg/fundkit
+https://github.com/gratorawp/gratora
 
 == Installation ==
 
-1. Install Fundraising Toolkit from Plugins > Add New, or upload the plugin folder to `/wp-content/plugins/` and activate it.
-2. Open **Fundraising Toolkit** in the admin menu and follow the short onboarding.
-3. Under **Fundraising Toolkit > Settings**, add your payment provider keys, or enable offline donations.
+1. Install Gratora from Plugins > Add New, or upload the plugin folder to `/wp-content/plugins/` and activate it.
+2. Open **Gratora** in the admin menu and follow the short onboarding.
+3. Under **Gratora > Settings**, add your payment provider keys, or enable offline donations.
 4. Create a campaign, then add a donation form to any page.
 
 == Frequently Asked Questions ==
@@ -134,13 +134,13 @@ All of it. A campaign page is an ordinary WordPress page, so you can move, resty
 
 No. Campaign pages and donation forms are built from blocks in the WordPress editor.
 
-= Is Fundraising Toolkit GDPR-friendly? =
+= Is Gratora GDPR-friendly? =
 
-Email, phone, address and tax ID are encrypted at rest, consent is recorded per donation, and you can erase or anonymize a donor on request. Fundraising Toolkit gives you the tools; compliance depends on how you use them.
+Email, phone, address and tax ID are encrypted at rest, consent is recorded per donation, and you can erase or anonymize a donor on request. Gratora gives you the tools; compliance depends on how you use them.
 
 = Can I bring donations in from somewhere else? =
 
-Yes. Import a CSV of donors, or donors and donations together, mapping your columns to Fundraising Toolkit fields.
+Yes. Import a CSV of donors, or donors and donations together, mapping your columns to Gratora fields.
 
 == Screenshots ==
 

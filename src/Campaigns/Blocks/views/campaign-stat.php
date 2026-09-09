@@ -12,14 +12,14 @@ defined('ABSPATH') || exit;
 <div <?php
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
 echo get_block_wrapper_attributes(array_filter([
-    'class' => 'fundkit-block fundkit-block--stat is-' . $size . ' is-align-' . $align,
+    'class' => 'gratora-block gratora-block--stat is-' . $size . ' is-align-' . $align,
     'style' => $styleVars,
 ]));
 // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
-?> data-block="fundkit/campaign-stat" data-metric="<?php echo esc_attr($metric);
+?> data-block="gratora/campaign-stat" data-metric="<?php echo esc_attr($metric);
 ?>">
-    <div class="fundkit-stat__label"><?php echo esc_html($label);
+    <div class="gratora-stat__label"><?php echo esc_html($label);
 ?></div>
-    <div class="fundkit-stat__value"><?php echo esc_html($value);
+    <div class="gratora-stat__value"><?php echo esc_html($value);
 ?></div>
 </div>

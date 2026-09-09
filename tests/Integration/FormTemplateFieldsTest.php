@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Forms\Blocks\BlockRegistry;
-use FundKit\Forms\FormTemplates;
+use Gratora\Foundation\Plugin;
+use Gratora\Forms\Blocks\BlockRegistry;
+use Gratora\Forms\FormTemplates;
 
 /**
  * A template is a claim about which fields suit a situation, and the claim is
@@ -15,13 +15,13 @@ use FundKit\Forms\FormTemplates;
  */
 final class FormTemplateFieldsTest extends IntegrationTestCase
 {
-    /** @return list<string> every fundkit/* block name a template uses */
+    /** @return list<string> every gratora/* block name a template uses */
     private function blocksIn(string $id): array
     {
         $t = FormTemplates::find($id);
         $this->assertNotNull($t, "template {$id} is not registered");
 
-        preg_match_all('#wp:(fundkit/[a-z-]+)#', (string) $t['blocks'], $m);
+        preg_match_all('#wp:(gratora/[a-z-]+)#', (string) $t['blocks'], $m);
 
         return $m[1];
     }
@@ -77,22 +77,22 @@ final class FormTemplateFieldsTest extends IntegrationTestCase
             }
             $blocks = $this->blocksIn($id);
 
-            $this->assertCount(1, array_keys($blocks, 'fundkit/donation-amount', true), "{$id}: needs exactly one amount block");
-            $this->assertCount(1, array_keys($blocks, 'fundkit/payment-gateways', true), "{$id}: needs exactly one gateway block");
-            $this->assertCount(1, array_keys($blocks, 'fundkit/submit-button', true), "{$id}: needs exactly one submit button");
-            $this->assertContains('fundkit/email', $blocks, "{$id}: a receipt needs an email address");
+            $this->assertCount(1, array_keys($blocks, 'gratora/donation-amount', true), "{$id}: needs exactly one amount block");
+            $this->assertCount(1, array_keys($blocks, 'gratora/payment-gateways', true), "{$id}: needs exactly one gateway block");
+            $this->assertCount(1, array_keys($blocks, 'gratora/submit-button', true), "{$id}: needs exactly one submit button");
+            $this->assertContains('gratora/email', $blocks, "{$id}: a receipt needs an email address");
         }
     }
 
     public function test_the_emergency_appeal_offers_no_fund_choice(): void
     {
-        $this->assertNotContains('fundkit/fund-picker', $this->blocksIn('emergency-appeal'));
+        $this->assertNotContains('gratora/fund-picker', $this->blocksIn('emergency-appeal'));
     }
 
     /** Without a fund picker it is just the everyday form with a longer name. */
     public function test_designated_giving_lets_the_donor_pick_a_fund(): void
     {
-        $this->assertContains('fundkit/fund-picker', $this->blocksIn('designated'));
+        $this->assertContains('gratora/fund-picker', $this->blocksIn('designated'));
     }
 
     public function test_the_sustainer_preselects_a_recurring_frequency(): void
@@ -108,15 +108,15 @@ final class FormTemplateFieldsTest extends IntegrationTestCase
     {
         foreach ($this->templateIds() as $id) {
             $blocks = $this->blocksIn($id);
-            $social = in_array('fundkit/comment', $blocks, true)
-                || in_array('fundkit/anonymous-toggle', $blocks, true);
+            $social = in_array('gratora/comment', $blocks, true)
+                || in_array('gratora/anonymous-toggle', $blocks, true);
 
             if (! $social) {
                 continue;
             }
 
             $this->assertContains(
-                'fundkit/goal',
+                'gratora/goal',
                 $blocks,
                 "{$id}: carries a message or anonymity field but shows no public campaign progress"
             );
@@ -127,9 +127,9 @@ final class FormTemplateFieldsTest extends IntegrationTestCase
     {
         $blocks = $this->blocksIn('quick-give');
 
-        $this->assertNotContains('fundkit/phone', $blocks);
-        $this->assertNotContains('fundkit/address', $blocks);
-        $this->assertNotContains('fundkit/comment', $blocks);
+        $this->assertNotContains('gratora/phone', $blocks);
+        $this->assertNotContains('gratora/address', $blocks);
+        $this->assertNotContains('gratora/comment', $blocks);
         $this->assertLessThan(
             count($this->blocksIn('everyday')) + 1,
             count($blocks),

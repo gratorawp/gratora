@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Blocks;
+namespace Gratora\Campaigns\Blocks;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Foundation\Hooks\HookProvider;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Foundation\Hooks\HookProvider;
 
 /**
  * Block Bindings source resolving campaign stats for core blocks (e.g. bind a
- * Heading to fundkit/campaign:raised). args.campaign_id is optional; it falls back
- * to the page's _fundkit_campaign_id meta, same as CampaignBlock.
+ * Heading to gratora/campaign:raised). args.campaign_id is optional; it falls back
+ * to the page's _gratora_campaign_id meta, same as CampaignBlock.
  *
  * @since 1.0.0
  */
@@ -44,17 +44,17 @@ final class CampaignBindings extends HookProvider
     public static function fields(): array
     {
         return [
-            'title'           => __('Title', 'fundraising-toolkit'),
-            'description'     => __('Short description', 'fundraising-toolkit'),
-            'image'           => __('Cover image', 'fundraising-toolkit'),
-            'image_alt'       => __('Cover image description', 'fundraising-toolkit'),
-            'url'             => __('Page link', 'fundraising-toolkit'),
-            'raised'          => __('Raised', 'fundraising-toolkit'),
-            'goal'            => __('Goal', 'fundraising-toolkit'),
-            'percent_label'   => __('Percent of goal', 'fundraising-toolkit'),
-            'donors_count'    => __('Donors', 'fundraising-toolkit'),
-            'donations_count' => __('Donations', 'fundraising-toolkit'),
-            'days_left'       => __('Days left', 'fundraising-toolkit'),
+            'title'           => __('Title', 'gratora'),
+            'description'     => __('Short description', 'gratora'),
+            'image'           => __('Cover image', 'gratora'),
+            'image_alt'       => __('Cover image description', 'gratora'),
+            'url'             => __('Page link', 'gratora'),
+            'raised'          => __('Raised', 'gratora'),
+            'goal'            => __('Goal', 'gratora'),
+            'percent_label'   => __('Percent of goal', 'gratora'),
+            'donors_count'    => __('Donors', 'gratora'),
+            'donations_count' => __('Donations', 'gratora'),
+            'days_left'       => __('Days left', 'gratora'),
         ];
     }
 
@@ -81,8 +81,8 @@ final class CampaignBindings extends HookProvider
     {
         if (! function_exists('register_block_bindings_source')) return;
 
-        register_block_bindings_source('fundkit/campaign', [
-            'label'              => __('Fundraising Toolkit campaign', 'fundraising-toolkit'),
+        register_block_bindings_source('gratora/campaign', [
+            'label'              => __('Gratora campaign', 'gratora'),
             'get_value_callback' => [$this, 'resolve'],
             'uses_context'       => ['postId'],
         ]);
@@ -122,7 +122,7 @@ final class CampaignBindings extends HookProvider
         }
         if ($postId === 0) return null;
 
-        $bound = (int) get_post_meta($postId, '_fundkit_campaign_id', true);
+        $bound = (int) get_post_meta($postId, '_gratora_campaign_id', true);
         return $bound > 0 ? $this->campaigns->findRenderable($bound) : null;
     }
 

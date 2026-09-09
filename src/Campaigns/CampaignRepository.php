@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns;
+namespace Gratora\Campaigns;
 
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Vendor\Queryable\DB;
 
 /** @since 1.0.0 */
 final class CampaignRepository
@@ -50,7 +50,7 @@ final class CampaignRepository
         // Drafts/archived render only for users who can actually manage
         // campaigns (not any edit_posts holder like a Contributor); public and
         // under-privileged visitors get nothing.
-        if ($campaign->status !== 'published' && ! Capabilities::userCan('fundkit_manage_campaigns')) {
+        if ($campaign->status !== 'published' && ! Capabilities::userCan('gratora_manage_campaigns')) {
             return null;
         }
         return $campaign;
@@ -249,7 +249,7 @@ final class CampaignRepository
             return $q;
         };
 
-        $base = fn () => DB::table('fundkit_campaigns');
+        $base = fn () => DB::table('gratora_campaigns');
 
         $totalCount  = (int) $applyFilters($base())->count();
         $activeCount = (int) $applyFilters($base())->where('status', 'published')->count();

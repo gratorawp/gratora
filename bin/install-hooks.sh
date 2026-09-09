@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Install each repo’s composer-test pre-push hook. Re-runs replace only this hook.
-# FUNDKIT_EXTRA_REPOS adds colon-separated paths outside the plugins directory.
+# GRATORA_EXTRA_REPOS adds colon-separated paths outside the plugins directory.
 set -uo pipefail
 
 CORE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -8,7 +8,7 @@ PLUGINS_DIR="$(dirname "$CORE_DIR")"
 
 read -r -d '' HOOK <<'HOOKEOF'
 #!/usr/bin/env bash
-# Installed by fundkit/bin/install-hooks.sh; runs this repo’s analysis and tests.
+# Installed by gratora/bin/install-hooks.sh; runs this repo’s analysis and tests.
 set -uo pipefail
 
 if [ ! -x vendor/bin/phpunit ] && [ ! -x vendor/bin/phpstan ]; then
@@ -52,10 +52,10 @@ install_into() {
 }
 
 install_into "$CORE_DIR"
-for d in "$PLUGINS_DIR"/fundkit-*/; do
+for d in "$PLUGINS_DIR"/gratora-*/; do
     install_into "${d%/}"
 done
-IFS=':' read -ra EXTRA <<< "${FUNDKIT_EXTRA_REPOS:-}"
+IFS=':' read -ra EXTRA <<< "${GRATORA_EXTRA_REPOS:-}"
 for d in ${EXTRA[@]+"${EXTRA[@]}"}; do
     [ -n "$d" ] && [ -d "$d" ] && install_into "$d"
 done

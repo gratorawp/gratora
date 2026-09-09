@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns\Styling;
+namespace Gratora\Campaigns\Styling;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Forms\Form;
+use Gratora\Campaigns\Campaign;
+use Gratora\Forms\Form;
 
 /**
  * Resolve the final token map for a form rendering.
@@ -56,7 +56,7 @@ final class CampaignStyleResolver
             $tokens = array_merge($tokens, $campaignInline);
         }
 
-        $tokens = (array) apply_filters('fundkit.form_style.tokens', $tokens, $form, $campaign);
+        $tokens = (array) apply_filters('gratora.form_style.tokens', $tokens, $form, $campaign);
 
         $inline = $formPresetId === '' ? $campaignInline : [];
         $tokens = $this->dropStalePairs($tokens, array_merge($presetLayers, [$inline]));
@@ -64,7 +64,7 @@ final class CampaignStyleResolver
 
         return [
             'tokens'        => $tokens,
-            'accent'        => (string) ($tokens['fundkit-accent'] ?? '#211d3f'),
+            'accent'        => (string) ($tokens['gratora-accent'] ?? '#211d3f'),
             'preset_id'     => $presetId,
             'preset_seeded' => null,
         ];
@@ -78,7 +78,7 @@ final class CampaignStyleResolver
         // attributes that safecss_filter_attr never sees.
         $tokens = Tokens::sanitize($this->resolveForCampaign($campaign));
 
-        return (string) ($tokens['fundkit-accent'] ?? '#211d3f');
+        return (string) ($tokens['gratora-accent'] ?? '#211d3f');
     }
 
     /**
@@ -105,7 +105,7 @@ final class CampaignStyleResolver
             $tokens = array_merge($tokens, $campaignInline);
         }
 
-        $tokens = (array) apply_filters('fundkit.campaign_style.tokens', $tokens, $campaign);
+        $tokens = (array) apply_filters('gratora.campaign_style.tokens', $tokens, $campaign);
 
         return $this->inkFollowsGround(
             $this->dropStalePairs($tokens, array_merge($presetLayers, [$campaignInline])),
@@ -118,7 +118,7 @@ final class CampaignStyleResolver
      * The selected/hover tint and the focus ring belong to the accent they were
      * chosen beside. A later layer that repaints the accent and says nothing
      * about them leaves them to the stylesheet, which derives both from the
-     * resolved --fundkit-accent: otherwise a campaign on Bold that picks a red
+     * resolved --gratora-accent: otherwise a campaign on Bold that picks a red
      * accent keeps Bold's navy tint on its selected tiles and a navy ring
      * around a red halo. One nothing chose goes the same way; one only a filter
      * left stands.
@@ -132,14 +132,14 @@ final class CampaignStyleResolver
     private function dropStalePairs(array $tokens, array $layers): array
     {
         $defaults = Tokens::defaults();
-        $resolved = (string) ($tokens['fundkit-accent'] ?? '');
+        $resolved = (string) ($tokens['gratora-accent'] ?? '');
 
-        foreach (['fundkit-accent-soft', 'fundkit-focus-ring'] as $key) {
-            $accent     = (string) ($defaults['fundkit-accent'] ?? '');
+        foreach (['gratora-accent-soft', 'gratora-focus-ring'] as $key) {
+            $accent     = (string) ($defaults['gratora-accent'] ?? '');
             $pairedWith = null;
             foreach ($layers as $layer) {
-                if (isset($layer['fundkit-accent'])) {
-                    $accent = (string) $layer['fundkit-accent'];
+                if (isset($layer['gratora-accent'])) {
+                    $accent = (string) $layer['gratora-accent'];
                 }
                 if (isset($layer[$key])) {
                     $pairedWith = $accent;
@@ -177,9 +177,9 @@ final class CampaignStyleResolver
     private function inkFollowsGround(array $tokens, array $presetTokens, array $inline): array
     {
         $defaults = Tokens::defaults();
-        $ground   = (string) ($tokens['fundkit-bg'] ?? '');
+        $ground   = (string) ($tokens['gratora-bg'] ?? '');
 
-        if ($ground === '' || $ground === ($defaults['fundkit-bg'] ?? null)) {
+        if ($ground === '' || $ground === ($defaults['gratora-bg'] ?? null)) {
             return $tokens;
         }
 
@@ -188,7 +188,7 @@ final class CampaignStyleResolver
             return $tokens;
         }
 
-        foreach (['fundkit-text' => 0, 'fundkit-text-muted' => 1] as $key => $slot) {
+        foreach (['gratora-text' => 0, 'gratora-text-muted' => 1] as $key => $slot) {
             $chosen = isset($presetTokens[$key]) || isset($inline[$key]);
             if (! $chosen && ($tokens[$key] ?? null) === ($defaults[$key] ?? null)) {
                 $tokens[$key] = $on[$slot];

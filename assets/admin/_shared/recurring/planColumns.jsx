@@ -22,16 +22,16 @@ export function intervalLabel( unit, count ) {
     switch ( unit ) {
         case 'day':
             /* translators: %d: number of days between charges. */
-            return sprintf( _n( '%d day', '%d days', n, 'fundraising-toolkit' ), n );
+            return sprintf( _n( '%d day', '%d days', n, 'gratora' ), n );
         case 'week':
             /* translators: %d: number of weeks between charges. */
-            return sprintf( _n( '%d week', '%d weeks', n, 'fundraising-toolkit' ), n );
+            return sprintf( _n( '%d week', '%d weeks', n, 'gratora' ), n );
         case 'month':
             /* translators: %d: number of months between charges. */
-            return sprintf( _n( '%d month', '%d months', n, 'fundraising-toolkit' ), n );
+            return sprintf( _n( '%d month', '%d months', n, 'gratora' ), n );
         case 'year':
             /* translators: %d: number of years between charges. */
-            return sprintf( _n( '%d year', '%d years', n, 'fundraising-toolkit' ), n );
+            return sprintf( _n( '%d year', '%d years', n, 'gratora' ), n );
         default:
             return n > 1 ? `${ n } ${ unit }` : String( unit );
     }
@@ -45,10 +45,10 @@ export function intervalLabel( unit, count ) {
 export function renderHealth( item ) {
     if ( item.failed_renewals_count > 0 ) {
         return (
-            <span className="fundkit-pill fundkit-pill--amber">
+            <span className="gratora-pill gratora-pill--amber">
                 { sprintf(
                     /* translators: %d: consecutive failed renewals. */
-                    _n( '%d failure', '%d failures', item.failed_renewals_count, 'fundraising-toolkit' ),
+                    _n( '%d failure', '%d failures', item.failed_renewals_count, 'gratora' ),
                     item.failed_renewals_count
                 ) }
             </span>
@@ -58,17 +58,17 @@ export function renderHealth( item ) {
     const problems = item.errors?.length || 0;
     if ( problems > 0 ) {
         return (
-            <span className="fundkit-pill fundkit-pill--red">
+            <span className="gratora-pill gratora-pill--red">
                 { sprintf(
                     /* translators: %d: recorded problems on this subscription. */
-                    _n( '%d problem', '%d problems', problems, 'fundraising-toolkit' ),
+                    _n( '%d problem', '%d problems', problems, 'gratora' ),
                     problems
                 ) }
             </span>
         );
     }
 
-    return <span className="fundkit-row__sub">{ __( 'OK', 'fundraising-toolkit' ) }</span>;
+    return <span className="gratora-row__sub">{ __( 'OK', 'gratora' ) }</span>;
 }
 
 /**
@@ -80,7 +80,7 @@ export function renderHealth( item ) {
 export function viewDetailsAction( setDetail ) {
     return {
         id:       'view_details',
-        label:    __( 'View details', 'fundraising-toolkit' ),
+        label:    __( 'View details', 'gratora' ),
         callback: ( items ) => setDetail( items[ 0 ] ),
     };
 }
@@ -89,7 +89,7 @@ export function viewDetailsAction( setDetail ) {
 export function copySubscriptionIdAction() {
     return {
         id:         'copy_subscription_id',
-        label:      __( 'Copy subscription id', 'fundraising-toolkit' ),
+        label:      __( 'Copy subscription id', 'gratora' ),
         isPrimary:  false,
         isEligible: ( item ) => !! item.gateway_subscription_id,
         callback:   async ( [ item ] ) => {
@@ -98,7 +98,7 @@ export function copySubscriptionIdAction() {
                 // origin, which awaits clean and reports a copy nobody made.
                 if ( ! window.navigator?.clipboard ) throw new Error( 'no clipboard' );
                 await window.navigator.clipboard.writeText( item.gateway_subscription_id );
-                notify.success( __( 'Subscription id copied.', 'fundraising-toolkit' ) );
+                notify.success( __( 'Subscription id copied.', 'gratora' ) );
             } catch ( e ) {
                 // No clipboard permission, so show it instead of failing
                 // silently: it is a lookup key and reading it is the point.

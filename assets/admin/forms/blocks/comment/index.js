@@ -4,7 +4,7 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'fundkit/comment';
+const NAME = 'gratora/comment';
 
 function Edit( { attributes, setAttributes } ) {
     const {
@@ -16,31 +16,31 @@ function Edit( { attributes, setAttributes } ) {
 
     // Attributes default to '' and the walker injects these when empty; mirror
     // that in the preview so the canvas is never a nameless field.
-    const labelText       = label || __( 'Add a message', 'fundraising-toolkit' );
-    const placeholderText = placeholder || __( 'Anything you want to share?', 'fundraising-toolkit' );
+    const labelText       = label || __( 'Add a message', 'gratora' );
+    const placeholderText = placeholder || __( 'Anything you want to share?', 'gratora' );
 
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview' } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Comment', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Comment', 'gratora' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundraising-toolkit' ) }
+                        label={ __( 'Label', 'gratora' ) }
                         value={ label }
-                        placeholder={ __( 'Add a message', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Add a message', 'gratora' ) }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Placeholder', 'fundraising-toolkit' ) }
+                        label={ __( 'Placeholder', 'gratora' ) }
                         value={ placeholder }
-                        placeholder={ __( 'Anything you want to share?', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Anything you want to share?', 'gratora' ) }
                         onChange={ ( v ) => setAttributes( { placeholder: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Required', 'fundraising-toolkit' ) }
+                        label={ __( 'Required', 'gratora' ) }
                         checked={ required }
                         onChange={ ( v ) => setAttributes( { required: v } ) }
                         __nextHasNoMarginBottom
@@ -52,11 +52,11 @@ function Edit( { attributes, setAttributes } ) {
                 />
             </InspectorControls>
             <div { ...blockProps }>
-                <span className="fundkit-block-preview__label">
+                <span className="gratora-block-preview__label">
                     { labelText }
-                    { required && <em className="fundkit-block-preview__req" aria-hidden="true">*</em> }
+                    { required && <em className="gratora-block-preview__req" aria-hidden="true">*</em> }
                 </span>
-                <div className="fundkit-block-preview__textarea">{ placeholderText }</div>
+                <div className="gratora-block-preview__textarea">{ placeholderText }</div>
             </div>
         </>
     );
@@ -65,9 +65,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Comment', 'fundraising-toolkit' ),
-        description: __( 'Optional message from the donor to the organization.', 'fundraising-toolkit' ),
-        category:   'fundkit-fields',
+        title:      __( 'Comment', 'gratora' ),
+        description: __( 'Optional message from the donor to the organization.', 'gratora' ),
+        category:   'gratora-fields',
         icon:       BlockIcons[ 'comment' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Foundation;
+namespace Gratora\Tests\Unit\Foundation;
 
 use DateTimeImmutable;
-use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Foundation\Time\FrozenClock;
+use Gratora\Foundation\References\ReferenceGenerator;
+use Gratora\Foundation\Time\FrozenClock;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -20,7 +20,7 @@ final class ReferenceGeneratorFormatTest extends TestCase
 
     protected function setUp(): void
     {
-        ($GLOBALS['_fundkit_reset_options'])();
+        ($GLOBALS['_gratora_reset_options'])();
         $this->gen = new ReferenceGenerator(new FrozenClock(new DateTimeImmutable('2026-05-13')));
     }
 

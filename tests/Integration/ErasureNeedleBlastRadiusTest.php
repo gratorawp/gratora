@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\Erasure\ErasureRequest;
-use FundKit\Foundation\Plugin;
+use Gratora\Analytics\Event;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\Erasure\ErasureRequest;
+use Gratora\Foundation\Plugin;
 
 /**
  * Erasing one donor must not blank another donor's rows.
@@ -55,12 +55,12 @@ final class ErasureNeedleBlastRadiusTest extends IntegrationTestCase
         $request = ErasureRequest::make(
             1,
             [],
-            ['FUNDKIT-2026-00700', 'pi_3abc', 'sub_9xy'],
+            ['GRATORA-2026-00700', 'pi_3abc', 'sub_9xy'],
             [],
             gmdate('Y-m-d H:i:s')
         );
 
-        $this->assertContains('FUNDKIT-2026-00700', $request->needles);
+        $this->assertContains('GRATORA-2026-00700', $request->needles);
         $this->assertContains('pi_3abc', $request->needles);
         $this->assertContains('sub_9xy', $request->needles);
     }

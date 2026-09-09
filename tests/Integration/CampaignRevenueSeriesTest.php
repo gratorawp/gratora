@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignMetricsService;
-use FundKit\Donations\Donation;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignMetricsService;
+use Gratora\Donations\Donation;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 
 final class CampaignRevenueSeriesTest extends IntegrationTestCase
 {
@@ -34,7 +34,7 @@ final class CampaignRevenueSeriesTest extends IntegrationTestCase
 
         // A paid donation 90 days ago, i.e. 60 days BEFORE the campaign existed.
         $d = Donation::make();
-        $d->reference         = 'FUNDKIT-BK-' . substr(md5(uniqid('', true)), 0, 8);
+        $d->reference         = 'GRATORA-BK-' . substr(md5(uniqid('', true)), 0, 8);
         $d->donor_id          = (int) $donor->id;
         $d->campaign_id       = (int) $c->id;
         $d->amount_cents      = 5000;

@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\EventRecorder;
-use FundKit\Currency\FxRates;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\DonorService;
-use FundKit\Forms\DefaultFormTypeHandler;
-use FundKit\Forms\FormTypeHandler;
-use FundKit\Forms\FormTypeRegistry;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Funds\FundResolver;
-use FundKit\Gateways\GatewayManager;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Currency\FxRates;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\DonorService;
+use Gratora\Forms\DefaultFormTypeHandler;
+use Gratora\Forms\FormTypeHandler;
+use Gratora\Forms\FormTypeRegistry;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\References\ReferenceGenerator;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Funds\FundResolver;
+use Gratora\Gateways\GatewayManager;
 
 /**
  * Use an explicit registry to avoid the process-global container’s once-per-run registration
@@ -41,8 +41,8 @@ final class TypeDispatchTest extends IntegrationTestCase
             $c->get(FundResolver::class),
             $c->get(FxRates::class),
             $types,
-            $c->get(\FundKit\Foundation\Crypto\Crypto::class),
-            $c->get(\FundKit\Gateways\TestMode::class),
+            $c->get(\Gratora\Foundation\Crypto\Crypto::class),
+            $c->get(\Gratora\Gateways\TestMode::class),
         );
     }
 

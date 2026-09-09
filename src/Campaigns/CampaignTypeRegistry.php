@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Campaigns;
+namespace Gratora\Campaigns;
 
 use RuntimeException;
 

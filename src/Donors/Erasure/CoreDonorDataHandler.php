@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors\Erasure;
+namespace Gratora\Donors\Erasure;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationNote;
-use FundKit\Donations\Refund;
-use FundKit\Donors\Consent;
-use FundKit\Donors\DonorNote;
-use FundKit\Donors\MagicLinkToken;
-use FundKit\Donors\PendingSignup;
-use FundKit\Donors\PendingSignupRepository;
-use FundKit\Recurring\RecurringPlan;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationNote;
+use Gratora\Donations\Refund;
+use Gratora\Donors\Consent;
+use Gratora\Donors\DonorNote;
+use Gratora\Donors\MagicLinkToken;
+use Gratora\Donors\PendingSignup;
+use Gratora\Donors\PendingSignupRepository;
+use Gratora\Recurring\RecurringPlan;
 
 /**
  * Core's own share of an erasure: everything hanging off the donor by foreign
@@ -26,7 +26,7 @@ final class CoreDonorDataHandler implements ErasureHandler
     /** @since 1.0.0 */
     public function key(): string
     {
-        return 'fundkit.core';
+        return 'gratora.core';
     }
 
     /** @since 1.0.0 */

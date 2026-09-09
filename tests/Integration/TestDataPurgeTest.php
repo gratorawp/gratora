@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Maintenance\TestDataPurger;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Maintenance\TestDataPurger;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Vendor\Queryable\DB;
 use WP_REST_Request;
 
 /**
@@ -42,7 +42,7 @@ final class TestDataPurgeTest extends IntegrationTestCase
     {
         $now = gmdate('Y-m-d H:i:s');
         $d = Donation::make();
-        $d->reference         = 'FUNDKIT-T-' . bin2hex(random_bytes(4));
+        $d->reference         = 'GRATORA-T-' . bin2hex(random_bytes(4));
         $d->donor_id          = (int) $donor->id;
         $d->amount_cents      = 2500;
         $d->currency          = 'USD';
@@ -190,18 +190,18 @@ final class TestDataPurgeTest extends IntegrationTestCase
         $donation = $this->donation($this->donor('withnote@example.test'), true);
         $id = (int) $donation->id;
 
-        DB::table('fundkit_donation_notes')->insert([
+        DB::table('gratora_donation_notes')->insert([
             'donation_id'    => $id,
             'author_user_id' => 1,
             'body_encrypted' => 'enc-internal-note',
             'created_at'     => gmdate('Y-m-d H:i:s'),
             'updated_at'     => gmdate('Y-m-d H:i:s'),
         ]);
-        $this->assertSame(1, (int) DB::table('fundkit_donation_notes')->where('donation_id', $id)->count());
+        $this->assertSame(1, (int) DB::table('gratora_donation_notes')->where('donation_id', $id)->count());
 
         $this->purger()->purge();
 
-        $this->assertSame(0, (int) DB::table('fundkit_donation_notes')->where('donation_id', $id)->count());
+        $this->assertSame(0, (int) DB::table('gratora_donation_notes')->where('donation_id', $id)->count());
     }
 
     public function test_add_ons_are_told_before_the_rows_disappear(): void
@@ -209,7 +209,7 @@ final class TestDataPurgeTest extends IntegrationTestCase
         $donation = $this->donation($this->donor('addon@example.test'), true);
 
         $seen = [];
-        add_action('fundkit.test_data.purge_donations', function (array $ids) use (&$seen): void {
+        add_action('gratora.test_data.purge_donations', function (array $ids) use (&$seen): void {
             $seen = array_merge($seen, $ids);
         });
 
@@ -223,7 +223,7 @@ final class TestDataPurgeTest extends IntegrationTestCase
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
         $donation = $this->donation($this->donor('guard@example.test'), true);
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/purge-test-data');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/tools/purge-test-data');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['confirmation' => 'yes please']));
         $res = rest_do_request($req);
@@ -231,7 +231,7 @@ final class TestDataPurgeTest extends IntegrationTestCase
         $this->assertSame(400, $res->get_status());
         $this->assertNotNull(Donation::query()->where('id', (int) $donation->id)->get(), 'nothing was removed');
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/purge-test-data');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/tools/purge-test-data');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['confirmation' => 'DELETE']));
         $this->assertSame(200, rest_do_request($req)->get_status());

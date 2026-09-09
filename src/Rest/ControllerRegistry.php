@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest;
+namespace Gratora\Rest;
 
 /**
  * Registry for add-on REST controllers. Any object with registerRoutes(): void
- * can be contributed via fundkit.rest.register without modifying RestProvider.
+ * can be contributed via gratora.rest.register without modifying RestProvider.
  *
  * @since 1.0.0
  */

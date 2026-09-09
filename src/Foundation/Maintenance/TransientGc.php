@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Maintenance;
+namespace Gratora\Foundation\Maintenance;
 
-use FundKit\Async\AsyncDispatcher;
-use FundKit\Foundation\Batch\BatchProcessor;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Async\AsyncDispatcher;
+use Gratora\Foundation\Batch\BatchProcessor;
+use Gratora\Vendor\Queryable\DB;
 
 /**
- * Defensive GC for FundKit's own expired transients.
+ * Defensive GC for Gratora's own expired transients.
  *
  * Runs independently of wp_scheduled_delete (which may be disabled by perf plugins),
  * and independently of whether an object cache is present: delete_transient clears
@@ -20,7 +20,7 @@ use FundKit\Vendor\Queryable\DB;
  */
 final class TransientGc
 {
-    public const HOOK = 'fundkit.cron.transient_gc';
+    public const HOOK = 'gratora.cron.transient_gc';
     private const DAILY = 86400;
     private const BATCH = 2000;
 
@@ -47,7 +47,7 @@ final class TransientGc
             // Prefix LIKE (no leading %) keeps the option_name index usable.
             fn (int $n) => DB::table('options')
                 ->select('option_name')
-                ->whereLike('option_name', '_transient_timeout_fundkit_%')
+                ->whereLike('option_name', '_transient_timeout_gratora_%')
                 ->where('option_value', (string) $now, '<')
                 ->limit($n)
                 ->getAll(),

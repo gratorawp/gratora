@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Receipts;
+namespace Gratora\Receipts;
 
 /** @since 1.0.0 */
 final class ReceiptRepository

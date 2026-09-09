@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -23,7 +23,7 @@ final class DonationExportRefundColumnTest extends IntegrationTestCase
         $this->donationService()->refund($donation, 40000, 'partial - one item returned');
 
         [$header, $row] = $this->headerAndRow(
-            $this->serveBody('/fundkit/v1/admin/donations/export.csv'),
+            $this->serveBody('/gratora/v1/admin/donations/export.csv'),
             (string) $donation->reference,
         );
 
@@ -38,7 +38,7 @@ final class DonationExportRefundColumnTest extends IntegrationTestCase
         $donation = $this->paidDonation(50000);
 
         [$header, $row] = $this->headerAndRow(
-            $this->serveBody('/fundkit/v1/admin/donations/export.csv'),
+            $this->serveBody('/gratora/v1/admin/donations/export.csv'),
             (string) $donation->reference,
         );
 
@@ -47,7 +47,7 @@ final class DonationExportRefundColumnTest extends IntegrationTestCase
 
     private function paidDonation(int $cents): Donation
     {
-        $create = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $create = new WP_REST_Request('POST', '/gratora/v1/donations');
         $create->set_header('content-type', 'application/json');
         $create->set_body((string) wp_json_encode([
             'email'        => 'sarah@example.com',
@@ -58,7 +58,7 @@ final class DonationExportRefundColumnTest extends IntegrationTestCase
         ]));
         $reference = (string) rest_do_request($create)->get_data()['reference'];
 
-        $confirm = new WP_REST_Request('POST', "/fundkit/v1/donations/{$reference}/confirm");
+        $confirm = new WP_REST_Request('POST', "/gratora/v1/donations/{$reference}/confirm");
         $confirm->set_header('content-type', 'application/json');
         $confirm->set_body('{}');
         rest_do_request($confirm);

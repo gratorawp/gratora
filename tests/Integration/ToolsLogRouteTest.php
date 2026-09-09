@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Analytics\Event;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Analytics\Event;
 use WP_REST_Request;
 
 /**
- * One log, two kinds of entry. What FundKit could not finish and what a gateway
+ * One log, two kinds of entry. What Gratora could not finish and what a gateway
  * sent this site are the same question asked twice, and an org chasing a payment
  * that never arrived should not have to know which screen holds which half.
  */
@@ -24,7 +24,7 @@ final class ToolsLogRouteTest extends IntegrationTestCase
     /** Drive a real delivery through the router so the row is written the way production writes it. */
     private function deliver(string $body = '{"event":"fake"}'): void
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/webhooks/offline');
+        $req = new WP_REST_Request('POST', '/gratora/v1/webhooks/offline');
         $req->set_header('content-type', 'application/json');
         $req->set_body($body);
         rest_do_request($req);
@@ -33,7 +33,7 @@ final class ToolsLogRouteTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function fetch(array $params = []): array
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/tools/log');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/tools/log');
         foreach ($params as $k => $v) {
             $req->set_param($k, $v);
         }
@@ -90,7 +90,7 @@ final class ToolsLogRouteTest extends IntegrationTestCase
         $all      = $this->fetch();
         $failures = $this->fetch(['status' => 'failed']);
 
-        // A gateway sends every event it has and FundKit acts on the few it needs.
+        // A gateway sends every event it has and Gratora acts on the few it needs.
         // Counting the rest as faults would make a healthy site look broken.
         $this->assertSame(1, (int) $all['total']);
         $this->assertSame(0, (int) $failures['total']);
@@ -156,7 +156,7 @@ final class ToolsLogRouteTest extends IntegrationTestCase
         $this->deliver();
         $kept = $this->activity('recurring.amount_changed');
 
-        $res = rest_do_request(new WP_REST_Request('DELETE', '/fundkit/v1/admin/tools/log'));
+        $res = rest_do_request(new WP_REST_Request('DELETE', '/gratora/v1/admin/tools/log'));
         $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));
 
         // The donor timelines and the dashboard figures read from this table.
@@ -182,7 +182,7 @@ final class ToolsLogRouteTest extends IntegrationTestCase
     {
         $kept = $this->activity('donation.completed');
 
-        $req = new WP_REST_Request('DELETE', '/fundkit/v1/admin/tools/log');
+        $req = new WP_REST_Request('DELETE', '/gratora/v1/admin/tools/log');
         $req->set_param('source', 'donation.completed');
         rest_do_request($req);
 
@@ -206,7 +206,7 @@ final class ToolsLogRouteTest extends IntegrationTestCase
     {
         ErrorLog::record('gateway.intent', 'Something.');
 
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/tools/log');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/tools/log');
         $req->set_param('orderby', 'id; DROP TABLE wp_posts');
         $res = rest_do_request($req);
 
@@ -219,7 +219,7 @@ final class ToolsLogRouteTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
 
-        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/tools/log'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/tools/log'));
 
         $this->assertGreaterThanOrEqual(400, $res->get_status());
     }

@@ -1,5 +1,5 @@
 /**
- * `fundkit/phone` block - optional donor phone input.
+ * `gratora/phone` block - optional donor phone input.
  */
 
 import { test, expect } from '../fixtures/donor-form';

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Donors\Consent;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Identity\IdentityHasher;
-use FundKit\Foundation\Plugin;
-use FundKit\Settings\SettingsService;
+use Gratora\Analytics\Event;
+use Gratora\Donors\Consent;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Identity\IdentityHasher;
+use Gratora\Foundation\Plugin;
+use Gratora\Settings\SettingsService;
 use WP_REST_Request;
 
 /**
@@ -32,7 +32,7 @@ final class ConsentEvidenceBehindProxyTest extends IntegrationTestCase
         parent::setUp();
         $this->makeOfflinePayable();
 
-        update_option('fundkit_privacy', ['trusted_proxies' => [self::EDGE . '/32']]);
+        update_option('gratora_privacy', ['trusted_proxies' => [self::EDGE . '/32']]);
         Plugin::instance()->container->get(SettingsService::class)->update('consents', [
             'purposes' => [[
                 'key' => 'updates', 'label' => 'Send me updates', 'description' => '',
@@ -46,7 +46,7 @@ final class ConsentEvidenceBehindProxyTest extends IntegrationTestCase
     protected function tearDown(): void
     {
         unset($_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_X_FORWARDED_FOR']);
-        delete_option('fundkit_privacy');
+        delete_option('gratora_privacy');
         parent::tearDown();
     }
 
@@ -85,17 +85,17 @@ final class ConsentEvidenceBehindProxyTest extends IntegrationTestCase
             ->findOrCreate('portal-proxy-' . uniqid() . '@example.test');
 
         $csrf = 'proxy-csrf';
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession((int) $donor->id, $csrf);
+        $_COOKIE['gratora_donor_session'] = $this->portalSession((int) $donor->id, $csrf);
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/portal/consents');
+        $req = new WP_REST_Request('POST', '/gratora/v1/portal/consents');
         $req->set_header('content-type', 'application/json');
-        $req->set_header('X-FundKit-Csrf', $csrf);
+        $req->set_header('X-Gratora-Csrf', $csrf);
         $req->set_body((string) wp_json_encode([
             'items' => [['key' => 'updates', 'granted' => true]],
         ]));
         $this->assertSame(200, rest_do_request($req)->get_status());
 
-        unset($_COOKIE['fundkit_donor_session']);
+        unset($_COOKIE['gratora_donor_session']);
 
         $consent = Consent::query()->where('donor_id', (int) $donor->id)->orderBy('id', 'DESC')->get();
         $this->assertNotNull($consent);
@@ -105,7 +105,7 @@ final class ConsentEvidenceBehindProxyTest extends IntegrationTestCase
     /** @param array<string,mixed> $extra */
     private function donate(array $extra): void
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/donations');
+        $req = new WP_REST_Request('POST', '/gratora/v1/donations');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(array_merge([
             'email'        => 'proxy-donor-' . uniqid() . '@example.test',

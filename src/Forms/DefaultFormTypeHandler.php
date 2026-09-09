@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms;
+namespace Gratora\Forms;
 
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
 
 /** @since 1.0.0 */
 final class DefaultFormTypeHandler implements FormTypeHandler
@@ -19,7 +19,7 @@ final class DefaultFormTypeHandler implements FormTypeHandler
     /** @since 1.0.0 */
     public function label(): string
     {
-        return __('Donation', 'fundraising-toolkit');
+        return __('Donation', 'gratora');
     }
 
     /** @since 1.0.0 */

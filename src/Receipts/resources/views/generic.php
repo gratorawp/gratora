@@ -3,8 +3,8 @@
 defined('ABSPATH') || exit;
 
 /**
- * @var \FundKit\Donations\Donation $donation
- * @var \FundKit\Donors\Donor    $donor
+ * @var \Gratora\Donations\Donation $donation
+ * @var \Gratora\Donors\Donor    $donor
  * @var string   $donor_name      name given for this donation (resolved)
  * @var string   $donor_address   formatted multi-line address, empty when missing
  * @var array    $org             keys: name, address_lines (array), tax_id, vat_id, email
@@ -20,16 +20,16 @@ defined('ABSPATH') || exit;
  * @var array    $custom_field_labels
  */
 
-$orgName = (string) ($org['name'] ?? __('Your Organization', 'fundraising-toolkit'));
+$orgName = (string) ($org['name'] ?? __('Your Organization', 'gratora'));
 $orgAddressLines = (array) ($org['address_lines'] ?? []);
 $orgTaxId  = (string) ($org['tax_id'] ?? '');
 $orgVatId  = (string) ($org['vat_id'] ?? '');
 $orgEmail  = (string) ($org['email'] ?? '');
 
 $tpl = is_array($receipt_template ?? null) ? $receipt_template : [];
-$headerTitle = (string) ($tpl['header_title'] ?? __('Donation receipt', 'fundraising-toolkit'));
+$headerTitle = (string) ($tpl['header_title'] ?? __('Donation receipt', 'gratora'));
 $intro       = (string) ($tpl['intro']        ?? '');
-$signoff     = (string) ($tpl['signoff']      ?? __('Thank you for your support.', 'fundraising-toolkit'));
+$signoff     = (string) ($tpl['signoff']      ?? __('Thank you for your support.', 'gratora'));
 $footerNote  = (string) ($tpl['footer_note']  ?? '');
 $showTaxId   = array_key_exists('show_tax_id', $tpl) ? (bool) $tpl['show_tax_id'] : true;
 $showDonorAddr = array_key_exists('show_donor_address', $tpl) ? (bool) $tpl['show_donor_address'] : false;
@@ -42,17 +42,17 @@ if ($donorName === '') $donorName = '-';
 // The whole receipt renders in the donor's locale, so the frequency has to be
 // a translated label rather than the stored slug.
 $frequencyLabels = [
-    'weekly'    => __('Weekly', 'fundraising-toolkit'),
-    'biweekly'  => __('Every 2 weeks', 'fundraising-toolkit'),
-    'monthly'   => __('Monthly', 'fundraising-toolkit'),
-    'quarterly' => __('Quarterly', 'fundraising-toolkit'),
-    'yearly'    => __('Yearly', 'fundraising-toolkit'),
+    'weekly'    => __('Weekly', 'gratora'),
+    'biweekly'  => __('Every 2 weeks', 'gratora'),
+    'monthly'   => __('Monthly', 'gratora'),
+    'quarterly' => __('Quarterly', 'gratora'),
+    'yearly'    => __('Yearly', 'gratora'),
 ];
 $frequencyLabel = $donation->frequency === 'one_time'
-    ? __('One-time donation', 'fundraising-toolkit')
+    ? __('One-time donation', 'gratora')
     : sprintf(
         /* translators: %s: frequency label (Monthly, Quarterly, Yearly, …). */
-        __('Recurring donation (%s)', 'fundraising-toolkit'),
+        __('Recurring donation (%s)', 'gratora'),
         $frequencyLabels[(string) $donation->frequency] ?? ucfirst((string) $donation->frequency)
     );
 
@@ -69,7 +69,7 @@ foreach ($customDataArr as $key => $value) {
     if ($label === '') continue;
 
     if (is_bool($value)) {
-        $display = $value ? __('Yes', 'fundraising-toolkit') : __('No', 'fundraising-toolkit');
+        $display = $value ? __('Yes', 'gratora') : __('No', 'gratora');
     } elseif (is_array($value)) {
         $display = implode(', ', array_map('strval', $value));
         if ($display === '') continue;
@@ -84,7 +84,7 @@ $refundedDisplay = (string) ($refunded_display ?? '');
 $receiptNumber   = (string) ($receipt_number ?? '');
 $refundedCents   = (int) ($refunded_cents ?? 0);
 $netDisplay      = $refundedCents > 0
-    ? \FundKit\Foundation\Helpers\Money::format(
+    ? \Gratora\Foundation\Helpers\Money::format(
         (int) $donation->amount_cents - $refundedCents,
         (string) $donation->currency
     )
@@ -94,7 +94,7 @@ $fullyRefunded   = $refundedCents > 0 && $refundedCents >= (int) $donation->amou
 // A payment that bought something has to say so, and say what is left as a
 // donation, because only the remainder is deductible. Whatever sold the thing
 // states its value through the receipt context.
-$money      = static fn (int $c): string => \FundKit\Foundation\Helpers\Money::format($c, (string) $donation->currency);
+$money      = static fn (int $c): string => \Gratora\Foundation\Helpers\Money::format($c, (string) $donation->currency);
 $goodsCents = max(0, (int) ($extras['goods_received_cents'] ?? 0));
 $goodsLabel = trim((string) ($extras['goods_received_label'] ?? ''));
 $hasGoods   = $goodsCents > 0 && $goodsCents <= (int) $donation->amount_cents;
@@ -137,7 +137,7 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
 
 <?php if (! empty($donation->is_test)): ?>
 <div style="border:2pt solid #b91c1c; color:#b91c1c; font-weight:700; text-align:center; padding:8pt; margin:0 0 18pt; letter-spacing:.5pt;">
-    <?php esc_html_e('TEST DONATION - NOT A REAL PAYMENT', 'fundraising-toolkit'); ?>
+    <?php esc_html_e('TEST DONATION - NOT A REAL PAYMENT', 'gratora'); ?>
 </div>
 <?php endif; ?>
 
@@ -147,7 +147,7 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
     <?php
     printf(
         /* translators: %s: refunded amount. */
-        esc_html__('This donation has been refunded (%s).', 'fundraising-toolkit'),
+        esc_html__('This donation has been refunded (%s).', 'gratora'),
         esc_html($refundedDisplay)
     );
     ?>
@@ -155,7 +155,7 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
     <?php
     printf(
         /* translators: 1: refunded amount, 2: amount retained after the refund. */
-        esc_html__('Part of this donation has been refunded (%1$s). The amount retained is %2$s.', 'fundraising-toolkit'),
+        esc_html__('Part of this donation has been refunded (%1$s). The amount retained is %2$s.', 'gratora'),
         esc_html($refundedDisplay),
         esc_html($netDisplay)
     );
@@ -188,21 +188,21 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
 
 <dl class="ref">
     <?php if ($receiptNumber !== ''): ?>
-        <dt><?php esc_html_e('Receipt number', 'fundraising-toolkit'); ?></dt>
+        <dt><?php esc_html_e('Receipt number', 'gratora'); ?></dt>
         <dd><?php echo esc_html($receiptNumber); ?></dd>
     <?php endif; ?>
 
-    <dt><?php esc_html_e('Reference', 'fundraising-toolkit'); ?></dt>
+    <dt><?php esc_html_e('Reference', 'gratora'); ?></dt>
     <dd><?php echo esc_html($donation->reference); ?></dd>
 
-    <dt><?php esc_html_e('Date', 'fundraising-toolkit'); ?></dt>
+    <dt><?php esc_html_e('Date', 'gratora'); ?></dt>
     <dd><?php echo esc_html($paidAt); ?></dd>
 
-    <dt><?php esc_html_e('Donor', 'fundraising-toolkit'); ?></dt>
+    <dt><?php esc_html_e('Donor', 'gratora'); ?></dt>
     <dd><?php echo esc_html($donorName); ?></dd>
 
     <?php if ($showDonorAddr && $donorAddress !== ''): ?>
-        <dt><?php esc_html_e('Donor address', 'fundraising-toolkit'); ?></dt>
+        <dt><?php esc_html_e('Donor address', 'gratora'); ?></dt>
         <dd>
             <?php foreach (preg_split('/\R/', $donorAddress) as $line): ?>
                 <?php $line = trim((string) $line); if ($line === '') continue; ?>
@@ -212,12 +212,12 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
     <?php endif; ?>
 
     <?php if ($showTaxId && $orgTaxId !== ''): ?>
-        <dt><?php esc_html_e('Organization tax ID', 'fundraising-toolkit'); ?></dt>
+        <dt><?php esc_html_e('Organization tax ID', 'gratora'); ?></dt>
         <dd><?php echo esc_html($orgTaxId); ?></dd>
     <?php endif; ?>
 
     <?php if ($showTaxId && $orgVatId !== ''): ?>
-        <dt><?php esc_html_e('VAT ID', 'fundraising-toolkit'); ?></dt>
+        <dt><?php esc_html_e('VAT ID', 'gratora'); ?></dt>
         <dd><?php echo esc_html($orgVatId); ?></dd>
     <?php endif; ?>
 </dl>
@@ -225,36 +225,36 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
 <table class="lines">
     <thead>
         <tr>
-            <th><?php esc_html_e('Description', 'fundraising-toolkit'); ?></th>
-            <th class="amt"><?php esc_html_e('Amount', 'fundraising-toolkit'); ?></th>
+            <th><?php esc_html_e('Description', 'gratora'); ?></th>
+            <th class="amt"><?php esc_html_e('Amount', 'gratora'); ?></th>
         </tr>
     </thead>
     <tbody>
         <?php if ($hasGoods): ?>
         <tr>
-            <td><?php echo esc_html($goodsLabel !== '' ? $goodsLabel : __('Goods and services received', 'fundraising-toolkit')); ?></td>
+            <td><?php echo esc_html($goodsLabel !== '' ? $goodsLabel : __('Goods and services received', 'gratora')); ?></td>
             <td class="amt"><?php echo esc_html($money($goodsCents)); ?></td>
         </tr>
         <?php endif; ?>
         <tr>
-            <td><?php /* translators: %s: organization name. */ printf(esc_html__('Donation to %s', 'fundraising-toolkit'), esc_html($orgName)); ?></td>
+            <td><?php /* translators: %s: organization name. */ printf(esc_html__('Donation to %s', 'gratora'), esc_html($orgName)); ?></td>
             <td class="amt"><?php echo esc_html($hasGoods ? $money($giftCents) : $amount_display); ?></td>
         </tr>
         <?php if ($refundedDisplay !== ''): ?>
         <tr class="refund-row">
-            <td><?php esc_html_e('Refunded', 'fundraising-toolkit'); ?></td>
+            <td><?php esc_html_e('Refunded', 'gratora'); ?></td>
             <td class="amt">-<?php echo esc_html($refundedDisplay); ?></td>
         </tr>
         <?php endif; ?>
     </tbody>
     <tfoot>
         <tr>
-            <td><?php echo $hasGoods ? esc_html__('Total', 'fundraising-toolkit') : '&nbsp;'; ?></td>
+            <td><?php echo $hasGoods ? esc_html__('Total', 'gratora') : '&nbsp;'; ?></td>
             <td class="amt total"><?php echo esc_html($netDisplay); ?></td>
         </tr>
         <?php if ($hasGoods): ?>
         <tr class="deductible-row">
-            <td><?php esc_html_e('Tax-deductible amount', 'fundraising-toolkit'); ?></td>
+            <td><?php esc_html_e('Tax-deductible amount', 'gratora'); ?></td>
             <td class="amt"><?php echo esc_html($money(max(0, $giftCents - $refundedCents))); ?></td>
         </tr>
         <?php endif; ?>
@@ -263,7 +263,7 @@ $giftCents  = (int) $donation->amount_cents - $goodsCents;
 
 <?php if (! empty($customRows)): ?>
 <div class="custom">
-    <h3><?php esc_html_e('Additional information', 'fundraising-toolkit'); ?></h3>
+    <h3><?php esc_html_e('Additional information', 'gratora'); ?></h3>
     <dl>
         <?php foreach ($customRows as $row): ?>
             <dt><?php echo esc_html($row['label']); ?></dt>

@@ -1,5 +1,5 @@
 import { __, sprintf } from '@wordpress/i18n';
-import { slidable } from '@fundkit/ui/styling/TokenEditor';
+import { slidable } from '@gratora/ui/styling/TokenEditor';
 
 /**
  * The row shows a value no slider can hold as the literal it is, which is
@@ -15,12 +15,12 @@ export default function UnshownNotice( { tokens = {}, catalogue = {} } ) {
     if ( ! unshown.length ) return null;
 
     return (
-        <ul className="fundkit-preset-editor__unshown">
+        <ul className="gratora-preset-editor__unshown">
             { unshown.map( ( t ) => (
                 <li key={ t.key }>
                     { sprintf(
                         /* translators: 1: token name, e.g. Small corner radius, 2: the value it holds, e.g. 1rem */
-                        __( '%1$s is %2$s, which is outside what its slider offers. Its row takes the value as text.', 'fundraising-toolkit' ),
+                        __( '%1$s is %2$s, which is outside what its slider offers. Its row takes the value as text.', 'gratora' ),
                         t.label,
                         t.value
                     ) }

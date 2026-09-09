@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\EventRecorder;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorMetricsService;
-use FundKit\Foundation\Plugin;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorMetricsService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -55,7 +55,7 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
         $now = gmdate('Y-m-d H:i:s');
 
         $d = Donation::make();
-        $d->reference    = 'FUNDKIT-SUP-' . strtoupper(substr(md5(uniqid('', true)), 0, 10));
+        $d->reference    = 'GRATORA-SUP-' . strtoupper(substr(md5(uniqid('', true)), 0, 10));
         $d->donor_id     = $this->donorId;
         $d->status       = $status;
         $d->kind         = 'donation';
@@ -109,7 +109,7 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
 
     private function listRequest(array $params = []): \WP_REST_Response
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donations');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/donations');
         $req->set_query_params(array_merge(['page' => 1, 'per_page' => 25], $params));
 
         return rest_do_request($req);
@@ -117,7 +117,7 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
 
     private function statsRequest(array $params = []): array
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donations/stats');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/donations/stats');
         $req->set_query_params($params);
 
         return (array) rest_do_request($req)->get_data();
@@ -278,7 +278,7 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
     {
         [$first, $second, $third] = $this->tree();
 
-        $csv = $this->serveBody('/fundkit/v1/admin/donations/export.csv');
+        $csv = $this->serveBody('/gratora/v1/admin/donations/export.csv');
 
         $this->assertStringContainsString((string) $third->reference, $csv);
         $this->assertStringNotContainsString((string) $first->reference, $csv);
@@ -333,7 +333,7 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
     {
         $this->tree();
 
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donors/' . $this->donorId . '/events');
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/donors/' . $this->donorId . '/events');
         $req->set_query_params(['page' => 1, 'per_page' => 25, 'order' => 'desc']);
         $res = rest_do_request($req);
 
@@ -373,7 +373,7 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
 
     private function detail(Donation $d): array
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/admin/donations/' . $d->reference);
+        $req = new WP_REST_Request('GET', '/gratora/v1/admin/donations/' . $d->reference);
         $req->set_url_params(['reference' => (string) $d->reference]);
 
         return (array) rest_do_request($req)->get_data();
@@ -458,6 +458,6 @@ final class SupersededAttemptReadsTest extends IntegrationTestCase
 
         $res = $this->listRequest();
 
-        $this->assertSame('1', $res->get_headers()['X-FundKit-Test-Hidden'] ?? null);
+        $this->assertSame('1', $res->get_headers()['X-Gratora-Test-Hidden'] ?? null);
     }
 }

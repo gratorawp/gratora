@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /**
  * An address somebody typed into the portal that nobody has proven yet.
@@ -24,7 +24,7 @@ use FundKit\Vendor\Queryable\Schema\Table;
  */
 final class PendingSignup extends Model
 {
-    protected string $table = 'fundkit_pending_signups';
+    protected string $table = 'gratora_pending_signups';
     protected string $version = '1.0.0';
 
     public int $id;

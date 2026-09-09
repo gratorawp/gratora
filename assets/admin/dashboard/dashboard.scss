@@ -1,7 +1,7 @@
 // Import shared widget layout and styling.
 @import '../campaigns/campaigns.scss';
 
-.fundkit-dashboard {
+.gratora-dashboard {
     &__header {
         display: flex;
         align-items: center;
@@ -22,7 +22,7 @@
     &[data-loading="true"] { opacity: .6; transition: opacity .15s; }
 }
 
-.fundkit-active-campaigns {
+.gratora-active-campaigns {
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -34,7 +34,7 @@
         padding: 8px 0;
         border-radius: 8px;
 
-        &:hover .fundkit-active-campaigns__title { color: $accent; }
+        &:hover .gratora-active-campaigns__title { color: $accent; }
     }
 
     &__head {
@@ -82,7 +82,7 @@
     &__when { color: $text-soft; }
 }
 
-.fundkit-quick-actions {
+.gratora-quick-actions {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -112,7 +112,7 @@
     }
 }
 
-.fundkit-today {
+.gratora-today {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -125,7 +125,7 @@
         border-radius: 50%;
         background: $accent;
         box-shadow: 0 0 0 4px rgba(33, 29, 63, .15);
-        animation: fundkit-today-pulse 2.4s ease-in-out infinite;
+        animation: gratora-today-pulse 2.4s ease-in-out infinite;
     }
 
     &__label {
@@ -167,11 +167,11 @@
     }
 }
 
-@keyframes fundkit-today-pulse {
+@keyframes gratora-today-pulse {
     0%, 100% { box-shadow: 0 0 0 4px rgba(33, 29, 63, .15); }
     50%      { box-shadow: 0 0 0 7px rgba(33, 29, 63, .08); }
 }
-.fundkit-activity {
+.gratora-activity {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -249,7 +249,7 @@
         white-space: nowrap;
     }
 }
-.fundkit-top-campaigns {
+.gratora-top-campaigns {
     &__spark {
         width: 88px;
         padding: 0 8px;
@@ -258,9 +258,9 @@
     }
 
     // Block SVGs need auto margins; text-align does not center them.
-    .fundkit-spark { display: block; margin: 0 auto; }
+    .gratora-spark { display: block; margin: 0 auto; }
 }
-.fundkit-recurring {
+.gratora-recurring {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -321,7 +321,7 @@
         font-variant-numeric: tabular-nums;
     }
 }
-.fundkit-attention {
+.gratora-attention {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -409,30 +409,30 @@
             outline-offset: 1px;
         }
 
-        .fundkit-attention__item:hover &,
-        .fundkit-attention__item:focus-within & { opacity: 1; }
+        .gratora-attention__item:hover &,
+        .gratora-attention__item:focus-within & { opacity: 1; }
     }
 }
 
 // Show the control without hover on coarse pointers.
 @media (hover: none) {
-    .fundkit-attention__dismiss { opacity: 1; }
+    .gratora-attention__dismiss { opacity: 1; }
 }
 
 // Distinguish loading from an empty result.
-.fundkit-widget-skeleton {
+.gratora-widget-skeleton {
     min-height: 120px;
     border-radius: 8px;
     background: linear-gradient(90deg, rgba(0, 0, 0, .04) 25%, rgba(0, 0, 0, .07) 37%, rgba(0, 0, 0, .04) 63%);
     background-size: 400% 100%;
-    animation: fundkit-widget-skeleton 1.4s ease infinite;
+    animation: gratora-widget-skeleton 1.4s ease infinite;
 }
 
-@keyframes fundkit-widget-skeleton {
+@keyframes gratora-widget-skeleton {
     0%   { background-position: 100% 50%; }
     100% { background-position: 0 50%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .fundkit-widget-skeleton { animation: none; }
+    .gratora-widget-skeleton { animation: none; }
 }

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Exports;
+namespace Gratora\Exports;
 
-use FundKit\Donations\DonationQueries;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Helpers\Csv;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Donations\DonationQueries;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Helpers\Csv;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * Streams the donor list as CSV. Columns are opt-in because most of them are
@@ -110,7 +110,7 @@ final class DonorExporter
 
         // A distinct filter from the donations export: a site that raised that
         // cap should not silently raise one that decrypts three columns a row.
-        $cap     = max(1, (int) apply_filters('fundkit.export.donors_max_rows', self::MAX_ROWS));
+        $cap     = max(1, (int) apply_filters('gratora.export.donors_max_rows', self::MAX_ROWS));
         $written = 0;
         $afterId = 0;
         while (true) {
@@ -158,20 +158,20 @@ final class DonorExporter
     public static function labels(): array
     {
         return [
-            'first_name'      => __('First name', 'fundraising-toolkit'),
-            'last_name'       => __('Last name', 'fundraising-toolkit'),
-            'email'           => __('Email', 'fundraising-toolkit'),
-            'phone'           => __('Phone', 'fundraising-toolkit'),
-            'address'         => __('Address', 'fundraising-toolkit'),
-            'company'         => __('Company', 'fundraising-toolkit'),
-            'country'         => __('Country', 'fundraising-toolkit'),
-            'donor_type'      => __('Type', 'fundraising-toolkit'),
-            'donations_count' => __('Donations', 'fundraising-toolkit'),
-            'total_donated'   => __('Total donated', 'fundraising-toolkit'),
-            'first_donation'  => __('First donation', 'fundraising-toolkit'),
-            'last_donation'   => __('Last donation', 'fundraising-toolkit'),
-            'created_at'      => __('Donor since', 'fundraising-toolkit'),
-            'donor_id'        => __('Donor ID', 'fundraising-toolkit'),
+            'first_name'      => __('First name', 'gratora'),
+            'last_name'       => __('Last name', 'gratora'),
+            'email'           => __('Email', 'gratora'),
+            'phone'           => __('Phone', 'gratora'),
+            'address'         => __('Address', 'gratora'),
+            'company'         => __('Company', 'gratora'),
+            'country'         => __('Country', 'gratora'),
+            'donor_type'      => __('Type', 'gratora'),
+            'donations_count' => __('Donations', 'gratora'),
+            'total_donated'   => __('Total donated', 'gratora'),
+            'first_donation'  => __('First donation', 'gratora'),
+            'last_donation'   => __('Last donation', 'gratora'),
+            'created_at'      => __('Donor since', 'gratora'),
+            'donor_id'        => __('Donor ID', 'gratora'),
         ];
     }
 
@@ -233,7 +233,7 @@ final class DonorExporter
     /** @since 1.0.0 */
     private function donorIdsForCampaign(int $campaignId): array
     {
-        $q = DonationQueries::donationsOnly(DB::table('fundkit_donations'))
+        $q = DonationQueries::donationsOnly(DB::table('gratora_donations'))
             ->select('donor_id')
             ->distinct()
             ->whereNotNull('donor_id')

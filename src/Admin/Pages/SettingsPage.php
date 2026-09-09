@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Admin\Pages;
+namespace Gratora\Admin\Pages;
 
-use FundKit\Admin\ExtensionAssets;
-use FundKit\Foundation\Hooks\HookProvider;
+use Gratora\Admin\ExtensionAssets;
+use Gratora\Foundation\Hooks\HookProvider;
 
 /** @since 1.0.0 */
 final class SettingsPage extends HookProvider
 {
-    private const PAGE_ID   = 'fundkit-settings';
-    private const HANDLE    = 'fundkit-admin-settings';
+    private const PAGE_ID   = 'gratora-settings';
+    private const HANDLE    = 'gratora-admin-settings';
     private const BUILD_DIR = 'build/admin/settings';
 
     /** @since 1.0.0 */
     protected function filters(): array
     {
-        return ['fundkit.admin.pages' => 'registerPage'];
+        return ['gratora.admin.pages' => 'registerPage'];
     }
 
     /** @since 1.0.0 */
@@ -25,8 +25,8 @@ final class SettingsPage extends HookProvider
     {
         $pages[] = [
             'id'         => self::PAGE_ID,
-            'title'      => __('Settings', 'fundraising-toolkit'),
-            'capability' => 'fundkit_access_settings',
+            'title'      => __('Settings', 'gratora'),
+            'capability' => 'gratora_access_settings',
             'position'   => 90,
             'render'     => [$this, 'render'],
         ];
@@ -41,7 +41,7 @@ final class SettingsPage extends HookProvider
         <div class="wrap">
             <?php // Keep WordPress notices above the React header.?>
             <hr class="wp-header-end" />
-            <div id="fundkit-admin-settings"></div>
+            <div id="gratora-admin-settings"></div>
         </div>
         <?php
     }
@@ -49,7 +49,7 @@ final class SettingsPage extends HookProvider
     /** @since 1.0.0 */
     private function enqueueAssets(): void
     {
-        $assetPath = FUNDKIT_DIR . self::BUILD_DIR . '/index.asset.php';
+        $assetPath = GRATORA_DIR . self::BUILD_DIR . '/index.asset.php';
         if (! file_exists($assetPath)) return;
         $asset = require $assetPath;
 
@@ -60,19 +60,19 @@ final class SettingsPage extends HookProvider
 
         wp_enqueue_script(
             self::HANDLE,
-            FUNDKIT_URL . self::BUILD_DIR . '/index.js',
+            GRATORA_URL . self::BUILD_DIR . '/index.js',
             array_merge($asset['dependencies'] ?? [], [ExtensionAssets::HANDLE]),
-            $asset['version']      ?? FUNDKIT_VERSION,
+            $asset['version']      ?? GRATORA_VERSION,
             true
         );
-        wp_set_script_translations(self::HANDLE, 'fundraising-toolkit', FUNDKIT_DIR . 'languages');
+        wp_set_script_translations(self::HANDLE, 'gratora', GRATORA_DIR . 'languages');
 
         wp_enqueue_style('wp-components');
         wp_enqueue_style(
             self::HANDLE,
-            FUNDKIT_URL . 'build/admin/settings.css',
+            GRATORA_URL . 'build/admin/settings.css',
             ['wp-components'],
-            (string) (@filemtime(FUNDKIT_DIR . 'build/admin/settings.css') ?: FUNDKIT_VERSION)
+            (string) (@filemtime(GRATORA_DIR . 'build/admin/settings.css') ?: GRATORA_VERSION)
         );
         wp_style_add_data(self::HANDLE, 'rtl', 'replace');
     }

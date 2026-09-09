@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
-use FundKit\Foundation\Helpers\View;
-use FundKit\Settings\SettingsService;
+use Gratora\Foundation\Helpers\View;
+use Gratora\Settings\SettingsService;
 
 /** @since 1.0.0 */
 final class CurrencySwitcherBlock implements Block
@@ -13,7 +13,7 @@ final class CurrencySwitcherBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/currency-switcher';
+        return 'gratora/currency-switcher';
     }
 
     /** @since 1.0.0 */

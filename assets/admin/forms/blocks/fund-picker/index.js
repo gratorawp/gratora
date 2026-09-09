@@ -6,9 +6,9 @@ import { __ } from '@wordpress/i18n';
 import { ConditionPanel, DEFAULT_CONDITION } from '../_shared/condition';
 import { BlockIcons } from '../_shared/block-icons';
 
-const NAME = 'fundkit/fund-picker';
+const NAME = 'gratora/fund-picker';
 
-const FUNDS_ADMIN_URL = 'admin.php?page=fundkit-funds';
+const FUNDS_ADMIN_URL = 'admin.php?page=gratora-funds';
 
 function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescription, emptySelected, showDescriptions } ) {
     if ( funds === null ) {
@@ -22,9 +22,9 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
     if ( funds.length === 0 ) {
         return (
             <Notice status="warning" isDismissible={ false }>
-                { __( 'No active funds yet. Create funds under Donations → Funds; donations will use your organization default until then.', 'fundraising-toolkit' ) }
+                { __( 'No active funds yet. Create funds under Donations → Funds; donations will use your organization default until then.', 'gratora' ) }
                 {' '}
-                <a href={ FUNDS_ADMIN_URL }>{ __( 'Manage funds', 'fundraising-toolkit' ) }</a>
+                <a href={ FUNDS_ADMIN_URL }>{ __( 'Manage funds', 'gratora' ) }</a>
             </Notice>
         );
     }
@@ -42,9 +42,9 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
                 <div
                     style={ {
                         padding:        '10px 12px',
-                        background:     emptySelected ? 'color-mix(in srgb, var(--fundkit-accent, #211d3f) 6%, transparent)' : '#fafbfc',
-                        border:         `${ emptySelected ? '2px' : '1px' } solid ${ emptySelected ? 'var(--fundkit-accent, #211d3f)' : '#e5e7eb' }`,
-                        borderRadius:   'var(--fundkit-radius-sm, 8px)',
+                        background:     emptySelected ? 'color-mix(in srgb, var(--gratora-accent, #211d3f) 6%, transparent)' : '#fafbfc',
+                        border:         `${ emptySelected ? '2px' : '1px' } solid ${ emptySelected ? 'var(--gratora-accent, #211d3f)' : '#e5e7eb' }`,
+                        borderRadius:   'var(--gratora-radius-sm, 8px)',
                         display:        'flex',
                         flexDirection:  'column',
                         alignItems:     'center',
@@ -56,7 +56,7 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
                     } }
                 >
                     <span style={ { fontSize: 13, fontWeight: 600 } }>
-                        { emptyLabel || __( 'No specific fund', 'fundraising-toolkit' ) }
+                        { emptyLabel || __( 'No specific fund', 'gratora' ) }
                     </span>
                     { showDescriptions && emptyDescription && (
                         <span style={ { fontSize: 11, lineHeight: 1.3 } }>
@@ -92,9 +92,9 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
                         style={ {
                             padding:       '10px 12px',
                             marginLeft:    f.depth ? 14 : 0,
-                            background:    isSelected ? 'color-mix(in srgb, var(--fundkit-accent, #211d3f) 6%, transparent)' : '#fafbfc',
-                            border:        `2px solid ${ isSelected ? 'var(--fundkit-accent, #211d3f)' : '#e5e7eb' }`,
-                            borderRadius:  'var(--fundkit-radius-sm, 8px)',
+                            background:    isSelected ? 'color-mix(in srgb, var(--gratora-accent, #211d3f) 6%, transparent)' : '#fafbfc',
+                            border:        `2px solid ${ isSelected ? 'var(--gratora-accent, #211d3f)' : '#e5e7eb' }`,
+                            borderRadius:  'var(--gratora-radius-sm, 8px)',
                             display:       'flex',
                             flexDirection: 'column',
                             gap:           4,
@@ -105,7 +105,7 @@ function FundTiles( { funds, selectedId, allowEmpty, emptyLabel, emptyDescriptio
                             style={ {
                                 fontSize:   13,
                                 fontWeight: 600,
-                                color:      isSelected ? 'var(--fundkit-accent, #211d3f)' : '#111827',
+                                color:      isSelected ? 'var(--gratora-accent, #211d3f)' : '#111827',
                             } }
                         >
                             { f.label }
@@ -138,13 +138,13 @@ function Edit( { attributes, setAttributes } ) {
 
     useEffect( () => {
         let cancelled = false;
-        apiFetch( { path: '/fundkit/v1/admin/forms/funds' } )
+        apiFetch( { path: '/gratora/v1/admin/forms/funds' } )
             .then( ( res ) => { if ( ! cancelled ) setFunds( Array.isArray( res ) ? res : [] ); } )
             .catch( () => { if ( ! cancelled ) setFunds( [] ); } );
         return () => { cancelled = true; };
     }, [] );
 
-    const blockProps = useBlockProps( { className: 'fundkit-block-preview fundkit-block-preview--fund' } );
+    const blockProps = useBlockProps( { className: 'gratora-block-preview gratora-block-preview--fund' } );
 
     // When the admin restricts fundIds, only those + their parents flow into
     // the preview tiles. Empty array = "all active funds".
@@ -182,8 +182,8 @@ function Edit( { attributes, setAttributes } ) {
     // Offer only funds this block actually shows; a restricted set must not let
     // the admin preselect a fund the donor can't pick.
     const preselectChoices = [
-        { value: '', label: __( 'Auto (form, campaign, then org default)', 'fundraising-toolkit' ) },
-        ...( allowEmpty ? [ { value: '__none__', label: __( 'No specific fund', 'fundraising-toolkit' ) } ] : [] ),
+        { value: '', label: __( 'Auto (form, campaign, then org default)', 'gratora' ) },
+        ...( allowEmpty ? [ { value: '__none__', label: __( 'No specific fund', 'gratora' ) } ] : [] ),
         ...visible.map( ( f ) => ( {
             value:    f.selectable ? String( f.id ) : `g:${ f.id }`,
             label:    f.depth ? `- ${ f.label }` : f.label,
@@ -194,51 +194,51 @@ function Edit( { attributes, setAttributes } ) {
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Fund picker', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Fund picker', 'gratora' ) } initialOpen>
                     <TextControl
-                        label={ __( 'Label', 'fundraising-toolkit' ) }
+                        label={ __( 'Label', 'gratora' ) }
                         value={ label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Direct my donation to', 'fundraising-toolkit' ) }
-                        help={ __( 'This picker always shows your active funds. Fund names and descriptions are managed under Donations → Funds.', 'fundraising-toolkit' ) }
+                        placeholder={ __( 'Direct my donation to', 'gratora' ) }
+                        help={ __( 'This picker always shows your active funds. Fund names and descriptions are managed under Donations → Funds.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <p style={ { margin: '8px 0 20px' } }>
                         <ExternalLink href={ FUNDS_ADMIN_URL }>
-                            { __( 'Manage funds', 'fundraising-toolkit' ) }
+                            { __( 'Manage funds', 'gratora' ) }
                         </ExternalLink>
                     </p>
                     <SelectControl
-                        label={ __( 'Preselected fund', 'fundraising-toolkit' ) }
+                        label={ __( 'Preselected fund', 'gratora' ) }
                         value={ defaultId }
                         options={ preselectChoices }
                         onChange={ ( v ) => setAttributes( { defaultId: v } ) }
-                        help={ __( 'Leave on the first fund to follow the form, campaign, then organization default order.', 'fundraising-toolkit' ) }
+                        help={ __( 'Leave on the first fund to follow the form, campaign, then organization default order.', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                     <div style={ { display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 } }>
                         <ToggleControl
-                            label={ __( 'Show fund descriptions', 'fundraising-toolkit' ) }
+                            label={ __( 'Show fund descriptions', 'gratora' ) }
                             checked={ showDescriptions }
                             onChange={ ( v ) => setAttributes( { showDescriptions: v } ) }
-                            help={ __( 'Descriptions come from Donations → Funds. Turn this off to show fund names only.', 'fundraising-toolkit' ) }
+                            help={ __( 'Descriptions come from Donations → Funds. Turn this off to show fund names only.', 'gratora' ) }
                             __nextHasNoMarginBottom
                         />
                         <ToggleControl
-                            label={ __( 'Allow "no specific fund"', 'fundraising-toolkit' ) }
+                            label={ __( 'Allow "no specific fund"', 'gratora' ) }
                             checked={ allowEmpty }
                             onChange={ ( v ) => setAttributes( { allowEmpty: v } ) }
-                            help={ __( 'Adds a tile letting donors skip choosing a fund.', 'fundraising-toolkit' ) }
+                            help={ __( 'Adds a tile letting donors skip choosing a fund.', 'gratora' ) }
                             __nextHasNoMarginBottom
                         />
                     </div>
                     { list.length > 0 && (
                         <div style={ { marginTop: 16, marginBottom: 24 } }>
                             <strong style={ { fontSize: 11, textTransform: 'uppercase', letterSpacing: '.04em', color: '#6b7280' } }>
-                                { __( 'Restrict to funds', 'fundraising-toolkit' ) }
+                                { __( 'Restrict to funds', 'gratora' ) }
                             </strong>
                             <p style={ { margin: '4px 0 8px', fontSize: 12, color: '#6b7280' } }>
-                                { __( 'Pick which funds this block offers. Leave all unchecked to show every active fund.', 'fundraising-toolkit' ) }
+                                { __( 'Pick which funds this block offers. Leave all unchecked to show every active fund.', 'gratora' ) }
                             </p>
                             <div style={ { display: 'flex', flexDirection: 'column', gap: 4 } }>
                                 { list.filter( ( f ) => f.selectable ).map( ( f ) => (
@@ -257,18 +257,18 @@ function Edit( { attributes, setAttributes } ) {
                     { allowEmpty && (
                         <div style={ { display: 'flex', flexDirection: 'column', gap: 16 } }>
                             <TextControl
-                                label={ __( 'No-specific-fund label', 'fundraising-toolkit' ) }
+                                label={ __( 'No-specific-fund label', 'gratora' ) }
                                 value={ emptyLabel }
                                 onChange={ ( v ) => setAttributes( { emptyLabel: v } ) }
-                                placeholder={ __( 'No specific fund', 'fundraising-toolkit' ) }
+                                placeholder={ __( 'No specific fund', 'gratora' ) }
                                 __nextHasNoMarginBottom
                             />
                             { showDescriptions && (
                                 <TextControl
-                                    label={ __( 'No-specific-fund description', 'fundraising-toolkit' ) }
+                                    label={ __( 'No-specific-fund description', 'gratora' ) }
                                     value={ emptyDescription }
                                     onChange={ ( v ) => setAttributes( { emptyDescription: v } ) }
-                                    help={ __( 'Optional. Shown under the label on that tile.', 'fundraising-toolkit' ) }
+                                    help={ __( 'Optional. Shown under the label on that tile.', 'gratora' ) }
                                     __nextHasNoMarginBottom
                                 />
                             ) }
@@ -283,10 +283,10 @@ function Edit( { attributes, setAttributes } ) {
             <div { ...blockProps }>
                 <RichText
                     tagName="span"
-                    className="fundkit-block-preview__label"
+                    className="gratora-block-preview__label"
                     value={ label }
                     onChange={ ( v ) => setAttributes( { label: v } ) }
-                    placeholder={ __( 'Direct my donation to', 'fundraising-toolkit' ) }
+                    placeholder={ __( 'Direct my donation to', 'gratora' ) }
                     allowedFormats={ [] }
                 />
                 <FundTiles
@@ -306,9 +306,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion:  3,
-        title:       __( 'Fund picker', 'fundraising-toolkit' ),
-        description: __( 'Tile-style picker that lets donors choose which fund or designation their donation goes to.', 'fundraising-toolkit' ),
-        category:    'fundkit-extras',
+        title:       __( 'Fund picker', 'gratora' ),
+        description: __( 'Tile-style picker that lets donors choose which fund or designation their donation goes to.', 'gratora' ),
+        category:    'gratora-extras',
         icon:        BlockIcons[ 'fund-picker' ],
         supports: { html: false, anchor: false, inserter: true, multiple: false },
         attributes: {

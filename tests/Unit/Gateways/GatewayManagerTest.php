@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Gateways;
+namespace Gratora\Tests\Unit\Gateways;
 
-use FundKit\Donations\Donation;
-use FundKit\Gateways\GatewayConfirmResult;
-use FundKit\Gateways\GatewayIntentResult;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\ModeCredentialed;
-use FundKit\Gateways\PaymentGateway;
-use FundKit\Gateways\RefundResult;
-use FundKit\Gateways\WebhookOutcome;
+use Gratora\Donations\Donation;
+use Gratora\Gateways\GatewayConfirmResult;
+use Gratora\Gateways\GatewayIntentResult;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\ModeCredentialed;
+use Gratora\Gateways\PaymentGateway;
+use Gratora\Gateways\RefundResult;
+use Gratora\Gateways\WebhookOutcome;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use WP_REST_Request;
@@ -203,7 +203,7 @@ final class GatewayManagerTest extends TestCase
 
     public function test_options_for_empty_allowed_returns_all_enabled_in_registration_order(): void
     {
-        $GLOBALS['_fundkit_test_options'] = [];
+        $GLOBALS['_gratora_test_options'] = [];
         $gm = new GatewayManager();
         $gm->register(new FakeGateway('offline', ['one_time', 'recurring'], ['card'], ['*'], ['*']));
         $gm->register(new FakeGateway('stripe',  ['one_time', 'recurring'], ['card'], ['*'], ['*']));
@@ -213,7 +213,7 @@ final class GatewayManagerTest extends TestCase
 
     public function test_options_for_excludes_explicitly_disabled_gateway(): void
     {
-        $GLOBALS['_fundkit_test_options'] = ['fundkit_gateway_config' => ['stripe' => ['enabled' => false]]];
+        $GLOBALS['_gratora_test_options'] = ['gratora_gateway_config' => ['stripe' => ['enabled' => false]]];
         $gm = new GatewayManager();
         $gm->register(new FakeGateway('offline', ['one_time'], ['card'], ['*'], ['*']));
         $gm->register(new FakeGateway('stripe',  ['one_time'], ['card'], ['*'], ['*']));
@@ -223,7 +223,7 @@ final class GatewayManagerTest extends TestCase
 
     public function test_options_for_intersects_and_orders_by_allowed_list(): void
     {
-        $GLOBALS['_fundkit_test_options'] = [];
+        $GLOBALS['_gratora_test_options'] = [];
         $gm = new GatewayManager();
         $gm->register(new FakeGateway('offline', ['one_time'], ['card'], ['*'], ['*']));
         $gm->register(new FakeGateway('stripe',  ['one_time'], ['card'], ['*'], ['*']));
@@ -235,7 +235,7 @@ final class GatewayManagerTest extends TestCase
 
     public function test_options_for_drops_context_unavailable_gateway(): void
     {
-        $GLOBALS['_fundkit_test_options'] = [];
+        $GLOBALS['_gratora_test_options'] = [];
         $gm = new GatewayManager();
         $gm->register(new FakeGateway('offline',  ['one_time'], ['card'], ['*'],  ['*']));
         $gm->register(new FakeGateway('usd_only', ['one_time'], ['card'], ['*'],  ['USD']));
@@ -245,7 +245,7 @@ final class GatewayManagerTest extends TestCase
 
     public function test_options_meta_for_is_not_context_filtered_and_carries_metadata(): void
     {
-        $GLOBALS['_fundkit_test_options'] = [];
+        $GLOBALS['_gratora_test_options'] = [];
         $gm = new GatewayManager();
         $gm->register(new FakeGateway('offline',  ['one_time', 'recurring'], ['card'], ['*'],  ['*']));
         $gm->register(new FakeGateway('usd_only', ['one_time'],              ['card'], ['DE'], ['USD']));
@@ -260,7 +260,7 @@ final class GatewayManagerTest extends TestCase
 
     public function test_options_meta_for_respects_org_disable_and_allowed_order(): void
     {
-        $GLOBALS['_fundkit_test_options'] = ['fundkit_gateway_config' => ['usd_only' => ['enabled' => false]]];
+        $GLOBALS['_gratora_test_options'] = ['gratora_gateway_config' => ['usd_only' => ['enabled' => false]]];
         $gm = new GatewayManager();
         $gm->register(new FakeGateway('offline',  ['one_time'], ['card'], ['*'], ['*']));
         $gm->register(new FakeGateway('usd_only', ['one_time'], ['card'], ['*'], ['USD']));
@@ -277,7 +277,7 @@ final class GatewayManagerTest extends TestCase
      */
     public function test_the_options_a_test_mode_form_offers_are_the_test_mode_ones(): void
     {
-        $GLOBALS['_fundkit_test_options'] = [];
+        $GLOBALS['_gratora_test_options'] = [];
 
         $gm = new GatewayManager();
         $gm->register(new FakeModeGateway('modal', ['one_time', 'recurring'], ['card'], ['*'], ['*']));
@@ -289,7 +289,7 @@ final class GatewayManagerTest extends TestCase
 
     public function test_a_live_form_still_gets_the_live_ones(): void
     {
-        $GLOBALS['_fundkit_test_options'] = [];
+        $GLOBALS['_gratora_test_options'] = [];
 
         $gm = new GatewayManager();
         $gm->register(new FakeModeGateway('modal', ['one_time', 'recurring'], ['card'], ['*'], ['*']));

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Recurring;
+namespace Gratora\Recurring;
 
 use RuntimeException;
 
 /**
- * Bridge between FundKit donation frequencies and Stripe billing intervals.
+ * Bridge between Gratora donation frequencies and Stripe billing intervals.
  *
- * FundKit frequencies are user-facing labels chosen on the form: one_time, weekly,
+ * Gratora frequencies are user-facing labels chosen on the form: one_time, weekly,
  * biweekly, monthly, quarterly, yearly. Stripe Prices take an `interval`
  * (day|week|month|year) plus `interval_count`; this mapper produces the pair.
  *
@@ -90,11 +90,11 @@ final class FrequencyMap
     public static function label(string $frequency): string
     {
         return match ($frequency) {
-            'weekly'    => __('every week', 'fundraising-toolkit'),
-            'biweekly'  => __('every 2 weeks', 'fundraising-toolkit'),
-            'monthly'   => __('every month', 'fundraising-toolkit'),
-            'quarterly' => __('every 3 months', 'fundraising-toolkit'),
-            'yearly'    => __('every year', 'fundraising-toolkit'),
+            'weekly'    => __('every week', 'gratora'),
+            'biweekly'  => __('every 2 weeks', 'gratora'),
+            'monthly'   => __('every month', 'gratora'),
+            'quarterly' => __('every 3 months', 'gratora'),
+            'yearly'    => __('every year', 'gratora'),
             default     => $frequency,
         };
     }

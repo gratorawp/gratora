@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
+namespace Gratora\Rest\Admin;
 
-use FundKit\Rest\Paging;
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignRepository;
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\GatewayTransportException;
-use FundKit\Gateways\PaymentRetryUnavailable;
-use FundKit\Gateways\SubscriptionAware;
-use FundKit\Gateways\SubscriptionChangeNeedsApproval;
-use FundKit\Recurring\FrequencyMap;
-use FundKit\Recurring\GatewayUnreachable;
-use FundKit\Recurring\PlanRow;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Recurring\RecurringPlanActions;
-use FundKit\Recurring\RecurringPlanChange;
-use FundKit\Recurring\RecurringPlanRepository;
-use FundKit\Vendor\Queryable\ModelQueryBuilder;
-use FundKit\Vendor\Queryable\QueryBuilder;
+use Gratora\Rest\Paging;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignRepository;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\GatewayTransportException;
+use Gratora\Gateways\PaymentRetryUnavailable;
+use Gratora\Gateways\SubscriptionAware;
+use Gratora\Gateways\SubscriptionChangeNeedsApproval;
+use Gratora\Recurring\FrequencyMap;
+use Gratora\Recurring\GatewayUnreachable;
+use Gratora\Recurring\PlanRow;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Recurring\RecurringPlanActions;
+use Gratora\Recurring\RecurringPlanChange;
+use Gratora\Recurring\RecurringPlanRepository;
+use Gratora\Vendor\Queryable\ModelQueryBuilder;
+use Gratora\Vendor\Queryable\QueryBuilder;
 use InvalidArgumentException;
 use RuntimeException;
 use WP_Error;
@@ -43,7 +43,7 @@ use WP_REST_Server;
  */
 final class RecurringController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /**
      * flags is LONGTEXT, so a non-JSON value can reach it: MySQL raises on one
@@ -86,7 +86,7 @@ final class RecurringController
     {
         register_rest_route(self::NAMESPACE, '/admin/recurring', [
             'methods'             => WP_REST_Server::READABLE,
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_view_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_view_donations'),
             'callback'            => [$this, 'index'],
             'args'                => [
                 'page'         => ['type' => 'integer', 'default' => 1, 'minimum' => 1],
@@ -106,7 +106,7 @@ final class RecurringController
 
         register_rest_route(self::NAMESPACE, '/admin/recurring/stats', [
             'methods'             => WP_REST_Server::READABLE,
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_view_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_view_donations'),
             'callback'            => [$this, 'stats'],
             'args'                => [
                 'include_test' => ['type' => 'boolean', 'default' => false],
@@ -115,7 +115,7 @@ final class RecurringController
 
         register_rest_route(self::NAMESPACE, '/admin/recurring/unlinked', [
             'methods'             => WP_REST_Server::READABLE,
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_view_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_view_donations'),
             'callback'            => [$this, 'unlinked'],
             'args'                => [
                 'limit' => ['type' => 'integer', 'default' => 10, 'minimum' => 1, 'maximum' => 50],
@@ -124,7 +124,7 @@ final class RecurringController
 
         register_rest_route(self::NAMESPACE, '/admin/recurring/gateway-options', [
             'methods'             => WP_REST_Server::READABLE,
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_view_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_view_donations'),
             'callback'            => [$this, 'gatewayOptions'],
         ]);
 
@@ -132,7 +132,7 @@ final class RecurringController
             'methods'             => WP_REST_Server::CREATABLE,
             // The same authority as a refund: both change what the donor is
             // charged, rather than only annotating a record.
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_refund_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_refund_donations'),
             'callback'            => [$this, 'act'],
             'args'                => [
                 'action'       => ['type' => 'string', 'required' => true],
@@ -186,7 +186,7 @@ final class RecurringController
         // because then nothing is hidden and the number would be noise.
         if (! $args['include_test']) {
             $response->header(
-                'X-FundKit-Test-Hidden',
+                'X-Gratora-Test-Hidden',
                 (string) max(0, $this->plans->countAdmin(['include_test' => true] + $args) - $total)
             );
         }
@@ -227,7 +227,7 @@ final class RecurringController
             'window_days' => self::WINDOW_DAYS,
             // Creating the plan is a refund-grade action, so a reader with view
             // access has to hand these on rather than act on them.
-            'can_retry'   => Capabilities::userCan('fundkit_refund_donations'),
+            'can_retry'   => Capabilities::userCan('gratora_refund_donations'),
             'items'       => array_map(static fn (Donation $d): array => [
                 'reference'        => (string) $d->reference,
                 'amount_cents'     => (int) $d->amount_cents,
@@ -380,8 +380,8 @@ final class RecurringController
                 // its actions need to see there is nobody left to email.
                 'redacted' => $donor->redacted_at !== null,
                 // Contact details are the donor record, not the plan record, so
-                // they follow fundkit_view_donors the way the donations list does.
-                'email'    => $donor->redacted_at === null && Capabilities::userCan('fundkit_view_donors')
+                // they follow gratora_view_donors the way the donations list does.
+                'email'    => $donor->redacted_at === null && Capabilities::userCan('gratora_view_donors')
                     ? $this->donorService->decryptEmail($donor)
                     : null,
             ] : null,
@@ -396,7 +396,7 @@ final class RecurringController
     private function donorName(Donor $d): string
     {
         if ($d->redacted_at !== null) {
-            return __('[redacted]', 'fundraising-toolkit');
+            return __('[redacted]', 'gratora');
         }
 
         $full = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
@@ -409,7 +409,7 @@ final class RecurringController
     {
         $plan = RecurringPlan::query()->find('id', (int) $request['id']);
         if (! $plan) {
-            return new WP_Error('fundkit_not_found', __('Recurring plan not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Recurring plan not found.', 'gratora'), ['status' => 404]);
         }
 
         $action = (string) $request['action'];
@@ -449,7 +449,7 @@ final class RecurringController
                     break;
 
                 default:
-                    return new WP_Error('fundkit_invalid_action', __('Unknown action.', 'fundraising-toolkit'), ['status' => 422]);
+                    return new WP_Error('gratora_invalid_action', __('Unknown action.', 'gratora'), ['status' => 422]);
             }
         } catch (SubscriptionChangeNeedsApproval $e) {
             // Ahead of RuntimeException, which is its parent. Nothing was
@@ -457,8 +457,8 @@ final class RecurringController
             // new amount here would put the plan permanently out of step with
             // what the card is actually charged.
             return new WP_Error(
-                'fundkit_change_needs_approval',
-                __('The payment provider needs the donor to approve this change before it takes effect. Nothing has changed yet.', 'fundraising-toolkit'),
+                'gratora_change_needs_approval',
+                __('The payment provider needs the donor to approve this change before it takes effect. Nothing has changed yet.', 'gratora'),
                 ['status' => 409, 'approve_url' => $e->approveUrl]
             );
         } catch (GatewayTransportException $e) {
@@ -467,38 +467,38 @@ final class RecurringController
             // sends an admin to look at the plan, the card and the gateway
             // dashboard, none of which are involved.
             return new WP_Error(
-                'fundkit_gateway_unreachable',
+                'gratora_gateway_unreachable',
                 sprintf(
                     /* translators: %s: transport error, e.g. a DNS failure */
-                    __('This site could not reach the payment provider, so nothing has changed: %s. That is a problem with this server rather than with the plan. Try again in a moment.', 'fundraising-toolkit'),
+                    __('This site could not reach the payment provider, so nothing has changed: %s. That is a problem with this server rather than with the plan. Try again in a moment.', 'gratora'),
                     $e->getMessage()
                 ),
                 ['status' => 503]
             );
         } catch (PaymentRetryUnavailable $e) {
-            return new WP_Error('fundkit_nothing_to_collect', $e->getMessage(), ['status' => 409]);
+            return new WP_Error('gratora_nothing_to_collect', $e->getMessage(), ['status' => 409]);
         } catch (InvalidArgumentException $e) {
-            return new WP_Error('fundkit_invalid_input', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('gratora_invalid_input', $e->getMessage(), ['status' => 422]);
         } catch (GatewayUnreachable $e) {
             // Ahead of the RuntimeException arm, its parent, which would answer
             // the screen and record nothing. The plan is still billing, which
             // is the thing an admin has to be able to find afterwards.
-            \FundKit\Analytics\ErrorLog::record('admin.recurring', $e->getMessage(), [
+            \Gratora\Analytics\ErrorLog::record('admin.recurring', $e->getMessage(), [
                 'recurring_plan_id' => (int) $plan->id,
                 'donor_id'          => (int) $plan->donor_id,
             ]);
 
-            return new WP_Error('fundkit_gateway_unreachable', $e->getMessage(), ['status' => 503]);
+            return new WP_Error('gratora_gateway_unreachable', $e->getMessage(), ['status' => 503]);
         } catch (RuntimeException $e) {
-            return new WP_Error('fundkit_plan_terminal', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('gratora_plan_terminal', $e->getMessage(), ['status' => 422]);
         } catch (\Throwable $e) {
-            \FundKit\Analytics\ErrorLog::record('admin.recurring', $e->getMessage(), [
+            \Gratora\Analytics\ErrorLog::record('admin.recurring', $e->getMessage(), [
                 'recurring_plan_id' => (int) $plan->id,
                 'donor_id'          => (int) $plan->donor_id,
             ]);
             return new WP_Error(
-                'fundkit_gateway_error',
-                __('The payment provider would not accept that change. Nothing has been altered.', 'fundraising-toolkit'),
+                'gratora_gateway_error',
+                __('The payment provider would not accept that change. Nothing has been altered.', 'gratora'),
                 ['status' => 502]
             );
         }

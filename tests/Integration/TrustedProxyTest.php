@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Http\ClientIp;
+use Gratora\Foundation\Http\ClientIp;
 
 /**
  * Reading a forwarded header without being fooled by one.
@@ -23,15 +23,15 @@ final class TrustedProxyTest extends IntegrationTestCase
     protected function tearDown(): void
     {
         unset($_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_X_FORWARDED_FOR'], $_SERVER['HTTP_CF_CONNECTING_IP']);
-        delete_option('fundkit_privacy');
-        remove_all_filters('fundkit.spam.trusted_proxies');
-        remove_all_filters('fundkit.spam.client_ip');
+        delete_option('gratora_privacy');
+        remove_all_filters('gratora.spam.trusted_proxies');
+        remove_all_filters('gratora.spam.client_ip');
         parent::tearDown();
     }
 
     private function trust(array $cidrs): void
     {
-        update_option('fundkit_privacy', ['trusted_proxies' => $cidrs]);
+        update_option('gratora_privacy', ['trusted_proxies' => $cidrs]);
     }
 
     private function request(string $remote, ?string $xff = null): void
@@ -164,7 +164,7 @@ final class TrustedProxyTest extends IntegrationTestCase
         $this->request('10.0.0.7', '203.0.113.5');
         $this->assertSame('10.0.0.7', ClientIp::resolve());
 
-        add_filter('fundkit.spam.trusted_proxies', static fn (): array => ['10.0.0.0/8']);
+        add_filter('gratora.spam.trusted_proxies', static fn (): array => ['10.0.0.0/8']);
         $this->assertSame('203.0.113.5', ClientIp::resolve());
     }
 
@@ -172,7 +172,7 @@ final class TrustedProxyTest extends IntegrationTestCase
     {
         $this->request('10.0.0.7', '203.0.113.5');
 
-        add_filter('fundkit.spam.client_ip', static fn (): string => '198.51.100.77');
+        add_filter('gratora.spam.client_ip', static fn (): string => '198.51.100.77');
         $this->assertSame('198.51.100.77', ClientIp::resolve());
     }
 
@@ -180,7 +180,7 @@ final class TrustedProxyTest extends IntegrationTestCase
     {
         $this->request('198.51.100.9');
 
-        add_filter('fundkit.spam.client_ip', static fn (): string => 'nonsense');
+        add_filter('gratora.spam.client_ip', static fn (): string => 'nonsense');
         $this->assertSame('198.51.100.9', ClientIp::resolve());
     }
 

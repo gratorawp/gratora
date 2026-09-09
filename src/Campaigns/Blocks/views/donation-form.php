@@ -10,26 +10,26 @@ defined('ABSPATH') || exit;
  * @var string  $styleVars
  */
 ?>
-<section id="fundkit-form" <?php
+<section id="gratora-form" <?php
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
 echo get_block_wrapper_attributes(array_filter([
-    'class' => 'fundkit-block fundkit-block--donation-form',
+    'class' => 'gratora-block gratora-block--donation-form',
     'style' => $styleVars,
 ]));
 // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
-?> data-block="fundkit/donation-form">
+?> data-block="gratora/donation-form">
     <?php if (($mode ?? 'front') === 'empty'): ?>
-        <p class="fundkit-block__empty"><?php echo esc_html($emptyText ?? '');
+        <p class="gratora-block__empty"><?php echo esc_html($emptyText ?? '');
 ?></p>
         <?php if (($notice ?? '') !== ''): ?>
-            <div class="fundkit-block-notice"><?php echo esc_html($notice);
+            <div class="gratora-block-notice"><?php echo esc_html($notice);
 ?></div>
         <?php endif; ?>
     <?php elseif (($mode ?? 'front') === 'editor'): ?>
         <?php if (($previewDoc ?? '') !== ''): ?>
             <iframe
-                class="fundkit-donation-form__editor-preview"
-                title="<?php echo esc_attr($formTitle ?? __('Donation form', 'fundraising-toolkit'));
+                class="gratora-donation-form__editor-preview"
+                title="<?php echo esc_attr($formTitle ?? __('Donation form', 'gratora'));
 ?>"
                 loading="lazy"
                 style="width:100%;border:0;display:block;min-height:520px"
@@ -37,10 +37,10 @@ echo get_block_wrapper_attributes(array_filter([
 ?>"
             ></iframe>
         <?php else: ?>
-            <div class="fundkit-donation-form__placeholder">
+            <div class="gratora-donation-form__placeholder">
                 <strong><?php echo esc_html($formTitle ?? '');
 ?></strong>
-                <span><?php esc_html_e('Donation form - shown to visitors here.', 'fundraising-toolkit');
+                <span><?php esc_html_e('Donation form - shown to visitors here.', 'gratora');
 ?></span>
             </div>
         <?php endif; ?>
@@ -49,7 +49,7 @@ echo get_block_wrapper_attributes(array_filter([
         // Trusted first-party form output (shortcode -> do_blocks + bootstrap
         // script/style/JSON config). Must be echoed raw, never kses'd, or the
         // form renders as visible gibberish and never initializes.
-        echo $formHtml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_shortcode('[fundkit_donation_form]') output; DonationFormShortcode::renderBlocks esc_attr()s every attribute and wp_json_encode()s the config with JSON_HEX_TAG.
+        echo $formHtml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_shortcode('[gratora_donation_form]') output; DonationFormShortcode::renderBlocks esc_attr()s every attribute and wp_json_encode()s the config with JSON_HEX_TAG.
         ?>
     <?php endif; ?>
 </section>

@@ -5,13 +5,13 @@ import { __, sprintf } from '@wordpress/i18n';
 import { deriveFieldKey } from './slug';
 
 export const OP_OPTIONS = [
-    { value: '=', label: __( 'equals', 'fundraising-toolkit' ) },
-    { value: '!=', label: __( 'does not equal', 'fundraising-toolkit' ) },
-    { value: '>', label: __( 'greater than', 'fundraising-toolkit' ) },
-    { value: '>=', label: __( 'greater than or equal', 'fundraising-toolkit' ) },
-    { value: '<', label: __( 'less than', 'fundraising-toolkit' ) },
-    { value: '<=', label: __( 'less than or equal', 'fundraising-toolkit' ) },
-    { value: 'contains', label: __( 'contains', 'fundraising-toolkit' ) },
+    { value: '=', label: __( 'equals', 'gratora' ) },
+    { value: '!=', label: __( 'does not equal', 'gratora' ) },
+    { value: '>', label: __( 'greater than', 'gratora' ) },
+    { value: '>=', label: __( 'greater than or equal', 'gratora' ) },
+    { value: '<', label: __( 'less than', 'gratora' ) },
+    { value: '<=', label: __( 'less than or equal', 'gratora' ) },
+    { value: 'contains', label: __( 'contains', 'gratora' ) },
 ];
 
 export const DEFAULT_CONDITION = { field: '', op: '=', value: '' };
@@ -19,28 +19,28 @@ export const DEFAULT_CONDITION = { field: '', op: '=', value: '' };
 // Built-in donor inputs whose value the runtime exposes at a fixed key.
 // Offered as a condition source only when that block is in the form.
 const BUILTIN_SOURCES = {
-    'fundkit/donation-amount':  { value: 'amount_cents', label: __( 'Amount (cents)', 'fundraising-toolkit' ) },
-    'fundkit/recurring-toggle': { value: 'frequency',    label: __( 'Frequency', 'fundraising-toolkit' ) },
-    'fundkit/anonymous-toggle': { value: 'is_anonymous', label: __( 'Is anonymous', 'fundraising-toolkit' ) },
-    'fundkit/cover-fees':       { value: 'cover_fees',   label: __( 'Cover fees', 'fundraising-toolkit' ) },
+    'gratora/donation-amount':  { value: 'amount_cents', label: __( 'Amount (cents)', 'gratora' ) },
+    'gratora/recurring-toggle': { value: 'frequency',    label: __( 'Frequency', 'gratora' ) },
+    'gratora/anonymous-toggle': { value: 'is_anonymous', label: __( 'Is anonymous', 'gratora' ) },
+    'gratora/cover-fees':       { value: 'cover_fees',   label: __( 'Cover fees', 'gratora' ) },
 };
 
 // Custom-input blocks: the donor runtime stores their value at
 // values.custom[field], so the condition path is `custom.<field>`.
 const CUSTOM_FIELD_BLOCKS = new Set( [
-    'fundkit/text-input',
-    'fundkit/number-input',
-    'fundkit/date',
-    'fundkit/dropdown',
-    'fundkit/radio',
-    'fundkit/checkbox',
-    'fundkit/multi-select',
-    'fundkit/hidden',
+    'gratora/text-input',
+    'gratora/number-input',
+    'gratora/date',
+    'gratora/dropdown',
+    'gratora/radio',
+    'gratora/checkbox',
+    'gratora/multi-select',
+    'gratora/hidden',
 ] );
 
 // Kept for backwards-compatible imports; the live list is computed per-render
 // in ConditionPanel from the blocks actually in the editor.
-export const FIELD_OPTIONS = [ { value: '', label: __( '(Always show)', 'fundraising-toolkit' ) } ];
+export const FIELD_OPTIONS = [ { value: '', label: __( '(Always show)', 'gratora' ) } ];
 
 function flatten( blocks, out ) {
     for ( const b of blocks || [] ) {
@@ -62,9 +62,9 @@ export function ConditionPanel( { condition, onChange, title } ) {
 
         // A donor field an add-on contributes exposes its value at a fixed
         // key too, so it can be a condition source like any built-in.
-        const sources = applyFilters( 'fundkit.editor.conditionSources', BUILTIN_SOURCES );
+        const sources = applyFilters( 'gratora.editor.conditionSources', BUILTIN_SOURCES );
 
-        const opts = [ { value: '', label: __( '(Always show)', 'fundraising-toolkit' ) } ];
+        const opts = [ { value: '', label: __( '(Always show)', 'gratora' ) } ];
         const seen = new Set( [ '' ] );
 
         for ( const b of all ) {
@@ -84,7 +84,7 @@ export function ConditionPanel( { condition, onChange, title } ) {
             // other custom field goes through DropdownBlock::deriveField, which
             // falls back to the label. Deriving for both would offer a key the
             // hidden field never answers to.
-            const slug = b.name === 'fundkit/hidden'
+            const slug = b.name === 'gratora/hidden'
                 ? String( b.attributes?.field || '' ).trim()
                 : deriveFieldKey( b.attributes?.field, b.attributes?.label );
             if ( ! slug ) continue;
@@ -101,36 +101,36 @@ export function ConditionPanel( { condition, onChange, title } ) {
             opts.push( {
                 value: c.field,
                 /* translators: %s: stored condition field key that is no longer in the form. */
-                label: sprintf( __( '%s (not in form)', 'fundraising-toolkit' ), c.field ),
+                label: sprintf( __( '%s (not in form)', 'gratora' ), c.field ),
             } );
         }
         return opts;
     }, [ c.field ] );
 
     return (
-        <PanelBody title={ title || __( 'Conditional logic', 'fundraising-toolkit' ) } initialOpen={ false }>
+        <PanelBody title={ title || __( 'Conditional logic', 'gratora' ) } initialOpen={ false }>
             <SelectControl
-                label={ __( 'Show this when', 'fundraising-toolkit' ) }
+                label={ __( 'Show this when', 'gratora' ) }
                 value={ c.field }
                 options={ options }
                 onChange={ ( v ) => set( { field: v } ) }
-                help={ __( 'Only fields already added to this form can be used.', 'fundraising-toolkit' ) }
+                help={ __( 'Only fields already added to this form can be used.', 'gratora' ) }
                 __nextHasNoMarginBottom
             />
             { c.field && (
                 <>
                     <SelectControl
-                        label={ __( 'Operator', 'fundraising-toolkit' ) }
+                        label={ __( 'Operator', 'gratora' ) }
                         value={ c.op }
                         options={ OP_OPTIONS }
                         onChange={ ( v ) => set( { op: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Value', 'fundraising-toolkit' ) }
+                        label={ __( 'Value', 'gratora' ) }
                         value={ c.value }
                         onChange={ ( v ) => set( { value: v } ) }
-                        help={ __( 'For amount, use cents (e.g. 5000 = $50).', 'fundraising-toolkit' ) }
+                        help={ __( 'For amount, use cents (e.g. 5000 = $50).', 'gratora' ) }
                         __nextHasNoMarginBottom
                     />
                 </>

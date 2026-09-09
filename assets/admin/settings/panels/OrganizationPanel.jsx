@@ -35,58 +35,58 @@ export default function OrganizationPanel( { s } ) {
     };
 
     return (
-        <div className="fundkit-panel">
+        <div className="gratora-panel">
             <Card
-                title={ __( 'Identity', 'fundraising-toolkit' ) }
-                meta={ __( 'Used by receipts and footer', 'fundraising-toolkit' ) }
+                title={ __( 'Identity', 'gratora' ) }
+                meta={ __( 'Used by receipts and footer', 'gratora' ) }
                 edited={ s.isDirty }
             >
                 <FormRow
-                    label={ __( 'Legal name', 'fundraising-toolkit' ) }
+                    label={ __( 'Legal name', 'gratora' ) }
                     required
-                    help={ __( 'The entity that legally receives donations.', 'fundraising-toolkit' ) }
+                    help={ __( 'The entity that legally receives donations.', 'gratora' ) }
                 >
-                    <input type="text" className="fundkit-input" { ...s.bind( 'legal_name' ) } />
+                    <input type="text" className="gratora-input" { ...s.bind( 'legal_name' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Display name', 'fundraising-toolkit' ) }
-                    help={ __( 'Donor-facing name in subject lines and headers.', 'fundraising-toolkit' ) }
+                    label={ __( 'Display name', 'gratora' ) }
+                    help={ __( 'Donor-facing name in subject lines and headers.', 'gratora' ) }
                 >
-                    <input type="text" className="fundkit-input" { ...s.bind( 'name' ) } />
+                    <input type="text" className="gratora-input" { ...s.bind( 'name' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Contact email', 'fundraising-toolkit' ) }
-                    help={ __( 'Printed on receipts, so donors know where to reply.', 'fundraising-toolkit' ) }
+                    label={ __( 'Contact email', 'gratora' ) }
+                    help={ __( 'Printed on receipts, so donors know where to reply.', 'gratora' ) }
                 >
-                    <input type="email" className="fundkit-input" { ...s.bind( 'email' ) } />
+                    <input type="email" className="gratora-input" { ...s.bind( 'email' ) } />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Address', 'fundraising-toolkit' ) }
-                    help={ __( 'Optional. Receipts print it when set; donors claiming tax relief usually need it.', 'fundraising-toolkit' ) }
+                    label={ __( 'Address', 'gratora' ) }
+                    help={ __( 'Optional. Receipts print it when set; donors claiming tax relief usually need it.', 'gratora' ) }
                 >
-                    <div className="fundkit-stack-12">
+                    <div className="gratora-stack-12">
                         <input
                             type="text"
-                            className="fundkit-input"
-                            placeholder={ __( 'Street', 'fundraising-toolkit' ) }
+                            className="gratora-input"
+                            placeholder={ __( 'Street', 'gratora' ) }
                             value={ addressLines[ 0 ] || '' }
                             onChange={ ( e ) => updateAddressLine( 0, e.target.value ) }
                         />
-                        <div className="fundkit-grid-2-eq">
+                        <div className="gratora-grid-2-eq">
                             <input
                                 type="text"
-                                className="fundkit-input"
-                                placeholder={ __( 'Postcode', 'fundraising-toolkit' ) }
+                                className="gratora-input"
+                                placeholder={ __( 'Postcode', 'gratora' ) }
                                 value={ addressLines[ 1 ] || '' }
                                 onChange={ ( e ) => updateAddressLine( 1, e.target.value ) }
                             />
                             <input
                                 type="text"
-                                className="fundkit-input"
-                                placeholder={ __( 'City', 'fundraising-toolkit' ) }
+                                className="gratora-input"
+                                placeholder={ __( 'City', 'gratora' ) }
                                 value={ addressLines[ 2 ] || '' }
                                 onChange={ ( e ) => updateAddressLine( 2, e.target.value ) }
                             />
@@ -95,16 +95,16 @@ export default function OrganizationPanel( { s } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Country', 'fundraising-toolkit' ) }
+                    label={ __( 'Country', 'gratora' ) }
                     required
-                    help={ __( 'Drives tax-ID format and VAT visibility.', 'fundraising-toolkit' ) }
+                    help={ __( 'Drives tax-ID format and VAT visibility.', 'gratora' ) }
                 >
                     <select
-                        className="fundkit-select"
+                        className="gratora-select"
                         value={ country }
                         onChange={ ( e ) => s.setValue( 'country' )( e.target.value ) }
                     >
-                        <option value="">{ __( 'Select a country', 'fundraising-toolkit' ) }</option>
+                        <option value="">{ __( 'Select a country', 'gratora' ) }</option>
                         { localizedCountries().map( ( c ) => (
                             <option key={ c.code } value={ c.code }>{ c.label }</option>
                         ) ) }
@@ -112,14 +112,14 @@ export default function OrganizationPanel( { s } ) {
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Tax ID / EU VAT', 'fundraising-toolkit' ) }
-                    help={ __( 'VIES validation is not performed.', 'fundraising-toolkit' ) }
+                    label={ __( 'Tax ID / EU VAT', 'gratora' ) }
+                    help={ __( 'VIES validation is not performed.', 'gratora' ) }
                 >
-                    <div className="fundkit-grid-2-eq">
+                    <div className="gratora-grid-2-eq">
                         <input
                             type="text"
-                            className="fundkit-input fundkit-input--mono"
-                            placeholder={ __( 'Tax number', 'fundraising-toolkit' ) }
+                            className="gratora-input gratora-input--mono"
+                            placeholder={ __( 'Tax number', 'gratora' ) }
                             { ...s.bind( 'tax_id' ) }
                         />
                         { /* Always offered, whatever the country reads today:
@@ -127,8 +127,8 @@ export default function OrganizationPanel( { s } ) {
                              with no field on screen to clear it. */ }
                         <input
                             type="text"
-                            className="fundkit-input fundkit-input--mono"
-                            placeholder={ __( 'EU VAT ID', 'fundraising-toolkit' ) }
+                            className="gratora-input gratora-input--mono"
+                            placeholder={ __( 'EU VAT ID', 'gratora' ) }
                             { ...s.bind( 'vat_id' ) }
                         />
                     </div>

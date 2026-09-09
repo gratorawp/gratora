@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Donors;
+namespace Gratora\Tests\Unit\Donors;
 
-use FundKit\Donors\AtRiskReason;
+use Gratora\Donors\AtRiskReason;
 use PHPUnit\Framework\TestCase;
 
 /**

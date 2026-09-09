@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\References\ReferenceGenerator;
-use FundKit\Foundation\Time\FrozenClock;
-use FundKit\Settings\SettingsService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\References\ReferenceGenerator;
+use Gratora\Foundation\Time\FrozenClock;
+use Gratora\Settings\SettingsService;
 use DateTimeImmutable;
 use DateTimeZone;
 use InvalidArgumentException;
@@ -59,7 +59,7 @@ final class ToolsAndNumberingTest extends IntegrationTestCase
 
     public function test_the_route_says_why_rather_than_erroring(): void
     {
-        $req = new WP_REST_Request('PUT', '/fundkit/v1/admin/settings/numbering');
+        $req = new WP_REST_Request('PUT', '/gratora/v1/admin/settings/numbering');
         $req->set_param('group', 'numbering');
         $req->set_header('content-type', 'application/json');
         $req->set_body('{"padding":12,"separator":"---"}');
@@ -67,13 +67,13 @@ final class ToolsAndNumberingTest extends IntegrationTestCase
         $res = rest_do_request($req);
 
         $this->assertSame(422, $res->get_status());
-        $this->assertSame('fundkit_invalid_setting', (string) $res->get_data()['code']);
+        $this->assertSame('gratora_invalid_setting', (string) $res->get_data()['code']);
     }
 
 
     private function numbering(bool $resetYearly): void
     {
-        update_option('fundkit_reference_settings', [
+        update_option('gratora_reference_settings', [
             'include_year' => true,
             'reset_yearly' => $resetYearly,
             'padding'      => 5,
@@ -109,7 +109,7 @@ final class ToolsAndNumberingTest extends IntegrationTestCase
 
     private function import(array $settings): \WP_REST_Response|\WP_Error
     {
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/tools/import');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/tools/import');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode(['settings' => $settings]));
 
@@ -119,7 +119,7 @@ final class ToolsAndNumberingTest extends IntegrationTestCase
     public function test_a_restore_carrying_an_impossible_numbering_format_is_reported(): void
     {
         $res = $this->import([
-            'fundkit_reference_settings' => ['padding' => 12, 'separator' => '---'],
+            'gratora_reference_settings' => ['padding' => 12, 'separator' => '---'],
         ]);
 
         $this->assertInstanceOf(\WP_REST_Response::class, $res);
@@ -128,13 +128,13 @@ final class ToolsAndNumberingTest extends IntegrationTestCase
 
     public function test_a_restore_does_not_carry_a_logo_id_across_sites(): void
     {
-        update_option('fundkit_receipt_settings', ['logo_attachment_id' => 0]);
+        update_option('gratora_receipt_settings', ['logo_attachment_id' => 0]);
 
         $this->import([
-            'fundkit_receipt_settings' => ['logo_attachment_id' => 4242, 'header_title' => 'Their receipt'],
+            'gratora_receipt_settings' => ['logo_attachment_id' => 4242, 'header_title' => 'Their receipt'],
         ]);
 
-        $stored = (array) get_option('fundkit_receipt_settings', []);
+        $stored = (array) get_option('gratora_receipt_settings', []);
 
         $this->assertSame(0, (int) ($stored['logo_attachment_id'] ?? 0));
         $this->assertSame('Their receipt', (string) ($stored['header_title'] ?? ''), 'the rest of the group still lands');
@@ -148,7 +148,7 @@ final class ToolsAndNumberingTest extends IntegrationTestCase
     public function test_a_counter_refusal_reaches_the_admin_translated_and_renderable(): void
     {
         $set = static function (int $next): \WP_REST_Response {
-            $req = new WP_REST_Request('POST', '/fundkit/v1/admin/numbering/counter');
+            $req = new WP_REST_Request('POST', '/gratora/v1/admin/numbering/counter');
             $req->set_header('content-type', 'application/json');
             $req->set_body((string) wp_json_encode(['scope' => 'donation', 'next' => $next]));
 
@@ -158,7 +158,7 @@ final class ToolsAndNumberingTest extends IntegrationTestCase
         // The probe for translation: it fires only if the string passes through
         // __(), and it needs no language pack.
         $filter = static function ($translated, $text, $domain) {
-            return $domain === 'fundraising-toolkit' && str_contains($text, 'counter is already at')
+            return $domain === 'gratora' && str_contains($text, 'counter is already at')
                 ? 'COUNTER REFUSED'
                 : $translated;
         };

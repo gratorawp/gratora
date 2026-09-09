@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Analytics\Event;
-use FundKit\Analytics\EventRecorder;
-use FundKit\Foundation\Commands\Command;
-use FundKit\Foundation\Commands\CommandContext;
-use FundKit\Foundation\Commands\CommandRegistry;
-use FundKit\Foundation\Plugin;
+use Gratora\Analytics\Event;
+use Gratora\Analytics\EventRecorder;
+use Gratora\Foundation\Commands\Command;
+use Gratora\Foundation\Commands\CommandContext;
+use Gratora\Foundation\Commands\CommandRegistry;
+use Gratora\Foundation\Plugin;
 
 final class CommandRateLimitTest extends IntegrationTestCase
 {

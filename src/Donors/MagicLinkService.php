@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donors;
+namespace Gratora\Donors;
 
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Foundation\Http\ClientIp;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Foundation\Http\ClientIp;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
 
 /** @since 1.0.0 */
 final class MagicLinkService
@@ -189,7 +189,7 @@ final class MagicLinkService
         // edge does not shut every donor out of receipts together.
         $ip = ClientIp::resolve() ?: 'unknown';
 
-        return 'fundkit_ml_val_' . hash('sha256', $purpose . '|' . $ip);
+        return 'gratora_ml_val_' . hash('sha256', $purpose . '|' . $ip);
     }
 
     /** @since 1.0.0 */

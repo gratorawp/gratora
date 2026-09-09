@@ -5,24 +5,24 @@ import { __ } from '@wordpress/i18n';
 import { BlockIcons } from '../_shared/block-icons';
 import Slider from '../../../_shared/components/Slider';
 
-const NAME = 'fundkit/row';
+const NAME = 'gratora/row';
 
 // Donor fields only: content blocks (heading/paragraph/currency-switcher) are
 // rendered outside the grid by the runtime, so they must not sit in a row.
 const ALLOWED = [
-    'fundkit/name',
-    'fundkit/email',
-    'fundkit/country',
-    'fundkit/phone',
-    'fundkit/comment',
-    'fundkit/anonymous-toggle',
-    'fundkit/cover-fees',
+    'gratora/name',
+    'gratora/email',
+    'gratora/country',
+    'gratora/phone',
+    'gratora/comment',
+    'gratora/anonymous-toggle',
+    'gratora/cover-fees',
 ];
 
 // Resolved at registration, not module scope, so a donor field an add-on
 // contributes can join the list before the editor mounts.
 function allowedBlocks() {
-    return applyFilters( 'fundkit.editor.rowAllowedBlocks', ALLOWED );
+    return applyFilters( 'gratora.editor.rowAllowedBlocks', ALLOWED );
 }
 
 const GAP_UNITS = [ 'px', 'em', 'rem', '%' ];
@@ -36,23 +36,23 @@ function Edit( { attributes, setAttributes } ) {
             gap:                 `${ gap }${ gapUnit }`,
             padding:             8,
             border:              '1px dashed #c3c4c7',
-            borderRadius:        'var(--fundkit-radius-sm, 6px)',
+            borderRadius:        'var(--gratora-radius-sm, 6px)',
         },
     } );
 
     return (
         <>
             <InspectorControls>
-                <PanelBody title={ __( 'Row', 'fundraising-toolkit' ) } initialOpen>
+                <PanelBody title={ __( 'Row', 'gratora' ) } initialOpen>
                     <Slider
-                        label={ __( 'Columns', 'fundraising-toolkit' ) }
+                        label={ __( 'Columns', 'gratora' ) }
                         value={ columns }
                         onChange={ ( v ) => setAttributes( { columns: v } ) }
                         min={ 1 }
                         max={ 4 }
                     />
                     <Slider
-                        label={ __( 'Gap', 'fundraising-toolkit' ) }
+                        label={ __( 'Gap', 'gratora' ) }
                         value={ gap }
                         onChange={ ( v ) => setAttributes( { gap: v } ) }
                         min={ 0 }
@@ -76,9 +76,9 @@ function Edit( { attributes, setAttributes } ) {
 export default function register( api ) {
     api.register( NAME, {
         apiVersion: 3,
-        title:      __( 'Row', 'fundraising-toolkit' ),
-        description: __( 'Lay out fields side by side in columns.', 'fundraising-toolkit' ),
-        category:   'fundkit-content',
+        title:      __( 'Row', 'gratora' ),
+        description: __( 'Lay out fields side by side in columns.', 'gratora' ),
+        category:   'gratora-content',
         icon:       BlockIcons[ 'row' ],
         supports: { html: false, anchor: false, inserter: true },
         attributes: {

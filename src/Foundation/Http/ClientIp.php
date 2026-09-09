@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Http;
+namespace Gratora\Foundation\Http;
 
 /**
  * Trust REMOTE_ADDR unless it belongs to configured proxy infrastructure. Only then inspect
@@ -50,7 +50,7 @@ final class ClientIp
         // For a host that already normalises REMOTE_ADDR, or puts the client
         // somewhere of its own choosing. Answered first because a site that
         // knows its own edge knows better than any of the below.
-        $override = apply_filters('fundkit.spam.client_ip', null, $remote);
+        $override = apply_filters('gratora.spam.client_ip', null, $remote);
         if (is_string($override) && filter_var($override, FILTER_VALIDATE_IP)) {
             return $override;
         }
@@ -90,11 +90,11 @@ final class ClientIp
      */
     public static function trustedProxies(): array
     {
-        $privacy = get_option('fundkit_privacy', []);
+        $privacy = get_option('gratora_privacy', []);
         $stored  = is_array($privacy) ? ($privacy['trusted_proxies'] ?? []) : [];
         $stored  = is_array($stored) ? $stored : [];
 
-        $ranges = apply_filters('fundkit.spam.trusted_proxies', $stored);
+        $ranges = apply_filters('gratora.spam.trusted_proxies', $stored);
         if (! is_array($ranges)) {
             return [];
         }

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
 use WP_REST_Request;
 
 /**
@@ -17,17 +17,17 @@ final class PortalSessionAfterErasureTest extends IntegrationTestCase
 {
     /** Endpoints that read the session and return the donor's own data. */
     private const AUTHENTICATED = [
-        '/fundkit/v1/portal/donations',
-        '/fundkit/v1/portal/recurring',
-        '/fundkit/v1/portal/receipts',
-        '/fundkit/v1/portal/preferences',
-        '/fundkit/v1/portal/me',
-        '/fundkit/v1/portal/profile',
+        '/gratora/v1/portal/donations',
+        '/gratora/v1/portal/recurring',
+        '/gratora/v1/portal/receipts',
+        '/gratora/v1/portal/preferences',
+        '/gratora/v1/portal/me',
+        '/gratora/v1/portal/profile',
     ];
 
     protected function tearDown(): void
     {
-        unset($_COOKIE['fundkit_donor_session']);
+        unset($_COOKIE['gratora_donor_session']);
         parent::tearDown();
     }
 
@@ -49,7 +49,7 @@ final class PortalSessionAfterErasureTest extends IntegrationTestCase
             ->findOrCreate('portal-' . uniqid() . '@example.test', ['first_name' => 'Sam']);
 
         $sid = $this->portalSession((int) $donor->id, bin2hex(random_bytes(8)));
-        $_COOKIE['fundkit_donor_session'] = $sid;
+        $_COOKIE['gratora_donor_session'] = $sid;
 
         return $donor;
     }

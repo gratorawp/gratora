@@ -2,29 +2,29 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\License\LicenseService;
-use FundKit\Donors\Portal\PortalPage;
-use FundKit\Forms\FormReadinessService;
-use FundKit\Forms\FormRepository;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PayPal\PayPalAccount;
-use FundKit\Gateways\Stripe\ApplePayDomain;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Gateways\Stripe\StripeApi;
-use FundKit\Gateways\Stripe\StripeGateway;
-use FundKit\Gateways\TestMode;
-use FundKit\Foundation\Plugin;
-use FundKit\Recurring\RecurringPlanRepository;
-use FundKit\Settings\ReadinessService;
-use FundKit\Settings\SettingsService;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\License\LicenseService;
+use Gratora\Donors\Portal\PortalPage;
+use Gratora\Forms\FormReadinessService;
+use Gratora\Forms\FormRepository;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PayPal\PayPalAccount;
+use Gratora\Gateways\Stripe\ApplePayDomain;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Gateways\Stripe\StripeApi;
+use Gratora\Gateways\Stripe\StripeGateway;
+use Gratora\Gateways\TestMode;
+use Gratora\Foundation\Plugin;
+use Gratora\Recurring\RecurringPlanRepository;
+use Gratora\Settings\ReadinessService;
+use Gratora\Settings\SettingsService;
 
 /**
  * Test keys are optional, so an ordinary live site has none. Flipping the
@@ -36,7 +36,7 @@ final class TestModeWithoutCredentialsTest extends IntegrationTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        delete_option('fundkit_gateway_config');
+        delete_option('gratora_gateway_config');
         (new StripeAccount(new Crypto()))->forget();
     }
 
@@ -51,7 +51,7 @@ final class TestModeWithoutCredentialsTest extends IntegrationTestCase
 
     private function testModeOn(): void
     {
-        update_option('fundkit_gateway_config', ['test_mode' => true]);
+        update_option('gratora_gateway_config', ['test_mode' => true]);
     }
 
 
@@ -106,7 +106,7 @@ final class TestModeWithoutCredentialsTest extends IntegrationTestCase
 
         $service = new ReadinessService(
             $settings,
-            new FormReadinessService($settings, new GatewayManager(), $stripe, new TestMode(new FormRepository()), \FundKit\Foundation\Plugin::instance()->container->get(\FundKit\Donors\ConsentService::class)),
+            new FormReadinessService($settings, new GatewayManager(), $stripe, new TestMode(new FormRepository()), \Gratora\Foundation\Plugin::instance()->container->get(\Gratora\Donors\ConsentService::class)),
             $stripe,
             $api,
             new ApplePayDomain($api, $stripe),
@@ -152,7 +152,7 @@ final class TestModeWithoutCredentialsTest extends IntegrationTestCase
         $account->saveKeys(true, 'sk_test_ok', 'pk_test_ok');
         $this->testModeOn();
 
-        add_filter('fundkit.readiness.test_mode_gaps', static fn (array $gaps): array => [...$gaps, 'Square']);
+        add_filter('gratora.readiness.test_mode_gaps', static fn (array $gaps): array => [...$gaps, 'Square']);
 
         $check = $this->checks()['mode'];
 
@@ -166,7 +166,7 @@ final class TestModeWithoutCredentialsTest extends IntegrationTestCase
         $account->saveKeys(true, 'sk_test_ok', 'pk_test_ok');
         $this->testModeOn();
 
-        add_filter('fundkit.readiness.live_mode_gaps', static fn (array $gaps): array => [...$gaps, 'Square']);
+        add_filter('gratora.readiness.live_mode_gaps', static fn (array $gaps): array => [...$gaps, 'Square']);
 
         $this->assertSame(ReadinessService::WARN, $this->checks()['mode']['status']);
     }

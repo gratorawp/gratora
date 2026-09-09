@@ -14,7 +14,7 @@ function MonoCopy( { value, label } ) {
                 type="button"
                 className="dd-mono-copy__btn"
                 aria-label={ label }
-                title={ ok ? __( 'Copied', 'fundraising-toolkit' ) : label }
+                title={ ok ? __( 'Copied', 'gratora' ) : label }
                 onClick={ async () => {
                     try {
                         await navigator.clipboard.writeText( value );
@@ -37,29 +37,29 @@ export default function PaymentDetailsCard( { donation } ) {
             <div className="dd-card__body">
                 <div className="dd-kv" style={ { gridTemplateColumns: '160px 1fr' } }>
                     <div className="dd-kv__row">
-                        <div className="dd-kv__lbl">{ __( 'Intent ID', 'fundraising-toolkit' ) }</div>
-                        <div className="dd-kv__val"><MonoCopy value={ donation.gateway_intent_id } label={ __( 'Copy intent ID', 'fundraising-toolkit' ) } /></div>
+                        <div className="dd-kv__lbl">{ __( 'Intent ID', 'gratora' ) }</div>
+                        <div className="dd-kv__val"><MonoCopy value={ donation.gateway_intent_id } label={ __( 'Copy intent ID', 'gratora' ) } /></div>
                     </div>
                     <div className="dd-kv__row">
-                        <div className="dd-kv__lbl">{ __( 'Transaction ID', 'fundraising-toolkit' ) }</div>
-                        <div className="dd-kv__val"><MonoCopy value={ donation.gateway_txn_id } label={ __( 'Copy transaction ID', 'fundraising-toolkit' ) } /></div>
+                        <div className="dd-kv__lbl">{ __( 'Transaction ID', 'gratora' ) }</div>
+                        <div className="dd-kv__val"><MonoCopy value={ donation.gateway_txn_id } label={ __( 'Copy transaction ID', 'gratora' ) } /></div>
                     </div>
                 </div>
 
                 { hasFees && (
                     <div style={ { marginTop: 18 } }>
-                        <div className="dd-section-lbl">{ __( 'Fees breakdown', 'fundraising-toolkit' ) }</div>
+                        <div className="dd-section-lbl">{ __( 'Fees breakdown', 'gratora' ) }</div>
                         <div className="dd-fees">
                             <div className="dd-fees__cell">
-                                <div className="dd-fees__lbl">{ __( 'Gross', 'fundraising-toolkit' ) }</div>
+                                <div className="dd-fees__lbl">{ __( 'Gross', 'gratora' ) }</div>
                                 <div className="dd-fees__val num">{ formatAmount( donation.amount_cents, donation.currency ) }</div>
                             </div>
                             <div className="dd-fees__cell dd-fees__cell--neg">
-                                <div className="dd-fees__lbl">{ __( 'Gateway fee', 'fundraising-toolkit' ) }</div>
+                                <div className="dd-fees__lbl">{ __( 'Gateway fee', 'gratora' ) }</div>
                                 <div className="dd-fees__val num">- { formatAmount( donation.fee_cents, donation.currency ) }</div>
                             </div>
                             <div className="dd-fees__cell dd-fees__cell--net">
-                                <div className="dd-fees__lbl">{ __( 'Net', 'fundraising-toolkit' ) }</div>
+                                <div className="dd-fees__lbl">{ __( 'Net', 'gratora' ) }</div>
                                 <div className="dd-fees__val num">{ formatAmount( donation.net_cents, donation.currency ) }</div>
                             </div>
                         </div>

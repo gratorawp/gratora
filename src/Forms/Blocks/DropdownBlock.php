@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
-use FundKit\Foundation\Helpers\View;
+use Gratora\Foundation\Helpers\View;
 
 /** @since 1.0.0 */
 final class DropdownBlock implements Block
@@ -12,7 +12,7 @@ final class DropdownBlock implements Block
     /** @since 1.0.0 */
     public function name(): string
     {
-        return 'fundkit/dropdown';
+        return 'gratora/dropdown';
     }
 
     /** @since 1.0.0 */

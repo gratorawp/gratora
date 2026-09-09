@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Blocks\BlockEditorIntegration;
-use FundKit\Campaigns\CampaignTemplates;
+use Gratora\Campaigns\Blocks\BlockEditorIntegration;
+use Gratora\Campaigns\CampaignTemplates;
 use WP_REST_Request;
 
 final class CampaignTemplatesTest extends IntegrationTestCase
@@ -22,7 +22,7 @@ final class CampaignTemplatesTest extends IntegrationTestCase
 
             $this->assertNotNull($page, $template['id'] . ' produced no page');
             $this->assertStringContainsString(
-                'wp:fundkit/donation-form',
+                'wp:gratora/donation-form',
                 (string) $page->post_content,
                 $template['id'] . ' has no way to donate on it'
             );
@@ -99,7 +99,7 @@ final class CampaignTemplatesTest extends IntegrationTestCase
     }
 
     /**
-     * Every fundkit block a layout names is one that exists.
+     * Every gratora block a layout names is one that exists.
      *
      * A typo in a block name renders as nothing at all, with no error anywhere.
      *
@@ -110,7 +110,7 @@ final class CampaignTemplatesTest extends IntegrationTestCase
         $campaign = $this->createCampaign(['title' => 'Registered ' . $id, 'page_template' => $id]);
         $content  = (string) get_post((int) $campaign['page_id'])->post_content;
 
-        preg_match_all('#wp:(fundkit/[a-z-]+)#', $content, $m);
+        preg_match_all('#wp:(gratora/[a-z-]+)#', $content, $m);
 
         $registry = \WP_Block_Type_Registry::get_instance();
         foreach (array_unique($m[1]) as $name) {
@@ -197,7 +197,7 @@ final class CampaignTemplatesTest extends IntegrationTestCase
 
         foreach (['campaign-stat', 'campaign-progress', 'top-donors', 'recent-donations', 'supporter-wall'] as $block) {
             $this->assertStringNotContainsString(
-                'wp:fundkit/' . $block,
+                'wp:gratora/' . $block,
                 $content,
                 'minimal should carry nothing that needs donations to render, but has ' . $block
             );
@@ -251,7 +251,7 @@ final class CampaignTemplatesTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $response = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/campaigns/templates'));
+        $response = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/campaigns/templates'));
         $data     = $response->get_data();
 
         $this->assertSame(200, $response->get_status());
@@ -273,14 +273,14 @@ final class CampaignTemplatesTest extends IntegrationTestCase
         $campaign = $this->createCampaign(['title' => 'Read a layout']);
         $before   = (string) get_post((int) $campaign['page_id'])->post_content;
 
-        $request = new WP_REST_Request('GET', '/fundkit/v1/admin/campaigns/' . (int) $campaign['id'] . '/layout');
+        $request = new WP_REST_Request('GET', '/gratora/v1/admin/campaigns/' . (int) $campaign['id'] . '/layout');
         $request->set_param('template', 'story');
         $response = rest_do_request($request);
         $data     = (array) $response->get_data();
 
         $this->assertSame(200, $response->get_status());
         $this->assertSame('story', $data['template']);
-        $this->assertStringContainsString('wp:fundkit/donation-form', (string) $data['blocks']);
+        $this->assertStringContainsString('wp:gratora/donation-form', (string) $data['blocks']);
         $this->assertStringContainsString(
             '"campaignId":' . (int) $campaign['id'],
             (string) $data['blocks'],
@@ -308,7 +308,7 @@ final class CampaignTemplatesTest extends IntegrationTestCase
         // Narrowed only when a type is actually asked about, so a caller that
         // forgets to pass one still sees the general list and is caught here.
         add_filter(
-            'fundkit.campaign.templates',
+            'gratora.campaign.templates',
             static fn (array $templates, string $type): array => $type === 'standard'
                 ? array_values(array_filter($templates, static fn (array $t): bool => $t['id'] === 'minimal'))
                 : $templates,
@@ -317,7 +317,7 @@ final class CampaignTemplatesTest extends IntegrationTestCase
         );
 
         $ask = function (string $template) use ($campaign): int {
-            $request = new WP_REST_Request('GET', '/fundkit/v1/admin/campaigns/' . (int) $campaign['id'] . '/layout');
+            $request = new WP_REST_Request('GET', '/gratora/v1/admin/campaigns/' . (int) $campaign['id'] . '/layout');
             $request->set_param('template', $template);
 
             return rest_do_request($request)->get_status();
@@ -340,7 +340,7 @@ final class CampaignTemplatesTest extends IntegrationTestCase
         $campaign = $this->createCampaign(['title' => 'Offered where']);
 
         $other = self::factory()->post->create(['post_type' => 'page']);
-        update_post_meta($other, '_fundkit_campaign_id', (int) $campaign['id']);
+        update_post_meta($other, '_gratora_campaign_id', (int) $campaign['id']);
 
         $GLOBALS['post'] = null;
 
@@ -358,7 +358,7 @@ final class CampaignTemplatesTest extends IntegrationTestCase
 
     /**
      * The button opens a modal whose list route and whose apply route both want
-     * fundkit_manage_campaigns. An editor with edit_posts and no FundKit caps
+     * gratora_manage_campaigns. An editor with edit_posts and no Gratora caps
      * was offered it, got a load failure with a Try again that can never
      * succeed, and would have been refused again after choosing.
      */
@@ -384,7 +384,7 @@ final class CampaignTemplatesTest extends IntegrationTestCase
     {
         $campaign = $this->createCampaign(['title' => 'Bad layout']);
 
-        $request = new WP_REST_Request('GET', '/fundkit/v1/admin/campaigns/' . (int) $campaign['id'] . '/layout');
+        $request = new WP_REST_Request('GET', '/gratora/v1/admin/campaigns/' . (int) $campaign['id'] . '/layout');
         $request->set_param('template', 'no-such-layout');
 
         $this->assertSame(400, rest_do_request($request)->get_status());
@@ -395,7 +395,7 @@ final class CampaignTemplatesTest extends IntegrationTestCase
     {
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
 
-        $req = new WP_REST_Request('POST', '/fundkit/v1/admin/campaigns');
+        $req = new WP_REST_Request('POST', '/gratora/v1/admin/campaigns');
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) json_encode($input + ['status' => 'published']));
 
@@ -408,7 +408,7 @@ final class CampaignTemplatesTest extends IntegrationTestCase
     private function blocksOf(array $campaign): string
     {
         $content = (string) get_post((int) $campaign['page_id'])->post_content;
-        preg_match_all('#wp:fundkit/[a-z-]+#', $content, $m);
+        preg_match_all('#wp:gratora/[a-z-]+#', $content, $m);
 
         return implode(',', $m[0]);
     }

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Donations\Donation;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Foundation\Plugin;
-use FundKit\Receipts\Receipt;
+use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Foundation\Plugin;
+use Gratora\Receipts\Receipt;
 use WP_REST_Request;
 
 /**
@@ -33,12 +33,12 @@ final class PortalReceiptsPagingTest extends IntegrationTestCase
         $this->donorId = (int) $donor->id;
 
         $this->csrf = bin2hex(random_bytes(8));
-        $_COOKIE['fundkit_donor_session'] = $this->portalSession($this->donorId, $this->csrf);
+        $_COOKIE['gratora_donor_session'] = $this->portalSession($this->donorId, $this->csrf);
     }
 
     protected function tearDown(): void
     {
-        unset($_COOKIE['fundkit_donor_session']);
+        unset($_COOKIE['gratora_donor_session']);
         parent::tearDown();
     }
 
@@ -80,8 +80,8 @@ final class PortalReceiptsPagingTest extends IntegrationTestCase
     /** @return array<string,mixed> */
     private function list(): array
     {
-        $req = new WP_REST_Request('GET', '/fundkit/v1/portal/receipts');
-        $req->set_header('X-FundKit-Csrf', $this->csrf);
+        $req = new WP_REST_Request('GET', '/gratora/v1/portal/receipts');
+        $req->set_header('X-Gratora-Csrf', $this->csrf);
 
         $res = rest_do_request($req);
         $this->assertSame(200, $res->get_status(), (string) wp_json_encode($res->get_data()));

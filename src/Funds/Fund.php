@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Funds;
+namespace Gratora\Funds;
 
 defined('ABSPATH') || exit;
 
-use FundKit\Foundation\Time\ScheduleWindow;
-use FundKit\Vendor\Queryable\Model;
-use FundKit\Vendor\Queryable\Schema\Table;
+use Gratora\Foundation\Time\ScheduleWindow;
+use Gratora\Vendor\Queryable\Model;
+use Gratora\Vendor\Queryable\Schema\Table;
 
 /** @since 1.0.0 */
 final class Fund extends Model
 {
-    protected string $table = 'fundkit_funds';
+    protected string $table = 'gratora_funds';
     protected string $version = '1.0.0';
 
     public int $id;

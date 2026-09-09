@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest;
+namespace Gratora\Rest;
 
-use FundKit\Analytics\ErrorLog;
-use FundKit\Campaigns\Campaign;
-use FundKit\Donations\AntiSpamGuard;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\MagicLinkService;
-use FundKit\Receipts\OrgProfile;
-use FundKit\Receipts\ReceiptContext;
-use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Receipts\ReceiptRenderer;
-use FundKit\Receipts\ReceiptRepository;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Campaigns\Campaign;
+use Gratora\Donations\AntiSpamGuard;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\MagicLinkService;
+use Gratora\Receipts\OrgProfile;
+use Gratora\Receipts\ReceiptContext;
+use Gratora\Receipts\ReceiptIssuer;
+use Gratora\Receipts\ReceiptRenderer;
+use Gratora\Receipts\ReceiptRepository;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -29,7 +29,7 @@ use WP_REST_Server;
  */
 final class ReceiptsController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     /**
      * Renders per address per window.
@@ -80,7 +80,7 @@ final class ReceiptsController
         // Spent before the token is read, because a valid token is exactly what
         // this bounds: an invalid one is already counted by the magic-link
         // limiter, and a valid one was never counted anywhere.
-        if ($err = $this->spam->consumeIpBudget('fundkit_receipt', self::RENDER_MAX, self::RENDER_WINDOW)) {
+        if ($err = $this->spam->consumeIpBudget('gratora_receipt', self::RENDER_MAX, self::RENDER_WINDOW)) {
             return $err;
         }
 
@@ -89,12 +89,12 @@ final class ReceiptsController
 
         $valid = $this->magicLinks->validate($rawToken, 'download_receipt', $receiptId);
         if (! $valid) {
-            return new WP_Error('fundkit_invalid_token', __('Link is invalid or expired.', 'fundraising-toolkit'), ['status' => 403]);
+            return new WP_Error('gratora_invalid_token', __('Link is invalid or expired.', 'gratora'), ['status' => 403]);
         }
 
         $receipt = $this->receipts->findById($receiptId);
         if (! $receipt) {
-            return new WP_Error('fundkit_receipt_not_found', __('Receipt not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_receipt_not_found', __('Receipt not found.', 'gratora'), ['status' => 404]);
         }
 
         if ($receipt->voided) {
@@ -102,21 +102,21 @@ final class ReceiptsController
             // "not found" reads as a broken one. A voided receipt means the
             // donation was refunded in full, so say that instead.
             return new WP_Error(
-                'fundkit_receipt_voided',
-                __('This receipt was withdrawn because the donation it covers was refunded in full. If that is not what you expected, please contact the organization.', 'fundraising-toolkit'),
+                'gratora_receipt_voided',
+                __('This receipt was withdrawn because the donation it covers was refunded in full. If that is not what you expected, please contact the organization.', 'gratora'),
                 ['status' => 410]
             );
         }
 
         // Defense-in-depth: token must belong to the same donor as the receipt.
         if ($valid->donor_id !== $receipt->donor_id) {
-            return new WP_Error('fundkit_invalid_token', __('Link is invalid.', 'fundraising-toolkit'), ['status' => 403]);
+            return new WP_Error('gratora_invalid_token', __('Link is invalid.', 'gratora'), ['status' => 403]);
         }
 
         $donation = $this->donations->findById($receipt->donation_id);
         $donor    = $this->donors->findById($receipt->donor_id);
         if (! $donation || ! $donor) {
-            return new WP_Error('fundkit_receipt_data_missing', __('Receipt data is no longer available.', 'fundraising-toolkit'), ['status' => 410]);
+            return new WP_Error('gratora_receipt_data_missing', __('Receipt data is no longer available.', 'gratora'), ['status' => 410]);
         }
 
         $ctx = new ReceiptContext(
@@ -133,7 +133,7 @@ final class ReceiptsController
         // The same answers the attached copy carried: without them the emailed
         // link handed the donor a different document under the same number.
         $ctx = $this->issuer->withCustomFields($ctx, $donation);
-        $ctx = apply_filters('fundkit.receipt.context', $ctx);
+        $ctx = apply_filters('gratora.receipt.context', $ctx);
 
         $renderer = $this->findRendererById($receipt->renderer_id);
         if (! $renderer) {
@@ -146,8 +146,8 @@ final class ReceiptsController
             // it would hand the donor a different, non-compliant document
             // under the same receipt number.
             return new WP_Error(
-                'fundkit_renderer_missing',
-                __('This receipt was produced by an extension that is no longer active. Please contact the organization.', 'fundraising-toolkit'),
+                'gratora_renderer_missing',
+                __('This receipt was produced by an extension that is no longer active. Please contact the organization.', 'gratora'),
                 ['status' => 410, 'renderer_id' => (string) $receipt->renderer_id]
             );
         }
@@ -167,8 +167,8 @@ final class ReceiptsController
             ]);
 
             return new WP_Error(
-                'fundkit_receipt_render_failed',
-                __('We could not produce this receipt right now. Please try again shortly, or contact the organization.', 'fundraising-toolkit'),
+                'gratora_receipt_render_failed',
+                __('We could not produce this receipt right now. Please try again shortly, or contact the organization.', 'gratora'),
                 ['status' => 500]
             );
         } finally {
@@ -182,7 +182,7 @@ final class ReceiptsController
     /** @since 1.0.0 */
     private function findRendererById(string $id): ?ReceiptRenderer
     {
-        foreach ((array) apply_filters('fundkit.receipt.renderers', []) as $r) {
+        foreach ((array) apply_filters('gratora.receipt.renderers', []) as $r) {
             if ($r instanceof ReceiptRenderer && $r->id() === $id) return $r;
         }
         return null;

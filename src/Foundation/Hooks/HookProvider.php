@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Hooks;
+namespace Gratora\Foundation\Hooks;
 
 /**
  * Override actions()/filters(), then call register().

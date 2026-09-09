@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
 use WP_REST_Request;
 
@@ -16,7 +16,7 @@ final class GatewaySecretTest extends IntegrationTestCase
 {
     private function put(string $group, array $body): void
     {
-        $req = new WP_REST_Request('PUT', "/fundkit/v1/admin/settings/{$group}");
+        $req = new WP_REST_Request('PUT', "/gratora/v1/admin/settings/{$group}");
         $req->set_header('content-type', 'application/json');
         $req->set_body((string) wp_json_encode($body));
         rest_do_request($req);
@@ -24,12 +24,12 @@ final class GatewaySecretTest extends IntegrationTestCase
 
     private function show(string $group): array
     {
-        return (array) rest_do_request(new WP_REST_Request('GET', "/fundkit/v1/admin/settings/{$group}"))->get_data();
+        return (array) rest_do_request(new WP_REST_Request('GET', "/gratora/v1/admin/settings/{$group}"))->get_data();
     }
 
     private function storedSecret(): string
     {
-        $stored = (array) get_option('fundkit_gateway_config');
+        $stored = (array) get_option('gratora_gateway_config');
         return (string) ($stored['stripe']['webhook_secret_test'] ?? '');
     }
 
@@ -66,7 +66,7 @@ final class GatewaySecretTest extends IntegrationTestCase
         $this->put('gateways', ['stripe' => ['webhook_secret_test' => 'whsec_realsecret']]);
 
         wp_set_current_user(self::factory()->user->create(['role' => 'subscriber']));
-        $res = rest_do_request(new WP_REST_Request('GET', '/fundkit/v1/admin/settings/gateways'));
+        $res = rest_do_request(new WP_REST_Request('GET', '/gratora/v1/admin/settings/gateways'));
 
         $this->assertContains($res->get_status(), [401, 403], 'a subscriber cannot read gateway settings');
         $this->assertStringNotContainsString(

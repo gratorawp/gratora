@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Receipts\OrgProfile;
-use FundKit\Reports\TaxStatementBuilder;
-use FundKit\Foundation\Plugin;
+use Gratora\Receipts\OrgProfile;
+use Gratora\Reports\TaxStatementBuilder;
+use Gratora\Foundation\Plugin;
 use ReflectionMethod;
 
 /**
@@ -19,7 +19,7 @@ final class StatementOrgAddressTest extends IntegrationTestCase
 {
     protected function tearDown(): void
     {
-        delete_option('fundkit_org_profile');
+        delete_option('gratora_org_profile');
         parent::tearDown();
     }
 
@@ -37,7 +37,7 @@ final class StatementOrgAddressTest extends IntegrationTestCase
 
     public function test_a_state_and_a_country_code_are_not_an_address(): void
     {
-        update_option('fundkit_org_profile', [
+        update_option('gratora_org_profile', [
             'legal_name' => 'Helping Hands',
             'state'      => 'CA',
             'country'    => 'US',
@@ -48,7 +48,7 @@ final class StatementOrgAddressTest extends IntegrationTestCase
 
     public function test_a_postcode_alone_is_not_one_either(): void
     {
-        update_option('fundkit_org_profile', [
+        update_option('gratora_org_profile', [
             'legal_name'  => 'Helping Hands',
             'postal_code' => '94110',
             'country'     => 'US',
@@ -59,7 +59,7 @@ final class StatementOrgAddressTest extends IntegrationTestCase
 
     public function test_an_address_the_org_actually_gave_is_kept(): void
     {
-        update_option('fundkit_org_profile', [
+        update_option('gratora_org_profile', [
             'legal_name'    => 'Helping Hands',
             'address_line1' => '1 Market Street',
             'city'          => 'San Francisco',
@@ -76,7 +76,7 @@ final class StatementOrgAddressTest extends IntegrationTestCase
 
     public function test_a_city_alone_still_counts(): void
     {
-        update_option('fundkit_org_profile', [
+        update_option('gratora_org_profile', [
             'legal_name' => 'Helping Hands',
             'city'       => 'Berlin',
             'country'    => 'DE',

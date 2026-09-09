@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Foundation\Commands;
+namespace Gratora\Tests\Unit\Foundation\Commands;
 
-use FundKit\Foundation\Commands\Command;
-use FundKit\Foundation\Commands\CommandRegistry;
+use Gratora\Foundation\Commands\Command;
+use Gratora\Foundation\Commands\CommandRegistry;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 

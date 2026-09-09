@@ -2,41 +2,41 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Rest\Admin;
+namespace Gratora\Rest\Admin;
 use DateTimeImmutable;
-use FundKit\Analytics\ErrorLog;
-use FundKit\Campaigns\Campaign;
-use FundKit\Currency\Currency;
-use FundKit\Currency\SupportedCurrencies;
-use FundKit\Donations\ChannelClassifier;
-use FundKit\Donations\Donation;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationNoteRepository;
-use FundKit\Donations\DonationQueries;
-use FundKit\Donations\DonationRepository;
-use FundKit\Donations\DonationService;
-use FundKit\Donations\Refund;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorRepository;
-use FundKit\Donors\DonorService;
-use FundKit\Forms\Blocks\CustomFieldLabels;
-use FundKit\Forms\Form;
-use FundKit\Foundation\Auth\Capabilities;
-use FundKit\Foundation\Helpers\Csv;
-use FundKit\Foundation\Helpers\Money;
-use FundKit\Funds\Fund;
-use FundKit\Funds\FundRepository;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\PayPal\PayPalHoldReason;
-use FundKit\Receipts\OrgProfile;
-use FundKit\Receipts\Receipt;
-use FundKit\Receipts\ReceiptContext;
-use FundKit\Receipts\ReceiptIssuer;
-use FundKit\Receipts\ReceiptRepository;
-use FundKit\Receipts\Renderers\GenericReceiptRenderer;
-use FundKit\Recurring\RecurringPlan;
-use FundKit\Rest\Paging;
-use FundKit\Settings\SettingsService;
+use Gratora\Analytics\ErrorLog;
+use Gratora\Campaigns\Campaign;
+use Gratora\Currency\Currency;
+use Gratora\Currency\SupportedCurrencies;
+use Gratora\Donations\ChannelClassifier;
+use Gratora\Donations\Donation;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationNoteRepository;
+use Gratora\Donations\DonationQueries;
+use Gratora\Donations\DonationRepository;
+use Gratora\Donations\DonationService;
+use Gratora\Donations\Refund;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorRepository;
+use Gratora\Donors\DonorService;
+use Gratora\Forms\Blocks\CustomFieldLabels;
+use Gratora\Forms\Form;
+use Gratora\Foundation\Auth\Capabilities;
+use Gratora\Foundation\Helpers\Csv;
+use Gratora\Foundation\Helpers\Money;
+use Gratora\Funds\Fund;
+use Gratora\Funds\FundRepository;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\PayPal\PayPalHoldReason;
+use Gratora\Receipts\OrgProfile;
+use Gratora\Receipts\Receipt;
+use Gratora\Receipts\ReceiptContext;
+use Gratora\Receipts\ReceiptIssuer;
+use Gratora\Receipts\ReceiptRepository;
+use Gratora\Receipts\Renderers\GenericReceiptRenderer;
+use Gratora\Recurring\RecurringPlan;
+use Gratora\Rest\Paging;
+use Gratora\Settings\SettingsService;
 use RuntimeException;
 use Throwable;
 use WP_Error;
@@ -51,7 +51,7 @@ use WP_REST_Server;
  */
 final class DonationsController
 {
-    private const NAMESPACE = 'fundkit/v1';
+    private const NAMESPACE = 'gratora/v1';
 
     // See DonorsController::NOTE_MAX_LENGTH: the note column is the same shape.
     private const NOTE_MAX_LENGTH = 12000;
@@ -89,12 +89,12 @@ final class DonationsController
             [
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [$this, 'record'],
-                // Not fundkit_edit_donations: that cap is for notes, and this
+                // Not gratora_edit_donations: that cap is for notes, and this
                 // creates confirmed money at a caller-chosen amount and date.
                 // Marking an existing pending donation paid already requires
                 // this one, and creating an already-paid donation cannot need
                 // less than that.
-                'permission_callback' => static fn () => Capabilities::userCan('fundkit_refund_donations'),
+                'permission_callback' => static fn () => Capabilities::userCan('gratora_refund_donations'),
                 'args'                => $this->recordArgs(),
             ],
         ]);
@@ -108,7 +108,7 @@ final class DonationsController
 
         // Campaign names for the record-a-donation picker.
         //
-        // /admin/campaigns needs fundkit_manage_campaigns, which is exactly what a
+        // /admin/campaigns needs gratora_manage_campaigns, which is exactly what a
         // bookkeeper role created to enter checks will not have. The donations
         // list already shows campaign titles to anyone who can read it, so
         // serving the names under the same capability discloses nothing new,
@@ -121,7 +121,7 @@ final class DonationsController
 
         // Fund names for the record-a-donation picker, under the donations
         // capability for the same reason campaign-options exists: /admin/funds
-        // needs fundkit_manage_campaigns, which the bookkeeper entering the
+        // needs gratora_manage_campaigns, which the bookkeeper entering the
         // envelope does not have.
         register_rest_route(self::NAMESPACE, '/admin/donations/fund-options', [
             'methods'             => WP_REST_Server::READABLE,
@@ -167,7 +167,7 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/refund', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'refund'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_refund_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_refund_donations'),
             'args'                => [
                 'amount_cents' => ['type' => 'integer', 'minimum' => 1],
                 'reason'       => ['type' => 'string'],
@@ -180,7 +180,7 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/release-refund', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'releaseRefund'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_refund_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_refund_donations'),
             'args'                => [
                 'gateway_refund_id' => ['type' => 'string', 'required' => true],
             ],
@@ -189,13 +189,13 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/mark-paid', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'markPaid'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_refund_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_refund_donations'),
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/mark-failed', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'markFailed'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_refund_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_refund_donations'),
             'args'                => [
                 'reason' => ['type' => 'string'],
             ],
@@ -204,13 +204,13 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/resend-receipt', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'resendReceipt'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_resend_receipt'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_resend_receipt'),
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/retry-subscription', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'retrySubscription'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_refund_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_refund_donations'),
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/receipts/(?P<receipt_id>\d+)/pdf', [
@@ -231,7 +231,7 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/donations/(?P<reference>[A-Za-z0-9_\-]+)/notes', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [$this, 'createNote'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_edit_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_edit_donations'),
             'args'                => [
                 'body' => ['type' => 'string', 'required' => true, 'maxLength' => self::NOTE_MAX_LENGTH],
             ],
@@ -240,7 +240,7 @@ final class DonationsController
         register_rest_route(self::NAMESPACE, '/admin/donations/notes/(?P<note_id>\d+)', [
             'methods'             => 'DELETE',
             'callback'            => [$this, 'deleteNote'],
-            'permission_callback' => static fn () => Capabilities::userCan('fundkit_edit_donations'),
+            'permission_callback' => static fn () => Capabilities::userCan('gratora_edit_donations'),
             'args'                => [
                 'note_id' => ['type' => 'integer', 'required' => true],
             ],
@@ -253,12 +253,12 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
         }
         $params = $request->get_json_params() ?: $request->get_body_params();
         $body   = trim((string) ($params['body'] ?? ''));
         if ($body === '') {
-            return new WP_Error('fundkit_invalid', __('Note body is required.', 'fundraising-toolkit'), ['status' => 400]);
+            return new WP_Error('gratora_invalid', __('Note body is required.', 'gratora'), ['status' => 400]);
         }
         $note = $this->notes->create($donation->id, $body, get_current_user_id() ?: null);
         return new WP_REST_Response($note, 201);
@@ -270,10 +270,10 @@ final class DonationsController
         $noteId = (int) $request['note_id'];
         $note = $this->notes->findById($noteId);
         if (! $note) {
-            return new WP_Error('fundkit_not_found', __('Note not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Note not found.', 'gratora'), ['status' => 404]);
         }
         if ($note->author_user_id && $note->author_user_id !== get_current_user_id() && ! current_user_can('manage_options')) {
-            return new WP_Error('fundkit_forbidden', __('You cannot delete this note.', 'fundraising-toolkit'), ['status' => 403]);
+            return new WP_Error('gratora_forbidden', __('You cannot delete this note.', 'gratora'), ['status' => 403]);
         }
         $this->notes->delete($noteId);
         return new WP_REST_Response(['deleted' => true], 200);
@@ -284,7 +284,7 @@ final class DonationsController
      * holds what the read route asks for.
      *
      * Changing what is charged and reading a donor's file are separately
-     * assignable capabilities, so a refunder without fundkit_view_donations is
+     * assignable capabilities, so a refunder without gratora_view_donations is
      * not handed the whole donation record by pressing a button.
      *
      * @since 1.0.0
@@ -297,7 +297,7 @@ final class DonationsController
 
         $donation = $this->donations->findByReference((string) $request['reference']);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
         }
 
         return new WP_REST_Response([
@@ -310,7 +310,7 @@ final class DonationsController
     /** @since 1.0.0 */
     public function canAccess(): bool
     {
-        return Capabilities::userCan('fundkit_view_donations');
+        return Capabilities::userCan('gratora_view_donations');
     }
 
     /**
@@ -322,7 +322,7 @@ final class DonationsController
      */
     public function canPreviewReceipt(): bool
     {
-        return Capabilities::userCan('fundkit_manage_settings');
+        return Capabilities::userCan('gratora_manage_settings');
     }
 
     /**
@@ -397,7 +397,7 @@ final class DonationsController
     /** @return list<array{id:string,label:string,extra:array<string,mixed>}> */
     private function attributionFor(int $campaignId): array
     {
-        $options = (array) apply_filters('fundkit.donation.attribution_options', [], $campaignId);
+        $options = (array) apply_filters('gratora.donation.attribution_options', [], $campaignId);
 
         return array_values(array_filter($options, static fn ($o): bool => is_array($o)
             && ($o['id'] ?? '') !== ''
@@ -462,14 +462,14 @@ final class DonationsController
     {
         $offline = $this->gateways->get('offline');
         if (! $offline) {
-            return new WP_Error('fundkit_offline_unavailable', __('The offline gateway is not available.', 'fundraising-toolkit'), ['status' => 500]);
+            return new WP_Error('gratora_offline_unavailable', __('The offline gateway is not available.', 'gratora'), ['status' => 500]);
         }
 
         $method = (string) $request['payment_method'];
         if (! in_array($method, $offline->paymentMethods(), true)) {
             return new WP_Error(
-                'fundkit_invalid_payment_method',
-                __('That is not a way money can arrive offline.', 'fundraising-toolkit'),
+                'gratora_invalid_payment_method',
+                __('That is not a way money can arrive offline.', 'gratora'),
                 ['status' => 400]
             );
         }
@@ -477,8 +477,8 @@ final class DonationsController
         $receivedAt = $this->receivedAt((string) $request['received_at']);
         if ($receivedAt === null) {
             return new WP_Error(
-                'fundkit_invalid_received_at',
-                __('Give the date the money arrived, and it cannot be in the future.', 'fundraising-toolkit'),
+                'gratora_invalid_received_at',
+                __('Give the date the money arrived, and it cannot be in the future.', 'gratora'),
                 ['status' => 400]
             );
         }
@@ -492,18 +492,18 @@ final class DonationsController
         // at the gateway and mischarges.
         if (Currency::minorUnits($currency) === 0 && ((int) $request['amount_cents']) % 100 !== 0) {
             return new WP_Error(
-                'fundkit_invalid_amount',
-                __('This currency does not support fractional amounts.', 'fundraising-toolkit'),
+                'gratora_invalid_amount',
+                __('This currency does not support fractional amounts.', 'gratora'),
                 ['status' => 422]
             );
         }
 
         if (! SupportedCurrencies::accepts($currency)) {
             return new WP_Error(
-                'fundkit_unsupported_currency',
+                'gratora_unsupported_currency',
                 sprintf(
                     /* translators: 1: the currency code entered, 2: the accepted codes. */
-                    __('%1$s is not one of your accepted currencies (%2$s). Add it under Settings, Currency, so it can be converted into your reporting totals.', 'fundraising-toolkit'),
+                    __('%1$s is not one of your accepted currencies (%2$s). Add it under Settings, Currency, so it can be converted into your reporting totals.', 'gratora'),
                     $currency,
                     implode(', ', SupportedCurrencies::all())
                 ),
@@ -520,8 +520,8 @@ final class DonationsController
             );
             if ($existing !== null) {
                 return new WP_Error(
-                    'fundkit_duplicate_donation',
-                    __('This donor is already down for the same amount on that date.', 'fundraising-toolkit'),
+                    'gratora_duplicate_donation',
+                    __('This donor is already down for the same amount on that date.', 'gratora'),
                     ['status' => 409, 'reference' => (string) $existing->reference]
                 );
             }
@@ -533,8 +533,8 @@ final class DonationsController
         $campaignId = $request['campaign_id'] !== null ? (int) $request['campaign_id'] : null;
         if ($campaignId !== null && Campaign::query()->find('id', $campaignId) === null) {
             return new WP_Error(
-                'fundkit_invalid_campaign',
-                __('That campaign does not exist. Pick one from the list.', 'fundraising-toolkit'),
+                'gratora_invalid_campaign',
+                __('That campaign does not exist. Pick one from the list.', 'gratora'),
                 ['status' => 422]
             );
         }
@@ -553,8 +553,8 @@ final class DonationsController
             }
             if ($extra === []) {
                 return new WP_Error(
-                    'fundkit_invalid_attribution',
-                    __('That is not somebody this campaign can credit a donation to.', 'fundraising-toolkit'),
+                    'gratora_invalid_attribution',
+                    __('That is not somebody this campaign can credit a donation to.', 'gratora'),
                     ['status' => 422]
                 );
             }
@@ -569,8 +569,8 @@ final class DonationsController
             $offered = array_map(static fn (array $o): int => (int) $o['id'], $this->selectableFunds());
             if (! in_array($fundId, $offered, true)) {
                 return new WP_Error(
-                    'fundkit_invalid_fund',
-                    __('That fund is not open for donations right now. Pick another.', 'fundraising-toolkit'),
+                    'gratora_invalid_fund',
+                    __('That fund is not open for donations right now. Pick another.', 'gratora'),
                     ['status' => 422]
                 );
             }
@@ -594,7 +594,7 @@ final class DonationsController
 	        note_to_org: (string) $request['note_to_org'] ?: null,
             // A real check is real money even on a site left rehearsing. This
             // has to be settled before the insert rather than corrected after
-            // it: Gift Aid reads the flag on fundkit.donation.creating to decide
+            // it: Gift Aid reads the flag on gratora.donation.creating to decide
             // whether to write a claim snapshot, and it never asks again, so a
             // donation corrected a moment later still loses the 25%.
 	        extra: $extra,
@@ -622,7 +622,7 @@ final class DonationsController
             $filter   = static function (bool $should, Donation $candidate) use ($donation, $suppress): bool {
                 return (int) $candidate->id === (int) $donation->id ? ! $suppress && $should : $should;
             };
-            add_filter('fundkit.receipt.should_issue', $filter, 10, 2);
+            add_filter('gratora.receipt.should_issue', $filter, 10, 2);
 
             try {
                 $donation = $this->donationService->confirm($donation, [
@@ -631,7 +631,7 @@ final class DonationsController
                     'paid_at'        => $receivedAt,
                 ]);
             } finally {
-                remove_filter('fundkit.receipt.should_issue', $filter, 10);
+                remove_filter('gratora.receipt.should_issue', $filter, 10);
             }
 
             // Inside the try, because the catch reads the row back and answers
@@ -641,7 +641,7 @@ final class DonationsController
                 (int) $donation->id,
                 sprintf(
                     /* translators: %s: how the money arrived, e.g. check. */
-                    __('Recorded by hand. Received as %s.', 'fundraising-toolkit'),
+                    __('Recorded by hand. Received as %s.', 'gratora'),
                     $method
                 ),
                 get_current_user_id() ?: null
@@ -674,15 +674,15 @@ final class DonationsController
             // the list as money the org is still waiting for and is never
             // reconciled because nobody knows it is there. Marked failed it says
             // what happened, and unlike deleting it does not orphan rows an
-            // add-on wrote against this donation on fundkit.donation.creating.
+            // add-on wrote against this donation on gratora.donation.creating.
             if ($recorded !== null && (string) $recorded->status === 'pending') {
                 $this->donationService->markFailed(
                     $recorded,
-                    __('Recording this donation by hand did not finish.', 'fundraising-toolkit')
+                    __('Recording this donation by hand did not finish.', 'gratora')
                 );
             }
 
-            return new WP_Error('fundkit_record_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('gratora_record_failed', $e->getMessage(), ['status' => 500]);
         }
 
         return new WP_REST_Response([
@@ -805,7 +805,7 @@ final class DonationsController
             return null;
         }
 
-        // Nothing before FundKit existed. Catches a mistyped year landing in the
+        // Nothing before Gratora existed. Catches a mistyped year landing in the
         // earliest bucket of every time series, where it is invisible.
         if ($date->format('Y') < '2000') {
             return null;
@@ -908,7 +908,7 @@ final class DonationsController
         // already looking at exactly what they chose. Nothing is hidden once
         // include_test is on either, so the count would just be noise.
         if ($request['is_test'] === null && ! $request['include_test']) {
-            $response->header('X-FundKit-Test-Hidden', (string) $this->donations->countTestHidden([
+            $response->header('X-Gratora-Test-Hidden', (string) $this->donations->countTestHidden([
                 'status'             => $request['status'] !== null ? (string) $request['status'] : null,
                 'search'             => $search !== '' ? $search : null,
                 'matching_donor_ids' => $matchingDonorIds,
@@ -972,7 +972,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
         }
 
         $donor = $this->donors->findById($donation->donor_id);
@@ -1065,7 +1065,7 @@ final class DonationsController
         $donorBlock = null;
         if ($donor) {
             // Contact details are the donor record, not the donation record, so
-            // they follow fundkit_view_donors the way the CSV columns do.
+            // they follow gratora_view_donors the way the CSV columns do.
             $withDonorPii = $donor->redacted_at === null && $this->canReadDonorPii();
 
             $donorBlock = [
@@ -1160,14 +1160,14 @@ final class DonationsController
     {
         $donation = $this->donations->findByReference((string) $request['reference']);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
         }
 
         $released = $this->donationService->failAwaitedRefund($donation, (string) $request['gateway_refund_id']);
         if (! $released) {
             return new WP_Error(
-                'fundkit_refund_not_awaiting',
-                __('That refund is not waiting to settle, so there is nothing to release.', 'fundraising-toolkit'),
+                'gratora_refund_not_awaiting',
+                __('That refund is not waiting to settle, so there is nothing to release.', 'gratora'),
                 ['status' => 422]
             );
         }
@@ -1180,7 +1180,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
         }
         if ($donation->status === 'paid') {
             return $this->actionResult($request);
@@ -1190,10 +1190,10 @@ final class DonationsController
         // first to know it landed.
         if (! in_array($donation->status, ['pending', 'processing', 'failed'], true)) {
             return new WP_Error(
-                'fundkit_invalid_transition',
+                'gratora_invalid_transition',
                 sprintf(
                     /* translators: %s: current donation status. */
-                    __('Cannot mark a %s donation as paid.', 'fundraising-toolkit'),
+                    __('Cannot mark a %s donation as paid.', 'gratora'),
                     $donation->status
                 ),
                 ['status' => 422]
@@ -1222,7 +1222,7 @@ final class DonationsController
         try {
             $this->donationService->confirm($donation, $confirmation);
         } catch (RuntimeException $e) {
-            return new WP_Error('fundkit_confirm_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('gratora_confirm_failed', $e->getMessage(), ['status' => 500]);
         }
         return $this->actionResult($request);
     }
@@ -1233,15 +1233,15 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
         }
         if ($donation->status === 'failed') {
             return $this->actionResult($request);
         }
         if ($donation->status === 'paid') {
             return new WP_Error(
-                'fundkit_invalid_transition',
-                __('A paid donation cannot be marked as failed. Use refund instead.', 'fundraising-toolkit'),
+                'gratora_invalid_transition',
+                __('A paid donation cannot be marked as failed. Use refund instead.', 'gratora'),
                 ['status' => 422]
             );
         }
@@ -1249,10 +1249,10 @@ final class DonationsController
         // from the bank before any webhook arrives.
         if (! in_array($donation->status, ['pending', 'processing'], true)) {
             return new WP_Error(
-                'fundkit_invalid_transition',
+                'gratora_invalid_transition',
                 sprintf(
                     /* translators: %s: current donation status. */
-                    __('Cannot mark a %s donation as failed.', 'fundraising-toolkit'),
+                    __('Cannot mark a %s donation as failed.', 'gratora'),
                     $donation->status
                 ),
                 ['status' => 422]
@@ -1278,7 +1278,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
         }
 
         $body = (array) ($request->get_json_params() ?? []);
@@ -1294,8 +1294,8 @@ final class DonationsController
         // "nothing happened".
         if ($cancelPlan && $planId === 0) {
             return new WP_Error(
-                'fundkit_no_plan',
-                __('This donation is not part of a recurring schedule, so there is nothing to cancel. No refund was issued.', 'fundraising-toolkit'),
+                'gratora_no_plan',
+                __('This donation is not part of a recurring schedule, so there is nothing to cancel. No refund was issued.', 'gratora'),
                 ['status' => 422]
             );
         }
@@ -1309,7 +1309,7 @@ final class DonationsController
                 'admin',
             );
         } catch (RuntimeException $e) {
-            return new WP_Error('fundkit_refund_failed', $e->getMessage(), ['status' => 422]);
+            return new WP_Error('gratora_refund_failed', $e->getMessage(), ['status' => 422]);
         }
 
         $reloaded = $this->donations->findByReference($reference);
@@ -1359,7 +1359,7 @@ final class DonationsController
                 'id'      => $planId,
                 'status'  => null,
                 'stopped' => false,
-                'error'   => __('The recurring schedule could not be found, so it is still running.', 'fundraising-toolkit'),
+                'error'   => __('The recurring schedule could not be found, so it is still running.', 'gratora'),
             ];
         }
 
@@ -1392,7 +1392,7 @@ final class DonationsController
             'stopped' => $stopped,
             'error'   => $stopped ? null : ($response->is_error()
                 ? $response->as_error()->get_error_message()
-                : __('The recurring schedule is still running.', 'fundraising-toolkit')),
+                : __('The recurring schedule is still running.', 'gratora')),
         ];
     }
 
@@ -1402,7 +1402,7 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
         }
 
         // Erasure wiped the address, so the issuer would find nothing to send to
@@ -1412,8 +1412,8 @@ final class DonationsController
         $donor = $donation->donor_id ? $this->donors->findById((int) $donation->donor_id) : null;
         if ($donor && $donor->redacted_at !== null) {
             return new WP_Error(
-                'fundkit_donor_redacted',
-                __('This donor has been erased, so there is no address to send a receipt to.', 'fundraising-toolkit'),
+                'gratora_donor_redacted',
+                __('This donor has been erased, so there is no address to send a receipt to.', 'gratora'),
                 ['status' => 422],
             );
         }
@@ -1421,8 +1421,8 @@ final class DonationsController
         $ok = $this->receiptIssuer->requeueForDonation($donation->id);
         if (! $ok) {
             return new WP_Error(
-                'fundkit_resend_unavailable',
-                __('Receipts can only be resent for paid donations.', 'fundraising-toolkit'),
+                'gratora_resend_unavailable',
+                __('Receipts can only be resent for paid donations.', 'gratora'),
                 ['status' => 422],
             );
         }
@@ -1446,14 +1446,14 @@ final class DonationsController
         $reference = (string) $request['reference'];
         $donation  = $this->donations->findByReference($reference);
         if (! $donation) {
-            return new WP_Error('fundkit_not_found', __('Donation not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Donation not found.', 'gratora'), ['status' => 404]);
         }
 
         $flags = (array) ($donation->flags ?? []);
         if (empty($flags['subscription_creation_failed'])) {
             return new WP_Error(
-                'fundkit_no_retry_needed',
-                __('No subscription-creation failure is recorded for this donation.', 'fundraising-toolkit'),
+                'gratora_no_retry_needed',
+                __('No subscription-creation failure is recorded for this donation.', 'gratora'),
                 ['status' => 422]
             );
         }
@@ -1463,17 +1463,17 @@ final class DonationsController
         // money that bought a first period and is owed the ones after it.
         if (! in_array((string) $donation->status, ['paid', 'partial_refund'], true)) {
             return new WP_Error(
-                'fundkit_retry_not_allowed',
-                __('A recurring plan can only be created from a donation the organisation was paid and still holds. This one was refunded, reversed, or never settled.', 'fundraising-toolkit'),
+                'gratora_retry_not_allowed',
+                __('A recurring plan can only be created from a donation the organisation was paid and still holds. This one was refunded, reversed, or never settled.', 'gratora'),
                 ['status' => 422]
             );
         }
 
         $gateway = $this->gateways->get((string) $donation->gateway);
-        if (! $gateway instanceof \FundKit\Gateways\Stripe\StripeGateway) {
+        if (! $gateway instanceof \Gratora\Gateways\Stripe\StripeGateway) {
             return new WP_Error(
-                'fundkit_unsupported_gateway',
-                __('Only Stripe subscriptions can be retried.', 'fundraising-toolkit'),
+                'gratora_unsupported_gateway',
+                __('Only Stripe subscriptions can be retried.', 'gratora'),
                 ['status' => 422]
             );
         }
@@ -1482,7 +1482,7 @@ final class DonationsController
             $plan = $gateway->retrySubscriptionCreation($donation);
         } catch (RuntimeException $e) {
             return new WP_Error(
-                'fundkit_retry_failed',
+                'gratora_retry_failed',
                 $e->getMessage(),
                 ['status' => 502]
             );
@@ -1503,14 +1503,14 @@ final class DonationsController
 
         $receipt = $this->receipts->findById($receiptId);
         if (! $receipt) {
-            return new WP_Error('fundkit_not_found', __('Receipt not found.', 'fundraising-toolkit'), ['status' => 404]);
+            return new WP_Error('gratora_not_found', __('Receipt not found.', 'gratora'), ['status' => 404]);
         }
 
         $pdf = $this->receiptIssuer->renderReceiptPdf($receiptId);
         if ($pdf === null || $pdf === '') {
             return new WP_Error(
-                'fundkit_render_failed',
-                __('Could not regenerate the receipt PDF. The reason is recorded under Tools > Logs.', 'fundraising-toolkit'),
+                'gratora_render_failed',
+                __('Could not regenerate the receipt PDF. The reason is recorded under Tools > Logs.', 'gratora'),
                 ['status' => 500],
             );
         }
@@ -1575,7 +1575,7 @@ final class DonationsController
         $donation->donor_id       = 0;
         $donation->amount_cents   = 5000;
         $donation->net_cents      = 5000;
-        $donation->currency       = strtoupper((string) \FundKit\Foundation\Helpers\Money::defaultCurrency());
+        $donation->currency       = strtoupper((string) \Gratora\Foundation\Helpers\Money::defaultCurrency());
         $donation->frequency      = 'one_time';
         $donation->status         = 'paid';
         $donation->gateway        = 'offline';
@@ -1596,7 +1596,7 @@ final class DonationsController
         try {
             $pdf = $this->genericRenderer->render($ctx);
         } catch ( Throwable $e) {
-            return new WP_Error('fundkit_render_failed', $e->getMessage(), ['status' => 500]);
+            return new WP_Error('gratora_render_failed', $e->getMessage(), ['status' => 500]);
         }
 
         $route = $request->get_route();
@@ -1692,10 +1692,10 @@ final class DonationsController
         ];
 
         // Whether this caller may take donor identities away in bulk. The rest
-        // of the file is donation records, which fundkit_view_donations covers;
+        // of the file is donation records, which gratora_view_donations covers;
         // the name and email columns are the donor list by another route, and
-        // that is what fundkit_export_donors exists to gate.
-        $withDonorPii = Capabilities::userCan('fundkit_export_donors');
+        // that is what gratora_export_donors exists to gate.
+        $withDonorPii = Capabilities::userCan('gratora_export_donors');
 
         /**
          * How many rows one export may hold. The cap is memory, not policy: a
@@ -1705,7 +1705,7 @@ final class DonationsController
          *
          * @since 1.0.0
          */
-        $cap = max(1, (int) apply_filters('fundkit.export.max_rows', self::EXPORT_MAX_ROWS));
+        $cap = max(1, (int) apply_filters('gratora.export.max_rows', self::EXPORT_MAX_ROWS));
 
         // Asked for before a byte is written, because whether the answer fits
         // decides a header, and a header cannot follow the body.
@@ -1718,7 +1718,7 @@ final class DonationsController
             // bookkeeper reconciles against, so the screen is told on the way
             // out and the log keeps it for whoever asks later.
             if ($server !== null) {
-                $server->send_header('X-FundKit-Export-Truncated', (string) $cap);
+                $server->send_header('X-Gratora-Export-Truncated', (string) $cap);
             }
 
             ErrorLog::record(
@@ -1733,29 +1733,29 @@ final class DonationsController
         fwrite($out, "\xEF\xBB\xBF");
 
         Csv::writeRow($out, array_merge([
-            __('Reference', 'fundraising-toolkit'),
-            __('Status', 'fundraising-toolkit'),
-            __('Amount', 'fundraising-toolkit'),
-            __('Currency', 'fundraising-toolkit'),
-            __('Base amount', 'fundraising-toolkit'),
-            __('Base currency', 'fundraising-toolkit'),
-            __('Fee', 'fundraising-toolkit'),
-            __('Net', 'fundraising-toolkit'),
+            __('Reference', 'gratora'),
+            __('Status', 'gratora'),
+            __('Amount', 'gratora'),
+            __('Currency', 'gratora'),
+            __('Base amount', 'gratora'),
+            __('Base currency', 'gratora'),
+            __('Fee', 'gratora'),
+            __('Net', 'gratora'),
             // Its own column rather than netted off Net: Net is the amount less
             // the processing fee, which is what the gateway settled, so a row
             // refunded afterwards has to carry both figures to reconcile.
-            __('Refunded', 'fundraising-toolkit'),
-            __('Gateway', 'fundraising-toolkit'),
-            __('Frequency', 'fundraising-toolkit'),
-            __('Fund', 'fundraising-toolkit'),
-            __('Country', 'fundraising-toolkit'),
+            __('Refunded', 'gratora'),
+            __('Gateway', 'gratora'),
+            __('Frequency', 'gratora'),
+            __('Fund', 'gratora'),
+            __('Country', 'gratora'),
         ], $withDonorPii ? [
-            __('Donor name', 'fundraising-toolkit'),
-            __('Donor email', 'fundraising-toolkit'),
+            __('Donor name', 'gratora'),
+            __('Donor email', 'gratora'),
         ] : [], [
-            __('Created at', 'fundraising-toolkit'),
-            __('Paid at', 'fundraising-toolkit'),
-            __('Refunded at', 'fundraising-toolkit'),
+            __('Created at', 'gratora'),
+            __('Paid at', 'gratora'),
+            __('Refunded at', 'gratora'),
         ]));
 
         foreach (array_chunk($ids, self::EXPORT_PAGE) as $idChunk) {
@@ -1896,7 +1896,7 @@ final class DonationsController
             return [];
         }
 
-        $labels = (array) apply_filters('fundkit.donation.attribution_labels', [], $credited);
+        $labels = (array) apply_filters('gratora.donation.attribution_labels', [], $credited);
 
         return array_filter(
             $labels,
@@ -1907,21 +1907,21 @@ final class DonationsController
     /**
      * Whether the caller may read donor contact details. Paging the donations
      * list one email at a time is the donor list by another route, and that is
-     * what fundkit_view_donors gates; the donation record itself stays readable on
-     * fundkit_view_donations alone.
+     * what gratora_view_donors gates; the donation record itself stays readable on
+     * gratora_view_donations alone.
      *
      * @since 1.0.0
      */
     private function canReadDonorPii(): bool
     {
-        return Capabilities::userCan('fundkit_view_donors');
+        return Capabilities::userCan('gratora_view_donors');
     }
 
     /** @since 1.0.0 */
     private function donorName(Donor $d): string
     {
         if ($d->redacted_at !== null) {
-            return __('[redacted]', 'fundraising-toolkit');
+            return __('[redacted]', 'gratora');
         }
 
         $full = trim(($d->first_name ?? '') . ' ' . ($d->last_name ?? ''));
@@ -1984,18 +1984,18 @@ final class DonationsController
     public static function gatewayLabel(string $slug): string
     {
         $known = [
-            'stripe'  => __('Stripe', 'fundraising-toolkit'),
-            'paypal'  => __('PayPal', 'fundraising-toolkit'),
-            'offline' => __('Offline', 'fundraising-toolkit'),
-            'sandbox' => __('Test donation', 'fundraising-toolkit'),
-            'manual'  => __('Manually entered', 'fundraising-toolkit'),
+            'stripe'  => __('Stripe', 'gratora'),
+            'paypal'  => __('PayPal', 'gratora'),
+            'offline' => __('Offline', 'gratora'),
+            'sandbox' => __('Test donation', 'gratora'),
+            'manual'  => __('Manually entered', 'gratora'),
         ];
 
         if (isset($known[$slug])) {
             return $known[$slug];
         }
 
-        $added = (array) apply_filters('fundkit.gateway_admin_labels', []);
+        $added = (array) apply_filters('gratora.gateway_admin_labels', []);
         $label = $added[$slug] ?? null;
 
         return is_string($label) && $label !== ''

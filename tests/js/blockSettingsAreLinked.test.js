@@ -45,7 +45,7 @@ describe( 'a block that sends the admin elsewhere gives them a link', () => {
 			// Two shapes are in use: a literal admin.php URL, and one handed
 			// down from PHP by admin_url(), which is what a block linking to a
 			// core screen has to use.
-			expect( source ).toMatch( /admin\.php\?page=fundkit-|href=\{\s*\w*[Uu]rl|href=\{\s*\w*[Hh]ref/ );
+			expect( source ).toMatch( /admin\.php\?page=gratora-|href=\{\s*\w*[Uu]rl|href=\{\s*\w*[Hh]ref/ );
 		} );
 	}
 } );

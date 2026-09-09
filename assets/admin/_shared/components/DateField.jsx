@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/DateField';
+export { default } from '@gratora/ui/components/DateField';

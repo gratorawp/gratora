@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Foundation;
+namespace Gratora\Tests\Unit\Foundation;
 
-use FundKit\Foundation\Helpers\Money;
+use Gratora\Foundation\Helpers\Money;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -24,7 +24,7 @@ final class MoneyDisplayPrecisionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $GLOBALS['_fundkit_test_options']['fundkit_currency_locale'] = [
+        $GLOBALS['_gratora_test_options']['gratora_currency_locale'] = [
             'default_currency' => 'USD',
             'format'           => ['decimal_places' => 0],
         ];
@@ -37,7 +37,7 @@ final class MoneyDisplayPrecisionTest extends TestCase
 
     protected function tearDown(): void
     {
-        ($GLOBALS['_fundkit_reset_options'])();
+        ($GLOBALS['_gratora_reset_options'])();
         parent::tearDown();
     }
 

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Admin;
+namespace Gratora\Admin;
 
-use FundKit\Foundation\Helpers\View;
-use FundKit\Foundation\Uninstall\DataEraser;
+use Gratora\Foundation\Helpers\View;
+use Gratora\Foundation\Uninstall\DataEraser;
 
 /**
  * Ask whether to retain data before deactivation removes the plugin’s UI.
@@ -14,7 +14,7 @@ use FundKit\Foundation\Uninstall\DataEraser;
  */
 final class DeactivationDialog
 {
-    private const ACTION = 'fundkit_deactivation_choice';
+    private const ACTION = 'gratora_deactivation_choice';
 
     /** @since 1.0.0 */
     public function register(): void
@@ -33,32 +33,32 @@ final class DeactivationDialog
 
         // Version source assets by mtime so unreleased changes invalidate caches.
         wp_enqueue_style(
-            'fundkit-deactivation',
-            FUNDKIT_URL . 'assets/deactivation/dialog.css',
+            'gratora-deactivation',
+            GRATORA_URL . 'assets/deactivation/dialog.css',
             [],
             $this->assetVersion('dialog.css')
         );
         wp_enqueue_script(
-            'fundkit-deactivation',
-            FUNDKIT_URL . 'assets/deactivation/dialog.js',
+            'gratora-deactivation',
+            GRATORA_URL . 'assets/deactivation/dialog.js',
             [],
             $this->assetVersion('dialog.js'),
             true
         );
-        wp_localize_script('fundkit-deactivation', 'fundkitDeactivation', [
+        wp_localize_script('gratora-deactivation', 'gratoraDeactivation', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'action'  => self::ACTION,
             'nonce'   => wp_create_nonce(self::ACTION),
-            'slug'    => plugin_basename(FUNDKIT_FILE),
+            'slug'    => plugin_basename(GRATORA_FILE),
         ]);
     }
 
     /** @since 1.0.0 */
     private function assetVersion(string $file): string
     {
-        $path = FUNDKIT_DIR . 'assets/deactivation/' . $file;
+        $path = GRATORA_DIR . 'assets/deactivation/' . $file;
 
-        return (string) (@filemtime($path) ?: FUNDKIT_VERSION);
+        return (string) (@filemtime($path) ?: GRATORA_VERSION);
     }
 
     /** @since 1.0.0 */

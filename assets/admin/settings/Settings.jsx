@@ -8,7 +8,7 @@ import { notify } from '../_shared/notify';
 import { tablistKeyDown } from '../_shared/tablistKeys';
 import { useExtensionTabs, ExtensionTabPanel } from '../_shared/extensionTabs';
 
-import { useFundKitSettings } from '../_shared/useFundKitSettings';
+import { useGratoraSettings } from '../_shared/useGratoraSettings';
 import { useFxRates } from '../_shared/useFxRates';
 import SetupPanel from './panels/SetupPanel';
 import OrganizationPanel from './panels/OrganizationPanel';
@@ -30,41 +30,41 @@ import {
 // Ordered by how often an operator opens it, money first. Add-on tabs land
 // after these.
 const TABS = [
-    { key: 'setup',        label: __( 'Setup', 'fundraising-toolkit' ),                Icon: IconSetup },
-    { key: 'gateways',     label: __( 'Payment gateways', 'fundraising-toolkit' ),     Icon: IconGateways },
-    { key: 'organization', label: __( 'Organization', 'fundraising-toolkit' ),         Icon: IconOrganization },
-    { key: 'brand',        label: __( 'Brand', 'fundraising-toolkit' ),                Icon: IconBrand },
-    { key: 'email',        label: __( 'Emails', 'fundraising-toolkit' ),               Icon: IconEmail },
-    { key: 'receipts',     label: __( 'Receipts', 'fundraising-toolkit' ),             Icon: IconReceipt },
-    { key: 'currency',     label: __( 'Currency', 'fundraising-toolkit' ),             Icon: IconCurrency },
-    { key: 'numbering',    label: __( 'Numbering', 'fundraising-toolkit' ),            Icon: IconNumbering },
-    { key: 'privacy',      label: __( 'Privacy', 'fundraising-toolkit' ),              Icon: IconPrivacy },
-    { key: 'roles',        label: __( 'Roles', 'fundraising-toolkit' ),                Icon: IconRoles, adminOnly: true },
+    { key: 'setup',        label: __( 'Setup', 'gratora' ),                Icon: IconSetup },
+    { key: 'gateways',     label: __( 'Payment gateways', 'gratora' ),     Icon: IconGateways },
+    { key: 'organization', label: __( 'Organization', 'gratora' ),         Icon: IconOrganization },
+    { key: 'brand',        label: __( 'Brand', 'gratora' ),                Icon: IconBrand },
+    { key: 'email',        label: __( 'Emails', 'gratora' ),               Icon: IconEmail },
+    { key: 'receipts',     label: __( 'Receipts', 'gratora' ),             Icon: IconReceipt },
+    { key: 'currency',     label: __( 'Currency', 'gratora' ),             Icon: IconCurrency },
+    { key: 'numbering',    label: __( 'Numbering', 'gratora' ),            Icon: IconNumbering },
+    { key: 'privacy',      label: __( 'Privacy', 'gratora' ),              Icon: IconPrivacy },
+    { key: 'roles',        label: __( 'Roles', 'gratora' ),                Icon: IconRoles, adminOnly: true },
 ];
 
 // Always last, whatever add-ons register in between.
 //
-// Roles assigns FundKit capabilities, so the REST route requires full admin. A
+// Roles assigns Gratora capabilities, so the REST route requires full admin. A
 // settings manager was still offered the tab and only learned their save was
 // refused after editing the grid.
 const visibleTabs = () =>
-    TABS.filter( ( t ) => ! t.adminOnly || !! window.fundkit?.can?.manage_options );
+    TABS.filter( ( t ) => ! t.adminOnly || !! window.gratora?.can?.manage_options );
 
 const TAIL_TABS = [];
 
 // Save-job slug -> human label, for failure messages (job slugs are not tab keys).
 const SECTION_LABELS = {
-    'org-profile':     __( 'Organization', 'fundraising-toolkit' ),
-    'org-brand':       __( 'Brand', 'fundraising-toolkit' ),
-    'currency-locale': __( 'Currency & locale', 'fundraising-toolkit' ),
-    'exchange-rates':  __( 'Exchange rates', 'fundraising-toolkit' ),
-    'gateways':        __( 'Payment gateways', 'fundraising-toolkit' ),
-    'email':           __( 'Emails', 'fundraising-toolkit' ),
-    'receipts':        __( 'Receipts', 'fundraising-toolkit' ),
-    'numbering':       __( 'Numbering', 'fundraising-toolkit' ),
-    'consents':        __( 'Consents', 'fundraising-toolkit' ),
-    'privacy':         __( 'Data & privacy', 'fundraising-toolkit' ),
-    'roles':           __( 'Roles & permissions', 'fundraising-toolkit' ),
+    'org-profile':     __( 'Organization', 'gratora' ),
+    'org-brand':       __( 'Brand', 'gratora' ),
+    'currency-locale': __( 'Currency & locale', 'gratora' ),
+    'exchange-rates':  __( 'Exchange rates', 'gratora' ),
+    'gateways':        __( 'Payment gateways', 'gratora' ),
+    'email':           __( 'Emails', 'gratora' ),
+    'receipts':        __( 'Receipts', 'gratora' ),
+    'numbering':       __( 'Numbering', 'gratora' ),
+    'consents':        __( 'Consents', 'gratora' ),
+    'privacy':         __( 'Data & privacy', 'gratora' ),
+    'roles':           __( 'Roles & permissions', 'gratora' ),
 };
 
 function initialTab() {
@@ -78,7 +78,7 @@ function initialTab() {
 /**
  * A panel reads its group through fallbacks, so a group that failed to load
  * draws a complete, ordinary looking form of literal defaults: Anonymize IPs
- * on, prefix FUNDKIT, an empty legal name. None of it is this site's settings, and
+ * on, prefix GRATORA, an empty legal name. None of it is this site's settings, and
  * nothing on the screen said so.
  *
  * @since 1.0.0
@@ -89,11 +89,11 @@ export function SettingsGroup( { of, children } ) {
 
     if ( failed ) {
         return (
-            <div className="fundkit-panel">
+            <div className="gratora-panel">
                 <Card>
                     <p style={ { color: '#b42318', margin: '0 0 12px' } }>{ failed.loadError }</p>
                     <Btn variant="secondary" onClick={ () => groups.forEach( ( g ) => g.reload?.() ) }>
-                        { __( 'Retry', 'fundraising-toolkit' ) }
+                        { __( 'Retry', 'gratora' ) }
                     </Btn>
                 </Card>
             </div>
@@ -112,23 +112,23 @@ function PanelSkeleton() {
     return (
         <>
             <p className="screen-reader-text" role="status">
-                { __( 'Loading settings…', 'fundraising-toolkit' ) }
+                { __( 'Loading settings…', 'gratora' ) }
             </p>
-            <div className="fundkit-card" aria-hidden="true">
-                <div className="fundkit-card__head">
-                    <div className="fundkit-card__head-left">
-                        <span className="fundkit-skeleton fundkit-skeleton--lg" />
-                        <span className="fundkit-skeleton" style={ { display: 'block', marginTop: 8, width: 220 } } />
+            <div className="gratora-card" aria-hidden="true">
+                <div className="gratora-card__head">
+                    <div className="gratora-card__head-left">
+                        <span className="gratora-skeleton gratora-skeleton--lg" />
+                        <span className="gratora-skeleton" style={ { display: 'block', marginTop: 8, width: 220 } } />
                     </div>
                 </div>
-                <div className="fundkit-card__body">
+                <div className="gratora-card__body">
                     { [ 0, 1, 2 ].map( ( i ) => (
-                        <div className="fundkit-form-row" key={ i }>
-                            <div className="fundkit-form-row__label">
-                                <span className="fundkit-skeleton" />
+                        <div className="gratora-form-row" key={ i }>
+                            <div className="gratora-form-row__label">
+                                <span className="gratora-skeleton" />
                             </div>
-                            <div className="fundkit-form-row__field">
-                                <span className="fundkit-skeleton" style={ { width: '100%', height: 32 } } />
+                            <div className="gratora-form-row__field">
+                                <span className="gratora-skeleton" style={ { width: '100%', height: 32 } } />
                             </div>
                         </div>
                     ) ) }
@@ -152,17 +152,17 @@ export default function Settings() {
         ...TAIL_TABS,
     ];
 
-    const org      = useFundKitSettings( 'org-profile' );
-    const brand    = useFundKitSettings( 'org-brand' );
-    const currency = useFundKitSettings( 'currency-locale' );
+    const org      = useGratoraSettings( 'org-profile' );
+    const brand    = useGratoraSettings( 'org-brand' );
+    const currency = useGratoraSettings( 'currency-locale' );
     const fx       = useFxRates();
-    const gateways = useFundKitSettings( 'gateways' );
-    const email    = useFundKitSettings( 'email' );
-    const receipts = useFundKitSettings( 'receipts' );
-    const numbering = useFundKitSettings( 'numbering' );
-    const consents = useFundKitSettings( 'consents' );
-    const privacy  = useFundKitSettings( 'privacy' );
-    const roles    = useFundKitSettings( 'roles' );
+    const gateways = useGratoraSettings( 'gateways' );
+    const email    = useGratoraSettings( 'email' );
+    const receipts = useGratoraSettings( 'receipts' );
+    const numbering = useGratoraSettings( 'numbering' );
+    const consents = useGratoraSettings( 'consents' );
+    const privacy  = useGratoraSettings( 'privacy' );
+    const roles    = useGratoraSettings( 'roles' );
 
     // Re-run when extTabs changes so this closure never holds a stale list: an
     // add-on tab registers after mount, and a hash-only navigation to it never
@@ -261,7 +261,7 @@ export default function Settings() {
             .filter( Boolean );
 
         if ( failed.length === 0 ) {
-            notify.success( __( 'All changes saved.', 'fundraising-toolkit' ) );
+            notify.success( __( 'All changes saved.', 'gratora' ) );
             return;
         }
 
@@ -272,10 +272,10 @@ export default function Settings() {
         const base = failed.length < jobs.length
             ? sprintf(
                 /* translators: %s: comma-separated section names that failed */
-                __( 'Could not save: %s.', 'fundraising-toolkit' ),
+                __( 'Could not save: %s.', 'gratora' ),
                 labels.join( ', ' ),
             )
-            : __( 'Save failed.', 'fundraising-toolkit' );
+            : __( 'Save failed.', 'gratora' );
         notify.error( reason ? `${ base } ${ reason }` : base );
     };
 
@@ -296,34 +296,34 @@ export default function Settings() {
     const anySaving = org.isSaving || brand.isSaving || currency.isSaving || fx.isSaving || gateways.isSaving || email.isSaving || receipts.isSaving || numbering.isSaving || consents.isSaving || privacy.isSaving || roles.isSaving;
 
     return (
-        <div className="fundkit-settings-page">
-            <div className="fundkit-crumbs">
-                <a href="admin.php?page=fundkit">{ __( 'Fundraising', 'fundraising-toolkit' ) }</a>
+        <div className="gratora-settings-page">
+            <div className="gratora-crumbs">
+                <a href="admin.php?page=gratora">{ __( 'Fundraising', 'gratora' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Settings', 'fundraising-toolkit' ) }</span>
+                <span>{ __( 'Settings', 'gratora' ) }</span>
                 <span className="sep">›</span>
                 <span>{ allTabs.find( ( t ) => t.key === tab )?.label || '' }</span>
             </div>
 
-            <div className="fundkit-page-head">
-                <div className="fundkit-page-head__title-row">
-                    <h1>{ __( 'Settings', 'fundraising-toolkit' ) }</h1>
+            <div className="gratora-page-head">
+                <div className="gratora-page-head__title-row">
+                    <h1>{ __( 'Settings', 'gratora' ) }</h1>
                 </div>
-                <div className="fundkit-page-head__right">
-                    <span className="fundkit-page-head__meta">
-                        { __( 'Changes save when you click Save changes', 'fundraising-toolkit' ) }
+                <div className="gratora-page-head__right">
+                    <span className="gratora-page-head__meta">
+                        { __( 'Changes save when you click Save changes', 'gratora' ) }
                     </span>
                 </div>
             </div>
 
             <div
-                className="fundkit-tabs"
+                className="gratora-tabs"
                 role="tablist"
                 tabIndex={ -1 }
-                aria-label={ __( 'Settings sections', 'fundraising-toolkit' ) }
+                aria-label={ __( 'Settings sections', 'gratora' ) }
                 onKeyDown={ ( e ) => tablistKeyDown( e, allTabs.map( ( t ) => t.key ), tab, jumpTo ) }
             >
-                <div className="fundkit-tabs__scroll">
+                <div className="gratora-tabs__scroll">
                     { allTabs.map( ( t ) => {
                         const active   = tab === t.key;
                         const isDirty  = !! dirtyByTab[ t.key ];
@@ -338,9 +338,9 @@ export default function Settings() {
                                 className={ active ? 'is-active' : '' }
                                 onClick={ ( e ) => { e.preventDefault(); jumpTo( t.key ); } }
                             >
-                                <Icon className="fundkit-tab__icon" />
+                                <Icon className="gratora-tab__icon" />
                                 { t.label }
-                                { isDirty && <span className="fundkit-tab__dot" title={ __( 'Unsaved changes', 'fundraising-toolkit' ) } /> }
+                                { isDirty && <span className="gratora-tab__dot" title={ __( 'Unsaved changes', 'gratora' ) } /> }
                             </a>
                         );
                     } ) }
@@ -349,7 +349,7 @@ export default function Settings() {
 
             <Toaster />
 
-            <div className="fundkit-settings-page__body">
+            <div className="gratora-settings-page__body">
                 <div hidden={ tab !== 'setup' }>
                     <SetupPanel onJumpTo={ jumpTo } active={ tab === 'setup' } />
                 </div>
@@ -393,32 +393,32 @@ export default function Settings() {
             </div>
 
             { dirtySections > 0 && (
-                <div className="fundkit-save-bar" role="status" aria-live="polite">
-                    <span className="fundkit-save-bar__dot" aria-hidden="true" />
-                    <span className="fundkit-save-bar__count">
+                <div className="gratora-save-bar" role="status" aria-live="polite">
+                    <span className="gratora-save-bar__dot" aria-hidden="true" />
+                    <span className="gratora-save-bar__count">
                         { dirtySections === 1
-                            ? __( 'Unsaved changes in 1 section', 'fundraising-toolkit' )
+                            ? __( 'Unsaved changes in 1 section', 'gratora' )
                             : sprintf(
                                 /* translators: %d: number of sections with unsaved changes */
-                                _n( 'Unsaved changes across %d section', 'Unsaved changes across %d sections', dirtySections, 'fundraising-toolkit' ),
+                                _n( 'Unsaved changes across %d section', 'Unsaved changes across %d sections', dirtySections, 'gratora' ),
                                 dirtySections,
                             ) }
                     </span>
                     <button
                         type="button"
-                        className="fundkit-save-bar__btn fundkit-save-bar__btn--ghost"
+                        className="gratora-save-bar__btn gratora-save-bar__btn--ghost"
                         onClick={ discardAll }
                         disabled={ anySaving }
                     >
-                        { __( 'Discard', 'fundraising-toolkit' ) }
+                        { __( 'Discard', 'gratora' ) }
                     </button>
                     <button
                         type="button"
-                        className="fundkit-save-bar__btn fundkit-save-bar__btn--primary"
+                        className="gratora-save-bar__btn gratora-save-bar__btn--primary"
                         onClick={ saveAll }
                         disabled={ anySaving }
                     >
-                        { __( 'Save changes', 'fundraising-toolkit' ) }
+                        { __( 'Save changes', 'gratora' ) }
                     </button>
                 </div>
             ) }

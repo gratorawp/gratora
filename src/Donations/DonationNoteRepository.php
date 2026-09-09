@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Donations;
+namespace Gratora\Donations;
 
-use FundKit\Foundation\Crypto\Crypto;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Foundation\Crypto\Crypto;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Vendor\Queryable\DB;
 
 /** @since 1.0.0 */
 final class DonationNoteRepository
@@ -53,7 +53,7 @@ final class DonationNoteRepository
     {
         $note = DonationNote::query()->find('id', $noteId);
         if (! $note) return false;
-        DB::table('fundkit_donation_notes')->where('id', $noteId)->delete();
+        DB::table('gratora_donation_notes')->where('id', $noteId)->delete();
         return true;
     }
 

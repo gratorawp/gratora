@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Foundation\Batch;
+namespace Gratora\Foundation\Batch;
 
 use Closure;
-use FundKit\Vendor\Queryable\DB;
+use Gratora\Vendor\Queryable\DB;
 
 /**
  * One bounded, resumable tick of a batched data operation. The caller must operate

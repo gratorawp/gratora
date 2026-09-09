@@ -2,34 +2,34 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Cli;
+namespace Gratora\Cli;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignService;
-use FundKit\Currency\FxRates;
-use FundKit\Donations\AggregateSyncer;
-use FundKit\Donations\DonationIntent;
-use FundKit\Donations\DonationService;
-use FundKit\Donors\Donor;
-use FundKit\Donors\DonorService;
-use FundKit\Donors\MagicLinkService;
-use FundKit\Donors\Portal\PortalPage;
-use FundKit\Donors\Portal\PortalSession;
-use FundKit\Forms\Form;
-use FundKit\Forms\FormService;
-use FundKit\Foundation\Plugin;
-use FundKit\Foundation\Time\Clock;
-use FundKit\Funds\Fund;
-use FundKit\Funds\FundService;
-use FundKit\Gateways\GatewayManager;
-use FundKit\Gateways\Stripe\StripeAccount;
-use FundKit\Onboarding\Onboarding;
-use FundKit\Recurring\RecurringPlanRepository;
-use FundKit\Settings\SettingsService;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignService;
+use Gratora\Currency\FxRates;
+use Gratora\Donations\AggregateSyncer;
+use Gratora\Donations\DonationIntent;
+use Gratora\Donations\DonationService;
+use Gratora\Donors\Donor;
+use Gratora\Donors\DonorService;
+use Gratora\Donors\MagicLinkService;
+use Gratora\Donors\Portal\PortalPage;
+use Gratora\Donors\Portal\PortalSession;
+use Gratora\Forms\Form;
+use Gratora\Forms\FormService;
+use Gratora\Foundation\Plugin;
+use Gratora\Foundation\Time\Clock;
+use Gratora\Funds\Fund;
+use Gratora\Funds\FundService;
+use Gratora\Gateways\GatewayManager;
+use Gratora\Gateways\Stripe\StripeAccount;
+use Gratora\Onboarding\Onboarding;
+use Gratora\Recurring\RecurringPlanRepository;
+use Gratora\Settings\SettingsService;
 use WP_CLI;
 
 /**
- * `wp fundkit ...` commands. Registered only under WP-CLI (see fundkit.php).
+ * `wp gratora ...` commands. Registered only under WP-CLI (see gratora.php).
  * Operational commands (migrate, recompute-aggregates) are production-safe;
  * seed writes fake data and is gated on org-wide test mode.
  *
@@ -38,11 +38,11 @@ use WP_CLI;
 final class CliCommands
 {
     /** Fixture credentials for a throwaway site: they charge nothing and reach no network. */
-    private const E2E_STRIPE_SECRET      = 'sk_test_fundkit_e2e_fixture';
-    private const E2E_STRIPE_PUBLISHABLE = 'pk_test_fundkit_e2e_fixture';
+    private const E2E_STRIPE_SECRET      = 'sk_test_gratora_e2e_fixture';
+    private const E2E_STRIPE_PUBLISHABLE = 'pk_test_gratora_e2e_fixture';
 
     /** @since 1.0.0 */
-    private function container(): \FundKit\Foundation\Container\Container
+    private function container(): \Gratora\Foundation\Container\Container
     {
         return Plugin::instance()->container;
     }
@@ -218,7 +218,7 @@ final class CliCommands
      * Seed a year of plausible fundraising history so the admin screens can be
      * screenshotted against something that looks like a real organisation.
      *
-     * Unlike `wp fundkit seed`, the rows are live (is_test = 0): test-mode rows
+     * Unlike `wp gratora seed`, the rows are live (is_test = 0): test-mode rows
      * are excluded from money reporting by design, so a dashboard seeded with
      * them renders empty. That makes this unsafe anywhere real money is
      * recorded, and it refuses when it finds any.
@@ -247,9 +247,9 @@ final class CliCommands
      *
      * ## EXAMPLES
      *
-     *     wp fundkit demo-seed
-     *     wp fundkit demo-seed --yes
-     *     wp fundkit demo-seed --purge
+     *     wp gratora demo-seed
+     *     wp gratora demo-seed --yes
+     *     wp gratora demo-seed --purge
      *
      * @when after_wp_load
      * @since 1.0.0
@@ -362,10 +362,10 @@ final class CliCommands
      * whatever the current spec set expects.
      *
      * Sets up:
-     *   - Campaign "FundKit E2E" (status=published)
-     *   - Form "FundKit E2E Form" (status=published) with every donor block the
+     *   - Campaign "Gratora E2E" (status=published)
+     *   - Form "Gratora E2E Form" (status=published) with every donor block the
      *     spec suite asserts against
-     *   - WP page "FundKit E2E" containing [fundkit_donation_form slug="..."]
+     *   - WP page "Gratora E2E" containing [gratora_donation_form slug="..."]
      *
      * Rewrites org-wide money settings, so it refuses on an install that
      * reports itself as production.
@@ -381,11 +381,11 @@ final class CliCommands
      *
      * ## EXAMPLES
      *
-     *     wp fundkit e2e-seed
+     *     wp gratora e2e-seed
      *     # then in your shell:
-     *     export FUNDKIT_E2E_URL="http://localhost:10075"
-     *     export FUNDKIT_E2E_FORM_PATH="/fundkit-e2e/"
-     *     export FUNDKIT_E2E_MULTI_STEP_FORM_PATH="/fundkit-e2e-wizard/"
+     *     export GRATORA_E2E_URL="http://localhost:10075"
+     *     export GRATORA_E2E_FORM_PATH="/gratora-e2e/"
+     *     export GRATORA_E2E_MULTI_STEP_FORM_PATH="/gratora-e2e-wizard/"
      *
      * @when after_wp_load
      * @since 1.0.0
@@ -419,7 +419,7 @@ final class CliCommands
         $settings   = $this->container()->get(SettingsService::class);
 
         // Activation leaves onboarding pending, and while it is pending every
-        // admin screen redirects to it. A spec that drives a FundKit admin page
+        // admin screen redirects to it. A spec that drives a Gratora admin page
         // never arrives, and the failure reads as a missing control rather
         // than a redirect.
         update_option(Onboarding::OPTION, 'completed', false);
@@ -445,7 +445,7 @@ final class CliCommands
         $this->e2ePinFxRates();
 
         // Enable relaxed test quotas for automation.
-        $gatewayConfig = get_option('fundkit_gateway_config', []);
+        $gatewayConfig = get_option('gratora_gateway_config', []);
         if (! is_array($gatewayConfig)) $gatewayConfig = [];
         $gatewayConfig['test_mode'] = true;
 
@@ -463,20 +463,20 @@ final class CliCommands
             ]
         );
 
-        update_option('fundkit_gateway_config', $gatewayConfig, false);
+        update_option('gratora_gateway_config', $gatewayConfig, false);
 
         $this->e2eSeedStripeFixtureKeys();
 
         global $wpdb;
         $wpdb->query(
-            "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_fundkit_donate_%' OR option_name LIKE '_transient_timeout_fundkit_donate_%'"
+            "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_gratora_donate_%' OR option_name LIKE '_transient_timeout_gratora_donate_%'"
         );
 
-        $campaign = Campaign::query()->where('slug', 'fundkit-e2e')->get();
+        $campaign = Campaign::query()->where('slug', 'gratora-e2e')->get();
         if (! $campaign) {
             $campaign = $campaigns->create([
-                'title'         => 'FundKit E2E',
-                'slug'          => 'fundkit-e2e',
+                'title'         => 'Gratora E2E',
+                'slug'          => 'gratora-e2e',
                 'status'        => 'published',
                 'skip_template' => true,
             ]);
@@ -493,46 +493,46 @@ final class CliCommands
         $singleUrl = $this->e2eUpsertFormAndPage(
             $forms,
             (int) $campaign->id,
-            'fundkit-e2e-form',
-            'FundKit E2E Form',
-            'fundkit-e2e',
-            'FundKit E2E',
+            'gratora-e2e-form',
+            'Gratora E2E Form',
+            'gratora-e2e',
+            'Gratora E2E',
             self::e2eCanonicalBlocks()
         );
         $multiUrl = $this->e2eUpsertFormAndPage(
             $forms,
             (int) $campaign->id,
-            'fundkit-e2e-wizard',
-            'FundKit E2E Wizard',
-            'fundkit-e2e-wizard',
-            'FundKit E2E Wizard',
+            'gratora-e2e-wizard',
+            'Gratora E2E Wizard',
+            'gratora-e2e-wizard',
+            'Gratora E2E Wizard',
             self::e2eMultiStepBlocks()
         );
         $condUrl = $this->e2eUpsertFormAndPage(
             $forms,
             (int) $campaign->id,
-            'fundkit-e2e-conditional',
-            'FundKit E2E Conditional',
-            'fundkit-e2e-conditional',
-            'FundKit E2E Conditional',
+            'gratora-e2e-conditional',
+            'Gratora E2E Conditional',
+            'gratora-e2e-conditional',
+            'Gratora E2E Conditional',
             self::e2eConditionalBlocks()
         );
         $customUrl = $this->e2eUpsertFormAndPage(
             $forms,
             (int) $campaign->id,
-            'fundkit-e2e-custom-fields',
-            'FundKit E2E Custom Fields',
-            'fundkit-e2e-custom-fields',
-            'FundKit E2E Custom Fields',
+            'gratora-e2e-custom-fields',
+            'Gratora E2E Custom Fields',
+            'gratora-e2e-custom-fields',
+            'Gratora E2E Custom Fields',
             self::e2eCustomFieldsBlocks()
         );
         $layoutUrl = $this->e2eUpsertFormAndPage(
             $forms,
             (int) $campaign->id,
-            'fundkit-e2e-layout',
-            'FundKit E2E Layout',
-            'fundkit-e2e-layout',
-            'FundKit E2E Layout',
+            'gratora-e2e-layout',
+            'Gratora E2E Layout',
+            'gratora-e2e-layout',
+            'Gratora E2E Layout',
             self::e2eLayoutBlocks()
         );
         // Its own form, not the canonical one: only a gateway that pays in the
@@ -541,16 +541,16 @@ final class CliCommands
         $paymentUrl = $this->e2eUpsertFormAndPage(
             $forms,
             (int) $campaign->id,
-            'fundkit-e2e-payment',
-            'FundKit E2E Payment',
-            'fundkit-e2e-payment',
-            'FundKit E2E Payment',
+            'gratora-e2e-payment',
+            'Gratora E2E Payment',
+            'gratora-e2e-payment',
+            'Gratora E2E Payment',
             self::e2ePaymentBlocks(),
             ['offline', 'sandbox', 'stripe']
         );
 
         WP_CLI::success("Canonical forms ready.");
-        WP_CLI::log('  export FUNDKIT_E2E_URL="' . untrailingslashit(home_url()) . '"');
+        WP_CLI::log('  export GRATORA_E2E_URL="' . untrailingslashit(home_url()) . '"');
         // The specs select gateways by name, and a form that offers none still
         // renders perfectly: the failure only shows up much later, as a
         // thank-you card that never arrives. Check here, while there is still
@@ -560,7 +560,7 @@ final class CliCommands
         // if test mode is on, and boot already happened in this process. Asking
         // the registry now would report sandbox missing however right the
         // fixture is. What the next request will see is the option.
-        $written = get_option('fundkit_gateway_config', []);
+        $written = get_option('gratora_gateway_config', []);
 
         if (empty($written['test_mode'])) {
             WP_CLI::error('Test mode did not stick, so the sandbox gateway will not be registered.');
@@ -581,15 +581,15 @@ final class CliCommands
 
         [$adminUser, $adminPass] = $this->ensureE2eAdmin();
 
-        WP_CLI::log('  export FUNDKIT_E2E_ADMIN_USER="' . $adminUser . '"');
-        WP_CLI::log('  export FUNDKIT_E2E_ADMIN_PASS="' . $adminPass . '"');
-        WP_CLI::log('  export FUNDKIT_E2E_FORM_PATH="' . wp_parse_url($singleUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export FUNDKIT_E2E_MULTI_STEP_FORM_PATH="' . wp_parse_url($multiUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export FUNDKIT_E2E_CONDITIONAL_FORM_PATH="' . wp_parse_url($condUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export FUNDKIT_E2E_CUSTOM_FIELDS_FORM_PATH="' . wp_parse_url($customUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export FUNDKIT_E2E_LAYOUT_FORM_PATH="' . wp_parse_url($layoutUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export FUNDKIT_E2E_PAYMENT_FORM_PATH="' . wp_parse_url($paymentUrl, PHP_URL_PATH) . '"');
-        WP_CLI::log('  export FUNDKIT_E2E_PORTAL_REOPEN_URL="' . $this->e2eMintPortalLink() . '"');
+        WP_CLI::log('  export GRATORA_E2E_ADMIN_USER="' . $adminUser . '"');
+        WP_CLI::log('  export GRATORA_E2E_ADMIN_PASS="' . $adminPass . '"');
+        WP_CLI::log('  export GRATORA_E2E_FORM_PATH="' . wp_parse_url($singleUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export GRATORA_E2E_MULTI_STEP_FORM_PATH="' . wp_parse_url($multiUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export GRATORA_E2E_CONDITIONAL_FORM_PATH="' . wp_parse_url($condUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export GRATORA_E2E_CUSTOM_FIELDS_FORM_PATH="' . wp_parse_url($customUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export GRATORA_E2E_LAYOUT_FORM_PATH="' . wp_parse_url($layoutUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export GRATORA_E2E_PAYMENT_FORM_PATH="' . wp_parse_url($paymentUrl, PHP_URL_PATH) . '"');
+        WP_CLI::log('  export GRATORA_E2E_PORTAL_REOPEN_URL="' . $this->e2eMintPortalLink() . '"');
     }
 
     /**
@@ -604,7 +604,7 @@ final class CliCommands
     private function e2eMintPortalLink(): string
     {
         $donor = $this->container()->get(DonorService::class)->findOrCreate(
-            'fundkit-e2e-portal@example.test',
+            'gratora-e2e-portal@example.test',
             ['first_name' => 'Portal', 'last_name' => 'Tester']
         );
 
@@ -641,7 +641,7 @@ final class CliCommands
         try {
             $account->saveKeys(true, self::E2E_STRIPE_SECRET, self::E2E_STRIPE_PUBLISHABLE);
             $account->refresh([
-                'id'                => 'acct_fundkit_e2e',
+                'id'                => 'acct_gratora_e2e',
                 'charges_enabled'   => true,
                 'details_submitted' => true,
                 'country'           => 'NL',
@@ -657,12 +657,12 @@ final class CliCommands
     private static function e2ePaymentBlocks(): string
     {
         return implode("\n", [
-            '<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
-            '<!-- wp:fundkit/name {"requireFirst":true,"requireLast":true} /-->',
-            '<!-- wp:fundkit/email {"required":true} /-->',
-            '<!-- wp:fundkit/payment-gateways {"style":"radio","allowed":["offline","sandbox","stripe"]} /-->',
-            '<!-- wp:fundkit/donation-summary /-->',
-            '<!-- wp:fundkit/submit-button {"label":"Donate now"} /-->',
+            '<!-- wp:gratora/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
+            '<!-- wp:gratora/name {"requireFirst":true,"requireLast":true} /-->',
+            '<!-- wp:gratora/email {"required":true} /-->',
+            '<!-- wp:gratora/payment-gateways {"style":"radio","allowed":["offline","sandbox","stripe"]} /-->',
+            '<!-- wp:gratora/donation-summary /-->',
+            '<!-- wp:gratora/submit-button {"label":"Donate now"} /-->',
         ]);
     }
 
@@ -711,7 +711,7 @@ final class CliCommands
             WP_CLI::log("  form updated: slug={$form->slug} id={$form->id}");
         }
 
-        $content = '[fundkit_donation_form slug="' . esc_attr($form->slug) . '"]';
+        $content = '[gratora_donation_form slug="' . esc_attr($form->slug) . '"]';
         $page    = get_page_by_path($pageSlug, OBJECT, 'page');
 
         // A campaign owns its page, and a campaign slug can collide with a form
@@ -767,8 +767,8 @@ final class CliCommands
      */
     private function ensureE2eAdmin(): array
     {
-        $login = (string) (getenv('FUNDKIT_E2E_ADMIN_USER') ?: 'fundkit-e2e-admin');
-        $pass  = (string) (getenv('FUNDKIT_E2E_ADMIN_PASS') ?: 'fundkit-e2e-pass');
+        $login = (string) (getenv('GRATORA_E2E_ADMIN_USER') ?: 'gratora-e2e-admin');
+        $pass  = (string) (getenv('GRATORA_E2E_ADMIN_PASS') ?: 'gratora-e2e-pass');
 
         $user = get_user_by('login', $login);
 
@@ -776,7 +776,7 @@ final class CliCommands
             $id = wp_insert_user([
                 'user_login' => $login,
                 'user_pass'  => $pass,
-                'user_email' => $login . '@fundkit.test',
+                'user_email' => $login . '@gratora.test',
                 'role'       => 'administrator',
             ]);
 
@@ -878,23 +878,23 @@ final class CliCommands
         ]);
 
         return implode("\n", [
-            '<!-- wp:fundkit/heading {"text":"Support our work","level":2} /-->',
-            '<!-- wp:fundkit/currency-switcher {"currencies":["EUR","USD","GBP"]} /-->',
-            '<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
-            '<!-- wp:fundkit/name {"requireFirst":true,"requireLast":true} /-->',
-            '<!-- wp:fundkit/email {"required":true} /-->',
-            '<!-- wp:fundkit/country /-->',
-            '<!-- wp:fundkit/address {"requireLine1":false,"requireCity":false,"requireRegion":false,"requirePostal":false,"requireCountry":false} /-->',
-            '<!-- wp:fundkit/phone /-->',
-            '<!-- wp:fundkit/comment {"label":"Add a message"} /-->',
-            '<!-- wp:fundkit/anonymous-toggle /-->',
-            '<!-- wp:fundkit/cover-fees /-->',
-            '<!-- wp:fundkit/date {"label":"Preferred call date","field":"call_date"} /-->',
-            '<!-- wp:fundkit/dropdown ' . $dropdown . ' /-->',
-            '<!-- wp:fundkit/consent ' . $consent . ' /-->',
-            '<!-- wp:fundkit/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
-            '<!-- wp:fundkit/donation-summary /-->',
-            '<!-- wp:fundkit/submit-button {"label":"Donate now"} /-->',
+            '<!-- wp:gratora/heading {"text":"Support our work","level":2} /-->',
+            '<!-- wp:gratora/currency-switcher {"currencies":["EUR","USD","GBP"]} /-->',
+            '<!-- wp:gratora/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
+            '<!-- wp:gratora/name {"requireFirst":true,"requireLast":true} /-->',
+            '<!-- wp:gratora/email {"required":true} /-->',
+            '<!-- wp:gratora/country /-->',
+            '<!-- wp:gratora/address {"requireLine1":false,"requireCity":false,"requireRegion":false,"requirePostal":false,"requireCountry":false} /-->',
+            '<!-- wp:gratora/phone /-->',
+            '<!-- wp:gratora/comment {"label":"Add a message"} /-->',
+            '<!-- wp:gratora/anonymous-toggle /-->',
+            '<!-- wp:gratora/cover-fees /-->',
+            '<!-- wp:gratora/date {"label":"Preferred call date","field":"call_date"} /-->',
+            '<!-- wp:gratora/dropdown ' . $dropdown . ' /-->',
+            '<!-- wp:gratora/consent ' . $consent . ' /-->',
+            '<!-- wp:gratora/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
+            '<!-- wp:gratora/donation-summary /-->',
+            '<!-- wp:gratora/submit-button {"label":"Donate now"} /-->',
         ]);
     }
 
@@ -902,22 +902,22 @@ final class CliCommands
     private static function e2eMultiStepBlocks(): string
     {
         return <<<'BLOCKS'
-<!-- wp:fundkit/steps -->
-<!-- wp:fundkit/step {"title":"Your donation"} -->
-<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->
-<!-- /wp:fundkit/step -->
+<!-- wp:gratora/steps -->
+<!-- wp:gratora/step {"title":"Your donation"} -->
+<!-- wp:gratora/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->
+<!-- /wp:gratora/step -->
 
-<!-- wp:fundkit/step {"title":"Your info"} -->
-<!-- wp:fundkit/name {"requireFirst":true,"requireLast":true} /-->
-<!-- wp:fundkit/email {"required":true} /-->
-<!-- /wp:fundkit/step -->
+<!-- wp:gratora/step {"title":"Your info"} -->
+<!-- wp:gratora/name {"requireFirst":true,"requireLast":true} /-->
+<!-- wp:gratora/email {"required":true} /-->
+<!-- /wp:gratora/step -->
 
-<!-- wp:fundkit/step {"title":"Confirm"} -->
-<!-- wp:fundkit/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
-<!-- wp:fundkit/donation-summary /-->
-<!-- wp:fundkit/submit-button {"label":"Donate now"} /-->
-<!-- /wp:fundkit/step -->
-<!-- /wp:fundkit/steps -->
+<!-- wp:gratora/step {"title":"Confirm"} -->
+<!-- wp:gratora/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
+<!-- wp:gratora/donation-summary /-->
+<!-- wp:gratora/submit-button {"label":"Donate now"} /-->
+<!-- /wp:gratora/step -->
+<!-- /wp:gratora/steps -->
 BLOCKS;
     }
 
@@ -932,33 +932,33 @@ BLOCKS;
     private static function e2eLayoutBlocks(): string
     {
         return <<<'BLOCKS'
-<!-- wp:fundkit/heading {"text":"LAYOUT_HEADING_TEXT","level":2} /-->
-<!-- wp:fundkit/paragraph {"text":"LAYOUT_PARAGRAPH_TEXT"} /-->
-<!-- wp:fundkit/html {"content":"<span class=\"layout-html-marker\">LAYOUT_HTML_TEXT</span>"} /-->
-<!-- wp:fundkit/divider {"marginTop":24,"marginBottom":24,"thickness":2,"color":"#cccccc"} /-->
+<!-- wp:gratora/heading {"text":"LAYOUT_HEADING_TEXT","level":2} /-->
+<!-- wp:gratora/paragraph {"text":"LAYOUT_PARAGRAPH_TEXT"} /-->
+<!-- wp:gratora/html {"content":"<span class=\"layout-html-marker\">LAYOUT_HTML_TEXT</span>"} /-->
+<!-- wp:gratora/divider {"marginTop":24,"marginBottom":24,"thickness":2,"color":"#cccccc"} /-->
 
-<!-- wp:fundkit/section {"label":"LAYOUT_SECTION_LABEL"} -->
-<!-- wp:fundkit/paragraph {"text":"Inside a section"} /-->
-<!-- /wp:fundkit/section -->
+<!-- wp:gratora/section {"label":"LAYOUT_SECTION_LABEL"} -->
+<!-- wp:gratora/paragraph {"text":"Inside a section"} /-->
+<!-- /wp:gratora/section -->
 
-<!-- wp:fundkit/columns {"columns":2,"gap":20,"gapUnit":"px"} -->
-<!-- wp:fundkit/heading {"text":"LAYOUT_COL_LEFT","level":4} /-->
-<!-- wp:fundkit/heading {"text":"LAYOUT_COL_RIGHT","level":4} /-->
-<!-- /wp:fundkit/columns -->
+<!-- wp:gratora/columns {"columns":2,"gap":20,"gapUnit":"px"} -->
+<!-- wp:gratora/heading {"text":"LAYOUT_COL_LEFT","level":4} /-->
+<!-- wp:gratora/heading {"text":"LAYOUT_COL_RIGHT","level":4} /-->
+<!-- /wp:gratora/columns -->
 
-<!-- wp:fundkit/row {"columns":2,"gap":14,"gapUnit":"px"} -->
-<!-- wp:fundkit/name /-->
-<!-- wp:fundkit/email /-->
-<!-- /wp:fundkit/row -->
+<!-- wp:gratora/row {"columns":2,"gap":14,"gapUnit":"px"} -->
+<!-- wp:gratora/name /-->
+<!-- wp:gratora/email /-->
+<!-- /wp:gratora/row -->
 
-<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->
-<!-- wp:fundkit/recurring-toggle {"label":"LAYOUT_RECURRING_LABEL","frequencies":["one-time","monthly"]} /-->
-<!-- wp:fundkit/fund-picker {"label":"LAYOUT_FUND_LABEL"} /-->
-<!-- wp:fundkit/goal {"showAmount":true} /-->
-<!-- wp:fundkit/privacy-notice {"text":"LAYOUT_PRIVACY_TEXT"} /-->
-<!-- wp:fundkit/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
-<!-- wp:fundkit/donation-summary /-->
-<!-- wp:fundkit/submit-button {"label":"Donate now"} /-->
+<!-- wp:gratora/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->
+<!-- wp:gratora/recurring-toggle {"label":"LAYOUT_RECURRING_LABEL","frequencies":["one-time","monthly"]} /-->
+<!-- wp:gratora/fund-picker {"label":"LAYOUT_FUND_LABEL"} /-->
+<!-- wp:gratora/goal {"showAmount":true} /-->
+<!-- wp:gratora/privacy-notice {"text":"LAYOUT_PRIVACY_TEXT"} /-->
+<!-- wp:gratora/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->
+<!-- wp:gratora/donation-summary /-->
+<!-- wp:gratora/submit-button {"label":"Donate now"} /-->
 BLOCKS;
     }
 
@@ -985,19 +985,19 @@ BLOCKS;
         ]);
 
         return implode("\n", [
-            '<!-- wp:fundkit/heading {"text":"Custom Fields Form","level":2} /-->',
-            '<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
-            '<!-- wp:fundkit/name {"requireFirst":true,"requireLast":true} /-->',
-            '<!-- wp:fundkit/email {"required":true} /-->',
-            '<!-- wp:fundkit/text-input {"label":"CUSTOM_TEXT_LABEL","field":"cf_text","placeholder":"Type something"} /-->',
-            '<!-- wp:fundkit/number-input {"label":"CUSTOM_NUMBER_LABEL","field":"cf_number","min":1,"max":100} /-->',
-            '<!-- wp:fundkit/radio ' . $radio . ' /-->',
-            '<!-- wp:fundkit/checkbox {"label":"CUSTOM_CHECKBOX_LABEL","field":"cf_check"} /-->',
-            '<!-- wp:fundkit/multi-select ' . $multi . ' /-->',
-            '<!-- wp:fundkit/hidden {"field":"cf_hidden","defaultValue":"hidden-default"} /-->',
-            '<!-- wp:fundkit/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
-            '<!-- wp:fundkit/donation-summary /-->',
-            '<!-- wp:fundkit/submit-button {"label":"Donate now"} /-->',
+            '<!-- wp:gratora/heading {"text":"Custom Fields Form","level":2} /-->',
+            '<!-- wp:gratora/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
+            '<!-- wp:gratora/name {"requireFirst":true,"requireLast":true} /-->',
+            '<!-- wp:gratora/email {"required":true} /-->',
+            '<!-- wp:gratora/text-input {"label":"CUSTOM_TEXT_LABEL","field":"cf_text","placeholder":"Type something"} /-->',
+            '<!-- wp:gratora/number-input {"label":"CUSTOM_NUMBER_LABEL","field":"cf_number","min":1,"max":100} /-->',
+            '<!-- wp:gratora/radio ' . $radio . ' /-->',
+            '<!-- wp:gratora/checkbox {"label":"CUSTOM_CHECKBOX_LABEL","field":"cf_check"} /-->',
+            '<!-- wp:gratora/multi-select ' . $multi . ' /-->',
+            '<!-- wp:gratora/hidden {"field":"cf_hidden","defaultValue":"hidden-default"} /-->',
+            '<!-- wp:gratora/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
+            '<!-- wp:gratora/donation-summary /-->',
+            '<!-- wp:gratora/submit-button {"label":"Donate now"} /-->',
         ]);
     }
 
@@ -1030,17 +1030,17 @@ BLOCKS;
         ]);
 
         return implode("\n", [
-            '<!-- wp:fundkit/heading {"text":"Support our work","level":2} /-->',
-            '<!-- wp:fundkit/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
-            '<!-- wp:fundkit/name {"requireFirst":true,"requireLast":true} /-->',
-            '<!-- wp:fundkit/email {"required":true} /-->',
-            '<!-- wp:fundkit/dropdown ' . $dropdown . ' /-->',
-            '<!-- wp:fundkit/heading ' . $headingShownForSocial . ' /-->',
-            '<!-- wp:fundkit/text-input ' . $hiddenRequiredTextInput . ' /-->',
-            '<!-- wp:fundkit/comment ' . $commentVisibleWhenAnyValue . ' /-->',
-            '<!-- wp:fundkit/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
-            '<!-- wp:fundkit/donation-summary /-->',
-            '<!-- wp:fundkit/submit-button {"label":"Donate now"} /-->',
+            '<!-- wp:gratora/heading {"text":"Support our work","level":2} /-->',
+            '<!-- wp:gratora/donation-amount {"presets":[1000,2500,5000,10000],"allowCustom":true,"currency":"EUR"} /-->',
+            '<!-- wp:gratora/name {"requireFirst":true,"requireLast":true} /-->',
+            '<!-- wp:gratora/email {"required":true} /-->',
+            '<!-- wp:gratora/dropdown ' . $dropdown . ' /-->',
+            '<!-- wp:gratora/heading ' . $headingShownForSocial . ' /-->',
+            '<!-- wp:gratora/text-input ' . $hiddenRequiredTextInput . ' /-->',
+            '<!-- wp:gratora/comment ' . $commentVisibleWhenAnyValue . ' /-->',
+            '<!-- wp:gratora/payment-gateways {"style":"radio","allowed":["offline","sandbox"]} /-->',
+            '<!-- wp:gratora/donation-summary /-->',
+            '<!-- wp:gratora/submit-button {"label":"Donate now"} /-->',
         ]);
     }
 

@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/Card';
+export { default } from '@gratora/ui/components/Card';

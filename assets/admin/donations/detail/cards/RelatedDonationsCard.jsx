@@ -5,7 +5,7 @@ import { formatAmount, formatDate, donationStatusPill } from '../helpers';
 
 function donationHref( reference ) {
     return addQueryArgs( window.location.pathname, {
-        page:      'fundkit-donations',
+        page:      'gratora-donations',
         view:      'detail',
         reference,
     } );
@@ -20,10 +20,10 @@ export default function RelatedDonationsCard( { donor, related } ) {
                     <table className="dd-table">
                         <thead>
                             <tr>
-                                <th>{ __( 'Reference', 'fundraising-toolkit' ) }</th>
-                                <th>{ __( 'Date', 'fundraising-toolkit' ) }</th>
-                                <th style={ { textAlign: 'right' } }>{ __( 'Amount', 'fundraising-toolkit' ) }</th>
-                                <th>{ __( 'Status', 'fundraising-toolkit' ) }</th>
+                                <th>{ __( 'Reference', 'gratora' ) }</th>
+                                <th>{ __( 'Date', 'gratora' ) }</th>
+                                <th style={ { textAlign: 'right' } }>{ __( 'Amount', 'gratora' ) }</th>
+                                <th>{ __( 'Status', 'gratora' ) }</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -33,7 +33,7 @@ export default function RelatedDonationsCard( { donor, related } ) {
                                     <tr key={ d.id }>
                                         <td className="ref-cell">
                                             <a href={ donationHref( d.reference ) }>{ d.reference }</a>
-                                            { d.is_self && <span className="muted" style={ { fontFamily: 'inherit', fontSize: 11, marginLeft: 6 } }>{ __( '(this one)', 'fundraising-toolkit' ) }</span> }
+                                            { d.is_self && <span className="muted" style={ { fontFamily: 'inherit', fontSize: 11, marginLeft: 6 } }>{ __( '(this one)', 'gratora' ) }</span> }
                                         </td>
                                         <td>{ formatDate( d.paid_at || d.created_at ) }</td>
                                         <td className="num-cell">{ formatAmount( d.amount_cents, d.currency ) }</td>

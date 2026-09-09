@@ -41,7 +41,7 @@ const CONFIG = {
     currency: 'USD',
     stripe:   { publishableKey: 'pk_test_probe' },
     i18n:     I18N,
-    rest:     'https://example.test/wp-json/fundkit/v1/donations',
+    rest:     'https://example.test/wp-json/gratora/v1/donations',
 };
 
 const PAYMENT = {
@@ -59,13 +59,13 @@ const button = ( label ) => [ ...document.querySelectorAll( 'button' ) ]
 
 beforeEach( () => {
     document.body.innerHTML = '<div id="root"></div>';
-    window.fundkit = {
+    window.gratora = {
         default_currency: 'USD',
         number_format: { decimalPlaces: 2, decimalSep: '.', thousandSep: ',', symbolPosition: 'before', symbol: '$' },
     };
 } );
 
-afterEach( () => { delete window.fundkit; } );
+afterEach( () => { delete window.gratora; } );
 
 it( 'leaves the donor a way out when confirmPayment throws', async () => {
     render(

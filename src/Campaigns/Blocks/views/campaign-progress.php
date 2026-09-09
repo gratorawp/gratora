@@ -12,7 +12,7 @@ defined('ABSPATH') || exit;
  */
 $formatValue = static function (int $value, string $type, string $currency): string {
     if ($type === 'amount') {
-        return \FundKit\Foundation\Helpers\Money::compact($value, $currency);
+        return \Gratora\Foundation\Helpers\Money::compact($value, $currency);
     }
     return (string) number_format_i18n($value);
 };
@@ -20,30 +20,30 @@ $formatValue = static function (int $value, string $type, string $currency): str
 <section <?php
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() escapes what it returns; core's own blocks print it the same way.
 echo get_block_wrapper_attributes(array_filter([
-    'class' => 'fundkit-block fundkit-block--progress is-align-' . $align,
+    'class' => 'gratora-block gratora-block--progress is-align-' . $align,
     'style' => $styleVars,
 ]));
 // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
-?> data-block="fundkit/campaign-progress">
+?> data-block="gratora/campaign-progress">
     <?php if ($showLabels): ?>
-        <div class="fundkit-progress__labels">
-            <div class="fundkit-progress__current">
-                <span class="fundkit-progress__value"><?php echo esc_html($formatValue($current, $goalType, $currency));
+        <div class="gratora-progress__labels">
+            <div class="gratora-progress__current">
+                <span class="gratora-progress__value"><?php echo esc_html($formatValue($current, $goalType, $currency));
 ?></span>
-                <span class="fundkit-progress__caption">
+                <span class="gratora-progress__caption">
                     <?php echo esc_html(match ($goalType) {
-                        'donations' => __('donations', 'fundraising-toolkit'),
-                        'donors'    => __('donors', 'fundraising-toolkit'),
-                        default     => __('raised', 'fundraising-toolkit'),
+                        'donations' => __('donations', 'gratora'),
+                        'donors'    => __('donors', 'gratora'),
+                        default     => __('raised', 'gratora'),
                     });
 ?>
                 </span>
             </div>
             <?php if ($target > 0): ?>
-                <div class="fundkit-progress__target">
+                <div class="gratora-progress__target">
                     <?php echo esc_html(sprintf(
                         /* translators: %1$s: percent, %2$s: target value */
-                        __('%1$d%% of %2$s goal', 'fundraising-toolkit'),
+                        __('%1$d%% of %2$s goal', 'gratora'),
                         $pct,
                         $formatValue($target, $goalType, $currency)
                     ));
@@ -52,11 +52,11 @@ echo get_block_wrapper_attributes(array_filter([
             <?php endif; ?>
         </div>
     <?php endif; ?>
-    <div class="fundkit-progress__bar" role="progressbar"
+    <div class="gratora-progress__bar" role="progressbar"
          aria-valuenow="<?php echo esc_attr((string) $pct);
 ?>"
          aria-valuemin="0" aria-valuemax="100">
-        <div class="fundkit-progress__bar-fill" style="width: <?php echo esc_attr((string) $pct);
+        <div class="gratora-progress__bar-fill" style="width: <?php echo esc_attr((string) $pct);
 ?>%;"></div>
     </div>
 </section>

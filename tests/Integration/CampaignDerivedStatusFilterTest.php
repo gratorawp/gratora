@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Integration;
+namespace Gratora\Tests\Integration;
 
-use FundKit\Campaigns\Campaign;
-use FundKit\Campaigns\CampaignRepository;
+use Gratora\Campaigns\Campaign;
+use Gratora\Campaigns\CampaignRepository;
 
 /**
  * The list badges a campaign by its derived state, so the filter has to derive

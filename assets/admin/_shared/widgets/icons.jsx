@@ -1,1 +1,1 @@
-export * from '@fundkit/ui/widgets/icons';
+export * from '@gratora/ui/widgets/icons';

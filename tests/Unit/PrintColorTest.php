@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit;
+namespace Gratora\Tests\Unit;
 
-use FundKit\Campaigns\Styling\Tokens;
-use FundKit\Vendor\Dompdf\Css\Color;
+use Gratora\Campaigns\Styling\Tokens;
+use Gratora\Vendor\Dompdf\Css\Color;
 use PHPUnit\Framework\TestCase;
 
 /**

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Forms\Blocks;
+namespace Gratora\Forms\Blocks;
 
 /** @since 1.0.0 */
 final class BlockRegistry
@@ -38,7 +38,7 @@ final class BlockRegistry
         foreach ($this->blocks as $name => $block) {
             $attrs = $block->attributes();
             // Every form block supports conditional visibility via the
-            // fundkit/condition inspector panel. Declare the attribute centrally
+            // gratora/condition inspector panel. Declare the attribute centrally
             // so individual blocks don't each need to repeat it.
             if (! isset($attrs['condition'])) {
                 $attrs['condition'] = ['type' => 'object', 'default' => null];

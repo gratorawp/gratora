@@ -69,12 +69,12 @@ function config() {
 
 function addForm( cfg ) {
     const form = document.createElement( 'form' );
-    form.className = 'fundkit-donation-form';
-    form.id = 'fundkit-form-1';
+    form.className = 'gratora-donation-form';
+    form.id = 'gratora-form-1';
 
     const json = document.createElement( 'script' );
     json.type = 'application/json';
-    json.setAttribute( 'data-fundkit-form-config', '' );
+    json.setAttribute( 'data-gratora-form-config', '' );
     json.textContent = JSON.stringify( cfg );
     form.appendChild( json );
 
@@ -84,13 +84,13 @@ function addForm( cfg ) {
 }
 
 function returningFrom( reference ) {
-    const search = '?fundkit_return=1&fundkit_ref=' + reference
+    const search = '?gratora_return=1&gratora_ref=' + reference
         + '&payment_intent_client_secret=pi_probe_secret';
     captureNavigation( search );
-    window.sessionStorage.setItem( 'fundkit:pending-donation', JSON.stringify( {
+    window.sessionStorage.setItem( 'gratora:pending-donation', JSON.stringify( {
         reference,
         statusToken: 'tok',
-        formKey:     'fundkit-form-1',
+        formKey:     'gratora-form-1',
         amountCents: 1000,
         currency:    'EUR',
     } ) );
@@ -115,18 +115,18 @@ let listener = null;
 // hold the next test's redirect open.
 function listen( handler ) {
     listener = handler;
-    window.addEventListener( 'fundkit:donation:completed', listener );
+    window.addEventListener( 'gratora:donation:completed', listener );
 }
 
 beforeEach( () => {
     document.body.innerHTML = '';
     window.sessionStorage.clear();
     mockStatus = 'succeeded';
-    returningFrom( 'FUNDKIT-2026-00042' );
+    returningFrom( 'GRATORA-2026-00042' );
 } );
 
 afterEach( () => {
-    if ( listener ) window.removeEventListener( 'fundkit:donation:completed', listener );
+    if ( listener ) window.removeEventListener( 'gratora:donation:completed', listener );
     listener = null;
     jest.useRealTimers();
 } );

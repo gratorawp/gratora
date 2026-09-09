@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FundKit\Tests\Unit\Campaigns\Styling;
+namespace Gratora\Tests\Unit\Campaigns\Styling;
 
-use FundKit\Campaigns\Styling\Ink;
+use Gratora\Campaigns\Styling\Ink;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -38,7 +38,7 @@ final class InkTest extends TestCase
         $css = Ink::declarationsFor($accent);
 
         $this->assertStringContainsString(
-            $expectsLight ? '--fundkit-on-accent:#ffffff' : '--fundkit-on-accent:#10162a',
+            $expectsLight ? '--gratora-on-accent:#ffffff' : '--gratora-on-accent:#10162a',
             $css,
             $accent . ' got the wrong ink'
         );
@@ -48,9 +48,9 @@ final class InkTest extends TestCase
     {
         $css = Ink::declarationsFor('#211d3f');
 
-        $this->assertStringContainsString('--fundkit-on-accent:', $css);
-        $this->assertStringContainsString('--fundkit-on-accent-muted:', $css);
-        $this->assertStringContainsString('--fundkit-on-accent-line:', $css);
+        $this->assertStringContainsString('--gratora-on-accent:', $css);
+        $this->assertStringContainsString('--gratora-on-accent-muted:', $css);
+        $this->assertStringContainsString('--gratora-on-accent-line:', $css);
     }
 
     /**
@@ -79,21 +79,21 @@ final class InkTest extends TestCase
     /**
      * The amount tiles, the order summary and the secondary buttons sit on the
      * soft ground, not on the page. The page ink is chosen against
-     * --fundkit-bg and knows nothing about this one.
+     * --gratora-bg and knows nothing about this one.
      */
     public function test_the_soft_ground_gets_ink_of_its_own(): void
     {
-        $css = Ink::softDeclarations(['fundkit-bg-soft' => '#101828', 'fundkit-accent' => '#452ef5']);
+        $css = Ink::softDeclarations(['gratora-bg-soft' => '#101828', 'gratora-accent' => '#452ef5']);
 
-        $this->assertStringContainsString('--fundkit-on-soft:#ffffff;', $css);
-        $this->assertStringContainsString('--fundkit-on-soft-muted:rgba(255,255,255,.72);', $css);
+        $this->assertStringContainsString('--gratora-on-soft:#ffffff;', $css);
+        $this->assertStringContainsString('--gratora-on-soft-muted:rgba(255,255,255,.72);', $css);
     }
 
     public function test_a_pale_soft_ground_gets_dark_ink(): void
     {
         $this->assertStringContainsString(
-            '--fundkit-on-soft:#10162a;',
-            Ink::softDeclarations(['fundkit-bg-soft' => '#f8fafb', 'fundkit-accent' => '#211d3f'])
+            '--gratora-on-soft:#10162a;',
+            Ink::softDeclarations(['gratora-bg-soft' => '#f8fafb', 'gratora-accent' => '#211d3f'])
         );
     }
 
@@ -105,8 +105,8 @@ final class InkTest extends TestCase
     public function test_the_accent_keeps_the_total_where_it_reads(): void
     {
         $this->assertStringContainsString(
-            '--fundkit-on-soft-accent:#211d3f;',
-            Ink::softDeclarations(['fundkit-bg-soft' => '#f8fafb', 'fundkit-accent' => '#211d3f'])
+            '--gratora-on-soft-accent:#211d3f;',
+            Ink::softDeclarations(['gratora-bg-soft' => '#f8fafb', 'gratora-accent' => '#211d3f'])
         );
     }
 
@@ -114,14 +114,14 @@ final class InkTest extends TestCase
     {
         // Violet on this blue measures 2.5:1, so the total would be a smudge.
         $this->assertStringContainsString(
-            '--fundkit-on-soft-accent:#10162a;',
-            Ink::softDeclarations(['fundkit-bg-soft' => '#05a2f0', 'fundkit-accent' => '#452ef5'])
+            '--gratora-on-soft-accent:#10162a;',
+            Ink::softDeclarations(['gratora-bg-soft' => '#05a2f0', 'gratora-accent' => '#452ef5'])
         );
     }
 
     public function test_an_unreadable_soft_ground_leaves_the_stylesheet_its_fallback(): void
     {
-        $this->assertSame('', Ink::softDeclarations(['fundkit-bg-soft' => 'var(--wp--preset--color--x)']));
+        $this->assertSame('', Ink::softDeclarations(['gratora-bg-soft' => 'var(--wp--preset--color--x)']));
     }
 
     /**
@@ -147,7 +147,7 @@ final class InkTest extends TestCase
     public function test_an_hsl_ground_is_measured_like_any_other(string $ground, bool $expectsLight): void
     {
         $this->assertStringContainsString(
-            $expectsLight ? '--fundkit-on-accent:#ffffff;' : '--fundkit-on-accent:#10162a;',
+            $expectsLight ? '--gratora-on-accent:#ffffff;' : '--gratora-on-accent:#10162a;',
             Ink::declarationsFor($ground)
         );
     }

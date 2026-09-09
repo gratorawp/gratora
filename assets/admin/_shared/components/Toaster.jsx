@@ -1,1 +1,1 @@
-export { default } from '@fundkit/ui/components/Toaster';
+export { default } from '@gratora/ui/components/Toaster';

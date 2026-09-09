@@ -33,26 +33,26 @@ function hasContext( row ) {
 
 /**
  * A delivery has four readings, and only two of them are faults. An event type
- * FundKit has no handler for is ordinary traffic: gateways send everything they
+ * Gratora has no handler for is ordinary traffic: gateways send everything they
  * have, and most of it is none of our business.
  */
 function deliveryOutcome( row ) {
     if ( ! row.verified ) {
-        return { tone: 'red', label: __( 'Not verified', 'fundraising-toolkit' ) };
+        return { tone: 'red', label: __( 'Not verified', 'gratora' ) };
     }
     if ( row.error ) {
-        return { tone: 'red', label: __( 'Handling failed', 'fundraising-toolkit' ) };
+        return { tone: 'red', label: __( 'Handling failed', 'gratora' ) };
     }
     if ( row.processed ) {
-        return { tone: 'green', label: __( 'Processed', 'fundraising-toolkit' ) };
+        return { tone: 'green', label: __( 'Processed', 'gratora' ) };
     }
-    return { tone: 'gray', label: __( 'No action needed', 'fundraising-toolkit' ) };
+    return { tone: 'gray', label: __( 'No action needed', 'gratora' ) };
 }
 
 function Pill( { tone, label } ) {
     return (
-        <span className={ `fundkit-pill fundkit-pill--${ tone }` }>
-            <span className="fundkit-pill__dot" />
+        <span className={ `gratora-pill gratora-pill--${ tone }` }>
+            <span className="gratora-pill__dot" />
             { label }
         </span>
     );
@@ -104,7 +104,7 @@ export default function LogsTab( { active, setNotice } ) {
     const load = useCallback( () => {
         const mine = ++generation.current;
         setLoading( true );
-        apiFetch( { path: addQueryArgs( '/fundkit/v1/admin/tools/log', apiParams ) } )
+        apiFetch( { path: addQueryArgs( '/gratora/v1/admin/tools/log', apiParams ) } )
             .then( ( res ) => {
                 if ( mine !== generation.current ) return;
                 setLog( res );
@@ -115,7 +115,7 @@ export default function LogsTab( { active, setNotice } ) {
                 // Deliberately not an empty result: "nothing has happened" and
                 // "we could not find out" are opposite answers, and this screen
                 // is read precisely when someone suspects the second.
-                setError( err?.message || __( 'The log could not be read.', 'fundraising-toolkit' ) );
+                setError( err?.message || __( 'The log could not be read.', 'gratora' ) );
             } )
             .finally( () => {
                 if ( mine === generation.current ) setLoading( false );
@@ -130,7 +130,7 @@ export default function LogsTab( { active, setNotice } ) {
         setClearing( true );
         try {
             const res = await apiFetch( {
-                path:   addQueryArgs( '/fundkit/v1/admin/tools/log', { source } ),
+                path:   addQueryArgs( '/gratora/v1/admin/tools/log', { source } ),
                 method: 'DELETE',
             } );
             setView( ( v ) => ( { ...v, page: 1 } ) );
@@ -139,12 +139,12 @@ export default function LogsTab( { active, setNotice } ) {
                 type: 'success',
                 text: sprintf(
                     /* translators: %d: number of log entries deleted. */
-                    _n( '%d entry cleared.', '%d entries cleared.', Number( res?.deleted ) || 0, 'fundraising-toolkit' ),
+                    _n( '%d entry cleared.', '%d entries cleared.', Number( res?.deleted ) || 0, 'gratora' ),
                     Number( res?.deleted ) || 0
                 ),
             } );
         } catch ( err ) {
-            setNotice( { type: 'error', text: err?.message || __( 'Could not clear the log.', 'fundraising-toolkit' ) } );
+            setNotice( { type: 'error', text: err?.message || __( 'Could not clear the log.', 'gratora' ) } );
         } finally {
             setClearing( false );
         }
@@ -156,16 +156,16 @@ export default function LogsTab( { active, setNotice } ) {
     // alone, and the delivery history goes with the failures otherwise.
     const askClear = () => setConfirm( {
         title: source
-            ? __( 'Clear this source', 'fundraising-toolkit' )
-            : __( 'Clear the log', 'fundraising-toolkit' ),
+            ? __( 'Clear this source', 'gratora' )
+            : __( 'Clear the log', 'gratora' ),
         message: source
             ? sprintf(
                 /* translators: %s: the log source being cleared, e.g. webhook.stripe */
-                __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'fundraising-toolkit' ),
+                __( 'Deletes every entry recorded under %s. Nothing else is touched.', 'gratora' ),
                 source
             )
-            : __( 'Deletes every entry: the failures Fundraising Toolkit recorded and the history of what your gateways sent. The log fills again as things happen.', 'fundraising-toolkit' ),
-        confirmLabel: __( 'Clear log', 'fundraising-toolkit' ),
+            : __( 'Deletes every entry: the failures Gratora recorded and the history of what your gateways sent. The log fills again as things happen.', 'gratora' ),
+        confirmLabel: __( 'Clear log', 'gratora' ),
         destructive:  true,
         onConfirm:    doClear,
     } );
@@ -179,7 +179,7 @@ export default function LogsTab( { active, setNotice } ) {
     const fields = useMemo( () => [
         {
             id:            'occurred_at',
-            label:         __( 'When', 'fundraising-toolkit' ),
+            label:         __( 'When', 'gratora' ),
             enableSorting: true,
             enableHiding:  false,
             getValue:      ( { item } ) => item.occurred_at || '',
@@ -187,34 +187,34 @@ export default function LogsTab( { active, setNotice } ) {
         },
         {
             id:            'source',
-            label:         __( 'Source', 'fundraising-toolkit' ),
+            label:         __( 'Source', 'gratora' ),
             enableSorting: true,
             elements:      sources.map( ( s ) => ( { value: s, label: s } ) ),
             filterBy:      { operators: [ 'is' ] },
             getValue:      ( { item } ) => fullType( item ),
-            render:        ( { item } ) => <code className="fundkit-log__source">{ fullType( item ) }</code>,
+            render:        ( { item } ) => <code className="gratora-log__source">{ fullType( item ) }</code>,
         },
         {
             id:            'message',
-            label:         __( 'What it says', 'fundraising-toolkit' ),
+            label:         __( 'What it says', 'gratora' ),
             enableSorting: false,
             getValue:      ( { item } ) => item.message || '',
             render: ( { item } ) => (
-                <div className="fundkit-log__message">
+                <div className="gratora-log__message">
                     <div>{ item.message }</div>
                     { item.kind === 'webhook' && item.error && (
-                        <div className="fundkit-row__sub fundkit-log__message-sub">{ item.error }</div>
+                        <div className="gratora-row__sub gratora-log__message-sub">{ item.error }</div>
                     ) }
                 </div>
             ),
         },
         {
             id:            'outcome',
-            label:         __( 'Outcome', 'fundraising-toolkit' ),
+            label:         __( 'Outcome', 'gratora' ),
             enableSorting: false,
             // The one narrowing worth offering: everything else on this screen
             // is ordinary traffic an org reads by scanning, not by filtering.
-            elements:      [ { value: 'failed', label: __( 'Problems only', 'fundraising-toolkit' ) } ],
+            elements:      [ { value: 'failed', label: __( 'Problems only', 'gratora' ) } ],
             filterBy:      { operators: [ 'is' ] },
             render: ( { item } ) => {
                 if ( item.kind === 'webhook' ) {
@@ -230,7 +230,7 @@ export default function LogsTab( { active, setNotice } ) {
     const actions = useMemo( () => [
         {
             id:         'detail',
-            label:      __( 'View detail', 'fundraising-toolkit' ),
+            label:      __( 'View detail', 'gratora' ),
             isEligible: hasContext,
             callback:   ( [ item ] ) => setDetail( item ),
         },
@@ -247,10 +247,10 @@ export default function LogsTab( { active, setNotice } ) {
     const emptyAndUnfiltered = ! loading && ! error && total === 0 && ! filtered;
 
     return (
-        <div className="fundkit-panel">
-            <div className="fundkit-tools-logbar">
+        <div className="gratora-panel">
+            <div className="gratora-tools-logbar">
                 <Btn variant="secondary" onClick={ load } disabled={ loading }>
-                    { __( 'Refresh', 'fundraising-toolkit' ) }
+                    { __( 'Refresh', 'gratora' ) }
                 </Btn>
                 { userCan( 'manage_options' ) && (
                     <Btn
@@ -259,22 +259,22 @@ export default function LogsTab( { active, setNotice } ) {
                         disabled={ clearing || total === 0 }
                         isBusy={ clearing }
                     >
-                        { __( 'Clear log', 'fundraising-toolkit' ) }
+                        { __( 'Clear log', 'gratora' ) }
                     </Btn>
                 ) }
             </div>
 
             { error ? (
-                <p className="fundkit-tools-empty">
-                    { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'fundraising-toolkit' ) }
+                <p className="gratora-tools-empty">
+                    { __( 'The log could not be read, so this screen cannot say what has happened. Check that you are still signed in, then try Refresh.', 'gratora' ) }
                     { ' ' }
                     <code>{ error }</code>
                 </p>
             ) : emptyAndUnfiltered ? (
-                <p className="fundkit-tools-empty">{ __( 'Nothing recorded yet.', 'fundraising-toolkit' ) }</p>
+                <p className="gratora-tools-empty">{ __( 'Nothing recorded yet.', 'gratora' ) }</p>
             ) : (
                 // Carries the shared table styling every other list screen uses.
-                <div className="fundkit-dataviews">
+                <div className="gratora-dataviews">
                     <DataViews
                         data={ items }
                         fields={ fields }
@@ -292,21 +292,21 @@ export default function LogsTab( { active, setNotice } ) {
 
             { detail && (
                 <Dialog
-                    title={ __( 'Entry detail', 'fundraising-toolkit' ) }
+                    title={ __( 'Entry detail', 'gratora' ) }
                     size="wide"
                     onClose={ () => setDetail( null ) }
                     foot={ (
                         <Btn variant="secondary" onClick={ () => setDetail( null ) }>
-                            { __( 'Close', 'fundraising-toolkit' ) }
+                            { __( 'Close', 'gratora' ) }
                         </Btn>
                     ) }
                 >
-                    <div className="fundkit-log__detail-head">
-                        <code className="fundkit-log__source">{ fullType( detail ) }</code>
-                        <span className="fundkit-row__sub">{ formatDate( detail.occurred_at ) }</span>
+                    <div className="gratora-log__detail-head">
+                        <code className="gratora-log__source">{ fullType( detail ) }</code>
+                        <span className="gratora-row__sub">{ formatDate( detail.occurred_at ) }</span>
                     </div>
-                    <div className="fundkit-log__message">{ detail.message }</div>
-                    <pre className="fundkit-log__context">{ JSON.stringify( detail.context, null, 2 ) }</pre>
+                    <div className="gratora-log__message">{ detail.message }</div>
+                    <pre className="gratora-log__context">{ JSON.stringify( detail.context, null, 2 ) }</pre>
                 </Dialog>
             ) }
 
