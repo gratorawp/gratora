@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8db433f53f5a0ae1108b41437fb016fe",
+    "content-hash": "e8f7a6ef27bb7069d8229d3169c61e81",
     "packages": [
         {
             "name": "dompdf/dompdf",
@@ -163,16 +163,16 @@
         },
         {
             "name": "gratora/queryable",
-            "version": "v1.2.0",
+            "version": "v1.3.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/gratorawp/queryable.git",
-                "reference": "3b3254187b15226a39230ab294f76664a54ba8e0"
+                "url": "git@github.com:gratorawp/queryable.git",
+                "reference": "ab6cecf02c9eecc2b73d24e55d93025dae6ab767"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gratorawp/queryable/zipball/3b3254187b15226a39230ab294f76664a54ba8e0",
-                "reference": "3b3254187b15226a39230ab294f76664a54ba8e0",
+                "url": "https://api.github.com/repos/gratorawp/queryable/zipball/ab6cecf02c9eecc2b73d24e55d93025dae6ab767",
+                "reference": "ab6cecf02c9eecc2b73d24e55d93025dae6ab767",
                 "shasum": ""
             },
             "require": {
@@ -181,6 +181,7 @@
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.94",
                 "phpunit/phpunit": "^9.0",
+                "wp-phpunit/wp-phpunit": "^7.1",
                 "yoast/phpunit-polyfills": "^2.0"
             },
             "type": "library",
@@ -206,11 +207,7 @@
                 "MIT"
             ],
             "description": "A fluent SQL query builder for WordPress",
-            "support": {
-                "source": "https://github.com/gratorawp/queryable/tree/v1.2.0",
-                "issues": "https://github.com/gratorawp/queryable/issues"
-            },
-            "time": "2026-09-01T06:09:38+00:00"
+            "time": "2026-09-09T02:48:03+00:00"
         },
         {
             "name": "masterminds/html5",
