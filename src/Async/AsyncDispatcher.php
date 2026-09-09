@@ -76,7 +76,9 @@ final class AsyncDispatcher
         // as_has_scheduled_action is an uncached join, and every registered
         // sweep fires one on init for every request the site serves. The answer
         // is remembered in an autoloaded option and revalidated daily, so a hook
-        // someone unscheduled by hand still comes back.
+        // someone unscheduled by hand comes back within a day rather than on the
+        // next request. forgetRecurring() drops the memo for a caller that needs
+        // it back sooner.
         $key   = $hook . '|' . md5((string) wp_json_encode($args));
         $known = get_option(self::INSTALLED_OPTION, []);
         $known = is_array($known) ? $known : [];

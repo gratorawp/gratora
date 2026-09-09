@@ -7,17 +7,17 @@
 const { rewrite } = require( '../../build-tools/gratoraUiDomain.cjs' );
 
 it( 'rewrites the package domain to the one this plugin declares', () => {
-    expect( rewrite( "__( 'Close', 'gratora-fundraising-campaigns' )" ) )
+    expect( rewrite( "__( 'Close', 'gratora' )" ) )
         .toBe( "__( 'Close', 'gratora' )" );
 } );
 
 it( 'handles double quotes too, since the dist build emits both', () => {
-    expect( rewrite( '__("Close", "gratora-fundraising-campaigns")' ) )
+    expect( rewrite( '__("Close", "gratora")' ) )
         .toBe( '__("Close", "gratora")' );
 } );
 
 it( 'leaves a string that is not the domain alone', () => {
-    const src = "const slug = 'gratora-fundraising-campaigns-something';";
+    const src = "const slug = 'gratora-something';";
 
     expect( rewrite( src ) ).toBe( src );
 } );
