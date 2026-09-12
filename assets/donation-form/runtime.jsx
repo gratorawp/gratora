@@ -1343,7 +1343,7 @@ function applyThemeTokens( form, theme ) {
  * recomputed here: without them a pale accent previews as a white label on a
  * white button, which is not what the published form renders.
  *
- * @param {HTMLElement} form
+ * @param {HTMLElement}           form
  * @param {Record<string,string>} tokens
  */
 export function applyPreviewTokens( form, tokens ) {

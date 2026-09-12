@@ -56,21 +56,21 @@ export default function GatewaysPanel( { s } ) {
     const [ offlineOpen, setOfflineOpen ] = useCardOpen( offlineEnabled && ! offlineConfigured, 'payments', 'offline' );
 
     const offlinePill = ! offlineEnabled
-        ? <span className="gratora-pill gratora-pill--gray"><span className="gratora-pill__dot gratora-pill__dot--soft" />{ __( 'Disabled', 'gratora' ) }</span>
+        ? <span className="gratora-pill gratora-pill--gray"><span className="gratora-pill__dot gratora-pill__dot--soft" />{ __( 'Disabled', 'gratora-donation-platform' ) }</span>
         : offlineConfigured
-            ? <span className="gratora-pill gratora-pill--green"><span className="gratora-pill__dot" />{ __( 'Configured', 'gratora' ) }</span>
-            : <span className="gratora-pill gratora-pill--amber"><span className="gratora-pill__dot" />{ __( 'Enabled, no way to pay', 'gratora' ) }</span>;
+            ? <span className="gratora-pill gratora-pill--green"><span className="gratora-pill__dot" />{ __( 'Configured', 'gratora-donation-platform' ) }</span>
+            : <span className="gratora-pill gratora-pill--amber"><span className="gratora-pill__dot" />{ __( 'Enabled, no way to pay', 'gratora-donation-platform' ) }</span>;
 
     return (
         <div className="gratora-panel">
             <Card
-                title={ __( 'Test mode', 'gratora' ) }
-                sub={ __( 'Org-wide rehearsal switch, also settable per form', 'gratora' ) }
+                title={ __( 'Test mode', 'gratora-donation-platform' ) }
+                sub={ __( 'Org-wide rehearsal switch, also settable per form', 'gratora-donation-platform' ) }
                 edited={ s.isDirty }
             >
                 <ToggleRow
-                    title={ __( 'Enable test mode for all forms', 'gratora' ) }
-                    sub={ __( 'No real payment is taken and these donations are excluded from reporting.', 'gratora' ) }
+                    title={ __( 'Enable test mode for all forms', 'gratora-donation-platform' ) }
+                    sub={ __( 'No real payment is taken and these donations are excluded from reporting.', 'gratora-donation-platform' ) }
                     checked={ !! s.value( 'test_mode', false ) }
                     onChange={ s.setValue( 'test_mode' ) }
                 />
@@ -86,8 +86,8 @@ export default function GatewaysPanel( { s } ) {
 
             <Card
                 leading={ <BrandMark letter="O" variant="offline" /> }
-                title={ __( 'Offline donations', 'gratora' ) }
-                sub={ __( 'Donor sees your bank details and pays offline', 'gratora' ) }
+                title={ __( 'Offline donations', 'gratora-donation-platform' ) }
+                sub={ __( 'Donor sees your bank details and pays offline', 'gratora-donation-platform' ) }
                 meta={ offlinePill }
                 edited={ s.isDirty }
                 collapsible
@@ -95,28 +95,28 @@ export default function GatewaysPanel( { s } ) {
                 onToggle={ setOfflineOpen }
             >
                 <ToggleRow
-                    title={ __( 'Enable offline donations', 'gratora' ) }
-                    sub={ __( 'For cash, check, or bank transfer donations marked paid by admin.', 'gratora' ) }
+                    title={ __( 'Enable offline donations', 'gratora-donation-platform' ) }
+                    sub={ __( 'For cash, check, or bank transfer donations marked paid by admin.', 'gratora-donation-platform' ) }
                     checked={ offlineEnabled }
                     onChange={ s.setValue( 'offline.enabled' ) }
                 />
 
                 <FormRow
-                    label={ __( 'Instructions', 'gratora' ) }
-                    help={ __( 'Emailed to donors who choose bank transfer, with their donation reference.', 'gratora' ) }
+                    label={ __( 'Instructions', 'gratora-donation-platform' ) }
+                    help={ __( 'Emailed to donors who choose bank transfer, with their donation reference.', 'gratora-donation-platform' ) }
                     wide
                 >
                     <textarea
                         className="gratora-textarea"
                         rows={ 4 }
-                        placeholder={ __( 'Please transfer the donation amount within 7 days. Use the reference number so we can match your donation to your receipt.', 'gratora' ) }
+                        placeholder={ __( 'Please transfer the donation amount within 7 days. Use the reference number so we can match your donation to your receipt.', 'gratora-donation-platform' ) }
                         { ...s.bind( 'offline.instructions' ) }
                     />
                 </FormRow>
 
                 <FormRow
-                    label={ __( 'Bank details template', 'gratora' ) }
-                    help={ __( 'Click a placeholder to drop it in. They expand when the donor is shown their transfer details.', 'gratora' ) }
+                    label={ __( 'Bank details template', 'gratora-donation-platform' ) }
+                    help={ __( 'Click a placeholder to drop it in. They expand when the donor is shown their transfer details.', 'gratora-donation-platform' ) }
                     wide
                 >
                     <div className="gratora-merge-tags">
@@ -135,10 +135,15 @@ export default function GatewaysPanel( { s } ) {
                         ref={ bankRef }
                         className="gratora-textarea gratora-textarea--mono"
                         rows={ 5 }
-                        placeholder={
-                            /* translators: sample bank transfer details. Keep {reference} and {amount} exactly as written: they are expanded when the donor is shown their transfer details. */
-                            __( 'Account holder: …\nIBAN: …\nBIC: …\nReference: {reference}\nAmount: {amount}', 'gratora' )
-                        }
+                        placeholder={ [
+                            __( 'Account holder: …', 'gratora-donation-platform' ),
+                            __( 'IBAN: …', 'gratora-donation-platform' ),
+                            __( 'BIC: …', 'gratora-donation-platform' ),
+                            /* translators: sample bank transfer line. Keep {reference} exactly as written: it is expanded when the donor is shown their transfer details. */
+                            __( 'Reference: {reference}', 'gratora-donation-platform' ),
+                            /* translators: sample bank transfer line. Keep {amount} exactly as written: it is expanded when the donor is shown their transfer details. */
+                            __( 'Amount: {amount}', 'gratora-donation-platform' ),
+                        ].join( '\n' ) }
                         { ...s.bind( 'offline.bank_details' ) }
                     />
                 </FormRow>

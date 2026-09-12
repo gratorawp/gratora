@@ -2,7 +2,7 @@
 // ServerSideRender. campaignId=0 falls back to the page's _gratora_campaign_id
 // post meta.
 
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { useEntityRecord, useEntityRecords, store as coreStore } from '@wordpress/core-data';
 import { useState } from '@wordpress/element';
 import { registerBlockType } from '@wordpress/blocks';
@@ -15,7 +15,6 @@ import {
 } from '@wordpress/block-editor';
 import {
     Button,
-    ComboboxControl,
     Disabled,
     PanelBody,
     Placeholder,
@@ -82,8 +81,8 @@ function CampaignCanvas( { block, attributes, setAttributes, onCampaignPage, res
             <div { ...blockProps }>
                 <Placeholder
                     icon={ icon }
-                    label={ __( 'Gratora campaign block', 'gratora' ) }
-                    instructions={ __( 'Choose which campaign this block should display.', 'gratora' ) }
+                    label={ __( 'Gratora campaign block', 'gratora-donation-platform' ) }
+                    instructions={ __( 'Choose which campaign this block should display.', 'gratora-donation-platform' ) }
                 >
                     <CampaignPicker
                         value={ attributes.campaignId }
@@ -147,7 +146,7 @@ function CampaignImagePicker( { campaign, campaignId } ) {
             image_attachment_id: attachmentId,
         }, { throwOnError: true } )
             .catch( ( err ) => setError(
-                err?.message || __( 'That image could not be saved to the campaign.', 'gratora' )
+                err?.message || __( 'That image could not be saved to the campaign.', 'gratora-donation-platform' )
             ) )
             .finally( () => setBusy( false ) );
     };
@@ -173,12 +172,12 @@ function CampaignImagePicker( { campaign, campaignId } ) {
                         <div className="gratora-block-image-picker__actions">
                             <Button variant="secondary" onClick={ open } disabled={ busy }>
                                 { current
-                                    ? __( 'Replace image', 'gratora' )
-                                    : __( 'Choose image', 'gratora' ) }
+                                    ? __( 'Replace image', 'gratora-donation-platform' )
+                                    : __( 'Choose image', 'gratora-donation-platform' ) }
                             </Button>
                             { !! current && (
                                 <Button variant="tertiary" isDestructive onClick={ () => apply( null ) } disabled={ busy }>
-                                    { __( 'Remove', 'gratora' ) }
+                                    { __( 'Remove', 'gratora-donation-platform' ) }
                                 </Button>
                             ) }
                         </div>
@@ -187,7 +186,7 @@ function CampaignImagePicker( { campaign, campaignId } ) {
             </MediaUploadCheck>
 
             <p className="gratora-block-image-picker__note">
-                { __( 'Saved to the campaign as soon as you choose, and used everywhere the campaign appears.', 'gratora' ) }
+                { __( 'Saved to the campaign as soon as you choose, and used everywhere the campaign appears.', 'gratora-donation-platform' ) }
             </p>
 
             { error && <Notice status="error">{ error }</Notice> }
@@ -197,8 +196,8 @@ function CampaignImagePicker( { campaign, campaignId } ) {
 
 registerBlockType( 'gratora/campaign-image', {
     apiVersion: 3,
-    title:       __( 'Campaign image', 'gratora' ),
-    description: __( "The campaign's cover photo. Follows the campaign, not the page it sits on.", 'gratora' ),
+    title:       __( 'Campaign image', 'gratora-donation-platform' ),
+    description: __( "The campaign's cover photo. Follows the campaign, not the page it sits on.", 'gratora-donation-platform' ),
     category:    'gratora',
     icon:        'format-image',
     attributes: {
@@ -213,7 +212,7 @@ registerBlockType( 'gratora/campaign-image', {
         const issues = [];
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Image', 'gratora' ) }>
+                <PanelBody title={ __( 'Image', 'gratora-donation-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -222,27 +221,27 @@ registerBlockType( 'gratora/campaign-image', {
                     />
                     <CampaignImagePicker campaign={ campaign } campaignId={ resolvedId } />
                     <SelectControl
-                        label={ __( 'Aspect ratio', 'gratora' ) }
+                        label={ __( 'Aspect ratio', 'gratora-donation-platform' ) }
                         value={ attributes.aspectRatio }
                         options={ [
-                            { value: '16-9', label: __( 'Wide (16:9)',     'gratora' ) },
-                            { value: '3-2',  label: __( 'Photo (3:2)',     'gratora' ) },
-                            { value: '4-3',  label: __( 'Classic (4:3)',   'gratora' ) },
-                            { value: '1-1',  label: __( 'Square (1:1)',    'gratora' ) },
-                            { value: 'auto', label: __( "The image's own", 'gratora' ) },
+                            { value: '16-9', label: __( 'Wide (16:9)',     'gratora-donation-platform' ) },
+                            { value: '3-2',  label: __( 'Photo (3:2)',     'gratora-donation-platform' ) },
+                            { value: '4-3',  label: __( 'Classic (4:3)',   'gratora-donation-platform' ) },
+                            { value: '1-1',  label: __( 'Square (1:1)',    'gratora-donation-platform' ) },
+                            { value: 'auto', label: __( "The image's own", 'gratora-donation-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { aspectRatio: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Rounded corners', 'gratora' ) }
+                        label={ __( 'Rounded corners', 'gratora-donation-platform' ) }
                         checked={ attributes.rounded }
                         onChange={ ( v ) => setAttributes( { rounded: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Load with priority', 'gratora' ) }
-                        help={ __( 'Leave on when this is the first image a visitor sees. Turn it off further down the page so it loads only when needed.', 'gratora' ) }
+                        label={ __( 'Load with priority', 'gratora-donation-platform' ) }
+                        help={ __( 'Leave on when this is the first image a visitor sees. Turn it off further down the page so it loads only when needed.', 'gratora-donation-platform' ) }
                         checked={ attributes.priority }
                         onChange={ ( v ) => setAttributes( { priority: v } ) }
                         __nextHasNoMarginBottom
@@ -265,15 +264,15 @@ registerBlockType( 'gratora/campaign-image', {
 // Mirrors CampaignStatMetrics::labels() in PHP, which is what actually renders;
 // a key here that is not there falls back to raised.
 const STAT_METRICS = [
-    { value: 'raised',    label: __( 'Amount raised',    'gratora' ) },
-    { value: 'goal',      label: __( 'Our goal',         'gratora' ) },
-    { value: 'remaining', label: __( 'Still needed',     'gratora' ) },
-    { value: 'percent',   label: __( 'Of goal reached',  'gratora' ) },
-    { value: 'donations', label: __( 'Donations',        'gratora' ) },
-    { value: 'donors',    label: __( 'Donors',           'gratora' ) },
-    { value: 'average',   label: __( 'Average donation', 'gratora' ) },
-    { value: 'top',       label: __( 'Top donation',     'gratora' ) },
-    { value: 'days_left', label: __( 'Days left',        'gratora' ) },
+    { value: 'raised',    label: __( 'Amount raised',    'gratora-donation-platform' ) },
+    { value: 'goal',      label: __( 'Our goal',         'gratora-donation-platform' ) },
+    { value: 'remaining', label: __( 'Still needed',     'gratora-donation-platform' ) },
+    { value: 'percent',   label: __( 'Of goal reached',  'gratora-donation-platform' ) },
+    { value: 'donations', label: __( 'Donations',        'gratora-donation-platform' ) },
+    { value: 'donors',    label: __( 'Donors',           'gratora-donation-platform' ) },
+    { value: 'average',   label: __( 'Average donation', 'gratora-donation-platform' ) },
+    { value: 'top',       label: __( 'Top donation',     'gratora-donation-platform' ) },
+    { value: 'days_left', label: __( 'Days left',        'gratora-donation-platform' ) },
 ];
 
 // Metrics this campaign cannot answer, so the editor says so instead of leaving
@@ -283,13 +282,13 @@ function statIssue( campaign, metric ) {
     const goalType = campaign.goal_type || 'amount';
     const noGoal = ! Number( goalType === 'amount' ? campaign.goal_cents : campaign.goal_count );
     if ( noGoal && [ 'goal', 'remaining', 'percent' ].includes( metric ) ) {
-        return __( 'This campaign has no goal, so this stat will not render.', 'gratora' );
+        return __( 'This campaign has no goal, so this stat will not render.', 'gratora-donation-platform' );
     }
     if ( metric === 'days_left' && ! campaign.ends_at ) {
-        return __( 'This campaign has no end date, so this stat will not render.', 'gratora' );
+        return __( 'This campaign has no end date, so this stat will not render.', 'gratora-donation-platform' );
     }
     if ( [ 'average', 'top' ].includes( metric ) && ! Number( campaign.donations_count ) ) {
-        return __( 'No donations yet, so this stat will not render until the first one arrives.', 'gratora' );
+        return __( 'No donations yet, so this stat will not render until the first one arrives.', 'gratora-donation-platform' );
     }
     return null;
 }
@@ -314,8 +313,8 @@ function StatNotRendering( { label, issue } ) {
 
 registerBlockType( 'gratora/campaign-stat', {
     apiVersion: 3,
-    title:       __( 'Campaign stat', 'gratora' ),
-    description: __( 'A single campaign figure. Add one per number you want to show.', 'gratora' ),
+    title:       __( 'Campaign stat', 'gratora-donation-platform' ),
+    description: __( 'A single campaign figure. Add one per number you want to show.', 'gratora-donation-platform' ),
     category:    'gratora',
     icon:        'chart-bar',
     attributes: {
@@ -332,7 +331,7 @@ registerBlockType( 'gratora/campaign-stat', {
         const fallbackLabel = ( STAT_METRICS.find( ( m ) => m.value === attributes.metric ) || {} ).label || '';
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Stat', 'gratora' ) }>
+                <PanelBody title={ __( 'Stat', 'gratora-donation-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -340,37 +339,37 @@ registerBlockType( 'gratora/campaign-stat', {
                         issues={ issues }
                     />
                     <SelectControl
-                        label={ __( 'Figure', 'gratora' ) }
+                        label={ __( 'Figure', 'gratora-donation-platform' ) }
                         value={ attributes.metric }
                         options={ STAT_METRICS }
                         onChange={ ( v ) => setAttributes( { metric: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ attributes.label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
                         placeholder={ fallbackLabel }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Size', 'gratora' ) }
+                        label={ __( 'Size', 'gratora-donation-platform' ) }
                         value={ attributes.size }
                         options={ [
-                            { value: 'sm', label: __( 'Small',  'gratora' ) },
-                            { value: 'md', label: __( 'Medium', 'gratora' ) },
-                            { value: 'lg', label: __( 'Large',  'gratora' ) },
+                            { value: 'sm', label: __( 'Small',  'gratora-donation-platform' ) },
+                            { value: 'md', label: __( 'Medium', 'gratora-donation-platform' ) },
+                            { value: 'lg', label: __( 'Large',  'gratora-donation-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { size: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Alignment', 'gratora' ) }
+                        label={ __( 'Alignment', 'gratora-donation-platform' ) }
                         value={ attributes.align }
                         options={ [
-                            { value: 'left',   label: __( 'Left',   'gratora' ) },
-                            { value: 'center', label: __( 'Center', 'gratora' ) },
-                            { value: 'right',  label: __( 'Right',  'gratora' ) },
+                            { value: 'left',   label: __( 'Left',   'gratora-donation-platform' ) },
+                            { value: 'center', label: __( 'Center', 'gratora-donation-platform' ) },
+                            { value: 'right',  label: __( 'Right',  'gratora-donation-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         __nextHasNoMarginBottom
@@ -400,8 +399,8 @@ registerBlockType( 'gratora/campaign-stat', {
 
 registerBlockType( 'gratora/campaign-progress', {
     apiVersion: 3,
-    title:      __( 'Campaign progress', 'gratora' ),
-    description: __( 'Progress bar toward the campaign goal.', 'gratora' ),
+    title:      __( 'Campaign progress', 'gratora-donation-platform' ),
+    description: __( 'Progress bar toward the campaign goal.', 'gratora-donation-platform' ),
     category:   'gratora',
     icon:       'chart-line',
     attributes: {
@@ -416,12 +415,12 @@ registerBlockType( 'gratora/campaign-progress', {
             const goalType = campaign.goal_type || 'amount';
             const target = goalType === 'amount' ? ( campaign.goal_cents ?? 0 ) : ( campaign.goal_count ?? 0 );
             if ( ! target ) {
-                issues.push( __( 'No goal set on this campaign. Until you set one, the bar will sit at 0%.', 'gratora' ) );
+                issues.push( __( 'No goal set on this campaign. Until you set one, the bar will sit at 0%.', 'gratora-donation-platform' ) );
             }
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Progress', 'gratora' ) }>
+                <PanelBody title={ __( 'Progress', 'gratora-donation-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -429,17 +428,17 @@ registerBlockType( 'gratora/campaign-progress', {
                         issues={ issues }
                     />
                     <ToggleControl
-                        label={ __( 'Show labels', 'gratora' ) }
+                        label={ __( 'Show labels', 'gratora-donation-platform' ) }
                         checked={ attributes.showLabels }
                         onChange={ ( v ) => setAttributes( { showLabels: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Alignment', 'gratora' ) }
+                        label={ __( 'Alignment', 'gratora-donation-platform' ) }
                         value={ attributes.align }
                         options={ [
-                            { value: 'left',   label: __( 'Left',   'gratora' ) },
-                            { value: 'center', label: __( 'Center', 'gratora' ) },
+                            { value: 'left',   label: __( 'Left',   'gratora-donation-platform' ) },
+                            { value: 'center', label: __( 'Center', 'gratora-donation-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         __nextHasNoMarginBottom
@@ -461,8 +460,8 @@ registerBlockType( 'gratora/campaign-progress', {
 
 registerBlockType( 'gratora/donate-button', {
     apiVersion: 3,
-    title:      __( 'Donate button', 'gratora' ),
-    description: __( 'Button that opens the campaign\'s default donation form.', 'gratora' ),
+    title:      __( 'Donate button', 'gratora-donation-platform' ),
+    description: __( 'Button that opens the campaign\'s default donation form.', 'gratora-donation-platform' ),
     category:   'gratora',
     icon:       'heart',
     attributes: {
@@ -476,14 +475,14 @@ registerBlockType( 'gratora/donate-button', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && ! campaign.default_form_id ) {
-            issues.push( __( 'This campaign has no default form. The button will appear but clicking it won\'t open anything until a form is set.', 'gratora' ) );
+            issues.push( __( 'This campaign has no default form. The button will appear but clicking it won\'t open anything until a form is set.', 'gratora-donation-platform' ) );
         }
         if ( campaign?.status === 'archived' ) {
-            issues.push( __( 'This campaign is archived. The button will render but submissions will be rejected.', 'gratora' ) );
+            issues.push( __( 'This campaign is archived. The button will render but submissions will be rejected.', 'gratora-donation-platform' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Donate button', 'gratora' ) }>
+                <PanelBody title={ __( 'Donate button', 'gratora-donation-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -491,36 +490,36 @@ registerBlockType( 'gratora/donate-button', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Label', 'gratora' ) }
+                        label={ __( 'Label', 'gratora-donation-platform' ) }
                         value={ attributes.label }
                         onChange={ ( v ) => setAttributes( { label: v } ) }
-                        placeholder={ __( 'Donate now', 'gratora' ) }
+                        placeholder={ __( 'Donate now', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Alignment', 'gratora' ) }
+                        label={ __( 'Alignment', 'gratora-donation-platform' ) }
                         value={ attributes.align }
                         options={ [
-                            { value: 'left',   label: __( 'Left',   'gratora' ) },
-                            { value: 'center', label: __( 'Center', 'gratora' ) },
-                            { value: 'right',  label: __( 'Right',  'gratora' ) },
+                            { value: 'left',   label: __( 'Left',   'gratora-donation-platform' ) },
+                            { value: 'center', label: __( 'Center', 'gratora-donation-platform' ) },
+                            { value: 'right',  label: __( 'Right',  'gratora-donation-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { align: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Button size', 'gratora' ) }
+                        label={ __( 'Button size', 'gratora-donation-platform' ) }
                         value={ attributes.size }
                         options={ [
-                            { value: 'sm', label: __( 'Small',  'gratora' ) },
-                            { value: 'md', label: __( 'Medium', 'gratora' ) },
-                            { value: 'lg', label: __( 'Large',  'gratora' ) },
+                            { value: 'sm', label: __( 'Small',  'gratora-donation-platform' ) },
+                            { value: 'md', label: __( 'Medium', 'gratora-donation-platform' ) },
+                            { value: 'lg', label: __( 'Large',  'gratora-donation-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { size: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Full width', 'gratora' ) }
+                        label={ __( 'Full width', 'gratora-donation-platform' ) }
                         checked={ attributes.fullWidth }
                         onChange={ ( v ) => setAttributes( { fullWidth: v } ) }
                         __nextHasNoMarginBottom
@@ -542,8 +541,8 @@ registerBlockType( 'gratora/donate-button', {
 
 registerBlockType( 'gratora/top-donors', {
     apiVersion: 3,
-    title:      __( 'Top donors', 'gratora' ),
-    description: __( 'Leaderboard of the donors who gave the most to this campaign.', 'gratora' ),
+    title:      __( 'Top donors', 'gratora-donation-platform' ),
+    description: __( 'Leaderboard of the donors who gave the most to this campaign.', 'gratora-donation-platform' ),
     category:   'gratora',
     icon:       'awards',
     attributes: {
@@ -560,11 +559,11 @@ registerBlockType( 'gratora/top-donors', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
-            issues.push( __( 'No donations yet, so the leaderboard will be empty on the page.', 'gratora' ) );
+            issues.push( __( 'No donations yet, so the leaderboard will be empty on the page.', 'gratora-donation-platform' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Top donors', 'gratora' ) }>
+                <PanelBody title={ __( 'Top donors', 'gratora-donation-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -572,32 +571,32 @@ registerBlockType( 'gratora/top-donors', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Title', 'gratora' ) }
+                        label={ __( 'Title', 'gratora-donation-platform' ) }
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Top supporters', 'gratora' ) }
+                        placeholder={ __( 'Top supporters', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'gratora' ) }
+                        label={ __( 'Empty state text', 'gratora-donation-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'No donors to rank yet.', 'gratora' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'gratora' ) }
+                        placeholder={ __( 'No donors to rank yet.', 'gratora-donation-platform' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Layout', 'gratora' ) }
+                        label={ __( 'Layout', 'gratora-donation-platform' ) }
                         value={ attributes.layout }
                         options={ [
-                            { value: 'list',   label: __( 'List',   'gratora' ) },
-                            { value: 'podium', label: __( 'Podium', 'gratora' ) },
+                            { value: 'list',   label: __( 'List',   'gratora-donation-platform' ) },
+                            { value: 'podium', label: __( 'Podium', 'gratora-donation-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { layout: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'Number of donors', 'gratora' ) }
+                        label={ __( 'Number of donors', 'gratora-donation-platform' ) }
                         value={ attributes.limit }
                         onChange={ ( v ) => setAttributes( { limit: Number( v ) || 10 } ) }
                         min={ 3 }
@@ -605,22 +604,22 @@ registerBlockType( 'gratora/top-donors', {
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donation amount', 'gratora' ) }
+                        label={ __( 'Show donation amount', 'gratora-donation-platform' ) }
                         checked={ attributes.showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donation count per donor', 'gratora' ) }
+                        label={ __( 'Show donation count per donor', 'gratora-donation-platform' ) }
                         checked={ attributes.showDonorCount }
                         onChange={ ( v ) => setAttributes( { showDonorCount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Hide anonymous donors', 'gratora' ) }
+                        label={ __( 'Hide anonymous donors', 'gratora-donation-platform' ) }
                         checked={ attributes.hideAnonymous }
                         onChange={ ( v ) => setAttributes( { hideAnonymous: v } ) }
-                        help={ __( 'When off, anonymous donors appear as "Anonymous".', 'gratora' ) }
+                        help={ __( 'When off, anonymous donors appear as "Anonymous".', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                 </PanelBody>
@@ -640,7 +639,7 @@ registerBlockType( 'gratora/top-donors', {
                     className="gratora-campaign-block-edit__title"
                     value={ attributes.title }
                     onChange={ ( v ) => setAttributes( { title: v } ) }
-                    placeholder={ __( 'Top supporters', 'gratora' ) }
+                    placeholder={ __( 'Top supporters', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                 />
             </CampaignCanvas>
@@ -651,8 +650,8 @@ registerBlockType( 'gratora/top-donors', {
 
 registerBlockType( 'gratora/recent-donations', {
     apiVersion: 3,
-    title:      __( 'Recent donations', 'gratora' ),
-    description: __( 'Live feed of the most recent paid donations for this campaign.', 'gratora' ),
+    title:      __( 'Recent donations', 'gratora-donation-platform' ),
+    description: __( 'Live feed of the most recent paid donations for this campaign.', 'gratora-donation-platform' ),
     category:   'gratora',
     icon:       'list-view',
     attributes: {
@@ -669,11 +668,11 @@ registerBlockType( 'gratora/recent-donations', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
-            issues.push( __( 'No donations yet, so the feed will be empty on the page.', 'gratora' ) );
+            issues.push( __( 'No donations yet, so the feed will be empty on the page.', 'gratora-donation-platform' ) );
         }
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Recent donations', 'gratora' ) }>
+                <PanelBody title={ __( 'Recent donations', 'gratora-donation-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -681,22 +680,22 @@ registerBlockType( 'gratora/recent-donations', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Title', 'gratora' ) }
+                        label={ __( 'Title', 'gratora-donation-platform' ) }
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Recent donations', 'gratora' ) }
+                        placeholder={ __( 'Recent donations', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'gratora' ) }
+                        label={ __( 'Empty state text', 'gratora-donation-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'No donations to show yet.', 'gratora' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'gratora' ) }
+                        placeholder={ __( 'No donations to show yet.', 'gratora-donation-platform' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'Number of donations', 'gratora' ) }
+                        label={ __( 'Number of donations', 'gratora-donation-platform' ) }
                         value={ attributes.limit }
                         onChange={ ( v ) => setAttributes( { limit: Number( v ) || 10 } ) }
                         min={ 1 }
@@ -704,25 +703,25 @@ registerBlockType( 'gratora/recent-donations', {
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show amount', 'gratora' ) }
+                        label={ __( 'Show amount', 'gratora-donation-platform' ) }
                         checked={ attributes.showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show time ago', 'gratora' ) }
+                        label={ __( 'Show time ago', 'gratora-donation-platform' ) }
                         checked={ attributes.showTime }
                         onChange={ ( v ) => setAttributes( { showTime: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donor message', 'gratora' ) }
+                        label={ __( 'Show donor message', 'gratora-donation-platform' ) }
                         checked={ attributes.showMessage }
                         onChange={ ( v ) => setAttributes( { showMessage: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Include anonymous donations', 'gratora' ) }
+                        label={ __( 'Include anonymous donations', 'gratora-donation-platform' ) }
                         checked={ attributes.showAnonymous }
                         onChange={ ( v ) => setAttributes( { showAnonymous: v } ) }
                         __nextHasNoMarginBottom
@@ -744,7 +743,7 @@ registerBlockType( 'gratora/recent-donations', {
                     className="gratora-campaign-block-edit__title"
                     value={ attributes.title }
                     onChange={ ( v ) => setAttributes( { title: v } ) }
-                    placeholder={ __( 'Recent donations', 'gratora' ) }
+                    placeholder={ __( 'Recent donations', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                 />
             </CampaignCanvas>
@@ -755,8 +754,8 @@ registerBlockType( 'gratora/recent-donations', {
 
 registerBlockType( 'gratora/supporter-wall', {
     apiVersion: 3,
-    title:      __( 'Supporter wall', 'gratora' ),
-    description: __( 'A wall of campaign supporters with optional messages.', 'gratora' ),
+    title:      __( 'Supporter wall', 'gratora-donation-platform' ),
+    description: __( 'A wall of campaign supporters with optional messages.', 'gratora-donation-platform' ),
     category:   'gratora',
     icon:       'groups',
     attributes: {
@@ -774,14 +773,14 @@ registerBlockType( 'gratora/supporter-wall', {
         const { campaign, onCampaignPage, resolvedId } = useBoundCampaign( attributes.campaignId );
         const issues = [];
         if ( campaign && Number( campaign.donations_count ) === 0 ) {
-            issues.push( __( 'No donations yet, so the wall will be empty on the page.', 'gratora' ) );
+            issues.push( __( 'No donations yet, so the wall will be empty on the page.', 'gratora-donation-platform' ) );
         }
         // Displayed in major units, stored as cents.
         const minAmountMajor = ( Number( attributes.minAmountCents ) || 0 ) / 100;
         const { step: minAmountStep } = amountEntry( defaultCurrency() );
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Supporter wall', 'gratora' ) }>
+                <PanelBody title={ __( 'Supporter wall', 'gratora-donation-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
@@ -789,32 +788,32 @@ registerBlockType( 'gratora/supporter-wall', {
                         issues={ issues }
                     />
                     <TextControl
-                        label={ __( 'Title', 'gratora' ) }
+                        label={ __( 'Title', 'gratora-donation-platform' ) }
                         value={ attributes.title }
                         onChange={ ( v ) => setAttributes( { title: v } ) }
-                        placeholder={ __( 'Thank you to our supporters', 'gratora' ) }
+                        placeholder={ __( 'Thank you to our supporters', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'gratora' ) }
+                        label={ __( 'Empty state text', 'gratora-donation-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'The supporter wall is empty.', 'gratora' ) }
-                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'gratora' ) }
+                        placeholder={ __( 'The supporter wall is empty.', 'gratora-donation-platform' ) }
+                        help={ __( 'Shown when there is nothing to list yet, so a heading above this block never captions the wrong thing.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Sort by', 'gratora' ) }
+                        label={ __( 'Sort by', 'gratora-donation-platform' ) }
                         value={ attributes.sort }
                         options={ [
-                            { value: 'recent',       label: __( 'Most recent',  'gratora' ) },
-                            { value: 'alphabetical', label: __( 'Alphabetical', 'gratora' ) },
+                            { value: 'recent',       label: __( 'Most recent',  'gratora-donation-platform' ) },
+                            { value: 'alphabetical', label: __( 'Alphabetical', 'gratora-donation-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { sort: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'Number of supporters', 'gratora' ) }
+                        label={ __( 'Number of supporters', 'gratora-donation-platform' ) }
                         value={ attributes.limit }
                         onChange={ ( v ) => setAttributes( { limit: Number( v ) || 50 } ) }
                         min={ 5 }
@@ -823,7 +822,7 @@ registerBlockType( 'gratora/supporter-wall', {
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Minimum donation amount', 'gratora' ) }
+                        label={ __( 'Minimum donation amount', 'gratora-donation-platform' ) }
                         type="number"
                         min={ 0 }
                         step={ minAmountStep }
@@ -835,29 +834,29 @@ registerBlockType( 'gratora/supporter-wall', {
                                 : 0;
                             setAttributes( { minAmountCents: cents } );
                         } }
-                        help={ __( 'Only show donors who gave at least this amount. 0 = no minimum.', 'gratora' ) }
+                        help={ __( 'Only show donors who gave at least this amount. 0 = no minimum.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donor message', 'gratora' ) }
+                        label={ __( 'Show donor message', 'gratora-donation-platform' ) }
                         checked={ attributes.showMessage }
                         onChange={ ( v ) => setAttributes( { showMessage: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <ToggleControl
-                        label={ __( 'Show donation amount', 'gratora' ) }
+                        label={ __( 'Show donation amount', 'gratora-donation-platform' ) }
                         checked={ attributes.showAmount }
                         onChange={ ( v ) => setAttributes( { showAmount: v } ) }
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Columns', 'gratora' ) }
+                        label={ __( 'Columns', 'gratora-donation-platform' ) }
                         value={ attributes.columns }
                         options={ [
-                            { value: 'auto', label: __( 'Auto', 'gratora' ) },
-                            { value: '2',    label: __( '2', 'gratora' ) },
-                            { value: '3',    label: __( '3', 'gratora' ) },
-                            { value: '4',    label: __( '4', 'gratora' ) },
+                            { value: 'auto', label: __( 'Auto', 'gratora-donation-platform' ) },
+                            { value: '2',    label: __( '2', 'gratora-donation-platform' ) },
+                            { value: '3',    label: __( '3', 'gratora-donation-platform' ) },
+                            { value: '4',    label: __( '4', 'gratora-donation-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { columns: v } ) }
                         __nextHasNoMarginBottom
@@ -879,7 +878,7 @@ registerBlockType( 'gratora/supporter-wall', {
                     className="gratora-campaign-block-edit__title"
                     value={ attributes.title }
                     onChange={ ( v ) => setAttributes( { title: v } ) }
-                    placeholder={ __( 'Thank you to our supporters', 'gratora' ) }
+                    placeholder={ __( 'Thank you to our supporters', 'gratora-donation-platform' ) }
                     allowedFormats={ [] }
                 />
             </CampaignCanvas>
@@ -890,8 +889,8 @@ registerBlockType( 'gratora/supporter-wall', {
 
 registerBlockType( 'gratora/campaign-grid', {
     apiVersion: 3,
-    title:       __( 'Campaigns grid', 'gratora' ),
-    description: __( 'A responsive grid of other published campaigns as cards.', 'gratora' ),
+    title:       __( 'Campaigns grid', 'gratora-donation-platform' ),
+    description: __( 'A responsive grid of other published campaigns as cards.', 'gratora-donation-platform' ),
     category:   'gratora',
     icon:       'grid-view',
     attributes: {
@@ -906,23 +905,23 @@ registerBlockType( 'gratora/campaign-grid', {
         const revision = useCampaignsRevision();
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Campaigns grid', 'gratora' ) }>
+                <PanelBody title={ __( 'Campaigns grid', 'gratora-donation-platform' ) }>
                     <TextControl
-                        label={ __( 'Heading', 'gratora' ) }
+                        label={ __( 'Heading', 'gratora-donation-platform' ) }
                         value={ attributes.heading }
                         onChange={ ( v ) => setAttributes( { heading: v } ) }
-                        help={ __( 'Leave empty when a Heading block above this one already names the section, as the seeded layout does.', 'gratora' ) }
+                        help={ __( 'Leave empty when a Heading block above this one already names the section, as the seeded layout does.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'gratora' ) }
+                        label={ __( 'Empty state text', 'gratora-donation-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        help={ __( 'Shown when there is nothing to list. Left empty, the block says whether this is the only campaign running or that none are, whichever fits the page.', 'gratora' ) }
+                        help={ __( 'Shown when there is nothing to list. Left empty, the block says whether this is the only campaign running or that none are, whichever fits the page.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     <RangeControl
-                        label={ __( 'How many', 'gratora' ) }
+                        label={ __( 'How many', 'gratora-donation-platform' ) }
                         value={ attributes.count }
                         min={ 1 }
                         max={ 12 }
@@ -930,12 +929,12 @@ registerBlockType( 'gratora/campaign-grid', {
                         __nextHasNoMarginBottom
                     />
                     <SelectControl
-                        label={ __( 'Order by', 'gratora' ) }
+                        label={ __( 'Order by', 'gratora-donation-platform' ) }
                         value={ attributes.orderBy }
                         options={ [
-                            { value: 'recent',      label: __( 'Most recent', 'gratora' ) },
-                            { value: 'most-funded', label: __( 'Most funded', 'gratora' ) },
-                            { value: 'ending-soon', label: __( 'Ending soon', 'gratora' ) },
+                            { value: 'recent',      label: __( 'Most recent', 'gratora-donation-platform' ) },
+                            { value: 'most-funded', label: __( 'Most funded', 'gratora-donation-platform' ) },
+                            { value: 'ending-soon', label: __( 'Ending soon', 'gratora-donation-platform' ) },
                         ] }
                         onChange={ ( v ) => setAttributes( { orderBy: v } ) }
                         __nextHasNoMarginBottom
@@ -945,10 +944,10 @@ registerBlockType( 'gratora/campaign-grid', {
                             <CampaignPicker
                                 value={ attributes.campaignId }
                                 onChange={ ( v ) => setAttributes( { campaignId: v } ) }
-                                noneLabel={ __( 'Exclude none', 'gratora' ) }
+                                noneLabel={ __( 'Exclude none', 'gratora-donation-platform' ) }
                             />
                             <p className="gratora-block-note gratora-block-note--muted">
-                                { __( 'The selected campaign (or this page\'s campaign) is excluded from the grid.', 'gratora' ) }
+                                { __( 'The selected campaign (or this page\'s campaign) is excluded from the grid.', 'gratora-donation-platform' ) }
                             </p>
                         </>
                     ) }
@@ -973,8 +972,8 @@ registerBlockType( 'gratora/campaign-grid', {
 
 registerBlockType( 'gratora/donation-form', {
     apiVersion: 3,
-    title:       __( 'Donation form', 'gratora' ),
-    description: __( 'Renders the campaign donation form inline on the page.', 'gratora' ),
+    title:       __( 'Donation form', 'gratora-donation-platform' ),
+    description: __( 'Renders the campaign donation form inline on the page.', 'gratora-donation-platform' ),
     category:   'gratora',
     icon:       'money-alt',
     attributes: {
@@ -995,18 +994,18 @@ registerBlockType( 'gratora/donation-form', {
         ).href;
         return <>
             <InspectorControls>
-                <PanelBody title={ __( 'Donation form', 'gratora' ) }>
+                <PanelBody title={ __( 'Donation form', 'gratora-donation-platform' ) }>
                     <CampaignField
                         attributes={ attributes }
                         setAttributes={ setAttributes }
                         onCampaignPage={ onCampaignPage }
                     />
                     <TextControl
-                        label={ __( 'Empty state text', 'gratora' ) }
+                        label={ __( 'Empty state text', 'gratora-donation-platform' ) }
                         value={ attributes.emptyText }
                         onChange={ ( v ) => setAttributes( { emptyText: v } ) }
-                        placeholder={ __( 'Donations are not open for this campaign yet.', 'gratora' ) }
-                        help={ __( 'Shown when the campaign is not taking donations, so the heading above this block never captions an empty space.', 'gratora' ) }
+                        placeholder={ __( 'Donations are not open for this campaign yet.', 'gratora-donation-platform' ) }
+                        help={ __( 'Shown when the campaign is not taking donations, so the heading above this block never captions an empty space.', 'gratora-donation-platform' ) }
                         __nextHasNoMarginBottom
                     />
                     { campaign && (
@@ -1018,8 +1017,8 @@ registerBlockType( 'gratora/donation-form', {
                                 __next40pxDefaultSize
                             >
                                 { formId
-                                    ? __( 'Edit donation form', 'gratora' )
-                                    : __( 'Manage donation forms', 'gratora' ) }
+                                    ? __( 'Edit donation form', 'gratora-donation-platform' )
+                                    : __( 'Manage donation forms', 'gratora-donation-platform' ) }
                             </Button>
                         </p>
                     ) }
