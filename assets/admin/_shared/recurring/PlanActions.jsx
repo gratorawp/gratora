@@ -4,6 +4,7 @@ import apiFetch from '@wordpress/api-fetch';
 
 import Btn from '../components/Btn';
 import Dialog from '../components/Dialog';
+import Notice from '../components/Notice';
 import { Switch } from '../components/Switch';
 import AmountInput from '../components/AmountInput';
 import { userCan } from '../caps';
@@ -45,11 +46,11 @@ export function dueIn( iso ) {
     const days = Math.round( ( then - Date.now() ) / 86400000 );
     if ( days < 0 ) {
         /* translators: %d: days a renewal is overdue by. */
-        return sprintf( _n( '%d day overdue', '%d days overdue', Math.abs( days ), 'gratora' ), Math.abs( days ) );
+        return sprintf( _n( '%d day overdue', '%d days overdue', Math.abs( days ), 'gratora-donation-platform' ), Math.abs( days ) );
     }
-    if ( days === 0 ) return __( 'today', 'gratora' );
+    if ( days === 0 ) return __( 'today', 'gratora-donation-platform' );
     /* translators: %d: days until the next charge. */
-    return sprintf( _n( 'in %d day', 'in %d days', days, 'gratora' ), days );
+    return sprintf( _n( 'in %d day', 'in %d days', days, 'gratora-donation-platform' ), days );
 }
 
 export function retryActionFor( plan ) {
@@ -58,7 +59,7 @@ export function retryActionFor( plan ) {
     if ( ! plan.can_retry ) return null;
     if ( ! ( plan.failed_renewals_count > 0 || plan.status === 'past_due' ) ) return null;
 
-    return { id: 'retry', label: __( 'Retry payment', 'gratora' ) };
+    return { id: 'retry', label: __( 'Retry payment', 'gratora-donation-platform' ) };
 }
 
 export function actionsFor( plan ) {
@@ -67,45 +68,45 @@ export function actionsFor( plan ) {
 
     const actions = [];
     if ( plan.status === 'paused' ) {
-        actions.push( { id: 'resume', label: __( 'Resume', 'gratora' ) } );
+        actions.push( { id: 'resume', label: __( 'Resume', 'gratora-donation-platform' ) } );
     } else {
-        actions.push( { id: 'pause', label: __( 'Pause', 'gratora' ) } );
-        actions.push( { id: 'skip_next', label: __( 'Skip next', 'gratora' ) } );
+        actions.push( { id: 'pause', label: __( 'Pause', 'gratora-donation-platform' ) } );
+        actions.push( { id: 'skip_next', label: __( 'Skip next', 'gratora-donation-platform' ) } );
     }
-    actions.push( { id: 'change_amount', label: __( 'Change amount', 'gratora' ) } );
+    actions.push( { id: 'change_amount', label: __( 'Change amount', 'gratora-donation-platform' ) } );
     // Most processors mint a mandate against a fixed cadence, so this is a
     // capability the row carries rather than something every plan can do.
     if ( plan.can_change_interval ) {
-        actions.push( { id: 'change_interval', label: __( 'Change schedule', 'gratora' ) } );
+        actions.push( { id: 'change_interval', label: __( 'Change schedule', 'gratora-donation-platform' ) } );
     }
-    actions.push( { id: 'cancel', label: __( 'Cancel subscription', 'gratora' ), destructive: true } );
+    actions.push( { id: 'cancel', label: __( 'Cancel subscription', 'gratora-donation-platform' ), destructive: true } );
 
     return actions;
 }
 
 /** The five this product can name, in the order a donor reads them. */
 const FREQUENCY_LABELS = {
-    weekly:    __( 'Every week', 'gratora' ),
-    biweekly:  __( 'Every 2 weeks', 'gratora' ),
-    monthly:   __( 'Every month', 'gratora' ),
-    quarterly: __( 'Every 3 months', 'gratora' ),
-    yearly:    __( 'Every year', 'gratora' ),
+    weekly:    __( 'Every week', 'gratora-donation-platform' ),
+    biweekly:  __( 'Every 2 weeks', 'gratora-donation-platform' ),
+    monthly:   __( 'Every month', 'gratora-donation-platform' ),
+    quarterly: __( 'Every 3 months', 'gratora-donation-platform' ),
+    yearly:    __( 'Every year', 'gratora-donation-platform' ),
 };
 
 const TITLES = {
-    retry:         __( 'Retry the payment', 'gratora' ),
-    pause:         __( 'Pause this donation', 'gratora' ),
-    resume:        __( 'Resume this donation', 'gratora' ),
-    skip_next:     __( 'Skip the next payment', 'gratora' ),
-    change_amount:   __( 'Change the amount', 'gratora' ),
-    change_interval: __( 'Change the schedule', 'gratora' ),
-    cancel:        __( 'Cancel this donation', 'gratora' ),
+    retry:         __( 'Retry the payment', 'gratora-donation-platform' ),
+    pause:         __( 'Pause this donation', 'gratora-donation-platform' ),
+    resume:        __( 'Resume this donation', 'gratora-donation-platform' ),
+    skip_next:     __( 'Skip the next payment', 'gratora-donation-platform' ),
+    change_amount:   __( 'Change the amount', 'gratora-donation-platform' ),
+    change_interval: __( 'Change the schedule', 'gratora-donation-platform' ),
+    cancel:        __( 'Cancel this donation', 'gratora-donation-platform' ),
 };
 
 /** The confirm button names the act, not the dialog. */
 const CONFIRM_LABELS = {
-    retry:  __( 'Retry now', 'gratora' ),
-    cancel: __( 'Cancel subscription', 'gratora' ),
+    retry:  __( 'Retry now', 'gratora-donation-platform' ),
+    cancel: __( 'Cancel subscription', 'gratora-donation-platform' ),
 };
 
 export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
@@ -129,11 +130,11 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
         if ( action === 'cancel' && reason.trim() ) body.reason = reason.trim();
         if ( action === 'change_interval' ) {
             if ( frequency === '' ) {
-                setError( __( 'Choose a schedule.', 'gratora' ) );
+                setError( __( 'Choose a schedule.', 'gratora-donation-platform' ) );
                 return;
             }
             if ( frequency === currentFrequency ) {
-                setError( __( 'That is the schedule it is on already.', 'gratora' ) );
+                setError( __( 'That is the schedule it is on already.', 'gratora-donation-platform' ) );
                 return;
             }
             body.frequency = frequency;
@@ -143,7 +144,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             // here belongs to it now.
             const cents = Math.round( Number( amount ) * 100 );
             if ( ! Number.isFinite( cents ) || cents <= 0 ) {
-                setError( __( 'Enter an amount.', 'gratora' ) );
+                setError( __( 'Enter an amount.', 'gratora-donation-platform' ) );
                 return;
             }
             body.amount_cents = cents;
@@ -155,7 +156,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
         apiFetch( { path: `/gratora/v1/admin/recurring/${ plan.id }/action`, method: 'POST', data: body } )
             .then( () => { onClose(); if ( onDone ) onDone(); } )
             .catch( ( e ) => {
-                setError( e?.message || __( 'That change could not be made.', 'gratora' ) );
+                setError( e?.message || __( 'That change could not be made.', 'gratora-donation-platform' ) );
                 // PayPal answers a revision with a link the donor has to open.
                 // The API has always returned it and nothing rendered it, so
                 // the message said "approve this change" and gave no way to.
@@ -166,12 +167,12 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
 
     return (
         <Dialog
-            title={ TITLES[ action ] || __( 'Change this donation', 'gratora' ) }
+            title={ TITLES[ action ] || __( 'Change this donation', 'gratora-donation-platform' ) }
             onClose={ () => ( busy ? null : onClose() ) }
             foot={
                 <>
                     <Btn variant="secondary" onClick={ onClose } disabled={ busy }>
-                        { __( 'Close', 'gratora' ) }
+                        { __( 'Close', 'gratora-donation-platform' ) }
                     </Btn>
                     <Btn
                         variant={ action === 'cancel' ? 'danger' : 'primary' }
@@ -180,8 +181,8 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                         disabled={ busy }
                     >
                         { busy
-                            ? __( 'Working…', 'gratora' )
-                            : ( CONFIRM_LABELS[ action ] ?? __( 'Apply change', 'gratora' ) ) }
+                            ? __( 'Working…', 'gratora-donation-platform' )
+                            : ( CONFIRM_LABELS[ action ] ?? __( 'Apply change', 'gratora-donation-platform' ) ) }
                     </Btn>
                 </>
             }
@@ -192,7 +193,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                         { /* The currency is on the control itself, so the label
                              does not name it a second time. */ }
                         <span style={ { display: 'block', marginBottom: 4 } }>
-                            { __( 'New amount', 'gratora' ) }
+                            { __( 'New amount', 'gratora-donation-platform' ) }
                         </span>
                         <AmountInput
                             value={ amount }
@@ -208,7 +209,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                 <p>
                     <label>
                         <span style={ { display: 'block', marginBottom: 4 } }>
-                            { __( 'Charge this donation', 'gratora' ) }
+                            { __( 'Charge this donation', 'gratora-donation-platform' ) }
                         </span>
                         <select
                             className="gratora-select"
@@ -217,7 +218,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                             autoFocus
                         >
                             { currentFrequency === '' && (
-                                <option value="">{ __( 'Choose a schedule', 'gratora' ) }</option>
+                                <option value="">{ __( 'Choose a schedule', 'gratora-donation-platform' ) }</option>
                             ) }
                             { ( plan.frequency_options || [] ).map( ( f ) => (
                                 <option key={ f } value={ f }>{ FREQUENCY_LABELS[ f ] || f }</option>
@@ -225,7 +226,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                         </select>
                     </label>
                     <span className="gratora-row__sub" style={ { display: 'block', marginTop: 6 } }>
-                        { __( 'The donor stays paid up to their current date. The new schedule starts from the charge after that.', 'gratora' ) }
+                        { __( 'The donor stays paid up to their current date. The new schedule starts from the charge after that.', 'gratora-donation-platform' ) }
                     </span>
                 </p>
             ) }
@@ -233,7 +234,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             { action === 'pause' && (
                 <p>
                     <label>
-                        <span style={ { display: 'block', marginBottom: 4 } }>{ __( 'Pause for', 'gratora' ) }</span>
+                        <span style={ { display: 'block', marginBottom: 4 } }>{ __( 'Pause for', 'gratora-donation-platform' ) }</span>
                         <select
                             className="gratora-select"
                             value={ String( months ) }
@@ -243,7 +244,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                                 <option key={ m } value={ m }>
                                     { sprintf(
                                         /* translators: %d: number of months */
-                                        _n( '%d month', '%d months', m, 'gratora' ),
+                                        _n( '%d month', '%d months', m, 'gratora-donation-platform' ),
                                         m
                                     ) }
                                 </option>
@@ -256,7 +257,7 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
             { action === 'cancel' && (
                 <p>
                     <label>
-                        <span style={ { display: 'block', marginBottom: 4 } }>{ __( 'Reason (optional)', 'gratora' ) }</span>
+                        <span style={ { display: 'block', marginBottom: 4 } }>{ __( 'Reason (optional)', 'gratora-donation-platform' ) }</span>
                         <input
                             type="text"
                             className="gratora-input"
@@ -269,16 +270,16 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
 
             { action === 'retry' && (
                 <p>
-                    { __( 'The gateway will try to collect the outstanding renewal again now. If it succeeds the donation appears within a few moments, once the gateway confirms it.', 'gratora' ) }
+                    { __( 'The gateway will try to collect the outstanding renewal again now. If it succeeds the donation appears within a few moments, once the gateway confirms it.', 'gratora-donation-platform' ) }
                 </p>
             ) }
 
             { action === 'skip_next' && (
-                <p>{ __( 'The next payment is skipped and the donation carries on one cycle later. Nothing is charged in between.', 'gratora' ) }</p>
+                <p>{ __( 'The next payment is skipped and the donation carries on one cycle later. Nothing is charged in between.', 'gratora-donation-platform' ) }</p>
             ) }
 
             { action === 'resume' && (
-                <p>{ __( 'Charging restarts on the plan’s normal schedule.', 'gratora' ) }</p>
+                <p>{ __( 'Charging restarts on the plan’s normal schedule.', 'gratora-donation-platform' ) }</p>
             ) }
 
             { /* Cancellation always emails through the canceller, so offering
@@ -288,23 +289,34 @@ export default function PlanActionDialog( { plan, action, onClose, onDone } ) {
                     <Switch
                         checked={ notify }
                         onChange={ setNotify }
-                        label={ __( 'Notify donor', 'gratora' ) }
+                        label={ __( 'Notify donor', 'gratora-donation-platform' ) }
                     />
-                    <span>{ __( 'Email the donor about this change', 'gratora' ) }</span>
+                    <span>{ __( 'Email the donor about this change', 'gratora-donation-platform' ) }</span>
                 </div>
             ) }
 
-            { error && <p className="dp-error" style={ { marginTop: 12 } }>{ error }</p> }
-            { approveUrl && (
-                <p style={ { marginTop: 8 } }>
-                    <a href={ approveUrl } target="_blank" rel="noreferrer noopener">
-                        { __( 'Open the approval page', 'gratora' ) }
-                    </a>
-                    { ' ' }
-                    <span className="gratora-muted">
-                        { __( 'The donor has to approve it while signed in to their own account.', 'gratora' ) }
-                    </span>
-                </p>
+            { /* A component, not a bare class: this dialog is shared by two
+                 screens with their own stylesheets, and a class defined in one
+                 of them renders as ordinary body text on the other. The Notice
+                 carries its own styling and announces itself to a screen
+                 reader, which a paragraph does not. */ }
+            { error && (
+                <div style={ { marginTop: 12 } }>
+                    <Notice status="error" isDismissible={ false }>
+                        { error }
+                        { /* The remedy for this particular refusal, so it sits
+                             inside it rather than below as a loose line. */ }
+                        { approveUrl && (
+                            <div style={ { marginTop: 8 } }>
+                                <a href={ approveUrl } target="_blank" rel="noreferrer noopener">
+                                    { __( 'Open the approval page', 'gratora-donation-platform' ) }
+                                </a>
+                                { ' ' }
+                                { __( 'The donor has to approve it while signed in to their own account.', 'gratora-donation-platform' ) }
+                            </div>
+                        ) }
+                    </Notice>
+                </div>
             ) }
         </Dialog>
     );

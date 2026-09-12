@@ -105,6 +105,57 @@ final class RecurringGatewayReachableTest extends IntegrationTestCase
         }
     }
 
+    public function test_change_interval_refuses_when_the_gateway_is_gone(): void
+    {
+        $plan = $this->orphanedPlan();
+
+        try {
+            $this->actions()->changeInterval($plan, 'yearly', RecurringPlanChange::byAdmin('change_interval', false));
+            $this->fail('a cadence the processor never hears about must refuse');
+        } catch (GatewayUnreachable) {
+            $fresh = $this->reload($plan);
+            $this->assertSame('month', (string) $fresh->interval_unit);
+            $this->assertSame(1, (int) $fresh->interval_count);
+        }
+    }
+
+    /**
+     * The refusal is read by an admin deciding what to do next, and the only
+     * thing it can tell them is what the processor is still doing. A resume
+     * that refuses leaves the plan suspended and collecting nothing, so a
+     * message about money still being taken sends them looking for a charge
+     * that is not there.
+     */
+    public function test_a_refused_resume_does_not_claim_the_card_is_still_being_billed(): void
+    {
+        $plan = $this->orphanedPlan();
+
+        try {
+            $this->actions()->resume($plan, RecurringPlanChange::byAdmin('resume', false));
+            $this->fail('resuming a plan whose processor is absent must refuse');
+        } catch (GatewayUnreachable $e) {
+            $this->assertStringNotContainsString('billing', $e->getMessage());
+            $this->assertStringContainsString('stay paused at the processor', $e->getMessage());
+        }
+    }
+
+    /** And the one where money really does keep moving still says so. */
+    public function test_a_refused_pause_says_the_card_goes_on_being_charged(): void
+    {
+        $plan = $this->orphanedPlan();
+
+        try {
+            $this->actions()->pause(
+                $plan,
+                RecurringPlanActions::monthsFromNow(1),
+                RecurringPlanChange::byAdmin('pause', false)
+            );
+            $this->fail('pausing a plan whose processor is absent must refuse');
+        } catch (GatewayUnreachable $e) {
+            $this->assertStringContainsString('go on being charged', $e->getMessage());
+        }
+    }
+
     public function test_an_offline_plan_is_still_changeable(): void
     {
         // Offline is registered and simply has no subscriptions, so a local

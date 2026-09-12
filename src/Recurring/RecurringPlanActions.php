@@ -54,7 +54,7 @@ final class RecurringPlanActions
         $resumesAt = self::resumeDate($resumesAt);
 
         $this->assertChangeable($plan);
-        $this->assertGatewayReachable($plan, 'pause');
+        $this->assertGatewayReachable($plan, 'pause', 'it would go on being charged');
 
         $this->subscription($plan)?->pauseSubscription($plan, $resumesAt);
 
@@ -89,14 +89,14 @@ final class RecurringPlanActions
         $at = strtotime($resumesAt);
         if ($at === false) {
             throw new InvalidArgumentException(
-                esc_html__('That is not a date this donation can restart on.', 'gratora')
+                esc_html__('That is not a date this donation can restart on.', 'gratora-donation-platform')
             );
         }
 
         $now = time();
         if ($at <= $now) {
             throw new InvalidArgumentException(
-                esc_html__('A donation can only be paused until a date in the future.', 'gratora')
+                esc_html__('A donation can only be paused until a date in the future.', 'gratora-donation-platform')
             );
         }
 
@@ -123,10 +123,10 @@ final class RecurringPlanActions
         $this->assertChangeable($plan);
         // After the reachability check, not before: an active plan on an absent
         // gateway must still answer GatewayUnreachable.
-        $this->assertGatewayReachable($plan, 'resume');
+        $this->assertGatewayReachable($plan, 'resume', 'it would stay paused at the processor');
 
         if ((string) $plan->status !== 'paused') {
-            throw new PlanChangeRefused(esc_html__('This donation is not paused.', 'gratora'));
+            throw new PlanChangeRefused(esc_html__('This donation is not paused.', 'gratora-donation-platform'));
         }
 
         $this->subscription($plan)?->resumeSubscription($plan);
@@ -152,10 +152,10 @@ final class RecurringPlanActions
     public function skipNext(RecurringPlan $plan, RecurringPlanChange $change): void
     {
         $this->assertChangeable($plan);
-        $this->assertGatewayReachable($plan, 'skip a payment on');
+        $this->assertGatewayReachable($plan, 'skip a payment on', 'that payment would still be taken on its date');
 
         if (! $plan->next_payment_at) {
-            throw new InvalidArgumentException(esc_html__('This donation has no scheduled payment to skip.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('This donation has no scheduled payment to skip.', 'gratora-donation-platform'));
         }
 
         // The stored date is the base of the arithmetic and the result goes
@@ -167,7 +167,7 @@ final class RecurringPlanActions
         $from = strtotime((string) $plan->next_payment_at);
         if ($from === false) {
             throw new InvalidArgumentException(
-                esc_html__('This donation has no scheduled payment to skip.', 'gratora')
+                esc_html__('This donation has no scheduled payment to skip.', 'gratora-donation-platform')
             );
         }
 
@@ -203,19 +203,19 @@ final class RecurringPlanActions
     public function changeAmount(RecurringPlan $plan, int $amountCents, RecurringPlanChange $change): void
     {
         $this->assertChangeable($plan);
-        $this->assertGatewayReachable($plan, 'change the amount of');
+        $this->assertGatewayReachable($plan, 'change the amount of', 'the old amount would keep being charged');
 
         if ($amountCents < 50) {
-            throw new InvalidArgumentException(esc_html__('Amount is too low.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('Amount is too low.', 'gratora-donation-platform'));
         }
         if ($amountCents > 99999999) {
-            throw new InvalidArgumentException(esc_html__('Amount is too high.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('Amount is too high.', 'gratora-donation-platform'));
         }
         // Storage is major units x 100, so a fractional amount in a zero-decimal
         // currency rounds at the gateway and the row keeps a figure nobody is
         // charging, on every renewal.
         if (Currency::minorUnits((string) $plan->currency) === 0 && $amountCents % 100 !== 0) {
-            throw new InvalidArgumentException(esc_html__('This currency does not support fractional amounts.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('This currency does not support fractional amounts.', 'gratora-donation-platform'));
         }
 
         $was = (int) $plan->amount_cents;
@@ -257,7 +257,7 @@ final class RecurringPlanActions
         if (! $gateway instanceof SupportsPaymentRetry) {
             throw new InvalidArgumentException(esc_html(sprintf(
                 /* translators: %s: the payment gateway name, e.g. PayPal. */
-                __('%s does not allow a renewal to be retried on demand. It retries on its own schedule; ask the donor to update their card from the donor portal.', 'gratora'),
+                __('%s does not allow a renewal to be retried on demand. It retries on its own schedule; ask the donor to update their card from the donor portal.', 'gratora-donation-platform'),
                 ucfirst((string) $plan->gateway)
             )));
         }
@@ -309,11 +309,11 @@ final class RecurringPlanActions
         // processor is doing, and answering with a gateway error would send an
         // admin looking at the wrong thing.
         if (! in_array($frequency, FrequencyMap::recurringFrequencies(), true)) {
-            throw new InvalidArgumentException(esc_html__('That is not a schedule this site offers.', 'gratora'));
+            throw new InvalidArgumentException(esc_html__('That is not a schedule this site offers.', 'gratora-donation-platform'));
         }
 
         $this->assertChangeable($plan);
-        $this->assertGatewayReachable($plan, 'change the schedule of');
+        $this->assertGatewayReachable($plan, 'change the schedule of', 'it would keep to its current schedule');
 
         [$unit, $count] = FrequencyMap::toStripe($frequency);
 
@@ -325,7 +325,7 @@ final class RecurringPlanActions
 
         $gateway = $this->gateways->get((string) $plan->gateway);
         if (! $gateway instanceof SupportsScheduleChange) {
-            throw new PlanChangeRefused(esc_html__('This payment provider cannot change how often a donation is taken. Cancel it and start a new one.', 'gratora'));
+            throw new PlanChangeRefused(esc_html__('This payment provider cannot change how often a donation is taken. Cancel it and start a new one.', 'gratora-donation-platform'));
         }
 
         $schedule = $gateway->updateSubscriptionSchedule($plan, (int) $plan->amount_cents, $unit, $count);
@@ -371,7 +371,7 @@ final class RecurringPlanActions
     private function assertChangeable(RecurringPlan $plan): void
     {
         if (in_array((string) $plan->status, self::TERMINAL, true)) {
-            throw new PlanChangeRefused(esc_html__('This donation is no longer active.', 'gratora'));
+            throw new PlanChangeRefused(esc_html__('This donation is no longer active.', 'gratora-donation-platform'));
         }
     }
 
@@ -401,18 +401,19 @@ final class RecurringPlanActions
      *
      * @since 1.0.0
      */
-    private function assertGatewayReachable(RecurringPlan $plan, string $verb): void
+    private function assertGatewayReachable(RecurringPlan $plan, string $verb, string $consequence): void
     {
         if ($this->gateways->get((string) $plan->gateway) !== null) {
             return;
         }
 
         throw new GatewayUnreachable(esc_html(sprintf(
-            'Cannot %1$s subscription %2$s (%3$s, plan #%4$d): the gateway is not available, so it would keep billing.',
+            'Cannot %1$s subscription %2$s (%3$s, plan #%4$d): the gateway is not available, so %5$s.',
             $verb,
             (string) ($plan->gateway_subscription_id ?: 'unlinked'),
             (string) $plan->gateway,
-            (int) $plan->id
+            (int) $plan->id,
+            $consequence
         )));
     }
 
