@@ -159,9 +159,6 @@ final class DonorRepository
         $hasSearch = ! empty($args['has_search']);
 
         $applyFilters = function ($q) use ($args, $ids, $hasSearch) {
-            $q = ($args['trashed'] ?? '') === 'only'
-                ? $q->whereIsNotNull('trashed_at')
-                : DonorQueries::notTrashed($q);
             if (! empty($args['country'])) {
                 $q = $q->where('country', strtoupper((string) $args['country']));
             }
@@ -175,10 +172,10 @@ final class DonorRepository
             return $q;
         };
 
-        // Every donor row on the working list belongs here: one with no
-        // donations is a real person who has not given yet, and one with only
-        // test donations is a person the operator created and needs to find.
-        // The bin is the one thing held back, and it is a view of its own.
+        // Every donor row belongs here: one with no donations is a real person
+        // who has not given yet, and one with only test donations is a person
+        // the operator created and needs to find. The union is the whole table,
+        // so there is nothing left to filter.
         $total = (int) $applyFilters(Donor::query())->count();
         $items = $applyFilters(Donor::query())
             ->orderBy($orderBy, $order)
@@ -187,20 +184,6 @@ final class DonorRepository
             ->getAll();
 
         return ['items' => $items, 'total' => $total];
-    }
-
-    /**
-     * How many donors are in the bin, under the same filters the screen holds.
-     *
-     * @param array<string,mixed> $args
-     *
-     * @since 1.0.0
-     */
-    public function countTrashed(array $args = []): int
-    {
-        $args['trashed'] = 'only';
-
-        return (int) $this->aggregateAdmin($args)['total_count'];
     }
 
     /**
@@ -215,9 +198,6 @@ final class DonorRepository
         $hasSearch = ! empty($args['has_search']);
 
         $applyFilters = function ($q) use ($args, $ids, $hasSearch) {
-            $q = ($args['trashed'] ?? '') === 'only'
-                ? $q->whereIsNotNull('trashed_at')
-                : DonorQueries::notTrashed($q);
             if (! empty($args['country'])) {
                 $q = $q->where('country', strtoupper((string) $args['country']));
             }
@@ -230,10 +210,8 @@ final class DonorRepository
             return $q;
         };
 
-        // Same population as the list above it, the bin included: a total that
-        // disagrees with the rows underneath reads as a broken screen, and
-        // unlike the donation figures this one is a headcount rather than
-        // money, so it has to move when the list does. Only this count widens.
+        // Same population as the list above it: a total that disagrees with the
+        // rows underneath reads as a broken screen. Only this headcount widens.
         // with_donations gates on donations_count, which is live-only by
         // construction, and a test-only donor carries total_donated_cents 0, so
         // the money cards cannot move.

@@ -62,7 +62,6 @@ final class DonorsController
                 'country'    => ['type' => 'string'],
                 'donor_type' => ['type' => 'string', 'enum' => Donor::TYPES],
                 'search'     => ['type' => 'string'],
-                'trashed'    => ['type' => 'string', 'enum' => ['exclude', 'only'], 'default' => 'exclude'],
             ],
         ]);
 
@@ -74,9 +73,6 @@ final class DonorsController
                 'country'    => ['type' => 'string'],
                 'donor_type' => ['type' => 'string', 'enum' => Donor::TYPES],
                 'search'     => ['type' => 'string'],
-                // Unlike the donation figures, this total is a headcount
-                // rather than money, so the bin's view needs its own.
-                'trashed'    => ['type' => 'string', 'enum' => ['exclude', 'only'], 'default' => 'exclude'],
             ],
         ]);
 
@@ -105,28 +101,6 @@ final class DonorsController
                 'per_page' => ['type' => 'integer', 'default' => 25, 'minimum' => 1, 'maximum' => 100],
                 'order'    => ['type' => 'string',  'default' => 'desc', 'enum' => ['asc', 'desc']],
             ],
-        ]);
-
-        // Collection routes rather than per-donor: every row gets its own
-        // answer and the screens act on a selection.
-        //
-        // Above the id routes. Nothing makes that load-bearing today, because
-        // (?P<id>\d+) cannot match "trash", but widening that pattern later
-        // would mis-dispatch these silently rather than erroring.
-        register_rest_route(self::NAMESPACE, '/admin/donors/trash', [
-            'methods'             => WP_REST_Server::CREATABLE,
-            // Reversible, touching no money and no external system, so it sits
-            // on the same tier as hiding a donor from the public pages.
-            'permission_callback' => static fn () => Capabilities::userCan('gratora_edit_donors'),
-            'callback'            => [$this, 'trashMany'],
-            'args'                => self::batchArgs(),
-        ]);
-
-        register_rest_route(self::NAMESPACE, '/admin/donors/restore', [
-            'methods'             => WP_REST_Server::CREATABLE,
-            'permission_callback' => static fn () => Capabilities::userCan('gratora_edit_donors'),
-            'callback'            => [$this, 'restoreMany'],
-            'args'                => self::batchArgs(),
         ]);
 
         register_rest_route(self::NAMESPACE, '/admin/donors/(?P<id>\d+)', [
@@ -767,92 +741,6 @@ final class DonorsController
     }
 
     /** @since 1.0.0 */
-    /**
-     * A donor is addressed by id everywhere, so this cannot share the
-     * donations shape: that one declares its references as strings.
-     *
-     * @return array<string,array<string,mixed>>
-     *
-     * @since 1.0.0
-     */
-    private static function batchArgs(): array
-    {
-        return [
-            'ids' => [
-                'type'     => 'array',
-                'required' => true,
-                'items'    => ['type' => 'integer'],
-                'minItems' => 1,
-                // The screens act on one visible page. A larger selection is
-                // split by the caller and the answers merged per row.
-                'maxItems' => 50,
-            ],
-        ];
-    }
-
-    /** @since 1.0.0 */
-    public function trashMany(WP_REST_Request $request): WP_REST_Response
-    {
-        return $this->applyToMany(
-            $request,
-            static fn (Donor $d): bool => $d->trashed_at !== null,
-            function (Donor $d): void {
-                $this->donorService->trash($d);
-            }
-        );
-    }
-
-    /** @since 1.0.0 */
-    public function restoreMany(WP_REST_Request $request): WP_REST_Response
-    {
-        return $this->applyToMany(
-            $request,
-            static fn (Donor $d): bool => $d->trashed_at === null,
-            function (Donor $d): void {
-                $this->donorService->restore($d);
-            }
-        );
-    }
-
-    /**
-     * Per row, so a mixed selection says which donors it could not move and
-     * why. A donor who has gone since the page was drawn is reported rather
-     * than failing the whole batch.
-     *
-     * @param callable(Donor):bool $alreadyDone
-     * @param callable(Donor):void $apply
-     *
-     * @since 1.0.0
-     */
-    private function applyToMany(WP_REST_Request $request, callable $alreadyDone, callable $apply): WP_REST_Response
-    {
-        $done    = [];
-        $already = [];
-        $refused = [];
-
-        foreach (array_map('intval', (array) $request['ids']) as $id) {
-            $donor = Donor::query()->find('id', $id);
-            if (! $donor) {
-                $refused[] = ['id' => $id, 'reason' => __('That donor no longer exists.', 'gratora-donation-platform')];
-                continue;
-            }
-
-            if ($alreadyDone($donor)) {
-                $already[] = ['id' => $id];
-                continue;
-            }
-
-            try {
-                $apply($donor);
-                $done[] = ['id' => $id];
-            } catch (InvalidArgumentException $e) {
-                $refused[] = ['id' => $id, 'reason' => $e->getMessage()];
-            }
-        }
-
-        return new WP_REST_Response(['done' => $done, 'already' => $already, 'refused' => $refused], 200);
-    }
-
     public function stats(WP_REST_Request $request): WP_REST_Response
     {
         $search = $request['search'] !== null ? trim((string) $request['search']) : '';
@@ -862,7 +750,6 @@ final class DonorsController
             : [];
 
         $stats = $this->donors->aggregateAdmin([
-            'trashed'      => (string) ($request['trashed'] ?? 'exclude'),
             'country'      => $request['country']    !== null ? (string) $request['country'] : null,
             'donor_type'   => $request['donor_type'] !== null ? (string) $request['donor_type'] : null,
             'has_search'   => $search !== '',
@@ -870,29 +757,6 @@ final class DonorsController
         ]);
 
         return new WP_REST_Response($stats, 200);
-    }
-
-    /**
-     * Display names for a set of user ids, in one query.
-     *
-     * @param  list<int> $ids
-     * @return array<int,string>
-     *
-     * @since 1.0.0
-     */
-    private static function displayNames(array $ids): array
-    {
-        $ids = array_values(array_unique(array_filter($ids)));
-        if ($ids === []) {
-            return [];
-        }
-
-        $out = [];
-        foreach (get_users(['include' => $ids, 'fields' => ['ID', 'display_name']]) as $user) {
-            $out[(int) $user->ID] = (string) $user->display_name;
-        }
-
-        return $out;
     }
 
     /** @since 1.0.0 */
@@ -905,7 +769,6 @@ final class DonorsController
             : [];
 
         $result = $this->donors->listAdmin([
-            'trashed'      => (string) ($request['trashed'] ?? 'exclude'),
             'page'         => Paging::page($request['page'] ?? null),
             'per_page'     => (int) ($request['per_page'] ?? 25),
             'orderby'      => (string) ($request['orderby'] ?? 'last_donation_at'),
@@ -929,14 +792,6 @@ final class DonorsController
         // an abandoned attempt, still keeps the donor.
         $undeletable = $this->donorService->undeletableReasons($result['items']);
 
-        // One lookup for the page. Asked per row this is a user query per
-        // line, which is what the rest of this handler goes to lengths to
-        // avoid.
-        $trashedBy = self::displayNames(array_map(
-            static fn (Donor $d): int => (int) $d->trashed_by,
-            $result['items']
-        ));
-
         $shaped = array_map(
             fn (Donor $d): array => [
                 'id'                  => $d->id,
@@ -952,13 +807,6 @@ final class DonorsController
                 'created_at'          => $d->created_at,
                 'redacted'            => $d->redacted_at !== null,
                 'deletable'           => ($undeletable[(int) $d->id] ?? null) === null,
-                // The gate's own words. Shipping only the boolean left the
-                // screen unable to say why a row refuses to move, which is how
-                // a reversible act comes to look like an irreversible one.
-                'undeletable_reason'  => $undeletable[(int) $d->id] ?? null,
-                'trashed'             => $d->trashed_at !== null,
-                'trashed_at'          => $d->trashed_at,
-                'trashed_by_name'     => $trashedBy[(int) $d->trashed_by] ?? null,
                 'avatar_url'          => $this->avatars->adminUrl($d),
             ],
             $result['items'],
@@ -968,12 +816,6 @@ final class DonorsController
         $response = new WP_REST_Response($shaped, 200);
         $response->header('X-WP-Total',      (string) $result['total']);
         $response->header('X-WP-TotalPages', (string) max(1, (int) ceil($result['total'] / max(1, $perPage))));
-        // So the view switcher carries the bin's size without this screen
-        // fetching the bin it is not showing.
-        $response->header('X-Gratora-Trashed', (string) $this->donors->countTrashed([
-            'country'    => $request['country']    !== null ? (string) $request['country'] : null,
-            'donor_type' => $request['donor_type'] !== null ? (string) $request['donor_type'] : null,
-        ]));
         return $response;
     }
 

@@ -72,8 +72,7 @@ final class DonorRetention
         if (time() < self::startsAt()) return;
 
         $prefix    = DB::getPrefix();
-        $liveDonor = DonorQueries::notRedactedPredicate('d')
-            . ' AND ' . DonorQueries::notTrashedPredicate('d');
+        $liveDonor = DonorQueries::notRedactedPredicate('d');
         $cutoff = self::cutoff($years);
         $cursor = self::cursor();
 
@@ -245,8 +244,7 @@ final class DonorRetention
     private function countBefore(string $cutoff): int
     {
         $prefix    = DB::getPrefix();
-        $liveDonor = DonorQueries::notRedactedPredicate('d')
-            . ' AND ' . DonorQueries::notTrashedPredicate('d');
+        $liveDonor = DonorQueries::notRedactedPredicate('d');
 
         $rows = DB::raw(
             "SELECT COUNT(*) AS n FROM {$prefix}gratora_donors d
