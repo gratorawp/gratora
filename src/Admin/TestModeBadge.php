@@ -51,10 +51,10 @@ final class TestModeBadge extends HookProvider
 
         // Name Gratora to distinguish other plugins’ test badges.
         $title = $orgWide
-            ? __('Gratora Test Mode Active', 'gratora')
+            ? __('Gratora Test Mode Active', 'gratora-donation-platform')
             : sprintf(
                 /* translators: %d: how many published forms are in test mode. */
-                _n('%d Gratora Form in Test Mode', '%d Gratora Forms in Test Mode', $forms, 'gratora'),
+                _n('%d Gratora Form in Test Mode', '%d Gratora Forms in Test Mode', $forms, 'gratora-donation-platform'),
                 $forms
             );
 
@@ -65,8 +65,8 @@ final class TestModeBadge extends HookProvider
             'href'   => esc_url(admin_url('admin.php?page=gratora-settings&tab=gateways')),
             'meta'  => [
                 'title' => $orgWide
-                    ? __('No card is charged and these donations stay out of your reporting. Turn this off before you go live.', 'gratora')
-                    : __('These forms take no real money. Every other form on the site does.', 'gratora'),
+                    ? __('No card is charged and these donations stay out of your reporting. Turn this off before you go live.', 'gratora-donation-platform')
+                    : __('These forms take no real money. Every other form on the site does.', 'gratora-donation-platform'),
             ],
         ]);
     }
@@ -97,10 +97,14 @@ final class TestModeBadge extends HookProvider
         align-items: center;
         gap: 4px;
         margin: 0 4px;
+        /* Offset rather than a margin: the bar is a fixed 32px and a vertical
+           margin on an inline-level box grows the line it sits on. */
+        position: relative;
+        top: 2px;
         padding: 0 8px;
         border-radius: 4px;
         background: #e89940;
-        color: #fff;
+        color: #000;
         font-weight: 600;
         font-size: 12px;
         line-height: 25px;
