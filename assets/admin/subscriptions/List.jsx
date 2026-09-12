@@ -6,7 +6,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
-import { RotateCw, SearchX } from 'lucide-react';
+import { RotateCw, SearchX, Pause, Play, Ban } from 'lucide-react';
 
 import Btn from '../_shared/components/Btn';
 import PlanDetailDialog from './PlanDetailDialog';
@@ -808,6 +808,8 @@ export default function List() {
         },
         {
             id:       'pause',
+            // The bulk bar is icon-only and drops an action without one.
+            icon:     () => <Pause size={ 16 } strokeWidth={ 1.75 } />,
             label:    __( 'Pause', 'gratora-donation-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'pause' ),
             supportsBulk: true,
@@ -831,6 +833,7 @@ export default function List() {
         },
         {
             id:       'resume',
+            icon:     () => <Play size={ 16 } strokeWidth={ 1.75 } />,
             label:    __( 'Resume', 'gratora-donation-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'resume' ),
             supportsBulk: true,
@@ -866,6 +869,7 @@ export default function List() {
         {
             id:            'cancel',
             label:         __( 'Cancel', 'gratora-donation-platform' ),
+            icon:          () => <Ban size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'cancel' ),
             supportsBulk: true,

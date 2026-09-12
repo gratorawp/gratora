@@ -9,7 +9,7 @@ import { DataViews } from '@wordpress/dataviews';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Trash2, SearchX } from 'lucide-react';
+import { Trash2, SearchX, Undo2, FlameKindling } from 'lucide-react';
 
 import Btn from '../_shared/components/Btn';
 import Notice from '../_shared/components/Notice';
@@ -116,6 +116,10 @@ export default function Trash() {
         {
             id:           'restore',
             label:        __( 'Restore', 'gratora-donation-platform' ),
+            // Without an icon the bulk bar drops it: DataViews draws those
+            // buttons icon-only, which is why selecting rows in here offered
+            // nothing to press.
+            icon:         () => <Undo2 size={ 16 } strokeWidth={ 1.75 } />,
             supportsBulk: true,
             // Deliberately no isEligible: DataViews drops an ineligible action
             // from the row menu entirely, which would leave a bin row with no
@@ -160,6 +164,7 @@ export default function Trash() {
         {
             id:            'delete-permanently',
             label:         __( 'Delete permanently', 'gratora-donation-platform' ),
+            icon:          () => <FlameKindling size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
             isEligible:    ( item ) => userCan( 'delete_donations' ) && ! item.delete_blocked,

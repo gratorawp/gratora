@@ -5,7 +5,7 @@ import { DataViews } from '@wordpress/dataviews';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Mail as MailIcon, Check as CheckIcon, Coins, Plus, SearchX, Trash2 } from 'lucide-react';
+import { Mail as MailIcon, Check as CheckIcon, Coins, Plus, SearchX, Trash2, FlameKindling } from 'lucide-react';
 
 import Btn from '../_shared/components/Btn';
 import { useTableView } from '../_shared/useTableView';
@@ -471,6 +471,10 @@ export default function List() {
         {
             id:            'delete-permanently',
             label:         __( 'Delete permanently', 'gratora-donation-platform' ),
+            // The bulk bar draws icon-only buttons and drops any action
+            // without one, so this is what puts it on the screen at all.
+            // Deliberately not the bin: that one is reversible and this is not.
+            icon:          () => <FlameKindling size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
             supportsBulk:  true,
             // Only for a row with no bin to pass through. Anything that can be
