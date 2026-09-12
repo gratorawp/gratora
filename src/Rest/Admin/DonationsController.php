@@ -1401,6 +1401,12 @@ final class DonationsController
      * agrees. Silently skips the ones it refuses, so the default can never
      * remove somebody the checkbox would not have offered.
      *
+     * A donor still holding a row in the bin is refused here rather than by the
+     * gate. The gate is a statement about money, and a stopped attempt
+     * deliberately stops holding its donor, which is what lets the spam case
+     * through at all. This is a statement about confirmation: the typed word
+     * named a selection, and a row left in the bin was not in it.
+     *
      * Deleting a donor record is donor-tier work, so a role that can clear
      * donations but not erase people deletes the attempts and leaves the donor.
      *
@@ -1425,11 +1431,26 @@ final class DonationsController
         }
 
         $reasons = $this->donorService->undeletableReasons($donors);
+
+        // The batch is already gone by now, so anything still trashed is by
+        // definition a row this request never named.
+        $stillBinned = array_flip(array_map(
+            'intval',
+            Donation::query()
+                ->whereIn('donor_id', array_map(static fn (Donor $d): int => (int) $d->id, $donors))
+                ->whereIsNotNull('trashed_at')
+                ->distinct()
+                ->pluck('donor_id'),
+        ));
+
         $deleted = [];
 
         foreach ($donors as $donor) {
             $id = (int) $donor->id;
             if (($reasons[$id] ?? null) !== null) {
+                continue;
+            }
+            if (isset($stillBinned[$id])) {
                 continue;
             }
 

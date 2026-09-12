@@ -15,6 +15,7 @@ use Gratora\Donors\Donor;
 use Gratora\Donors\DonorService;
 use Gratora\Foundation\Plugin;
 use InvalidArgumentException;
+use WP_REST_Request;
 
 /**
  * Deleting a spam donor, and what goes with their attempts.
@@ -34,10 +35,10 @@ final class DonorCascadeDeleteTest extends IntegrationTestCase
     }
 
     /** A stopped spam attempt: what the donor gate lets through. */
-    private function stoppedAttempt(): Donation
+    private function stoppedAttempt(?string $email = null): Donation
     {
         $donation = Plugin::instance()->container->get(DonationService::class)->createPending(new DonationIntent(
-            email:        'cascade-' . uniqid() . '@example.test',
+            email:        $email ?? 'cascade-' . uniqid() . '@example.test',
             amount_cents: 2500,
             currency:     'USD',
             gateway:      'offline',
@@ -127,5 +128,42 @@ final class DonorCascadeDeleteTest extends IntegrationTestCase
         $this->assertNotNull(Donor::query()->find('id', $donorId), 'nothing is half deleted');
         $this->assertNotNull(Donation::query()->find('id', (int) $donation->id));
         $this->assertSame([], Event::query()->where('type', 'donation.deleted')->getAll());
+    }
+
+    /**
+     * The typed DELETE names the rows it names. A donor's other attempts, still
+     * in the bin and confirmed by nobody, are not part of that answer.
+     *
+     * The gate is what makes this reachable rather than theoretical: a trashed
+     * attempt always carries payment_stopped_at, so it can never become money
+     * and never holds its donor. The donor therefore reads as somebody this one
+     * attempt was the whole of, the cascade removes them, and removing a donor
+     * removes every donation they have.
+     */
+    public function test_deleting_one_binned_attempt_spares_the_donors_other_binned_attempts(): void
+    {
+        $email  = 'cascade-pair-' . uniqid() . '@example.test';
+        $first  = $this->stoppedAttempt($email);
+        $second = $this->stoppedAttempt($email);
+
+        $this->assertSame(
+            (int) $first->donor_id,
+            (int) $second->donor_id,
+            'the fixture needs both attempts on one donor'
+        );
+
+        $request = new WP_REST_Request('POST', '/gratora/v1/admin/donations/delete');
+        $request->set_param('references', [(string) $first->reference]);
+        $request->set_param('confirmation', 'DELETE');
+        $request->set_param('delete_donors', true);
+
+        $response = rest_do_request($request);
+        $this->assertSame(200, $response->get_status(), (string) wp_json_encode($response->get_data()));
+
+        $this->assertNull(Donation::query()->find('id', (int) $first->id), 'the named row goes');
+        $this->assertNotNull(
+            Donation::query()->find('id', (int) $second->id),
+            'a row in the bin that nobody confirmed was destroyed by the donor cascade'
+        );
     }
 }
