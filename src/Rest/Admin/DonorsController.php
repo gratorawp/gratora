@@ -798,6 +798,21 @@ final class DonorsController
         // deleted, and the counters here say nothing about that.
         $undeletable = $this->donorService->undeletableReasons($result['items']);
 
+        /**
+         * What an add-on knows about a donor that core cannot see: tickets it
+         * holds, a page it runs, a tax declaration the delete would destroy.
+         * A warning rather than a veto, because the decision is the operator's
+         * and the dialog is where it gets made.
+         *
+         * Asked once for the whole page and handed every donor on it, so an
+         * add-on answers with one query rather than one per row. The vetoes
+         * this replaces each ran an EXISTS per donor.
+         *
+         * @param array<int, list<string>> $warnings keyed by donor id
+         * @param list<Donor>              $donors   the page being shaped
+         */
+        $warnings = (array) apply_filters('gratora.donor.delete_warnings', [], $result['items']);
+
         $shaped = array_map(
             fn (Donor $d): array => [
                 'id'                  => $d->id,
@@ -817,6 +832,10 @@ final class DonorsController
                 // place it can be read, and a row with no delete on it and no
                 // reason beside it reads as a missing feature.
                 'delete_blocked'      => $undeletable[(int) $d->id] ?? null,
+                'delete_warnings'     => array_values(array_filter(
+                    array_map('strval', (array) ($warnings[(int) $d->id] ?? [])),
+                    static fn (string $line): bool => trim($line) !== ''
+                )),
                 'avatar_url'          => $this->avatars->adminUrl($d),
             ],
             $result['items'],

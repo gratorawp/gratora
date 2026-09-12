@@ -39,11 +39,19 @@ jest.mock( '@wordpress/dataviews', () => ( {
     },
 } ) );
 
+// Renders what it was handed: the body is the subject here, and a stub that
+// returns null would let every assertion about it pass against an empty page.
 jest.mock( '../../assets/admin/_shared/components/ConfirmDialog', () => ( {
     __esModule: true,
     default: ( { confirm } ) => {
         if ( confirm ) captured.confirm = confirm;
-        return null;
+        if ( ! confirm ) return null;
+        return (
+            <div>
+                <p>{ confirm.message }</p>
+                { confirm.body }
+            </div>
+        );
     },
 } ) );
 
@@ -87,6 +95,60 @@ const del = () => captured.actions.find( ( a ) => a.id === 'delete' );
 
 beforeEach( () => {
     window.gratora = { can: { redact_donors: true } };
+} );
+
+describe( 'what an add-on warns about', () => {
+    it( 'is shown before the operator confirms', async () => {
+        const rows = [ { ...donor( 1, 5, 10000 ), delete_warnings: [ 'Holds 2 event tickets.' ] } ];
+        await mount( rows );
+
+        del().callback( rows );
+        await settle();
+
+        expect( document.body.textContent ).toContain( 'Holds 2 event tickets.' );
+    } );
+
+    it( 'names the donor it belongs to when several are going', async () => {
+        const rows = [
+            { ...donor( 1, 5, 10000 ), delete_warnings: [ 'Runs a fundraiser page.' ] },
+            { ...donor( 2, 5, 10000 ), delete_warnings: [] },
+        ];
+        await mount( rows );
+
+        del().callback( rows );
+        await settle();
+
+        const shown = document.body.textContent;
+        expect( shown ).toContain( 'Runs a fundraiser page.' );
+        expect( shown ).toContain( 'd1@example.test' );
+    } );
+
+    it( 'says nothing extra when no add-on warns', async () => {
+        const rows = [ donor( 1, 5, 10000 ) ];
+        await mount( rows );
+
+        del().callback( rows );
+        await settle();
+
+        expect( document.body.textContent ).not.toContain( 'Also going' );
+    } );
+
+    /** A page-sized selection would otherwise bury the confirmation itself. */
+    it( 'caps a long list and says how many it left out', async () => {
+        const rows = Array.from( { length: 12 }, ( _v, i ) => ( {
+            ...donor( i + 1, 1, 1000 ),
+            delete_warnings: [ `Warning for ${ i + 1 }.` ],
+        } ) );
+        await mount( rows );
+
+        del().callback( rows );
+        await settle();
+
+        const shown = document.body.textContent;
+        expect( shown ).toContain( 'Warning for 1.' );
+        expect( shown ).not.toContain( 'Warning for 12.' );
+        expect( shown ).toMatch( /\b7 more\b/ );
+    } );
 } );
 
 it( 'totals the donations and the money across the selection', async () => {

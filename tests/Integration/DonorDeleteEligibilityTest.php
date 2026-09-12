@@ -130,6 +130,51 @@ final class DonorDeleteEligibilityTest extends IntegrationTestCase
         $this->assertNull($row['delete_blocked']);
     }
 
+    /**
+     * What an add-on knows that core cannot see.
+     *
+     * The dialog can only warn about what reaches the row, and core has no
+     * idea a donor holds event tickets, runs a fundraiser page, or has a Gift
+     * Aid declaration about to be destroyed. Those were vetoes once, which
+     * refused the delete outright; a warning says the same thing without
+     * taking the decision away.
+     *
+     * Asked once for the page rather than once per donor, so an add-on answers
+     * with one query instead of one per row.
+     */
+    public function test_an_add_on_can_warn_about_what_the_delete_will_take(): void
+    {
+        $donor = $this->donors()->findOrCreate('rae.warned@example.org', ['first_name' => 'Rae']);
+        $seen  = 0;
+
+        $warn = static function (array $warnings, array $donors) use (&$seen): array {
+            $seen++;
+            foreach ($donors as $d) {
+                $warnings[(int) $d->id][] = 'Holds 2 event tickets.';
+            }
+
+            return $warnings;
+        };
+        add_filter('gratora.donor.delete_warnings', $warn, 10, 2);
+
+        try {
+            $row = $this->listRows()[(int) $donor->id];
+        } finally {
+            remove_filter('gratora.donor.delete_warnings', $warn, 10);
+        }
+
+        $this->assertSame(['Holds 2 event tickets.'], $row['delete_warnings']);
+        $this->assertTrue($row['deletable'], 'a warning is not a refusal');
+        $this->assertSame(1, $seen, 'asked once for the page, not once per donor');
+    }
+
+    public function test_a_donor_nobody_warns_about_carries_an_empty_list(): void
+    {
+        $donor = $this->donors()->findOrCreate('rae.unwarned@example.org', ['first_name' => 'Rae']);
+
+        $this->assertSame([], $this->listRows()[(int) $donor->id]['delete_warnings']);
+    }
+
     public function test_a_donor_with_no_donation_row_at_all_is_offered_delete_and_deletes(): void
     {
         $donor = $this->donors()->findOrCreate('rae.bare@example.org', ['first_name' => 'Rae']);

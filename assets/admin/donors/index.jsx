@@ -74,6 +74,36 @@ function report( results, done, failed ) {
     if ( no > 0 ) notify.error( failed( no ) );
 }
 
+/** Beyond this the warnings bury the question they are attached to. */
+const WARNING_LIMIT = 5;
+
+/**
+ * What the add-ons say this delete will take with it.
+ *
+ * Core cannot see a ticket order, a fundraiser page or a Gift Aid declaration,
+ * so it asks and puts the answers here. Each line names its donor once more
+ * than one is going: a bare sentence in a list of twelve says nothing about
+ * which of them it is about.
+ *
+ * @param {Array} items The donors the delete will act on.
+ * @return {Array} Lines to show, already capped.
+ */
+function deleteWarnings( items ) {
+    const named = items.length > 1;
+
+    return items.flatMap( ( item ) => ( item.delete_warnings || [] ).map( ( line ) => ( {
+        key:  `${ item.id }:${ line }`,
+        text: named
+            ? sprintf(
+                /* translators: 1: donor email or name, 2: what the add-on warned about. */
+                __( '%1$s: %2$s', 'gratora-donation-platform' ),
+                item.email || item.name || `#${ item.id }`,
+                line
+            )
+            : line,
+    } ) ) );
+}
+
 /**
  * The confirmation itself. Split by whether there is anything to count, so the
  * sentence never reads "0 donations and $0.00" for a donor who never gave.
@@ -400,11 +430,31 @@ export function DonorsApp( { toggleSlot } ) {
                 const items = selection.filter( ( i ) => !! i.deletable );
                 if ( ! items.length ) return;
                 const n = items.length;
-                const damage = deleteDamage( items );
+                const damage   = deleteDamage( items );
+                const warnings = deleteWarnings( items );
+                const shown    = warnings.slice( 0, WARNING_LIMIT );
+                const hidden   = warnings.length - shown.length;
 
                 setConfirm( {
                     title:        _n( 'Delete donor', 'Delete donors', n, 'gratora-donation-platform' ),
                     message: donorDeleteMessage( n, damage ),
+                    body: warnings.length === 0 ? null : (
+                        <div className="gratora-list-note" style={ { marginTop: 12 } }>
+                            <strong>{ __( 'Also going:', 'gratora-donation-platform' ) }</strong>
+                            <ul style={ { margin: '4px 0 0', paddingLeft: 18 } }>
+                                { shown.map( ( w ) => <li key={ w.key }>{ w.text }</li> ) }
+                            </ul>
+                            { hidden > 0 && (
+                                <p style={ { margin: '4px 0 0' } }>
+                                    { sprintf(
+                                        /* translators: %d: how many further warnings were not listed. */
+                                        _n( 'and %d more.', 'and %d more.', hidden, 'gratora-donation-platform' ),
+                                        hidden
+                                    ) }
+                                </p>
+                            ) }
+                        </div>
+                    ),
                     confirmLabel: __( 'Delete', 'gratora-donation-platform' ),
                     destructive:  true,
                     // The bin asks for this before it removes one attempt, and
