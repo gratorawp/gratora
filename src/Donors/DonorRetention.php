@@ -71,7 +71,8 @@ final class DonorRetention
         if ($years <= 0) return;
         if (time() < self::startsAt()) return;
 
-        $prefix = DB::getPrefix();
+        $prefix    = DB::getPrefix();
+        $liveDonor = DonorQueries::notRedactedPredicate('d');
         $cutoff = self::cutoff($years);
         $cursor = self::cursor();
 
@@ -80,7 +81,7 @@ final class DonorRetention
                 static fn ($r) => (int) ($r->id ?? 0),
                 DB::raw(
                     "SELECT id FROM {$prefix}gratora_donors d
-                     WHERE d.redacted_at IS NULL
+                     WHERE {$liveDonor}
                        AND d.id > %d
                        AND COALESCE(d.last_donation_at, d.created_at) < %s
                        AND NOT EXISTS (
@@ -242,11 +243,12 @@ final class DonorRetention
     /** @since 1.0.0 */
     private function countBefore(string $cutoff): int
     {
-        $prefix = DB::getPrefix();
+        $prefix    = DB::getPrefix();
+        $liveDonor = DonorQueries::notRedactedPredicate('d');
 
         $rows = DB::raw(
             "SELECT COUNT(*) AS n FROM {$prefix}gratora_donors d
-             WHERE d.redacted_at IS NULL
+             WHERE {$liveDonor}
                AND COALESCE(d.last_donation_at, d.created_at) < %s
                AND NOT EXISTS (
                    SELECT 1 FROM {$prefix}gratora_recurring_plans p

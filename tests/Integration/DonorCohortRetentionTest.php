@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gratora\Tests\Integration;
 
 use Gratora\Donations\Donation;
+use Gratora\Donors\Donor;
 use Gratora\Donors\DonorRepository;
 use Gratora\Donors\DonorService;
 use Gratora\Foundation\Plugin;
@@ -40,6 +41,45 @@ final class DonorCohortRetentionTest extends IntegrationTestCase
         $this->assertSame(100.0, $cohort['retention'][0]['pct']);
         $this->assertSame(1, $cohort['retention'][2]['count'], 'only donor A returns at +2 months');
         $this->assertSame(50.0, $cohort['retention'][2]['pct'], 'retention never exceeds 100%');
+    }
+
+    /**
+     * The cohort figures reach the donors table through a correlated subquery
+     * that also names the donations table. The population rule there is
+     * qualified: redacted_at belongs to only one of the two, so it resolves
+     * either way, but a column both tables carry binds to whichever the
+     * optimiser reaches first.
+     */
+    public function test_a_redacted_donor_leaves_the_cohort(): void
+    {
+        $m0 = gmdate('Y-m-15 12:00:00', strtotime('-3 months'));
+
+        $live     = $this->donor('cohort-live@example.com');
+        $redacted = $this->donor('cohort-redacted@example.com');
+        $this->donation($live, 5000, $m0, 'paid');
+        $this->donation($redacted, 3000, $m0, 'paid');
+
+        $month = gmdate('Y-m', strtotime('-3 months'));
+        $this->assertSame(2, $this->cohortSize($month), 'both anchor here before the redaction');
+
+        Donor::query()->where('id', $redacted)->update(['redacted_at' => gmdate('Y-m-d H:i:s')]);
+
+        $this->assertSame(
+            1,
+            $this->cohortSize($month),
+            'a row that no longer stands for a person is not counted as a cohort member'
+        );
+    }
+
+    private function cohortSize(string $month): int
+    {
+        foreach ($this->repo()->donorCohortRetention()['cohorts'] as $c) {
+            if ($c['month'] === $month) {
+                return (int) $c['size'];
+            }
+        }
+
+        return 0;
     }
 
     private function repo(): DonorRepository

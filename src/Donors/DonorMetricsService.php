@@ -71,7 +71,7 @@ final class DonorMetricsService
         // One whereRaw, not two: it emits no AND connector, so a second one
         // runs straight into the first and the SQL will not parse.
         return (int) Donor::query()
-            ->whereRaw(DonorRepository::testOnlyDonorPredicate() . ' AND redacted_at IS NULL')
+            ->whereRaw(DonorRepository::testOnlyDonorPredicate() . ' AND ' . DonorQueries::notRedactedPredicate())
             ->count();
     }
 

@@ -256,7 +256,7 @@ final class DonorRepository
         $lapsedCut = esc_sql($this->daysAgo($today, $lapsedDays));
 
         $row = DB::table('gratora_donors')
-            ->whereRaw('redacted_at IS NULL AND ' . $this->givingDonorPredicate())
+            ->whereRaw(DonorQueries::notRedactedPredicate() . ' AND ' . $this->givingDonorPredicate())
             ->selectRaw("
                 COUNT(*) AS total,
                 SUM(CASE WHEN created_at >= '{$newCut}' THEN 1 ELSE 0 END) AS new_donors,
@@ -302,7 +302,8 @@ final class DonorRepository
         $atRiskCut = esc_sql($this->daysAgo($today, $atRiskDays));
         $offset    = max(0, ($page - 1) * $perPage);
 
-        $where = "redacted_at IS NULL AND last_donation_at < '{$activeCut}' AND last_donation_at >= '{$atRiskCut}'";
+        $where = DonorQueries::notRedactedPredicate()
+            . " AND last_donation_at < '{$activeCut}' AND last_donation_at >= '{$atRiskCut}'";
 
         $total = (int) DB::table('gratora_donors')->whereRaw($where)->count();
 
@@ -346,7 +347,7 @@ final class DonorRepository
             // One fragment, not two: whereRaw contributes no AND connector, so
             // a second call runs straight into the first and the SQL will not
             // parse.
-            ->whereRaw('redacted_at IS NULL AND total_donated_cents > 0')
+            ->whereRaw(DonorQueries::notRedactedPredicate() . ' AND total_donated_cents > 0')
             ->selectRaw('id, first_name, last_name, email_encrypted, country, total_donated_cents, donations_count, last_donation_at')
             ->orderBy('total_donated_cents', 'DESC')
             ->limit($limit)
@@ -384,7 +385,7 @@ final class DonorRepository
         $bucketExpr = 'CASE ' . implode(' ', $cases) . ' ELSE NULL END';
 
         $rows = DB::table('gratora_donors')
-            ->whereRaw('redacted_at IS NULL AND total_donated_cents > 0')
+            ->whereRaw(DonorQueries::notRedactedPredicate() . ' AND total_donated_cents > 0')
             ->selectRaw("{$bucketExpr} AS bucket, COUNT(*) AS donor_count, COALESCE(SUM(total_donated_cents), 0) AS ltv")
             ->groupByRaw($bucketExpr)
             ->getAll();
@@ -450,7 +451,7 @@ final class DonorRepository
         //
         // One whereRaw: it emits no AND connector, so a second runs into it.
         $rows = DB::table('gratora_donors')
-            ->whereRaw($this->givingDonorPredicate() . ' AND redacted_at IS NULL')
+            ->whereRaw($this->givingDonorPredicate() . ' AND ' . DonorQueries::notRedactedPredicate())
             ->selectRaw("
                 {$segmentCase} AS segment,
                 COUNT(*) AS donor_count,
@@ -489,6 +490,9 @@ final class DonorRepository
     {
         $donorsT    = DB::getPrefix() . 'gratora_donors';
         $donationsT = DB::getPrefix() . 'gratora_donations';
+        // Qualified: an unqualified column in a correlated subquery binds to
+        // whichever table the optimiser reaches first.
+        $liveDonor  = DonorQueries::notRedactedPredicate('dn2');
         $cutoff     = esc_sql((new DateTimeImmutable("first day of -{$cohortMonths} months"))->format('Y-m-d'));
 
         // Anchor each donor's cohort on their own earliest live donation, over
@@ -507,7 +511,7 @@ final class DonorRepository
                 SELECT d2.donor_id, MIN(d2.paid_at) AS first_paid
                 FROM {$donationsT} d2
                 JOIN {$donorsT} dn2 ON dn2.id = d2.donor_id
-                WHERE dn2.redacted_at IS NULL
+                WHERE {$liveDonor}
                   AND d2.status IN ('paid', 'partial_refund')
                   AND d2.is_test = 0
                   AND d2.paid_at IS NOT NULL
@@ -610,7 +614,7 @@ final class DonorRepository
         if ($giverCount === 0) return 0;
         $offset = (int) floor($giverCount / 2);
         $row = DB::table('gratora_donors')
-            ->whereRaw('redacted_at IS NULL')
+            ->whereRaw(DonorQueries::notRedactedPredicate())
             ->where('total_donated_cents', 0, '>')
             ->selectRaw('total_donated_cents')
             ->orderBy('total_donated_cents', 'ASC')

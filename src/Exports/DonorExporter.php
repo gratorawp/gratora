@@ -6,6 +6,7 @@ namespace Gratora\Exports;
 
 use Gratora\Donations\DonationQueries;
 use Gratora\Donors\Donor;
+use Gratora\Donors\DonorQueries;
 use Gratora\Donors\DonorRepository;
 use Gratora\Donors\DonorService;
 use Gratora\Foundation\Helpers\Csv;
@@ -254,7 +255,7 @@ final class DonorExporter
      */
     private function livePredicate(): string
     {
-        return 'redacted_at IS NULL AND ' . DonorRepository::mailableDonorPredicate();
+        return DonorQueries::notRedactedPredicate() . ' AND ' . DonorRepository::mailableDonorPredicate();
     }
 
     /**
