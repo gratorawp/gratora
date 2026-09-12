@@ -208,6 +208,27 @@ final class DonorDeleteTest extends IntegrationTestCase
         $this->assertFalse($this->exists((int) $donor->id));
     }
 
+    /**
+     * Redacting keeps the donations and takes the person out of them, so a
+     * donor who has been through it still has rows attached and is still a
+     * row somebody may want gone. Nothing about having been redacted is a
+     * reason to keep them.
+     */
+    public function test_a_redacted_donor_who_gave_can_still_be_removed(): void
+    {
+        $donor = $this->donor('redacted-gave-' . uniqid() . '@example.test');
+        $this->gave($donor);
+
+        $redacted = Plugin::instance()->container->get(DonorService::class)->redact($donor);
+        $this->assertNotNull($redacted->redacted_at, 'the fixture has to actually be redacted');
+
+        $res = $this->deleteViaRest((int) $donor->id);
+
+        $this->assertSame(200, $res->get_status());
+        $this->assertFalse($this->exists((int) $donor->id));
+        $this->assertSame(0, (int) Donation::query()->where('donor_id', (int) $donor->id)->count());
+    }
+
     public function test_a_missing_donor_is_a_404(): void
     {
         $this->assertSame(404, $this->deleteViaRest(99999999)->get_status());
