@@ -55,4 +55,33 @@ final class DonorQueries
     {
         return $q->whereIsNull('redacted_at');
     }
+
+    /**
+     * A row still on the working list.
+     *
+     * Kept apart from the redaction rule rather than folded into one
+     * "visible" helper: a trashed donor is somebody an admin put aside and a
+     * redacted one is somebody who asked to be forgotten. The screens that
+     * care about one do not all care about the other.
+     *
+     * @since 1.0.0
+     */
+    public static function notTrashedPredicate(?string $alias = null): string
+    {
+        $qualifier = $alias !== null && $alias !== '' ? $alias . '.' : '';
+
+        return "{$qualifier}trashed_at IS NULL";
+    }
+
+    /**
+     * @template T
+     * @param  T $q
+     * @return T
+     *
+     * @since 1.0.0
+     */
+    public static function notTrashed($q)
+    {
+        return $q->whereIsNull('trashed_at');
+    }
 }

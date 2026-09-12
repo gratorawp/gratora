@@ -255,7 +255,9 @@ final class DonorExporter
      */
     private function livePredicate(): string
     {
-        return DonorQueries::notRedactedPredicate() . ' AND ' . DonorRepository::mailableDonorPredicate();
+        return DonorQueries::notRedactedPredicate()
+            . ' AND ' . DonorQueries::notTrashedPredicate()
+            . ' AND ' . DonorRepository::mailableDonorPredicate();
     }
 
     /**
