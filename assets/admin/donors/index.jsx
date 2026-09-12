@@ -74,6 +74,73 @@ function report( results, done, failed ) {
     if ( no > 0 ) notify.error( failed( no ) );
 }
 
+/**
+ * The confirmation itself. Split by whether there is anything to count, so the
+ * sentence never reads "0 donations and $0.00" for a donor who never gave.
+ */
+function donorDeleteMessage( n, damage ) {
+    if ( damage === null ) {
+        return n === 1
+            ? __( 'Delete this donor? Their record goes for good, along with any attempt that never completed. A recurring donation is cancelled at the processor first, and the delete stops if the processor cannot be reached.', 'gratora-donation-platform' )
+            : sprintf(
+                /* translators: %d: number of donors to delete */
+                _n(
+                    'Delete %d donor? Their record goes for good, along with any attempt that never completed. A recurring donation is cancelled at the processor first, and the delete stops if the processor cannot be reached.',
+                    'Delete %d donors? Their records go for good, along with any attempts that never completed. Recurring donations are cancelled at the processor first, and a donor whose processor cannot be reached is left alone.',
+                    n,
+                    'gratora-donation-platform'
+                ),
+                n
+            );
+    }
+
+    return n === 1
+        ? sprintf(
+            /* translators: %s: what will be removed, for example "20 donations and $2,460.00" */
+            __( 'Delete this donor? This removes %s and takes that money out of your totals, along with any attempt that never completed. A recurring donation is cancelled at the processor first, and the delete stops if the processor cannot be reached.', 'gratora-donation-platform' ),
+            damage
+        )
+        : sprintf(
+            /* translators: 1: number of donors, 2: what will be removed, for example "440 donations and $82,250.00" */
+            __( 'Delete %1$d donors? This removes %2$s and takes that money out of your totals, along with any attempts that never completed. Recurring donations are cancelled at the processor first, and a donor whose processor cannot be reached is left alone.', 'gratora-donation-platform' ),
+            n,
+            damage
+        );
+}
+
+/**
+ * What a delete is about to destroy, in the numbers the rows already carry.
+ *
+ * The row count is the one figure that does not describe the damage: 22 donors
+ * was 440 donations and $82,250, and the confirmation said 22.
+ *
+ * donations_count and total_donated_cents are paid money only and net of
+ * refunds, so the sentence names exactly those and says separately that the
+ * attempts nobody counted go as well, rather than implying the figure covers
+ * every row that will be removed.
+ */
+function deleteDamage( items ) {
+    const donations = items.reduce( ( n, i ) => n + ( parseInt( i.donations_count, 10 ) || 0 ), 0 );
+
+    if ( donations === 0 ) {
+        return null;
+    }
+
+    const cents = items.reduce( ( n, i ) => n + ( parseInt( i.total_donated_cents, 10 ) || 0 ), 0 );
+
+    return sprintf(
+        /* translators: 1: number of donations, 2: formatted money, for example $82,250.00 */
+        _n(
+            '%1$d donation and %2$s',
+            '%1$d donations and %2$s',
+            donations,
+            'gratora-donation-platform'
+        ),
+        donations,
+        formatAmount( cents )
+    );
+}
+
 export function DonorsApp( { toggleSlot } ) {
     const [ view, setView, viewReady ] = useTableView( 'donors', {
         type:    'table',
@@ -333,20 +400,11 @@ export function DonorsApp( { toggleSlot } ) {
                 const items = selection.filter( ( i ) => !! i.deletable );
                 if ( ! items.length ) return;
                 const n = items.length;
+                const damage = deleteDamage( items );
+
                 setConfirm( {
                     title:        _n( 'Delete donor', 'Delete donors', n, 'gratora-donation-platform' ),
-                    message: n === 1
-                        ? __( 'Delete this donor? Their record and every donation they made go for good, and money already recorded against them comes out of your totals. A recurring donation is cancelled at the processor first, and the delete stops if the processor cannot be reached.', 'gratora-donation-platform' )
-                        : sprintf(
-                            /* translators: %d: number of donors to delete */
-                            _n(
-                                'Delete %d donor? Their record and every donation they made go for good, and money already recorded against them comes out of your totals. A recurring donation is cancelled at the processor first, and the delete stops if the processor cannot be reached.',
-                                'Delete %d donors? Their records and every donation they made go for good, and money already recorded against them comes out of your totals. Recurring donations are cancelled at the processor first, and a donor whose processor cannot be reached is left alone.',
-                                n,
-                                'gratora-donation-platform'
-                            ),
-                            n
-                        ),
+                    message: donorDeleteMessage( n, damage ),
                     confirmLabel: __( 'Delete', 'gratora-donation-platform' ),
                     destructive:  true,
                     // The bin asks for this before it removes one attempt, and
