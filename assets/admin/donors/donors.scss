@@ -2,6 +2,7 @@
 @import '../_shared/admin-base';
 @import '@gratora/ui/scss/components/empty-state';
 @import '../_shared/plan-dialog';
+@import '../_shared/dataviews';
 
 $violet:        #7c5cff;
 $violet-soft:   #ede7fe;
@@ -9,12 +10,6 @@ $rose:          #db2777;
 $rose-soft:     #fce7f3;
 
 $bar-radius:    6px;
-
-.gratora-view-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
 
 .gratora-donor-insights {
     display: flex;

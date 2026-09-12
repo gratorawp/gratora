@@ -1496,43 +1496,6 @@ $card-radius:   $radius-lg;
     }
 }
 
-// Scope view-nav overrides to preserve dashboard pill shadows.
-.gratora-view-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-
-    .gratora-cmp-toggle {
-        text-decoration: none;
-        font-weight: 500;
-        box-shadow: none;
-        border-color: $border-mid;
-    }
-    .gratora-cmp-toggle.is-active {
-        background: $accent-soft;
-        border-color: $accent;
-        color: $accent-dark;
-
-        svg { color: $accent-dark; }
-    }
-
-    .gratora-cmp-toggle__badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 18px;
-        margin-left: 2px;
-        padding: 0 5px;
-        border-radius: 999px;
-        background: $amber-soft;
-        color: $amber;
-        font-size: $text-xs;
-        font-weight: 700;
-        font-variant-numeric: tabular-nums;
-        line-height: 17px;
-    }
-}
-
 .gratora-pill {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 2px 9px;

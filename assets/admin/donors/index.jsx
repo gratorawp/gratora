@@ -27,6 +27,8 @@ import Insights from './Insights';
 import DonorProfile from './DonorProfile';
 import { userCan } from '../_shared/caps';
 import './donors.scss';
+// Restores the template picker, the KPI strip and the shared field styles,
+// which live in that file rather than in a shared partial.
 import '../campaigns/campaigns.scss';
 
 function initials( name ) {

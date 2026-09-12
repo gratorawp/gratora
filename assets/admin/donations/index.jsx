@@ -6,6 +6,8 @@ import List from './List';
 import Detail from './Detail';
 import Trash from './Trash';
 import Toaster from '../_shared/components/Toaster';
+// Restores the template picker, the notices, the toaster and the shared
+// field styles, which live in that file rather than in a shared partial.
 import '../campaigns/campaigns.scss';
 
 function App() {
