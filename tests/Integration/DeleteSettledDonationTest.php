@@ -53,7 +53,11 @@ final class DeleteSettledDonationTest extends IntegrationTestCase
         $d->currency          = 'USD';
         $d->base_currency     = 'USD';
         $d->status            = 'paid';
-        $d->gateway           = 'offline';
+        // Stripe on purpose, with no credentials stored. offline settles out
+        // of band and closes trivially, which hides the case that matters: a
+        // settled row has no payment to stop, and asking a gateway this site
+        // cannot reach returns a refusal that would block the delete.
+        $d->gateway           = 'stripe';
         $d->frequency         = 'one_time';
         $d->kind              = 'donation';
         $d->is_test           = false;

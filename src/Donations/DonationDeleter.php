@@ -89,16 +89,21 @@ final class DonationDeleter
             throw new InvalidArgumentException(esc_html($reason));
         }
 
-        if (! $cascade) {
+        // Asked before anything else, because it decides both whether there is
+        // a payment to close and whether a stored total has to be recomputed.
+        $carriedMoney = $donation->paid_at !== null
+            || in_array((string) $donation->status, ['paid', 'partial_refund', 'refunded', 'disputed'], true);
+
+        // Nothing to stop on a row that already settled. Asking anyway is
+        // meaningless, and on a gateway this site cannot reach it comes back a
+        // refusal that would block the delete on the money having moved, which
+        // is the thing the caller already accepted.
+        if (! $cascade && ! $carriedMoney) {
             $this->closeFor($donation);
         }
 
         $snapshot = $this->snapshot($donation);
-        // Asked before the row goes. A row that never reached money feeds no
-        // stored total, so it skips the recompute entirely.
-        $carriedMoney = $donation->paid_at !== null
-            || in_array((string) $donation->status, ['paid', 'partial_refund', 'refunded', 'disputed'], true);
-        $deleted = false;
+        $deleted  = false;
 
         DB::transaction(function () use ($id, $note, $requireTrashed, $cascade, $snapshot, &$deleted): void {
             if (! $this->lockRow($id)) {
