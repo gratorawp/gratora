@@ -452,14 +452,14 @@ final class DonorService
 
         DB::transaction(function () use ($donor, $id, $hash, $dids, $request, $deleter, $donations): void {
             if ($dids !== []) {
-                // A receipt is an issued document and a settled refund is money
-                // that moved. The gate makes both unreachable; these are the
-                // belt, and they run before anything is destroyed.
-                if (DB::table('gratora_receipts')->whereIn('donation_id', $dids)->count() > 0) {
-                    throw new InvalidArgumentException(esc_html__('This donor has a receipt on record, which has to be kept. Erase them instead.', 'gratora-donation-platform'));
-                }
-                if (DB::table('gratora_refunds')->whereIn('donation_id', $dids)->where('status', 'succeeded')->count() > 0) {
-                    throw new InvalidArgumentException(esc_html__('This donor has a refund on record, which has to be kept. Erase them instead.', 'gratora-donation-platform'));
+                // A receipt that still stands is a document somebody can ask
+                // for, so it holds the donor. A voided one does not: the refund
+                // that voided it is the record, and the delete names the number
+                // on its audit row. Asked the same way the donation rule asks
+                // it, or a donation deletable on its own would have a donor who
+                // could never go.
+                if (DB::table('gratora_receipts')->whereIn('donation_id', $dids)->where('voided', 0)->count() > 0) {
+                    throw new InvalidArgumentException(esc_html__('This donor has a receipt that still stands. Refund the donation first, which withdraws the receipt, or erase the donor instead.', 'gratora-donation-platform'));
                 }
 
                 // Before anything is destroyed, so an add-on clears what it

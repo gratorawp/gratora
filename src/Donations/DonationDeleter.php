@@ -149,10 +149,23 @@ final class DonationDeleter
 
             DB::table('gratora_donation_notes')->where('donation_id', $id)->delete();
 
+            // Read before they go. The reference counter is never rolled back,
+            // so the sequence keeps a gap either way, and this audit row is the
+            // only thing left that can name the number: the receipt.issued
+            // event that carried the id is destroyed by the sweep above.
+            $documents = $this->documentsOf($id);
+
+            // A row keyed to an id nothing answers to is unreachable from every
+            // screen and is dropped outright by the importer, so leaving it
+            // records nothing. The donor cascade already removed refunds, so
+            // the two delete paths disagreed about this until now.
+            DB::table('gratora_receipts')->where('donation_id', $id)->delete();
+            DB::table('gratora_refunds')->where('donation_id', $id)->delete();
+
             // Before the row goes, and never through EventRecorder: a failed
             // insert has to abort the delete rather than be swallowed, or the
             // donation is gone with nothing saying who removed it.
-            $this->recordAudit($locked, $note, $snapshot['consent_ids']);
+            $this->recordAudit($locked, $note, $snapshot['consent_ids'], $documents);
 
             Donation::query()->where('id', $id)->delete();
 
@@ -218,6 +231,40 @@ final class DonationDeleter
      *
      * @return array<string,mixed>
      */
+    /**
+     * The documents a delete is about to remove, named so the gap they leave
+     * can be explained afterwards.
+     *
+     * @return array{receipts:list<array<string,mixed>>,refunds:list<array<string,mixed>>}
+     */
+    private function documentsOf(int $donationId): array
+    {
+        $receipts = [];
+        foreach (DB::table('gratora_receipts')->where('donation_id', $donationId)->getAll() as $row) {
+            $r          = (array) $row;
+            $receipts[] = [
+                'receipt_number' => (string) ($r['receipt_number'] ?? ''),
+                'renderer_id'    => (string) ($r['renderer_id'] ?? ''),
+                'voided'         => (bool) ($r['voided'] ?? false),
+                'issued_at'      => (string) ($r['issued_at'] ?? ''),
+            ];
+        }
+
+        $refunds = [];
+        foreach (DB::table('gratora_refunds')->where('donation_id', $donationId)->getAll() as $row) {
+            $r         = (array) $row;
+            $refunds[] = [
+                'amount_cents'      => (int) ($r['amount_cents'] ?? 0),
+                'currency'          => (string) ($r['currency'] ?? ''),
+                'status'            => (string) ($r['status'] ?? ''),
+                'gateway_refund_id' => (string) ($r['gateway_refund_id'] ?? ''),
+                'occurred_at'       => (string) ($r['occurred_at'] ?? ''),
+            ];
+        }
+
+        return ['receipts' => $receipts, 'refunds' => $refunds];
+    }
+
     /**
      * Put the stored totals back in step with the rows that remain.
      *
@@ -302,9 +349,10 @@ final class DonationDeleter
      * donor_id stays null, or an admin's action lands on the donor's own
      * activity timeline as something the donor did.
      *
-     * @param list<int> $consentIds
+     * @param list<int>                  $consentIds
+     * @param array{receipts:list<array<string,mixed>>,refunds:list<array<string,mixed>>} $documents
      */
-    private function recordAudit(Donation $donation, ?string $note, array $consentIds): void
+    private function recordAudit(Donation $donation, ?string $note, array $consentIds, array $documents): void
     {
         $user = wp_get_current_user();
 
@@ -317,6 +365,9 @@ final class DonationDeleter
             'created_at'  => (string) $donation->created_at,
             'actor_name'  => (string) ($user->display_name ?? ''),
             'consent_ids' => $consentIds,
+            // What an auditor can still ask about after the rows are gone.
+            'receipts'    => $documents['receipts'],
+            'refunds'     => $documents['refunds'],
         ];
 
         $trimmed = is_string($note) ? trim($note) : '';

@@ -12,7 +12,9 @@ use Gratora\Donations\DonationTrasher;
 use Gratora\Donations\TrashOutcome;
 use Gratora\Donors\DonorService;
 use Gratora\Foundation\Plugin;
+use Gratora\Analytics\Event;
 use Gratora\Receipts\Receipt;
+use Gratora\Vendor\Queryable\DB;
 use InvalidArgumentException;
 use WP_REST_Request;
 
@@ -198,6 +200,73 @@ final class DeleteSettledDonationTest extends IntegrationTestCase
         $this->assertCount(1, $refused);
         $this->assertStringContainsString('trash', strtolower((string) $refused[0]['reason']));
         $this->assertNotNull(Donation::query()->find('id', (int) $donation->id));
+    }
+
+    private function refundFor(Donation $donation): int
+    {
+        DB::table('gratora_refunds')->insert([
+            'donation_id'  => (int) $donation->id,
+            'amount_cents' => (int) $donation->amount_cents,
+            'currency'     => (string) $donation->currency,
+            'initiated_by' => 'admin',
+            'status'       => 'succeeded',
+            'occurred_at'  => gmdate('Y-m-d H:i:s'),
+        ]);
+
+        return (int) DB::table('gratora_refunds')
+            ->where('donation_id', (int) $donation->id)
+            ->count();
+    }
+
+    /**
+     * A receipt row keyed to an id nothing answers to is unreachable from every
+     * screen and is dropped outright by the importer, so it is not a record of
+     * anything. The rows go with the donation.
+     */
+    public function test_deleting_a_donation_takes_its_receipt_and_refund_rows_with_it(): void
+    {
+        $donation = $this->paid(['status' => 'refunded', 'refunded_cents' => 5000]);
+        $this->receiptFor($donation, true);
+        $this->refundFor($donation);
+        $id = (int) $donation->id;
+
+        $this->deleter()->delete($donation, null, false);
+
+        $this->assertSame(
+            0,
+            (int) DB::table('gratora_receipts')->where('donation_id', $id)->count(),
+            'a receipt pointing at a donation that is gone is not a record'
+        );
+        $this->assertSame(
+            0,
+            (int) DB::table('gratora_refunds')->where('donation_id', $id)->count(),
+            'and the donor cascade already removed these, so the two paths agreed on nothing'
+        );
+    }
+
+    /**
+     * The counter is never rolled back, so the sequence keeps a gap. The audit
+     * row is the only thing that can name the number, and the event that used
+     * to carry it is destroyed by this same delete.
+     */
+    public function test_the_audit_row_names_the_receipt_numbers_it_removed(): void
+    {
+        $donation = $this->paid(['status' => 'refunded', 'refunded_cents' => 5000]);
+        $receipt  = $this->receiptFor($donation, true);
+        $number   = (string) $receipt->receipt_number;
+
+        $this->deleter()->delete($donation, null, false);
+
+        $rows = Event::query()->where('type', 'donation.deleted')->getAll();
+        $this->assertNotSame([], $rows);
+
+        $payload = (array) $rows[count($rows) - 1]->payload;
+        $this->assertArrayHasKey('receipts', $payload, 'the removal names what it took');
+        $this->assertStringContainsString(
+            $number,
+            (string) wp_json_encode($payload['receipts']),
+            'an auditor asking about this number has somewhere to find it'
+        );
     }
 
     /** Trash stops a payment. A settled one has nothing left to stop. */
