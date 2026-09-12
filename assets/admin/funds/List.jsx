@@ -241,6 +241,33 @@ export default function List() {
         setReload( ( n ) => n + 1 );
     }, [] );
 
+    /**
+     * The same change across a selection. A request each, because the route
+     * takes one fund, and settled so a fund the server refuses does not
+     * abandon the rest of the batch.
+     */
+    const mutateMany = useCallback( async ( funds, payload, done ) => {
+        const results = await Promise.allSettled( funds.map( ( fund ) => apiFetch( {
+            path:   `/gratora/v1/admin/funds/${ fund.id }`,
+            method: 'POST',
+            data:   payload,
+        } ) ) );
+
+        const ok     = results.filter( ( r ) => r.status === 'fulfilled' ).length;
+        const failed = results.length - ok;
+
+        if ( ok > 0 ) notify.success( done( ok ) );
+        if ( failed > 0 ) {
+            setError( sprintf(
+                /* translators: %d: how many funds could not be changed. */
+                _n( '%d fund could not be changed.', '%d funds could not be changed.', failed, 'gratora-donation-platform' ),
+                failed
+            ) );
+        }
+
+        afterChange();
+    }, [ afterChange ] );
+
     const mutate = useCallback( async ( id, payload, done = '' ) => {
         try {
             await apiFetch( { path: `/gratora/v1/admin/funds/${ id }`, method: 'POST', data: payload } );
@@ -414,18 +441,41 @@ export default function List() {
             },
         },
         {
-            id:         'deactivate',
-            label:      __( 'Deactivate', 'gratora-donation-platform' ),
-            icon:       () => <PowerOff size={ 16 } strokeWidth={ 1.75 } />,
-            isEligible: ( item ) => ! item.is_default && item.is_active && ! item.reassign_pending,
-            callback:   ( [ item ] ) => mutate( item.id, { is_active: false } ),
+            id:           'deactivate',
+            label:        __( 'Deactivate', 'gratora-donation-platform' ),
+            icon:         () => <PowerOff size={ 16 } strokeWidth={ 1.75 } />,
+            supportsBulk: true,
+            isEligible:   ( item ) => ! item.is_default && item.is_active && ! item.reassign_pending,
+            // DataViews hands a bulk callback the whole selection, so the
+            // eligibility is repeated here or the request reaches the default
+            // fund, which the server refuses anyway.
+            callback: ( items ) => {
+                const targets = items.filter( ( i ) => ! i.is_default && i.is_active && ! i.reassign_pending );
+                if ( ! targets.length ) return;
+
+                return mutateMany( targets, { is_active: false }, ( n ) => sprintf(
+                    /* translators: %d: number of funds. */
+                    _n( '%d fund deactivated.', '%d funds deactivated.', n, 'gratora-donation-platform' ),
+                    n
+                ) );
+            },
         },
         {
-            id:         'activate',
-            label:      __( 'Activate', 'gratora-donation-platform' ),
-            icon:       () => <Power size={ 16 } strokeWidth={ 1.75 } />,
-            isEligible: ( item ) => ! item.is_default && ! item.is_active && ! item.reassign_pending,
-            callback:   ( [ item ] ) => mutate( item.id, { is_active: true } ),
+            id:           'activate',
+            label:        __( 'Activate', 'gratora-donation-platform' ),
+            icon:         () => <Power size={ 16 } strokeWidth={ 1.75 } />,
+            supportsBulk: true,
+            isEligible:   ( item ) => ! item.is_default && ! item.is_active && ! item.reassign_pending,
+            callback: ( items ) => {
+                const targets = items.filter( ( i ) => ! i.is_default && ! i.is_active && ! i.reassign_pending );
+                if ( ! targets.length ) return;
+
+                return mutateMany( targets, { is_active: true }, ( n ) => sprintf(
+                    /* translators: %d: number of funds. */
+                    _n( '%d fund activated.', '%d funds activated.', n, 'gratora-donation-platform' ),
+                    n
+                ) );
+            },
         },
         {
             id:            'delete',
@@ -435,7 +485,7 @@ export default function List() {
             isEligible:    ( item ) => ! item.is_default && ! item.reassign_pending,
             callback:      ( [ item ] ) => setDeleteTarget( item ),
         },
-    ], [ mutate ] );
+    ], [ mutate, mutateMany ] );
 
     return (
         <div>

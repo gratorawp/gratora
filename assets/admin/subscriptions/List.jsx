@@ -1,6 +1,6 @@
 // Subscriptions list: paginated DataViews against /gratora/v1/admin/recurring.
 
-import { useState, useEffect, useMemo } from '@wordpress/element';
+import { useState, useEffect, useMemo, useRef } from '@wordpress/element';
 import { DataViews } from '@wordpress/dataviews';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
@@ -15,9 +15,11 @@ import EmptyState from '../_shared/components/EmptyState';
 import { isViewFiltered, clearedView } from '../_shared/viewFilters';
 import KpiStrip from '../_shared/components/KpiStrip';
 import Notice from '../_shared/components/Notice';
+import ConfirmDialog from '../_shared/components/ConfirmDialog';
+import notify from '../_shared/notify';
 import StatusBadge from '../_shared/components/StatusBadge';
 import { Switch } from '../_shared/components/Switch';
-import PlanActionDialog, { actionsFor, dueIn, isTerminal, retryActionFor } from '../_shared/recurring/PlanActions';
+import PlanActionDialog, { actionsFor, applyToPlans, dueIn, isTerminal, retryActionFor } from '../_shared/recurring/PlanActions';
 import { CADENCE_LABEL, cadenceLabel, renderHealth, viewDetailsAction, copySubscriptionIdAction } from '../_shared/recurring/planColumns';
 import { dashboardHref } from '../_shared/adminPages';
 import { rowLinkProps } from '../_shared/rowLink';
@@ -385,6 +387,10 @@ export default function List() {
     const [ gateways, setGateways ] = useState( [] );
     const [ campaigns, setCampaigns ] = useState( [] );
     const [ dialog, setDialog ]     = useState( null );
+    const [ confirm, setConfirm ]   = useState( null );
+    // Per-plan failures in a persistent notice: a gateway that refuses says
+    // why, and a toast carrying six of those is unreadable.
+    const [ refusals, setRefusals ] = useState( [] );
     const [ detail, setDetail ]     = useState( null );
     const [ unlinked, setUnlinked ] = useState( {
         total:      0,
@@ -734,6 +740,42 @@ export default function List() {
         },
     ], [ gateways, campaigns ] );
 
+    // The actions are memoised once, so a reload captured in them would hold
+    // the first render's page and filters and refetch the wrong rows. A ref is
+    // read at call time, which is when the admin actually acted.
+    const reload = useRef( null );
+    reload.current = () => { load(); loadStats(); };
+
+    /**
+     * A selection goes through one confirmation and then a request per plan.
+     * A single row keeps the per-plan dialog, which carries the reason and the
+     * notify choice a batch cannot ask once and mean for everybody.
+     */
+    const runOverSelection = ( action, plans, { title, message, confirmLabel, destructive, extra, done } ) => {
+        setConfirm( {
+            title,
+            message,
+            confirmLabel,
+            destructive: !! destructive,
+            onConfirm: async () => {
+                const { ok, failed } = await applyToPlans( action, plans, extra || {} );
+
+                if ( ok > 0 ) notify.success( done( ok ) );
+
+                setRefusals( failed );
+                if ( failed.length > 0 ) {
+                    notify.error( sprintf(
+                        /* translators: %d: how many plans the gateway refused. */
+                        _n( '%d subscription could not be changed.', '%d subscriptions could not be changed.', failed.length, 'gratora-donation-platform' ),
+                        failed.length
+                    ) );
+                }
+
+                reload.current();
+            },
+        } );
+    };
+
     const actions = useMemo( () => [
         viewDetailsAction( setDetail ),
         copySubscriptionIdAction(),
@@ -746,19 +788,68 @@ export default function List() {
             isPrimary:  true,
             icon:       () => <RotateCw size={ 16 } strokeWidth={ 1.75 } />,
             isEligible: ( item ) => !! retryActionFor( item ),
-            callback:   ( items ) => setDialog( { plan: items[ 0 ], action: 'retry' } ),
+            supportsBulk: true,
+            callback: ( items ) => ( items.length === 1
+                ? setDialog( { plan: items[ 0 ], action: 'retry' } )
+                : runOverSelection( 'retry', items, {
+                    title:        __( 'Retry these payments', 'gratora-donation-platform' ),
+                    message:      sprintf(
+                        /* translators: %d: number of subscriptions. */
+                        _n( 'Ask the gateway to take %d payment again now?', 'Ask the gateway to take %d payments again now?', items.length, 'gratora-donation-platform' ),
+                        items.length
+                    ),
+                    confirmLabel: __( 'Retry', 'gratora-donation-platform' ),
+                    done:         ( n ) => sprintf(
+                        /* translators: %d: number of subscriptions. */
+                        _n( '%d payment retried.', '%d payments retried.', n, 'gratora-donation-platform' ),
+                        n
+                    ),
+                } ) ),
         },
         {
             id:       'pause',
             label:    __( 'Pause', 'gratora-donation-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'pause' ),
-            callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'pause' } ),
+            supportsBulk: true,
+            callback: ( items ) => ( items.length === 1
+                ? setDialog( { plan: items[ 0 ], action: 'pause' } )
+                : runOverSelection( 'pause', items, {
+                    title:        __( 'Pause these subscriptions', 'gratora-donation-platform' ),
+                    message:      sprintf(
+                        /* translators: %d: number of subscriptions. */
+                        _n( 'Pause %d subscription for a month? Nothing is charged until it resumes.', 'Pause %d subscriptions for a month? Nothing is charged until they resume.', items.length, 'gratora-donation-platform' ),
+                        items.length
+                    ),
+                    confirmLabel: __( 'Pause', 'gratora-donation-platform' ),
+                extra:        { months: 1 },
+                    done:         ( n ) => sprintf(
+                        /* translators: %d: number of subscriptions. */
+                        _n( '%d subscription paused.', '%d subscriptions paused.', n, 'gratora-donation-platform' ),
+                        n
+                    ),
+                } ) ),
         },
         {
             id:       'resume',
             label:    __( 'Resume', 'gratora-donation-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'resume' ),
-            callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'resume' } ),
+            supportsBulk: true,
+            callback: ( items ) => ( items.length === 1
+                ? setDialog( { plan: items[ 0 ], action: 'resume' } )
+                : runOverSelection( 'resume', items, {
+                    title:        __( 'Resume these subscriptions', 'gratora-donation-platform' ),
+                    message:      sprintf(
+                        /* translators: %d: number of subscriptions. */
+                        _n( 'Resume %d subscription? Charging starts again on its normal schedule.', 'Resume %d subscriptions? Charging starts again on their normal schedules.', items.length, 'gratora-donation-platform' ),
+                        items.length
+                    ),
+                    confirmLabel: __( 'Resume', 'gratora-donation-platform' ),
+                    done:         ( n ) => sprintf(
+                        /* translators: %d: number of subscriptions. */
+                        _n( '%d subscription resumed.', '%d subscriptions resumed.', n, 'gratora-donation-platform' ),
+                        n
+                    ),
+                } ) ),
         },
         {
             id:       'skip_next',
@@ -777,7 +868,24 @@ export default function List() {
             label:         __( 'Cancel', 'gratora-donation-platform' ),
             isDestructive: true,
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'cancel' ),
-            callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'cancel' } ),
+            supportsBulk: true,
+            callback: ( items ) => ( items.length === 1
+                ? setDialog( { plan: items[ 0 ], action: 'cancel' } )
+                : runOverSelection( 'cancel', items, {
+                    title:        __( 'Cancel these subscriptions', 'gratora-donation-platform' ),
+                    message:      sprintf(
+                        /* translators: %d: number of subscriptions. */
+                        _n( 'Cancel %d subscription at the processor? It stops being charged and cannot be restarted.', 'Cancel %d subscriptions at the processor? They stop being charged and cannot be restarted.', items.length, 'gratora-donation-platform' ),
+                        items.length
+                    ),
+                    confirmLabel: __( 'Cancel subscriptions', 'gratora-donation-platform' ),
+                destructive:  true,
+                    done:         ( n ) => sprintf(
+                        /* translators: %d: number of subscriptions. */
+                        _n( '%d subscription cancelled.', '%d subscriptions cancelled.', n, 'gratora-donation-platform' ),
+                        n
+                    ),
+                } ) ),
         },
     ], [] );
 
@@ -868,6 +976,17 @@ export default function List() {
                 <Notice status="error" isDismissible={ false }>{ fetchError }</Notice>
             ) }
 
+            { refusals.length > 0 && (
+                <Notice status="warning" onRemove={ () => setRefusals( [] ) }>
+                    <ul style={ { margin: 0, paddingLeft: 18 } }>
+                        { refusals.map( ( reason, at ) => (
+                            // eslint-disable-next-line react/no-array-index-key
+                            <li key={ at }>{ reason }</li>
+                        ) ) }
+                    </ul>
+                </Notice>
+            ) }
+
             { ! loading && total === 0 && ! filtered && ! fetchError ? (
                 <EmptyState { ...emptyStateCopy( unlinked, testHidden ) } />
             ) : (
@@ -918,6 +1037,8 @@ export default function List() {
                     onDone={ () => { load(); loadStats(); } }
                 />
             ) }
+
+            <ConfirmDialog confirm={ confirm } onClose={ () => setConfirm( null ) } />
         </div>
     );
 }

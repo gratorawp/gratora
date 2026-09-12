@@ -62,6 +62,36 @@ export function retryActionFor( plan ) {
     return { id: 'retry', label: __( 'Retry payment', 'gratora-donation-platform' ) };
 }
 
+/**
+ * One action across a selection of plans.
+ *
+ * A request each, because each one is its own call out to the processor and a
+ * single route taking the batch would hold the connection open for all of
+ * them. Settled rather than raced: one plan the gateway refuses must not
+ * abandon the rest, and the caller reports what actually happened.
+ *
+ * @param {string} action The action id, as the per-plan route names it.
+ * @param {Array}  plans  The plans to act on.
+ * @param {Object} extra  Anything the action needs beyond its name.
+ * @return {Promise<{ok: number, failed: string[]}>} What happened.
+ */
+export async function applyToPlans( action, plans, extra = {} ) {
+    const results = await Promise.allSettled( plans.map( ( plan ) => apiFetch( {
+        path:   `/gratora/v1/admin/recurring/${ plan.id }/action`,
+        method: 'POST',
+        // Telling the donor is the default here too: the change was not theirs.
+        data:   { action, notify_donor: true, ...extra },
+    } ) ) );
+
+    return {
+        ok: results.filter( ( r ) => r.status === 'fulfilled' ).length,
+        failed: results
+            .filter( ( r ) => r.status === 'rejected' )
+            .map( ( r ) => r.reason?.message )
+            .filter( Boolean ),
+    };
+}
+
 export function actionsFor( plan ) {
     if ( ! canManagePlans() ) return [];
     if ( isTerminal( plan.status ) ) return [];
