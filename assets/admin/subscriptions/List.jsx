@@ -18,39 +18,27 @@ import Notice from '../_shared/components/Notice';
 import StatusBadge from '../_shared/components/StatusBadge';
 import { Switch } from '../_shared/components/Switch';
 import PlanActionDialog, { actionsFor, dueIn, isTerminal, retryActionFor } from '../_shared/recurring/PlanActions';
-import notify from '../_shared/notify';
-import { renderHealth, viewDetailsAction, copySubscriptionIdAction } from '../_shared/recurring/planColumns';
+import { CADENCE_LABEL, cadenceLabel, renderHealth, viewDetailsAction, copySubscriptionIdAction } from '../_shared/recurring/planColumns';
 import { dashboardHref } from '../_shared/adminPages';
 import { rowLinkProps } from '../_shared/rowLink';
 import { formatAmount, formatDate } from '../donations/format';
 
 const STATUS_OPTIONS = [
-    { value: 'active',    label: __( 'Active', 'gratora' ) },
-    { value: 'past_due',  label: __( 'Past due', 'gratora' ) },
-    { value: 'paused',    label: __( 'Paused', 'gratora' ) },
-    { value: 'cancelled', label: __( 'Cancelled', 'gratora' ) },
-    { value: 'expired',   label: __( 'Expired', 'gratora' ) },
+    { value: 'active',    label: __( 'Active', 'gratora-donation-platform' ) },
+    { value: 'past_due',  label: __( 'Past due', 'gratora-donation-platform' ) },
+    { value: 'paused',    label: __( 'Paused', 'gratora-donation-platform' ) },
+    { value: 'cancelled', label: __( 'Cancelled', 'gratora-donation-platform' ) },
+    { value: 'expired',   label: __( 'Expired', 'gratora-donation-platform' ) },
 ];
 
 // A cadence, not an interval unit: quarterly is three months and biweekly is
 // two weeks, so filtering on the unit filed both under a chip they are not.
-const INTERVAL_OPTIONS = [
-    { value: 'weekly',    label: __( 'Weekly', 'gratora' ) },
-    { value: 'biweekly',  label: __( 'Every 2 weeks', 'gratora' ) },
-    { value: 'monthly',   label: __( 'Monthly', 'gratora' ) },
-    { value: 'quarterly', label: __( 'Quarterly', 'gratora' ) },
-    { value: 'yearly',    label: __( 'Yearly', 'gratora' ) },
-];
+const INTERVAL_OPTIONS = Object.entries( CADENCE_LABEL ).map( ( [ value, label ] ) => ( { value, label } ) );
 
-// A donation carries the cadence the donor chose on the form, not the plan's
-// interval pair, so it reads from its own labels.
-const FREQUENCY_LABEL = {
-    weekly:    __( 'Weekly', 'gratora' ),
-    biweekly:  __( 'Every 2 weeks', 'gratora' ),
-    monthly:   __( 'Monthly', 'gratora' ),
-    quarterly: __( 'Quarterly', 'gratora' ),
-    yearly:    __( 'Yearly', 'gratora' ),
-};
+// The field the cadence filter hangs on. dataviews offers every field it is
+// given as a column, so the saved view is told to keep this one out of `fields`
+// while still recognising a saved filter on it.
+const FILTER_ONLY = 'interval';
 
 // A view preference, not a setting: it belongs to the person looking at the
 // screen, and having it reset on every page load would make it useless for the
@@ -78,23 +66,6 @@ const ORDERBY_COLUMN = {
 /** @since 1.0.0 */
 export const orderbyFor = ( field ) => ORDERBY_COLUMN[ field ] || field || 'next_payment_at';
 
-export function intervalLabel( unit, count ) {
-    const n = Number( count ) || 1;
-    switch ( unit ) {
-        case 'week':
-            /* translators: %d: number of weeks between charges. */
-            return sprintf( _n( '%d week', '%d weeks', n, 'gratora' ), n );
-        case 'year':
-            /* translators: %d: number of years between charges. */
-            return sprintf( _n( '%d year', '%d years', n, 'gratora' ), n );
-        case 'month':
-            /* translators: %d: number of months */
-            return sprintf( _n( '%d month', '%d months', n, 'gratora' ), n );
-        default:
-            return n > 1 ? `${ n } ${ unit }` : String( unit );
-    }
-}
-
 function donorHref( donorId ) {
     return addQueryArgs( window.location.pathname, { page: 'gratora-donors' } ) + `#donor/${ donorId }`;
 }
@@ -117,7 +88,7 @@ function attentionSub( failing, unlinked, failingEver = 0 ) {
             '%d plan still running that the gateway could not collect from',
             '%d plans still running that the gateway could not collect from',
             failing,
-            'gratora'
+            'gratora-donation-platform'
         ),
         failing
     );
@@ -129,7 +100,7 @@ function attentionSub( failing, unlinked, failingEver = 0 ) {
                 '%d plan has ever failed a renewal, including ended ones',
                 '%d plans have ever failed a renewal, including ended ones',
                 failingEver,
-                'gratora'
+                'gratora-donation-platform'
             ),
             failingEver
         )
@@ -141,7 +112,7 @@ function attentionSub( failing, unlinked, failingEver = 0 ) {
             '%d paid recurring donation has no plan and is listed above',
             '%d paid recurring donations have no plan and are listed above',
             unlinked.total,
-            'gratora'
+            'gratora-donation-platform'
         ),
         unlinked.total
     );
@@ -150,7 +121,7 @@ function attentionSub( failing, unlinked, failingEver = 0 ) {
     // resolving the unknown half in the org's favour.
     let second = null;
     if ( unlinked.error ) {
-        second = __( 'Donations charged with no plan could not be checked', 'gratora' );
+        second = __( 'Donations charged with no plan could not be checked', 'gratora-donation-platform' );
     } else if ( unlinked.total > 0 ) {
         second = noPlan;
     }
@@ -161,7 +132,7 @@ function attentionSub( failing, unlinked, failingEver = 0 ) {
         second,
     ].filter( Boolean );
 
-    if ( lines.length === 0 ) return __( 'Nothing to chase', 'gratora' );
+    if ( lines.length === 0 ) return __( 'Nothing to chase', 'gratora-donation-platform' );
     if ( lines.length === 1 ) return lines[ 0 ];
 
     return <>{ lines.map( ( line, i ) => <div key={ i }>{ line }</div> ) }</>;
@@ -172,7 +143,7 @@ function attentionSub( failing, unlinked, failingEver = 0 ) {
 function withTestNote( sub, includeTest ) {
     if ( ! includeTest ) return sub;
 
-    const note = __( 'Includes test subscriptions', 'gratora' );
+    const note = __( 'Includes test subscriptions', 'gratora-donation-platform' );
     if ( ! sub ) return note;
 
     return (
@@ -189,7 +160,7 @@ export function subscriptionKpis( stats, unlinked, includeTest ) {
     return [
         {
             id:    'mrr',
-            label: __( 'Monthly recurring revenue', 'gratora' ),
+            label: __( 'Monthly recurring revenue', 'gratora-donation-platform' ),
             value: formatAmount( stats.mrr_cents ),
             sub:   withTestNote(
                 stats.unconverted > 0
@@ -199,34 +170,34 @@ export function subscriptionKpis( stats, unlinked, includeTest ) {
                             '%d plan could not be converted and is not counted',
                             '%d plans could not be converted and are not counted',
                             stats.unconverted,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         stats.unconverted
                     )
-                    : __( 'Active plans, normalised', 'gratora' ),
+                    : __( 'Active plans, normalised', 'gratora-donation-platform' ),
                 includeTest
             ),
         },
         {
             id:    'active',
-            label: __( 'Active plans', 'gratora' ),
+            label: __( 'Active plans', 'gratora-donation-platform' ),
             value: String( stats.active_count ),
             sub:   withTestNote( null, includeTest ),
         },
         {
             id:    'failing',
-            label: __( 'Needs attention', 'gratora' ),
+            label: __( 'Needs attention', 'gratora-donation-platform' ),
             value: String( failing ),
             sub:   withTestNote( attentionSub( failing, unlinked, Number( stats.failing_ever_count ) || 0 ), includeTest ),
         },
         {
             id:    'churn',
-            label: __( 'Churn this month', 'gratora' ),
+            label: __( 'Churn this month', 'gratora-donation-platform' ),
             value: `${ stats.churn_pct }%`,
             sub:   withTestNote(
                 sprintf(
                     /* translators: %d: number of plans cancelled this month. */
-                    _n( '%d cancelled', '%d cancelled', stats.churned_this_month, 'gratora' ),
+                    _n( '%d cancelled', '%d cancelled', stats.churned_this_month, 'gratora-donation-platform' ),
                     stats.churned_this_month
                 ),
                 includeTest
@@ -246,12 +217,12 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                 <div>
                     { __(
                         'Recurring donations charged with no plan behind them could not be checked, so nothing on this screen rules them out.',
-                        'gratora'
+                        'gratora-donation-platform'
                     ) }
                 </div>
                 <div className="gratora-row__sub">{ error }</div>
                 <Btn variant="ghost" size="sm" onClick={ onReload }>
-                    { __( 'Check again', 'gratora' ) }
+                    { __( 'Check again', 'gratora-donation-platform' ) }
                 </Btn>
             </Notice>
         );
@@ -274,7 +245,7 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                         '%d recurring donation was charged, but no plan was created for it. Nothing will collect the next payment.',
                         '%d recurring donations were charged, but no plans were created for them. Nothing will collect their next payments.',
                         total,
-                        'gratora'
+                        'gratora-donation-platform'
                     ),
                     total
                 ) }
@@ -287,7 +258,7 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                             'Covers donations paid in the last %d day.',
                             'Covers donations paid in the last %d days.',
                             windowDays,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         windowDays
                     ) }
@@ -299,12 +270,12 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                     { ' ' }
                     { formatAmount( it.amount_cents, it.currency ) }
                     { ' ' }
-                    { FREQUENCY_LABEL[ it.frequency ] || it.frequency }
+                    { CADENCE_LABEL[ it.frequency ] || it.frequency }
                     { ' ' }
                     <span className="gratora-row__sub">
                         { it.failure_recorded
-                            ? __( 'failure recorded', 'gratora' )
-                            : __( 'no failure recorded', 'gratora' ) }
+                            ? __( 'failure recorded', 'gratora-donation-platform' )
+                            : __( 'no failure recorded', 'gratora-donation-platform' ) }
                     </span>
                 </div>
             ) ) }
@@ -312,7 +283,7 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                 <Btn variant="ghost" size="sm" onClick={ onShowAll }>
                     { sprintf(
                         /* translators: %d: number of donations not yet listed. */
-                        _n( 'Show %d more', 'Show %d more', hidden, 'gratora' ),
+                        _n( 'Show %d more', 'Show %d more', hidden, 'gratora-donation-platform' ),
                         hidden
                     ) }
                 </Btn>
@@ -325,20 +296,20 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                             '%d more is not listed here.',
                             '%d more are not listed here.',
                             beyond,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         beyond
                     ) }
                 </div>
             ) }
             { canRetry && anyRecorded && (
-                <div>{ __( 'Open a donation with a recorded failure to create its plan.', 'gratora' ) }</div>
+                <div>{ __( 'Open a donation with a recorded failure to create its plan.', 'gratora-donation-platform' ) }</div>
             ) }
             { ! canRetry && (
                 <div>
                     { __(
                         'Creating a plan needs permission to issue refunds, so pass these references to someone who has it.',
-                        'gratora'
+                        'gratora-donation-platform'
                     ) }
                 </div>
             ) }
@@ -346,7 +317,7 @@ function UnlinkedNotice( { unlinked, showAll, onShowAll, onReload } ) {
                 <div>
                     { __(
                         'Where no failure was recorded, check the payment provider for a subscription before asking the donor to set one up again.',
-                        'gratora'
+                        'gratora-donation-platform'
                     ) }
                 </div>
             ) }
@@ -360,35 +331,35 @@ function emptyStateCopy( unlinked, testHidden ) {
     // debug an integration that worked.
     if ( testHidden > 0 ) {
         return {
-            title: __( 'No live subscriptions', 'gratora' ),
+            title: __( 'No live subscriptions', 'gratora-donation-platform' ),
             // The count and the way to reveal them are in the notice above, so
             // this says what the empty table means rather than repeating them.
-            body:  __( 'Nothing here is charging real money yet.', 'gratora' ),
+            body:  __( 'Nothing here is charging real money yet.', 'gratora-donation-platform' ),
         };
     }
 
     if ( unlinked.error ) {
         return {
-            title: __( 'No subscriptions to show', 'gratora' ),
+            title: __( 'No subscriptions to show', 'gratora-donation-platform' ),
             body:  __(
                 'Whether a recurring donation was charged with no plan behind it is unknown, so this is not the whole picture.',
-                'gratora'
+                'gratora-donation-platform'
             ),
         };
     }
 
     if ( unlinked.total > 0 ) {
         return {
-            title: __( 'No subscriptions were created', 'gratora' ),
+            title: __( 'No subscriptions were created', 'gratora-donation-platform' ),
             body:  unlinked.canRetry
-                ? __( 'The recurring donations above were charged, but no plan was ever created for them. Open one with a recorded failure to create its plan.', 'gratora' )
-                : __( 'The recurring donations above were charged, but no plan was ever created for them. Creating a plan needs permission to issue refunds.', 'gratora' ),
+                ? __( 'The recurring donations above were charged, but no plan was ever created for them. Open one with a recorded failure to create its plan.', 'gratora-donation-platform' )
+                : __( 'The recurring donations above were charged, but no plan was ever created for them. Creating a plan needs permission to issue refunds.', 'gratora-donation-platform' ),
         };
     }
 
     return {
-        title: __( 'No subscriptions yet', 'gratora' ),
-        body:  __( 'Recurring plans appear here once a donor sets one up on a form that offers it.', 'gratora' ),
+        title: __( 'No subscriptions yet', 'gratora-donation-platform' ),
+        body:  __( 'Recurring plans appear here once a donor sets one up on a form that offers it.', 'gratora-donation-platform' ),
     };
 }
 
@@ -401,7 +372,7 @@ export default function List() {
         filters: [],
         search:  '',
         fields:  [ 'id', 'donor', 'amount', 'status', 'next_payment_at', 'started_at', 'campaign', 'gateway', 'lifetime' ],
-    }, () => fields.map( ( f ) => f.id ) );
+    }, () => fields.map( ( f ) => f.id ), [ FILTER_ONLY ] );
 
     const [ data, setData ]         = useState( [] );
     const [ total, setTotal ]       = useState( 0 );
@@ -484,7 +455,7 @@ export default function List() {
                 setError( null );
             } )
             .catch( ( err ) => {
-                setError( err?.message || __( 'Failed to load subscriptions.', 'gratora' ) );
+                setError( err?.message || __( 'Failed to load subscriptions.', 'gratora-donation-platform' ) );
                 setData( [] );
                 setTotal( 0 );
                 setTestHidden( 0 );
@@ -513,7 +484,7 @@ export default function List() {
             } )
             .catch( ( err ) => {
                 if ( aborted ) return;
-                setError( err?.message || __( 'Failed to load subscriptions.', 'gratora' ) );
+                setError( err?.message || __( 'Failed to load subscriptions.', 'gratora-donation-platform' ) );
                 setData( [] );
                 setTotal( 0 );
                 setTestHidden( 0 );
@@ -530,7 +501,7 @@ export default function List() {
         path: addQueryArgs( '/gratora/v1/admin/recurring/stats', { include_test: test || undefined } ),
     } );
 
-    const statsMessage = ( e ) => e?.message || __( 'The recurring totals could not be loaded.', 'gratora' );
+    const statsMessage = ( e ) => e?.message || __( 'The recurring totals could not be loaded.', 'gratora-donation-platform' );
 
     const loadStats = () => fetchStats( includeTest )
         .then( ( r ) => {
@@ -557,7 +528,7 @@ export default function List() {
             items:      [],
             windowDays: 0,
             canRetry:   false,
-            error:      err?.message || __( 'The check could not be run.', 'gratora' ),
+            error:      err?.message || __( 'The check could not be run.', 'gratora-donation-platform' ),
         } ) );
 
     // Two flips of the toggle land in whatever order the network decides, and
@@ -575,7 +546,7 @@ export default function List() {
     const fields = useMemo( () => [
         {
             id:    'id',
-            label: __( 'ID', 'gratora' ),
+            label: __( 'ID', 'gratora-donation-platform' ),
             render: ( { item } ) => (
                 <span className="gratora-ref-cell">
                     <a
@@ -590,7 +561,7 @@ export default function List() {
         },
         {
             id:    'donor',
-            label: __( 'Donor', 'gratora' ),
+            label: __( 'Donor', 'gratora-donation-platform' ),
             render: ( { item } ) => {
                 const d = item.donor;
                 if ( ! d ) return <span className="gratora-row__sub">-</span>;
@@ -599,18 +570,18 @@ export default function List() {
                         <div className="gratora-row__body">
                             <span className="gratora-ref-cell">
                                 <a className="gratora-row__link gratora-row__link--strong" href={ donorHref( d.id ) } { ...rowLinkProps }>
-                                    { d.name || __( '(no name)', 'gratora' ) }
+                                    { d.name || __( '(no name)', 'gratora-donation-platform' ) }
                                 </a>
                                 { item.simulated && (
                                     <span
                                         className="gratora-pill gratora-pill--test"
                                         title={ sprintf(
                                             /* translators: %d: minutes between simulated renewals. */
-                                            __( 'Test plan. It renews every %d minutes so a full cycle can be watched, and no money moves.', 'gratora' ),
+                                            __( 'Test plan. It renews every %d minutes so a full cycle can be watched, and no money moves.', 'gratora-donation-platform' ),
                                             item.simulated_cycle_minutes || 0
                                         ) }
                                     >
-                                        { __( 'Simulated', 'gratora' ) }
+                                        { __( 'Simulated', 'gratora-donation-platform' ) }
                                     </span>
                                 ) }
                             </span>
@@ -622,20 +593,20 @@ export default function List() {
         },
         {
             id:            'amount',
-            label:         __( 'Amount / interval', 'gratora' ),
+            label:         __( 'Amount / interval', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 // Muted once the plan has ended: it describes a charge that will
                 // not happen again, and Lifetime beside it says what was taken.
                 <span className={ isTerminal( item.status ) ? 'gratora-row__sub' : undefined }>
                     { formatAmount( item.amount_cents, item.currency ) }
-                    <span className="gratora-row__sub"> / { intervalLabel( item.interval_unit, item.interval_count ) }</span>
+                    <span className="gratora-row__sub"> / { cadenceLabel( item ) }</span>
                 </span>
             ),
         },
         {
             id:       'status',
-            label:    __( 'Status', 'gratora' ),
+            label:    __( 'Status', 'gratora-donation-platform' ),
             elements: STATUS_OPTIONS,
             filterBy: { operators: [ 'is' ] },
             enableSorting: true,
@@ -646,7 +617,7 @@ export default function List() {
                         <span className="gratora-row__sub" style={ { marginLeft: 6 } }>
                             { sprintf(
                                 /* translators: %d: consecutive failed renewals. */
-                                _n( '%d failure', '%d failures', item.failed_renewals_count, 'gratora' ),
+                                _n( '%d failure', '%d failures', item.failed_renewals_count, 'gratora-donation-platform' ),
                                 item.failed_renewals_count
                             ) }
                         </span>
@@ -656,7 +627,7 @@ export default function List() {
         },
         {
             id:            'next_payment_at',
-            label:         __( 'Next charge', 'gratora' ),
+            label:         __( 'Next charge', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 isTerminal( item.status )
@@ -665,10 +636,10 @@ export default function List() {
                             { item.cancelled_at
                                 ? sprintf(
                                     /* translators: %s: date the plan ended. */
-                                    __( 'Ended %s', 'gratora' ),
+                                    __( 'Ended %s', 'gratora-donation-platform' ),
                                     formatDate( item.cancelled_at )
                                 )
-                                : __( 'Ended', 'gratora' ) }
+                                : __( 'Ended', 'gratora-donation-platform' ) }
                         </span>
                     )
                     : item.status === 'paused' && item.resume_at
@@ -676,7 +647,7 @@ export default function List() {
                             <div className="gratora-row">
                                 <div className="gratora-row__body">
                                     <div className="gratora-row__name">{ formatDate( item.resume_at ) }</div>
-                                    <div className="gratora-row__sub">{ __( 'when it resumes', 'gratora' ) }</div>
+                                    <div className="gratora-row__sub">{ __( 'when it resumes', 'gratora-donation-platform' ) }</div>
                                 </div>
                             </div>
                         )
@@ -692,7 +663,7 @@ export default function List() {
         },
         {
             id:            'started_at',
-            label:         __( 'Giving since', 'gratora' ),
+            label:         __( 'Giving since', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 item.started_at
@@ -701,7 +672,7 @@ export default function List() {
             ),
         },
         {            id:       'campaign',
-            label:    __( 'Campaign', 'gratora' ),
+            label:    __( 'Campaign', 'gratora-donation-platform' ),
             elements: campaigns.map( ( c ) => ( { value: String( c.id ), label: c.title || `#${ c.id }` } ) ),
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
@@ -712,7 +683,7 @@ export default function List() {
         },
         {
             id:       'gateway',
-            label:    __( 'Gateway', 'gratora' ),
+            label:    __( 'Gateway', 'gratora-donation-platform' ),
             elements: gateways,
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => (
@@ -720,32 +691,31 @@ export default function List() {
                     <div style={ { textTransform: 'capitalize' } }>{ item.gateway }</div>
                     { item.gateway_subscription_id
                         ? <code className="gratora-row__sub gratora-row__sub--mono">{ item.gateway_subscription_id }</code>
-                        : <span className="gratora-row__sub">{ __( 'Not linked', 'gratora' ) }</span> }
+                        : <span className="gratora-row__sub">{ __( 'Not linked', 'gratora-donation-platform' ) }</span> }
                 </div>
             ),
         },
         {
             id:       'failing',
-            label:    __( 'Health', 'gratora' ),
+            label:    __( 'Health', 'gratora-donation-platform' ),
             elements: [
-                { value: 'yes', label: __( 'Has ever failed a renewal', 'gratora' ) },
+                { value: 'yes', label: __( 'Has ever failed a renewal', 'gratora-donation-platform' ) },
             ],
             filterBy: { operators: [ 'is' ] },
             render: ( { item } ) => renderHealth( item ),
         },
         {
-            id:       'interval',
-            label:    __( 'Interval', 'gratora' ),
-            elements: INTERVAL_OPTIONS,
-            filterBy: { operators: [ 'is' ] },
-            // Filter only. The amount cell already reads "25.00 / month", so a
-            // column repeating the second half is a column saying nothing.
-            enableHiding: true,
-            render:   ( { item } ) => <span>{ intervalLabel( item.interval_unit, item.interval_count ) }</span>,
+            id:           FILTER_ONLY,
+            label:        __( 'Interval', 'gratora-donation-platform' ),
+            elements:     INTERVAL_OPTIONS,
+            filterBy:     { operators: [ 'is' ] },
+            // Locks the one toggle dataviews draws for it, so the cadence chip
+            // stays reachable without the field being offered as a column.
+            enableHiding: false,
         },
         {
             id:            'lifetime',
-            label:         __( 'Lifetime', 'gratora' ),
+            label:         __( 'Lifetime', 'gratora-donation-platform' ),
             enableSorting: true,
             render: ( { item } ) => (
                 <div className="gratora-row">
@@ -754,7 +724,7 @@ export default function List() {
                         <div className="gratora-row__sub">
                             { sprintf(
                                 /* translators: %d: number of payments taken so far. */
-                                _n( '%d payment', '%d payments', item.payments_count, 'gratora' ),
+                                _n( '%d payment', '%d payments', item.payments_count, 'gratora-donation-platform' ),
                                 item.payments_count
                             ) }
                         </div>
@@ -769,7 +739,7 @@ export default function List() {
         copySubscriptionIdAction(),
         {
             id:    'retry',
-            label: __( 'Retry payment', 'gratora' ),
+            label: __( 'Retry payment', 'gratora-donation-platform' ),
             // DataViews draws a primary action as an icon button, so one with
             // no icon renders as nothing at all -- and being primary, it is
             // left out of the row menu too, taking the action out of reach.
@@ -780,31 +750,31 @@ export default function List() {
         },
         {
             id:       'pause',
-            label:    __( 'Pause', 'gratora' ),
+            label:    __( 'Pause', 'gratora-donation-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'pause' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'pause' } ),
         },
         {
             id:       'resume',
-            label:    __( 'Resume', 'gratora' ),
+            label:    __( 'Resume', 'gratora-donation-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'resume' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'resume' } ),
         },
         {
             id:       'skip_next',
-            label:    __( 'Skip next', 'gratora' ),
+            label:    __( 'Skip next', 'gratora-donation-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'skip_next' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'skip_next' } ),
         },
         {
             id:       'change_amount',
-            label:    __( 'Change amount', 'gratora' ),
+            label:    __( 'Change amount', 'gratora-donation-platform' ),
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'change_amount' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'change_amount' } ),
         },
         {
             id:            'cancel',
-            label:         __( 'Cancel', 'gratora' ),
+            label:         __( 'Cancel', 'gratora-donation-platform' ),
             isDestructive: true,
             isEligible: ( item ) => actionsFor( item ).some( ( a ) => a.id === 'cancel' ),
             callback: ( items ) => setDialog( { plan: items[ 0 ], action: 'cancel' } ),
@@ -819,13 +789,13 @@ export default function List() {
     return (
         <div className="gratora-admin">
             <div className="gratora-crumbs">
-                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'gratora' ) }</a>
+                <a href={ dashboardHref( window.location.pathname ) }>{ __( 'Fundraising', 'gratora-donation-platform' ) }</a>
                 <span className="sep">›</span>
-                <span>{ __( 'Subscriptions', 'gratora' ) }</span>
+                <span>{ __( 'Subscriptions', 'gratora-donation-platform' ) }</span>
             </div>
             <div className="gratora-page-head">
                 <div className="gratora-page-head__title-row">
-                    <h1>{ __( 'Subscriptions', 'gratora' ) }</h1>
+                    <h1>{ __( 'Subscriptions', 'gratora-donation-platform' ) }</h1>
                 </div>
                 <div className="gratora-page-head__right">
                     { /* Offered once there is something to reveal, or while it
@@ -837,15 +807,15 @@ export default function List() {
                             <Switch
                                 checked={ includeTest }
                                 onChange={ () => toggleTest( ! includeTest ) }
-                                label={ __( 'Show test subscriptions', 'gratora' ) }
+                                label={ __( 'Show test subscriptions', 'gratora-donation-platform' ) }
                             />
-                            <span>{ __( 'Show test subscriptions', 'gratora' ) }</span>
+                            <span>{ __( 'Show test subscriptions', 'gratora-donation-platform' ) }</span>
                         </label>
                     ) }
                     <span className="gratora-page-head__meta">
                         { sprintf(
                             /* translators: %s: number of recurring plans. */
-                            _n( '%s plan', '%s plans', total, 'gratora' ),
+                            _n( '%s plan', '%s plans', total, 'gratora-donation-platform' ),
                             total.toLocaleString()
                         ) }
                     </span>
@@ -860,13 +830,13 @@ export default function List() {
                             '%d test subscription is hidden.',
                             '%d test subscriptions are hidden.',
                             testHidden,
-                            'gratora'
+                            'gratora-donation-platform'
                         ),
                         testHidden
                     ) }
                     { ' ' }
                     <Btn variant="link" onClick={ () => toggleTest( true ) }>
-                        { __( 'Show them', 'gratora' ) }
+                        { __( 'Show them', 'gratora-donation-platform' ) }
                     </Btn>
                 </Notice>
             ) }
@@ -879,15 +849,15 @@ export default function List() {
 
             { statsFailed && ! stats ? (
                 <Notice status="error" isDismissible={ false }>
-                    <div>{ __( 'The recurring totals could not be loaded, so nothing on this screen totals the book.', 'gratora' ) }</div>
+                    <div>{ __( 'The recurring totals could not be loaded, so nothing on this screen totals the book.', 'gratora-donation-platform' ) }</div>
                     <div className="gratora-row__sub">{ statsFailed }</div>
-                    <Btn variant="ghost" size="sm" onClick={ loadStats }>{ __( 'Try again', 'gratora' ) }</Btn>
+                    <Btn variant="ghost" size="sm" onClick={ loadStats }>{ __( 'Try again', 'gratora-donation-platform' ) }</Btn>
                 </Notice>
             ) : (
                 <>
                     { statsFailed && (
                         <Notice status="error" onRemove={ () => setStatsFailed( null ) }>
-                            { __( 'These totals are from before your last change. They could not be refreshed.', 'gratora' ) }
+                            { __( 'These totals are from before your last change. They could not be refreshed.', 'gratora-donation-platform' ) }
                         </Notice>
                     ) }
                     <KpiStrip items={ subscriptionKpis( stats, unlinked, includeTest ) } loading={ ! stats && ! statsFailed } />
@@ -920,11 +890,11 @@ export default function List() {
                         <EmptyState
                             compact
                             icon={ <SearchX size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'Nothing matches these filters', 'gratora' ) }
-                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'gratora' ) }
+                            title={ __( 'Nothing matches these filters', 'gratora-donation-platform' ) }
+                            body={ __( 'Try a different search, or clear the filters to see everything again.', 'gratora-donation-platform' ) }
                             action={
                                 <Btn variant="secondary" onClick={ clearFilters }>
-                                    { __( 'Clear filters', 'gratora' ) }
+                                    { __( 'Clear filters', 'gratora-donation-platform' ) }
                                 </Btn>
                             }
                         />

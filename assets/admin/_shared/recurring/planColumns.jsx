@@ -12,6 +12,33 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import notify from '../notify';
 
 /**
+ * The five cadences this product can name. FrequencyMap is the same table on
+ * the server, and PlanRow puts its answer on every row as `frequency`.
+ */
+export const CADENCE_LABEL = {
+    weekly:    __( 'Weekly', 'gratora-donation-platform' ),
+    biweekly:  __( 'Every 2 weeks', 'gratora-donation-platform' ),
+    monthly:   __( 'Monthly', 'gratora-donation-platform' ),
+    quarterly: __( 'Quarterly', 'gratora-donation-platform' ),
+    yearly:    __( 'Yearly', 'gratora-donation-platform' ),
+};
+
+/**
+ * The words the donor chose the plan with. A pair outside the five has no name
+ * here or on the server, so it falls back to counting rather than rounding to
+ * the nearest cadence and misreporting when the card is charged.
+ *
+ * @since 1.0.0
+ */
+export function cadenceLabel( plan ) {
+    return CADENCE_LABEL[ plan?.frequency ] || sprintf(
+        /* translators: %s: the gap between charges, for example "6 months". */
+        __( 'Every %s', 'gratora-donation-platform' ),
+        intervalLabel( plan?.interval_unit, plan?.interval_count )
+    );
+}
+
+/**
  * "month" and "2 week" come straight from the database, so the cell has to
  * translate and pluralise them per unit: a translator needs both forms and the
  * singular is not the column value.
@@ -22,16 +49,16 @@ export function intervalLabel( unit, count ) {
     switch ( unit ) {
         case 'day':
             /* translators: %d: number of days between charges. */
-            return sprintf( _n( '%d day', '%d days', n, 'gratora' ), n );
+            return sprintf( _n( '%d day', '%d days', n, 'gratora-donation-platform' ), n );
         case 'week':
             /* translators: %d: number of weeks between charges. */
-            return sprintf( _n( '%d week', '%d weeks', n, 'gratora' ), n );
+            return sprintf( _n( '%d week', '%d weeks', n, 'gratora-donation-platform' ), n );
         case 'month':
             /* translators: %d: number of months between charges. */
-            return sprintf( _n( '%d month', '%d months', n, 'gratora' ), n );
+            return sprintf( _n( '%d month', '%d months', n, 'gratora-donation-platform' ), n );
         case 'year':
             /* translators: %d: number of years between charges. */
-            return sprintf( _n( '%d year', '%d years', n, 'gratora' ), n );
+            return sprintf( _n( '%d year', '%d years', n, 'gratora-donation-platform' ), n );
         default:
             return n > 1 ? `${ n } ${ unit }` : String( unit );
     }
@@ -48,7 +75,7 @@ export function renderHealth( item ) {
             <span className="gratora-pill gratora-pill--amber">
                 { sprintf(
                     /* translators: %d: consecutive failed renewals. */
-                    _n( '%d failure', '%d failures', item.failed_renewals_count, 'gratora' ),
+                    _n( '%d failure', '%d failures', item.failed_renewals_count, 'gratora-donation-platform' ),
                     item.failed_renewals_count
                 ) }
             </span>
@@ -61,14 +88,14 @@ export function renderHealth( item ) {
             <span className="gratora-pill gratora-pill--red">
                 { sprintf(
                     /* translators: %d: recorded problems on this subscription. */
-                    _n( '%d problem', '%d problems', problems, 'gratora' ),
+                    _n( '%d problem', '%d problems', problems, 'gratora-donation-platform' ),
                     problems
                 ) }
             </span>
         );
     }
 
-    return <span className="gratora-row__sub">{ __( 'OK', 'gratora' ) }</span>;
+    return <span className="gratora-row__sub">{ __( 'OK', 'gratora-donation-platform' ) }</span>;
 }
 
 /**
@@ -80,7 +107,7 @@ export function renderHealth( item ) {
 export function viewDetailsAction( setDetail ) {
     return {
         id:       'view_details',
-        label:    __( 'View details', 'gratora' ),
+        label:    __( 'View details', 'gratora-donation-platform' ),
         callback: ( items ) => setDetail( items[ 0 ] ),
     };
 }
@@ -89,7 +116,7 @@ export function viewDetailsAction( setDetail ) {
 export function copySubscriptionIdAction() {
     return {
         id:         'copy_subscription_id',
-        label:      __( 'Copy subscription id', 'gratora' ),
+        label:      __( 'Copy subscription id', 'gratora-donation-platform' ),
         isPrimary:  false,
         isEligible: ( item ) => !! item.gateway_subscription_id,
         callback:   async ( [ item ] ) => {
@@ -98,7 +125,7 @@ export function copySubscriptionIdAction() {
                 // origin, which awaits clean and reports a copy nobody made.
                 if ( ! window.navigator?.clipboard ) throw new Error( 'no clipboard' );
                 await window.navigator.clipboard.writeText( item.gateway_subscription_id );
-                notify.success( __( 'Subscription id copied.', 'gratora' ) );
+                notify.success( __( 'Subscription id copied.', 'gratora-donation-platform' ) );
             } catch ( e ) {
                 // No clipboard permission, so show it instead of failing
                 // silently: it is a lookup key and reading it is the point.

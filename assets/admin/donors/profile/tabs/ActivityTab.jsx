@@ -3,7 +3,7 @@ import { addQueryArgs } from '@wordpress/url';
 import { Coins, History } from 'lucide-react';
 
 import EmptyState from '../../../_shared/components/EmptyState';
-import { intervalLabel } from '../../../_shared/recurring/planColumns';
+import { cadenceLabel } from '../../../_shared/recurring/planColumns';
 
 function donationHref( reference ) {
     return addQueryArgs( window.location.pathname, { page: 'gratora-donations', view: 'detail', reference } );
@@ -40,7 +40,7 @@ export function eventTitle( event, campaignTitle ) {
         : null;
 
     const toCampaign = campaignTitle
-        ? <> { __( 'to', 'gratora' ) } <span className="dp-tl-camp">{ campaignTitle }</span></>
+        ? <> { __( 'to', 'gratora-donation-platform' ) } <span className="dp-tl-camp">{ campaignTitle }</span></>
         : null;
 
     let title = <>{ meta.label }</>;
@@ -48,32 +48,32 @@ export function eventTitle( event, campaignTitle ) {
     switch ( event.type ) {
         case 'donation.completed':
             title = amount
-                ? <>{ __( 'Donated', 'gratora' ) } <strong>{ amount }</strong>{ toCampaign }</>
+                ? <>{ __( 'Donated', 'gratora-donation-platform' ) } <strong>{ amount }</strong>{ toCampaign }</>
                 : title;
             break;
         case 'donation.intent_created':
             title = amount
-                ? <>{ __( 'Started a donation of', 'gratora' ) } <strong>{ amount }</strong>{ toCampaign }</>
+                ? <>{ __( 'Started a donation of', 'gratora-donation-platform' ) } <strong>{ amount }</strong>{ toCampaign }</>
                 : title;
             break;
         case 'donation.failed':
             title = amount
-                ? <>{ __( 'Payment of', 'gratora' ) } <strong>{ amount }</strong> { __( 'failed', 'gratora' ) }</>
+                ? <>{ __( 'Payment of', 'gratora-donation-platform' ) } <strong>{ amount }</strong> { __( 'failed', 'gratora-donation-platform' ) }</>
                 : title;
             break;
         case 'donation.refunded':
             title = amount
-                ? <>{ __( 'Refund of', 'gratora' ) } <strong>{ amount }</strong> { __( 'issued', 'gratora' ) }</>
+                ? <>{ __( 'Refund of', 'gratora-donation-platform' ) } <strong>{ amount }</strong> { __( 'issued', 'gratora-donation-platform' ) }</>
                 : title;
             break;
         case 'recurring.renewed':
             title = amount
-                ? <>{ __( 'Recurring renewal of', 'gratora' ) } <strong>{ amount }</strong>{ toCampaign }</>
+                ? <>{ __( 'Recurring renewal of', 'gratora-donation-platform' ) } <strong>{ amount }</strong>{ toCampaign }</>
                 : title;
             break;
         case 'recurring.failed':
             title = amount
-                ? <>{ __( 'Renewal of', 'gratora' ) } <strong>{ amount }</strong> { __( 'was declined', 'gratora' ) }</>
+                ? <>{ __( 'Renewal of', 'gratora-donation-platform' ) } <strong>{ amount }</strong> { __( 'was declined', 'gratora-donation-platform' ) }</>
                 : title;
             break;
         case 'recurring.amount_changed': {
@@ -82,8 +82,8 @@ export function eventTitle( event, campaignTitle ) {
             title = ( from !== undefined && to !== undefined )
                 ? (
                     <>
-                        { __( 'Recurring amount changed from', 'gratora' ) } <strong>{ formatAmount( from, event.currency ) }</strong>
-                        { ' ' }{ __( 'to', 'gratora' ) } <strong>{ formatAmount( to, event.currency ) }</strong>
+                        { __( 'Recurring amount changed from', 'gratora-donation-platform' ) } <strong>{ formatAmount( from, event.currency ) }</strong>
+                        { ' ' }{ __( 'to', 'gratora-donation-platform' ) } <strong>{ formatAmount( to, event.currency ) }</strong>
                     </>
                 )
                 : title;
@@ -119,7 +119,7 @@ function TimelineRow( { event, campaigns } ) {
         facts.push( <span key="rec" className="dp-tl-ref">{ event.receipt_number }</span> );
     }
     if ( event.payload?.by === 'admin' ) {
-        facts.push( <span key="by">{ __( 'by an admin', 'gratora' ) }</span> );
+        facts.push( <span key="by">{ __( 'by an admin', 'gratora-donation-platform' ) }</span> );
     }
 
     // A note the donor left with the donation, in the same row as the rest so
@@ -156,8 +156,8 @@ function RecentDonationsCard( { donations, campaigns, donationsTotal, onAllDonat
                         <EmptyState
                             compact
                             icon={ <Coins size={ 22 } strokeWidth={ 1.75 } /> }
-                            title={ __( 'No donations yet', 'gratora' ) }
-                            body={ __( 'This donor’s donations will appear here as they come in.', 'gratora' ) }
+                            title={ __( 'No donations yet', 'gratora-donation-platform' ) }
+                            body={ __( 'This donor’s donations will appear here as they come in.', 'gratora-donation-platform' ) }
                         />
                     )
                     : (
@@ -175,7 +175,7 @@ function RecentDonationsCard( { donations, campaigns, donationsTotal, onAllDonat
                                             <span className="dp-recent-row__sub">
                                                 <a href={ donationHref( d.reference ) }>{ d.reference }</a>
                                                 { d.is_test && (
-                                                    <span className="gratora-pill gratora-pill--test">{ __( 'Test', 'gratora' ) }</span>
+                                                    <span className="gratora-pill gratora-pill--test">{ __( 'Test', 'gratora-donation-platform' ) }</span>
                                                 ) }
                                                 <span>{ timeAgo( d.paid_at || d.created_at ) }</span>
                                             </span>
@@ -192,12 +192,12 @@ function RecentDonationsCard( { donations, campaigns, donationsTotal, onAllDonat
                      pending and failed ones. lifetime.count is live paid
                      donations only, so it disagreed with both the list above it
                      and the tab badge that opens the same list. */ }
-                <span className="num">{ sprintf( /* translators: %d: how many donations this donor has */ __( '%d in total', 'gratora' ), donationsTotal ) }</span>
+                <span className="num">{ sprintf( /* translators: %d: how many donations this donor has */ __( '%d in total', 'gratora-donation-platform' ), donationsTotal ) }</span>
                 <a
                     href="#donations"
                     onClick={ ( e ) => { e.preventDefault(); onAllDonations?.(); } }
                 >
-                    { __( 'All donations →', 'gratora' ) }
+                    { __( 'All donations →', 'gratora-donation-platform' ) }
                 </a>
             </div>
         </div>
@@ -210,26 +210,26 @@ function ActivePlanCard( { plans } ) {
         return (
             <div className="dp-card">
                 <div className="dp-card__body" style={ { padding: '14px 18px' } }>
-                    <p className="dp-empty" style={ { padding: '8px 0' } }>{ __( 'No active recurring plan.', 'gratora' ) }</p>
+                    <p className="dp-empty" style={ { padding: '8px 0' } }>{ __( 'No active recurring plan.', 'gratora-donation-platform' ) }</p>
                 </div>
             </div>
         );
     }
     const pill = active.status === 'past_due'
-        ? { cls: 'is-warn', label: __( 'Past due', 'gratora' ) }
-        : { cls: 'is-ok',   label: __( 'Active', 'gratora' ) };
+        ? { cls: 'is-warn', label: __( 'Past due', 'gratora-donation-platform' ) }
+        : { cls: 'is-ok',   label: __( 'Active', 'gratora-donation-platform' ) };
     return (
         <div className="dp-card">
             <div className="dp-card__body" style={ { padding: '14px 18px' } }>
                 <div style={ { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 } }>
                     <strong className="num" style={ { fontSize: 15 } }>
-                        { formatAmount( active.amount_cents, active.currency ) } / { intervalLabel( active.interval_unit, active.interval_count ) }
+                        { formatAmount( active.amount_cents, active.currency ) } / { cadenceLabel( active ) }
                     </strong>
                     <span className={ `dp-pill ${ pill.cls }` }>{ pill.label }</span>
                 </div>
-                <Row label={ __( 'Next attempt', 'gratora' ) }       value={ formatDate( active.next_payment_at ) } />
-                <Row label={ __( 'Last successful', 'gratora' ) }    value={ active.last_payment_at ? formatDate( active.last_payment_at ) : '-' } />
-                <Row label={ __( 'Lifetime on plan', 'gratora' ) }   value={ formatAmount( active.total_paid_cents, active.currency ) } strong />
+                <Row label={ __( 'Next attempt', 'gratora-donation-platform' ) }       value={ formatDate( active.next_payment_at ) } />
+                <Row label={ __( 'Last successful', 'gratora-donation-platform' ) }    value={ active.last_payment_at ? formatDate( active.last_payment_at ) : '-' } />
+                <Row label={ __( 'Lifetime on plan', 'gratora-donation-platform' ) }   value={ formatAmount( active.total_paid_cents, active.currency ) } strong />
             </div>
         </div>
     );
@@ -269,8 +269,8 @@ export default function ActivityTab( { donations, events, eventsTotal, campaigns
                                     <EmptyState
                                         compact
                                         icon={ <History size={ 22 } strokeWidth={ 1.75 } /> }
-                                        title={ __( 'No events yet', 'gratora' ) }
-                                        body={ __( 'Status changes, refunds, and admin notes show up here over time.', 'gratora' ) }
+                                        title={ __( 'No events yet', 'gratora-donation-platform' ) }
+                                        body={ __( 'Status changes, refunds, and admin notes show up here over time.', 'gratora-donation-platform' ) }
                                     />
                                 )
                                 : (
@@ -288,7 +288,7 @@ export default function ActivityTab( { donations, events, eventsTotal, campaigns
                                 <span className="num">
                                     { sprintf(
                                         /* translators: %d: total number of recorded events for this donor. */
-                                        _n( '%d event', '%d events', eventsTotal, 'gratora' ),
+                                        _n( '%d event', '%d events', eventsTotal, 'gratora-donation-platform' ),
                                         eventsTotal
                                     ) }
                                 </span>
@@ -297,7 +297,7 @@ export default function ActivityTab( { donations, events, eventsTotal, campaigns
                                         href="#activity"
                                         onClick={ ( e ) => { e.preventDefault(); onSeeAllActivity(); } }
                                     >
-                                        { __( 'All activity →', 'gratora' ) }
+                                        { __( 'All activity →', 'gratora-donation-platform' ) }
                                     </a>
                                 ) }
                             </div>

@@ -6,7 +6,7 @@ import Btn from '../_shared/components/Btn';
 import StatusBadge from '../_shared/components/StatusBadge';
 import { formatAmount, formatDate } from '../donations/format';
 import { actionsFor } from '../_shared/recurring/PlanActions';
-import { intervalLabel } from './List';
+import { cadenceLabel } from '../_shared/recurring/planColumns';
 
 function donationHref( reference ) {
     return addQueryArgs( window.location.pathname, {
@@ -43,22 +43,22 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
     // Named after the provider, because the dialog title is also a subscription
     // id and the two never match.
     const gatewayName = plan.gateway ? plan.gateway.charAt( 0 ).toUpperCase() + plan.gateway.slice( 1 ) : '';
-    let providerIdLabel = __( 'Provider ID', 'gratora' );
+    let providerIdLabel = __( 'Provider ID', 'gratora-donation-platform' );
     if ( gatewayName ) {
         /* translators: %s: payment gateway name, e.g. Stripe. */
-        providerIdLabel = sprintf( __( '%s ID', 'gratora' ), gatewayName );
+        providerIdLabel = sprintf( __( '%s ID', 'gratora-donation-platform' ), gatewayName );
     }
 
     return (
         <Dialog
             /* translators: %d: subscription id */
-            title={ sprintf( __( 'Subscription #%d', 'gratora' ), plan.id ) }
+            title={ sprintf( __( 'Subscription #%d', 'gratora-donation-platform' ), plan.id ) }
             onClose={ onClose }
             size="wide"
             foot={
                 <>
                     <Btn className="sd-foot__close" variant="secondary" onClick={ onClose }>
-                        { __( 'Close', 'gratora' ) }
+                        { __( 'Close', 'gratora-donation-platform' ) }
                     </Btn>
                     { actionsFor( plan ).map( ( a ) => (
                         <Btn
@@ -76,7 +76,7 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
                 <div className="sd-head__amount">
                     { formatAmount( plan.amount_cents, plan.currency ) }
                     <span className="sd-head__interval">
-                        { ' / ' }{ intervalLabel( plan.interval_unit, plan.interval_count ) }
+                        { ' / ' }{ cadenceLabel( plan ) }
                     </span>
                 </div>
                 <StatusBadge status={ plan.status } />
@@ -91,7 +91,7 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
             { plan.last_failure && (
                 <div className="sd-failure">
                     <div className="sd-failure__reason">
-                        { plan.last_failure.reason || __( 'The gateway gave no reason.', 'gratora' ) }
+                        { plan.last_failure.reason || __( 'The gateway gave no reason.', 'gratora-donation-platform' ) }
                     </div>
                     <a href={ donationHref( plan.last_failure.reference ) }>
                         { plan.last_failure.reference }
@@ -100,29 +100,29 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
             ) }
 
             <Section
-                title={ __( 'Schedule', 'gratora' ) }
+                title={ __( 'Schedule', 'gratora-donation-platform' ) }
                 rows={ [
-                    { label: __( 'Next payment', 'gratora' ), value: plan.next_payment_at && formatDate( plan.next_payment_at ) },
-                    { label: __( 'Last payment', 'gratora' ), value: plan.last_payment_at && formatDate( plan.last_payment_at ) },
-                    { label: __( 'Started', 'gratora' ), value: plan.started_at && formatDate( plan.started_at ) },
-                    { label: __( 'Resumes', 'gratora' ), value: plan.resume_at && formatDate( plan.resume_at ) },
-                    { label: __( 'Cancelled', 'gratora' ), value: plan.cancelled_at && formatDate( plan.cancelled_at ) },
-                    { label: __( 'Reason', 'gratora' ), value: plan.cancellation_reason },
+                    { label: __( 'Next payment', 'gratora-donation-platform' ), value: plan.next_payment_at && formatDate( plan.next_payment_at ) },
+                    { label: __( 'Last payment', 'gratora-donation-platform' ), value: plan.last_payment_at && formatDate( plan.last_payment_at ) },
+                    { label: __( 'Started', 'gratora-donation-platform' ), value: plan.started_at && formatDate( plan.started_at ) },
+                    { label: __( 'Resumes', 'gratora-donation-platform' ), value: plan.resume_at && formatDate( plan.resume_at ) },
+                    { label: __( 'Cancelled', 'gratora-donation-platform' ), value: plan.cancelled_at && formatDate( plan.cancelled_at ) },
+                    { label: __( 'Reason', 'gratora-donation-platform' ), value: plan.cancellation_reason },
                 ] }
             />
 
             <Section
-                title={ __( 'Giving', 'gratora' ) }
+                title={ __( 'Giving', 'gratora-donation-platform' ) }
                 rows={ [
-                    { label: __( 'Payments', 'gratora' ), value: plan.payments_count || null },
-                    { label: __( 'Lifetime', 'gratora' ), value: formatAmount( plan.total_paid_cents, plan.currency ) },
-                    { label: __( 'Failed renewals', 'gratora' ), value: plan.failed_renewals_count || null },
+                    { label: __( 'Payments', 'gratora-donation-platform' ), value: plan.payments_count || null },
+                    { label: __( 'Lifetime', 'gratora-donation-platform' ), value: formatAmount( plan.total_paid_cents, plan.currency ) },
+                    { label: __( 'Failed renewals', 'gratora-donation-platform' ), value: plan.failed_renewals_count || null },
                 ] }
             />
 
             { plan.errors?.length > 0 && (
                 <div className="sd-group">
-                    <h4 className="sd-group__title">{ __( 'Problems', 'gratora' ) }</h4>
+                    <h4 className="sd-group__title">{ __( 'Problems', 'gratora-donation-platform' ) }</h4>
                     <ul className="sd-errors">
                         { plan.errors.map( ( e, i ) => (
                             <li className="sd-errors__row" key={ `${ e.at }-${ i }` }>
@@ -136,14 +136,14 @@ export default function PlanDetailDialog( { plan, onClose, onAction } ) {
             ) }
 
             <Section
-                title={ __( 'Payment provider', 'gratora' ) }
+                title={ __( 'Payment provider', 'gratora-donation-platform' ) }
                 rows={ [
-                    { label: __( 'Gateway', 'gratora' ), value: <span className="sd-cap">{ plan.gateway }</span> },
+                    { label: __( 'Gateway', 'gratora-donation-platform' ), value: <span className="sd-cap">{ plan.gateway }</span> },
                     {
                         label: providerIdLabel,
                         value: plan.gateway_subscription_id
                             ? <code className="sd-mono">{ plan.gateway_subscription_id }</code>
-                            : <span className="sd-muted">{ __( 'Not linked', 'gratora' ) }</span>,
+                            : <span className="sd-muted">{ __( 'Not linked', 'gratora-donation-platform' ) }</span>,
                     },
                 ] }
             />
