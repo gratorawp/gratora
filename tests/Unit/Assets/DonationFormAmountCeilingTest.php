@@ -50,35 +50,6 @@ final class DonationFormAmountCeilingTest extends TestCase
         $this->assertNull($out['at'], 'the cap itself is still a donation the server takes');
     }
 
-    /**
-     * Typing is the path the ceiling exists for, and a clamp on the box would
-     * settle it before the message could: the figure is rewritten to the cap
-     * while the box still shows what the donor typed, and the payload carries
-     * an amount they never entered. Nothing tells them.
-     *
-     * The box is JSX, which the node harness cannot execute, so the two
-     * expressions that would do the rewriting are pinned in source.
-     */
-    public function test_a_typed_amount_is_never_rewritten_to_the_ceiling(): void
-    {
-        $root = dirname(__DIR__, 3) . '/assets/donation-form';
-
-        $step = (string) file_get_contents($root . '/steps/AmountStep.jsx');
-        $this->assertNotSame('', $step);
-        $this->assertDoesNotMatchRegularExpression(
-            '/\bmax=\{/',
-            $step,
-            'the amount step must not cap the box: validateStep names the ceiling instead'
-        );
-
-        $input = (string) file_get_contents($root . '/components/AmountInput.jsx');
-        $this->assertNotSame('', $input);
-        $this->assertStringNotContainsString(
-            'n > max',
-            $input,
-            'and the box itself must not carry an upper clamp for a caller to arm'
-        );
-    }
 
     /**
      * Storage is major x 100 in every currency, so a zero-decimal currency

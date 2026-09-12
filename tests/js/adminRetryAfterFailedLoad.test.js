@@ -28,7 +28,7 @@ import apiFetch from '@wordpress/api-fetch';
 
 import Detail from '../../assets/admin/donations/Detail';
 
-const settle = () => new Promise( ( r ) => setTimeout( r, 40 ) );
+const { waitFor } = require( './support/waitFor' );
 
 const DONATION = {
     donation: { id: 1, reference: 'DON-1', status: 'paid', currency: 'USD', amount_cents: 5000, refundable_cents: 5000 },
@@ -40,6 +40,7 @@ const DONATION = {
 };
 
 const buttons = () => [ ...document.querySelectorAll( 'button' ) ].map( ( b ) => b.textContent.trim() );
+const text = () => document.body.textContent;
 
 beforeEach( () => {
     apiFetch.mockReset();
@@ -47,16 +48,18 @@ beforeEach( () => {
     window.gratora = { can: { view_donations: true, refund_donations: true, edit_donations: true, resend_receipt: true } };
 } );
 
-afterEach( () => { delete window.gratora; } );
+afterEach( () => {
+    render( null, document.getElementById( 'root' ) );
+    delete window.gratora;
+} );
 
 it( 'offers a retry when the donation cannot be loaded at all', async () => {
     apiFetch.mockRejectedValue( new Error( 'Request failed' ) );
 
     render( <Detail reference="DON-1" />, document.getElementById( 'root' ) );
-    await settle();
+    await waitFor( () => buttons().includes( 'Try again' ), { what: 'the retry button' } );
 
-    expect( document.body.textContent ).toContain( 'Request failed' );
-    expect( buttons() ).toContain( 'Try again' );
+    expect( text() ).toContain( 'Request failed' );
     expect( buttons() ).toContain( 'Back to donations' );
 } );
 
@@ -66,15 +69,15 @@ it( 'retries into the loaded screen', async () => {
         .mockResolvedValue( DONATION );
 
     render( <Detail reference="DON-1" />, document.getElementById( 'root' ) );
-    await settle();
+    await waitFor( () => buttons().includes( 'Try again' ), { what: 'the retry button' } );
 
     [ ...document.querySelectorAll( 'button' ) ]
         .find( ( b ) => b.textContent.trim() === 'Try again' )
         .click();
-    await settle();
+    await waitFor( () => buttons().includes( 'Refund' ), { what: 'the loaded donation' } );
 
-    expect( document.body.textContent ).toContain( 'DON-1' );
-    expect( document.body.textContent ).not.toContain( 'Request failed' );
+    expect( text() ).toContain( 'DON-1' );
+    expect( text() ).not.toContain( 'Request failed' );
 } );
 
 /** A failure after the screen has data says so above the cards, not instead. */
@@ -84,14 +87,13 @@ it( 'keeps the screen when a reload fails on top of data', async () => {
         .mockRejectedValue( new Error( 'Reload failed' ) );
 
     render( <Detail reference="DON-1" />, document.getElementById( 'root' ) );
-    await settle();
-    expect( document.body.textContent ).toContain( 'DON-1' );
+    await waitFor( () => buttons().includes( 'Refund' ), { what: 'the loaded donation' } );
+    expect( text() ).toContain( 'DON-1' );
 
     // A second load that fails while the first one's data is still in state.
     render( <Detail reference="DON-2" />, document.getElementById( 'root' ) );
-    await settle();
+    await waitFor( () => text().includes( 'Reload failed' ), { what: 'the failed reload notice' } );
 
-    expect( document.body.textContent ).toContain( 'Reload failed' );
-    expect( document.body.textContent ).toContain( 'DON-1' );
+    expect( text() ).toContain( 'DON-1' );
     expect( buttons() ).toContain( 'Refund' );
 } );

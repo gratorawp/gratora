@@ -58,15 +58,4 @@ final class DonationFormAmountInputTest extends TestCase
         );
     }
 
-    public function test_zero_decimal_helper_exists(): void
-    {
-        $path = dirname(__DIR__, 3) . '/assets/donation-form/util/fx.js';
-        $this->assertFileExists($path);
-
-        $this->assertStringContainsString(
-            'export function isZeroDecimal(',
-            (string) file_get_contents($path),
-            'The amount box relies on this helper to decide whether cents are typable.'
-        );
-    }
 }

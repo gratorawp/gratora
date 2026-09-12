@@ -104,7 +104,7 @@ describe( 'the country picker gets out of the way', () => {
 	 */
 	test( 'picking a country inside a label does not reopen the list', async () => {
 		const picked = [];
-		mount( <label><CountrySelect value="" onChange={ ( c ) => picked.push( c ) } id="c" /></label> );
+		mount( <label>Country <CountrySelect value="" onChange={ ( c ) => picked.push( c ) } id="c" /></label> );
 
 		await type( 'Germ' );
 		expect( list() ).toBeTruthy();

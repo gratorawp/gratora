@@ -4,7 +4,7 @@ import apiFetch from '@wordpress/api-fetch';
 
 import Detail from '../../assets/admin/campaigns/Detail';
 
-const { waitFor } = require( './support/waitFor' );
+const { waitFor, settle } = require( './support/waitFor' );
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 jest.mock( 'react', () => require( 'preact/compat' ) );
@@ -103,15 +103,21 @@ function serve() {
     } );
 }
 
+// A component left mounted keeps issuing requests into the next test's log.
+const mounted = [];
+
 function mount() {
     serve();
     const root = document.createElement( 'div' );
     document.body.appendChild( root );
+    mounted.push( root );
     render( <Detail id={ 7 } tab="overview" />, root );
     return root;
 }
 
-const settle = () => new Promise( ( resolve ) => setTimeout( resolve, 60 ) );
+const button = ( label ) => [ ...document.querySelectorAll( 'button' ) ]
+    .find( ( b ) => b.textContent.trim() === label );
+const grid = () => document.querySelector( '[data-grid]' );
 
 beforeEach( () => {
     captured.grids   = 0;
@@ -127,15 +133,17 @@ beforeEach( () => {
     document.body.innerHTML = '';
 } );
 
+afterEach( () => {
+    mounted.splice( 0 ).forEach( ( root ) => render( null, root ) );
+} );
+
 it( 'says nothing was measured rather than showing a measured zero', async () => {
     metricsFails = true;
 
     mount();
-    await waitFor( () => metricsCalls.length > 0 );
-    await settle();
+    await waitFor( () => document.body.textContent.includes( 'Could not load these metrics' ), { what: 'the failure notice' } );
 
-    expect( document.querySelector( '[data-grid]' ) ).toBeNull();
-    expect( document.body.textContent ).toContain( 'Could not load these metrics' );
+    expect( grid() ).toBeNull();
     expect( document.body.textContent ).not.toContain( 'No donations yet' );
 } );
 
@@ -143,25 +151,20 @@ it( 'asks again when told to', async () => {
     metricsFails = true;
 
     mount();
-    await waitFor( () => metricsCalls.length > 0 );
-    await settle();
+    await waitFor( () => button( 'Try again' ), { what: 'the retry button' } );
 
     metricsFails = false;
-    const retry = [ ...document.querySelectorAll( 'button' ) ]
-        .find( ( b ) => b.textContent.trim() === 'Try again' );
-    expect( retry ).toBeDefined();
-    retry.click();
-    await settle();
+    button( 'Try again' ).click();
+    await waitFor( grid, { what: 'the grid after the retry' } );
 
-    expect( metricsCalls.length ).toBe( 2 );
-    expect( document.querySelector( '[data-grid]' ) ).not.toBeNull();
+    expect( metricsCalls ).toHaveLength( 2 );
 } );
 
 it( 'asks once on load, and only for the widgets this reader kept', async () => {
     savedLayout = { order: [ 'revenue', 'kpis' ], hidden: [ 'gateway', 'top-donors' ] };
 
     mount();
-    await waitFor( () => metricsCalls.length > 0 );
+    await waitFor( grid, { what: 'the grid' } );
     await settle();
 
     expect( metricsCalls ).toHaveLength( 1 );
@@ -176,7 +179,7 @@ it( 'asks once on load, and only for the widgets this reader kept', async () => 
 
 it( 'does not re-run it because a widget moved or went away', async () => {
     mount();
-    await waitFor( () => metricsCalls.length > 0 );
+    await waitFor( grid, { what: 'the grid' } );
     await settle();
 
     const before = metricsCalls.length;
@@ -203,17 +206,16 @@ it( 'still measures the campaign when a widget is hidden mid-load', async () => 
     metricsHeld = true;
 
     mount();
-    await waitFor( () => metricsCalls.length > 0 );
-    await settle();
+    await waitFor( () => metricsCalls.length > 0 && typeof captured.hide === 'function', { what: 'the first request in flight' } );
 
     captured.hide( captured.order[ 0 ] );
     await settle();
 
     metricsHeld = false;
     releaseHeld.forEach( ( release ) => release() );
+    await waitFor( () => metricsCalls.length > 1, { what: 'the re-run request' } );
     await settle();
 
-    expect( metricsCalls.length ).toBeGreaterThan( 1 );
     expect( document.querySelector( '[data-loading="true"]' ) ).toBeNull();
 } );
 
@@ -230,21 +232,16 @@ describe( 'the danger zone', () => {
 
         const root = document.createElement( 'div' );
         document.body.appendChild( root );
+        mounted.push( root );
         render( <Detail id={ 7 } tab="settings" />, root );
-        await settle();
+        await waitFor( () => button( 'Advanced' ) || button( 'Delete campaign' ), { what: 'the settings tab' } );
 
-        const advanced = [ ...document.querySelectorAll( 'button' ) ]
-            .find( ( b ) => b.textContent.trim() === 'Advanced' );
-        if ( advanced ) {
-            advanced.click();
-            await settle();
+        if ( button( 'Advanced' ) ) {
+            button( 'Advanced' ).click();
         }
+        await waitFor( () => button( 'Delete campaign' ), { what: 'the delete button' } );
 
-        const del = [ ...document.querySelectorAll( 'button' ) ]
-            .find( ( b ) => b.textContent.trim() === 'Delete campaign' );
-        expect( del ).toBeDefined();
-        del.click();
-        await settle();
+        button( 'Delete campaign' ).click();
     };
 
     it( 'refuses a delete the server refuses, and offers the archive instead', async () => {
@@ -253,7 +250,8 @@ describe( 'the danger zone', () => {
             delete_blocked: 'This campaign has donations, so it cannot be deleted.',
         } );
 
-        expect( document.body.textContent ).toContain( 'This campaign cannot be deleted' );
+        await waitFor( () => document.body.textContent.includes( 'This campaign cannot be deleted' ), { what: 'the refusal' } );
+
         expect( document.body.textContent ).toContain( 'so it cannot be deleted' );
         expect( document.body.textContent ).toContain( 'Archive instead' );
         expect( document.body.textContent ).not.toContain( 'This cannot be undone' );
@@ -261,8 +259,8 @@ describe( 'the danger zone', () => {
 
     it( 'still offers the delete on a campaign the server would accept', async () => {
         await openAdvanced( { ...CAMPAIGN, delete_blocked: null } );
+        await waitFor( () => document.body.textContent.includes( 'This cannot be undone' ), { what: 'the delete confirmation' } );
 
-        expect( document.body.textContent ).toContain( 'This cannot be undone' );
         expect( document.body.textContent ).not.toContain( 'Archive instead' );
     } );
 } );

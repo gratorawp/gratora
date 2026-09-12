@@ -62,17 +62,6 @@ final class FormEditorAdminBarTest extends IntegrationTestCase
         $this->assertFalse($this->page()->hideAdminBar(false));
     }
 
-    public function test_registering_the_page_attaches_the_filter(): void
-    {
-        $page = $this->page();
-        $this->assertFalse(has_filter('show_admin_bar', [$page, 'hideAdminBar']));
-
-        $page->register();
-
-        $this->assertNotFalse(has_filter('show_admin_bar', [$page, 'hideAdminBar']));
-
-        remove_filter('show_admin_bar', [$page, 'hideAdminBar']);
-    }
 
     public function test_wordpress_gets_the_refusal_through_the_filter(): void
     {

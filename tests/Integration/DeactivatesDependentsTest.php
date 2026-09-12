@@ -15,6 +15,9 @@ use Gratora\Foundation\Plugin;
  */
 final class DeactivatesDependentsTest extends IntegrationTestCase
 {
+    /** The slug the directory distributes core under, which an add-on names. */
+    private const CORE = 'gratora-donation-platform';
+
     private string $fixtureDir = '';
 
     protected function tearDown(): void
@@ -66,7 +69,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
 
     public function test_an_addon_that_declares_core_is_switched_off_with_it(): void
     {
-        $addon = $this->givenActivePlugin('gratora-test-addon', 'gratora');
+        $addon = $this->givenActivePlugin('gratora-test-addon', self::CORE);
 
         $this->deactivateCore();
 
@@ -93,7 +96,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
 
     public function test_core_is_found_among_several_declared_dependencies(): void
     {
-        $addon = $this->givenActivePlugin('gratora-test-addon', 'woocommerce, gratora');
+        $addon = $this->givenActivePlugin('gratora-test-addon', 'woocommerce, ' . self::CORE);
 
         $this->deactivateCore();
 
@@ -102,7 +105,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
 
     public function test_core_does_not_deactivate_itself(): void
     {
-        $this->givenActivePlugin('gratora-test-addon', 'gratora');
+        $this->givenActivePlugin('gratora-test-addon', self::CORE);
 
         $this->deactivateCore();
 
@@ -133,7 +136,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
      */
     public function test_the_addons_own_deactivation_hook_runs(): void
     {
-        $addon = $this->givenActivePlugin('gratora-test-addon', 'gratora');
+        $addon = $this->givenActivePlugin('gratora-test-addon', self::CORE);
 
         $ran = false;
         add_action('deactivate_' . $addon, static function () use (&$ran): void {
@@ -155,7 +158,7 @@ final class DeactivatesDependentsTest extends IntegrationTestCase
      */
     public function test_the_removal_survives_the_write_that_follows_it(): void
     {
-        $addon = $this->givenActivePlugin('gratora-test-addon', 'gratora');
+        $addon = $this->givenActivePlugin('gratora-test-addon', self::CORE);
 
         $this->deactivateCore();
 

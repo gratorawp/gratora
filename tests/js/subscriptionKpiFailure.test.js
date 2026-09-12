@@ -11,7 +11,7 @@ import apiFetch from '@wordpress/api-fetch';
 
 import List from '../../assets/admin/subscriptions/List';
 
-const { waitFor } = require( './support/waitFor' );
+const { waitFor, settle } = require( './support/waitFor' );
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 jest.mock( 'react', () => require( 'preact/compat' ) );
@@ -25,13 +25,13 @@ jest.mock( '../../assets/admin/_shared/notify', () => ( {
 } ) );
 jest.mock( '@wordpress/dataviews', () => ( { DataViews: () => null } ) );
 
-const settle = async () => {
-    await new Promise( ( resolve ) => setTimeout( resolve, 60 ) );
-};
+const STATS = '/gratora/v1/admin/recurring/stats';
 
-async function mount( statsResult ) {
+const mounted = [];
+
+function mount( statsResult ) {
     apiFetch.mockImplementation( ( { path, parse } ) => {
-        if ( path.startsWith( '/gratora/v1/admin/recurring/stats' ) ) return statsResult();
+        if ( path.startsWith( STATS ) ) return statsResult();
         if ( path.startsWith( '/gratora/v1/admin/me/table-view' ) ) return Promise.resolve( {} );
         if ( parse === false ) {
             return Promise.resolve( { json: async () => [], headers: { get: () => '0' } } );
@@ -42,26 +42,33 @@ async function mount( statsResult ) {
 
     const root = document.createElement( 'div' );
     document.body.appendChild( root );
+    mounted.push( root );
     render( <List />, root );
-    await settle();
 
     return document.body;
 }
+
+const failed = ( host ) => () => host.textContent.includes( 'could not be loaded' );
 
 beforeEach( () => {
     apiFetch.mockReset();
     document.body.innerHTML = '';
 } );
 
-it( 'says the totals are missing rather than showing an empty strip', async () => {
-    const host = await mount( () => Promise.reject( new Error( 'gateway timeout' ) ) );
+afterEach( () => {
+    mounted.splice( 0 ).forEach( ( root ) => render( null, root ) );
+} );
 
-    expect( host.textContent ).toContain( 'could not be loaded' );
+it( 'says the totals are missing rather than showing an empty strip', async () => {
+    const host = mount( () => Promise.reject( new Error( 'gateway timeout' ) ) );
+    await waitFor( failed( host ), { what: 'the missing-totals notice' } );
+
     expect( host.textContent ).toContain( 'gateway timeout' );
 } );
 
 it( 'offers a way back without a page reload', async () => {
-    const host = await mount( () => Promise.reject( new Error( 'gateway timeout' ) ) );
+    const host = mount( () => Promise.reject( new Error( 'gateway timeout' ) ) );
+    await waitFor( failed( host ), { what: 'the missing-totals notice' } );
 
     const retry = [ ...host.querySelectorAll( 'button' ) ].find( ( b ) => /Try again/.test( b.textContent ) );
 
@@ -70,15 +77,19 @@ it( 'offers a way back without a page reload', async () => {
 
 /** aria-busy stayed on forever, so a reader was told it was still loading. */
 it( 'does not leave the strip claiming to be busy', async () => {
-    const host = await mount( () => Promise.reject( new Error( 'gateway timeout' ) ) );
+    const host = mount( () => Promise.reject( new Error( 'gateway timeout' ) ) );
+    await waitFor( failed( host ), { what: 'the missing-totals notice' } );
 
-    host.querySelectorAll( '[aria-busy="true"]' ).forEach( ( el ) => {
-        expect( el.getAttribute( 'aria-busy' ) ).not.toBe( 'true' );
-    } );
+    expect( host.querySelectorAll( '[aria-busy="true"]' ) ).toHaveLength( 0 );
 } );
 
 it( 'shows the strip when the totals do load', async () => {
-    const host = await mount( () => Promise.resolve( { mrr_cents: 1000, active: 2 } ) );
+    const host = mount( () => Promise.resolve( { mrr_cents: 1000, active: 2 } ) );
+    await waitFor(
+        () => apiFetch.mock.calls.some( ( [ options ] ) => String( options?.path ).startsWith( STATS ) ),
+        { what: 'the totals request' }
+    );
+    await settle();
 
     expect( host.textContent ).not.toContain( 'could not be loaded' );
 } );

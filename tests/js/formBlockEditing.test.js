@@ -6,8 +6,6 @@
 
 import { render } from 'preact';
 
-const { waitFor } = require( './support/waitFor' );
-
 jest.mock( 'react', () => require( 'preact/compat' ) );
 jest.mock( 'react-dom', () => require( 'preact/compat' ) );
 jest.mock( 'react/jsx-runtime', () => require( 'preact/compat/jsx-runtime' ) );
@@ -127,9 +125,7 @@ function mountBlock( registerDefault, initial ) {
 const input = ( label ) => document.querySelector( `[aria-label="${ label }"]` );
 
 const type = ( label, text ) => {
-    let sofar = '';
     for ( const ch of text ) {
-        sofar += ch;
         const el = input( label );
         el.value = el.value + ch;
         el.dispatchEvent( new window.Event( 'input', { bubbles: true } ) );

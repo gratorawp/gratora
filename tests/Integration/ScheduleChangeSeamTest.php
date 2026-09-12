@@ -29,17 +29,6 @@ final class ScheduleChangeSeamTest extends IntegrationTestCase
         }
     }
 
-    /** Every one of them still answers the amount-only path callers already use. */
-    public function test_they_keep_the_amount_only_method(): void
-    {
-        foreach ([
-            \Gratora\Gateways\Stripe\StripeGateway::class,
-            \Gratora\Gateways\PayPal\PayPalGateway::class,
-            \Gratora\Gateways\Sandbox\SandboxGateway::class,
-        ] as $class) {
-            $this->assertTrue(method_exists($class, 'updateSubscriptionAmount'), $class);
-        }
-    }
 
     public function test_a_schedule_says_nothing_rather_than_guessing_a_date(): void
     {

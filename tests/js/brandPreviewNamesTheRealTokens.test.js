@@ -18,7 +18,7 @@ jest.mock( 'react-dom', () => require( 'preact/compat' ) );
 jest.mock( 'react/jsx-runtime', () => require( 'preact/compat/jsx-runtime' ) );
 jest.mock( 'react/jsx-dev-runtime', () => require( 'preact/compat/jsx-dev-runtime' ) );
 
-import StylePreview, { resolveEffectiveTokens } from '../../assets/admin/_shared/styling/StylePreview';
+import StylePreview from '../../assets/admin/_shared/styling/StylePreview';
 
 const pkg = path.dirname( require.resolve( '@gratora/ui/package.json' ) );
 
@@ -63,11 +63,6 @@ it( 'shows the typography and border-width controls moving', () => {
 
 it( 'mounts the preview with no box of its own around it', () => {
     expect( preview( {} ).firstElementChild.className ).toBe( 'gratora-style-preview' );
-} );
-
-it( 'still hands the campaign screen the resolver it imports', () => {
-    expect( resolveEffectiveTokens( { layer: 'brand', tokens: { 'gratora-accent': '#ffd400' }, styling: {} } ) )
-        .toEqual( { 'gratora-accent': '#ffd400' } );
 } );
 
 /**

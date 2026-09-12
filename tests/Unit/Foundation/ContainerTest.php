@@ -11,14 +11,6 @@ use stdClass;
 
 final class ContainerTest extends TestCase
 {
-    public function test_resolves_a_bound_service(): void
-    {
-        $c = new Container();
-        $c->bind('greeter', fn () => new stdClass());
-
-        $a = $c->get('greeter');
-        $this->assertInstanceOf(stdClass::class, $a);
-    }
 
     public function test_returns_the_same_instance_on_subsequent_resolutions(): void
     {

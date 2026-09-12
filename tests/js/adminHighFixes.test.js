@@ -19,6 +19,7 @@ const plan = ( over = {} ) => ( {
 	currency: 'USD',
 	interval_unit: 'week',
 	interval_count: 2,
+	frequency: 'biweekly',
 	next_payment_at: '2026-10-01 09:00:00',
 	...over,
 } );
@@ -43,17 +44,23 @@ function screen( recurring ) {
 }
 
 describe( 'the plan card names the cadence the donor is actually on', () => {
-	// It printed interval_unit alone, so a plan charged every two weeks read as
-	// "week" and a quarterly one as "month".
+	// A card that names the unit alone files a fortnightly plan under weekly and
+	// a quarterly one under monthly, which is a wrong charge date either way.
 	test( 'a fortnightly plan does not read as weekly', () => {
-		expect( screen( [ plan() ] ) ).toContain( '2 weeks' );
+		const card = screen( [ plan() ] );
+
+		expect( card ).toContain( 'Every 2 weeks' );
+		expect( card ).not.toContain( 'Weekly' );
 	} );
 
 	test( 'a quarterly plan does not read as monthly', () => {
-		expect( screen( [ plan( { interval_unit: 'month', interval_count: 3 } ) ] ) ).toContain( '3 months' );
+		const card = screen( [ plan( { interval_unit: 'month', interval_count: 3, frequency: 'quarterly' } ) ] );
+
+		expect( card ).toContain( 'Quarterly' );
+		expect( card ).not.toContain( 'Monthly' );
 	} );
 
-	test( 'an ordinary monthly plan still reads as one month', () => {
-		expect( screen( [ plan( { interval_unit: 'month', interval_count: 1 } ) ] ) ).toContain( '1 month' );
+	test( 'an ordinary monthly plan reads as monthly', () => {
+		expect( screen( [ plan( { interval_unit: 'month', interval_count: 1, frequency: 'monthly' } ) ] ) ).toContain( 'Monthly' );
 	} );
 } );

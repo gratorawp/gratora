@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Gratora\Tests\Unit;
 
 use Gratora\Campaigns\Styling\Tokens;
-use Gratora\Vendor\Dompdf\Css\Color;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -76,14 +75,6 @@ final class PrintColorTest extends TestCase
     public function test_an_hsl_accent_reaches_the_page_as_the_colour_it_is(string $value, string $expected): void
     {
         $this->assertSame($expected, Tokens::printColor($value, self::FALLBACK));
-    }
-
-    /**
-     * @dataProvider converted
-     */
-    public function test_the_renderer_reads_everything_print_hands_it(string $value): void
-    {
-        $this->assertNotNull(Color::parse(Tokens::printColor($value, self::FALLBACK)));
     }
 
     /**

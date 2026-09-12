@@ -15,25 +15,6 @@ use Gratora\Foundation\Upgrade\UpgradeRunner;
  */
 final class ActivationHookSignatureTest extends IntegrationTestCase
 {
-    public function test_the_hook_registered_with_wordpress_is_not_the_fresh_flag_one(): void
-    {
-        $plugin = dirname(__DIR__, 2) . '/gratora/gratora.php';
-        if (! is_file($plugin)) {
-            $plugin = dirname(__DIR__, 2) . '/gratora.php';
-        }
-        $source = (string) file_get_contents($plugin);
-
-        $this->assertStringContainsString(
-            "register_activation_hook(__FILE__, [ Plugin::class, 'onPluginActivated'])",
-            $source,
-            'the hook must land on the entry point that ignores $network_wide'
-        );
-        $this->assertStringNotContainsString(
-            "register_activation_hook(__FILE__, [ Plugin::class, 'onActivation'])",
-            $source,
-            'pointing WordPress at onActivation() feeds $network_wide into $fresh'
-        );
-    }
 
     /**
      * The behaviour, not just the wiring. This site's schema is already

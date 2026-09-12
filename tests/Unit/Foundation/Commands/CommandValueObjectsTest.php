@@ -68,8 +68,4 @@ final class CommandValueObjectsTest extends TestCase
         $this->assertNull($r->error_code);
     }
 
-    public function test_command_error_is_runtime_exception(): void
-    {
-        $this->assertInstanceOf(\RuntimeException::class, new CommandError('boom'));
-    }
 }

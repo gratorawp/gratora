@@ -8,6 +8,8 @@ import { render } from 'preact';
 
 import DonorProfile from '../../assets/admin/donors/DonorProfile';
 
+const { waitFor } = require( './support/waitFor' );
+
 const ORIGINAL = Intl.DisplayNames;
 
 class GermanNames {
@@ -46,9 +48,12 @@ const PROFILE = {
     events_total: 0, donations_total: 0, receipts_total: 0, notes_total: 0,
 };
 
-const settle = () => new Promise( ( resolve ) => setTimeout( resolve, 40 ) );
-
 let root = null;
+
+const editButton = () => [ ...root.querySelectorAll( 'button' ) ]
+    .find( ( b ) => /edit/i.test( b.textContent.trim() ) );
+
+const countryInput = () => root.querySelector( '.dp-edit-form__country input, .dp-edit-form input[type="text"][role="combobox"]' );
 
 async function openEditor() {
     if ( root ) render( null, root );
@@ -57,21 +62,30 @@ async function openEditor() {
 
     global.__profile = PROFILE;
     render( <DonorProfile id={ 4 } onBack={ () => {} } />, root );
-    await settle();
+    await waitFor( editButton, { what: 'the loaded profile' } );
 
-    const edit = [ ...root.querySelectorAll( 'button' ) ]
-        .find( ( b ) => /edit/i.test( b.textContent.trim() ) );
-    if ( edit ) {
-        edit.click();
-        await settle();
-    }
+    editButton().click();
+    await waitFor( countryInput, { what: 'the edit form' } );
 
-    return root.querySelector( '.dp-edit-form__country input, .dp-edit-form input[type="text"][role="combobox"]' )
-        || root.querySelector( '.dp-edit-form__country input' );
+    return countryInput();
 }
 
 const options = () => [ ...root.querySelectorAll( '.dp-edit-form__country-list button' ) ]
     .map( ( b ) => b.textContent );
+
+async function search( input, query ) {
+    input.focus();
+    input.value = query;
+    input.dispatchEvent( new window.Event( 'input', { bubbles: true } ) );
+
+    // Each option carries its code beside the name. Frankreich matches neither
+    // query, so its absence is what says the list has been filtered rather than
+    // merely opened.
+    await waitFor(
+        () => options().length > 0 && ! options().some( ( o ) => o.includes( 'Frankreich' ) ),
+        { what: 'filtered countries' }
+    );
+}
 
 beforeEach( () => {
     Intl.DisplayNames = GermanNames;
@@ -80,34 +94,27 @@ beforeEach( () => {
 } );
 
 afterEach( () => {
+    if ( root ) render( null, root );
+    root = null;
     Intl.DisplayNames = ORIGINAL;
 } );
 
 it( 'seeds the field with the name the identity card shows', async () => {
     const input = await openEditor();
 
-    expect( input ).not.toBeNull();
     expect( input.value ).toBe( 'Deutschland' );
 } );
 
 it( 'matches a search in that language', async () => {
     const input = await openEditor();
-
-    input.focus();
-    input.value = 'Deutsch';
-    input.dispatchEvent( new window.Event( 'input', { bubbles: true } ) );
-    await settle();
+    await search( input, 'Deutsch' );
 
     expect( options().join( ' ' ) ).toContain( 'Deutschland' );
 } );
 
 it( 'still matches the English name', async () => {
     const input = await openEditor();
-
-    input.focus();
-    input.value = 'Germany';
-    input.dispatchEvent( new window.Event( 'input', { bubbles: true } ) );
-    await settle();
+    await search( input, 'Germany' );
 
     expect( options().join( ' ' ) ).toContain( 'Deutschland' );
 } );

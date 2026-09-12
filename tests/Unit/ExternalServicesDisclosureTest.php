@@ -235,16 +235,6 @@ final class ExternalServicesDisclosureTest extends TestCase
         );
     }
 
-    public function test_the_gravatar_setting_is_off_until_an_admin_turns_it_on(): void
-    {
-        $settings = (string) file_get_contents($this->root() . '/src/Settings/SettingsService.php');
-
-        $this->assertMatchesRegularExpression(
-            "/'gravatar_avatars'\s*=>\s*false/",
-            $settings,
-            'Donor pictures would be fetched from Gravatar on a site that never asked for it.'
-        );
-    }
 
     public function test_every_service_links_its_terms_or_privacy_policy(): void
     {

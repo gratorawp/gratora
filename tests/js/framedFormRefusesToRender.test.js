@@ -8,8 +8,6 @@
  * preview and the theme customiser all render the form inside one.
  */
 
-import { render } from 'preact';
-
 const CONFIG = {
     slug:     'probe',
     form_id:  7,

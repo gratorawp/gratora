@@ -11,10 +11,13 @@
 
 // The shared babel config compiles every .jsx to preact's runtime; pointing it
 // back at React's is what puts this component on the renderer it ships on.
+// eslint-disable-next-line import/no-extraneous-dependencies
 jest.mock( 'preact/jsx-runtime', () => require( 'react/jsx-runtime' ) );
 
+import { createRoot } from '@wordpress/element';
+// @wordpress/element does not re-export act.
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { act } from 'react';
-import { createRoot } from 'react-dom/client';
 
 import DowHourHeatmap from '../../assets/admin/campaigns/widgets/DowHourHeatmap';
 

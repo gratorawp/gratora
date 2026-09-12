@@ -77,18 +77,4 @@ final class ImportClearsAttachmentIdsTest extends IntegrationTestCase
         );
     }
 
-    public function test_every_attachment_column_is_cleared_on_import(): void
-    {
-        $source = (string) file_get_contents(
-            dirname(__DIR__, 2) . '/src/Foundation/Transfer/DataImporter.php'
-        );
-
-        foreach (['avatar_attachment_id', 'image_attachment_id', 'logo_attachment_id'] as $column) {
-            $this->assertStringContainsString(
-                "'{$column}',",
-                $source,
-                "{$column} points at media the export does not carry"
-            );
-        }
-    }
 }

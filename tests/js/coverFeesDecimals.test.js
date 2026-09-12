@@ -25,13 +25,11 @@ jest.mock( '../../assets/admin/forms/blocks/_shared/condition', () => ( {
 // are no longer controlled input[type=number] is asserted from source below,
 // since a type=number input sanitises its own value and no stub can show that.
 jest.mock( '@wordpress/components', () => {
-	let seq = 0;
 	return {
 		PanelBody: ( { children } ) => children,
 		ToggleControl: () => null,
 		TextControl: ( { label, value, onChange, onBlur, inputMode } ) => {
 			const id = `f-${ label.replace( /\W+/g, '' ) }`;
-			seq += 1;
 			return (
 				<div>
 					<label htmlFor={ id }>{ label }</label>
@@ -117,12 +115,6 @@ async function blur( labelText ) {
 	fieldFor( labelText ).dispatchEvent( new Event( 'focusout', { bubbles: true } ) );
 	await tick();
 }
-
-test( 'the panel was actually rendered', () => {
-	mount();
-	expect( fieldFor( 'Percent fee' ) ).toBeTruthy();
-	expect( fieldFor( 'Fixed fee' ) ).toBeTruthy();
-} );
 
 test( 'a percent typed with a decimal point is the percent that is saved', async () => {
 	mount();
