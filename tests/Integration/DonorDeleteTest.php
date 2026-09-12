@@ -45,7 +45,25 @@ final class DonorDeleteTest extends IntegrationTestCase
 
     private function deleteViaRest(int $id): \WP_REST_Response|\WP_Error
     {
-        return rest_do_request(new WP_REST_Request('DELETE', '/gratora/v1/admin/donors/' . $id));
+        $request = new WP_REST_Request('DELETE', '/gratora/v1/admin/donors/' . $id);
+        $request->set_param('confirmation', 'DELETE');
+
+        return rest_do_request($request);
+    }
+
+    /**
+     * The donations bin demands a typed DELETE before it removes one attempt.
+     * Removing a donor takes their record and every attempt attached to it, so
+     * it cannot be the cheaper of the two acts.
+     */
+    public function test_the_route_refuses_a_delete_nobody_typed_a_confirmation_for(): void
+    {
+        $donor = $this->donor('unconfirmed-' . uniqid() . '@example.test');
+
+        $res = rest_do_request(new WP_REST_Request('DELETE', '/gratora/v1/admin/donors/' . (int) $donor->id));
+
+        $this->assertSame(400, $res->get_status(), (string) wp_json_encode($res->get_data()));
+        $this->assertTrue($this->exists((int) $donor->id), 'the donor survives an unconfirmed delete');
     }
 
     private function exists(int $id): bool

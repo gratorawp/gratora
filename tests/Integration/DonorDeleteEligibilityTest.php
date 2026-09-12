@@ -66,7 +66,10 @@ final class DonorDeleteEligibilityTest extends IntegrationTestCase
 
     private function deleteStatus(int $donorId): int
     {
-        return rest_do_request(new WP_REST_Request('DELETE', "/gratora/v1/admin/donors/{$donorId}"))->get_status();
+        $request = new WP_REST_Request('DELETE', "/gratora/v1/admin/donors/{$donorId}");
+        $request->set_param('confirmation', 'DELETE');
+
+        return rest_do_request($request)->get_status();
     }
 
     public function test_a_donor_whose_only_donation_never_completed_is_not_offered_delete(): void

@@ -199,7 +199,8 @@ final class DonorsController
             // same capability.
             'permission_callback' => static fn () => Capabilities::userCan('gratora_redact_donors'),
             'args'                => [
-                'id' => ['type' => 'integer', 'required' => true],
+                'id'           => ['type' => 'integer', 'required' => true],
+                'confirmation' => ['type' => 'string',  'required' => true],
             ],
         ]);
 
@@ -594,13 +595,22 @@ final class DonorsController
      * Deletion refuses a donor whose donations could still take money, and
      * removes the spent attempts along with the donor when it goes ahead.
      *
-     * A donor can be held here by a row the admin cannot see on any list: a
-     * trashed attempt still belongs to them until it is deleted from the bin.
+     * The typed word is asked for the same way the donations bin asks for it,
+     * and for more than the bin does: this takes the donor's record and every
+     * attempt attached to it, not the one row somebody selected.
      *
      * @since 1.0.0
      */
     public function delete(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
+        if (strtoupper(trim((string) $request['confirmation'])) !== 'DELETE') {
+            return new WP_Error(
+                'gratora_confirmation_required',
+                __('Type DELETE to confirm.', 'gratora-donation-platform'),
+                ['status' => 400]
+            );
+        }
+
         $donor = $this->donors->findById((int) $request['id']);
         if (! $donor) {
             return new WP_Error('gratora_not_found', __('Donor not found.', 'gratora-donation-platform'), ['status' => 404]);

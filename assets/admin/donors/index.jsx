@@ -329,6 +329,9 @@ export function DonorsApp( { toggleSlot } ) {
                         ),
                     confirmLabel: __( 'Delete', 'gratora-donation-platform' ),
                     destructive:  true,
+                    // The bin asks for this before it removes one attempt, and
+                    // this removes the donor and every attempt attached to them.
+                    requireText:  'DELETE',
                     onConfirm: async () => {
                         // allSettled, not all: the first rejection abandoned
                         // the rest of the reporting, so a part-done batch
@@ -336,6 +339,7 @@ export function DonorsApp( { toggleSlot } ) {
                         const results = await Promise.allSettled( items.map( ( i ) => apiFetch( {
                             path:   `/gratora/v1/admin/donors/${ i.id }`,
                             method: 'DELETE',
+                            data:   { confirmation: 'DELETE' },
                         } ) ) );
 
                         report(
@@ -361,7 +365,9 @@ export function DonorsApp( { toggleSlot } ) {
             label:         __( 'Redact (anonymize)', 'gratora-donation-platform' ),
             icon:          () => <RedactIcon size={ 16 } strokeWidth={ 1.75 } />,
             isDestructive: true,
-            supportsBulk:  true,
+            // One row at a time on purpose. The server compares a confirmation
+            // against each donor's own address, so a batch behind a single
+            // typed word erases people nobody named.
             isEligible:    ( item ) => userCan( 'redact_donors' ) && ! item.redacted,
             callback: ( selection ) => {
                 const items = selection.filter( ( i ) => ! i.redacted );
@@ -384,10 +390,10 @@ export function DonorsApp( { toggleSlot } ) {
                     message,
                     confirmLabel: __( 'Redact', 'gratora-donation-platform' ),
                     destructive:  true,
-                    // The callback fills the server's confirmation from each
-                    // row, so nothing else stands between one click and erased
-                    // PII here.
-                    requireText:  __( 'REDACT', 'gratora-donation-platform' ),
+                    // The donor's own address, which is what the server
+                    // compares. A fixed word is the same on every row, so it
+                    // gets typed without reading the row it belongs to.
+                    requireText:  items[ 0 ].email || `DONOR_${ items[ 0 ].id }`,
                     onConfirm: async () => {
                         const results = await Promise.allSettled( items.map( ( i ) => apiFetch( {
                             path:   `/gratora/v1/admin/donors/${ i.id }/redact`,

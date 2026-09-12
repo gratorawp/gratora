@@ -209,7 +209,9 @@ final class DeleteRunsErasureHandlersTest extends IntegrationTestCase
             $id = (int) $this->donor()->id;
             $this->deadDonation($id);
 
-            $res = rest_do_request(new WP_REST_Request('DELETE', '/gratora/v1/admin/donors/' . $id));
+            $request = new WP_REST_Request('DELETE', '/gratora/v1/admin/donors/' . $id);
+            $request->set_param('confirmation', 'DELETE');
+            $res = rest_do_request($request);
 
             $this->assertSame(500, $res->get_status());
             $this->assertSame(1, Donor::query()->where('id', $id)->count());
@@ -228,7 +230,9 @@ final class DeleteRunsErasureHandlersTest extends IntegrationTestCase
             $id = (int) $this->donor()->id;
             $this->deadDonation($id);
 
-            $res = rest_do_request(new WP_REST_Request('DELETE', '/gratora/v1/admin/donors/' . $id));
+            $request = new WP_REST_Request('DELETE', '/gratora/v1/admin/donors/' . $id);
+            $request->set_param('confirmation', 'DELETE');
+            $res = rest_do_request($request);
 
             $this->assertSame(409, $res->get_status());
             $this->assertSame('this donor is on a legal hold', (string) $res->as_error()->get_error_message());

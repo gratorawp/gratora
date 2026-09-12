@@ -99,7 +99,6 @@ describe( 'a bulk action acts only on the rows it was offered for', () => {
 		global.__confirm = null;
 
 		const action = captured.actions.find( ( a ) => a.id === id );
-		expect( action.supportsBulk ).toBe( true );
 		action.callback( selection );
 
 		// setConfirm re-renders on a microtask, so the dialog has not been
@@ -145,5 +144,18 @@ describe( 'a bulk action acts only on the rows it was offered for', () => {
 
 		expect( paths ).toHaveLength( 1 );
 		expect( paths[ 0 ] ).toContain( `/donors/${ DELETABLE.id }` );
+	} );
+
+	// The server compares a confirmation against each donor's own address, so
+	// a batch behind one typed word erases people nobody read the row for.
+	// Delete stays bulk: it asks for DELETE and takes what the gate allows.
+	test( 'Redact is not offered as a bulk action, and Delete still is', async () => {
+		await mountList();
+
+		const redact = captured.actions.find( ( a ) => a.id === 'redact' );
+		const del    = captured.actions.find( ( a ) => a.id === 'delete' );
+
+		expect( redact.supportsBulk ).toBeFalsy();
+		expect( del.supportsBulk ).toBe( true );
 	} );
 } );
